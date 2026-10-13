@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "kwln_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
@@ -24,6 +25,7 @@
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "btl_model_record.h"
+#include "btl_model_cache_entry.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
@@ -96,8 +98,7 @@
 
 extern s8 D_003BBB0D; /* btlUpdateDebugEncounterSelector tests it with lb */
 
-struct BattleModelEntry;
-extern struct BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
+extern BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
 
 extern s32 btlCountTasksByKind(u32);
 
@@ -1021,19 +1022,6 @@ u16 btlCheckPartyCommandCounterEligibility(s32 commandId, u32 memberMask) {
     }
     return btlDetermineCommandCounterEligibility(entryList, count, 0, commandId);
 }
-
-/* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
-typedef struct BattleModelEntry {
-    s32 kind;
-    s32 id;
-    s32 refCount;
-    s8 state;
-    u8 unk_0d[3];
-    FilePacRequest *packRequest;
-    SoundSlotOwner *soundOwner;
-    struct BattleModelEntry *prev;
-    struct BattleModelEntry *next;
-} BattleModelEntry;
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
@@ -2238,7 +2226,6 @@ extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern s32 btlCountTasksForOwner(s64);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 /* The retail debug primitive receives a float radius in $f12. */

@@ -61,7 +61,8 @@ extern MnuEffectRecord *D_00438930;
 
 extern MnuShootingWork *D_0043891C;
 
-extern s32 func_00317FE0(MnuShootingWork *);
+extern s32 mnuRunShootingInitCallback(MnuShootingWork *);
+extern u32 mnuRunShootingUpdateCallback(MnuShootingWork *);
 extern void mnuReleaseShootingSectionResources(MnuShootingWork *);
 extern void mnuDestroyShootingWork(MnuShootingWork *);
 
@@ -80,7 +81,7 @@ extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 pac
 
 extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
-extern void func_00317AD0(MnuShootingWork *handle);
+extern void mnuInitializeShootingScene(MnuShootingWork *handle);
 
 
 extern void itfReleaseSpriteWorkPool(struct WideSlotPool *);
@@ -144,7 +145,7 @@ void mdlCreateViewerPackageTask(void) {
     mnuMovieTaskState = 1;
     handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
-    func_00317AD0(handle);
+    mnuInitializeShootingScene(handle);
     kwlnTaskCreate(D_0042D4D0, 0x2AF8, 0, 0, mdlAdvanceViewerPackageTask, 0, 0);
 }
 
@@ -184,13 +185,13 @@ s32 mdlAdvanceViewerPackageTask(KwlnTask *task) {
     u32 result;
     s64 status;
 
-    status = func_00317FE0(D_0043891C);
+    status = mnuRunShootingInitCallback(D_0043891C);
     if (status == -1) {
         fldDispatchDeferredFieldCommand();
         result = 0xffffffff;
     }
     else {
-        func_00318068(D_0043891C);
+        mnuRunShootingUpdateCallback(D_0043891C);
         result = 0;
     }
     return result;
@@ -545,7 +546,7 @@ u32 func_00317AC8(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
+INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingScene);
 
 /* Release the shooting task's owned lists, queues, slots and world object. */
 void mnuDestroyShootingWork(MnuShootingWork *work) {
@@ -602,7 +603,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
 }
 
 /* Advance initialization; completing state zero releases the section resources. */
-s32 func_00317FE0(MnuShootingWork *work) {
+s32 mnuRunShootingInitCallback(MnuShootingWork *work) {
     s32 state;
 
     if (work->initialize((u8 *)work) != 0) {
@@ -623,7 +624,7 @@ s32 func_00317FE0(MnuShootingWork *work) {
 
 /* Run the current update; on a nonzero result, refresh it from the state table.
    The dispatch table keeps its original opaque byte-work callback signature. */
-u32 func_00318068(MnuShootingWork *work) {
+u32 mnuRunShootingUpdateCallback(MnuShootingWork *work) {
     s32 (*update)(u8 *work) = work->update;
 
     if (update((u8 *)work) != 0) {
@@ -632,7 +633,7 @@ u32 func_00318068(MnuShootingWork *work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_003180B8);
+INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingWorkResources);
 
 void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
     s32 i;
@@ -670,8 +671,8 @@ extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
 extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
-extern void func_00323748(MenuWorkEntry *, MnuShootingWork *);
-extern s32 func_003233E8(s32);
+extern void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *, MnuShootingWork *);
+extern s32 mnuUpdateActiveMenuWorkEntries(s32);
 extern void func_003223F8(void);
 extern s32 func_00324840(void);
 extern s32 func_0031A0B8(MnuShootingWork *);
@@ -734,9 +735,9 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     if (work->phase == 2) mnuAdvanceCursorStepUntilThreshold();
     mnuTriggerProgressResourceRecords(mnuGetResourceProgressStepState());
     mnuVisitActiveRecords((s32)work);
-    func_00323748(&D_0040ABF8, work);
-    if (work->phase == 2) func_003233E8(0);
-    else func_003233E8(1);
+    mnuProcessMenuWorkEntryLifecycle(&D_0040ABF8, work);
+    if (work->phase == 2) mnuUpdateActiveMenuWorkEntries(0);
+    else mnuUpdateActiveMenuWorkEntries(1);
     func_003223F8();
     memset(&input, 0, sizeof(input));
     if (!((work->flags >> 2) & 1)) {
@@ -1133,7 +1134,7 @@ s32 func_0031A0B8(MnuShootingWork *work) {
         mode = entry->flagsBits.mode;
         if (entry->flagsBits.finished && mode >= 2) {
             mode = mode >= 3 ? mode - 2 : mode - 1;
-            func_003242D0(entry, mode);
+            mnuRebuildMenuWorkEntryCallbackRecords(entry, mode);
         }
         entry->flags = ((mode & 0xF) << 15) | 0x4001;
         work->unkAC = 0;

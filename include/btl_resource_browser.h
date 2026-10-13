@@ -28,8 +28,26 @@ enum BtlResourceEntryCategory {
     BTL_RESOURCE_ENTRY_CATEGORY_F2 = 0x80,
 };
 
-struct BtlResourceEntry;
-struct BtlResourceEntryList;
+/* Scanned resource rows and their owning list. The providers allocate each
+ * entry at 0x44 bytes, populate all six fields, and traverse both links. */
+typedef struct BtlResourceEntry {
+    s32 category;                    /* 0x00: preview/selection category */
+    s32 value;                       /* 0x04: category-specific index/data */
+    s32 id;                          /* 0x08: category-specific resource id */
+    char name[0x30];                 /* 0x0C: copied resource/display name */
+    struct BtlResourceEntry *prev;   /* 0x3C */
+    struct BtlResourceEntry *next;   /* 0x40 */
+} BtlResourceEntry;
+
+typedef struct BtlResourceEntryList {
+    s32 count;                       /* 0x00: number of linked entries */
+    char *pathPrefix;                /* 0x04: owned directory prefix */
+    BtlResourceEntry *head;          /* 0x08 */
+} BtlResourceEntryList;
+
+typedef char BtlResourceEntrySizeCheck[(sizeof(BtlResourceEntry) == 0x44) ? 1 : -1];
+typedef char BtlResourceEntryListSizeCheck[(sizeof(BtlResourceEntryList) == 0x0C) ? 1 : -1];
+
 struct SdfTex;
 
 /* Browser viewport/selection and texture ownership; the entry list is borrowed. */

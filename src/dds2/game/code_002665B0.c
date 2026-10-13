@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "evt_message_window_api.h"
 #include "fr_font.h"
+#include "mnu_text_entry.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_input.h"
@@ -322,12 +323,6 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
-/* Fixed-width text rows used by both font drawing and message substitution.
- * The font helper decodes single-byte and two-byte characters from this data. */
-typedef struct MenuTextEntry {
-    u8 encodedText[32];
-} MenuTextEntry;
-
 extern MenuTextEntry D_003A41A8[];
 extern MenuTextEntry D_003A47E8[];
 

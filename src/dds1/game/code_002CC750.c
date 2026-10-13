@@ -806,8 +806,8 @@ u16 prfGetRequiredProfileLevel(u16 profileId) {
     return D_003907B0[profileId].requiredLevel;
 }
 
-/* Read a byte parameter from the unchecked profile row. */
-u8 prfGetParamWord7b5(u16 profileId) {
+/* Read byte 5 from the unchecked profile parameter row. */
+u8 prfGetProfileParameterByte5(u16 profileId) {
     return D_003907B0[profileId].value05;
 }
 
@@ -1489,11 +1489,11 @@ void itfSetPackedRgbAlpha(SdfFlagListWork *p, u32 color) {
     p->params.alpha.alpha = color >> 24;
 }
 
-u32 func_002CF3E8(SdfFlagListWork *work) {
+u32 sdfGetFlagListAlphaSurfaceIndex(SdfFlagListWork *work) {
     return work->params.alpha.surfaceIndex;
 }
 
-void func_002CF3F0(SdfFlagListWork *work, u32 value) {
+void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *work, u32 value) {
     work->params.alpha.surfaceIndex = value;
 }
 
@@ -1504,11 +1504,11 @@ void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
     dst->params.alpha.surfaceIndex = src->alpha.surfaceIndex;
 }
 
-void func_002CF420(void) {
+void sdfEnableFlagListViewTargetRelativeMode(void) {
     D_003BD2C8 = 1;
 }
 
-void func_002CF430(void) {
+void sdfDisableFlagListViewTargetRelativeMode(void) {
     D_003BD2C8 = 0;
 }
 

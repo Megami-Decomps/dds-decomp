@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_model.h"
@@ -74,7 +75,7 @@ extern u8 D_003B1A38[];
 
 extern u8 D_003B1A88[];
 
-extern void func_00336538(f32 scale);
+extern void sdfVuLoadRotationMatrixY(f32 scale);
 extern void func_00336818(f32 angle);
 
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
@@ -318,10 +319,6 @@ extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
 
 
-extern void func_003365B8(f32 angle);
-
-
-
 /* Timer constructors copy these parameter prefixes before initializing
    the live source/target colors and frame counter. */
 typedef struct EffPCPFadeTimerParams {
@@ -525,7 +522,7 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
 void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
     u128 mtx[4];
 
-    func_00336538((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
+    sdfVuLoadRotationMatrixY((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
 ;
@@ -655,7 +652,7 @@ void effPcpSetTwinEffectColor(EffPCPTwinWork *work, u32 value) {
 void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
-    func_00336538((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
+    sdfVuLoadRotationMatrixY((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
 ;
@@ -771,13 +768,13 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     mdlAddEntryPlain(effParamWorkGetData(work->handle[i][j]), 0, 0);
     angle = (f32)j * -1.0471974f;
     if (i == 0) {
-        func_00336538(angle);
+        sdfVuLoadRotationMatrixY(angle);
     } else if (i == 1) {
-        func_00336538(-angle);
+        sdfVuLoadRotationMatrixY(-angle);
     } else if (i == 2) {
-        func_003365B8(-angle);
+        sdfVuLoadRotationMatrixZ(-angle);
     } else {
-        func_003365B8(angle);
+        sdfVuLoadRotationMatrixZ(angle);
     }
         VU0_STORE_MATRIX(mtx);
 ;
@@ -2938,7 +2935,6 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern void btlUnitGetMuzzlePosVU(void *unit);
 extern f32 sdfAtan2(f32 y, f32 x);
 
 /* On the first frame, center the sweep on the battle group's direction.
@@ -2963,7 +2959,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     if (effBTLFieldColorUsesActorSelectors() && work->frame == 0) {
         btlMeasureFilteredUnitGroupBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
-        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
+        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF(vf10, muzzle);
         look[0] = center[0] - muzzle[0];
         look[2] = center[2] - muzzle[2];
@@ -2987,7 +2983,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         if (work->frame > params->holdFrames) {
             work->angle += work->spin;
         }
-        func_00336538(work->angle);
+        sdfVuLoadRotationMatrixY(work->angle);
         VU0_STORE_MATRIX(mtx);
         effApplyNodeTransformMatrix(node, mtx);
         if (fadeFrames >= remaining && fadeFrames != 0) {
@@ -3010,7 +3006,7 @@ void effPcpSpanSetColor(EffPCPSpanWork *work, u32 value) {
 }
 
 void effPcpCopyHalfTurnMatrix(void *dst, void *src) {
-    func_00336538(3.1415927f);
+    sdfVuLoadRotationMatrixY(3.1415927f);
         VU0_LOAD_MATRIX_B(src);
 ;
     sdfComposeVuMatrixFromRegisters();
@@ -3527,7 +3523,7 @@ void effSpinEffectUpdate(EffPCPSpinWork *work) {
     effParamWorkCallback0(handle, work);
     effParamWorkCallback1(handle, work->scale);
     effParamWorkCallback3(handle, work->color);
-    func_00336538(work->angle);
+    sdfVuLoadRotationMatrixY(work->angle);
         VU0_LOAD_MATRIX_B(work->matrix);
 ;
     sdfComposeVuMatrixFromRegisters();
@@ -3603,7 +3599,7 @@ void effSpinPairUpdateDelayed(EffPCPSpinWork *work) {
     effParamWorkCallback1(handle[1], work->scale);
     effParamWorkCallback3(handle[0], work->color);
     effParamWorkCallback3(handle[1], work->color);
-    func_00336538(work->angle);
+    sdfVuLoadRotationMatrixY(work->angle);
             VU0_LOAD_MATRIX_B(work->matrix);
 
     sdfComposeVuMatrixFromRegisters();
@@ -3681,7 +3677,7 @@ void effPcpUpdateSpinningPair(EffPCPSpinWork *work) {
     effParamWorkCallback1(handle[1], work->scale);
     effParamWorkCallback3(handle[0], work->color);
     effParamWorkCallback3(handle[1], work->color);
-    func_00336538(work->angle);
+    sdfVuLoadRotationMatrixY(work->angle);
             VU0_LOAD_MATRIX_B(work->matrix);
 
     sdfComposeVuMatrixFromRegisters();
@@ -3923,7 +3919,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     u8 *params;
 
     if (effBTLFieldColorUsesActorSelectors() != 0) {
-        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetVariantSelector());
+        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
         VU0_LOAD_VF(vf11, work->pos);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
@@ -4385,7 +4381,7 @@ void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
         sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
     } else {
-        func_003365B8(work->rotationA);
+        sdfVuLoadRotationMatrixZ(work->rotationA);
         func_00336818(work->rotationB);
         sdfMultiplyVuMatrixInPlace();
         work->rotationB += work->rotationStep;

@@ -13,6 +13,8 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_object_node.h"
+#include "btl_effect_position.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "btl_stage_task_cleanup.h"
@@ -427,12 +429,6 @@ typedef struct EffectObjectFlag {
     u8 pad04[8];
     u32 flags;
 } EffectObjectFlag;
-
-typedef struct EffectObjectNode {
-    EffectObjectFlag *object;
-    struct EffectObjectNode *prev;
-    struct EffectObjectNode *next;
-} EffectObjectNode;
 
 extern EffectObjectNode *effFloorModelListHead;
 
@@ -6746,7 +6742,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
 
             *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
                                                    &common->header.emitterAlphaTrack, age, life);
-            particle->age++;
+            particle->age = (s32)((u32)particle->age + 1U);
             particle->height += rise;
         }
         goto next_particle;
@@ -8340,7 +8336,6 @@ typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 
 
 
 extern void btlUnitGetEffectPosVU(BtlUnit *);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
@@ -11968,7 +11963,7 @@ u32 effPollNamedFileJob(void) {
 }
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern void func_00336538(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 extern char D_0042D030[], D_0042D048[];
 extern s8 sdfPadButtonStates[];
 extern f32 D_003FFCB0[4];
@@ -12020,7 +12015,7 @@ s32 effHandleDebugOrbitInput(void) {
             flags |= 2;
         }
         if (angle != 0.0f) {
-            func_00336538(angle);
+            sdfVuLoadRotationMatrixY(angle);
             VU0_LOAD_VF(vf10, vector);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, vector);

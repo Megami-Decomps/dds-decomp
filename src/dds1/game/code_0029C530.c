@@ -12,6 +12,7 @@
 #include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_object_node.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -209,12 +210,6 @@ typedef struct EffectObjectFlag {
     u8 pad04[8];
     u32 flags;
 } EffectObjectFlag;
-
-typedef struct EffectObjectNode {
-    EffectObjectFlag *object;
-    struct EffectObjectNode *prev;
-    struct EffectObjectNode *next;
-} EffectObjectNode;
 
 extern EffectObjectNode *effFloorModelListHead;
 
@@ -6344,7 +6339,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
 
             *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
                                                    &common->header.emitterAlphaTrack, age, life);
-            particle->age++;
+            particle->age = (s32)((u32)particle->age + 1U);
             particle->height += rise;
         }
         goto next_particle;
@@ -7904,8 +7899,8 @@ typedef struct EffActorLightConfig {
 typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 1 : -1];
 
 
+#include "btl_effect_position.h"
 extern void btlUnitGetEffectPosVU(BtlUnit *);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);

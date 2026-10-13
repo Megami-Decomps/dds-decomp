@@ -46,8 +46,6 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
-extern void btlUnitGetMuzzlePosVU(void *);
-
 /* Kind 0x27: camera-mode task's complete 20-byte argument packet. */
 typedef struct BtlCameraModeArgs {
     BtlTask *actor;

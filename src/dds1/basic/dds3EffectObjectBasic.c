@@ -91,7 +91,6 @@ void effObjReleaseObjectData(EffectObj *obj) {
     obj->data = NULL;
 }
 
-extern s32 billGetKindOneParameter(struct EffNode *bill);
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
@@ -107,6 +106,7 @@ s32 effUpdateLinkedWorldObjectConsumers(EffectObj *obj) {
     EffectDependencyState *data;
     s32 moved = 0;
     struct EffNode *node;
+    struct BillObj *bill;
     s32 result;
 
     data = obj->data;
@@ -192,11 +192,11 @@ s32 effUpdateLinkedWorldObjectConsumers(EffectObj *obj) {
         }
         return 1;
     case 2:
-        node = data->handle;
-        if (node != NULL && moved) {
-            effCopyVector(node, position);
+        bill = data->handle;
+        if (bill != NULL && moved) {
+            effCopyVector(bill, position);
         }
-        result = billGetKindOneParameter(node);
+        result = billGetKindOneParameter(bill);
         goto expired;
     case EFF_OBJ_STATE_BILL_NODE:
         if (data->handle != NULL && moved) {

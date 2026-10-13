@@ -54,7 +54,7 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
     return matter;
 }
 
-void *fldResolveWorldObjectByResourceId(u32 id) {
+EffWorldNode *fldResolveWorldObjectByResourceId(u32 id) {
     u32 i = 0;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_003BD7B8;
@@ -72,7 +72,7 @@ void *fldResolveWorldObjectByResourceId(u32 id) {
                     }
                 }
             } else {
-                void *object = (void *)fldGetRecordValueById(resource->id);
+                EffWorldNode *object = (EffWorldNode *)(u32)fldGetRecordValueById(resource->id);
                 if (object == NULL) {
                     object = fldCreateDummyMatter();
                     fldSetRecordValueById(resource->id, (s32)object);
@@ -84,7 +84,7 @@ void *fldResolveWorldObjectByResourceId(u32 id) {
     return NULL;
 }
 
-void *fldResolveWorldObjectByResourceEntryName(const char *name) {
+EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *name) {
     u32 i = 0;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_003BD7B8;
@@ -654,13 +654,7 @@ typedef struct FldSpawnEvent {
     u32 reserved[2];
 } FldSpawnEvent;
 
-/* Type-10 placement records have a fixed four-word serialized header. */
-typedef struct FldPlacementData {
-    u32 kind;
-    s32 event;
-    u32 visible;
-    void *parameters;
-} FldPlacementData;
+#include "fld_placement_data.h"
 
 typedef struct FldSpecialPoint {
     u32 kind;
@@ -1042,11 +1036,11 @@ void fldActivateRoomFlagObjects(void) {
             modelKey = fldFindSearchId(modelName);
             collisionKey = fldFindSearchId(collisionName);
             if (modelKey == -1) {
-                object = (EffWorldNode *)fldResolveWorldObjectByResourceId(collisionKey);
+                object = fldResolveWorldObjectByResourceId(collisionKey);
             } else {
                 object = (EffWorldNode *)dds3FindWorldObjectNodeByKey(world, modelKey, 6);
                 if (object == NULL) {
-                    object = (EffWorldNode *)fldResolveWorldObjectByResourceId(collisionKey);
+                    object = fldResolveWorldObjectByResourceId(collisionKey);
                 }
             }
             path = (EffWorldNode *)dds3FindIndexedObjectChainNodeByName(world, 0x10, (const u8 *)pathName);
@@ -2494,7 +2488,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
 }
 
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
-extern void func_002DD708(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void func_002E2680(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
@@ -2518,7 +2512,7 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     header = (DmaPacketHeader *)sdfAllocPacketAligned(0x20);
     sdfConsInitDmaPacketHeader(header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
     sdfAppendReferencePacket(command, (u32)header);
-    func_002DD708(modelData->scale);
+    sdfVuLoadRotationMatrixY(modelData->scale);
         VU0_STORE_MATRIX(mat);
 ;
     packet = (u8 *)sdfAllocPacketAligned(0x38);

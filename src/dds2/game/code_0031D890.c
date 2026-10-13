@@ -320,10 +320,10 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
     itfDrawFadeGlyphStrip(&work->strip);
     itfSetFadeMode(&work->lowerNumber.fade, 1, 0x80);
     itfDrawLowerFadeGlyphPair(&work->lowerNumber);
-    itfSetLowerFadeValue(&work->lowerNumber, work->currentScore);
+    itfSetLowerFadeNumberDisplayValue(&work->lowerNumber, work->currentScore);
     itfSetFadeMode(&work->upperNumber.fade, 1, 0x80);
     itfDrawUpperFadeGlyphPair(&work->upperNumber);
-    itfSetUpperFadeValue(&work->upperNumber, work->peakScore);
+    itfSetUpperFadeNumberDisplayValue(&work->upperNumber, work->peakScore);
     itfSetFadeMode(&work->gauge.fade, 1, 0x80);
     itfSetFadeParameter(&work->gauge, 100);
     itfSetFadeSecondaryParameter(&work->gauge, work->progress);
@@ -334,7 +334,7 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
     }
     func_0031E8F0(&work->gauge);
     itfSetFadeMode(&work->frame.fade, 1, 0x80);
-    itfSetFrameFadeGlyphSelector(&work->frame, work->unkB0);
+    itfSetFrameFadeDisplayValue(&work->frame, work->unkB0);
     itfDrawFadeGlyphForFrame(&work->frame);
 }
 

@@ -1260,7 +1260,7 @@ s32 fldFindRecordItem(s32 scene, u32 index) {
     return result;
 }
 
-void func_00146150(SdfModel *model, s32 index, s32 clearFlag) {
+void sdfSetModelChildChainVisibility(SdfModel *model, s32 index, s32 clearFlag) {
     SdfDrawNode *parent = ((SdfDrawNode **)model->list->buffer)[index + 1];
     SdfDrawNode *first;
     SdfDrawNode *node;
@@ -1503,7 +1503,7 @@ void fldDrawAutomapScene(void) {
                     itemVisible = 1;
                 }
             }
-            func_00146150(D_003A5470[i], item->nodeIndex, itemVisible);
+            sdfSetModelChildChainVisibility(D_003A5470[i], item->nodeIndex, itemVisible);
         }
     }
     for (i = 0; i < fldSceneRecordCount; i++) {
@@ -1531,7 +1531,7 @@ void fldDrawAutomapScene(void) {
                     itemVisible = 1;
                 }
             }
-            func_00146150(D_003A5470[i], item->nodeIndex, itemVisible);
+            sdfSetModelChildChainVisibility(D_003A5470[i], item->nodeIndex, itemVisible);
         }
         D_003A5470[i]->color = 0x80808080;
         fldSetEmitterPosition(D_003A5470[i], -50.0f, D_00436290, 50.0f);
@@ -1541,7 +1541,7 @@ void fldDrawAutomapScene(void) {
 
         item = record->items;
         for (j = 0; j < record->count; j++, item++) {
-            func_00146150(D_003A5470[i], item->nodeIndex,
+            sdfSetModelChildChainVisibility(D_003A5470[i], item->nodeIndex,
                           selectedFloor == item->floor);
         }
         D_003A5470[i]->color = 0x10101010;
@@ -2825,7 +2825,7 @@ void fldReleaseTextureSlots(void) {
 extern u32 fldPlayerObject;
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
-extern void func_00336538(f32 angle);
+extern void sdfVuLoadRotationMatrixY(f32 angle);
 
 void fldUpdatePositionedTextureNodes(void) {
     f32 position[4] __attribute__((aligned(16)));
@@ -2846,7 +2846,7 @@ void fldUpdatePositionedTextureNodes(void) {
                 position[1] -= 100.0f;
             }
             effCopyVectorToNodeInstance((EffNode *)fldEffectTextureNodes[i], position);
-            func_00336538(-angle);
+            sdfVuLoadRotationMatrixY(-angle);
             VU0_STORE_MATRIX_UNCLOBBERED(matrix);
             effApplyNodeTransformMatrix((EffNode *)fldEffectTextureNodes[i], matrix);
             effUpdateNode((EffNode *)(u32)fldEffectTextureNodes[i]);

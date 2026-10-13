@@ -7,6 +7,7 @@
 #include "sdf_draw.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sdf_named_resource_request_api.h"
 #include "sce_io.h"
 #include "sdf_dev_state.h"
 #include "sdf_dev_event.h"
@@ -554,7 +555,6 @@ extern void sceSifSetRpcQueue(void *, s32);
 extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 extern void sceSifRpcLoop(void *);
 extern s32 func_0036B6E0(const char *, SceIoStat *);
-extern s32 sdfSendNamedResourceRequest(char *, s32, void *, s32 *);
 extern s32 WakeupThread(s32);
 extern u8 sdfPfsDebugMode;
 extern u8 D_0047BD00[];

@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_model.h"
@@ -185,7 +186,6 @@ extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern void btlUnitGetMuzzlePosVU(void *unit);
 
 
 extern u8 D_00355008[];
@@ -534,7 +534,7 @@ void effPcpSetStaggerEffectColor(EffPCPStaggered *work, u32 val) {
     work->color = val;
 }
 
-extern void func_002DD708(f32 angle);
+extern void sdfVuLoadRotationMatrixY(f32 angle);
 
 /* Spawns cross arm (i, j): rotates the model by j sixths of a turn about the axis chosen by i. */
 void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
@@ -548,9 +548,9 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     } else if (i == 1) {
         func_002DD688(-angle);
     } else if (i == 2) {
-        func_002DD708(-angle);
+        sdfVuLoadRotationMatrixY(-angle);
     } else {
-        func_002DD708(angle);
+        sdfVuLoadRotationMatrixY(angle);
     }
     VU0_STORE_MATRIX(mtx);
     effParamWorkCallback2(work->handle[i][j], mtx);
@@ -2786,7 +2786,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     if (effBTLFieldColorUsesActorSelectors() && work->frame == 0) {
         func_001F66D8(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
-        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
+        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF(vf10, muzzle);
         look[0] = center[0] - muzzle[0];
         look[2] = center[2] - muzzle[2];
@@ -3787,7 +3787,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     u8 *params;
 
     if (effBTLFieldColorUsesActorSelectors() != 0) {
-        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetVariantSelector());
+        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
         VU0_LOAD_VF(vf11, work->pos);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
@@ -4258,7 +4258,7 @@ void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
         sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
     } else {
-        func_002DD708(work->rotationA);
+        sdfVuLoadRotationMatrixY(work->rotationA);
         func_002DD968(work->rotationB);
         sdfMultiplyVuMatrixInPlace();
         work->rotationB += work->rotationStep;

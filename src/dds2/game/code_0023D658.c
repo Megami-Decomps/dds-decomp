@@ -337,7 +337,7 @@ void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpo
     }
 }
 
-void func_0023E320(s32 slotIndex, f32 x, f32 y) {
+void evtSetSlotVector(s32 slotIndex, f32 x, f32 y) {
     if (slotIndex < 10) {
         evtUnitVectorSlots[slotIndex].auxX = x;
         evtUnitVectorSlots[slotIndex].auxY = y;

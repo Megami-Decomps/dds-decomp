@@ -378,9 +378,9 @@ void mnuUpdateMantraNeighborNodeStates(MantraNodeStates *states, s32 unused, s16
     }
 }
 
-extern s32 scrIsPartyProfileEntryBit15Set(DatPartyRecord *context, u8 entry);
+extern s32 scrTestEntryFlagBit15(DatPartyRecord *context, u8 entry);
 
-extern s32 scrIsFirstPartyProfileEntryBitZeroSet(DatPartyRecord *context);
+extern s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context);
 
 /* Return true when all six neighbor conditions are satisfied across active party members. */
 s32 mnuCheckMantraNeighborRequirements(u16 entry) {
@@ -408,8 +408,8 @@ s32 mnuCheckMantraNeighborRequirements(u16 entry) {
 
                 if (neighbor != NULL) {
                     if ((neighbor->packedHeader & 0xF) == 1) {
-                        if (scrIsFirstPartyProfileEntryBitZeroSet(party) != 0) {
-                            if (scrIsPartyProfileEntryBit15Set(party, (u8)(*neighborSlot)->id) != 0) {
+                        if (scrTestEntryFlagAtZeroBit0(party) != 0) {
+                            if (scrTestEntryFlagBit15(party, (u8)(*neighborSlot)->id) != 0) {
                                 satisfiedNeighbors |= 1 << slot;
                             }
                         } else {

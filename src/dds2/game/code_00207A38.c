@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_command_partner_output.h"
 #include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
@@ -45,7 +46,7 @@ enum {
     BTL_DIRECTORY_PATH_BYTES = 0x70,
     BTL_BUILTIN_NAME_COUNT = 8,
     BTL_DIRECTORY_FLAG_CLEAR = 0x1000,
-    BTL_RESOURCE_ENTRY_BYTES = 0x44,
+    BTL_RESOURCE_ENTRY_BYTES = sizeof(BtlResourceEntry),
     BTL_BUTTON_ICON_SIZE = 0x40,
     /* High-bit selectors are game-specific callback-table positions. */
     BTL_PACKED_ENEMY_COUNT_LIMIT = 0x1C00000,
@@ -225,24 +226,6 @@ extern f32 D_00452FB0[];
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void evtConfigureUnitTransition(s32, s32);
-
-/* Resource-browser entries are linked in scan order and occupy 0x44 bytes. */
-typedef struct BtlResourceEntry {
-    s32 category;
-    s32 value; /* Category-specific index or metadata. */
-    s32 id;
-    char name[0x30];
-    struct BtlResourceEntry *prev;
-    struct BtlResourceEntry *next;
-} BtlResourceEntry;
-
-typedef struct BtlResourceEntryList {
-    s32 count;
-    char *pathPrefix; /* Owned copy of the directory-scan path, or NULL. */
-    BtlResourceEntry *head;
-} BtlResourceEntryList;
-
-
 
 extern u8 D_00436C50[];
 
@@ -1205,20 +1188,14 @@ u32 btlScriptSelectModeAValueOne(void) {
     return 1;
 }
 
-typedef struct BtlActionProbe {
-    u16 id;         // 0x00
-    u8 pad_02[2];
-    void *actionProbeFirst;    // 0x04
-    void *actionProbeSecond;   // 0x08
-} BtlActionProbe;
 
 extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
-extern s32 func_001ACD10(void *, s32, BtlActionProbe *);
+extern s32 func_001ACD10(void *, s32, BtlCommandPartnerOutput *);
 
 /* Resolve a command-table entry through its probe, or store the direct command id. */
 u32 btlScriptSelectActionEntry(void) {
     BtlCommandCtx *context;
-    BtlActionProbe probe;
+    BtlCommandPartnerOutput probe;
     s32 commandId;
 
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
@@ -1226,10 +1203,10 @@ u32 btlScriptSelectActionEntry(void) {
     if (datCommandSelectors[commandId].kind == 1) {
         if (btlHasRequiredCommandAffinityPartners((void *)context->actor, commandId) != 0 &&
             func_001ACD10((void *)context->actor, commandId, &probe) != 0) {
-            context->actionProbeFirst = probe.actionProbeFirst;
+            context->actionProbeFirst = probe.firstPartner;
             context->commandMode = 3;
-            context->commandValue = probe.id;
-            context->actionProbeSecond = probe.actionProbeSecond;
+            context->commandValue = probe.commandId;
+            context->actionProbeSecond = probe.secondPartner;
         } else {
             context->commandValue = 0;
             context->commandMode = 1;
@@ -1303,7 +1280,7 @@ u32 btlEnableCommandStateFlag(void) {
 
 u32 btlScriptSetActorUnitParameter(void) {
     u16 parameterValue;
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
     parameterValue = scrReadIntParameter(0);
@@ -1329,9 +1306,9 @@ u32 btlScriptCmdWithArgA(void) {
 }
 
 u32 btlScriptCmdSimpleB(void) {
-    s32 context = scrGetCurrentCommandWork();
+    void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleB(context, value);
+    btlCmdSimpleB((s32)(u32)context, value);
     return 1;
 }
 
@@ -1346,9 +1323,9 @@ u32 btlScriptCmdWithArgC(void) {
 }
 
 u32 btlScriptCmdSimpleA(void) {
-    s32 context = scrGetCurrentCommandWork();
+    void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleA(context, value);
+    btlCmdSimpleA((s32)(u32)context, value);
     return 1;
 }
 
@@ -1363,24 +1340,24 @@ u32 btlScriptCmdWithArgD(void) {
 }
 
 u32 btlScriptCmdSimpleC(void) {
-    s32 context = scrGetCurrentCommandWork();
+    void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleC(context, value);
+    btlCmdSimpleC((s32)(u32)context, value);
     return 1;
 }
 
 u32 btlScriptCmdSimpleD(void) {
-    s32 context = scrGetCurrentCommandWork();
+    void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleD(context, value);
+    btlCmdSimpleD((s32)(u32)context, value);
     return 1;
 }
 
 /* Apply script parameter 0 as the target unit-ID filter; return VM success. */
 u32 btlScriptFilterTargetsByUnitId(void) {
-    s32 context = scrGetCurrentCommandWork();
+    void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlFilterCommandTargetsByUnitId(context, value);
+    btlFilterCommandTargetsByUnitId((s32)(u32)context, value);
     return 1;
 }
 
@@ -1408,8 +1385,8 @@ u32 btlScriptCmdSimpleH(void) {
 
 /* Apply script parameter 0 as the command target-selection mode; return VM success. */
 s32 btlScriptCmdSelectTargetsByMode(void) {
-    s32 context = scrGetCurrentCommandWork();
-    btlSelectCommandTargetsByMode(context, scrReadIntParameter(0));
+    void *context = scrGetCurrentCommandWork();
+    btlSelectCommandTargetsByMode((s32)(u32)context, scrReadIntParameter(0));
     return 1;
 }
 
@@ -1425,9 +1402,9 @@ s32 btlScriptAppendSelectedOrCurrentTarget(void) {
 }
 
 u32 btlScriptCmdSimpleJ(void) {
-    s32 context = scrGetCurrentCommandWork();
+    void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleJ(context, value);
+    btlCmdSimpleJ((s32)(u32)context, value);
     return 1;
 }
 
@@ -1685,8 +1662,8 @@ s32 btlCmdRememberUpperEntryCondition(void) {
 
 /* Remember the actor entry-code-10 gate result; failure clears only its selection flag. */
 u32 btlCmdRememberActorActionGate(void) {
-    s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
+    void *context = scrGetCurrentCommandWork();
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000;
     } else {
@@ -1697,8 +1674,8 @@ u32 btlCmdRememberActorActionGate(void) {
 }
 
 u32 btlCmdReturnReadyWithoutTurnsCheck(void) {
-    s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
+    void *context = scrGetCurrentCommandWork();
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000000;
     } else {
@@ -1737,10 +1714,10 @@ s32 btlCmdStoreCounterReachedLimitChoice(void) {
 }
 
 u32 btlCmdReturnLowHpActionReadiness(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x8800000) != 0) {
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x8800000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1749,10 +1726,10 @@ u32 btlCmdReturnLowHpActionReadiness(void) {
 }
 
 u32 btlCmdReturnActorEligibility(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0xB000000) != 0) {
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0xB000000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1762,10 +1739,10 @@ u32 btlCmdReturnActorEligibility(void) {
 
 /* Report whether active-enemy and cumulative-spawn limits permit another enemy. */
 u32 btlCmdReportEnemySpawnCapacity(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0xB800000) != 0) {
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0xB800000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1802,8 +1779,8 @@ s32 btlCmdRememberUpperElementAccess(void) {
 }
 
 u32 btlCmdReturnPartyElementQueryCheck(void) {
-    s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x12C00000)) {
+    void *context = scrGetCurrentCommandWork();
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x12C00000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1812,8 +1789,8 @@ u32 btlCmdReturnPartyElementQueryCheck(void) {
 }
 
 u32 btlCmdReturnEnemyElementQueryCheck(void) {
-    s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13000000)) {
+    void *context = scrGetCurrentCommandWork();
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13000000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2005,8 +1982,8 @@ s32 btlCmdRememberUpperEntryCodeMismatch(void) {
 }
 
 u32 btlCmdReturnPartyActionPresence(void) {
-    s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13400000)) {
+    void *context = scrGetCurrentCommandWork();
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13400000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2069,10 +2046,10 @@ s32 btlCmdRememberLowerMissingStatus(void) {
 
 /* Report a queued party action with nonzero target type and options equal to two. */
 u32 btlCmdReturnQueuedSpecialAction(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x10800000) != 0) {
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x10800000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2082,8 +2059,8 @@ u32 btlCmdReturnQueuedSpecialAction(void) {
 
 /* Report extended bit 0x800000 on the actor, or an eligible enemy when requested. */
 u32 btlCmdReturnExtendedStatusCheck(void) {
-    s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
+    void *context = scrGetCurrentCommandWork();
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2092,10 +2069,10 @@ u32 btlCmdReturnExtendedStatusCheck(void) {
 }
 
 u32 btlCmdReturnPartyMissingFlagCheck(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x11000000) != 0) {
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x11000000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2104,10 +2081,10 @@ u32 btlCmdReturnPartyMissingFlagCheck(void) {
 }
 
 u32 btlCmdReturnPartyHeldFlagCheck(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x11400000) != 0) {
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x11400000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2261,8 +2238,8 @@ s32 btlCmdRememberLowerElementBlock(void) {
 
 /* Report whether an eligible party unit has zero current MP; the handler tests unit +0x12A. */
 s32 btlCmdReportPartyEmptyMp(void) {
-    s32 context = scrGetCurrentCommandWork();
-    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, BTL_PACKED_PARTY_EMPTY_MP)) {
+    void *context = scrGetCurrentCommandWork();
+    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, BTL_PACKED_PARTY_EMPTY_MP)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -2298,7 +2275,7 @@ u32 btlScriptReturnTurnCount(void) {
 
 /* Publish the actor's roster-record level, not an action timer; return VM success. */
 u32 btlScriptReturnActorLevel(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
     scrSetIntegerReturnValue(((BtlUnit *)((BtlCommandCtx *)context)->actor)->partyRecord.level);
@@ -2355,10 +2332,10 @@ u32 btlCmdGetSubtaskTargetMode(void) {
 }
 
 u32 btlScriptReturnContextSignedByte(void) {
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
-    scrSetIntegerReturnValue(*(s8 *)(context + 0x14E));
+    scrSetIntegerReturnValue(*(s8 *)((u8 *)context + 0x14E));
     return 1;
 }
 
@@ -2377,9 +2354,9 @@ u32 btlCmdRunWeightedAiSelection(void) {
 }
 
 u32 btlScriptSetBattleCommand(void) {
-    s32 context = scrGetCurrentCommandWork();
+    void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlRunWeightedAiAction(context, value);
+    btlRunWeightedAiAction((s32)(u32)context, value);
     return 1;
 }
 
@@ -2391,7 +2368,7 @@ s32 btlScriptSetBossStatSelector(void) {
 
 u32 btlResetCommandContextAndSetStateFlag(void) {
     s32 state;
-    s32 context;
+    void *context;
 
     context = scrGetCurrentCommandWork();
     state = btlTrackedTaskHandles;

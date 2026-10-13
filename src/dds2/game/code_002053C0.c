@@ -41,7 +41,7 @@ extern void btlClearAllUnitDefeatCandidates(void);
 
 extern s64 mnuGetSoundBufferStateLocked(void);
 
-extern void func_00336538(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 
 typedef struct BtlUnit BtlUnit;
 
@@ -74,7 +74,6 @@ extern u8 D_003E9130[];
 
 extern u8 D_003E9120[];
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
@@ -728,9 +727,9 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
             radius += 100.0f;
             if (i != 1) {
                 if (i == 0) {
-                    func_00336538(2.0943951f);
+                    sdfVuLoadRotationMatrixY(2.0943951f);
                 } else if (i == 2) {
-                    func_00336538(-2.0943951f);
+                    sdfVuLoadRotationMatrixY(-2.0943951f);
                 }
                 VU0_LOAD_VF(vf10, dir);
                 VU0_ROTATE_VEC(vf10, vf10);
@@ -936,9 +935,9 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         radius = slot[i]->unkBC * slot[i]->scale;
         radius += 100.0f;
         if (i == 0) {
-            func_00336538(1.0471975f);
+            sdfVuLoadRotationMatrixY(1.0471975f);
         } else {
-            func_00336538(-1.0471975f);
+            sdfVuLoadRotationMatrixY(-1.0471975f);
         }
         VU0_LOAD_VF(vf10, dir);
         VU0_ROTATE_VEC(vf10, vf10);
@@ -1060,9 +1059,9 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             radius = slots[i]->unkBC * slots[i]->scale;
             radius += 100.0f;
             if (i == 0) {
-                func_00336538(1.0471975f);
+                sdfVuLoadRotationMatrixY(1.0471975f);
             } else {
-                func_00336538(-1.0471975f);
+                sdfVuLoadRotationMatrixY(-1.0471975f);
             }
             VU0_LOAD_VF(vf10, &D_003BE0C0);
             VU0_ROTATE_VEC(vf10, vf10);
@@ -1120,11 +1119,11 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
     }
     PCP_COPY_VECTOR(firstDirection, D_003E9130);
     PCP_COPY_VECTOR(secondDirection, D_003E9130);
-    func_00336538(1.0471975f);
+    sdfVuLoadRotationMatrixY(1.0471975f);
     VU0_LOAD_VF(vf10, firstDirection);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF_UNCLOBBERED(vf10, firstDirection);
-    func_00336538(2.0943951f);
+    sdfVuLoadRotationMatrixY(2.0943951f);
 
     for (slot = 0; slot < 3; slot++) {
         if (second[slot] != NULL) {

@@ -11,6 +11,7 @@
 #include "evt_stage_model_scale.h"
 #include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
+#include "btl_stage_test_task.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -2729,16 +2730,6 @@ void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
     kwlnTaskCreate(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
-
-typedef struct StageTestTaskWork {
-    u8 pad00;
-    u8 kind;            /* 0x01: kind 6 owns stage-test resources */
-    u8 pad02[6];
-    void *allocation;   /* 0x08 */
-    s32 resource;       /* 0x0C */
-    u8 pad10[0x20];
-    u8 payload[1];      /* 0x30: passed to the stage cleanup routine */
-} StageTestTaskWork;
 
 /* Clean up kind-6 task resources, then free its allocation and task work.
  * Return zero when handled, or one for another task kind; retain the K&R definition. */

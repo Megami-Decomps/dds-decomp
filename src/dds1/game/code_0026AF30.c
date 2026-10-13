@@ -13,7 +13,7 @@ extern EffWorldNode *mnuTitleCameraObject;
 
 extern void fldReleaseCameraColorEffect(void);
 
-extern void func_002CF430(void);
+extern void sdfDisableFlagListViewTargetRelativeMode(void);
 
 extern void evtDestroySecondaryWorldNode(void);
 
@@ -27,7 +27,7 @@ extern u32 D_003BA8EC;
 
 extern void fldInitializeCameraColorResource(void);
 
-extern void func_002CF420(void);
+extern void sdfEnableFlagListViewTargetRelativeMode(void);
 
 extern void fldApplyLightSetIndex(s32);
 
@@ -54,12 +54,12 @@ void mnuInitializeTitleCameraScene(void) {
     D_003DC1D0[3] = -0.94f;
 
     fldInitializeCameraColorResource();
-    func_002CF420();
+    sdfEnableFlagListViewTargetRelativeMode();
     fldApplyLightSetIndex(1);
 }
 
 void mnuMovieShutdownA(void) {
     fldReleaseCameraColorEffect();
-    func_002CF430();
+    sdfDisableFlagListViewTargetRelativeMode();
     evtDestroySecondaryWorldNode();
 }

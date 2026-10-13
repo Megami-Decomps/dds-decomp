@@ -17,7 +17,7 @@ extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
-extern void func_0028D070(MnuStatusResource *, s32, s32);
+extern void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
 
@@ -52,7 +52,8 @@ DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *object, s32 index) {
     return NULL;
 }
 
-u32 func_002890A8(MnuStatusResource *object) {
+/* Return the selected mantra-unit row used to index this menu's slot arrays. */
+u32 mnuGetSelectedMantraUnitIndex(MnuStatusResource *object) {
     return object->list->cursor->index;
 }
 
@@ -125,7 +126,7 @@ void mnuSelectPreviousMantraUnit(MnuStatusResource *object) {
     value = mnuGetSelectedNodeValue(object);
     work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
     mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 1);
-    func_0028D070(object, 2, 0);
+    mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
     mnuRefreshNodeTransitionIcons(object, work, value);
     evtPrintDeveloperConsoleMessage("Next UnitIndex:%d\n", object->list->cursor->index);
 }
@@ -139,7 +140,7 @@ void mnuSelectNextMantraUnit(MnuStatusResource *object) {
     value = mnuGetSelectedNodeValue(object);
     work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
     mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 1);
-    func_0028D070(object, 2, 0);
+    mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
     mnuRefreshNodeTransitionIcons(object, work, value);
 }
 
@@ -150,7 +151,7 @@ void mnuSelectMantraUnitByIndex(MnuStatusResource *object, s8 target) {
         mnuMoveNodeCursorToTargetIndex(object, target);
         work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
         mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 0);
-        func_0028D070(object, 5, 1);
+        mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 5, 1);
         mnuRefreshNodeTransitionIcons(object, work, mnuGetSelectedNodeValue(object));
     }
 }
@@ -175,7 +176,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
     mnuAdvanceMantraUnitPanelListState(object->menu.selectionController);
     mnuRetreatNodeCursorAndClearListFlags(object);
     selectedValue = mnuGetSelectedNodeValue(object);
-    selectedIndex = func_002890A8(object);
+    selectedIndex = mnuGetSelectedMantraUnitIndex(object);
     initialPosition = (MantraNodePos *)work->defaultSelector;
     flags = ((MantraFlagResource *)work->slots[selectedIndex])->flags;
 
@@ -184,7 +185,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
         neighbors = position->neighbors;
         for (i = 0; i < 6; i++) {
             if (neighbors[i] != NULL) {
-                selectedIndex = func_002890A8(object);
+                selectedIndex = mnuGetSelectedMantraUnitIndex(object);
                 neighbor = neighbors[i];
                 flags =
                     ((MantraFlagResource *)work->slots[selectedIndex])->flags;
@@ -232,7 +233,7 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
     mnuQueueNextUnitPanelSelection(object->menu.selectionController);
     mnuAdvanceNodeCursorAndClearListFlags(object);
     selectedValue = mnuGetSelectedNodeValue(object);
-    selectedIndex = func_002890A8(object);
+    selectedIndex = mnuGetSelectedMantraUnitIndex(object);
     initialPosition = (MantraNodePos *)work->defaultSelector;
     flags = ((MantraFlagResource *)work->slots[selectedIndex])->flags;
 
@@ -241,7 +242,7 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
         neighbors = position->neighbors;
         for (i = 0; i < 6; i++) {
             if (neighbors[i] != NULL) {
-                selectedIndex = func_002890A8(object);
+                selectedIndex = mnuGetSelectedMantraUnitIndex(object);
                 neighbor = neighbors[i];
                 flags =
                     ((MantraFlagResource *)work->slots[selectedIndex])->flags;
@@ -275,7 +276,7 @@ void mnuUpdateSelectedMantraResourceId(s32 object) {
     MantraMenuWork *state = &((MnuStatusResource *)object)->menu;
     s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)((MnuStatusResource *)object)->list->cursor->unk70);
     state->defaultSelector = mnuGetMantraNodePositionRecord(id);
-    func_0028D070((MnuStatusResource *)object, 5, 0);
+    mnuSpawnMantraPanelsFromSelectedUnitFlags((MnuStatusResource *)object, 5, 0);
 }
 
 extern struct MantraDrawPool *mnuCreateMantraDrawPool(u32);
@@ -368,7 +369,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     }
     work->collectedCount = count;
     work->savedSelection = object->list->cursor->index;
-    func_0028D070(object, 5, 0);
+    mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 5, 0);
     evtStageTestInit(0);
     kwlnFadeOutStart(0, 0, 0, 0);
     evtPrintDeveloperConsoleMessage(D_00426360);
@@ -757,7 +758,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             } else if ((work->src->bits & 0xF00) == 0x300) {
                 mnuSelectMatchingNode(object, work->src);
             } else if ((work->src->bits & 0xF00) == 0x400) {
-                work->src->selectedIndex = func_002890A8(object);
+                work->src->selectedIndex = mnuGetSelectedMantraUnitIndex(object);
             } else {
                 evtPrintDeveloperConsoleMessage(D_00426C90);
             }
@@ -886,7 +887,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
                 (s16)scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
         } else if ((work->src->bits & 0xF00) == 0x200) {
             mnuTransitionActivePanelAnimations(work->resource, 1);
-            func_0028D070(object, 10, 1);
+            mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 10, 1);
             if (work->src->bits & 0x1000) {
                 MantraNodePos *cursorPosition;
                 cursorPosition = mnuGetMantraNodePositionRecord(
@@ -936,7 +937,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             work->delayFrames = 60;
         } else {
             mnuUpdateMantraNodeState(object, work->src->fields.unitIndex);
-            index = func_002890A8(object);
+            index = mnuGetSelectedMantraUnitIndex(object);
             if ((object->menu.slots[index]->flags[work->src->fields.unitIndex] & 0xF) == 2) {
                 work->delayFrames = 60;
             } else {
@@ -1106,7 +1107,7 @@ s32 mnuUpdateMantraPanelStatusFromFlags(s32 unused0, s32 unused1, s32 unused2, s
     s16 value;
     s16 id;
 
-    selectedFlags = object->menu.slots[func_002890A8(object)]->flags;
+    selectedFlags = object->menu.slots[mnuGetSelectedMantraUnitIndex(object)]->flags;
     position = work->defaultSelector;
     id = position->id;
     tableFlags = table->flags + id;
@@ -1200,7 +1201,7 @@ void mnuDrawMantraMapNodes(s32 offsetX, s32 offsetY, MnuStatusResource *object, 
         break;
     }
     node = mnuGetMantraNodePositionRecord(0);
-    selected = object->menu.slots[func_002890A8(object)];
+    selected = object->menu.slots[mnuGetSelectedMantraUnitIndex(object)];
     profile = object->menu.slots[5];
     count = 175;
     do {
@@ -1251,8 +1252,8 @@ extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u
 extern u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *, u32, s16);
 
 
-/* Spawn the available node panels from the currently selected unit's flags. */
-void func_0028D070(MnuStatusResource *object, s32 startDelay, s32 transitionMode) {
+/* Spawn available panels from the selected unit's eligible node flags. */
+void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *object, s32 startDelay, s32 transitionMode) {
     MantraPanelPool *pool = object->menu.resource;
     MantraNodePos *position;
     MantraPanelAnimation *panel;
@@ -1263,7 +1264,7 @@ void func_0028D070(MnuStatusResource *object, s32 startDelay, s32 transitionMode
     recordIndex = 175;
     do {
         if (position->id != 0) {
-            u32 selectedIndex = func_002890A8(object);
+            u32 selectedIndex = mnuGetSelectedMantraUnitIndex(object);
             MantraFlagResource *resource = (MantraFlagResource *)object->menu.slots[selectedIndex];
             u16 flags = resource->flags[position->id];
             s32 panelKind = -1;
@@ -1341,7 +1342,7 @@ s32 mnuActivateMantraNeighborEdges(MnuStatusResource *object, u16 nodeId, s16 mo
     s32 resultKind;
 
     position = mnuGetMantraNodePositionRecord((s16)nodeId);
-    resource = object->menu.slots[func_002890A8(object)];
+    resource = object->menu.slots[mnuGetSelectedMantraUnitIndex(object)];
     neighbors = position->neighbors;
     for (; i < 6; i++) {
         if (neighbors[i] != NULL && neighbors[i]->modelFlagState == modelFlagState) {
@@ -1566,7 +1567,7 @@ void mnuSpawnMantraMapPanels(MnuStatusResource *object, u16 nodeId, u16 panelX) 
     s32 recordIndex;
 
     position = (MantraNodePos *)mnuGetMantraNodePositionRecord((s16)nodeId);
-    selectedIndex = func_002890A8(object);
+    selectedIndex = mnuGetSelectedMantraUnitIndex(object);
     resource = (MantraFlagResource *)object->menu.slots[selectedIndex];
     modelFlagState = mnuGetActiveMantraModelFlagState();
 

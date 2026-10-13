@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
@@ -239,7 +240,7 @@ extern s32 func_001B2630();
 
 
 extern s64 mnuGetSoundBufferStateLocked(void);
-extern void func_00336538(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 extern void func_003364B8(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);
@@ -595,7 +596,6 @@ extern s32 sndGetEffectNodeParameter(SoundResourceNode *, u16);
 
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
@@ -687,8 +687,7 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-extern void sndFreeResourceNode(SoundResourceNode *);
-extern void sndFreeListNode(ActiveSoundNode *);
+#include "btl_sound_node_api.h"
 extern s32 btlIsUnitInActiveList(u8 *);
 extern void btlResetActiveUnitList(void);
 extern s32 btlCountTasksByKind(u16);

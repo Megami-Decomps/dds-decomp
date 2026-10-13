@@ -133,7 +133,7 @@ void itfDrawEightDigitFadeValue(s32 x, s32 y, s32 extent, u32 value) {
 }
 
 /* Set the value consumed by the lower eight-digit fade display. */
-void itfSetLowerFadeValue(FadeNumber *entry, u32 displayValue) {
+void itfSetLowerFadeNumberDisplayValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -151,7 +151,7 @@ void itfDrawLowerFadeGlyphPair(FadeNumber *entry) {
 }
 
 /* Set the value consumed by the upper eight-digit fade display. */
-void itfSetUpperFadeValue(FadeNumber *entry, u32 displayValue) {
+void itfSetUpperFadeNumberDisplayValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -274,7 +274,7 @@ void itfDrawFadeGlyphTriplet(FadeEntry *entry) {
 }
 
 /* Set the selector for optional glyphs in the frame fade display. */
-void itfSetFrameFadeGlyphSelector(FadeNumber *entry, u32 displayValue) {
+void itfSetFrameFadeDisplayValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 

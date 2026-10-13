@@ -12,6 +12,7 @@
 #include "fpu.h"
 #include "sdf.h"
 #include "sdf_grid.h"
+#include "sdf_grid_directions.h"
 #include "sdf_task_work.h"
 #include "itf.h"
 #include "kwln_task_lifecycle.h"
@@ -35,7 +36,7 @@ extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 
-extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
+#include "sdf_vector_transform.h"
 
 extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
 
@@ -1106,9 +1107,6 @@ SdfGridCell *sdfGridSetCursorCell(SdfGrid *grid, u32 column, u32 row) {
     return grid->cursor;
 }
 
-typedef struct SdfGridDirections {
-    s8 columns[3];
-} SdfGridDirections;
 extern const SdfGridDirections D_003BD298[];
 
 /* Select an occupied cell above and follow its viewport margins, or return NULL. */

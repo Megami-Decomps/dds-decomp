@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "evt_unit.h"
 #include "btl_task_condition.h"
@@ -596,7 +597,6 @@ s32 func_0020DE50(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
 
 extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command) {
     BtlTask *task;

@@ -32,6 +32,7 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_gs_packet.h"
 #include "sdf_draw.h"
 #include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
 #include "sdf_dma_tag.h"
 
 extern u32 sdfReadTimerCount(void);
