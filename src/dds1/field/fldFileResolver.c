@@ -4150,7 +4150,7 @@ void fldClearCameraObjectTransitionFlags(void) {
 
 extern void func_001372D0(f32 *);
 extern void effObjClearNodeFlags(void *, s32);
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_001312D8);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraObjectPose);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
