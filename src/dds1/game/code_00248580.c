@@ -5,6 +5,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "ui_color.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
@@ -117,7 +118,6 @@ extern u8 D_003BC3F8[];
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern u32 uiBlendColors(u32, u32, s32);
 
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);

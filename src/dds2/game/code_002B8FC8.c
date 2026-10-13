@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "ui_color.h"
 #include "fr_font_context.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
@@ -807,7 +808,6 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);
 }
 
-extern u32 uiBlendColors(u32 color, u32 previous, s32 blend);
 
 /* Blend the flag-selected packed color with the caller's previous color.
  * Flag one takes precedence over DDS2's additional flag-four color choice. */

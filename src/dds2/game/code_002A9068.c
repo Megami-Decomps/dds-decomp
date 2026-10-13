@@ -5,6 +5,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "ui_color.h"
 #include "fr_font.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -99,7 +100,6 @@ extern s32 mdlFlagTest(s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern u32 uiBlendColors(u32, u32, s32);
 
 extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
 

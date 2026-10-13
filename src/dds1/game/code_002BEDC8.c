@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "eff.h"
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
@@ -193,7 +194,6 @@ void func_002BF438(s32 x, s32 y, s32 z, u32 *palette, s32 flags, EffectSlotSet *
 
 
 
-extern u32 uiBlendColors(u32, u32, u32);
 
 void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
                    EffectSlotSet *set, s32 slotIndex, s32 layer) {

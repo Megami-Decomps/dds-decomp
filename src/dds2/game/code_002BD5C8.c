@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "dat_state.h"
@@ -49,7 +50,6 @@ typedef struct FrFontGlyph FrFontGlyph;
 extern const u8 (*D_00435E5C)[25];
 extern char D_00437C38[];
 extern char D_00437C40[];
-extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mdlFlagTest(u32);
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);

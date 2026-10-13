@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "fr_font_context.h"
 #include "mnu.h"
 #include "dat_state.h"
@@ -23,7 +24,6 @@ extern s32 ptyHasSkill(DatPartyRecord *, s32);
 
 
 extern struct { s32 v[6]; } D_0036D4B0;
-extern u32 uiBlendColors(u32, u32, s32);
 extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
 extern void brsDrawMaccaRewardTotal(s32, s32, s32, s32, const BrsRewardSummary *, s32);
 extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
@@ -480,7 +480,6 @@ void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
         -4);
 }
 
-extern u32 uiBlendColors(u32, u32, s32);
 
 /* The row renderer also passes its context word; this blend helper ignores it. */
 u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource, s32 context) {
