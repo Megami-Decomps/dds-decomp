@@ -26,7 +26,7 @@ extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
-extern void func_00276720(s32, s32, s32, s32);
+extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
 
 extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
@@ -897,7 +897,7 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
     return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276720);
+INCLUDE_ASM(const s32, "game/code_00274B80", mnuConfigurePartyPanelPage);
 
 
 s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
@@ -934,7 +934,7 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
         menu->motionSelection = 10;
     }
     evtStageTestSelectEntry(record->unitId, menu->motionSelection, 0);
-    func_00276720((s32)page, 1, menu->staffImage, menu->staffMode);
+    mnuConfigurePartyPanelPage((s32)page, 1, menu->staffImage, menu->staffMode);
     return 1;
 }
 
@@ -952,7 +952,7 @@ s32 mnuStaffReleasePanelScene(KwlnTask *task) {
     MenuPageWindow *entryList = &((CampMenuContext *)context)->partyWindow;
     CampMenuContext *work = (CampMenuContext *)context;
 
-    func_00276720((s32)entryList, 0, menu->staffImage, menu->staffMode);
+    mnuConfigurePartyPanelPage((s32)entryList, 0, menu->staffImage, menu->staffMode);
     btlStopStage();
     mnuClearEntries(entryList);
     mnuReleasePartyIconBundles(entryList);
@@ -1049,10 +1049,10 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
         if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
             if (menuWork->staffMode == 0) {
                 menuWork->staffMode = 1;
-                func_00276720((s32)&((CampMenuContext *)context)->partyWindow, 3, menuWork->staffImage, 1);
+                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 3, menuWork->staffImage, 1);
             } else {
                 menuWork->staffMode = 0;
-                func_00276720((s32)&((CampMenuContext *)context)->partyWindow, 2, menuWork->staffImage, 0);
+                mnuConfigurePartyPanelPage((s32)&((CampMenuContext *)context)->partyWindow, 2, menuWork->staffImage, 0);
             }
             menuWork->activeMark = 0;
         }

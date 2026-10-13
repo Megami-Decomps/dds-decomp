@@ -123,7 +123,7 @@ extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 extern void *memset(void *, s32, u32);
 extern void func_00345BA0(void *, SdfPoolNode *);
-extern void func_002A7B28(MovObj *, SdfPoolNode *);
+extern void mnuSubmitMovieDrawPacket(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
@@ -453,7 +453,7 @@ u32 mnuIsTitleMovieDrawActive(void) {
 
 extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5F80);
+INCLUDE_ASM(const s32, "game/code_002A5260", mnuStartTitleMovieDraw);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_004287E0);
 
@@ -1056,9 +1056,9 @@ void mnuUpdateStaffRollStreamState(void)
     }
 }
 
-extern s32 func_002A6580(KwlnTask *);
+extern s32 mnuUpdateStaffRoll(KwlnTask *);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
+INCLUDE_ASM(const s32, "game/code_002A5260", mnuUpdateStaffRoll);
 
 extern MnuStaffImageRecord D_003E4A80[19];
 extern s32 D_00437AB4;
@@ -1509,7 +1509,7 @@ void mnuCreateStaffTask(void) {
     mnuMovieWork->frame = 0;
     mnuMovieTaskState = 1;
     frFontUploadClearedTexture();
-    kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, mnuFinishStaffMovieAndFreeState, 0);
+    kwlnTaskCreate(D_00429968, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }
 
 u32 mnuStartStaffMovieRequest(void) {
@@ -1546,7 +1546,7 @@ s32 index;
     mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7B28);
+INCLUDE_ASM(const s32, "game/code_002A5260", mnuSubmitMovieDrawPacket);
 
 extern char D_0042A348[];
 
@@ -1566,7 +1566,7 @@ s32 mnuMovieDrawNextProc(s32 procedure) {
         sdfDebugPrintf(D_0042A348);
         return -1;
     }
-    func_002A7B28(&mnuMovieDrawContext, &D_003803C8);
+    mnuSubmitMovieDrawPacket(&mnuMovieDrawContext, &D_003803C8);
     D_00437AD0++;
     if (D_00437AD0 == 0x1E) {
         sdfDebugPrintf(D_0042A380, procedure);

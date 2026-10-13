@@ -60,7 +60,7 @@ extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
-extern void func_00276720(MenuPageWindow *, s32, s32, s32);
+extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 
 
 
@@ -705,7 +705,7 @@ void mnuSetupStaffMenuProfilePage(DatPartyRecord *source, MenuProgressHost *work
         work->staffSlots.pairResources[0]);
     work->currentEffect = mnuCreateProfilePanel(source);
     mnuCacheProfilePanelGridPositions(work->currentEffect, (u32)work->staffSlots.pairResources[1], 5, 14, 15);
-    func_00276720(window, 1, 1, 1);
+    mnuConfigurePartyPanelPage(window, 1, 1, 1);
 }
 
 /* Release the window's entries/icons before its panel, sprite and profile allocations. */

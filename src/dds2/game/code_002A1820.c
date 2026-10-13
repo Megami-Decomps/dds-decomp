@@ -920,7 +920,7 @@ extern void mnuDrawTitleSceneForPhase(void);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuResetTitleMovieMenuStateAndStartTrack(void);
-extern void func_002A5F80(void);
+extern void mnuStartTitleMovieDraw(void);
 extern void sndReleaseTrackHandle(u32);
 extern void sdfSoundSetChannelCount(u32);
 extern void sndStartTrackExtended(s32);
@@ -1144,7 +1144,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             mnuMovieMenuState->state = 23;
         } else {
             mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-            func_002A5F80();
+            mnuStartTitleMovieDraw();
             mnuMovieMenuState->state = 20;
         }
         break;
