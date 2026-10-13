@@ -11,6 +11,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_pac_state.h"
 #include "sdf_pac_work.h"
+#include "sdf_key_pool.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -617,15 +618,6 @@ void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
 }
 
 
-struct SdfKeyTreeItem;
-
-/* Larger keys use the right link, which precedes the left link in memory. */
-typedef struct SdfKeyTreeNode {
-    struct SdfKeyTreeNode *right; /* 0x0 */
-    struct SdfKeyTreeNode *left;  /* 0x4 */
-    struct SdfKeyTreeItem *item;  /* 0x8 */
-    s32 balance;                 /* 0xC */
-} SdfKeyTreeNode;
 /* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */
 SdfKeyTreeNode *sdfRotateBalancedTreeSecondLink(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
     SdfKeyTreeNode *childRoot = heavyChild;
@@ -768,22 +760,6 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
     }
 }
 
-typedef struct SdfKeyPoolNode {
-    struct SdfKeyPoolNode *next;
-    s32 unk4;
-    u8 unk8[4];
-    s32 kind;
-} SdfKeyPoolNode;
-
-typedef struct SdfPool {
-    u8 unk0[4];
-    SdfKeyPoolNode *head;  /* 0x04: first node of the chain */
-    SdfKeyPoolNode *tail;  /* 0x08: last node of the chain */
-    SdfKeyPoolNode *freeHead;
-    u8 unk10[8];
-    SdfKeyTreeNode *keyTree[1]; /* 0x18: key tree root */
-} SdfPool;
-
 extern void sdfInsertFloatKeyTreeItem();
 extern void sdfRebuildPoolChain();
 
@@ -860,9 +836,6 @@ void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *node) 
         break;
     }
 }
-
-extern void sdfReleasePoolNode();
-extern void sdfUpdatePoolFreeListByMode();
 
 void sdfInstallPoolNodeReleaseCallbacks(u32 *work) {
     work[4] = (u32)sdfReleasePoolNode;
