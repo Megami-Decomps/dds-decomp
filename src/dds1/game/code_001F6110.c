@@ -25,9 +25,6 @@
 
 extern s32 func_003101B8(s32 directory);
 extern s32 func_00310320(s32 directory, SceDirent *entry);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
     BTL_RESOURCE_NAME_RECORD_BYTES = 0x38,

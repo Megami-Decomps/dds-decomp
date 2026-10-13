@@ -8,9 +8,7 @@
 #include "fld_map_resource.h"
 #include "sdf_texture_file.h"
 
-struct SdfTex;
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
-
+#include "sdf.h"
 extern u32 sdfCounterAnimationValue;
 
 extern s32 D_003BD97C;

@@ -161,8 +161,6 @@ extern u8 D_00391F84[];
 extern s32 D_004361FC;
 
 extern s32 fldRainTextureResource;
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 extern char D_00413350[];
 
 extern u32 fldRainTextureData;

@@ -24,10 +24,6 @@ typedef struct EffModelOwner {
 
 
 extern u32 effModelUpdateControlFlags;
-
-extern void sdfTexReleaseReference(struct SdfTex *texture);
-
-
 extern u8 btlIsRuntimeAllocated(void);
 
 extern s32 btlIsCurrentActorFullyMarked(void);

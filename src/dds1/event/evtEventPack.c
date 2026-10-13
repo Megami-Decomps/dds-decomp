@@ -13,6 +13,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_offset_list.h"
 
+#include "sdf.h"
 s32 evtTickPackLoad(KwlnTask *task);
 void evtReleaseEventPackResources(KwlnTask *task);
 
@@ -284,9 +285,6 @@ extern void effInitCh72Id(void);
 extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *);
-
-
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
 void evtReleaseEventPackResources(KwlnTask *task) {

@@ -245,10 +245,6 @@ typedef struct BtlResourceEntryList {
 extern u8 D_00436C50[];
 
 extern u8 D_00436C58[];
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
-
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
 
 extern char *D_003BEA80[];

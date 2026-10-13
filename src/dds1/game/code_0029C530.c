@@ -177,9 +177,6 @@ extern u32 effFlashTextureHandles;
 
 
 extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern u32 effCreateSurfaceGridNode(u32, u32);
 
 extern void effFillSurfaceGridColorGradient(u32, u32 *);

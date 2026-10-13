@@ -503,8 +503,6 @@ extern u32 D_00438EC8;
 extern u8 D_0038A700[];
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 extern f32 D_004360B0;
 
 extern f32 D_00444980[];

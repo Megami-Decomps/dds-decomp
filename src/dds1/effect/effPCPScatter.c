@@ -19,6 +19,7 @@
 #include "fpu.h"
 #include "sdf_texture_file.h"
 
+#include "sdf.h"
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
 /* Keep these spellings distinct: HALF_TURN * 2.0f rounds differently. */
@@ -52,9 +53,6 @@
 
 
 extern void *effParamTableGetBlock(void *data, s32 index);
-
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 

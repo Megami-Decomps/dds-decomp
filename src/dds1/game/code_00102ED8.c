@@ -1171,8 +1171,6 @@ extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 arg6, SdfTexResource *secondary);
 extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
-extern void sdfTexReleaseReference(SdfTex *texture);
-
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
 s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {

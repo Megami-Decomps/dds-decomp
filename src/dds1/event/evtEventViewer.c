@@ -124,7 +124,6 @@ typedef struct EvtGroupRec {
 
 
 void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 
 EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);

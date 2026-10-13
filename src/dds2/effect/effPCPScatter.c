@@ -20,6 +20,7 @@
 #include "fpu.h"
 #include "sdf_texture_file.h"
 
+#include "sdf.h"
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
 /* Keep these spellings distinct: HALF_TURN * 2.0f rounds differently. */
@@ -1178,10 +1179,6 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     res->refCount = 1;
     return res;
 }
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
-
 /* Release the texture and owner only when the decremented reference count equals zero. */
 void effPcpScatterResRelease(PcpScatterRes *res) {
     res->refCount--;
