@@ -10,6 +10,7 @@
 #include "fld_resource_resolver.h"
 #include "fld_transfer_chunk.h"
 #include "fld.h"
+#include "fld_scene_request.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
@@ -658,31 +659,6 @@ extern s32 D_003BAE54;
 extern s32 D_003BAE5C;
 extern s32 D_003BAE60;
 
-/* Four resource references are copied into the scene's load queue in order. */
-typedef struct FldLoadRecord {
-    u32 unk_0;
-    u32 displayState;
-    void *resourceA;
-    void *resourceB;
-    void *resourceC;
-    void *resourceD;
-} FldLoadRecord;
-
-typedef struct FldLoadRequest {
-    u32 unk_0;
-    u32 unk_4;
-    FldLoadRecord *record;
-} FldLoadRequest;
-
-/* Layout shared by the two field-request dispatch paths. */
-typedef struct FldSceneRequest {
-    u32 primaryValue;
-    u32 secondaryValue;
-    FldLoadRecord *record;
-    u32 spawnCount;
-    FldActionSpawn *spawnList;
-} FldSceneRequest;
-
 extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
 extern char D_003BAC40[];
 extern void fldSpawnSceneResourceBatches(FldSpawnBatch *, u32);
@@ -1143,7 +1119,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             }
         }
     }
-    fldSpawnSceneResourceBatches((FldSpawnBatch *)request->unk_4, request->unk_0);
+    fldSpawnSceneResourceBatches(request->spawnBatches, request->spawnBatchCount);
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */
@@ -1152,12 +1128,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 0);
+    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 1);
+    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 1);
 }
 
 s32 fldGetTransferChunkPayload(s32 record) {
