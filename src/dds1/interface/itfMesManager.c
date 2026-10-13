@@ -93,7 +93,7 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDes
 
 extern s32 itfUpdateActiveMessageWindows(void);
 
-extern void sndFlushMessageQueue(void);
+extern void itfMesDestroyActiveWindowsAndReleaseTexture(void);
 
 extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
@@ -916,8 +916,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)itfUpdateActiveMessageWindows, (TaskDestroy)sndFlushMessageQueue, 0);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)sndFlushMessageQueue, 0);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)itfUpdateActiveMessageWindows, (TaskDestroy)itfMesDestroyActiveWindowsAndReleaseTexture, 0);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)itfMesDestroyActiveWindowsAndReleaseTexture, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
