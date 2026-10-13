@@ -8111,3 +8111,4 @@
 0x00306DC8	effDrawRepeatedSpriteTiles	inferred	blends the slot’s four corner colors with alpha cleared, initializes a complete tile width from sourceWidth * 16, and draws length / tileWidth repeated tiles.
 0x00306BF0	effDrawSpriteWithWorkCornerColors	inferred	draws the selected slot using the supplied work entry corner-color array at +0x14; the grid caller resolves and supplies that slot work.
 0x00306C28	effDrawSpriteWithCornerColors	inferred	draws the indexed slot using caller-supplied corner colors and the resolved slot work; paired DDS1 helper is effDrawSpriteWithCornerColors at 0x002BF438.
+0x00306678	effDrawTexturedRectBorderStrips	inferred	draws each enabled border strip around a textured rectangle, deriving edge colors and temporary texture coordinates before restoring the original coordinates; called by the lower textured-slot drawer.

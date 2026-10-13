@@ -41,7 +41,7 @@ extern void itfDrawRotatedTexturedRect(u32, u32, u32, u32, u32, const u32 *, con
                                       f32, u32, u32, u32, u32);
 
 /* Draw enabled border strips and restore the temporary texture-coordinate changes. */
-void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
+void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 height,
                   const u32 *edgeExtents, u8 *edgeColorBytes,
                   u32 *textureCoordinates, u32 *sourceCornerColors, u32 kind,
                   u32 mode, u32 flip, u32 texture, u32 buffer) {
