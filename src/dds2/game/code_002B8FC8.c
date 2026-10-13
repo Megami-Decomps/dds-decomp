@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "dsp_entry_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "fr_font_context.h"
@@ -90,7 +91,6 @@ typedef struct MenuIconState MenuIconState;
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 
-extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();

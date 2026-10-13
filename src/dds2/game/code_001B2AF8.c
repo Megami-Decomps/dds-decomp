@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "eff_random.h"
@@ -4161,7 +4162,6 @@ typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ?
 extern const BattlePanelColors D_00416650;
 extern u8 *D_00435E64;
 extern u32 btlGetActiveUnitId(void);
-extern s32 dspStartEntry(s32);
 extern void func_0026C900(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
@@ -4290,7 +4290,6 @@ extern u64 btlStartTask(void *);
 extern void btlCopyUnitCurrentPosition(void *, f32 *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
 extern void btlSetCommandPanelFadeMode(s8, s32);
-extern s32 dspStartEntry(s32);
 extern s32 dspCloseChannel(void);
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
@@ -7174,7 +7173,6 @@ extern void mdlFlagSet(s32);
 extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 dspCloseChannel(void);
 extern void evtCreateMessageWindowIfMissing(void *);
-extern s32 dspStartEntry(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void *memset(void *, s32, u32);
