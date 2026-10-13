@@ -470,7 +470,7 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
             particle->age++;
         }
     }
-    func_001891A8(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Update the first family's scattered float parameters without touching gaps. */
@@ -659,7 +659,7 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
         }
         delays++;
     }
-    func_001891A8(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
@@ -891,7 +891,7 @@ void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
             particle->age++;
         }
     }
-    func_001891A8(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Copy the ring origin as one quadword, including its fourth component. */
@@ -1143,7 +1143,7 @@ void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
             particle->age++;
         }
     }
-    func_001891A8(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
@@ -1386,7 +1386,7 @@ void effMagatuhiUpdateDriftParticles(EffMagatuhiDriftWork *work) {
             particle->age++;
         }
     }
-    func_001891A8(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Copy the drift origin as one quadword, preserving the source w. */

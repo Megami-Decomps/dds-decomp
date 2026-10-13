@@ -8314,6 +8314,7 @@
 0x00160D88	effBattleUpdate	inferred	Processes the active BattleEffect frame and entries, dispatches frame callbacks, then advances and returns currentFrame; paired DDS2 0x00168978.
 0x0017DCF8	effPcpBlockSetUpdate	inferred	Updates block-set frame, grouped cell transforms and colors; invoked for each rotate child after its start threshold. Paired DDS2 0x00185950.
 0x00184BC8	effBossUpdateGeometry	inferred	Rebuilds boss grouped trail geometry and colors from the per-cell state, then advances the owner frame; called by effBossUpdateGeometryCallback. Paired DDS2 0x0018C820.
+0x001891A8	effMagatuhiDrawOwnerHistoryTrails	inferred	Forwards owner->valueWork to effMagatuhiDrawHistoryTrails; DDS2 twin 0x00190DE0.
 0x001893D8	effMagatuhiDrawHistoryTrails	inferred	Builds batched compact-vertex packets from the Magatuhi value-work history slots and submits them for drawing; paired DDS2 0x00191010.
 0x0018CE30	effReturnCallbackValue	inferred	high confidence; returns incoming callback word unchanged; aligns existing DDS2 0x00194A68 name while retaining unsigned DDS1 and signed DDS2 source surfaces. Sole previously absent symbol row added with Main approval. [Namer1 batch 30]
 0x0024AE18	mnuConfigureTerminalModeEffects	inferred	high confidence; applies mode-specific geometry and material/state flags to terminal grids 9/10 using the selected effect field; aligns existing DDS2 0x00269478 name. Trace-justified real byte-displacement statement. [PurD]
