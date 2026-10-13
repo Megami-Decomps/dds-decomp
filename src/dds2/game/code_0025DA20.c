@@ -1,6 +1,7 @@
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
+#include "mnu_camp_display.h"
 #include "evt_solar.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -536,17 +537,6 @@ void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, 
     }
 }
 
-typedef struct CampDisplayDefaults {
-    s32 x;
-    s32 y;
-    u8 color[4];
-    f32 scaleY;
-    f32 scaleX;
-    s32 enabled;
-    s32 variant;
-    s32 unk1C;
-} CampDisplayDefaults;
-
 void mnuCampInitializeDisplayDefaults(CampDisplayDefaults *display) {
     display->x = 0x100;
     display->y = 0xE0;
@@ -558,7 +548,7 @@ void mnuCampInitializeDisplayDefaults(CampDisplayDefaults *display) {
     display->scaleY = 1.0f;
     display->enabled = 1;
     display->variant = 0;
-    display->unk1C = 0;
+    display->opaque1C = 0;
 }
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2);
@@ -675,7 +665,7 @@ void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
     display->enabled = from->p08.sb[0];
     display->variant = from->p08.sb[1];
 copyExtraMetadata:
-    display->unk1C = from->p1C.sb[0];
+    display->opaque1C = from->p1C.sb[0];
 }
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2) {
@@ -812,7 +802,7 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
         } else if (variant == 2) {
             itfSendTablePacket(packet, 2, 0);
         }
-        if (display->unk1C != 0) {
+        if (display->opaque1C != 0) {
             surfaceIndex = 0x3E;
             evtSetDrawSurfaceIndex(0x3E);
             evtSubmitPrimaryAlphaBlendMode(0);
