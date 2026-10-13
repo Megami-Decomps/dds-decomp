@@ -470,7 +470,6 @@ extern s32 scrReadIntParameter(s32);
 
 extern u32 sdfSoundIsCommandBusy(void);
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern u32 D_00437A2C;
 

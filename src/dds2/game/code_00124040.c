@@ -165,12 +165,11 @@ extern void func_0013DDC0(EffWorldNode *);
 
 extern void func_0014D0E8(void);
 
+#include "mnu_title_stream.h"
 
-extern void mnuMarkTitleStreamResetPending(void);
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
+
 
 extern u32 fldSceneControlFlags;
 

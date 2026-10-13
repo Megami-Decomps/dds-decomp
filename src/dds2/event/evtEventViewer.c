@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "dds3obj.h"
@@ -1016,8 +1017,6 @@ extern u32 kwlnDrawControlFlags;
 void fldInitializeCameraColorResource(void);
 
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
-extern s32 mnuPollTitleStreamStateLocked(void);
-extern void mnuMarkTitleStreamResetPending(void);
 extern s32 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx);
 
 struct EvtRuntime;

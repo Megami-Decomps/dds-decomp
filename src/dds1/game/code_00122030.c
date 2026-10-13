@@ -7,6 +7,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
@@ -2076,11 +2077,8 @@ struct KwlnTask;
 
 extern struct KwlnTask *kwlnTaskFindByPriority(u32);
 
-extern void mnuMarkTitleStreamResetPending(void);
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
 
 extern u32 D_003BABE8;
 

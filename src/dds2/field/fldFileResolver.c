@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
@@ -4059,10 +4060,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_00131B50);
 /* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_001321F8);
 
-extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern void mnuMarkTitleStreamResetPending(void);
-extern void mnuResetTitleStreamLocked(void);
 
 /* Advance the field transition while the camera model's motion drives completion. */
 s32 fldUpdateFieldTransition(void) {

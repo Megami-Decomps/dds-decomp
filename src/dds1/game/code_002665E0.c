@@ -449,7 +449,6 @@ extern s32 D_003BC5C8;
 
 extern u8 D_003D9178[];
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern u32 sdfSoundIsCommandBusy(void);
 

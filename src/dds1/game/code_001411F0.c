@@ -3,6 +3,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -157,7 +158,6 @@ extern void *effObjCreateEventNode(void *, f32 *, f32 *);
 extern void effObjClearFlags(void *, s32);
 extern void effObjSetFlags(void *, s32);
 extern void effObjReplaceActiveEventNode(void *, u32);
-extern void mnuMarkTitleStreamResetPending(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern u8 D_003A0978[];
 extern void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *);
@@ -4113,8 +4113,6 @@ void fldFinishEventFieldState(void) {
 extern void func_0024DD78(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void fldAddCameraModelEntry(s32);
-extern void mnuQueueTitleSoundStreamEntry(s32);
-extern s32 mnuPollTitleStreamStateLocked(void);
 extern void fldCreateSparkSlotObjects(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void evtSetSolarOverlayFullyTransparent(void);

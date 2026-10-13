@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
@@ -122,7 +123,6 @@ extern char D_003BC628[];
 extern void func_003014F0(char *, const char *, ...);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);
@@ -348,7 +348,6 @@ extern char D_003B1168[];
 
 
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 mnuUpdateStaffRoll(KwlnTask *task);
 

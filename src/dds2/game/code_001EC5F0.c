@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -113,11 +114,8 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern u32 kwlnDrawControlFlags;
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 D_00435E0C;
 
