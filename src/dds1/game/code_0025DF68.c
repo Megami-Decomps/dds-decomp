@@ -344,7 +344,7 @@ void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object,
 }
 
 /* Draw the selected shop row's two markers, its icon and its count text. */
-void func_0025F680(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
+void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_003BC520;
     struct MenuList *list = scene->window->list;
@@ -370,7 +370,7 @@ void func_0025F680(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
     }
 }
 
-void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
+void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
     struct EffectSlotSet *texture = D_003BC520;

@@ -1865,7 +1865,7 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
-extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
+extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
 extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
 extern void func_00260100(ShopScene *, s32);
 extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
@@ -2737,7 +2737,7 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
     func_0025E308(0, 0, 0, state, 0x100, 0x53);
     func_00260100(state, 0xA09DC380);
     mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-    func_0025F680(0, 0, 0, state, 0x53);
+    mnuDrawShopSelectedRowDetails(0, 0, 0, state, 0x53);
     mnuDrawIfActive(0, 0, 0, state->window, 0x53);
     func_0025FFC8(0, 0, 0, state, 0x53);
 
