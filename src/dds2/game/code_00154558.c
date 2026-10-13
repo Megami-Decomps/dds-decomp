@@ -786,7 +786,7 @@ extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 
 
 
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+#include "dds3_object_payload.h"
 
 s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;

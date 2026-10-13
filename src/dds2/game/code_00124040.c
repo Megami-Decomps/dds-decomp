@@ -54,9 +54,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 
 
 
-extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
-
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+#include "dds3_object_payload.h"
 
 extern u32 D_00435F60;
 

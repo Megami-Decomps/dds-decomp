@@ -2358,7 +2358,7 @@ extern char D_0041A378[]; /* "md_01all_02" */
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+#include "dds3_object_payload.h"
 
 /* Before marking a gate enemy, notify md_01all_02 with payload word 1; always allow. */
 s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
