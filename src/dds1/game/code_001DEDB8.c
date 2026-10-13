@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "fld_area_path.h"
 #include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -5239,7 +5240,6 @@ typedef struct BtlFieldLoadArgs {
     s32 frame;
 } BtlFieldLoadArgs;
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
                                             const SdfTextureOffsetListHeader *, s32);
