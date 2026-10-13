@@ -56,7 +56,7 @@ extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 extern u8 effSharedRandomState[];
 
-extern void func_001E38F0(BtlUnit *, MdlCtx *, SdfModel *, SdfPoolNode **, u32);
+extern void btlDrawUnitTransparencyPasses(BtlUnit *, MdlCtx *, SdfModel *, SdfPoolNode **, u32);
 
 extern void dds3ClearObjectFlags(void *, u32);
 
@@ -3349,8 +3349,9 @@ extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 extern u64 D_003B6BB0[4];
 
-void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
-                   SdfPoolNode **surfaces, u32 frame) {
+/* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
+void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
+                   SdfPoolNode **surfaces, u32 color) {
     SdfListHead *list;
     u64 *packet;
     MdlResourceItem *item;
@@ -3360,7 +3361,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
     if (model->flags & MDL_SKIP_TRANSFORMS) {
         return;
     }
-    mdlBroadcastMasked(model, frame);
+    mdlBroadcastMasked(model, color);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
@@ -3413,7 +3414,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
         sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    mdlSetAllResourceFrames(model, frame);
+    mdlSetAllResourceFrames(model, color);
     for (item = model->resourceItems; item != NULL; item = item->next) {
         mdlDispatchViewerAnchorRecord(model, item);
     }
@@ -3467,7 +3468,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             } else if (unit->unk344 == 0) {
                 btlCreateUnitTransparency(unit);
             } else {
-                func_001E38F0(unit, info, (SdfModel *)unit->unk344, D_003B6BD0, color);
+                btlDrawUnitTransparencyPasses(unit, info, (SdfModel *)unit->unk344, D_003B6BD0, color);
             }
         }
     }
@@ -3503,7 +3504,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
         dds3SetObjectFlags(unit->effectObject, 1);
         return;
     }
-    func_001E38F0(unit, info, (SdfModel *)unit->unk344, D_003B6BE0, unit->overlayColor);
+    btlDrawUnitTransparencyPasses(unit, info, (SdfModel *)unit->unk344, D_003B6BE0, unit->overlayColor);
     info = unit->mirror->ext->owner;
     if (unit->mirror->unk344 == 0) {
         unit->mirror->unk344 = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -3514,7 +3515,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     sdfCreateDescriptorPacket(list, D_0040B290.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
     D_003B6BF0[0]->append(D_003B6BF0[0], list);
-    func_001E38F0(unit->mirror, info, (SdfModel *)unit->mirror->unk344, D_003B6BF0, unit->mirror->overlayColor);
+    btlDrawUnitTransparencyPasses(unit->mirror, info, (SdfModel *)unit->mirror->unk344, D_003B6BF0, unit->mirror->overlayColor);
 }
 
 extern char D_00436A28[];
@@ -4632,14 +4633,16 @@ BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void) {
     return task;
 }
 
-u32 func_001E6790(void) {
+/* Complete the empty task on its first process call; no sound operation is performed. */
+u32 btlFinishNoOpTask(void) {
     return 1;
 }
 
-BtlRuntimeTask *func_001E6798(void) {
+/* Allocate the zero-argument, kind-0x20 task with an unconditional completion callback. */
+BtlRuntimeTask *btlCreateNoOpTask(void) {
     BtlRuntimeTask *task = btlAllocTask(0);
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
-    task->callback = func_001E6790;
+    task->callback = btlFinishNoOpTask;
     task->taskId = 0x20;
     task->onStart = 0;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;

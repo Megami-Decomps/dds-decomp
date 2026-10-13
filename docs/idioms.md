@@ -1437,8 +1437,8 @@ argument's semantic role and update definitions and declarations together.
 Do not enumerate signatures or assume this observation extends across an
 argument-register limit, varargs, or an unspecified declaration.
 
-The diagnostic sphere helper `func_0020D1F8` takes
-`(f32 *position, f32 radius, u32 color, s32 flags)`. Both sphere calls in
+The diagnostic radius-guide provider `btlDebugDrawRadiusGuide` takes
+`(f32 *position, f32 radius, u32 color, s32 flags)`. Both radius-guide calls in
 `effUpdateCameraDiagnostics` establish this source order: the integer arguments use
 `$a0`–`$a2` and the radius uses `$f12`. Placing the radius last preserves those
 incoming registers but changes the first call's float/color/flags setup.
@@ -10318,4 +10318,38 @@ compiler SHA-256
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
 The deciding logs are recorded in PurC's deep31 ledger, not in repository
 source as sandbox paths.
+
+## Retail no-op callbacks retain their observed roles
+
+The battle diagnostic providers are existing eight-byte retail stubs, not
+unfinished replacements. `btlDebugDrawPoint` receives the final guide
+endpoint; `btlDebugDrawSegment` receives two endpoints and a color;
+`btlDebugDrawRadiusGuide` receives a center, horizontal-vector length,
+color and flags. The last name deliberately does not choose sphere versus
+circle rendering, which the empty provider cannot establish. The menu-frame
+callers establish geometry and two colors for `btlDebugDrawTwoColorRectangle`,
+without proving a fill, outline or gradient algorithm. All existing parameter
+types and argument interleaving are preserved in each game.
+
+The primary-text native dispatch rows at DDS1 0x00398330 and DDS2 0x0040B4E0
+assign `sdfMotionCapturePrimaryTextNoOp` to `capturePrevious`. The secondary-text
+rows at 0x00398348 and 0x0040B4F8 assign `sdfMotionCaptureSecondaryTextNoOp`
+to the same slot. Adjacent nonempty color/text capture callbacks establish
+the slot order independently. These two callbacks intentionally capture
+nothing; their direct sample/blend paths retain the existing behavior.
+
+The kind-0x20 constructor `btlCreateNoOpTask` allocates no argument payload,
+uses ALWAYS start and NEVER end conditions, and installs `btlFinishNoOpTask`.
+Its process callback returns one without performing a sound operation.
+`btlRunTask` interprets that nonzero return as completion on the first
+process call; the existing start/end delay handling still applies. This
+does not change the legacy DDS1 `SoundTask *` return type or the DDS2
+`BtlRuntimeTask *` return type.
+
+`btlDrawUnitTransparencyPasses` is nonempty: it renders the model/overlay on
+four surfaces through the three native GS TEST passes and then updates
+anchors. Its named transparency and mirror callers supply packed
+`overlayColor`, so the formerly misleading `frame` parameter is named
+`color`. Types, packet values, statement order and rendering calls remain
+unchanged.
 

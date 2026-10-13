@@ -2674,7 +2674,8 @@ void btlDebugDrawText(s32 x, s32 y, s32 style, const char *text) {
 void btlDebugDrawRectangle(s32 x, s32 y, s32 width, s32 height) {
 }
 
-void func_0020D1C0(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
+/* Retail discards menu-frame rectangles; callers supply geometry and two colors. */
+void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
 void func_0020D1C8(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
@@ -2689,13 +2690,15 @@ void func_0020D1D8(void) {
 void func_0020D1E0(void) {
 }
 
-void func_0020D1E8(f32 *position) {
+/* Retail stub for the endpoint marker submitted by camera diagnostics. */
+void btlDebugDrawPoint(f32 *position) {
 }
 
 void func_0020D1F0(void) {
 }
 
-void func_0020D1F8(f32 *position, f32 radius, u32 color, s32 flags) {
+/* Retail stub for a centered radius guide; preserve the mixed-argument order. */
+void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
 void func_0020D200(void) {
@@ -2707,7 +2710,8 @@ void func_0020D208(f32 *position, u32 color, s32 mode, f32 scale) {
 void func_0020D210(void) {
 }
 
-void func_0020D218(f32 *from, f32 *to, u32 color) {
+/* Retail stub for a colored segment between two diagnostic guide endpoints. */
+void btlDebugDrawSegment(f32 *from, f32 *to, u32 color) {
 }
 
 void func_0020D220(void) {

@@ -248,7 +248,7 @@ extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 struct MdlCtx;
 struct SdfPoolNode;
-extern void func_001E38F0(void *, void *, s32, u8 *, u32);
+extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);
 extern struct SdfPoolNode *D_00380788[13][4];
 extern u8 D_003B6BD0[];
