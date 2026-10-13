@@ -1814,7 +1814,7 @@ unchanged. The ordering follows from what is referenced and for how long:
 for example, testing the other operand of a predicate swaps the homes. So look
 for the real data flow (which value is reloaded, cached or recomputed) and not
 for a declaration or prototype switch. Some "mirrored" parks are caller-saved
-`$v0`/`$v1` problems instead (`func_00244658`, `btlSelectLowestRankTarget`).
+`$v0`/`$v1` problems instead (`mnuShopHasExtraOption`, `btlSelectLowestRankTarget`).
 
 Two exact cross-title examples recover the meaningful data flow rather than
 choosing register homes. The selection-trail constructors `func_001B3DC8`
@@ -10744,7 +10744,7 @@ an unsupported interpretation of the trailing word.
 
 ## Trace-justified task roles: special pre-action callbacks
 
-DDS1 `func_002069C0` and DDS2 `func_00227DA8` are 1,400-byte callbacks for
+The DDS1/DDS2 `btlQueueLinkedPairModelSwapTasks` routines are 1,400-byte callbacks for
 the `0x170` and `0x189` modes. Their task records have one primary
 `BtlRuntimeTask` type. `timedTask` carries the real custom-sound and fade
 records that receive an `endDelay`; `task` carries the other queued records.
@@ -10877,4 +10877,89 @@ ring send: zero means accepted, one means empty or rejected. Its producer and
 worker loops retain their opposite continuation conditions.
 `sndSubmitTextCommandPayloadWithCommandBits80` forwards `strlen` bytes with command bit 0x80,
 excluding the terminating NUL.
+
+
+## Camera target dispatcher: two retained position samples
+
+DDS1 `func_001DE5F8` and DDS2 `func_001EBE30` retain two 16-byte SDK
+position samples in an 0x80-byte frame. The actor's sample is written to
+SP+0x10 at 001DE74C / 001EBF84; the other eligible actor's sample is written
+to SP+0 at 001DE794 / 001EBFCC. These are actual retail `sqc2` stores, not
+padding or invented dead stores. A two-row `f32 positions[2][4]` workspace
+expresses that native layout, with the partner row first and the actor row
+second. The existing `VU0_STORE_VF` SDK macro provides the native COP2 store;
+no new inline assembly or macro contract was added.
+
+The deciding compiler mechanism is global allocation followed by reload.
+With separate arrays in the opposite homes, the repeated partner sample needs
+a persistent SP+0x10 address pseudo that occupies $19; the single-target
+predicate spills, moving the runtime and target-policy result to SP+0x24 and
+SP+0x28. **Property P:** the repeated loop store must use SP directly, leaving
+$19 available for the single-target predicate. Grouping the genuine samples
+in their native row order achieves P. The parity-verified final trace allocates
+predicate pseudo 91 to $19, and reload places runtime pseudo 93 at SP+0x20 and
+policy-result pseudo 96 at SP+0x24. This is a real native-used workspace,
+not a declaration-order search or an unused-frame-gap exception.
+
+Two independent control-flow details finish the body: separate nested tests
+for readiness bit 1 and actor-class bit 0x200 retain retail's two predicates
+instead of folding them into a 0x201 comparison; the final default-camera
+case checks the transition-needed condition first, then falls back to the
+direct camera update. Zero target count still exits without freeing the list,
+as retail does. No sentinel, repeated artificial arm, helper, or goto is used.
+
+The rebase began at 143/214 differing words; native sample grouping improved
+that to 127/214. Nested predicates alone exceeded the target extent.
+The transition-first final branch then closed both 864-byte bodies:
+DDS1 **40 match, 0 differ**, DDS2 **44 match, 0 differ**, with every surrounding
+matched function and data object unchanged. Traces were recorded with
+`tools/cc1probe.sh <candidate> --as-unit <unit> --version <game> --func <target>
+--all`; hooked and unhooked assembly and RTL outputs agree. Exact log paths,
+allocation line references, individual gate logs, and the full step history
+are retained in the agent's ledger.
+
+
+## Linked encounter hooks, roster IDs and native text forwarding
+
+The linked encounter's update hooks are `btlRunLinkedPairUpdateHook`; their
+shared transform pass is `btlUpdateLinkedEffectUnitTransforms`. The DDS1
+and DDS2 native callback slots and defeated-body handling differ, so names
+describe the paired transforms without asserting identical update timing.
+`btlChooseLinkedPairMotion` uses effect phase and both units' quarter-value
+tests. Its native pair IDs remain `0x107/0x108` in DDS1 and `0x12E/0x12F`
+in DDS2.
+
+`btlQueueLinkedPairModelSwapTasks` preserves the task-role staging described
+in "Trace-justified task roles: special pre-action callbacks" above. Naming
+does not change the barriers, timed-task pointer epochs, rate-kind/effect-scale
+staging, parameter types, or declaration/statement order.
+
+`btlSetLinkedPairActionCamera` handles actions `0x171/0x189`. The DDS2
+`0x188` arm also resets progress while returning unhandled `0`; DDS1 does
+not perform that reset. The handled/unhandled result joins remain distinct.
+`btlAdvanceMarkedLinkedActionCamera` advances `0x188` only when the marked
+entry is ready and chooses fixed camera keys at step 25.
+
+The DDS2 frontline hooks use actor IDs, not enemy-name IDs. The decoded
+`data/battle/msg.tblasm` actor-name rows identify 1=Serph, 2=Sera, 4=Argilla,
+5=Gale, 7=Roland and 8=Seraph. `prfCapPresentMessages` indexes displayed
+names by `DatPartyRecord.unitId`; `ptyRebalanceFrontline` promotes that
+selected roster entry. Thus the hooks name their actual promoted actors.
+The fixed return-6 callback remains unnamed: sharing a slot with a
+target-kind callback does not prove that 6 means actor Cielo.
+
+The DDS1 enabled-action classifiers use a different namespace:
+enemy-name 265=Metatron, 273=Beelzebub and 275=Huang Long. Each returns
+11 only for its group-400 enemy and an enabled action record, otherwise -1.
+The names do not guess what category 11 means to the consumer.
+
+`sdfSoundStopMoviePlayback` sends command `0x100` during enabled movie-sound
+stream cancellation. It remains a distinct entry point from the standalone
+named-playback stop, despite using the same packet.
+
+`sdfPrintTextLine` forwards the native incoming `$a0` to libc's `puts`
+entry. Its reentrant worker builds two I/O vectors for the input string
+and one newline byte; the literal is `0x0A` at DDS1 `0x003B7AA0` and DDS2
+`0x00431BE0`. The zero-formal, void C definitions are deliberately retained
+for matching; this naming closure does not repair that source-level ABI.
 

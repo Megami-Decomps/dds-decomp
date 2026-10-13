@@ -338,7 +338,7 @@ void mnuDrawMantraEntryStatusOverlays(s32 x, s32 y, s32 depth, s32 amount, MnuPr
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025CA50);
+INCLUDE_ASM(const s32, "game/code_0025BC38", mnuDrawMantraProfileGridEntry);
 
 typedef struct MnuProfileIdList {
     s8 ids[22];
@@ -367,7 +367,7 @@ void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
     }
 }
 
-extern void func_0025CA50(s32, s32, s32, s32, s32,
+extern void mnuDrawMantraProfileGridEntry(s32, s32, s32, s32, s32,
                           MnuProfileProgress *, MnuMantraGridEntry *, s32);
 extern void mnuDrawMantraGridCursorHistory(s32, s32, s32, s32, s32, s32);
 
@@ -390,7 +390,7 @@ void mnuDrawMantraProfileGrid(s32 x, s32 y, s32 z, s32 alpha,
         for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, cell++) {
             entry = (MnuMantraGridEntry *)(u32)cell->value;
             if (entry != NULL) {
-                func_0025CA50(x, y, z,
+                mnuDrawMantraProfileGridEntry(x, y, z,
                               (s32)((f32)alpha * 0.5f),
                               (s32)gridOwner, profileOwner, entry, context);
             }

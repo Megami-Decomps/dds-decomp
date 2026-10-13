@@ -1212,7 +1212,7 @@ s32 mnuCampFindActiveSlot(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244658);
+INCLUDE_ASM(const s32, "game/code_00242608", mnuShopHasExtraOption);
 
 
 extern void mnuDestroyWindowContainer(MenuWindowContainer *);
@@ -1846,13 +1846,13 @@ extern void mnuStepShopWindowTransition(ShopScene *, s32);
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
 extern void mnuSetValueListTransition(struct MenuList *, u32);
-extern s32 func_00260AB0(ShopScene *);
+extern s32 mnuDrawShopPanelTransition(ShopScene *);
 extern void mnuDrawShopRowTextAndValue();
 extern void evtClearActiveFlag(s32);
 extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern void sndReleaseTrackHandle(s32);
 
-extern s32 func_00260670(ShopScene *context);
+extern s32 mnuDrawShopCommandPanel(ShopScene *context);
 
 extern void func_0024DD78(void);
 extern MenuPopupEntry D_0036AA68[];
@@ -1910,7 +1910,7 @@ void evtInstallStateTable(ShopScene *state) {
     }
 }
 
-extern s32 func_00244658();
+extern s32 mnuShopHasExtraOption();
 extern void mnuShopInitializeOptionList(ShopScene *);
 /* Prepare the active menu state and copy the selection into its window. */
 s32 evtInitializeActiveMenuState(KwlnTask *task) {
@@ -1921,7 +1921,7 @@ s32 evtInitializeActiveMenuState(KwlnTask *task) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 2);
     if (((ShopScene *)stateAddress)->sprite == 0) {
-        ((ShopScene *)stateAddress)->extraOption = func_00244658(stateAddress);
+        ((ShopScene *)stateAddress)->extraOption = mnuShopHasExtraOption(stateAddress);
         mnuShopInitializeOptionList((ShopScene *)stateAddress);
     }
     windowData = ((ShopScene *)stateAddress)->sprite->list->context;
@@ -2023,7 +2023,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
 s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260670((ShopScene *)stateAddress);
+    mnuDrawShopCommandPanel((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2144,7 +2144,7 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
 s32 evtStageDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260AB0((ShopScene *)stateAddress);
+    mnuDrawShopPanelTransition((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2264,7 +2264,7 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
 s32 evtStageDispatchStartB(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260AB0((ShopScene *)stateAddress);
+    mnuDrawShopPanelTransition((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2373,7 +2373,7 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
 s32 evtStageDispatchStartC(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260AB0((ShopScene *)stateAddress);
+    mnuDrawShopPanelTransition((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 

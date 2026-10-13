@@ -301,7 +301,9 @@ s32 btlGetEnabledEnemyActionResponse(BtlUnit *unit, s32 action) {
     return -1;
 }
 
-s32 func_0020D598(BtlUnit *unit, s32 action) {
+/* Classify enabled table actions for Beelzebub (enemy-name 273): return 11
+ * with group 400 set, otherwise -1. The result's category is not inferred. */
+s32 btlClassifyBeelzebubAction(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
@@ -347,7 +349,9 @@ s32 func_0020D668(BtlLinkedCommand *command, s32 modeA, s32 modeB) {
     return result;
 }
 
-s32 func_0020D690(BtlUnit *unit, s32 action) {
+/* Classify enabled table actions for Metatron (enemy-name 265): return 11
+ * with group 400 set, otherwise -1. */
+s32 btlClassifyMetatronAction(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
@@ -469,7 +473,9 @@ s32 btlNormalizeActionForStatus(BtlUnit *unit, s32 action) {
     }
 }
 
-s32 func_0020D9F8(BtlUnit *unit, s32 action) {
+/* Classify enabled table actions for Huang Long (enemy-name 275): return 11
+ * with group 400 set, otherwise -1. */
+s32 btlClassifyHuangLongAction(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }

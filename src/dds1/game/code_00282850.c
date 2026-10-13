@@ -186,7 +186,7 @@ extern void *evtBattleStageTestScreen(void);
 typedef struct MenuList MenuList;
 
 
-extern void func_00281D40(s32, s32, s32, MenuPageWindow *, s32, s32);
+extern void mnuDrawPartyMemberCommandPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
 
@@ -206,7 +206,7 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
     }
     switch (mode) {
     case 1:
-        func_00281D40(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberCommandPanel(x, y, z, menu, panelIndex, param);
         return;
     case 2:
         mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, param);

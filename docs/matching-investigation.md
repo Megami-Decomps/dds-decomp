@@ -189,7 +189,7 @@ justify changing arbitrary statement order or disabling multiply/add fusion.
 
 ### Camera success: recover both result joins
 
-DDS2 `game/code_00227288::func_00228B08` retained six flag-update/return
+DDS2 `game/code_00227288::btlSetLinkedPairActionCamera` retained six flag-update/return
 instruction differences. Before local allocation, scheduling placed the literal
 return value in `$v0` between the flag load and OR/store. The flag quantity's
 live interval therefore conflicted with `$v0` and took `$v1`. A boolean return

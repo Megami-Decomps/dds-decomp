@@ -71,7 +71,7 @@ void mnuReleaseMantraNodePositionTable(void) {
 }
 
 /* Return a 32-byte record address for a signed halfword index; callers sign-extend the index at the call
- * (func_0028DC08 +0x34), and this body re-extends it (sll/sra 16). */
+ * (mnuFindCompatibleMantraNeighbor +0x34), and this body re-extends it (sll/sra 16). */
 struct MantraNodePos;
 
 struct MantraNodePos *mnuGetMantraNodePositionRecord(s16 index) {
