@@ -20,18 +20,18 @@ extern void mnuCreateStaffImageSprite(s32);
 
 
 
-extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridEntry(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 
 extern u8 mnuGetItemRequirementCount(s32 index);
 
 
 void func_002AB890(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    func_002AB690(arg0, arg1, arg2, 0, arg3, arg4, arg5);
+    mnuDrawCampGridEntry(arg0, arg1, arg2, 0, arg3, arg4, arg5);
 }
 
 void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    func_002AB690(arg0, arg1, arg2, 0x200, arg3, arg4, arg5);
+    mnuDrawCampGridEntry(arg0, arg1, arg2, 0x200, arg3, arg4, arg5);
 }
 
 extern char (*D_00435E5C)[25];
@@ -233,9 +233,9 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, MenuStaffConte
     return window->list->count != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
+INCLUDE_ASM(const s32, "game/code_002AB890", mnuDrawOrderedStaffItemEntry);
 
-extern void func_002AC050();
+extern void mnuDrawOrderedStaffItemEntry();
 extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
 extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
 extern s32 mtrMantraIdIsValid(s32);
@@ -258,7 +258,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->resources.baseResources[1], 0xC, 7);
     window->list->context = owner;
-    window->list->drawCallback = func_002AC050;
+    window->list->drawCallback = mnuDrawOrderedStaffItemEntry;
     node = mnuAppendWindowListNode(window, D_00437BC8);
     node->sortKeyPrimary = 0;
     node->sortKeySecondary = 0;

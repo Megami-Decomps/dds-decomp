@@ -282,8 +282,8 @@ extern s32 mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
 extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
 extern void mnuMergePartyMantraProfileCapStates(MantraFlagResource **);
 extern void func_00315A50(void);
-extern void func_0028EF50(MnuStatusResource *);
-extern s32 func_0028F9A0(MnuStatusResource *);
+extern void mnuBuildMantraSourceList(MnuStatusResource *);
+extern s32 mnuScanMantraSourceCandidates(MnuStatusResource *);
 extern s32 mnuRefreshMantraSelectionResources(MnuStatusResource *);
 extern MantraPanelPool *mnuCreateMantraPanelPool(s32, MnuStatusResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
@@ -326,8 +326,8 @@ void func_00289BA0(MnuStatusResource *object) {
     state->slots[5] = evtAllocateMantraSelectionWork(NULL, 0);
     mnuMergePartyMantraProfileCapStates(state->slots);
     func_00315A50();
-    func_0028EF50(object);
-    state->drawBits.hasSource = func_0028F9A0(object);
+    mnuBuildMantraSourceList(object);
+    state->drawBits.hasSource = mnuScanMantraSourceCandidates(object);
     if (state->src == NULL) {
         mnuBindMantraMenuSourceRecord(object, NULL);
     }
@@ -670,7 +670,7 @@ extern void mtrDrawRankPass(s32, u16);
 extern void mnuSpawnMantraMapPanels(MnuStatusResource *, u16, u16);
 /* The following three declarations remain inferred from native callers. */
 extern s32 func_0028EB38(MnuStatusResource *, s32);
-extern void func_0028E638(MnuStatusResource *, u16);
+extern void mnuUpdateMantraNodeState(MnuStatusResource *, u16);
 extern s32 func_0028FEF0(MantraMenuSrc *, MnuStatusResource *);
 
 const char D_00426B90[0x48] = "MTR_MSL_MASTER_COMPLETE_CHECK  ...->MTR_MSL_MASTER_COMPLETE_WAIT\n";
@@ -940,7 +940,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             mnuActivateMantraNode(object, work->src->fields.unitIndex);
             work->delayFrames = 60;
         } else {
-            func_0028E638(object, work->src->fields.unitIndex);
+            mnuUpdateMantraNodeState(object, work->src->fields.unitIndex);
             index = func_002890A8(object);
             if ((object->menu.slots[index]->flags[work->src->fields.unitIndex] & 0xF) == 2) {
                 work->delayFrames = 60;

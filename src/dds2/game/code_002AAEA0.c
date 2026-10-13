@@ -285,7 +285,7 @@ s32 mtrMantraFindIndex(s32 mantraId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB690);
+INCLUDE_ASM(const s32, "game/code_002AAEA0", mnuDrawCampGridEntry);
 
 INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437B88);
 

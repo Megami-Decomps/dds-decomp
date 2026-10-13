@@ -186,7 +186,7 @@ typedef struct MenuList MenuList;
 
 
 extern void func_00281D40(s32, s32, s32, MenuPageWindow *, s32, s32);
-extern void func_00282360(s32, s32, s32, MenuPageWindow *, s32, s32);
+extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
 
 extern s32 D_0037CD80[];
@@ -208,7 +208,7 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
         func_00281D40(x, y, z, menu, panelIndex, param);
         return;
     case 2:
-        func_00282360(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, param);
         break;
     }
 }
@@ -942,9 +942,9 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
     sdfReleaseChipBlock(item);
 }
 
-extern void func_00284C48(s32, s32, s32, u32, s32, MenuPanelItem *, s32);
+extern void mnuDrawPanelItemDetail(s32, s32, s32, u32, s32, MenuPanelItem *, s32);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00284C48);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPanelItemDetail);
 
 void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer) {
     char buffer[16];
@@ -955,7 +955,7 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
 
     effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,
                  item->groupGridSlots[0].set, item->groupGridSlots[0].index, layer);
-    func_00284C48(x, y, depth, opacity, mode, item, layer);
+    mnuDrawPanelItemDetail(x, y, depth, opacity, mode, item, layer);
     effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,
                  item->groupGridSlots[1].set, item->groupGridSlots[1].index, layer);
     effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,

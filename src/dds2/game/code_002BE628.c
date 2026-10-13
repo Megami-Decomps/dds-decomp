@@ -106,7 +106,7 @@ typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 mnuScrollListToPreviousPage();
 
-extern void func_002BE730();
+extern void mnuInitializeQueuedCommandEffect();
 extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
@@ -235,7 +235,7 @@ void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE730);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuInitializeQueuedCommandEffect);
 
 /* Initialize both particle arrays for a queued menu command. */
 void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
@@ -317,7 +317,7 @@ s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) 
     }
     switch (kind) {
     case 0:
-        func_002BE730(entry);
+        mnuInitializeQueuedCommandEffect(entry);
         menu->fade = 0;
         break;
     case 1:
