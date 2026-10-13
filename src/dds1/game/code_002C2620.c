@@ -32,7 +32,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
-extern s32 evtGetMessageWindowControlState(void);
 extern void func_0024DD78(void);
 extern void sndReleaseTrackHandle(u32);
 extern s32 fldReleaseLocalMapResources(void);

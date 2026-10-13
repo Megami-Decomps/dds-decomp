@@ -4162,7 +4162,6 @@ extern const BattlePanelColors D_00416650;
 extern u8 *D_00435E64;
 extern u32 btlGetActiveUnitId(void);
 extern s32 dspStartEntry(s32);
-extern s32 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
@@ -4284,7 +4283,6 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
-extern s32 evtGetMessageWindowControlState(void);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern void func_0026C900(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);

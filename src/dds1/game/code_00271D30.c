@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"

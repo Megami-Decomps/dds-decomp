@@ -42,7 +42,6 @@ typedef struct SdfTex SdfTex;
 
 #define EVT_SCROLL_BOTTOM_FLAG 2
 
-extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 dspWindowHandle;
 

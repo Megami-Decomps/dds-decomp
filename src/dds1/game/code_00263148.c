@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "ui_color.h"
@@ -113,7 +114,6 @@ u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
     return 0;
 }
 
-extern s32 evtGetMessageWindowControlState(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);

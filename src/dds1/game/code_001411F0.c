@@ -148,7 +148,6 @@ extern struct FileRequest *D_003BAFE8;
 extern u32 D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
-extern s32 evtGetMessageWindowControlState(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void *effObjCreateEventNode(void *, f32 *, f32 *);

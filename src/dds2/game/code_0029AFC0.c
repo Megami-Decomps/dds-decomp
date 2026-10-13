@@ -23,7 +23,6 @@ extern void *memset(void *destination, s32 value, u32 size);
 
 extern s32 evtStageTestUpdateCamera(void);
 
-extern s32 evtGetMessageWindowControlState(void);
 
 
 extern char D_003D64C8[];

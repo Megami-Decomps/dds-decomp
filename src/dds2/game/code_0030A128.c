@@ -72,7 +72,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
-extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
 
 extern void dds3SetWorldObject(void *);

@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -844,7 +845,6 @@ s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     return 0;
 }
 
-extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 evtStageTestAdvanceResourceWork(void);
 
