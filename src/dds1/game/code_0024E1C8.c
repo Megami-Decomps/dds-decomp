@@ -330,7 +330,7 @@ void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
     }
 }
 
-void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawScaledScenePlacementSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
         EffectSlotSet *resource = D_0036C698[
@@ -763,13 +763,13 @@ INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
 INCLUDE_ASM(const s32, "game/code_0024E1C8", mnuUpdateResourceTaskState);
 
 extern void mnuDrawDisplaySpriteAndPanelMarks(s32, s32, s32);
-extern void func_002546D8(s32, s32);
-extern void func_00254758(s32, s32, s32, s32, s32);
-extern void func_00254778(s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSceneSpriteSequence(s32, s32);
+extern void mnuDrawMantraScenePlacementSprite(s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSceneSpriteGroup(s32, s32, s32, s32, s32);
 extern void mnuDrawDisplayModeSprites(s32, s32, s32, s32, s32, s32);
 extern void itfDspDrawSelectionStrip(s32, s32, s32, s32, s32, s32);
 extern void itfDspInitSelectedWindow(s32, s32, s32, s32, s32, s32);
-extern void func_00254810(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSelectedMantraProfile(s32, s32, s32, s32, s32, s32);
 
 /* Scene draw state: fade phase 1..5 and its frame counter. */
 typedef struct MenuFadeWork {
@@ -797,9 +797,9 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         }
         alpha = (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE);
         mnuDrawDisplaySpriteAndPanelMarks(sceneMetadata, alpha, 0x52);
-        func_002546D8(alpha, 0x52);
-        func_00254758(0, 0, 1, alpha, 0x53);
-        func_00254778(0, 0, 1, alpha, 0x53);
+        mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, alpha, 0x53);
+        mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
         itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
         if (fadeRatio < 0.5f) {
@@ -808,7 +808,7 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
             shadeFactor = (fadeRatio - 0.5f) * 2.0f;
         }
         itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
-        func_00254810(0, 0, 1, (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
+        mnuDrawSelectedMantraProfile(0, 0, 1, (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
         return 0;
     case 5:
         fadeRatio = (f32)work->timer / MNU_SCENE_FADE_FRAMES;
@@ -818,9 +818,9 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         }
         mnuDrawDisplaySpriteAndPanelMarks(sceneMetadata, MNU_SCENE_FULL_ALPHA, 0x52);
         alpha = (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE);
-        func_002546D8(alpha, 0x52);
-        func_00254758(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
-        func_00254778(0, 0, 1, alpha, 0x53);
+        mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
+        mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
         itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
         if (fadeRatio < 0.5f) {
@@ -829,7 +829,7 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
             shadeFactor = (fadeRatio - 0.5f) * 2.0f;
         }
         itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
-        func_00254810(0, 0, 1, (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
+        mnuDrawSelectedMantraProfile(0, 0, 1, (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
         return 0;
     case 2:
         elapsedTicks = work->timer;
@@ -841,13 +841,13 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         }
         mnuDrawDisplaySpriteAndPanelMarks(sceneMetadata, MNU_SCENE_FULL_ALPHA, 0x52);
         alpha = (s32)((1.0f - fadeRatio) * MNU_SCENE_ALPHA_SCALE);
-        func_002546D8(alpha, 0x52);
-        func_00254758(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
-        func_00254778(0, 0, 1, alpha, 0x53);
+        mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
+        mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
         itfDspDrawSelectionStrip(0, (s32)(fadeRatio * 36.0f), 1, alpha, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, (s32)((1.0f - shadeFactor) * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
-        func_00254810(0, 0, 1, alpha, (s32)work, 0x53);
+        mnuDrawSelectedMantraProfile(0, 0, 1, alpha, (s32)work, 0x53);
         return 0;
     case 3:
         elapsedTicks = work->timer;
@@ -862,23 +862,23 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         fadeRatio = 1.0f - fadeRatio;
         alpha = (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE);
         mnuDrawDisplaySpriteAndPanelMarks(sceneMetadata, alpha, 0x52);
-        func_002546D8(alpha, 0x52);
-        func_00254758(0, 0, 1, alpha, 0x53);
-        func_00254778(0, 0, 1, alpha, 0x53);
+        mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, alpha, 0x53);
+        mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
         itfDspDrawSelectionStrip(0, (s32)((1.0f - fadeRatio) * 36.0f), 1, alpha, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
-        func_00254810(0, 0, 1, alpha, (s32)work, 0x53);
+        mnuDrawSelectedMantraProfile(0, 0, 1, alpha, (s32)work, 0x53);
         return 0;
     case 4:
         mnuDrawDisplaySpriteAndPanelMarks(sceneMetadata, MNU_SCENE_FULL_ALPHA, 0x52);
-        func_002546D8(MNU_SCENE_FULL_ALPHA, 0x52);
-        func_00254758(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
-        func_00254778(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
+        mnuDrawMantraSceneSpriteSequence(MNU_SCENE_FULL_ALPHA, 0x52);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
+        mnuDrawMantraSceneSpriteGroup(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         mnuDrawDisplayModeSprites(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
         itfDspDrawSelectionStrip(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
         itfDspInitSelectedWindow(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
-        func_00254810(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
+        mnuDrawSelectedMantraProfile(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
         break;
     case 0:
     case 6:
@@ -969,7 +969,7 @@ extern void sdfSetShortPairValues(SdfGrid *, s32, s32);
 extern void mnuFreeTaskData(u32, u32);
 extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s32);
 extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
-extern void func_00253208(MenuSceneWork *, s32, s32 *, s32 *);
+extern void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *, s32, s32 *, s32 *);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 extern void mnuUpdateMantraSelectionPositions(MenuSceneWork *, s32);
 
@@ -986,7 +986,7 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     sceneWork->gridHandle->drawCell = mnuDrawMantraEntryStatus;
     resourceTaskAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
-    func_00253208(sceneWork, *(s32 *)(fieldAddress + 0x70),
+    mnuBuildMantraGridAndGetProfileCoordinates(sceneWork, *(s32 *)(fieldAddress + 0x70),
                   &selectedCoordinates[0], &selectedCoordinates[1]);
     if (sdfGridSelectFilledCell(sceneWork->gridHandle,
                                 selectedCoordinates[0], selectedCoordinates[1]) == NULL) {

@@ -663,7 +663,7 @@ extern void mnuHideMantraUnitPanel(struct MantraDrawPool *);
 extern void mnuShowMantraUnitPanel(struct MantraDrawPool *);
 extern void func_00278F60(struct MantraDrawPool *);
 extern void func_00278FA8(struct MantraDrawPool *);
-extern void func_00278FF0(struct MantraDrawPool *);
+extern void mnuSpawnMantraSpecialNodeIcon(struct MantraDrawPool *);
 extern void func_002790F0(u32, u32, struct MantraDrawPool *);
 extern void func_00279148(struct MantraDrawPool *);
 extern void mtrDrawRankPass(s32, u16);
@@ -834,7 +834,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
         if (work->src->bits & 0x8000) {
             position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
-            func_00278FF0(object->menu.selectionController);
+            mnuSpawnMantraSpecialNodeIcon(object->menu.selectionController);
             func_00279148(object->menu.selectionController);
             mdlFlagSet(work->src->unk02);
             work->alternateSelector = work->defaultSelector;
