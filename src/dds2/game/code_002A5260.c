@@ -1060,16 +1060,7 @@ extern s32 func_002A6580(KwlnTask *);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
 
-typedef struct StaffImage {
-    s32 startFrame;
-    s32 movieIndex;
-    s32 x;
-    s32 y;
-    s32 width;
-    s32 height;
-} StaffImage;
-
-extern StaffImage D_003E4A80[19];
+extern MnuStaffImageRecord D_003E4A80[19];
 extern s32 D_00437AB4;
 extern s32 mnuCheckMovieDecoderStatus(void);
 

@@ -70,17 +70,7 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
     }
 }
 
-typedef struct StaffImage {
-    s32 startFrame;
-    s32 movieIndex;
-    s32 x;
-    s32 y;
-    s32 width;
-    s32 height;
-    u32 imageIndex;
-} StaffImage;
-
-extern StaffImage D_0037AFC0[];
+extern MnuStaffImageRecord D_0037AFC0[];
 
 extern u32 D_0037AF70[];
 
