@@ -27,12 +27,12 @@ extern s8 dspWindowStateGate;
 
 extern u32 D_00437890[];
 
-extern s32 func_0026DB48(DatPartyRecord *context, u8 entry);
+extern s32 scrTestEntryFlagBit15(DatPartyRecord *context, u8 entry);
 
-extern s32 func_0026DB90(DatPartyRecord *context);
+extern s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context);
 
 /* Return whether bit 15 is set for the supplied entry. */
-s32 func_0026DB48(DatPartyRecord *context, u8 entry) {
+s32 scrTestEntryFlagBit15(DatPartyRecord *context, u8 entry) {
     return scrTestEntryFlag(context, entry, 0xf);
 }
 
@@ -42,13 +42,13 @@ void func_0026DB68(void) {
 /* The consumed context is cleared under the post-call cleanup exception.
  * Retail uses JAL plus epilogue. Qualified cc1 RTL retains this reset through
  * 01.sibling and 02.jump, then deletes it in 03.cse (both entry-zero clears). */
-void func_0026DB70(DatPartyRecord *context) {
+void scrClearEntryFlagAtZeroBit0(DatPartyRecord *context) {
     scrClearEntryFlag(context, 0, 0);
     context = NULL;
 }
 
 /* Return the flag test's result through the native selector-zero wrapper. */
-s32 func_0026DB90(DatPartyRecord *context) {
+s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context) {
     return scrTestEntryFlag(context, 0, 0);
 }
 
@@ -58,13 +58,13 @@ void func_0026DBB0(void) {
 /* The consumed context is cleared under the post-call cleanup exception.
  * Retail uses JAL plus epilogue. Qualified cc1 RTL retains this reset through
  * 01.sibling and 02.jump, then deletes it in 03.cse (both entry-zero clears). */
-void func_0026DBB8(DatPartyRecord *context) {
+void scrClearEntryFlagAtZeroBit1(DatPartyRecord *context) {
     scrClearEntryFlag(context, 0, 1);
     context = NULL;
 }
 
 /* Call the existing flag routine with entry zero and selector one; ignore its result. */
-void func_0026DBD8(DatPartyRecord *context) {
+void scrTestEntryFlagAtZeroBit1(DatPartyRecord *context) {
     scrTestEntryFlag(context, 0, 1);
 }
 
