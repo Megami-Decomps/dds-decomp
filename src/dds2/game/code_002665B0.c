@@ -34,12 +34,12 @@
 extern KwlnTask *kwlnTaskCreate();
 extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
-extern s32 func_00268550(KwlnTask *task);
-extern s32 func_00268588(KwlnTask *task);
+extern s32 evtRunTerminalPanel(KwlnTask *task);
+extern s32 evtRunTerminalPanelSync(KwlnTask *task);
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 
-extern void func_00266C08(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern void evtCreateEventScriptProcess(s32);
@@ -164,7 +164,7 @@ extern void mnuSetGroupProperties(MenuProfilePanel *, EffectSlotSet *, EffectSlo
 
 extern void mnuDrawListPanels(s32, s32, s32, s32, s32, s32);
 
-extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
+extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuTerminalSetTrack(s8, s8);
 
@@ -205,12 +205,12 @@ extern void mnuReleaseCampTextureHandlesAndClearOutput(u32 *);
 
 
 /* Destroy the camp effect's retained animation without freeing the effect. */
-void func_002665B0(MenuCampEffect *context) {
+void mnuDestroyTerminalCampAnimation(MenuCampEffect *context) {
     effDestroyPackedBatch(context->resources.animationHandle);
 }
 
 /* Return whether model flag 0x31 is set; its storyline meaning is not asserted. */
-u8 func_002665C8() {
+u8 mnuIsReducedTerminalModeEnabled() {
     s64 unlocked;
 
     unlocked = mdlFlagTest(0x31);
@@ -221,7 +221,7 @@ u8 func_002665C8() {
 void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
     s32 i;
 
-    scene->reducedMode = func_002665C8(scene);
+    scene->reducedMode = mnuIsReducedTerminalModeEnabled(scene);
     if (scene->reducedMode == 0) {
         for (i = 0; i < 3; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(
@@ -260,14 +260,14 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
 extern void mnuReleaseMantraSpriteSlots(void);
 
 /* Release the terminal's loaded resource banks, camp animation and mantra sprite slots. */
-func_00266808(MenuSlotState *scene) {
+mnuReleaseTerminalSceneResources(MenuSlotState *scene) {
     s32 i;
 
     if (scene->reducedMode == 0) {
         for (i = 0; i < 4; i++) {
             effDestroyResourceSlotSet(scene->resourceBank[i]);
         }
-        func_002665B0(&scene->campEffect);
+        mnuDestroyTerminalCampAnimation(&scene->campEffect);
     } else {
         for (i = 0; i < 2; i++) {
             effDestroyResourceSlotSet(scene->resourceBank[i]);
@@ -402,7 +402,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
+INCLUDE_ASM(const s32, "game/code_002665B0", mnuDrawTerminalRecoveryListEntry);
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x50 stride.
  * The source is a party-vitals record; the context supplies the retained camp texture. */
@@ -462,7 +462,7 @@ void mnuBuildTerminalNodeList(MenuSlotState *host) {
     list->context = host;
     host->progressList = list;
     list->scale = 0;
-    list->drawCallback = func_00266C08;
+    list->drawCallback = mnuDrawTerminalRecoveryListEntry;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         DatPartyRecord *unit = &datGameState->party[partyIndex];
 
@@ -722,12 +722,12 @@ void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
         if (state < 3) {
             if (state > 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
-            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || func_002665C8(scene) != 0) {
+            } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(scene) != 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
             } else {
                 evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
             }
-        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || func_002665C8(scene) != 0) {
+        } else if (mdlFlagTest(0x429) != 0 || mnuFirstPresentMainCharacterIndex() != 0 || mnuIsReducedTerminalModeEnabled(scene) != 0) {
             kwlnFadeOutStart(0, 0, 0, 0xF);
         } else {
             evtCreateEventScriptProcess(MNU_TERMINAL_EXIT_PROCESS);
@@ -789,7 +789,7 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
 extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *);
 extern void func_002B2C88(s32, s32, s32, s32);
 
-void func_00267B40(DatPartyRecord *entry, MenuProgressHost *host) {
+void mnuSetupStaffMenuProfilePage(DatPartyRecord *entry, MenuProgressHost *host) {
     MenuPageWindow *window = &host->partyWindow;
     s32 index;
 
@@ -807,7 +807,7 @@ void func_00267B40(DatPartyRecord *entry, MenuProgressHost *host) {
     func_002B2C88((s32)window, 1, 1, 1);
 }
 
-void func_00267C48(MenuProgressHost *host) {
+void mnuReleaseMenuVisualWorkResources(MenuProgressHost *host) {
     u32 index;
 
     mnuClearEntries(&host->partyWindow);
@@ -854,7 +854,7 @@ s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host
     }
     host->partyWindow.flags |= 0x280;
     mnuDrawListPanels(0, 0, 0, resource->profileId, (s32)&host->partyWindow, mode);
-    func_002C16F0(0, 0, 0, resource, resource->profileId,
+    mnuDrawPartyProfilePanelContents(0, 0, 0, resource, resource->profileId,
                    (s32)host->effectResource, mode);
     return 1;
 }
@@ -1018,7 +1018,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
-        func_00266808(work);
+        mnuReleaseTerminalSceneResources(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
@@ -1060,9 +1060,9 @@ void func_00268380(s32 reduced, s32 slot) {
     D_0043785C = kwlnTaskCreate(D_00424F00, 0x404, 1, 1,
         mnuPrepareTerminalPopupAndDispatch, NULL, (u32)scene);
     drawTask = kwlnTaskCreate(D_00424F10, 0x2B14, 1, 1,
-        func_00268550, NULL, (u32)scene);
+        evtRunTerminalPanel, NULL, (u32)scene);
     kwlnTaskCreate(D_00424F20, 0x5210, 1, 1,
-        func_00268588, mnuReleaseTerminalWorkAndResumeField, (u32)scene);
+        evtRunTerminalPanelSync, mnuReleaseTerminalWorkAndResumeField, (u32)scene);
     fadeTask = kwlnTaskCreate("term_fade", 0x2B15, 1, 0,
         mnuUpdateTerminalMessageWindowIndicator, NULL, (u32)scene);
     kwlnTaskAddChild(drawTask, fadeTask);
@@ -1102,12 +1102,12 @@ s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *request) {
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
-s32 func_00268550(KwlnTask *request) {
+s32 evtRunTerminalPanel(KwlnTask *request) {
     return menuSetHandler((void *)kwlnTaskGetUserValue(request), 1, (void *)request);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
-s32 func_00268588(KwlnTask *request) {
+s32 evtRunTerminalPanelSync(KwlnTask *request) {
     return menuSetHandler((void *)kwlnTaskGetUserValue(request), 2, (void *)request);
 }
 
@@ -1601,7 +1601,7 @@ void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
 }
 
 
-void func_00269638(s32 close, MenuSlotState *host) {
+void mnuDrawTerminalSecondaryListAndStep(s32 close, MenuSlotState *host) {
     struct {
         s32 slot;
         s32 x;
@@ -1731,7 +1731,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 
 
-extern void func_00269638(s32, MenuSlotState *);
+extern void mnuDrawTerminalSecondaryListAndStep(s32, MenuSlotState *);
 
 extern void mnuConfigureTerminalModeEffects(u32, s32);
 
@@ -1739,7 +1739,7 @@ extern void mnuConfigureTerminalModeEffects(u32, s32);
 
 
 
-extern void func_00269978(s32, MenuSlotState *);
+extern void mnuSlideTerminalThresholdList(s32, MenuSlotState *);
 typedef struct MenuGridPositions {
     EffectPair entries[2];
 } MenuGridPositions;
@@ -1753,7 +1753,7 @@ extern u8 D_003CE97C[];
 
 
 /* Slide the threshold list out while closing, or in after its grid entry completes. */
-void func_00269978(s32 close, MenuSlotState *host) {
+void mnuSlideTerminalThresholdList(s32 close, MenuSlotState *host) {
     MenuGridPositions positions = D_00424FF8;
     s32 offset = 0;
     s32 direction = 0;
@@ -1992,7 +1992,7 @@ u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
     if (context->menuActive == 0) {
         mnuSelectFirstListNode((s32)context->secondaryList);
         mnuConfigureTerminalSlotEffects(3, (s32)context);
-        evtRememberDispatchCallback(func_00269638, (s32)context);
+        evtRememberDispatchCallback(mnuDrawTerminalSecondaryListAndStep, (s32)context);
         mnuConfigureTerminalModeEffects(3, (s32)context);
         mnuSetTerminalPanelMotionMode(4, (s32)context);
         mnuTerminalSelectSlot(3, 1, (s32)context);
@@ -2076,7 +2076,7 @@ u32 evtEnterThresholdSelectionList(KwlnTask *task) {
     mnuTerminalSelectSlot(3, 2, (s32)context);
     mnuApplyGridPanelHostSetting(3, (MenuSlotState *)context);
     mnuSetTerminalPanelMotionMode(4, (s32)context);
-    evtRememberDispatchCallback(func_00269978, (s32)context);
+    evtRememberDispatchCallback(mnuSlideTerminalThresholdList, (s32)context);
     return 1;
 }
 
@@ -2092,7 +2092,7 @@ u32 evtBEnterStateA(KwlnTask *task) {
 }
 
 /* Recover the selected affordable party member, then process list input. */
-s32 func_0026A598(KwlnTask *task) {
+s32 mnuHandleTerminalRecoverySelection(KwlnTask *task) {
     MenuSlotState *host = (MenuSlotState *)kwlnTaskGetUserValue(task);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &host->dispatchStatus;

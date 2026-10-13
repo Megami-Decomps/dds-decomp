@@ -355,7 +355,7 @@ u64 mtrMantraSelectDraw(void) {
 
 extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
-extern void func_00267B40(DatPartyRecord *, MenuProgressHost *);
+extern void mnuSetupStaffMenuProfilePage(DatPartyRecord *, MenuProgressHost *);
 extern void mnuEnsureProfilePanelEffect(DatPartyRecord *, MenuProgressHost *);
 extern char D_00426208[];
 extern char D_00426218[];
@@ -375,7 +375,7 @@ s32 mtrMantraEquipInit(void) {
     memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
     work->snapshot.profileId = ((u8 *)selector)[2];
     evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxHp, work->snapshot.maxMp);
-    func_00267B40(snapshot, work->progressHost);
+    mnuSetupStaffMenuProfilePage(snapshot, work->progressHost);
     mnuEnsureProfilePanelEffect(snapshot, work->progressHost);
     mnuInitPartyPanelSlots(&work->progressHost->partyPanel);
     mnuRefreshPartyPanelBars(&work->progressHost->partyWindow);
@@ -393,7 +393,7 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
 /* Legacy calls forward the selected record to this no-op. */
 extern void func_0026DBB0();
-extern void func_00267C48(MenuProgressHost *);
+extern void mnuReleaseMenuVisualWorkResources(MenuProgressHost *);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern void func_00278EA8(struct MantraDrawPool *);
 extern void func_00279080(struct MantraDrawPool *);
@@ -408,7 +408,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
     MnuStatusResource *resource = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, -1);
     MantraMenuWork *work = &resource->menu;
 
-    func_00267C48(resource->progressHost);
+    mnuReleaseMenuVisualWorkResources(resource->progressHost);
     evtFinishMessageWindowAndNotify();
     if (resource->flags.unk04) {
         DatPartyRecord *selectedRecord;

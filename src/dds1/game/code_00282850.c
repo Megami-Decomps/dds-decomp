@@ -628,7 +628,7 @@ void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *sprite) {
     sdfReleaseChipBlock(sprite);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00283838);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyProfilePanelContents);
 
 
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
@@ -894,7 +894,7 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
     return color;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00284418);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawRatioPanelContents);
 
 INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawAndAdvanceRatioPanel);
 

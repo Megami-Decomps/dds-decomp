@@ -71,7 +71,7 @@ extern u32 effMiscRand(void *);
 
 extern u32 evtDisplayValues[];
 
-extern void func_0024A2D8(s32 arg0);
+extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
 
 
 extern void func_0024DD78(void);
@@ -196,7 +196,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
 /* Prepare the current terminal work and dispatch panel mode one. */
 s32 mnuDispatchTerminalPanel(KwlnTask *request) {
     s32 workAddress = kwlnTaskGetUserValue(request);
-    func_0024A2D8(workAddress);
+    mnuDrawTerminalEffectIfAvailable(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
@@ -269,7 +269,7 @@ s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
 /* Prepare the current work and dispatch panel mode one; distinct callback role unknown. */
 s32 func_0024D500(KwlnTask *request) {
     s32 workAddress = kwlnTaskGetUserValue(request);
-    func_0024A2D8(workAddress);
+    mnuDrawTerminalEffectIfAvailable(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 

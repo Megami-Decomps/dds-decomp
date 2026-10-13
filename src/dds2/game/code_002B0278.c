@@ -1056,7 +1056,7 @@ extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(MenuProfilePanel *, EffectSlotSet *, EffectSlotSet *, s32, s32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
-extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
+extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuDrawPartySelectionPreview(MenuContext *);
 extern void mnuDrawPartySelectionPreviewPanel(MenuContext *, MenuPageBar *, MenuPageBar *, DatPartyRecord *, EffectSlotSet *, u32, u32, s32);
@@ -1509,7 +1509,7 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGro
 void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
                                     MenuProfilePanel *resource,
                                     u32 unused4, u32 spriteFlags) {
-    func_002C16F0(0, 0, 0, entry, entry->profileId, (s32)spriteState, spriteFlags);
+    mnuDrawPartyProfilePanelContents(0, 0, 0, entry, entry->profileId, (s32)spriteState, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, resource, spriteFlags);
 }
 
@@ -2771,7 +2771,7 @@ extern s32 ptyGetAffinityKind(s32, s32);
 extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
 
 /* Draw each of the command's three partner requirements. */
-void func_002B6898(u16 affinity, s32 resource, s32 labels) {
+void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
     MenuPoint position = D_00437C08[0];
     MenuPoint textOffset = D_00437C10[0];
     MenuPoint iconOffset = D_00437C18[0];
@@ -2996,7 +2996,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
     if (label != 0 && label != 0xffff) {
         label = (u16)label;
         mnuDrawSelectionLabel(label);
-        func_002B6898(label, (s32)((MenuContext *)context)->resourceHandle, ((MenuContext *)context)->labelHandle);
+        mnuDrawAffinityParticipantLabels(label, (s32)((MenuContext *)context)->resourceHandle, ((MenuContext *)context)->labelHandle);
     }
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);

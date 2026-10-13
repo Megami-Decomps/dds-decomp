@@ -7881,3 +7881,17 @@
 0x00187468	effPcpCreateGlobalEffectFlag	inferred	Set global effect flag and return zero payload; native row 0x003B0868 identifies creation slot, independently corroborating DDS1 row 0x00353F38/twin 0x0017F810. [Namer1 batch 35, high]
 0x00187478	effPcpCloneGlobalEffectFlag	inferred	Set same flag and return zero without copying work; native row identifies clone slot. DDS1 twin 0x0017F820. [Namer1 batch 35, high]
 0x00187488	effPcpGlobalEffectFlagReleaseNoOp	inferred	Existing empty release-slot callback; already named update callback clears flag instead. DDS1 twin 0x0017F830. [Namer1 batch 35, high]
+0x002665B0	mnuDestroyTerminalCampAnimation	inferred	Destroys the packed animation batch retained by the terminal camp-effect work.
+0x002665C8	mnuIsReducedTerminalModeEnabled	inferred	Tests model flag 0x31; terminal state stores the result as reducedMode without asserting story semantics.
+0x00266808	mnuReleaseTerminalSceneResources	inferred	Releases terminal resource banks, retained camp animation, alternate batch, and optional mantra sprite slots.
+0x00266C08	mnuDrawTerminalRecoveryListEntry	inferred	Draws terminal recovery-list status, cost and selection panels using list state; DDS1 twin 0x00248810. [LiteH menu naming batch 15]
+0x00267B40	mnuSetupStaffMenuProfilePage	inferred	Selects and configures a party-profile window row, its icon bundle, panel group, and sprite work; DDS1 twin 0x00249850. [LiteH menu naming batch 15]
+0x00267C48	mnuReleaseMenuVisualWorkResources	inferred	Clears profile-window entries/icons and releases its panel group, sprite work, texture handles, and window context; DDS1 twin 0x00249930. [LiteH menu naming batch 15]
+0x00268550	evtRunTerminalPanel	inferred	Dispatches terminal task work through menu-handler mode one; DDS1 twin 0x0024A138. [LiteH menu naming batch 15]
+0x00268588	evtRunTerminalPanelSync	inferred	Dispatches terminal task work through menu-handler mode two; DDS1 twin 0x0024A170. [LiteH menu naming batch 15]
+0x00269638	mnuDrawTerminalSecondaryListAndStep	inferred	Draws terminal secondary-list rows and advances the list scale toward its open/close endpoint.
+0x00269978	mnuSlideTerminalThresholdList	inferred	Draws the terminal threshold list and advances or retreats its scale with panel progress; DDS1 twin 0x0024B168. [LiteH menu naming batch 15]
+0x0026A598	mnuHandleTerminalRecoverySelection	inferred	Applies an affordable recovery selection, updates currency/list state, and processes cursor/cancel input.
+0x002B6898	mnuDrawAffinityParticipantLabels	inferred	Draws the command's three partner-affinity requirement labels/icons; DDS1 twin 0x0027A140. [LiteH menu naming batch 15]
+0x002C16F0	mnuDrawPartyProfilePanelContents	inferred	Draws the profile-panel party preview from the selected record and sprite state; DDS1 twin 0x00283838. [LiteH menu naming batch 15]
+0x002C22D0	mnuDrawRatioPanelContents	inferred	Draws ratio-panel bars and their values; DDS1 twin 0x00284418. [LiteH menu naming batch 15]
