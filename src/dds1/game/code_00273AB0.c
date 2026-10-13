@@ -1,10 +1,12 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "mdl_flag_api.h"
 
 /* Legacy staff callbacks retain their word-address interfaces; the exit
  * callback forwards its task pointer to the task-user-value provider. */
@@ -27,7 +29,6 @@ extern void mnuRefreshStaffWindowDescription(s32, s32);
 extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
-extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
 extern void mnuSetStateValue(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
@@ -96,7 +97,6 @@ extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo();
 
 s32 mnuStaffImageEnterA(KwlnTask *task) {

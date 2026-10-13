@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
@@ -23,7 +24,6 @@
 /* Packed effect parameter-set accessor shared with the effect constructors. */
 extern void *effParamTableGetBlock(void *data, s32 index);
 
-extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Keep literal types and arithmetic associations identical to the native code. */
@@ -124,8 +124,8 @@ void effThunderCellRestart(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->delayFrames = effMiscRand(effDefaultRandomState) % work->head.vector.startDelayRange;
-    cell->activeFrames = effMiscRand(effDefaultRandomState) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->delayFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.vector.startDelayRange;
+    cell->activeFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     scratchVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
@@ -421,8 +421,8 @@ void effThunderRestartIndexedCell(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->delayFrames = effMiscRand(effDefaultRandomState) % work->head.vector.startDelayRange;
-    cell->activeFrames = effMiscRand(effDefaultRandomState) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->delayFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.vector.startDelayRange;
+    cell->activeFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     scratchVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
@@ -682,7 +682,7 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
         parDispatchSub(work->sparks[sparkIndex].system, 2, work->head.dispatchArg, work->head.dispatchArg);
         parSetCellDrawBucket(work->sparks[sparkIndex].system, work->head.systemParam);
         effThunderSparkInit(work, sparkIndex);
-        work->sparks[sparkIndex].age = -(effMiscRand(effDefaultRandomState) % delaySpread);
+        work->sparks[sparkIndex].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -729,7 +729,6 @@ void effThunderSparkInit(EffThunderSparkWork *work, s32 index) {
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Build one spark's kind-0 strip between its lowered and current positions.
  * Every iteration emits two two-vector rows into that spark's own cell.
@@ -903,7 +902,6 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
 }
 
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Advance each spark through delayed initialization, motion and alpha fades.
  * Snapshot the entry parameters and age; initialization and geometry callbacks
@@ -972,7 +970,7 @@ void effThunderUpdateOrbitingSparks(EffThunderSparkWork *work) {
             parPrependCellNode(spark->system);
         }
         if (age >= duration && loop) {
-            spark->age = -(effMiscRand(effDefaultRandomState) % delaySpread);
+            spark->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread);
         } else {
             spark->age++;
         }
@@ -1066,13 +1064,12 @@ void effThunderApplyFragmentColorBands(EffThunderFragmentWork *work) {
 void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index) {
     EffThunderFrag *fragment = &work->fragments[index];
 
-    fragment->delayFrames = effMiscRand(&effDefaultRandomState) % work->head.startDelayRange;
-    fragment->activeFrames = effMiscRand(&effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->delayFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.startDelayRange;
+    fragment->activeFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Build the first strip from the work's own start point. Each step emits
  * two five-vector rows; later chain segments reuse the final row as a seed.
@@ -1371,13 +1368,12 @@ void effThunderSetDualFragmentColor(EffThunderFragmentWork *work, u32 color) {
 void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index) {
     EffThunderFrag *fragment = &work->fragments[index];
 
-    fragment->delayFrames = effMiscRand(&effDefaultRandomState) % work->head.startDelayRange;
-    fragment->activeFrames = effMiscRand(&effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->delayFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.startDelayRange;
+    fragment->activeFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Build synchronized kind-0 core and kind-1 outer strips. Each step emits
  * two rows of two core vertices and three outer vertices from the same path.
@@ -1704,8 +1700,8 @@ void effThunderRandomizeCell(EffThunderCellWork *work, s32 index) {
     cell->directionY = centeredRandom + centeredRandom;
     centeredRandom = effMiscRandUnitFloat(&effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionZ = centeredRandom + centeredRandom;
-    cell->delayFrames = effMiscRand(&effDefaultRandomState) % work->head.startDelayRange;
-    cell->activeFrames = effMiscRand(&effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->delayFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.startDelayRange;
+    cell->activeFrames = effMiscRand((EffRandState *)effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
 }
 
 /* Build a kind-2 cell with three nested width bands. Each randomized step
@@ -1949,7 +1945,6 @@ void effSetResourceBlendColor(u32 handle, u32 color) {
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Continue a strip from the preceding segment's final five-vector row.
  * Each iteration emits two rows; seed[3] is the connection anchor used by
@@ -2666,7 +2661,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
             slot->position[0] = point[0];
             slot->position[1] = point[1];
             slot->position[2] = point[2];
-            slot->age = -(effMiscRand(effDefaultRandomState) % delayRange);
+            slot->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayRange);
             effResetFragmentHistory(slot->fragment);
         } else if (slot->age++ >= 0) {
             if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {

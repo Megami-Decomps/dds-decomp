@@ -2,7 +2,8 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
-extern s32 mdlFlagTest(u32 flagId);
+#include "dsp_name.h"
+#include "mdl_flag_api.h"
 
 extern void mdlFlagSet(u32 flagId);
 
@@ -163,10 +164,6 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     mnuApplyCompletedProfile(scene);
     return 1;
 }
-
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
 
 extern DspUnitName *D_00435E48;
 extern DspUnitName *D_00435E64;

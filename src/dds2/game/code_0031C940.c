@@ -8,7 +8,6 @@
 #include "eff_random.h"
 
 extern Motion *mdlFindNodeById(MdlCtx *model, s32 id);
-extern u32 effMiscRand(EffRandState *state);
 
 /* Negative frames request a random sample; NaN and nonnegative frames pass through.
  * Post-call reset exception: retail 0031C9F0 is JAL + restores, whereas

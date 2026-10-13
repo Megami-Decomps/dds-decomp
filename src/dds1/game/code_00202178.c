@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "dds3obj.h"
 #include "mdl_motion_api.h"
 #include "btl_effect_position.h"
@@ -20,6 +21,7 @@
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "mdl_flag_api.h"
 
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 
@@ -81,7 +83,6 @@ extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
 
 extern void func_001D6300(void *, void *);
 
-extern s32 mdlFlagTest(s32);
 
 extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
@@ -3273,9 +3274,7 @@ void btlTriggerSpecialUnitAction(void) {
     }
 }
 
-struct EffRandState;
 
-extern u32 effMiscRand(struct EffRandState *);
 
 extern char D_003A5D98[];
 

@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
@@ -16,6 +17,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_chip.h"
+#include "mdl_flag_api.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -130,7 +132,6 @@ typedef struct EffectPair {
 } EffectPair;
 
 extern EffectPair D_00437878[];
-extern s32 mdlFlagTest(u32);
 
 extern s32 evtGetMessageWindowControlState(void);
 

@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -41,6 +42,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "mdl_flag_api.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
@@ -127,7 +129,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
-extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 
@@ -161,9 +162,6 @@ extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern u8 D_0037F510[];
 
 extern char D_004178A8[];
@@ -3333,7 +3331,7 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
-extern void func_003320E8(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
@@ -3390,7 +3388,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     } else {
         overlay->lighting = NULL;
     }
-    func_003320E8(surfaces, overlay);
+    sdfModelBuildNodeResourcePackets(surfaces, overlay);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mdl_flag_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -450,7 +451,6 @@ extern s32 btlAverageAllMaximumForMask(u32 arg0);
 extern s32 btlAverageAllCurrentForMask(u32 arg0);
 extern s32 btlAverageAllLevelsForMask(u32 arg0);
 extern void *memset(void *dst, s32 c, u32 n);
-extern s32 mdlFlagTest(s32 flagIndex);
 extern void mdlFlagSet(s32 flagIndex);
 extern s32 effMiscRandMod(u32 stream, u32 modulus);
 

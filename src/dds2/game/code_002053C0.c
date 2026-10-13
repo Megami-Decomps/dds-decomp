@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
@@ -346,9 +347,7 @@ BtlRuntimeTask *btlCreateAdvanceTitleStateTask(void) {
 
 extern f32 D_003BE070[4];
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern f32 sdfSinPoly(f32);
 
 /* Orient party actors and expand their formation when the marked count grows. */
 s32 btlExpandPartyFormationAroundCenter(f32 *center) {
@@ -570,9 +569,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
     btlSetUnitPosition(link->unit, pos);
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern f32 sdfSinPoly(f32);
 
 /* Place the three actor slots around the common battle center supplied in vf10. */
 void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {

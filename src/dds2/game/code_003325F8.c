@@ -1,6 +1,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
 #include "sdf_model_scalars.h"
@@ -814,8 +815,6 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     }
 }
 
-extern f32 sdfSinPoly(f32 angle);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 
 
 /* Build the 3x2 scalar-block transform from the sub-parameter's five floats

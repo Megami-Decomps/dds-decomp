@@ -1,4 +1,5 @@
 #include "mnu_mantra.h"
+#include "mdl_flag_api.h"
 
 #include "common.h"
 #include "dat_state.h"
@@ -81,7 +82,6 @@ INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272C8);
 
 INCLUDE_ASM(const s32, "game/code_0028E568", mnuBuildMantraSourceList);
 
-extern s32 mdlFlagTest(s32);
 extern void *memcpy(void *, const void *, u32);
 extern const u16 D_004272F8[14][2];
 extern const u16 D_00427330[4][2];

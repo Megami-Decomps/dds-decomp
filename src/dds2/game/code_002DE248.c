@@ -12,6 +12,8 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "dds3obj.h"
@@ -2274,7 +2276,223 @@ void billReleaseStripNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceStripInstances);
+extern s32 effSharedRandomState[4];
+extern f32 effMiscRandUnitFloat(void *);
+
+void billAdvanceStripInstances(EffClassWork *work) {
+    EffBillStripFrameConfig *config = (EffBillStripFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffBillStripEntry *entries;
+    EffTrackSet *asset;
+    s32 lifetime;
+    s32 itemCount;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 remainingItems;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 waitingState;
+    s32 inactiveState;
+    s32 retiredState;
+    u32 respawn;
+    u32 colorA;
+    u32 colorB;
+    u32 *colors;
+    u128 *vertices;
+    f32 colorVectorA[4];
+    f32 colorVectorB[4];
+    f32 center[4];
+    f32 direction[4];
+    f32 lateral[4];
+    f32 acceleration;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) {
+        return;
+    }
+    lifetime = config->frame.lifetime;
+    resource = (EffBillFrameState *)work->resource;
+    entries = (EffBillStripEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) {
+        return;
+    }
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+
+    colorA = config->colorA;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    center[1] = 0.0f;
+    center[3] = 0.0f;
+    eeUnpackRGBAWordFloat(colorA, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, colorVectorA);
+    colorB = config->colorB;
+    eeUnpackRGBAWordFloat(colorB, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, colorVectorB);
+    fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+    fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+    acceleration = config->spinAccel;
+    respawn = config->frame.respawn;
+    waitingState = -1;
+    inactiveState = -2;
+    {
+    u32 packedB[4];
+    u32 packedA[4];
+
+    for (remainingItems = 0; remainingItems < itemCount; remainingItems++, entries++, vertices += 4, colors += 4) {
+        EffBillStripEntry *entry = entries;
+        s32 age = entry->age;
+        f32 time;
+
+        retiredState = respawn != 0 ? waitingState : inactiveState;
+        if (age == inactiveState) {
+            continue;
+        }
+        if (age == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 start;
+                f32 end;
+
+                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                start = config->lengthStart * (randomValue * config->lengthStartJitter + (1.0f - config->lengthStartJitter));
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                end = config->lengthEnd * (randomValue * config->lengthEndJitter + (1.0f - config->lengthEndJitter));
+                entry->length = start;
+                entry->lengthStep = (end - start) / (f32)lifetime;
+
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                start = config->radiusStart * (randomValue * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                end = config->radiusEnd * (randomValue * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
+                entry->radius = start;
+                entry->radiusStep = (end - start) / (f32)lifetime;
+
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                start = config->tiltStart * (randomValue * config->tiltStartJitter + (1.0f - config->tiltStartJitter));
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                end = config->tiltEnd * (randomValue * config->tiltEndJitter + (1.0f - config->tiltEndJitter));
+                entry->tilt = start;
+                entry->tiltStep = (end - start) / (f32)lifetime;
+
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
+                if (randomAge != 0) {
+                    time = (f32)(effMiscRand((struct EffRandState *)effSharedRandomState) % (u32)lifetime);
+                    entry->age = (s32)time;
+                    entry->length += entry->lengthStep * time;
+                    entry->radius += entry->radiusStep * time;
+                    entry->tilt += entry->tiltStep * time;
+                } else {
+                    entry->age = 0;
+                }
+                remainingSpawn = (s32)((u32)remainingSpawn - 1);
+            }
+        } else if (age >= lifetime) {
+            u32 *color = colors;
+            u128 *position = vertices;
+            s32 count = 3;
+            do {
+                VU0_STORE_VF(vf0, position);
+                *color = 0;
+                position++;
+                color++;
+            } while (--count >= 0);
+            entry->age = retiredState;
+        } else {
+            f32 angle;
+            f32 radius;
+            f32 tilt;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 packedColor;
+
+            time = (f32)age;
+            angle = (entry->spin + (acceleration * time) * 0.5f) * time + entry->angle;
+            radius = entry->radius;
+            tilt = entry->tilt;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            sine = sdfSinPoly(angle);
+
+            center[0] = cosine * radius;
+            center[2] = sine * radius;
+            direction[0] = cosine * tilt;
+            direction[1] = tilt + -1.0f;
+            direction[2] = sine * tilt;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_MOVE_VF(vf12, vf10);
+
+            direction[0] = sine;
+            direction[1] = 0.0f;
+            cosine = -cosine;
+            direction[2] = cosine;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_SCALE_VF(vf10, entry->width);
+            VU0_STORE_VF_UNCLOBBERED(vf10, lateral);
+            VU0_LOAD_VF(vf10, center);
+            VU0_LOAD_VF(vf11, lateral);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, vertices + 2);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, vertices + 3);
+            VU0_MOVE_VF(vf11, vf12);
+            VU0_SCALE_VF(vf11, entry->length);
+            VU0_LOAD_VF(vf10, center);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_LOAD_VF(vf11, lateral);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, vertices + 0);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, vertices + 1);
+
+            entry->length += entry->lengthStep;
+            entry->tilt += entry->tiltStep;
+            entry->radius += entry->radiusStep;
+            if (age < fadeStart) {
+                alpha = time / (f32)fadeStart;
+            } else if (fadeEnd < age) {
+                alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
+            } else {
+                alpha = 1.0f;
+            }
+            VU0_LOAD_VF(vf11, D_003E9100);
+            VU0_SCALE_VF(vf11, alpha);
+            VU0_LOAD_VF(vf10, colorVectorB);
+            VU0_MUL(vf10, vf10, vf11);
+            {
+                EE_MMI_RGBA_PACK_UNIT(packedB[0], 128.0f);
+                packedColor = packedB[0];
+                colors[0] = packedColor;
+                colors[1] = packedColor;
+            }
+            VU0_LOAD_VF(vf10, colorVectorA);
+            VU0_MUL(vf10, vf10, vf11);
+            {
+                EE_MMI_RGBA_PACK_UNIT(packedA[0], 128.0f);
+                packedColor = packedA[0];
+                colors[2] = packedColor;
+                colors[3] = packedColor;
+            }
+            entry->age = (s32)((u32)age + 1);
+        }
+    }
+    }
+}
+
 
 void billUpdateStripDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
@@ -2469,10 +2687,6 @@ void billReleaseQuadNode(s32 work) {
 }
 
 extern s32 effSharedRandomState[4];
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void billAdvanceQuadInstances(EffClassWork *work) {
     EffBillQuadFrameConfig *config = (EffBillQuadFrameConfig *)work->payload;
@@ -3309,8 +3523,6 @@ typedef struct EffExpandingRingParams {
 
 typedef char EffExpandingRingParams_size[(sizeof(EffExpandingRingParams) == 0x6C) ? 1 : -1];
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 /* Generate the timed ring's four radial point bands; reverse-time mode is retained. */
 void effUpdateExpandingRingPoints(EffClassWork *work) {
@@ -4689,8 +4901,6 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 }
 
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 
 typedef struct EffPointSetRow {
     EffPointSet *set; /* 0x00 */
@@ -4934,8 +5144,6 @@ void effAdvanceRadialClassResourceFrames(EffClassWork *work) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void effCopyClassResourcePosition(void *, void *);
 extern void effCopyClassResourceOrientation(void *, void *);
 extern void effSetClassResourceMatrixComponent(EffClassWork *, f32);
@@ -6150,8 +6358,6 @@ typedef struct EffBillColumnParticle {
 
 typedef char EffBillColumnParticleSizeCheck[(sizeof(EffBillColumnParticle) == 0x30) ? 1 : -1];
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Update the column's particle records and the ribbon vertices for this frame. */
 void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
@@ -6271,7 +6477,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
             }
 
             if (spawnAll) {
-                s32 birthAge = effMiscRand(effSharedRandomState) % life;
+                s32 birthAge = effMiscRand((EffRandState *)effSharedRandomState) % life;
                 f32 gravityDisplacement;
                 ageF = (f32)birthAge;
                 gravityDisplacement = gravity * ageF * ageF * 0.5f;
@@ -13972,8 +14178,6 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Rotate an offset in degrees and add its center; mode selects the screen aspect correction. */
 void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY, f32 angle, s32 mode) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
@@ -12,6 +13,7 @@
 #include "mnu_scene_work.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_scene.h"
+#include "mdl_flag_api.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -120,7 +122,6 @@ void mnuUpdateMantraSpriteCueGroups(MnuSpriteResourceGroup *resources) {
 }
 
 
-extern f32 sdfSinPoly(f32);
 
 /* Draw every live cue in the ten task slots using its remaining-life sine fade. */
 void mnuDrawMantraSpriteCueGroups(s32 x, s32 y, s32 depth, s32 alpha,
@@ -433,7 +434,6 @@ extern const MnuRequirementIds D_003BC4D8[];
 extern const MnuPanelRegions D_003AFA18;
 extern u32 mnuGetSelectedNodeValue(void);
 extern s32 prfReqCheckWithFallback(void *, u16);
-extern s32 mdlFlagTest(s32);
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
@@ -675,7 +675,6 @@ void mnuReleaseListNodes(MnuSceneListHead *head) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
 
 s32 mnuDrawMantraSineFade(s32 frame, s32 amount, s32 drawArg) {
     f32 wave = (f32)frame / 60.0f;
@@ -734,7 +733,6 @@ void mnuDrawMantraCostAfterListAdvance(s32 recordAddress, MnuSceneListHead *head
 }
 
 extern u16 D_0036C6D0[];
-extern s32 mdlFlagTest(s32);
 
 void mnuCollectFlagArray(u8 *flags) {
     u32 i;

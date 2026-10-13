@@ -4,6 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
 #include "ui_color.h"
@@ -118,7 +119,6 @@ extern u8 sdfViewMatrix[];
 extern u8 D_003270F0[];
 extern void evtStageTestAdvanceMotionQueue(void);
 extern void mnuQueuePartyPanelSlotBlend(MenuPageWindow *, s32, u32, s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 fldIsFlagActive(void);
 extern u8 fldTestSecondarySceneFlag(void);
 extern void fldSetPrimarySceneFlag(void);

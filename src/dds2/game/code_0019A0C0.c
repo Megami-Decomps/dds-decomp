@@ -46,7 +46,6 @@ typedef struct EffEmit {
     EffChanWork *primitive; /* 0x8: control-point work */
 } EffEmit;
 
-extern u32 effMiscRand(void *state);
 
 extern u8 effDefaultRandomState[];
 
@@ -111,7 +110,7 @@ EffChanWork *effChanWorkCreate(EffChanSource *source) {
         delayModulus = work->head.spread;
         for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
             recordCursor->param = effParamWorkDuplicate(parameterTemplate);
-            recordCursor->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+            recordCursor->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
             recordCursor++;
         }
     }
@@ -286,7 +285,7 @@ void effUpdateChannelWork(EffChanWork *work) {
         if (recordTime < activeSteps) {
             recordCursor->delay++;
         } else if (cycleEnabled != 0) {
-            recordCursor->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+            recordCursor->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         } else {
             recordCursor->delay++;
         }
@@ -336,7 +335,7 @@ void effFillRandRecords(EffEmit *emitter) {
     }
     do {
         effJitterChannelControlPoints(channelWork, recordIndex);
-        recordCursor->delay = effMiscRand(&effDefaultRandomState) % stepModulus;
+        recordCursor->delay = effMiscRand((EffRandState *)effDefaultRandomState) % stepModulus;
         bezierSlot = effMathGetSlotAt(channelWork->slots, recordIndex);
         recordIndex++;
         randomStep = recordCursor->delay;

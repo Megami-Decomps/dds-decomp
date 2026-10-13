@@ -19,6 +19,7 @@
 #include "mdl_track_poly_record.h"
 #include "mdl_resource_table.h"
 #include "mdl_grouped_parts_api.h"
+#include "mdl_flag_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -789,7 +790,7 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s3
 }
 
 void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
-    func_00217310(owner, record->payload.stream.selectorA,
+    mdlCreateDevSlotList(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
 }
@@ -2794,7 +2795,7 @@ void mdlFreeViewResources(void) {
 }
 
 
-extern void func_00103498(const char *name, s32, s32, s32);
+extern void kwlnConfigureNamedSlotMode1(const char *name, s32, s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void) {
     s32 i;
@@ -2804,7 +2805,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ABF88, 0);
     for (i = 0; i != 3; i++) {
         if (kwlnTaskGetTaskByName(D_00367AE0[i].name) == NULL) {
-            func_00103498(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
+            kwlnConfigureNamedSlotMode1(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
         }
     }
 }

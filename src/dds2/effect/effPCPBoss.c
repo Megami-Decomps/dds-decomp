@@ -30,7 +30,6 @@ extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
-extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 extern f32 D_004334C4;
 extern void effBossInitializeModelGroups(EffBossWork *work);
@@ -48,8 +47,8 @@ void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
     t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
     cell->baseExtent = work->head.baseExtent * t * scale;
     cell->tipExtent = work->head.tipExtent * t * scale;
-    cell->flip = effMiscRand(effDefaultRandomState) & 1;
-    cell->age = -(effMiscRand(effDefaultRandomState) % work->head.delaySpread);
+    cell->flip = effMiscRand((EffRandState *)effDefaultRandomState) & 1;
+    cell->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % work->head.delaySpread);
 }
 
 /* Create a draw pool and delayed cells for each model map-position group. */

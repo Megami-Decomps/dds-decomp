@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_list.h"
 #include "mnu_staff.h"
@@ -1044,7 +1045,6 @@ void mnuStaffCopyPanelBlock(DatPartyRecord *src, BrsSkillPackageWork *base) {
 }
 
 extern s32 mnuStaffRollThresholds[];
-extern s32 effMiscRand(s32);
 
 s32 mnuStaffPickRoll(void) {
     u32 roll = effMiscRand(0) & 0xFF;
@@ -1066,7 +1066,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
     s32 i;
 
     work->rewardMode = 0;
-    if ((effMiscRand(0) & 1) > 0) {
+    if (((s32)effMiscRand(0) & 1) > 0) {
         return;
     }
 

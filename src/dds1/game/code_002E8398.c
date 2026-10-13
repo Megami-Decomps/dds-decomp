@@ -13,7 +13,6 @@ extern EffRandState D_00398938;
 void effMiscSeedRandom(EffRandState *state, u32 seed);
 s32 effMiscReadCachedClockTime(ClockTime *now);
 
-extern u32 effMiscRand(void *state);
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
 f32 effMiscRandUnitFloat(void *state) {

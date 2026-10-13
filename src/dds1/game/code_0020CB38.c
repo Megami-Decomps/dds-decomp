@@ -101,7 +101,7 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
 void func_0020CCA8(void) {
     btlRestoreHaritiFormation();
 }
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020CCC0);
+INCLUDE_ASM(const s32, "game/code_0020CB38", btlUpdateBossUnitScaleTransition);
 
 /* Mode 0x10E allocates this 0x24-byte transition, distinct from the
  * common BattleEffectState payload used by other modes. */

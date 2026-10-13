@@ -239,10 +239,56 @@ typedef struct EffBillEmitterFrameConfig {
     u8 unk58[0x30];
 } EffBillEmitterFrameConfig; /* kind 5, 0x88 */
 
+/* Kind-6 radial strip simulation: copied 0xA4-byte configuration. */
 typedef struct EffBillStripFrameConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x4C];
+    u32 colorA;
+    u32 colorB;
+    f32 width;
+    f32 widthJitter;
+    f32 lengthStart;
+    f32 lengthStartJitter;
+    f32 lengthEnd;
+    f32 lengthEndJitter;
+    f32 radiusStart;
+    f32 radiusStartJitter;
+    f32 radiusEnd;
+    f32 radiusEndJitter;
+    f32 tiltStart;
+    f32 tiltStartJitter;
+    f32 tiltEnd;
+    f32 tiltEndJitter;
+    f32 spin;
+    f32 spinJitter;
+    f32 spinAccel;
 } EffBillStripFrameConfig; /* kind 6, 0xA4 */
+
+typedef struct EffBillStripEntry {
+    s32 age;
+    f32 angle;
+    f32 spin;
+    f32 length;
+    f32 lengthStep;
+    f32 radius;
+    f32 radiusStep;
+    f32 tilt;
+    f32 tiltStep;
+    f32 width;
+} EffBillStripEntry;
+
+typedef char EffBillStripEntrySizeCheck[(sizeof(EffBillStripEntry) == 0x28) ? 1 : -1];
+typedef char EffBillStripFrameConfig_colorA_OffsetCheck[((u32)&((EffBillStripFrameConfig *)0)->colorA == 0x58) ? 1 : -1];
+typedef char EffBillStripFrameConfig_width_OffsetCheck[((u32)&((EffBillStripFrameConfig *)0)->width == 0x60) ? 1 : -1];
+typedef char EffBillStripFrameConfig_lengthStart_OffsetCheck[((u32)&((EffBillStripFrameConfig *)0)->lengthStart == 0x68) ? 1 : -1];
+typedef char EffBillStripFrameConfig_radiusStart_OffsetCheck[((u32)&((EffBillStripFrameConfig *)0)->radiusStart == 0x78) ? 1 : -1];
+typedef char EffBillStripFrameConfig_tiltStart_OffsetCheck[((u32)&((EffBillStripFrameConfig *)0)->tiltStart == 0x88) ? 1 : -1];
+typedef char EffBillStripFrameConfig_spin_OffsetCheck[((u32)&((EffBillStripFrameConfig *)0)->spin == 0x98) ? 1 : -1];
+typedef char EffBillStripFrameConfig_spinAccel_OffsetCheck[((u32)&((EffBillStripFrameConfig *)0)->spinAccel == 0xA0) ? 1 : -1];
+typedef char EffBillStripEntry_length_OffsetCheck[((u32)&((EffBillStripEntry *)0)->length == 0xC) ? 1 : -1];
+typedef char EffBillStripEntry_radius_OffsetCheck[((u32)&((EffBillStripEntry *)0)->radius == 0x14) ? 1 : -1];
+typedef char EffBillStripEntry_tilt_OffsetCheck[((u32)&((EffBillStripEntry *)0)->tilt == 0x1C) ? 1 : -1];
+typedef char EffBillStripEntry_width_OffsetCheck[((u32)&((EffBillStripEntry *)0)->width == 0x24) ? 1 : -1];
+
 
 typedef struct EffBillTrailFrameConfig {
     EffBillFrameHeader frame;

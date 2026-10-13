@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "itf_mes_window.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
@@ -52,7 +53,6 @@ extern void sndTransitionBgm(s32 sequence);
 extern void func_003003F0(char *fmt, ...);
 extern void sndReleaseTrackHandle(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];

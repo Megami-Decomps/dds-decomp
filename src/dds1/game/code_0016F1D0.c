@@ -1,4 +1,6 @@
 #include "common.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
 #include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -44,8 +46,6 @@ extern u32 effMultiplyPackedColors(u32 color, u32 param);
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
 extern f32 D_00354980[];
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 
 typedef struct EffPacketParams {
@@ -84,7 +84,6 @@ typedef struct EffectRingBlock {
 } EffectRingBlock;
 
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
-extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
@@ -120,7 +119,7 @@ EffRingWork *effCreateRingFan(EffRingWork *source)
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
-        ring->vertices[i].age = -(effMiscRand(effDefaultRandomState) % spread);
+        ring->vertices[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         ring->vertices[i].angle = angle;
         angle += step;
     }
@@ -336,7 +335,7 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
             part->color = 0x80808080;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand(effDefaultRandomState) % randomRange);
+                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashWriteRingColorSlots(work, index, color);
@@ -849,7 +848,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     }
     segments = work->params.radialSegments;
     for (i = 0; i < count; i++, particle++) {
-        particle->age = ageOffset - effMiscRand(effDefaultRandomState) % delaySpread;
+        particle->age = ageOffset - effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread;
         if ((i + 1) % segments == 0) {
             ageOffset -= delaySpread;
         }

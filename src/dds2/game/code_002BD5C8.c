@@ -6,6 +6,7 @@
 #include "dat_command.h"
 #include "eff.h"
 #include "mnu.h"
+#include "mdl_flag_api.h"
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuGetPanelWindowTransitionState);
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD710);
@@ -50,7 +51,6 @@ typedef struct FrFontGlyph FrFontGlyph;
 extern const u8 (*D_00435E5C)[25];
 extern char D_00437C38[];
 extern char D_00437C40[];
-extern s32 mdlFlagTest(u32);
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);

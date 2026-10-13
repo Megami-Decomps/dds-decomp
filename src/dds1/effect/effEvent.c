@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
@@ -366,8 +367,6 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     scene->append(scene, (SdfListHead *)task);
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern void func_002DD608(f32);
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -440,8 +439,6 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
@@ -1369,7 +1366,6 @@ void effEventReleaseSharedResources(EffEventBillSet *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
@@ -1382,8 +1378,8 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     s32 startDelaySpread = work->head.startDelaySpread;
     s32 motionDelaySpread = work->head.motionDelaySpread;
 
-    particle->age = -(effMiscRand(effDefaultRandomState) % startDelaySpread);
-    particle->motionDelay = -(effMiscRand(effDefaultRandomState) % motionDelaySpread);
+    particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % startDelaySpread);
+    particle->motionDelay = -(effMiscRand((EffRandState *)effDefaultRandomState) % motionDelaySpread);
     scaleFactor = effMiscRandUnitFloat(effDefaultRandomState) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
     particle->baseScale = work->head.baseScale * scaleFactor;
     particle->scalePhaseX = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
@@ -1393,7 +1389,7 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
     particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
     particle->rotation = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    if (effMiscRand(effDefaultRandomState) & 1) {
+    if (effMiscRand((EffRandState *)effDefaultRandomState) & 1) {
         particle->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
     } else {
         particle->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
@@ -1421,7 +1417,7 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     particle->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
+INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateBillboardParticles);
 
 /* Fifteen billboard records are packed into each compact VIF batch. */
 typedef struct EffEventBillBatch {
@@ -1433,8 +1429,6 @@ typedef struct EffEventBillBatch {
 } EffEventBillBatch;
 typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -1];
 
-extern f32 sdfSinPoly(f32 angle);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 struct DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
@@ -1766,11 +1760,11 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
         delayModulus = work->head.spread;
         parameterTemplate = effParamWorkCreate(kind, params);
         record->param = parameterTemplate;
-        record->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+        record->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         record++;
         for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
             record->param = effParamWorkDuplicate(parameterTemplate);
-            record->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+            record->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
             record++;
         }
     }

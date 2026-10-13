@@ -152,7 +152,7 @@ void kwlnDebugTaskCreate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00102F98);
+INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnRegisterNamedSlot);
 
 typedef struct KwlnNamedSlot {
     s32 kind;
@@ -260,11 +260,11 @@ s32 kwlnUnregisterNamedSlot(const char *name) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103400);
+INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnConfigureNamedSlotMode3);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103498);
+INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnConfigureNamedSlotMode1);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103540);
+INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnConfigureNamedSlotMode2);
 
 void func_001035F0(void) {
 }

@@ -32,6 +32,7 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_gs_packet.h"
 #include "sdf_draw.h"
 #include "sdf_model.h"
+#include "sdf_dma_tag.h"
 
 extern u32 sdfReadTimerCount(void);
 extern s32 EIntr(void);
@@ -83,15 +84,6 @@ extern u8 sdfCurrentBufferIndex;
 #define SDF_VIF_DIRECT_THREE_WORD 0x50000003
 #define SDF_VIF_FLUSHE_HALFWORD 0x1000
 #define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
-
-/* Native DMAC tag: QWC/ID/ADDR followed by the two packed VIF command words. */
-typedef struct SdfDmaTag {
-    u16 quadwordCount;
-    u8 pad02;
-    u8 kind;
-    u32 address;
-    u64 vifCommands;
-} SdfDmaTag;
 
 extern s32 sdfPendingQueueSemaphore;
 

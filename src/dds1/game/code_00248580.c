@@ -5,6 +5,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -17,6 +18,7 @@
 #include "kwln_fade.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PERCENT_PAIR_BYTES 0xA8
@@ -40,7 +42,6 @@ extern s8 D_003BC3E1;
 
 extern s32 dds3GetWorldObject(void);
 
-extern s32 mdlFlagTest(u32);
 
 
 

@@ -8,9 +8,11 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "eff_vertex_draw_request.h"
 #include "par_kind_api.h"
 #include "par_table.h"
 #include "par_draw_block.h"
+#include "par_emitter_desc.h"
 
 #include "eff.h"
 #include "eff_track_poly_list.h"
@@ -127,28 +129,6 @@ struct SdfListHead;
 
 extern void *memcpy(void *dst, void *src, u32 n);
 extern void polyInitializeBasicRingCells(void *);
-
-/* The serialized cell-state block is copied after the variable emitter header. */
-typedef struct ParEmitCellState {
-    u8 pad00[8];
-    u16 verticesPerCell; /* 0x08 */
-    u8 pad0A[0xA];
-    s32 unk14;
-    s32 unk18;
-    s32 cellSystem;      /* 0x1C: allocated cell system */
-    u32 *cellWords;      /* 0x20: one inline word per cell */
-    u8 pad24[0xC];
-} ParEmitCellState; /* 0x30 */
-
-/* Emitter descriptor copied into a fresh allocation by parCloneEmitterAndInitCells. */
-typedef struct ParEmitDesc {
-    u8 pad00[0x10];
-    s32 count;          /* 0x10 */
-    u8 pad14[0x04];
-    s32 headerSize;     /* 0x18 */
-    u8 pad1C[0xA4];
-    ParEmitCellState cells; /* 0xC0 */
-} ParEmitDesc;
 
 extern void parClearHistorySlotPoints(s32);
 
@@ -554,21 +534,8 @@ void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
 }
 
 /* Draw parameter block filled per strip by parDrawPendingCellSystems. */
-typedef struct ParDrawState {
-    u16 width;    /* 0x00 */
-    u16 height;   /* 0x02 */
-    u16 flags;    /* 0x04 */
-    u8 pad06[2];
-    u32 color; /* 0x08: packed vertex color */
-    const u32 *indices; /* 0x0C: topology index stream */
-    u128 *positions; /* 0x10: current vertex cursor */
-    u8 pad14[0xC];
-    u32 *colors;     /* 0x20: current color cursor */
-    u8 pad24[8];
-} ParDrawState;
-
-extern ParDrawState parDrawControl;
-extern void *effCreateVertexDrawPacket(ParDrawState *);
+extern EffVertexDrawRequest parDrawControl;
+extern void *effCreateVertexDrawPacket(EffVertexDrawRequest *);
 
 void parControlInit(void) {
     memset(&parDrawControl, 0, 0x2C);
@@ -1700,7 +1667,7 @@ void parReleaseDrawBlock(ParBlock *block) {
 
 void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    ParDrawState state;
+    EffVertexDrawRequest state;
     s32 remaining;
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
@@ -1737,7 +1704,9 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
         desc->cells.verticesPerCell = 3;
     }
     desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub(desc->cells.cellSystem, 0, desc->cells.unk14, desc->cells.unk18);
+    parDispatchSub(desc->cells.cellSystem, 0,
+                   *(void **)((u8 *)&desc->cells + 0x14),
+                   *(void **)((u8 *)&desc->cells + 0x18));
     polyInitializeBasicRingCells(desc);
     return desc;
 }

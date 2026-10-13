@@ -11,6 +11,8 @@
 #include "kwln_task_lifecycle.h"
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
+#include "eff_random.h"
+#include "mdl_flag_api.h"
 
 struct SdfTex;
 struct MenuTerminalWork;
@@ -69,7 +71,6 @@ typedef struct {
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
 
-extern u32 effMiscRand(void *);
 
 extern u32 evtDisplayValues[];
 
@@ -85,7 +86,6 @@ extern void itfPanelSetPairFirst(s32, s32);
 extern void itfMesStartEntry(s32, s32, s32);
 extern char D_0036ACF8[];
 extern void itfMesDestroyWindowIfPresent(s32);
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern s32 D_003BAA70;
 extern s32 D_003BAA74;
