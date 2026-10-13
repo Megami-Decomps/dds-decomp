@@ -28,6 +28,7 @@
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
+#include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
 #include "actor_effect_task.h"
 #include "eff_field_color.h"
@@ -4173,14 +4174,6 @@ BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     return task;
 }
 
-typedef struct BtlFloorLoadArgs {
-    s32 frontHandle;
-    s32 sideHandle;
-    s32 stage;
-    s32 variant;
-    s32 state;
-} BtlFloorLoadArgs;
-
 s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     s32 result = 1;
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -4221,20 +4214,20 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     return result;
 }
 
-BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
+BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    BtlRuntimeTaskArgs *args;
+    BtlFloorLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 2;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFloorLoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->unk_08 = first;
-    args->unk_0C = second;
-    args->value = 0;
-    args->option = 0;
-    args->unk_10 = 0;
+    args->frontHandle = 0;
+    args->sideHandle = 0;
+    args->stage = stage;
+    args->variant = variant;
+    args->state = 0;
     return task;
 }
 
