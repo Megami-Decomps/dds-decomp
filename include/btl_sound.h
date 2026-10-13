@@ -183,6 +183,7 @@ typedef char SoundResourceLink_refreshRequested_offset_must_be_0x10[
 
 SoundLink *sndAllocLink(struct BtlUnit *owner);
 void sndFreeLink(SoundLink *link);
+#include "btl_sound_node_api.h"
 void btlUpdateUnitCommandEffect(SoundLink *link);
 SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
 void sndFreeResourceLink(SoundResourceLink *link);

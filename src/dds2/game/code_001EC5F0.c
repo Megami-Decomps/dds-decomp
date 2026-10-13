@@ -292,10 +292,6 @@ extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
 extern void *memset(void *, s32, u32);
 
-extern void sndFreeResourceNode(struct SoundResourceNode *);
-
-extern void sndFreeListNode(struct ActiveSoundNode *);
-
 extern f32 btlUnitGetTopY(BtlUnit *);
 
 static inline s32 btlHasFlag(u32 flags, u32 mask) {
