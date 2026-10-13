@@ -7,6 +7,7 @@
 #include "kwln_task_lifecycle.h"
 
 extern s32 scrTestEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
+extern void scrClearEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
 
 extern s32 mnuMantraPanelPositionTable;
 
@@ -38,7 +39,13 @@ s32 func_0026DB48(DatPartyRecord *context, u8 entry) {
 void func_0026DB68(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DB48", func_0026DB70);
+/* The consumed context is cleared under the post-call cleanup exception.
+ * Retail uses JAL plus epilogue. Qualified cc1 RTL retains this reset through
+ * 01.sibling and 02.jump, then deletes it in 03.cse (both entry-zero clears). */
+void func_0026DB70(DatPartyRecord *context) {
+    scrClearEntryFlag(context, 0, 0);
+    context = NULL;
+}
 
 /* Return the flag test's result through the native selector-zero wrapper. */
 s32 func_0026DB90(DatPartyRecord *context) {
@@ -48,7 +55,13 @@ s32 func_0026DB90(DatPartyRecord *context) {
 void func_0026DBB0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DB48", func_0026DBB8);
+/* The consumed context is cleared under the post-call cleanup exception.
+ * Retail uses JAL plus epilogue. Qualified cc1 RTL retains this reset through
+ * 01.sibling and 02.jump, then deletes it in 03.cse (both entry-zero clears). */
+void func_0026DBB8(DatPartyRecord *context) {
+    scrClearEntryFlag(context, 0, 1);
+    context = NULL;
+}
 
 /* Call the existing flag routine with entry zero and selector one; ignore its result. */
 void func_0026DBD8(DatPartyRecord *context) {
