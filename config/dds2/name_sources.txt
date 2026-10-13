@@ -3853,6 +3853,7 @@
 0x0025DB98	mnuFxWorldScrollDelta	inferred	DDS1 twin func_00242780 (scrolls fx node/child offsets by delta) [names_reviewed2.tsv]
 0x0025DD68	mnuFxWorldDropOutOfRange	inferred	calls evtEventViewerReleaseQueuedNode on nodes with child offset >= threshold [names_reviewed2.tsv]
 0x0025DFE8	mnuInitializeCampPanelVisualDefaults	inferred	Writes panel color vectors and numeric defaults into five output groups. [names_reviewed10.tsv]
+0x0025E048	mnuSampleCampPanelVisualTrack	inferred	Samples type-10 timeline keys into three panel vectors and two scalar values using neighboring key frames, defaults, and enabled interpolation.
 0x0025E240	mnuCampInitializeDisplayDefaults	inferred	Initializes camp display dimensions, neutral colors, unit scales and enabled state. [names_reviewed15.tsv]
 0x0025E338	mnuInitializeCampListLayoutDefaults	inferred	Fills the camp list window layout with its default sizes and settings. [names_reviewed10.tsv]
 0x0025E6F0	mnuFindCampKeyTrackNeighbors	inferred	Locates neighboring keyframe nodes around a track-relative value. [names_reviewed8.tsv]
@@ -3861,6 +3862,8 @@
 0x0025E8D0	campResolvePendingValue	inferred	unified with DDS1 twin (was mnuCampResolvePendingValue)
 0x0025E980	mnuDrawCampScaledTexture	inferred	U1
 0x0025EBC8	fldResetCampSceneEntries	inferred	Clears status of every linked camp scene entry and the scene's state at +0x240C.
+0x0025EC00	evtApplyCameraColorTrackAtFrame	inferred	Samples the type-0x19 camera-color track at the viewer frame, interpolates neighboring payloads, and applies the resulting camera-color parameters.
+0x0025EE00	evtUpdateCameraColorTrackEffect	inferred	Applies the viewer's camera-color track and updates the camera-color effect when that track is active.
 0x0025EE40	mnuCampInitFontResource	inferred	Byte-identical DDS1 counterpart: Creates and configures the camp scene font resource at offset 0x2410.
 0x0025EE90	mnuCampLinkFontGlyph	inferred	Byte-identical dds1 twin 0x00243AA8; Passes the camp scene font resource to frFontGlyph list-linking and clears its slot. [names_conflicts.tsv]
 0x0025EEC0	mnuCampCheckClockDivisor	inferred	DDS2 twin of DDS1 0x00243AD8 [names_M60_EffMid.tsv]
@@ -3887,12 +3890,18 @@
 0x002608E0	mnuAdvanceCampPopup	inferred	medium confidence; src/dds2/game/code_0025DA20.c func_002608E0: Dispatches mode 1 for the active camp popup; the retail dispatcher uses its advance callback/result after update activation. [names_reviewed25.tsv]
 0x00260918	mnuFinishCampPopup	inferred	medium confidence; src/dds2/game/code_0025DA20.c func_00260918: Dispatches mode 2 for the active camp popup; the retail dispatcher performs completion-transition cleanup and releases the current entry. [names_reviewed25.tsv]
 0x00260950	mnuCampGetSourceItemPrice	inferred	L13
+0x00260A58	mnuCampGetRankedItemPrice	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1748; Ranked-item pricing helper called by both ranked-stock builders with the same index/half-price argument shape as DDS1; twin=0x00244D10 (DDS1).
 0x00260B50	mnuCampFindListedItemIndex	inferred	Searches the three-entry camp item table for an ID and returns its index or negative one. [names_reviewed15.tsv]
 0x00260B90	itmClaimFreeSlot	inferred	scans 2 slots of a row for an id whose flag is clear and sets it (mdlFlagTest/mdlFlagSet) [names_M36_SmallSweep5.tsv]
+0x00260C28	mnuCampGetWideRewardRowIndex	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1792; Maps a listed reward row and its weighted three-way option to a wide reward-row index.
+0x00260C38	mnuCampGetCompactRewardRowIndex	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1800; Maps a listed reward row and compact slot to a compact reward-row index.
 0x00260C48	mnuCampChooseSolarWeightedOption	inferred	Chooses a weighted camp table option, switching the weights for a particular solar phase. [names_reviewed15.tsv]
 0x00260CE8	mnuCampChooseWeightedTableValue	inferred	Samples paired values and weights in the camp probability table. [names_reviewed15.tsv]
 0x00260D50	mnuCampFindFreeWideEntryIndex	inferred	Finds the first empty entry in a camp row with sixteen slots, capped at its last slot. [names_reviewed15.tsv]
 0x00260DA0	mnuCampFindFreeCompactEntryIndex	inferred	Finds the first empty entry in a separate camp row with eight slots, capped at its last slot. [names_reviewed15.tsv]
+0x00260DF0	mnuCampChooseWideRewardEntry	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1883; Selects a weighted eligible column from a wide reward row, excluding disallowed item and mantra entries.
+0x00260FE8	mnuCampGetWideRewardKind	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1935; Returns the reward-kind byte at the selected column in a wide reward row.
+0x00261018	mnuCampGetCompactRewardKind	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1941; Returns the reward-kind byte at the selected index in a compact reward row.
 0x00261040	mnuCampResolveOwnedItemVariant	inferred	Replaces a row item ID with its variant when the original qualifies and is owned. [names_reviewed15.tsv]
 0x002610C0	mnuCampGetCompactEntryId	inferred	Returns the ID at the requested column of a compact camp entry row. [names_reviewed15.tsv]
 0x002610E8	mnuCampCountRemainingUses	inferred	Per-mode remaining count (99 or 1 minus the flag byte) clamped at zero. [names_M44_Mid3.tsv]
@@ -3900,6 +3909,10 @@
 0x00261310	mnuCampDisableUnavailableItemEntries	inferred	readability/matching review (QP16)
 0x002613C8	mnuCampScalePriceByTier	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2072; Applies the first price percentage tier covering the selected quantity; selector zero uses the current progress-slot percentage.
 0x00261480	mnuCampAdvanceCounter	inferred	Adds a delta to the scene counter, clamps to [1, max] and flags saturation; mode 3 also rescales the record value. [names_M44_Mid3.tsv]
+0x00261538	mnuCampAppendRankedItemRows	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2120; Appends eligible non-bullet, nonzero entries from the active ranked-stock row.
+0x00261670	mnuCampRebuildItemStockWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2162; Rebuilds the stock item window, appends ranked-stock entries, and initializes its draw context.
+0x00261850	mnuCampAppendRankedFilteredRows	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2212; Appends active ranked-stock entries that match the selected bullet-or-skill filter.
+0x002619A8	mnuCampRebuildFilteredStockWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2256; Rebuilds a stock window for the selected bullet-or-skill filter and appends matching ranked entries.
 0x00261D78	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]
 0x00261E10	evtIsFadeDispatchIdle	inferred	Returns true only when no fade is active and the associated dispatch-status function returns zero.
 0x00261E80	evtInitializeSelectedSlot	inferred	Initializes the context's scene object, retrieves the selected slot, and stores that slot in both the scene record and context.
@@ -7820,11 +7833,8 @@
 0x002B0D90	mnuDrawPartySelectionListEntry	inferred	Draws one party-selection row through the list callback; DDS1 twin 0x00274BC0. [LiteH menu naming batch 14]
 0x002B9808	mnuClearWindowListSelectionFlags	inferred	Clears the window list's two selection/navigation flags; DDS1 twin 0x0027C788. [LiteH menu naming batch 14]
 0x002BB510	mnuDrawStaffScrollPanel	inferred	Draws the staff-menu scroll panel from its resource group and surface; DDS1 twin 0x0027E8D8. [LiteH menu naming batch 14]
-0x0025EC00	evtBlendCameraColorTrack	inferred	Blends the camera-color key values at the current frame and applies the resulting color words; DDS1 twin 0x00243818. [LiteG camp naming batch 2]
-0x0025EE00	evtUpdateCameraColorEffect	inferred	Applies the camera-color track and updates its active camera-color field effect; DDS1 twin 0x00243A18. [LiteG camp naming batch 2]
 0x0025EFD8	mnuShopCreateDescriptorSurface	inferred	Reuses the pending work buffer to create and queue a patchable descriptor surface; DDS1 twin 0x00243BF0. [LiteG camp naming batch 2]
 0x0025F2B0	mnuShopQueueAuxiliaryTexture	inferred	Queues the scene's auxiliary resource as a texture-bound quad; DDS1 twin 0x00243EC8. [LiteG camp naming batch 2]
-0x00260A58	mnuShopGetRankItemPrice	inferred	Calculates rank-stock item price from entry/row percentages and progress stage, or half the base price; DDS1 twin 0x00244D10. [LiteG camp naming batch 2]
 0x00261F48	mnuShopPollCommandSelection	inferred	Processes command-phase results and pad input for the shop selection list, updating popup, transition and selection state; DDS1 twin 0x00245DE0. [LiteG camp naming batch 2]
 0x00262190	evtPrimeDispatchStart	inferred	Runs menu setup and starts the primary dispatch handler; DDS1 twin 0x00246088. [LiteG camp naming batch 2]
 0x00262270	evtBuildShopCatalogIfActive	inferred	When the terminal shop phase is 1, builds the stock catalog; DDS1 twin 0x00246160. [LiteG camp naming batch 2]

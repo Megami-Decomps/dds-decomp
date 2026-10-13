@@ -765,7 +765,7 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 /* Blend the first camera-color track at the clamped frame. Lookup includes
  * the track base, but interpolation retains the native unre-based key frames.
  * Without a future key, pass zero blend and the uninitialized fallback block. */
-void evtBlendCameraColorTrack(EvtRuntime *scene) {
+void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *selectedKey;
     EvtRuntimeChild *futureKey;
@@ -817,8 +817,8 @@ void evtBlendCameraColorTrack(EvtRuntime *scene) {
 /* The genuine three-row typed candidate remains non-matching. */
 INCLUDE_ASM(const s32, "game/code_00242608", fldApplyCameraColorKeyWords);
 
-void evtUpdateCameraColorEffect(EvtRuntime *scene) {
-    evtBlendCameraColorTrack(scene);
+void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
+    evtApplyCameraColorTrackAtFrame(scene);
     if (scene->cameraColorActive == 1) {
         func_00134CD8();
         return;
@@ -1438,7 +1438,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-s32 mnuShopGetRankItemPrice(s32 index, s32 halfPrice) {
+s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
     u32 rowOffset;
     u8 *row;
     u8 *entry;
@@ -1654,7 +1654,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
             mnuClearWindowListSelectionFlags(scene->window);
             mnuAdvanceListCursorDefault(scene->window->list);
             params = &node->camp;
-            price = mnuShopGetRankItemPrice(i, 0);
+            price = mnuCampGetRankedItemPrice(i, 0);
             params->value = price;
             params->id = id;
             params->price = price;
@@ -1717,7 +1717,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
                 mnuClearWindowListSelectionFlags(scene->window);
                 mnuAdvanceListCursorDefault(scene->window->list);
                 parameters = &node->camp;
-                price = mnuShopGetRankItemPrice(i, 0);
+                price = mnuCampGetRankedItemPrice(i, 0);
                 parameters->value = price;
                 parameters->id = itemId;
                 parameters->price = price;

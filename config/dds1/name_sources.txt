@@ -4369,7 +4369,9 @@
 0x00243558	campResolvePendingValue	inferred	DDS1 twin of DDS2 func_0025E8D0. [names_M44_Mid3.tsv]
 0x00243608	mnuDrawCampScaledTexture	inferred	U1
 0x002437E0	fldResetCampSceneEntries	inferred	Byte-identical dds2 twin 0x0025EBC8; Clears status of every linked camp scene entry and the scene's state at +0x240C. [names_conflicts.tsv]
+0x00243818	evtApplyCameraColorTrackAtFrame	inferred	Samples the type-0x19 camera-color track at the viewer frame, interpolates neighboring payloads, and applies the resulting camera-color parameters.
 0x00243928	fldApplyCameraColorKeyWords	inferred	confidence=high; matched-C; src/dds1/game/code_00242608.c:561:func_00243928; Copies the current camera settings, replaces the observed scalar/interleaved fields with supplied key words, applies the camera color effect, and sets the owner control flag from four nonzero key words. DDS2 native counterpart remains claimed/ASM and is not queued here.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00243A18	evtUpdateCameraColorTrackEffect	inferred	Applies the viewer's camera-color track and updates the camera-color effect when that track is active.
 0x00243A58	mnuCampInitFontResource	inferred	Creates and configures the camp scene font resource at offset 0x2410.
 0x00243AA8	mnuCampLinkFontGlyph	inferred	Passes the camp scene font resource to frFontGlyph list-linking and clears its slot.
 0x00243AD8	mnuCampCheckClockDivisor	inferred	calls func_002D0B50 and keeps only the divide-by-zero check of an unused quotient [names_M60_EffMid.tsv]
@@ -4404,6 +4406,7 @@
 0x00244B30	mnuCampRunPanel0	inferred	mnu camp inits panel then runs mode 0
 0x00244B90	mnuCampRunPanel1	inferred	mnu camp runs panel mode 1
 0x00244BC8	mnuCampRunPanel2	inferred	mnu camp runs panel mode 2
+0x00244D10	mnuCampGetRankedItemPrice	inferred	confidence=high; src/dds1/game/code_00242608.c:1441; Reads the active ranked-stock item and applies its row/item percentage and progress-stage price scales, or returns half the base item price; twin=0x00260A58 (DDS2).
 0x00244E08	mnuShopGetTransactionLimit	inferred	U2
 0x00245190	mnuCampClampSceneCounter	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00245C00	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]
@@ -8397,11 +8400,8 @@
 0x00281AE8	mnuDrawPanelFadeSprite	inferred	Draws the sprite-kind expanding panel gradient and dim full-size overlay. [LiteH menu naming batch 14]
 0x00281BE0	mnuDrawAndAdvancePanelFades	inferred	Draws two active panel fades, advances delays/blends and clears completed work. [LiteH menu naming batch 14]
 0x002845F8	mnuDrawAndAdvanceRatioPanel	inferred	Draws and advances HP/MP ratio panels in the party selection preview; DDS2 twin 0x002C24E8. [LiteH menu naming batch 14]
-0x00243818	evtBlendCameraColorTrack	inferred	Blends the camera-color key values at the current frame and applies the resulting color words; DDS2 twin 0x0025EC00. [LiteG camp naming batch 2]
-0x00243A18	evtUpdateCameraColorEffect	inferred	Applies the camera-color track and updates its active camera-color field effect; DDS2 twin 0x0025EE00. [LiteG camp naming batch 2]
 0x00243BF0	mnuShopCreateDescriptorSurface	inferred	Reuses the pending work buffer to create and queue a patchable descriptor surface; DDS2 twin 0x0025EFD8. [LiteG camp naming batch 2]
 0x00243EC8	mnuShopQueueAuxiliaryTexture	inferred	Queues the scene's auxiliary resource as a texture-bound quad; DDS2 twin 0x0025F2B0. [LiteG camp naming batch 2]
-0x00244D10	mnuShopGetRankItemPrice	inferred	Calculates rank-stock item price from entry/row percentages and progress stage, or half the base price; DDS2 twin 0x00260A58. [LiteG camp naming batch 2]
 0x00246160	evtBuildShopCatalogIfActive	inferred	When the shop callback's action is 1, builds the shop stock catalog; DDS2 twin 0x00262270. [LiteG camp naming batch 2]
 0x00246220	mnuShopPollBuyCommandSelection	inferred	Polls the buy-command selection, updating command phases, popup state and list navigation; DDS2 twin 0x00262330. [LiteG camp naming batch 2]
 0x00246538	evtBuildFilteredShopCatalogIfActive	inferred	When the shop callback's action is 1, builds the filtered shop catalog; DDS2 twin 0x00262678. [LiteG camp naming batch 2]
