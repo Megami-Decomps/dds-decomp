@@ -8591,3 +8591,4 @@
 0x002BF438	effDrawSpriteWithCornerColors	inferred	draws the selected slot using the caller-supplied four corner colors, preserving the slot work from effGetSlotWorkOrOverride.
 0x002BF400	effDrawSpriteWithWorkCornerColors	inferred	draws the selected slot using the supplied BdWork entry geometry.cornerColors.
 0x002BEEA0	effDrawTexturedRectBorderStrips	inferred	draws each enabled border strip around a textured rectangle, deriving edge colors and temporary texture coordinates before restoring the original coordinates.
+0x002CF7B8	sdfRemoveHandler	inferred	Unlinks a registered handler node, unregisters its interrupt/DMA/SBUS endpoint by kind, and frees the node; used by sound IPU stream shutdown and pending-handler drain. [code-quality cleanup, 2026-10-13]
