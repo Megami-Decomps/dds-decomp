@@ -8661,3 +8661,4 @@
 0x002890B8	fileHandleAllocatedResourceReadEvent	inferred	Kind-zero device callback allocates retained resource storage, advances chunked reads into it, then queues job completion.
 0x00289380	fileHandleChunkedWriteEvent	inferred	Kind-two device callback advances chunked writes from the supplied address and queues job completion after the final reply.
 0x002C1548	uiPrepareMenuBackgroundSurface	inferred	Menu backdrop callers use this between textured grid layers and the background draw; dispatches the prepared texture packet and sets GS TEST 0x50000 plus ALPHA 0x54 for the selected surface.
+0x00297658	effUpdateGridRecordSlotHistory	inferred	Advances per-instance grid-record history, fades shifted trail colors, and interpolates trailing position, scale, angle, and color samples using linear or Catmull-Rom motion. Reused by five effect emitter update paths; paired with DDS2 0x002D7B58. [matched C]
