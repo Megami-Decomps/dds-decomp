@@ -88,18 +88,6 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
 
-/* Tagged scheduler predicate, embedded for task entry and exit. */
-typedef struct TaskCondition {
-    u8 kind; /* 0 never, 1 always, 2 counter threshold, 3-10 task queries. */
-    u8 pad01[7];
-    union {
-        s32 count;    /* Kind 2: signed threshold for the supplied counter. */
-        u64 handle;   /* Kinds 3-5: task handle. */
-        u64 owner;    /* Kinds 6-8: task owner; queries select its oldest task. */
-        u16 taskKind; /* Kinds 9-10: registered task kind. */
-    } value;
-} TaskCondition;
-
 /* Kind 0x27: camera-mode task's complete 20-byte argument packet. */
 typedef struct BtlCameraModeArgs {
     BtlTask *actor;
