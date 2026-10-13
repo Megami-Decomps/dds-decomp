@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
@@ -190,9 +191,6 @@ typedef struct SoundTask {
     struct SoundTask *deferPrev;
     u8 pad68[8];
 } SoundTask;
-
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
 extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
 
 extern s32 sndFindPackedTrackLoadStatus(u32);

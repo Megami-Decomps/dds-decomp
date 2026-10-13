@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "fr_font_context.h"
 #include "sdf_chip.h"
@@ -207,9 +208,6 @@ extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003E75E0[];
 extern char D_003E75A8[];
-
-extern void sndSetSequenceVolumePan();
-
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */

@@ -3,6 +3,9 @@
 
 #include "common.h"
 
+/* Apply volume and pan to a sequence track through the command queue. */
+void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan);
+
 /* Local packet object; only the first 0xC bytes are sent to the sound worker. */
 typedef struct SndSequenceVolumePanPacket {
     u32 trackId;          /* +0x00 */

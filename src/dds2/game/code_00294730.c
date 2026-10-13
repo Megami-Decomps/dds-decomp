@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fr_font.h"
 #include "dat_state.h"
@@ -495,10 +496,6 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
         D_003D03F0[26][MENU_ICON_FRAME], option
     );
 }
-
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
-
 void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;

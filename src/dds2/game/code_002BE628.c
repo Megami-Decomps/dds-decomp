@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
 #include "ui_color.h"

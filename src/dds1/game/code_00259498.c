@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_task_work.h"
@@ -310,7 +311,6 @@ extern MnuSpritePlacement D_0036B510[];
 extern struct EffectSlotSet *D_0036C698[];
 extern char D_003BC4C8[];
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 

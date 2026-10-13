@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "sdf_textured_rect.h"
@@ -433,7 +434,6 @@ extern s32 D_00438894;
 extern s8 D_004388D0;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void sdfCounterSetMode(s32);
 extern void sdfCounterStartTimerPositionTransition(s32, s32);
 extern s32 sdfCounterGetSelectionBoundaryFlags(void);

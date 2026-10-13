@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -211,7 +212,6 @@ typedef struct MenuSpriteArguments {
 } MenuSpriteArguments;
 
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void sndSetSequenceVolumePan();
 extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
 extern void mnuClearWindowListSelectionFlags(s32);
 

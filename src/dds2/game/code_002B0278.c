@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -210,9 +211,6 @@ extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003E75E0[];
 extern char D_003E75A8[];
-
-extern void sndSetSequenceVolumePan();
-
 typedef struct MenuPanelDrawEntry {
     s32 slotIndex;
     s32 x;

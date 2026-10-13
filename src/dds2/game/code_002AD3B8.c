@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "snd_sequence_volume_pan.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
@@ -66,7 +67,6 @@ extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void sndSetSequenceVolumePan();
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(MenuStaffContext *);
 extern void mnuCreateOrderedStaffItemWindow(void *);

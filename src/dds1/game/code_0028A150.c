@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_scale_params.h"
 #include "ee_mmi.h"
@@ -314,8 +315,6 @@ extern void dds3DispatchIndexedCallback(void *callback);
 extern void func_002966D8(s32 object);
 
 extern s32 fileResetSelection(void);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 extern s32 D_003BC818;
 extern s32 D_003BC820;
 extern void fileSetMenuValueAndInitializeFlags(u32 value);

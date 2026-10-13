@@ -5,6 +5,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "sdf_chip.h"
 #include "fr_font.h"

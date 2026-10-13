@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
@@ -43,7 +44,6 @@ extern void mnuSelectFirstListNode(struct MenuList *);
 
 
 extern void mnuDrawMovieMenuListItem();
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void sndStartTrackExtended(s32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern f32 fldVectorLength(f32 *);
