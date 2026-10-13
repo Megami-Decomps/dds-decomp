@@ -134,11 +134,11 @@ extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 
-void func_002E9708(void) {
+void sndStartReducedBgm(void) {
     func_002E87A8(0x180, 0, 0, 0);
 }
 
-void func_002E9730(void) {
+void sndStopReducedBgm(void) {
     func_002E87A8(400, 0, 0, 0);
 }
 

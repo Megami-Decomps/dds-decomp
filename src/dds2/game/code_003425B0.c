@@ -146,11 +146,11 @@ extern char *D_0040BBD8[];
 extern char *D_0040BBE8[];
 
 
-void func_003425B0(void) {
+void sndStartReducedBgm(void) {
     func_00341650(0x180, 0, 0, 0);
 }
 
-void func_003425D8(void) {
+void sndStopReducedBgm(void) {
     func_00341650(400, 0, 0, 0);
 }
 

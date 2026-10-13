@@ -6656,6 +6656,8 @@
 0x003424A8	sndGetTrackSlotTable	inferred	medium confidence; src/dds2/game/code_00341FE8.c func_003424A8: Returns the 8-byte sound track-slot table; D_0047ABD0 equals the slot-array address D_0047AA40 + 0x190 used by track lookup. [names_reviewed25.tsv]
 0x00342538	sndStartTrackExtended	inferred	Prepares a track ID and sends command 0x20 with setting 0x17f.
 0x00342580	sndReleaseTrackHandle	inferred	Stores the supplied track handle in word 0 and sends the 16-byte command 0xD0 packet.
+0x003425B0	sndStartReducedBgm	inferred	The paired 0x180 sound command selects the reduced-mode BGM start action; terminal-mode and menu/event callers use it on start or initialization.
+0x003425D8	sndStopReducedBgm	inferred	The paired 400 (0x190) sound command selects the reduced-mode BGM stop action; terminal-mode and menu/event callers use it on stop or teardown.
 0x00342600	sndTransitionBgm	inferred	Calls the paired BGM transition command 0xE0 plus the packed track channel; evtTransitionBgm supplies the encoded track and fade.
 0x00342688	sdfSoundIsCommandBusy	inferred	Returns the same nonzero command flag that blocks sdfSoundSendNamedCommand.
 0x00342690	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds2/game/code_003425B0.c:208:func_00342690; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
