@@ -6,6 +6,7 @@
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
+#include "mnu_event_flag_entries.h"
 #include "mdl_flag_api.h"
 
 
@@ -32,20 +33,8 @@ typedef struct FlagEntry {
 
 
 
-typedef struct FlagPair {
-    s32 first;
-    s32 second;
-} FlagPair;
-
-typedef struct FlagSource {
-    s32 first;
-    s32 second;
-    s32 pad[2];
-} FlagSource;
-
-extern FlagSource mnuSceneFlagEventEntries[];
-
-extern FlagPair mnuPartyFlagEventEntries[];
+extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
+extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 
 extern u8 D_003CE6AC[];
@@ -379,17 +368,17 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
-    for (i = 0; i < 4; i++) {
-        entries[i].firstFlag = mnuSceneFlagEventEntries[i].first;
+    for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
+        entries[i].firstFlag = mnuSceneFlagEventEntries[i].requiredFlag;
         entries[i].firstOn = mdlFlagTest(entries[i].firstFlag);
-        entries[i].secondFlag = mnuSceneFlagEventEntries[i].second;
+        entries[i].secondFlag = mnuSceneFlagEventEntries[i].handledFlag;
         entries[i].secondOn = mdlFlagTest(entries[i].secondFlag);
     }
-    for (i = 0; i < 16; i++) {
-        entries[4 + i].firstFlag = mnuPartyFlagEventEntries[i].first;
-        entries[4 + i].firstOn = mdlFlagTest(entries[4 + i].firstFlag);
-        entries[4 + i].secondFlag = mnuPartyFlagEventEntries[i].second;
-        entries[4 + i].secondOn = mdlFlagTest(entries[4 + i].secondFlag);
+    for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag = mnuPartyFlagEventEntries[i].requiredFlag;
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstOn = mdlFlagTest(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag = mnuPartyFlagEventEntries[i].handledFlag;
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondOn = mdlFlagTest(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
     }
     return handle;
 }
@@ -398,7 +387,7 @@ void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
         if (entries[i].firstOn != 0) {
             mdlFlagSet(entries[i].firstFlag);
         }
@@ -406,12 +395,12 @@ void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
             mdlFlagSet(entries[i].secondFlag);
         }
     }
-    for (i = 0; i < 16; i++) {
-        if (entries[4 + i].firstOn != 0) {
-            mdlFlagSet(entries[4 + i].firstFlag);
+    for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
+        if (entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstOn != 0) {
+            mdlFlagSet(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
         }
-        if (entries[4 + i].secondOn != 0) {
-            mdlFlagSet(entries[4 + i].secondFlag);
+        if (entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondOn != 0) {
+            mdlFlagSet(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
         }
     }
 }
@@ -419,13 +408,13 @@ void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
 void mnuClearCampResourceFlagEntries(void) {
     u32 i;
 
-    for (i = 0; i < 4; i++) {
-        mdlFlagClear(mnuSceneFlagEventEntries[i].first);
-        mdlFlagClear(mnuSceneFlagEventEntries[i].second);
+    for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
+        mdlFlagClear(mnuSceneFlagEventEntries[i].requiredFlag);
+        mdlFlagClear(mnuSceneFlagEventEntries[i].handledFlag);
     }
-    for (i = 0; i < 16; i++) {
-        mdlFlagClear(mnuPartyFlagEventEntries[i].first);
-        mdlFlagClear(mnuPartyFlagEventEntries[i].second);
+    for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
+        mdlFlagClear(mnuPartyFlagEventEntries[i].requiredFlag);
+        mdlFlagClear(mnuPartyFlagEventEntries[i].handledFlag);
     }
 }
 
