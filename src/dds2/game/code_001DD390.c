@@ -66,18 +66,6 @@ extern SdfPoolNode *D_003B6BD0[];
 
 typedef struct BtlUnit BtlUnit;
 
-typedef struct BtlEffectResource {
-    s128 vec0;
-    f32 f10;
-    f32 f14;
-    f32 f18;
-    f32 f1C;
-    f32 f20;
-    u8 pad24[6];
-    u16 unk2A;
-    BtlEffectNode nodes[1];
-} BtlEffectResource;
-
 typedef struct BtlFxSrcA {
     f32 f0;
     f32 f4;

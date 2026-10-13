@@ -111,17 +111,6 @@ extern s8 effSharedRandomState[];
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
-typedef struct BtlEffectResource {
-    s128 vec0;
-    f32 f10;
-    f32 f14;
-    f32 f18;
-    f32 f1C;
-    f32 f20;
-    u8 pad24[8];
-    BtlEffectNode nodes[1];
-} BtlEffectResource;
-
 extern s32 btlGetRuntime(void);
 
 extern void btlUnitGetBodyPosVU(u8 *);
