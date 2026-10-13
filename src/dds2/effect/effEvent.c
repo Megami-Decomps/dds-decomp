@@ -779,9 +779,9 @@ void effDispatchActive(void) {
 extern EffEventSetupRecord D_003B23E8;
 extern s8 D_004364AD;
 extern s8 D_0040B7DB[];
-extern void func_00194A28();
-extern void func_00194A30();
-extern void func_00194A38();
+extern void effEventSetupRecordNoOp();
+extern void effEventSetupBeforeRecordNoOp();
+extern void effEventSetupAfterRecordNoOp();
 
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
@@ -796,10 +796,10 @@ s8 effUpdateCh72Params(void) {
         D_004364AD = 1;
     }
     if ((u8)D_004364AD != 0) {
-        func_00194A08((u32)&D_003B23E8);
-        func_00194A30();
-        func_00194A28(&D_003B23E8);
-        func_00194A38();
+        effReturnEventSetupWord((u32)&D_003B23E8);
+        effEventSetupBeforeRecordNoOp();
+        effEventSetupRecordNoOp(&D_003B23E8);
+        effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
         D_004364AD = 0;
@@ -833,10 +833,10 @@ s8 effEventAdvanceBlurTemplateSetup(void) {
         D_004364BD = 1;
     }
     if ((u8)D_004364BD != 0) {
-        func_00194A08((u32)&D_003B2560);
-        func_00194A30();
-        func_00194A28(&D_003B2560);
-        func_00194A38();
+        effReturnEventSetupWord((u32)&D_003B2560);
+        effEventSetupBeforeRecordNoOp();
+        effEventSetupRecordNoOp(&D_003B2560);
+        effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
         D_004364BD = 0;
@@ -869,10 +869,10 @@ s8 effEventAdvanceScatterBlurSetup(void) {
         D_004364EF = 1;
     }
     if ((u8)D_004364EF != 0) {
-        func_00194A08((u32)&D_003B2738);
-        func_00194A30();
-        func_00194A28(&D_003B2738);
-        func_00194A38();
+        effReturnEventSetupWord((u32)&D_003B2738);
+        effEventSetupBeforeRecordNoOp();
+        effEventSetupRecordNoOp(&D_003B2738);
+        effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
         D_004364EF = 0;
@@ -905,10 +905,10 @@ s8 effEventAdvanceScreenDrawSetup(void) {
         D_00436504 = 1;
     }
     if ((u8)D_00436504 != 0) {
-        func_00194A08((u32)&D_003B2878);
-        func_00194A30();
-        func_00194A28(&D_003B2878);
-        func_00194A38();
+        effReturnEventSetupWord((u32)&D_003B2878);
+        effEventSetupBeforeRecordNoOp();
+        effEventSetupRecordNoOp(&D_003B2878);
+        effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
         D_00436504 = 0;
@@ -941,10 +941,10 @@ s8 effEventAdvanceSolidRectangleSetup(void) {
         D_00436517 = 1;
     }
     if ((u8)D_00436517 != 0) {
-        func_00194A08((u32)&D_003B2978);
-        func_00194A30();
-        func_00194A28(&D_003B2978);
-        func_00194A38();
+        effReturnEventSetupWord((u32)&D_003B2978);
+        effEventSetupBeforeRecordNoOp();
+        effEventSetupRecordNoOp(&D_003B2978);
+        effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
         D_00436517 = 0;
@@ -977,10 +977,10 @@ s8 effEventAdvanceResourceTemplateSetup(void) {
         D_0043651C = 1;
     }
     if ((u8)D_0043651C != 0) {
-        func_00194A08((u32)&D_003B2AB8);
-        func_00194A30();
-        func_00194A28(&D_003B2AB8);
-        func_00194A38();
+        effReturnEventSetupWord((u32)&D_003B2AB8);
+        effEventSetupBeforeRecordNoOp();
+        effEventSetupRecordNoOp(&D_003B2AB8);
+        effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
         D_0043651C = 0;
@@ -1013,10 +1013,10 @@ s8 effEventAdvanceScaleBlurSetup(void) {
         D_0043652F = 1;
     }
     if ((u8)D_0043652F != 0) {
-        func_00194A08((u32)&D_003B2C90);
-        func_00194A30();
-        func_00194A28(&D_003B2C90);
-        func_00194A38();
+        effReturnEventSetupWord((u32)&D_003B2C90);
+        effEventSetupBeforeRecordNoOp();
+        effEventSetupRecordNoOp(&D_003B2C90);
+        effEventSetupAfterRecordNoOp();
     }
     if (D_0040B7DB[0] < 0) {
         D_0043652F = 0;

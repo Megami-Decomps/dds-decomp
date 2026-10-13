@@ -20,8 +20,7 @@ typedef struct EffEventSetupRecord {
 typedef char EffEventSetupRecord_size_must_be_0x40[
     (sizeof(EffEventSetupRecord) == 0x40) ? 1 : -1];
 
-/* Native callers pass the record address as a word; these helpers return it unchanged. */
-u32 func_0018CDD0(u32 value);
-u32 func_00194A08(u32 value);
+/* Native callers pass the record address as a word; return it unchanged. */
+u32 effReturnEventSetupWord(u32 value);
 
 #endif

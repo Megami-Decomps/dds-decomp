@@ -2347,12 +2347,12 @@
 0x0018CB38	effTypeDispatch	inferred	calls D_00355734 type handler with +0x4 arg, no free
 0x0018CB70	effTypeDispatchFree	inferred	calls D_00355738 type handler then frees object via func_002CFF98
 0x0018CBB8	effGetHandlerArg	inferred	returns +0x4 handler argument word as u32
-0x0018CBD8	effTypeDispatchGuardedA	inferred	null-guarded call of D_0035573C type handler
-0x0018CC18	effTypeDispatchGuardedB	inferred	null-guarded call of D_00355744 type handler
-0x0018CC58	effTypeDispatchGuardedC	inferred	null-guarded call of D_00355740 type handler
+0x0018CBD8	effDispatchNodeSetVector	inferred	confidence=high; Replaces letter placeholder: native effNodeTypeOperations type3 setVector slot34DEBC forwards optional subtype callbackA at35573C. One-formal C surface preserved. [Namer1 b55]
+0x0018CC18	effDispatchNodeSetMatrix	inferred	confidence=high; Replaces letter placeholder: native node type3 setMatrix slot34DEC0 forwards optional subtype callbackB at355744. One-formal C surface preserved. [Namer1 b55]
+0x0018CC58	effDispatchNodeSetParameterWord	inferred	confidence=high; Replaces letter placeholder: native node type3 setParameterWord slot34DEC4 forwards optional subtype callbackC at355740. One-formal C surface preserved. [Namer1 b55]
 0x0018CC98	effSetSubSlot	inferred	switch on type stores byte to +0x20/+0x40/+0x50 of +0x4 sub-object
 0x0018CCF0	effGetSubSlot	inferred	switch on type returns byte from +0x20/+0x40/+0x50 of +0x4 sub-object
-0x0018CD50	effAllocSubWork	inferred	switch on type picks +0x4 or +0x44 slot then dispatches by type
+0x0018CD50	effAllocSubWork	inferred	confidence=high; Existing allocator name kept: native node type3 cloneInstanceWord slot34DED0 reconstructs through effAllocDispatch/sdfAllocSizeClassBlock using payload base for0/1 or payload+0x40 for2..4, not owner+0x4/+0x44 slots. Void surface unchanged. [Namer1 b55 evidence closure]
 0x0018CE70	effOpenDataDir	inferred	formats pfs0: path via func_003014F0 and opens with sceDopen, or clears handle
 0x0018CEC0	effRunIfEnabled	inferred	tail-calls func_003101B8 when byte D_003BD476 is set
 0x0018CEF0	effNextDataDirEntry	inferred	Enumerates one effect data directory entry: delegates to the directory reader when mounted, otherwise copies the next of 47 built-in names and clears bit 12.
@@ -8818,3 +8818,10 @@
 0x00289D50	fileSubmitMemoryCardDetectionRequest	inferred	confidence=high; Submits fileMemoryCardRequestIndex to the file request runner when card detection starts. [LiteH b25]
 0x002045E8	btlBuildProgressiveApproachCameraPose	inferred	confidence=high; Motion/scale-derived progress capped above1 interpolates0.55..0.60 pull-back; zero-coefficient35-degree expression and default-plane adjustment retained. Differs from DDS2 explicit-angle builder. [Namer1 b54]
 0x0020B560	btlUpdateLinkedDefeatCamera	inferred	confidence=high; Scene10E defeatCameraHook forwards presetA, captures s32 result and preserves consumed-command NULL staging; paired DDS2 scene30B adapter uses the same generic name despite different boss/preset data. Cedar released6137278646; body unchanged. [Namer1 b54]
+0x0018CBC8	effDispatchNodeRestartNoOp	inferred	confidence=high; Empty native node type3 restart slot34DEB4; paired DDS2 slot3AA7E4. EffTypeOps stride30 and effRestartNodeInstance establish role. [Namer1 b55]
+0x0018CBD0	effDispatchNodeConditionAlwaysTrue	inferred	confidence=high; Native node type3 queryCondition slot34DEB8 returns1; default acceptance in effInvokeNodeConditionOrAcceptDefault is also1. Original u32/zero-formal surface retained. [Namer1 b55]
+0x0018CDA0	effDispatchNodeScaleNoOp	inferred	confidence=high; Empty native node type3 applyScale slot34DED4; paired DDS2 slot3AA804, invoked by effApplyNodeScale. [Namer1 b55]
+0x0018CDD0	effReturnEventSetupWord	inferred	confidence=high; Returns u32 input unchanged; seven effEvent setup paths pass EffEventSetupRecord address word before no-op stages. No processing inferred. Shared twin194A08. [Namer1 b55]
+0x0018CDF8	effEventSetupBeforeRecordNoOp	inferred	confidence=high; Empty entry immediately before per-record no-op in all seven setup paths/game; observable order only. Shared twin194A30. [Namer1 b55]
+0x0018CDF0	effEventSetupRecordNoOp	inferred	confidence=high; Empty entry called with setup-record address between before/after stages in all seven paths/game; zero-formal definition and pointer extern preserved. Shared twin194A28. [Namer1 b55]
+0x0018CE00	effEventSetupAfterRecordNoOp	inferred	confidence=high; Empty entry immediately after per-record no-op in all seven setup paths/game; observable order only. Shared twin194A38. [Namer1 b55]
