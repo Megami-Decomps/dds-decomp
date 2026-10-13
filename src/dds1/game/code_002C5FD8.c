@@ -229,7 +229,7 @@ void sdfCounterStepDownAnimationValue(void) {
     }
 }
 
-extern void func_002C6948(f32 progress);
+extern void fldDrawLocalMapTransitionFrame(f32 progress);
 
 /* Draw the three local-map frame pieces: the side panels slide in from x 427 / 353. */
 static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 alpha3) {
@@ -256,7 +256,7 @@ static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 a
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
-/* Local-map open/close transition: fades the backdrop (func_002C6948), slides the side panels in, and fades the
+/* Local-map open/close transition: fades the backdrop, slides the side panels in, and fades the
  * frame pieces (each panel row is x, y, w, h, u, v, uw, vh). */
 void fldDrawLocalMapTransition(s32 opening) {
     f32 progress;
@@ -337,11 +337,11 @@ void fldDrawLocalMapTransition(s32 opening) {
         alpha2 = 0.0f;
         alpha1 = alpha2;
     }
-    func_002C6948(progress);
+    fldDrawLocalMapTransitionFrame(progress);
     fldDrawLocalMapFrame(slide, alpha1, alpha2, alpha3);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6948);
+INCLUDE_ASM(const s32, "game/code_002C5FD8", fldDrawLocalMapTransitionFrame);
 
 extern void evtSetDrawSurfaceIndex(u32);
 
