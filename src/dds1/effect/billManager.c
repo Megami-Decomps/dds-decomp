@@ -356,7 +356,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
     }
 }
 
-extern u32 func_002E2BB8(u128 *positions, void *attributes, void *halfAttributes,
+extern u32 sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes,
                          void *wordAttributes, s32 count, void *(*alloc)(s32));
 
 void billFlushPairedQuadStreams(BillRenderPair *pair) {
@@ -390,7 +390,7 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
         uv[i][3][3] = data[1]->uv[i].components[7];
     }
     sdfAppendPacket(pair->packetList,
-        func_002E2BB8((u128 *)data[1]->positions, colors, uv,
+        sdfBuildPairedQuadVifPacket((u128 *)data[1]->positions, colors, uv,
                       data[1]->offsets, count, NULL));
     data[0]->count = 0;
     data[1]->count = 0;

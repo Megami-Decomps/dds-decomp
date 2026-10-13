@@ -205,7 +205,7 @@ extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 extern u8 D_0040B730[];
 
-extern void func_0033AC10(void);
+extern void sdfConsCreatePowerLookupTexture(void);
 
 extern u8 D_00372C00[];
 
@@ -391,12 +391,14 @@ void sdfConsCacheTransformedNode(SdfProjectionRecord *node, void *transformMatri
     *(SdfProjectionRecord *)D_0040B580 = *node;
 }
 
-void func_0033A5B8(u32 arg0) {
-    D_00438A64 = arg0;
+/* Set the first DMA reference fallback used when a model has no override. */
+void sdfConsSetDefaultFirstReference(u32 referenceSource) {
+    D_00438A64 = referenceSource;
 }
 
-void func_0033A5C0(u32 arg0) {
-    D_00438A68 = arg0;
+/* Set the second DMA reference fallback used when a model has no override. */
+void sdfConsSetDefaultSecondReference(u32 referenceSource) {
+    D_00438A68 = referenceSource;
 }
 
 extern s8 D_00438A50;
@@ -541,7 +543,8 @@ typedef struct SdfGeneratedLookupTexture {
 
 typedef char SdfGeneratedLookupTextureSize[(sizeof(SdfGeneratedLookupTexture) == 0x2440) ? 1 : -1];
 
-void func_0033AC10(void) {
+/* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
+void sdfConsCreatePowerLookupTexture(void) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x2440);
     SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfResourceRetainAddress(allocation);
     s32 i;
@@ -572,7 +575,7 @@ void func_0033AC10(void) {
 /* Acquire texture resources, split their TEX0 words, and initialize queues. */
 void sdfInitializeResourceQueuesAndTextureWords(void) {
     u64 textureWord;
-    func_0033AC10();
+    sdfConsCreatePowerLookupTexture();
     textureWord = sdfTexGetPrimaryTextureState(D_00438A70);
     D_0037F1B8[0] = textureWord;
     D_00438A78 = textureWord;
@@ -647,7 +650,7 @@ extern f32 D_00438A4C;
 extern u32 D_0040B6B0[];
 
 /* Serialize the requested VIF attribute streams into one aligned DMA packet. */
-void *func_0033B050(SdfPrimitiveRequest *request) {
+void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *request) {
     s32 stripWords = request->stripWordCount;
     s32 count = request->vertexCount;
     s32 headerWords = 18;
@@ -858,8 +861,8 @@ u32 sdfMeasureAlignedRecordBufferBytes(s32 count) {
     return (count * 0x54 + 0x4bU) & 0xfffffff0;
 }
 
-/* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 func_0033BA68(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
+/* Build a quad packet from paired colors and per-corner UV sets; return its address. */
+u32 sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
     s32 bytes;
     u32 *packet;
     u32 *cursor;
@@ -923,7 +926,8 @@ s32 sdfMeasureAlignedRecordStorage(s32 count) {
     return (count * 0x4C + 0x4B) & ~0xF;
 }
 
-u32 func_0033BE18(const u128 *positions, const void *attributes,
+/* Build a quad packet with four corner colors, UV pairs and XY offset pairs. */
+u32 sdfBuildVertexColorQuadVifPacket(const u128 *positions, const void *attributes,
                   const void *halfAttributes, const void *wordAttributes,
                   s32 count, void *(*alloc)(s32)) {
     s32 bytes;
@@ -1355,7 +1359,8 @@ u32 sdfDevConsGetResourceHandle(void) {
     return D_00439194;
 }
 
-u32 *func_0033CBE8(void) {
+/* Return the packed glyph-UV table indexed by character minus 0x20. */
+u32 *sdfDevConsGetGlyphUvTable(void) {
     return D_0040B810;
 }
 

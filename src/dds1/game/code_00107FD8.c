@@ -684,7 +684,7 @@ void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s
 
 
 extern u64 D_003245A0[]; /* index table; only the first 8 bytes are used */
-extern void *func_002E21A0(SdfPrimitiveRequest *);
+extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 /* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
 void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
@@ -723,7 +723,7 @@ void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f
     indices[2] = i3;
     indices[3] = i1;
     strip[0] = D_003245A0[0];
-    sdfAppendPacket(list, (u32)(func_002E21A0(&desc)));
+    sdfAppendPacket(list, (u32)(sdfBuildPrimitiveAttributeVifPacket(&desc)));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     surface->append(surface, list);
 }
@@ -778,7 +778,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     uvs[5] = v1;
     uvs[6] = u1;
     uvs[7] = v0;
-    sdfAppendPacket(list, (u32)(func_002E21A0(&desc)));
+    sdfAppendPacket(list, (u32)(sdfBuildPrimitiveAttributeVifPacket(&desc)));
     surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     surface->append(surface, list);
     sdfQueueAssetRelease((SdfAsset *)asset);
