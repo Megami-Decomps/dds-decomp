@@ -172,7 +172,7 @@ void kwlnDebugTaskCreate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00102E88);
+INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnRegisterNamedSlot);
 
 typedef struct KwlnNamedSlot {
     s32 kind;
