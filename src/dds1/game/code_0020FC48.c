@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_affinity_row.h"
 #include "kwln_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
@@ -1869,10 +1870,6 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
-
-typedef struct BtlAffinityRow {
-    s32 value[19];
-} BtlAffinityRow;
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A69C0);
 
