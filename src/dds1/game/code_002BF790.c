@@ -4,6 +4,7 @@
 #include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
 #include "fpu.h"
 #include "eff.h"
 #include "eff_resource_slots.h"
@@ -35,14 +36,11 @@ typedef struct UiQuadWords {
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 
 extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
 
 extern s32 sdfConsMeasurePacketWithHeader(s32 address);
 
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitive, s32 registerCount,
-                                     s64 registers, s32 loopCount);
 
 #include "sdf_packet_alloc.h"
 

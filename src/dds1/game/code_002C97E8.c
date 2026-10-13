@@ -2,6 +2,7 @@
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
@@ -415,10 +416,8 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
 }
 
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
