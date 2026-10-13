@@ -39,7 +39,7 @@ extern void func_002BE8A8(s32, s32, s32, s32, s32, const u32 *, const u32 *, u32
                           f32, u32, u32, u32, u32);
 
 /* Draw enabled border strips and restore the temporary texture-coordinate changes. */
-void func_002BEEA0(s32 x, s32 y, s32 depth, s32 width, s32 height,
+void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 height,
                   const u32 *edgeExtents, u8 *edgeColorBytes,
                   u32 *textureCoordinates, u32 *sourceCornerColors, u32 kind,
                   u32 mode, u32 flip, u32 texture, u32 buffer) {
@@ -173,7 +173,7 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
         for (i = 0; i < 4; i++) {
             colors[i] = description->colors[i] + draw->parameters[i];
         }
-        func_002BEEA0(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], description->rect,
+        effDrawTexturedRectBorderStrips(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], description->rect,
                      (u8 *)draw->bounds.texture.rect, (u32 *)colors, (u32 *)color,
                      kind, mode, flip, texture, buffer);
         func_002BE8A8(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3],
