@@ -3,6 +3,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "snd_sequence_volume_pan.h"
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -319,7 +320,6 @@ s32 mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
 }
 
 #include "common.h"
-#include "snd_sequence_volume_pan.h"
 #include "mnu_result.h"
 
 
