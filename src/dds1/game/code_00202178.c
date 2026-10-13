@@ -1299,7 +1299,14 @@ s32 btlInitializeResources(s32 unused, s32 resource) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", btlInitResourcesWrap);
+s32 btlInitResourcesWrap(BtlLinkedCommand *command, BtlCamState *camera, s32 unused) {
+    s32 result = btlInitializeResources((s32)command, (s32)camera);
+    /* Retail 002056C8 uses JAL plus restores. This consumed-camera reset
+     * is the function-owned state exception in CONTRIBUTING: qualified
+     * cc1probe retains it in 01.sibling, then deletes it in a later pass. */
+    camera = NULL;
+    return result;
+}
 
 /* Mode 0x108 uses the same 0x18-byte linked actor payload as the callback
  * below. Its +4 word is the companion-unit pointer in this mode. */
@@ -4204,7 +4211,14 @@ s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_0020B560);
+s32 func_0020B560(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetLinkedDefeatCameraPresetA(command, camera, rotate);
+    /* Retail 0020B568 uses JAL plus restores. This consumed-command reset
+     * is the function-owned state exception in CONTRIBUTING: qualified
+     * cc1probe retains it in 01.sibling, then deletes it in a later pass. */
+    command = NULL;
+    return result;
+}
 
 s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
