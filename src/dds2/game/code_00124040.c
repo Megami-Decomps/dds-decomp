@@ -2034,7 +2034,7 @@ extern u8 fldHasPendingSceneFlags(void);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
-extern void func_00123B88(s32, s32, f32, f32, f32);
+extern void fldMarkStageExplorationCellsAroundPosition(s32, s32, f32, f32, f32);
 
 extern void kwlnFadeStartOut(s32 duration);
 
@@ -2156,7 +2156,7 @@ s32 fldUpdateNextFloorTransition(void) {
         if (fldGetSceneReadyOrPendingState() != 0) {
             return 0;
         }
-        func_00123B88(scene->floor, scene->unkC0, scene->x, scene->z, 50.0f);
+        fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->unkC0, scene->x, scene->z, 50.0f);
         if (scene->sceneMode == 0) {
             if (fldHasPendingSceneFlags() != 0) {
                 return 0;
@@ -2358,7 +2358,7 @@ s32 fldUpdateFieldSceneTask(void) {
         fldFinishDeferredExit();
         if (fldAreaState.transitionMode != 0) {
             func_00150F20();
-            func_00123B88(fldAreaState.floor, fldAreaState.unkC0,
+            fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.unkC0,
                           fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_00389988[0] == 0) {
             fldUpdateCampMenuTransition();

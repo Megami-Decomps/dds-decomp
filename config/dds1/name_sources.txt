@@ -826,6 +826,7 @@
 0x001216F8	fldTestMapSlotValueFlag	inferred	confidence=medium; matched-C; src/dds1/game/code_0011D3A0.c:758:func_001216F8; Reads a bit from the map slot bank written by fldCmdSetSceneBitsValue.; source=revalidated-unapplied-names_R_Names19.tsv:18 [names_qp12_apply.tsv]
 0x00121750	fldActivateFlaggedObject	inferred	Sets the indexed field object activation bit, calls fldActivateObjectById and conditionally dispatches the matching 16-byte activation record.
 0x001217F0	fldTestObjectActivationFlag	inferred	Returns the indexed activation bit from the field work bitset at offset 0x15970.
+0x00121B88	fldMarkStageExplorationCellsAroundPosition	inferred	Marks the valid 3-by-3 neighborhood around a stage position in the field exploration bitset; paired helper is 0x00123B88.
 0x00122030	fldAngleDifference	inferred	adds 360 to negative angles, reduces both mod 360 and returns the shortest signed difference b-a in degrees
 0x00122100	fldSnapAngleToCompassPoint	inferred	Wraps angle and chooses nearest of sixteen compass angles. [names_qp9.tsv]
 0x00122498	fldSnapAngleToCompassOctant	inferred	confidence=high; matched-C; src/dds1/game/code_0011D3A0.c:1032:func_00122498; Normalizes degrees and snaps to nearest of eight compass directions.; twin=0x001244A8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]

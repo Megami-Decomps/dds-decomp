@@ -655,6 +655,7 @@
 0x00123960	fldFindStageCoordinateIndex	inferred	Searches 16-byte stage coordinate records for x/y and returns the zero-based index, or 640 if missing.
 0x001239A8	fldFindStageCoordinateRowOffset	inferred	Scans stage coordinate records and accumulates row counts to return a matching coordinate row offset. [names_reviewed15.tsv]
 0x00123A10	fldFindStageCoordinateRecord	inferred	Searches the first 96 stage coordinate records for x/y and returns their address or null.
+0x00123B88	fldMarkStageExplorationCellsAroundPosition	inferred	Marks the valid 3-by-3 neighborhood around a stage position in the field exploration bitset; paired helper is 0x00121B88.
 0x00124110	fldSnapAngleToCompassPoint	inferred	Wraps angle and chooses nearest of sixteen compass angles; DDS1 twin. [names_qp9.tsv]
 0x001244A8	fldSnapAngleToCompassOctant	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:1203:func_001244A8; Normalizes degrees and snaps to nearest of eight compass directions.; twin=0x00122498, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00124720	fldSnapAngleToCardinalDirection	inferred	Normalizes degrees and returns the nearest cardinal direction. [names_reviewed9.tsv]
