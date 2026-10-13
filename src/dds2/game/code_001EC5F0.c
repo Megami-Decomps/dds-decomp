@@ -30,6 +30,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_field_load_task_args.h"
+#include "file_pac.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
 #include "actor_effect_task.h"
@@ -4062,25 +4063,13 @@ void btlStopRainSoundTransition(void) {
     }
 }
 
-typedef struct BtlFieldArchiveNode {
-    struct BtlFieldArchiveNode *next;
-    u32 unk04;
-    s32 handle;
-    void *data;
-} BtlFieldArchiveNode;
-
-typedef struct BtlFieldArchiveRequest {
-    u8 pad00[0x60];
-    BtlFieldArchiveNode *resources;
-} BtlFieldArchiveRequest;
-
 u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
 {
     BtlState *blocks = (BtlState *)btlGetRuntime();
     char directory[0x80];
     char path[0x80];
-    BtlFieldArchiveNode *node;
+    PacWork *node;
     u32 i;
 
     if (args->frame == 0) {
@@ -4088,28 +4077,28 @@ u32 btlPollFieldArchiveLoad(args)
         fldFormatAreaDirectory(directory, args->stage, 1);
         func_0035C860(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
         btlBossDebugPrintf("btl:field load[%s]\n", path);
-        args->request = (BtlFieldArchiveRequest *)fileQueuePlainDispatchRequest(path);
+        args->request = (struct FilePacRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
         if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
-            BtlFieldArchiveRequest *request = args->request;
-            node = request->resources;
+            FilePacRequest *request = args->request;
+            node = request->packet.queueHead;
             i = 0;
             while (node != NULL) {
                 switch (i) {
                 case 0:
-                    blocks->fieldTBResourceId = node->handle;
-                    args->fieldTB = node->data;
+                    blocks->fieldTBResourceId = (s32)(u32)node->resourceHandle;
+                    args->fieldTB = node->dataCursor;
                     break;
                 case 1:
-                    blocks->fieldF2ResourceId = node->handle;
-                    args->fieldF2 = node->data;
+                    blocks->fieldF2ResourceId = (s32)(u32)node->resourceHandle;
+                    args->fieldF2 = node->dataCursor;
                     break;
                 case 2:
-                    blocks->fieldF1ResourceId = node->handle;
-                    args->fieldF1 = node->data;
+                    blocks->fieldF1ResourceId = (s32)(u32)node->resourceHandle;
+                    args->fieldF1 = node->dataCursor;
                     break;
                 }
                 node = node->next;
