@@ -335,6 +335,7 @@
 0x00111300	ddsDispatchFirstWorldIndexAreas	inferred	src/dds2/game/code_00110FE8.c:func_00111300; Traverses the first owned world-index chain and invokes the area callback for each visited value; returns success. Registration: world-index callback record 0x00329A38. [names_qp9.tsv]
 0x00111330	dds3ExchangeAreaSlot	inferred	Replaces area object slot five and returns success; mirrors DDS1 dds3ExchangeAreaSlot.
 0x00111358	dds3InvokeAreaCallback	inferred	Invokes the nested area callback if present; mirrors DDS1 dds3InvokeAreaCallback.
+0x00111388	dds3SelectOwnerWorldIndexSlot	inferred	src/dds2/game/code_00111388.c func_00111388: Returns slot 1 only for node kind 8; returns slot 0 for other kinds.
 0x001113F0	dds3EnsureWorldNodeInSlot	inferred	src/dds2/game/code_00111388.c func_001113F0: Selects slot by node kind and appends node only if cursor search does not find it. Twin of DDS1 func_001111C8. [names_reviewed24.tsv]
 0x00111480	dds3RemoveObjectFromOwnerWorldIndex	inferred	src/dds2/game/code_00111480.c func_00111480: Selects the owner world-index slot by node kind and removes the matching node entry.
 0x001114D0	dds3GetWorldSlotValue	inferred	Returns the indexed word from the pointer stored in a world object's slot field.
