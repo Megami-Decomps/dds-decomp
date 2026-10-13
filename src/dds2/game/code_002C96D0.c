@@ -354,7 +354,7 @@ extern s8 fileConfigTaskState;
 
 extern s32 mcdFinishFileDetectionWithAudio(void);
 
-extern s32 func_002CAED0(void);
+extern s32 fileResetSlotSelection(void);
 
 extern s32 D_00437D50;
 
@@ -590,7 +590,7 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
     return condition != 0 && D_00437CE4 == 1;
 }
 
-void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
+void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
@@ -1171,7 +1171,7 @@ s32 fileRestartSlotScan(void) {
 
 /* 0x40-byte backing region; the browser uses the first ten slot states. */
 extern u32 fileSlotDisplayStates[16];
-extern s32 func_002CCAD0(void);
+extern s32 fileSlotBrowserUpdate(void);
 
 s32 fileScanSlotStates(void) {
     s32 i;
@@ -1195,7 +1195,7 @@ s32 fileScanSlotStates(void) {
         }
     }
     fileReqBegin(fileMemoryCardRequestIndex);
-    return (s32)func_002CCAD0;
+    return (s32)fileSlotBrowserUpdate;
 }
 
 s32 fileResolveAbortSlotFlow(void) {
@@ -1216,7 +1216,7 @@ s32 fileLoadIconFileAndResetSelection(void) {
     return fileResetSelection();
 }
 
-s32 func_002CAED0(void) {
+s32 fileResetSlotSelection(void) {
     return fileResetSelection();
 }
 
@@ -2130,7 +2130,7 @@ extern void fileLoadSetMode(s8);
 extern void fileSetMenuValueAndInitializeFlags(u32);
 extern void fileCopyRecordHeader(FileSavePreviewRecord *, const void *);
 
-s32 func_002CCAD0(void) {
+s32 fileSlotBrowserUpdate(void) {
     s32 oldSelection = fileSelectedSlotIndex;
     s32 offset;
     s32 selection;
@@ -2726,7 +2726,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     } else if (mode == 1) {
         D_00437D0C = 0;
         D_00437CF4 = 1;
-        fileMenuStateHandler = (s32 (*)())func_002CAED0;
+        fileMenuStateHandler = (s32 (*)())fileResetSlotSelection;
         mcdOriginalTitleFileMode = 0;
     } else if (mode == 2) {
         D_00437CF4 = 1;
@@ -3262,7 +3262,7 @@ s32 fileStartLoadDetectionAfterBranchDialog(void) {
 
 s32 fileRestartSelectionFlow(void) {
     fileResetMenuFlowState();
-    return (s32)func_002CAED0;
+    return (s32)fileResetSlotSelection;
 }
 
 s32 fileBeginLoadConfirmationDialog(void) {
