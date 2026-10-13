@@ -3,6 +3,7 @@
 #include "common.h"
 #include "mnu_list.h"
 #include "dat_state.h"
+#include "dsp_name.h"
 
 extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
 extern s32 mdlFlagTest(s32);
@@ -634,7 +635,6 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
     return 0;
 }
 
-typedef struct DspUnitName { u8 encodedText[17]; } DspUnitName;
 extern DspUnitName *D_00435E48;
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern s32 dspStartEntry(s32);

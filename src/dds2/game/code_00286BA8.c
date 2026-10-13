@@ -429,10 +429,6 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
     evtPrintDeveloperConsoleMessage("mtrMantraEquipRelease\n");
 }
 
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
 extern DspUnitName *D_00435E48;
 extern DspMantraName *D_00435E50;
 extern s8 D_0037F510[];
