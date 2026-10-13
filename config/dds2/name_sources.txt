@@ -4494,6 +4494,7 @@
 0x002A48F0	mnuSlidePathPoint	inferred	interpolates between two points of the D_003E38A0 path (segment from func_002A47E8, lengths via func_002A4770/func_002A4870)
 0x002A49C0	mnuStartRandomMovieMenuPulse	inferred	LeverAudit
 0x002A4A68	mnuDrawMovieMenuPulses	inferred	LeverAudit
+0x002A4B70	mnuDrawAndAdvanceMovieMenuSlidePath	inferred	Draws the movie-menu slide path, starts and renders pulse effects, and advances/wraps pathProgress at 0x1000.
 0x002A4D28	mnuAdvanceSlideBar	inferred	Draws and advances the position of a single active slide bar, clamping its travel.
 0x002A4DF0	mnuTimedSlideBarSetState	inferred	timer>0 stores the request id; otherwise mode 2/3 reset/open like SetState (pos 0x200)
 0x002A4E48	mnuAdvanceTimedSlideBar	inferred	Counts down a slide bar timer, then draws and advances its position.
