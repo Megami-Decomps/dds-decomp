@@ -279,7 +279,7 @@ extern s32 fldMirroredSolarThresholds[];
 
 extern char fldRoomNameSentinel[];
 
-extern s32 func_0035D600(char *, const char *);
+extern char *strstr(const char *, const char *);
 
 extern void fldSetFadeTarget(s32, s32, s32);
 
@@ -744,7 +744,7 @@ s32 fldFindSearchId(const char *name) {
 
 s32 fldParseRoomNumberFromName(char *name) {
     s32 index;
-    if (func_0035D600(name, fldRoomNameSentinel) == 0) return 0;
+    if (strstr(name, fldRoomNameSentinel) == 0) return 0;
     for (index = 0; index < 32; index++) {
         if (name[index] == '\0') {
             if (index < 4) return 0;
