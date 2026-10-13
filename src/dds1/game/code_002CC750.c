@@ -151,7 +151,7 @@ extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
-extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
@@ -172,7 +172,7 @@ void ptyClearProfileRecords(void) {
 }
 
 s8 scrSelectOperandIndex(DatPartyRecord *unit, s32 profileId);
-extern void ptySetProfileFlag1(DatPartyRecord *, u16);
+extern void ptySetSecondaryProfileFlag(DatPartyRecord *, u16);
 u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
 
 /* Pick the highest preset stage whose required profiles all sit at their cap, then apply that stage's script. */
@@ -207,7 +207,7 @@ void ptySelectProfileStage(DatPartyRecord *unit) {
     initialValue = D_00393A80[unitId].scriptChoices[best].initialValue;
     if (scriptId != 0) {
         scrSelectOperandIndex(unit, scriptId);
-        ptySetProfileFlag1(unit, scriptId);
+        ptySetSecondaryProfileFlag(unit, scriptId);
         ptyAddProfilePoints(unit, initialValue);
     }
 }
@@ -241,7 +241,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
                 partyUnit = &datGameState->party[i];
                 occupied = partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT;
                 if (occupied != 0 && profileId != 0) {
-                    if (ptyTestProfileFlag0(partyUnit, profileId) != 0) {
+                    if (ptyTestPrimaryProfileFlag(partyUnit, profileId) != 0) {
                         available = 0;
                     }
                 }
@@ -260,7 +260,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
         if (profileId != 0) {
             selectedProfileId = profileId;
             ptyApplyProfile(unit, selectedProfileId);
-            ptySetProfileFlag1(unit, selectedProfileId);
+            ptySetSecondaryProfileFlag(unit, selectedProfileId);
         }
     }
 }
@@ -522,7 +522,7 @@ extern ScriptFlagSlot D_00393280[];
 
 /* Search the selected 16-entry table for an exact nonzero byte ID.
  * Set and return its global flag ID; return zero if no entry matches. */
-u32 sdfSetFlagBySlotId(DatPartyRecord *unit, u32 slotId) {
+u32 ptySetMappedGlobalFlagForSlot(DatPartyRecord *unit, u32 slotId) {
     ScriptFlagSlot *slotCursor = (ScriptFlagSlot *)((u8 *)D_00393280 + (unit->unitId << SDF_FLAG_SLOT_TABLE_SHIFT));
     u32 slotIndex;
 
@@ -538,7 +538,8 @@ u32 sdfSetFlagBySlotId(DatPartyRecord *unit, u32 slotId) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfile);
 
-s32 ptyTestProfileFlag0(DatPartyRecord *work, u16 id) {
+/* Test the first bit of the decoded profile flag pair for this unit. */
+s32 ptyTestPrimaryProfileFlag(DatPartyRecord *work, u16 id) {
     u32 word;
     u32 shift;
 
@@ -553,7 +554,7 @@ s32 scrCheckStateBits(DatPartyRecord *unit) {
         u16 profileId = profileIndex;
         profileIndex++;
         if ((prfIsRequirementExcluded(profileId) & PRF_REQUIREMENT_EXCLUSION_BIT) == 0 &&
-            !ptyTestProfileFlag0(unit, profileId)) {
+            !ptyTestPrimaryProfileFlag(unit, profileId)) {
             return 0;
         }
     } while (profileIndex < PRF_PROFILE_COUNT);
@@ -561,7 +562,7 @@ s32 scrCheckStateBits(DatPartyRecord *unit) {
 }
 
 /* Mark the second bit of the decoded mantra pair for this unit. */
-void ptySetProfileFlag1(DatPartyRecord *unit, u16 id) {
+void ptySetSecondaryProfileFlag(DatPartyRecord *unit, u16 id) {
     u32 word;
     u32 shift;
 
@@ -570,7 +571,8 @@ void ptySetProfileFlag1(DatPartyRecord *unit, u16 id) {
     datGameState->mantraBits[unit->unitId].words[word] |= 1U << shift;
 }
 
-s32 ptyTestProfileFlag1(DatPartyRecord *work, u16 id) {
+/* Test the second bit of the decoded profile flag pair for this unit. */
+s32 ptyTestSecondaryProfileFlag(DatPartyRecord *work, u16 id) {
     u32 word;
     u32 shift;
 
@@ -607,7 +609,7 @@ s32 ptyGetCurrentProfileId(DatPartyRecord *op) {
 /* Store the narrowed selection, mark its paired profile flag, and return the stored ID. */
 s8 scrSelectOperandIndex(DatPartyRecord *unit, s32 profileId) {
     unit->profileId = profileId;
-    ptySetProfileFlag1(unit, profileId & SCR_FLAG_ID_MASK);
+    ptySetSecondaryProfileFlag(unit, profileId & SCR_FLAG_ID_MASK);
     return unit->profileId;
 }
 
@@ -797,8 +799,8 @@ s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId) {
     return 0;
 }
 
-/* Read a byte parameter from the unchecked profile row. */
-s32 prfGetParamWord7b4(u16 profileId) {
+/* Read the unchecked profile's label-display byte; DDS1 exposes it as a word. */
+s32 prfGetMantraDisplayParameter(u16 profileId) {
     return D_003907B0[profileId].value04;
 }
 
@@ -941,7 +943,7 @@ s32 ptyHasAllReqProfiles(DatPartyRecord *unit, u8 *operand) {
     if (profileCount > 0) {
         u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
         do {
-            if (ptyTestProfileFlag0(unit, profileIds[profileIndex++]) == 0) {
+            if (ptyTestPrimaryProfileFlag(unit, profileIds[profileIndex++]) == 0) {
                 return 0;
             }
         } while (profileIndex < profileCount);
@@ -957,7 +959,7 @@ s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
     if (profileCount > 0) {
         u8 *profileIds = operand + PRF_REQUIRED_PROFILE_IDS_OFFSET;
         do {
-            if (ptyTestProfileFlag0(unit, profileIds[profileIndex++]) != 0) {
+            if (ptyTestPrimaryProfileFlag(unit, profileIds[profileIndex++]) != 0) {
                 matchedCount++;
             }
         } while (profileIndex < profileCount);
@@ -974,7 +976,7 @@ s32 ptyProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
     u32 matchedCount = 0;
 
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
-        if (ptyTestProfileFlag0(unit, (u16)profileIndex)) {
+        if (ptyTestPrimaryProfileFlag(unit, (u16)profileIndex)) {
             if (D_003907B0[profileIndex].value05 >= operand[5]) {
                 matchedCount++;
             }
@@ -999,7 +1001,7 @@ s32 ptyAreReqProfilesInParty(u8 *operand) {
             for (unitIndex = 0; unitIndex < 5; unitIndex++) {
                 DatPartyRecord *partyUnit = &datGameState->party[unitIndex];
                 if ((partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
-                    if (ptyTestProfileFlag0(partyUnit, (u16)profileId) != 0) {
+                    if (ptyTestPrimaryProfileFlag(partyUnit, (u16)profileId) != 0) {
                         profilePresent = 1;
                     }
                 }
@@ -1108,7 +1110,8 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
     return result;
 }
 
-void prfReq54Evaluate(u32 state, u32 operand, u16 requirementId) {
+/* Evaluate rules without mismatch-count output; retain DDS1's existing void form. */
+void prfCheckRequirementRules(u32 state, u32 operand, u16 requirementId) {
     prfReqEvaluateRules(state, operand, requirementId, 0);
 }
 

@@ -165,9 +165,9 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 
-extern s32 func_00316020(DatPartyRecord *, u16);
+extern s32 prfReqCheckWithFallback(DatPartyRecord *, u16);
 
-extern s32 func_00314B00(DatPartyRecord *, u16);
+extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
 
 extern u32 ptyGetProfileRecordCap(u16);
 
@@ -175,7 +175,7 @@ extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
 extern s32 prfReqEvaluateRules(u32, u32, DatPartyRecord *, u16, u32 *);
 
-extern s32 func_00315FA0(u32, DatPartyRecord *, u16);
+extern s32 prfCheckRequirementRules(u32, DatPartyRecord *, u16);
 
 extern s32 func_0028F128(u16, s8);
 
@@ -207,13 +207,13 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
             } else {
                 rankMet = 1;
             }
-            if (func_00316020(unit, node->id) == 0) {
+            if (prfReqCheckWithFallback(unit, node->id) == 0) {
                 goto unavailable;
             } else {
                 if (selected == node->id) {
                     *entry |= 0x400;
                 }
-                if (func_00314B00(unit, node->id)) {
+                if (ptyTestSecondaryProfileFlag(unit, node->id)) {
                     *entry |= 0x200;
                 }
                 if (ptyGetProfileRecordCap(node->id) == ptyGetProfileRecordValue(unit, node->id)) {
@@ -231,7 +231,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                     } else {
                         *entry = (*entry & 0xFFF0) | 1;
                     }
-                } else if (func_00315FA0(0, unit, node->id) != 0 || rankMet) {
+                } else if (prfCheckRequirementRules(0, unit, node->id) != 0 || rankMet) {
                     switch ((s32)(node->packedHeader << 28) >> 28) {
                     case 2:
                         if (evtTestMantraNodePartyRequirements(node->id, mode)) {
@@ -256,7 +256,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                         break;
                     case 1:
                     case 4:
-                        if (func_00315FA0(1, unit, node->id)) {
+                        if (prfCheckRequirementRules(1, unit, node->id)) {
                             *entry = (*entry & 0xFFF0) | 1;
                         } else if (prfReqEvaluateRules(1, 2, unit, node->id, 0)) {
                             *entry = (*entry & 0xFFF0) | 1;

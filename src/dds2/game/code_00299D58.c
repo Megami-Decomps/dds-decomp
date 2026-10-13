@@ -136,7 +136,7 @@ u32 func_00299FE0(void) {
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
-extern s32 func_00314990(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern void func_00314868(DatPartyRecord *, u16);
 
 /* Apply a capped selected profile and record whether the selection was applied. */
@@ -146,7 +146,7 @@ void mnuApplyCompletedProfile(BrsSkillPackageWork *state) {
 
     if (item->profileId != 0 &&
         ptyGetProfileRecordCap(item->profileId) == profile->value &&
-        func_00314990(item, item->profileId) == 0) {
+        ptyTestPrimaryProfileFlag(item, item->profileId) == 0) {
         func_00314868(item, item->profileId);
         state->selectionApplied = 1;
         state->overlayFlags = state->overlayFlags | 1;

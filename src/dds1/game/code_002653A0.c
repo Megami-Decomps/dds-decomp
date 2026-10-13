@@ -278,7 +278,7 @@ s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
 
 
 
-extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern u32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
 extern u32 prfGetCapValue(u16);
 
@@ -304,7 +304,7 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
             profileId = unit->profileId;
             if (profileId != 0 &&
                 prfGetCapValue((u16)profileId) == profile->value &&
-                ptyTestProfileFlag0(unit, (u16)unit->profileId) == 0) {
+                ptyTestPrimaryProfileFlag(unit, (u16)unit->profileId) == 0) {
                 s32 count = batch->count;
                 BrsRewardValues *rowValues =
                     (BrsRewardValues *)(values + count * sizeof(BrsRewardRow));
@@ -422,7 +422,7 @@ u32 ptyBuildProfileCapSkillList(DatPartyRecord *unit, PrfSkillList *output) {
     profile = ptyGetCurrentProfileRecord(unit);
     if (unit->profileId != 0) {
         if (prfGetCapValue(unit->profileId) == profile->value) {
-            if (ptyTestProfileFlag0(unit, unit->profileId) == 0) {
+            if (ptyTestPrimaryProfileFlag(unit, unit->profileId) == 0) {
                 prfBuildSkillListState0(unit, profile, &skills);
                 count = skills.count;
                 if (count != 0) {

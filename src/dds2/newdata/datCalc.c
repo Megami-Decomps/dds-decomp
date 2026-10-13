@@ -1053,7 +1053,7 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 extern void evtCopyRosterTableValue(DatPartyRecord *);
 extern void func_00286618(void);
 extern void func_002866C8(void);
-extern void func_003140C8(s32, DatPartyRecord *);
+extern void ptyRebuildProfileSkills(s32, DatPartyRecord *);
 void ptyAssignRosterItemAndMarkOwned(DatPartyRecord *entry);
 
 /* Clone an entry template and raise it to the maximum occupied party level. */
@@ -1075,7 +1075,7 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
         entry->level = targetLevel;
     }
     entry->totalExp = ptyComputeTotalExp(entry, 0);
-    func_003140C8(0, entry);
+    ptyRebuildProfileSkills(0, entry);
     evtCopyRosterTableValue(entry);
     ptyAssignRosterItemAndMarkOwned(entry);
 }
@@ -1113,7 +1113,7 @@ void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s
         ptyRecomputeMaxHpMp(entry);
     }
     if (!(initFlags & 2)) {
-        func_003140C8(1, entry);
+        ptyRebuildProfileSkills(1, entry);
     }
     func_00286BA8(entry);
     if (entry->itemId != 0) {
@@ -1194,16 +1194,16 @@ void ptyCloneTemplateSevenToRosterUnitThree(DatPartyRecord *entry, s32 initFlags
     memcpy(gameState->profileBanks[3].records, gameState->profileBanks[7].records, sizeof(gameState->profileBanks[3].records));
     func_002866C8();
     if (!(initFlags & 2)) {
-        func_003140C8(1, entry);
+        ptyRebuildProfileSkills(1, entry);
     }
     if (entry->itemId != 0) {
         datGameState->inventory.counts[entry->itemId] = 1;
     }
 }
 
-extern s32 func_00314B00(DatPartyRecord *, u16);
-extern void func_00314A80(DatPartyRecord *, u16);
-extern s32 func_00314990(DatPartyRecord *, u16);
+extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
+extern void ptySetSecondaryProfileFlag(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern void func_00314868(DatPartyRecord *, u16);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 extern void ptySetProfileRecordValue(DatPartyRecord *, u16, u32);
@@ -1243,15 +1243,15 @@ void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
     ptyRecomputeMaxHpMp(entry);
     entry->totalExp = ptyComputeTotalExp(entry, 0);
     for (index = 1; index < 0xB0; index++) {
-        present = func_00314B00(&first, index) != 0;
-        if (func_00314B00(&second, index)) {
+        present = ptyTestSecondaryProfileFlag(&first, index) != 0;
+        if (ptyTestSecondaryProfileFlag(&second, index)) {
             present = 1;
         }
         if (present) {
-            func_00314A80(entry, index);
+            ptySetSecondaryProfileFlag(entry, index);
         }
-        present = func_00314990(&first, index) != 0;
-        if (func_00314990(&second, index)) {
+        present = ptyTestPrimaryProfileFlag(&first, index) != 0;
+        if (ptyTestPrimaryProfileFlag(&second, index)) {
             present = 1;
         }
         if (present) {

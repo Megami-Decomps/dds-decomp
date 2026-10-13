@@ -196,7 +196,7 @@ void mnuFreeTaskData(u32 unused, u32 taskData) {
     }
 }
 
-extern s32 prfReq54Evaluate(s32, ScrVmOperand *, u16);
+extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern u32 mnuGetSelectedNodeValue(void);
@@ -227,7 +227,7 @@ s32 mnuScheduleUnlockedMantraMessages(MenuSceneWork *work) {
 
     for (i = 0; i < 8; i++) {
         if (mdlFlagTest(*flagBase + i) == 0 &&
-            (prfReq54Evaluate(0, (ScrVmOperand *)selection->partyRecord,
+            (prfCheckRequirementRules(0, (ScrVmOperand *)selection->partyRecord,
                               requirementIds[i]) != 0 ||
              (i == 6 && mdlFlagTest(0x908) != 0))) {
             cap = prfGetCapValue(requirementIds[i]);
@@ -403,8 +403,8 @@ extern u16 prfGetRequiredProfileLevel(u16);
 extern u8 prfGetParamWord7b5(u16);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
 extern u32 prfGetCapValue(u16);
-extern s32 ptyTestProfileFlag1(DatPartyRecord *, u16);
-extern s32 prfReq54Evaluate(s32, ScrVmOperand *, u16);
+extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
+extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 extern s32 mdlFlagTest(s32);
 
@@ -428,11 +428,11 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
     prfBuildRawSkillList(entry->sceneId, &entry->skills);
     entry->cap = prfGetCapValue(entry->sceneId);
     entry->frame = 0x3C;
-    entry->profileFlag = ptyTestProfileFlag1(selection->partyRecord, entry->sceneId);
+    entry->profileFlag = ptyTestSecondaryProfileFlag(selection->partyRecord, entry->sceneId);
 
-    if (prfReq54Evaluate(0, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0 ||
+    if (prfCheckRequirementRules(0, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0 ||
         entry->sceneId == 0x4E) {
-        if (prfReq54Evaluate(1, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0) {
+        if (prfCheckRequirementRules(1, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0) {
             entry->state = MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG;
         } else if (entry->profileFlag != 0) {
             entry->state = MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG;

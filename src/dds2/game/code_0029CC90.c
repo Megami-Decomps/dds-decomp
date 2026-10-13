@@ -8,7 +8,7 @@
 extern u32 func_0029D790(DatPartyRecord *, PrfSkillList *);
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
-extern s32 func_00314990(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern s32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
 extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
 extern s32 scrSetFlag(DatPartyRecord *, u16);
@@ -307,7 +307,7 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
             prfBuildSkillListState0(unit, profile, &skills);
             if (unit->profileId != 0 &&
                 ptyGetProfileRecordCap(unit->profileId) == profile->value &&
-                func_00314990(unit, unit->profileId) == 0) {
+                ptyTestPrimaryProfileFlag(unit, unit->profileId) == 0) {
                 s32 count = batch->count;
                 BrsRewardValues *rowValues =
                     (BrsRewardValues *)(values + count * sizeof(BrsRewardRow));
@@ -415,7 +415,7 @@ u32 func_0029D790(DatPartyRecord *entry, PrfSkillList *out) {
 
     memset(&result, 0, 0x34);
     slot = ptyGetCurrentProfileRecord(entry);
-    if (entry->profileId != 0 && ptyGetProfileRecordCap(entry->profileId) == slot->value && func_00314990(entry, entry->profileId) == 0) {
+    if (entry->profileId != 0 && ptyGetProfileRecordCap(entry->profileId) == slot->value && ptyTestPrimaryProfileFlag(entry, entry->profileId) == 0) {
         prfBuildSkillListState0(entry, slot, &result);
         applied = result.count;
         if (applied != 0) {

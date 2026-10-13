@@ -8,7 +8,7 @@ extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
 extern s32 mdlFlagTest(s32);
 extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
 extern s32 scrGetEntryRequirementFlags(u16);
-extern s32 func_00314990(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
@@ -417,7 +417,7 @@ s32 mnuCheckRequiredMantraEntries(DatPartyRecord *unit) {
     for (index = 1; index < 0xb0; index++) {
         u16 id = index;
         if ((scrGetEntryRequirementFlags(id) & 1) == 0 &&
-            func_00314990(unit, id) == 0) {
+            ptyTestPrimaryProfileFlag(unit, id) == 0) {
             return 0;
         }
     }

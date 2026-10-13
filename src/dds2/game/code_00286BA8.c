@@ -84,7 +84,7 @@ extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
-extern s32 func_00316020(DatPartyRecord *, u16);
+extern s32 prfReqCheckWithFallback(DatPartyRecord *, u16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 extern s32 ptyGetProfileRecordCap(u16);
 extern void func_00314868(DatPartyRecord *, u16);
@@ -111,7 +111,7 @@ void func_00286BA8(DatPartyRecord *record) {
     cur = current->flags;
     src = source->flags;
     for (i = 0; i < 176; i++, node++, cur++, src++) {
-        if (node->id != 0 && modelFlagState >= node->modelFlagState && func_00316020(record, node->id) != 0) {
+        if (node->id != 0 && modelFlagState >= node->modelFlagState && prfReqCheckWithFallback(record, node->id) != 0) {
             oldFlags = *cur;
             if ((oldFlags & 0xF) == 3) {
                 if ((*src & 0xF) != 3) {

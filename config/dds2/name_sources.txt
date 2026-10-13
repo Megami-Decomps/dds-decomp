@@ -4130,7 +4130,7 @@
 0x0026DE08	mnuDrawAnimatedMantraValue	inferred	Displays a panel number interpolated over twenty updates and plays a sequence sound on changed frames; the underlying stat is not identified.
 0x0026DF48	mnuDrawOptionalMantraLabel	inferred	Renders formatted text for a nonzero entry ID and distinct art for the empty entry.
 0x0026E060	mnuDrawMantraLabelA	inferred	Draws label 0x4D, then optional 0x55 fallback or func_00311E60 text
-0x0026E198	mnuDrawMantraDigitRow	inferred	Prints the digit count from func_003151D0 and repeats sprite 0x51 with a 0xF stride
+0x0026E198	mnuDrawMantraDigitRow	inferred	Prints the display parameter from prfGetMantraDisplayParameter and repeats sprite 0x51 with a 0xF stride
 0x0026E2D8	mnuDrawMantraCostCounter	inferred	Draws "%d" of func_0026E470(id) or "---" beside the cost sprites
 0x0026E470	mnuGetMantraSourceValue	inferred	Returns value of first active source slot (prefers slot zero), or zero if none is active. [names_reviewed7.tsv]
 0x0026E4C8	mnuMergeMantraSpriteSlots	inferred	Copies nonzero entries into the twelve-entry mantra sprite resource table.
@@ -5942,7 +5942,7 @@
 0x00314690	ptyGetProfileRecordCap	inferred	Returns the profile cap used by the routine that sets a record to its maximum. [names_reviewed13.tsv]
 0x003146B8	ptySetProfileRecordValue	inferred	Writes the selected profile record value. [names_reviewed13.tsv]
 0x00314728	ptyAddProfileRecordValueClamped	inferred	Increments the current profile record without exceeding its script-specific cap. [names_reviewed13.tsv]
-0x003147C8	sdfSetFlagBySlotId	inferred	scans 16 slots for id, mdlFlagSet(flag)
+0x003147C8	ptySetMappedGlobalFlagForSlot	inferred	Corrected module/role name: scan the unit-specific16 ScriptFlagSlot entries for a nonzero matching ID, mdlFlagSet(mapped flag), return its global flag ID or zero. This is not a mantra-bit setter. DDS1 twin0x002CD3B8. [Namer1 batch39, high]
 0x00314838	scrClearProfileFlagsTable	inferred	Clears the profile flag words tested by the indexed profile flag lookup. [names_reviewed13.tsv]
 0x00314A08	prfAreAllRequiredProfileFlagsSet	inferred	Rejects any required profile flag not present in the active profile bitset. [names_reviewed13.tsv]
 0x00314B78	scrGetSelectedScriptEntryId	inferred	Reads the current script ID from the active script flag work. [names_reviewed13.tsv]
@@ -7989,3 +7989,14 @@
 0x00283FA8	mnuDrawMantraDualCyclePanel	inferred	src/dds2/game/code_0026DBF8.c:6079; draws the dual-cycle panel with two orbiting accents.
 0x00284508	mnuUpdateAndDrawMantraSparkleEmitter	inferred	src/dds2/game/code_0026DBF8.c:6176; advances the emitter and spawns and draws active sparkle particles.
 0x00285788	mnuUpdateAndDrawMantraSparkEffect	inferred	src/dds2/game/code_0026DBF8.c:6450; ticks the eight spark particles and prepares their effect surface.
+0x00313C70	ptySelectProfileStage	inferred	Align DDS1 name0x002CC808: choose highest eligible preset script stage, initialize profile, set secondary pair bit and add initial value. DDS2 uses mantra model flag state; DDS1 uses required-profile caps. [Namer1 batch39, high]
+0x003140C8	ptyRebuildProfileSkills	inferred	Align DDS1 name0x002CCCC0: mode0 installs preset skills/pool, recomputes and restores HP/MP; mode1 applies current profile and compacts/marks skill flags. Preserve game-specific branch/eligibility forms. [Namer1 batch39, high]
+0x00314990	ptyTestPrimaryProfileFlag	inferred	prfDecodeFlagPair selects word/base shift; test the lower bit in unit mantraBits. DDS1 twin0x002CD548. No mastery/ownership semantics asserted. [Namer1 batch39, high]
+0x00314A80	ptySetSecondaryProfileFlag	inferred	Set base shift+1 of the decoded profile pair in unit mantraBits; DDS1 twin0x002CD630. [Namer1 batch39, high]
+0x00314B00	ptyTestSecondaryProfileFlag	inferred	Test base shift+1 of the decoded profile pair; menu status and saved-template merging consume this upper bit. DDS1 twin0x002CD6B0. [Namer1 batch39, high]
+0x003151D0	prfGetMantraDisplayParameter	inferred	Read unchecked profile metadata byte value04; mnuDrawMantraDigitRow prints it and repeats sprite0x51. DDS1 twin0x002CDD38 selects styled labels instead and preserves promoted s32 return. [Namer1 batch39, medium]
+0x00315388	prfBuildRawSkillList	inferred	Align DDS1 name0x002CDED0: compact eight nonzero profile skills into zeroed list with cleared flags, optionally copy output, return count. [Namer1 batch39, high]
+0x00315950	prfCheckAdjacentMantraRequirements	inferred	Get mantra node; mode exactly0x40 requires relevant six neighbors' primary flags except kind2, otherwise accept any flagged neighbor lacking selector bit0x100. Existing requirement evaluator consumes this predicate. [Namer1 batch39, high]
+0x00315C40	prfIsMantraCategoryEnabled	inferred	Bounds-check index<17 then test D0045C828; mnuIsResourceCategoryAvailable indexes the same array through the mantra node category selector. [Namer1 batch39, high]
+0x00315FA0	prfCheckRequirementRules	inferred	Dispatch prfReqEvaluateRules with zero extra flags and no mismatch-count output; DDS1 twin0x002CE698 retains its void definition and distinct operand types. [Namer1 batch39, high]
+0x00316020	prfReqCheckWithFallback	inferred	Align DDS1 name0x002CE710: masked requirement ID, rule evaluator with mismatch output, matching fallback group's global flags, existing unknown-ID success. [Namer1 batch39, high]

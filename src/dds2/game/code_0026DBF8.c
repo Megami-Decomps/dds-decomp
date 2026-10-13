@@ -431,7 +431,7 @@ void mnuDrawMantraLabelA(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 draw
     }
 }
 
-extern u8 func_003151D0(u16);
+extern u8 prfGetMantraDisplayParameter(u16);
 
 /* Print the entry's count and draw one repeated marker per count unit. */
 void mnuDrawMantraDigitRow(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 drawArg) {
@@ -442,7 +442,7 @@ void mnuDrawMantraDigitRow(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 d
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x4E, 0, drawArg);
     if (entryId != 0) {
-        count = func_003151D0(entryId);
+        count = prfGetMantraDisplayParameter(entryId);
         if (count != 0) {
             func_0035C860(text, mnuMantraNumberFormat, count);
             frFontDrawTextVariantBAndMeasure(x + 0x82, y + 0x17C, depth, flags, 4, text, 0, drawArg);
