@@ -72,8 +72,10 @@ typedef struct BattleSceneWork {
     s32 step;
     u8 pad254[4];
     u8 unk258;
-    u8 pad259[0x23];
-    s32 mode;
+    u8 pad259[0x17];
+    s32 streamAdjustmentIndex; /* 0x270 */
+    u8 pad274[8];
+    s32 sceneId;               /* 0x27C */
     u8 pad280[8];
     s16 tileX;                 /* 0x288 */
     s16 tileY;                 /* 0x28A */
@@ -105,6 +107,10 @@ typedef char BattleSceneWorkBaseVariantOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->baseVariant == 0x248) ? 1 : -1];
 typedef char BattleSceneWorkStatusModeOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->statusMode == 0x24A) ? 1 : -1];
+typedef char BattleSceneWorkStreamAdjustmentIndexOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->streamAdjustmentIndex == 0x270) ? 1 : -1];
+typedef char BattleSceneWorkSceneIdOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->sceneId == 0x27C) ? 1 : -1];
 typedef char BattleSceneWorkOnUnitCreatedOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->onUnitCreated == 0x5C0) ? 1 : -1];
 typedef char BattleSceneWorkSizeCheck[(sizeof(BattleSceneWork) == 0x5FC) ? 1 : -1];
@@ -147,7 +153,8 @@ u32 func_001C48B0(void) {
 }
 
 void fldBattleSceneEnterInit(u8 *arg0) {
-    u32 id = *(u32 *)(arg0 + 0x27C);
+    BattleSceneWork *work = (BattleSceneWork *)arg0;
+    u32 id = work->sceneId;
     if (id < 0x400 && (datBattleSceneRecords[id].flags & 0x8000) != 0) {
         *(u32 *)(arg0 + 0x1F8) |= 8;
         kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
@@ -158,8 +165,8 @@ void fldBattleSceneEnterInit(u8 *arg0) {
         *(u8 *)(arg0 + 0x24A) = 0;
     }
     btlRequestSceneEventResources();
-    btlInitializeBossCallbacks(*(u32 *)(arg0 + 0x27C));
-    sndStartBattleSceneStream(*(u32 *)(arg0 + 0x270), *(u32 *)(arg0 + 0x27C));
+    btlInitializeBossCallbacks(work->sceneId);
+    sndStartBattleSceneStream(work->streamAdjustmentIndex, work->sceneId);
     VU0_STORE_VF($vf0, arg0);
 }
 
@@ -490,6 +497,7 @@ extern s32 btlIsFadeOutCompleteOrIdle(void);
 extern s32 btlAreWorkBuffersReady(void);
 
 s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
+    BattleSceneWork *work = (BattleSceneWork *)arg0;
     u32 i;
 
     if (btlCountTasksForOwner(0x8000000000000003ULL) == 0 &&
@@ -499,9 +507,9 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         btlResetSceneSlotFades();
         *(u8 *)(arg0 + 0x258) = 0;
         func_001A9780();
-        if (datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01 != 0) {
-            for (i = 0; i < datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk02; i++) {
-                btlAddItemDrop(datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01);
+        if (datBattleSceneRecords[work->sceneId].unk01 != 0) {
+            for (i = 0; i < datBattleSceneRecords[work->sceneId].unk02; i++) {
+                btlAddItemDrop(datBattleSceneRecords[work->sceneId].unk01);
             }
         }
         return 8;
