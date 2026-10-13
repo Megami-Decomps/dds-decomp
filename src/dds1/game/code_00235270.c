@@ -24,9 +24,9 @@
 #include "sdf_texture_file.h"
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
-extern s32 func_00237428();
+extern s32 evtDrawFrameListColumnHeadings();
 
-extern void func_0023D5B0(s32 output, void *data, s32 size);
+extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
 extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
@@ -570,7 +570,7 @@ void evtDrawProjectCommandRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
     }
 }
 
-extern void func_00237130();
+extern void evtDrawEntrySelectionRow();
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
@@ -859,7 +859,7 @@ void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32
     }
 }
 
-void func_00237130(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawEntrySelectionRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char names[33][30] = {
         "STAGE",
         "UNIT",
@@ -930,7 +930,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     s32 count;
     s32 shown;
 
-    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, (u8 *)work, 0, func_00237130);
+    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, (u8 *)work, 0, evtDrawEntrySelectionRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (work->actionMode != 4) {
         return 0;
@@ -951,7 +951,7 @@ extern s8 D_00368750[];
 extern char D_003BC0D0[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 func_00237428(SdfListHead *list, s32 x, s32 y, u8 *data) {
+s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *data) {
     EvtRuntime *ctx = (EvtRuntime *)data;
     s32 type = ctx->frameGroup->type;
     s32 i;
@@ -1022,7 +1022,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE570);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE580);
 
-void func_002375D8(SdfListHead *list, s32 x, s32 y, s32 color,
+void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, EvtRuntime *ctx) {
     char name[32];
     s32 type;
@@ -1337,7 +1337,7 @@ void func_002375D8(SdfListHead *list, s32 x, s32 y, s32 color,
 }
 
 
-extern void func_002375D8(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
+extern void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
 
 /* Draw an indexed child of the selected group, or its trailing new-frame row. */
 s32 evtDrawFrameListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
@@ -1363,7 +1363,7 @@ s32 evtDrawFrameListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *
             color = 0;
         }
         if (node != NULL) {
-            func_002375D8(list, x, y, color, node, ctx);
+            evtDrawFrameListKeyValues(list, x, y, color, node, ctx);
         } else {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
@@ -1388,7 +1388,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
-                 group->childCount + 1, (u8 *)ctx, func_00237428, evtDrawFrameListRow);
+                 group->childCount + 1, (u8 *)ctx, evtDrawFrameListColumnHeadings, evtDrawFrameListRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 5) {
         return 0;
@@ -3560,7 +3560,7 @@ s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
     return D_00368B48[index](x, y, runtime);
 }
 
-void func_0023D5B0(s32 output, void *data, s32 size) {
+void evtWriteSerializedBytes(s32 output, void *data, s32 size) {
     func_0030F190(output, data, size);
 }
 
@@ -3837,7 +3837,7 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     header.kind = 9;
     header.reserved18 = 0;
     header.reserved1C = 0;
-    func_0023D5B0(output, &header, sizeof(header));
+    evtWriteSerializedBytes(output, &header, sizeof(header));
 
     for (i = 0; i < 26; i++) {
         entry.type = i;
@@ -3951,7 +3951,7 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
         if (entry.unk_04 != 0 || entry.value != 0) {
             entry.offset = payloadOffset;
             payloadOffset += (s32)entry.unk_04 * (s32)entry.value;
-            func_0023D5B0(output, &entry, sizeof(entry));
+            evtWriteSerializedBytes(output, &entry, sizeof(entry));
         }
     }
 }
@@ -3969,7 +3969,7 @@ void evtWriteRuntimeHeaderValues(s32 output, EvtRuntime *state) {
     buf[1] = second;
     buf[2] = third;
     buf[3] = metadata;
-    func_0023D5B0(output, buf, 0x10);
+    evtWriteSerializedBytes(output, buf, 0x10);
 }
 
 typedef struct EvtSerializedChild {
@@ -4023,7 +4023,7 @@ void evtViewerWriteChildRecords(s32 output, s32 mode, EvtRuntime *runtime) {
                     }
                 }
             }
-            func_0023D5B0(output, &record, sizeof(record));
+            evtWriteSerializedBytes(output, &record, sizeof(record));
         }
     }
 }
@@ -4038,7 +4038,7 @@ void evtWriteFixedSizeEntries(s32 output, EvtRuntime *table) {
     if (0 < table->entryTotal) {
         entry = table->entryName;
         do {
-            func_0023D5B0(output, entry, 0x20);
+            evtWriteSerializedBytes(output, entry, 0x20);
             index = index + 1;
             entry = (void *)((s32)entry + 0x20);
         } while (index < table->entryTotal);
@@ -4054,7 +4054,7 @@ void evtWriteGroupHeader(s32 output, EvtRuntime *runtime) {
             header[1] = 0;
             header[2] = 0;
             header[3] = 0;
-            func_0023D5B0(output, header, 0x10);
+            evtWriteSerializedBytes(output, header, 0x10);
         }
     }
 }
@@ -4065,7 +4065,7 @@ void evtCopyRuntimeChildPayloadsToBuffer(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xA) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x30);
+                evtWriteSerializedBytes(output, child->payload, 0x30);
             }
         }
     }
@@ -4077,7 +4077,7 @@ void evtEmitGroupTypeElevenPayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xB) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x20);
+                evtWriteSerializedBytes(output, child->payload, 0x20);
             }
         }
     }
@@ -4089,7 +4089,7 @@ void evtEmitGroupTypeThirteenPayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x28);
+                evtWriteSerializedBytes(output, child->payload, 0x28);
             }
         }
     }
@@ -4101,7 +4101,7 @@ void evtEmitGroupTypeFourteenPayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x2C);
+                evtWriteSerializedBytes(output, child->payload, 0x2C);
             }
         }
     }
@@ -4113,7 +4113,7 @@ void evtEmitGroupTypeFifteenPayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x2C);
+                evtWriteSerializedBytes(output, child->payload, 0x2C);
             }
         }
     }
@@ -4125,7 +4125,7 @@ void evtEmitGroupTypeTwentyThreePayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x2C);
+                evtWriteSerializedBytes(output, child->payload, 0x2C);
             }
         }
     }
@@ -4137,7 +4137,7 @@ void evtEmitGroupTypeTwentySevenPayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x28);
+                evtWriteSerializedBytes(output, child->payload, 0x28);
             }
         }
     }
@@ -4149,7 +4149,7 @@ void evtEmitGroupTypeSixteenPayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x18);
+                evtWriteSerializedBytes(output, child->payload, 0x18);
             }
         }
     }
@@ -4161,7 +4161,7 @@ void evtEmitGroupTypeSeventeenPayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x11) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x24);
+                evtWriteSerializedBytes(output, child->payload, 0x24);
             }
         }
     }
@@ -4177,7 +4177,7 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
         *(u16 *)&header[4] = group->metadata.value;
         header[6] = group->metadata.extra1;
         header[7] = group->metadata.extra2;
-        func_0023D5B0(output, header, sizeof(header));
+        evtWriteSerializedBytes(output, header, sizeof(header));
     }
 }
 
@@ -4187,7 +4187,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
         if (group->type == 0x19) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                func_0023D5B0(output, child->payload, 0x40);
+                evtWriteSerializedBytes(output, child->payload, 0x40);
             }
         }
     }

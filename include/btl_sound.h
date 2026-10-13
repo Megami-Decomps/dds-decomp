@@ -4,6 +4,27 @@
 #include "common.h"
 #include "active_sound_node.h"
 
+enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
+
+/* One SYSEFF archive slot. The loader tests enabled, stores the archive data
+ * word from node+0x0C, and retains node+0x08 without interpreting it. */
+typedef struct BattleSoundArchiveEntry {
+    u32 enabled;       /* +0x00: nonzero rows consume one archive node. */
+    u32 archiveData;   /* +0x04: archive data address, kept as a 32-bit word. */
+    u32 opaque08;      /* +0x08: copied archive metadata; role not established. */
+} BattleSoundArchiveEntry;
+
+typedef char BattleSoundArchiveEntry_size_must_be_0x0C[
+    (sizeof(BattleSoundArchiveEntry) == 0x0C) ? 1 : -1];
+typedef char BattleSoundArchiveEntry_enabled_at_0x00[
+    ((u32)&((BattleSoundArchiveEntry *)0)->enabled == 0x00) ? 1 : -1];
+typedef char BattleSoundArchiveEntry_archiveData_at_0x04[
+    ((u32)&((BattleSoundArchiveEntry *)0)->archiveData == 0x04) ? 1 : -1];
+typedef char BattleSoundArchiveEntry_opaque08_at_0x08[
+    ((u32)&((BattleSoundArchiveEntry *)0)->opaque08 == 0x08) ? 1 : -1];
+typedef char BattleSoundArchiveTable_extent_must_be_0x24C[
+    (sizeof(BattleSoundArchiveEntry[BTL_SOUND_ENTRY_COUNT]) == 0x24C) ? 1 : -1];
+
 typedef struct BattleEffect BattleEffect;
 typedef void (*BattleEffectCallback)(BattleEffect *effect);
 

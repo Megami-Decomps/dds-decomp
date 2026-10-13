@@ -47,7 +47,7 @@ typedef struct MovieListNode {
 
 extern MnuMovieList mnuMovieList;
 
-extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
+extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 
 
 extern s32 mnuMovieViewer();
@@ -62,7 +62,7 @@ void mnuRequestIndexedMovieResource(s32 index);
 
 s32 mnuCheckMovieDecoderStatus(void);
 
-s32 func_00270088(void);
+s32 mnuGetMovieDrawState(void);
 
 void mnuStopMovieDrawTask(void);
 
@@ -129,7 +129,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
 u8 func_00270218(void) {
     s64 movieState;
 
-    movieState = func_00270088();
+    movieState = mnuGetMovieDrawState();
     return movieState == 2;
 }
 
@@ -174,7 +174,7 @@ void mnuDrawMovieList(void) {
         return;
     }
     packets = mnuMovieList.packets;
-    sdfAppendPacket(packets, func_0011D3E8(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000, 0x60404040));
+    sdfAppendPacket(packets, sdfCreateBorderedRectanglePacket(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000, 0x60404040));
     selected = mnuMovieList.cursor;
     i = mnuMovieList.top;
     node = mnuMovieList.head;
@@ -200,7 +200,7 @@ void mnuDrawMovieProgressCounter(void) {
     SdfListHead *list;
     if (mnuCheckMovieDecoderStatus() == 0) {
         list = (SdfListHead *)D_003DC570[0];
-        sdfAppendPacket(list, func_0011D3E8(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
+        sdfAppendPacket(list, sdfCreateBorderedRectanglePacket(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
         sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.playbackFrameIndex, (s32)mnuMovieDrawContext.soundNode.cycleLength));
     }
 }
@@ -363,7 +363,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
     }
     mnuCommitPendingMovieDrawValues();
     packets = sdfCreateResetPacketList();
-    sdfAppendPacket(packets, func_0011D3E8(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
+    sdfAppendPacket(packets, sdfCreateBorderedRectanglePacket(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
     sdfCreatePacketA(packets, 0x80A03000, 0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7180, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x79C0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7240, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
     sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, D_003BC650, mnuMovieDrawSources.wordSource));
     if (mnuMovieDrawSources.wordPending != 0) {

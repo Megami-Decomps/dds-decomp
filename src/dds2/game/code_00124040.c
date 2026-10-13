@@ -325,7 +325,8 @@ extern u8 D_0037FF88[];
 
 extern u8 D_003807F8[];
 
-extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+struct SdfMsg;
+extern void sdfStoreMessageWordsAndNotifyConsumer(struct SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord);
 
 typedef struct FldEncEntry {
     s16 stage;
@@ -1788,7 +1789,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void func_00126B70(void) {
-    sdfStoreMessageWordsAndNotifyConsumer(D_003807F8, (s32)D_0037FF88, (s32)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003807F8, (s32)D_0037FF88, (s32)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
 }
 
 enum {

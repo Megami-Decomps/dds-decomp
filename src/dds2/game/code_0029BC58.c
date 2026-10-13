@@ -112,7 +112,7 @@ void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
 #include "kwln.h"
 #include "mnu_result.h"
 struct EffectSlotSet;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain();
 
@@ -284,14 +284,14 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
             glyph = itfCreateConvertedTextGlyph(x, y, z, packed, D_00435E5C[id], 0);
             frFontDrawGlyphChain(glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
-            func_00306C28(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
+            effDrawSpriteWithCornerColors(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
             func_0035C860(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
             glyph = func_0019F6C8(x + 0x900, y, z, packed, name, 0);
             frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)glyph, 3);
             frFontDrawGlyphChain(glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
-            func_00306C28(x + 0x6E0, y + 0x88, 0, valueColor, 0, work->teardownResource, 0x1B, 0x53);
+            effDrawSpriteWithCornerColors(x + 0x6E0, y + 0x88, 0, valueColor, 0, work->teardownResource, 0x1B, 0x53);
             y += 0xB8;
         }
     }
@@ -319,7 +319,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     color[1] = alpha;
     color[2] = alpha;
     color[3] = alpha;
-    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, work->teardownResource, 0x1B, 0x53);
+    effDrawSpriteWithCornerColors(x + 0x180, y + 0x78, 0, color, 0, work->teardownResource, 0x1B, 0x53);
 }
 
 extern s32 mdlFlagTest();
@@ -341,7 +341,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSumm
         color[1] = alpha;
         color[2] = alpha;
         color[3] = alpha;
-        func_00306C28(x + 0x180, y + 0x78, 0, color, 0, work->teardownResource, 0x1B, 0x53);
+        effDrawSpriteWithCornerColors(x + 0x180, y + 0x78, 0, color, 0, work->teardownResource, 0x1B, 0x53);
     }
 }
 

@@ -4,7 +4,7 @@
 #include "evt_solar.h"
 
 extern f32 sdfSinPoly(f32 angle);
-extern void func_00228E20(s32, s32, s32, s32, s32, s32, s32, s32, f32);
+extern void evtDrawSolarNoiseLayerAtCenteredScale(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
 
 typedef struct {
@@ -13,7 +13,7 @@ typedef struct {
     s8 active;  /* 0x06 */
 } SolarLayerTimer;
 
-void func_00228CA0(s32, s32, s32, s32, s32, s32, s32, s32);
+void evtDrawSolarNoiseLayerAtConfiguredScale(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void sdfDrawColoredTriangleFan(s32, s32, s32 *, s32, s32, s32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 D_0036832C[];
@@ -57,7 +57,7 @@ void evtPrepareSolarOverlayTestState(s32 object) {
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, object);
 }
 
-void func_00228CA0(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
+void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
     s32 contextHandle, s32 color) {
     {
         SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
@@ -85,7 +85,7 @@ void func_00228CA0(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
 }
 
 /* Draw a scaled sprite around its center, then restore its native dimensions. */
-void func_00228E20(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
+void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
     s32 contextHandle, s32 color, f32 scale) {
     {
         SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
@@ -175,7 +175,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s3
         }
     }
     evtFinalizeSolarOverlay(t2);
-    func_00228CA0(a0, a1, 0, a3, 0xA, 0x20, t1, t2);
+    evtDrawSolarNoiseLayerAtConfiguredScale(a0, a1, 0, a3, 0xA, 0x20, t1, t2);
     evtPrepareSolarOverlayTestState(t2);
 }
 
@@ -199,15 +199,15 @@ void evtDrawPartialSolarOverlay(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, 
         }
     }
     evtFinalizeSolarOverlay(t2);
-    func_00228CA0(a0, a1, 0, a3, 0x10, 0x20, t1, t2);
+    evtDrawSolarNoiseLayerAtConfiguredScale(a0, a1, 0, a3, 0x10, 0x20, t1, t2);
     evtPrepareSolarOverlayTestState(t2);
 }
 
 /* Draw the selected solar-noise layer; intermediate layers also receive layer 9. */
 void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
-    func_00228CA0(x, y, z, width, layer, 0, context, color);
+    evtDrawSolarNoiseLayerAtConfiguredScale(x, y, z, width, layer, 0, context, color);
     if (layer != 0 && layer != 4 && layer != 8) {
-        func_00228CA0(x, y, z, width, 9, 0, context, color);
+        evtDrawSolarNoiseLayerAtConfiguredScale(x, y, z, width, 9, 0, context, color);
     }
 }
 
@@ -352,7 +352,7 @@ void evtDrawShortSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseStat
             value *= t;
             scale = (f32)layer->scale / 100.0f;
             scale *= t;
-            func_00228E20(layerX, layerY, z, (s32)value, 15, 0, context, color, scale);
+            evtDrawSolarNoiseLayerAtCenteredScale(layerX, layerY, z, (s32)value, 15, 0, context, color, scale);
         }
     }
 }
@@ -377,7 +377,7 @@ void evtDrawLongSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState
             value *= t;
             scale = (f32)layer->scale / 100.0f;
             scale *= t;
-            func_00228E20(layerX, layerY, z, (s32)value, 15, 0, context, color, scale);
+            evtDrawSolarNoiseLayerAtCenteredScale(layerX, layerY, z, (s32)value, 15, 0, context, color, scale);
         }
     }
 }

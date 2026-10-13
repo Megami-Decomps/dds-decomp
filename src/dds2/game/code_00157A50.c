@@ -8,6 +8,7 @@
 #include "eff_node.h"
 #include "file_request_api.h"
 #include "eff_node_descriptor.h"
+#include "eff_bill_resource_init.h"
 
 #include "sdf.h"
 EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
@@ -20,7 +21,7 @@ EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
     return copy;
 }
 
-extern void func_0035B6E0(const char *format, ...);
+extern void sdfDebugPrintf(const char *format, ...);
 
 void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
     u8 *payload = descriptor->payload;
@@ -55,7 +56,7 @@ void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
                 *(f32 *)(payload + 0x10);
         }
         if (type < 2 && descriptor->arg == 0) {
-            func_0035B6E0("effManager:par spiral old version!![%f]\n", descriptor->version);
+            sdfDebugPrintf("effManager:par spiral old version!![%f]\n", descriptor->version);
         }
     }
 }
@@ -73,19 +74,12 @@ typedef struct EffBillResourceArchive {
     EffBillResourceNode *nodes;
 } EffBillResourceArchive;
 
-typedef struct EffBillResourceInit {
-    const char *resourcePath;
-    s16 billboardKind;
-    s16 pad06;
-    f32 scale;
-} EffBillResourceInit;
-
 extern s32 D_00438EFC;
 extern BillObj *effBillResourceOwners[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
-extern void func_0035B6E0(const char *format, ...);
+extern void sdfDebugPrintf(const char *format, ...);
 
 void effInitializeBillResourceOwners(void) {
     EffBillResourceArchive *archive;
@@ -121,7 +115,7 @@ void effInitializeBillResourceOwners(void) {
         } while (node != NULL);
     }
     func_002C7CE8(archive);
-    func_0035B6E0(D_004142C0, D_004142B0);
+    sdfDebugPrintf(D_004142C0, D_004142B0);
 }
 
 void effBillDispatchAll(void) {

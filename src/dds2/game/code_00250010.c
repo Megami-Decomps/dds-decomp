@@ -126,7 +126,7 @@ extern char D_004374F8[]; /* "%3d" */
 extern char D_00437500[]; /* "   CUT" */
 extern char D_00437508[]; /* "%03d" */
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
-extern s32 func_002521C8();
+extern s32 evtDrawFrameListColumnHeadings();
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
 extern void sndEnsureMidiBankResident(s32 sound);
@@ -135,7 +135,7 @@ extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 
 extern void sndStartTrackDefault(s32 track);
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern void sndStartTrackExtended(s32 track);
 
@@ -901,7 +901,7 @@ void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32
 }
 
 /* Draw one event-group row, highlighting the entry under the cursor. */
-void func_00251ED0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawEntrySelectionRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char names[33][30] = {
         "STAGE",
         "UNIT",
@@ -967,7 +967,7 @@ void func_00251ED0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-extern void func_00251ED0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
+extern void evtDrawEntrySelectionRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
 s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     SdfListHead *list;
@@ -975,7 +975,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 shown;
 
     list = sdfCreateResetPacketList();
-    evtDrawMenuFrame(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, func_00251ED0);
+    evtDrawMenuFrame(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, evtDrawEntrySelectionRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 4) {
         return 0;
@@ -996,7 +996,7 @@ extern s8 D_003C9520[];
 extern char D_00437518[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 func_002521C8(SdfListHead *list, s32 x, s32 y, u8 *data) {
+s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *data) {
     EvtRuntime *ctx = (EvtRuntime *)data;
     s32 type = ctx->frameGroup->type;
     s32 i;
@@ -1081,7 +1081,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B60);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B70);
 
-void func_00252378(SdfListHead *list, s32 x, s32 y, s32 color,
+void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, EvtRuntime *ctx) {
     char name[32];
     s32 type;
@@ -1434,7 +1434,7 @@ void func_00252378(SdfListHead *list, s32 x, s32 y, s32 color,
     }
 }
 
-extern void func_00252378(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
+extern void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
 
 /* Draw an indexed child of the selected group, or its trailing new-frame row. */
 s32 evtDrawFrameListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
@@ -1460,7 +1460,7 @@ s32 evtDrawFrameListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *
             color = 0;
         }
         if (node != NULL) {
-            func_00252378(list, x, y, color, node, ctx);
+            evtDrawFrameListKeyValues(list, x, y, color, node, ctx);
         } else {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
@@ -1485,7 +1485,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 39, 21, ctx->frameCursor,
-                 group->childCount + 1, ctx, func_002521C8, evtDrawFrameListRow);
+                 group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, evtDrawFrameListRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 5) {
         return 0;
@@ -4360,16 +4360,16 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     }
 
     if (sdfPfsDebugMode) {
-        func_0035B6E0("hdd -> %s\n", pm2Path);
+        sdfDebugPrintf("hdd -> %s\n", pm2Path);
         pm2 = func_00369B70(pm2Path, 0x602, 0666);
         pm3 = func_00369B70(pm3Path, 0x602, 0666);
     } else {
-        func_0035B6E0("pc -> %s\n", pm2Path);
+        sdfDebugPrintf("pc -> %s\n", pm2Path);
         pm2 = func_00369B70(pm2Path, 0x602);
         pm3 = func_00369B70(pm3Path, 0x602);
     }
     if (pm2 < 0 || pm3 < 0) {
-        func_0035B6E0(D_004377C0);
+        sdfDebugPrintf(D_004377C0);
         return 0;
     }
 
@@ -4391,11 +4391,11 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         case 24: evtEmitGroupTypeTwentySevenPayloads(pm2, runtime); break;
         case 21:
             evtWriteGroupMetadata(pm2, runtime);
-            func_0035B6E0("save object table\n");
+            sdfDebugPrintf("save object table\n");
             break;
         case 25:
             evtEmitGroupTypeTwentyFivePayloads(pm2, runtime);
-            func_0035B6E0("save rain data\n");
+            sdfDebugPrintf("save rain data\n");
             break;
         }
     }
@@ -4408,7 +4408,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         }
     }
     func_00369DF8(pm3);
-    func_0035B6E0("save pm3 file\n");
+    sdfDebugPrintf("save pm3 file\n");
     func_0036BCD0(D_004377C8, 0);
     return 1;
 }
@@ -4466,7 +4466,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
                 }
             }
         }
-        func_0035B6E0("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
+        sdfDebugPrintf("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
         link->extra1 = 0;
         link->extra2 = 0;
     }
@@ -4550,7 +4550,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
     EvtCameraColorPayload *color;
     void *payload;
 
-    func_0035B6E0("start SetGameData\n");
+    sdfDebugPrintf("start SetGameData\n");
     needsBgm = 0;
     if (work->mainEntry2Data != NULL) {
         resourceGroup = ((EvtPmdWorldResource *)work->mainEntry2Data)->area;
@@ -4654,7 +4654,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
             }
         }
     }
-    func_0035B6E0("end pm1 load\n");
+    sdfDebugPrintf("end pm1 load\n");
     header = (EvtPmdRuntimeHeader *)work->subEntry0Data;
     if (header != NULL) {
         runtime->headerThird = header->frameCount;
@@ -4678,7 +4678,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                         evtGetRowVariant(work, row) * 32, runtime);
                     if (key->p08.sb[0] == 7) {
                         nameIndex = ((EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0];
-                        func_0035B6E0("oldtable index=%d string=%s\n", nameIndex,
+                        sdfDebugPrintf("oldtable index=%d string=%s\n", nameIndex,
                             (char *)work->subEntry1Data + ((EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0] * 32);
                         if (((EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0] != -1) {
                             worldObject = dds3GetWorldObject();
@@ -4688,7 +4688,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                                     ((EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0] * 32, runtime);
                             } else {
                                 key->p0C.h[0] = -1;
-                                func_0035B6E0("name not found \n");
+                                sdfDebugPrintf("name not found \n");
                             }
                         }
                     }
@@ -5103,7 +5103,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                 for (component = 2; component >= 0; component--) {
                     color->parameters.z[component] = 0;
                 }
-                func_0035B6E0("modify rain param\n");
+                sdfDebugPrintf("modify rain param\n");
             }
         }
     }
@@ -5190,14 +5190,14 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
         evtPreloadBgm(((EvtPmdWorldResource *)work->mainEntry2Data)->area);
         while (evtIsBgmLoaded(((EvtPmdWorldResource *)work->mainEntry2Data)->area) == 0) {
         }
-        func_0035B6E0("smg file load :eventViewer\n");
+        sdfDebugPrintf("smg file load :eventViewer\n");
     }
     if (title != -1) {
         if (fldTitleIsActive() == 0) {
             fldStartTitle(title, -1, 30);
-            func_0035B6E0("timei file load=%d\n", title);
+            sdfDebugPrintf("timei file load=%d\n", title);
         } else {
-            func_0035B6E0("warning!! timei process doing!!\n");
+            sdfDebugPrintf("warning!! timei process doing!!\n");
         }
     }
     if (mnuCampGetPrimaryOption(runtime) == 0) {
@@ -5208,7 +5208,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
     evtViewerDispatchFlagMode(runtime);
     evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
     evtViewerDispatchFlagMode(runtime);
-    func_0035B6E0("SetGameData PM2 Version = %d Stageno = %d\n",
+    sdfDebugPrintf("SetGameData PM2 Version = %d Stageno = %d\n",
         work->sub->kind, ((EvtPmdWorldResource *)work->mainEntry2Data)->area);
     return 1;
 }
@@ -5309,7 +5309,7 @@ s32 evtPlayBgm(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_0035B6E0("Event BGM play :%08X\n", sound);
+    sdfDebugPrintf("Event BGM play :%08X\n", sound);
     sndStartTrackDefault(sound);
     return sound;
 }
@@ -5325,7 +5325,7 @@ void evtTransitionBgm(s32 id, s32 fade) {
         if (fade >= 0) {
             sound = evtEncodeBgmSoundCode(id, fade);
         }
-        func_0035B6E0(D_004247F8, sound);
+        sdfDebugPrintf(D_004247F8, sound);
         sndTransitionBgm(sound);
     }
 }
@@ -5338,7 +5338,7 @@ s32 evtFadeInBgm(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_0035B6E0("Event BGM fade in play :%08X\n", sound);
+    sdfDebugPrintf("Event BGM fade in play :%08X\n", sound);
     sndStartTrackExtended(sound);
     return sound;
 }

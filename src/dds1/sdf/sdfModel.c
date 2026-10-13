@@ -37,12 +37,12 @@ typedef struct {
 } SdfPacket; /* 0x10 */
 
 
-typedef struct {
+typedef struct SdfMsg {
     s32 firstWord;
     s32 work;
     s32 thirdWord;
     s32 fourthWord;
-} SdfMsg;
+} SdfMsg; /* 0x10 */
 
 extern void effMiscQuaternionToMatrixVU(void);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);

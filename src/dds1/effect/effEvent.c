@@ -243,7 +243,7 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
     return &((EffSegmentedBezierSlot *)table->slots)[index];
 }
 
-extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDrawMarkerBoxAtPoint(f32 *position) {
@@ -262,7 +262,7 @@ void effDrawMarkerBoxAtPoint(f32 *position) {
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, (u32)(func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
+    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
     scene = &kwlnPositionedTextSurface;
     scene->append(scene, (SdfListHead *)list);
 }
@@ -284,7 +284,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, (u32)(func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
+    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
     scene = &kwlnPositionedTextSurface;
     scene->append(scene, (SdfListHead *)list);
 }
@@ -574,7 +574,7 @@ void effSubmitSizedDrawPacket(s32 x, s32 y, s32 width, s32 height, s32 fillColor
     SdfPoolNode *scene;
 
     sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)(func_0011D3E8(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
+    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
     scene = &kwlnPositionedTextSurface;
     scene->append(scene, (SdfListHead *)list);
 }

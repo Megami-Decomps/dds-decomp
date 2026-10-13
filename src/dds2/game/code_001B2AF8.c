@@ -1686,7 +1686,7 @@ void btlUpdateCommandPanelFades(void) {
 
 extern BtlResBlock *btlResourceBlock;
 
-extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 typedef struct BattlePanelColors {
     u32 values[4];
@@ -1714,16 +1714,16 @@ void btlDrawCommandPanelClassLabel(void) {
             colors.values[1] = btlCommandPanelWork->cornerFade[1] | 0x80808000;
             colors.values[2] = btlCommandPanelWork->cornerFade[2] | 0x80808000;
             colors.values[3] = btlCommandPanelWork->cornerFade[3] | 0x80808000;
-            func_00306C28(0x50, 0x968, 0, colors.values, 0, btlResourceBlock->resA, 0x1E, 0x53);
+            effDrawSpriteWithCornerColors(0x50, 0x968, 0, colors.values, 0, btlResourceBlock->resA, 0x1E, 0x53);
             func_001B6180();
             colors.values[0] = btlCommandPanelWork->classFade | 0x80808000;
             colors.values[1] = colors.values[0];
             colors.values[2] = colors.values[0];
             colors.values[3] = colors.values[0];
-            func_00306C28((btlCommandPanelWork->classX + 5) << 4,
+            effDrawSpriteWithCornerColors((btlCommandPanelWork->classX + 5) << 4,
                          (btlCommandPanelWork->classY + 0x12D) << 3,
                          0, colors.values, 0, btlResourceBlock->resA, 0x1A, 0x53);
-            func_00306C28((btlCommandPanelWork->classX + 0x37) << 4,
+            effDrawSpriteWithCornerColors((btlCommandPanelWork->classX + 0x37) << 4,
                          (btlCommandPanelWork->classY + 0x12D) << 3,
                          0, colors.values, 0, btlResourceBlock->resA, 0x1B, 0x53);
             colors.values[0] = btlCommandPanelWork->labelFade | 0x80808000;
@@ -1733,7 +1733,7 @@ void btlDrawCommandPanelClassLabel(void) {
             {
                 s32 x = btlCommandPanelWork->classX + 5;
                 s32 y = btlCommandPanelWork->classY + 0x12D;
-                func_00306C28((x + offsets.values[btlCommandPanelWork->classIndex][0]) << 4,
+                effDrawSpriteWithCornerColors((x + offsets.values[btlCommandPanelWork->classIndex][0]) << 4,
                              (y + offsets.values[btlCommandPanelWork->classIndex][1]) << 3,
                              0, colors.values, 0, btlResourceBlock->resA, (s16)btlCommandPanelWork->labelEntry, 0x53);
             }
@@ -1806,8 +1806,8 @@ void btlDrawMirroredPanelSprites(BtlUnit *unused, BattleMirroredSpriteRecord *re
                 colors.values[1] = color;
                 colors.values[2] = color;
                 colors.values[3] = color;
-                func_00306C28(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
-                func_00306C28(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                effDrawSpriteWithCornerColors(record->x << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
+                effDrawSpriteWithCornerColors(record->secondX << 4, record->y << 3, 0, colors.values, 0, btlResourceBlock->resA, record->slot, 0x53);
                 btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[2] = record->restoredWidth << 4;
                 btlResourceBlock->resA->workEntries[record->slot].geometry.bounds[3] = record->restoredHeight << 3;
             }
@@ -2972,7 +2972,7 @@ void btlDrawPanelIconGroup(s32 section, s32 delta) {
             colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA,
                                                (*strip)[2], j, delta);
         }
-        func_00306C28((*strip)[0] << 4, (*strip)[1] << 3, 0, colors, 0,
+        effDrawSpriteWithCornerColors((*strip)[0] << 4, (*strip)[1] << 3, 0, colors, 0,
                      btlResourceBlock->resA, (*strip)[2], 0x53);
     }
 }
@@ -3293,7 +3293,7 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
         for (j = 0; j < 4; j++) {
             colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA, strip->texture, j, delta);
         }
-        func_00306C28((x + strip->x) << 4, (y + strip->y) << 3,
+        effDrawSpriteWithCornerColors((x + strip->x) << 4, (y + strip->y) << 3,
                      0, colors, 0, btlResourceBlock->resA, strip->texture, 0x53);
     }
 }
@@ -3386,7 +3386,7 @@ void btlDrawCompositePanelSprites(void *unused, s32 x, s32 y, u32 alpha) {
                 break;
             }
         }
-        func_00306C28((x + xOffset) << 4, (y + yOffset) << 3,
+        effDrawSpriteWithCornerColors((x + xOffset) << 4, (y + yOffset) << 3,
                      0, colors, 0, btlResourceBlock->resA, strips[i][2], 0x53);
         btlResourceBlock->resA->workEntries[strips[i][2]].geometry.bounds[2] =
             btlResourceBlock->resA->workEntries[strips[i][2]].sourceWidth << 4;
@@ -3591,33 +3591,33 @@ s32 btlUpdateRegisteredPanelTask(KwlnTask *task) {
             for (i = 0; i < 4; i++) {
                 colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x29, i, work->backdropAlpha);
             }
-            func_00306C28(0x19C0, -0x50, 0, colors, 0, btlResourceBlock->resC, 0x29, 0x53);
+            effDrawSpriteWithCornerColors(0x19C0, -0x50, 0, colors, 0, btlResourceBlock->resC, 0x29, 0x53);
             for (i = 0; i < 4; i++) {
                 colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x28, i, work->backdropAlpha);
             }
-            func_00306C28(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x28, 0x53);
+            effDrawSpriteWithCornerColors(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x28, 0x53);
             if (sprite == 0x26) {
                 for (i = 0; i < 4; i++) {
                     colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x28, i, work->backdropAlpha);
                 }
-                func_00306C28(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x3A, 0x53);
+                effDrawSpriteWithCornerColors(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x3A, 0x53);
                 for (i = 0; i < 4; i++) {
                     colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x3D, i, work->backdropAlpha);
                 }
                 btlResourceBlock->resC->workEntries[0x3D].geometry.angleDegrees = 90.0f;
-                func_00306C28(0x1CB0, 0x70, 0, colors, 0, btlResourceBlock->resC, 0x3D, 0x53);
+                effDrawSpriteWithCornerColors(0x1CB0, 0x70, 0, colors, 0, btlResourceBlock->resC, 0x3D, 0x53);
                 btlResourceBlock->resC->workEntries[0x3D].geometry.angleDegrees = 0.0f;
             }
             for (i = 0; i < 4; i++) {
                 colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, sprite, i, work->spriteAlpha);
             }
-            func_00306C28((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
+            effDrawSpriteWithCornerColors((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
                          0, colors, 0, btlResourceBlock->resC, sprite, 0x53);
             if (work->mode == 4 || sprite == 0x26) {
                 for (i = 0; i < 4; i++) {
                     colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, sprite, i, work->overlayAlpha);
                 }
-                func_00306C28((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
+                effDrawSpriteWithCornerColors((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
                              0, colors, 0, btlResourceBlock->resC, 0x3B, 0x53);
             }
         }
@@ -3925,20 +3925,20 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
         btlResourceBlock->resC->workEntries[0x17].geometry.bounds[3] =
             (btlResourceBlock->resC->workEntries[0x17].sourceHeight << 3) - (work->verticalShift << 4);
     }
-    func_00306C28(work->initial[1].x << 4, (work->initial[1].y + work->verticalShift) << 3,
+    effDrawSpriteWithCornerColors(work->initial[1].x << 4, (work->initial[1].y + work->verticalShift) << 3,
                   0, colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
     colors.values[0] = work->fadeLevels[1] | 0x80808000;
     colors.values[1] = work->fadeLevels[0] | 0x80808000;
     colors.values[2] = work->fadeLevels[3] | 0x80808000;
     colors.values[3] = work->fadeLevels[2] | 0x80808000;
-    func_00306C28(work->initial[0].x << 4, (work->initial[0].y + work->verticalShift) << 3,
+    effDrawSpriteWithCornerColors(work->initial[0].x << 4, (work->initial[0].y + work->verticalShift) << 3,
                   0, colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
     colors.values[0] = work->fadeLevels[2] | 0x80808000;
     colors.values[1] = work->fadeLevels[3] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
     colors.values[3] = work->fadeLevels[0] | 0x80808000;
     btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = width << 4;
-    func_00306C28((0x100 - width / 2) << 4, (work->initial[1].y + work->verticalShift) << 3,
+    effDrawSpriteWithCornerColors((0x100 - width / 2) << 4, (work->initial[1].y + work->verticalShift) << 3,
                   0, colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
     btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
@@ -4046,14 +4046,14 @@ s32 btlDrawTimedDialogTask(KwlnTask *task) {
         colors.values[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x15, i, data->fade);
     }
     half = width / 32;
-    func_00306C28(((width >> 4) - half + 0x105) << 4, 0x200, 0,
+    effDrawSpriteWithCornerColors(((width >> 4) - half + 0x105) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x17, 0x53);
     btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = (width >> 4) << 4;
-    func_00306C28((0x100 - half) << 4, 0x200, 0,
+    effDrawSpriteWithCornerColors((0x100 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x16, 0x53);
     btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
-    func_00306C28((0x92 - half) << 4, 0x200, 0,
+    effDrawSpriteWithCornerColors((0x92 - half) << 4, 0x200, 0,
                   colors.values, 0, btlResourceBlock->resC, 0x15, 0x53);
     if (expired) {
         return -1;
@@ -4993,7 +4993,7 @@ void btlDrawReservePanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s
         colors.values[1] = color;
         colors.values[2] = color;
         colors.values[3] = color;
-        func_00306C28(
+        effDrawSpriteWithCornerColors(
             (x + work->reserveEntries[index].presentation.transitionGeometry[0] + xOffset) << 4,
             (y + work->reserveEntries[index].presentation.transitionGeometry[1] - yOffset) << 3,
             0, colors.values, 0, btlResourceBlock->resA, 9, 0x53);
@@ -5011,7 +5011,7 @@ void btlDrawReservePanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s
         colors.values[1] = color;
         colors.values[2] = color;
         colors.values[3] = color;
-        func_00306C28(
+        effDrawSpriteWithCornerColors(
             (x + work->reserveEntries[index].presentation.transitionGeometry[2] - xOffset) << 4,
             (y + work->reserveEntries[index].presentation.transitionGeometry[3] + yOffset) << 3,
             0, colors.values, 0, btlResourceBlock->resA, 12, 0x53);
@@ -5083,7 +5083,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
                 colors.values[1] = tint;
                 colors.values[2] = tint;
                 colors.values[3] = tint;
-                func_00306C28((work->reserveEntries[i].position[0] + 0x22) << 4, (work->reserveEntries[i].position[1] + 0x46) << 3,
+                effDrawSpriteWithCornerColors((work->reserveEntries[i].position[0] + 0x22) << 4, (work->reserveEntries[i].position[1] + 0x46) << 3,
                               0, colors.values, 0, btlResourceBlock->resA, 0xE, 0x53);
             }
 
@@ -5421,7 +5421,7 @@ void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWor
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C3EC0);
 
 extern BtlResBlock *btlResourceBlock;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern const BattlePanelColors D_00416870;
 
 /* Draw the active row's selected cursor sprite at its stored cursor offset. */
@@ -5438,7 +5438,7 @@ void btlDrawActorPanelCursor(BtlUnit *unusedUnit, BattleActorPanelWork *work, s3
         for (i = 3; i >= 0; i--) {
             colors.values[i] = color;
         }
-        func_00306C28((x + work->activeEntries[slot].presentation.cursorOffset[0]) << 4,
+        effDrawSpriteWithCornerColors((x + work->activeEntries[slot].presentation.cursorOffset[0]) << 4,
                       (y + work->activeEntries[slot].presentation.cursorOffset[1]) << 3, 0,
                       colors.values, 0, btlResourceBlock->resA, work->activeEntries[slot].presentation.cursorOption,
                       0x53);
@@ -5648,7 +5648,7 @@ void btlDrawActorPanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32
                 colors.values[1] = color;
                 colors.values[2] = color;
                 colors.values[3] = color;
-                func_00306C28((x + work->activeEntries[slot].presentation.transitionGeometry[0] + offsetX) << 4,
+                effDrawSpriteWithCornerColors((x + work->activeEntries[slot].presentation.transitionGeometry[0] + offsetX) << 4,
                               (y + work->activeEntries[slot].presentation.transitionGeometry[1] - offsetY) << 3, 0,
                               colors.values, 0, btlResourceBlock->resA, 9, 0x53);
                 if (n > 0) {
@@ -5663,7 +5663,7 @@ void btlDrawActorPanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32
                 colors.values[1] = color;
                 colors.values[2] = color;
                 colors.values[3] = color;
-                func_00306C28((x + work->activeEntries[slot].presentation.transitionGeometry[2] - offsetX) << 4,
+                effDrawSpriteWithCornerColors((x + work->activeEntries[slot].presentation.transitionGeometry[2] - offsetX) << 4,
                               (y + work->activeEntries[slot].presentation.transitionGeometry[3] + offsetY) << 3, 0,
                               colors.values, 0, btlResourceBlock->resA, 0xC, 0x53);
             }
@@ -5909,7 +5909,7 @@ void btlDrawActorPanelSecondaryPulse(BtlUnit *unusedUnit, BattleActorPanelWork *
                 colors.values[1] = color;
                 colors.values[2] = color;
                 colors.values[3] = color;
-                func_00306C28((x + work->activeEntries[slot].presentation.secondaryGeometry[0] + offsetX) << 4,
+                effDrawSpriteWithCornerColors((x + work->activeEntries[slot].presentation.secondaryGeometry[0] + offsetX) << 4,
                               (y + work->activeEntries[slot].presentation.secondaryGeometry[1] - offsetY) << 3, 0,
                               colors.values, 0, btlResourceBlock->resA, 9, 0x53);
                 if (n > 0) {
@@ -5924,7 +5924,7 @@ void btlDrawActorPanelSecondaryPulse(BtlUnit *unusedUnit, BattleActorPanelWork *
                 colors.values[1] = color;
                 colors.values[2] = color;
                 colors.values[3] = color;
-                func_00306C28((x + work->activeEntries[slot].presentation.secondaryGeometry[2] - offsetX) << 4,
+                effDrawSpriteWithCornerColors((x + work->activeEntries[slot].presentation.secondaryGeometry[2] - offsetX) << 4,
                               (y + work->activeEntries[slot].presentation.secondaryGeometry[3] + offsetY) << 3, 0,
                               colors.values, 0, btlResourceBlock->resA, 0xC, 0x53);
             }
@@ -6039,7 +6039,7 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
         colors.values[i] = (colors.values[i] & 0xFFFFFF00) | pulse->alpha;
     }
     if (!(unit->status.flags & 0x20) && value != 0.0f && !(unit->partyRecord.status & 0x4800)) {
-        func_00306C28((x + xOffset + pulse->progress) << 4,
+        effDrawSpriteWithCornerColors((x + xOffset + pulse->progress) << 4,
                      (y + yOffset + pulse->yOffset) << 3, 0, colors.values,
                      0, btlResourceBlock->resA, sprite, 0x53);
     }
@@ -6353,7 +6353,7 @@ s32 btlUpdateCommandUiTransition(void) {
 }
 
 extern BtlResBlock *btlResourceBlock;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 extern void func_001CE418(EffectSlotSet *, s32, s32 *, s32 *, f32);
 
 extern SceneSlotFadeWork *D_00438F54;
@@ -6762,7 +6762,7 @@ void btlDrawItemCommandRows(BattleSceneObject *object) {
         colors.values[1] = color;
         colors.values[2] = color;
         colors.values[3] = color;
-        func_00306C28(0x900, countY << 3, 0, colors.values, 0,
+        effDrawSpriteWithCornerColors(0x900, countY << 3, 0, colors.values, 0,
                      btlResourceBlock->resA, 5, 0x53);
         itfSetTextDrawLimit(0x13);
         func_0035C860(text, D_004368A0, D_003B5B10[index * 2 + 1]);
@@ -7772,12 +7772,12 @@ void btlDrawCenteredPanelSegments(s32 width) {
     u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 half = width / 2;
     s32 x = width - half + 0x105;
-    func_00306C28(x * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x17, 0x53);
+    effDrawSpriteWithCornerColors(x * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x17, 0x53);
     btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] = width << 4;
-    func_00306C28((0x100 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x16, 0x53);
+    effDrawSpriteWithCornerColors((0x100 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x16, 0x53);
     btlResourceBlock->resC->workEntries[0x16].geometry.bounds[2] =
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
-    func_00306C28((0x92 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x15, 0x53);
+    effDrawSpriteWithCornerColors((0x92 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x15, 0x53);
 }
 
 extern s32 btlGetEffectActive();
@@ -8179,7 +8179,7 @@ void btlDrawActorSlotOrder(void) {
             func_001CE418(btlResourceBlock->resC, coordinates[index][2],
                           &xOffset, &yOffset,
                           (f32)D_00438F58[bank]->unk8C[index]);
-            func_00306C28((coordinates[index][0] + xOffset) << 4,
+            effDrawSpriteWithCornerColors((coordinates[index][0] + xOffset) << 4,
                           (coordinates[index][1] + yOffset) << 3,
                           0, colors, 0, btlResourceBlock->resC,
                           coordinates[index][2], 0x53);
@@ -8195,7 +8195,7 @@ void btlDrawActorSlotOrder(void) {
                         channel,
                         D_00438F58[bank]->slotFade[index] >> 1);
                 }
-                func_00306C28(coordinates[index][0] << 4,
+                effDrawSpriteWithCornerColors(coordinates[index][0] << 4,
                               coordinates[index][1] << 3,
                               0, colors, 0, btlResourceBlock->resC,
                               D_00438F58[bank]->entries[index], 0x53);
@@ -8219,7 +8219,7 @@ void btlDrawActorSlotOrder(void) {
                     btlResourceBlock->resC, coordinates[index][2],
                     channel, D_00438F58[bank]->slotFade[index]);
             }
-            func_00306C28(coordinates[index][0] << 4,
+            effDrawSpriteWithCornerColors(coordinates[index][0] << 4,
                           coordinates[index][1] << 3,
                           0, colors, 0, btlResourceBlock->resC,
                           coordinates[index][2], 0x53);
@@ -8408,7 +8408,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(425 << 4, 21 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(425 << 4, 21 << 3, 0, colors, 0,
             btlResourceBlock->resC, 16, 0x53);
         }
         if (last >= 2) {
@@ -8419,7 +8419,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(392 << 4, 33 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(392 << 4, 33 << 3, 0, colors, 0,
             btlResourceBlock->resC, 17, 0x53);
         }
         if (last >= 3) {
@@ -8430,7 +8430,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(425 << 4, 21 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(425 << 4, 21 << 3, 0, colors, 0,
             btlResourceBlock->resC, 18, 0x53);
             for (channel = 0; channel < 4; channel++) {
                 colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 19, channel,
@@ -8439,7 +8439,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(349 << 4, 21 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(349 << 4, 21 << 3, 0, colors, 0,
             btlResourceBlock->resC, 19, 0x53);
         }
         if (last >= 4) {
@@ -8450,7 +8450,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(298 << 4, 21 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(298 << 4, 21 << 3, 0, colors, 0,
             btlResourceBlock->resC, 20, 0x53);
         }
         if (last >= 7) {
@@ -8461,7 +8461,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(206 << 4, 33 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(206 << 4, 33 << 3, 0, colors, 0,
             btlResourceBlock->resC, 17, 0x53);
         }
 
@@ -8480,7 +8480,7 @@ void btlDrawSceneSlotFades(void) {
                 colors[channel] |= overlays[bank];
             }
         }
-        func_00306C28(440 << 4, 6 << 3, 0, colors, 0,
+        effDrawSpriteWithCornerColors(440 << 4, 6 << 3, 0, colors, 0,
         btlResourceBlock->resC, 10, 0x53);
         if (last >= 3) {
             for (channel = 0; channel < 4; channel++) {
@@ -8494,7 +8494,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(395 << 4, 21 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(395 << 4, 21 << 3, 0, colors, 0,
             btlResourceBlock->resC, 11, 0x53);
             for (channel = 0; channel < 4; channel++) {
                 if (channel == 0 || channel == 2) {
@@ -8507,7 +8507,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(362 << 4, 21 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(362 << 4, 21 << 3, 0, colors, 0,
             btlResourceBlock->resC, 12, 0x53);
         }
         if (last == 5) {
@@ -8518,7 +8518,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(302 << 4, 46 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(302 << 4, 46 << 3, 0, colors, 0,
             btlResourceBlock->resC, 13, 0x53);
         }
         if (last >= 6) {
@@ -8533,7 +8533,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(302 << 4, 48 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(302 << 4, 48 << 3, 0, colors, 0,
             btlResourceBlock->resC, 14, 0x53);
             for (channel = 0; channel < 4; channel++) {
                 if (channel == 0 || channel == 2) {
@@ -8546,7 +8546,7 @@ void btlDrawSceneSlotFades(void) {
                     colors[channel] |= overlays[bank];
                 }
             }
-            func_00306C28(269 << 4, 48 << 3, 0, colors, 0,
+            effDrawSpriteWithCornerColors(269 << 4, 48 << 3, 0, colors, 0,
             btlResourceBlock->resC, 15, 0x53);
         }
     }
@@ -8590,7 +8590,7 @@ void btlDrawSceneSlotFadeTiles(void) {
                 colors[channel] |= overlays[D_00438F54->bank];
             }
         }
-        func_00306C28(rows[row][0] << 4, rows[row][1] << 3, 0, colors,
+        effDrawSpriteWithCornerColors(rows[row][0] << 4, rows[row][1] << 3, 0, colors,
                       0, btlResourceBlock->resC, rows[row][2], 0x53);
     }
     if (last >= 0) {
@@ -8602,7 +8602,7 @@ void btlDrawSceneSlotFadeTiles(void) {
                 colors[channel] |= overlays[D_00438F54->bank];
             }
         }
-        func_00306C28(finalRows[last][0] << 4, finalRows[last][1] << 3,
+        effDrawSpriteWithCornerColors(finalRows[last][0] << 4, finalRows[last][1] << 3,
                       0, colors, 0, btlResourceBlock->resC, finalRows[last][2], 0x53);
     }
 }

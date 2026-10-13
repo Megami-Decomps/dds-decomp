@@ -22,6 +22,7 @@
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
 #include "sdf_lookup_texture.h"
+#include "sdf_dev_console_node.h"
 
 #define SDF_PAD_ENTRY_COUNT 2
 
@@ -114,23 +115,6 @@ extern u32 D_003BD374;
 extern u32 D_003BDA2C;
 
 extern u32 D_003BDA28;
-
-typedef struct ConsNode {
-    /* 0x00 */ struct ConsNode *next;
-    /* 0x04 */ struct ConsNode *prev;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 unkA;
-    /* 0x0C */ s16 columns;
-    /* 0x0E */ s16 rows;
-    /* 0x10 */ u16 cursorColumn;
-    /* 0x12 */ u16 cursorRow;
-    /* 0x14 */ u8 controlByte;
-    /* 0x15 */ u8 pad15;
-    /* 0x16 */ u8 textAttribute;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u32 bufferHandle;
-    /* 0x1C */ u8 *cells;
-} ConsNode;
 
 /* Logical pad entries, sdfPadPorts[2] (0x28 bytes each). */
 typedef struct F9B00Entry {
@@ -1430,11 +1414,11 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
 
     sdfDevConsInit();
     node = sdfAllocSizeClassBlock(SDF_CONSOLE_NODE_BYTES);
-    node->unk8 = first;
-    node->unkA = second;
+    node->opaque08[0] = first;
+    node->opaque08[1] = second;
     node->columns = columns;
     node->rows = rows;
-    node->unk17 = 8;
+    node->opaque17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
     bufferHandle = (u32)sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);

@@ -7,6 +7,7 @@
 #include "sdf_texture_submit.h"
 #include "sdf_texture_registry.h"
 #include "sdf_tex_lifetime.h"
+#include "sdf_tex_create.h"
 #include "sdf_tex_packet.h"
 #include "sdf_pending.h"
 #include "ee_mmi.h"
@@ -165,8 +166,6 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
                      texture->clampMode, 1);
     }
 }
-
-extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
 
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     SdfTex *texture;

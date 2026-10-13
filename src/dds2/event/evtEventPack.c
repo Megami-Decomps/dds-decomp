@@ -30,7 +30,7 @@ extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
 
 extern s32 D_004377D8;
-extern s32 func_0035B6E0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 
@@ -57,7 +57,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 case 5:
                     entrySize = entry->dataSize;
                     payload = data->data + entry->dataOffset;
-                    func_0035B6E0(D_00424830, resourceId, entrySize);
+                    sdfDebugPrintf(D_00424830, resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
                     case 0x2AC:
@@ -74,7 +74,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                     if (D_004377D8 >= 0x7D0) {
                         D_004377D8 = 0x3E8;
                     }
-                    func_0035B6E0(D_00424850, D_004377D8, entrySize);
+                    sdfDebugPrintf(D_00424850, D_004377D8, entrySize);
                     return unitKey;
                 }
             }
@@ -174,7 +174,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
             for (cueIndex = 0; cueIndex < data->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == frame) {
                     evtSetBgmVolumePan(params->eventTaskId, cues[cueIndex].fade);
-                    func_0035B6E0("EVE_SE motno = %d, frame = %d\n", motionId, frame);
+                    sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, frame);
                 }
             }
         }
@@ -218,7 +218,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 directoryId;
     struct FileRequest *request;
 
-    func_0035B6E0(D_004377E0);
+    sdfDebugPrintf(D_004377E0);
     eventId = state->eventId;
     directoryId = eventId - eventId % 10;
     func_0035C860(D_00453C50, D_004248A0, directoryId, eventId, eventId);
@@ -257,7 +257,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             }
         }
     } else {
-        func_0035B6E0(D_004377E8);
+        sdfDebugPrintf(D_004377E8);
         state->loaded = EVT_PACK_LOAD_COMPLETE;
     }
 }

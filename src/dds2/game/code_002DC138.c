@@ -12,6 +12,7 @@
 #include "sdf.h"
 #include "sdf_texture_submit.h"
 #include "sdf_texture_file.h"
+#include "sdf_tex_create.h"
 #include "sdf_chunk.h"
 #include "eff_expanded_list.h"
 #include "eff_update_flags.h"
@@ -41,7 +42,7 @@ extern EffModelOwner *effCreateModelOwner(void *);
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern struct SdfPoolNode *D_00380828[4];
 
@@ -384,7 +385,7 @@ void effFloorModelListPush(EffModelOwner *obj) {
 
 void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->object != NULL) {
-        func_0035B6E0("eff:floor model delete[%p]\n", node->object);
+        sdfDebugPrintf("eff:floor model delete[%p]\n", node->object);
         effDestroyModelOwner(node->object);
         node->object = NULL;
     }
@@ -684,7 +685,6 @@ void effObjectListCountersReset(void) {
 }
 
 extern s32 sdfFormatImageSize(u32 format, s32 width, s32 height);
-extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
 RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {

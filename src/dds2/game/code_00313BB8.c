@@ -16,6 +16,7 @@ extern void memset();
 #include "itf.h"
 #include "dat_state.h"
 #include "mnu_mantra.h"
+#include "prf_profile_cap.h"
 
 extern void mdlFlagSet(s32);
 
@@ -66,8 +67,6 @@ extern void mdlFlagSet(s32);
 
 extern DspMantraName *D_00435E50;
 
-
-extern u32 ptyGetProfileRecordCap(u16);
 
 extern DatProfileRecord *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 

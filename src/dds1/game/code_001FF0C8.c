@@ -58,7 +58,7 @@ extern s32 btlHasAvailableOption(void);
 
 extern s32 btlMatchesActorEntryCodeCondition();
 
-extern s32 func_002007A8(BtlUnit *, s32, s8);
+extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
 extern s32 btlIsSelectedActorStatusAndRecordClear();
 
@@ -603,7 +603,7 @@ s32 btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex)
 
 extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 
-s32 func_002007A8(BtlUnit *unit, s32 conditionIndex, s8 inverse) {
+s32 btlUnitMatchesEntryCodeCondition(BtlUnit *unit, s32 conditionIndex, s8 inverse) {
     s32 index;
     s16 result;
 
@@ -701,7 +701,7 @@ s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
 u8 btlCheckUnitActionModeZero(u32 unitAddress, u32 actionQuery) {
     s32 queryResult;
 
-    queryResult = func_002007A8((BtlUnit *)unitAddress, (s32)actionQuery, 0);
+    queryResult = btlUnitMatchesEntryCodeCondition((BtlUnit *)unitAddress, (s32)actionQuery, 0);
     return queryResult != 0;
 }
 
@@ -709,7 +709,7 @@ u8 btlCheckUnitActionModeZero(u32 unitAddress, u32 actionQuery) {
 u8 btlCheckUnitActionModeOne(u32 unitAddress, u32 actionQuery) {
     s32 queryResult;
 
-    queryResult = func_002007A8((BtlUnit *)unitAddress, (s32)actionQuery, 1);
+    queryResult = btlUnitMatchesEntryCodeCondition((BtlUnit *)unitAddress, (s32)actionQuery, 1);
     return queryResult != 0;
 }
 
@@ -718,7 +718,7 @@ s32 btlAnyPartyPassesEntryCheck(s32 unused, u32 actionQuery) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (func_002007A8(unitCursor, actionQuery, 0) != 0) {
+            if (btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0) != 0) {
                 return 1;
             }
         }
@@ -732,7 +732,7 @@ s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, u32 actionQuery) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (func_002007A8(unitCursor, actionQuery, 1) != 0) {
+            if (btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 1) != 0) {
                 return 1;
             }
         }
@@ -746,7 +746,7 @@ s32 btlAnyEnemyPassesEntryCheck(s32 unused, u32 actionQuery) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
-            if (func_002007A8(unitCursor, actionQuery, 0) != 0) {
+            if (btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0) != 0) {
                 return 1;
             }
         }
@@ -760,7 +760,7 @@ s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, u32 actionQuery) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
-            if (func_002007A8(unitCursor, actionQuery, 1) != 0) {
+            if (btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 1) != 0) {
                 return 1;
             }
         }
@@ -774,7 +774,7 @@ s32 btlAnyPartyFailsEntryCheck(s32 unused, u32 actionQuery) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (func_002007A8(unitCursor, actionQuery, 0) == 0) {
+            if (btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0) == 0) {
                 return 1;
             }
         }
@@ -788,7 +788,7 @@ s32 btlAnyEnemyFailsEntryCheck(s32 unused, u32 actionQuery) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
-            if (func_002007A8(unitCursor, actionQuery, 0) == 0) {
+            if (btlUnitMatchesEntryCodeCondition(unitCursor, actionQuery, 0) == 0) {
                 return 1;
             }
         }

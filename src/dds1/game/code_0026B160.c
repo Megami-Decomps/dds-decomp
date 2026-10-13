@@ -54,7 +54,7 @@ extern void mnuDrawMovieMenuSpriteSlot17(s32 volume);
 extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void mnuRequestIndexedMovieResource(s32 index);
-extern s32 func_00270088(void);
+extern s32 mnuGetMovieDrawState(void);
 extern s32 mnuCheckMovieDecoderStatus(void);
 extern void sdfSoundSetChannelCount(u32 channelCount);
 extern void mnuRequestDefaultMovieResource(void);
@@ -251,7 +251,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 15:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        if (func_00270088() != 0) {
+        if (mnuGetMovieDrawState() != 0) {
             mnuMovieMenuState->state = 0x10;
         }
         break;
@@ -291,7 +291,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 19:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        if (func_00270088() != 0) {
+        if (mnuGetMovieDrawState() != 0) {
             mnuMovieMenuState->state = 0x14;
         }
         break;

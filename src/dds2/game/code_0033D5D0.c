@@ -167,7 +167,7 @@ extern u8 D_00438B68;
 
 extern s32 func_0036D880(const char *, s32, void *, s32 *);
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
 
@@ -1836,11 +1836,11 @@ void sdfLoadDevModule(void) {
     if (sdfDevModuleLoaded == 0) {
         D_00438B68 = 0;
         if (func_0036D880("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
-            func_0035B6E0("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
+            sdfDebugPrintf("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
             return;
         }
         if (resident != 0) {
-            func_0035B6E0(D_0042E3A0);
+            sdfDebugPrintf(D_0042E3A0);
             return;
         }
         D_00438B68 = 1;

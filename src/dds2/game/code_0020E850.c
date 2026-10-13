@@ -358,7 +358,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
 }
 
 extern s32 btlGetRuntime(void);
-extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 /* Draw a centered decimal value, using optional per-digit offsets. */
 void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
@@ -407,11 +407,11 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
             if (offsets != NULL) {
                 s32 yOffset = offsets[offsetIndex];
                 if (yOffset >= 0) {
-                    func_00306C28(drawX, baseY + yOffset, -0x10, colors, 0,
+                    effDrawSpriteWithCornerColors(drawX, baseY + yOffset, -0x10, colors, 0,
                                   battle->resB, digits[digitCount] + 4, 0x5E);
                 }
             } else {
-                func_00306C28(drawX, y - (height >> 1), -0x10, colors, 0,
+                effDrawSpriteWithCornerColors(drawX, y - (height >> 1), -0x10, colors, 0,
                               battle->resB, digits[digitCount] + 4, 0x5E);
             }
             drawX += width;

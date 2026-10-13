@@ -184,7 +184,7 @@ extern BtlAiScratchWork *btlActionScratchWork;
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern s32 func_001E2E58(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -419,7 +419,7 @@ s32 func_00214C78(BtlUnit *actor, s32 command, BtlUnit **outFirst, BtlUnit **out
     return 0;
 }
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern u32 fldCountSceneSlots(void);
 
@@ -443,15 +443,15 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
     if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
         if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) && !(datBattleSceneRecords[state->battleMode].flags & 1)) {
             if (datCommandSelectors[command].kind != 1) {
-                func_0035B6E0(D_00419C80);
+                sdfDebugPrintf(D_00419C80);
                 return 0;
             }
             if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
-                func_0035B6E0(D_00419CB0);
+                sdfDebugPrintf(D_00419CB0);
                 return 0;
             }
             if (fldCountSceneSlots() < btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
-                func_0035B6E0(D_00419CD8);
+                sdfDebugPrintf(D_00419CD8);
                 return 0;
             }
             if (btlFindCommandPartnersByAffinity(unit, command, &members[1], &members[2]) != 0) {
@@ -485,7 +485,7 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
             return 1;
         }
     }
-    func_0035B6E0(D_00419D00);
+    sdfDebugPrintf(D_00419D00);
     return 0;
 }
 
@@ -2042,7 +2042,7 @@ s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
 /* Install these camera keys once, after motion 0x10's duration plus 15 task ticks. */
 s32 btlSpawnLinkedActionEffect(u8 *task) {
     if (((BtlLinkedCommand *)task)->motionProgress == 0) {
-        if (func_001E2E58(((BtlLinkedCommand *)task)->link->unit, 0x10) + 0xF <=
+        if (btlGetUnitMotionDurationFrames(((BtlLinkedCommand *)task)->link->unit, 0x10) + 0xF <=
             ((BtlLinkedCommand *)task)->state) {
             btlSetEffectCameraKeys((s32)task, -6.8f, -476.8f, -525.0f, 0.184f, 0.008f, -0.011f, 0.974f, 0.3f,
                           -214.2f, -1419.8f, -0.101f, 0.012f, -0.013f, 0.986f, 40.0f, 12.0f);
@@ -3141,7 +3141,7 @@ void btlCancelCurrentSubtask(void) {
  */
 u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BtlRuntimeTask *task = func_001E5FF8(battle->effect->guard.unit, 0xC);
+    BtlRuntimeTask *task = btlCreateUnitDefeatFadeInTask(battle->effect->guard.unit, 0xC);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -3237,7 +3237,7 @@ void func_0021C0C8(ActionStateLink *handle, s32 unused, u64 completionOwner, u64
         if (state->pending != 0 && hero != NULL) {
             isFormation = handle->indexWork.slot == 0x19;
             btlUpdateSpecialActorFormation();
-            delay = func_001E2E58(handle->unit, handle->indexWork.slot);
+            delay = btlGetUnitMotionDurationFrames(handle->unit, handle->indexWork.slot);
             task = btlAllocateIndexedUnitEffectTask(hero, 0x10, 2, 1.0f);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = prerequisite;
@@ -3565,7 +3565,7 @@ extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
-extern void func_001EFEE8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern s32 btlCanUseActorCategoryFlag2(s32);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
@@ -3681,7 +3681,7 @@ s32 func_0021CF18(BtlLinkedCommand *command, s8 side, s8 targetSide) {
         }
         if (count >= 2 && side == 0 && targetSide == 1) {
             if (btlCanUseActorCategoryFlag4(command)) {
-                func_001EFEE8(command, &command->frontCamera, &command->backCamera);
+                btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
                 goto flag_defeat_candidates;
             }
             if (btlCanUseLinkedActor(command)) {
@@ -5323,7 +5323,7 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     light->startCondition.value.handle = load->handle;
     light->ownerId = owner;
     btlStartTask(light);
-    fade = func_001E5FF8(effect->actor, 0);
+    fade = btlCreateUnitDefeatFadeInTask(effect->actor, 0);
     fade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     fade->startCondition.value.handle = light->handle;
     fade->ownerId = owner;
