@@ -4,6 +4,7 @@
 #include "common.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
+#include "sdf_vu_matrix.h"
 #include "file.h"
 #include "sdf.h"
 #include "eff_curve.h"
@@ -1426,7 +1427,6 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 
 extern f32 sdfViewTargetVector[4];
 extern u32 D_00438918;
-extern void vuBuildLookAtBasis(void);
 extern f32 sdfAtan2Poly(f32 ratio);
 extern u32 effMiscRand(void *state);
 extern u8 effSharedRandomState[];

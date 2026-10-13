@@ -69,9 +69,9 @@ extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
 extern void func_001EF030(void *, void *);
 
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
-extern void func_001ECBF8();
+extern void btlSetDefaultActionCameraPose();
 
 extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 
@@ -566,14 +566,14 @@ s32 func_001EC828(BtlUnit *unit) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EC868);
+INCLUDE_ASM(const s32, "game/code_001EC5F0", btlBuildBattleUnitFramingCameraPose);
 
-void func_001ECBF8(BtlLinkedCommand *command, BtlCamState *pose) {
-    func_001EC868(command, pose, 27.5f);
+void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
+    btlBuildBattleUnitFramingCameraPose(command, pose, 27.5f);
 }
 
 void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
-    func_001EC868(command, pose, 20.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 20.0f);
     btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
         func_00336538(-(20.0f * 0.017453293f));
@@ -857,7 +857,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
         btlFlagAllUnitsDefeatCandidate();
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
-            func_001EC868(action, from, 17.5f);
+            btlBuildBattleUnitFramingCameraPose(action, from, 17.5f);
             btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
@@ -1054,7 +1054,7 @@ f32 angle, f32 blend) {
         }
     }
     if (first == NULL || last == NULL) {
-        func_001ECBF8(command, pose);
+        btlSetDefaultActionCameraPose(command, pose);
         return;
     }
     if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
@@ -1164,7 +1164,7 @@ void func_001EF668(BtlLinkedCommand *action, BtlCamState *out) {
 
     user = action->link->unit;
     if (btlGetIndexListCount(action->targetList) >= 2U) {
-        func_001ECBF8(action, out);
+        btlSetDefaultActionCameraPose(action, out);
         return;
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
@@ -1431,7 +1431,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     if (!(user->status.flags & target->status.flags & 0x600)) {
         btlFlagAllUnitsDefeatCandidate();
     } else {
-        func_001ECBF8(command, &command->camera);
+        btlSetDefaultActionCameraPose(command, &command->camera);
         return;
     }
     func_001EF668(command, command->frontCamera.position);
@@ -2001,7 +2001,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
             break;
         }
     }
-    func_001ECBF8(command, out);
+    btlSetDefaultActionCameraPose(command, out);
     btlCopyMotionTransform(pose, out);
     span = func_00208000(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;
@@ -2124,7 +2124,7 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
 }
 
 void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
-    func_001EC868(command, pose, 0.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 0.0f);
 }
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F2758);
@@ -6249,7 +6249,7 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
 }
 
 /* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
-void btlResetSoundLoadFrames(void) {
+void btlResetMotionSoundFrameCounters(void) {
     s32 context = btlGetRuntime();
     ((BtlState *)context)->unk288 = -1;
     ((BtlState *)context)->unk28C = -1;

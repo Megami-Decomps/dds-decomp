@@ -732,8 +732,8 @@ extern s32 evtFadeInBgm(s32, s32);
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern void evtTransitionBgm(s32, s32);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
-extern void func_003425B0(void);
-extern void func_003425D8(void);
+extern void sndStartReducedBgm(void);
+extern void sndStopReducedBgm(void);
 extern void func_00341CA8(void);
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern void kwlnFadeSetupFrames(s32 mode, s32 frames);
@@ -854,10 +854,10 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             evtTransitionBgm(D_004372B0, key->p08.sh[1]);
             break;
         case 4:
-            func_003425B0();
+            sndStartReducedBgm();
             break;
         case 5:
-            func_003425D8();
+            sndStopReducedBgm();
             break;
         case 6:
             func_00341CA8();

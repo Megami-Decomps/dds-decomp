@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "sdf_textured_rect.h"
 #include "sdf_resource.h"

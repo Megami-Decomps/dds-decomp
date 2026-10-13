@@ -5316,7 +5316,7 @@ s32 evtPlayBgm(s32 id, s32 fade) {
 
 extern char D_004247F8[]; /* "Event BGM trans :%08X\n" */
 extern s32 evtEncodeBgmSoundCode();
-extern void func_00342600();
+extern void sndTransitionBgm();
 
 void evtTransitionBgm(s32 id, s32 fade) {
     s32 sound;
@@ -5326,7 +5326,7 @@ void evtTransitionBgm(s32 id, s32 fade) {
             sound = evtEncodeBgmSoundCode(id, fade);
         }
         func_0035B6E0(D_004247F8, sound);
-        func_00342600(sound);
+        sndTransitionBgm(sound);
     }
 }
 

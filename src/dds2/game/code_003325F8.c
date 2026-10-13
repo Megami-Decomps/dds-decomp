@@ -9,6 +9,7 @@
 #include "pcp_vu0.h"
 
 #include "sdf.h"
+#include "sdf_model_copy.h"
 #include "sdf_asset_state.h"
 #include "sdf_pending.h"
 #include "sdf_draw.h"
@@ -98,7 +99,6 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
-extern void sdfModelCopyData(DevRequest *, DevRequest *);
 
 void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     SdfDrawNode **destinationNodes;

@@ -230,9 +230,9 @@ extern s32 btlSetActorEffectParameter();
 
 extern s32 mdlFlagTest(u32);
 
-extern void func_001DEFE0(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
-extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
@@ -250,7 +250,7 @@ extern s8 effSharedRandomState[];
 
 extern void sndResetTransition(void);
 
-extern void btlResetSoundLoadFrames(void);
+extern void btlResetMotionSoundFrameCounters(void);
 
 extern void btlResetFieldColorAndSweepFlags(void);
 
@@ -544,10 +544,10 @@ s32 func_001DEFA0(s32 actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001DEFE0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", btlBuildBattleUnitFramingCameraPose);
 
-void func_001DF358(BtlLinkedCommand *command, BtlCamState *pose) {
-    func_001DEFE0(command, pose, 27.5f);
+void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
+    btlBuildBattleUnitFramingCameraPose(command, pose, 27.5f);
 }
 
 extern void func_002DD688(f32 angle);
@@ -557,7 +557,7 @@ BtlLinkedCommand *command;
 BtlCamState *pose;
 BtlCamState *out;
 {
-    func_001DEFE0(command, pose, 20.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 20.0f);
     btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
         func_002DD688(-(20.0f * 0.017453293f));
@@ -841,7 +841,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
         btlFlagAllUnitsDefeatCandidate();
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
-            func_001DEFE0(action, from, 17.5f);
+            btlBuildBattleUnitFramingCameraPose(action, from, 17.5f);
             btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
@@ -1044,7 +1044,7 @@ f32 angle, f32 blend) {
         }
     }
     if (first == NULL || last == NULL) {
-        func_001DF358(command, pose);
+        btlSetDefaultActionCameraPose(command, pose);
         return;
     }
     if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
@@ -1155,7 +1155,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
 
     user = action->task->unit;
     if (btlGetIndexListCount(action->targetList) >= 2U) {
-        func_001DF358(action, out);
+        btlSetDefaultActionCameraPose(action, out);
         return;
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
@@ -1419,7 +1419,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     if (!(user->status.flags & target->status.flags & 0x600)) {
         btlFlagAllUnitsDefeatCandidate();
     } else {
-        func_001DF358(command, &command->camera);
+        btlSetDefaultActionCameraPose(command, &command->camera);
         return;
     }
     btlFrameSingleTargetActionCamera(command, &command->frontCamera);
@@ -1969,7 +1969,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
             break;
         }
     }
-    func_001DF358(command, out);
+    btlSetDefaultActionCameraPose(command, out);
     btlCopyMotionTransform(pose, out);
     span = func_001F66D8(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;
@@ -2091,7 +2091,7 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
 }
 
 void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
-    func_001DEFE0(command, pose, 0.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 0.0f);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E4AC0);
@@ -7405,7 +7405,7 @@ void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
 }
 
 /* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
-void btlResetSoundLoadFrames(void) {
+void btlResetMotionSoundFrameCounters(void) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
     work->unk264 = -1;
@@ -7918,7 +7918,7 @@ s32 btlRepositionPartyAroundBattleCenter(void) {
     return btlExpandPartyFormationAroundCenter(vector);
 }
 
-s64 func_001F53F0(void) {
+s64 btlArrangeOpponentFormationSlots(void) {
     return btlArrangeFormationSlots(0x400);
 }
 

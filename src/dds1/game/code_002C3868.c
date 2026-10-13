@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "dds3obj.h"
 #include "sdf_textured_rect.h"
@@ -127,7 +128,6 @@ void sdfInitializeMapCounterSelection(s32 index, s32 count) {
     fldLocalMapSecondCameraVector.v[3] = D_00390180[index].v[3];
 }
 
-extern void sdfCommitPendingVectorAndMarkChanged();
 
 /* Latch the base vectors into the pending pair and flag the change. */
 void sdfLatchBaseVectorsForSelection(void) {

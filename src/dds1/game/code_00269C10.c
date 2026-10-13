@@ -11,6 +11,7 @@
 #include "file.h"
 #include "file_request_api.h"
 #include "sdf_thread.h"
+#include "sdf_thread_sleep.h"
 #include "mnu_title_stream.h"
 
 #define SND_MIX_SAMPLE_COUNT 0x800

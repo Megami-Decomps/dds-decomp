@@ -11,6 +11,7 @@
 #include "sdf_dev_state.h"
 #include "sdf_dev_event.h"
 #include "sdf_pac_state.h"
+#include "sdf_pac_decoder.h"
 #include "sdf_pac_work.h"
 #include "sdf_key_pool.h"
 #include "sdf_packet_alloc.h"
@@ -84,17 +85,6 @@ enum {
     SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE = 0x80,
     SDF_DECODE_COMMAND_EXPAND_BYTES = 0xA0
 };
-
-typedef struct SdfPacDecoder {
-    u8 state;
-    u8 command;
-    u16 pendingBytes;
-    u8 *output;
-    u8 *input;
-    s32 inputBytes;
-    u8 backrefLow;
-    u8 pad11[3];
-} SdfPacDecoder;
 
 extern s32 D_003BDAC0;
 extern u8 *D_003FF300[16];
@@ -717,13 +707,6 @@ void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKe
         *root = replacement;
     }
 }
-
-typedef struct SdfKeyTreeItem {
-    struct SdfKeyTreeItem *replaced; /* 0x0: previous item when a duplicate key replaces it */
-    u8 pad04[8];
-    f32 key;                      /* 0xC */
-} SdfKeyTreeItem;
-
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
 void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {

@@ -8,6 +8,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_gs_geometry.h"
 #include "sdf_texture_flush.h"
+#include "sdf_tex_lifetime.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_timer.h"
@@ -123,7 +124,6 @@ typedef struct SdfDescriptorSource {
 
 extern SdfDescriptorSource *sdfPacketResourceEntries[];
 
-void sdfTexRelease(SdfTex *texture);
 void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,

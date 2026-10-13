@@ -6,6 +6,6 @@ extern s32 btlRepositionPartyAroundBattleCenter(void);
 s32 btlCommandRecenterParty(void)
 {
     btlRepositionPartyAroundBattleCenter();
-    func_00206090();
+    btlArrangeOpponentFormationSlots();
     return 1;
 }

@@ -955,8 +955,8 @@ void mnuTerminalSelectResourceBank(MenuSlotState *host) {
     sndEnsureMidiBankResident(host->bgmHandle & MNU_BGM_BANK_MASK);
 }
 
-extern void func_003425B0(void);
-extern void func_003425D8(void);
+extern void sndStartReducedBgm(void);
+extern void sndStopReducedBgm(void);
 
 /* Mode zero starts the selected BGM in full mode or invokes the reduced-mode action.
  * Other modes use their counterpart actions; keep the native selection field. */
@@ -965,12 +965,12 @@ void mnuApplyFadeTrackMode(s32 mode, MenuSlotState *host) {
         if (host->reduced == 0) {
             sndStartTrackExtended(host->bgmHandle);
         } else {
-            func_003425B0();
+            sndStartReducedBgm();
         }
     } else if (host->reduced == 0) {
         sndReleaseTrackHandle(host->bgmHandle);
     } else {
-        func_003425D8();
+        sndStopReducedBgm();
     }
 }
 
@@ -1944,7 +1944,6 @@ s32 evtBeginSelectionExitFade(KwlnTask *task) {
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
-extern void fileSetPreviewLocation();
 extern void func_002CE208(s32 mode);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */

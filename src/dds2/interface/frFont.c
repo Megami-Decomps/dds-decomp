@@ -1232,7 +1232,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019DD48);
 /* Read the packed table count, then skip the table and its trailing metadata
  * word to reach the encoded text. The native parser copies that metadata even
  * though this lookup does not use its value. */
-u8 *frFontGetBankEntryText(s32 textId, FrFontTextBank *bank, s32 mode) {
+u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode) {
     u32 offset;
     u32 tableCount;
     u32 textMetadata;

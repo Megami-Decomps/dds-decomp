@@ -1,9 +1,10 @@
 #include "common.h"
+#include "sdf_alarm.h"
 #include "mnu_sound_resource_path_api.h"
 #include "snd_command_packet.h"
 #include "snd_midi_state_views.h"
 
-u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
+u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
 void sndEnsureMidiBankResident(s32 trackId);
 
@@ -90,7 +91,6 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
 }
 
 extern s32 func_0035C860();
-extern void sdfSleepWithAlarm();
 extern void (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
@@ -212,14 +212,14 @@ void sndStartTrackExtended(s32 trackId) {
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x17F;
-    func_00341650(0x20, 0, &packet, 0x10);
+    sndQueueCommandPacket(0x20, 0, &packet, 0x10);
 }
 
 void sndReleaseTrackHandle(u32 value) {
     u32 packet[4];
 
     packet[0] = value;
-    func_00341650(0xd0, 0, packet, 0x10);
+    sndQueueCommandPacket(0xd0, 0, packet, 0x10);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00341FE8", sndRequestedMidiBankId);

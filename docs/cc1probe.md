@@ -103,6 +103,13 @@ The exit status is 0 only for `verify: OK`. A log whose header says anything
 else must not be cited. The baseline assembly is also what `tools/cc.sh` gives
 for the unit (checked for `fldTitle`'s unit `src/dds1/game/code_001411F0.c`).
 
+The GDB launch keeps `startup-with-shell on` so the quoted arguments supplied
+by `--args` retain their grouping. Turning it off on GDB 16.3 splits existing
+multiword compiler defines such as `-D__SIZE_TYPE__=unsigned int` and loses
+the literal quotes in `ASM_ROOT`. The compiler can still emit output while
+reporting malformed arguments and exiting with errors; output equality alone
+does not qualify that run. The probe also requires a successful compiler exit.
+
 ## Citing a trace for the trace-justified rule
 
 [CONTRIBUTING.md](CONTRIBUTING.md) accepts a form the trace says the compiler

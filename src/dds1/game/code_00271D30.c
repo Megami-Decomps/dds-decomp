@@ -99,7 +99,7 @@ extern void mnuAppendStaffResourceRequests(void *);
 
 extern void mnuResetGradientFadeColor(void *, s32);
 
-extern void func_002E9708(void);
+extern void sndStartReducedBgm(void);
 
 /* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
@@ -122,7 +122,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     mnuLoadStaffImageResources(menu);
     mnuAppendStaffResourceRequests(menu);
     mnuResetGradientFadeColor(menu->timer, 0x40);
-    func_002E9708();
+    sndStartReducedBgm();
     return menu;
 }
 
@@ -146,7 +146,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     effDestroyEffectList(menu->resourceQueue);
     sdfReleaseResourceAllocation(menu->resource);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
-    func_002E9730();
+    sndStopReducedBgm();
 }
 
 u32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {

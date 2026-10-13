@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "gs_packet.h"
 #include "pcp_vu0.h"
+#include "eff_blur.h"
 
 extern u32 kwlnDrawControlFlags;
 extern u8 kwlnDrawOverlayEnabled;
@@ -68,20 +69,6 @@ typedef struct {
     KwlnBlurRectParams source;
 } KwlnPixelBlurParams;
 
-typedef struct {
-    u32 count;
-    u32 delaySpread;
-    f32 angleStep;
-    KwlnColor color;
-    u32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u32 x;
-    u32 y;
-    u32 positionSpread;
-    u32 size;
-} KwlnScatterBlurParams;
-
 /* Staggered (ripple) blur parameters. The staged block and the interpolated
  * body are both 8-byte aligned and the compiler copies between them with
  * aligned 8-byte moves, so the type carries that alignment; a body reached
@@ -106,9 +93,9 @@ extern u32 D_003C2E14;
 extern u32 D_003C2E18;
 extern KwlnBlurRectParams kwlnRectangleBlurParameters;
 extern KwlnPixelBlurParams kwlnTexturedBlurParameters;
-extern KwlnScatterBlurParams kwlnFilterBlurParameters;
+extern EffBlurScatterParams kwlnFilterBlurParameters;
 extern KwlnScaleBlurParams kwlnStaggeredBlurParameters;
-extern KwlnScatterBlurParams D_003C2CA0;
+extern EffBlurScatterParams D_003C2CA0;
 extern KwlnScaleBlurParams D_003C2D00;
 extern u32 D_003C2DCC;
 extern u8 D_003C2DCB;
@@ -534,7 +521,7 @@ void kwlnDrawSetupC70B(s32 duration) {
 #define KWLN_DRAW_STAGGERED_MAX_COUNT 0x28
 
 /* Stage filter-blur parameters, counting/clamping only counts above 100.
- * Negative counts and the opaque word/float parameters remain uninterpreted. */
+ * The secondary values are forwarded into the shared effect parameter body. */
 void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 unknownWord,
                            f32 angleStep, f32 secondFloat, f32 thirdFloat) {
     if (count >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
@@ -545,26 +532,26 @@ void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 unknownWord
     kwlnFilterBlurParameters.size = size;
     kwlnFilterBlurParameters.delaySpread = delaySpread;
     kwlnFilterBlurParameters.angleStep = angleStep;
-    kwlnFilterBlurParameters.unk14 = secondFloat;
-    kwlnFilterBlurParameters.unk18 = thirdFloat;
-    kwlnFilterBlurParameters.unk10 = unknownWord;
+    kwlnFilterBlurParameters.uvDisplacementAngleDegrees = secondFloat;
+    kwlnFilterBlurParameters.uvDisplacementAmplitude = thirdFloat;
+    kwlnFilterBlurParameters.blendControl = unknownWord;
 }
 
 /* Stage the filter blur's packed RGBA color. */
 void kwlnDrawSetCd0Fourth(u32 rgba) {
-    kwlnFilterBlurParameters.color.rgba = rgba;
+    kwlnFilterBlurParameters.color = rgba;
 }
 
 /* Stage filter-blur position spread and coordinates. */
 void kwlnDrawSetCd0Triple(u32 positionSpread, u32 x, u32 y) {
     kwlnFilterBlurParameters.positionSpread = positionSpread;
-    kwlnFilterBlurParameters.x = x;
-    kwlnFilterBlurParameters.y = y;
+    kwlnFilterBlurParameters.position[0] = x;
+    kwlnFilterBlurParameters.position[1] = y;
 }
 
 /* Save live filter-blur params; zero copies the staged body immediately. */
 void kwlnSetFilterBlurParameterTransition(s32 duration) {
-    D_003C2CA0 = *(KwlnScatterBlurParams *)effGetCh72Work();
+    D_003C2CA0 = *(EffBlurScatterParams *)effGetCh72Work();
     D_003BD72C = 0;
     D_003BD72E = duration;
     if (duration == 0) {
@@ -578,12 +565,12 @@ void kwlnSetFilterBlurParameterTransition(s32 duration) {
 /* Fade filter alpha from zero to staged alpha. Both paths copy params;
  * a timed fade disables the effect before subsequent updates sample alpha. */
 void kwlnDrawSetupCd0(s32 duration) {
-    KwlnScatterBlurParams *params = &kwlnFilterBlurParameters;
+    EffBlurScatterParams *params = &kwlnFilterBlurParameters;
     s32 requestedDuration = duration;
 
     kwlnFilterBlurStartAlpha = 0;
     kwlnFilterBlurFadeCounter = 0;
-    kwlnFilterBlurTargetAlpha = params->color.channels[KWLN_DRAW_ALPHA_CHANNEL];
+    kwlnFilterBlurTargetAlpha = ((KwlnColor *)&params->color)->channels[KWLN_DRAW_ALPHA_CHANNEL];
     kwlnFilterBlurFadeDuration = requestedDuration;
     if (requestedDuration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_FADE_BIT;
@@ -600,7 +587,7 @@ void kwlnDrawSetupCd0(s32 duration) {
 /* Fade staged filter alpha toward zero; zero disables it immediately. */
 void kwlnDrawEnableCd0(s32 duration) {
     kwlnFilterBlurTargetAlpha = 0;
-    kwlnFilterBlurStartAlpha = kwlnFilterBlurParameters.color.channels[KWLN_DRAW_ALPHA_CHANNEL];
+    kwlnFilterBlurStartAlpha = ((u8 *)&kwlnFilterBlurParameters.color)[KWLN_DRAW_ALPHA_CHANNEL];
     kwlnFilterBlurFadeCounter = 0;
     kwlnFilterBlurFadeDuration = duration;
     if (duration == 0) {
@@ -698,7 +685,7 @@ void kwlnDrawEnableD30(s32 duration) {
  * started with the staged block into one of these, and the effCopy* call then
  * hands the result to the effect. */
 extern KwlnPixelBlurParams D_003C2510;
-extern KwlnScatterBlurParams D_003C2540;
+extern EffBlurScatterParams D_003C2540;
 extern KwlnScaleBlurParams D_003C2570;
 extern KwlnBlurRectParams D_003C25A0;
 extern KwlnSolidRectParams D_003C25D0;
@@ -709,7 +696,7 @@ extern KwlnResourceRectParams D_003C25F0;
 extern void evtBlendParamsA(s32 enable, f32 t, KwlnBlurRectParams *from, KwlnBlurRectParams *to, KwlnBlurRectParams *out);
 extern void evtBlendParamsB(s32 enable, f32 t, KwlnPixelBlurParams *from, KwlnPixelBlurParams *to, KwlnPixelBlurParams *out);
 extern void evtBlendParamsD(s32 enable, f32 t, KwlnResourceRectParams *from, KwlnResourceRectParams *to, KwlnResourceRectParams *out);
-extern void evtBlendParamsE(s32 enable, f32 t, KwlnScatterBlurParams *from, KwlnScatterBlurParams *to, KwlnScatterBlurParams *out);
+extern void evtBlendParamsE(s32 enable, f32 t, EffBlurScatterParams *from, EffBlurScatterParams *to, EffBlurScatterParams *out);
 extern void evtBlendParamsF(s32 enable, f32 t, KwlnScaleBlurParams *from, KwlnScaleBlurParams *to, KwlnScaleBlurParams *out);
 extern void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, KwlnSolidRectParams *from, KwlnSolidRectParams *to, KwlnSolidRectParams *out);
 
@@ -818,7 +805,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         evtBlendParamsE(1, (f32)D_003BD72C / (f32)D_003BD72E, &D_003C2CA0,
                         &kwlnFilterBlurParameters, &D_003C2540);
         effCopyFilterBlurParameters(&D_003C2540);
-        if (D_003C2540.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        if (((u8 *)&D_003C2540.color)[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             effEnableFilterBlur();
         }
         else {
@@ -836,7 +823,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         alpha = kwlnFilterBlurStartAlpha + kwlnFilterBlurFadeCounter *
                 (kwlnFilterBlurTargetAlpha - kwlnFilterBlurStartAlpha) /
                 kwlnFilterBlurFadeDuration;
-        D_003C2540.color.rgba = (D_003C2540.color.rgba & 0xFFFFFF) | (alpha << 24);
+        D_003C2540.color = (D_003C2540.color & 0xFFFFFF) | (alpha << 24);
         effCopyFilterBlurParameters(&D_003C2540);
         if (alpha == 0) {
             effDisableFilterBlur();

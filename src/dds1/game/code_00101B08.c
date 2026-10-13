@@ -7,6 +7,7 @@
 #include "kwln_task_flags.h"
 #include "sdf.h"
 #include "sdf_thread.h"
+#include "sdf_thread_sleep.h"
 
 struct EffWorldNode;
 extern struct EffWorldNode *dds3ActiveWorld;
@@ -66,7 +67,6 @@ extern void sdfDevSetDefaultDeviceWorker(s32);
 extern void sdfEnsureDeviceWorkerThreadStarted(s32);
 extern void func_002D0D70(const char *, const char *);
 extern void sdfStartAndSuspendWorkerThread(void);
-extern s32 sdfThreadSleepSelf(void);
 extern void kwlnRunMainLoop(void);
 
 extern char D_0039DF28[]; /* "cdrom0:\IRX\IOPRP255.IMG;1" */
@@ -213,7 +213,7 @@ extern u8 sdfViewMatrix[0x40];
 extern u8 D_00325788[];
 extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
-extern void func_001083F8(void);
+extern void kwlnUpdateDrawParameterTransitions(void);
 extern void func_001248D0(void);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 #include "sdf_packet_alloc.h"
@@ -238,7 +238,7 @@ s32 kwlnBuildFrameScenePackets(void) {
 
     kwlnAdvanceShakeOffsets();
     evtCheckSelectionState();
-    func_001083F8();
+    kwlnUpdateDrawParameterTransitions();
     if (kwlnTextureReferenceFlag != 0) {
         sdfBuildLightingPacket(D_00327500 + bufferIndex * KWLN_FRAME_BUFFER_BYTES,
             D_00324940, D_00324950);
@@ -394,9 +394,9 @@ extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
-extern void func_00106368(void);
+extern void kwlnDrawBackgroundFadeBands(void);
 extern void kwlnFadeUpdate(void);
-extern void func_00105DD8(void);
+extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
 extern s32 func_0011E278(void);
 extern void func_002EA5C0(s32);
@@ -431,9 +431,9 @@ s32 kwlnRenderFrame(void) {
 
     kwlnDrawBlurErrorCounters();
     kwlnStepBackgroundFade();
-    func_00106368();
+    kwlnDrawBackgroundFadeBands();
     kwlnFadeUpdate();
-    func_00105DD8();
+    kwlnQueueBackgroundFadeOverlayPacket();
     kwlnAdvanceDrawFadesAndTransitions();
     groupHeads = D_00325788;
     packetGroups = D_003258B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;

@@ -1,20 +1,11 @@
 #include "snd_ring.h"
 #include "common.h"
 #include "eff_random.h"
+#include "clock_time.h"
 
 extern s8 D_003BDA80;
 extern u16 D_00398910[];
 extern void *sceSifAllocIopHeap(s32 size);
-
-typedef struct ClockTime {
-    u8 pad0;
-    u8 sec;   /* 0x1 */
-    u8 min;   /* 0x2 */
-    u8 hour;  /* 0x3 */
-    u8 day;   /* 0x4 */
-    u8 month; /* 0x5 */
-    u16 year; /* 0x6 */
-} ClockTime;
 
 extern EffRandState D_00398938;
 

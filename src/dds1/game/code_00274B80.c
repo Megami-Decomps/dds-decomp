@@ -864,7 +864,6 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
 
 extern u8 D_0037C3A8[];
 extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
-extern void mnuCreateStaffImageSprite();
 extern void mnuDrawCampGridAndLabelDefault();
 
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {

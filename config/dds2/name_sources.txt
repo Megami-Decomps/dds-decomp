@@ -1,4 +1,6 @@
 # addr	name	evidence|inferred	note
+0x0019DE70	frFontGetEncodedTextData	inferred	Bounds-checks textId, skips the packed index table and trailing metadata word, and returns the encoded text bytes from FrFontTextBank; itfDrawBankTextWithLayoutFlags passes the result to the glyph-chain parser. Twin 0x001961B0. [code-quality cleanup, 2026-10-13]
+0x002050D0	btlResetMotionSoundFrameCounters	inferred	Battle initialization resets the paired motion-sound frame counters to -1; the ATRAC3 motion-SE path checks one counter and the frame update advances both. DDS1 twin 0x001F4430. [code-quality cleanup, 2026-10-13]
 0x00100400	kwlnGetDrawBufferIndex	inferred	confidence=high; matched-C; src/dds2/game/code_00100000.c:49:func_00100400; Returns current draw buffer selector used throughout matched frame-packet and scene/viewer double-buffer indexing; twin=0x00100518, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x001005C8	kwlnTaskRemoveFromStateQueue	inferred	confidence=high; matched-C; src/dds2/game/code_00100000.c:106:func_001005C8; M141; source=names_pending_main.tsv:111; review=Unlinks a task from its delayed-start, active or delayed-destroy state queue, repairing head/tail and neighboring links. [names_qp11.tsv]
 0x00100740	kwlnTaskInsertIntoOrderedStateQueue	inferred	confidence=high; src/dds2/game/code_00100000.c:func_00100740; Selects the queue from task state, inserts by ascending comparison key, repairs links and increments that queue count. [names_qp9.tsv]
@@ -46,6 +48,7 @@
 0x00102D48	dds3AdminReleaseTaskWork	inferred	src/dds2/kernel/dds3AdminiProcess.c func_00102D48: Calls mode destroy callback then frees attached data and task user-value block. Twin of DDS1 func_00102E58. [names_reviewed24.tsv]
 0x00102DC8	kwlnDebugTaskCreate	inferred	DDS1 twin func_00102ED8; creates task named by D_00435C18 once [names_M39_SmallSweep7.tsv]
 0x00103050	kwlnFindNamedSlot	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:203:func_00103050; M143; source=names_M143.tsv:1; review=Walks linked named slots, requires an exact NUL-terminated string match and returns slot index or -1. [names_qp11.tsv]
+0x00103108	kwlnUnregisterNamedSlot	inferred	Stops the named task when applicable, clears and unlinks its slot record, updates list/active/count state, and reports whether a slot was removed; DDS1 twin 0x00103218.
 0x001034E8	kwlnStepListCursor	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:237:func_001034E8; Updates a list cursor and optional scroll offset from caller-selected pad directions, wrapping on initial presses and bounding repeats.; source=names_pending_main.tsv:122 [names_qp11.tsv]
 0x001036B0	kwlnStepTwoListCursors	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:308:func_001036B0; Updates two list cursor/scroll pairs with the directional inputs and returns positive/negative confirmation/cancellation, otherwise zero.; source=names_pending_main.tsv:123 [names_qp11.tsv]
 0x00103860	kwlnDebugPulsePadMotors	inferred	Starts the small and large pad motors when the task timer reaches the pulse interval; varies the large-motor level.
@@ -54,10 +57,12 @@
 0x00104180	kwlnDebugGraphUpdate	inferred	DebugTimeGrph update callback; native body returns signed zero scheduler control and ignores the incoming task argument.
 0x001044E8	kwlnDebugGraphTaskDestroy	inferred	No-op destroy callback registered for the DebugTimeGrph task.
 0x00104568	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104678, input-family pairing. [names_qp10.tsv]
+0x00104700	kwlnDrawTextureResourceDetails	inferred	Appends formatted texture dimensions, pixel-format label, resource key and battle-texture slot to the viewer packet list; DDS1 twin 0x00104810.
 0x00104898	kwlnTextureCountIncompleteResources	inferred	counts D_004389F8 list nodes whose ready flag pointer is NULL or points to 0 [names_M39_SmallSweep7.tsv]
 0x00104900	kwlnTextureGetPageIndex	inferred	Returns the texture viewer's global page index, as in the DDS1 counterpart.
 0x00104908	kwlnSelectIncompleteResourceAtPageIndex	inferred	Selects the reached incomplete-texture page, stores its resource pointer and returns the reached index; DDS1 twin 0x00104A18. DDS2 skips clone-source entries at the head before applying the requested index.
 0x00104AA8	kwlnDrawTextureViewerFrame	inferred	Builds the texture-viewer packet list with page counter, image outline/info and optional allocation-map diagnostics, then submits it to the supplied surface; DDS1 twin 0x00104B88.
+0x00104D40	kwlnDrawTextureAllocationMapBlock	inferred	Draws a texture-resource allocation block as colored map rows from its start word, size and allocation mode; callers render primary/secondary resources with selection/highlight mode. DDS1 twin 0x00104E20.
 0x00104F30	kwlnDrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:425:func_00104F30; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00105010, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
 0x00105240	evtResetDisplayProjectionAndVectorState	inferred	Sets display mode, rebuilds both projections and ensures draw-vector state. [names_reviewed9.tsv]
 0x001053F0	kwlnCreateHeldTextureBuffer	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:648:func_001053F0; Replaces the held texture reference, allocates the requested image buffer and texture, initializes texture state and returns one only after both allocations succeed.; source=names_pending_main.tsv:124 [names_qp11.tsv]
@@ -67,14 +72,17 @@
 0x00105540	kwlnTextureGetReferenceFlag	inferred	Sequel twin of first-game texture reference flag getter; returns flag set only for held texture. [names_reviewed18.tsv]
 0x00105548	kwlnTextureGetHeldReference	inferred	Sequel twin of first-game retained texture reference getter; same pointer passed to sdfTexReleaseReference. [names_reviewed18.tsv]
 0x001057A8	kwlnCancelConfiguredFadeFrames	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:754:func_001057A8; Disables the configured frame-fade state initialized by kwlnFadeSetupFrames.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001057B0	evtInitializeFrameStatePacketTemplates	inferred	Initializes the six 0xB0 packet records for three 0x160-byte frame states later selected by evtBuildFrameStatePacketList; called during display-state reset. Paired DDS1 provider at 0x00105890.
 0x00105910	evtBuildFrameStatePacketList	inferred	Creates a reset packet list and appends the selected buffered frame state. [names_reviewed9.tsv]
 0x001059D8	kwlnFadeGetColor	inferred	Returns a pointer to the global fade RGBA color through its output parameter.
 0x00105B78	kwlnFadeUpdate	inferred	quiet3 twin unification
+0x00105CF8	kwlnQueueBackgroundFadeOverlayPacket	inferred	Reads the active frame-buffer index and background-fade alpha; when visible, initializes and appends the current surface overlay packet. Paired DDS1 provider at 0x00105DD8.
 0x00105FE8	kwlnFadeBackgroundStartOut	inferred	quiet3 twin unification
 0x00106080	kwlnFadeBackgroundStartIn	inferred	quiet3 twin unification
 0x00106108	kwlnFadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]
 0x00106160	kwlnFadeSetMode	inferred	stores D_00435CFC mode; mode 0 clears the two counters, otherwise sets alpha byte 0x80 [names_reviewed2.tsv]
 0x00106188	kwlnStepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106268, input-family pairing. [names_qp10.tsv]
+0x00106288	kwlnDrawBackgroundFadeBands	inferred	Applies current fade alpha and ramp offsets as two horizontal gradient bands; called once per render frame after stepping fade state. DDS1 twin 0x00106368.
 0x001063A8	sdfSetViewFieldOfView	inferred	confidence=high; matched-C provider and paired native twin 0x00106488; Stores the shared view field of view in radians for camera projection and screen-plane mapping.
 0x00106460	kwlnDrawSnapshotSolidRect	inferred	confidence=high; func_00106460 saves the current solid rectangle parameters and stages or immediately applies pending parameters.; sources=names_R_Structs54.tsv; twin=0x00106540, input-family pairing. [names_qp10.tsv]
 0x00106658	kwlnDrawSetupE08FromCh75	inferred	readability/matching review (QP16)
@@ -90,6 +98,7 @@
 0x00108138	kwlnSetBackgroundColorTarget	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:224:func_00108138; M141; source=names_pending_main.tsv:106; review=Either installs the background color vector immediately or starts a timed interpolation from its previous color. [names_qp11.tsv]
 0x001081F8	kwlnSetDrawColorTarget	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:258:func_001081F8; M141; source=names_pending_main.tsv:107; review=Either installs the packed draw color immediately or starts a timed interpolation from its previous packed value. [names_qp11.tsv]
 0x00108280	evtSetDrawVectorTarget	inferred	Directly stores the event draw vector in mode zero or retains its previous value and sets a new target in other modes.
+0x00108318	kwlnUpdateDrawParameterTransitions	inferred	Per frame, interpolates the enabled camera/draw-vector, default-color, and saved scalar-vector transitions, clearing each control flag when its duration completes. DDS1 twin at 0x001083F8.
 0x001089A0	evtSetDrawSurfaceIndex	inferred	stores draw surface slot used by GS packet submitters [names_R_FuncNames2.tsv]
 0x001089A8	evtSubmitPrimaryGsTest	inferred	R_Names31 B94
 0x00108AC0	evtSubmitSecondaryGsTest	inferred	R_Names31 B94
@@ -100,6 +109,7 @@
 0x00109780	evtSubmitQuadFromVertices	inferred	readability/matching review (QP16)
 0x00109C30	evtDrawPositionedSurfacePacket	inferred	Allocates packet list, builds XY-offset draw packet and submits to event surface. [names_reviewed7.tsv]
 0x00109D00	evtPrepareSizedDrawResource	inferred	Creates graphics resource from shifted dimensions and passes it to two preparation routines. [names_reviewed7.tsv]
+0x00109E60	evtUpdateSelectionStateInterpolation	inferred	Updates the three timed values for an active selection state, handles its mode transitions and leaves completion to evtCheckSelectionState. DDS1 twin at 0x00109D20.
 0x0010A298	evtDestroySelectionState	inferred	calls evtSelStateDestroy [names_R_FuncNames2.tsv]
 0x0010A358	evtOpenFileMenuModeThree	inferred	passes 3 to file menu mode selector [names_R_FuncNames2.tsv]
 0x0010A370	evtPollFileMenuModeThree	inferred	releases file resources then tests file menu completion [names_R_FuncNames2.tsv]
@@ -154,9 +164,11 @@
 0x0010AD98	evtWaitFileMenuTaskFour	inferred	polls active file task sentinel [names_R_FuncNames2.tsv]
 0x0010AE08	evtDestroyFontResourceChain	inferred	Destroys existing console font resource node and clears global handle. [names_reviewed7.tsv]
 0x0010AE38	evtPrintDeveloperConsoleMessage	inferred	src/dds2/game/code_00107EF8.c func_0010AE38: Formats variadic message into stack buffer and prints it only when developer console node exists. Twin of DDS1 func_0010AC10. [names_reviewed24.tsv]
+0x0010B110	evtGeneralHeapGraphTaskDestroy	inferred	Empty destroy callback registered for the DebugTimeGrph heap-usage task created by evtToggleDebugTimeGraphTask; paired DDS1 callback at 0x0010AEE8.
 0x0010B118	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
 0x0010B190	sdfDrawHeapSpanOverlay	inferred	U2
 0x0010B780	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
+0x0010B8D0	evtResourceCountDebugTaskDestroy	inferred	Empty destroy callback registered by evtToggleAlternateDebugTimeGraphTask for the DebugTimeGrph task that draws font, text and GS resource counts; paired DDS1 callback at 0x0010B6A8.
 0x0010B8D8	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:1228:func_0010B8D8; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0010BD50	scrOpenProcessFromResource	inferred	Obtains a resource handle, constructs script process from its ID, and stores the resource handle on the process.
 0x0010BE08	scrClearProcessGlobals	inferred	Clears all 256 integer and float-bit global VM slots; mirrors DDS1 scrClearProcessGlobals.
@@ -645,9 +657,11 @@
 0x00123960	fldFindStageCoordinateIndex	inferred	Searches 16-byte stage coordinate records for x/y and returns the zero-based index, or 640 if missing.
 0x001239A8	fldFindStageCoordinateRowOffset	inferred	Scans stage coordinate records and accumulates row counts to return a matching coordinate row offset. [names_reviewed15.tsv]
 0x00123A10	fldFindStageCoordinateRecord	inferred	Searches the first 96 stage coordinate records for x/y and returns their address or null.
+0x00123B88	fldMarkStageExplorationCellsAroundPosition	inferred	Marks the valid 3-by-3 neighborhood around a stage position in the field exploration bitset; paired helper is 0x00121B88.
 0x00124110	fldSnapAngleToCompassPoint	inferred	Wraps angle and chooses nearest of sixteen compass angles; DDS1 twin. [names_qp9.tsv]
 0x001244A8	fldSnapAngleToCompassOctant	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:1203:func_001244A8; Normalizes degrees and snaps to nearest of eight compass directions.; twin=0x00122498, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00124720	fldSnapAngleToCardinalDirection	inferred	Normalizes degrees and returns the nearest cardinal direction. [names_reviewed9.tsv]
+0x001248E8	fldGetDirectionAngleBetweenXZPositions	inferred	Returns the 0-to-360 degree heading from one X/Z point to another; paired with 0x001228D8 and used by fldGetNormalizedComplementaryAngle.
 0x001249B8	fldGetNormalizedComplementaryAngle	inferred	Converts the source angle to its complementary wrapped angle in degrees. [names_reviewed10.tsv]
 0x00124A10	fldGetTriangleHeightAtXZ	inferred	Interpolates the support triangle's Y coordinate at camera-follow X/Z samples; paired DDS1 helper is 0x00122A00.
 0x00124BF0	fldToggleWorldNodeState	inferred	Walks world-secondary nodes of kind six and switches nodes currently in state four to state three or zero according to the supplied mode.
@@ -2943,6 +2957,7 @@
 0x00205990	btlAdvanceTitleStateAfterSound	inferred	Task callback calls btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x002059B0	btlCreateAdvanceTitleStateTask	inferred	Creates callback task for btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x00206060	btlRepositionPartyAroundBattleCenter	inferred	Passes the battle center vector to the routine spreading party units around it. [names_reviewed14.tsv]
+0x00206090	btlArrangeOpponentFormationSlots	inferred	Calls btlArrangeFormationSlots with status mask 0x400; its other branch selects party spacing/orientation via 0x200, while the special-unit scene path uses this helper for the opponent-side arrangement. DDS1 twin 0x001F53F0. [code-quality cleanup, 2026-10-13]
 0x002060B0	btlMoveOtherUnitsAway	inferred	for every other active unit sharing the caller mask, positions it with Y += 1000000.0 then repositions the owner [names_reviewed2.tsv]
 0x002061B0	btlPlaceTripleFormationAroundCenter	inferred	U1
 0x00206370	btlPlaceTripleFormationAroundTarget	inferred	places up to three units on a circle (radius max(500, reach*scale+100)) around the single target and faces them to it [names_M88_VuBattle.tsv]
@@ -3251,7 +3266,7 @@
 0x002199C8	btlTriggerLinkedActionMotionAlternate	inferred	sibling of btlTriggerLinkedActionMotion, calls func_00217378 instead of func_00217470 [names_reviewed2.tsv]
 0x00219A70	btlTriggerLinkedActionMotion	inferred	When action owner has flags 0x400 and code 0x136 with bound actor state 0x1200, applies an effect vector, raises motion coordinate 150, and refreshes actor effect state.
 0x00219B48	btlStartLinkedActionMotionPrimary	inferred	actionCode 0x17E branch of btlSetupHariActionCameraPair sibling [names_M86_BattleAct.tsv]
-0x00219CC8	btlAdvanceTimedActionState	inferred	For action 0x10C, increments its frame counter when accepted; after frame 18 calls func_001E9890 and invokes func_001EC868 with a zero float.
+0x00219CC8	btlAdvanceTimedActionState	inferred	For action 0x10C, increments its frame counter when accepted; after frame 18 calls func_001E9890 and invokes btlBuildBattleUnitFramingCameraPose with a zero float.
 0x00219D40	btlRemapCommandKind	inferred	sibling of func_00218630 style kind remap in the battle-select state [names_M86_BattleAct.tsv]
 0x00219E38	btlGetSpecialEnemyActionStatus	inferred	L13
 0x00219F58	btlRecenterActorsAroundLead	inferred	mode 0x10D lead is placed at x=0 and every other live actor is shifted by the lead's -x through btlSetUnitPosition [names_M69_Battle3.tsv]
@@ -6644,6 +6659,9 @@
 0x003424A8	sndGetTrackSlotTable	inferred	medium confidence; src/dds2/game/code_00341FE8.c func_003424A8: Returns the 8-byte sound track-slot table; D_0047ABD0 equals the slot-array address D_0047AA40 + 0x190 used by track lookup. [names_reviewed25.tsv]
 0x00342538	sndStartTrackExtended	inferred	Prepares a track ID and sends command 0x20 with setting 0x17f.
 0x00342580	sndReleaseTrackHandle	inferred	Stores the supplied track handle in word 0 and sends the 16-byte command 0xD0 packet.
+0x003425B0	sndStartReducedBgm	inferred	The paired 0x180 sound command selects the reduced-mode BGM start action; terminal-mode and menu/event callers use it on start or initialization.
+0x003425D8	sndStopReducedBgm	inferred	The paired 400 (0x190) sound command selects the reduced-mode BGM stop action; terminal-mode and menu/event callers use it on stop or teardown.
+0x00342600	sndTransitionBgm	inferred	Calls the paired BGM transition command 0xE0 plus the packed track channel; evtTransitionBgm supplies the encoded track and fade.
 0x00342688	sdfSoundIsCommandBusy	inferred	Returns the same nonzero command flag that blocks sdfSoundSendNamedCommand.
 0x00342690	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds2/game/code_003425B0.c:208:func_00342690; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00342728	sdfSoundTryQueueCommand	inferred	Rejects a command while the sound device is busy; otherwise stores and returns the requested command.
@@ -8066,7 +8084,6 @@
 0x001A9B80	btlInitializeBattleRuntime	inferred	Allocates/resets battle runtime, seeds RNG, initializes actor state and three message windows, and queues shared model/audio/input resources before btlStart. DDS1 twin 0x001A0F10; game-specific initialization preserved. [Namer1 batch 41]
 0x001A9F30	btlStart	inferred	Exact name in native '** btlStart **************' diagnostic; initializes runtime/draw tasks, selects encounter/background parameters and battle scene, then sets entry flags. DDS1 twin 0x001A11F0. [Namer1 batch 41]
 0x001ADA10	btlGetEscapeAttemptCount	inferred	Returns runtime counter 0x278 incremented only by btlRecordEscapeAttemptOutcome before its escape chance test; evtPushAvailableIntegerValue exposes it to scripts. DDS1 twin 0x001A4630 reads 0x254. [Namer1 batch 41]
-0x0019DE70	frFontGetBankEntryText	inferred	Bounds-checks bank entry ID, skips packed count/table and metadata word, and returns encoded text consumed by bank-text renderers. DDS1 twin 0x001961B0; unused mode and metadata copy retained. [Namer1 batch 41]
 0x001EA940	btlIsLinkedFireOfSinaiCommand	inferred	Tests linked actionCode 0x5F; both games' skill-name tables identify entry 95 as Fire of Sinai, and linked-camera selectors use this predicate. DDS1 twin 0x001DD488. [Namer1 batch 41]
 0x001EAA08	btlIsLinkedItemDropCommand	inferred	Tests linked actionCode 0x1A0; skill-name entry 416 is Dropped Item in DDS2 and Item Drop in DDS1; linked-camera selector chooses the actor-count pose for it. DDS1 twin 0x001DD498. [Namer1 batch 41]
 0x001EAC10	btlPreparePrimaryActionCamera	inferred	Passes the action and its embedded camera to the existing pose provider, whose native builder receives 27.5f; arbitrary-output and tilt variants remain separate. DDS1 twin 0x001DD680; no unproven field-of-view meaning assigned. [Namer1 batch 41]
@@ -8082,10 +8099,13 @@
 0x002DCCE8	effCreateResourceOwner	inferred	confidence=high; allocates/clears the owner, loads its model, and creates per-map-record file queues when given a job; the job option selects the preserved 0x40/0x80 resource-header layouts; DDS1 twin 0x0029B368. [Namer1 batch 42]
 0x002DD3C0	effResetModelMotionAndOwnerFlag	inferred	confidence=high; notifies queued jobs, samples the owner's first model motion at frame zero, and clears its owner word; common role aligns with existing DDS1 0x0029B7E0, preserving the extra DDS2 queue notifications. [Namer1 batch 42]
 0x002DDF48	effCreateTextureAnimationSet	inferred	confidence=high; allocates packed animation entries plus shared texture handles and creates the per-entry texture resources while counting expanded entries; alignment with existing DDS1 0x0029C230. [Namer1 batch 42]
-0x002050D0	btlResetSoundLoadFrames	inferred	confidence=high; sets the motion- and skill-SE load-frame words at 0x288/0x28C to -1; frame increments test for nonnegative values and diagnostics identify the SE counters; DDS1 twin 0x001F4430. [Namer1 batch 42]
 0x001F3C30	btlInitializeActorCameraPreset	inferred	confidence=high; selects the actor-ID/mode preset records, initializes both camera vectors, motion progress and frame state, and marks defeat candidates; caller selects linked-command step 0xC. [Namer1 batch 42]
 0x001F3E48	btlAdvanceActorCameraPreset	inferred	confidence=high; advances the preset's motion/frame-triggered transition, blends camera distance/offset, updates defeat-candidate state, and increments its frame; dispatched for linked-command step 0xC. [Namer1 batch 42]
 0x001FDD20	btlCombineCameraSpheresVU	inferred	confidence=medium; combines two centers and radii, returns the result radius and writes the result center to vf10; the unusual native containment branch is retained and is not described as a minimum enclosing sphere. [Namer1 batch 42]
 0x001FDF18	btlBuildUnitTargetSphereVU	inferred	confidence=medium; combines selected first/second unit bounds and an optional target sphere via the existing camera-bounds provider and sphere combiner, returning radius with center in vf10. [Namer1 batch 42]
 0x001FF5D8	btlInitializeCameraCursorForActorId	inferred	confidence=high; clears the shared sound cursor, switches on the linked unit ID to seed camera descriptors/cursor fields, and falls back to the single-linked-resource camera; preserves the legacy implicit return type. [Namer1 batch 42]
 0x0030F898	sdfSetVectorComponents	inferred	confidence=high; directly stores the supplied X/Y/Z scalars to the output vector; alignment with existing DDS1 0x002C84B8 without normalizing this game's different argument order; genuinely absent symbol row registered. [Namer1 batch 42]
+0x001ECBF8	btlSetDefaultActionCameraPose	inferred	Paired wrapper applies the baseline action-camera pose through the three-argument camera worker at 27.5f. Multiple battle-camera paths use it as a framing fallback or starting pose before adjusting FOV, distance, and position. DDS1 twin 0x001DF358.
+0x001EC868	btlBuildBattleUnitFramingCameraPose	inferred	Walk the active battle-unit list, filter status flags, accumulate scaled reach and vertical bounds, and build the output camera pose using the requested angle; paired callers use it for action framing. DDS1 twin 0x001DEFE0.
+0x00341650	sndQueueCommandPacket	inferred	Reserve a sound-command ring slot, stamp its sequence, copy payload, pack command/channel/quadword count, advance the producer cursor, wake the consumer and return the sequence; DDS1 twin 0x002E87A8. This is the queue producer beneath sndSendCommandPacket.
+0x00306DC8	effDrawRepeatedSpriteTiles	inferred	blends the slot’s four corner colors with alpha cleared, initializes a complete tile width from sourceWidth * 16, and draws length / tileWidth repeated tiles.

@@ -988,7 +988,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->messageWindows[2] =
         itfMesCreateWindow(&D_00385228);
     sndResetTransition();
-    btlResetSoundLoadFrames();
+    btlResetMotionSoundFrameCounters();
     btlResetDeferredTaskQueue();
     btlResetToInitialScene();
     fldClearSceneSlotsAndGroups();

@@ -8,6 +8,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
+#include "sdf_tex_packet.h"
 #include "kwln.h"
 #include "kwln_fade.h"
 #include "sdf.h"
@@ -235,7 +236,7 @@ extern s32 D_00435C28;
 extern s32 D_00435C2C;
 
 /* Unregister a named slot: stop its task, clear it and unlink it from the slot chain. */
-s32 func_00103108(const char *name) {
+s32 kwlnUnregisterNamedSlot(const char *name) {
     s32 slotIndex;
 
     if (kwlnTaskGetTaskByName(D_00411198) == NULL) {
@@ -819,7 +820,7 @@ extern char D_00411308[];
 
 INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004111F8);
 
-void func_00104700(SdfListHead *packetList, SdfTex *texture) {
+void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
     char text[0x70];
     s32 formatIndex = 0;
     s32 formatMode = 0;
@@ -967,20 +968,20 @@ void kwlnDrawTextureViewerFrame(void *data, s32 handle) {
     sdfAppendPacket(packetList, (u32)func_0011F250(0x7160, 0x7A50, 0x0FFFFF7F, 0x1040, 0x820, 0x80000000, 0x80806020));
     kwlnDrawImageOutline(packetList, image);
     sdfAppendPacket(packetList, (u32)func_0011F250(0x7160, 0x8290, 0x0FFFFF7F, 0x1040, 0xE0, 0x80000000, 0x80806020));
-    func_00104700(packetList, image);
+    kwlnDrawTextureResourceDetails(packetList, image);
 
     if (D_00435C60 != 0) {
         kwlnDrawTextureListDiagnostic(packetList, 0x8240, 0x7A60);
         counter = D_00435CB0;
         mode = (counter >> 4) & 1;
         if (image->primaryResource != NULL) {
-            func_00104D40(packetList, 0x8240, 0x7A60, image->primaryResource, mode);
+            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->primaryResource, mode);
         }
         counter = D_00435CB0;
         /* Boolean highlight selection; see docs/idioms.md, "Trace-justified boolean extraction: texture viewer highlight". */
         mode = (counter & 0x10) ? 2 : 0;
         if (image->secondaryResource != NULL) {
-            func_00104D40(packetList, 0x8240, 0x7A60, image->secondaryResource, mode);
+            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->secondaryResource, mode);
         }
         D_00435CB0++;
     }
@@ -1035,7 +1036,7 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
 /* Draw one allocation-map block in address units, choosing color by mode.
  * Only the initial partial row forces a nonzero remainder to occupy one cell;
  * the final partial row retains its truncated cell count. */
-void func_00104D40(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode) {
+void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode) {
     s32 color;
     u32 remainingUnits;
     s32 columnIndex;
@@ -1109,7 +1110,7 @@ void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
                                           0x0FFFFF7F, KWLN_MAP_BORDER_WIDTH, 0x820,
                                           0x80000000, 0x80806020));
         do {
-            func_00104D40(packetList, x, y, block, 0);
+            kwlnDrawTextureAllocationMapBlock(packetList, x, y, block, 0);
             block = block->prev;
         } while (block != NULL);
     }
@@ -1195,7 +1196,7 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
 
 extern void sdfGraphSetDisplayMode(s32);
 extern void kwlnInitializeFrameDrawPackets(s32);
-extern void func_001057B0(void);
+extern void evtInitializeFrameStatePacketTemplates(void);
 extern u8 D_00435BC8;
 extern void evtEnsureDrawVectorState(void);
 
@@ -1206,7 +1207,7 @@ void evtResetDisplayProjectionAndVectorState(void) {
     sdfCameraBuildProjection(&D_0037F980.camera);
     kwlnInitializeFrameDrawPackets(0);
     kwlnInitializeFrameDrawPackets(1);
-    func_001057B0();
+    evtInitializeFrameStatePacketTemplates();
     D_00435BC8 = 0;
     evtEnsureDrawVectorState();
 }
@@ -1263,7 +1264,6 @@ extern void kwlnInitHeldTextureScenePackets(void);
 extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 arg6, SdfTexResource *secondary);
 extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
-extern void sdfTexCreateFirstPacket(SdfTex *texture);
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
 s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
@@ -1421,7 +1421,7 @@ void kwlnCancelConfiguredFadeFrames(void) {
     D_00435CE8 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
+INCLUDE_ASM(const s32, "game/code_00102DC8", evtInitializeFrameStatePacketTemplates);
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
 SdfListHead *evtBuildFrameStatePacketList(s32 stateIndex) {
@@ -1571,7 +1571,7 @@ void kwlnDrawBlurErrorCounters(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105CF8);
+INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnQueueBackgroundFadeOverlayPacket);
 
 /* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
  * This reset does not rewrite the background counter or duration. */
@@ -1679,7 +1679,7 @@ void kwlnStepBackgroundFade(void) {
     }
 }
 
-void func_00106288(void) {
+void kwlnDrawBackgroundFadeBands(void) {
     s16 firstRamp = 0;
     s16 secondRamp = 0;
     s32 fade;

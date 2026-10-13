@@ -190,7 +190,6 @@ extern void mnuDrawCampGridAndLabelDefault();
 
 extern char D_003E69B0[];
 
-extern void mnuCreateStaffImageSprite();
 
 
 

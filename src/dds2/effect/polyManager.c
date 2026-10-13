@@ -6,6 +6,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "poly_ring_head.h"
 
 struct SdfMemBlock;
 
@@ -37,27 +38,6 @@ typedef struct {
     ParSystem *strip;
     s32 *ages;
 } PolyNode;
-
-/* The allocated ring families copy this common 0xC0-byte prefix and append
- * their own parameters/resources; their tails are not interchangeable. */
-typedef struct {
-    f32 origin[4];
-    u32 entryCount;                /* 0x10 */
-    s32 duration;                  /* 0x14 */
-    u32 templateSize;              /* 0x18 */
-    u8 pad1C[4];
-    f32 matrix[16];                /* 0x20 */
-    u32 color;                     /* 0x60 */
-    u8 loop;                       /* 0x64 */
-    u8 pad65;
-    u16 unk66;
-    u32 startColorRampFrames;      /* 0x68 */
-    u32 endColorRampFrames;        /* 0x6C */
-    f32 matrixCopy[16];            /* 0x70: initialized from the template transform */
-    u8 padB0[2];
-    u16 active;                    /* 0xB2: cleared when all entries finish */
-    u8 padB4[0xC];
-} PolyRingHead; /* 0xC0 */
 
 /* +4 is the per-update radius delta, not an absolute radius. */
 typedef struct {
