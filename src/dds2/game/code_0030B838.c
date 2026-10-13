@@ -99,7 +99,7 @@ extern SdfCameraVector D_00400990;
 extern SdfCameraVector D_004009A0;
 extern SdfCameraVector D_004009B0[];
 extern SdfCameraVector D_00400A50[];
-extern u32 func_0030B678(void);
+extern u32 sdfGetInitialMapCameraTransitionState(void);
 
 extern struct MenuList *mnuCreateListState(u32, u32, s32);
 extern void *memset(void *, s32, u32);
@@ -153,7 +153,7 @@ void sdfInitializeMapCounterSelection(s32 index, s32 count) {
     sdfCounterSelectionCount = count;
     sdfSelectedCounterIndex = index;
     D_004388C0 = 0;
-    D_004388C1 = func_0030B678();
+    D_004388C1 = sdfGetInitialMapCameraTransitionState();
 }
 
 
@@ -196,7 +196,7 @@ s8 sdfGetMapCameraTransitionFrame(void) {
     return D_004388C0;
 }
 
-void func_0030BCF0(void) {
+void sdfTickMapCameraTransition(void) {
     sdfUpdateSelectedCounterMapCameraTransition();
 }
 

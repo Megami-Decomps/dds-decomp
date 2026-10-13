@@ -558,7 +558,7 @@ void fileReqSetSelectedSlot(s32 request, s32 selectedSlot) {
     fileRequestEntries[request].selectedSlot = selectedSlot;
 }
 
-void fileSubmitMemoryCardDetectionRequest(u32 arg0) {
+void fileRequestMemoryCardFormat(u32 arg0) {
     func_002F6E90(arg0, 0);
 }
 

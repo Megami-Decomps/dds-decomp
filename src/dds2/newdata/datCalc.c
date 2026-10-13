@@ -1277,7 +1277,7 @@ void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
     }
 }
 
-extern s32 func_002D0B08(s32 rosterIndex);
+extern s32 fileApplyStoryStatBonuses(s32 rosterIndex);
 extern s32 D_00386048[][4];
 
 /* Add a roster member to the first free party slot: initialise it from its saved template or by
@@ -1351,7 +1351,7 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
         }
     }
 
-    if (func_002D0B08(rosterIndex) != 0) {
+    if (fileApplyStoryStatBonuses(rosterIndex) != 0) {
         entry->maxHp = datComputeSkillBoostedMaxHp(entry);
         entry->maxMp = datComputeSkillBoostedMaxMp(entry);
         entry->hp = entry->maxHp;
