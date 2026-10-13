@@ -456,7 +456,7 @@ extern s32 btlGroupContainsId(s32, s32);
 extern void btlAddGroupId(s32, s32);
 extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);
 extern char *func_0035D5B0(const char *, s32);
-extern s32 func_0035CB10(const char *, const char *);
+extern s32 strcasecmp(const char *, const char *);
 extern const char D_00436FA8[];
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *, MdlLoadRequest *);
@@ -491,7 +491,7 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     packed = 0;
     extension = func_0035D5B0(path->path, '.');
     if (extension != NULL) {
-        packed = func_0035CB10(extension, D_00436FA8) == 0;
+        packed = strcasecmp(extension, D_00436FA8) == 0;
     }
     btlAddGroupId(group, id);
     SignalSema(mdlGroupJobSemaphore);
