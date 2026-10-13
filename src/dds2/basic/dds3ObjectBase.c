@@ -4,6 +4,7 @@
 #include "dds3_path.h"
 
 #include "dds3obj.h"
+#include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "dds3Admin.h"
 #include "pcp_vu0.h"
