@@ -1458,7 +1458,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     packet = (void *)sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
     sdfAppendPacket(list, (u32)packet);
-    sdfAppendPacket(list, (u32)func_0011D3E8(0x70D0, 0x85A8, 0xFFFF7F, 0x1260, 0xC0, 0x20000000, 0x40806040));
+    sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(0x70D0, 0x85A8, 0xFFFF7F, 0x1260, 0xC0, 0x20000000, 0x40806040));
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x85C0, 0xFFFF80, 0, D_003BA978, freePercent));
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8080, 0x85C0, 0xFFFF80, 6, D_003BA978, D_003BA970));
     currentColumn = (s32)((f32)freePercent / 100.0f * 200.0f) + 0x2A;
@@ -1611,7 +1611,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     sdfSetPacketCursorAligned((s32)entry);
 
     entry = snapshot;
-    sdfAppendPacket(list, (u32)func_0011D3E8(x - 0x20, y - 0x10,
+    sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(x - 0x20, y - 0x10,
         0x0FFFFF7F, 0x840, (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x20,
         0x80000000, 0x80806020));
     for (i = 0; i < count; i++) {
@@ -1672,7 +1672,7 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
     return 0;
 }
 
-extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern s32 frFontGetParentGlyphCount(void);
 extern s32 frFontGetChildGlyphCount(void);
 extern s32 effGetFontListCount(void);
@@ -1695,7 +1695,7 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     packet = (void *)sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
     sdfAppendPacket(list, (u32)packet);
-    sdfAppendPacket(list, (u32)func_0011D3E8(0x70d0, 0x7968, 0xffff7f,
+    sdfAppendPacket(list, (u32)sdfCreateBorderedRectanglePacket(0x70d0, 0x7968, 0xffff7f,
                                           0xf70, 0x98, 0x20000000, 0x40806040));
     fontCount = frFontGetParentGlyphCount();
     textCount = frFontGetChildGlyphCount();

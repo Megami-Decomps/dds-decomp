@@ -82,7 +82,7 @@ extern char D_003BB2C0[]; /* ">" */
 extern char D_003BB2C8[]; /* " %s" */
 extern char D_003BB2D0[]; /* "%3d" */
 extern char D_003BB2D8[]; /* "%4d" */
-extern s32 func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
+extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 void itfDrawPulsingTestOverlay(s32 surfaceIndex);
 
 /* Draw the four color channels and handle selection and value editing. */
@@ -98,7 +98,7 @@ s32 itfEditOverlayColor(void) {
 
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list,
-        func_0011D3E8(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
+        sdfCreateBorderedRectanglePacket(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB2B8));
     if (D_003D73E0.editing == 0) {
