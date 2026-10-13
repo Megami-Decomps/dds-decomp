@@ -951,7 +951,7 @@ void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
 
-extern void func_0011CE38();
+extern void btlPreemptiveChanceHook();
 
 const char D_003A1CA8[] = "btl:preemptive=%d%%[ratio=%.2f]\n";
 
@@ -994,6 +994,6 @@ s32 btlSelectPreemptiveOutcome(void) {
         chance = 80;
     }
     btlBossDebugPrintf(D_003A1CA8, chance, ratio);
-    func_0011CE38(chance);
+    btlPreemptiveChanceHook(chance);
     return btlRollAiBucket() < chance ? 1 : 2;
 }

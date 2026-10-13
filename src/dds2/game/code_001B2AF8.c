@@ -728,7 +728,7 @@ s32 func_001B3B28(BtlUnit *actor) {
 }
 
 /* Preserve the native forwarded chance word; the empty provider ignores it. */
-extern void func_0011EBE8();
+extern void btlPreemptiveChanceHook();
 
 extern const char D_004156F8[];
 
@@ -780,7 +780,7 @@ s32 btlSelectPreemptiveOutcome(void) {
         }
     }
     btlBossDebugPrintf(D_004156F8, chance, ratio);
-    func_0011EBE8(chance);
+    btlPreemptiveChanceHook(chance);
     return btlRollAiBucket() < chance ? 1 : 2;
 }
 
@@ -835,7 +835,7 @@ s32 btlRollMajinEncounter(void) {
 extern const f32 D_004157A0[9];
 extern const char D_004157C8[];
 /* The empty native provider still receives the calculated chance word. */
-extern void func_0011EBF8();
+extern void btlSurpriseChanceHook();
 
 s32 btlRollSurpriseAttack(void) {
     f32 levelScale[9];
@@ -915,7 +915,7 @@ s32 btlRollSurpriseAttack(void) {
     }
     chance = (s32)((f32)chance * ratio);
     btlBossDebugPrintf(D_004157C8, chance, difference, ratio);
-    func_0011EBF8(chance);
+    btlSurpriseChanceHook(chance);
     return btlRollAiBucket() < chance;
 }
 

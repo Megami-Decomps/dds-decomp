@@ -189,7 +189,7 @@
 0x00109D20	evtUpdateSelectionStateInterpolation	inferred	Updates the three timed values for an active selection state, handles its mode transitions and leaves completion to evtCheckSelectionState. DDS2 twin at 0x00109E60.
 0x0010A158	evtDestroySelectionState	inferred	DDS2 0010A298 twin; calls evtSelStateDestroy [names_R_FuncNames2.tsv]
 0x0010A170	evtSelStateDestroy	inferred	evt frees D_003BD760 and clears the vector at D_00324590
-0x0010A1B0	evtStartSelCreate	inferred	creates StartSel kwln task via kwlnTaskCreate with update func_00104260; tail-calls
+0x0010A1B0	evtStartSelCreate	inferred	creates StartSel kwln task via kwlnTaskCreate with update kwlnTaskNoopCallback; tail-calls
 0x0010A1E8	evtStartSelDestroy	inferred	destroys StartSel task hierarchy by name, returns 1
 0x0010A230	evtPollFileMenuModeThree	inferred	DDS2 0010A370 twin; releases file resources then tests file menu completion [names_R_FuncNames2.tsv]
 0x0010A268	evtWaitFileMenuTaskThree	inferred	DDS2 0010A3A8 twin; tests active file task sentinel [names_R_FuncNames2.tsv]
@@ -8871,3 +8871,10 @@
 0x001470E0	fldDrawAutomapWhenReady	inferred	confidence=high; When fldSceneReady is exactly1, draws the backdrop and automap scene; invoked by fldProcDraw. DDS2 14B050 counterpart. [PurC readability b1]
 0x0014A298	fldSetTitleDrawMode	inferred	confidence=high; Stores the title draw mode selecting display buffer53 versus5E in fldTitle; event timeline track1E supplies the mode. DDS2 14E668 counterpart. [PurC readability b1]
 0x0014A2C8	fldBeginTitleAnimation	inferred	confidence=high; Clears the title startup countdown and selects phase1, the fade-in animation; event timeline track1E starts it. Does not reset the frame counter. DDS2 14E698 counterpart. [PurC readability b1]
+0x0011B140	ptyReturnZero	inferred	confidence=high; Constant-zero party helper in datCalc; DDS1 script wrapper 0011CEF0 forwards two operands and stores its result. DDS2 0011C698 has the same party-helper position and body. Signatures preserved. [PurD readability b1]
+0x0011C520	evtPushLevelValueCCommand18D	inferred	confidence=high; Pushes the first party record's levelValuesC[level-1] as the script float return. Builtin command table 0039E288 has its entry at 0039EEF0, index18D with 8-byte entries. DDS2 0011E198 occupies the same command slot. [PurD readability b1]
+0x0011C550	evtPushLevelValueCCommand18E	inferred	confidence=high; Pushes the first party record's levelValuesC[level-1] as the script float return. Builtin command table 0039E288 has its entry at 0039EEF8, index18E with 8-byte entries. DDS2 0011E1D0 occupies the same command slot; neither duplicate is designated primary. [PurD readability b1]
+0x0011CE38	btlPreemptiveChanceHook	inferred	confidence=high; Empty retail hook called with the finalized chance by btlSelectPreemptiveOutcome immediately after its preemptive-percent diagnostic and before the RNG roll. DDS2 0011EBE8 counterpart. [PurD readability b1]
+0x0011CE40	btlSerialBattleChanceHook	inferred	confidence=high; Empty retail hook receives the clamped serial-battle chance at 001A98BC, immediately after the btl:serial ratio diagnostic and before RNG comparison. DDS2 0011EBF0 is called at 001B3F28 in the same sequence. [PurD readability b1]
+0x0011CE48	btlSurpriseChanceHook	inferred	confidence=high; Empty retail hook called with the finalized chance by btlRollSurpriseAttack immediately after its surprise-percent diagnostic and before the RNG roll. DDS2 0011EBF8 counterpart. [PurD readability b1]
+0x00104260	kwlnTaskNoopCallback	inferred	confidence=high; Task update callback returns zero without using its task argument; registered by evtStartSelCreate for the StartSel task. DDS2 00104150 counterpart. [PurD readability b1]

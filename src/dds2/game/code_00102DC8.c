@@ -688,7 +688,7 @@ void kwlnUpdatePadMotorDurations(void) {
     }
 }
 
-s32 func_00104150(KwlnTask *task) {
+s32 kwlnTaskNoopCallback(KwlnTask *task) {
     return 0;
 }
 
