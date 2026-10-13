@@ -39,7 +39,7 @@ u32 sndSubmitTextCommandPayloadWithCommandBits60(s32 command, char *text) {
 }
 
 /* Send text with command bit 0x80; payload length excludes its NUL terminator. */
-u32 sndSendTextCommandPacket(s32 command, char *text) {
+u32 sndSubmitTextCommandPayloadWithCommandBits80(s32 command, char *text) {
     u32 length = strlen(text);
 
     return sndSendCommandPacket(command | 0x80, 0, text, length);

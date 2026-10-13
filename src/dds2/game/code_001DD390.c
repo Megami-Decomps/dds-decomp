@@ -5960,8 +5960,6 @@ extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 extern void dds3EnsureSlotData(void *);
 
-extern void dds3SetObjectSlot1MoverCallback(EffWorldNode *, Dds3MoverUpdate);
-
 /* vu0 routine: add the battle origin to the default camera position. */
 void btlInitializeWorldCamera(void) {
     f32 position[4];

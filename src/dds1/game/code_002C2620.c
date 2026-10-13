@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -54,7 +55,7 @@ extern void fldDrawLocalMapOverlay(void);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern s32 fldLocalMapTrackState;
-extern void evtCreateWorldObjectForKey(s32, s32);
+
 extern void dds3SetWorldObject(void *);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void fldCreateLocalMapCamera(void);

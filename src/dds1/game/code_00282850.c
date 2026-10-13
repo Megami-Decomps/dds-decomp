@@ -4,6 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
 #include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
@@ -1076,7 +1077,7 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
 }
 
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
-extern void func_002C1548(s32, s32);
+extern void uiPrepareMenuBackgroundSurface(s32, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 /* Draw the filled profile bar and its animated background strips. */
 void mnuDrawProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
@@ -1106,7 +1107,7 @@ void mnuDrawProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surfa
     if (index != panel->background.index) {
         uiDrawTexturedSurfaceAtFarDepth(surface);
         itfDrawGridWithResolvedSlot(x, y, z, 0x21, slots, index, surface);
-        func_002C1548(0, surface);
+        uiPrepareMenuBackgroundSurface(0, surface);
         slots = panel->background.set;
         index = panel->background.index;
         offset = (s32)((u32)panel->phase << 7) / 0x200;
@@ -2681,7 +2682,6 @@ extern SdfPoolNode D_00325708;
 extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
 #include "sdf_packet_alloc.h"
-extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */

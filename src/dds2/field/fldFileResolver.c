@@ -10,6 +10,7 @@
 #include "fld_transfer_chunk.h"
 #include "fld.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "sdf_texture_file.h"
 #include "evt_action_object.h"
 #include "sdf_texture_offset_list.h"
@@ -23,7 +24,6 @@ extern void *dds3GetWorldSecondaryObject(void);
 struct EffWorldNode;
 extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
 extern s32 fldGetRecordValueById(s32 id);
 extern void fldSetRecordValueById(s32 id, s32 value);
@@ -800,7 +800,6 @@ extern void func_0014C9B0(u32, f32 *, f32, f32, f32);
 extern s32 fldSetSparkVectors(s32, const u128 *, const u128 *);
 extern void fldAppendPendingSoundForScene(s32, f32, f32, f32, f32);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
-extern void dds3SetWorldNodeValue(EffWorldNode *, u32);
 
 /* Serialized transforms leave the position W component zero. */
 static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32 *source) {
@@ -1036,7 +1035,6 @@ extern u32 D_00438EC4;
 extern struct DevRequest *D_00435FA4;
 struct EffWorldNode;
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
@@ -1144,7 +1142,6 @@ extern s32 fldTestMapSlotValueFlag(s32, u32, s32);
 extern s32 fldTestRoomModeFlag(s32, u32, s32);
 extern s32 fldFindSearchId(const char *);
 extern void dds3EnsureSlotData(void *);
-extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern void evtScaleSlotByClampedMultiplier(void *, f32);

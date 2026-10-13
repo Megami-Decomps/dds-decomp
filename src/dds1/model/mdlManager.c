@@ -33,6 +33,7 @@
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "btl_group_id_entry.h"
+#include "mdl_grouped_parts_api.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -1216,7 +1217,6 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
 }
 
 
-extern PacWork *mdlApplyGroupedPartPackets(PacWork *, s32, s32, s32);
 typedef struct MdlPartTagRecord {
     u32 tag;
     u8 state;

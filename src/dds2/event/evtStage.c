@@ -5,6 +5,7 @@
 #include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
+#include "evt_world_object_api.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_query.h"
 #include "kwln_task_state.h"
@@ -16,7 +17,6 @@ extern void sdfFreezeFloatCounter(struct EvtScaledValue *);
 extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *);
 
 
-extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);

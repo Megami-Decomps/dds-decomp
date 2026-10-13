@@ -53,7 +53,7 @@ void brsDrawResultIconPairWithAlpha(s32 unused, u32 alpha, s32 iconIndex, s32 op
                          D_0036C728[8][BRS_ICON_ID], option);
 }
 
-void func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
+void brsDrawResultIconPairWithSlidingCompanion(s32 unused, u32 value, s32 iconIndex, s32 option) {
     f32 normalized;
     f32 companionPosition;
     struct EffectSlotSet *layer;
@@ -196,7 +196,7 @@ s32 func_00260670(ShopScene *scene) {
         mnuDrawStatusIconAndCompanion(0, (s32)((1.0f - position) * -48.0f) << 3,
                                      0, scene, (s32)(opacity * 256.0f), 0x53);
         mnuDrawShopCurrencyBalance(scene, 0xA09DC300 | (s32)(opacity * 128.0f));
-        func_00260370((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
+        brsDrawResultIconPairWithSlidingCompanion((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
         break;
     case 2:
         if ((f32)scene->frames > 0.0f) {
@@ -343,10 +343,10 @@ s32 func_00260AB0(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260370((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithSlidingCompanion((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
             break;
         case 2:
-            func_00260370((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithSlidingCompanion((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
             break;
         }
         break;
@@ -408,7 +408,7 @@ s32 func_00260AB0(ShopScene *scene) {
         }
         mnuDrawStatusIconAndCompanion(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
                       (s32)(opacity * 256.0f), 0x53);
-        func_00260370((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
+        brsDrawResultIconPairWithSlidingCompanion((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
         progress = (f32)scene->frames / 10.0f;
         if (progress > 1.0f) {
             progress = 1.0f;

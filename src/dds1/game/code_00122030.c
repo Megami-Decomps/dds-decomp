@@ -6,6 +6,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -18,6 +19,7 @@
 #include "evt_solar.h"
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "mdl.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
@@ -147,7 +149,6 @@ extern char D_0039FBC0[]; /* "fldProcSequence" */
 
 struct EffWorldNode;
 
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern u8 D_003BAB3C;
 
@@ -824,7 +825,7 @@ typedef char FieldAreaEncounterRow_size_check[(sizeof(FieldAreaEncounterRow) == 
 typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable) == 0x304) ? 1 : -1];
 extern FieldAreaEncounterTable *D_003BAA38;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
-extern s32 evtCreateWorldObjectForKey(s32 area, s32 room);
+
 extern void *func_00117648(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
@@ -844,7 +845,7 @@ extern void fldLoadFieldEffectTextureSlots(void);
  * the earlier Obsidian/Slate/Peregrine/Sable reconstruction lineage. */
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FBC0);
 
-void func_001233D0(void) {
+void fldRebuildFieldScene(void) {
     f32 fallback[12];
     f32 *transform = NULL;
     FieldPlayerSceneWork *sceneWork;
@@ -1846,7 +1847,7 @@ extern u8 fldTestSceneLifecycleFlags(u32);
 
 extern s16 D_0032E4D8[];
 
-s32 func_00124F58(void) {
+s32 fldUpdateCampMenuTransition(void) {
     FldAreaWork *scene;
     s32 control;
 
@@ -2055,7 +2056,7 @@ extern void fldUpdateSwayOffset(void);
 
 extern void func_00120EC8(void);
 
-extern void func_001233D0(void);
+extern void fldRebuildFieldScene(void);
 
 extern s32 fldUpdateTravelAndEncounters(void);
 
@@ -2134,7 +2135,7 @@ s32 fldProcSequence(void) {
     mode = fldGetCampSceneControlMode();
     if (mode < 3) {
         if (mode > 0) {
-            func_00124F58();
+            fldUpdateCampMenuTransition();
             return 0;
         }
     }
@@ -2147,7 +2148,7 @@ s32 fldProcSequence(void) {
         D_003BA8EC = 0x80000000;
         evtEnableSolarPhaseAdvance();
         D_003BAD58 = 0;
-        func_001233D0();
+        fldRebuildFieldScene();
         dds3SetWorldObject(dds3GetWorldSecondaryObject());
         fldCreateInputPanelTask();
         if (fldAreaState.transitionMode == 0) evtSetSolarOverlayFullyVisible();
@@ -2241,7 +2242,7 @@ s32 fldProcSequence(void) {
             fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.unkC0,
                          fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_0032E570[0] == 0) {
-            func_00124F58();
+            fldUpdateCampMenuTransition();
             if (fldTestSceneControlFlags(0x20) == 0) break;
             if (D_0032E570[0] == 0) fldUpdateNextFloorTransition();
         }

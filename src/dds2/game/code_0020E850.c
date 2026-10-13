@@ -1288,7 +1288,7 @@ void btlSelectCommandTargetsByMode(void) {
     btlSelectTargetsByMode();
 }
 
-void func_00211108(s32 context) {
+void btlCmdAppendCurrentUnitIdToCommandIndices(s32 context) {
     btlAppendCurrentUnitIdToCommandIndices(context, 0);
 }
 

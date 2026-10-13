@@ -34,7 +34,7 @@ extern u32 D_003BDA28;
 
 extern u128 *D_003EB860[][3];
 
-extern void func_002DE010(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
+extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 
 extern u16 D_003BDA24;
 
@@ -332,7 +332,7 @@ void func_002E02D8(u32 workAddress) {
             if (param8 != paramC) {
                 u128 parameters[3];
 
-                func_002DE010((SdfVuColorTransform *)parameters, D_003BDA28, work->packedColor,
+                sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, D_003BDA28, work->packedColor,
                               paramC, node->unk04, node->unk1C,
                               node->x + work->offsetX, node->y + work->offsetY);
                 func_002DE980(work, parameters);

@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "btl_camera_cursor.h"
 #include "common.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
@@ -78,7 +79,7 @@ extern void func_001F2758(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern BattleSoundArchiveEntry D_003BDE18[BTL_SOUND_ENTRY_COUNT];
 
-extern u8 D_003BD7D0[];
+extern BtlCameraCursorView D_003BD7D0;
 
 /* Two camera vectors are written at work+0x50 and work+0x60 by btlInitializeSceneLightingAndTint. */
 typedef struct BtlCameraVectors {
@@ -221,43 +222,13 @@ extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
 
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
-typedef struct SoundCursor {
-    u16 unk_00;
-    s16 frame;
-    s16 mode;
-    s16 index;
-    union {
-        u16 unk_08;
-        s8 category;
-    };
-    s16 unk_0A;
-    s16 unk_0C;
-    u16 unk_0E;
-    u8 pad10[4];
-    s8 busy; /* 0x14: nonzero suspends camera endpoint updates. */
-    u8 pad15[0xB];
-    f32 pathEnd[4]; /* 0x20 */
-    f32 pathStart[4]; /* 0x30 */
-    u8 pad40[0x40];
-    f32 direction[4]; /* 0x80 */
-    f32 distance; /* 0x90 */
-    u8 pad94[0x9C];
-} SoundCursor;
-
-#define CURSOR ((SoundCursor *)D_003BD7D0)
+#define CURSOR (&D_003BD7D0)
 
 extern char D_00418C58[];
 
 extern s32 sndHasActiveFileLoad(void);
 
 extern void func_003422F8(s32, s32);
-
-typedef struct BattleFieldBlocks {
-    u8 unk_00[0x2B8];
-    s32 fieldF1;
-    s32 fieldF2;
-    s32 fieldTB;
-} BattleFieldBlocks;
 
 extern f32 *D_0037F770[];
 
@@ -3539,7 +3510,7 @@ s32 btlCountUnitsByFlags(u32 mask) {
 /* Reset the shared cursor and select camera setup by the linked actor's unit ID.
  * Preserve the legacy implicit return type and the callers' existing signatures. */
 btlInitializeCameraCursorForActorId(BtlLinkedCommand *action, BtlCamState *state) {
-    memset(D_003BD7D0, 0, sizeof(SoundCursor));
+    memset(&D_003BD7D0, 0, sizeof(D_003BD7D0));
     switch (action->link->unit->partyRecord.unitId) {
     case 1:
         func_001FA480(action, state, D_003BC0A0[4]);
@@ -3606,7 +3577,7 @@ void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *action, BtlCamState *stat
 }
 
 void btlClearCommandCursorAndRunAction(BtlLinkedCommand *action) {
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     btlFlagUserAndTargetDefeat(action, action);
 }
 
@@ -3626,7 +3597,7 @@ void btlAdvanceCommandCursorOrAction(BtlLinkedCommand *action, BtlCamState *stat
 }
 
 void btlInitCommandCursorForCategory(BtlLinkedCommand *action, BtlCamState *state) {
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     switch (action->link->unit->partyRecord.unitId) {
     case 1:
         func_001F5868(action, state, 4, 0);
@@ -3705,7 +3676,7 @@ void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
 void btlInitLinkedUnitActionCursor(ActionStateLink *linkState) {
     BtlLinkedCommand *scene = &((BtlState *)btlGetRuntime())->cameraCommand;
     scene->link = linkState;
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     CURSOR->unk_0A = 0;
     CURSOR->unk_0E = 0;
     btlRefreshUnitEffectMotionAndEntry(linkState->unit);
@@ -3728,7 +3699,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
 
     memset(offset, 0, sizeof(offset));
     offset[2] = 1.0f;
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     func_001F5868(action, state, 2, 3);
     func_001F5320(action, state, 0, 0);
     btlConstrainCameraEndpointHeight(action, state, 0, 1);
@@ -3761,7 +3732,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
 
 s32 btlInitCursorAndApplyAction(BtlLinkedCommand *action, BtlCamState *state) {
     s32 result;
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     func_001F5868(action, state, 2, 6);
     func_001F5320(action, state, 0, 0);
     result = btlConstrainCameraEndpointHeight(action, state, 0, 1);
@@ -3823,25 +3794,25 @@ void btlWaitForPendingWorkAndReleaseBuffers(void) {
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418C58);
 
 void btlFreeFieldBlocks(void) {
-    BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
+    BtlState *blocks = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
-    if (blocks->fieldTB != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
-        blocks->fieldTB = 0;
+    if (blocks->fieldTBResourceId != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
+        blocks->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_00418C58);
     }
-    if (blocks->fieldF2 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF2);
-        blocks->fieldF2 = 0;
+    if (blocks->fieldF2ResourceId != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF2ResourceId);
+        blocks->fieldF2ResourceId = 0;
         btlBossDebugPrintf("btl:free field F2\n");
     }
-    if (blocks->fieldF1 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF1);
-        blocks->fieldF1 = 0;
+    if (blocks->fieldF1ResourceId != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF1ResourceId);
+        blocks->fieldF1ResourceId = 0;
         btlBossDebugPrintf("btl:free field F1\n");
     }
-    blocks = (BattleFieldBlocks *)btlGetRuntime();
-    ((BtlState *)blocks)->battleFlags &= ~2;
+    blocks = (BtlState *)btlGetRuntime();
+    blocks->battleFlags &= ~2;
 }
 
 void btlInitializeSceneLightingAndTint(void) {
@@ -4146,7 +4117,7 @@ typedef struct BtlFieldLoadArgs {
 u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
 {
-    BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
+    BtlState *blocks = (BtlState *)btlGetRuntime();
     char directory[0x80];
     char path[0x80];
     BtlFieldArchiveNode *node;
@@ -4169,15 +4140,15 @@ u32 btlPollFieldArchiveLoad(args)
             while (node != NULL) {
                 switch (i) {
                 case 0:
-                    blocks->fieldTB = node->handle;
+                    blocks->fieldTBResourceId = node->handle;
                     args->fieldTB = node->data;
                     break;
                 case 1:
-                    blocks->fieldF2 = node->handle;
+                    blocks->fieldF2ResourceId = node->handle;
                     args->fieldF2 = node->data;
                     break;
                 case 2:
-                    blocks->fieldF1 = node->handle;
+                    blocks->fieldF1ResourceId = node->handle;
                     args->fieldF1 = node->data;
                     break;
                 }
@@ -4192,12 +4163,12 @@ u32 btlPollFieldArchiveLoad(args)
                                              args->fieldF1, args->fieldF2,
                                              (const SdfTextureOffsetListHeader *)args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
-            if (blocks->fieldTB != 0) {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
-                blocks->fieldTB = 0;
+            if (blocks->fieldTBResourceId != 0) {
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
+                blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_00418C58);
             }
-            ((BtlState *)blocks)->battleFlags |= 2;
+            blocks->battleFlags |= 2;
             btlBossDebugPrintf("btl:field load end[f%03d_%03d]\n", args->stage, args->variant);
             return 1;
         }

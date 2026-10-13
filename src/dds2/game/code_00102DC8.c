@@ -452,7 +452,7 @@ void kwlnResetPadInputAndMotorState(void) {
 
 extern u8 sdfPadAnalogSticks[8];
 extern f32 func_003532B8(f32);
-extern void func_00104058(void);
+extern void kwlnUpdatePadMotorDurations(void);
 
 /* vu0 routine: native stick length, normalization and forward dot product. */
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C20);
@@ -593,7 +593,7 @@ void kwlnUpdatePadInputState(void) {
             }
         }
     }
-    func_00104058();
+    kwlnUpdatePadMotorDurations();
 }
 
 void kwlnPadStepLargeMotorLevel(void) {
@@ -660,7 +660,7 @@ void kwlnPadResetMotorLevelsAndOutput(void) {
 }
 
 
-void func_00104058(void) {
+void kwlnUpdatePadMotorDurations(void) {
     s32 largeMotor = KWLN_PAD_LARGE_MOTOR;
     u8 *levels = kwlnPadMotorLevels;
     u8 *targets = D_00438D98;

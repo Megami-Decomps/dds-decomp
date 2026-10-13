@@ -45,8 +45,8 @@ extern MenuRuntimeList D_0045C880;
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
-extern void *func_0035A828(u32 bytes);
-s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
+/* SDK malloc wrapper: a successful result owns a fresh allocation. */
+extern void *func_0035A828(u32 bytes) __attribute__((malloc));
 
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
@@ -1214,7 +1214,23 @@ void func_00324D28(u32 unused, u32 ptr) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_003224C8", func_00324D50);
+typedef struct MnuCallbackPair8 {
+    MnuCallbackList *first;
+    MnuCallbackList *second;
+} MnuCallbackPair8;
+
+typedef char MnuCallbackPair8_size_check[(sizeof(MnuCallbackPair8) == 8) ? 1 : -1];
+
+u32 *func_00324D50(void) {
+    MnuCallbackPair8 *pair = (MnuCallbackPair8 *)func_0035A828(sizeof(*pair));
+
+    memset(pair, 0, sizeof(*pair));
+    pair->first = mnuCreateCallbackNode(0);
+    pair->second = mnuCreateCallbackNode(0);
+    pair->second->onRemove = func_00324D28;
+    return (u32 *)pair;
+}
+
 
 void mnuReleaseEffectPairAndNode(u32 node) {
     if (node != 0) {

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "fpu.h"
 #include "sdf.h"
 
@@ -14,7 +15,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern void effObjSetInnerFloat(s32, f32);
 

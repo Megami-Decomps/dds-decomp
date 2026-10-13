@@ -8429,8 +8429,8 @@ above; the newly validated working-result identity closes that frontier.
 
 ### DDS1 field scene initializer and generated axis ownership
 
-The 1,256-byte DDS1 `func_001233D0` transfers from PiM's exact DDS2
-`func_00125380` (commit f75bf24579a84cfd7b71301e7dbfb5338865e31f), with
+The 1,256-byte DDS1 `fldRebuildFieldScene` (0x001233D0) is paired with PiM's exact DDS2
+`fldRebuildFieldScene` (0x00125380; commit f75bf24579a84cfd7b71301e7dbfb5338865e31f), with
 actual DDS1 behavior restored: the title threshold is 39, player/camera
 preparation is one provider call, and two independent reads of flag 0x413
 gate camera color and the location-bit-8 menu initialization. DDS1 has no
@@ -9466,7 +9466,7 @@ hooked and unhooked output identity.
 | fldResolveWorldObjectByResourceId | 001287B8 / 272B | Mutable global pointer, then pointer member | Loading D_00438EC0 obtains a pointer value, not the global's address; names at +24 and its +4 member remain indirect. |
 | fldUpdateCameraColorEffect | 001379C0 / 412B | Constant array address using HIGH/LO_SUM | CSE1 retains root-relative +4/+8 stores; array syntax using -> is not evidence of a mutable pointer. |
 | fldSetSceneLifecycleFlags | 00128340 / 20B | GP-small symbol, real read-modify-write | MEM(REG) survives CSE1 at offset zero; this is not proof that a nonzero member load will retain its base. |
-| sdfReadCachedClockTime | 003413F0 / 224B | Direct ClockTime member addresses | CSE1 reconstructs later addresses as offsets from the first member-address quantity, cache+1. |
+| effMiscReadCachedClockTime | 003413F0 / 224B | Direct ClockTime member addresses | CSE1 reconstructs later addresses as offsets from the first member-address quantity, cache+1. |
 | fldLoadAreaRoomResources | 0012A6F0 / 1440B | Early FieldPlayerSceneWork HIGH/LO_SUM address | CSE1 preserves the late +0x58 read; reload rematerializes LUI / ADDIU / LW without requiring additional member reads. |
 
 ### fldProcDraw: a local fix can create global address sharing
@@ -10853,7 +10853,7 @@ matched wrappers. With the word formal, the two caller units retain all
 The previous E-labelled cross-game bridge attribution conflated two operations.
 DDS1 `btlSelectCommandTargetsByMode` (`001FEF50`) forwards to
 `btlSelectTargetsByMode`; its true DDS2 counterpart is `002110E8`.
-Their script entries, `btlScriptSelectTargetsByMode`, are `001F8790` and
+Their script entries, `btlScriptCmdSelectTargetsByMode`, are `001F8790` and
 `0020A3F0`. DDS2 `btlFilterCommandTargetsByUnitId` (`002111E8`) instead calls
 the unit-ID filter, with script entry `btlScriptFilterTargetsByUnitId`
 (`0020A2F8`). Zero-formal bridge definitions and the existing argument-bearing
@@ -10870,10 +10870,10 @@ segment. That native quirk remains explicit and unchanged.
 
 `effSetFanRecordPoolColor` and `effSetFanRecordPoolScale` are the five-position
 fan pool setters, separate from the triple-vertex pool's existing generic
-setters. `sdfReadCachedClockTime` preserves its 20-tick cache gate, three return
-cases and month-as-year input quirk. `sndTrySendQueuedCommandPacket` attempts one
+setters. `effMiscReadCachedClockTime` preserves its 20-tick cache gate, three return
+cases and month-as-year input quirk. `sndTryDispatchQueuedCommand` attempts one
 ring send: zero means accepted, one means empty or rejected. Its producer and
 worker loops retain their opposite continuation conditions.
-`sndSendTextCommandPacket` forwards `strlen` bytes with command bit 0x80,
+`sndSubmitTextCommandPayloadWithCommandBits80` forwards `strlen` bytes with command bit 0x80,
 excluding the terminating NUL.
 

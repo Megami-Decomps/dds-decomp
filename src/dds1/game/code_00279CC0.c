@@ -552,7 +552,7 @@ void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
     itfDrawGridWithResolvedSlot(0x1050, 0xfffffffffffffc18, 0, 0x61, assets->sprites[4], 2, drawArg);
     itfDrawGridWithResolvedSlot(0x10b0, 0x3c0, 0, 0x61, assets->sprites[4], 3, drawArg);
     itfDrawGridWithResolvedSlot(0x1300, 0xb70, 0, 0x61, assets->sprites[4], 4, drawArg);
-    func_002C1548(0, drawArg);
+    uiPrepareMenuBackgroundSurface(0, drawArg);
     itfGridLookupValueOrDefault((s32)assets->sprites[4], 0);
     itfGridLookupValueOrDefault((s32)assets->sprites[4], 1);
     itfDrawGridWithResolvedSlot(0, 0, 0, 0x60, assets->sprites[1], 0, drawArg);

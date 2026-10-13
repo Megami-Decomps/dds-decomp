@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -16,6 +17,7 @@
 #include "evt_solar.h"
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "kwln.h"
 #include "kwln_fade.h"
 #include "dat_state.h"
@@ -72,7 +74,7 @@ extern s32 D_003898AC[];
 
 extern void func_00122E50(void);
 
-extern void func_00125380(void);
+extern void fldRebuildFieldScene(void);
 
 extern void fldApplySkyLightSet(u32, s32);
 
@@ -250,7 +252,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 struct EffWorldNode;
 
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
 
@@ -973,7 +974,7 @@ typedef char FieldAreaEncounterRow_size_check[(sizeof(FieldAreaEncounterRow) == 
 typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable) == 0x304) ? 1 : -1];
 extern FieldAreaEncounterTable *D_00435E08;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
-extern s32 evtCreateWorldObjectForKey(s32 area, s32 room);
+
 extern void *func_001178B0(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
@@ -993,7 +994,7 @@ extern void fldLoadResourceByIndex(s32 index);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412D50);
 
-void func_00125380(void) {
+void fldRebuildFieldScene(void) {
     f32 fallback[12];
     f32 *transform = NULL;
     FieldPlayerSceneWork *sceneWork;
@@ -2255,7 +2256,7 @@ s32 fldUpdateFieldSceneTask(void) {
         D_00435CBC = 0x80000000;
         evtEnableSolarPhaseAdvance();
         D_004360E8 = 0;
-        func_00125380();
+        fldRebuildFieldScene();
         dds3SetWorldObject(dds3GetWorldSecondaryObject());
         fldCreateInputPanelTask();
         if (fldAreaState.transitionMode == 0) evtSetSolarOverlayFullyVisible();
