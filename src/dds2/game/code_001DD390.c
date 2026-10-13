@@ -42,6 +42,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "mdl_flag_api.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
@@ -128,7 +129,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
-extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 

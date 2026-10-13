@@ -42,6 +42,7 @@
 #include "file.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "mdl_flag_api.h"
 
 extern f32 D_00359EE0[4];
 
@@ -226,7 +227,6 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s32 btlSetActorEffectParameter();
 
-extern s32 mdlFlagTest(u32);
 
 extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 

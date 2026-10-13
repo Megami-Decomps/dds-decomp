@@ -30,6 +30,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "sdf_textured_rect.h"
+#include "mdl_flag_api.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
 extern void mnuMarkTitleStreamResetPending(void);
@@ -383,7 +384,6 @@ extern void func_00145698(void);
 
 extern s32 fldStageSoundBaseTable[];
 
-extern s32 mdlFlagTest();
 
 typedef struct {
     s16 id;

@@ -19,6 +19,7 @@
 #include "sdf_texture_offset_list.h"
 #include "evt_script_model.h"
 #include "sdf_model.h"
+#include "mdl_flag_api.h"
 
 
 extern FldFileResource *D_003BD7B8;
@@ -1354,7 +1355,6 @@ struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destina
     return NULL;
 }
 
-extern s32 mdlFlagTest(s32);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE08);
 
@@ -7446,7 +7446,6 @@ void fldStartSelectedActorTask(void) {
     D_003308B0[slot] = evtStartSceneResourceTask(dds3GetWorldObject(), actor);
 }
 
-extern s32 mdlFlagTest(s32);
 extern u8 D_003369B0[];
 extern u8 D_003369C0[];
 extern u8 D_003369D0[];

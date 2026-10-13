@@ -25,6 +25,7 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -1613,7 +1614,6 @@ typedef struct FldEncEntry {
 
 extern FldEncEntry *fldEncounterRollTable;
 
-extern s32 mdlFlagTest();
 
 
 enum {

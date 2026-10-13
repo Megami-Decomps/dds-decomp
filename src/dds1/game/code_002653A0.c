@@ -6,10 +6,10 @@
 #include "dat_state.h"
 #include "mnu_result.h"
 #include "kwln.h"
+#include "mdl_flag_api.h"
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
-extern s32 mdlFlagTest(u32);
 
 typedef struct LevelStep {
     u8 threshold;

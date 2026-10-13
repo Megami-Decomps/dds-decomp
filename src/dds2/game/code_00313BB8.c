@@ -9,6 +9,7 @@
 #include "sdf.h"
 #include "eff_curve.h"
 #include "sdf_projection.h"
+#include "mdl_flag_api.h"
 extern void memset();
 
 #include "fpu.h"

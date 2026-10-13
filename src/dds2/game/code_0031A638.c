@@ -2,6 +2,7 @@
 #include "mnu_work.h"
 #include "dat_state.h"
 #include "mnu_shooting.h"
+#include "mdl_flag_api.h"
 
 
 extern void mdlFlagSet(s32);
@@ -20,7 +21,6 @@ void func_0031A638(MenuRuntimeRecord *record, MenuRuntimeRecord *unused, MnuShoo
 }
 
 extern void sdfDebugPrintf(const char *fmt, ...);
-extern s32 mdlFlagTest(s32);
 
 /* Seed the saved-score floor and score snapshots, then clear the current score. */
 void mnuInitializeHighScoreState(MnuShootingWork *work) {

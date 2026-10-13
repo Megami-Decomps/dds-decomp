@@ -31,6 +31,7 @@
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
+#include "mdl_flag_api.h"
 
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
@@ -419,7 +420,6 @@ void fldAppendClearEntry(s32 id, f32 x, f32 y, f32 z, f32 w) {
 
 extern s32 fldStageSoundBaseTable[];
 
-extern s32 mdlFlagTest();
 
 void fldPlayPendingSounds(void) {
     s32 stage;
@@ -806,7 +806,6 @@ void fldCacheMapLabelLengths(s32 map) {
     D_003BD7D0 = strlen(D_0033EC90[i]);
 }
 
-extern s32 mdlFlagTest(s32);
 extern s32 func_003014F0(char *, const char *, ...);
 
 /* The base format occupies the first 16-byte-aligned AMB format record. */

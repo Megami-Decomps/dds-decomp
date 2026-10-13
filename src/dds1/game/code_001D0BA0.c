@@ -42,6 +42,7 @@
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "dat_affinity.h"
+#include "mdl_flag_api.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
@@ -151,7 +152,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 btlSetActorEffectParameter();
 
-extern s32 mdlFlagTest(u32);
 
 extern SoundTask *btlDeferredTaskTail;
 

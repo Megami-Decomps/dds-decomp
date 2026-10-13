@@ -7,6 +7,7 @@
 #include "mnu_scene_work.h"
 #include "sdf_task_work.h"
 #include "sdf_chip.h"
+#include "mdl_flag_api.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -197,7 +198,6 @@ void mnuFreeTaskData(u32 unused, u32 taskData) {
 }
 
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern void sdfGridGetCursorCoordinates(SdfGrid *, u32 *, u32 *);
@@ -401,7 +401,6 @@ extern u32 prfGetCapValue(u16);
 extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
-extern s32 mdlFlagTest(s32);
 
 /* Build the 0x58-byte list entry for one profile, or NULL when it is not available (profile 0x4E is still
  * listed once flag 0x908 is set). The entry's state is 1 when requirement 1 passes or the profile flag is set,

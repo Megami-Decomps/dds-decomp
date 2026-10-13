@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "dat_state.h"
+#include "mdl_flag_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -221,7 +222,6 @@ s32 datRaiseCalculatedValueFloor(DatPartyRecord *unit, s32 packedValue) {
 extern s32 *D_00435DD8;
 extern s32 *D_00435DDC;
 extern s32 *D_00435DFC;
-extern s32 mdlFlagTest(s32 flag);
 
 s32 datGetEffectiveAffinity(DatPartyRecord *unit, s32 element) {
     s32 value;
@@ -506,7 +506,6 @@ extern u32 btlGetEscapeAttemptCount(void);
 
 extern s32 D_00435E8C;
 
-extern s32 mdlFlagTest(s32 flagIndex);
 
 extern s8 (*D_00435E3C)[6];
 
