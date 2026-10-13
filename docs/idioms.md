@@ -10038,3 +10038,67 @@ as a tiled overlay, applying radial VU rotation and per-tile delay, age,
 displacement and alpha updates. Its completion result is consumed by the
 outgoing fade path. These are naming/comment changes only, not new source forms.
 
+## Apparent-tail JAL: early sibling-call inhibitors
+
+A retail JAL followed only by restores does not by itself prove that the translation unit disabled sibling calls. Call expansion must first supply a sibling alternative; the early `optimize_sibling_and_tail_recursive_calls` pass must then accept the call block and its successor. Real work visible to this pass can disappear before assembly, leaving an apparent tail call that nevertheless remains JAL.
+
+### Matched controls in default-enabled units
+
+These are matched in-tree C, not synthetic controls. Fresh whole-unit `check_unit.py` gates were exact, without context/data/undefined-symbol rows. None of these five units has a sibling-disable entry in its game's cflags.txt. The two narrow wrappers, scale operation and positive control share the first gate.
+
+| Control | Retail call site | Whole-unit gate | Early inhibitor |
+|---|---|---:|---|
+| DDS1 `effParGetInstanceMode`, `game/code_0015A758` | 0015ADB0, 28B; JAL 0015ADB8 | 60 match, 0 differ | Truthful u8 result contract leaves an unskippable result-pseudo chain. |
+| DDS1 `effParGetInstanceRestartFlag`, same unit | 0015AD48, 28B; JAL 0015AD50 | same 60/0 | Truthful u16 result contract, same copy-chain mechanism. |
+| DDS1 `effParScaleComponent`, same unit | 0015AD08, 60B; JAL 0015AD1C | same 60/0 | Actual post-call float load/multiply/store at owner +8C. |
+| DDS1 `effObjDispatchReadyState`, `basic/dds3EffectObjectBasic` | 00115970, 116B; JAL 001159C0 and 001159D0 | 38 match, 0 differ | Existing implicit-int definition retains an undefined-result CLOBBER in a nonqualifying exit block. |
+| DDS2 `func_00286A58`, `game/code_00286A58` | Final JAL 00286B7C, then restores | 1 match, 0 differ | Existing local workspace reset follows release in early RTL and dies later. |
+| DDS2 `brsDrawProfileProgressIndicator`, `game/code_0029DF18` | 002A0148, 304B; final JAL 002A0250 | 45 match, 0 differ | Actual escaped 16B palette workspace gives nonzero stack-slot `frame_offset`. |
+| DDS1 `billInvokeCallback`, `effect/billManager` | 00151F38, 32B; JALR 00151F44 | 25 match, 0 differ | Actual callback field +28 produces an ordinary indirect call with no sibling alternative. |
+
+Positive control: matched void `parRestartInstanceCallback` in DDS1 `code_0015A758` (0015ACF0, 20B) simply calls `parRestartKind`. Retail J at 0015ACFC and early uid13 SIBLING demonstrate that this unit is not uniformly preventing siblings.
+
+The model setter in DDS2 `code_0031B188` and the DDS1 staff-resource donor in `code_00271500` are not default-enabled controls: those units have an explicit sibling-disable flag.
+
+### Truthful narrow results can leave no native extension
+
+The mode getter and its wrapper genuinely return u8; the restart getter and its wrapper return u16. Their printed physical call/return ABI registers are SI, not QI/HI: this is not a claim of a physical return-register mode mismatch.
+
+In the mode wrapper's initial RTL, call_placeholder23's ordinary call returns SI v0. Its result passes through pseudo87, pseudo85 and the function return register. The first sibling pass rejects uid23 because instructions after the call cannot be skipped. The selected normal chain contains uid22 `reg87 <- v0`, uid25 `reg85 <- reg87`, and uid27 `retval <- reg85`. Later these copies vanish; retail has no ANDI or other result-extension instruction, only JAL and restores.
+
+Property P is the actual early result chain, induced here by the truthful narrow API. Absence of a native extension does not disprove a narrow source contract. It does not authorize inventing a narrow return, changing a truthful prototype, or adding a steering cast to another function.
+
+### Undefined-result exits require the right block topology
+
+Matched `effObjDispatchReadyState` has no return-type keyword. It invokes true-void handlers within an actual state switch and falls through. Selected RTL puts FUNCTION_END96, CLOBBER98(v0) and USE100(v0) inside bb9 after label93. Both handler call placeholders, uid46/65, remain NORMAL because their successor is neither EXIT nor the recognized alternate exit.
+
+One ordinary-C transfer trial removed only the return-type keyword from DDS2 `func_0031C940`, preserving actual sampler calls and the random-arm early return. The trial did not improve its 7/51 differing compared words plus one absent word, first +B0; source remained 204B versus retail 208B. Both sampler placeholders, uid112/134, still selected SIBLING through alternate_exitbb4. CLOBBER139 lies before label140; bb4 begins after that label and contains only USE141(v0). The earlier random-arm return clobber also does not recreate the matched control's nonqualifying exit.
+
+Thus implicit-int spelling alone is not P. The actual exit block must retain the unskippable work. This wrapper also refutes a blanket no-sib inference: its random sampler jumps at 0031C9E4, whereas its direct sampler JALs at 0031C9F0 and then executes only restores.
+
+### Post-call work and escaped slots must be real
+
+`effParScaleComponent` has surviving semantic work after its call: early uid20/22/24 load, multiply and store. It is not an inhibitor to borrow by adding a dummy update.
+
+The already-landed mantra loop's reset is an observation only: uid251 clears its workspace local after release, so uid248 remains NORMAL, then the clear disappears before assembly. This control does not authorize adding dead stores or meaningless resets to other bodies.
+
+The profile progress indicator writes four palette words in its frame and passes SP to two draw calls, at 002A0204 and 002A0238. Its uid157/208 calls reject with `frame_offset != 0`. Physical frame size and saved registers alone do not establish that property: solar's 0xA0 frame and the sampler wrapper's 0x20 frame still permit siblings. Do not invent a workspace, address escape or unused stack slot as a lever.
+
+### Indirect-call provenance is an independent first-stage explanation
+
+Matched `billInvokeCallback` invokes `obj->callback()` using the real `BillObj` field. Initial RTL loads +28 into pseudo85 and emits ordinary call_insn12 through that pseudo; no CALL_PLACEHOLDER exists. The sibling-decision hook therefore has no placeholder to select.
+
+As the earlier synthetic callback controls demonstrate, an indirect call may later become a direct target without acquiring a sibling alternative. Those synthetic controls are not matched in-tree evidence. Recover an actual generic callback abstraction before transferring this mechanism; do not invent a one-off inline or pointer solely to manufacture a JAL.
+
+### Remaining parks classified against these controls
+
+- **Sampler wrapper, DDS2 0031C940:** native random-arm J/direct-arm JAL require an arm-specific source or exit property. The single implicit-int transfer above fails.
+- **`evtDrawFadingSolarOverlayFrame`, DDS1 0022A248 / DDS2 00244F00, 1544B:** fresh DDS2 F29 trace selects uid1188 hot-final and uid1229 default as SIBLING via bb26; uid1139 first hot draw is NORMAL because real work follows. Retail requires only the default call to remain JAL. The true void seven-argument API and save-only frame do not supply that distinction. Already-measured return-void-expression, provider-visibility and early-return forms were not repeated.
+- **Script lookup, DDS2 002181E8, 104B:** uid100 final lookup remains SIBLING via bb9. `btlFindScriptResource` has a genuine s32/-1 contract; no truthful narrow result, surviving post-call work or escaped local was found. Current candidate is 108B OVER.
+- **`mnuBuildCampTitleEffectResourceList`, DDS2 002A9908, 312B:** final uid256 selects SIBLING, successor EXIT. `effAppendListEntry` returns u32 `++list->count`; its destination is heap-owned workspace, not escaped stack storage. Raw-bank GCSE/PRE and closing-call eligibility remain distinct problems.
+- **`btlGetTaskState6`, DDS1 001B5480 / DDS2 001C0118, 64B:** fresh actual DDS2 parked baseline selects final uid67 SIBLING via bb3. The provider has a s32 count/0/1 contract. Retail JAL shares the null-task zero-return epilogue. The prior real boolean carrier blocked sibling selection but grew/mislaid the code; it was not repeated. This standalone eligibility probe is not a new whole-unit gate.
+
+All thirteen new read-only vendor-hook traces had hooked/unhooked assembly and every RTL dump identical, against mirror links explicitly resolved to the live repository. Deciding tier is the first sibling RTL pass unless the expansion already lacks an alternative. Compiler SHA-256 was `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`; exact trace paths and the unsuccessful trial receipt are retained in PurD's renewal50 ledger/report and wrapper park. No flags, prototypes, owners or live bodies were changed by this study.
+
+The contemporary source explains the alternate-exit whitelist but is not asserted to be the exact Sony revision: [GCC sibcall.c](https://github.com/gcc-mirror/gcc/blob/fd442cef30223941cf09068241580e3d8f3fb7ae/gcc/sibcall.c), [GCC calls.c](https://github.com/gcc-mirror/gcc/blob/fd442cef30223941cf09068241580e3d8f3fb7ae/gcc/calls.c). Actual vendor-hook decisions, parity and whole-unit gates ground the controls above.
+
