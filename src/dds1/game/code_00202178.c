@@ -777,7 +777,7 @@ void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     }
 }
 
-extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern f32 btlGetActorEffectScale(BtlTask *);
 
@@ -808,7 +808,7 @@ void func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f
     user = btlGetTargetUnitForLink(command);
     target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
     extent = user->reach * user->scale;
-    span = func_001D6050(user, user->unkEC);
+    span = btlGetUnitMotionDurationFrames(user, user->unkEC);
     span /= btlGetActorEffectScale(command->task);
     ratio = (f32)command->state / span;
     if (ratio > 1.0f) {

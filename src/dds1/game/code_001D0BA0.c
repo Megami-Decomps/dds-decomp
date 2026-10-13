@@ -599,7 +599,7 @@ extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
 
 extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern s32 btlSelectedEntryHitsElement(s32, BtlUnit *, s32);
 
@@ -784,7 +784,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
             }
         }
     }
-    helperResult = func_001D6050(action->unit, ((BtlActionAnimationRecord *)datActionAnimationRecords)[command].cameraKind);
+    helperResult = btlGetUnitMotionDurationFrames(action->unit, ((BtlActionAnimationRecord *)datActionAnimationRecords)[command].cameraKind);
     if (datCommandRecords[command].unk2E != 0) {
         counterCommand = command;
         btlBossDebugPrintf("btl:counter=%d\n", command);
@@ -2956,7 +2956,7 @@ void btlResetUnitModelProgress(BtlUnit *object) {
     }
 }
 
-s32 func_001D6050(BtlUnit *unit, s32 motionIndex) {
+s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlActorStatusRecord *status = (BtlActorStatusRecord *)
         btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);

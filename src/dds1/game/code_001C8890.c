@@ -953,7 +953,7 @@ extern const char D_003A3670[];
 extern s32 btlGetSlotRateKind(u8 *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
-extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 extern void *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
@@ -1072,7 +1072,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
         }
     }
     resource = NULL;
-    groupDelay = (s32)(func_001D6050(action->unit, action->indexWork.slot) / scale);
+    groupDelay = (s32)(btlGetUnitMotionDurationFrames(action->unit, action->indexWork.slot) / scale);
     initialDelay = groupDelay;
     btlBossDebugPrintf(D_003A3658, groupDelay);
     if ((action->unit->status.flags & 0x200) != 0 &&
@@ -1440,7 +1440,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
-extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 extern void *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
@@ -1543,7 +1543,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
     btlStartTask(sndCreateSetStateTask());
     for (groupIndex = 0; groupIndex < 3; groupIndex++) {
         if (actors[groupIndex] != NULL) {
-            actorFrames[groupIndex] = func_001D6050(actors[groupIndex], slot);
+            actorFrames[groupIndex] = btlGetUnitMotionDurationFrames(actors[groupIndex], slot);
             if (actorFrames[groupIndex] < 20) actorFrames[groupIndex] = 20;
             if (maxFrames < actorFrames[groupIndex]) maxFrames = actorFrames[groupIndex];
         }
@@ -2003,7 +2003,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     unit = task->unit;
     status = (u16 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
     if (!(unit->status.flags & 0x20)) {
-        motion = func_001D6050(unit, 0x11) + 0x14;
+        motion = btlGetUnitMotionDurationFrames(unit, 0x11) + 0x14;
     } else {
         motion = status[0x15];
     }
@@ -2135,7 +2135,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
     unit = task->unit;
     status = (u16 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
     if (!(unit->status.flags & 0x20)) {
-        motion = func_001D6050(unit, 0x10) + 0x14;
+        motion = btlGetUnitMotionDurationFrames(unit, 0x10) + 0x14;
     } else {
         motion = status[0x15];
     }

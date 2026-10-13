@@ -184,7 +184,7 @@ extern BtlAiScratchWork *btlActionScratchWork;
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern s32 func_001E2E58(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -2042,7 +2042,7 @@ s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
 /* Install these camera keys once, after motion 0x10's duration plus 15 task ticks. */
 s32 btlSpawnLinkedActionEffect(u8 *task) {
     if (((BtlLinkedCommand *)task)->motionProgress == 0) {
-        if (func_001E2E58(((BtlLinkedCommand *)task)->link->unit, 0x10) + 0xF <=
+        if (btlGetUnitMotionDurationFrames(((BtlLinkedCommand *)task)->link->unit, 0x10) + 0xF <=
             ((BtlLinkedCommand *)task)->state) {
             btlSetEffectCameraKeys((s32)task, -6.8f, -476.8f, -525.0f, 0.184f, 0.008f, -0.011f, 0.974f, 0.3f,
                           -214.2f, -1419.8f, -0.101f, 0.012f, -0.013f, 0.986f, 40.0f, 12.0f);
@@ -3237,7 +3237,7 @@ void func_0021C0C8(ActionStateLink *handle, s32 unused, u64 completionOwner, u64
         if (state->pending != 0 && hero != NULL) {
             isFormation = handle->indexWork.slot == 0x19;
             btlUpdateSpecialActorFormation();
-            delay = func_001E2E58(handle->unit, handle->indexWork.slot);
+            delay = btlGetUnitMotionDurationFrames(handle->unit, handle->indexWork.slot);
             task = btlAllocateIndexedUnitEffectTask(hero, 0x10, 2, 1.0f);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = prerequisite;
