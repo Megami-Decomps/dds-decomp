@@ -6074,6 +6074,8 @@
 0x00317958	mdlLoadViewerPackageFromWork	inferred	medium confidence; src/dds2/game/code_00316E08.c func_00317958: Reads the work package ID and two resource values, then loads viewer kind 5 with fixed options 0x101. [names_reviewed25.tsv]
 0x00317988	mnuLoadSectionObjectListWithRelocations	inferred	Copies the section-object payload into retained storage, applies relocation offsets from its trailing table, and returns the MnuSectionObjectList descriptor; used for object, player, map, and draw lists. [DDS2 BN analysis, 2026-10-13]
 0x00317E48	mnuDestroyShootingWork	inferred	U2
+0x00317FE0	mnuRunShootingInitCallback	inferred	Invokes the current MnuShootingWork initialization callback, advances its init-state callback table, and installs update callback 0 after init state 0; the caller routes -1 to deferred field dispatch.
+0x00318068	mnuRunShootingUpdateCallback	inferred	Invokes the current MnuShootingWork update callback and refreshes it from the update-state table when it returns nonzero. Called by mdlAdvanceViewerPackageTask after initialization succeeds.
 0x00318570	mnuReleaseShootingSectionResources	inferred	Deactivates the shooting work entry, releases section object allocations, and destroys model node contexts during initialization completion and shutdown. [DDS2 source/caller analysis, 2026-10-13]
 0x00318660	mnuUpdateShootingWork	inferred	Reads input, updates shooting records and score progress, advances round phases, and updates sound slots; retail callback table entry 0x0040ABE8 points to this function. [DDS2 source/BN/caller analysis, 2026-10-13]
 0x00319FF0	mnuUpdateTimedEffectPosition	inferred	TaskPurist4
