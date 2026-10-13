@@ -34,7 +34,7 @@ extern void *memset(void *, s32, u32);
 
 
 extern s32 D_0043909C;
-extern void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2, u32 color3, s32 image, s32 flags,
+extern void sdfDrawSlotGridWithCornerColors(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2, u32 color3, s32 image, s32 flags,
                           s32 depth);
 extern void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 image, s32 flags, s32 depth);
 
@@ -57,7 +57,7 @@ void fldDrawTransitionBackdrop(f32 progress) {
     } else {
         fade = 1.0f;
     }
-    func_0030DBF0(0, 0, 0, (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
+    sdfDrawSlotGridWithCornerColors(0, 0, 0, (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
                   (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000, 0x1F, 0, depth);
     if (progress < 0.3f) {
         alpha = 0.0f;
@@ -75,7 +75,7 @@ void fldDrawTransitionBackdrop(f32 progress) {
             sdfDrawPositionedSlotImage(0, -2, 0, (s32)(alpha * 128.0f), D_0043909C + 0x2D, 0, depth);
             break;
         case 3:
-            func_0030DBF0(0, -2, 0, (u32)(alpha * 128.0f) | 0x80808000, (u32)(alpha * 104.0f) | 0x80808000,
+            sdfDrawSlotGridWithCornerColors(0, -2, 0, (u32)(alpha * 128.0f) | 0x80808000, (u32)(alpha * 104.0f) | 0x80808000,
                           (u32)(alpha * 104.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
                           D_0043909C + 0x35, 0, depth);
             break;

@@ -5826,6 +5826,7 @@
 0x0030DAA0	sdfInstallNonzeroSpriteSlots	inferred	Installs only nonzero sprite slot handles from a slot set into the active resource table. [names_reviewed15.tsv]
 0x0030DAE8	sdfReleaseAllSpriteSlots	inferred	Destroys each active sprite resource slot and clears every table entry. [names_reviewed15.tsv]
 0x0030DB40	sdfDrawPositionedSlotImage	inferred	Fam
+0x0030DBF0	sdfDrawSlotGridWithCornerColors	inferred	Temporarily applies four corner colors to a resolved sprite slot, draws the grid slot at the placement-table offset, then restores the saved colors.
 0x0030DE08	sdfDrawScaledCenteredSlotImage	inferred	Fam
 0x0030E010	sdfDrawUniformlyScaledSlotImage	inferred	medium confidence; src/dds2/game/code_0030B838.c func_0030E010: Supplies equal horizontal and vertical scales to the slot-backed image renderer, which temporarily changes quad dimensions and restores them after submission. [names_reviewed25.tsv]
 0x0030E130	sdfCounterInitializeDisplayAnimation	inferred	Initializes the counter display value and animation count. [names_reviewed10.tsv]
