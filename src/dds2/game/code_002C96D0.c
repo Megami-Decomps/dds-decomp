@@ -731,7 +731,7 @@ extern char D_003E8C70[];
 extern char D_003E8C98[];
 extern char D_003E8CC0[];
 
-void func_002C9CF8(void) {
+void fileDrawMemoryCardFlowPrompt(void) {
     if (D_00437D3C == 0) {
         return;
     }
@@ -2612,7 +2612,7 @@ s32 fileDrawMenuFrame(s32 task) {
     }
     fileDrawModeSpecificMemoryCardPrompt();
     func_002CEEC0();
-    func_002C9CF8();
+    fileDrawMemoryCardFlowPrompt();
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     return 0;
