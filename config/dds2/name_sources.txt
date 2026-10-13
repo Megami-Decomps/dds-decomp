@@ -5215,6 +5215,7 @@
 0x002D0A20	fileMenuWorkCreate	inferred	DDS2-only: allocates a 0x40-byte work block into D_00437D84 and clears it, seeding +0x34 with the argument
 0x002D0A90	fileReleaseMenuFlowResource	inferred	Releases the resource handle owned by active menu work and clears its global pointer; does not free the work itself. [names_reviewed15.tsv]
 0x002D0AD8	fileSaveAndDisplayCurrentMoney	inferred	caches money in save work +0x1E650 and displays formatted amount [names_R_FuncNames2.tsv]
+0x002D0B08	ptyApplyUnlockedUnitStatBonusesOnce	inferred	Finds the active party slot for the unit, returns if absent or already marked, sets the one-time marker, and adds stat bonuses selected by story flags; returns whether any bonus was applied. Called during party restoration and unit addition. [provider and caller dataflow, 2026-10-13]
 0x002D0D00	fileCopySaveHeaderNumbers	inferred	copies save-state fields +0x20..+0x2C from source [names_R_FuncNames2.tsv]
 0x002D0D28	fileCopyRecordHeader	inferred	copies 0x30-byte save record header verbatim [names_R_FuncNames2.tsv]
 0x002D0D90	fileApplyMenuFlagsToModel	inferred	copies the 0x4F-bit flag block of the menu work into model flags 0xB40+i, then sets summary bits 2/4/9 in work+0x32 [names_M75_Large2.tsv]

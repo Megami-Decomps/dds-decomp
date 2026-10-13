@@ -140,7 +140,7 @@ extern void fldPrepareDeferredSceneTransition(void);
 extern void fileCopySaveHeaderNumbers(FileSavePreviewRecord *);
 extern void func_002D0AB8(void);
 extern void fileSaveAndDisplayCurrentMoney(void);
-extern s32 func_002D0B08(s32);
+extern s32 ptyApplyUnlockedUnitStatBonusesOnce(s32);
 extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 extern void mtrMantraEventBitReset(void);
@@ -3192,7 +3192,7 @@ s32 func_002D0498(void) {
     fileSaveAndDisplayCurrentMoney();
     for (i = 0; i < 5; i++) {
         u16 activeFlag = datGameState->party[i].flags & DAT_PARTY_FLAG_OCCUPIED;
-        if (activeFlag && func_002D0B08(datGameState->party[i].unitId)) {
+        if (activeFlag && ptyApplyUnlockedUnitStatBonusesOnce(datGameState->party[i].unitId)) {
             u32 maximumMp;
             u16 restoredHp;
             datGameState->party[i].maxHp =
@@ -3412,7 +3412,7 @@ extern s32 sdfDebugPrintf(const char *, ...);
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */
-s32 func_002D0B08(s32 unitId) {
+s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     s32 partyIndex;
     DatPartyRecord *party;
     s32 changed;
