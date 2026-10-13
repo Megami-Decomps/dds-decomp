@@ -1018,8 +1018,7 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
 }
 
 
-extern void frFontSetChildColors(struct FrFontGlyph *, u32);
-extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 typedef struct StaffFramePiece {
     s32 gridId;
@@ -1038,7 +1037,7 @@ void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 c
     StaffFramePiece *pieces;
     MenuStaffContext *menu = (MenuStaffContext *)context;
     s32 i;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
     memcpy(primary, D_0042AC40, sizeof(primary));
     memcpy(alternate, D_0042AC70, sizeof(alternate));
     switch (kind) {
@@ -1073,9 +1072,9 @@ void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 c
         }
         glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
                                              0, labelIndex, textTable, textOption);
-        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC35A);
-        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, layer);
-        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
+        frFontSetChildColors(glyph, 0xA09DC35A);
+        frFontDrawGlyphChain(glyph, 1, layer);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 

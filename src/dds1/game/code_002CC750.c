@@ -10,6 +10,7 @@
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "itf.h"
+#include "fr_font.h"
 #include "dat_state.h"
 #include "file.h"
 #include "prf_profile_cap.h"
