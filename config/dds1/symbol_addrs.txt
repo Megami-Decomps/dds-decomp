@@ -7427,6 +7427,7 @@ effBillResourceOwners = 0x003D6438;
 effEmitterDelayRandomState = 0x003D6480;
 frFontResourceList = 0x003D68C0;
 frFontWork = 0x003D6C80;
+frFontIndexedTextSlots = 0x003D6E20;
 frFontResourceRecords = 0x003D6C84;
 itfMesWork = 0x003D6EA0;
 itfWindowSlots = 0x003D6ECC;

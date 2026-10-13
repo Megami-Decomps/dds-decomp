@@ -653,7 +653,8 @@ segments:
       - { start: 0x2BE63C, type: sbss, vram: 0x3BD9A0, name: sbss_before_sdfChip }
       - { start: 0x2BE63C, type: .sbss, vram: 0x3BD9A8, name: sdf/sdfChip }
       - { start: 0x2BE63C, type: sbss, vram: 0x3BD9C8, name: sbss_after_sdfChip }
-      - { start: 0x2BE63C, type: bss, vram: 0x3BDB00, name: bss_before_itfMesManager }
+      - { start: 0x2BE63C, type: bss, vram: 0x3BDB00, name: bss_before_frFontTextSlots }
+      - { start: 0x2BE63C, type: .bss, vram: 0x3D6E20, name: game/code_00193C08 }
       - { start: 0x2BE63C, type: .bss, vram: 0x3D6EA0, name: interface/itfMesManager }
       - { start: 0x2BE63C, type: bss, vram: 0x3D73C0, name: bss_before_fileManager }
       - { start: 0x2BE63C, type: .bss, vram: 0x3DC658, name: file/fileManager }

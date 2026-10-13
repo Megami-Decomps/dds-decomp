@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_text_slots.h"
 #include "sdf.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -192,7 +193,7 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
 
 extern void frFontInitializeGlyphAtlas(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 extern void frFontUploadImageBlocks(void);
-extern u32 D_004528C0[];
+u32 frFontIndexedTextSlots[FR_FONT_INDEXED_TEXT_SLOT_COUNT] __attribute__((section(".bss")));
 extern s32 D_00438F1C;
 
 void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
@@ -234,8 +235,8 @@ void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
     frFontWork.glyphPool = itfCreateMemNodeRing(0x44, glyphRingCount);
     frFontLoadDefaultFonts();
     frFontUploadImageBlocks();
-    for (i = 0; i < 32; i++) {
-        D_004528C0[i] = 0;
+    for (i = 0; i < FR_FONT_INDEXED_TEXT_SLOT_COUNT; i++) {
+        frFontIndexedTextSlots[i] = 0;
     }
     frFontUploadClearedTexture();
     D_00438F1C = glyphsPerRow * rowTotal;

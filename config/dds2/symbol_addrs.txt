@@ -7088,6 +7088,7 @@ effEmitterDelayRandomState = 0x00451F20;
 parDrawControl = 0x00451F60;
 frFontResourceList = 0x00452360;
 frFontWork = 0x00452720;
+frFontIndexedTextSlots = 0x004528C0;
 frFontResourceRecords = 0x00452724;
 itfMesWork = 0x00452940;
 itfWindowSlots = 0x0045296C;
