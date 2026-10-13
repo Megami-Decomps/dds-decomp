@@ -315,7 +315,6 @@ void mnuReleaseMenuResourceGroup(s32 address, u32 preserveWork) {
 void mnuReleaseResourceGroupTextureHandles(u32 address) {
     mnuReleaseMenuResourceGroup(address, 0);
 }
-extern FrFontGlyph *itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);

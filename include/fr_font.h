@@ -152,6 +152,8 @@ struct FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
 /* Decode encoded text and append the resulting glyph to an optional parent. */
 struct FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth,
     u32 colors, const u8 *text, struct FrFontGlyph *parent);
+struct FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth,
+    u32 colors, char *text, struct FrFontGlyph *parent);
 
 /* Link a glyph chain into the current draw-buffer slot. */
 s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *glyph);
