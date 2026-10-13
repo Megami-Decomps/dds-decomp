@@ -5,6 +5,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_pac_state.h"
 #include "sdf_pac_work.h"
+#include "sdf_resource_list_item.h"
 #include "sdf_texture_file.h"
 
 enum {
@@ -43,7 +44,6 @@ void sdfPacStartRegularPacket(PacState *state, SdfPacStreamPacketHeader *packet)
 void sdfPacStartRelocatingPacket(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
-void sdfAppendResourceListItem(s32 handle, s32 resource);
 void sdfStoreWordAndSetState(void *decoder, void *destination);
 s32 sdfPacDecodeInputChunk(void *decoder, void *input, s32 available);
 extern void *memcpy(void *dst, const void *src, u32 n);
@@ -426,7 +426,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacListAllocation *allocation = state->slot.list;
-    sdfAppendResourceListItem((s32)state->queueTail->resourceHandle, (s32)allocation->buffer.texture);
+    sdfAppendResourceListItem(state->queueTail->resourceHandle, allocation->buffer.texture);
     {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;
