@@ -287,7 +287,6 @@ extern s32 D_00435EF8;
 
 
 
-extern void mdlFlagSet(s32);
 
 extern void sdfResetGameRuntime(s32);
 
@@ -1445,7 +1444,6 @@ extern void dds3SetObjectFlags(void *, u32);
 extern void fldResetCameraModelHandles(void);
 
 
-extern void mdlFlagClear(s32);
 
 
 extern void fldActivatePendingSceneCommand(void);
@@ -1630,7 +1628,6 @@ void fldConsumeSceneCommandFlag(void) {
     }
 }
 
-extern void mdlFlagClear(s32);
 
 extern void evtClearSolarOverlayControl(void);
 

@@ -5,7 +5,6 @@
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
 
-extern void mdlFlagSet(u32 flagId);
 
 extern void dspSetActive(s32 index);
 

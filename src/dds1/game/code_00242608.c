@@ -2626,7 +2626,6 @@ void evtAccumulateStateScore(s32 stateAddress) {
 
 extern void datAddCurrencyClamped(s32);
 extern u32 func_002CD800(u32);
-extern void mdlFlagSet(s32);
 
 /* Apply the selected buy/sell operation, then restore the row's displayed price. */
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
@@ -3113,7 +3112,6 @@ typedef struct FlagEntry {
     s32 secondOn;
 } FlagEntry;
 
-extern void mdlFlagSet(s32);
 
 
 typedef struct FlagPair {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -3126,8 +3127,6 @@ extern u8 D_00436F96;
 extern s32 D_003C3248[5][24];
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
-extern void mdlFlagSet(u32);
-extern void mdlFlagClear(u32);
 
 void func_00230D90(void) {
     u32 i;

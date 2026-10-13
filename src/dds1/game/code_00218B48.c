@@ -3299,7 +3299,6 @@ void mdlFlagClearAll(void) {
     } while (i >= 0);
 }
 
-void mdlFlagClear(s32 flag);
 
 void mdlClearFlagRanges(void) {
     s32 i = 0;

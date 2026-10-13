@@ -138,7 +138,6 @@ extern u32 D_0032E4EC[];
 
 extern s32 D_003BABEC;
 
-extern void mdlFlagSet(s32);
 
 void fldDispatchDeferredFieldCommand(void);
 

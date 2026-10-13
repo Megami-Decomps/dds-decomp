@@ -1270,9 +1270,7 @@ u32 func_002055F0(void) {
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
-extern void mdlFlagSet(u32);
 
-extern void mdlFlagClear(u32);
 
 s32 func_002055F8(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;

@@ -48,7 +48,6 @@ extern DspMantraName *D_00435E50;
 extern s32 D_00435E4C;
 extern DspUnitName *D_00435E48;
 
-extern void mdlFlagSet(s32);
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();

@@ -251,7 +251,6 @@ extern MdlCtrlState mdlViewerControlState;
 
 void fldDrawPackedRgbEditor();
 
-void mdlFlagClear(s32);
 
 typedef struct EffMarkParams {
     u8 unk0[8];

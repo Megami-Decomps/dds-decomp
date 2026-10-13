@@ -2887,7 +2887,6 @@ extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
-extern void mdlFlagSet(u32);
 
 void btlApplyPartySetupOverride(void) {
     u32 i;

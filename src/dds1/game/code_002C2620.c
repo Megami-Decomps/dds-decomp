@@ -688,8 +688,6 @@ s32 fldLmapToggleOverlay(void) {
     return result;
 }
 
-extern void mdlFlagClear(s32 flag);
-extern void mdlFlagSet(s32 flag);
 
 void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);

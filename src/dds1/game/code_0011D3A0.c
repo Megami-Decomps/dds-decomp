@@ -5,6 +5,7 @@
 #include "kwln_task_create.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -87,7 +88,6 @@ extern FieldActivationRecord D_0034C8F0[256];
 
 extern void fldActivateObjectById(s32);
 
-extern void mdlFlagSet(s32);
 
 extern void ptyReturnOne(s32);
 

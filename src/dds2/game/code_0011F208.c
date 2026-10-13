@@ -2,6 +2,7 @@
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -129,7 +130,6 @@ extern void fldSubmitBackgroundDescriptorPacket(void);
 
 extern s32 D_00389780[];
 
-extern void mdlFlagSet(s32);
 
 void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[4] = first;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_chip.h"
@@ -166,7 +167,6 @@ void *evtGetTestTaskUpdateCallback(void) {
 extern s32 func_003014F0(char *, const char *, ...);
 extern s32 sdfPathExists(char *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
-extern void mdlFlagClearAll(void);
 extern SdfPoolNode D_00325708;
 extern u8 D_00324510[2][2][16];
 extern s32 D_003BBDEC;
