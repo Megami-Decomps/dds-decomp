@@ -758,6 +758,8 @@
 0x0011C700	evtTestSolarPhaseOrModelFlag	inferred	Interprets condition type: solar-phase bitset or model flag, returning matched state. [names_reviewed7.tsv]
 0x0011C790	btlSelectConditionalEncounterGroup	inferred	U3
 0x0011C990	btlCheckScenePartyLevelThreshold	inferred	R_Names31 B92
+0x0011CAB0	btlGetConditionalEncounterInterval	inferred	Reuses the active interval or seeds one from the selected nonempty weighted conditional encounter group; DDS2 twin 0x0011E848.
+0x0011CB90	btlAdvanceConditionalEncounterRoll	inferred	Accumulates field-step encounter progress and selects a weighted, eligible scene when the conditional encounter threshold is reached; returns the packed result. DDS2 twin 0x0011E930.
 0x0011CE18	dds3WorkClear	inferred	zeroes s32 at +0x1360, s16 at +0x1364 of D_003BAA00 base and D_003BAAB8 flag
 0x0011CE50	evtPushRequestedRosterPresence	inferred	Reads roster index from script, searches active roster entry and returns its presence flag. [names_reviewed18.tsv]
 0x0011CE88	ptyScriptAddUnitAndReturnResult	inferred	confidence=high; src/dds1/game/code_0011CE88.c:func_0011CE88; Reads the script unit parameter, adds the party unit and writes the add result to the script return slot. CORRECTED: verbatim twin of ptyScriptRemoveUnitAndReturnResult = 0x0011CEB8, which sets the return slot and returns 1; aligned verb form with the existing name. [names_qp9.tsv]

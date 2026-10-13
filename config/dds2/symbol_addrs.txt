@@ -7080,6 +7080,8 @@ evtCommandSetEffectUnitPosition = 0x00241CF0; // type:func
 evtCommandSetEffectUnitQuaternionRotation = 0x00241E70; // type:func
 
 mnuDrawMantraPanelBTransition = 0x0027E360; // type:func
+btlGetConditionalEncounterInterval = 0x0011E848; // type:func
+btlAdvanceConditionalEncounterRoll = 0x0011E930; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -9035,8 +9037,6 @@ func_0011D130 = 0x0011D130; // type:func
 func_0011E198 = 0x0011E198; // type:func
 func_0011E1D0 = 0x0011E1D0; // type:func
 func_0011E3A0 = 0x0011E3A0; // type:func
-func_0011E848 = 0x0011E848; // type:func
-func_0011E930 = 0x0011E930; // type:func
 func_0011EBE0 = 0x0011EBE0; // type:func
 func_0011EBE8 = 0x0011EBE8; // type:func
 func_0011EBF0 = 0x0011EBF0; // type:func

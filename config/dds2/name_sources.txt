@@ -574,6 +574,8 @@
 0x0011E498	evtTestSolarPhaseOrModelFlag	inferred	Interprets condition type: solar-phase bitset or model flag, returning matched state. [names_reviewed7.tsv]
 0x0011E528	btlSelectConditionalEncounterGroup	inferred	U3
 0x0011E728	btlCheckScenePartyLevelThreshold	inferred	R_Names31 B92
+0x0011E848	btlGetConditionalEncounterInterval	inferred	Reuses the active interval or seeds one from the selected nonempty weighted conditional encounter group; DDS1 twin 0x0011CAB0.
+0x0011E930	btlAdvanceConditionalEncounterRoll	inferred	Accumulates field-step encounter progress and selects a weighted, eligible scene when the conditional encounter threshold is reached; returns the packed result. DDS1 twin 0x0011CB90.
 0x0011ECC8	ptyScriptAddUnitWithFlagsAndReturnResult	inferred	Reads roster ID and initialization flags, stores the party-unit creation slot/status in the script return slot, then returns command success; complements ptyScriptAddUnitAndReturnResult with default flags.
 0x0011ED60	scrCmdHasEnoughOwnedMantras	inferred	Stores mtrHasEnoughOwnedMantras() in the script integer return slot, then returns command success.
 0x0011ED88	scrCmdSetEntryFlagsInBothStores	inferred	Finds script entry by identifier and sets matching flag in primary and secondary script flag stores. [names_reviewed19.tsv]

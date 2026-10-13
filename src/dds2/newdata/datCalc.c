@@ -2396,7 +2396,7 @@ s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
 }
 
 /* Reuse an active interval, or seed one for a nonempty encounter group. */
-s32 func_0011E848(s32 index) {
+s32 btlGetConditionalEncounterInterval(s32 index) {
     s32 variant;
     s32 total;
     s32 i;
@@ -2428,7 +2428,7 @@ extern s32 D_00435E94;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
-s32 func_0011E930(f32 step, s32 index) {
+s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
     s32 group;
     s32 interval;
     s32 count;
@@ -2443,7 +2443,7 @@ s32 func_0011E930(f32 step, s32 index) {
         return 0;
     }
     group = btlSelectConditionalEncounterGroup(index);
-    interval = func_0011E848(index);
+    interval = btlGetConditionalEncounterInterval(index);
     if (interval == 0) {
         return interval;
     }
