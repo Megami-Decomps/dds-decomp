@@ -395,7 +395,7 @@ void ptyRebuildAllProfiles(void) {
 extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *unit);
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *unit);
 
-void func_00314298(DatPartyRecord *unit, const s32 *statGains) {
+void ptyRecomputeMaxVitals(DatPartyRecord *unit, const s32 *statGains) {
     DatPartyRecord adjusted = *unit;
     u16 oldMaxHp;
     u16 oldMaxMp;
@@ -449,7 +449,7 @@ void func_00314298(DatPartyRecord *unit, const s32 *statGains) {
 }
 
 void ptyRecomputeMaxHpMp(DatPartyRecord *unit) {
-    func_00314298(unit, 0);
+    ptyRecomputeMaxVitals(unit, 0);
 }
 
 extern u32 strlen(const char *text);

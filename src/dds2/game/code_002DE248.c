@@ -12160,7 +12160,7 @@ typedef struct EffectCameraDebugScratch {
     s128 rotationMatrix[4];
 } EffectCameraDebugScratch;
 
-u32 func_002FF8A0(EffectStateSnapshot *state, s8 useBattlePosition) {
+u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePosition) {
     EffectCameraDebugScratch scratch;
     u32 result = 1;
 
@@ -12267,13 +12267,13 @@ s32 effRunWithStateBackup(void) {
     return result;
 }
 
-extern u32 func_002FF8A0(EffectStateSnapshot *, s8);
+extern u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *, s8);
 
 u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
     memcpy(D_0045C110, file, 0x90);
-    result = func_002FF8A0((EffectStateSnapshot *)D_0045C110, 1);
+    result = effUpdateCameraSnapshotGuides((EffectStateSnapshot *)D_0045C110, 1);
     memcpy(file, D_0045C110, 0x90);
     if (result & 1) {
         result |= 0x800000;

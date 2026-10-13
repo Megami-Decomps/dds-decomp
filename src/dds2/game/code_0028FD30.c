@@ -503,7 +503,7 @@ void mnuSynchronizeMantraModelFlags(s32 mode) {
     }
 }
 
-extern void func_00314298(DatPartyRecord *, const s32 *);
+extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 extern s32 ptyAddClampedEntryValue(DatPartyRecord *entry, s32 statIndex, s32 amount);
 
 /* Apply one stat, or all five base stats, to each occupied party slot. */
@@ -523,7 +523,7 @@ void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
             } else {
                 ptyAddClampedEntryValue(entry, statIndex, amount);
             }
-            func_00314298(entry, NULL);
+            ptyRecomputeMaxVitals(entry, NULL);
         }
     }
 }

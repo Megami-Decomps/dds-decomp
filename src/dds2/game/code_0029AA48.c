@@ -175,10 +175,10 @@ void mnuClearItemSelectionSlots(BrsSkillPackageWork *context) {
     } while (-1 < remaining);
 }
 
-extern void func_00314298(DatPartyRecord *, const s32 *);
+extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
 void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *unit, BrsSkillPackageWork *menu) {
-    func_00314298(unit, menu->statGains);
+    ptyRecomputeMaxVitals(unit, menu->statGains);
     mnuRefreshSelectedUnitPanels(unit, menu);
 }

@@ -449,7 +449,7 @@ void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback);
 void mnuSetRuntimeWorkHitCallback(MenuRuntimeWorkCallback callback);
 void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback);
 
-void func_003191B0(MenuWorkEntry *, struct MnuShootingWork *);
+void mnuCreateShootingEntryObject(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319388(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319A58(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319E48(MenuRuntimeRecord *);
