@@ -1301,7 +1301,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     return 0;
 }
 
-u32 func_002A3A50(s32 mode) {
+u32 mnuOpenTitleMenuForMode(s32 mode) {
     mnuCreateTitleMenuTask(mode);
     return 0xffffffff;
 }
