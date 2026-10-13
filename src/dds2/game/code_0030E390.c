@@ -197,7 +197,7 @@ void fldUpdateMapRequestQueues(s32 enabled) {
 }
 
 extern f32 sdfCounterGetScaledValue(void);
-extern void func_0030F038(MapRequestState *);
+extern void fldDispatchMapRequestCallbacks(MapRequestState *);
 
 /* Draw the selected map marker and overlay its highlight twice. */
 void fldDrawSelectedMapMarker(void) {
@@ -217,7 +217,7 @@ void fldDrawSelectedMapMarker(void) {
     } else if (remaining > 0.0f) {
         alpha = remaining;
     }
-    func_0030F038(D_004390B0);
+    fldDispatchMapRequestCallbacks(D_004390B0);
     fldProjectPointToGridCell(&gridX, &gridY, D_00400700[index][0], D_00400700[index][1], D_00400700[index][2]);
     opacity = alpha * 32.0f;
     sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x20, 0, 0x54, 2.0f);
@@ -339,7 +339,7 @@ done:
 }
 
 /* Report normalized progress for each active request in the ring. */
-void func_0030F038(MapRequestState *ring) {
+void fldDispatchMapRequestCallbacks(MapRequestState *ring) {
     MapRequestNode *node;
     s32 remaining;
     s32 end;
