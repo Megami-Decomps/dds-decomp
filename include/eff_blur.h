@@ -121,6 +121,10 @@ typedef char EffBlurScaleWorkSizeCheck[sizeof(EffBlurScaleWork) == 0x38 ? 1 : -1
 typedef char EffBlurScaleAllocationOffsetCheck[((u32)&((EffBlurScaleWork *)0)->allocation == 0x30) ? 1 : -1];
 typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots == 0x34) ? 1 : -1];
 
+/* Reset burst state and selected quad fields from the owning work parameters;
+ * corner coordinates remain for the slot's updater to recompute. */
+void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
+
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params);
 void effBlurReleaseFirstResource(EffBlurScatterWork *work);
