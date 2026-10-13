@@ -6344,7 +6344,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
 
             *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
                                                    &common->header.emitterAlphaTrack, age, life);
-            particle->age++;
+            particle->age = (s32)((u32)particle->age + 1U);
             particle->height += rise;
         }
         goto next_particle;
