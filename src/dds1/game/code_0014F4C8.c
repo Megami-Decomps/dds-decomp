@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "eff_random.h"
 
 extern u32 sdfSoundIsCommandBusy(void);
 
@@ -115,7 +116,7 @@ s32 func_0014F780(void) {
     return 1;
 }
 
-extern void effMiscSeedRandomFromClock(u8 *);
+extern u8 effDefaultRandomState[];
 
 extern void fileManagerResetSubsystems(void);
 
@@ -144,7 +145,7 @@ extern u8 effDefaultRandomState[];
 extern char D_003BB008[];
 
 void fldCreateFieldEffectTask(void) {
-    effMiscSeedRandomFromClock(effDefaultRandomState);
+    effMiscSeedRandomFromClock((EffRandState *)effDefaultRandomState);
     fileManagerResetSubsystems();
     effInitializeBillResourceOwners();
     parSysReset();

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -141,7 +142,7 @@ typedef struct ParEmitDesc {
 
 extern void parControlInit();
 
-extern void effMiscSeedRandomFromClock(void *arg);
+extern u8 D_003D64B0[];
 
 extern u8 D_003D64B0[];
 
@@ -534,7 +535,7 @@ u32 func_0015B220(void) {
 void parSysReset(void) {
     parRecordListHead = 0;
     parControlInit();
-    effMiscSeedRandomFromClock(&D_003D64B0);
+    effMiscSeedRandomFromClock((EffRandState *)&D_003D64B0);
 }
 
 void func_0015B250(void) {

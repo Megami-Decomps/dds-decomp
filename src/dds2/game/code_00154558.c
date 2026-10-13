@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "eff_random.h"
 #include "dds3_path.h"
 extern void func_00140BC8(const char *name);
 #include "pcp_vu0.h"
@@ -1763,7 +1764,6 @@ s32 func_00157308(void) {
     return 1;
 }
 
-extern void effMiscSeedRandomFromClock(void *);
 
 extern void effLoadCommonTexturesAndResetRenderFlags(void);
 
@@ -1790,7 +1790,7 @@ extern u8 effDefaultRandomState[];
 extern char D_004363F8[];
 
 void fldCreateFieldEffectTask(void) {
-    effMiscSeedRandomFromClock(effDefaultRandomState);
+    effMiscSeedRandomFromClock((EffRandState *)effDefaultRandomState);
     effLoadCommonTexturesAndResetRenderFlags();
     effInitializeBillResourceOwners();
     parSysReset();
