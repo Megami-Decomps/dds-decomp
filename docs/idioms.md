@@ -10395,3 +10395,30 @@ Final whole-unit gates were DDS1 109 match / 0 differ and DDS2 110 match /
 0 differ, with no safety diagnostics. No owner type, ABI, compiler flag,
 helper or assembly primitive changed.
 
+## Post-call local cleanup: title menu cursor
+
+DDS2 `func_002A5890` (0x002A5890, 44B, `game/code_002A5260`)
+clears the existing title workspace's phase, selected page and sequence
+timer, starts track `0x310000`, then retires its local `state` cursor.
+The matched DDS1 `mnuResetMovieMenuStateAndStartTrack` (0x0026D108)
+confirms the native state/sound operation; its original TU already disables
+sibling calls. DDS2's mixed J/JAL unit does not justify copying that flag.
+
+**P / deciding pass:** early sibling-call selection must still see the
+existing local cursor's cleanup after the sound call. In the parity-checked
+vendor trace, call placeholder uid29 remains NORMAL because reset uid32
+sets real workspace pseudo84 to NULL afterward. The reset survives
+`01.sibling` and `11.cfg`, then disappears in `13.life`; no reset instruction
+or extra storage survives in the exact 44B object. Omitting it leaves a
+40B sibling-call body with six differing overlapping words and one missing
+native word.
+
+This uses the approved post-call local-cleanup exception, not a newly
+introduced blocker local. The trace establishes the compiler mechanism;
+it does not independently prove Atlus wrote this cleanup. Compiler
+SHA-256 is `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`;
+hooked/unhooked assembly and all RTL dumps agree. Trace paths are in PurA's
+deep67 ledger and park. The pre-rename whole-unit gate is 49 match /
+0 differ; the current-name gate keeps all 49 C exact, with only the
+accepted stale rename/ASM-label artifacts pending Main's resplit.
+
