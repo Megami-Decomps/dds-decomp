@@ -375,19 +375,19 @@ s32 evtCommandReadSecondaryWorldIdValue(void) {
     return 1;
 }
 
-s32 func_00226650(void)
+s32 evtCommandOpenTitleMenu(void)
 {
     dds3AdminSubmitModeRequest(2, 0, 0, 0);
     return 1;
 }
 
-s32 func_00226680(void)
+s32 evtCommandOpenMemoryCardMenu(void)
 {
     dds3AdminSubmitModeRequest(0xc, 0, 0, 0);
     return 1;
 }
 
-s32 func_002266B0(void)
+s32 evtCommandStartStaffMovie(void)
 {
     dds3AdminSubmitModeRequest(4, 0, 0, 0);
     return 1;

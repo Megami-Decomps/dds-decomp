@@ -4020,6 +4020,9 @@
 0x002264B0	evtCommandAttachLightToUnitPath	inferred	Resolves unit-path and light object; attaches light to path when both exist. [names_reviewed6.tsv]
 0x00226540	evtCommandWaitEffectResourceScale	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:341:evtCommandWaitEffectResourceScale; Finds the effect object by ID and holds the script until its resource scale resolves (EFFECT_PATH_WAIT).; twin=0x002411A0 (DDS2).
 0x002265B8	evtCommandReadSecondaryWorldIdValue	inferred	Looks up named ID in secondary world and returns node value or zero with warning. [names_reviewed6.tsv]
+0x00226650	evtCommandOpenTitleMenu	inferred	Requests admin mode 2, whose dispatch opens the title menu.
+0x00226680	evtCommandOpenMemoryCardMenu	inferred	Requests admin mode 0xC, whose dispatch enters the memory-card pack scene.
+0x002266B0	evtCommandStartStaffMovie	inferred	Requests admin mode 4, whose dispatch starts the staff movie.
 0x002266E0	evtCommandSubmitPairedAdminRequest	inferred	Passes two script parameters to administrative request queue and sets script return to zero. [names_reviewed6.tsv]
 0x00226730	evtCommandDeferFieldTransition	inferred	Logs CALL_NEXT arguments and saves two of them as deferred field command. [names_reviewed6.tsv]
 0x002267B0	evtCommandCallEvent	inferred	Logs call_event with the script-supplied event ID and submits request type 6 containing that ID.

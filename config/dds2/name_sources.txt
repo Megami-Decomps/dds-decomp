@@ -3619,6 +3619,9 @@
 0x002410D0	evtCommandClearSelectedEffectNode	inferred	confidence=high; matched-C; src/dds2/event/evtCommand.c:217:func_002410D0; Resolves script operand zero as a kind-seven world object and dispatches its supported inner-node clear callback with flag zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00241110	evtCommandAttachLightToUnitPath	inferred	Resolves unit-path and light object; attaches light to path when both exist. [names_reviewed6.tsv]
 0x00241218	evtCommandReadSecondaryWorldIdValue	inferred	Looks up named ID in secondary world and returns node value or zero with warning. [names_reviewed6.tsv]
+0x002412B0	evtCommandOpenTitleMenu	inferred	Requests admin mode 2, whose dispatch opens the title menu.
+0x002412E0	evtCommandOpenMemoryCardMenu	inferred	Requests admin mode 0xC, whose dispatch enters the memory-card pack scene.
+0x00241310	evtCommandStartStaffMovie	inferred	Requests admin mode 4, whose dispatch starts the staff movie.
 0x00241340	evtCommandSubmitPairedAdminRequest	inferred	Passes two script parameters to administrative request queue and sets script return to zero. [names_reviewed6.tsv]
 0x00241390	evtCommandDeferFieldTransition	inferred	Logs CALL_NEXT arguments and saves two of them as deferred field command. [names_reviewed6.tsv]
 0x00241460	evtCommandSignalAdminAtTimerZero	inferred	Signals administrative flag when script command timer equals zero. [names_reviewed6.tsv]
