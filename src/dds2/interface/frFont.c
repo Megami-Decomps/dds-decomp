@@ -40,7 +40,7 @@ typedef struct FrFontSegments {
 } FrFontSegments;
 
 extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
-extern void func_001A00B8(void *dst, s32 option, void *block, FrFontSegments *segments);
+extern void itfDecodePackedResourceEntry(void *decodedBytes, s32 entryIndex, void *resourceBase, FrFontSegments *segments);
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
@@ -430,15 +430,15 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
     return cachedItem;
 }
 
-/* Allocate a fixed-size clone and process the selected font resource's segments.
- * The processing option remains opaque; neither allocation nor index is checked. */
-void *frFontCloneEntryResource(u8 fontIndex, s32 resourceOption) {
+/* Decode one packed font-resource entry into a fixed-size clone.
+ * Neither allocation nor entry index is checked. */
+void *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
     FrFontEntry *entry = &frFontWork.entries[fontIndex];
     void *clonedResource = sdfAllocSizeClassBlock(FR_FONT_RESOURCE_CLONE_BYTES);
     FrFontSegments segments;
 
     itfSplitRelativeSegments(entry->resource, &segments);
-    func_001A00B8(clonedResource, resourceOption, entry->resource, &segments);
+    itfDecodePackedResourceEntry(clonedResource, entryIndex, entry->resource, &segments);
     return clonedResource;
 }
 

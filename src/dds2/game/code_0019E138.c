@@ -389,22 +389,25 @@ u32 itfTestTextInterfaceMask(u32 mask) {
     return D_0043654C & mask;
 }
 
-void func_0019E8F0(s32 index, s32 value) {
-    D_004528C0[index] = value;
+/* Store an unchecked replacement-text address word in the font's indexed table. */
+void itfSetIndexedTextSlot(s32 slotIndex, s32 encodedTextAddress) {
+    D_004528C0[slotIndex] = encodedTextAddress;
 }
 
-u32 func_0019E908(void) {
+/* Return the unit identifier saved by text lip-sync control 0xF416. */
+u32 itfGetTextLipsUnitId(void) {
     return D_0043655C;
 }
 
-u32 func_0019E910(void) {
+/* Return the motion number saved by text lip-sync control 0xF416. */
+u32 itfGetTextLipsMotionId(void) {
     return D_00436560;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E918);
 
 /* Skip one encoded-text control without executing it; returns 1 for the stop codes and 2 for the voice trigger. */
-s32 func_0019EC00(s32 code, FrFontCtx *stream) {
+s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
     u8 *bytes = stream->encodedText;
     s32 payloadWords = code & 0xF;
@@ -484,7 +487,7 @@ s32 itfScanEncodedTextControls(FrFontCtx *stream) {
             break;
         }
         if ((value & 0xF0) == 0xF0) {
-            s32 result = func_0019EC00(value, stream);
+            s32 result = itfSkipEncodedTextOpcode(value, stream);
 
             if (result == 1) {
                 break;
@@ -1014,7 +1017,8 @@ s32 itfReturnThirdCallbackValue(s32 unused0, s32 unused1, s32 value) {
 }
 
 extern s32 D_00438F20;
-s32 func_001A0058(void) {
+/* Return the byte count saved by the most recent packed-resource decode. */
+s32 itfGetLastDecodedByteCount(void) {
     return D_00438F20;
 }
 
@@ -1033,13 +1037,15 @@ void itfSplitRelativeSegments(MemBlock *block, MemOut *segments) {
     segments->third = (u8 *)block + thirdOffset;
 }
 
-u32 func_001A0098(u32 object) {
-    return *(u32 *)(func_001A0060(object) + 0x10);
+/* Read the opaque header word at 0x10; its role is not established. */
+u32 itfGetPackedResourceHeaderWord(u32 resourceBase) {
+    return *(u32 *)(func_001A0060(resourceBase) + 0x10);
 }
 
-/* Decode the option's selected bit span through the resource's six-byte
- * lookup records, appending the byte carried by each terminal record. */
-s32 func_001A00B8(u8 *dst, s32 option, u32 block, MemOut *segments) {
+/* Decode entryIndex's bit span through the resource's six-byte prefix-tree records.
+ * Write terminal bytes to decodedBytes and return/cache the count. The font atlas
+ * uses these bytes as pixels; neither entry nor output bounds are checked. */
+s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, u32 resourceBase, MemOut *segments) {
     ItfBitRange range;
     s32 produced;
     u8 *table = segments->first;
@@ -1051,10 +1057,10 @@ s32 func_001A00B8(u8 *dst, s32 option, u32 block, MemOut *segments) {
     u16 *root;
     u16 *node;
 
-    memcpy(&range.start, (u8 *)segments->second + option * 4, 4);
-    memcpy(&range.end, (u8 *)segments->second + option * 4 + 4, 4);
+    memcpy(&range.start, (u8 *)segments->second + entryIndex * 4, 4);
+    memcpy(&range.end, (u8 *)segments->second + entryIndex * 4 + 4, 4);
     produced = 0;
-    func_001A0060(block);
+    func_001A0060(resourceBase);
     start = range.start;
     bitWords = segments->third;
     wordIndex = start >> 4;
@@ -1067,7 +1073,7 @@ s32 func_001A00B8(u8 *dst, s32 option, u32 block, MemOut *segments) {
 
         node = (u16 *)(table + index * 6 + 2);
         if (*node == 0) {
-            dst[produced++] = ((u8 *)node)[2];
+            decodedBytes[produced++] = ((u8 *)node)[2];
             node = root;
         }
         state >>= 1;

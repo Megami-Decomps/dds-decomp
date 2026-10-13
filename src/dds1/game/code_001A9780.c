@@ -23,7 +23,7 @@
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 
-extern void func_001B96F8(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -1341,7 +1341,7 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern void btlSetTrackedTaskHandle(s32, s32);
 
-extern s32 func_001ADE68(KwlnTask *);
+extern s32 btlUpdateValueMessageWindows(KwlnTask *);
 
 extern void itfMesCloseAllWindows(KwlnTask *);
 
@@ -1374,7 +1374,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     work->x = 0x20;
     work->y = 0x20;
     task = kwlnTaskCreate(btlMahenPanelTaskNameRef, 0x2B0E, 1, 1,
-                          func_001ADE68, itfMesCloseAllWindows, (u32)work);
+                          btlUpdateValueMessageWindows, itfMesCloseAllWindows, (u32)work);
     kwlnTaskAddChild(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(10, (s32)task);
     return 1;
@@ -1933,7 +1933,8 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-s32 func_001ADE68(KwlnTask *task) {
+/* Fade and draw the task's enabled label/value windows; return -1 after fade-out. */
+s32 btlUpdateValueMessageWindows(KwlnTask *task) {
     MesWindowList *work;
     s32 i;
     s32 count;
@@ -4044,7 +4045,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
             btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
             btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
             btlUpdateActorPanelHighlights(unit, work, i, 1);
-            func_001B96F8(unit, work, i, 1);
+            btlDrawActorPanelHighlights(unit, work, i, 1);
             func_001BBE18(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
                           work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
 
@@ -4472,7 +4473,8 @@ void btlUpdateActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s3
 
 extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_001B96F8(BtlUnit *unit, BattleActorPanelWork *work, s32 index, s8 reserve) {
+/* Draw an active/reserve slot's eight-alpha highlights, then reset primary blending. */
+void btlDrawActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 index, s8 reserve) {
     s32 x;
     s32 y;
     u32 alpha[8];
@@ -6923,7 +6925,8 @@ void fldSetSceneSlotRange(s32 index) {
 
 extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
 
-void func_001C3040(void) {
+/* Step the current bank's slot fades when the task pair permits; slots share a timer. */
+void btlUpdateBankedSlotFadeSequence(void) {
     s32 bank = D_003BD83C->bank;
     s32 last = D_003BD83C->lastIndex;
     s32 status = btlGetNamedTaskPairStatusOrUnavailable();
