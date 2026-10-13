@@ -97,8 +97,6 @@ s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 extern void frFontLoadTemporaryEntry(u32);
 
 
-extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
-
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
 extern s32 sndVisitQueuedResources(void);
@@ -106,8 +104,6 @@ extern s32 sndVisitQueuedResources(void);
 extern void sndFlushMessageQueue(void);
 
 extern s32 func_001A76C8(void);
-
-extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
 extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
@@ -1077,7 +1073,6 @@ void itfMesClearGlobalWords(void) {
 extern ItfMesWindowRec D_00452960[];
 extern void btlReleaseEffectResourceHandles();
 extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
-extern void itfReleasePoolNode();
 
 /* Tear down installed content/resources, return the pool record and decrement
  * the pool-array-relative counter. An empty record is a no-op. */
@@ -1092,7 +1087,7 @@ void itfMesDestroyWindow(s32 window) {
         mes->flags = 0;
         sdfReleaseResourceAllocation((struct SdfMemBlock *)windowRecord->resourceHandle);
         windowRecord->stateAddress = 0;
-        itfReleasePoolNode(windowRecord, (u8 *)D_00452960 - 0x10);
+        itfReleasePoolNode(windowRecord, (ItfMesPool *)((u8 *)D_00452960 - 0x10));
         ((ItfMesGlobals *)((u8 *)D_00452960 - 0x20))->activeWindowCount -= 1;
     }
 }
