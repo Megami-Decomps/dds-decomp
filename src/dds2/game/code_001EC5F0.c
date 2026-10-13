@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
+#include "btl_pair_camera_preset.h"
 #include "common.h"
 #include "mnu_title_stream.h"
 #include "eff_random_mod.h"
@@ -525,15 +526,6 @@ void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *command, BtlCamState *
 }
 
 extern f32 func_00353228(f32);
-
-typedef struct BattlePairCameraPreset {
-    f32 fromQuaternion[4];
-    f32 toQuaternion[4];
-    f32 fromDistanceScale;
-    f32 toDistanceScale;
-    f32 fromHeightScale;
-    f32 motionParameter;
-} BattlePairCameraPreset;
 
 /* The two default rows form one copied camera-preset bank. */
 typedef struct BattlePairCameraPresetSet {

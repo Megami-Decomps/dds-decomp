@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
+#include "btl_pair_camera_preset.h"
 #include "common.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
@@ -563,15 +564,6 @@ extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
 extern f32 func_002FA148(f32);
-
-typedef struct BattlePairCameraPreset {
-    f32 fromQuaternion[4];
-    f32 toQuaternion[4];
-    f32 fromDistanceScale;
-    f32 toDistanceScale;
-    f32 fromHeightScale;
-    f32 motionParameter;
-} BattlePairCameraPreset;
 
 void btlConfigureBattleCameraAction(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4];
