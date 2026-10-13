@@ -50,13 +50,13 @@ extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 
 extern void fldApplyLightSetToChaseCameraUnit(void);
 extern void func_001526B8(void);
-extern void func_00153FA0(void);
+extern void fldInitializeSceneGuideMarkers(void);
 extern EffWorldNode *D_00435F1C;
 extern MdlCtx *D_00435F20;
 
 extern void fldUpdateGuideMarkerPulse(void);
-extern void func_001523F0(void);
-extern void func_001525F0(void);
+extern void fldUpdateTargetGuideMovementState(void);
+extern void fldDispatchTargetGuideMotionUpdate(void);
 extern void fldUpdateTargetGuideEffects(void);
 extern void func_00153068(void);
 extern s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *gridX, s16 *gridY);
@@ -548,7 +548,7 @@ extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
 extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
-s32 func_001442D0(void) {
+s32 fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
     FldAreaWork *area;
 
@@ -3700,7 +3700,7 @@ s32 fldTitleMiniIsActive(void) {
     return kwlnTaskGetTaskByName(D_00413C80) != 0;
 }
 
-s32 func_0014EDB8(KwlnTask *task) {
+s32 fldTitleMini(KwlnTask *task) {
     s32 alpha;
     u32 color;
     s32 slide;
@@ -3802,7 +3802,7 @@ extern s32 D_003898B4[];
 
 extern s32 D_00436378;
 
-extern s32 func_0014EDB8(KwlnTask *task);
+extern s32 fldTitleMini(KwlnTask *task);
 
 extern void fldReleaseTitleMiniTexture(void);
 
@@ -3930,7 +3930,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_0043637C = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
-        kwlnTaskCreate(D_00413C80, 0x2B0A, 0, 1, func_0014EDB8, fldReleaseTitleMiniTexture, 0);
+        kwlnTaskCreate(D_00413C80, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
     }
 }
 
@@ -5172,7 +5172,7 @@ void func_001523D0(void) {
 }
 
 
-void func_001523F0(void) {
+void fldUpdateTargetGuideMovementState(void) {
     FieldTargetGuideState *state = &fldTargetGuideState;
     FldVec4 guidePosition;
     FldVec4 areaPosition;
@@ -5252,7 +5252,7 @@ void func_001523F0(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F20);
 
-void func_001525F0(void) {
+void fldDispatchTargetGuideMotionUpdate(void) {
     s32 mode = fldTargetGuideState.mode;
 
     switch (mode) {
@@ -5466,8 +5466,8 @@ void fldUpdateTargetGuideController(void) {
             }
         } else {
             fldUpdateGuideMarkerPulse();
-            func_001523F0();
-            func_001525F0();
+            fldUpdateTargetGuideMovementState();
+            fldDispatchTargetGuideMotionUpdate();
             fldUpdateTargetGuideEffects();
             func_00153068();
             fldFindNearestOccupiedMapGridCell(fldAreaState.x, fldAreaState.z, &D_00438EF8.x, &D_00438EF8.y);
@@ -5488,7 +5488,7 @@ s32 fldIsTargetWithinInteractionRange(void) {
     return inRange;
 }
 
-s32 func_00153560(s32 unusedArea, s32 unusedRoom) {
+s32 fldCanUseTargetGuideInCurrentScene(s32 unusedArea, s32 unusedRoom) {
     if (fldAreaState.area == 23) {
         if (fldAreaState.floor == 10 && mdlFlagTest(1254)) {
             return 0;
@@ -5536,7 +5536,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
 void fldSetTargetGuideMode(s32 mode) {
     s32 previousMode;
 
-    if (func_00153560(fldAreaState.area, fldAreaState.floor + 1) == 0) {
+    if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1) == 0) {
         return;
     }
     previousMode = fldTargetGuideState.unk64;
@@ -5823,7 +5823,7 @@ extern FieldGuideObjectPreset D_003AA458[];
 extern FieldGuideObjectPreset D_003AA460[];
 extern FieldGuideObjectPreset D_003AA4B8[];
 
-void func_00153FA0(void) {
+void fldInitializeSceneGuideMarkers(void) {
     FieldGuideObjectPreset *presets = NULL;
     s32 slot;
     s32 packedCoordinates;
@@ -5898,7 +5898,7 @@ void fldCreateChaseCameraObject(void) {
     sdfSetModelScalarOverrides(D_00435F20->inner, 15.0f, 0.0f);
     fldApplyLightSetToChaseCameraUnit();
     func_001526B8();
-    func_00153FA0();
+    fldInitializeSceneGuideMarkers();
 }
 
 extern s32 D_004363DC;

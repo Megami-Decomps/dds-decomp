@@ -2335,7 +2335,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     call `jal` (a void caller still `j`); a `default:` written FIRST (source order
     first) with `break` and the others `return;` gives `jal` for that arm only
     (`default_first`: jal, j, j, j, j), but retail emits the default last, so that
-    does not reproduce DDS2 `func_001525F0` (jump-table, cases `j`, default `jal`);
+    does not reproduce DDS2 `fldDispatchTargetGuideMotionUpdate` (jump-table, cases `j`, default `jal`);
     default last, `case 3` sharing the default, or `return;` after it all give `j`.
     Still open: how retail gets a trailing `jal` default after `j` cases.
 16. **`addu` operand order follows how the element is reached.** A table element
@@ -2564,7 +2564,7 @@ dependency graph. Check the active mode, allocation and other field users
 before taking such a pointer; the union remains the owner of heterogeneous
 payloads.
 
-DDS2 `game/code_001442D0::func_00153FA0` provides a packed-record example.
+DDS2 `game/code_001442D0::fldInitializeSceneGuideMarkers` provides a packed-record example.
 Each eight-byte preset contains a real `FieldGridCoordPair` of two signed
 halfwords, followed by a float phase. The terminal record encodes both
 coordinates as `0xFFFF`. Read its four-byte representation with fixed-size
@@ -10590,7 +10590,7 @@ formula and 16-byte rounding are not rewritten.
 
 ## Post-call guide mode cleanup
 
-DDS2 `func_001525F0` (`0x001525F0`, `code_001442D0`) dispatches the
+DDS2 `fldDispatchTargetGuideMotionUpdate` (`0x001525F0`, `code_001442D0`) dispatches the
 existing guide mode. Its eight explicit cases return through sibling jumps;
 the default fast-route phase instead uses native `jal` at `0x001526A0`,
 followed by the saved-return-address epilogue.

@@ -4524,7 +4524,7 @@ extern void fldStartTitle(s32, s32, s32);
 extern void kwlnFadeBackgroundStartIn(s32);
 extern void kwlnFadeBackgroundStartOut(s32);
 
-s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
+s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime) {
     char motionName[0x40];
     EvtWorldTable *world;
     s32 needsBgm;
@@ -5265,7 +5265,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     work = evtGetPolygonMovieWorkData2(D_004372B0, D_004372B2, mode);
     if (work != NULL) {
         runtime->windowContext = work;
-        func_0025A280(work, runtime);
+        evtPopulateViewerTimelineFromMovie(work, runtime);
         return 1;
     }
     return 0;
