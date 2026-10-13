@@ -2618,6 +2618,8 @@
 0x0019ADF0	itfPanelEmitRecord	inferred	calls itfPanel helper func_00199998 with record unkA8 plus args
 0x0019AE38	itfPanelGetStatus	inferred	reads status byte at record +0x34 via D_003D6ECC table
 0x0019AE58	itfPanelSetStatus	inferred	writes status byte at record +0x34 via D_003D6ECC table
+0x0019A628	itfDrawFramedPanelWithTextureStrips	inferred	Draws two alpha-scaled border bands and six texture-bound strips from the live panel rectangle; installed in the panel callback table.
+0x0019A9A8	itfDrawThreePieceTexturedPanel	inferred	Draws a textured left cap, colored center section, and reversed right cap from panel bounds; installed in the panel callback table.
 0x0019AE78	itfPanelAcquireHold	inferred	stores scrGetWindow() into D_00357D90 and calls func_0019C968(window, 3, 0); DDS2 001A2EA8 [names_M33_SmallSweep2.tsv]
 0x0019AED8	itfPanelReleaseHold	inferred	closes the held message window (itfMesCleanupWindow) and resets D_00357D90 (window/counter = -1/0); DDS2 001A2F08 [names_M33_SmallSweep2.tsv]
 0x0019AF30	itfCommandQueueHeldPanelEntry	inferred	src/dds1/game/code_00199AD8.c func_0019AF30: Reads three script integers into held panel queue, ignoring absent hold or full queue. [names_reviewed24.tsv]
