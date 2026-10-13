@@ -20,6 +20,12 @@ typedef struct BtlSceneFadingRecord {
     u8 alpha;
     s32 target;
 } BtlSceneFadingRecord;
+typedef char BtlSceneSlotSizeCheck[(sizeof(BtlSceneSlot) == 3) ? 1 : -1];
+typedef char BtlSceneFadingRecordSizeCheck[(sizeof(BtlSceneFadingRecord) == 8) ? 1 : -1];
+typedef char BtlSceneFadingRecordAlphaOffsetCheck[
+    ((u32)&((BtlSceneFadingRecord *)0)->alpha == 3) ? 1 : -1];
+typedef char BtlSceneFadingRecordTargetOffsetCheck[
+    ((u32)&((BtlSceneFadingRecord *)0)->target == 4) ? 1 : -1];
 
 typedef struct BtlItemDrop {
     u16 id;
