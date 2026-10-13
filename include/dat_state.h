@@ -100,7 +100,7 @@ typedef struct DatPartyRecord {
     u8 pad1B;
     u16 hpBonus;
     u16 mpBonus;
-    u8 unk20; /* Packed nonzero effectData count written by the enemy constructor. */
+    u8 effectDataCount; /* Enemy constructor count; custom party setup clears it. */
     u8 pad21;
     u16 effectData[24];
     u16 menuValue;
@@ -136,6 +136,9 @@ typedef struct DatPartyRecord {
     u8 pad1BC[8];
 #endif
 } DatPartyRecord;
+
+typedef char DatPartyRecord_effectDataCount_offset[
+    ((unsigned long)&((DatPartyRecord *)0)->effectDataCount == 0x20) ? 1 : -1];
 
 typedef struct DatInventory {
 #ifdef VERSION_DDS1
