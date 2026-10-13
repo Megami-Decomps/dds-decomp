@@ -1428,7 +1428,8 @@ s32 btlNbScriptCheckActorFlag(void) {
     return 1;
 }
 
-s32 func_0020A580(void) {
+/* Remember the choice when the packed MP-percentage condition succeeds. */
+s32 btlCmdStoreActorMpCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
@@ -1442,7 +1443,8 @@ s32 func_0020A580(void) {
     return 1;
 }
 
-s32 func_0020A610(void) {
+/* Identical unregistered copy of the preceding MP-choice command. */
+s32 btlCmdStoreActorMpCheckChoiceUnregistered(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
@@ -2660,10 +2662,12 @@ void btlDebugDrawRectangle(s32 x, s32 y, s32 width, s32 height) {
 void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
-void func_0020D1C8(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
+/* Retail no-op for the colored span between adjacent mapping-plot knots. */
+void btlDebugDrawMappingColorSpan(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
-void func_0020D1D0(s32 x0, s32 y0, s32 x1, s32 y1, u32 color) {
+/* Retail no-op: plot guides supply two-dimensional endpoints and packed color. */
+void btlDebugDrawLine2D(s32 x0, s32 y0, s32 x1, s32 y1, u32 color) {
 }
 
 void func_0020D1D8(void) {
@@ -2684,7 +2688,7 @@ void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
 /* Retail stub for the two extents and orientation submitted by camera diagnostics. */
-void func_0020D200(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
+void btlDebugDrawOrientedExtentGuide(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
 }
 
 /* Retail stub for the position, color, mode and scale submitted by the actor editor. */
@@ -2701,10 +2705,12 @@ void btlDebugDrawSegment(f32 *from, f32 *to, u32 color) {
 void func_0020D220(void) {
 }
 
-void func_0020D228(void) {
+/* Empty stage immediately before the per-context debug-menu entry. */
+void btlDebugMenuBeforeRecordNoOp(void) {
 }
 
-void func_0020D230(void) {
+/* Empty stage immediately after the per-context debug-menu entry. */
+void btlDebugMenuAfterRecordNoOp(void) {
 }
 
 void func_0020D238(void) {
@@ -2722,14 +2728,16 @@ void func_0020D250(void) {
 void func_0020D258(void) {
 }
 
-u32 func_0020D260(u32 value) {
+/* First debug-menu stage; return the supplied context word unchanged. */
+u32 btlReturnDebugMenuSetupWord(u32 value) {
     return value;
 }
 
 void func_0020D268(void) {
 }
 
-void func_0020D270(u32 value) {
+/* Empty per-context stage; its sequence position does not imply recording. */
+void btlDebugMenuRecordNoOp(u32 value) {
 }
 
 

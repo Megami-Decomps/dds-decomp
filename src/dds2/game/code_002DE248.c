@@ -11668,10 +11668,10 @@ typedef char EffCameraMenuStateSizeCheck[(sizeof(EffCameraMenuState) == 0x38) ? 
 extern EffCameraMenuState D_003FFBB0;
 extern s8 sdfPadButtonStates[];
 extern char D_00438740[];
-extern u32 func_0020D260(u32);
-extern void func_0020D228(void);
-extern void func_0020D270(u32);
-extern void func_0020D230(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuRecordNoOp(u32);
+extern void btlDebugMenuAfterRecordNoOp(void);
 
 typedef struct EffCameraCreateRow {
     EffCameraCreateRequest request;
@@ -11725,10 +11725,10 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
         oldIndex = state->selectedIndex;
     }
     state->nameKey = nameKey;
-    func_0020D260((u32)state);
-    func_0020D228();
-    func_0020D270((u32)state);
-    func_0020D230();
+    btlReturnDebugMenuSetupWord((u32)state);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((u32)state);
+    btlDebugMenuAfterRecordNoOp();
     sdfReleaseResourceAllocation(allocation);
 
     if (sdfPadButtonStates[1] < 0 && count != 0) {
@@ -12051,10 +12051,10 @@ s32 effResetStaticState(void) {
     return 0;
 }
 
-extern u32 func_0020D260(u32);
-extern void func_0020D228(void);
-extern void func_0020D270(u32);
-extern void func_0020D230(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuRecordNoOp(u32);
+extern void btlDebugMenuAfterRecordNoOp(void);
 extern void btlDebugDrawRadiusGuide(f32 *, f32, u32, s32);
 extern void btlDebugDrawSegment(f32 *, f32 *, u32);
 extern void btlDebugDrawPoint(f32 *);
@@ -12077,10 +12077,10 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
     }
 
     PCP_COPY_VECTOR(D_0045C2F0, state->position);
-    func_0020D260((u32)D_003FFC78);
-    func_0020D228();
-    func_0020D270((u32)D_003FFC78);
-    func_0020D230();
+    btlReturnDebugMenuSetupWord((u32)D_003FFC78);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((u32)D_003FFC78);
+    btlDebugMenuAfterRecordNoOp();
     PCP_COPY_VECTOR(state->position, D_0045C2F0);
     if (D_003FFC78[4] & 8) {
         flags |= 2;
@@ -12150,7 +12150,7 @@ s32 effResetCameraSnapshotSelection(void) {
 }
 
 extern EffCameraMenuState D_003FFD08;
-extern void func_0020D200(f32 *, f32, f32, u32, f32 (*)[4]);
+extern void btlDebugDrawOrientedExtentGuide(f32 *, f32, f32, u32, f32 (*)[4]);
 
 /* Private scratch feeds only VU loads or empty retail debug providers. */
 typedef struct EffectCameraDebugScratch {
@@ -12179,10 +12179,10 @@ u32 func_002FF8A0(EffectStateSnapshot *state, s8 useBattlePosition) {
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.basePosition);
     VU0_STORE_VF(vf10, D_0045C2F0);
 
-    func_0020D260((u32)&D_003FFD08);
-    func_0020D228();
-    func_0020D270((u32)&D_003FFD08);
-    func_0020D230();
+    btlReturnDebugMenuSetupWord((u32)&D_003FFD08);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((u32)&D_003FFD08);
+    btlDebugMenuAfterRecordNoOp();
     PCP_COPY_VECTOR(state->quat, D_0045C300);
     if (D_003FFD08.unk10 & 8) {
         result |= 2;
@@ -12203,7 +12203,7 @@ u32 func_002FF8A0(EffectStateSnapshot *state, s8 useBattlePosition) {
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
 
-    func_0020D200((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
+    btlDebugDrawOrientedExtentGuide((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
     btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80000080);
     btlDebugDrawPoint((f32 *)&scratch.segmentStart);
 

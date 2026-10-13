@@ -1310,7 +1310,8 @@ u32 btlNbScriptCheckActorFlag(void) {
     return 1;
 }
 
-u32 btlCmdSelectActorActionAndStoreChoice(void) {
+/* Remember the choice when the packed MP-percentage condition succeeds. */
+u32 btlCmdStoreActorMpCheckChoice(void) {
     void *context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x6000000)) {
         scrSetIntegerReturnValue(1);
@@ -2354,10 +2355,12 @@ void btlDebugDrawRectangle(s32 x, s32 y, s32 width, s32 height) {
 void btlDebugDrawTwoColorRectangle(void) {
 }
 
-void func_001FB148(void) {
+/* Retail no-op for the colored span between adjacent mapping-plot knots. */
+void btlDebugDrawMappingColorSpan(void) {
 }
 
-void func_001FB150(void) {
+/* Retail no-op: native plot guides supply two-dimensional endpoints and color. */
+void btlDebugDrawLine2D(void) {
 }
 
 void func_001FB158(void) {
@@ -2378,7 +2381,7 @@ void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
 /* Retail diagnostic stub: two extents, a start point, color and matrix. */
-void func_001FB180(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
+void btlDebugDrawOrientedExtentGuide(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
 }
 
 /* Retail stub for the position, color, mode and scale submitted by the actor editor. */
@@ -2395,10 +2398,12 @@ void btlDebugDrawSegment(f32 *from, f32 *to, u32 color) {
 void func_001FB1A0(void) {
 }
 
-void func_001FB1A8(void) {
+/* Empty stage immediately before the per-context debug-menu entry. */
+void btlDebugMenuBeforeRecordNoOp(void) {
 }
 
-void func_001FB1B0(void) {
+/* Empty stage immediately after the per-context debug-menu entry. */
+void btlDebugMenuAfterRecordNoOp(void) {
 }
 
 void func_001FB1B8(void) {
@@ -2416,14 +2421,16 @@ void func_001FB1D0(void) {
 void func_001FB1D8(void) {
 }
 
-void func_001FB1E0(void *context) {
+/* First debug-menu stage; retail ignores the supplied context. */
+void btlDebugMenuSetupNoOp(void *context) {
     (void)context;
 }
 
 void func_001FB1E8(void) {
 }
 
-void func_001FB1F0(void *context) {
+/* Empty per-context stage; its sequence position does not imply recording. */
+void btlDebugMenuRecordNoOp(void *context) {
     (void)context;
 }
 
