@@ -190,7 +190,19 @@ u32 dds3GetCurrentPackedValueBuffer(s32 object) {
     return *(u32 *)(*(s32 *)(*(s32 *)(object + 4) + 8) + 0x10);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F280);
+DdsPackedObject *func_0031F280(void) {
+    DdsPackedObject *object = (DdsPackedObject *)func_0035A828(sizeof(DdsPackedObject));
+
+    object->maxPackedOffset = 0;
+    object->segments = (u32)mnuCreateCallbackNode(0);
+    ((MnuCallbackList *)object->segments)->onRemove = dds3DestroyPackedSegmentCallback;
+    object->namedReferences = (u32)mnuCreateCallbackNode(0);
+    ((MnuCallbackList *)object->namedReferences)->onRemove = dds3DestroyNamedReferenceCallback;
+    object->pendingReferences = (u32)mnuCreateCallbackNode(0);
+    ((MnuCallbackList *)object->pendingReferences)->onRemove = dds3DestroyNamedReferenceCallback;
+    dds3AllocateAndAttachPackedValueBuffer((s32)object);
+    return object;
+}
 
 void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
     DdsCallbackCollection *collection = (DdsCallbackCollection *)node;
@@ -853,7 +865,23 @@ void dds3SetCallbackNodeLastListener(MnuCallbackList *callbackNode,
     }
 }
 
-INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320CE0);
+SdfListNode *func_00320CE0(MnuCallbackList *list, s32 key, u32 valueWord) {
+    SdfListNode *node = (SdfListNode *)func_0035A828(sizeof(SdfListNode));
+
+    memset(node, 0, sizeof(SdfListNode));
+    node->index = list->count++;
+    node->key = key;
+    node->value = (void *)valueWord;
+    if (list->head == NULL) {
+        list->head = node;
+    } else {
+        SdfListNode *tail = list->tail;
+        node->prev = tail;
+        tail->next = node;
+    }
+    list->tail = node;
+    return node;
+}
 
 INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320D80);
 
