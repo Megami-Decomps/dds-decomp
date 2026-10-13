@@ -6243,7 +6243,7 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     return task;
 }
 
-void func_002050D0(void) {
+void btlResetMotionSoundFrameCounters(void) {
     s32 context = btlGetRuntime();
     ((BtlState *)context)->unk288 = -1;
     ((BtlState *)context)->unk28C = -1;
