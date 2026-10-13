@@ -5292,6 +5292,7 @@
 0x00288D68	fileQueuePendingRequestInFreeSlot	inferred	Semaphore guards a free-slot check and moves a queued request from state three to four. [names_reviewed21.tsv]
 0x00289030	fileStartChunkedReadWhenReady	inferred	Transitions a ready file job to transferring and queues a bounded read chunk. [names_reviewed10.tsv]
 0x002892F8	fileStartChunkedWriteWhenReady	inferred	Transitions a ready file job to transferring and queues a bounded write chunk. [names_reviewed10.tsv]
+0x00289540	fileStartOrResumeQueuedJob	inferred	confidence=high; src/dds1/game/code_00288E70.c:301; Starts or resumes the read, PAC, or write job at the head of the file queue; twin=0x002C8AC0 (DDS2).
 0x00289738	fileManDispatchDone	inferred	drains work done-queue under sema, runs each node callback
 0x002897A0	fileManUpdate	inferred	fileMan task update; pumps pending jobs then completion queue
 0x00289950	fileMan	inferred	update proc of the task registered as "fileMan" (a task label, not proof of the function's name)
