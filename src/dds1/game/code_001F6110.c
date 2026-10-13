@@ -13,6 +13,7 @@
 #include "btl_resource_browser.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "bill_object_api.h"
 #include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -2795,7 +2796,6 @@ extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0039862B[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
-extern SdfTex *effGetBillResourceTexture(s32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
