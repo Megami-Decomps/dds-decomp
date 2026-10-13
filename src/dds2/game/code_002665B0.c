@@ -39,7 +39,7 @@ extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
 extern s32 evtRunTerminalPanel(KwlnTask *task);
 extern s32 evtRunTerminalPanelSync(KwlnTask *task);
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 
 extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
@@ -508,7 +508,7 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
         width /= 2;
     }
     if (isCurrent) {
-        func_00306CD0(x, y, 0, width, 0, host->resourceBank[0], 0x18, priority);
+        effDrawTextureSlotWithBlendedCornerColors(x, y, 0, width, 0, host->resourceBank[0], 0x18, priority);
         chainFlags = 4;
     }
     color = (node->flags48 & 1) ? 0xA09DC320 : 0xA09DC380;
@@ -603,10 +603,10 @@ void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuList *list, Menu
         width /= 2;
     }
     if (isCurrent) {
-        func_00306CD0(x, y, 0, width, 0, host->resourceBank[0], 0x16, priority);
+        effDrawTextureSlotWithBlendedCornerColors(x, y, 0, width, 0, host->resourceBank[0], 0x16, priority);
         index += 1;
     }
-    func_00306CD0(x + 0x50, y - 0x10, 0, width, 0, host->resourceBank[0], index, priority);
+    effDrawTextureSlotWithBlendedCornerColors(x + 0x50, y - 0x10, 0, width, 0, host->resourceBank[0], index, priority);
 }
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
@@ -1175,10 +1175,10 @@ void mnuDrawTerminalBackdrop(s32 address) {
     if (state->reducedMode == 0) {
         switch (state->mode) {
         case 0:
-            func_00306CD0(0, 0, 0, 0x100, 0, state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
+            effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 0x100, 0, state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
             bank = state->resourceBank[3];
             bank->workEntries[0].geometry.angleDegrees = 90.0f;
-            func_00306CD0(0x7B0, 0x698, 0, 0x100, 2, state->resourceBank[3], 0, MNU_TEXT_DRAW_PRIORITY);
+            effDrawTextureSlotWithBlendedCornerColors(0x7B0, 0x698, 0, 0x100, 2, state->resourceBank[3], 0, MNU_TEXT_DRAW_PRIORITY);
             break;
         case 1:
         case 2:
@@ -1186,9 +1186,9 @@ void mnuDrawTerminalBackdrop(s32 address) {
             break;
         }
     } else {
-        func_00306CD0(0, 0, 0, 0x100, 0, state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
+        effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 0x100, 0, state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
         resource = state->resourceBank[1];
-        func_00306CD0(0x60, -0x30, 0, 0x100, 0, resource, 1, MNU_TEXT_DRAW_PRIORITY);
+        effDrawTextureSlotWithBlendedCornerColors(0x60, -0x30, 0, 0x100, 0, resource, 1, MNU_TEXT_DRAW_PRIORITY);
         bank = resource;
         work = &bank->workEntries[1];
         work->geometry.angleDegrees += 0.6f;
@@ -1208,10 +1208,10 @@ void mnuDrawAndStepTerminalPanelFade(s32 decrement, MenuSlotState *state) {
     } else {
         switch (state->mode) {
         case 0:
-            func_00306CD0(0, 0, 0, state->panelFade, 1,
+            effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, state->panelFade, 1,
                          state->resourceBank[1], 1, 0x52);
             state->resourceBank[3]->workEntries[1].geometry.angleDegrees = 90.0f;
-            func_00306CD0(0x7B0, 0x698, 0, state->panelFade, 3,
+            effDrawTextureSlotWithBlendedCornerColors(0x7B0, 0x698, 0, state->panelFade, 3,
                          state->resourceBank[3], 1, 0x52);
             if (state->panelHoldFrames > 0) {
                 state->panelHoldFrames--;
@@ -1402,7 +1402,7 @@ void mnuDrawTerminalFrameAndSlotLabels(s32 context) {
     progress = ((u32)*(u8 *)&record->geometry.cornerColors[0] << 8) /
         *(u8 *)&record->savedColors[0];
     if (state->reduced != 2) {
-        func_00306CD0(position[1].firstValue, position[1].secondValue, 0,
+        effDrawTextureSlotWithBlendedCornerColors(position[1].firstValue, position[1].secondValue, 0,
                       progress, 0x81, batch, 4, MNU_TEXT_DRAW_PRIORITY);
         batch = state->resourceBank[0];
     }

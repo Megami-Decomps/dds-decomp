@@ -203,7 +203,7 @@ void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
 }
 
 extern const s32 D_004284E0[9][3];
-extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 void brsDrawResultPanelSprites(BrsSkillPackageWork *work) {
     s32 table[9][3];
@@ -216,12 +216,12 @@ void brsDrawResultPanelSprites(BrsSkillPackageWork *work) {
     if (work->teardownResource != NULL) {
         for (i = 0; i < count; i++) {
             scale = (work->opacity << 8) >> 7;
-            func_00306CD0(table[i][0] << 4, table[i][1] << 3,
+            effDrawTextureSlotWithBlendedCornerColors(table[i][0] << 4, table[i][1] << 3,
                          0, scale, 0, work->teardownResource,
                          table[i][2], 0x53);
             if (i == 0) {
                 mnuTitleDrawBurstSprites(scale, 0x53);
-                func_00306CD0(0, 0, 0, 0x100, 0,
+                effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 0x100, 0,
                              work->teardownResource, 0x25, 0x53);
             }
         }

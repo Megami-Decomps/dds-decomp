@@ -4550,7 +4550,7 @@
 0x002A3AC0	mnuRestartRuntimeAfterViewer	inferred	Destroys secondary viewer world then restarts runtime task. [names_reviewed8.tsv]
 0x002A3AE8	mnuSpriteGraphicHandle	inferred	returns work->gfx[D_003E3790[index].gfx]: graphic handle of sprite table entry (8-byte entries {gfx,unk2,x,y})
 0x002A3B10	mnuSpriteDrawParam	inferred	returns D_003E3790[index].unk2 (fourth arg of the sprite draw call in func_002A3B28)
-0x002A3B28	mnuDrawSprite	inferred	draws sprite-table entry `item` at (x+e.x, y+e.y) with alpha strength*2 through func_00306CD0; (still asm)
+0x002A3B28	mnuDrawSprite	inferred	draws sprite-table entry `item` at (x+e.x, y+e.y) with alpha strength*2 through effDrawTextureSlotWithBlendedCornerColors; (still asm)
 0x002A3BE0	mnuRecreateMenuSelectionList	inferred	Recreates a menu list, binds its callback and appends three nodes. [names_reviewed8.tsv]
 0x002A3C90	mnuSelectMenuListCursorByAdvance	inferred	Resets a menu list cursor and advances it the requested count. [names_reviewed8.tsv]
 0x002A3CE0	mnuIsAnyMenuInputPressed	inferred	Tests whether any of the configured menu input keys are pressed. [names_reviewed9.tsv]
@@ -4854,7 +4854,7 @@
 0x002B99D8	mnuReleaseWindowTextures	inferred	Destroys all three icon sprite slots then releases resource handle. [names_reviewed5.tsv]
 0x002B9A40	mnuDrawListScrollbar	inferred	Draws list track and thumb sprites using visible count and head index; omitted when the full list fits its viewport
 0x002B9BB0	mnuDrawWindowResourceSpriteRows	inferred	Passes resource sprite, list, and state of window container to resource-row rendering routine. [names_reviewed18.tsv]
-0x002B9BE0	mnuDrawWindowIconRows	inferred	draws the window background icon (originX/originY offset) and one func_00306CD0 per visible row (rowHeight step) [names_M76_MenuLarge.tsv]
+0x002B9BE0	mnuDrawWindowIconRows	inferred	draws the window background icon (originX/originY offset) and one effDrawTextureSlotWithBlendedCornerColors per visible row (rowHeight step) [names_M76_MenuLarge.tsv]
 0x002B9CD8	mnuDrawVisibleWindowIconRows	inferred	Draws icon rows using the current window list visible-count rather than a caller supplied count. [names_reviewed15.tsv]
 0x002B9CF8	mnuDrawWindowDecorations	inferred	U0
 0x002B9DD8	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
@@ -8251,3 +8251,4 @@
 0x00103430	kwlnConfigureNamedSlotMode2	inferred	Finds the existing named-slot entry, sets kind 2, stores the three mode arguments, clears the other mode fields, and reports success; paired with DDS1 0x00103540. [code-quality cleanup, 2026-10-13]
 0x00340CB0	sdfConvertWrappedEulerAnglesToQuaternionVU	inferred	Wraps each of three Euler angles, evaluates half-angle sine/cosine products, composes quaternion components, and loads the quaternion into VF10. Paired with 0x002E7E08; adjacent sdfConvertEulerAnglesToQuaternionVU performs the unwrapped variant. [code-quality cleanup, 2026-10-13]
 0x00145948	fldDrawProjectedMapIcon	inferred	Draws a field-map item icon from projected coordinates using the indexed sprite anchor, dimensions, UVs, color, and texture slot; the map renderer calls it after item visibility and distance checks. Paired with DDS1 0x00142800. [code-quality cleanup, 2026-10-13]
+0x00306CD0	effDrawTextureSlotWithBlendedCornerColors	inferred	Resolves the indexed slot work, blends each corner color with an alpha-cleared copy using the supplied blend amount, and submits the texture slot through effDrawTextureSlot. Used by DDS2 menu, UI, movie, and file-window drawing callers. [code-quality cleanup, 2026-10-13]

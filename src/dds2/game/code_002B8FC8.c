@@ -205,7 +205,7 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003E75E0[];
 extern char D_003E75A8[];
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
@@ -1095,11 +1095,11 @@ void mnuDrawListScrollbar(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
     }
 
     rowOffset = (top - bottom) * list->head->index / (count - visible);
-    func_00306CD0(x, y, depth, opacity, 1,
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, opacity, 1,
                   firstSprite, 0, drawArg);
-    func_00306CD0(x, y + top, depth, opacity, 1,
+    effDrawTextureSlotWithBlendedCornerColors(x, y + top, depth, opacity, 1,
                   resource->sprite[1], 0, drawArg);
-    func_00306CD0(x, y + rowOffset + 0x28, depth, opacity, 1,
+    effDrawTextureSlotWithBlendedCornerColors(x, y + rowOffset + 0x28, depth, opacity, 1,
                   resource->sprite[2], 0, drawArg);
 }
 
@@ -1115,10 +1115,10 @@ void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window,
     s32 field = window->field1C;
     if (sprite != 0) {
         if (field == 0) {
-            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
+            effDrawTextureSlotWithBlendedCornerColors(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
         }
         for (i = 0; i < count; i++) {
-            func_00306CD0(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
+            effDrawTextureSlotWithBlendedCornerColors(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
                           window->spriteResource, window->param24, option);
         }
     }
@@ -1140,7 +1140,7 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
         u32 offset = window->decorationX[i];
 
         if (sprite != NULL) {
-            func_00306CD0(x + offset + 0xC0, y - 0xB8, depth, state,
+            effDrawTextureSlotWithBlendedCornerColors(x + offset + 0xC0, y - 0xB8, depth, state,
                          1, sprite, parameter, option);
         }
     }
@@ -1330,7 +1330,7 @@ void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, 
         if (i == 2 && mode == 2) {
             continue;
         }
-        func_00306CD0(x + table.pos[i].x, y + table.pos[i].y, z, a, 1, state->sprite[i], 0, arg);
+        effDrawTextureSlotWithBlendedCornerColors(x + table.pos[i].x, y + table.pos[i].y, z, a, 1, state->sprite[i], 0, arg);
     }
     state->sprite[0]->workEntries->geometry.bounds[2] = width;
     if (state->count >= 3) {
@@ -1345,7 +1345,7 @@ void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) 
     s32 i;
     for (i = 0; i < state->count; i++) {
         if (i != 3 && i != 5) {
-            func_00306CD0(x + table.pos[i].x, y + table.pos[i].y, z, w, 1, state->sprite[i], 0, arg);
+            effDrawTextureSlotWithBlendedCornerColors(x + table.pos[i].x, y + table.pos[i].y, z, w, 1, state->sprite[i], 0, arg);
         }
     }
 }
@@ -1361,8 +1361,8 @@ extern MenuOffsets D_0042AF90;
 
 void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
     MenuOffsets offset = D_0042AF90;
-    func_00306CD0(x + offset.x0, y + offset.y0, z, w, 1, state->sprite[0], 0, arg);
-    func_00306CD0(x + offset.x1, y + offset.y1, z, w, 1, state->sprite[1], 0, arg);
+    effDrawTextureSlotWithBlendedCornerColors(x + offset.x0, y + offset.y0, z, w, 1, state->sprite[0], 0, arg);
+    effDrawTextureSlotWithBlendedCornerColors(x + offset.x1, y + offset.y1, z, w, 1, state->sprite[1], 0, arg);
 }
 
 extern void mnuDrawIconPanelFade();
@@ -2006,7 +2006,7 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
     u32 i;
     if (skip == 0) {
         for (i = 0; i < 5; i++) {
-            func_00306CD0(0xBC0, 0x3C8, depth, set->fade, 0, set->icon[i], 0, drawArg);
+            effDrawTextureSlotWithBlendedCornerColors(0xBC0, 0x3C8, depth, set->fade, 0, set->icon[i], 0, drawArg);
         }
     }
 }
@@ -2087,9 +2087,9 @@ void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu) {
 void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, s32 drawArg) {
     s32 fade = obj->fade;
     s32 next;
-    func_00306CD0(x, y, depth, fade, 0, obj->sprite[0], 0, drawArg);
-    func_00306CD0(x, y, depth, fade, 0, obj->sprite[1], 0, drawArg);
-    func_00306CD0(x, y, depth, fade, 0, obj->sprite[2], 0, drawArg);
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, obj->sprite[0], 0, drawArg);
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, obj->sprite[1], 0, drawArg);
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, obj->sprite[2], 0, drawArg);
     if (obj->fadeOut == 0) {
         MNU_ADVANCE_FADE(obj->fade, 0x10, 0x100);
     } else {

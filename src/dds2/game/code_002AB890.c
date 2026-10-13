@@ -332,7 +332,7 @@ s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, Menu
     return 1;
 }
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern void itfGridCopyEntryQuad(s32, s32);
 
 void mnuDrawOwnedCatalogListNode(s32 x, s32 y, s32 depth, struct MenuList *list,
@@ -354,20 +354,20 @@ void mnuDrawOwnedCatalogListNode(s32 x, s32 y, s32 depth, struct MenuList *list,
             resources->workEntries[1].geometry.cornerColors[1] = 0x89FEFF80;
             resources->workEntries[1].geometry.cornerColors[2] = 0x89FEFF80;
             resources->workEntries[1].geometry.cornerColors[3] = 0x89FEFF80;
-            func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x1B0, y + 0x10, 0, listScale, 0,
                           resources, 1, 0x53);
             itfGridCopyEntryQuad((s32)owner->titleFrames[0], 1);
 
-            func_00306CD0(x - 0x20, y - 8, 0, 0x100, 0,
+            effDrawTextureSlotWithBlendedCornerColors(x - 0x20, y - 8, 0, 0x100, 0,
                           owner->resources.baseResources[1], 0x1F, 0x53);
-            func_00306CD0(x + 0x960, y - 8, 0, 0x100, 0,
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x960, y - 8, 0, 0x100, 0,
                           owner->resources.baseResources[1], 0x1F, 0x53);
         } else {
-            func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x1B0, y + 0x10, 0, listScale, 0,
                           owner->titleFrames[0], 1, 0x53);
-            func_00306CD0(x + 0x60, y, 0, 0xFF, 0,
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x60, y, 0, 0xFF, 0,
                           owner->resources.baseResources[1], 0xA, 0x53);
-            func_00306CD0(x + 0x950, y, 0, 0xFF, 0,
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x950, y, 0, 0xFF, 0,
                           owner->resources.baseResources[1], 0xA, 0x53);
         }
     } else {

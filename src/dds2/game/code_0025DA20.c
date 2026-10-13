@@ -1363,7 +1363,7 @@ void mnuShopReleaseWindowAndEffectResources(MenuTerminalContext *scene) {
     }
 }
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
 /* The shop layouts use slot 1 as their background and slot 3 as the rotated portrait. */
@@ -1371,10 +1371,10 @@ void mnuDrawShopPanelDecorations(MenuTerminalContext *scene) {
     switch (scene->type) {
     case 0:
     case 2:
-        func_00306CD0(0, 0, 0, 0x100, 0, scene->effectSlots[1], 0, 0x53);
-        func_00306CD0(0xE30, 0x610, 0, 0x100, 0, scene->effectSlots[2], 0, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 0x100, 0, scene->effectSlots[1], 0, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0xE30, 0x610, 0, 0x100, 0, scene->effectSlots[2], 0, 0x53);
         scene->effectSlots[3]->workEntries[0].geometry.angleDegrees = 90.0f;
-        func_00306CD0(0x9F0, 0x610, 0, 0x100, 2, scene->effectSlots[3], 0, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0x9F0, 0x610, 0, 0x100, 2, scene->effectSlots[3], 0, 0x53);
         return;
     case 1:
     case 3:

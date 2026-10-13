@@ -55,7 +55,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 dspStartEntry(s32);
 extern void ptyAdjustItemQuantity();
 extern void mnuRefreshStaffWindowDescription();
-extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 extern char D_003E74F8[];
 extern char D_003E7514[];
 extern char D_003E7530[];
@@ -95,7 +95,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
         mnuRefreshStaffWindowDescription(context, 0);
     } else {
         if (menu->secondListState == 0) {
-            func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, ((MenuStaffContext *)context)->titleFrames[0], 0x11, 0x53);
+            effDrawTextureSlotWithBlendedCornerColors(0x390, 0x570, 0, object->fadeScale, 1, ((MenuStaffContext *)context)->titleFrames[0], 0x11, 0x53);
         }
         mnuDrawCampGridAndLabelDefault(0, 0, 0, context, 1, 0x53);
     }
@@ -329,7 +329,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
     if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, ((MenuStaffContext *)context)->titleFrames[0], 0x11, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0x390, 0x570, 0, object->fadeScale, 1, ((MenuStaffContext *)context)->titleFrames[0], 0x11, 0x53);
         mnuDrawCampGridAndLabelDefault(0, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->resources.baseResources[0]);
@@ -657,7 +657,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
         }
         mnuDrawStaffCaption(selectedLabel, (u8 *)context);
     } else {
-        func_00306CD0(0x390, 0x570, 0, window->fadeScale, 1,
+        effDrawTextureSlotWithBlendedCornerColors(0x390, 0x570, 0, window->fadeScale, 1,
                      ((MenuStaffContext *)context)->titleFrames[0], 0x11, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
         mnuDrawStaffCaption(0, (u8 *)context);
@@ -946,7 +946,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
             mnuDrawRemainingAndTotalCounts(0x770, 0xB98, 0x100, selectionId, (s32)context->resources.baseResources[1], 0x2C);
         }
     } else {
-        func_00306CD0(0x390, 0x570, 0, menu->windows[3]->fadeScale, 1,
+        effDrawTextureSlotWithBlendedCornerColors(0x390, 0x570, 0, menu->windows[3]->fadeScale, 1,
                      context->titleFrames[0], 0x11, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, (s32)context, 1, 0x53);
         mnuDrawStaffValueGrid(0, 0, 0, context);

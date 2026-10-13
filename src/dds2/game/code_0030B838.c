@@ -158,7 +158,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Resource bank, entry index, X offset, Y offset. */
 extern s32 D_00400DF0[][4];
-extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, u32, s32, s32);
 #define SDF_SPRITE(index) (((EffectSlotSet *)sdfInstalledSpriteSlots[D_00400DF0[index][0]])->workEntries + D_00400DF0[index][1])
 
 
@@ -912,7 +912,7 @@ void sdfReleaseAllSpriteSlots(void) {
 
 void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 flags, s32 context) {
-    func_00306CD0((x + D_00400DF0[placementIndex][2]) << 4,
+    effDrawTextureSlotWithBlendedCornerColors((x + D_00400DF0[placementIndex][2]) << 4,
                   (y + D_00400DF0[placementIndex][3]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -949,7 +949,7 @@ void sdfDrawScaledCenteredSlotImage(f32 scaleX, f32 scaleY, s32 x, s32 y, s32 z,
         (s32)(scaleX * (f32)SDF_SPRITE(placementIndex)->sourceWidth) << 4;
     height = SDF_SPRITE(placementIndex)->geometry.bounds[3] =
         (s32)(scaleY * (f32)SDF_SPRITE(placementIndex)->sourceHeight) << 3;
-    func_00306CD0(((x + D_00400DF0[placementIndex][2]) << 4) - (width >> 1),
+    effDrawTextureSlotWithBlendedCornerColors(((x + D_00400DF0[placementIndex][2]) << 4) - (width >> 1),
                   ((y + D_00400DF0[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   sdfInstalledSpriteSlots[D_00400DF0[placementIndex][0]],
