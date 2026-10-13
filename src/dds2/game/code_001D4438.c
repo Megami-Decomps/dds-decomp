@@ -459,7 +459,7 @@ extern s32 datActionAnimationRecords;
 
 extern void btlRunTask(BtlRuntimeTask *);
 
-extern f32 func_00208000(s32, f32 *, f32 *);
+extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
 extern void func_0035C860();
 

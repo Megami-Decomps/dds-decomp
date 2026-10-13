@@ -452,7 +452,7 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
     return -position[1] - unit->height * unit->scale * 0.5f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208000);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureFilteredUnitGroupBounds);
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208298);
 
