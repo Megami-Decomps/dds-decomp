@@ -107,6 +107,7 @@ void *fldResolveWorldObjectByResourceEntryName(const char *name) {
 
 #include "eff_light.h"
 #include "fld_area_work.h"
+#include "fld_spawn_collision.h"
 
 struct EffNodeDescriptor;
 struct EffectObj;
@@ -114,16 +115,7 @@ struct EffectObj;
 
 /* Complete serialized descriptors shared with their existing consumers. */
 
-typedef struct FldSpawnCollision {
-    u32 kind;
-    u32 word04;
-    u32 *header;
-    u32 word0C;
-    u32 geometry[8];
-} FldSpawnCollision;
-
 typedef char FldSpawnBatchSize[(sizeof(FldSpawnBatch) == 12) ? 1 : -1];
-typedef char FldSpawnCollisionSize[(sizeof(FldSpawnCollision) == 0x30) ? 1 : -1];
 
 extern FldFileResource *D_00438EB8;
 extern u32 D_00438EBC;
