@@ -2221,12 +2221,12 @@ s32 itfUpdateActiveMessageWindows(KwlnTask *task) {
     return 0;
 }
 
-extern s32 func_001200E0(void);
+extern s32 fldIsUpdateInhibited(void);
 
 s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     ItfMesPoolNode *node;
 
-    if (func_001200E0() != 0) {
+    if (fldIsUpdateInhibited() != 0) {
         return 0;
     }
     for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {

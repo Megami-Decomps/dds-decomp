@@ -59,7 +59,7 @@ extern SdfPoolNode D_003803E8;
 extern SdfPoolNode D_003803C8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern u32 func_001200E0(void);
+extern u32 fldIsUpdateInhibited(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
@@ -79,7 +79,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     u32 sourceColor;
     u32 alpha;
 
-    if (func_001200E0() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, work->params.blendControl, work->texture);
@@ -179,7 +179,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     void *drawPacket;
 
-    if (func_001200E0() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
