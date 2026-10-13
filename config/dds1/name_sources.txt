@@ -3749,6 +3749,7 @@
 0x002124E8	btlInitVisibilityGrid	inferred	allocates gridWidth*gridHeight byte grid filled with -128
 0x00212640	btlReleaseOwnedData	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x002127A8	btlDrawTexturedGridCell	inferred	U1
+0x00212998	btlDrawCapturedScreenTileOverlay	inferred	Builds tiled captured-screen overlay packets and advances their fade transition; called by battle runtime fade-in and fade-out paths.
 0x002131F8	btlInitFadeColors	inferred	Initialises the battle fade colour words and the visibility grid
 0x00213280	btlUpdateFadeIn	inferred	Advances the fade-in colour words, submits the fade packet and reports when the fade is finished
 0x002135B8	btlReleaseRuntimeResource	inferred	btl battle control and actor operations in game/code_001FF030.c
