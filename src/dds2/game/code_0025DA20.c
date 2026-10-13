@@ -69,7 +69,7 @@ extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
 extern s32 mnuCampGetCurrentRowQuantityLimit();
-extern s32 func_002613C8();
+extern s32 mnuCampScalePriceByTier();
 extern s32 ptyCountBulletItem(s32);
 
 extern s8 mnuCampListedItems[34];
@@ -2069,7 +2069,7 @@ typedef struct CampRateRow {
 
 extern CampRateRow D_003CE150[];
 
-s32 func_002613C8(s32 level, s32 price) {
+s32 mnuCampScalePriceByTier(s32 level, s32 price) {
     u32 i;
 
     if (level != 0) {
@@ -2104,7 +2104,7 @@ s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
         scene->unkC7 = 0;
     }
     if (scene->ownedWindows[0]->list->cursor->camp.value == 3) {
-        slot->value = func_002613C8(cur, slot->price);
+        slot->value = mnuCampScalePriceByTier(cur, slot->price);
         cur = scene->multiplier;
     }
     return cur;
@@ -2337,7 +2337,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
                 value = datItemSkillRecords[i].price;
                 value >>= 1;
                 params->value = value;
-                price = func_002613C8(0, value);
+                price = mnuCampScalePriceByTier(0, value);
                 params->id = i;
                 params->value = price;
                 params->price = price;
@@ -2345,7 +2345,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
                 params = &mnuAppendWindowListNode(scene->window, D_00435E5C + i * 0x19)->camp;
                 value = D_003CD0D0[i - 0x60][evtGetSolarPhase()];
                 params->value = value;
-                price = func_002613C8(0, value);
+                price = mnuCampScalePriceByTier(0, value);
                 params->id = i;
                 params->value = price;
                 params->price = price;
