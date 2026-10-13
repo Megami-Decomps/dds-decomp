@@ -2519,7 +2519,7 @@ void func_0011EBF8(s32 chance) {
  * frontline group. The latter is not a pure presence test: its retail
  * callee changes flag mask 2 and swaps roster records. Preserve the short-arity
  * presence call and push whether the operation returned exactly one. */
-s32 func_0011EC00(void) {
+s32 ptyScriptCheckOrRebalanceFrontline(void) {
     s32 rosterIndex = scrReadIntParameter(0);
     s32 result;
     if (scrReadIntParameter(1) == 0) {

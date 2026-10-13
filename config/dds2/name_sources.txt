@@ -588,6 +588,7 @@
 0x0011E728	btlCheckScenePartyLevelThreshold	inferred	R_Names31 B92
 0x0011E848	btlGetConditionalEncounterInterval	inferred	Reuses the active interval or seeds one from the selected nonempty weighted conditional encounter group; DDS1 twin 0x0011CAB0.
 0x0011E930	btlAdvanceConditionalEncounterRoll	inferred	Accumulates field-step encounter progress and selects a weighted, eligible scene when the conditional encounter threshold is reached; returns the packed result. DDS1 twin 0x0011CB90.
+0x0011EC00	ptyScriptCheckOrRebalanceFrontline	inferred	Reads roster ID and mode; mode zero checks roster presence, while nonzero rebalances the frontline, then publishes whether the operation returned one as the script integer result.
 0x0011ECC8	ptyScriptAddUnitWithFlagsAndReturnResult	inferred	Reads roster ID and initialization flags, stores the party-unit creation slot/status in the script return slot, then returns command success; complements ptyScriptAddUnitAndReturnResult with default flags.
 0x0011ED10	ptyScriptRemoveUnitWithFlagsAndReturnResult	inferred	Reads roster ID and a second removal-control operand, invokes ptyRemoveUnitWithFlags, and stores whether it returned one.
 0x0011ED60	scrCmdHasEnoughOwnedMantras	inferred	Stores mtrHasEnoughOwnedMantras() in the script integer return slot, then returns command success.
