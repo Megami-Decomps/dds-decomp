@@ -20,6 +20,7 @@ quickstart.
 - [Event-unit transition managers](evt-unit-transition-matching.md).
 - [Scatter effects](scatter-radial-matching.md).
 - [Thunder Bezier group updates](thunder-bezier-matching.md).
+- [Return-tail merging](compiler-trace-brahma-return.md): a qualified nonmatching boundary.
 
 ## Scripts
 
