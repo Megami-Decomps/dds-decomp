@@ -11,6 +11,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_thunder_draw_params.h"
 #include "eff_math.h"
 #include "eff_thunder_fragment.h"
 #include "eff_event.h"
@@ -2800,19 +2801,6 @@ void effCopyResourceGroupVector(void *dst, void *src) {
 void effThunderSetCurveGroupTint(s32 work, u32 value) {
     *(u32 *)(work + 0x54) = value;
 }
-
-typedef struct EffThunderDrawParams {
-    s16 primitiveCount;
-    s16 pointCount;
-    u16 flags;
-    u8 pad06[2];
-    u32 color;
-    const u32 *primitiveIndices; /* 0x0C: packed triangle-index words */
-    u128 *points;
-    u8 pad14[0xC];
-    u32 *colors;
-    u8 pad24[0xC];
-} EffThunderDrawParams;
 
 extern EffThunderDrawParams D_00451F90;
 extern EffThunderDrawParams D_00451FC0;
