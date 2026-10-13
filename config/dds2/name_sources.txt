@@ -2160,6 +2160,8 @@
 0x001A2C98	itfDrawTintedPanelRect	inferred	Builds a panel rectangle and draws it with scaled stored tint. [names_reviewed9.tsv]
 0x001A2D10	itfAppendGsPanelStatePacket	inferred	Builds and appends a packet carrying GS panel state registers. [names_reviewed9.tsv]
 0x001A2D80	itfPanelStartEntry	inferred	DDS1 twin 0019AD50 [names_M33_SmallSweep2.tsv]
+0x001A2658	itfDrawFramedPanelWithTextureStrips	inferred	Draws two alpha-scaled border bands and six texture-bound strips from the live panel rectangle; installed in the panel callback table.
+0x001A29D8	itfDrawThreePieceTexturedPanel	inferred	Draws a textured left cap, colored center section, and reversed right cap from panel bounds; installed in the panel callback table.
 0x001A2EA8	itfPanelAcquireHold	inferred	DDS1 twin 0019AE78 [names_M33_SmallSweep2.tsv]
 0x001A2F08	itfPanelReleaseHold	inferred	DDS1 twin 0019AED8 [names_M33_SmallSweep2.tsv]
 0x001A2F60	itfCommandQueueHeldPanelEntry	inferred	src/dds2/game/code_001A1B08.c func_001A2F60: Reads three script integers into held panel queue, ignoring absent hold or full queue. Twin of DDS1 func_0019AF30. [names_reviewed24.tsv]

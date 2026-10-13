@@ -503,7 +503,7 @@ void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
     itfSendTablePacket(command, 0, 0);
 }
 
-/*BEGIN func_001A2658*/
+/*BEGIN itfDrawFramedPanelWithTextureStrips*/
 extern u32 D_003B4690[];
 extern DrawColorRec D_003B4700;
 extern DrawColorRec D_003B4710;
@@ -511,7 +511,7 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 
 /* Draw the framed panel: two bordered bands, then six texture-bound strips whose
  * rectangles are rebuilt from the live panel bounds. */
-void func_001A2658(UiSprite *panel, SdfListHead *command) {
+void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) {
     PanelRect rect;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
     s32 *color = &panel->unk2C;
@@ -573,7 +573,7 @@ void func_001A2658(UiSprite *panel, SdfListHead *command) {
     rect.x0 = x - 0x1220;
     itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->unk0C, payload->texture, 0, command);
 }
-/*END func_001A2658*/
+/*END itfDrawFramedPanelWithTextureStrips*/
 
 extern DrawColorRec D_003B4720;
 extern DrawColorRec D_003B4730;
@@ -582,7 +582,7 @@ extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, Draw
 
 /* Bind the texture for the left cap, then draw the center and reversed right
  * cap. Insets are captured before the first submission; Y bounds are live. */
-void func_001A29D8(UiSprite *panel, SdfListHead *command) {
+void itfDrawThreePieceTexturedPanel(UiSprite *panel, SdfListHead *command) {
     DrawVertex rect[2];
     DrawColorRec *color = (DrawColorRec *)&panel->unk2C;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
