@@ -146,7 +146,7 @@ void func_00306CD0(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
     func_00306970(x, y, depth, colors, flags, set, slotIndex, payload, layer);
 }
 
-void func_00306DC8(s32 x, s32 y, s32 z, s32 length, u32 weight, s32 flags,
+void effDrawRepeatedSpriteTiles(s32 x, s32 y, s32 z, s32 length, u32 weight, s32 flags,
                   EffectSlotSet *set, s32 slot, s32 layer) {
     u32 colors[4];
     void *draw;
