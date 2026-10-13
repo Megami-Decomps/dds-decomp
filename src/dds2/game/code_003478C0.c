@@ -554,7 +554,7 @@ extern s32 sdfSendNamedResourceRequest(char *, s32, void *, s32 *);
 extern s32 WakeupThread(s32);
 extern u8 sdfPfsDebugMode;
 extern u8 D_0047BD00[];
-void func_00348540(void) {
+void sdfRunStreamIopRpcServer(void) {
     SdfStreamState *state = &D_0047BCC0;
     SceIoStat info;
     u8 queue[0x20];
@@ -578,7 +578,7 @@ void func_00348540(void) {
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
-    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)func_00348540, 0x1000, 0x4C);
+    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)sdfRunStreamIopRpcServer, 0x1000, 0x4C);
 
     _StartThread(workerId, 0);
     D_00439224 = GetThreadId();
