@@ -3718,6 +3718,7 @@
 0x0024D788	evtViewerAdvanceUpdate	inferred	viewer update step: reads the message window flags, ticks EventViewerState.unk2440 or hands over to func_0024D6B0; matched [names_L18_Units.tsv]
 0x0024D878	evtViewerStartUpdate	inferred	initialises the active viewer and returns func_0024D788; parked (2 words: li $2,1 vs li $3,1) [names_L18_Units.tsv]
 0x0024D918	evtViewerRelease	inferred	tears down the active event viewer (DDS1 twin 00232BC0)
+0x0024DAE0	evtEventViewerInitCampFontResource	inferred	Forwards the initialized viewer to mnuCampInitFontResource before either task or movie use.
 0x0024DAF8	evtViewerCreateTaskWithSky	inferred	Allocates and clears viewer state, creates EventViewer task and links sky task. [names_reviewed7.tsv]
 0x0024DD20	evtPolygonMovieTestFlag	inferred	returns bit 8 of the first word of the event state [names_M67_Named.tsv]
 0x0024DD48	evtMovieInterpolateFloatIfEnabled	inferred	confidence=high; matched-C; src/dds2/event/evtPolygonMovie.c:240:func_0024DD48; Returns a*(1-t)+b*t when enabled, otherwise the first floating endpoint.; source=revalidated-unapplied-names_R_Names31.tsv:31 [names_qp12_apply.tsv]

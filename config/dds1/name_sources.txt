@@ -4194,6 +4194,7 @@
 0x00232BC0	evtViewerReleaseResources	inferred	Releases viewer windows, waits for pending work, and tears down resources.
 0x00232D08	evtEventViewerDestroyActive	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3504:evtEventViewerDestroyActive; Destroys the currently active event viewer.; twin=0x0024DAA0 (DDS2).
 0x00232D28	evtEventViewerDestroyActiveAlternate	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3512:evtEventViewerDestroyActiveAlternate; Alternate destroy callback for the active event viewer, used as the polygon-movie task destroy function.; twin=0x0024DAC0 (DDS2).
+0x00232D48	evtEventViewerInitCampFontResource	inferred	Forwards the initialized viewer to mnuCampInitFontResource before either task or movie use.
 0x00232D60	evtViewerCreateTaskWithSky	inferred	Allocates and clears viewer state, creates EventViewer task and links sky task. [names_reviewed7.tsv]
 0x00232E00	evtEventViewerDestroyTask	inferred	destroys hierarchy of task named "EventViewer" via kwlnTaskDestroyWithHierarchyByName
 0x00232E20	evtEventViewerPollMovieResources	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3550:evtEventViewerPollMovieResources; Polls the movie's three resource requests, retains loaded addresses and initializes the polygon-movie work once all are ready.; twin=0x0024DBB8 (DDS2).
