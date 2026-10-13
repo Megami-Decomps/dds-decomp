@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "btl_camera_timed_instruction.h"
 #include "snd_sequence_volume_pan.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
@@ -181,14 +182,6 @@ extern void effMiscQuaternionToMatrixVU(void);
 extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
-
-typedef struct BtlCameraTimedInstruction {
-    s32 kind;
-    s16 parameterIndex;
-    u8 pad06[2];
-    f32 startFrame;
-    f32 duration;
-} BtlCameraTimedInstruction;
 
 extern const BtlCameraTimedInstruction *D_003BBF70[];
 
