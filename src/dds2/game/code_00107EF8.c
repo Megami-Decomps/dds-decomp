@@ -1266,10 +1266,10 @@ u8 evtWaitSkyCampTaskState(void) {
 void evtCreateSkyAndFieldTasks(u32 unused, u32 *fieldArgs) {
     evtCreateSkyTask();
     if (fieldArgs != 0) {
-        func_00268380(fieldArgs[0], fieldArgs[1]);
+        mnuCreateTerminalSceneTasks(fieldArgs[0], fieldArgs[1]);
         return;
     }
-    func_00268380(0, 1);
+    mnuCreateTerminalSceneTasks(0, 1);
 }
 
 u32 evtDestroySkyAndFieldTasks(void) {

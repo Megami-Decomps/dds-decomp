@@ -4082,6 +4082,7 @@
 0x00268178	mnuTerminalCreateScene	inferred	Loads /facility/msg/terminal/mes_data.bmd into the new 0x3F8-byte scene. [names_M44_Mid3.tsv]
 0x00268278	mnuReleaseTerminalWorkAndResumeField	inferred	src/dds2/game/code_002665B0.c func_00268278: Releases terminal menu resources and effect batches, stops resource task and processes deferred field command. Twin of DDS1 func_00249F08. [names_reviewed24.tsv]
 0x00268318	mnuUpdateTerminalMessageWindowIndicator	inferred	Updates terminal task indicator according to current event message-window control state. [names_reviewed18.tsv]
+0x00268380	mnuCreateTerminalSceneTasks	inferred	Creates the terminal scene, registers popup/draw/sync/fade tasks, parents the fade task, then marks terminal task state active. [names_reviewed18.tsv]
 0x002684F0	mnuPrepareTerminalPopupAndDispatch	inferred	confidence=high; matched-C; src/dds2/game/code_002665B0.c:886:func_002684F0; confidence=high; matched-C; src/dds2/game/code_002665B0.c:886:func_002684F0; Sets the terminal popup entry before mode-zero dispatch, matching DDS1 0x0024A0D8. Existing mnuPreparePopupAndDispatchSelection at 0x00260880 is camp-owned and stays named.; resolution=rename; source=names_qp11_conflicts.tsv:2 [names_qp11.tsv]
 0x002685C0	evtIsFadeCompleteAndMessageWindowIdle	inferred	Tests whether fading is finished and the message window is idle. [names_reviewed10.tsv]
 0x002686D0	fldSaveSceneOptionsAndClearFlags	inferred	Copies both current scene options into their previous slots and retains only flag bits 0xFA2F.
