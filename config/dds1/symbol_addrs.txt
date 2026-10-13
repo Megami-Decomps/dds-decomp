@@ -7463,6 +7463,7 @@ btlGetConditionalEncounterInterval = 0x0011CAB0; // type:func
 btlAdvanceConditionalEncounterRoll = 0x0011CB90; // type:func
 itfReturnThirdCallbackValue = 0x00198020; // type:func
 kwlnDrawTextureResourceDetails = 0x00104810; // type:func
+kwlnUnregisterNamedSlot = 0x00103218; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -8203,7 +8204,6 @@ func_00101A78 = 0x00101A78; // type:func
 kwlnTaskAddChild = 0x00101A80; // type:func
 func_00101BD8 = 0x00101BD8; // type:func
 func_00102F98 = 0x00102F98; // type:func
-func_00103218 = 0x00103218; // type:func
 func_00103400 = 0x00103400; // type:func
 func_00103498 = 0x00103498; // type:func
 func_00103540 = 0x00103540; // type:func

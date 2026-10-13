@@ -2737,7 +2737,7 @@ void mdlSaveViewerPresentationConfig(void) {
 }
 
 extern void func_00218E20(void);
-extern s32 func_00103218(const char *);
+extern s32 kwlnUnregisterNamedSlot(const char *);
 extern MdlEyeVec D_00367CD0;
 extern MdlEyeVec D_003246C0;
 
@@ -2772,7 +2772,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlViewerState.resourceCount = 1;
     func_00218E20();
     for (i = 0, task = D_00367AE0; i != 3; i++, task++) {
-        func_00103218(task->name);
+        kwlnUnregisterNamedSlot(task->name);
     }
     mdlViewerState.unk00 = (s32)kwlnTaskCreate(D_003ABF78, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
     kwlnTaskCreate(D_003ABF88, 0x2B01, 1, 0, mdlViewerEnd, NULL, 0);

@@ -215,7 +215,7 @@ extern s32 D_003BA858;
 extern s32 D_003BA85C;
 
 /* Unregister a named slot: stop its task, clear it and unlink it from the slot chain. */
-s32 func_00103218(const char *name) {
+s32 kwlnUnregisterNamedSlot(const char *name) {
     s32 slotIndex;
 
     if (kwlnTaskGetTaskByName(D_0039E018) == NULL) {
