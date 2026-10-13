@@ -1284,7 +1284,7 @@ extern s32 D_00386048[][4];
 /* Add a roster member to the first free party slot: initialise it from its saved template or by
  * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
  * slot, -1 if the member is already present or -2 if the party is full. */
-s32 func_0011C0B0(s32 rosterIndex, s32 initFlags) {
+s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     DatPartyRecord *entry;
     DatPartyRecord *party;
     s32 slotIndex;
@@ -1362,7 +1362,7 @@ s32 func_0011C0B0(s32 rosterIndex, s32 initFlags) {
 }
 
 void func_0011C328(u32 arg0) {
-    func_0011C0B0(arg0, 0);
+    ptyAddUnitWithFlags(arg0, 0);
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_0011C340);
