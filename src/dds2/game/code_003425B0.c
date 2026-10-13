@@ -73,7 +73,7 @@ extern s32 D_00438D1C;
 
 extern u32 D_00438D20;
 
-u32 func_00341650(u32, u32, void *, u32);
+u32 sndQueueCommandPacket(u32, u32, void *, u32);
 
 u32 sndSendCommandPacket(u32, u32, void *, u32);
 
@@ -147,15 +147,15 @@ extern char *D_0040BBE8[];
 
 
 void sndStartReducedBgm(void) {
-    func_00341650(0x180, 0, 0, 0);
+    sndQueueCommandPacket(0x180, 0, 0, 0);
 }
 
 void sndStopReducedBgm(void) {
-    func_00341650(400, 0, 0, 0);
+    sndQueueCommandPacket(400, 0, 0, 0);
 }
 
 void sndTransitionBgm(s32 channel) {
-    func_00341650(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
+    sndQueueCommandPacket(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 
 s32 sdfSoundSendNamedCommand(const char *name, u8 channel) {

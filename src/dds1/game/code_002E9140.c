@@ -31,7 +31,7 @@ extern SndMidiStateWords sndMidiTrackState;
 
 u32 sndSendCommandPacket();
 
-u32 func_002E87A8(u32 command, u32 channel, void *packet, u32 size);
+u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
 void sndEnsureMidiBankResident(s32 trackId);
 
@@ -207,14 +207,14 @@ void sndStartTrackExtended(s32 trackId) {
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x17F;
-    func_002E87A8(0x20, 0, &packet, 0x10);
+    sndQueueCommandPacket(0x20, 0, &packet, 0x10);
 }
 
 void sndReleaseTrackHandle(u32 value) {
     u32 packet[4];
 
     packet[0] = value;
-    func_002E87A8(0xd0, 0, packet, 0x10);
+    sndQueueCommandPacket(0xd0, 0, packet, 0x10);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002E9140", sndRequestedMidiBankId);
