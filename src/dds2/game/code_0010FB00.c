@@ -25,33 +25,33 @@ void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
     }
 }
 
-s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
+s32 dds3TestObjectSphereOverlap(ObjectTransform *left, ObjectTransform *right) {
     f32 length;
     f32 leftLimit;
     f32 rightLimit;
 
-    VU0_LOAD_VF(vf10, left + 0x40);
-    VU0_LOAD_VF(vf11, right + 0x40);
+    VU0_LOAD_VF(vf10, left->position);
+    VU0_LOAD_VF(vf11, right->position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(length);
-    leftLimit = *(f32 *)(left + 0xC4);
-    rightLimit = *(f32 *)(right + 0xC4);
+    leftLimit = left->radius;
+    rightLimit = right->radius;
     if (fabsf(length) - (leftLimit + rightLimit) < 0.0f) {
         return 1;
     }
     return 0;
 }
 
-/* vu0 routine: whether the distance between the two points at +0x40 is inside the second object's radius at +0xC4 */
-s32 dds3IsPointWithinObjectRadius(u8 *left, u8 *right) {
+/* vu0 routine: whether the distance between the position vectors is inside the second object's radius */
+s32 dds3IsPointWithinObjectRadius(ObjectTransform *left, ObjectTransform *right) {
     f32 length;
     f32 rightLimit;
 
-    VU0_LOAD_VF(vf10, left + 0x40);
-    VU0_LOAD_VF(vf11, right + 0x40);
+    VU0_LOAD_VF(vf10, left->position);
+    VU0_LOAD_VF(vf11, right->position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(length);
-    rightLimit = *(f32 *)(right + 0xC4);
+    rightLimit = right->radius;
     if (ffabsf(length) - rightLimit < 0.0f) {
         return 1;
     }
