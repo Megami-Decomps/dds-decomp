@@ -1105,14 +1105,6 @@ void effEventSetState(EffEventWork *work, void *actor) {
 INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateEffectParameters);
 
 
-/* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
-typedef struct EffEventLight {
-    SoundMixer *handle;    /* 0x00 */
-    EffEventWork *owner;   /* 0x04 */
-    EffEventInit init;    /* 0x08 */
-    u8 active;            /* 0x38 */
-} EffEventLight; /* 0x3C */
-
 /* Initialize a holder and its effect record; the teardown flag starts set. */
 EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
