@@ -133,7 +133,7 @@ s32 btlFlagToElementIndex(s32 flag);
 
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
-u32 func_001B1350(BtlUnit *attacker, BtlUnit *defender, u32 command,
+u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
                   s32 reaction, s32 mode) {
     u32 guardMask;
     s32 guardAbility;
