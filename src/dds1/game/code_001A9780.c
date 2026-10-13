@@ -165,7 +165,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 s8 btlGetLinkageSlotCost(s32 command);
 
-s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
+s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001A9780);
 
