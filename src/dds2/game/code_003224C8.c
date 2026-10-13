@@ -205,7 +205,7 @@ f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
 }
 
 extern void mnuBuildNamedResourceList(MnuCallbackList *, MenuRegistryRecord *);
-extern void func_003232A0(MenuWorkEntry *, MenuShortRecordList *);
+extern void mnuApplyShortRecordRepeatDirective(MenuWorkEntry *, MenuShortRecordList *);
 
 void mnuInitializeRegistryWorkEntry(MenuWorkEntry *entry, u32 tag,
                                     s32 resourceRecordIndex, s32 x, s32 y,
@@ -227,7 +227,7 @@ void mnuInitializeRegistryWorkEntry(MenuWorkEntry *entry, u32 tag,
     table = registry->table;
     entry->remaining = registry->initialRemainingCount;
     record = table->recordBase;
-    func_003232A0(entry, record->lists);
+    mnuApplyShortRecordRepeatDirective(entry, record->lists);
     entry->callback = mnuCreateReleaseCallbackNode();
     mnuBuildNamedResourceList(entry->callback, record);
 }
@@ -350,7 +350,7 @@ s32 mnuAdvanceRegistryRow(MenuWorkEntry *entry, MenuRegistryTable *table,
                     return 2;
                 }
                 row = &table->recordBase[entry->recordIndex];
-                func_003232A0(entry, row->lists);
+                mnuApplyShortRecordRepeatDirective(entry, row->lists);
                 return 1;
             }
         }
@@ -358,7 +358,7 @@ s32 mnuAdvanceRegistryRow(MenuWorkEntry *entry, MenuRegistryTable *table,
     return 0;
 }
 
-void func_003232A0(MenuWorkEntry *entry, MenuShortRecordList *list) {
+void mnuApplyShortRecordRepeatDirective(MenuWorkEntry *entry, MenuShortRecordList *list) {
     MenuShortRecord *record;
 
     entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_NONE;
