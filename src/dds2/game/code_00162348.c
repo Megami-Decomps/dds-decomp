@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_release_record.h"
 #include "par_vertex_colors.h"
 #include "eff_random.h"
 #include "sdf_asset_state.h"
@@ -65,15 +66,6 @@ typedef struct ParListNode {
 } ParListNode;
 
 
-/* Resource header view: native flags select its geometry regions; the
- * descriptor and asset are released through their canonical resource APIs. */
-typedef struct ParReleaseRecord {
-    u16 flags;          /* 0x00: constructor flags, set to 1 on release */
-    u8 pad02[0x0E];
-    struct SdfMemBlock *allocation; /* 0x10 */
-    u8 pad14[0x2C];
-    SdfAsset *asset;     /* 0x40 */
-} ParReleaseRecord;
 
 
 
