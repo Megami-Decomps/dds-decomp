@@ -818,7 +818,7 @@ void itfCopyTextSegment(char *src, char *dst, s32 segmentIndex) {
 extern u16 D_00436582;
 extern s32 D_00436584;
 extern s32 D_00436588;
-extern u8 *func_0019DE70(s32 textId, FrFontTextBank *bank, s32 mode);
+extern u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 frFontCountGlyphBands(FrFontGlyph *text);
 extern s32 frFontMeasureLineWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
@@ -835,7 +835,7 @@ FrFontGlyph *func_0019FA08(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *
         D_00436584 = 0;
         D_00436588 = 0;
     }
-    text = func_0019DE70(textId, bank, 0);
+    text = frFontGetEncodedTextData(textId, bank, 0);
     if (text == 0) {
         return 0;
     }
@@ -889,7 +889,7 @@ FrFontGlyph *func_0019FA08(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *
 
 
 FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
-    u8 *text = func_0019DE70(textId, bank, 0);
+    u8 *text = frFontGetEncodedTextData(textId, bank, 0);
     u32 mode;
     FrFontGlyph *handle;
 
