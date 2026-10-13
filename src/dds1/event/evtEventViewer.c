@@ -22,6 +22,7 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
+#include "evt_viewer_group_record.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 
@@ -108,15 +109,6 @@ extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *displ
 
 
 /* Table of 0x20-byte (group, type) records at +0x34, counted at +0x38. */
-typedef struct EvtGroupRec {
-    u8 pad00[8];
-    s32 group;                 /* 0x8 */
-    s32 type;                  /* 0xC */
-    u8 pad10[0x10];
-} EvtGroupRec;
-
-
-
 /* Event viewer: name table at 0x20, entry list at 0x2030. */
 
 
@@ -457,7 +449,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer)
 
     if (viewer->windowContext != NULL) {
         for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
-            btlRemoveCurrentGroupedEntity(((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].type);
+            btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].type);
         }
     }
 }
