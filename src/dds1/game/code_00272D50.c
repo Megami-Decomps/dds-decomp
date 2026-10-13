@@ -72,7 +72,7 @@ extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u3
 extern void mnuDrawStaffItemListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 mnuIsBulletItemId(s32);
 extern char *D_003BAA84;
-extern s32 func_00286A00(s32);
+extern s32 mnuIsSolarPricedItemId(s32);
 extern s32 evtCheckValueThreshold(s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 
@@ -100,13 +100,13 @@ void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
 
         if (datGameState->inventory.counts[itemId] != 0) {
             itemFlags = datItemSkillRecords[itemId].flags;
-            if (((itemFlags & 3) != 0 || func_00286A00(itemId) != 0) &&
+            if (((itemFlags & 3) != 0 || mnuIsSolarPricedItemId(itemId) != 0) &&
                 mnuIsBulletItemId(itemId) == 0) {
                 node = mnuAppendWindowListNode(window, D_003BAA84 + textOffset);
                 quantity = datGameState->inventory.counts[itemId];
                 node->sortKeySecondary = itemId;
                 node->sortKeyPrimary = quantity;
-                if ((datItemSkillRecords[itemId].flags & 1) == 0 || func_00286A00(itemId) != 0) {
+                if ((datItemSkillRecords[itemId].flags & 1) == 0 || mnuIsSolarPricedItemId(itemId) != 0) {
                     node->flags48 |= 1;
                 }
             }

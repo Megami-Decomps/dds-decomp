@@ -38,8 +38,8 @@ void mnuDrawStaffItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
 extern char (*D_00435E5C)[25];
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
-extern s32 func_002C54B0(s32);
-extern s32 func_002C5498(s32);
+extern s32 mnuIsHighRangeItemId(s32);
+extern s32 mnuIsSolarPricedItemId(s32);
 extern s32 mtrMantraFindIndex(s32);
 extern s32 evtCheckValueThreshold(s32 itemId, s32 minimum);
 extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
@@ -69,15 +69,15 @@ void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
 
     for (itemId = 1; itemId < 0x100; itemId++) {
         if (datGameState->inventory.counts[itemId] != 0 && (datItemSkillRecords[itemId].flags & 3) != 0 &&
-            mnuIsBulletItemId(itemId) == 0 && func_002C54B0(itemId) == 0 &&
-            func_002C5498(itemId) == 0 && mtrMantraFindIndex(itemId) == 0) {
+            mnuIsBulletItemId(itemId) == 0 && mnuIsHighRangeItemId(itemId) == 0 &&
+            mnuIsSolarPricedItemId(itemId) == 0 && mtrMantraFindIndex(itemId) == 0) {
             u32 quantity;
 
             node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
             quantity = datGameState->inventory.counts[itemId];
             node->sortKeySecondary = itemId;
             node->sortKeyPrimary = quantity;
-            if ((datItemSkillRecords[itemId].flags & 1) == 0 || func_002C5498(itemId) != 0) {
+            if ((datItemSkillRecords[itemId].flags & 1) == 0 || mnuIsSolarPricedItemId(itemId) != 0) {
                 node->flags48 |= 1;
             }
         }
@@ -98,7 +98,7 @@ void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
     }
 
     for (itemId = 1; itemId < 0x100; itemId++) {
-        if (datGameState->inventory.counts[itemId] != 0 && func_002C5498(itemId) != 0) {
+        if (datGameState->inventory.counts[itemId] != 0 && mnuIsSolarPricedItemId(itemId) != 0) {
             u32 quantity;
 
             node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
@@ -264,7 +264,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     node->sortKeySecondary = 0;
     node->sortKeyTertiary = 0;
     do {
-        if (func_002C54B0(itemId) != 0) {
+        if (mnuIsHighRangeItemId(itemId) != 0) {
             catalogOrdinal = *ordinal;
             if (catalogOrdinal != 0) {
                 if (datGameState->inventory.counts[itemId] != 0) {

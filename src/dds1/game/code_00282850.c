@@ -1851,7 +1851,7 @@ s32 mnuIsBulletItemId(s32 id) {
     return id < 0xbf;
 }
 
-s32 func_00286A00(s32 id) {
+s32 mnuIsSolarPricedItemId(s32 id) {
     if (id < 0x60) {
         return 0;
     }

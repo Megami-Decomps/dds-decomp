@@ -5,7 +5,7 @@
 #include "mdl_flag_api.h"
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void func_00286BA8(DatPartyRecord *);
+extern void mtrRecomputePartyMantraUnlockState(DatPartyRecord *);
 extern void mtrMantraBitResetUnit(DatPartyRecord *);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
@@ -16,14 +16,14 @@ extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
 
 const char D_00425F30[] = "*****************[mtrMantraSetBit():[0x%x]]*****************\n";
 
-void func_00286A58(DatPartyRecord *record) {
+void mtrMantraSetBit(DatPartyRecord *record) {
     MantraFlagResource *work;
     MantraNodePos *node;
     s32 i;
 
     evtPrintDeveloperConsoleMessage(D_00425F30, record->unitId);
     if (mdlFlagTest(0xBA0) != 0 && mdlFlagTest(0x80E) == 0) {
-        func_00286BA8(record);
+        mtrRecomputePartyMantraUnlockState(record);
     } else {
         mtrMantraBitResetUnit(record);
         work = evtAllocateMantraSelectionWork(record, 1);

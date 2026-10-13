@@ -68,7 +68,7 @@ extern s32 mnuAdvanceCampPopup(KwlnTask *task);
 extern s32 mnuFinishCampPopup(KwlnTask *task);
 
 extern void mnuInitializeShopStatusBatches(MenuTerminalContext *);
-extern void func_002945B8(MenuTerminalContext *);
+extern void mnuSetCurrentTerminalContext(MenuTerminalContext *);
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
@@ -160,9 +160,9 @@ extern void *memset(void *dst, s32 c, u32 n);
 extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
 
-extern s32 func_002C54B0(s32);
+extern s32 mnuIsHighRangeItemId(s32);
 extern s32 mnuIsBulletItemId(s32);
-extern s32 func_002C5498(s32);
+extern s32 mnuIsSolarPricedItemId(s32);
 
 extern u8 D_003CDA88[];
 
@@ -1392,7 +1392,7 @@ s32 mnuCampHasEligibleOwnedItems(void *context) {
         if (mnuIsBulletItemId(i) != 0) {
             continue;
         }
-        if (func_002C54B0(i) != 0) {
+        if (mnuIsHighRangeItemId(i) != 0) {
             continue;
         }
         if (datGameState->inventory.counts[i] == 0) {
@@ -1402,7 +1402,7 @@ s32 mnuCampHasEligibleOwnedItems(void *context) {
             result = 1;
             break;
         }
-        if (func_002C5498(i) != 0) {
+        if (mnuIsSolarPricedItemId(i) != 0) {
             result = 1;
             break;
         }
@@ -1601,7 +1601,7 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     obj->options = func_00260460();
     obj->availableCount = mnuCountActivePartyEntries();
     obj->delayFrames = 0xF;
-    func_002945B8(obj);
+    mnuSetCurrentTerminalContext(obj);
     mnuResetGradientFadeColor(&obj->gradientFade, 0x60);
     mnuCampClearListedItemCounts();
     sndEnsureMidiBankResident(0x300000);
@@ -1929,7 +1929,7 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
 
             if (entry->kind == 0) {
                 if (mdlFlagTest(0x901) == 0) {
-                    if (func_002C54B0(id) != 0) {
+                    if (mnuIsHighRangeItemId(id) != 0) {
                         allowed = 0;
                     }
                 }
@@ -1976,7 +1976,7 @@ s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
     u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
     s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
 
-    if (entry[1] == 0 && func_002C54B0(id) != 0 && datGameState->inventory.counts[id] != 0) {
+    if (entry[1] == 0 && mnuIsHighRangeItemId(id) != 0 && datGameState->inventory.counts[id] != 0) {
         id = *(u16 *)(entry + 8);
     }
     return id;
@@ -2213,7 +2213,7 @@ s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *scene) {
         CampWindowParams *params;
         s32 price;
 
-        if (mnuIsBulletItemId(id) != 0 || func_002C54B0(id) != 0 || id == 0) {
+        if (mnuIsBulletItemId(id) != 0 || mnuIsHighRangeItemId(id) != 0 || id == 0) {
             continue;
         }
         node = mnuAppendWindowListNode(scene->window,
@@ -2260,7 +2260,7 @@ s32 mnuCampAppendRankedFilteredRows(MenuTerminalContext *scene, s32 filterMode) 
         if (filterMode == 1) {
             include = mnuIsBulletItemId(id);
         } else {
-            include = func_002C54B0(id);
+            include = mnuIsHighRangeItemId(id);
         }
         if (include == 0) {
             continue;
@@ -2311,7 +2311,7 @@ s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *scene, s32 filterMode
         if (filterMode == 1) {
             include = mnuIsBulletItemId(id);
         } else {
-            include = func_002C54B0(id);
+            include = mnuIsHighRangeItemId(id);
         }
         if (include == 0) {
             continue;
@@ -2358,7 +2358,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
     scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
     for (i = 0; i < 0x100; i++) {
         scene->unkC7 = 1;
-        if (mnuIsBulletItemId(i) != 0 || func_002C54B0(i) != 0) {
+        if (mnuIsBulletItemId(i) != 0 || mnuIsHighRangeItemId(i) != 0) {
             continue;
         }
         if (datGameState->inventory.counts[i] != 0) {
@@ -2371,7 +2371,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
                 params->id = i;
                 params->value = price;
                 params->price = price;
-            } else if (func_002C5498(i) != 0) {
+            } else if (mnuIsSolarPricedItemId(i) != 0) {
                 params = &mnuAppendWindowListNode(scene->window, D_00435E5C + i * 0x19)->camp;
                 value = D_003CD0D0[i - 0x60][evtGetSolarPhase()];
                 params->value = value;
@@ -2463,7 +2463,7 @@ typedef struct EvtFlagGate {
 } EvtFlagGate;
 
 
-extern s32 func_002C5498();
+extern s32 mnuIsSolarPricedItemId();
 extern u8 D_003CE604[];
 extern u16 D_003CE3F8[];
 extern void mnuDrawSpriteMenuFadeOut();
@@ -3445,7 +3445,7 @@ void evtMarkSceneFollowupReadyAndQueueAction(KwlnTask *task) {
 
 void evtAccumulateEligibleStageMultiplierValue(MenuTerminalContext *state) {
     CampWindowParams *entryValues = &state->window->list->cursor->camp;
-    if (func_002C5498(entryValues->id)) {
+    if (mnuIsSolarPricedItemId(entryValues->id)) {
         datGameState->world.score += entryValues->value * state->multiplier;
     }
 }
@@ -3727,7 +3727,7 @@ extern u8 mnuCampGetWideRewardKind(s32, s32);
 extern u8 mnuCampGetCompactRewardKind(s32, s32);
 extern s32 mnuCampResolveOwnedItemVariant(s32, s32);
 extern s32 mnuCampGetCompactEntryId(s32, s32);
-extern s32 func_002C54B0(s32);
+extern s32 mnuIsHighRangeItemId(s32);
 extern u8 D_003CE5E8[];
 extern char D_00437848[];
 extern char D_00437850[];
@@ -3769,7 +3769,7 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
                     state->rewardKind = mnuCampGetCompactRewardKind(state->rewardRow, state->rewardIndex);
                     state->rewardValue = mnuCampGetCompactEntryId(state->rewardRow, state->rewardIndex);
                 }
-                if (state->rewardKind == 0 && func_002C54B0(state->rewardValue) != 0) {
+                if (state->rewardKind == 0 && mnuIsHighRangeItemId(state->rewardValue) != 0) {
                     state->rewardDelay = 60;
                     sequence = 0x300003;
                 } else {

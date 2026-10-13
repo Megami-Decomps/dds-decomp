@@ -8262,3 +8262,13 @@
 0x00320CE0	dds3AppendIndexedListNode	inferred	confidence=high; Allocates/zeros list node, index=count++, stores key/value and appends head/tail links. Cedar Spark released after c77a19865 exact landing. [Namer1 batch47]
 0x00320D80	dds3InsertIndexedListNodeAfter	inferred	confidence=high; Nullable predecessor inserts at head or after node, updates links/count and increments only nonzero successor indices. Cedar Spark released after cb243313e exact landing. [Namer1 batch47]
 0x00324DF8	dds3AppendFirstResourceListValue	inferred	confidence=high; Appends key0/value to owner[0], used by three owned-record clone builders; corrects misleading reset comments without changing any operation. [Namer1 batch47]
+0x00286A58	mtrMantraSetBit	inferred	Native debug banner spells mtrMantraSetBit; updates one party member's mantra-node flags. Source: src/dds2/game/code_00286A58.c. LiteH-2 b23.
+0x00286BA8	mtrRecomputePartyMantraUnlockState	inferred	Recomputes every mantra node's unlock state for one party member and reports changes, as its source comment states. Source: src/dds2/game/code_00286BA8.c. LiteH-2 b23.
+0x00291400	mnuFindPanelPositionRecordByScriptId	inferred	Searches one 37-record panel-position bank for a record matching the script ID. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
+0x00292B90	mnuAcquireTutorialMantraNodeAndNeighbors	inferred	Acquires tutorial mantra node 8 and unlocks its neighbors; called by tutorial state 14. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
+0x002933A8	mnuBeginMantraTutorialFromNormalMode	inferred	Initializes tutorial state 3 and resets its counters before the normal-mode transition out. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
+0x002945B8	mnuSetCurrentTerminalContext	inferred	Stores the active MenuTerminalContext pointer in D_00438FC8. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
+0x00294680	mnuDrawTerminalContextEffectSprites	inferred	Draws effect slots 2 and 3 only for terminal context type 2. Source: src/dds2/game/code_002945C0.c. LiteH-2 b23.
+0x002AB3A8	mnuRunCampFieldSkillDisplayTask	inferred	Camp field-skill display task callback prepares the display and returns success. Source: src/dds2/game/code_002AAEA0.c. LiteH-2 b23.
+0x002C5498	mnuIsSolarPricedItemId	inferred	Accepts item IDs 0x60-0x6C; used with the solar-phase price table. DDS1 twin 0x00286A00 accepts 0x60-0x7E. Source: src/dds2/game/code_002BE628.c. LiteH-2 b23.
+0x002C54B0	mnuIsHighRangeItemId	inferred	Accepts item IDs 0xC0-0xFF; used by staff and camp item filters. Source: src/dds2/game/code_002BE628.c. LiteH-2 b23.

@@ -2185,14 +2185,14 @@ s32 mnuIsBulletItemId(s32 id) {
     return id < 0xC0;
 }
 
-s32 func_002C5498(s32 id) {
+s32 mnuIsSolarPricedItemId(s32 id) {
     if (id < 0x60) {
         return 0;
     }
     return id < 0x6D;
 }
 
-s32 func_002C54B0(s32 id) {
+s32 mnuIsHighRangeItemId(s32 id) {
     if (id < 0xC0) {
         return 0;
     }

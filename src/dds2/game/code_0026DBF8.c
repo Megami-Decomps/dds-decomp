@@ -4010,7 +4010,7 @@ typedef struct MenuPanelPositionRecord {
         };
     };
 } MenuPanelPositionRecord;
-extern MenuPanelPositionRecord *func_00291400(s32, u16);
+extern MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32, u16);
 extern u16 mnuGetPanelValueAt(MnuStatusResource *, s32);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A98);
@@ -4164,7 +4164,7 @@ s32 mnuDrawMantraPanelNodeTransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanel
                 s16 nodeIndex = node->panelIndex;
                 if ((panel->flags >> 28) & 1) {
                     /* menu.flagBytes[3] selects the current character. */
-                    if ((func_00291400(((u8 *)resource)[0xBF3] & 0xF, (u16)nodeIndex)->stateFlags & 0xF) != 3) {
+                    if ((mnuFindPanelPositionRecordByScriptId(((u8 *)resource)[0xBF3] & 0xF, (u16)nodeIndex)->stateFlags & 0xF) != 3) {
                         mask |= 1 << i;
                     }
                 } else {
@@ -4610,7 +4610,7 @@ s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool
             u16 nodeIndex = (*neighbor)->panelIndex;
             if ((panel->flags >> 28) & 1) {
                 /* menu.flagBytes[3] selects the current character. */
-                if (func_00291400(((u8 *)resource)[0xBF3] & 0xF, nodeIndex)->flags & 1) {
+                if (mnuFindPanelPositionRecordByScriptId(((u8 *)resource)[0xBF3] & 0xF, nodeIndex)->flags & 1) {
                     mask |= 3 << i;
                 }
             } else {
