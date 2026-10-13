@@ -59,12 +59,10 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
 extern s32 func_0034D308(SdfCdClock *);
 extern s32 sdfBcdStrToInt(s32);
 extern u8 D_00438B70;
-extern ClockTime D_00438B78;
+ClockTime D_00438B78 = {0};
 
 /* Copy cached time to now; return 0 for a valid refresh, -1 for failure, or 1 for reuse.
  * The native 20-tick refresh gate and month-as-year conversion are retained. */
-INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
-
 s32 effMiscReadCachedClockTime(ClockTime *now) {
     SdfCdClock clock;
     s32 result = 1;
