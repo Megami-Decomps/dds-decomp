@@ -4983,6 +4983,7 @@
 0x002C82E8	fileQueuePendingRequestInFreeSlot	inferred	Semaphore guards a free-slot check and moves a queued request from state three to four. [names_reviewed21.tsv]
 0x002C85B0	fileStartChunkedReadWhenReady	inferred	Transitions a ready file job to transferring and queues a bounded read chunk. [names_reviewed10.tsv]
 0x002C8878	fileStartChunkedWriteWhenReady	inferred	Transitions a ready file job to transferring and queues a bounded write chunk. [names_reviewed10.tsv]
+0x002C8AC0	fileStartOrResumeQueuedJob	inferred	confidence=high; src/dds2/game/code_002C83F0.c:310; Starts or resumes the read, PAC, or write job at the head of the file queue; twin=0x00289540 (DDS1).
 0x002C92E8	mcPollStrictSuccess	inferred	Returns pending until SDK completion, success only for status zero and failure otherwise. [names_reviewed6.tsv]
 0x002C9328	mcChangeCurrentDirectory	inferred	confidence=high; matched-C; src/dds2/mc/mcManager.c:20:func_002C9328; Marshals card port, slot zero and path to memory-card RPC command 12 (change directory).; twin=0x00289DA8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002C93B8	mcPollWithExtendedErrors	inferred	Polls SDK; classifies error values below negative ten separately. [names_reviewed6.tsv]
