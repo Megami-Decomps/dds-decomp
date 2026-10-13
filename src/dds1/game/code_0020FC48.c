@@ -30,6 +30,7 @@
 #include "mdl_asset_request.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "mdl_flag_api.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 

@@ -19,6 +19,7 @@
 #include "mdl_track_poly_record.h"
 #include "mdl_resource_table.h"
 #include "mdl_grouped_parts_api.h"
+#include "mdl_flag_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"

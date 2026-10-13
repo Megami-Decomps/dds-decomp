@@ -32,6 +32,7 @@
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
+#include "mdl_flag_api.h"
 
 #include "sdf.h"
 extern void *memset(void *dst, s32 value, s32 size);
@@ -218,7 +219,6 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
-extern s32 mdlFlagTest(s32 flag);
 extern u32 D_003BD8F4;
 extern u32 D_003BD8F8;
 

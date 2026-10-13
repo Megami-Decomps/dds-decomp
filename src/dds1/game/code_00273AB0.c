@@ -6,6 +6,7 @@
 #include "mnu_list.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "mdl_flag_api.h"
 
 /* Legacy staff callbacks retain their word-address interfaces; the exit
  * callback forwards its task pointer to the task-user-value provider. */
@@ -28,7 +29,6 @@ extern void mnuRefreshStaffWindowDescription(s32, s32);
 extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
-extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
 extern void mnuSetStateValue(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);

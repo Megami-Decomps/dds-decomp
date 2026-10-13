@@ -22,6 +22,7 @@
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_chip.h"
+#include "mdl_flag_api.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -3114,7 +3115,6 @@ typedef struct FlagEntry {
 
 extern void mdlFlagSet(s32);
 
-extern s32 mdlFlagTest(s32);
 
 typedef struct FlagPair {
     s32 first;

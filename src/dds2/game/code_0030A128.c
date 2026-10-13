@@ -12,6 +12,7 @@
 #include "fld_lmap_task.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 typedef struct SdfSlotSet SdfSlotSet;
 
@@ -32,7 +33,6 @@ extern u32 D_0043908C;
 
 extern s32 D_00439090; /* fade timer: func_0030B1E8 tests >= 31 with slti */
 
-extern s32 mdlFlagTest(u32);
 
 
 extern char fldLocalMapTaskName[]; /* "LmapMain" */

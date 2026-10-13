@@ -3,7 +3,7 @@
 #include "mnu.h"
 #include "mnu_result.h"
 #include "dsp_name.h"
-extern s32 mdlFlagTest(u32 flagId);
+#include "mdl_flag_api.h"
 
 extern void mdlFlagSet(u32 flagId);
 

@@ -3,6 +3,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_result.h"
+#include "mdl_flag_api.h"
 
 #include "mnu.h"
 extern const char *D_003D62F0[6];
@@ -202,7 +203,6 @@ void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
 }
 
 extern const s32 D_004284E0[9][3];
-extern s32 mdlFlagTest(u32);
 extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 void brsDrawResultPanelSprites(BrsSkillPackageWork *work) {
@@ -322,7 +322,6 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     effDrawSpriteWithCornerColors(x + 0x180, y + 0x78, 0, color, 0, work->teardownResource, 0x1B, 0x53);
 }
 
-extern s32 mdlFlagTest();
 
 void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
     char name[32];

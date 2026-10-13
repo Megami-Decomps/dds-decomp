@@ -14,6 +14,7 @@
 #include "file.h"
 #include "prf_profile_cap.h"
 #include "prf_requirement.h"
+#include "mdl_flag_api.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7

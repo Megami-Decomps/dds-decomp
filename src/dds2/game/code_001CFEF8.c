@@ -11,6 +11,7 @@
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
+#include "mdl_flag_api.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -1407,7 +1408,6 @@ s32 fldGetSceneGroupIndexByActorFlags(u8 *task) {
 
 extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRandMod(void *, u32);
-extern s32 mdlFlagTest(s32);
 extern void fldInitSceneFadeRecords(void);
 
 /* Initialize scene slots from selected actors and mode-specific modifiers. */

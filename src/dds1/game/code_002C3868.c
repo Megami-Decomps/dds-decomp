@@ -10,6 +10,7 @@
 #include "sdf.h"
 #include "mnu_list.h"
 #include "fld_map_resource.h"
+#include "mdl_flag_api.h"
 
 extern void sdfCounterTickCountdown(void);
 
@@ -337,7 +338,6 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
 }
 
 extern u8 D_00390310[][52];
-extern s32 mdlFlagTest(s32);
 
 u8 *sdfResolveSceneCounterInfo(s32 scene) {
     switch (scene) {

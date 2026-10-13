@@ -35,6 +35,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "sdf.h"
+#include "mdl_flag_api.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -116,7 +117,6 @@ typedef struct FileStatBonus {
 } FileStatBonus;
 extern MdlFlagPair D_003E8CE8[];
 extern FileStatBonus D_003E8D10[24];
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);

@@ -9,6 +9,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "mnu_scroll_panel.h"
+#include "mdl_flag_api.h"
 
 
 
@@ -239,7 +240,6 @@ extern void mnuDrawOrderedStaffItemEntry();
 extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
 extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
 extern s32 mtrMantraIdIsValid(s32);
-extern s32 mdlFlagTest(s32);
 extern void mnuSortItems(struct MenuList *, s32, s32);
 
 /* The upper item-ID range shares ordered staff entries with mantra availability. */

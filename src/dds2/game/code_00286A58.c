@@ -2,9 +2,9 @@
 #include "dat_state.h"
 #include "mnu_mantra.h"
 #include "prf_profile_cap.h"
+#include "mdl_flag_api.h"
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern s32 mdlFlagTest(s32);
 extern void func_00286BA8(DatPartyRecord *);
 extern void mtrMantraBitResetUnit(DatPartyRecord *);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);

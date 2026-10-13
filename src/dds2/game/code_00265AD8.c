@@ -4,6 +4,7 @@
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
+#include "mdl_flag_api.h"
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -26,7 +27,6 @@ typedef struct FlagEntry {
 } FlagEntry;
 
 
-extern s32 mdlFlagTest(s32);
 
 extern void mdlFlagClear(s32);
 
