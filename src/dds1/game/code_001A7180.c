@@ -112,7 +112,7 @@ u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1);
 
 s8 btlGetLinkageSlotCost(s32 command);
 
-s32 func_001A2F50(BtlUnit *battler, s32 element);
+s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 
 s32 btlFlagToElementIndex(s32 flag);
 
@@ -194,7 +194,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     if ((selection & 0xE0000) != 0) {
         return 100;
     }
-    value = func_001A2F50(unit, index);
+    value = btlGetUnitElementAffinity(unit, index);
     ratio = btlGetAbilityAttributeMultiplierPercent(unit, index);
     if (ratio != 100) {
         ratio = (u16)value * ratio / 100;

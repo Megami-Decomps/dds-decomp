@@ -2277,6 +2277,7 @@
 0x001AB9F0	btlGetSlotValueAdjustedForSpecialAbility	inferred	Reduces a slot table value when a matching actor ability is active. [names_reviewed14.tsv]
 0x001ABCC0	btlGetCombinedPartyCommandPower	inferred	L13
 0x001ABF00	btlGetActorIndexedSignedValue	inferred	Returns an indexed signed value, with an actor-specific lookup when flagged. [names_reviewed9.tsv]
+0x001ABF50	btlGetUnitElementAffinity	inferred	Resolves the unit's element affinity through the runtime override hook, falling back to its party-record affinity. Paired DDS1 0x001A2F50.
 0x001ABF68	btlResolveUnitValueWithOverride	inferred	Uses a registered callback value unless it declines, then uses the default result. [names_reviewed8.tsv]
 0x001ABFD8	btlGetSideIndexedActorStatusTable	inferred	Selects one of two indexed battle status record tables according to side. [names_reviewed16.tsv]
 0x001AC020	btlSelectSharedOrIndexedTransformParameters	inferred	Chooses global transform parameters or indexed record parameters by selector; caller copies vector and scale data. [names_reviewed17.tsv]

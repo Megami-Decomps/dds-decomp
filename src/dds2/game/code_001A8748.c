@@ -1828,7 +1828,7 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 
-s32 func_001ABF50(BtlUnit *battler, s32 element) {
+s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride((s32)&battler->partyRecord.flags, element);
 }
 
