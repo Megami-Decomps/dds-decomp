@@ -953,7 +953,7 @@ extern SdfTex *func_0029C048(void *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 
 /* Draw an indexed 64-pixel glyph with independent corner colors. */
-void func_001F7DF8(SdfPoolNode *surface, s32 x, s32 y,
+void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
                    s32 topLeftColor, s32 topRightColor,
                    s32 bottomLeftColor, s32 bottomRightColor,
                    s32 buttonIndex) {

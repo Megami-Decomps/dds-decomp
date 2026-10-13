@@ -187,7 +187,7 @@ extern f32 D_0037F5B0[][4];
 
 extern u32 D_0037F5D0[];
 
-extern void *func_00348158(const f32 (*)[4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 extern s8 evtSelectionStateActive;
 
@@ -798,7 +798,7 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     D_0037F5D0[0] = first;
     list = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)func_00348158(D_0037F5B0, D_0037F5D0, 2, 0x80));
+    sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(D_0037F5B0, D_0037F5D0, 2, 0x80));
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append(surface, list);

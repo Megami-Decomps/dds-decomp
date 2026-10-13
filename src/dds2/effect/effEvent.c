@@ -374,7 +374,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 extern void func_003364B8(f32);
-extern void *func_00348158(const f32 [][4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
@@ -432,7 +432,7 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
                 VU0_STORE_VF(vf10, *out);
                 out++;
             }
-            sdfAppendPacket(list, (u32)func_00348158(vertices, colors, 40, 0x80));
+            sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 40, 0x80));
         }
         func_003364B8(1.5707963f);
         VU0_LOAD_MATRIX_B_F32(matrix);
@@ -447,7 +447,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_001969B8);
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
-extern void *func_00348158(const f32 [][4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
@@ -495,7 +495,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
             VU0_STORE_VF(vf10, *out);
             out++;
         }
-        sdfAppendPacket(list, (u32)func_00348158(vertices, colors, 40, 0x80));
+        sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 40, 0x80));
         y += heightStep;
     }
 
@@ -519,7 +519,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
         out++;
         angle += angleStep;
     }
-    sdfAppendPacket(list, (u32)func_00348158(vertices, colors, 40, 0x80));
+    sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 40, 0x80));
 
     out = vertices;
     VU0_LOAD_VF(vf11, center);
@@ -542,7 +542,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
         out++;
         angle += angleStep;
     }
-    sdfAppendPacket(list, (u32)func_00348158(vertices, colors, 20, 0x80));
+    sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 20, 0x80));
 
     out = vertices;
     VU0_LOAD_VF(vf11, center);
@@ -565,7 +565,7 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
         out++;
         angle += angleStep;
     }
-    sdfAppendPacket(list, (u32)func_00348158(vertices, colors, 20, 0x80));
+    sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 20, 0x80));
     surface = &kwlnDrawSurfaces[55];
     surface->append(surface, list);
 }

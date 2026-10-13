@@ -2548,7 +2548,7 @@ extern f32 D_00367B80[][4];
 extern u32 D_00367BE0[];
 
 
-extern void *func_002EF2E0(const f32 (*)[4], const u32 *, s32, u32);
+extern void *sdfDrawPostmultipliedLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Submit the intermediate packet with an identity basis in phases 2 and 3. */
 void mdlSubmitViewerIntermediateDrawPacket(void) {
@@ -2558,7 +2558,7 @@ void mdlSubmitViewerIntermediateDrawPacket(void) {
         if (mdlViewerState.taskPhase >= 2) {
             packetList = sdfCreateResetPacketList();
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            sdfAppendPacket(packetList, (u32)((s32)func_002EF2E0(D_00367B80, D_00367BE0, 6, 0x80)));
+            sdfAppendPacket(packetList, (u32)((s32)sdfDrawPostmultipliedLinePairsVU(D_00367B80, D_00367BE0, 6, 0x80)));
             D_00325048.append(&D_00325048, packetList);
         }
     }
@@ -2582,7 +2582,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
         packetList = sdfCreateResetPacketList();
         resource = mdlViewerState.resources[0];
     VU0_LOAD_MATRIX(resource->inner->matrix);
-        drawPacket = (s32)func_002EF2E0(D_00367C00, D_00367C40, 4, 0x80);
+        drawPacket = (s32)sdfDrawPostmultipliedLinePairsVU(D_00367C00, D_00367C40, 4, 0x80);
         if ((sdfPadButtonStates[13] < 0) & (D_003BBCB8 == 0)) {
             D_003BBCB8 = 1;
             sdfPrintHexMemoryDump(drawPacket, 0x100);
@@ -2625,7 +2625,7 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
         for (recordIndex = 0; recordIndex != recordCount; recordIndex++) {
             sdfSetLookAtBasisFromRecord(resource->inner, recordCursor);
             recordCursor++;
-            sdfAppendPacket(packetList, (u32)((s32)func_002EF2E0(D_00367C50, D_00367CB0, 6, 0x80)));
+            sdfAppendPacket(packetList, (u32)((s32)sdfDrawPostmultipliedLinePairsVU(D_00367C50, D_00367CB0, 6, 0x80)));
         }
         D_00325048.append(&D_00325048, packetList);
     }

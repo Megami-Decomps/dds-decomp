@@ -149,11 +149,13 @@ void sndReleaseMidiTrack(s32 id) {
     }
 }
 
-u8 func_002E9598(s32 index) {
+/* Read the byte used as the minuend by the nonnegative balance query. */
+u8 sndGetTrackBalanceMinuend(s32 index) {
     return sndTrackBalanceEntries[index].unk4;
 }
 
-u8 func_002E95B0(s32 index) {
+/* Read the byte subtracted by the nonnegative balance query. */
+u8 sndGetTrackBalanceSubtrahend(s32 index) {
     return sndTrackBalanceEntries[index].unk5;
 }
 
@@ -167,7 +169,8 @@ s32 sndGetNonnegativeEntryBalance(s32 index) {
     return difference;
 }
 
-SndTrackVolume *func_002E95F0(void) {
+/* Return the MIDI channel-array address, retaining this unit's existing return type. */
+SndTrackVolume *sndGetMidiChannelTable(void) {
     return D_003FE0D0;
 }
 
@@ -175,14 +178,16 @@ SndTrackVolume *sndGetTrackSlotTable(void) {
     return sndTrackBalanceEntries;
 }
 
-u32 func_002E9610(u32 *outSecondaryValue) {
+/* Return one opaque MIDI word and optionally copy its adjacent word. */
+u32 sndGetMidiStateWordPair(u32 *outSecondaryValue) {
     if (outSecondaryValue != NULL) {
         *outSecondaryValue = sndMidiTrackState.opaque20C;
     }
     return sndMidiTrackState.opaque208;
 }
 
-void func_002E9630(u8 *out) {
+/* Pack two 24-byte MIDI state groups into out; NULL leaves the state untouched. */
+void sndCopyGroupedMidiStateBytes(u8 *out) {
     s32 group;
     u8 *state;
 

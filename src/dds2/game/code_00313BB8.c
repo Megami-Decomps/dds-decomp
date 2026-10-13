@@ -1573,7 +1573,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
 
 extern SdfPoolNode *D_0040A958[];
 #include "sdf_packet_alloc.h"
-extern void *func_00348158(const f32 (*)[4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.
  * count is reused first as an entry count and then as a vertex count. */
@@ -1604,7 +1604,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     }
     packetList = (SdfListHead *)sdfAllocPacketAligned(SDF_FLAG_LIST_PACKET_BYTES);
     sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)func_00348158(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
+    sdfAppendPacket(packetList, (u32)sdfDrawCachedMatrixLinePairsVU(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_0040A958[work->params.alpha.surfaceIndex];
     surface->append(surface, packetList);
     sdfReleaseResourceAllocation(vertexAllocation);
