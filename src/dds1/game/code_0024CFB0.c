@@ -1,3 +1,4 @@
+#include "evt_world_object_api.h"
 #include "kwln_task_state.h"
 #include "itf_mes_window.h"
 #include "mnu.h"
