@@ -19,6 +19,7 @@
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
 #include "btl.h"
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
@@ -2516,7 +2517,7 @@ void btlReleaseActorModelResources(BtlUnit *object) {
         }
         load = *(s32 *)((u8 *)object + 0x324);
         if (load != 0) {
-            sdfReleaseDevSlot(load, 1, 1);
+            sdfReleaseDevSlot((SdfModel *)load, 1, 1);
             *(s32 *)((u8 *)object + 0x324) = 0;
             btlBossDebugPrintf(D_003A3AD0, object);
         }
@@ -3350,8 +3351,6 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
 
-extern void sdfReleaseDevSlot(s32, s32, s32);
-
 extern struct SdfPoolNode *D_00325788[13][4];
 
 extern SdfPoolNode *D_00359D10[];
@@ -3369,7 +3368,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             alpha = color >> 24;
             if (!(flags & 0x20000)) {
                 if (unit->transparencyModel != 0) {
-                    sdfReleaseDevSlot(unit->transparencyModel, 1, 1);
+                    sdfReleaseDevSlot((SdfModel *)unit->transparencyModel, 1, 1);
                     unit->transparencyModel = 0;
                     if (unit->status.flags & 2) {
                         info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;

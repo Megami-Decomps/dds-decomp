@@ -17,6 +17,7 @@
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
 #include "btl.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
@@ -2558,8 +2559,6 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
     }
 }
 
-extern void sdfReleaseDevSlot(s32, s32, s32);
-
 extern char D_00417940[]; /* "btl:unit transparency delete[%p]\n" */
 
 void btlReleaseActorModelResources(BtlUnit *unit) {
@@ -2569,7 +2568,7 @@ void btlReleaseActorModelResources(BtlUnit *unit) {
             unit->unk328 = 0;
         }
         if (unit->unk344 != 0) {
-            sdfReleaseDevSlot(unit->unk344, 1, 1);
+            sdfReleaseDevSlot((SdfModel *)unit->unk344, 1, 1);
             unit->unk344 = 0;
             btlBossDebugPrintf(D_00417940, unit);
         }
@@ -3435,7 +3434,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             alpha = color >> 24;
             if (!(flags & 0x20000)) {
                 if (unit->unk344 != 0) {
-                    sdfReleaseDevSlot(unit->unk344, 1, 1);
+                    sdfReleaseDevSlot((SdfModel *)unit->unk344, 1, 1);
                     unit->unk344 = 0;
                     if (unit->status.flags & 2) {
                         info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
