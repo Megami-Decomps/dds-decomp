@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "ee_mmi.h"
+#include "sdf_graph_display.h"
 
 extern s32 D_003BD9D8;
 extern s32 iWakeupThread(s32 threadId);
@@ -46,13 +47,7 @@ void sdfGraphRecreateBuffers(SdfGraphObj *graph) {
     graph->buffers[1] = sdfAllocImageBuffer(width, height, bufferFormat);
 }
 
-typedef struct SdfDisplayEnv {
-    u8 pad00[0x10];
-    u32 fbp : 9;
-    u32 : 23;
-} SdfDisplayEnv;
-
-extern SdfDisplayEnv D_003EB820;
+extern SdfDisplayEnvView D_003EB820;
 extern void sceGsSetDefDispEnv(void *, s32, s32, s32, s32, s32);
 extern void sceGsPutDispEnv(void *);
 
@@ -64,7 +59,7 @@ void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
     sceGsSetDefDispEnv((void *)(((u32)&D_003EB820 & SDF_GRAPH_CPU_ADDRESS_MASK) | SDF_GRAPH_UNCACHED_ALIAS),
                       0, D_003980E0.width, D_003980E0.height, 0, 0);
     /* VRAM offsets are in 32-bit words; FBP counts 2048-word (8 KiB) pages. */
-    D_003EB820.fbp = displayBuffer->word >> SDF_GS_FRAMEBUFFER_PAGE_SHIFT;
+    D_003EB820.framebufferPage = displayBuffer->word >> SDF_GS_FRAMEBUFFER_PAGE_SHIFT;
     sceGsPutDispEnv(&D_003EB820);
 }
 
