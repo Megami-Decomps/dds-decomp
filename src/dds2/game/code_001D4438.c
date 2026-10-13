@@ -619,7 +619,7 @@ extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
 extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
 
-extern void func_002A27A8(s32, s32, u8);
+extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
 extern void btlMoveActorOutOfActiveParty(BtlUnit *);
 extern s32 btlCreateUnitExitFadeTask(s32 owner, s32 option);
 
