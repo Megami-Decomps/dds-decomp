@@ -13,6 +13,7 @@
 #include "mnu_scene_work.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_scene.h"
+#include "mdl_flag_api.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -433,7 +434,6 @@ extern const MnuRequirementIds D_003BC4D8[];
 extern const MnuPanelRegions D_003AFA18;
 extern u32 mnuGetSelectedNodeValue(void);
 extern s32 prfReqCheckWithFallback(void *, u16);
-extern s32 mdlFlagTest(s32);
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
@@ -733,7 +733,6 @@ void mnuDrawMantraCostAfterListAdvance(s32 recordAddress, MnuSceneListHead *head
 }
 
 extern u16 D_0036C6D0[];
-extern s32 mdlFlagTest(s32);
 
 void mnuCollectFlagArray(u8 *flags) {
     u32 i;

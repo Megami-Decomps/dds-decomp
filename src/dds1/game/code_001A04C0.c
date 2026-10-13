@@ -12,6 +12,7 @@
 #include "kwln_task_lifecycle.h"
 #include "itf_mes_resource.h"
 #include "sdf_sif_command.h"
+#include "mdl_flag_api.h"
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {
@@ -41,7 +42,6 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern void btlUpdateScene(void);
 
-extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 

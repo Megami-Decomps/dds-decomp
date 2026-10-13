@@ -9,6 +9,7 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "mdl_flag_api.h"
 
 /* Staff callbacks receive a task handle as an integer word. Preserve the
  * native parameter widths and the short-arity task-user-value calls. */
@@ -71,7 +72,6 @@ extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(MenuStaffContext *);
 extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
-extern s32 mdlFlagTest();
 extern void mnuDrawCampIconBackdropByKind(s32, s32);
 extern void mnuDrawCampGridAndLabel(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;

@@ -18,6 +18,7 @@
 #include "mnu_scroll_panel.h"
 #include "menu_fade_entry.h"
 #include "eff_random.h"
+#include "mdl_flag_api.h"
 
 struct StaffMenuRuntime;
 
@@ -86,7 +87,6 @@ typedef struct MenuList MenuList;
 typedef struct MenuIconState MenuIconState;
 
 
-extern s32 mdlFlagTest(s32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 

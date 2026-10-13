@@ -6,6 +6,7 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 #include "mnu_scroll_panel.h"
+#include "mdl_flag_api.h"
 
 
 extern s64 fileConsumeConfigTaskReady(void);
@@ -247,7 +248,6 @@ s32 mtrMantraIdIsValid(s32 mantraId) {
 extern u16 D_00437B6E;
 extern u8 D_00437B88;
 extern u16 D_003E6730[];
-extern s32 mdlFlagTest(s32);
 
 s32 mtrHasEnoughOwnedMantras(void) {
     s32 owned = 0;

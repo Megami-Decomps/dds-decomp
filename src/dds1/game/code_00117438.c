@@ -12,6 +12,7 @@
 #include "sdf.h"
 #include "sdf_dev_state.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern u32 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
@@ -245,7 +246,6 @@ extern SdfMemBlock *D_003BD794;
 extern SdfMemBlock *D_003BD798;
 extern SdfMemBlock *D_003BD79C;
 extern u32 D_003BD7A0;
-extern s32 mdlFlagTest(s32 flag);
 extern void ptySaveActiveUnitsToStock(void);
 extern void mnuCollectFlagArray(u8 *flags);
 

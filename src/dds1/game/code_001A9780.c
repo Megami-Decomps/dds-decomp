@@ -25,6 +25,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 
@@ -63,7 +64,6 @@ extern s8 D_00324530[];
 
 extern u32 D_00359A78[];
 
-extern s32 mdlFlagTest(s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 

@@ -10,6 +10,7 @@
 #include "sdf_resource.h"
 #include "file_request_api.h"
 #include "mnu_mantra_position_api.h"
+#include "mdl_flag_api.h"
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"

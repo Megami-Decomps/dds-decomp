@@ -34,6 +34,7 @@
 #include "btl.h"
 #include "btl_command.h"
 #include "fr_font.h"
+#include "mdl_flag_api.h"
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x30];
@@ -103,7 +104,6 @@ extern s8 effSharedRandomState[];
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-extern s32 mdlFlagTest(s32);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
@@ -7164,7 +7164,6 @@ typedef struct SceneGlobalState {
     s32 fadeKindB;
 } SceneGlobalState;
 
-extern s32 mdlFlagTest();
 
 extern s32 btlGetTaskState6();
 

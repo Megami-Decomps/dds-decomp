@@ -30,6 +30,7 @@
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern s32 func_001ABB10(BtlUnit *, s32);
 
@@ -146,7 +147,6 @@ extern f32 D_003B4E28[];
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-extern s32 mdlFlagTest(s32);
 
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 

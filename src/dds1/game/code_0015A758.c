@@ -12,6 +12,7 @@
 #include "par_kind_api.h"
 #include "par_table.h"
 #include "par_draw_block.h"
+#include "par_emitter_desc.h"
 #include "eff.h"
 #include "eff_track_poly_list.h"
 
@@ -103,28 +104,6 @@ extern void (*D_0034E5E0[])(void *, void *, void *);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void *memcpy(void *dst, void *src, u32 n);
 extern void polyInitializeBasicRingCells(void *);
-
-/* The serialized cell-state block is copied after the variable emitter header. */
-typedef struct ParEmitCellState {
-    u8 pad00[8];
-    u16 verticesPerCell; /* 0x08 */
-    u8 pad0A[0xA];
-    s32 unk14;
-    s32 unk18;
-    s32 cellSystem;      /* 0x1C: allocated cell system */
-    u32 *cellWords;      /* 0x20: one inline word per cell */
-    u8 pad24[0xC];
-} ParEmitCellState; /* 0x30 */
-
-/* Emitter descriptor copied into a fresh allocation by parCloneEmitterAndInitCells. */
-typedef struct ParEmitDesc {
-    u8 pad00[0x10];
-    s32 count;          /* 0x10 */
-    u8 pad14[0x04];
-    s32 headerSize;     /* 0x18 */
-    u8 pad1C[0xA4];
-    ParEmitCellState cells; /* 0xC0 */
-} ParEmitDesc;
 
 extern void parControlInit();
 
@@ -1718,7 +1697,9 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
         desc->cells.verticesPerCell = 3;
     }
     desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub(desc->cells.cellSystem, 0, desc->cells.unk14, desc->cells.unk18);
+    parDispatchSub(desc->cells.cellSystem, 0,
+                   *(void **)((u8 *)&desc->cells + 0x14),
+                   *(void **)((u8 *)&desc->cells + 0x18));
     polyInitializeBasicRingCells(desc);
     return desc;
 }

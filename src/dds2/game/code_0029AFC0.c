@@ -4,6 +4,7 @@
 #include "mnu.h"
 #include "mnu_result.h"
 #include "eff_random.h"
+#include "mdl_flag_api.h"
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -276,7 +277,6 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
 }
 
 extern u16 D_003D6332[][17];
-extern s32 mdlFlagTest(s32);
 
 s32 mnuChooseWeightedItem(s32 index) {
     s32 random = (u8)effMiscRand(NULL);

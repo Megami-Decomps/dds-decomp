@@ -3,6 +3,7 @@
 #include "eff_random.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
+#include "mdl_flag_api.h"
 
 
 extern void evtPrintDeveloperConsoleMessage();
@@ -11,7 +12,6 @@ extern void mdlFlagClear(s32 flag);
 
 extern void mdlFlagSet(s32 flag);
 
-extern s32 mdlFlagTest(s32 flag);
 
 extern void mnuClearCampResourceFlagEntries(void);
 

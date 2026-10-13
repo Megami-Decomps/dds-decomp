@@ -43,6 +43,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "mdl_flag_api.h"
 
 extern f32 D_003B6DC0[4];
 
@@ -102,7 +103,6 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
-extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 

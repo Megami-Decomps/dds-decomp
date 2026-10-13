@@ -27,6 +27,7 @@
 #include "fld.h"
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -88,7 +89,6 @@ typedef struct CampFlagRow {
 
 extern CampFlagRow D_003C9A40[];
 
-extern s32 mdlFlagTest(u32);
 
 
 extern u8 D_003CE658[];
@@ -2452,7 +2452,6 @@ extern s32 D_003CE14C[];
 extern u8 D_003CE620[];
 extern u8 D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
-extern s32 mdlFlagTest();
 extern s32 dspStartEntry(s32);
 
 
@@ -3997,7 +3996,6 @@ void mnuSetFlagForMenuEntry(s32 index) {
 #include "dat_state.h"
 #include "mnu_list.h"
 
-extern s32 mdlFlagTest(u32);
 
 
 extern void func_0026C900(void);

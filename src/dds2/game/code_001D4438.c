@@ -18,6 +18,7 @@
 #include "mdl.h"
 #include "active_sound_node.h"
 #include "btl_scene_initializer.h"
+#include "mdl_flag_api.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
@@ -182,7 +183,6 @@ typedef struct SceneGlobalState {
 } SceneGlobalState;
 
 extern u8 *btlTrackedTaskHandles;
-extern s32 mdlFlagTest();
 extern s32 btlGetTaskState6();
 
 extern s32 D_00416BB8[];

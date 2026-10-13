@@ -22,6 +22,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "dds3obj.h"
+#include "mdl_flag_api.h"
 
 
 
@@ -197,7 +198,6 @@ extern u32 btlGetSubtaskTargetMode(void);
 
 extern u32 btlAppendEffectActorToCommandIndices(s32);
 
-extern s32 mdlFlagTest(s32);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 

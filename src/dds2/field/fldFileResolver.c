@@ -18,6 +18,7 @@
 #include "sdf_texture_offset_list.h"
 #include "evt_script_model.h"
 #include "sdf_model.h"
+#include "mdl_flag_api.h"
 
 
 extern FldFileResource *D_00438EC0;

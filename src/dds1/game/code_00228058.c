@@ -8,6 +8,7 @@
 #include "evt_event_pack.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 
 
@@ -395,7 +396,6 @@ extern void fldConsumePrimarySceneFlag(void);
 extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagClear(s32);
 
 void func_00228930(f32 delta) {
