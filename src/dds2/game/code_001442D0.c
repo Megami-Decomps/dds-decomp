@@ -3194,7 +3194,7 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-void func_0014D0E8(void) {
+void fldUpdateObjectSlotActivation(void) {
     s32 i;
     MdlCtx *resource;
 
