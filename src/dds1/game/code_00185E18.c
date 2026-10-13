@@ -29,7 +29,7 @@ typedef struct {
 extern void effThunderUpdateChainSegments(EffThunderGroup *group);
 extern void effThunderGroupRelease(EffThunderGroup *group);
 extern void effSetResourceBlendColor(u32 handle, u32 color);
-extern u32 func_001673C0(u32 address);
+extern u32 effGetPairedBlurResourceVectorRecordAddress(u32 address);
 
 void effFreePairedResources(PairedEffectResources *pair) {
 
@@ -69,7 +69,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                     btlSetActorEffectParameterOrMuzzlePosition((struct BtlUnit *)actor, 0xB);
                 }
                 VU0_STORE_VF(vf10, actorPosition);
-                record = (BlurVectorRecord *)func_001673C0((u32)work->resource[resourceIndex]);
+                record = (BlurVectorRecord *)effGetPairedBlurResourceVectorRecordAddress((u32)work->resource[resourceIndex]);
                 VU0_LOAD_VF(vf10, actorPosition);
                 VU0_MOVE_VF(vf12, vf10);
                 VU0_STORE_VF(vf10, record->start);

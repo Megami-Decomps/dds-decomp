@@ -1934,7 +1934,8 @@ void effThunderGroupRelease(EffThunderGroup *group) {
     sdfReleaseChipBlock(group);
 }
 
-u32 func_001673C0(u32 arg0) {
+/* Preserve the address word; the paired blur caller fills the leading point vectors. */
+u32 effGetPairedBlurResourceVectorRecordAddress(u32 arg0) {
     return arg0;
 }
 

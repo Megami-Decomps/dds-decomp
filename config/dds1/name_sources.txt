@@ -3863,7 +3863,7 @@
 0x00219388	mdlCountRecords	inferred	mdl model resources and viewer in game/code_00218B48.c
 0x002193D8	mdlRecordHasKind	inferred	Checks whether a viewer record carries the requested record kind; all current callers test the track-poly kind.
 0x00219590	mdlDrawMarkParamsPanel	inferred	debug panel: MARK/START/END/ITRVL/FACE/BLEND text plus 4x4 colour byte grid
-0x002198D8	mdlEditMarkParametersWithPad	inferred	confidence=high; src/dds1/game/code_00218B48.c:func_002198D8; Navigates a viewer mark-parameter cursor and edits mark indices, timing, blending, and color channels from pad input. [names_qp9.tsv]
+0x002198D8	mdlEditMarkParametersWithPad	inferred	confidence=high; src/dds1/game/code_00218B48.c:mdlEditMarkParametersWithPad; Navigates a viewer mark-parameter cursor and edits mark indices, timing, blending, and color channels from pad input. [names_qp9.tsv]
 0x00219AF8	mdlAddBillboardPart	inferred	Appends a kind-zero model part and creates its indexed billboard resource.
 0x00219B50	mdlAddEffectPart	inferred	Appends a kind-one model part using the associated effect resource creator.
 0x00219BB0	mdlAppendObjectPart	inferred	Allocates object handler node, appends object part and increments list count. [names_reviewed7.tsv]
@@ -8847,3 +8847,6 @@
 0x001DE5F8	btlUpdateActionCameraFromTargetPolicy	inferred	confidence=high; State7/phase guard, target-policy list/category queries select actor-set/default camera or front/back blend. Paired DDS2 EBE30; retained two SDK position snapshots unchanged. [Namer1 b57]
 0x00264B08	brsAnimateSkillIconRows	inferred	confidence=high; Result-panel skill icon rows are animated through their row records and fade state; DDS2 0x0029C120 has the corresponding updater. [LiteH b27]
 0x0027A300	ptyDrawLinkageSkillEntry	inferred	confidence=high; Draws a linkage-skill entry with cost/icon and marker handling; its body is analogous, not identical, to DDS2 mnuDrawSkillCategoryEntry. [LiteH b27]
+0x001673C0	effGetPairedBlurResourceVectorRecordAddress	inferred	confidence=high; Adopts upstream spelling at this exact address; returns input address word unchanged. Paired blur caller writes four leading vectors into grouphead.points; native-identical DDS2 twin16F018. No allocation/conversion inferred. [Namer1 b59]
+0x00208C20	btlUpdateNidhoggrOpponentSlots	inferred	confidence=high; Nidhoggr mode116 update callback reapplies opponent formation slots through the existing arranger. Original independent tail-jump entry preserved. [Namer1 b59]
+0x00208EA8	btlFinishRavanaModelUnit	inferred	confidence=high; Ravana finishModelUnit callback reapplies unit dimensions and selected-actor presentation through its existing initializer; no lifecycle semantics beyond registered hook. [Namer1 b59]

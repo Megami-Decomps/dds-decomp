@@ -121,7 +121,7 @@ typedef struct BattleWork {
     u8 pad26A[2];
     u16 phase;
     u8 pad26E[2];
-    u16 phaseControl; /* 0x270: required phase in func_00218150 */
+    u16 phaseControl; /* 0x270: required phase in btlCheckPhaseOnePartyStatusGate */
     u8 pad272[2];
     s32 turnCount;
     u8 pad278[4];

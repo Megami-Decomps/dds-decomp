@@ -3234,7 +3234,8 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     }
 }
 
-void func_00208C20(void) {
+/* Nidhoggr's update hook reapplies the opponent formation slots. */
+void btlUpdateNidhoggrOpponentSlots(void) {
     btlArrangeOpponentFormationSlots();
 }
 
@@ -3333,7 +3334,8 @@ void btlConfigureRavanaUnitDimensions(BtlUnit *unit) {
     }
 }
 
-void func_00208EA8(BtlUnit *unit) {
+/* Reapply Ravana dimensions when the mode's model-unit finish hook runs. */
+void btlFinishRavanaModelUnit(BtlUnit *unit) {
     btlConfigureRavanaUnitDimensions(unit);
 }
 

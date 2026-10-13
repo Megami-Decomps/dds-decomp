@@ -463,7 +463,7 @@ functions use trampolines and are a different case.
   puts `daddu $2,$0,$0` in the branch delay slot; the variable adds a move
   or changes the branch to `beql` (`func_0030D3C0`, `func_00312320`).
 - Separate `return 1` exits can keep a `li $2,1` at each branch site;
-  one merged return changes the delay slots (`func_002198D8`).
+  one merged return changes the delay slots (`btlPrepareGateDefeatCandidateSet`).
 - A small `if/else` whose else is `dir = 1` gives `bgezl; li` when written
   `if (x < 0) { dir = -1; x = -x; } else { dir = 1; }`; testing `x >= 0`
   first gives plain `bgez` (`func_00279CC0`).
@@ -11295,3 +11295,27 @@ DDS2 adopts the existing DDS1 `btlDisableUnitsIfSpeciesFlagged` and
 games, but their flagged-lead fade and Rahu head/body operand roles
 agree. All names preserve the original declarations, callback surfaces,
 casts, state transitions and compiler-sensitive access forms.
+
+## Defeat-candidate notifications and paired blur address access
+
+DDS2 `btlFlagUnitDefeatCandidate` invokes the mode's `unk69C` hook before
+setting unit flags 0x4/0x8; `btlClearUnitDefeatCandidate` invokes `unk6A0`
+before clearing them. The gate hooks therefore prepare the set/clear
+operations by notifying `md_01all_02` with payload words 1/2. They always
+allow the operation, even when the object is missing. The words' wider
+meaning is not established: these names do not assert show/hide behavior.
+The Brahman hooks occupy the same veto slots but reject resource kind 1,
+index 0x10B. That resource index is not an enemy-name table index.
+
+The paired blur caller writes four leading point vectors through the
+address returned by `effGetPairedBlurResourceVectorRecordAddress`.
+`EffThunderGroup` begins with `EffThunderGroupParams`, whose first member
+is the point array. Both games retain the original identity function and
+word-sized ABI; the shared name adopts upstream's DDS1 spelling.
+
+The Vritra actor-category camera selector retains all native `VURI`
+branches, reflection/regeneration handling, callback-fresh loads and
+compiler-sensitive control flow. Frontline setup uses the native actor
+names Serph (1) and True Heat (9), while Calamity and all three Eternal
+Zero entries are identified by the native skill-name rows. The remaining
+phase/status and script-result names deliberately avoid unknown meanings.
