@@ -4,10 +4,10 @@
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
+#include "dds3_vu_transform.h"
 
 extern u32 dds3WorldCounter;
 
-extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 extern void dds3DestroyWorldNode(EffWorldNode *node);
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
@@ -19,7 +19,7 @@ void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
         VU0_LOAD_MATRIX(transform->matrix);
     } else {
         transform->flags = flags | OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-        dds3BuildVuTransformFromComponents(&transform->scale, &transform->rotation, &transform->position);
+        dds3BuildVuTransformFromComponents(transform->scale, transform->rotation, transform->position);
         VU0_STORE_MATRIX(transform->matrix);
     }
 }
