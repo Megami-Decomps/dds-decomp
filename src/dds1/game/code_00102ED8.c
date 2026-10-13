@@ -14,6 +14,8 @@
 #include "sdf_projection.h"
 #include "sdf_linked_packet.h"
 #include "sdf_draw.h"
+#include "sdf_gs_blend.h"
+#include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "kwln_task_lifecycle.h"
 
@@ -674,7 +676,71 @@ void kwlnInitMagicState(void) {
     effMiscSeedRandom(effSharedRandomState, KWLN_SHARED_RANDOM_SEED);
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnDebugGraphUpdate);
+extern s16 D_003BA728;
+extern u16 D_003BD32E;
+extern u16 D_003BA880;
+extern u16 D_003BA882;
+extern u16 D_003BA884;
+extern u16 D_003BA886;
+extern char D_003BA888[];
+
+s32 kwlnDebugGraphUpdate(void) {
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfGsBlendPacket *blendPacket;
+    s32 originX = 0x7100;
+    /* Keep the four real conversion epochs in one local; see docs/idioms.md,
+     * "Trace-justified pixel conversion reuse: kwlnDebugGraphUpdate". */
+    s32 pixels;
+
+    sdfInitPacketList(packetList);
+    blendPacket = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    sdfBuildPrimaryAlphaBlendDmaPacket(blendPacket);
+    sdfAppendPacket(packetList, (u32)blendPacket);
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(0x70D0, 0x85A8,
+                    0xFFFF7F, 0x1260, 0xF0, 0x20000000, 0x40806040));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(originX,
+                    0x85C0, 0xFFFF80, 0, D_003BA888, (u16)D_003BA728));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(originX,
+                    0x8620, 0xFFFF80, 0, D_003BA888, D_003BD32E));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x8080,
+                    0x85C0, 0xFFFF80, 6, D_003BA888, D_003BA880));
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x8080,
+                    0x8620, 0xFFFF80, 6, D_003BA888, D_003BA882));
+    pixels = (s32)((f32)(u16)D_003BA728 / 224.0f * 200.0f);
+    sdfCreatePacketA(packetList, 0x8000C000, 0, 0x73A0, 0x85F0,
+                    originX + ((pixels + 0x2A) << 4),
+                    0x8600, 0xFF0000, NULL);
+    pixels = (s32)((f32)D_003BD32E / 224.0f * 200.0f);
+    sdfCreatePacketA(packetList, 0x80000080, 0, 0x73A0, 0x8650,
+                    originX + ((pixels + 0x2A) << 4),
+                    0x8660, 0xFF0000, NULL);
+    pixels = (s32)((f32)D_003BA880 / 224.0f * 200.0f);
+    sdfCreatePacketA(packetList, 0x8000FFFF, 0,
+                    originX + ((pixels + 0x2B) << 4),
+                    0x85D0,
+                    originX + 0x20 + ((pixels + 0x2B) << 4),
+                    0x8610, 0xFF0000, NULL);
+    pixels = (s32)((f32)D_003BA882 / 224.0f * 200.0f);
+    sdfCreatePacketA(packetList, 0x8000FFFF, 0,
+                    originX + ((pixels + 0x2B) << 4),
+                    0x8630,
+                    originX + 0x20 + ((pixels + 0x2B) << 4),
+                    0x8670, 0xFF0000, NULL);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packetList);
+    if (D_003BA884 >= 0x47 || D_003BA880 < (u16)D_003BA728) {
+        D_003BA880 = D_003BA728;
+        D_003BA884 = 0;
+    } else {
+        D_003BA884++;
+    }
+    if (D_003BA886 >= 0x47 || D_003BA882 < D_003BD32E) {
+        D_003BA882 = D_003BD32E;
+        D_003BA886 = 0;
+    } else {
+        D_003BA886++;
+    }
+    return 0;
+}
 
 void kwlnDebugGraphTaskDestroy(void) {
 }
@@ -1638,7 +1704,11 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA879);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA880);
 
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA882);
+
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA884);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA886);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA888);
 
