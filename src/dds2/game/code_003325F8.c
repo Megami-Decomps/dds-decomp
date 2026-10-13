@@ -541,31 +541,31 @@ void sdfAppendAssetToResourceList(DevRequest *list, SdfAsset *asset) {
 
 /* Store the first primary-state word and dirty both draw entries. */
 void sdfSetPrimaryStateWordFirst(SdfAsset *asset, u32 value) {
-    asset->unk10 = value;
+    asset->primaryStateWordFirst = value;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the second primary-state word and dirty both draw entries. */
 void sdfSetPrimaryStateWordSecond(SdfAsset *asset, u32 value) {
-    asset->unk14 = value;
+    asset->primaryStateWordSecond = value;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the third primary-state word and dirty both draw entries. */
 void sdfSetPrimaryStateWordThird(SdfAsset *asset, u32 value) {
-    asset->unk20 = value;
+    asset->primaryStateWordThird = value;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store raw bits in the fourth primary-state word, without float conversion. */
 void sdfSetPrimaryStateWordFourth(SdfAsset *asset, u32 bits) {
-    asset->unk28 = bits;
+    asset->primaryStateWordFourth = bits;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the primary-state float and dirty both draw entries. */
 void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
-    asset->unk1C = value;
+    asset->primaryStateFloat = value;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
@@ -697,8 +697,8 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     }
     asset->scalarPairFirst = 0;
     asset->scalarPairSecond = 0;
-    asset->unk10 = 0x80808080;
-    asset->unk14 = 0x80808080;
+    asset->primaryStateWordFirst = 0x80808080;
+    asset->primaryStateWordSecond = 0x80808080;
     asset->secondaryColor = 0x80808080;
     return asset;
 }
@@ -798,15 +798,15 @@ void *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfDmaTagHeader *tag, 
 /* Copy primary words and optional GS texture state; only mode one zeros its state word. */
 void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     SdfTex *texture;
-    entry->unk04 = asset->unk10;
-    entry->unk1C = asset->unk1C;
-    entry->unk08 = asset->unk14;
+    entry->unk04 = asset->primaryStateWordFirst;
+    entry->unk1C = asset->primaryStateFloat;
+    entry->unk08 = asset->primaryStateWordSecond;
     if (sdfForcedAssetTextureMode == SDF_FORCED_TEXTURE_ZERO_STATE_MODE) {
         entry->unk10 = 0;
     } else {
-        entry->unk10 = asset->unk20;
+        entry->unk10 = asset->primaryStateWordThird;
     }
-    entry->unk14 = asset->unk28;
+    entry->unk14 = asset->primaryStateWordFourth;
     texture = asset->texture;
     if (texture != NULL) {
         entry->primaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
@@ -977,14 +977,14 @@ void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
     SdfSubParam *subParameters;
 
     destination->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
-    destination->unk10 = source->unk10;
-    destination->unk14 = source->unk14;
-    destination->unk1C = source->unk1C;
+    destination->primaryStateWordFirst = source->primaryStateWordFirst;
+    destination->primaryStateWordSecond = source->primaryStateWordSecond;
+    destination->primaryStateFloat = source->primaryStateFloat;
     destination->secondaryColor = source->secondaryColor;
     destination->unk04 = source->unk04;
     destination->texture = source->texture;
-    destination->unk20 = source->unk20;
-    destination->unk28 = source->unk28;
+    destination->primaryStateWordThird = source->primaryStateWordThird;
+    destination->primaryStateWordFourth = source->primaryStateWordFourth;
     subParameters = source->primarySubParam;
     if (subParameters != NULL) {
         sdfEnsurePrimaryTextSubParam(destination)->scalar = subParameters->scalar;

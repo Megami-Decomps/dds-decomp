@@ -571,13 +571,13 @@ typedef struct SdfAsset {
     u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
     u8 pad07;
     struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
-    u32 unk10;
-    u32 unk14;
+    u32 primaryStateWordFirst; /* 0x10: first word set by primary-state updates */
+    u32 primaryStateWordSecond; /* 0x14: second word set by primary-state updates */
     u32 secondaryColor; /* 0x18 */
-    f32 unk1C;
-    u32 unk20;
+    f32 primaryStateFloat; /* 0x1C: interpolated primary-state float */
+    u32 primaryStateWordThird; /* 0x20 */
     u32 unk24;
-    u32 unk28;
+    u32 primaryStateWordFourth; /* 0x28: retained as raw bits */
     SdfTex *texture;
     SdfTex *secondaryTexture; /* 0x30 */
     u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
@@ -595,6 +595,16 @@ typedef char SdfAsset_dirtyFlags_at_6[
     ((u32)&((SdfAsset *)0)->dirtyFlags == 6) ? 1 : -1];
 typedef char SdfAsset_drawEntries_offset_must_be_0x08[
     ((u32)&((SdfAsset *)0)->drawEntries == 0x08) ? 1 : -1];
+typedef char SdfAsset_primaryStateWordFirst_offset_must_be_0x10[
+    ((u32)&((SdfAsset *)0)->primaryStateWordFirst == 0x10) ? 1 : -1];
+typedef char SdfAsset_primaryStateWordSecond_offset_must_be_0x14[
+    ((u32)&((SdfAsset *)0)->primaryStateWordSecond == 0x14) ? 1 : -1];
+typedef char SdfAsset_primaryStateFloat_offset_must_be_0x1C[
+    ((u32)&((SdfAsset *)0)->primaryStateFloat == 0x1C) ? 1 : -1];
+typedef char SdfAsset_primaryStateWordThird_offset_must_be_0x20[
+    ((u32)&((SdfAsset *)0)->primaryStateWordThird == 0x20) ? 1 : -1];
+typedef char SdfAsset_primaryStateWordFourth_offset_must_be_0x28[
+    ((u32)&((SdfAsset *)0)->primaryStateWordFourth == 0x28) ? 1 : -1];
 typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[
     ((u32)&((SdfAsset *)0)->dirtyFlags == 0x06) ? 1 : -1];
 typedef char SdfAsset_primarySubParam_offset_must_be_0x38[

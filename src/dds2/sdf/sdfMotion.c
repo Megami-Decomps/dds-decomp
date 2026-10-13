@@ -623,7 +623,7 @@ void sdfMotionBlendPrimaryWordSecondKey(SdfMotionIndexedValueBinding *binding, f
 }
 
 void sdfMotionCapturePrimaryWordSecond(SdfMotionIndexedValueBinding *binding) {
-    binding->capturedWord = binding->target->unk14;
+    binding->capturedWord = binding->target->primaryStateWordSecond;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFirstBinding(Motion *motion, s32 unused, s32 options) {
@@ -653,7 +653,7 @@ void sdfMotionBlendPrimaryWordFirstKey(SdfMotionIndexedValueBinding *binding, f3
 }
 
 void sdfMotionCapturePrimaryWordFirst(SdfMotionIndexedValueBinding *binding) {
-    binding->capturedWord = binding->target->unk10;
+    binding->capturedWord = binding->target->primaryStateWordFirst;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordThirdBinding(Motion *motion, s32 unused, s32 options) {
@@ -683,7 +683,7 @@ void sdfMotionBlendPrimaryWordThirdKey(SdfMotionIndexedValueBinding *binding, f3
 }
 
 void sdfMotionCapturePrimaryWordThird(SdfMotionIndexedValueBinding *binding) {
-    binding->capturedWord = binding->target->unk20;
+    binding->capturedWord = binding->target->primaryStateWordThird;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFourthBinding(Motion *motion, s32 unused, s32 options) {
@@ -713,7 +713,7 @@ void sdfMotionBlendPrimaryWordFourthKey(SdfMotionIndexedValueBinding *binding, f
 }
 
 void sdfMotionCapturePrimaryWordFourth(SdfMotionIndexedValueBinding *binding) {
-    binding->capturedWord = binding->target->unk28;
+    binding->capturedWord = binding->target->primaryStateWordFourth;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreateFloatBinding(Motion *motion, s32 unused, s32 options) {
@@ -740,7 +740,7 @@ void sdfMotionBlendInterpolatedFloat(SdfMotionIndexedValueBinding *motion, f32 u
 
 /* Capture the bound float as the base value for a later blend. */
 void sdfMotionReadBoundFloat(SdfMotionIndexedValueBinding *a0) {
-    a0->capturedFloat = a0->target->unk1C;
+    a0->capturedFloat = a0->target->primaryStateFloat;
 }
 
 SdfMotionIndexedTextBinding *sdfMotionCreateTextBlendBinding(Motion *motion, s32 unused, s32 options) {
