@@ -43,10 +43,7 @@
 extern f32 D_003B6DC0[4];
 
 /* SYSEFF metadata and runtime registrations share these indices. */
-enum {
-    BTL_SOUND_ENTRY_COUNT = 0x31,
-    BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT = 0x2C
-};
+enum { BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT = 0x2C };
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
@@ -79,13 +76,7 @@ typedef struct BtlUnit BtlUnit;
 
 extern void func_001F2758(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-typedef struct SoundEntry {
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-} SoundEntry;
-
-extern SoundEntry D_003BDE18[];
+extern BattleSoundArchiveEntry D_003BDE18[BTL_SOUND_ENTRY_COUNT];
 
 extern u8 D_003BD7D0[];
 
@@ -5551,21 +5542,21 @@ void sndLoadSysEffLb(void) {
     node = *(s32 *)(archive + 0x60);
     i = 0;
     while (node != 0) {
-        if (D_003BDE18[i].unk0 != 0) {
+        if (D_003BDE18[i].enabled != 0) {
             u32 unk08 = *(u32 *)(node + 8);
             u32 unk0C = *(u32 *)(node + 0xC);
-            D_003BDE18[i].unk8 = unk08;
-            D_003BDE18[i].unk4 = unk0C;
+            D_003BDE18[i].opaque08 = unk08;
+            D_003BDE18[i].archiveData = unk0C;
             node = *(s32 *)node;
         } else {
-            D_003BDE18[i].unk4 = 0;
-            D_003BDE18[i].unk8 = 0;
+            D_003BDE18[i].archiveData = 0;
+            D_003BDE18[i].opaque08 = 0;
         }
         i++;
     }
     for (; i < BTL_SOUND_ENTRY_COUNT; i++) {
-        D_003BDE18[i].unk4 = 0;
-        D_003BDE18[i].unk8 = 0;
+        D_003BDE18[i].archiveData = 0;
+        D_003BDE18[i].opaque08 = 0;
     }
     func_002C7CE8((void *)archive);
 }
@@ -5575,9 +5566,9 @@ void btlRefreshSoundEntries(void) {
     u32 i;
     btlGetRuntime();
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
-        if (D_003BDE18[i].unk4 != 0) {
+        if (D_003BDE18[i].archiveData != 0) {
             /* Bank entries retain their original data-address word representation. */
-            btlCreateIndexedSoundResourceNode(i, (void *)D_003BDE18[i].unk4);
+            btlCreateIndexedSoundResourceNode(i, (void *)D_003BDE18[i].archiveData);
         }
     }
 }
@@ -5587,7 +5578,7 @@ void sndFreeBattleSoundEntries(void) {
     SoundResourceNode **slots = ((BtlState *)btlGetRuntime())->resources;
     u32 i;
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
-        if (D_003BDE18[i].unk4 != 0) {
+        if (D_003BDE18[i].archiveData != 0) {
             sndFreeResourceNode(slots[i]);
             slots[i] = 0;
         }
@@ -5615,9 +5606,9 @@ typedef struct SoundHandleNode {
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
-    SoundEntry *entry = &D_003BDE18[index];
+    BattleSoundArchiveEntry *entry = &D_003BDE18[index];
     node->actor = actor;
-    node->queue = fileCloneQueueEntries((struct FileQueue *)entry->unk4);
+    node->queue = fileCloneQueueEntries((struct FileQueue *)entry->archiveData);
     return node;
 }
 

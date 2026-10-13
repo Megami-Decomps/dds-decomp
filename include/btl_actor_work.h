@@ -3,8 +3,7 @@
 
 #include "btl.h"
 #include "common.h"
-
-enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
+#include "btl_sound.h"
 
 /* Observed prefix of the DDS1 singleton battle work. Actor/task registration,
  * resource-node lists, and packed battle tint share this owner; intervening
