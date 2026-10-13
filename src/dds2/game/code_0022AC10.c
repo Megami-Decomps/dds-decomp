@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "eff_random_mod.h"
 #include "mdl_flag_api.h"
@@ -2395,7 +2396,6 @@ extern s32 btlCountTasksForOwner(u64);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, f32 *);
 extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
 #include "dds3obj.h"
@@ -167,7 +168,6 @@ s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
 }
 
 extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *unit);
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
 extern void btlBossDebugPrintf(const char *format, ...);

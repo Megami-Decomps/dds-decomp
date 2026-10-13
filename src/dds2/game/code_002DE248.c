@@ -13,6 +13,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "btl_stage_task_cleanup.h"
@@ -8340,7 +8341,6 @@ typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 
 
 
 extern void btlUnitGetEffectPosVU(BtlUnit *);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);

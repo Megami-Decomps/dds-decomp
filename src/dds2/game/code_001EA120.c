@@ -64,7 +64,6 @@ extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 

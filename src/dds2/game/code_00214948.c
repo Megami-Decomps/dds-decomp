@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "mdl_motion_api.h"
@@ -229,7 +230,6 @@ extern s32 sdfNamedChunkFindId(SdfModel *, const char *);
 
 extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
 

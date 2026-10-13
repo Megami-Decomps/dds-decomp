@@ -74,7 +74,6 @@ extern u8 D_003E9130[];
 
 extern u8 D_003E9120[];
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 

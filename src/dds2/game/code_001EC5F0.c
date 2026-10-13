@@ -218,7 +218,6 @@ extern f32 *D_0037F770[];
 
 struct FileQueue;
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 

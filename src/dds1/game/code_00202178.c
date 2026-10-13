@@ -748,7 +748,6 @@ BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
     return command->task->unit;
 }
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     BtlUnit *user;
