@@ -8660,3 +8660,4 @@
 0x00288E70	fileHandleFixedSlotReadEvent	inferred	Kind-one device callback records the requested size, fills the job's selected fixed slot from read replies, and queues continuation or completion.
 0x002890B8	fileHandleAllocatedResourceReadEvent	inferred	Kind-zero device callback allocates retained resource storage, advances chunked reads into it, then queues job completion.
 0x00289380	fileHandleChunkedWriteEvent	inferred	Kind-two device callback advances chunked writes from the supplied address and queues job completion after the final reply.
+0x002C1548	uiPrepareMenuBackgroundSurface	inferred	Menu backdrop callers use this between textured grid layers and the background draw; dispatches the prepared texture packet and sets GS TEST 0x50000 plus ALPHA 0x54 for the selected surface.
