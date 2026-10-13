@@ -9583,7 +9583,115 @@ s32 effResetCameraSnapshotSelection(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B8648);
+/* The camera snapshot payload is the 0x90-byte record consumed by this updater. */
+typedef union EffectCameraSnapshotView {
+    u32 word[36];
+    struct {
+        u8 pad00[0x40];
+        f32 offset[4];
+        f32 quat[4];
+        u8 pad60[0x30];
+    } camera;
+} EffectCameraSnapshotView;
+
+typedef struct EffectCameraDebugState {
+    u32 unknown00[4];
+    u32 flags;
+    u32 unknown14[9];
+} EffectCameraDebugState;
+extern EffectCameraDebugState D_0038F588;
+extern s8 D_0039862B[];
+extern f32 D_0037E120[4];
+extern void func_001FB180(f32 *, f32, f32, u32, f32 (*)[4]);
+extern void btlDebugDrawPoint(f32 *);
+
+typedef struct EffectCameraDebugScratch {
+    s128 basePosition;
+    s128 segmentStart;
+    s128 segmentEnd;
+    s128 rotationMatrix[4];
+} EffectCameraDebugScratch;
+
+u32 func_002B8648(EffectCameraSnapshotView *state, s8 useBattlePosition) {
+    EffectCameraDebugScratch scratch;
+    u32 result = 1;
+
+    if ((D_0038F588.flags & 2) == 0) {
+        if (D_0039862B[0] < 0) {
+            result = 0;
+        }
+    }
+
+    PCP_COPY_VECTOR(D_003DFA30, state->camera.quat);
+    if (useBattlePosition != 0) {
+        effComputeBattleCameraPositionVU((u8 *)state);
+    } else {
+        VU0_LOAD_VF(vf10, state->camera.offset);
+    }
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.basePosition);
+    VU0_STORE_VF(vf10, D_003DFA20);
+
+    func_001FB1E0(&D_0038F588);
+    func_001FB1A8();
+    func_001FB1F0(&D_0038F588);
+    func_001FB1B0();
+    PCP_COPY_VECTOR(state->camera.quat, D_003DFA30);
+    if (D_0038F588.flags & 8) {
+        result |= 2;
+    }
+    VU0_LOAD_VF(vf10, &scratch.basePosition);
+    VU0_LOAD_VF(vf11, D_003DF910);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
+
+    VU0_LOAD_VF(vf10, state->camera.quat);
+    effMiscQuaternionToMatrixVU();
+    VU0_STORE_MATRIX_UNCLOBBERED(scratch.rotationMatrix);
+
+    VU0_LOAD_VF(vf10, D_0037E120);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_SCALE_VF(vf10, 250.0f);
+    VU0_LOAD_VF(vf11, &scratch.segmentStart);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
+
+    func_001FB180((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80000080);
+    btlDebugDrawPoint((f32 *)&scratch.segmentStart);
+
+    VU0_LOAD_VF(vf11, D_003DF910);
+    VU0_LOAD_MATRIX(scratch.rotationMatrix);
+    VU0_LOAD_VF(vf31, &scratch.basePosition);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(x, 100.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(x, -100.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
+
+    VU0_LOAD_VF(vf11, D_003DF910);
+    VU0_LOAD_MATRIX(scratch.rotationMatrix);
+    VU0_LOAD_VF(vf31, &scratch.basePosition);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(z, 25.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(z, -25.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
+
+    return result;
+}
+
 
 u32 effLoadFileSlotAndPoll(void) {
     FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
@@ -9613,14 +9721,14 @@ s32 effRunWithStateBackup(void) {
     return result;
 }
 
-extern u32 func_002B8648(u8 *, s32);
+extern u32 func_002B8648(EffectCameraSnapshotView *, s8);
 
 u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
 
     memcpy(D_003DF840, file, 0x90);
-    result = func_002B8648(D_003DF840, 1);
+    result = func_002B8648((EffectCameraSnapshotView *)D_003DF840, 1);
     memcpy(file, D_003DF840, 0x90);
     if (result & 1) {
         result |= 0x800000;
