@@ -1,3 +1,4 @@
+#include "eff_packet_params.h"
 #include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
@@ -56,21 +57,6 @@
 
 extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
-typedef struct EffPacketParams {
-    s16 parameterCount;
-    s16 vertexCount;
-    u16 primitive;
-    u16 mask;
-    u32 unk08;
-    u32 *parameters;
-    u128 *positions;
-    u128 *normals;
-    u32 *texcoords;
-    u32 *extraTexcoords;
-    u32 *colors;
-    void *(*allocate)(s32);
-    f32 depth;
-} EffPacketParams;
 
 typedef struct EffGsPacket {
     u64 dmaTag;
@@ -3348,7 +3334,7 @@ setTexture:
     D_004582B0.colors = colors;
     D_004582B0.positions = positions;
     D_004582B0.texcoords = texcoords;
-    D_004582B0.unk08 = color;
+    D_004582B0.color = color;
 
     switch (kind) {
     case 0:
@@ -4141,7 +4127,7 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_004582E0[0].colors = (u32 *)set->tail;
         D_004582E0[0].positions = (u128 *)set->buffer;
-        D_004582E0[0].unk08 = set->color;
+        D_004582E0[0].color = set->color;
         D_004582E0[0].parameterCount = 12;
         D_004582E0[0].vertexCount = 12;
         D_004582E0[0].parameters = D_003E9BE0;
@@ -5926,7 +5912,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_004583A0[0].colors = (u32 *)set->tail;
         D_004583A0[0].positions = (u128 *)set->buffer;
-        D_004583A0[0].unk08 = set->color;
+        D_004583A0[0].color = set->color;
         D_004583A0[0].parameterCount = 0x10;
         D_004583A0[0].vertexCount = 0xF;
         D_004583A0[0].parameters = D_003E9D80;
@@ -7881,7 +7867,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_00458430[0].colors = (u32 *)set->tail;
         D_00458430[0].positions = (u128 *)set->buffer;
-        D_00458430[0].unk08 = set->color;
+        D_00458430[0].color = set->color;
         D_00458430[0].parameterCount = 0x10;
         D_00458430[0].vertexCount = 0xF;
         D_00458430[0].parameters = (u32 *)D_003E9C40;
@@ -9762,7 +9748,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blendedColor[0] = packed;
-    D_004584C0.unk08 = blendedColor[0];
+    D_004584C0.color = blendedColor[0];
     billSetAnimationFrameForImmediateAdvance(resource->billboard, frame);
     billCopyCurrentRecordToSnapshot(resource->billboard, &snapshot);
     sdfSetAssetPrimaryTextureAddress(resource->asset, snapshot.texture);

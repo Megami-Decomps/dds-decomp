@@ -1,3 +1,4 @@
+#include "eff_packet_params.h"
 #include "common.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
@@ -289,21 +290,6 @@ u64 *effBuildDrawPacketWithFlags(u32 flags) {
     return packet;
 }
 
-typedef struct EffPacketParams {
-    s16 parameterCount;
-    s16 vertexCount;
-    u16 primitive;
-    u16 mask;
-    u32 color;
-    u32 *parameters;
-    u128 *positions;
-    u128 *normals;
-    u32 *texcoords;
-    u32 *extraTexcoords;
-    u32 *colors;
-    void *(*allocate)(s32);
-    f32 depth;
-} EffPacketParams;
 
 extern u32 D_0034E6A0[];
 

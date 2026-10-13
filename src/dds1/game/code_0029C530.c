@@ -1,3 +1,4 @@
+#include "eff_packet_params.h"
 #include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
@@ -45,21 +46,6 @@
 #include "sdf_texture_file.h"
 
 
-typedef struct EffPacketParams {
-    s16 parameterCount;
-    s16 vertexCount;
-    u16 primitive;
-    u16 mask;
-    u32 unk08;
-    u32 *parameters;
-    u128 *positions;
-    u128 *normals;
-    u32 *texcoords;
-    u32 *extraTexcoords;
-    u32 *colors;
-    void *(*allocate)(s32);
-    f32 depth;
-} EffPacketParams;
 
 typedef struct EffGsPacket {
     u64 dmaTag;
@@ -3173,7 +3159,7 @@ setTexture:
     D_003DC9E0.colors = colors;
     D_003DC9E0.positions = positions;
     D_003DC9E0.texcoords = texcoords;
-    D_003DC9E0.unk08 = color;
+    D_003DC9E0.color = color;
 
     switch (kind) {
     case 0:
@@ -3949,7 +3935,7 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_003DCA10[0].colors = (u32 *)set->tail;
         D_003DCA10[0].positions = (u128 *)set->buffer;
-        D_003DCA10[0].unk08 = set->color;
+        D_003DCA10[0].color = set->color;
         D_003DCA10[0].parameterCount = 12;
         D_003DCA10[0].vertexCount = 12;
         D_003DCA10[0].parameters = D_0037EB30;
@@ -5505,7 +5491,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_003DCAD0[0].colors = (u32 *)set->tail;
         D_003DCAD0[0].positions = (u128 *)set->buffer;
-        D_003DCAD0[0].unk08 = set->color;
+        D_003DCAD0[0].color = set->color;
         D_003DCAD0[0].parameterCount = 0x10;
         D_003DCAD0[0].vertexCount = 0xF;
         D_003DCAD0[0].parameters = D_0037ECB0;
@@ -7511,7 +7497,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_003DCB60[0].colors = (u32 *)set->tail;
         D_003DCB60[0].positions = (u128 *)set->buffer;
-        D_003DCB60[0].unk08 = set->color;
+        D_003DCB60[0].color = set->color;
         D_003DCB60[0].parameterCount = 0x10;
         D_003DCB60[0].vertexCount = 0xF;
         D_003DCB60[0].parameters = (u32 *)D_0037EB90;

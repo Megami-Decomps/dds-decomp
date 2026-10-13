@@ -1,3 +1,4 @@
+#include "eff_packet_params.h"
 #include "common.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
@@ -40,21 +41,6 @@
 extern void *effParamTableGetBlock(void *table, s32 index);
 
 
-typedef struct EffPacketParams {
-    s16 parameterCount;
-    s16 vertexCount;
-    u16 primitive;
-    u16 mask;
-    u32 unk08;
-    u32 *parameters;
-    u128 *positions;
-    u128 *normals;
-    u32 *texcoords;
-    u32 *extraTexcoords;
-    u32 *colors;
-    s32 (*allocate)(s32);
-    f32 depth;
-} EffPacketParams;
 
 
 extern EffPacketParams D_00451FF0[];
@@ -444,7 +430,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     remaining = work->vertexCount;
     D_00451FF0->colors = (u32 *)work->auxRecordBase;
     D_00451FF0->positions = (u128 *)work->recordBase;
-    D_00451FF0->unk08 = work->color;
+    D_00451FF0->color = work->color;
     D_00451FF0->parameterCount = EFF_FAN_BATCH_PARAMS;
     D_00451FF0->vertexCount = EFF_FAN_BATCH_VERTICES;
     D_00451FF0->parameters = D_003B12C0;
@@ -575,7 +561,7 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     remainingVertices = pool->vertexCount;
     D_00451FF0->colors = (u32 *)pool->auxRecordBase;
     D_00451FF0->positions = (u128 *)pool->recordBase;
-    D_00451FF0->unk08 = pool->color;
+    D_00451FF0->color = pool->color;
     D_00451FF0->parameterCount = 0x10;
     D_00451FF0->vertexCount = EFF_TRIANGLE_BATCH_VERTICES;
     D_00451FF0->parameters = NULL;
@@ -663,7 +649,7 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     remainingVertices = pool->vertexCount;
     D_00451FF0->colors = (u32 *)pool->auxRecordBase;
     D_00451FF0->positions = (u128 *)pool->recordBase;
-    D_00451FF0->unk08 = pool->color;
+    D_00451FF0->color = pool->color;
     D_00451FF0->parameterCount = 0x10;
     D_00451FF0->vertexCount = EFF_QUAD_BATCH_VERTICES;
     D_00451FF0->parameters = D_003B1330;
@@ -728,7 +714,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     remaining = work->vertexCount;
     D_00451FF0->colors = (u32 *)work->auxRecordBase;
     D_00451FF0->positions = (u128 *)work->recordBase;
-    D_00451FF0->unk08 = work->color;
+    D_00451FF0->color = work->color;
     D_00451FF0->parameterCount = EFF_FAN_BATCH_PARAMS;
     D_00451FF0->vertexCount = EFF_FAN_BATCH_VERTICES;
     D_00451FF0->parameters = D_003B12C0;
