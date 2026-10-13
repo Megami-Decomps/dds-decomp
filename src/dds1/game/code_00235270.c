@@ -570,7 +570,7 @@ void evtDrawProjectCommandRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
     }
 }
 
-extern void func_00237130();
+extern void evtDrawEntrySelectionRow();
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
@@ -859,7 +859,7 @@ void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32
     }
 }
 
-void func_00237130(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawEntrySelectionRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char names[33][30] = {
         "STAGE",
         "UNIT",
@@ -930,7 +930,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     s32 count;
     s32 shown;
 
-    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, (u8 *)work, 0, func_00237130);
+    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, (u8 *)work, 0, evtDrawEntrySelectionRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packets);
     if (work->actionMode != 4) {
         return 0;

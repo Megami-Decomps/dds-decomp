@@ -901,7 +901,7 @@ void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32
 }
 
 /* Draw one event-group row, highlighting the entry under the cursor. */
-void func_00251ED0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawEntrySelectionRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char names[33][30] = {
         "STAGE",
         "UNIT",
@@ -967,7 +967,7 @@ void func_00251ED0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-extern void func_00251ED0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
+extern void evtDrawEntrySelectionRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
 s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     SdfListHead *list;
@@ -975,7 +975,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 shown;
 
     list = sdfCreateResetPacketList();
-    evtDrawMenuFrame(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, func_00251ED0);
+    evtDrawMenuFrame(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, evtDrawEntrySelectionRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 4) {
         return 0;
