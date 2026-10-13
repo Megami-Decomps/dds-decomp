@@ -921,7 +921,7 @@ void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
                   context);
 }
 
-void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2,
+void sdfDrawSlotGridWithCornerColors(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2,
                   u32 color3, s32 placementIndex, u32 flags, u32 context) {
     SDF_SPRITE(placementIndex)->geometry.cornerColors[0] = color0;
     SDF_SPRITE(placementIndex)->geometry.cornerColors[1] = color1;
