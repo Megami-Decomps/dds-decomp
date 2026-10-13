@@ -32,7 +32,7 @@ extern u32 D_004388B0;
 
 extern u32 D_0043908C;
 
-extern s32 D_00439090; /* fade timer: func_0030B1E8 tests >= 31 with slti */
+extern s32 D_00439090; /* fade timer: fldUpdateLocalMapCounterSelection tests >= 31 with slti */
 
 
 
@@ -320,7 +320,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
 
 extern u8 fldUpdateLmapResourceLoad(LmapTaskState *);
 extern void fldInitializeLocalMapScene(void);
-extern s32 func_0030B1E8(void);
+extern s32 fldUpdateLocalMapCounterSelection(void);
 extern void fldDrawLocalMapOverlay(void);
 
 s32 fldLmapTaskUpdate(KwlnTask *task) {
@@ -340,7 +340,7 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
         D_0043888C->phase = 2;
         break;
     case 2:
-        result = func_0030B1E8();
+        result = fldUpdateLocalMapCounterSelection();
         if (result == -1) {
             return result;
         }
@@ -675,7 +675,7 @@ extern void sdfInitInnerVectors(void);
 extern void fldUpdateSelectedValueTransition(void);
 extern void fldUpdateSwayOffset(void);
 
-s32 func_0030B1E8(void) {
+s32 fldUpdateLocalMapCounterSelection(void) {
     s32 result = 0;
 
     switch (D_004388AC) {
