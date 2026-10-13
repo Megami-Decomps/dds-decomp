@@ -529,9 +529,9 @@ void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
     }
 }
 
-extern void func_002A4B70(PickList *, s32);
+extern void mnuDrawAndAdvanceMovieMenuSlidePath(PickList *, s32);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4B70);
+INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuDrawAndAdvanceMovieMenuSlidePath);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
@@ -540,7 +540,7 @@ void mnuAdvanceSlideBar(PickList *bar, s32 drawContext) {
         mnuTitlePickRandomSlot(bar);
         mnuDrawMovieMenuSpritePickList(bar, drawContext);
         mnuDrawSprite(0, 0, 0, bar->control.pos, 0, 0x16, drawContext);
-        func_002A4B70(bar, drawContext);
+        mnuDrawAndAdvanceMovieMenuSlidePath(bar, drawContext);
         if (bar->control.active != 0) {
             bar->control.pos += 8;
         } else {
