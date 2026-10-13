@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_vertical_move.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "mdl.h"
@@ -959,7 +960,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
 
 
 extern s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit);
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 /* Run a copy of the unit until evtUnitHasReachedMotionEndpoint reports done, and derive its per-step Y speed. */
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215D0);
@@ -989,7 +990,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         unit->effObj->inner->rotation[i] = savedB[i];
     }
     if (count == 0) {
-        func_0035B6E0("ymove frameno = 0\n");
+        sdfDebugPrintf("ymove frameno = 0\n");
         unit->stepCount = 0;
         unit->speedY = 0;
         return 0;
@@ -1000,7 +1001,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     VU0_STORE_VF(vf10, delta);
     unit->stepCount = count;
     unit->speedY = delta[1] / (f32)count;
-    func_0035B6E0("ymove frameno = %d addvalue = %f total yzahyo=%f\n", count, unit->speedY, delta[1]);
+    sdfDebugPrintf("ymove frameno = %d addvalue = %f total yzahyo=%f\n", count, unit->speedY, delta[1]);
     return count;
 }
 

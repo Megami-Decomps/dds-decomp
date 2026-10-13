@@ -49,7 +49,7 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitive, s32 r
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, EffectSlotSet *object, s32 index, s32 surfaceIndex) {
     void *renderEntry = effGetSlotWorkOrOverride(object, index);
-    func_002BF400(offsetX, offsetY, z, drawFlags, object, index, (BdWork *)renderEntry,
+    effDrawSpriteWithWorkCornerColors(offsetX, offsetY, z, drawFlags, object, index, (BdWork *)renderEntry,
                   surfaceIndex);
 }
 

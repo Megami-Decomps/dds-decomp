@@ -28,7 +28,8 @@ extern void (*sdfTickCallback)(void);
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 typedef struct SdkFileStream SdkFileStream;
-extern void *func_0035A828(u32 bytes);
+/* SDK malloc wrapper: a successful result owns a fresh allocation. */
+extern void *func_0035A828(u32 bytes) __attribute__((malloc));
 extern void func_0035A880(void *memory);
 extern SdkFileStream *func_00359A98(const char *name, const char *mode);
 extern u32 func_00359B18(void *data, u32 size, u32 count, SdkFileStream *stream);
@@ -146,7 +147,17 @@ void dds3ReleasePackedValueBuffer(u32 node) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F168);
+extern void *memset(void *, s32, u32);
+
+/* Allocate the named reference and its writable name. Native clears the first
+ * four name bytes, then returns the record through the existing address word. */
+u32 func_0031F168(void) {
+    DdsNamedRecord *record = func_0035A828(sizeof(DdsNamedRecord));
+    record->name = func_0035A828(DDS_NAMED_RECORD_NAME_BYTES);
+    record->value = 0;
+    memset(record->name, 0, sizeof(record->name));
+    return (u32)record;
+}
 
 /* Release a named reference's owned name buffer and the reference record. */
 void dds3ReleaseNamedReference(u32 referenceAddress) {
@@ -179,7 +190,19 @@ u32 dds3GetCurrentPackedValueBuffer(s32 object) {
     return *(u32 *)(*(s32 *)(*(s32 *)(object + 4) + 8) + 0x10);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F280);
+DdsPackedObject *func_0031F280(void) {
+    DdsPackedObject *object = (DdsPackedObject *)func_0035A828(sizeof(DdsPackedObject));
+
+    object->maxPackedOffset = 0;
+    object->segments = (u32)mnuCreateCallbackNode(0);
+    ((MnuCallbackList *)object->segments)->onRemove = dds3DestroyPackedSegmentCallback;
+    object->namedReferences = (u32)mnuCreateCallbackNode(0);
+    ((MnuCallbackList *)object->namedReferences)->onRemove = dds3DestroyNamedReferenceCallback;
+    object->pendingReferences = (u32)mnuCreateCallbackNode(0);
+    ((MnuCallbackList *)object->pendingReferences)->onRemove = dds3DestroyNamedReferenceCallback;
+    dds3AllocateAndAttachPackedValueBuffer((s32)object);
+    return object;
+}
 
 void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
     DdsCallbackCollection *collection = (DdsCallbackCollection *)node;
@@ -842,7 +865,23 @@ void dds3SetCallbackNodeLastListener(MnuCallbackList *callbackNode,
     }
 }
 
-INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320CE0);
+SdfListNode *func_00320CE0(MnuCallbackList *list, s32 key, u32 valueWord) {
+    SdfListNode *node = (SdfListNode *)func_0035A828(sizeof(SdfListNode));
+
+    memset(node, 0, sizeof(SdfListNode));
+    node->index = list->count++;
+    node->key = key;
+    node->value = (void *)valueWord;
+    if (list->head == NULL) {
+        list->head = node;
+    } else {
+        SdfListNode *tail = list->tail;
+        node->prev = tail;
+        tail->next = node;
+    }
+    list->tail = node;
+    return node;
+}
 
 INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320D80);
 

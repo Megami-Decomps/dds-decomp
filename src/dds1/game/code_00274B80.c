@@ -34,7 +34,7 @@ extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
-extern s32 func_002CD240(u16, u8 **);
+extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
@@ -597,7 +597,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
     effDrawSpriteWithCornerFade(0x740, 0xCB0, 0, opacity, 1, sets[0], 0x1D, 0x53);
     effDrawSpriteWithCornerFade(0x11D0, 0xCB0, 0, opacity, 1, sets[0], 0x1E, 0x53);
     if (profile) {
-        if (func_002CD240(profile, &name)) {
+        if (prfResolveMantraNameOrFallback(profile, &name)) {
             mnuDrawCenteredLabel(0x650, 0xBC8, 0, color, profile, 0x53);
         } else {
             glyph = itfCreateConvertedTextGlyph(

@@ -647,7 +647,7 @@ extern void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *, BtlCamSta
 extern void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlChooseActionPoseBlendFromActorCount();
 extern void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001EFEE8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
@@ -756,7 +756,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->stepKind = 5;
                 btlBuildDistanceClampedActionCameraBlend(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseActorCategoryFlag4(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
-                func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
@@ -856,7 +856,7 @@ extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *)
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001EFEE8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 static inline s32 btlChooseLinkedCameraVariant(BtlLinkedCommand *action) {
     if (btlCanUseLinkedActor(action)) {
@@ -916,7 +916,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     btlInitCommandCursorForFirstActor(action, &action->camera);
                     action->stepKind = 13;
                 } else if (btlCanUseActorCategoryFlag4(action)) {
-                    func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                    btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 } else {
                     /* Only the random linked variant reduces camera distance. */
                     choice = btlCanUseLinkedActor(action)
@@ -945,7 +945,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 }
             } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
                 if (btlCanUseActorCategoryFlag4(action)) {
-                    func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                    btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 } else if (btlMatchFirstLinkedActorFlags(action)) {
                     func_001EDC38(action, &action->frontCamera, &action->backCamera);
                     action->motionParameter = 30.0f;
@@ -968,7 +968,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             if (btlIsLinkedFireOfSinaiCommand(action)) {
                 btlInitTargetCursorAndFacing(action, &action->camera);
             } else if (btlCanUseActorCategoryFlag4(action)) {
-                func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else {
                 choice = btlChooseLinkedCameraVariant(action);
                 if (choice != 0) {
@@ -987,7 +987,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             }
         } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
             if (btlCanUseActorCategoryFlag4(action)) {
-                func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else {
                 func_001EDFB8(action, &action->frontCamera, &action->backCamera);
             }
@@ -999,7 +999,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
     } else if (hasFlag200 == 1 && hasFlag400 != 1) {
         if (btlHasSingleLinkedResource(action)) {
             if (btlCanUseActorCategoryFlag4(action)) {
-                func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
                        ((effMiscRand(effSharedRandomState) & 1) ||
                         btlCanUseActorCategoryFlag2(action))) {
@@ -1018,7 +1018,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
             }
         } else if (btlCanUseActorCategoryFlag4(action)) {
-            func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+            btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
                    ((effMiscRand(effSharedRandomState) & 1) ||
                     btlCanUseActorCategoryFlag2(action))) {
@@ -1031,7 +1031,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         }
     } else if (hasFlag200 != 1 && hasFlag400 == 1) {
         if (btlCanUseActorCategoryFlag4(action)) {
-            func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+            btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
             action->motionParameter = 200.0f;

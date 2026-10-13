@@ -3151,7 +3151,7 @@ void func_00230D90(void) {
                     for (; n < 24; n++) {
                         datGameState->party[i].effectData[n] = 0;
                     }
-                    datGameState->party[i].unk20 = 0;
+                    datGameState->party[i].effectDataCount = 0;
                 }
                 if (i < D_00436F60) {
                     datGameState->party[i].flags |= 0x1002;

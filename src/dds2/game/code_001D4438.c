@@ -204,7 +204,7 @@ typedef struct BtlPanelBlock {
 } BtlPanelBlock;
 
 extern BtlPanelBlock *btlResourceBlock;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 
 extern s32 btlGetEffectActive();
 extern void btlUpdateTargetSelectionInput();
@@ -1533,7 +1533,7 @@ extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount);
 extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actorTask, u32 counterAmount, s32 counterMode);
 extern s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId);
 extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit);
-extern s32 func_001E2E58(BtlUnit *unit, s32 motionIndex);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern SoundResourceNode *sndCreateResourceNode(struct SoundMixer *soundId);
@@ -1638,7 +1638,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
         }
     }
     resource = NULL;
-    groupDelay = (s32)(func_001E2E58(action->unit, action->indexWork.slot) / scale);
+    groupDelay = (s32)(btlGetUnitMotionDurationFrames(action->unit, action->indexWork.slot) / scale);
     initialDelay = groupDelay;
     btlBossDebugPrintf(D_00417348, groupDelay);
     if ((action->unit->status.flags & 0x200) != 0 &&
@@ -2008,7 +2008,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlMapActionCode(s32, u32);
-extern s32 func_001E2E58(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *, s32);
@@ -2184,7 +2184,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     btlStartTask(sndCreateSetStateTask());
     for (groupIndex = 0; groupIndex < 3; groupIndex++) {
         if (actors[groupIndex] != NULL) {
-            actorFrames[groupIndex] = func_001E2E58(actors[groupIndex], slot);
+            actorFrames[groupIndex] = btlGetUnitMotionDurationFrames(actors[groupIndex], slot);
             if (actorFrames[groupIndex] < 20) actorFrames[groupIndex] = 20;
             if (maxFrames < actorFrames[groupIndex]) maxFrames = actorFrames[groupIndex];
         }
@@ -2627,7 +2627,7 @@ void btlMarkLinkedActorStatusFlag(ActionStateLink *task) {
 }
 
 extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
-extern s32 func_001E2E58(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 model, s32 variant, s32 motion, s32 frames, u8 mode);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
@@ -2659,7 +2659,7 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
     unit = task->unit;
     status = (u16 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
     if (!(unit->status.flags & 0x20)) {
-        motion = func_001E2E58(unit, 0x11) + 0x14;
+        motion = btlGetUnitMotionDurationFrames(unit, 0x11) + 0x14;
     } else {
         motion = status[0x15];
     }
@@ -2790,7 +2790,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
     unit = task->unit;
     status = (u16 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
     if (!(unit->status.flags & 0x20)) {
-        motion = func_001E2E58(unit, 0x10) + 0x14;
+        motion = btlGetUnitMotionDurationFrames(unit, 0x10) + 0x14;
     } else {
         motion = status[0x15];
     }
@@ -2943,7 +2943,7 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
     }
     state = (BtlState *)btlGetRuntime();
     unit = action->unit;
-    delay = func_001E2E58(unit, 0x10) + 15;
+    delay = btlGetUnitMotionDurationFrames(unit, 0x10) + 15;
     sound = btlCreateHookedUnitSoundTask(unit, 0x10);
     btlStartTask(sound);
     spawned = btlCreateCommandSoundUpdateTask();
@@ -3284,7 +3284,7 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     spawned->startCondition.value.handle = load->handle;
     btlStartTask(spawned);
-    delayed = func_001E5FF8(unit, 0x12);
+    delayed = btlCreateUnitDefeatFadeInTask(unit, 0x12);
     delayed->ownerId = task->unit->owner;
     delayed->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     delayed->startDelay = 2;

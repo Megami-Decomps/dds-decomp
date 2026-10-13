@@ -7,6 +7,7 @@
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
 #include "evt_unit.h"
+#include "evt_unit_vertical_move.h"
 #include "evt_task.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -861,8 +862,6 @@ u32 evtCmdDestroySelectedWorldUnit(void) {
     dds3RemoveWorldObjectNode(unit);
     return 1;
 }
-
-extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     EvtUnit *unit;

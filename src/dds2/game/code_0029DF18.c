@@ -3,6 +3,7 @@
 #include "mnu_voice_resource_path_api.h"
 #include "ui_color.h"
 #include "mnu_result.h"
+#include "brs_result_counter.h"
 
 typedef struct { u32 word[6]; } BurstSprite;
 
@@ -13,7 +14,7 @@ extern BurstTable D_00428420;
 
 
 struct EffectSlotSet;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern void *memcpy(void *, const void *, u32);
 extern u32 D_004285E0[4];
 
@@ -247,7 +248,7 @@ void brsDrawLevelProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
             color[1] = packed;
             color[2] = packed;
             color[3] = packed;
-            func_00306C28(x + (work->levelAnimation[index].progressIconPosition[0] << 4),
+            effDrawSpriteWithCornerColors(x + (work->levelAnimation[index].progressIconPosition[0] << 4),
                          y + (work->levelAnimation[index].progressIconPosition[1] << 3) + 0x40,
                          z, color, 0, work->teardownResource, 0x12, depth);
         }
@@ -339,9 +340,9 @@ void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
             color[1] = packed;
             color[2] = packed;
             color[3] = packed;
-            func_00306C28(x + 0x1180, y + 0x130, z, color, 0,
+            effDrawSpriteWithCornerColors(x + 0x1180, y + 0x130, z, color, 0,
                          work->teardownResource, 0x16, depth);
-            func_00306C28(x + 0x17E0, y + 0x130, z, color, 0,
+            effDrawSpriteWithCornerColors(x + 0x17E0, y + 0x130, z, color, 0,
                          work->teardownResource, 0x17, depth);
         }
     }
@@ -526,6 +527,13 @@ typedef struct BrsResultCounter {
     s8 unk60;
     u8 pad61[7];
 } BrsResultCounter;
+
+typedef char BrsResultCounter_shared_view_size[
+    (sizeof(BrsResultCounter) == sizeof(BrsResultCounterView)) ? 1 : -1];
+typedef char BrsResultCounter_shared_phase_offset[
+    ((u32)&((BrsResultCounter *)0)->phase == 0x14) ? 1 : -1];
+typedef char BrsResultCounter_shared_remaining_offset[
+    ((u32)&((BrsResultCounter *)0)->remaining == 0x34) ? 1 : -1];
 
 typedef struct BrsResultWork {
     u8 pad00[0xAEAC];
@@ -770,7 +778,7 @@ void mnuPlayTitleVoiceFile(char *voiceArgument) {
     char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
     TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
-        func_0035B6E0(D_00428610);
+        sdfDebugPrintf(D_00428610);
         sdfSoundStopNamedPlayback();
     }
     func_0035C860(voicePath, D_00428628, D_003E09F0 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);

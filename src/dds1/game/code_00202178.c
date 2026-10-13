@@ -777,7 +777,7 @@ void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     }
 }
 
-extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern f32 btlGetActorEffectScale(BtlTask *);
 
@@ -808,7 +808,7 @@ void func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f
     user = btlGetTargetUnitForLink(command);
     target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
     extent = user->reach * user->scale;
-    span = func_001D6050(user, user->unkEC);
+    span = btlGetUnitMotionDurationFrames(user, user->unkEC);
     span /= btlGetActorEffectScale(command->task);
     ratio = (f32)command->state / span;
     if (ratio > 1.0f) {
@@ -2908,7 +2908,7 @@ void btlDestroySpecialUnitSlot(void) {
  */
 u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     u8 *subtaskSlot = (u8 *)((BtlState *)btlGetRuntime())->effect;
-    BtlRuntimeTask *task = (BtlRuntimeTask *)func_001D9038(*(void **)subtaskSlot, 12);
+    BtlRuntimeTask *task = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask(*(void **)subtaskSlot, 12);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -4593,7 +4593,7 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
     return 1;
 }
 
-extern u32 func_001DD2C0(BtlLinkedCommand *);
+extern u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
@@ -4637,7 +4637,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
             return 1;
         }
         if (count >= 2 && selector == 0 && mode == 1) {
-            if (func_001DD2C0(command)) {
+            if (btlCanUseActorCategoryFlag4(command)) {
                 btlFlagAllUnitDefeatCandidatesTask();
                 shot = effMiscRandMod(0, 3);
                 switch (shot) {

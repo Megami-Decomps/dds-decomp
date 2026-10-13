@@ -41,7 +41,7 @@ extern void itfDrawRotatedTexturedRect(u32, u32, u32, u32, u32, const u32 *, con
                                       f32, u32, u32, u32, u32);
 
 /* Draw enabled border strips and restore the temporary texture-coordinate changes. */
-void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
+void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 height,
                   const u32 *edgeExtents, u8 *edgeColorBytes,
                   u32 *textureCoordinates, u32 *sourceCornerColors, u32 kind,
                   u32 mode, u32 flip, u32 texture, u32 buffer) {
@@ -122,10 +122,10 @@ void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
 
 INCLUDE_ASM(const s32, "game/code_003065A0", func_00306970);
 
-void func_00306BF0(s32 a0, s32 a1, s32 a2, s32 a3, EffectSlotSet *a4, s32 a5, void *a6, s32 a7) {
+void effDrawSpriteWithWorkCornerColors(s32 a0, s32 a1, s32 a2, s32 a3, EffectSlotSet *a4, s32 a5, void *a6, s32 a7) {
     func_00306970(a0, a1, a2, (u32 *)((u8 *)a6 + 0x14), a3, a4, a5, a6, a7);
 }
-void func_00306C28(s32 a0, s32 a1, s32 a2, u32 *a3, s32 a4, EffectSlotSet *a5, s32 a6, s32 a7) {
+void effDrawSpriteWithCornerColors(s32 a0, s32 a1, s32 a2, u32 *a3, s32 a4, EffectSlotSet *a5, s32 a6, s32 a7) {
     func_00306970(a0, a1, a2, a3, a4, a5, a6,
                   effGetSlotWorkOrOverride(a5, a6), a7);
 }

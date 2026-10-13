@@ -36,7 +36,7 @@ extern s32 kwlnDelayedDestroyTaskCount;
 
 extern s32 kwlnActiveTaskCount;
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern u8 D_00435BF8[];
 
@@ -318,12 +318,12 @@ void kwlnPrintTaskQueueDiagnostics(void)
 
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedStartTaskHead, D_00411008);
     tmp = D_00411038;
-    func_0035B6E0(tmp, kwlnDelayedStartTaskCount);
+    sdfDebugPrintf(tmp, kwlnDelayedStartTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnActiveTaskHead, D_00411048);
-    func_0035B6E0(tmp, kwlnActiveTaskCount);
+    sdfDebugPrintf(tmp, kwlnActiveTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedDestroyTaskHead, D_00411078);
-    func_0035B6E0(tmp, kwlnDelayedDestroyTaskCount);
-    func_0035B6E0(D_00435BF8);
+    sdfDebugPrintf(tmp, kwlnDelayedDestroyTaskCount);
+    sdfDebugPrintf(D_00435BF8);
 }
 
 extern u8 D_004393C8[];
@@ -331,7 +331,7 @@ extern u8 D_00435C00[];
 
 void kwlnPrintTaskTreeRecursive(KwlnTask *task, s32 depth)
 {
-    func_0035B6E0(D_00435C00, D_004393C8, task);
+    sdfDebugPrintf(D_00435C00, D_004393C8, task);
     if (task->childList != NULL) {
         if (task->parent == NULL) {
             D_004393C8[0] = ' ';

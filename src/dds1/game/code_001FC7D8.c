@@ -272,7 +272,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     VU0_LOAD_VF(vf10, baseline);
 }
 
-extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -320,11 +320,11 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
             if (offsets != NULL) {
                 s32 yOffset = offsets[offsetIndex];
                 if (yOffset >= 0) {
-                    func_002BF438(drawX, baseY + yOffset, -0x10, colors, 0,
+                    effDrawSpriteWithCornerColors(drawX, baseY + yOffset, -0x10, colors, 0,
                                   battle->resB, digits[digitCount] + 4, 0x54);
                 }
             } else {
-                func_002BF438(drawX, y - (height >> 1), -0x10, colors, 0,
+                effDrawSpriteWithCornerColors(drawX, y - (height >> 1), -0x10, colors, 0,
                               battle->resB, digits[digitCount] + 4, 0x54);
             }
             drawX += width;

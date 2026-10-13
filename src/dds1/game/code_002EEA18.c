@@ -15,6 +15,7 @@
 #include "sdf_pac_work.h"
 #include "sdf_key_pool.h"
 #include "sdf_packet_alloc.h"
+#include "sdf_stream_state.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -402,23 +403,7 @@ void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 he
     header->unk00 = 2;
 }
 
-/* Command 34 carries a buffer address and byte count after an opaque first word. */
-typedef struct SdfStreamReadRequest {
-    u8 pad00[4];
-    s32 destinationAddress;
-    s32 byteCount;
-} SdfStreamReadRequest;
-
-typedef struct SdfStreamCfg {
-    DevState *deviceState;
-    s32 semaphore;
-    s32 readResult;
-    s32 remainingBytes;
-    s32 destinationAddress;
-    s32 transferredBytes;
-} SdfStreamCfg;
-
-extern SdfStreamCfg D_003FF340;
+extern SdfStreamState D_003FF340;
 extern u8 D_003FF4C0[];
 extern s32 D_003FF480[];
 extern DevState *sdfDevCreateCallbackState(const char *, s32 (*)(DevState *, s32, s32, s32, s32), s32);
@@ -447,7 +432,7 @@ extern s32 sdfReadTimerCount(void);
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
 s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
-    SdfStreamCfg *stream = &D_003FF340;
+    SdfStreamState *stream = &D_003FF340;
     s32 dmaId;
     s32 timer;
 
@@ -503,7 +488,7 @@ s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAdd
  * request is a scalar argument except for a read command, which carries a read-request address.
  * An unrecognized command leaves the shared reply unchanged. */
 s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
-    SdfStreamCfg *state = &D_003FF340;
+    SdfStreamState *state = &D_003FF340;
     DevState *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
@@ -559,8 +544,8 @@ extern s32 D_003BDAC4;
 extern u8 D_003FF380[];
 extern u8 sdfPfsDebugMode;
 /* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */
-void sdfStreamRpcWorker(void) {
-    SdfStreamCfg *stream = &D_003FF340;
+void sdfRunStreamIopRpcServer(void) {
+    SdfStreamState *stream = &D_003FF340;
     SceIoStat info;
     u8 queue[0x20];
     u8 server[0x50];
@@ -586,7 +571,7 @@ extern void SleepThread(void);
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
-    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)sdfStreamRpcWorker, 0x1000, 0x4C);
+    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)sdfRunStreamIopRpcServer, 0x1000, 0x4C);
 
     _StartThread(workerId, 0);
     D_003BDAC4 = GetThreadId();

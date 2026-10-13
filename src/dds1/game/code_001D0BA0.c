@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_world_camera_view.h"
 #include "snd_pad.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -316,7 +317,7 @@ extern BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *, f32 
 
 extern BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *, f32 *, f32);
 
-extern u8 *func_001D9038(u8 *, u32);
+extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 
 extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
 
@@ -598,7 +599,7 @@ extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
 
 extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern s32 btlSelectedEntryHitsElement(s32, BtlUnit *, s32);
 
@@ -783,7 +784,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
             }
         }
     }
-    helperResult = func_001D6050(action->unit, ((BtlActionAnimationRecord *)datActionAnimationRecords)[command].cameraKind);
+    helperResult = btlGetUnitMotionDurationFrames(action->unit, ((BtlActionAnimationRecord *)datActionAnimationRecords)[command].cameraKind);
     if (datCommandRecords[command].unk2E != 0) {
         counterCommand = command;
         btlBossDebugPrintf("btl:counter=%d\n", command);
@@ -2955,7 +2956,7 @@ void btlResetUnitModelProgress(BtlUnit *object) {
     }
 }
 
-s32 func_001D6050(BtlUnit *unit, s32 motionIndex) {
+s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlActorStatusRecord *status = (BtlActorStatusRecord *)
         btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
@@ -4302,7 +4303,7 @@ u32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     return 0;
 }
 
-u8 *func_001D9038(u8 *owner, u32 value) {
+u8 *btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
@@ -5948,21 +5949,6 @@ u32 btlIsRuntimeFlag2000Clear(void) {
     temp_v0 = btlGetRuntime();
     return ((*(s32 *)(temp_v0 + 0x160) >> 0xd) ^ 1U) & 1;
 }
-
-typedef struct WorldObjectSub {
-    u8 pad0[0x34];
-    s32 handle;
-} WorldObjectSub;
-
-typedef struct WorldObjectHead {
-    u8 pad0[8];
-    WorldObjectSub *sub;
-} WorldObjectHead;
-
-typedef struct WorldObj {
-    u8 pad0[0x18];
-    WorldObjectHead *head;
-} WorldObj;
 
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
 

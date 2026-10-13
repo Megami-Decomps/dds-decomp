@@ -31,7 +31,7 @@ extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0039862B[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern EffHandler D_00355734[];
 extern EffHandler D_00355738[];
 extern EffHandler D_0035573C[];
@@ -546,11 +546,11 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
 
     packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)func_0011D3E8(
+    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(
         0x8000 - (descriptor->x << 4), 0x8000 - (descriptor->y << 3),
         0xFEFFFF, 0xC00, 0x620, descriptor->fillColor, descriptor->borderColor));
     if (descriptor->previewActive != 0) {
-        sdfAppendPacket(packetList, (u32)func_0011D3E8(
+        sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(
             0x8000 - (descriptor->x << 4),
             0x8000 - ((descriptor->y - 0xC4) << 3),
             0xFEFFFF, 0x800, 0x400, 0, 0x40806020));

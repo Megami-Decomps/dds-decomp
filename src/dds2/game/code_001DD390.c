@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_world_camera_view.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -559,7 +560,7 @@ extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit 
 
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
-extern s32 func_001E2E58(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
@@ -749,7 +750,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
             }
         }
     }
-    helperResult = func_001E2E58(action->unit, ((BtlActionTableEntry *)datActionAnimationRecords)[command].kind);
+    helperResult = btlGetUnitMotionDurationFrames(action->unit, ((BtlActionTableEntry *)datActionAnimationRecords)[command].kind);
     if (datCommandRecords[command].unk2E != 0) {
         counterCommand = command;
         btlBossDebugPrintf("btl:counter=%d\n", command);
@@ -3010,7 +3011,7 @@ void btlResetUnitModelProgress(BtlUnit *unit) {
     }
 }
 
-s32 func_001E2E58(BtlUnit *unit, s32 motionIndex) {
+s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlActorStatusRecord *status = (BtlActorStatusRecord *)
         btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
@@ -4399,7 +4400,7 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     return 0;
 }
 
-BtlRuntimeTask *func_001E5FF8(BtlUnit *actor, s32 option) {
+BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -6112,21 +6113,6 @@ u32 btlIsRuntimeFlag2000Clear(void) {
     workAddress = btlGetRuntime();
     return ((((s32)((BtlState *)workAddress)->cameraCommand.flags >> 0xd)) ^ 1U) & 1;
 }
-
-typedef struct WorldObjectSub {
-    u8 pad0[0x34];
-    s32 handle;
-} WorldObjectSub;
-
-typedef struct WorldObjectHead {
-    u8 pad0[8];
-    WorldObjectSub *sub;
-} WorldObjectHead;
-
-typedef struct WorldObj {
-    u8 pad0[0x18];
-    WorldObjectHead *head;
-} WorldObj;
 
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
 

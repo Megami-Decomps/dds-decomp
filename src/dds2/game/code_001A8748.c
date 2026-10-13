@@ -237,7 +237,7 @@ s32 sndUpdateTestMsgTask(KwlnTask *task) {
     return 0;
 }
 
-extern s32 func_0035B6E0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EB0);
 
@@ -246,7 +246,7 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EC8);
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EE0);
 
 void itfPrintTestMessageCallback(void) {
-    func_0035B6E0("********* AAAA ********\n");
+    sdfDebugPrintf("********* AAAA ********\n");
 }
 
 typedef struct ItfFovPanelWork {
@@ -1435,7 +1435,7 @@ void func_001AA898(DatPartyRecord *entry, s32 index) {
     for (i = count; i < 24; i++) {
         entry->effectData[i] = 0;
     }
-    entry->unk20 = count;
+    entry->effectDataCount = count;
     entry->maxHp = datEnemyRecords[index].maxHp;
     entry->hp = datEnemyRecords[index].hp;
     entry->maxMp = datEnemyRecords[index].maxMp;
@@ -3180,7 +3180,7 @@ void btlPushSavedPartyUnitStates(void) {
                        sizeof(D_00452EA0[count].entrySlots));
                 D_00452EA0[count].status = unit->partyRecord.status & 0xCFF9;
                 count++;
-                func_0035B6E0("btl:state push[%d:%X]\n", count,
+                sdfDebugPrintf("btl:state push[%d:%X]\n", count,
                               unit->partyRecord.unitId);
             }
         }
@@ -3217,7 +3217,7 @@ void btlRestorePartySlotSnapshots(void) {
                             unit->partyRecord.hp = 0;
                             unit->status.flags |= 0x20;
                         }
-                        func_0035B6E0(D_00415340, index,
+                        sdfDebugPrintf(D_00415340, index,
                                       unit->partyRecord.unitId);
                         break;
                     }

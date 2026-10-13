@@ -354,7 +354,7 @@ s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
     return btlGetIndexListCount(actor->targetList) == 1;
 }
 
-u32 func_001DD2C0(BtlLinkedCommand *actor) {
+u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
     s32 index;
     if (btlCanUseLinkedActor(actor) == 0) {
         return 0;
@@ -599,7 +599,7 @@ extern void btlConfigureBattleCameraAction(BtlLinkedCommand *, BtlCamState *, Bt
 extern void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001E2578(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
@@ -632,7 +632,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             return;
         }
         if (task->unit->status.flags & 0x200) {
-            if ((hasFlag200 == 1 || hasFlag400 != 1) && func_001DD2C0(action) == 0) {
+            if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
                     if (effMiscRand(effSharedRandomState) & 1) {
                         func_001E0B68(action, &action->frontCamera, &action->backCamera);
@@ -669,7 +669,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 }
                 action->flags |= 0x800;
             } else {
-                if (btlCanUseActorCategoryFlag2(action) != 0 || func_001DD2C0(action) != 0 ||
+                if (btlCanUseActorCategoryFlag2(action) != 0 || btlCanUseActorCategoryFlag4(action) != 0 ||
                     btlIsLinkedFireOfSinaiCommand(action) != 0) {
                     action->stepKind = 1;
                 } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
@@ -702,8 +702,8 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else if (btlHasSingleLinkedResource(action) != 0 && btlHasLinkedEffectNodeTrigger(action) != 0) {
                 action->stepKind = 5;
                 btlBuildDistanceClampedActionCameraBlend(action, &action->frontCamera, &action->backCamera);
-            } else if (func_001DD2C0(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
-                func_001E2578(action, &action->frontCamera, &action->backCamera);
+            } else if (btlCanUseActorCategoryFlag4(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
@@ -712,7 +712,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
-                    func_001DD2C0(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
+                    btlCanUseActorCategoryFlag4(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
                     action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 4 : 5;
                 } else {
                     action->stepKind = 4;
@@ -786,7 +786,7 @@ extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
-extern void func_001E2578(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern u32 effMiscRand(void *state);
 
 /* Same chooser: DDS1 001DE048..001DE08C and 001DE218..001DE248;
@@ -855,8 +855,8 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 if (btlIsActorCategoryMarked(action)) {
                     btlInitCommandCursorForFirstActor(action, &action->camera);
                     action->stepKind = 12;
-                } else if (func_001DD2C0(action)) {
-                    func_001E2578(action, &action->frontCamera, &action->backCamera);
+                } else if (btlCanUseActorCategoryFlag4(action)) {
+                    btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 } else {
                     choice = btlChooseLinkedCameraVariant(action, &reduceDistance);
                     if (choice == 0) {
@@ -879,8 +879,8 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     }
                 }
             } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
-                if (func_001DD2C0(action)) {
-                    func_001E2578(action, &action->frontCamera, &action->backCamera);
+                if (btlCanUseActorCategoryFlag4(action)) {
+                    btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 } else if (btlMatchFirstLinkedActorFlags(action)) {
                     func_001E0398(action, &action->frontCamera, &action->backCamera);
                     action->motionParameter = 30.0f;
@@ -902,8 +902,8 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
             if (btlIsLinkedFireOfSinaiCommand(action)) {
                 btlInitTargetCursorAndFacing(action, &action->camera);
-            } else if (func_001DD2C0(action)) {
-                func_001E2578(action, &action->frontCamera, &action->backCamera);
+            } else if (btlCanUseActorCategoryFlag4(action)) {
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else {
                 choice = btlChooseLinkedCameraVariant(action, NULL);
                 if (choice != 0) {
@@ -921,8 +921,8 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 }
             }
         } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
-            if (func_001DD2C0(action)) {
-                func_001E2578(action, &action->frontCamera, &action->backCamera);
+            if (btlCanUseActorCategoryFlag4(action)) {
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else {
                 func_001E0718(action, &action->frontCamera, &action->backCamera);
             }
@@ -933,8 +933,8 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         }
     } else if (hasFlag200 == 1 && hasFlag400 != 1) {
         if (btlHasSingleLinkedResource(action)) {
-            if (func_001DD2C0(action)) {
-                func_001E2578(action, &action->frontCamera, &action->backCamera);
+            if (btlCanUseActorCategoryFlag4(action)) {
+                btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
                        ((effMiscRand(effSharedRandomState) & 1) ||
                         btlCanUseActorCategoryFlag2(action))) {
@@ -952,8 +952,8 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 action->backCamera.distance = distance + 150.0f;
                 btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
             }
-        } else if (func_001DD2C0(action)) {
-            func_001E2578(action, &action->frontCamera, &action->backCamera);
+        } else if (btlCanUseActorCategoryFlag4(action)) {
+            btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
                    ((effMiscRand(effSharedRandomState) & 1) ||
                     btlCanUseActorCategoryFlag2(action))) {
@@ -965,8 +965,8 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             action->flags |= 0x41;
         }
     } else if (hasFlag200 != 1 && hasFlag400 == 1) {
-        if (func_001DD2C0(action)) {
-            func_001E2578(action, &action->frontCamera, &action->backCamera);
+        if (btlCanUseActorCategoryFlag4(action)) {
+            btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
             action->motionParameter = 200.0f;

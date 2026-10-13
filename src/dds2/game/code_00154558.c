@@ -1,6 +1,8 @@
 #include "fld_area_work.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "kwln_task_create.h"
+#include "eff_manager_task.h"
 #include "eff_random.h"
 #include "dds3_path.h"
 extern void func_00140BC8(const char *name);
@@ -203,8 +205,6 @@ extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern s32 sdfSoundIsCommandBusy(void);
 
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
-
 extern u8 D_00436208[];
 
 extern s32 fldPendingSoundCount;
@@ -230,7 +230,7 @@ extern s32 D_003897C0[];
 extern void *dds3GetWorldSecondaryObject(void);
 
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern s32 D_003897C8[];
 
@@ -745,7 +745,7 @@ s32 fldFindSearchId(const char *name) {
     if (entry != 0) {
         return entry->key;
     }
-    func_0035B6E0("field SEARCH_ID NotFound:[%s]\n", name);
+    sdfDebugPrintf("field SEARCH_ID NotFound:[%s]\n", name);
     return -1;
 }
 
@@ -1778,12 +1778,6 @@ extern void func_00194A70(void);
 extern void effInitWorks(void);
 
 extern void effBTLFieldColorResetFlags(void);
-
-extern void effSubmitFieldBlendStateTask(void);
-
-extern void effManagerUpdateAndDispatch(void);
-
-extern void effManagerInitializeSubsystems(void);
 
 extern u8 effDefaultRandomState[];
 

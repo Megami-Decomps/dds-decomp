@@ -4,6 +4,7 @@
 #include "mnu_result.h"
 
 #include "mnu.h"
+#include "prf_profile_cap.h"
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
@@ -16,8 +17,6 @@ extern void dspSetActive(s32);
 extern s32 dspStartEntry(s32);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
-
-extern s32 prfGetCapValue(u16);
 
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 
@@ -67,7 +66,7 @@ extern DspUnitName *D_003BAA70;
 extern DspUnitName *D_003BAA8C;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
-extern s32 func_002CD240(u16, u8 **);
+extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
 void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     u8 *message;
@@ -78,7 +77,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     if (scene->selectionApplied != 0) {
         evtCopyEntryStringToActiveWindow(
             0, D_003BAA70[item->unitId].encodedText);
-        func_002CD240(profileId & 0xFFFF, &message);
+        prfResolveMantraNameOrFallback(profileId & 0xFFFF, &message);
         evtCopyEntryStringToActiveWindow(1, message);
         dspSetActive(1);
         dspStartEntry(item->unitId + 2);

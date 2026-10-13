@@ -10791,7 +10791,7 @@ bases. These names do not normalize their caller declarations or packet ABI.
 device state. Read replies perform SIF DMA, advance byte counts and either
 request another chunk or signal completion. Other recognized replies wake the
 semaphore. It ignores the passed device/callback context and returns zero.
-`sdfStreamRpcWorker` registers the synchronous stream dispatcher, loads
+`sdfRunStreamIopRpcServer` registers the synchronous stream dispatcher, loads
 `SDFIOPFL.IRX`, wakes its creator and enters the RPC loop.
 
 `sndGetTrackBalanceMinuend` and `sndGetTrackBalanceSubtrahend` name only their
@@ -10807,4 +10807,18 @@ DDS1's direct fixed-size icon renderer now shares DDS2's established
 `btlDrawButtonIconFixed64` name. DDS2 delegates to its variable-size renderer;
 neither game's signature, index truncation, corner colors or call structure
 is changed.
+
+## Fresh SDK allocator results
+
+DDS2 `func_0031F168` allocates an eight-byte named reference and a separate
+64-byte name buffer, initializes the value word, and clears the first four name
+bytes. Its SDK allocator `func_0035A828` returns a fresh live block: the underlying
+allocator unlinks a free chunk and marks it in use. The truthful
+`__attribute__((malloc))` declaration gives GCC that non-aliasing result contract.
+
+Without the attribute, four of the constructor's 19 words differ: the name-pointer
+store precedes the `memset` argument setup. With it, the store fills the call's
+delay slot exactly as retail does. The 76-byte body and all 39 existing functions
+in its unit match. The ordinary and observed compiler runs preserve the complete
+assembly and all 22 RTL dumps; no calling convention or compiler flag changes.
 
