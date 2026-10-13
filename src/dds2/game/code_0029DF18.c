@@ -39,7 +39,7 @@ INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428570);
 
 INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowEntries);
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E220);
+INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowUnitInfo);
 
 /* Fade a result row's portrait in; the row is ready once the opacity reaches 0x60. */
 void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,

@@ -127,7 +127,7 @@ s32 mnuIsMantraNodeModelFlagSetForMember(u16 nodeId, s8 member) {
 
 /* Select a menu row whose mantra profile cannot advance at the current model
  * state; if none qualifies, search party profiles against the active rank set. */
-s32 func_0028F380(MnuStatusResource *object, MantraMenuSrc *state) {
+s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state) {
     MantraNodePos *record;
     MantraNodePos *entry;
     MtrUnitMenuEntry *slot;

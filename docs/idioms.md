@@ -1814,7 +1814,7 @@ unchanged. The ordering follows from what is referenced and for how long:
 for example, testing the other operand of a predicate swaps the homes. So look
 for the real data flow (which value is reloaded, cached or recomputed) and not
 for a declaration or prototype switch. Some "mirrored" parks are caller-saved
-`$v0`/`$v1` problems instead (`func_00244658`, `btlSelectLowestRankTarget`).
+`$v0`/`$v1` problems instead (`mnuShopHasExtraOption`, `btlSelectLowestRankTarget`).
 
 Two exact cross-title examples recover the meaningful data flow rather than
 choosing register homes. The selection-trail constructors `func_001B3DC8`
