@@ -3146,7 +3146,7 @@ void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
     }
 }
 
-extern char D_003AF590[];
+extern const char D_003AF590[];
 extern s32 D_0036AC78[];
 
 /* Keep the two loaded handles and their derived slot set in the menu work array. */
@@ -3179,11 +3179,9 @@ void mnuReleaseResourceHandles(u32 *menuWork) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF570);
-
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF580);
-
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF590);
+const char D_003AF570[] __attribute__((aligned(8))) = "karma_bg.spr";
+const char D_003AF580[] __attribute__((aligned(8))) = "karma_01.spr";
+const char D_003AF590[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3D0);
 
