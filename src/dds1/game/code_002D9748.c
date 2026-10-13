@@ -93,11 +93,6 @@ extern u16 D_00398198[];
 extern SdfTex *sdfTexClone(SdfTex *);
 extern void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *, s32, f32);
 
-typedef struct SdfPacketOwner {
-    u8 pad00[0x10];
-    void (*sync)(struct SdfPacketOwner *, void *);
-    void (*draw)(struct SdfPacketOwner *, s32, void *);
-} SdfPacketOwner;
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
 
@@ -174,14 +169,14 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
 }
 
 /* Submit the four draw lists, then the trailing list to the fourth owner. */
-void sdfSubmitDrawPacketGroups(SdfPacketOwner **owners, u8 *memory) {
+void sdfSubmitDrawPacketGroups(SdfPoolNode **owners, u8 *memory) {
     SdfDrawPacketGroups *packets = (SdfDrawPacketGroups *)memory;
     s32 i;
 
     for (i = 0; i != 4; i++) {
-        owners[i]->draw(owners[i], 1, &packets->groups[i]);
+        owners[i]->prepend(owners[i], 1, &packets->groups[i].list);
     }
-    owners[3]->sync(owners[3], &packets->syncList);
+    owners[3]->append(owners[3], &packets->syncList);
 }
 
 /* Follow chunk byte extents until the requested ID or the zero-ID terminator is reached. */

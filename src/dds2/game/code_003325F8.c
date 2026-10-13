@@ -175,20 +175,15 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
     sdfAppendPacket(&ctx->syncList, (u32)&ctx->syncPacketWords[0]);
 }
 
-typedef struct SdfPacketOwner {
-    u8 pad00[0x10];
-    void (*sync)(struct SdfPacketOwner *, void *);
-    void (*draw)(struct SdfPacketOwner *, s32, void *);
-} SdfPacketOwner;
 /* Submit the four draw lists, then the trailing list to the fourth owner. */
-void sdfSubmitDrawPacketGroups(SdfPacketOwner **owners, u8 *memory) {
+void sdfSubmitDrawPacketGroups(SdfPoolNode **owners, u8 *memory) {
     SdfDrawPacketGroups *packets = (SdfDrawPacketGroups *)memory;
     s32 i;
 
     for (i = 0; i != 4; i++) {
-        owners[i]->draw(owners[i], 1, &packets->groups[i]);
+        owners[i]->prepend(owners[i], 1, &packets->groups[i].list);
     }
-    owners[3]->sync(owners[3], &packets->syncList);
+    owners[3]->append(owners[3], &packets->syncList);
 }
 
 /* Follow chunk byte extents until the requested ID or the zero-ID terminator is reached. */

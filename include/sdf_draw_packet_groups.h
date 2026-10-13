@@ -19,6 +19,8 @@ typedef struct SdfDrawPacketGroups {
     u64 syncPacketWords[2];
 } SdfDrawPacketGroups;
 
+void sdfSubmitDrawPacketGroups(SdfPoolNode **owners, u8 *memory);
+
 typedef char SdfDrawPacketGroup_size_must_be_0x60[
     (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];
 typedef char SdfDrawPacketGroup_packet_at_0x20[
