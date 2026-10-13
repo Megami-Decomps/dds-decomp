@@ -5267,7 +5267,40 @@ void func_001523F0(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F20);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001525F0);
+void func_001525F0(void) {
+    s32 mode = fldTargetGuideState.mode;
+
+    switch (mode) {
+    case 0:
+        func_00151DD8();
+        return;
+    case 1:
+        fldTickTargetGuideCounter();
+        return;
+    case 2:
+        fldUpdateTargetGuideSlowRoute();
+        return;
+    case 4:
+        fldTickTargetGuideAndNotify();
+        return;
+    case 5:
+        fldUpdateTargetGuideCycleMotion();
+        return;
+    case 6:
+        func_00152390();
+        return;
+    case 7:
+        func_001523B0();
+        return;
+    case 8:
+        func_001523D0();
+        return;
+    }
+    fldUpdateTargetGuideFastRoute();
+    /* Retire the mode after the fast-route phase; see docs/idioms.md,
+     * "Post-call guide mode cleanup" for the late-deletion trace. */
+    mode = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001526B8);
 
