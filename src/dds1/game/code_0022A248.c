@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "evt_viewer.h"
@@ -24,14 +25,13 @@ extern u32 D_003BBDF0;
 
 void evtBeginSolarOverlayFadeIn(s32 fadeDuration);
 
-s32 evtUpdateScriptTestSelection(void);
+s32 evtUpdateScriptTestSelection(KwlnTask *task);
 
 extern s32 evtSolarOverlayFadeCounter;
 
 extern s32 evtSolarOverlayFadeDuration;
 extern u32 D_003BA8EC;
 extern char D_003ACD18[]; /* "EventTest" */
-void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, void *destroy, void *data);
 void evtDestroySecondaryWorldNode(void);
 
 
@@ -174,7 +174,7 @@ extern const char D_003ACC68[];
 extern const char D_003ACC78[];
 extern const char D_003ACC88[];
 
-s32 evtUpdateScriptTestSelection(void) {
+s32 evtUpdateScriptTestSelection(KwlnTask *task) {
     char path[0x40];
     SdfListHead *list;
 
@@ -230,7 +230,7 @@ s32 evtUpdateScriptTestSelection(void) {
 
 
 /* Test-task teardown destroys the named script processes. */
-void evtDestroyTestTaskScripts(void) {
+void evtDestroyTestTaskScripts(KwlnTask *task) {
     scrDestroyAllNamedProcesses();
 }
 

@@ -15,6 +15,7 @@
 #include "sdf_primitive.h"
 
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_resource.h"
@@ -82,7 +83,7 @@ extern u32 kwlnDrawControlFlags;
 
 extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 
-extern u32 func_00104260(void);
+extern s32 func_00104260(KwlnTask *task);
 
 extern void fldStartSequenceRecord(void);
 
@@ -192,7 +193,6 @@ typedef struct KwlnResourceNode {
 
 extern s32 D_003BD3C8;
 
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
 extern s32 evtDrawResourceCountDebugTask(KwlnTask *task);
 
@@ -1473,7 +1473,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     return 0;
 }
 
-void evtGeneralHeapGraphTaskDestroy(void) {
+void evtGeneralHeapGraphTaskDestroy(KwlnTask *task) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E1F0);
@@ -1482,7 +1482,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E200);
 
 void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, NULL);
+        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, 0);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_003BD764, 0);
     }
@@ -1704,12 +1704,12 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     return 0;
 }
 
-void evtResourceCountDebugTaskDestroy(void) {
+void evtResourceCountDebugTaskDestroy(KwlnTask *task) {
 }
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, (void (*)(void))evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, NULL);
+        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, 0);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_003BD768, 0);
     }

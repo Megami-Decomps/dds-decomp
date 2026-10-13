@@ -14,6 +14,7 @@
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "dat_state.h"
 #include "itf.h"
 
@@ -347,8 +348,6 @@ typedef struct MantraFileRequest {
     MantraFileEntry *entries;
 } MantraFileRequest;
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
-                                TaskDestroy, u32);
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);

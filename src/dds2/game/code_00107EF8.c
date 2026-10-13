@@ -11,6 +11,7 @@
 #include "fr_font.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_primitive.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -209,9 +210,8 @@ extern void evtUpdateSelectionStateInterpolation(void);
 
 extern u8 D_0037F590[];
 
-extern s32 kwlnTaskCreate(const char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
 
-extern u32 func_00104150(void);
+extern s32 func_00104150(KwlnTask *task);
 
 extern s32 evtPendingEventSelection;
 
@@ -885,8 +885,8 @@ void evtSelStateDestroy(void) {
     }
 }
 
-s32 evtStartSelCreate(void) {
-    return kwlnTaskCreate(D_00411370, 0x2AF9, 0, 0, (s32)func_00104150, 0, 0);
+KwlnTask *evtStartSelCreate(void) {
+    return kwlnTaskCreate(D_00411370, 0x2AF9, 0, 0, func_00104150, 0, 0);
 }
 
 u32 evtStartSelDestroy(void) {
@@ -1509,7 +1509,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     return 0;
 }
 
-void evtGeneralHeapGraphTaskDestroy(void) {
+void evtGeneralHeapGraphTaskDestroy(KwlnTask *task) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411370);
@@ -1518,7 +1518,7 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411380);
 
 void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, NULL);
+        D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, 0);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_00438E64, 0);
     }
@@ -1739,17 +1739,17 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     return 0;
 }
 
-void evtResourceCountDebugTaskDestroy(void) {
+void evtResourceCountDebugTaskDestroy(KwlnTask *task) {
 }
 
 extern s32 evtDrawResourceCountDebugTask(KwlnTask *task);
-extern void evtResourceCountDebugTaskDestroy(void);
+extern void evtResourceCountDebugTaskDestroy(KwlnTask *task);
 extern s32 D_00438E68;
 extern char D_004113B8[]; /* "DebugTimeGrph" */
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, NULL);
+        D_00438E68 = (s32)kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, 0);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy((void *)D_00438E68, 0);
     }

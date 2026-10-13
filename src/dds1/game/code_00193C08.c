@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mem_node.h"
+#include "kwln.h"
 
 #define FR_FONT_BYTE_MASK 0xFF
 #define FR_FONT_ENTRY_ENABLED 1
@@ -215,7 +216,7 @@ void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
 }
 
 /* Release slot allocations, both glyph chains/rings, and the shared GS resource buffers. */
-void frFontReleaseAll(void) {
+void frFontReleaseAll(KwlnTask *task) {
     frFontFreeAllEntries();
     frFontReleaseGlyphChain(frFontWork.glyphSlots[0]);
     frFontReleaseGlyphChain(frFontWork.glyphSlots[1]);

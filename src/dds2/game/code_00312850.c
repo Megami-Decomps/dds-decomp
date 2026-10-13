@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "fr_font_context.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -66,9 +67,7 @@ extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 
-extern void kwlnTaskCreate();
 
-extern void kwlnTaskCreate();
 
 extern void sdfNoOpGridDrawCallback(void);
 

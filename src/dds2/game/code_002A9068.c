@@ -8,6 +8,7 @@
 #include "ui_color.h"
 #include "fr_font.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -42,11 +43,13 @@ extern void *memset(void *, s32, u32);
 
 extern s32 mnuHandleCampFieldSkillInput(KwlnTask *);
 
-extern void mnuDrawCampFieldSkillPage();
+extern s32 mnuDrawCampFieldSkillPage(KwlnTask *task);
 
-extern s32 mnuFinishStaffConfigPopup(s32);
+extern s32 mnuFinishStaffConfigPopup(KwlnTask *task);
 
-extern void kwlnTaskAddChild(s32, s32);
+extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
+
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
@@ -834,7 +837,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     sndStopReducedBgm();
 }
 
-u32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
+s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     s32 work;
 
     work = kwlnTaskGetUserValue(task);
@@ -884,15 +887,15 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampDrawTaskName);
 INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampOwnerTaskName);
 
 void mnuCreateCampTasks(void) {
-    s32 menuAddress;
-    s32 drawTask;
+    u8 *menu;
+    KwlnTask *drawTask;
 
-    menuAddress = (s32)mnuCreateStaffMenuWork();
-    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
-    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawCampFieldSkillPage, 0, menuAddress);
-    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, menuAddress);
-    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, menuAddress));
-    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));
+    menu = mnuCreateStaffMenuWork();
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, (u32)menu);
+    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawCampFieldSkillPage, 0, (u32)menu);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, (u32)menu);
+    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
+    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
     kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
     mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
 }

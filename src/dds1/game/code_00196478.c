@@ -3,6 +3,7 @@
 #include "sdf_packet_header.h"
 #include "fr_font.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -1059,26 +1060,25 @@ void itfDrawBackgroundSprite(void) {
     }
 }
 
-extern s32 kwlnTaskCreate(s32, s32, s32, s32, s32, s32, s32);
 extern s32 scrCreateProcessTaskFromResource(s32, char *, s32);
-extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
-extern void itfReleaseFontTestTaskResources(void);
+extern s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task);
+extern void itfReleaseFontTestTaskResources(KwlnTask *task);
 
 /* Start the background draw task and host-file font-test process. */
 void itfStartFontTestScene(void) {
     itfLoadBackgroundSprite();
-    kwlnTaskCreate((s32)"test_font", 0x2B06, 0, 0, (s32)itfDrawBackgroundAndGetTaskReadyMask, (s32)itfReleaseFontTestTaskResources, 0);
+    kwlnTaskCreate("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, itfReleaseFontTestTaskResources, 0);
     itfFontTestScriptTask = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
 }
 
 /* Advance/retain the test glyph and release its background texture reference. */
-void itfReleaseFontTestTaskResources(void) {
+void itfReleaseFontTestTaskResources(KwlnTask *task) {
     frFontAdvanceOrRetainFadingGlyph(D_003BB18C);
     itfReleaseBackgroundSpriteTexture();
 }
 
 /* Draw first, then report all bits set only for a task awaiting destruction. */
-u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
+s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task) {
     s32 taskState;
     u32 readyMask;
 
@@ -1578,7 +1578,7 @@ void itfDrawFixedPointProgressBar(s32 value, s32 limit, s32 highlight,
 }
 
 
-u32 func_001997E0(void) {
+s32 func_001997E0(KwlnTask *task) {
     return 0;
 }
 

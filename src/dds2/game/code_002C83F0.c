@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "file.h"
 #include "file_slot_flags.h"
@@ -63,7 +64,6 @@ s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
 
 
-s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 s32 fileManUpdate(void);
 
@@ -449,7 +449,7 @@ s32 fileManUpdate(void) {
 }
 
 /* Task callback driving asynchronous file work. */
-u32 fileMan(void) {
+s32 fileMan(KwlnTask *task) {
     fileManUpdate();
     return 0;
 }
@@ -459,7 +459,7 @@ void fileManInit(void) {
     fileManagerWork.freeSlots = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
     fileManagerWork.buffer = (u8 *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
-    kwlnTaskCreate((s32)&D_00437CC8, 0x384, 1, 0, (s32)&fileMan, 0, 0);
+    kwlnTaskCreate(D_00437CC8, 0x384, 1, 0, fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }
 

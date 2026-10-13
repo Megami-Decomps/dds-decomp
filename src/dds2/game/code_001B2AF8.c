@@ -9,6 +9,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"
@@ -130,7 +131,6 @@ extern u8 D_00436630[5];
 
 extern u8 D_00436638[5];
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern char D_00436660[];
 
@@ -1033,7 +1033,6 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
     }
     return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
-
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415840);
 
@@ -5408,7 +5407,6 @@ void btlDrawActorPanelCursor(BtlUnit *unusedUnit, BattleActorPanelWork *work, s3
                       0x53);
     }
 }
-
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004167E0);
 

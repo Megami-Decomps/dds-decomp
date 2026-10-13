@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
@@ -100,7 +101,6 @@ extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 struct SdfMsg;
 extern void sdfStoreMessageWordsAndNotifyConsumer(struct SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord);
 
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 extern u32 fldPlayerObject;
 
@@ -2111,7 +2111,7 @@ INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FCB0);
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FCC8);
 
-s32 fldProcSequence(void) {
+s32 fldProcSequence(KwlnTask *task) {
     EffBlurScatterParams blur;
     FieldPlayerSceneWork *scene = &D_0032F1A0;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
@@ -2348,7 +2348,7 @@ u8 fldTestSceneControlFlags(u32 mask) {
 
 extern s32 D_003BABF4;
 extern char D_0039FD30[], D_0039FD40[];
-extern s32 fldProcDraw(void);
+extern s32 fldProcDraw(KwlnTask *task);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
 void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
@@ -2373,8 +2373,8 @@ void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
         strcpy(scene->note, record->note);
         scene->options = record->options;
     }
-    kwlnTaskCreate((s32)D_0039FD30, 0x3F7, 0, 0, (s32)fldProcSequence, 0, 0);
-    kwlnTaskCreate((s32)D_0039FD40, 0x2B0A, 0, 0, (s32)fldProcDraw, 0, 0);
+    kwlnTaskCreate(D_0039FD30, 0x3F7, 0, 0, fldProcSequence, 0, 0);
+    kwlnTaskCreate(D_0039FD40, 0x2B0A, 0, 0, fldProcDraw, 0, 0);
     D_003BABF4 = 1;
     fldTestDrawCreate();
 }

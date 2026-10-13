@@ -4,6 +4,7 @@
 #include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
+#include "kwln.h"
 
 
 
@@ -899,7 +900,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
-s32 frFontReleaseOppositeDrawBufferGlyphs(void) {
+s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task) {
     s32 queueIndex = (kwlnGetDrawBufferIndex() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);

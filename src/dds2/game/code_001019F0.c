@@ -162,7 +162,7 @@ extern void sdfInitializeDrawPacketGroups(u8 *);
 
 /* Prepare the selected buffer's thirteen packet groups and link its draw sink.
  * The buffer index is sampled before waiting/selecting; keep that ordering. */
-s32 kwlnPrepareFrameDrawPackets(void) {
+s32 kwlnPrepareFrameDrawPackets(KwlnTask *task) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     s32 groupIndex;
     u8 *packetGroups;
@@ -229,7 +229,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Rebuild and queue the selected buffer's scene, overlay and view packets. */
-s32 kwlnBuildFrameScenePackets(void) {
+s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     s128 eye;
     s128 target;
     const u32 bufferIndex = kwlnGetDrawBufferIndex();
@@ -414,7 +414,7 @@ extern s8 D_00438A20;
 
 /* Update draw controls, submit thirteen packet groups, optionally draw the
  * vignette, then flush pools. The skip bit suppresses one packet-slot publication. */
-s32 kwlnRenderFrame(void) {
+s32 kwlnRenderFrame(KwlnTask *task) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     u8 *groupHeads;
     u8 *packetGroups;
@@ -510,13 +510,13 @@ s32 kwlnRenderFrame(void) {
 }
 
 /* Invoke the active world's first callback column; this task step returns zero. */
-u32 dds3RunWorldPrimaryCallbacks(void) {
+s32 dds3RunWorldPrimaryCallbacks(KwlnTask *task) {
     dds3InvokeWorldCallbackFirst(dds3ActiveWorld);
     return 0;
 }
 
 /* Invoke the active world's second callback column; this task step returns zero. */
-u32 dds3RunWorldSecondaryCallbacks(void) {
+s32 dds3RunWorldSecondaryCallbacks(KwlnTask *task) {
     dds3InvokeWorldCallbackSecond(dds3ActiveWorld);
     return 0;
 }

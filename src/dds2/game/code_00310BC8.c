@@ -6,6 +6,7 @@
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -66,7 +67,6 @@ extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void sdfNoOpGridDrawCallback(void);
 

@@ -19,6 +19,7 @@
 #include "evt_world.h"
 #include "sdf.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
@@ -3194,7 +3195,7 @@ void *evtCreateBattleStageTestCamera(void) {
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */
-void *evtBattleStageTestScreen(void) {
+s32 evtBattleStageTestScreen(KwlnTask *task) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(EVT_STAGE_SCREEN_WORK_BYTES);
 
     sdfInitPacketList(packetList);
@@ -3206,7 +3207,7 @@ void *evtBattleStageTestScreen(void) {
     D_00380708.append(&D_00380708, packetList);
     if (D_0037F510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_00437CB8, D_00437CBC);
-        return evtCreateBattleStageTestCamera;
+        return (s32)evtCreateBattleStageTestCamera;
     }
     if (D_0037F510[0x25] & MNU_PAD_TRIGGER_BIT) {
         D_00437CB8++;
@@ -3223,7 +3224,7 @@ void *evtBattleStageTestScreen(void) {
     return 0;
 }
 
-void evtDestroyBattleStageTestWorldNode(void) {
+void evtDestroyBattleStageTestWorldNode(KwlnTask *task) {
     evtDestroySecondaryWorldNode();
 }
 
