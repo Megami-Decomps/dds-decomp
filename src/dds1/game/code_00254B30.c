@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "dsp_name.h"
 #include "common.h"
 #include "sdf_trig.h"
@@ -24,8 +25,6 @@ struct EffectSlotSet;
 #define MNU_DISPLAY_TEXT_FLAGS 0x80000000
 #define MNU_SELECTED_ROW_SPRITE 12
 #define MNU_UNSELECTED_ROW_SPRITE 14
-
-extern void dspStartEntry(s32 signal);
 
 extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
 
@@ -256,7 +255,6 @@ extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(u16);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
-extern void dspStartEntry(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */

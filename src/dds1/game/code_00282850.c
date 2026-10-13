@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "sdf_packet_list.h"
 #include "itf_draw_grid.h"
@@ -1892,8 +1893,6 @@ u16 mnuGetPartyEntryMenuValue(DatPartyRecord *entry) {
 }
 
 extern u16 D_0037CE00[];
-extern void dspStartEntry(s32);
-
 /* Match an item ID, select its mode-dependent SE ID, and start it; id changes roles. */
 s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
     u16 *soundRow = D_0037CE00;

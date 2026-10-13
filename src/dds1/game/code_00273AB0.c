@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
 #include "mnu.h"
@@ -374,7 +375,6 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
 
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void dspStartEntry(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA84;

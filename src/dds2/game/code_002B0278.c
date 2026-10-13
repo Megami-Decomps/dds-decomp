@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "sdf_chip.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -94,7 +95,6 @@ extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *
 extern char D_00437BF8[];
 
 
-extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
