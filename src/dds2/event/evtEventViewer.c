@@ -1089,7 +1089,7 @@ extern s32 func_0035B6E0(const char *, ...);
 
 /* Applies duration-scaled alpha to the selected effect for supported track
  * kinds. The key's duration is used directly, without validation here. */
-void func_00247DE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s32 unused3, EvtRuntime *viewer) {
+void evtEventViewerApplyDurationScaledEffectAlpha(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s32 unused3, EvtRuntime *viewer) {
     s32 elapsed;
     struct EffNode *node;
     s32 alpha;
@@ -1442,7 +1442,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
                 (difference > 0 && time >= child->frame &&
                  time < child->frame + difference)) {
                 evtEventViewerApplyTimelineKey(group, child, time, difference, viewer);
-                func_00247DE0(group, child, time, difference, viewer);
+                evtEventViewerApplyDurationScaledEffectAlpha(group, child, time, difference, viewer);
             } else {
                 evtEventViewerFadeEffectSlot(group, child, time, difference, viewer);
             }
