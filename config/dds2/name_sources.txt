@@ -7887,5 +7887,7 @@
 0x002A3EF0	mnuDrawMovieMenuSpriteSlot1F	inferred	mnuDrawSprite uses table slot 0x1F with caller-supplied alpha; DDS1 counterpart uses slot 0x16
 0x002A44C0	mnuDrawMovieMenuSpritePickList	inferred	Draws and advances the sprite entries in the movie-menu pick list, removing entries after their fade sequence. [LiteH menu naming batch 10]
 0x002A5040	mnuDrawMovieMenuSlideBar	inferred	Draws the movie-menu slide bar using the active fade amount or primary/secondary slide position. [LiteH menu naming batch 10]
+0x002A50E8	mnuSetMovieWorkFlag	inferred	Writes the selected byte in the title movie work block; callers set or clear flag bytes 0 and 1 during input and phase drawing.
+0x002A50F8	mnuResetMovieWorkState	inferred	Clears movie work flag bytes 0 and 1 plus the words at offsets 4 and 8; called when title movie work is reset/stopped.
 0x002A55B8	mnuDrawMovieChoiceTransition	inferred	Draws the title-menu choice sprites and their selection highlight with frame-driven fades. [LiteH menu naming batch 10]
 0x002A5A78	mnuDrawMovieMenuListItem	inferred	Draws a row's base sprite and selection highlight; DDS1 twin 0x0026D480. [LiteH menu naming batch 10]
