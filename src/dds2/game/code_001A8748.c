@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "evt_solar.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
@@ -2216,7 +2217,6 @@ s32 btlFlagToElementIndex(s32 flag) {
 
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 s32 btlCheckSpecialAbility(DatPartyRecord *record, s32 ability) {
     if (datUnitHasSkill(record, ability) == 0) {

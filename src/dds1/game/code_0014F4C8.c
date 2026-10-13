@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "evt_solar.h"
 #include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "eff_manager_task.h"
@@ -57,7 +58,6 @@ s32 fldCommandClearSelectedFlag(void) {
 }
 
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 fldMirroredSolarThresholds[];
 
