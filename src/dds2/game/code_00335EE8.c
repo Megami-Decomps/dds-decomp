@@ -255,7 +255,8 @@ INCLUDE_ASM(const s32, "game/code_00335EE8", func_003364B8);
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", sdfVuLoadRotationMatrixY);
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_003365B8);
+/* Build and load the Z-axis rotation matrix in primary VU0 registers. */
+INCLUDE_ASM(const s32, "game/code_00335EE8", sdfVuLoadRotationMatrixZ);
 
 extern f32 func_00353040(f32 angle);
 extern f32 func_00353140(f32 angle);

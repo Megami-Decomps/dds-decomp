@@ -24,6 +24,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "kwln_fade.h"
+#include "sdf_vu_matrix.h"
 
 
 extern FldFileResource *D_00438EC0;
@@ -670,7 +671,6 @@ extern u8 D_00384790[];
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 
 
-extern void func_003365B8(f32);
 
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 
@@ -2612,7 +2612,7 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     header = (DmaPacketHeader *)sdfAllocPacketAligned(0x20);
     sdfConsInitDmaPacketHeader(header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
     sdfAppendReferencePacket(command, (u32)header);
-    func_003365B8(modelData->scale);
+    sdfVuLoadRotationMatrixZ(modelData->scale);
     VU0_STORE_MATRIX(mat);
     packet = (u8 *)sdfAllocPacketAligned(0x38);
     sdfInitGeometryDmaPacket(packet, mat);
