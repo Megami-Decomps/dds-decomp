@@ -14,6 +14,7 @@
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "eff_object.h"
+#include "eff_object_dispatch_api.h"
 #include "eff_event.h"
 #include "eff_node_descriptor.h"
 #include "scr.h"
@@ -146,9 +147,6 @@ extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 
 extern char D_00421AF8[];
-
-extern void effObjDispatchReadyState(void *arg0);
-
 
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 
@@ -1620,7 +1618,7 @@ u32 func_002409E0(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchReadyState(obj);
+        effObjDispatchReadyState((EffWorldNode *)obj);
     }
     return 1;
 }
@@ -1632,7 +1630,7 @@ u32 func_00240A20(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchReadyState(obj);
+        effObjDispatchReadyState((EffWorldNode *)obj);
     }
     return 1;
 }
