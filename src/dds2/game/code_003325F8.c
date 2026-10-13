@@ -16,6 +16,7 @@
 #include "sdf_draw.h"
 #include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
+#include "sdf_draw_packet_groups.h"
 
 extern u32 sdfForcedAssetTextureMode;
 
@@ -151,31 +152,6 @@ void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     }
 }
 
-/* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
- * Each blend builder fills the 0x40-byte packet area after the list head. */
-typedef struct SdfDrawPacketGroup {
-    SdfListHead list;
-    union {
-        SdfGsBlendPacket blend;
-        SdfDmaTagHeader dma;
-    } packet;
-} SdfDrawPacketGroup;
-
-typedef struct SdfDrawPacketGroups {
-    SdfDrawPacketGroup groups[4];
-    SdfListHead syncList;
-    u64 unk1A0;
-    u64 unk1A8;
-} SdfDrawPacketGroups;
-
-typedef char SdfDrawPacketGroup_size_must_be_0x60[
-    (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];
-typedef char SdfDrawPacketGroup_packet_at_0x20[
-    ((u32)&((SdfDrawPacketGroup *)0)->packet == 0x20) ? 1 : -1];
-typedef char SdfDrawPacketGroups_size_must_be_0x1B0[
-    (sizeof(SdfDrawPacketGroups) == 0x1B0) ? 1 : -1];
-
-
 /* Initialize one draw-group record in the kernel's byte-buffer storage. */
 void sdfInitializeDrawPacketGroups(u8 *memory) {
     SdfDrawPacketGroups *ctx = (SdfDrawPacketGroups *)memory;
@@ -194,9 +170,9 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);
-    ctx->unk1A0 = 0;
-    ctx->unk1A8 = 0x13000000;
-    sdfAppendPacket(&ctx->syncList, (u32)&ctx->unk1A0);
+    ctx->syncPacketWords[0] = 0;
+    ctx->syncPacketWords[1] = 0x13000000;
+    sdfAppendPacket(&ctx->syncList, (u32)&ctx->syncPacketWords[0]);
 }
 
 typedef struct SdfPacketOwner {
