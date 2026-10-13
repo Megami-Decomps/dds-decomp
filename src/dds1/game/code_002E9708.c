@@ -142,7 +142,7 @@ void func_002E9730(void) {
     func_002E87A8(400, 0, 0, 0);
 }
 
-void func_002E9758(s32 channel) {
+void sndTransitionBgm(s32 channel) {
     func_002E87A8(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 

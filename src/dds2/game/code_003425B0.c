@@ -154,7 +154,7 @@ void func_003425D8(void) {
     func_00341650(400, 0, 0, 0);
 }
 
-void func_00342600(s32 channel) {
+void sndTransitionBgm(s32 channel) {
     func_00341650(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 

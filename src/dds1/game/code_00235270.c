@@ -48,7 +48,7 @@ extern void fldSelectDisplayBuffer(s32 id);
 extern void fldSubmitTexturedOverlaySprite(void);
 extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
-extern void func_002E9758(s32 sequence);
+extern void sndTransitionBgm(s32 sequence);
 extern void func_003003F0(char *fmt, ...);
 extern void sndReleaseTrackHandle(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
@@ -5348,7 +5348,7 @@ void evtTransitionBgm(s32 id, s32 fade) {
         sound = evtEncodeBgmSoundCode(id, fade);
     }
     func_003003F0("Event BGM trans :%08X\n", sound);
-    func_002E9758(sound);
+    sndTransitionBgm(sound);
 }
 
 s32 evtFadeInBgm(s32 id, s32 fade) {
