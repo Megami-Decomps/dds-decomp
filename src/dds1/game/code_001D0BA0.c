@@ -5082,7 +5082,7 @@ void btlUpdateActorModelColorAndLinks(void) {
             }
             func_001F2818(unit->resourceLink);
             btlUpdateUnitCommandEffect(unit->link);
-            func_001FC998(unit);
+            btlDrawUnitStatusShadowDisc(unit);
         }
     }
 }

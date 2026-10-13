@@ -91,7 +91,7 @@ void func_001FC990(void) {
 
 /* Actor-status providers select one complete 0x270-byte model record. */
 /* Use a map anchor for X/Z while retaining the actor's own height. */
-void func_001FC998(BtlUnit *unit) {
+void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
     f32 position[4] __attribute__((aligned(16)));
     f32 ownPosition[4] __attribute__((aligned(16)));
     f32 radius;
