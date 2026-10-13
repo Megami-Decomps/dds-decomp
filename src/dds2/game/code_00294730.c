@@ -352,7 +352,7 @@ extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
 
 /* Draw the selected row's icons and quantity at full opacity. */
-void func_00296298(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 option) {
+void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
@@ -385,7 +385,7 @@ void func_00296298(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 opti
 }
 
 /* Fade the selected row's icons and quantity while preserving its row snapshot. */
-void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
+void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
                    u32 alpha, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
