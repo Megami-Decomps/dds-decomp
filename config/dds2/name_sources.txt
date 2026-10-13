@@ -6129,6 +6129,7 @@
 0x0031DF68	itfClaimFreeCompactSlot	inferred	Scans sixteen-byte entries for a clear active bit and sets that bit before returning the entry.
 0x0031DFB8	itfClaimCompactSlotWithPayload	inferred	Claims a compact pool slot and initializes both payloads when available. [names_reviewed17.tsv]
 0x0031E008	itfReleaseCompactSlot	inferred	Clears the in-use bit for a compact pool slot.
+0x0031E020	itfUpdateAndDrawSpriteHitEffects	inferred	Advances the age of active compact slots unless flag bit 0 is set, draws each as a growing/fading indexed sprite, and releases slots at age 11; used by the shooting-work update and pause draw paths.
 0x0031E198	itfApplyWorkTintAndClearBuffers	inferred	confidence=high; src/dds2/game/code_0031D890.c:func_0031E198; Applies the tint stored in the work record and clears its eight embedded buffers. [names_qp9.tsv]
 0x0031E240	itfClearTintAndWorkBuffers	inferred	confidence=high; src/dds2/game/code_0031D890.c:func_0031E240; Clears the interface fade tint and the same eight embedded work buffers. [names_qp9.tsv]
 0x0031E2E8	itfDrawFullExtentWorkPanels	inferred	readability/matching review (QP16)

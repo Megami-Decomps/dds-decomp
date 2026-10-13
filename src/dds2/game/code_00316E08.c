@@ -836,7 +836,7 @@ extern void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, 
 extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
 extern void func_0031CBC8(MnuSectionModelWork *work, s32 paused);
 extern void func_0031DA38(struct WideSlotPool *work, u32 flags);
-extern void func_0031E020(struct CompactSlotPool *work, u32 flags);
+extern void itfUpdateAndDrawSpriteHitEffects(struct CompactSlotPool *work, u32 flags);
 extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
 extern void mnuSetNodeScaleVector(u8 *node, f32 value);
 extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
@@ -951,12 +951,12 @@ s32 func_00318C00(MnuShootingWork *work) {
         mnuUpdateEffectQueues(work->effectWork, 0);
         func_0031CBC8(work->modelWork, 0);
         func_0031DA38(work->spriteWork, 0);
-        func_0031E020(work->tintWork, 0);
+        itfUpdateAndDrawSpriteHitEffects(work->tintWork, 0);
     } else {
         mnuUpdateEffectQueues(work->effectWork, 1);
         func_0031CBC8(work->modelWork, 1);
         func_0031DA38(work->spriteWork, 1);
-        func_0031E020(work->tintWork, 1);
+        itfUpdateAndDrawSpriteHitEffects(work->tintWork, 1);
     }
 
     if (D_00438928 != NULL) {
