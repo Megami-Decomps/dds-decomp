@@ -209,7 +209,7 @@ extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s6
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
 void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 
-s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
+s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 
 s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
@@ -583,7 +583,7 @@ void mdlDrawMarkParamsPanel(SdfListHead *packetList, s32 x, s32 y, s32 depth, Ef
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, y + 0x240, depth, 0, "BLEND:%d", params->blend));
     for (colorIndex = 0; colorIndex != MDL_MARK_COLOR_COUNT; colorIndex++) {
         packedColor = params->colors[colorIndex];
-        sdfAppendPacket(packetList, (u32)func_0011F250(x + 0x480, colorY, depth, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040));
+        sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x480, colorY, depth, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040));
         for (channelIndex = 0; channelIndex != MDL_COLOR_CHANNEL_COUNT; channelIndex++) {
             sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(labelX, colorY, depth, D_003C8760[channelIndex], D_003C8768[channelIndex]));
             sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x + 0x240, colorY, depth, 0, D_00436FF0, packedColor & MDL_COLOR_BYTE_MASK));
@@ -1024,7 +1024,7 @@ void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
 }
 
 s32 mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
-    return func_0011F250(x, y, depth, width, height, 0x30000000, 0x60404040);
+    return sdfCreateBorderedRectanglePacket(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
 void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
@@ -3002,7 +3002,7 @@ s32 mdlUpdateLightEditorTask(KwlnTask *task) {
         state->blinkTick = 0;
     }
     sdfAppendPacket(state->packetList,
-                    func_0011F250(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
+                    sdfCreateBorderedRectanglePacket(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
                                   0x60000000, 0x40806020));
     label = D_003C8A90;
     for (labelIndex = 0; labelIndex != 4; labelIndex++, label++) {
@@ -3278,7 +3278,7 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
     }
 
     sdfAppendPacket(D_00453660.packetList,
-                    func_0011F250(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
+                    sdfCreateBorderedRectanglePacket(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
                                   0x60000000, 0x40806020));
     label = D_003C8B68;
     for (i = 0; i != 4; i++, label++) {

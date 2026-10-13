@@ -261,7 +261,7 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
 extern SdfPoolNode kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDrawMarkerBoxAtPoint(f32 *position) {
@@ -279,7 +279,7 @@ void effDrawMarkerBoxAtPoint(f32 *position) {
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, (u32)(func_0011F250((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
+    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
@@ -299,7 +299,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
     pixel[0] = x;
     pixel[1] = y;
-    sdfAppendPacket(list, (u32)(func_0011F250((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
+    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
@@ -569,14 +569,14 @@ void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
 }
 
 
-extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 
 /* Submit a filled rectangle and its line-strip border. Keep native width/height
  * scaling and the distinct shift/multiply forms used by the other draw paths. */
 void effSubmitSizedDrawPacket(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)(func_0011F250(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
+    sdfAppendPacket(list, (u32)(sdfCreateBorderedRectanglePacket(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 

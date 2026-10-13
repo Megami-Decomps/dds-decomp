@@ -26,7 +26,7 @@ void scrSetIntegerReturnValue(s32 value);
 extern char D_003ACAE0[];
 
 extern s32 fileMenuTaskExists(void);
-extern s32 func_0011E278(void);
+extern s32 fldIsUpdateInhibited(void);
 extern void fldSelectDisplayBuffer(u32 row);
 extern void fldSetGsAlphaBlendEquation(s32 arg);
 extern void fldSubmitFrameQuad(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
@@ -357,7 +357,7 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
     f32 f;
 
     f = 0.0f;
-    if ((fileMenuTaskExists() != 0) || (func_0011E278() != 0)) {
+    if ((fileMenuTaskExists() != 0) || (fldIsUpdateInhibited() != 0)) {
         return 0;
     }
     overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);

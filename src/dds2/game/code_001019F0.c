@@ -393,7 +393,7 @@ extern void kwlnDrawBackgroundFadeBands(void);
 extern void kwlnFadeUpdate(void);
 extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
-extern u32 func_001200E0(void);
+extern u32 fldIsUpdateInhibited(void);
 extern void func_00343468(s32);
 extern void sdfQueueFramePackets(SdfListHead *, SdfPacketChain *);
 extern u8 D_00380788[];
@@ -437,7 +437,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
         groupHeads += KWLN_FRAME_GROUP_HEAD_BYTES / sizeof(*groupHeads);
         packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
-    if (kwlnDrawOverlayEnabled != 0 && func_001200E0() == 0) {
+    if (kwlnDrawOverlayEnabled != 0 && fldIsUpdateInhibited() == 0) {
         packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
         sdfInitPacketList(packetList);
         sdfAppendDmaPrimary(packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
