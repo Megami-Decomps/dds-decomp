@@ -45,7 +45,7 @@ extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 
 extern void func_0019F770(UiSprite *sprite);
 
-extern s32 func_0019EA88(ItfMesBlk40 *seq);
+extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *seq);
 
 extern void itfMesSetRowItemFlag(FrFontGlyph *sequence, s32 index, s32 count, s32 selected);
 
@@ -421,7 +421,7 @@ s32 sndSeqSelectPoll(ItfMesState *panel) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         return 1;
     }
-    if (sel->optionCount > 0 && (index = func_0019EA88(sel)) >= 0) {
+    if (sel->optionCount > 0 && (index = itfMesFindPressedOptionRank(sel)) >= 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         if (index != sel->selectedIndex) {
             itfMesSetRowItemFlag(sel->glyphChain, sel->selectedIndex, sel->rowCount, 0);
@@ -457,7 +457,7 @@ void sndStepSequenceIndex(ItfMesBlk40 *obj, s32 dir) {
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);
 }
 
-s32 func_0019EA88(ItfMesBlk40 *selection) {
+s32 itfMesFindPressedOptionRank(ItfMesBlk40 *selection) {
     s32 i;
 
     for (i = 0; i < selection->optionCount; i++) {

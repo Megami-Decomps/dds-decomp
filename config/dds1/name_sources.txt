@@ -2704,6 +2704,7 @@
 0x0019E7B0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]
 0x0019E888	sndSeqSelectPoll	inferred	pad prev/next step the sequence select, confirm plays sound; uses sndStepSequenceIndex
 0x0019E9D8	sndStepSequenceIndex	inferred	Steps a sequence cursor up/down with wraparound against a maximum, programs it through func_0019D958 twice, stores it back and resets sequence volume/pan.
+0x0019EA88	itfMesFindPressedOptionRank	inferred	Checks option buttons and returns the selectable row rank for the pressed option, or -1 when no registered choice is eligible.
 0x0019ED78	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
 0x0019F4C8	itfDrawSoundSelectorFadeLayers	inferred	U3
 0x0019F660	sndVisitQueuedResources	inferred	snd sound tasks and playback in game/code_0019DB88.c
