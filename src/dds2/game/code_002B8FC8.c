@@ -508,7 +508,7 @@ typedef struct SkillInfo {
     u16 codes[14];
 } SkillInfo;
 
-extern void func_00315388(u16, SkillInfo *);
+extern void prfBuildRawSkillList(u16, SkillInfo *);
 
 u32 *mnuBuildOwnedSkillBits(void);
 

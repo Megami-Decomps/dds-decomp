@@ -4152,7 +4152,7 @@ width rounding shift (`dsra32` versus retail `sra`).
 
 ## Mantra node tables and profile requirements
 
-DDS2 `func_00315950` and `mnuIsResourceCategoryAvailable` use the canonical
+DDS2 `prfCheckAdjacentMantraRequirements` and `mnuIsResourceCategoryAvailable` use the canonical
 `MantraNodePos` from `mnu_mantra.h`. Their whole-word tag reads belong to
 `selector.packed`, and their six links belong to `neighbors`; a separate
 header/adjacency view is unnecessary. This owner fold leaves
@@ -5045,10 +5045,10 @@ cases reproduce the complete 144-byte body.
 
 ## Mantra label words and encoded style rows
 
-DDS1 `mnuDrawMantraCostCounter` and `func_00255368` retain the incoming
+DDS1 `mnuDrawMantraCostCounter` and `mnuDrawMantraCostPlaceholder` retain the incoming
 `s32 sceneId` and narrow `(u16)sceneId` at each ID consumer. Replacing those
 uses with a normalized local changes the raw-word and masked-ID value roles.
-The getter `prfGetParamWord7b4` returns its stored byte as a promoted word;
+The getter `prfGetMantraDisplayParameter` returns its stored byte as a promoted word;
 both callers explicitly narrow it to `u8`. Keep its definition and declarations
 coherent.
 
@@ -10549,4 +10549,35 @@ This is the documented post-call exception for a genuinely used local
 phase/mode value, not permission to construct a dummy reset variable or reset
 an incoming formal in a one-call wrapper. The whole-unit gate was
 175 match, 0 differ, with no context/data/unresolved-symbol findings.
+
+
+## Party profile flag pairs and mantra display parameters
+
+`ptyTestPrimaryProfileFlag`, `ptySetSecondaryProfileFlag`, and
+`ptyTestSecondaryProfileFlag` name the lower and upper bits selected by
+`prfDecodeFlagPair`, without assigning unproven mastery or ownership meanings.
+Keep each game's existing shift expressions, signedness, and declaration order.
+`ptySetMappedGlobalFlagForSlot` is a separate operation: it searches the unit's
+sixteen `ScriptFlagSlot` rows, calls `mdlFlagSet` for a matching nonzero slot ID,
+and returns the mapped global flag ID or zero. It does not update mantra bits.
+
+`prfGetMantraDisplayParameter` reads metadata byte `value04` in both games.
+DDS1 returns a promoted `s32`; its two cost-label renderers narrow it to `u8`
+and choose a styled-label row. DDS2 returns `u8`; its digit-row renderer prints
+the value and repeats a marker that many times. The common name states its
+display use without pretending these consumers implement the same UI.
+The metadata fields and both return types remain unchanged.
+
+DDS2's `ptySelectProfileStage`, `ptyRebuildProfileSkills`, `prfBuildRawSkillList`,
+and `prfReqCheckWithFallback` align with existing DDS1 names by observable role,
+not by asserting identical game-specific eligibility tests or branch forms.
+`prfCheckAdjacentMantraRequirements` preserves the exact `mode == 0x40`
+all-relevant-neighbors case and the other modes' any-eligible-neighbor case.
+`prfIsMantraCategoryEnabled` uses the same enable array as the existing mantra
+node-category availability predicate.
+
+`prfCheckRequirementRules` selects the evaluator without mismatch-count output.
+This naming-only closure deliberately retains DDS1's existing `void`
+definition, its caller extern types, and DDS2's distinct typed return/operands;
+it is not a return-type or ABI restructuring.
 

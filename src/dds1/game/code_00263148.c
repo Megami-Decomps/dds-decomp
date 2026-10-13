@@ -19,7 +19,7 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 
 extern s32 prfGetCapValue(u16);
 
-extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 
 extern void ptyApplyProfile(DatPartyRecord *, u16);
 
@@ -37,7 +37,7 @@ void kwlnItemApplySelection(BrsSkillPackageWork *scene) {
     DatProfileRecord *data = ptyGetCurrentProfileRecord(item);
     s8 selection = item->profileId;
     if (selection != 0 && prfGetCapValue((u16)selection) == data->value &&
-        ptyTestProfileFlag0(item, item->profileId) == 0) {
+        ptyTestPrimaryProfileFlag(item, item->profileId) == 0) {
         ptyApplyProfile(item, item->profileId);
         scene->selectionApplied = 1;
         if (mdlFlagTest(0x910) == 0) {

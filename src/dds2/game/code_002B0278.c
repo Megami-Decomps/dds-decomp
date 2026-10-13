@@ -1886,7 +1886,7 @@ typedef struct SkillInfo {
     u16 codes[14];
 } SkillInfo;
 
-extern void func_00315388(u16, SkillInfo *);
+extern void prfBuildRawSkillList(u16, SkillInfo *);
 
 u32 *mnuBuildOwnedSkillBits(void) {
     SkillInfo info;
@@ -1895,7 +1895,7 @@ u32 *mnuBuildOwnedSkillBits(void) {
     u32 j;
     memset(bits, 0, 0x58);
     for (i = 0; i < 0xb0; i++) {
-        func_00315388(i, &info);
+        prfBuildRawSkillList(i, &info);
         for (j = 0; j < info.count; j++) {
             u16 id = info.codes[j];
             if (id != 0) {

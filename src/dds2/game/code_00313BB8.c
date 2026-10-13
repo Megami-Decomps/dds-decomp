@@ -93,7 +93,7 @@ extern Entry24W D_00404AA4[];
 extern FrFontTextBank frFontColoredGlyphResource;
 
 
-extern s32 func_00314990(DatPartyRecord *, u16);
+extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 
 /* The first four pairs in each 0xA0-byte row select script/value initialization
  * for the active mantra model flag state. */
@@ -113,7 +113,7 @@ typedef char PtyPresetRecordProfileOffsetCheck[((u32)&((PtyPresetRecord *)0)->pr
 extern PtyPresetRecord D_004052A8[];
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
-extern void func_00314A80(DatPartyRecord *, u16);
+extern void ptySetSecondaryProfileFlag(DatPartyRecord *, u16);
 extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *, u32);
 
 extern u16 D_004052E8[][80];
@@ -198,7 +198,7 @@ extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
 
 
-void func_003140C8(s32 useCurrentProfile, DatPartyRecord *unit);
+void ptyRebuildProfileSkills(s32 useCurrentProfile, DatPartyRecord *unit);
 
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
@@ -219,7 +219,8 @@ void ptyClearProfileRecords(void) {
     memset(datGameState->profileBanks, 0, sizeof(datGameState->profileBanks));
 }
 
-void func_00313C70(DatPartyRecord *work) {
+/* Select the highest eligible preset script stage and initialize its profile. */
+void ptySelectProfileStage(DatPartyRecord *work) {
     s32 i;
     s32 selected = 0;
     u16 preset;
@@ -238,7 +239,7 @@ void func_00313C70(DatPartyRecord *work) {
     amount = D_004052A8[preset].scriptChoices[selected].initialValue;
     if (scriptId != 0) {
         scrSelectScriptEntryAndInitialize(work, scriptId);
-        func_00314A80(work, scriptId);
+        ptySetSecondaryProfileFlag(work, scriptId);
         ptyAddProfileRecordValueClamped(work, amount);
     }
 }
@@ -264,7 +265,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
     DatPartyRecord *partyUnit;
 
     if (useCurrentProfile == 0) {
-        func_00313C70(unit);
+        ptySelectProfileStage(unit);
     }
     bestScore = 0;
     selectedGroup = 0;
@@ -277,7 +278,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
                 partyUnit = &datGameState->party[i];
                 occupied = partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT;
                 if (occupied != 0 && profileId != 0) {
-                    if (func_00314990(partyUnit, profileId) != 0) {
+                    if (ptyTestPrimaryProfileFlag(partyUnit, profileId) != 0) {
                         available = 0;
                     }
                 }
@@ -296,7 +297,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
         if (profileId != 0) {
             selectedProfileId = profileId;
             func_00314868(unit, selectedProfileId);
-            func_00314A80(unit, selectedProfileId);
+            ptySetSecondaryProfileFlag(unit, selectedProfileId);
         }
     }
     if (useCurrentProfile == 0) {
@@ -340,11 +341,12 @@ void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
 }
 
 void ptyRecomputeMaxHpMp(DatPartyRecord *);
-s32 func_00315388(u16, PrfSkillList *);
+s32 prfBuildRawSkillList(u16, PrfSkillList *);
 void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
 void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
 
-void func_003140C8(s32 mode, DatPartyRecord *unit) {
+/* Rebuild preset skills/vitals in mode0, or current-profile skill flags in mode1. */
+void ptyRebuildProfileSkills(s32 mode, DatPartyRecord *unit) {
     PrfSkillList list;
     s32 profile;
     u16 profileId;
@@ -362,10 +364,10 @@ void func_003140C8(s32 mode, DatPartyRecord *unit) {
     case 1:
         profile = ptyGetCurrentProfileId(unit);
         profileId = profile;
-        if (profile != 0 && func_00314990(unit, profileId) == 0) {
+        if (profile != 0 && ptyTestPrimaryProfileFlag(unit, profileId) == 0) {
             func_00314868(unit, profileId);
             memset(&list, 0, sizeof(list));
-            func_00315388(profileId, &list);
+            prfBuildRawSkillList(profileId, &list);
             if (list.count != 0) {
                 scrClearAllSecondaryScriptFlags(unit);
                 for (i = 0; i < list.count; i++) {
@@ -388,7 +390,7 @@ void ptyRebuildAllProfiles(void) {
             s32 candidateUnitId;
             for (candidateUnitId = 0; candidateUnitId < PTY_PROFILE_UNIT_ID_COUNT; candidateUnitId++) {
                 if (unit->unitId == candidateUnitId) {
-                    func_003140C8(0, unit);
+                    ptyRebuildProfileSkills(0, unit);
                 }
             }
         }
@@ -543,7 +545,7 @@ void prfDecodeFlagPair(u32 v, u32 *a, u32 *b) {
 
 /* Search the selected 16-entry table for an exact nonzero byte ID.
  * Set and return its global flag ID; return zero if no entry matches. */
-u32 sdfSetFlagBySlotId(DatPartyRecord *unit, u32 slotId) {
+u32 ptySetMappedGlobalFlagForSlot(DatPartyRecord *unit, u32 slotId) {
     ScriptFlagSlot *slotCursor = (ScriptFlagSlot *)((u8 *)D_00404AA8 + (unit->unitId << SDF_FLAG_SLOT_TABLE_SHIFT));
     u32 slotIndex;
 
@@ -563,7 +565,8 @@ void scrClearProfileFlagsTable(void) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314868);
 
-s32 func_00314990(DatPartyRecord *work, u16 id) {
+/* Test the first bit of the decoded profile flag pair for this unit. */
+s32 ptyTestPrimaryProfileFlag(DatPartyRecord *work, u16 id) {
     u32 word, shift;
     prfDecodeFlagPair(id, &word, &shift);
     return (datGameState->mantraBits[work->unitId].words[word] & (1 << shift)) != 0;
@@ -574,7 +577,7 @@ s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *unit) {
     u32 profileIndex;
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
         u16 profileId = profileIndex;
-        if (!(scrGetEntryRequirementFlags(profileId) & PRF_REQUIREMENT_EXCLUSION_BIT) && !func_00314990(unit, profileId)) {
+        if (!(scrGetEntryRequirementFlags(profileId) & PRF_REQUIREMENT_EXCLUSION_BIT) && !ptyTestPrimaryProfileFlag(unit, profileId)) {
             return 0;
         }
     }
@@ -582,7 +585,7 @@ s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *unit) {
 }
 
 /* Mark the second bit of the decoded mantra pair for this unit. */
-void func_00314A80(DatPartyRecord *unit, u16 id) {
+void ptySetSecondaryProfileFlag(DatPartyRecord *unit, u16 id) {
     u32 word;
     u32 shift;
 
@@ -590,7 +593,8 @@ void func_00314A80(DatPartyRecord *unit, u16 id) {
     datGameState->mantraBits[unit->unitId].words[word] |= 1U << (shift + 1);
 }
 
-s32 func_00314B00(DatPartyRecord *work, u16 id) {
+/* Test the second bit of the decoded profile flag pair for this unit. */
+s32 ptyTestSecondaryProfileFlag(DatPartyRecord *work, u16 id) {
     u32 word, shift;
     prfDecodeFlagPair(id, &word, &shift);
     return (datGameState->mantraBits[work->unitId].words[word] & (1 << (shift + 1))) != 0;
@@ -624,7 +628,7 @@ s32 ptyGetCurrentProfileId(DatPartyRecord *work) {
 /* Store the narrowed selection, initialize its profile state, and return the stored ID. */
 u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *unit, u32 profileId) {
     unit->profileId = profileId;
-    func_00314A80(unit, (u16)profileId);
+    ptySetSecondaryProfileFlag(unit, (u16)profileId);
     return unit->profileId;
 }
 
@@ -803,8 +807,8 @@ s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId) {
     return 0;
 }
 
-/* Read a byte parameter from the unchecked profile row. */
-u8 func_003151D0(u16 profileId) {
+/* Read the unchecked profile's display byte, used as a marker count in DDS2. */
+u8 prfGetMantraDisplayParameter(u16 profileId) {
     return D_00401320[profileId].value04;
 }
 
@@ -861,7 +865,8 @@ u8 scrIsSelectedScriptEntryId(DatPartyRecord *work, u16 id) {
 }
 
 
-s32 func_00315388(u16 profile, PrfSkillList *output) {
+/* Compact eight nonzero profile skills with cleared flags; optionally copy and return count. */
+s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
     PrfSkillList list;
     u32 i;
     u16 *skills;
@@ -950,7 +955,7 @@ s32 ptyHasAllReqProfiles(DatPartyRecord *unit, PrfRequirementOperand *operand) {
     if (profileCount > 0) {
         u8 *profileIds = operand->profileIds;
         do {
-            if (func_00314990(unit, profileIds[profileIndex++]) == 0) {
+            if (ptyTestPrimaryProfileFlag(unit, profileIds[profileIndex++]) == 0) {
                 return 0;
             }
         } while (profileIndex < profileCount);
@@ -966,7 +971,7 @@ s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, PrfRequirementOperand *opera
     if (profileCount > 0) {
         u8 *profileIds = operand->profileIds;
         do {
-            if (func_00314990(unit, profileIds[profileIndex++]) != 0) {
+            if (ptyTestPrimaryProfileFlag(unit, profileIds[profileIndex++]) != 0) {
                 matchedCount++;
             }
         } while (profileIndex < profileCount);
@@ -983,7 +988,7 @@ s32 ptyProfileCountAtLeast(DatPartyRecord *unit, PrfRequirementOperand *operand)
     u32 matchedCount = 0;
 
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
-        if (func_00314990(unit, (u16)profileIndex)) {
+        if (ptyTestPrimaryProfileFlag(unit, (u16)profileIndex)) {
             if (D_00401320[profileIndex].value05 >= operand->profileThreshold) {
                 matchedCount++;
             }
@@ -1008,7 +1013,7 @@ s32 ptyAreReqProfilesInParty(PrfRequirementOperand *operand) {
             for (unitIndex = 0; unitIndex < 5; unitIndex++) {
                 DatPartyRecord *partyUnit = &datGameState->party[unitIndex];
                 if ((partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT) != 0) {
-                    if (func_00314990(partyUnit, (u16)profileId) != 0) {
+                    if (ptyTestPrimaryProfileFlag(partyUnit, (u16)profileId) != 0) {
                         profilePresent = 1;
                     }
                 }
@@ -1039,7 +1044,8 @@ s32 prfReqCheckGlobalCounter(PrfRequirementOperand *operand) {
 }
 
 /* The word-sized ID API narrows only when calling the node-record lookup. */
-s32 func_00315950(s32 id, DatPartyRecord *context, s32 mode) {
+/* Check six neighboring mantra flags: mode0x40 requires all relevant neighbors, otherwise any. */
+s32 prfCheckAdjacentMantraRequirements(s32 id, DatPartyRecord *context, s32 mode) {
     s32 result = 1;
     MantraNodePos *record = mnuGetMantraNodePositionRecord(id);
     MantraNodePos **adjacent;
@@ -1053,7 +1059,7 @@ s32 func_00315950(s32 id, DatPartyRecord *context, s32 mode) {
         i = 0;
         do {
             if (*adjacent != NULL &&
-                func_00314990(context, (*adjacent)->selector.packed >> 16) == 0 &&
+                ptyTestPrimaryProfileFlag(context, (*adjacent)->selector.packed >> 16) == 0 &&
                 ((*adjacent)->selector.packed & 0xF) != 2) {
                 result = 0;
             }
@@ -1066,7 +1072,7 @@ s32 func_00315950(s32 id, DatPartyRecord *context, s32 mode) {
     i = 0;
     do {
         if (*adjacent != NULL &&
-            func_00314990(context, (*adjacent)->selector.packed >> 16) != 0 &&
+            ptyTestPrimaryProfileFlag(context, (*adjacent)->selector.packed >> 16) != 0 &&
             ((*adjacent)->selector.packed & 0x100) == 0) {
             return 1;
         }
@@ -1086,7 +1092,8 @@ s32 mnuIsResourceCategoryAvailable(s32 id) {
     return D_0045C828[(s32)(info->selector.packed << 24) >> 28] != 0;
 }
 
-s32 func_00315C40(u32 index) {
+/* Test the shared mantra-category enable table; out-of-range indices are disabled. */
+s32 prfIsMantraCategoryEnabled(u32 index) {
     if (index >= 17) {
         return 0;
     }
@@ -1189,14 +1196,14 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, DatPartyRecord *unit, u32 requirem
     }
     if (flags == 0) {
         if ((D_00402BE0[requirementId].state & 0x20) == 0) {
-            if (func_00315950(requirementId, unit, D_00402BE0[requirementId].state) == 0) {
+            if (prfCheckAdjacentMantraRequirements(requirementId, unit, D_00402BE0[requirementId].state) == 0) {
                 result = 0;
             }
         }
     } else if (flags & 2) {
         result = 1;
         if ((D_00402BE0[requirementId].state & 0x20) == 0) {
-            result = func_00315950(requirementId, unit, D_00402BE0[requirementId].state) != 0;
+            result = prfCheckAdjacentMantraRequirements(requirementId, unit, D_00402BE0[requirementId].state) != 0;
         }
     }
     if (mismatchCount != NULL) {
@@ -1205,7 +1212,8 @@ s32 prfReqEvaluateRules(u32 state, u32 flags, DatPartyRecord *unit, u32 requirem
     return result;
 }
 
-s32 func_00315FA0(u32 mode, DatPartyRecord *unit, u16 id) {
+/* Evaluate requirement rules with zero extra flags and no mismatch-count output. */
+s32 prfCheckRequirementRules(u32 mode, DatPartyRecord *unit, u16 id) {
     return prfReqEvaluateRules(mode, 0, unit, id, 0);
 }
 
@@ -1229,7 +1237,7 @@ extern RequirementFallbackEntry D_00404A20[];
 
 /* A zero evaluator return selects its result; otherwise test the fallback flags.
  * Missing fallback IDs succeed, as do entries with no nonzero flag requirements. */
-s32 func_00316020(DatPartyRecord *operand, u16 requirementId) {
+s32 prfReqCheckWithFallback(DatPartyRecord *operand, u16 requirementId) {
     u32 ruleResult;
     u32 groupIndex;
     u32 flagIndex;

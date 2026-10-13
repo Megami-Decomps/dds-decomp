@@ -6326,10 +6326,10 @@
 0x002CD310	ptyAddProfilePoints	inferred	legacy PartyUnit_AddCurrentProfilePointsClamped: adds clamped delta to the current-profile record points
 0x002CD398	prfDecodeFlagPair	inferred	legacy ProfileFlagPair_Decode: decodes profile_id into packed flag-pair coordinates
 0x002CD428	ptyApplyProfile	inferred	legacy PartyUnit_ApplyProfileById: completed-profile writer; sets profile flags/skill state for the given profile id
-0x002CD548	ptyTestProfileFlag0	inferred	legacy PartyUnit_TestProfileFlagBit0: tests profile flag bit0 in the g_GameState1+0x2E9F0 map
+0x002CD548	ptyTestPrimaryProfileFlag	inferred	Corrected legacy numbered flag name: prfDecodeFlagPair selects word/base shift and this tests the lower bit in the unit's mantraBits; DDS2 twin0x00314990. No mastery/ownership semantics asserted. [Namer1 batch39, high]
 0x002CD5B8	scrCheckStateBits	inferred	scr script flags and VM helpers in game/code_002CC750.c
-0x002CD630	ptySetProfileFlag1	inferred	legacy PartyUnit_SetProfileFlagBit1: sets profile flag bit1 in the g_GameState1+0x2E9F0 map
-0x002CD6B0	ptyTestProfileFlag1	inferred	legacy PartyUnit_TestProfileFlagBit1: tests profile flag bit1; drives profile-menu status/overlay
+0x002CD630	ptySetSecondaryProfileFlag	inferred	Corrected legacy numbered flag name: set base shift+1 of the decoded profile pair in unit mantraBits; DDS2 twin0x00314A80. [Namer1 batch39, high]
+0x002CD6B0	ptyTestSecondaryProfileFlag	inferred	Corrected legacy numbered flag name: test base shift+1 of the decoded profile pair; menu status and saved-template merging consume this upper bit. DDS2 twin0x00314B00. [Namer1 batch39, high]
 0x002CD728	scrGetSelectedOperandIndex	inferred	Returns the VM operand's currently selected signed index.
 0x002CD730	ptyGetProfileRecord	inferred	legacy PartyUnitProfileRecord_Get: returns the 8-byte per-unit per-profile save sidecar record
 0x002CD768	ptyGetProfileRecordValue	inferred	legacy PartyUnitProfileRecord_GetValue: low dword of a profile record entry
@@ -6352,7 +6352,7 @@
 0x002CDCA0	scrCountSlots	inferred	counts the non-zero entries of the 24-entry u16 skill-slot list at +0x22
 0x002CDCD8	scrSetSlot	inferred	stores into the 24-entry u16 skill-slot list at index*2+0x22, returning the previous value
 0x002CDCF0	scrRemoveSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
-0x002CDD38	prfGetParamWord7b4	inferred	legacy ProfileId_GetParamWord_7b4: profile row param word at +0x7B4
+0x002CDD38	prfGetMantraDisplayParameter	inferred	Corrected legacy offset-derived getter name: read profile metadata byte value04, promoted to s32 in DDS1; actual styled-label consumers narrow to u8 and select D0036C490[label-1]. DDS2 twin0x003151D0 uses the byte as a repeated marker count, not the same UI role. [Namer1 batch39, medium]
 0x002CDD60	prfGetRequiredProfileLevel	inferred	Mirrors DDS2; returns the per-profile level threshold compared with the unit's current level.
 0x002CDD88	prfGetParamWord7b5	inferred	legacy ProfileId_GetParamWord_7b5: profile row param word at +0x7B5
 0x002CDDB8	scrCallIfOperandReady	inferred	calls func_002CD7B8 twice then forwards selected index to func_002CDDB0 stub
@@ -6370,7 +6370,7 @@
 0x002CE468	prfReqCheckUnitLevel	inferred	legacy ProfileReqEntry_CheckUnitLevelAtLeastByte4: requirement entry unit-level gate
 0x002CE480	prfReqCheckGlobalCounter	inferred	legacy ProfileReqEntry_CheckGlobalCounterAtLeastWord8: requirement entry global-counter gate
 0x002CE498	prfReqEvaluateRules	inferred	legacy ProfileReq54_EvaluateTwoRuleBlocks: profile requirement rule evaluator, opcode dispatch via the 0x3B3F20 jump table
-0x002CE698	prfReq54Evaluate	inferred	legacy ProfileReq54_EvaluateTwoRuleBlocks_NoFailOut: evaluates the two rule blocks without early failure
+0x002CE698	prfCheckRequirementRules	inferred	Corrected numeric requirement-evaluator name: dispatch prfReqEvaluateRules without mismatch-count output. Keep existing DDS1 void definition and caller extern types; DDS2 twin0x00315FA0 returns s32 and takes a typed unit pointer. [Namer1 batch39, high]
 0x002CE6B8	prfIsRequirementExcluded	inferred	legacy ProfileId_IsRequirementExcluded: profile id excluded from the requirement check
 0x002CE6E0	prfReq54GetWord1230	inferred	legacy ProfileReq54_GetWord_1230: requirement-54 param word at +0x1230
 0x002CE710	prfReqCheckWithFallback	inferred	legacy ProfileReq_CheckWithFallbackFlagTable: requirement gate with the fallback req->flag table at 0x3931B0
@@ -8500,3 +8500,4 @@
 0x002E2F40	sdfMeasureAlignedRecordStorage	inferred	Native(count*0x4c+0x4bU)&0xfffffff0 matches the already-named DDS2 storage query at0x0033BDF0; preserve DDS1 u32 and DDS2 s32 return types. Previously absent native symbol row added with Main approval. [Namer1 batch 38, high]
 0x002E2F68	sdfBuildVertexColorQuadVifPacket	inferred	Build13-register quad payload with four per-corner RGBA values, UV pairs and XY offset pairs; preserve native allocation formula and byte/count reuse, without asserting Gouraud shading. DDS2 twin 0x0033BE18. [Namer1 batch 38, high]
 0x002E3D38	sdfDevConsGetGlyphUvTable	inferred	Return the96-entry packed glyph-UV table indexed by character-0x20 in sdfDevConsDrawGlyphGrid. DDS2 twin 0x0033CBE8. [Namer1 batch 38, high]
+0x002CD3B8	ptySetMappedGlobalFlagForSlot	inferred	Corrected module/role name: scan the unit-specific16 ScriptFlagSlot entries for a nonzero matching ID, mdlFlagSet(mapped flag), return its global flag ID or zero. This is not a mantra-bit setter. DDS2 twin0x003147C8. [Namer1 batch39, high]

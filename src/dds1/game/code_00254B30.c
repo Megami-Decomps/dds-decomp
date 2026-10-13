@@ -204,7 +204,7 @@ void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
 
 extern const u8 D_0036C490[][0x18];
 extern struct FrFontTextBank *frFontGetColoredGlyphResource(void);
-extern s32 prfGetParamWord7b4(u16 profileId);
+extern s32 prfGetMantraDisplayParameter(u16 profileId);
 extern s32 frFontDrawColoredGlyphChainAndMeasure(s32, s32, u32, u32, u8, u16,
                                                   struct FrFontTextBank *, u32, s32, s32);
 extern s32 mnuGetMantraSourceValue(u16);
@@ -220,7 +220,7 @@ void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 d
     frFontDrawColoredGlyphChainAndMeasure(x + 0x39, y + 0x155, z, textColor, 0, (u16)sceneId, glyphResource, 0, 0,
                                           drawContext);
     mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x3B, drawContext);
-    label = prfGetParamWord7b4((u16)sceneId);
+    label = prfGetMantraDisplayParameter((u16)sceneId);
     if (label != 0) {
         const u8 *style = D_0036C490[label - 1];
         frFontDrawStyledGlyphChainAndMeasure(x + 0xBA, y + 0x171, z, dimColor, 0, style, 0, drawContext);
@@ -240,7 +240,7 @@ void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s
                                           drawContext);
     mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x3B, drawContext);
 
-    label = prfGetParamWord7b4((u16)sceneId);
+    label = prfGetMantraDisplayParameter((u16)sceneId);
     if (label != 0) {
         const u8 *style = D_0036C490[label - 1];
         frFontDrawStyledGlyphChainAndMeasure(x + 0xBA, y + 0x171, z, dimColor, 0, style, 0, drawContext);
