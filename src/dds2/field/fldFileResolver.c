@@ -3446,7 +3446,7 @@ void fldUpdateLookAtSegmentDistance(void) {
 }
 
 extern u32 fldValueRecords;
-extern f32 func_00124A10(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
+extern f32 fldGetTriangleHeightAtXZ(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* Probe the support surface under the camera's focus and its mirrored heading. */
 void fldProbeCameraSupportSurface(void) {
@@ -3492,10 +3492,10 @@ void fldProbeCameraSupportSurface(void) {
     ys[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][1] + offset[1];
     zs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][2] + offset[2];
     x = cam->x - sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk5C = cam->y - func_00124A10(x,
+    cam->unk5C = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     x = cam->x - sdfSinPoly(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk17C = cam->y - func_00124A10(x,
+    cam->unk17C = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfEvaluateCosineViaSinePhaseShift(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     if (cam->overrideSupportRecordIndex == -1) {
         cam->unk5C = 0.0f;
