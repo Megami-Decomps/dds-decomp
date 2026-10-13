@@ -1,3 +1,4 @@
+#include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "snd_pad.h"
@@ -5785,7 +5786,7 @@ extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 extern void dds3EnsureSlotData(void *);
 
-extern void func_001127A0(EffWorldNode *, s32);
+extern void func_001127A0(EffWorldNode *, Dds3MoverUpdate);
 
 /* vu0 routine: add the battle origin to the default camera position. */
 void btlInitializeWorldCamera(void) {
