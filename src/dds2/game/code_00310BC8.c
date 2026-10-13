@@ -14,6 +14,7 @@
 #include "sdf_task_work.h"
 #include "itf.h"
 #include "kwln_task_lifecycle.h"
+#include "fr_font.h"
 
 extern s8 D_0037F510[];
 
@@ -25,7 +26,6 @@ extern s8 D_0037F510[];
 
 
 
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);

@@ -18,6 +18,7 @@
 #include "mnu_panel_state.h"
 #include "dsp_name.h"
 #include "eff_random.h"
+#include "fr_font.h"
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
@@ -40,7 +41,6 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void func_00196088(s32, s32, FrFontGlyph *);
 extern char D_003BC6F0[], D_003BC6F8[];
 extern char D_003BC700[];

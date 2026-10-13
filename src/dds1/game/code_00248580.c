@@ -156,7 +156,6 @@ void mnuReleaseBothVisualResourceTextures(MenuTerminalWork *work) {
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
 
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 extern MenuTextEntry D_00347C68[];
 extern MenuTextEntry D_003482A8[];
 

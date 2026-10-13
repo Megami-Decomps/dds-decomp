@@ -38,6 +38,7 @@
 #include "sdf_texture_file.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "fr_font.h"
 
 extern void sndQueueNoPayloadCommand1A0(void);
 extern u8 D_00324510[2][2][16];
@@ -1124,7 +1125,6 @@ extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_001428C0(s32, f32, f32, f32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
@@ -1635,7 +1635,7 @@ void fldDrawAutomapScene(void) {
     {
         const u8 *title = (const u8 *)D_0033EC90[fldAreaState.area % 100];
 
-        D_003BD7CC = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - D_003BD7D0 * 6) << 4, 112, 0, 0xA09DC380,
             title, 0);
         frFontStoreShiftedRenderValue(D_003BD7CC, 0xFFFFFF);
@@ -1662,7 +1662,7 @@ void fldDrawAutomapScene(void) {
         }
         labelColor = labelAlpha | 0x78759B00;
         labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_003BAEF4);
-        D_003BD7CC = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - (D_003D4408[D_003BAEF4] / 2) * 12) << 4,
             (D_003BAF08 + 42) << 3, 0, labelColor,
             (const u8 *)D_0034606C[labelIndex], 0);
@@ -1684,7 +1684,7 @@ void fldDrawAutomapScene(void) {
         }
         labelColor = labelAlpha | 0x78759B00;
         labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_003BAEF0);
-        D_003BD7CC = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_003BD7CC = itfCreateConvertedTextGlyph(
             (450 - (D_003D4408[D_003BAEF0] / 2) * 12) << 4,
             (D_003BAF04 << 3) + 332, 0, labelColor,
             (const u8 *)D_0034606C[labelIndex], 0);
