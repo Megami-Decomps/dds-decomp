@@ -3852,6 +3852,7 @@
 0x0025DAE8	mnuCampDestroyAllTasks	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campDestroyAllTasks behavior.
 0x0025DB98	mnuFxWorldScrollDelta	inferred	DDS1 twin func_00242780 (scrolls fx node/child offsets by delta) [names_reviewed2.tsv]
 0x0025DD68	mnuFxWorldDropOutOfRange	inferred	calls evtEventViewerReleaseQueuedNode on nodes with child offset >= threshold [names_reviewed2.tsv]
+0x0025DE08	mnuAdjustTimelineDurations	inferred	DDS1 counterpart mnuAdjustTimelineDurations walks timeline keys and adjusts durations/end-time payloads crossing a threshold.
 0x0025DFE8	mnuInitializeCampPanelVisualDefaults	inferred	Writes panel color vectors and numeric defaults into five output groups. [names_reviewed10.tsv]
 0x0025E048	mnuSampleCampPanelVisualTrack	inferred	Samples type-10 timeline keys into three panel vectors and two scalar values using neighboring key frames, defaults, and enabled interpolation.
 0x0025E240	mnuCampInitializeDisplayDefaults	inferred	Initializes camp display dimensions, neutral colors, unit scales and enabled state. [names_reviewed15.tsv]
