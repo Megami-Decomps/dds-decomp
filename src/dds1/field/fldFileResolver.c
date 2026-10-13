@@ -2611,7 +2611,7 @@ void fldSubmitAlternateFramePacket(void) {
 
 extern f32 D_0032F4E0[][4];
 extern u32 D_0032F500[];
-extern void *func_002EF2B0(const f32 (*)[4], const u32 *, s32, u32);
+extern void *sdfDrawCachedMatrixLinePairsVU(const f32 (*)[4], const u32 *, s32, u32);
 
 void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     SdfListHead *list;
@@ -2627,7 +2627,7 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     D_0032F500[0] = first;
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    record = (s32)func_002EF2B0(D_0032F4E0, D_0032F500, 2, 0x80);
+    record = (s32)sdfDrawCachedMatrixLinePairsVU(D_0032F4E0, D_0032F500, 2, 0x80);
     sdfAppendPacket(list, record);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, list);

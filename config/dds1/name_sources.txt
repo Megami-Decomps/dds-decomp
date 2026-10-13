@@ -173,7 +173,7 @@
 0x001093B8	evtSubmitDefaultDepthGradientRect	inferred	R_Names31 B94
 0x00109640	evtSubmitQuadFromVertices	inferred	readability/matching review (QP16)
 0x00109810	evtSubmitTexturedQuadFromVertices	inferred	confidence=high; src/dds1/game/code_00107FD8.c:func_00109810; Builds a four-vertex textured descriptor, submits its packet and queues release of the temporary draw asset. [names_qp9.tsv]
-0x00109A40	evtSubmitViewParamPacket	inferred	evt copies view params to D_003245B0/D_003245D0 and submits func_002EF2B0 record (twin of func_0012AC80)
+0x00109A40	evtSubmitViewParamPacket	inferred	evt copies view params to D_003245B0/D_003245D0 and submits sdfDrawCachedMatrixLinePairsVU record (twin of func_0012AC80)
 0x00109AF0	evtDrawPositionedSurfacePacket	inferred	Allocates packet list, builds XY-offset draw packet and submits to event surface. [names_reviewed7.tsv]
 0x00109BC0	evtPrepareSizedDrawResource	inferred	Creates graphics resource from shifted dimensions and passes it to two preparation routines. [names_reviewed7.tsv]
 0x00109C10	evtSelStateCreate	inferred	evt allocates the 0x28-byte selection state (limit/frames/callbacks) into D_003BD760
@@ -7612,7 +7612,7 @@
 0x003F9B00	sdfPadPorts	inferred	high confidence; src/dds1/game/code_002DDC98.c sdfPadUpdatePorts(): sdfPadUpdatePort(&D_003F9B00[i]); Two pad-port work records updated by the pad polling loop. [names_reviewed26.tsv]
 0x003F9B90	sdfDevRpcBuffer	inferred	confidence=high; src/dds1/game/code_002E4720.c:sdfDevStartRpcServer; Receive buffer registered with the device RPC server. [names_qp9.tsv]
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
-0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
+0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceMinuend; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
 0x001FBF30	btlSetResourceBrowserPosition	inferred	Sets the browser descriptor origin used by list and preview rendering.
 0x001FBF48	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
@@ -8612,3 +8612,13 @@
 0x00254758	mnuDrawMantraScenePlacementSprite	inferred	confidence=high; draws fixed placement entry 14 at the supplied coordinates, alpha and draw argument. [LiteH menu naming batch 20]
 0x00254778	mnuDrawMantraSceneSpriteGroup	inferred	confidence=high; draws fixed placement entries 0x47 through 0x49 at the supplied coordinates and alpha. [LiteH menu naming batch 20]
 0x00254810	mnuDrawSelectedMantraProfile	inferred	confidence=high; draws the selected unit's profile sprite and fade effect, then queues its profile name. [LiteH menu naming batch 20]
+0x001F7DF8	btlDrawButtonIconFixed64	inferred	confidence=high; indexed 64-pixel glyph with independent corner colors and a 16-bit atlas index; same observable fixed-size operation as existing DDS2 0x00209978. [Namer1 naming batch 44]
+0x002E9598	sndGetTrackBalanceMinuend	inferred	confidence=high; returns the byte used as the minuend by sndGetNonnegativeEntryBalance; no additional audio meaning asserted; DDS2 twin 0x00342440. [Namer1 naming batch 44]
+0x002E95B0	sndGetTrackBalanceSubtrahend	inferred	confidence=high; returns the byte subtracted by sndGetNonnegativeEntryBalance; no additional audio meaning asserted; DDS2 twin 0x00342458. [Namer1 naming batch 44]
+0x002E95F0	sndGetMidiChannelTable	inferred	confidence=high; returns sndMidiTrackState+0x10, the channels array identified by SndWork layout assertions and startup initialization; existing return type retained; DDS2 twin 0x00342498. [Namer1 naming batch 44]
+0x002E9610	sndGetMidiStateWordPair	inferred	confidence=high; returns the opaque MIDI word at +0x208 and optionally writes the adjacent +0x20C word; meanings remain opaque; DDS2 twin 0x003424B8. [Namer1 naming batch 44]
+0x002E9630	sndCopyGroupedMidiStateBytes	inferred	confidence=high; packs two 24-byte state groups into caller storage, ignoring NULL output; DDS2 twin 0x003424D8. [Namer1 naming batch 44]
+0x002EF2B0	sdfDrawCachedMatrixLinePairsVU	inferred	confidence=high; loads the composed matrix cached by sdfConsCacheTransformedNode before building clipped line-pair packets; DDS2 twin 0x00348158. [Namer1 naming batch 44]
+0x002EF2E0	sdfDrawPostmultipliedLinePairsVU	inferred	confidence=high; postmultiplies the current VU matrix by that cached transform before building line-pair packets; model-viewer callers provide their basis; DDS2 twin 0x00348188. [Namer1 naming batch 44]
+0x002EF408	sdfStreamHandleDeviceEvent	inferred	confidence=high; stream callback handles device replies, DMA read chunks, progress, next reads and semaphore wakeups; always returns zero; DDS2 twin 0x003482B0. [Namer1 naming batch 44]
+0x002EF698	sdfStreamRpcWorker	inferred	confidence=high; thread entry registers stream RPC, loads SDFIOPFL.IRX, wakes its creator and enters the RPC loop; DDS2 twin 0x00348540. [Namer1 naming batch 44]

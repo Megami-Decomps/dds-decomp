@@ -1734,8 +1734,8 @@ groups; row seven can contain these work callbacks. Its generic owner
 interface is therefore a separate boundary, not a draw-only owner array.
 Do not force `sdfSubmitDrawPacketGroups` through draw append/prepend types.
 
-The flag-list geometry packet wrappers `func_002EF2B0` / `func_00348158`
-still have legacy caller/provider declarations. Recover their renderer
+The paired flag-list geometry packet provider `sdfDrawCachedMatrixLinePairsVU`
+still has legacy caller/provider declarations. Recover its renderer
 return and argument-forwarding ABI independently; canonical draw owners
 do not establish that wrapper ABI.
 
@@ -7926,7 +7926,7 @@ DDS2 caller unit `game/code_00214948` gates **259 match, 0 differ**.
 ## Indexed icons separate screen size from atlas size
 
 DDS2 `btlDrawIconAtSize` (`0x002097E8`, 400 bytes) is a variable-size
-counterpart of the matched DDS1 `func_001F7DF8` (`0x001F7DF8`, 372 bytes).
+counterpart of DDS1 `btlDrawButtonIconFixed64` (`0x001F7DF8`, 372 bytes).
 The direct native-adjusted donor port matches on its first form; the complete
 DDS2 `game/code_00207A38` unit gates **248 match, 0 differ**, including the
 existing fixed-64 caller and button renderer.
@@ -10778,4 +10778,33 @@ Whole-unit gates are DDS1 151 match/0 differ and DDS2 43 match/0 differ, includi
 data and all surrounding C. Objdiff's 11 literal-pool relocation-name differences
 are metadata only: target words are exact, and the normal linked retail SHA-1
 remains the end-to-end gate.
+
+## Cached line transforms, stream RPC and observable MIDI state accessors
+
+`sdfDrawCachedMatrixLinePairsVU` loads the composed matrix saved by
+`sdfConsCacheTransformedNode` before generating clipped line-pair packets.
+`sdfDrawPostmultipliedLinePairsVU` instead composes the current VU matrix with
+that cache first; model-viewer callers supply identity, resource or map-position
+bases. These names do not normalize their caller declarations or packet ABI.
+
+`sdfStreamHandleDeviceEvent` is the callback registered for the shared stream's
+device state. Read replies perform SIF DMA, advance byte counts and either
+request another chunk or signal completion. Other recognized replies wake the
+semaphore. It ignores the passed device/callback context and returns zero.
+`sdfStreamRpcWorker` registers the synchronous stream dispatcher, loads
+`SDFIOPFL.IRX`, wakes its creator and enters the RPC loop.
+
+`sndGetTrackBalanceMinuend` and `sndGetTrackBalanceSubtrahend` name only their
+observable arithmetic roles in the nonnegative balance query.
+`sndGetMidiChannelTable` returns the channel-array address at the MIDI state
+prefix, established by `SndWork` layout assertions and its startup initializer;
+the existing game-specific return types remain unchanged.
+`sndGetMidiStateWordPair` retains the opaque adjacent-word semantics, while
+`sndCopyGroupedMidiStateBytes` packs the two 24-byte groups into caller storage.
+No voice, pause, or playback interpretation is inferred.
+
+DDS1's direct fixed-size icon renderer now shares DDS2's established
+`btlDrawButtonIconFixed64` name. DDS2 delegates to its variable-size renderer;
+neither game's signature, index truncation, corner colors or call structure
+is changed.
 

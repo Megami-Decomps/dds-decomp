@@ -378,12 +378,14 @@ void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 ve
 extern u8 D_00398470[];
 extern void sdfPostmultiplyVuMatrixFromMemory();
 
-void *func_002EF2B0(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+/* vu0 routine: render line pairs using the cached composed matrix. */
+void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     VU0_LOAD_MATRIX(D_00398470);
     return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }
 
-void *func_002EF2E0(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+/* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
+void *sdfDrawPostmultipliedLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     sdfPostmultiplyVuMatrixFromMemory(D_00398470);
     return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }
@@ -423,7 +425,7 @@ extern DevState *sdfDevCreateCallbackState(const char *, s32 (*)(DevState *, s32
 extern s32 sdfDevQueueControlRequest();
 extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
-extern s32 func_002EF408(DevState *, s32, s32, s32, s32);
+extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
 
 /* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
 void sdfStreamSendChunk(void) {
@@ -441,7 +443,9 @@ extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
 extern s32 sdfReadTimerCount(void);
 
-s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
+/* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
+ * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
+s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
     SdfStreamCfg *stream = &D_003FF340;
     s32 dmaId;
@@ -503,7 +507,7 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     DevState *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
-        state->deviceState = sdfDevCreateCallbackState((const char *)request, func_002EF408, 0);
+        state->deviceState = sdfDevCreateCallbackState((const char *)request, sdfStreamHandleDeviceEvent, 0);
         if (state->deviceState != 0) {
             WaitSema(state->semaphore);
             deviceState = state->deviceState;
@@ -554,7 +558,8 @@ extern s32 WakeupThread(s32);
 extern s32 D_003BDAC4;
 extern u8 D_003FF380[];
 extern u8 sdfPfsDebugMode;
-void func_002EF698(void) {
+/* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */
+void sdfStreamRpcWorker(void) {
     SdfStreamCfg *stream = &D_003FF340;
     SceIoStat info;
     u8 queue[0x20];
@@ -581,7 +586,7 @@ extern void SleepThread(void);
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
-    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)func_002EF698, 0x1000, 0x4C);
+    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)sdfStreamRpcWorker, 0x1000, 0x4C);
 
     _StartThread(workerId, 0);
     D_003BDAC4 = GetThreadId();
