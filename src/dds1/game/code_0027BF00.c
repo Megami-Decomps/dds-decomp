@@ -2153,14 +2153,14 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     }
 }
 
-extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
+extern void prfCopyMantraNamePart(u32 textId, s32 arg1, char *out);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
     struct FrFontGlyph *glyph;
     s32 width;
 
-    func_002CD0D8(textId & 0xFFFF, 1, text);
+    prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
     glyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
     frFontSetChildColors(glyph, color);
     width = frFontMeasureGlyphChain(glyph) + 8;

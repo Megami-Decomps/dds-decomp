@@ -178,14 +178,14 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     }
 }
 
-extern void func_00314500(u32, s32, char *);
+extern void prfCopyMantraNamePart(u32, s32, char *);
 extern void frFontSetChildColors(FrFontGlyph *, u32);
 void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
     s32 item;
 
     color = (color & 0xFF) | 0xD7ABFA00;
-    func_00314500(textId & 0xFFFF, 1, text);
+    prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
     item = (s32)(u32)frFontBuildGlyphChain(text, 0, 0, 0, 0);
     frFontSetChildColors((FrFontGlyph *)(u32)item, color);
     frFontSetGlyphPosition((struct FrFontGlyph *)(u32)item, x, y);

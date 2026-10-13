@@ -409,7 +409,7 @@ void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, 
     mnuDrawMantraSprite(x, y, depth, fade, 0x4C, 0, drawArg);
     if (entryId != 0) {
         memset(buffer, 0, 0x20);
-        func_00314500(entryId, 1, buffer);
+        prfCopyMantraNamePart(entryId, 1, buffer);
         frFontDrawStyledGlyphChainAndMeasure(x + 0x27, y + 0x146, depth, flags, 4, buffer, 0x101, drawArg);
         mnuDrawMantraSprite(x, y, depth, fade, 0x50, 0, drawArg);
     } else {
