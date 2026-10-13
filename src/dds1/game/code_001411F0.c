@@ -2266,7 +2266,7 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     }
 }
 
-void func_00146CA8(s32 index) {
+void fldSetPrimaryMapLabelSelection(s32 index) {
     if (index >= 0x40) {
         D_0032E474[0] = -1;
     } else {
@@ -2274,7 +2274,7 @@ void func_00146CA8(s32 index) {
     }
 }
 
-void func_00146CD0(s32 index) {
+void fldSetSecondaryMapLabelSelection(s32 index) {
     if (index >= 0x40) {
         D_0032E478[0] = -1;
     } else {

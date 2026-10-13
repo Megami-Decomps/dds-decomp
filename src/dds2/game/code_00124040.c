@@ -161,7 +161,7 @@ extern void fldUpdateSelectedValueTransition(void);
 
 extern void func_0013DDC0(EffWorldNode *);
 
-extern void func_0014D0E8(void);
+extern void fldUpdateObjectActivation(void);
 
 #include "mnu_title_stream.h"
 
@@ -2418,7 +2418,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             fldHasKiretaLabelProcess() == 0 && fldHasHirakenaiLabelProcess() == 0 &&
             fldHasBadkaifukuLabelProcess() == 0) {
             fldFlushQueuedEffectPositions();
-            func_0014D0E8();
+            fldUpdateObjectActivation();
         }
     }
     if (fldGetCampSceneControlMode() != 1) fldUpdateCameraFollow();

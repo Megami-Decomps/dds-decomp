@@ -1554,7 +1554,7 @@ extern void fldInitSparkTable(void);
 extern void fldInitializeMenuResources(void);
 extern void fldUpdateSparkSlots(void);
 extern void fldActivateRoomFlagObjects(void);
-extern void func_00142B70(void);
+extern void fldInitializeActorMotionSlots(void);
 extern struct DevRequest *sndLoadNamedOffsetResourceList(const char *name);
 extern s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle);
 extern char D_00436028[];
@@ -1726,7 +1726,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
                sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
         evtRetainSceneResource(dds3GetWorldSecondaryObject(), (void *)D_00435FDC);
     }
-    func_00142B70();
+    fldInitializeActorMotionSlots();
     fldAreaState.unk20 = 0;
     if (fldAreaState.transitionMode != 0) {
         fldUpdateSparkSlots();
