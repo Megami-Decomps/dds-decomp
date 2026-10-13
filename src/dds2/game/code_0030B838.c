@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
@@ -178,7 +179,6 @@ void sdfInitializeMapCounterSelection(s32 index, s32 count) {
     D_004388C1 = func_0030B678();
 }
 
-extern void sdfCommitPendingVectorAndMarkChanged();
 
 /* Latch the base vectors into the pending pair and flag the change. */
 void sdfLatchBaseVectorsForSelection(void) {
