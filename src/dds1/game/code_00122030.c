@@ -1913,7 +1913,7 @@ struct ObjBase;
 
 extern void func_00145B18(void);
 
-extern void func_00121B88(s32, s32, f32, f32, f32);
+extern void fldMarkStageExplorationCellsAroundPosition(s32, s32, f32, f32, f32);
 
 /* Gate next-floor input on camp/readiness flags, then start the native scene
  * transition or its delayed fade path. All return paths retain zero. */
@@ -1954,7 +1954,7 @@ s32 fldUpdateNextFloorTransition(void) {
         if (fldGetSceneReadyOrPendingState() != 0) {
             return 0;
         }
-        func_00121B88(scene->floor, scene->unkC0, scene->x, scene->z, 50.0f);
+        fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->unkC0, scene->x, scene->z, 50.0f);
         if (scene->sceneMode == 0) {
             if (fldHasPendingSceneFlags() != 0) {
                 return 0;
@@ -2237,7 +2237,7 @@ s32 fldProcSequence(void) {
         fldFinishDeferredExit();
         if (fldAreaState.transitionMode != 0) {
             fldUpdateSparkEncounterScene();
-            func_00121B88(fldAreaState.floor, fldAreaState.unkC0,
+            fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.unkC0,
                          fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_0032E570[0] == 0) {
             func_00124F58();
