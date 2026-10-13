@@ -6652,6 +6652,7 @@
 0x003412D8	effMiscSeedRandom	inferred	M141; sources=names_pending_main.tsv; twin=0x002E8430, input-family pairing. [names_qp10.tsv]
 0x00341348	effMiscSeedRandomFromClock	inferred	confidence=high; matched-C; src/dds2/game/code_00341240.c:57:func_00341348; Combines clock year/month/day/hour/minute/second and seeds specified random state.; twin=0x002E84A0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x003414D0	sndReserveIopWorkMemory	inferred	readability/matching review (QP16)
+0x003414E8	sndTryDispatchQueuedCommand	inferred	Attempts to submit the command at the IOP ring read cursor; returns zero and advances the cursor on success, otherwise returns one for an empty queue or failed SIF submission. Producer and worker callers use this contract to drain queued commands.
 0x00341570	sdfServiceUnblockedWorkerThread	inferred	Sleeps until signaled, then services worker requests while the gate is clear. [names_reviewed10.tsv]
 0x00341958	sndInitializeChannelAndTrackState	inferred	confidence=high; src/dds2/game/code_00341650.c:func_00341958; Initializes sixteen sound channels, allocates channel-zero storage, and resets thirteen track slots to unused ids. [names_qp9.tsv]
 0x00341A00	sndAllocateAlignedIopBuffers	inferred	queued
