@@ -109,5 +109,5 @@ INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_004389D9);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfCurrentBufferIndex);
 
-INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfGsImageUploadSemaphore);
+volatile s32 sdfGsImageUploadSemaphore __attribute__((section(".sdata"))) = 0;
 
