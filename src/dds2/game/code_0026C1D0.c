@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "evt_world_object_api.h"
 #include "kwln.h"
 #include "mnu_list.h"

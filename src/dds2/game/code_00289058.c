@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "mnu_mantra.h"
 #include "prf_requirement.h"
 #include "common.h"
@@ -635,7 +636,6 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
 
 extern DspUnitName *D_00435E48;
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
-extern s32 dspStartEntry(s32);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern s32 evtGetMessageWindowControlState(void);

@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "mnu_mantra.h"
 #include "snd_sequence_volume_pan.h"
 #include "kwln.h"
@@ -441,7 +442,6 @@ extern s32 mnuGetMantraSourceValue(u16);
 extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
-extern s32 dspStartEntry(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
@@ -789,7 +789,6 @@ void mnuReleaseSelectionWorkResources(MnuStatusResource *resourceWork) {
 }
 
 extern s32 mnuHandleMantraSelectionInput(MnuStatusResource *);
-extern s32 dspStartEntry(s32);
 extern s32 evtGetMessageWindowControlState(void);
 
 s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {

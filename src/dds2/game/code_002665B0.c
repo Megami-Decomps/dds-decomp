@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -1722,8 +1723,6 @@ extern void mnuSelectFirstListNode(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
 extern void dspSetActive(s32);
-
-extern s32 dspStartEntry(s32);
 
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 

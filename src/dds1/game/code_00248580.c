@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "evt_world.h"
 #include "eff_resource_slots.h"
@@ -2200,7 +2201,6 @@ s32 evtBDispatchSync(KwlnTask *request) {
 
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive(s32);
-extern void dspStartEntry(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 

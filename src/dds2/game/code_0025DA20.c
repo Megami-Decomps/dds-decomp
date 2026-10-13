@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "common.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -2452,9 +2453,6 @@ extern s32 D_003CE14C[];
 extern u8 D_003CE620[];
 extern u8 D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
-extern s32 dspStartEntry(s32);
-
-
 typedef struct EvtFlagGate {
     s8 threshold;
     u8 pad1;
@@ -4024,7 +4022,6 @@ extern void func_0026C7F8();
 extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 dspStartEntry(s32);
 extern void ptyAdjustItemQuantity();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);

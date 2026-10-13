@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "common.h"
 
 void dspStartActivePresetEntry(void) {
