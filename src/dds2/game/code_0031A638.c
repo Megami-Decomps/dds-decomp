@@ -35,7 +35,7 @@ void mnuInitializeHighScoreState(MnuShootingWork *work) {
 
 
 /* Clamp the pending score snapshot to the current high-water mark. */
-void func_0031A730(MnuShootingWork *work) {
+void mnuClampPendingScoreToPeak(MnuShootingWork *work) {
     u32 peakScore = work->peakScore;
     u32 pendingScore = work->pendingScore;
 
@@ -63,7 +63,7 @@ void mnuUpdateHighScoreFlag(MnuShootingWork *work) {
 
 
 /* Reset current and peak scores to the pending snapshot. */
-void func_0031A7F8(MnuShootingWork *work) {
+void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *work) {
     s32 pendingScore = work->pendingScore;
 
     work->peakScore = pendingScore;

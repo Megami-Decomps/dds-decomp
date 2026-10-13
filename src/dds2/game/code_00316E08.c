@@ -680,10 +680,10 @@ extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
 extern void mnuUpdateShootingCameraVectors(void);
 extern void mnuTickScoreProgressState(MnuShootingWork *);
 extern s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *);
-extern void func_0031A7F8(MnuShootingWork *);
+extern void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *);
 extern void mnuClearRuntimeRecordStorage(MenuRuntimeList *);
 void func_0031A090(void);
-extern void func_0031A730(MnuShootingWork *);
+extern void mnuClampPendingScoreToPeak(MnuShootingWork *);
 extern void dds3UpdateSoundSlots(void);
 
 s32 mnuUpdateShootingWork(MnuShootingWork *work) {
@@ -781,7 +781,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->unkB0 = 2;
         work->unk94 = 0;
         work->flags |= 4;
-        func_0031A7F8(work);
+        mnuResetCurrentAndPeakScoresToPending(work);
         work->progress = 0;
         work->completed = 0;
         work->currentScore = 0;
@@ -803,7 +803,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         func_0031A090();
         if (work->round >= 3) {
             work->state = -1;
-            func_0031A730(work);
+            mnuClampPendingScoreToPeak(work);
         }
         return 1;
     }
