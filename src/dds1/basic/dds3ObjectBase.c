@@ -420,7 +420,15 @@ void dds3EnsureSlotData(void *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001127A0);
+s32 dds3InvokeSlot1Handler(void *, Dds3MoverUpdate);
+
+void func_001127A0(EffWorldNode *object, Dds3MoverUpdate update) {
+    dds3InvokeSlot1Handler(object, update);
+    /* Retail 001127A8/001129D0 use JAL plus an epilogue.
+     * cc1probe keeps this consumed-callback reset through 01.sibling
+     * and 02.jump, then deletes it in 03.cse. */
+    update = NULL;
+}
 
 s32 dds3InvokeSlot1Handler(void *obj, Dds3MoverUpdate update) {
     void *handler;

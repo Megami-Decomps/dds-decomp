@@ -1,3 +1,4 @@
+#include "dds3_path.h"
 #include "sdf_request.h"
 #include "kwln.h"
 #include "sdf_packet_list.h"
@@ -173,7 +174,7 @@ extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 extern void dds3RebuildObjectModelContext(EffWorldNode *obj, s32 a, s32 b);
 
-extern void func_001129C8(EffWorldNode *obj, s32 a);
+extern void func_001129C8(EffWorldNode *obj, Dds3MoverUpdate a);
 
 extern void *dds3GetWorldSecondaryObject(void);
 

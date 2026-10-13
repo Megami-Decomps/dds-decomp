@@ -1,3 +1,4 @@
+#include "dds3_path.h"
 #include "sdf_request.h"
 #include "kwln.h"
 #include "sdf_packet_list.h"
@@ -3308,7 +3309,7 @@ extern void dds3EnsureSlotData();
 extern void *dds3GetWorldSecondaryObject(void);
 
 
-extern void func_001127A0(EffWorldNode *object, s32 arg);
+extern void func_001127A0(EffWorldNode *object, Dds3MoverUpdate arg);
 
 extern void *memset(void *dst, s32 value, u32 size);
 
