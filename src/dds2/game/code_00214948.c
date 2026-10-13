@@ -190,15 +190,6 @@ typedef struct BtlAiScratchWork {
 
 extern BtlAiScratchWork *btlActionScratchWork;
 
-/* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
-
-typedef struct AiSpecies {
-    u8 pad00[4];
-    AiDecisionRow decisions[3];
-    AiSlot slot[25];
-    u8 pad108[0x54];
-} AiSpecies;
-
 extern AiSpecies *datEnemyAiRecords;
 
 extern s32 func_001E2E58(BtlUnit *, s32);

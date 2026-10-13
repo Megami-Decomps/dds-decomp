@@ -107,13 +107,6 @@ extern void mdlFlagSet(s32);
 
 extern void mdlFlagClear(s32);
 
-typedef struct AiSpecies {
-    u8 unk00;
-    u8 pad01[0x3F];
-    AiSlot slot[25];
-    u8 pad108[0x54];
-} AiSpecies;
-
 extern AiSpecies *datEnemyAiRecords;
 
 extern s32 btlCollectAvailableOptionSkills(s32, s32 *);
@@ -321,7 +314,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
     if (unit->partyRecord.status & 0x2A0F) {
         return 0;
     }
-    return datEnemyAiRecords[unit->partyRecord.unitId].unk00 == 0;
+    return datEnemyAiRecords[unit->partyRecord.unitId].unknown00[0] == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
