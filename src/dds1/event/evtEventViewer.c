@@ -3293,7 +3293,7 @@ extern s8 D_00324510[];
 extern s32 itfMesStartEntry(s32, s32, s32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void mnuAdvanceShopMenuState(struct EvtRuntime *);
-extern s32 func_00270088(void);
+extern s32 mnuGetMovieDrawState(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
@@ -3362,7 +3362,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
                 evtViewerDispatchFlagMode(viewer);
             }
         } else if (viewer->timedActive == 1) {
-            if (func_00270088() == 2) {
+            if (mnuGetMovieDrawState() == 2) {
                 viewer->curFrame++;
             }
         } else {

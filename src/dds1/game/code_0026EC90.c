@@ -413,7 +413,7 @@ s32 mnuCheckMovieDecoderStatus(void) {
 }
 
 
-s32 func_00270088(void) {
+s32 mnuGetMovieDrawState(void) {
     return D_0037B8BC[0];
 }
 
