@@ -1012,7 +1012,7 @@ s32 itfGetLastDecodedByteCount(void) {
     return D_00438F20;
 }
 
-u32 func_001A0060(u32 value) {
+u32 itfReturnPackedResourceBase(u32 value) {
     return value;
 }
 
@@ -1029,7 +1029,7 @@ void itfSplitRelativeSegments(ItfRelativeSegmentResourceView *block, ItfPackedRe
 
 /* Read the opaque header word at 0x10; its role is not established. */
 u32 itfGetPackedResourceHeaderWord(u32 resourceBase) {
-    return *(u32 *)(func_001A0060(resourceBase) + 0x10);
+    return *(u32 *)(itfReturnPackedResourceBase(resourceBase) + 0x10);
 }
 
 /* Decode entryIndex's bit span through the resource's six-byte prefix-tree records.
@@ -1050,7 +1050,7 @@ s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, void *resourc
     memcpy(&range.start, (u8 *)segments->entryBitOffsets + entryIndex * 4, 4);
     memcpy(&range.end, (u8 *)segments->entryBitOffsets + entryIndex * 4 + 4, 4);
     produced = 0;
-    func_001A0060((u32)resourceBase);
+    itfReturnPackedResourceBase((u32)resourceBase);
     start = range.start;
     bitWords = segments->packedBitstream;
     wordIndex = start >> 4;
@@ -1696,7 +1696,7 @@ s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task) {
     return 0;
 }
 
-u32 func_001A1818(void) {
+u32 scrCmdCompleteImmediately(void) {
     return 1;
 }
 

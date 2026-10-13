@@ -215,7 +215,7 @@ extern u8 D_00325788[];
 extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
 extern void kwlnUpdateDrawParameterTransitions(void);
-extern void func_001248D0(void);
+extern void fldConfigureRenderCleanupMessage(void);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 #include "sdf_packet_alloc.h"
 #include "sdf_message.h"
@@ -317,7 +317,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00325788),
             (s32)(messageData + 0x400), (u32 *)(messageData + 0x420),
             (s32)(messageData + 0x600), (s32)(messageData + 0x620));
-        func_001248D0();
+        fldConfigureRenderCleanupMessage();
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00325788 + 0x80),
             (s32)(messageData + 0x6E0), (u32 *)(messageData + 0x700),
             (s32)(messageData + 0x720), (s32)(messageData + 0x740));
