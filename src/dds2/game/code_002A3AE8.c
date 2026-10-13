@@ -179,15 +179,15 @@ void mnuReleaseSpriteHandle(void) {
     }
 }
 
-void mnuStartMovieMenuSfx16(s32 work) {
+void mnuDrawMovieMenuSpriteSlot1F(s32 work) {
     mnuDrawSprite(0, 0, 0, work, 0, 0x1F, 0x53);
 }
 
-void mnuStartMovieMenuSfx17(u32 work) {
+void mnuDrawMovieMenuSpriteSlot20(u32 work) {
     mnuDrawSprite(0, 0, 0, work, 0, 0x20, 0x53);
 }
 
-void mnuStartMovieMenuSfx18(u32 work) {
+void mnuDrawMovieMenuSpriteSlot21(u32 work) {
     mnuDrawSprite(0, 0, 0, work, 0, 0x21, 0x53);
 }
 

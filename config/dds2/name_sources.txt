@@ -4476,8 +4476,8 @@
 0x002A3C90	mnuSelectMenuListCursorByAdvance	inferred	Resets a menu list cursor and advances it the requested count. [names_reviewed8.tsv]
 0x002A3CE0	mnuIsAnyMenuInputPressed	inferred	Tests whether any of the configured menu input keys are pressed. [names_reviewed9.tsv]
 0x002A3DE8	mnuReleaseMenuResourceSlots	inferred	Releases both menu resource slots and clears their handles. [names_reviewed8.tsv]
-0x002A3F28	mnuStartMovieMenuSfx17	inferred	same shape as mnuStartMovieMenuSfx16 with item 0x20, context 0x53
-0x002A3F60	mnuStartMovieMenuSfx18	inferred	same shape with item 0x21, context 0x53
+0x002A3F28	mnuDrawMovieMenuSpriteSlot20	inferred	mnuDrawSprite uses table slot 0x20 with caller-supplied alpha; DDS1 counterpart uses slot 0x17
+0x002A3F60	mnuDrawMovieMenuSpriteSlot21	inferred	mnuDrawSprite uses table slot 0x21 with caller-supplied alpha; DDS1 counterpart uses slot 0x18
 0x002A3F98	mnuSlideBarSetState	inferred	mode 2 = reset to closed (pos 0), 3 = open (pos 0x200), else store mode
 0x002A3FE0	mnuDrawAndAdvanceMovieMenuBar	inferred	readability/matching review (QP16)
 0x002A40C8	mnuSlideBarSetStateB	inferred	identical to func_002A3F98 (separate copy in retail)
@@ -7884,6 +7884,7 @@
 0x002A3C78	mnuGetMovieMenuSelectionIndex	inferred	Returns the current selection-list cursor index; DDS1 twin 0x0026BED0. [LiteH menu naming batch 10]
 0x002A3D70	mnuLoadMovieMenuResourceSlots	inferred	Loads both indexed movie-menu resource slots; DDS1 twin 0x0026BFC8. [LiteH menu naming batch 10]
 0x002A3E38	mnuEnsureMovieMenuSpriteHandle	inferred	Loads or requests the movie-menu sprite handle depending on mode; DDS1 twin 0x0026C098. [LiteH menu naming batch 10]
+0x002A3EF0	mnuDrawMovieMenuSpriteSlot1F	inferred	mnuDrawSprite uses table slot 0x1F with caller-supplied alpha; DDS1 counterpart uses slot 0x16
 0x002A44C0	mnuDrawMovieMenuSpritePickList	inferred	Draws and advances the sprite entries in the movie-menu pick list, removing entries after their fade sequence. [LiteH menu naming batch 10]
 0x002A5040	mnuDrawMovieMenuSlideBar	inferred	Draws the movie-menu slide bar using the active fade amount or primary/secondary slide position. [LiteH menu naming batch 10]
 0x002A55B8	mnuDrawMovieChoiceTransition	inferred	Draws the title-menu choice sprites and their selection highlight with frame-driven fades. [LiteH menu naming batch 10]

@@ -184,20 +184,20 @@ void mnuReleaseSpriteHandle(void) {
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-/* These entry points differ only in the selected menu sound identifier. */
-void mnuStartMovieMenuSfx16(s32 parameter) {
+/* These entry points draw distinct movie-menu sprite table slots. */
+void mnuDrawMovieMenuSpriteSlot16(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
 }
 
-void mnuStartMovieMenuSfx17(s32 parameter) {
+void mnuDrawMovieMenuSpriteSlot17(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
 }
 
-void mnuStartMovieMenuSfx18(s32 parameter) {
+void mnuDrawMovieMenuSpriteSlot18(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
 }
 
-void func_0026C1F8(s32 parameter) {
+void mnuDrawMovieMenuSpriteSlot1A(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
 }
 
