@@ -1812,7 +1812,7 @@ void btlResetRuntimeState(void) {
     btlReleaseOwnedData();
 }
 
-s32 func_00213B50(void) {
+s32 btlGetRuntimeResult(void) {
     return D_003D7588[0];
 }
 

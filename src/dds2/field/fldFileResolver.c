@@ -634,7 +634,7 @@ extern s32 fldEncounterRuntimeState;
 
 extern u32 D_0043608C;
 
-extern s32 func_0022E450(void);
+extern s32 btlGetRuntimeResult(void);
 
 extern s32 fldEncProc(void);
 
@@ -3368,7 +3368,7 @@ s32 fldGetEncounterRuntimeResult(void) {
         if (state < 0) {
             result = D_0043608C;
         } else {
-            result = func_0022E450();
+            result = btlGetRuntimeResult();
         }
     } else {
         result = D_0043608C;
