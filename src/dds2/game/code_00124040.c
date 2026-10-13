@@ -1684,13 +1684,13 @@ void fldConsumeFieldTransitionFlag(void) {
     }
 }
 
-extern void func_00243320(void);
+extern void evtResetFieldTransitionCounter(void);
 
 /* Clear the transition work flag and its area-state consumption marker. */
 void fldClearFieldTransitionFlag(void) {
     datGameState->world.fieldFlags &= ~FIELD_TRANSITION_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
-    func_00243320();
+    evtResetFieldTransitionCounter();
 }
 
 /* Set the transition work flag and reset its area-state consumption marker. */
