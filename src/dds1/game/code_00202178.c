@@ -77,7 +77,7 @@ extern const char D_003A5D60[];
 
 extern BtlTask *btlFindUnitByActor(BtlUnit *);
 
-extern void func_001A1990(DatPartyRecord *, s32);
+extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
 
 extern void func_001D6300(void *, void *);
 
@@ -2878,7 +2878,7 @@ u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle) {
     }
     model = btlCreateUnit();
     *slot = model;
-    func_001A1990(&model->partyRecord, 0x10a);
+    btlInitializePartyRecordFromEnemy(&model->partyRecord, 0x10a);
     func_00207E68();
     entry = btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
     if (prerequisiteHandle != 0) {
@@ -3352,7 +3352,7 @@ u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle) {
     }
     model = btlCreateUnit();
     *slot = model;
-    func_001A1990(&model->partyRecord, 0x10e);
+    btlInitializePartyRecordFromEnemy(&model->partyRecord, 0x10e);
     entry = btlCreateModelLoadPollTask(*slot, 1, 0x10e, 0);
     if (prerequisiteHandle != 0) {
         entry->startCondition.value.handle = prerequisiteHandle;
@@ -3953,7 +3953,7 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
                 return -1;
             }
             stats = &unit->partyRecord;
-            func_001A1990(stats, mode == 0x119 ? 0x11A : 0x119);
+            btlInitializePartyRecordFromEnemy(stats, mode == 0x119 ? 0x11A : 0x119);
             stats->flags |= 0x23;
             effectState->formCount++;
             task = btlFindUnitByActor(unit);
