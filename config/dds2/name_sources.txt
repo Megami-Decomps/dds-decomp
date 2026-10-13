@@ -2232,6 +2232,7 @@
 0x001A6128	itfUpdateBattleDisplayAndFadeIndicator	inferred	Runs the display update stages and advances the battle fade indicator. [names_reviewed16.tsv]
 0x001A6160	itfMesUpdatePanelFades	inferred	U2
 0x001A67E0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]
+0x001A6AB8	itfMesFindPressedOptionRank	inferred	Checks option buttons and returns the selectable row rank for the pressed option, or -1 when no registered choice is eligible.
 0x001A6B48	btlUpdateFadeIndicator	inferred	BtlFade {kind,dir,alpha,timer} at unit+0x1D0 pulses alpha 0x20/0x40..0xFF
 0x001A6BF8	itfUpdateSoundSelectorPanel	inferred	U1
 0x001A6DA8	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
