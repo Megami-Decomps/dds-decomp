@@ -966,7 +966,7 @@ extern SdfPoolNode *D_00325838[];
 extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
 
-extern void func_002D9238(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
@@ -983,7 +983,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
         VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    func_002D9238(D_00325838, emitter);
+    sdfModelBuildNodeResourcePackets(D_00325838, emitter);
 }
 
 typedef struct {

@@ -4821,7 +4821,7 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void func_002D9238(struct SdfPoolNode **table, SdfModel *model);
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **table, SdfModel *model);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
 void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
@@ -4870,7 +4870,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             VU0_LOAD_VF(vf10, vec);
             effPcpCaptureNodeVectors(root);
             sdfModelUpdateCurrentFrameTransforms(model);
-            func_002D9238(D_00325828, model);
+            sdfModelBuildNodeResourcePackets(D_00325828, model);
         }
     }
     work->frame++;

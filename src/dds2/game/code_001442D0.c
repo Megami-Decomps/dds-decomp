@@ -551,7 +551,7 @@ extern SdfPoolNode *D_00380838[4];
 extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
 
-extern void func_003320E8(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 s32 func_001442D0(void) {
     FldTitleBannerMenu *menu;
@@ -1207,7 +1207,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    func_003320E8(D_00380838, emitter);
+    sdfModelBuildNodeResourcePackets(D_00380838, emitter);
 }
 
 extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32,

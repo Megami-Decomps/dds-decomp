@@ -391,7 +391,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTestTransformedClipVectors);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildVisibleNodePackets);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D9238);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildNodeResourcePackets);
 
 /* Copy the destination's declared number of 16-byte object entries. */
 void sdfModelCopyData(DevRequest *dst, DevRequest *src) {
