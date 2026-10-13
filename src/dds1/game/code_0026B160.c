@@ -48,9 +48,9 @@ extern u8 mnuHasSpriteHandle(void);
 extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void sndStartTrackExtended(s32 trackId);
-extern void mnuStartMovieMenuSfx16(s32 volume);
-extern void mnuStartMovieMenuSfx17(s32 volume);
-extern void mnuStartMovieMenuSfx18(s32 volume);
+extern void mnuDrawMovieMenuSpriteSlot16(s32 volume);
+extern void mnuDrawMovieMenuSpriteSlot17(s32 volume);
+extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
 extern s32 kwlnFadeIsActive(void);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void mnuRequestIndexedMovieResource(s32 index);
@@ -78,7 +78,7 @@ extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData,
                                        u32 dataBytes, s32 markHistory);
 extern void mnuRestartRuntimeAfterViewer(s32 unused);
 extern void fldPrepareDeferredSceneTransition(void);
-extern void func_0026C1F8(s32 alpha);
+extern void mnuDrawMovieMenuSpriteSlot1A(s32 alpha);
 extern void kwlnFadeClear(void);
 
 s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
@@ -127,7 +127,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 5:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        mnuStartMovieMenuSfx16(0x80);
+        mnuDrawMovieMenuSpriteSlot16(0x80);
         if (kwlnFadeIsActive() == 0) {
             mnuMovieMenuState->cursor = 0;
             mnuMovieMenuState->state = mnuMovieMenuState->state + 1;
@@ -136,7 +136,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 6:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        mnuStartMovieMenuSfx16(0x80);
+        mnuDrawMovieMenuSpriteSlot16(0x80);
         if (mnuIsAnyMenuInputPressed() != 0) {
             mnuMovieMenuState->cursor = 0x4B;
         }
@@ -151,7 +151,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         mnuDrawMovieMenuBackgroundQuad(0x80);
         alpha = 0x80 - mnuMovieMenuState->cursor * 8;
         if (alpha > 0) {
-            mnuStartMovieMenuSfx16(alpha);
+            mnuDrawMovieMenuSpriteSlot16(alpha);
         }
         if (mnuMovieMenuState->cursor < 0x16) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
@@ -167,7 +167,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
             alpha = 0x80;
         }
         if (alpha > 0) {
-            mnuStartMovieMenuSfx17(alpha);
+            mnuDrawMovieMenuSpriteSlot17(alpha);
         }
         if (mnuMovieMenuState->cursor < 0x14) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
@@ -178,7 +178,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 9:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        mnuStartMovieMenuSfx17(0x80);
+        mnuDrawMovieMenuSpriteSlot17(0x80);
         if (mnuIsAnyMenuInputPressed() != 0) {
             mnuMovieMenuState->cursor = 0x4B;
         }
@@ -193,7 +193,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         mnuDrawMovieMenuBackgroundQuad(0x80);
         alpha = 0x80 - mnuMovieMenuState->cursor * 8;
         if (alpha > 0) {
-            mnuStartMovieMenuSfx17(alpha);
+            mnuDrawMovieMenuSpriteSlot17(alpha);
         }
         if (mnuMovieMenuState->cursor < 0x16) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
@@ -209,7 +209,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
             alpha = 0x80;
         }
         if (alpha > 0) {
-            mnuStartMovieMenuSfx18(alpha);
+            mnuDrawMovieMenuSpriteSlot18(alpha);
         }
         if (mnuMovieMenuState->cursor < 0x14) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
@@ -220,7 +220,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 12:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        mnuStartMovieMenuSfx18(0x80);
+        mnuDrawMovieMenuSpriteSlot18(0x80);
         if (mnuIsAnyMenuInputPressed() != 0) {
             mnuMovieMenuState->cursor = 0x4B;
         }
@@ -235,7 +235,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
     case 13:
         mnuDrawMovieMenuBackgroundQuad(0x80);
         if (mnuMovieMenuState->cursor < 0x16) {
-            mnuStartMovieMenuSfx18(0x80);
+            mnuDrawMovieMenuSpriteSlot18(0x80);
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
         } else {
             kwlnFadeOutStart(0, 0, 0, 0x1E);
@@ -465,7 +465,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 40:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        func_0026C1F8(0x80);
+        mnuDrawMovieMenuSpriteSlot1A(0x80);
         if (mnuMovieMenuState->cursor < 0x3C) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
         } else {
@@ -476,7 +476,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 41:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        func_0026C1F8(0x80);
+        mnuDrawMovieMenuSpriteSlot1A(0x80);
         if (mnuMovieMenuState->cursor < 0x96) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
         } else {
@@ -487,7 +487,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 42:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        func_0026C1F8(0x80);
+        mnuDrawMovieMenuSpriteSlot1A(0x80);
         if (mnuMovieMenuState->cursor < 0x2D) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
         } else {

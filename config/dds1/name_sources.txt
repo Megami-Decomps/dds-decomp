@@ -4839,7 +4839,10 @@
 0x0026C048	mnuReleaseMenuResourceSlots	inferred	Releases both menu resource slots and clears their handles. [names_reviewed8.tsv]
 0x0026C108	mnuHasSpriteHandle	inferred	Tests whether the menu state owns a sprite handle at offset eight.
 0x0026C118	mnuReleaseSpriteHandle	inferred	Releases the menu state's sprite handle and clears its slot when present.
-0x0026C150	mnuStartMovieMenuSfx16	inferred	mnu forwards constant 0x16 to func_0026BD80
+0x0026C150	mnuDrawMovieMenuSpriteSlot16	inferred	mnuDrawSprite uses table slot 0x16 with caller-supplied alpha; DDS2 counterpart uses slot 0x1F
+0x0026C188	mnuDrawMovieMenuSpriteSlot17	inferred	mnuDrawSprite uses table slot 0x17 with caller-supplied alpha; DDS2 counterpart uses slot 0x20
+0x0026C1C0	mnuDrawMovieMenuSpriteSlot18	inferred	mnuDrawSprite uses table slot 0x18 with caller-supplied alpha; DDS2 counterpart uses slot 0x21
+0x0026C1F8	mnuDrawMovieMenuSpriteSlot1A	inferred	mnuDrawSprite uses DDS1 movie-menu table slot 0x1A with caller-supplied alpha; no paired wrapper found
 0x0026C230	mnuDrawMovieMenuBackgroundQuad	inferred	Configures draw registers and emits a full-screen menu background quad with the caller draw parameter. [names_reviewed18.tsv]
 0x0026C290	mnuDrawMovieMenuSpriteLayers	inferred	confidence=high; matched-C; src/dds1/game/code_0026BD80.c:144:func_0026C290; M143; source=names_M143.tsv:16; review=Draws the movie-menu background quad and its four indexed sprite layers. [names_qp11.tsv]
 0x0026CA18	mnuStartMovieMenuSfxGroup	inferred	mnu forwards constants 6,0xD,0xE,0xF to func_0026BD80
