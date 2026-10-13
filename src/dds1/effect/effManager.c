@@ -17,8 +17,8 @@ extern void effObjectListCountersReset(void);
 
 void effManagerInitializeSubsystems(KwlnTask *task) {
     (void)task;
-    func_001536A0();
-    func_0015B250();
+    effInitializeEmitterSubsystem();
+    parInitializeParticleSubsystem();
     effBillDispatchAll();
 }
 

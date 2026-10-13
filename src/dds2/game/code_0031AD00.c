@@ -25,7 +25,7 @@ void itfDispatchObjectFadeSequenceMode(MnuShootingWork *object) {
     case 0:
         itfSetFadeMode(&object->roundFade.fade, 1, 8);
         itfQueueFadeMode(&object->roundFade.fade, 0, 8, 0x78);
-        func_0031EEE8(&object->roundFade, object->round + 1);
+        itfSetRoundFadeDisplayValue(&object->roundFade, object->round + 1);
         return;
     case 1:
         mnuDrawFadeSequenceOffset(&object->roundFade);

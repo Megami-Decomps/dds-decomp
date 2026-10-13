@@ -49,32 +49,34 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
 
 INCLUDE_ASM(const s32, "game/code_0031CA10", func_0031CBC8);
 
-extern u32 D_0045C840[];
+extern u32 itfIndexedImageResourceBanks[];
 
-void func_0031CDE8(u32 *source, s32 count) {
+/* Clear seven bank words, then install count source words without bounds checks. */
+void itfInstallIndexedImageResourceBanks(u32 *source, s32 count) {
     s32 i;
 
-    memset(D_0045C840, 0, 0x1C);
+    memset(itfIndexedImageResourceBanks, 0, 0x1C);
     for (i = 0; i < count; i++) {
-        D_0045C840[i] = source[i];
+        itfIndexedImageResourceBanks[i] = source[i];
     }
 }
 
 /* Resource bank, work-entry index, X offset, Y offset. */
-extern s16 D_0040AE28[][4];
+extern s16 itfIndexedImageDescriptors[][4];
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
-#define INDEXED_SPRITE(index) (((EffectSlotSet *)D_0045C840[D_0040AE28[index][0]])->workEntries + D_0040AE28[index][1])
+#define INDEXED_SPRITE(index) (((EffectSlotSet *)itfIndexedImageResourceBanks[itfIndexedImageDescriptors[index][0]])->workEntries + itfIndexedImageDescriptors[index][1])
 
-void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context) {
-    effDrawTextureSlotWithBlendedCornerColors(((x + D_0040AE28[index][2]) << 4) -
+/* Draw the indexed entry centered on its offset position; alpha is scaled to GS units. */
+void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context) {
+    effDrawTextureSlotWithBlendedCornerColors(((x + itfIndexedImageDescriptors[index][2]) << 4) -
                      (INDEXED_SPRITE(index)->geometry.bounds[2] >> 1),
-                  ((y + D_0040AE28[index][3]) << 3) -
+                  ((y + itfIndexedImageDescriptors[index][3]) << 3) -
                      (INDEXED_SPRITE(index)->geometry.bounds[3] >> 1),
                   z, (u32)((f32)alpha * 256.0f * 0.0078125f), flags,
-                  (EffectSlotSet *)D_0045C840[D_0040AE28[index][0]],
-                  D_0040AE28[index][1], context);
+                  (EffectSlotSet *)itfIndexedImageResourceBanks[itfIndexedImageDescriptors[index][0]],
+                  itfIndexedImageDescriptors[index][1], context);
 }
 
 extern void func_0031CF88(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale, s32 flags, s32 index, s32 context);
@@ -85,12 +87,13 @@ void itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flag
 
 INCLUDE_ASM(const s32, "game/code_0031CA10", func_0031CF88);
 
-void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {
+/* Convert radians to degrees for this draw, then reset the shared angle to zero. */
+void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {
     INDEXED_SPRITE(index)->geometry.angleDegrees = angle * 57.29577637f;
-    effDrawTextureSlotWithBlendedCornerColors((x + D_0040AE28[index][2]) << 4,
-                  (y + D_0040AE28[index][3]) << 3,
+    effDrawTextureSlotWithBlendedCornerColors((x + itfIndexedImageDescriptors[index][2]) << 4,
+                  (y + itfIndexedImageDescriptors[index][3]) << 3,
                   z, (u32)((f32)alpha * 256.0f * 0.0078125f), flags,
-                  (EffectSlotSet *)D_0045C840[D_0040AE28[index][0]], D_0040AE28[index][1], context);
+                  (EffectSlotSet *)itfIndexedImageResourceBanks[itfIndexedImageDescriptors[index][0]], itfIndexedImageDescriptors[index][1], context);
     INDEXED_SPRITE(index)->geometry.angleDegrees = 0.0f;
 }
 
@@ -218,7 +221,7 @@ void itfSetModelInstancePrimaryVector(ModelInstance *model, f32 x, f32 y, f32 z)
 
 /* Draw each active instance first; bit 0 skips its subsequent aging and movement.
  * The final position increment still occurs after its countdown deactivates it. */
-void func_0031D558(ModelInstanceWork *work, u32 flags) {
+void itfDrawAndAdvanceModelInstances(ModelInstanceWork *work, u32 flags) {
     s32 listIndex = 0;
     s32 instanceIndex;
     ModelInstanceList *list = work->lists;

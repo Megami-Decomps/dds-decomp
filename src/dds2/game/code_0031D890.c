@@ -65,7 +65,8 @@ WideSlotPool *itfCreateSpriteWorkPool(u32 count) {
     return pool;
 }
 
-void func_0031D928(WideSlotPool *pool) {
+/* Release the allocation containing the sprite-number pool header and slots. */
+void itfReleaseSpriteWorkPool(WideSlotPool *pool) {
     sdfReleaseResourceAllocation(pool->allocation);
 }
 
@@ -108,10 +109,11 @@ void itfReleaseWideSlot(WideSlot *slot) {
     slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
-extern void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
+extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
 extern s32 func_0035C860(char *destination, const char *format, ...);
 
-void func_0031DA38(WideSlotPool *pool, u32 flags) {
+/* Draw decimal digits and optional tags with fade/rise; bit 0 pauses aging. */
+void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
     WideSlot *slot = pool->slots;
     s32 slotIndex;
     char text[32];
@@ -157,10 +159,10 @@ void func_0031DA38(WideSlotPool *pool, u32 flags) {
             offset = (s32)((f32)-width * 0.5f);
             for (digit = 0; digit < length; digit++, offset += 10) {
                 if (((slot->flags >> 1) & 0xFF) == 20) {
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, text[digit] - 7, 0x53);
                 } else {
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, text[digit] + 3, 0x53);
                 }
             }
@@ -168,23 +170,23 @@ void func_0031DA38(WideSlotPool *pool, u32 flags) {
                 offset += 13;
                 switch ((slot->flags >> 1) & 0xFF) {
                 case 1:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 61, 0x53);
                     break;
                 case 2:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 62, 0x53);
                     break;
                 case 4:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 63, 0x53);
                     break;
                 case 8:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 64, 0x53);
                     break;
                 case 20:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 75, 0x53);
                     break;
                 }
@@ -197,7 +199,7 @@ void func_0031DA38(WideSlotPool *pool, u32 flags) {
 }
 
 /* Sprite-hit-effect work pool: count 0x10-byte items plus a 0xC-byte header. */
-CompactSlotPool *func_0031DEB8(u32 count) {
+CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
     u32 size = count * 0x10 + 0xC;
     SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
     CompactSlotPool *pool = (CompactSlotPool *)sdfMemoryGetBlockAddress(allocation);
@@ -210,7 +212,8 @@ CompactSlotPool *func_0031DEB8(u32 count) {
     return pool;
 }
 
-void func_0031DF48(CompactSlotPool *pool) {
+/* Release the allocation containing the hit-effect pool header and records. */
+void itfReleaseSpriteHitEffectWorkPool(CompactSlotPool *pool) {
     sdfReleaseResourceAllocation(pool->allocation);
 }
 
@@ -317,10 +320,10 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
     itfDrawFadeGlyphStrip(&work->strip);
     itfSetFadeMode(&work->lowerNumber.fade, 1, 0x80);
     itfDrawLowerFadeGlyphPair(&work->lowerNumber);
-    func_0031E7C8(&work->lowerNumber, work->currentScore);
+    itfSetLowerFadeValue(&work->lowerNumber, work->currentScore);
     itfSetFadeMode(&work->upperNumber.fade, 1, 0x80);
     itfDrawUpperFadeGlyphPair(&work->upperNumber);
-    func_0031E850(&work->upperNumber, work->peakScore);
+    itfSetUpperFadeValue(&work->upperNumber, work->peakScore);
     itfSetFadeMode(&work->gauge.fade, 1, 0x80);
     itfSetFadeParameter(&work->gauge, 100);
     itfSetFadeSecondaryParameter(&work->gauge, work->progress);
@@ -331,7 +334,7 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
     }
     func_0031E8F0(&work->gauge);
     itfSetFadeMode(&work->frame.fade, 1, 0x80);
-    func_0031F040(&work->frame, work->unkB0);
+    itfSetFrameFadeGlyphSelector(&work->frame, work->unkB0);
     itfDrawFadeGlyphForFrame(&work->frame);
 }
 

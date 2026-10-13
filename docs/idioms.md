@@ -2044,7 +2044,7 @@ to hide a missing generated include.
 
 DDS2 `game/code_0031CA10` covers the native no-sibling-jump run
 `0x31CA10..0x31D680`: 18 functions between sibling-calling `func_0031C940`
-and `itfDrawModelInstanceImage`. The `func_0031CE60` and
+and `itfDrawModelInstanceImage`. The `itfDrawCenteredIndexedImage` and
 `itfDrawUniformlyScaledIndexedImage` bodies both become exact with the flag;
 all existing matched C in the run and its neighbours remains exact. The
 projection/angle `.lit4` values and the `SpriteWork Object Size %d\n` string
@@ -11351,3 +11351,37 @@ Both startup functions register `kwlnUpdateDevelopmentDumpTask` with the
 literal task name `DbgDevDump` and id 0x5215. The retail callbacks return zero
 without doing any dump work. This is retained retail behavior, not unfinished
 implementation.
+
+## Indexed image work and fade-display setters
+
+DDS2's indexed-image descriptors contain four signed halfwords per row:
+resource bank, work entry, X offset and Y offset. The bank installer clears
+seven address words, then copies the requested count without checking it.
+The centered drawer applies the descriptor offsets and subtracts half the
+entry's bounds. The rotated drawer instead uses the offset position directly,
+converts radians to degrees in the shared entry and resets that angle to zero
+after drawing; it does not restore a previous angle. Keep the original alpha
+conversion, expression order and unit-wide sibling-call setting intact.
+
+The sprite-number pool displays decimal digits and optional tag glyphs with
+age-dependent fade and rise, releasing a slot at age 91. Bit zero pauses age
+increments, not drawing or the expiry check. The separate 16-byte-record pool
+is identified by its native `Sprite HitEffect Work Crate Size[%d]` allocation
+message and the existing hit-effect update routine. Both release routines
+free their retained allocation, not an individual slot.
+
+Model instances draw before advancing. Bit zero suppresses animation aging
+and finite-lifetime movement. The position increment still executes when
+the countdown has just deactivated the instance.
+
+The five `FadeNumber` setters all write `displayValue`; their individual
+roles come from the same-object setters and consumers in the callers, not
+from adjacency. Lower and upper score values are written after drawing;
+the round and two-choice selectors are clamped by their drawers. The frame
+setter supplies optional-glyph selection, leaving the source `unkB0` field
+unnamed. Prototype names alone change in the shared fade header.
+
+Effect-manager startup calls the emitter and particle initialization hooks
+before billboard startup. Their empty retail bodies are intentional. The
+DDS1 particle hook adopts the already-established DDS2 name, and the emitter
+hook uses the same name in both games without adding initialization work.

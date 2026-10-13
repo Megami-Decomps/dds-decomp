@@ -132,7 +132,8 @@ void itfDrawEightDigitFadeValue(s32 x, s32 y, s32 extent, u32 value) {
     }
 }
 
-void func_0031E7C8(FadeNumber *entry, u32 displayValue) {
+/* Set the value consumed by the lower eight-digit fade display. */
+void itfSetLowerFadeValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -149,7 +150,8 @@ void itfDrawLowerFadeGlyphPair(FadeNumber *entry) {
     }
 }
 
-void func_0031E850(FadeNumber *entry, u32 displayValue) {
+/* Set the value consumed by the upper eight-digit fade display. */
+void itfSetUpperFadeValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -205,7 +207,8 @@ void mnuDrawFadeSequenceThree(FadeNumber *entry) {
     }
 }
 
-void func_0031EE28(FadeNumber *entry, u32 displayValue) {
+/* Set the two-choice atlas row; the drawing function performs the clamp. */
+void itfSetTwoChoiceFadeSelection(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -230,7 +233,8 @@ void mnuDrawFadeSequenceTwo(FadeNumber *entry) {
     }
 }
 
-void func_0031EEE8(FadeNumber *entry, u32 displayValue) {
+/* Set the round display's glyph selector; its drawer clamps to 1..3. */
+void itfSetRoundFadeDisplayValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -269,7 +273,8 @@ void itfDrawFadeGlyphTriplet(FadeEntry *entry) {
     }
 }
 
-void func_0031F040(FadeNumber *entry, u32 displayValue) {
+/* Set the selector for optional glyphs in the frame fade display. */
+void itfSetFrameFadeGlyphSelector(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 

@@ -757,7 +757,8 @@ void effSeedEmitterDelayRandomState(void) {
     effMiscSeedRandomFromClock((EffRandState *)&effEmitterDelayRandomState);
 }
 
-void func_001536A0(void) {
+/* Effect-manager startup hook for emitter work; retail currently does no work. */
+void effInitializeEmitterSubsystem(void) {
 }
 
 /* Allocate records followed by their owner tail; clear only two native state words per record. */
