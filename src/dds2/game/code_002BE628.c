@@ -122,7 +122,7 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 
 
@@ -2873,7 +2873,7 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
     evtStageTestSelectEntry(entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetOption);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
+INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestAdvanceResourceWork);
 
 void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     MdlCtx *model = evtStageTestState.model;
@@ -3006,7 +3006,7 @@ void evtStageTestUpdateCamera(void)
 }
 
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
-    s8 result = func_002C6CE8();
+    s8 result = evtStageTestAdvanceResourceWork();
 
     if (result == 1) {
         return 1;

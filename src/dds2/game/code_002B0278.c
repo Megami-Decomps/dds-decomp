@@ -99,7 +99,7 @@ extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 extern s32 mnuIsStaffMenuInputBlocked();
 
@@ -1155,7 +1155,7 @@ s32 mnuStepPartySelectionControl(KwlnTask *callback) {
 u8 mnuIsStateNotOne(void) {
     s64 state;
 
-    state = func_002C6CE8();
+    state = evtStageTestAdvanceResourceWork();
     return state != 1;
 }
 
@@ -1444,7 +1444,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
             menuWork->idleFrames = 0;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            if (func_002C6CE8() != 1) {
+            if (evtStageTestAdvanceResourceWork() != 1) {
                 evtStageTestStop();
                 menuWork->staffExit = 1;
                 menuWork->active = 1;
@@ -1556,7 +1556,7 @@ s32 mnuDrawSelectedStaffPartyView(KwlnTask *callback) {
 void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
     u32 count;
     if (object->motionSelection == -1) {
-        if (func_002C6CE8() != 1) {
+        if (evtStageTestAdvanceResourceWork() != 1) {
             if (evtStageTestHasPendingMotion() == 0) {
                 object->idleFrames += 1;
             }
