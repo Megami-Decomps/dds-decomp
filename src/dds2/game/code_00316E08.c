@@ -55,7 +55,7 @@ extern void mnuUpdateTimedEffectPosition(void);
 typedef struct SoundSlot SoundSlot;
 extern SoundSlot *dds3ClaimSoundSlot(u32, u32);
 extern s32 D_00438934;
-void func_00319F48(void);
+void mnuClaimTimedEntryEffectRecord(void);
 
 extern MnuEffectRecord *D_00438930;
 
@@ -1074,12 +1074,12 @@ void func_00319E48(MenuRuntimeRecord *record) {
         sdfMotionSampleAtFrame(node->model->first, 20.0f);
         D_00438934 = node->model->first->frameCount - 20;
         evtPrintDeveloperConsoleMessage("ModelFrame [%d]\n", D_00438934);
-        func_00319F48();
+        mnuClaimTimedEntryEffectRecord();
     }
 }
 
 /* Acquire a record from the third effect list at the timed UI position. */
-void func_00319F48(void) {
+void mnuClaimTimedEntryEffectRecord(void) {
     MenuProgressParameters *origin;
     s32 y, x;
     f32 value;
