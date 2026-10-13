@@ -70,6 +70,7 @@
 0x00105540	kwlnTextureGetReferenceFlag	inferred	Sequel twin of first-game texture reference flag getter; returns flag set only for held texture. [names_reviewed18.tsv]
 0x00105548	kwlnTextureGetHeldReference	inferred	Sequel twin of first-game retained texture reference getter; same pointer passed to sdfTexReleaseReference. [names_reviewed18.tsv]
 0x001057A8	kwlnCancelConfiguredFadeFrames	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:754:func_001057A8; Disables the configured frame-fade state initialized by kwlnFadeSetupFrames.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001057B0	evtInitializeFrameStatePacketTemplates	inferred	Initializes the six 0xB0 packet records for three 0x160-byte frame states later selected by evtBuildFrameStatePacketList; called during display-state reset. Paired DDS1 provider at 0x00105890.
 0x00105910	evtBuildFrameStatePacketList	inferred	Creates a reset packet list and appends the selected buffered frame state. [names_reviewed9.tsv]
 0x001059D8	kwlnFadeGetColor	inferred	Returns a pointer to the global fade RGBA color through its output parameter.
 0x00105B78	kwlnFadeUpdate	inferred	quiet3 twin unification

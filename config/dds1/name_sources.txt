@@ -90,6 +90,7 @@
 0x00105630	kwlnAdvanceShakeOffsets	inferred	U3
 0x00105828	kwlnFadeSetupFrames	inferred	configures fade mode and scaled frame durations
 0x00105888	kwlnCancelConfiguredFadeFrames	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:719:func_00105888; Disables the configured frame-fade state initialized by kwlnFadeSetupFrames.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00105890	evtInitializeFrameStatePacketTemplates	inferred	Initializes the six 0xB0 packet records for three 0x160-byte frame states later selected by evtBuildFrameStatePacketList; called during display-state reset. Paired DDS2 provider at 0x001057B0.
 0x001059F0	evtBuildFrameStatePacketList	inferred	Creates a reset packet list and appends the selected buffered frame state. [names_reviewed9.tsv]
 0x00105A68	kwlnFadeClear	inferred	clears fade RGBA bytes and flag bits 0-1
 0x00105A90	kwlnFadeSetColor	inferred	sets fade RGBA bytes from args, clears flag bits 0-1
