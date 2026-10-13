@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "bill_state_packet.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
@@ -185,7 +186,6 @@ void billFlushPendingChildPackets(void) {
     D_00438EFC = NULL;
 }
 
-extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 extern f32 D_003AA970[4];

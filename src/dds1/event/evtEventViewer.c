@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "itf_mes_window.h"
@@ -62,7 +63,6 @@ extern s32 D_003BBE94;
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
-extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
@@ -1053,7 +1053,6 @@ extern s32 D_003BBE94;
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
-extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);

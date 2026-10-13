@@ -2,6 +2,7 @@
 #include "sdf_dev_cons.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
@@ -172,8 +173,6 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-
-extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 

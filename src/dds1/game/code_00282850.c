@@ -5,6 +5,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
@@ -111,7 +112,6 @@ extern void btlUpdateJobPositionFromModel(s32);
 extern void mnuApplyModelCamera(MdlCtx *);
 extern void evtStageTestApplyEntryRotation(MdlCtx *);
 extern void evtStageTestUpdateCamera(void);
-extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];

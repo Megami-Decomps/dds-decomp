@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
@@ -14,7 +15,6 @@
 
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 kwlnGetDrawBufferIndex(void);
 extern SdfTex *kwlnTextureGetHeldReference(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_0037FB88;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_timer.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
