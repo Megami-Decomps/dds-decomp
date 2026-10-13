@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_bill_config.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
@@ -109,19 +110,6 @@ struct EffNodeDescriptor;
 
 
 /* Complete serialized descriptors shared with their existing consumers. */
-typedef struct BillConfig {
-    u32 flags;
-    u32 kind;
-    u32 resourceIndex;
-    f32 width;
-    f32 height;
-    f32 depth;
-    u32 projectionDistance;
-    s32 mapSelector;
-    union { u32 entry; u32 fadeStart; };
-    u32 fadeEnd;
-    u32 parameters28[2];
-} BillConfig;
 
 typedef struct FldSpawnCollision {
     u32 kind;
@@ -132,7 +120,6 @@ typedef struct FldSpawnCollision {
 } FldSpawnCollision;
 
 typedef char FldSpawnBatchSize[(sizeof(FldSpawnBatch) == 12) ? 1 : -1];
-typedef char BillConfigSize[(sizeof(BillConfig) == 0x30) ? 1 : -1];
 typedef char FldSpawnCollisionSize[(sizeof(FldSpawnCollision) == 0x30) ? 1 : -1];
 
 extern FldFileResource *D_003BD7B0;

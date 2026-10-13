@@ -16,6 +16,7 @@
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "mdl_part_entry.h"
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
 #include "mdl_resource_table.h"
@@ -592,18 +593,6 @@ void mdlEditMarkParametersWithPad(EffMarkParams *params, s16 *fieldCursor) {
     }
     *fieldCursor = selectedField;
 }
-
-typedef struct MdlPartEntry {
-    u32 kind;     /* 0x00: billboard, effect, or object */
-    s32 state;    /* 0x04 */
-    void *object; /* 0x08: billboard, effect, or object pointer */
-    u8 pad0C[4];
-} MdlPartEntry;
-
-typedef char MdlPartEntry_size_must_be_0x10[(sizeof(MdlPartEntry) == 0x10) ? 1 : -1];
-typedef char MdlPartEntry_object_offset_must_be_0x08[
-    ((unsigned long)&((MdlPartEntry *)0)->object == 0x08) ? 1 : -1];
-
 
 #define MDL_PART_BILLBOARD 0
 

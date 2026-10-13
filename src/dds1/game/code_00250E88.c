@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "dsp_name.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -260,7 +261,6 @@ extern void *memcpy(void *, const void *, u32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
-extern s32 dspStartEntry(s32);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 
 /* Display the selected mantra and move the scene grid to its filled cell. */

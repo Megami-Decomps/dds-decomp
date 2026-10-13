@@ -769,7 +769,7 @@ s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *list, struct MnuShootingWork
 }
 
 /* Advance work entries whose hit rectangles overlap the input. */
-s32 func_00324070(MenuWorkEntry *input) {
+s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *input) {
     s32 entryIndex;
 
     if (input->remaining == 0) {

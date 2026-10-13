@@ -1117,6 +1117,7 @@
 0x001425F8	fldSetSceneRecordChunk	inferred	relocates scene record chunk and caches count plus rows [names_R_FuncNames2.tsv]
 0x00142658	fldInitSceneMapLabels	inferred	initializes scene map label lengths and associated data [names_R_FuncNames2.tsv]
 0x001426A8	fldReleaseSceneRecordChunk	inferred	frees stored transfer resource and clears record pointers [names_R_FuncNames2.tsv]
+0x001426E0	fldResetSceneResourceTables	inferred	resets the scene-record state and clears the title-specific scene model/slot tables during field display initialization; counterpart 0x00145818 (DDS2)
 0x00142758	fldSetEmitterPosition	inferred	builds (x,y,z,1) vector, stores via COP2 into emitter+0x50 and restarts it
 0x00142C00	fldFindRecordItem	inferred	scans D_003BAEDC 0x14-stride records/0x1C-stride items for (record, itemIndex), returns item+0x10 value +1 or 1
 0x00142D18	fldGetMaxItemValue	inferred	scans D_003BAEDC table for maximum item+0x10 value via movn update, returns max+1
@@ -4125,6 +4126,7 @@
 0x00227EE0	evtCommandSetUnitScaledValueFlag	inferred	Finds world unit and sets a flag on its nested scaled-value record. [names_reviewed6.tsv]
 0x00227F60	evtCommandClearUnitScaledValueFlag	inferred	Finds world unit and clears a flag on its nested scaled-value record. [names_reviewed6.tsv]
 0x00227FE0	evtCommandMoveLightAlongPathOrWarn	inferred	Moves light along path and prints LIGHT_PATH_MOVE warning on failure. [names_reviewed6.tsv]
+0x00228058	evtCommandWaitLightResourceScale	inferred	Waits for the kind-9 LIGHT object resource scale to reach its selected target; absent or unsupported scale state completes immediately. Paired DDS2 0x00242CB8.
 0x002280B0	evtCreateTextureEntryChildTask	inferred	confidence=high; matched-C; src/dds1/game/code_00228058.c:73:func_002280B0; Resolves TEX_BE entry from script IDs, creates task, parents it to current script task and pushes new handle.; twin=0x00242D10, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00228180	evtOpcodeCreateWorldChildTask	inferred	Byte-identical dds2 twin 0x00242DE0; Creates an event task from the first script argument, attaches it under the world task at offset 0xE4, and selects the new task. [names_conflicts.tsv]
 0x00228210	evtOpcodeSetTaskContextFlag	inferred	Byte-identical dds2 twin 0x00242E70; If the script-selected task is registered, its context helper sets flag bit zero on that task's event context. [names_conflicts.tsv]

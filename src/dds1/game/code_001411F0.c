@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
@@ -167,8 +168,6 @@ extern s32 D_0032E4C4[];
 extern u8 D_0034D8F0[];
 
 extern s32 evtCreateMessageWindowIfMissing(s32 unused);
-
-extern void dspStartEntry(s32 arg0);
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -939,7 +938,7 @@ extern SdfTex *D_003D40A0[4];
 extern SdfModel *D_00348F30[];
 extern FldSlot D_003D40B0[];
 
-void func_001426E0(void) {
+void fldResetSceneResourceTables(void) {
     s32 i;
 
     fldAreaState.unkC4 = -1;

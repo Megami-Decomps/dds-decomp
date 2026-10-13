@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "common.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -2452,9 +2453,6 @@ extern s32 D_003CE14C[];
 extern u8 D_003CE620[];
 extern u8 D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
-extern s32 dspStartEntry(s32);
-
-
 typedef struct EvtFlagGate {
     s8 threshold;
     u8 pad1;
@@ -3626,7 +3624,7 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
 extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawShopCurrencyBalance(void *, s32);
-extern void func_00296E98(s32, u32, s32, s32);
+extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
 
 /* Draw the active dispatch mode before advancing its callback state. */
 s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
@@ -3641,7 +3639,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         mnuDrawShopPricePlaceholder(0, 0, 0, state, 0x53);
         mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-        func_00296E98((s32)state, 0x100, 3, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
         if (state->stateTable == (s32)D_003CE498) {
@@ -3650,7 +3648,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             mnuDrawListChildrenWithCountdown(
                 0, 0, 0, (u8 *)state->ownedWindows[0]->list, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-            func_00296E98((s32)state, 0x100, 4, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 4, 0x53);
         } else {
             mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
@@ -3658,7 +3656,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
             mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)state, 0x100, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-            func_00296E98((s32)state, 0x100, 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 2, 0x53);
         }
         break;
     }
@@ -3941,7 +3939,7 @@ s32 func_00264FF0(KwlnTask *callbackContext) {
 }
 
 /* Select the highest reached reward tier, retiring earlier tier flags first. */
-s32 func_00265038(void) {
+s32 mnuSelectUnclaimedProgressRewardTier(void) {
     DatGameState *state = datGameState;
     s32 index;
     s32 selected = -1;
@@ -4007,7 +4005,7 @@ extern s32 evtGetMessageWindowControlState(void);
 
 extern char D_003CE63C[];
 extern char D_00437850[];
-extern s32 func_00265038();
+extern s32 mnuSelectUnclaimedProgressRewardTier();
 extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);
 extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
@@ -4024,7 +4022,6 @@ extern void func_0026C7F8();
 extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 dspStartEntry(s32);
 extern void ptyAdjustItemQuantity();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
@@ -4035,7 +4032,7 @@ struct KwlnTask;
 
 s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
-    s32 slotIndex = func_00265038();
+    s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 i;
     MnuProgressReward *reward;
     char text[0x40];
@@ -4103,7 +4100,7 @@ s32 evtFinishPopupAfterMenuConfiguration(KwlnTask *callback) {
 s32 func_00265408(KwlnTask *task) {
     char text[0x40];
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
-    s32 slotIndex = func_00265038();
+    s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 choice;
     s32 rewardValue;
 
@@ -4152,7 +4149,7 @@ extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
 s32 func_002655C0(KwlnTask *callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
-    s32 slotIndex = func_00265038();
+    s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 *popup = &context->popupState;
     s32 dispatch = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
     s32 choice;

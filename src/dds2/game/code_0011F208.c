@@ -1192,7 +1192,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00123DE8);
 
-s32 func_00123EE0(s32 floor, f32 x, f32 z) {
+s32 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z) {
     FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldAreaState.area, floor);
     s32 cellX;
     s32 row;

@@ -665,7 +665,7 @@ extern u8 D_0037F510[2][2][16];
 extern void func_0031AEB8(MnuShootingWork *);
 extern s32 func_0031AF68(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
-extern s32 func_00321340(MenuProgressState *);
+extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
 extern void func_00323748(MenuWorkEntry *, MnuShootingWork *);
 extern s32 func_003233E8(s32);
@@ -674,10 +674,10 @@ extern s32 func_00324840(void);
 extern s32 func_0031A0B8(MnuShootingWork *);
 extern MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *, MnuShootingWork *);
 extern s32 func_00323BB8(MnuShootingWork *);
-extern s32 func_00324070(MenuWorkEntry *);
+extern s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *);
 extern MenuRuntimeList *func_00321ED8(void);
 extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
-extern void func_0031B188(void);
+extern void mnuUpdateShootingCameraVectors(void);
 extern void mnuTickScoreProgressState(MnuShootingWork *);
 extern s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *);
 extern void func_0031A7F8(MnuShootingWork *);
@@ -729,7 +729,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         return 0;
     }
     if (work->phase == 2) mnuAdvanceCursorStepUntilThreshold();
-    func_00321340(mnuGetResourceProgressStepState());
+    mnuTriggerProgressResourceRecords(mnuGetResourceProgressStepState());
     mnuVisitActiveRecords((s32)work);
     func_00323748(&D_0040ABF8, work);
     if (work->phase == 2) func_003233E8(0);
@@ -769,10 +769,10 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     }
     if (work->phase < 3) {
         func_00323BB8(work);
-        if (work->phase < 3) func_00324070(&D_0040ABF8);
+        if (work->phase < 3) mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
     }
     mnuDispatchRuntimeWorkOverlaps(func_00321ED8(), work);
-    func_0031B188();
+    mnuUpdateShootingCameraVectors();
     mnuTickScoreProgressState(work);
     switch (mnuAdvanceShootingRoundPhase(work)) {
     case 0:
@@ -836,7 +836,7 @@ extern void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, 
 extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
 extern void func_0031CBC8(MnuSectionModelWork *work, s32 paused);
 extern void func_0031DA38(struct WideSlotPool *work, u32 flags);
-extern void func_0031E020(struct CompactSlotPool *work, u32 flags);
+extern void itfUpdateAndDrawSpriteHitEffects(struct CompactSlotPool *work, u32 flags);
 extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
 extern void mnuSetNodeScaleVector(u8 *node, f32 value);
 extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
@@ -951,12 +951,12 @@ s32 func_00318C00(MnuShootingWork *work) {
         mnuUpdateEffectQueues(work->effectWork, 0);
         func_0031CBC8(work->modelWork, 0);
         func_0031DA38(work->spriteWork, 0);
-        func_0031E020(work->tintWork, 0);
+        itfUpdateAndDrawSpriteHitEffects(work->tintWork, 0);
     } else {
         mnuUpdateEffectQueues(work->effectWork, 1);
         func_0031CBC8(work->modelWork, 1);
         func_0031DA38(work->spriteWork, 1);
-        func_0031E020(work->tintWork, 1);
+        itfUpdateAndDrawSpriteHitEffects(work->tintWork, 1);
     }
 
     if (D_00438928 != NULL) {

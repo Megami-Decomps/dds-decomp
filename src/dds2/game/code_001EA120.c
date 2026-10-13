@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -51,7 +52,7 @@ extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern s32 datActionAnimationRecords;
 
-extern f32 func_00208000(s32, f32 *, f32 *);
+extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -83,7 +84,6 @@ extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 
@@ -228,7 +228,7 @@ s32 btlCheckActorDistanceLimit(void) {
 }
 
 s32 btlIsEntryHeightWithinLimit(void) {
-    if (func_00208000(0x400, 0, 0) > 600.0f) {
+    if (btlMeasureFilteredUnitGroupBounds(0x400, 0, 0) > 600.0f) {
         return 0;
     }
     return 1;

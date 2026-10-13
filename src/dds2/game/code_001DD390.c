@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
 #include "eff_random.h"
@@ -3043,7 +3044,6 @@ void btlSeekUnitModelFrameZero(BtlUnit *unit) {
     }
 }
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 void btlSeekRandomModelFrame(BtlUnit *object) {
     s32 duration;
@@ -6284,7 +6284,7 @@ void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
     }
 }
 
-extern f32 func_00208750(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
     s128 vec[3];
@@ -6302,7 +6302,7 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
             }
             btlUnitGetMuzzlePosVU(first);
         } else {
-            func_00208750(action->targetList, 0, 0);
+            btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
         }
         pos = &vec[1];
         VU0_STORE_VF(vf10, pos);
@@ -6332,7 +6332,7 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
         if (count == 1) {
             btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
         } else {
-            func_00208750(action->targetList, 0, 0);
+            btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
         }
         pos = &vec[1];
         VU0_STORE_VF(vf10, pos);

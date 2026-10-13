@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "ui_color.h"
 #include "kwln.h"
@@ -15,7 +16,6 @@ extern u8 brsGetLevelStepCrossedBy(s32, s32);
 extern u8 brsGetLevelStepForValue(s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern void dspSetActive(s32);
-extern void dspStartEntry(s32);
 extern void evtStageTestQueueMotion(s32, u32);
 extern char D_003BC550[];
 extern char D_003BC558[];

@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -7,10 +8,6 @@
 
 
 extern void dspSetActive(s32 index);
-
-extern s32 dspStartEntry(s32 index);
-
-
 
 extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
 

@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
@@ -2325,7 +2326,6 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
 
 extern s32 btlRollAiBucket(void);
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 /* Select an enemy item drop; keep DDS2's party ability bonus and event exclusions. */
 u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
@@ -2546,7 +2546,6 @@ u32 btlGetEscapeAttemptCount(void) {
     return *(u32 *)(controller + 0x278);
 }
 
-extern u32 effMiscRandMod(void *, u32);
 
 /* Return a random eligible actor task, or 0 if no candidate is available. */
 s32 btlChooseAvailableUnit(void) {

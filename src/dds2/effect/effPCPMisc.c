@@ -2958,7 +2958,7 @@ void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u32 func_001695C8(void);
-extern f32 func_00208000(s32 mask, f32 *maxTop, f32 *minTop);
+extern f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern f32 sdfAtan2(f32 y, f32 x);
@@ -2983,7 +2983,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         return;
     }
     if (func_001695C8() && work->frame == 0) {
-        func_00208000(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
+        btlMeasureFilteredUnitGroupBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
         btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF(vf10, muzzle);

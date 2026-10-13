@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "dat_command.h"
 #include "itf_mes_window.h"
 #include "fr_font.h"
@@ -2759,8 +2760,6 @@ s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
-
-extern s32 dspStartEntry(s32);
 
 s32 evtPlayDispatchModeCue(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);

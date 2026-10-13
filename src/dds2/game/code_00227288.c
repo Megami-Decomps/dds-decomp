@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "dds3obj.h"
 #include "btl_effect_position.h"
@@ -71,7 +72,6 @@ extern char D_0041B628[];
 extern char D_0041B640[];
 extern s32 btlHasMarkedEntry14(s32 actor);
 extern void btlClearRuntimeFlag2000(void);
-extern u32 effMiscRandMod(void *state, u32 modulus);
 extern void btlSetEffectCameraKeys(s32 command, f32, f32, f32, f32, f32, f32, f32, f32,
     f32, f32, f32, f32, f32, f32, f32, f32);
 
