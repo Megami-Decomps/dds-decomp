@@ -1092,8 +1092,8 @@ post-final-call cleanup exception: clear the consumed context parameter after
 the true void provider call. Qualified cc1 RTL retains reset uid30 through
 `01.sibling` and `02.jump`, then deletes it in `03.cse`; both retail bodies
 retain JAL and epilogue. Their complete owner is `7 match, 0 differ`.
-The same exception resolves DDS2 `btlUnitWrapA` (0x002226D0), `btlUnitWrapB`
-(0x002247B0), and `func_00225778` (28B each). They clear the consumed signed
+The same exception resolves DDS2 `btlUpdateBrahmanDefeatCamera` (0x002226D0), `btlUnitWrapB`
+(0x002247B0), and `btlUpdateSatanDefeatCamera` (28B each). They clear the consumed signed
 rotation mode after capturing the true signed provider result. Reset uid38
 survives `01.sibling`/`02.jump` and first disappears in `03.cse`; qualified
 assembly and all 22 RTL dumps agree. Complete owner: `264 match, 0 differ`.
@@ -7654,8 +7654,8 @@ earlier unit asks whether those two are one file. To find the boundary:
    below `p`). The allowed boundaries are the intersection, a window, not a
    point.
 
-Examples. DDS2 `func_00224500` and `func_00225B48` match only with
-`func_00217470` defined in their own TU (`bne` becomes `bnel` at `+0x38`
+Examples. DDS2 `btlUpdatePartyApproachCameraStep` and `btlUpdateSatanApproachCameraStep` match only with
+`btlBuildAngledApproachCameraPose` defined in their own TU (`bne` becomes `bnel` at `+0x38`
 otherwise), so no boundary can lie between 0x217470 and 0x225B48; this is why
 `code_00224FC0` and a 0x2240F8 split are wrong even though their no-sibling-call
 runs look clean. DDS2 `code_001DD390` / `code_001EB5B0`: `btlBeginActionEndCameraPullback` needs
@@ -11170,4 +11170,32 @@ retaining the script unit's original `u64` extern/local despite the backend's
 `u32` definition. No truthful-type closure is part of this identifier-only
 batch. DDS1's differently behaving general-effect script getter keeps its
 existing name.
+
+## Progressive approach framing and boss-camera registrations
+
+`btlBuildProgressiveApproachCameraPose` (DDS1 0x002045E8) derives progress
+from command state, motion duration and effect scale, caps only above one,
+and uses `0.55 + ratio * (0.60 - 0.55)` for pull-back. Its
+`ratio * 0.0f + 0.6108652f` angle expression and default-plane adjustment
+are preserved, not simplified. DDS2 `btlBuildAngledApproachCameraPose`
+(0x00217470) instead has fixed 0.6 pull-back and an explicit degree angle,
+without that timeline/plane handling. They intentionally have distinct names.
+
+DDS2 camera roles come from the live scene callback installer, literal
+diagnostics and native enemy-name indexes, not speculative skill names:
+`btlQueueVetalaResourceAndSoundOnce`, Vritra action framing, the five-form
+Brahman party presets, and Satan action/defeat framing. Action 0x211
+retains its numeric identifier in `btlSelectAction211CameraPair`; the
+`3SIK:LKG` strings alone do not establish a skill or boss identity.
+`btlChooseSatanGroupAwareCamera` reflects its actual candidate-marking
+difference: cases zero/one mark all, case two clears all and marks the
+linked group. The `SATAN:I` abbreviation and duplicate `I-0` labels are
+not expanded into an unsupported idle-state claim.
+
+The released preset-A adapters at DDS1 0x0020B560 and DDS2 0x0021C7F8
+share `btlUpdateLinkedDefeatCamera`, since their observable forwarding and
+captured signed-result behavior agree while their scene/preset data differ.
+All consumed-command/rotation resets that block sibling calls stay intact.
+DDS1 0x0020DE50 and DDS2 `btlUnitWrapB` (0x002247B0) remain outside this
+naming closure because the DDS1 adapter is still claimed.
 

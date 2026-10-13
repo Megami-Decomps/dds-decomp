@@ -270,7 +270,7 @@ void btlQueueLinkedPairModelSwapTasks(BtlTask *, s32, u64, u64, u64);
 void func_00209EB8(BtlTask *);
 s32 func_0020A860(void);
 s32 func_0020AB08(DatPartyRecord *, s32);
-s32 func_0020B560(BtlLinkedCommand *, BtlCamState *, s32);
+s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 void btlUpdateBossUnitScaleTransition(void);
 s32 func_0020D668(BtlLinkedCommand *, s32, s32);
 s32 func_0020DE50(BtlLinkedCommand *, BtlCamState *, s32);
@@ -488,7 +488,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlMapSpeciesToActionVariant);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, func_0020CCA8);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetLinkedDefeatCameraPresetA);
-        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, func_0020B560);
+        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUpdateLinkedDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->cameraStateChangePredicate, 0x0, btlTryStartTargetFacingActionEffect);
         BTL_INSTALL_CALLBACK(battle->pad614, 0x0, btlUpdateSpecialTargetCamera);
         BTL_INSTALL_CALLBACK(battle->pad614, 0x4, btlHandleTargetedDefeatAction);
