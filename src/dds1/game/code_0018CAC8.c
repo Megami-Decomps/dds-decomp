@@ -13,6 +13,7 @@
 #include "eff.h"
 #include "eff_math.h"
 #include "sdf_texture_file.h"
+#include "sdf_projection.h"
 
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
 #define EFF_DIRECTORY_PATH_BYTES 0x70

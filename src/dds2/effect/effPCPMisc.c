@@ -2253,7 +2253,6 @@ void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void sdfProjectVuVectorToScreen();
 extern void effResourceRectDrawPixels(EffResourceRectWork *work);
 
 /* Both compact fade renderers interpolate their extent with integer truncation. */

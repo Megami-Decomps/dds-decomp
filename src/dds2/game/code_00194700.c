@@ -23,6 +23,7 @@ extern s8 D_0043643D;
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
+#include "sdf_projection.h"
 
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
 #define EFF_DIRECTORY_PATH_BYTES 0x70

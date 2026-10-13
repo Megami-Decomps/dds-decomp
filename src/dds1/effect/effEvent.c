@@ -241,7 +241,6 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
 }
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
-extern void sdfProjectVuVectorToScreen();
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDrawMarkerBoxAtPoint(f32 *position) {
