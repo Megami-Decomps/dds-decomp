@@ -82,7 +82,7 @@ void func_00154F18(s32);
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
-s32 func_001A4A10(s32 window, s32 first, s32 second);
+s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
@@ -345,7 +345,7 @@ s32 itfMesScriptSetMessageRange(void) {
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    func_001A4A10(window, first, second);
+    itfMesSetOptionValue(window, first, second);
     return 1;
 }
 
@@ -833,7 +833,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
 }
 
 /* Set or append a window option; reserved and out-of-range IDs are rejected. */
-s32 func_001A4A10(s32 window, s32 id, s32 value) {
+s32 itfMesSetOptionValue(s32 window, s32 id, s32 value) {
     ItfMesBlk40 *optionBlock = &itfWindowSlots[window].mes->blk40;
     ItfMesOption *option = NULL;
     s32 index;
