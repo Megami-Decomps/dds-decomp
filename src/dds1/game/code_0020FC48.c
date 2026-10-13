@@ -1062,7 +1062,7 @@ void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
         return;
     }
     if (cacheEntry->packRequest != 0) {
-        func_00288788(cacheEntry->packRequest);
+        btlStageTaskCleanupCallback(cacheEntry->packRequest);
     }
     if (cacheEntry->soundOwner != 0) {
         sndReleaseSlotOwner(cacheEntry->soundOwner);
@@ -1208,7 +1208,7 @@ void func_00211740(s32 kind, s32 id) {
                     sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
                 }
             }
-            func_00288788(entry->packRequest);
+            btlStageTaskCleanupCallback(entry->packRequest);
             entry->packRequest = NULL;
         }
         entry->state = 1;

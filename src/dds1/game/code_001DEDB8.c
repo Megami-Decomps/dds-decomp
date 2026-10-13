@@ -5273,7 +5273,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                 node = node->next;
                 i++;
             }
-            func_00288788(request);
+            btlStageTaskCleanupCallback(request);
             args->request = NULL;
         }
         if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
@@ -6584,7 +6584,7 @@ void sndLoadSysEffLb(void) {
         D_0035F748[i].archiveData = 0;
         D_0035F748[i].opaque08 = 0;
     }
-    func_00288788((void *)archive);
+    btlStageTaskCleanupCallback((void *)archive);
 }
 
 /* Register available SYSEFF handles; unavailable slots are left untouched. */

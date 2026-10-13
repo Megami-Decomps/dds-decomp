@@ -1503,7 +1503,7 @@ void dds3ForEachEntry(void) {
 }
 
 extern void mtrRefreshMantraStateForUnit1(void);
-extern void func_00286700(void);
+extern void mtrRefreshMantraStateForUnit7(void);
 extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
 extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
 extern u16 D_003862D0[16][4];
@@ -1530,7 +1530,7 @@ void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry) {
                 stockId = 3;
                 datGameState->mantraBits[7] = datGameState->mantraBits[3];
                 datGameState->profileBanks[7] = datGameState->profileBanks[3];
-                func_00286700();
+                mtrRefreshMantraStateForUnit7();
             }
             break;
         default:

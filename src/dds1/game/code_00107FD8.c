@@ -73,7 +73,7 @@ extern s32 fldIsFieldResourceWaitFinished(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileEnterMcPackScene(s32 mode);
 
-extern s32 func_0028F5F8(void);
+extern s32 fileMenuOperationSucceeded(void);
 
 extern u32 kwlnDrawSurfaceIndex;
 
@@ -917,9 +917,9 @@ u32 evtPollFileMenuModeThree(void) {
     s64 operationResult;
     u32 status;
 
-    func_0028F458();
+    fileMenuReleaseNoOp();
     fileReleaseMenuResources();
-    operationResult = func_0028F5F8();
+    operationResult = fileMenuOperationSucceeded();
     status = 0xffffffff;
     if (operationResult != 0) {
         status = 0;
@@ -956,9 +956,9 @@ void evtOpenFileMenuModeOne(void) {
 }
 
 s32 evtCheckSelectionInput(void) {
-    func_0028F458();
+    fileMenuReleaseNoOp();
     fileReleaseMenuResources();
-    if (func_0028F5F8() != 0) {
+    if (fileMenuOperationSucceeded() != 0) {
         fldStartSequenceRecord();
         return 0;
     }
@@ -993,9 +993,9 @@ u32 evtPollFileMenuModeTwo(void) {
     s64 operationResult;
     u32 status;
 
-    func_0028F458();
+    fileMenuReleaseNoOp();
     fileReleaseMenuResources();
-    operationResult = func_0028F5F8();
+    operationResult = fileMenuOperationSucceeded();
     status = 0xffffffff;
     if (operationResult != 0) {
         status = 0;

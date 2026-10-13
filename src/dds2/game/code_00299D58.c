@@ -324,7 +324,7 @@ s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029A5D8(KwlnTask *request) {
+s32 mnuRequestMessageWindowAndAdvanceResultPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();

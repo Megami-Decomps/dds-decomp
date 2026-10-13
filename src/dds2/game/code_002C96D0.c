@@ -1058,14 +1058,14 @@ s32 fileBeginDirectoryScan(void) {
     return fileBeginPromptDialog(&mcPrepareDirectory, &fileScanSlotStates, 1);
 }
 
-extern s32 func_002CACF0(void);
+extern s32 fileRequestDefaultMode(void);
 
 s32 fileBeginSlotResetPrompt(void) {
     fileSetMenuFlowState(0);
     D_00437D3C = 0;
     D_00437D1C = 8;
     D_00437CF8 = 0;
-    return fileBeginPromptDialog(&func_002CACF0, &fileBeginSlotReset, 1);
+    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileBeginSlotReset, 1);
 }
 
 s32 fileReturnToSlotSelection(void) {
@@ -1087,16 +1087,16 @@ s32 fileBeginSlotPromptFive(void) {
     D_00437CF4 = 1;
     fileSetMenuFlowState(0);
     D_00437D1C = 5;
-    return fileBeginPromptDialog(&func_002CACF0, &fileRestartSlotSelection, 1);
+    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileRestartSlotSelection, 1);
 }
 
-extern s32 func_002CACF0(void);
+extern s32 fileRequestDefaultMode(void);
 
 s32 fileBeginSlotPromptSix(void) {
     D_00437CF4 = 1;
     fileSetMenuFlowState(0);
     D_00437D1C = 6;
-    return fileBeginPromptDialog(&func_002CACF0, &fileRestartSlotSelection, 1);
+    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileRestartSlotSelection, 1);
 }
 
 s32 fileBeginSlotMetadataRefresh(void) {
@@ -1147,7 +1147,7 @@ s32 mcdEnterDefaultFileFlow(void) {
     return 0;
 }
 
-s32 func_002CACF0(void) {
+s32 fileRequestDefaultMode(void) {
     return mcdEnterDefaultFileFlow();
 }
 
@@ -1298,7 +1298,7 @@ s32 fileIsCardSpaceAboveMinimum(void) {
 }
 
 extern s32 fileBeginSlotPromptFive(void);
-extern s32 func_002CACF0(void);
+extern s32 fileRequestDefaultMode(void);
 extern s32 fileIsCardSpaceAboveMinimum(void);
 extern s32 fileRestartSlotSelection(void);
 
@@ -1318,10 +1318,10 @@ s32 fileSlotSelectPoll(void) {
     case 3:
         return fileBeginSlotPromptFive();
     case 2:
-        return (s32)func_002CACF0();
+        return (s32)fileRequestDefaultMode();
     case 1:
         if (fileIsCardSpaceAboveMinimum() != 0) {
-            return (s32)func_002CACF0();
+            return (s32)fileRequestDefaultMode();
         }
         return (s32)fileRestartSlotSelection();
     default:
@@ -1330,7 +1330,7 @@ s32 fileSlotSelectPoll(void) {
 }
 
 extern s32 fileBeginSlotPromptFive(void);
-extern s32 func_002CACF0(void);
+extern s32 fileRequestDefaultMode(void);
 extern s32 fileIsCardSpaceAboveMinimum(void);
 
 s32 fileSlotSelectPollClear(void) {
@@ -1347,10 +1347,10 @@ s32 fileSlotSelectPollClear(void) {
     case 3:
         return fileBeginSlotPromptFive();
     case 2:
-        return func_002CACF0();
+        return fileRequestDefaultMode();
     case 1:
         if (fileIsCardSpaceAboveMinimum() != 0) {
-            return func_002CACF0();
+            return fileRequestDefaultMode();
         }
         return mcClearSlotMetadata();
     default:
@@ -1695,7 +1695,7 @@ s32 fileScanSlotStatesAdvance(void) {
                 fileSetMenuFlowState(0);
                 D_00437CF8 = 0;
                 D_00437D3C = 0;
-                return func_002CACF0();
+                return fileRequestDefaultMode();
             }
         }
     }
@@ -2716,7 +2716,7 @@ void func_002CE208(s32 mode) {
         index++;
         node = node->next;
     }
-    func_002C7CE8(request);
+    btlStageTaskCleanupCallback(request);
     D_00437D80 = 1;
     if (mode == 0) {
         D_00437CF4 = 1;
@@ -2774,7 +2774,7 @@ void func_002CE738(KwlnTask *task) {
     fileReleaseMenuResources();
 }
 
-void func_002CE750(void) {
+void fileMenuReleaseNoOp(void) {
 }
 
 void fileReleaseMenuResources(void) {
@@ -2852,7 +2852,7 @@ void fileReleaseMenuResources(void) {
     }
 }
 
-u32 func_002CE920(void) {
+u32 fileMenuOperationSucceeded(void) {
     return 1;
 }
 

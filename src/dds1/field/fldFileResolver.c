@@ -1253,7 +1253,7 @@ void fldFreeDisplayObjects(void) {
                 work = work->next;
             } while (work != NULL);
         }
-        func_00288788(fldAreaLoadRequest);
+        btlStageTaskCleanupCallback(fldAreaLoadRequest);
         fldAreaLoadRequest = NULL;
     }
     fldPendingArea = 0;
@@ -1485,7 +1485,7 @@ void fldReleaseAreaResourceCache(void) {
     }
     resourceHandle = (u32)fldAreaPackedArchive;
     if (resourceHandle != 0) {
-        func_00288788((void *)resourceHandle);
+        btlStageTaskCleanupCallback((void *)resourceHandle);
         fldAreaPackedArchive = 0;
     }
     D_003C9200[0] = D_003BAC90[0];
@@ -1806,7 +1806,7 @@ void fldReleaseFieldResources(void) {
                 i++;
             } while (work != 0);
         }
-        func_00288788(D_003BAC38);
+        btlStageTaskCleanupCallback(D_003BAC38);
         D_003BAC38 = NULL;
     }
 }

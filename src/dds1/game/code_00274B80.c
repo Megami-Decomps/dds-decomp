@@ -248,7 +248,7 @@ void mnuSelectPartySelectionVisuals(u32 context) {
     mnuSetStaffDisplayMode(4, context);
 }
 
-void func_00274BA0(s32 context) {
+void mnuNoOpPartySelectionCleanup(s32 context) {
 }
 
 s32 mnuIsFinalItemIndex(s32 index, s32 item) {
@@ -491,7 +491,7 @@ s32 mnuShopReleaseResources(KwlnTask *task) {
     PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
-    func_00274BA0(context);
+    mnuNoOpPartySelectionCleanup(context);
     sdfReleaseResourceAllocation(menu->allocation);
     return 1;
 }

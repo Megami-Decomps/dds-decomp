@@ -114,7 +114,7 @@ void effInitializeBillResourceOwners(void) {
             node = node->next;
         } while (node != NULL);
     }
-    func_002C7CE8(archive);
+    btlStageTaskCleanupCallback(archive);
     sdfDebugPrintf(D_004142C0, D_004142B0);
 }
 

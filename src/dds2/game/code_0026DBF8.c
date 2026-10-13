@@ -570,7 +570,7 @@ s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)entry->handle));
             }
         }
-        func_002C7CE8(request);
+        btlStageTaskCleanupCallback(request);
         result = -1;
     }
     return result;
