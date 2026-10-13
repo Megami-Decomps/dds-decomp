@@ -10187,3 +10187,35 @@ mode tests preserved another comparison and grew the frame. The single
 workspace reset instead passed the authoritative whole-unit gate:
 `1 match, 0 differ`, 208B, with no CONTEXT/RODATA/UNDEF diagnostics.
 
+## PCP retained inputs and flag lifecycle
+
+The DDS1/DDS2 `effect/effPCPMisc` twins retain six float inputs beside
+already-identified vector/color setters. The four thunder fade variants
+store the input in `EffPCPFadeWork.unk10`; the compact and long-compact
+variants store it in `EffPCPCompactFadeWork.unk34`. Their names distinguish
+the existing effect families, not an unproven meaning for the float.
+The observed updaters do not consume these fields, so the fields retain
+their unknown names. In particular, `effPcpSetThunderScaleFadeInput` does
+not assert that its retained input itself scales the effect.
+
+`effPcpCreateBlockSetMode1` and `effPcpCreateBlockSetMode2` both call
+`effPcpBuildBlockSet` and then store the indicated literal mode. The native
+DDS1 updater at 0x0017DCF8 loads the mode at 0x0017DE30 and 0x0017DF58,
+distinguishing zero from the modes one/two that it treats alike.
+The numeric suffixes therefore state the observable constructor difference,
+not an inferred distinction between two rendering algorithms.
+
+The global-flag callback rows at DDS1 0x00353F38 and DDS2 0x003B0868
+independently establish creation/update/release/clone ordering, corroborated
+by the adjacent named spinning-pair row. `effPcpCreateGlobalEffectFlag` and
+`effPcpCloneGlobalEffectFlag` both set the game's existing global effect
+flag and return a zero payload; neither allocates or copies effect work.
+`effPcpGlobalEffectFlagReleaseNoOp` is the existing empty release callback,
+while `effPcpClearGlobalEffectFlag` occupies the update slot and clears the
+flag. The release name describes the retail no-op; it is not a replacement
+implementation or a deferred cleanup.
+
+These identifications change identifiers and comments only. The existing
+return types, parameter types, field offsets, literal values and callback
+bodies remain unchanged in both games.
+

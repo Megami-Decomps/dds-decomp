@@ -1861,8 +1861,9 @@ void effPcpCopyThunderHandleVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00182458(EffPCPFadeWork *work, f32 val) {
-    work->unk10 = val;
+/* Retain this fade variant's float input; its observed updater does not read it. */
+void effPcpSetExpandingThunderFadeInput(EffPCPFadeWork *work, f32 input) {
+    work->unk10 = input;
 }
 
 void effPcpSetExpandingThunderFadeColor(EffPCPFadeWork *work, u32 value) {
@@ -2027,8 +2028,9 @@ void effPcpCopyGrowingThunderFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00182B38(EffPCPFadeWork *work, f32 val) {
-    work->unk10 = val;
+/* Retain this fade variant's float input; its observed updater does not read it. */
+void effPcpSetGrowingThunderFadeInput(EffPCPFadeWork *work, f32 input) {
+    work->unk10 = input;
 }
 
 void effPcpSetGrowingThunderFadeColor(EffPCPFadeWork *work, u32 value) {
@@ -2313,8 +2315,9 @@ void effPcpSetCompactColor(EffPCPCompactFadeWork *work, u32 value) {
     work->color = value;
 }
 
-void func_001832E0(EffPCPCompactFadeWork *work, f32 val) {
-    work->unk34 = val;
+/* Retain the compact fade input without claiming a scale or timing interpretation. */
+void effPcpSetCompactFadeInput(EffPCPCompactFadeWork *work, f32 input) {
+    work->unk34 = input;
 }
 
 EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *params) {
@@ -2408,8 +2411,9 @@ void effPcpSetLongCompactColor(EffPCPCompactFadeWork *work, u32 value) {
     work->color = value;
 }
 
-void func_00183638(EffPCPCompactFadeWork *work, f32 val) {
-    work->unk34 = val;
+/* Retain the long compact fade input; leave the write-only field's meaning unknown. */
+void effPcpSetLongCompactFadeInput(EffPCPCompactFadeWork *work, f32 input) {
+    work->unk34 = input;
 }
 
 void *effPcpCopyWork(src)
@@ -2816,8 +2820,9 @@ void effPcpCopyScalingThunderFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00184400(EffPCPFadeWork *work, f32 val) {
-    work->unk10 = val;
+/* Retain this fade variant's float input; its observed updater does not read it. */
+void effPcpSetScalingThunderFadeInput(EffPCPFadeWork *work, f32 input) {
+    work->unk10 = input;
 }
 
 void effPcpSetScalingThunderFadeColor(EffPCPFadeWork *work, u32 value) {
@@ -2889,8 +2894,9 @@ void effPcpCopyThunderScaleFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_001846A8(EffPCPFadeWork *work, f32 val) {
-    work->unk10 = val;
+/* Retain this fade variant's float input; its observed updater does not read it. */
+void effPcpSetThunderScaleFadeInput(EffPCPFadeWork *work, f32 input) {
+    work->unk10 = input;
 }
 
 void effPcpSetThunderScaleFadeColor(EffPCPFadeWork *work, u32 value) {
@@ -3330,7 +3336,8 @@ void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *src) {
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
-EffPCPBlockSetWork *func_00186148(void *parameterTable) {
+/* Construct the mode-one block set; the native updater treats modes one and two alike. */
+EffPCPBlockSetWork *effPcpCreateBlockSetMode1(void *parameterTable) {
     EffPCPBlockSetWork *work;
 
     work = effPcpBuildBlockSet(parameterTable);
@@ -3352,7 +3359,8 @@ EffPCPBlockSetWork *effPcpCloneBlockWithUnitMatrix(EffPCPBlockSetWork *src) {
     return work;
 }
 
-EffPCPBlockSetWork *func_001862C0(void *parameterTable) {
+/* Construct the mode-two block set; no further semantic distinction is established. */
+EffPCPBlockSetWork *effPcpCreateBlockSetMode2(void *parameterTable) {
     EffPCPBlockSetWork *work;
 
     work = effPcpBuildBlockSet(parameterTable);
@@ -3745,17 +3753,20 @@ void effPcpSetSpinMatrix(EffPCPSpinWork *work, void *src) {
     VU0_STORE_MATRIX(work->matrix);
 }
 
-u32 func_00187468(void) {
+/* Creation-slot callback: enable the global effect flag and return a NULL payload. */
+u32 effPcpCreateGlobalEffectFlag(void) {
     D_0043643C = 1;
     return 0;
 }
 
-u32 func_00187478(void) {
+/* Clone-slot callback: enable the same flag and return a NULL payload, without copying work. */
+u32 effPcpCloneGlobalEffectFlag(void) {
     D_0043643C = 1;
     return 0;
 }
 
-void func_00187488(void) {
+/* Release-slot callback is intentionally empty; the update callback clears the global flag. */
+void effPcpGlobalEffectFlagReleaseNoOp(void) {
 }
 
 void effPcpClearGlobalEffectFlag(void) {
