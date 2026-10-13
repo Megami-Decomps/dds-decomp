@@ -1647,7 +1647,7 @@ extern f32 D_0032F250[4];
 extern void *dds3GetWorldObject(void);
 extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
-extern void func_00228930(f32);
+extern void evtAdvanceSolarClockAndExpireControls(f32);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32,s32);
@@ -1696,7 +1696,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         return 0;
     }
     if (fldAreaState.transitionMode != 0) return 0;
-    func_00228930(distance);
+    evtAdvanceSolarClockAndExpireControls(distance);
     phase = evtGetSolarPhase();
     if (fldAreaState.consumedFlags & 15) {
         fldResetPlayerSceneObjectState();

@@ -4150,13 +4150,14 @@
 0x002286C0	evtGetMirroredSolarPhase	inferred	Returns the raw phase below nine, otherwise folds the low three bits around eight.
 0x002286E8	evtGetSolarPhase	inferred	Returns the solar phase byte at world offset 0xA41.
 0x002286F8	evtSetSolarPhase	inferred	Stores the phase's low four bits and resets the phase counter.
-0x00228710	evtEnableSolarPhaseAdvance	inferred	Sets solar world flag bit zero, which gates the phase timer and phase increment in func_00228930.
-0x00228728	evtDisableSolarPhaseAdvance	inferred	Clears solar world flag bit zero, disabling periodic phase advances in func_00228930.
+0x00228710	evtEnableSolarPhaseAdvance	inferred	Sets solar world flag bit zero, which gates the phase timer and phase increment in evtAdvanceSolarClockAndExpireControls.
+0x00228728	evtDisableSolarPhaseAdvance	inferred	Clears solar world flag bit zero, disabling periodic phase advances in evtAdvanceSolarClockAndExpireControls.
 0x00228740	evtSetSolarOverlayFullyVisible	inferred	Enables the solar alpha flag, sets overlay alpha to 1.0 and calls func_0022AB00(0).
 0x00228778	evtSetSolarOverlayFullyTransparent	inferred	Disables the solar alpha flag and sets the overlay alpha to 0.0.
 0x00228790	evtEnableSolarOverlayAlpha	inferred	Sets the solar alpha flag, making the solar callback interpolate alpha toward 1.0.
 0x002287A8	evtDisableSolarOverlayAlpha	inferred	Clears the solar alpha flag, making the solar callback interpolate alpha toward 0.0.
 0x002287C0	evtUpdateSolarOverlayFade	inferred	src/dds1/game/code_00228058.c func_002287C0: Steps and clamps solar-overlay alpha toward flag-selected endpoint and submits overlay. [names_reviewed24.tsv]
+0x00228930	evtAdvanceSolarClockAndExpireControls	inferred	Paired DDS1 implementation of DDS2 0x00243568: advances enabled solar phase by player travel distance, resets after 4500 units, and expires field-control flags on phase rollover; fldUpdateTravelAndEncounters passes measured movement distance and consumes the resulting flags.
 0x00228A00	evtCreateSolarOverlayWork	inferred	Allocates solar overlay visual work, loads its noise sprite and installs it on the owner.
 0x00228A58	evtFreeSolarOverlayWork	inferred	Releases the solar noise sprite, frees overlay work and clears the task ID.
 0x00228A98	evtStartSolarOverlay	inferred	Creates the task named by D_003BBDC8, initializes the overlay flags and phase and stores its task ID.
