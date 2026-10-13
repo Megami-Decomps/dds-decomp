@@ -8303,6 +8303,7 @@
 0x0018CE30	effReturnCallbackValue	inferred	high confidence; returns incoming callback word unchanged; aligns existing DDS2 0x00194A68 name while retaining unsigned DDS1 and signed DDS2 source surfaces. Sole previously absent symbol row added with Main approval. [Namer1 batch 30]
 0x0024AE18	mnuConfigureTerminalModeEffects	inferred	high confidence; applies mode-specific geometry and material/state flags to terminal grids 9/10 using the selected effect field; aligns existing DDS2 0x00269478 name. Trace-justified real byte-displacement statement. [PurD]
 0x0024E1C8	mnuDrawSpriteAtPlacement	inferred	Draws the caller-selected sprite with offset, flags and context from a menu placement row. [LiteH b12]
+0x0024E260	mnuDrawPlacedSpriteFromTable	inferred	Draws the resource and sprite selected by a placement row with flags fixed to zero. [LiteH b12]
 0x0024E310	mnuDrawPlacedSpriteByIndex	inferred	Draws the resource and sprite index selected by a menu placement row. [LiteH b12]
 0x0024E3C0	mnuDrawPlacedSpriteWithFlags	inferred	Draws the resource and sprite index selected by a menu placement row with caller-supplied flags. [LiteH b12]
 0x0024E470	mnuDrawRotatedPlacedSprite	inferred	Temporarily sets the placed sprite rotation, draws it, then restores zero rotation. [LiteH b12]

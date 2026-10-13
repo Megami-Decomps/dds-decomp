@@ -26,7 +26,7 @@ struct EffectSlotSet;
 
 extern void dspStartEntry(s32 signal);
 
-extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
 
 
 
@@ -82,7 +82,7 @@ void itfDspDrawSelectionStrip(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *
     s32 selectedIndex = *displayUnit->selectedIndex;
     s32 rowIndex;
 
-    func_0024E260(x, y, z, alpha, 0x56, drawContext);
+    mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x56, drawContext);
     rowIndex = displayUnit->entryCount - 1;
     if (rowIndex >= 0) {
         do {
@@ -160,8 +160,8 @@ void mnuDrawDisplayPlaceholder(s32 x, s32 y, s32 layer, s32 alpha, s32 drawConte
     u32 textColor = (u32)((f32)alpha * MNU_DISPLAY_DIM_ALPHA_SCALE) | MNU_DISPLAY_DIM_TEXT_RGB;
     char placeholderText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
 
-    func_0024E260(x, y, layer, alpha, 0x21, drawContext);
-    func_0024E260(x, y, layer, alpha, 0x11, drawContext);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x21, drawContext);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x11, drawContext);
     func_003014F0(placeholderText, "%s %s %s", D_003BC458, D_003BC458, D_003BC458);
     func_003014F0(placeholderText, D_003BC460);
     frFontDrawStyledGlyphChainAndMeasure(x + 0xB3, y + 0x171, layer, textColor,
@@ -173,8 +173,8 @@ void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue
     u32 textColor = (u32)((f32)alpha * MNU_DISPLAY_DIM_ALPHA_SCALE) | MNU_DISPLAY_DIM_TEXT_RGB;
     char valueText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
 
-    func_0024E260(x, y, layer, alpha, 0x21, drawContext);
-    func_0024E260(x, y, layer, alpha, 0x11, drawContext);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x21, drawContext);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x11, drawContext);
     func_003014F0(valueText, D_003BC468, displayValue);
     itfDrawGlyphChainWithWidthQuery(x + 0xB3, y + 0x173, layer, textColor,
                                   0, valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
@@ -219,7 +219,7 @@ void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 d
     itfDspDrawIndexedRecord(x, y, z, alpha, (u16)sceneId, drawContext);
     frFontDrawColoredGlyphChainAndMeasure(x + 0x39, y + 0x155, z, textColor, 0, (u16)sceneId, glyphResource, 0, 0,
                                           drawContext);
-    func_0024E260(x, y, z, alpha, 0x3B, drawContext);
+    mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x3B, drawContext);
     label = prfGetParamWord7b4((u16)sceneId);
     if (label != 0) {
         const u8 *style = D_0036C490[label - 1];
@@ -238,7 +238,7 @@ void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s
     itfDspDrawIndexedRecord(x, y, z, (u32)alpha, (u16)sceneId, drawContext);
     frFontDrawColoredGlyphChainAndMeasure(x + 0x39, y + 0x155, z, textColor, 0, (u16)sceneId, glyphResource, 0, 0,
                                           drawContext);
-    func_0024E260(x, y, z, alpha, 0x3B, drawContext);
+    mnuDrawPlacedSpriteFromTable(x, y, z, alpha, 0x3B, drawContext);
 
     label = prfGetParamWord7b4((u16)sceneId);
     if (label != 0) {
@@ -455,27 +455,27 @@ void mnuDrawMantraSparkScene(MenuSceneMetadata *scene, s32 alpha, s32 context) {
     DspParticleState *sparkles;
     f32 factor;
 
-    func_0024E260(0, 0, 0, alpha, 0x2A, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x2A, context);
     factor = (f32)scene->sparkles.countdown / (f32)scene->sparkles.period;
     factor = 1.0f - factor;
     factor = scene->sparkles.strength * sdfSinPoly(factor * 3.14159265f) +
              0.2f;
-    func_0024E260(0, 0, 0, (f32)alpha * factor, 0x2B, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (f32)alpha * factor, 0x2B, context);
     sparkles = &scene->sparkles;
     mnuTickMantraSparkParticles(sparkles);
     mnuDrawMantraSparkBackdrop(sparkles, (s32)D_0036C698[1], context);
 }
 
 void itfDspDrawMarksA(s32 scale, s32 context) {
-    func_0024E260(0, 0, 0, scale, 0x3A, context);
-    func_0024E260(0, 0, 0, scale, 0x38, context);
-    func_0024E260(0, 0, 0, scale, 0x39, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x3A, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x38, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x39, context);
 }
 
 void itfDspDrawMarksB(s32 scale, s32 context) {
-    func_0024E260(0, 0, 0, scale, 0xF, context);
-    func_0024E260(0, 0, 0, scale, 0x10, context);
-    func_0024E260(0, 0, 0, scale, 0x12, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0xF, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x10, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x12, context);
 }
 
 extern u32 prfGetCapValue(u16);
@@ -506,12 +506,12 @@ u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *targ
 }
 
 void itfDspDrawStrip(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
-    func_0024E260(x, y, layer, scale, 4, context);
-    func_0024E260(x, y, layer, scale, 5, context);
-    func_0024E260(x, y, layer, scale, 0xA, context);
-    func_0024E260(x, y, layer, scale, 0xB, context);
-    func_0024E260(x, y, layer, scale, 0xC, context);
-    func_0024E260(x, y, layer, scale, 0xD, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 4, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 5, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0xA, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0xB, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0xC, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0xD, context);
 }
 
 typedef struct DspUnitSpriteLookup {
@@ -529,7 +529,7 @@ void itfDspDrawEntryWithLevel(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scal
     char text[0x10];
     u32 textColor = scale | 0xA09DC300;
 
-    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
     func_003014F0(text, D_003BC450, entry->level);
     frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, textColor,
                                      4, text, 0, context);
@@ -539,7 +539,7 @@ void itfDspDrawEntryWithLevel(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scal
 void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
     DspUnitSpriteLookup lookup = D_003BC478[0];
 
-    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
 }
 
 /* Draw both layers of a display entry and queue its formatted value. */
@@ -548,8 +548,8 @@ void itfDspDrawPartyRecordWithLevel(s32 x, s32 y, s32 layer, DatPartyRecord *ent
     char text[0x10];
     u32 tag = scale | 0xA09DC300;
 
-    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
-    func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId] + 0x14, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, lookup.spriteIndices[entry->unitId] + 0x14, context);
     func_003014F0(text, D_003BC450, entry->level);
     frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, tag,
                                      4, text, 0, context);
@@ -564,13 +564,13 @@ s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
 
     wave = sdfSinPoly(wave * 3.1415926f);
 
-    func_0024E260(0, 0, 0, scale, 0x1F, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x1F, context);
     drawScale = (s32)(baseScale * (wave * 0.5f + 0.5f));
-    func_0024E260(0, 0, 0, drawScale, 0x16, context);
-    func_0024E260(0, 0, 0, drawScale, 0x17, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, drawScale, 0x16, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, drawScale, 0x17, context);
     drawScale = (s32)(baseScale * 0.5f);
-    func_0024E260(0, 0, 0, drawScale, 0x18, context);
-    func_0024E260(0, 0, 0, drawScale, 0x19, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, drawScale, 0x18, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, drawScale, 0x19, context);
     if (frame < 60) {
         return 0;
     }
@@ -648,18 +648,18 @@ s32 itfAdvanceDisplayList(MnuSceneListHead *head, s32 scale, s32 context) {
 }
 
 void itfDspDrawScaledA(s32 unused, s32 scale, s32 context) {
-    func_0024E260(0, 0, 0, scale, 0x16, context);
-    func_0024E260(0, 0, 0, scale * 0.5f, 0x18, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x16, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale * 0.5f, 0x18, context);
 }
 
 void itfDspDrawScaledB(s32 unused, s32 scale, s32 context) {
-    func_0024E260(0, 0, 0, scale, 0x17, context);
-    func_0024E260(0, 0, 0, scale * 0.5f, 0x19, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x17, context);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, scale * 0.5f, 0x19, context);
 }
 
 void itfDspDrawPair(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
-    func_0024E260(x, y, layer, scale, 0x14, context);
-    func_0024E260(x, y, layer, scale, 0x15, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x14, context);
+    mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x15, context);
 }
 
 void func_00256E88(void) {
@@ -687,7 +687,7 @@ void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *obj, s32 scale, s32
         } else {
             kind = 7;
         }
-        func_0024E260(0, 0, 1, scale, kind, context);
+        mnuDrawPlacedSpriteFromTable(0, 0, 1, scale, kind, context);
     }
 }
 
