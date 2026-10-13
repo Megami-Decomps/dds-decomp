@@ -374,7 +374,7 @@ extern void fldReleaseMenuSlotsAfterWait(void);
 
 void fldSetSceneControlFlags(u32 mask);
 
-s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target);
+s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target);
 
 extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
@@ -1383,7 +1383,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldSetSceneControlFlags(0x40);
-        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, func_001266D8);
+        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
     fldAreaState.unkE8 = 4;
     if (fldAreaState.sceneMode < 4) {
@@ -1610,7 +1610,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
 
-s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target) {
+s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target) {
     return 0;
 }
 
