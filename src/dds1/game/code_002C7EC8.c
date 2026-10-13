@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_mat4.h"
 #include "fr_font.h"
 #include "sdf_resource.h"
 #include "fpu.h"
@@ -186,10 +187,6 @@ void fldNormalizedVectorCross(float *output, float *left, float *right) {
     output[1] = normalizedLeft.z * normalizedRight.x - normalizedLeft.x * normalizedRight.z;
     output[2] = normalizedLeft.x * normalizedRight.y - normalizedLeft.y * normalizedRight.x;
 }
-
-typedef struct SdfMat4 {
-    f32 m[16];
-} SdfMat4;
 
 /* Rotate rows 1 and 2 of the matrix about the X axis by `angle`. */
 void sdfRotateMatrixBasisAboutX(SdfMat4 *matrix, f32 angle) {
