@@ -250,7 +250,7 @@ extern s8 effSharedRandomState[];
 
 extern void sndResetTransition(void);
 
-extern void func_001F4430(void);
+extern void btlResetMotionSoundFrameCounters(void);
 
 extern void btlResetFieldColorAndSweepFlags(void);
 
@@ -7404,7 +7404,7 @@ void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     return task;
 }
 
-void func_001F4430(void) {
+void btlResetMotionSoundFrameCounters(void) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
     work->unk264 = -1;
