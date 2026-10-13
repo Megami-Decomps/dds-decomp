@@ -1682,10 +1682,10 @@ u32 fldLoadAreaRoomResources(const char *name) {
     return fldCachedRoomF1ResourceAllocation;
 }
 
-extern u32 func_00128780(u32, u32, u32, u32,
+extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
                         const SdfTextureOffsetListHeader *, u32);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00128780);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
 
 extern s32 D_003BAC10;
 extern FldTransferChunk *D_003BAC18;

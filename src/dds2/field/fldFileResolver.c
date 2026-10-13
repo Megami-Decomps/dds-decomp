@@ -1750,10 +1750,10 @@ u32 fldLoadAreaRoomResources(const char *name) {
     return fldCachedRoomF1ResourceAllocation;
 }
 
-extern u32 func_0012AC90(u32, u32, u32, u32,
+extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
                         const SdfTextureOffsetListHeader *, u32);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012AC90);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
 
 extern void fldClearMenuEntries();
 
