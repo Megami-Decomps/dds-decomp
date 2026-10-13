@@ -907,6 +907,7 @@
 0x00151480	fldTickWeatherEffectNodes	inferred	Calls the weather-effect node updater; twin 0x0014D0E8. [names_R_FuncNames6.tsv]
 0x001514C8	fldResetViewState	inferred	Clears field view state D_00451D38 and sets the +0x6C sentinel to -1
 0x001515A0	fldReleaseTargetGuideResource	inferred	releases handle and clears target guide entries [names_R_FuncNames2.tsv]
+0x001515E0	fldFindNearestOccupiedMapGridCell	inferred	Scans nonempty map-grid cells and returns the nearest cell to world x/z; adjacent mapper establishes grid coordinates, with -1 reserved for cell (0,0).
 0x00151760	fldMapGridToScreenPosition	inferred	scales X and inverted Y with cached origin/scale [names_R_FuncNames2.tsv]
 0x001517D0	fldFindCoordinateRecord	inferred	scans coordinate records for four matching byte components [names_R_FuncNames2.tsv]
 0x00151868	fldCalcTargetDistanceYaw	inferred	sqrt of squared deltas to D_00451D38 and sdfAtan2*180/3.14

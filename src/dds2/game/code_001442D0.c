@@ -54,7 +54,7 @@ extern void func_001523F0(void);
 extern void func_001525F0(void);
 extern void fldUpdateTargetGuideEffects(void);
 extern void func_00153068(void);
-extern s32 func_001515E0(f32 x, f32 z, s16 *gridX, s16 *gridY);
+extern s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *gridX, s16 *gridY);
 
 
 extern s32 D_003899E0[];
@@ -4919,7 +4919,7 @@ typedef struct FieldCellGrid {
 } FieldCellGrid;
 
 /* Find the occupied grid cell nearest to a world position; returns -1 when it is cell (0, 0). */
-s32 func_001515E0(f32 x, f32 z, s16 *outX, s16 *outY) {
+s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *outX, s16 *outY) {
     f32 originX = D_004363BC;
     f32 originY = D_004363BE;
     f32 nearest = 10000.0f;
@@ -5485,7 +5485,7 @@ void fldUpdateTargetGuideController(void) {
             func_001525F0();
             fldUpdateTargetGuideEffects();
             func_00153068();
-            func_001515E0(fldAreaState.x, fldAreaState.z, &D_00438EF8.x, &D_00438EF8.y);
+            fldFindNearestOccupiedMapGridCell(fldAreaState.x, fldAreaState.z, &D_00438EF8.x, &D_00438EF8.y);
             fldTargetGuideState.previousGridX = fldTargetGuideState.gridX;
             fldTargetGuideState.previousGridY = fldTargetGuideState.gridY;
         }
