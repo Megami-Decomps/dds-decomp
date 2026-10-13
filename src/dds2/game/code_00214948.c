@@ -3070,7 +3070,7 @@ BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
-extern void func_001AA898(DatPartyRecord *, s32);
+extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
 
 /* Create/load the unit only for an empty slot. A populated slot returns a fresh
  * sequence ID without launching a task; a nonzero prerequisite waits until
@@ -3084,7 +3084,7 @@ s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
         return btlAdvanceRuntimeSequenceCounter();
     }
     *slot = btlCreateUnit();
-    func_001AA898(&(*slot)->partyRecord, 0x110);
+    btlInitializePartyRecordFromEnemy(&(*slot)->partyRecord, 0x110);
     task = btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
@@ -5310,7 +5310,7 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
         return btlAdvanceRuntimeSequenceCounter();
     }
     effect->actor = btlCreateUnit();
-    func_001AA898(&effect->actor->partyRecord, 0x10B);
+    btlInitializePartyRecordFromEnemy(&effect->actor->partyRecord, 0x10B);
     load = btlCreateModelLoadPollTask(effect->actor, 1, 0x10B, 0);
     if (prerequisiteHandle != 0) {
         load->startCondition.value.handle = prerequisiteHandle;
@@ -5700,7 +5700,7 @@ void func_00222100(ActionStateLink *link) {
         return;
     }
     savedFlags = link->unit->partyRecord.flags;
-    func_001AA898(&link->unit->partyRecord, replacementId);
+    btlInitializePartyRecordFromEnemy(&link->unit->partyRecord, replacementId);
     link->unit->partyRecord.flags = savedFlags;
     script = (BtlRuntimeTask *)btlCreateScriptResourceTask(link->unit, scriptGroup);
     script->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;

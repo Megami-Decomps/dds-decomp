@@ -2923,7 +2923,7 @@ void btlEnterTuningActionState(ActionStateLink *task) {
 }
 
 extern BtlRuntimeTask *btlCreateControlObject(void);
-extern void func_001AA898(DatPartyRecord *record, s32 index);
+extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *record, s32 index);
 extern DatEnemyRecord *datEnemyRecords;
 
 void btlStartAlternateModelChange(ActionStateLink *action) {
@@ -2991,7 +2991,7 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
     btlStartTask(sndCreateStationedSeTask(0x1000F));
     flags = unit->partyRecord.flags;
     party = &unit->partyRecord;
-    func_001AA898(party, action->indexWork.unk18);
+    btlInitializePartyRecordFromEnemy(party, action->indexWork.unk18);
     party->flags = flags;
     if ((unit->status.flags & 0x400) && unit->partyRecord.unitId < 0x180) {
         action->actionNumber = datEnemyRecords[unit->partyRecord.unitId].unk15;
