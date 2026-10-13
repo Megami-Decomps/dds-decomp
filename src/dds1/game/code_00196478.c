@@ -761,13 +761,13 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
     frFontLinkGlyph(parent, glyph, 0);
 }
 
-extern u8 *func_001961B0(s32 textId, FrFontTextBank *bank, s32 mode);
+extern u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 frFontCountGlyphChainNodes(FrFontGlyph *text);
 extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
 FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
-    u8 *text = func_001961B0(textId, bank, 0);
+    u8 *text = frFontGetEncodedTextData(textId, bank, 0);
     u32 mode;
     FrFontGlyph *handle;
 
