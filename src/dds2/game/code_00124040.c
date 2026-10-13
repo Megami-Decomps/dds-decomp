@@ -2217,7 +2217,7 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F40);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F58);
 
-s32 func_001278D0(void) {
+s32 fldUpdateFieldSceneTask(void) {
     EffBlurScatterParams blur;
     FieldPlayerSceneWork *playerWork = &D_0038A640;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
@@ -2499,7 +2499,7 @@ void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
         strcpy(scene->resourceName, record->note);
         scene->sequenceOption = record->options;
     }
-    kwlnTaskCreate((s32)D_00412FD0, 0x3F7, 0, 0, (s32)func_001278D0, 0, 0);
+    kwlnTaskCreate((s32)D_00412FD0, 0x3F7, 0, 0, (s32)fldUpdateFieldSceneTask, 0, 0);
     kwlnTaskCreate((s32)D_00412FE0, 0x2B0A, 0, 0, (s32)fldProcDraw, 0, 0);
     D_00435F84 = 1;
     fldTestDrawCreate();
