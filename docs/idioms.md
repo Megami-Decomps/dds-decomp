@@ -3552,7 +3552,7 @@ DDS1 `func_00150EB0` and DDS2 `func_00158AA0` build seven-entry local color
 and UV arrays from both `BillPacketWork` children. Each vertex's first
 two UV components come from child zero and its last two from child one;
 the paired packet builder consumes those arrays before both counts reset.
-The paired builder is DDS1 `func_002E2BB8` / DDS2 `func_0033BA68`, distinct
+The paired builder is `sdfBuildPairedQuadVifPacket` in both games, distinct
 from the compact single-stream vertex builder.
 
 ## Party vitals use one paired-effect owner
@@ -10493,4 +10493,38 @@ arrays cached aggregate addresses across the drawing calls and enlarged the
 frame. The scalar declarations reproduce retail's GP-relative halfword accesses
 and its 64-byte frame. The Nocturne debug counterpart at `0x00105D18` corroborates
 the two-meter graph and separate peak-expiry/new-peak reset predicates.
+
+## Renderer reference defaults and quad attribute packets
+
+The renderer twins use two independent optional DMA prefixes.
+`sdfConsSetDefaultFirstReference` and `sdfConsSetDefaultSecondReference`
+store fallbacks that native `sdfModel` selects when the respective per-model
+reference is null, then copies to `SdfListHead.firstReferenceSource` and
+`secondReferenceSource`. The frame caller supplies a frustum packet for the
+second source. Its first source points just after `ConsMatrixPacket`, so the
+name deliberately does not assert that it is the matrix payload itself.
+
+`sdfBuildPrimitiveAttributeVifPacket` serializes `SdfPrimitiveRequest` position
+data and optional normal, UV, second-UV and per-vertex-color streams. Its
+existing triangle, quad and radial-cylinder callers establish the primitive
+role without requiring a new structure or stream-order change.
+
+`sdfBuildPairedQuadVifPacket` consumes two child colors and two child UV sets
+per quad from `billFlushPairedQuadStreams`. Its GIF descriptor has ten
+registers. `sdfBuildVertexColorQuadVifPacket` instead has thirteen registers,
+including UV/RGBAQ/XYZF2 for each of four corners. Both preserve primitive
+`0x155`; per-corner color storage alone is not evidence of Gouraud shading
+because its IIP bit is clear. Keep the original allocation arithmetic, casts,
+loop forms and byte-count temporary reuse unchanged.
+
+`sdfConsCreatePowerLookupTexture` acquires a 128x64 indexed TMX texture with
+a grayscale CLUT and rounded `255 * (x / 127)^row` samples in rows 1 through 63.
+The special first row and CLUT-slot permutation remain native. Its temporary
+image is released after texture acquisition. `sdfDevConsGetGlyphUvTable`
+returns the 96-entry packed UV table used at character minus `0x20`.
+
+The DDS1 `sdfMeasureAlignedRecordStorage` definition retains its unsigned
+return and literal; the already-named DDS2 counterpart retains its signed
+return. Only the identifiers align: their native 76-byte-record storage
+formula and 16-byte rounding are not rewritten.
 

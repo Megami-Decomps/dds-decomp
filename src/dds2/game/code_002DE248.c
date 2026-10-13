@@ -8903,7 +8903,7 @@ extern void evtSetDrawSurfaceIndex(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32,
                                          s32, s32, s32, s32);
-extern void *func_0033B050(SdfPrimitiveRequest *);
+extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 /* Draw a scaled radial cylinder, advancing its travel counter up to the payload limit. */
 void effDrawMovingRadialCylinder(EffActiveResource *work) {
@@ -8992,7 +8992,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
         side[vertexCount + 1][2] = circle[i][1];
         vertexCount += 2;
         if (vertexCount >= 0x12) {
-            sdfAppendPacket(list, (u32)func_0033B050(description));
+            sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(description));
             vertexCount = 0;
         } else {
             i++;
@@ -9001,7 +9001,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
     if (vertexCount >= 4) {
         request.stripWordCount = (s16)(vertexCount - 2);
         request.vertexCount = (s16)vertexCount;
-        sdfAppendPacket(list, (u32)func_0033B050(description));
+        sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(description));
     }
 
     request.stripWordCount = 0x10;
@@ -9021,7 +9021,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
         cap[vertexCount + 1][2] = circle[i + 1][1];
         vertexCount += 3;
         if (vertexCount >= 48) {
-            sdfAppendPacket(list, (u32)func_0033B050(description));
+            sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(description));
             vertexCount = 0;
         }
     }
@@ -9037,14 +9037,14 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
         cap[vertexCount + 2][2] = circle[i + 1][1];
         vertexCount += 3;
         if (vertexCount >= 48) {
-            sdfAppendPacket(list, (u32)func_0033B050(description));
+            sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(description));
             vertexCount = 0;
         }
     }
     if (vertexCount >= 3) {
         request.stripWordCount = (s16)(vertexCount / 3);
         request.vertexCount = (s16)vertexCount;
-        sdfAppendPacket(list, (u32)func_0033B050(description));
+        sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(description));
     }
 
     drawNode = &D_0037FF48;

@@ -17,7 +17,7 @@
 #include "sdf_primitive.h"
 #include "sdf_packet_append.h"
 
-extern void *func_002E21A0(SdfPrimitiveRequest *);
+extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 
@@ -846,7 +846,7 @@ void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f
     textureCoordinates[1][1] = 0.0f;
     textureCoordinates[2][0] = 0.0f;
     textureCoordinates[2][1] = 0.0f;
-    sdfAppendPacket(list, (u32)func_002E21A0(&request));
+    sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(&request));
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }

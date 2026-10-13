@@ -601,7 +601,7 @@ extern void *memset(void *s, s32 c, u32 n);
 
 
 
-extern void *func_0033B050(SdfPrimitiveRequest *);
+extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 extern u32 D_0040B2A0[];
 
@@ -2748,7 +2748,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     indices[0] = a0;
     indices[1] = a1;
     indices[2] = a2;
-    sdfAppendPacket(command, (u32)func_0033B050(&desc));
+    sdfAppendPacket(command, (u32)sdfBuildPrimitiveAttributeVifPacket(&desc));
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
 }

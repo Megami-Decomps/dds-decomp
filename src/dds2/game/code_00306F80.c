@@ -21,7 +21,7 @@
 #include "sdf_packet_append.h"
 
 #include "sdf_packet_alloc.h"
-extern void *func_0033B050(SdfPrimitiveRequest *);
+extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
@@ -950,7 +950,7 @@ void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f
     textureCoordinates[1][1] = 0.0f;
     textureCoordinates[2][0] = 0.0f;
     textureCoordinates[2][1] = 0.0f;
-    sdfAppendPacket(list, (u32)func_0033B050(&request));
+    sdfAppendPacket(list, (u32)sdfBuildPrimitiveAttributeVifPacket(&request));
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }

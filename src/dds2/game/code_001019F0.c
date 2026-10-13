@@ -221,8 +221,8 @@ typedef struct SdfMsg {
     s32 firstWord, work, thirdWord, fourthWord;
 } SdfMsg;
 extern void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *, s32, s32, s32, s32);
-extern void func_0033A5B8(u32);
-extern void func_0033A5C0(u32);
+extern void sdfConsSetDefaultFirstReference(u32);
+extern void sdfConsSetDefaultSecondReference(u32);
 extern SdfListHead *evtBuildFrameStatePacketList(s32);
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -352,8 +352,8 @@ s32 kwlnBuildFrameScenePackets(void) {
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0xC0),
             (s32)(messageData - 0xA0), (s32)(messageData - 0x80),
             (s32)(messageData - 0x60), (s32)(messageData - 0x40));
-        func_0033A5B8((u32)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
-        func_0033A5C0((u32)viewFrustum);
+        sdfConsSetDefaultFirstReference((u32)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
+        sdfConsSetDefaultSecondReference((u32)viewFrustum);
 
     }
     {

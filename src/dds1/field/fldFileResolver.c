@@ -2634,7 +2634,7 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     descriptor->append(descriptor, list);
 }
 
-extern void *func_002E21A0(SdfPrimitiveRequest *);
+extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
     SdfPrimitiveRequest desc;
     f32 verts[12];
@@ -2664,7 +2664,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     indices[0] = a0;
     indices[1] = a1;
     indices[2] = a2;
-    sdfAppendPacket(command, (u32)func_002E21A0(&desc));
+    sdfAppendPacket(command, (u32)sdfBuildPrimitiveAttributeVifPacket(&desc));
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
 }

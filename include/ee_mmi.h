@@ -329,8 +329,8 @@ static inline u32 eePackRGBAWord(f32 unit) {
 /*
  * Pack an aligned four-word vector into an unaligned three-word stream:
  * lq $3,0(src); pcpyud $2,$3,$0; sdr $3,0(dst); sdl $3,7(dst); sw $2,8(dst).
- * Retail: effCreateVertexDrawPacket in both games, plus DDS1
- * func_002E21A0/DDS2 func_0033B050, twice per builder (positions and normals).
+ * Retail: effCreateVertexDrawPacket and sdfBuildPrimitiveAttributeVifPacket
+ * in both games, twice per builder (positions and normals).
  * Tried u128 C extraction: cc1 rejects >>64 as an unsupported wide operation;
  * union half/word extraction spills the quadword rather than emitting pcpyud.
  * Stores to the macro's own destination are part of the packing idiom.
