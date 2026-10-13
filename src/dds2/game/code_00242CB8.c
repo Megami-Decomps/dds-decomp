@@ -243,12 +243,12 @@ u32 evtCommandQueueBgmWithFade(void) {
     return 1;
 }
 
-u32 func_00243180(void) {
+u32 evtOpcodeStartReducedBgm(void) {
     sndStartReducedBgm();
     return 1;
 }
 
-u32 func_002431A0(void) {
+u32 evtOpcodeStopReducedBgm(void) {
     sndStopReducedBgm();
     return 1;
 }
