@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "ui_color.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "sdf_resource.h"

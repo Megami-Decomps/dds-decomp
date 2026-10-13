@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -445,7 +446,6 @@ extern const s32 D_0042B130[4];
 extern const s32 D_0042B140[4];
 extern const s32 D_00437C70[];
 extern char D_00437C68[]; /* "%2d", shared with func_002BF830. */
-extern u32 uiBlendColors(u32, u32, u32);
 struct MenuPageSpriteSlot;
 extern void func_002BE438(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
 extern void func_002BF660(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
@@ -1024,7 +1024,6 @@ void mnuSetStateValue(u32 *out, u32 value) {
     *out = value;
 }
 
-extern u32 uiBlendColors(u32, u32, u32);
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Draw two clear corners and two blended corners, then step the bounded blend value. */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "mnu_result.h"
 
 #include "mnu.h"
@@ -167,7 +168,6 @@ INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C120);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C3F0);
 
-extern u32 uiBlendColors(u32, u32, s32);
 
 /* The opacity is latched at 0x80; later fade steps leave it untouched. */
 void itfUpdateFadeColor(BrsSkillPackageWork *work) {

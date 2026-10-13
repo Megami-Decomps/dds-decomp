@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "ui_color.h"
 #include "kwln.h"
 #include "mnu_result.h"
 
@@ -331,7 +332,6 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern u32 uiBlendColors(u32, u32, s32);
 extern u32 func_001979C8(s32, s32, s32, u32, char *, s32);
 extern void frFontDrawGlyphChain(u32, s32, s32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {

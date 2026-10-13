@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
@@ -21,7 +22,6 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
 struct FrFontGlyph;
 
 extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
-extern u32 uiBlendColors(u32, u32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);

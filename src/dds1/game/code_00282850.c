@@ -4,6 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -640,7 +641,6 @@ void mnuSetStateValue(u32 *out, u32 value) {
     *out = value;
 }
 
-extern u32 uiBlendColors(u32, u32, u32);
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Draw two clear corners and two blended corners, then step the bounded blend value. */

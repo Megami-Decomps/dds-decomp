@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "ui_color.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -118,7 +119,6 @@ extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 uiBlendColors(u32, u32, u32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];

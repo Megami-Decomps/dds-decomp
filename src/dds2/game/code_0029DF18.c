@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "mnu_result.h"
 
 typedef struct { u32 word[6]; } BurstSprite;
@@ -15,7 +16,6 @@ extern void *memcpy(void *, const void *, u32);
 extern u32 D_004285E0[4];
 
 
-extern u32 uiBlendColors(u32, u32, u32);
 
 /* Fade a result row's background in; the row is ready once it is fully opaque. */
 void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
@@ -542,7 +542,6 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
-extern u32 uiBlendColors(u32, u32, u32);
 void mnuSetTitleSequenceVolumePan(u32);
 
 void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,

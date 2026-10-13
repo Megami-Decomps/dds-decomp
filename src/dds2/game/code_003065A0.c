@@ -1,11 +1,11 @@
 #include "common.h"
+#include "ui_color.h"
 #include "eff.h"
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 
 extern void func_00306970(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, void *, s32);
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern u32 uiBlendColors(u32, u32, u32);
 
 /* 0x80 leaves the copied corner words unchanged. */
 void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValues, u32 edge) {
