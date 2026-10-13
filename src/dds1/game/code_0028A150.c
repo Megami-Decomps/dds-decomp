@@ -507,7 +507,6 @@ extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 extern FileJob *fileJobCreate(void);
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern FileJob *fileQueueFindById(FileQueue *, u32);
 extern s32 fileFindQueuedJobIndex(FileQueue *, FileJob *);

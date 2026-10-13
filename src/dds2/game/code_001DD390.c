@@ -45,6 +45,7 @@
 #include "dat_command.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
@@ -179,7 +180,6 @@ extern void btlSetCameraCommandMode(u32, ActionStateLink *, BtlUnit *, BtlUnit *
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effMiscQuaternionNlerpVU(f32);
 
@@ -3519,7 +3519,6 @@ s32 btlFormatUnitBedName(BtlUnit *unit, char *name) {
     return 0;
 }
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 const char D_00417AE0[16] = "btl:warp[%p]\n";
 

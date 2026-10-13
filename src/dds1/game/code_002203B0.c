@@ -7,6 +7,7 @@
 #include "evt_unit.h"
 #include "pcp_vu0.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 struct EvtScaledValue;
 extern u32 sdfGetFloatCounterDirection(u32 *handle);
@@ -122,7 +123,6 @@ s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
 }
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vf10 = (a - b) with y replaced by 0 */
 void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b) {

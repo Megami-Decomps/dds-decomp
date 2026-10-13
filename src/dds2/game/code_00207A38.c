@@ -28,6 +28,7 @@
 #include "sce_io.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_matrix.h"
 
 extern s32 func_0036B420(s32 directory);
 extern s32 func_0036B588(s32 directory, SceDirent *entry);
@@ -254,7 +255,6 @@ extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern f32 btlUnitGetTopY(BtlUnit *);
 

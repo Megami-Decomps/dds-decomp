@@ -21,6 +21,7 @@
 #include "btl_scene_initializer.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
@@ -536,7 +537,6 @@ extern s32 btlCheckModelAssetByMode(u8 *, u32, u32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effMiscQuaternionNlerpVU(f32);
 

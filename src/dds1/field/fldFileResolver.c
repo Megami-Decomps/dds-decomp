@@ -22,6 +22,7 @@
 #include "sdf_model.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 
 extern FldFileResource *D_003BD7B8;
@@ -6895,7 +6896,6 @@ u32 fldPushDisplayValue(u32 value, EffWorldNode *object) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00138ED0);
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     f32 dir[4];

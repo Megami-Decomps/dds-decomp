@@ -8,6 +8,7 @@
 #include "sdf_draw.h"
 #include "sdf_motion.h"
 #include "sdf_motion_bindings.h"
+#include "sdf_vu_matrix.h"
 
 typedef struct {
     f32 *unk0;
@@ -46,7 +47,6 @@ void *sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0);
 extern void effMiscQuaternionNlerpVU(f32 amount);
-extern void effMiscQuaternionToMatrixVU(void);
 extern s32 (*D_003981B8[])(void *a0, s32 a1);
 extern s32 (*D_00398248[])(void *a0, s32 a1);
 extern SdfMotionBindingDispatch D_003981D0;

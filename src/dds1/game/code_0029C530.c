@@ -44,6 +44,7 @@
 #include "eff_resource_list.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_matrix.h"
 
 
 
@@ -80,7 +81,6 @@ extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
 
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern f32 effComputeProjectedOffsetAngle(u8 *, void *);
 
