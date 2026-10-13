@@ -17,7 +17,7 @@
 #define MTR_SELECTION_ALPHA_SCALE 128.0f
 #define MTR_UNIT_FADE_FRAMES 10
 
-extern void func_00286A58(DatPartyRecord *);
+extern void mtrMantraSetBit(DatPartyRecord *);
 
 struct MnuStatusResource;
 
@@ -92,7 +92,7 @@ extern void func_00314868(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
 
 /* Recompute every mantra node's unlock state for a party member and report changes. */
-void func_00286BA8(DatPartyRecord *record) {
+void mtrRecomputePartyMantraUnlockState(DatPartyRecord *record) {
     s32 modelFlagState;
     MantraFlagResource *current;
     MantraFlagResource *source;
@@ -155,7 +155,7 @@ void mtrMantraSetBitAll(void) {
 
     for (recordIndex = 0; recordIndex < MTR_RECORD_COUNT; recordIndex++) {
         if (datGameState->party[recordIndex].flags & 1) {
-            func_00286A58(&datGameState->party[recordIndex]);
+            mtrMantraSetBit(&datGameState->party[recordIndex]);
         }
     }
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");

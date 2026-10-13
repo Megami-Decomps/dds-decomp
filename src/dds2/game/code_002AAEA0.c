@@ -185,7 +185,7 @@ u32 func_002AB3A0(void) {
     return 1;
 }
 
-u32 func_002AB3A8(KwlnTask *task) {
+u32 mnuRunCampFieldSkillDisplayTask(KwlnTask *task) {
     mnuPrepareCampFieldSkillDisplay(task);
     return 1;
 }

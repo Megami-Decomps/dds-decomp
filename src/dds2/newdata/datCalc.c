@@ -1079,7 +1079,7 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
     ptyAssignRosterItemAndMarkOwned(entry);
 }
 
-extern void func_00286BA8(void *record);
+extern void mtrRecomputePartyMantraUnlockState(void *record);
 
 /* Consume a saved template, optionally raise its level, then mark its item owned. */
 void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
@@ -1114,7 +1114,7 @@ void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s
     if (!(initFlags & 2)) {
         ptyRebuildProfileSkills(1, entry);
     }
-    func_00286BA8(entry);
+    mtrRecomputePartyMantraUnlockState(entry);
     if (entry->itemId != 0) {
         datGameState->inventory.counts[entry->itemId] = 1;
     }

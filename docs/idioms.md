@@ -2011,7 +2011,7 @@ stack arguments, nested `return;`.
 
 At expansion time, a statement after the final call can also prevent a
 sibling call even if later passes delete that statement. DDS2
-`func_00286A58` has the release-and-clear form
+mtrMantraSetBit has the release-and-clear form
 `evtReleaseMantraSelectionWork(work); work = NULL;` and retains `jal`.
 This is a compiler observation, not evidence that every unexplained forwarder
 cleared a local. Require a genuine source-level reset or recurring macro
@@ -6435,7 +6435,7 @@ the contract; the local declaration does not change the call ABI.
 ## Signed mantra IDs and promoted panel status
 
 DDS2 `MenuPanelPositionRecord` contains a signed ID and an unsigned state
-halfword. Both the reset `func_00291338` and lookup `func_00291400` read
+halfword. Both the reset `func_00291338` and lookup `mnuFindPanelPositionRecordByScriptId` read
 IDs with `lh`; the flags use `lhu`. The three banks each contain 37
 four-byte records. A supposed “unknown upper halfword after lhu” is not
 a missing owner: unsigned halfwords still promote to signed `int`.
@@ -10073,7 +10073,7 @@ These are matched in-tree C, not synthetic controls. Fresh whole-unit `check_uni
 | DDS1 `effParGetInstanceRestartFlag`, same unit | 0015AD48, 28B; JAL 0015AD50 | same 60/0 | Truthful u16 result contract, same copy-chain mechanism. |
 | DDS1 `effParScaleComponent`, same unit | 0015AD08, 60B; JAL 0015AD1C | same 60/0 | Actual post-call float load/multiply/store at owner +8C. |
 | DDS1 `effObjDispatchReadyState`, `basic/dds3EffectObjectBasic` | 00115970, 116B; JAL 001159C0 and 001159D0 | 38 match, 0 differ | Existing implicit-int definition retains an undefined-result CLOBBER in a nonqualifying exit block. |
-| DDS2 `func_00286A58`, `game/code_00286A58` | Final JAL 00286B7C, then restores | 1 match, 0 differ | Existing local workspace reset follows release in early RTL and dies later. |
+| DDS2 `mtrMantraSetBit`, `game/code_00286A58` | Final JAL 00286B7C, then restores | 1 match, 0 differ | Existing local workspace reset follows release in early RTL and dies later. |
 | DDS2 `brsDrawProfileProgressIndicator`, `game/code_0029DF18` | 002A0148, 304B; final JAL 002A0250 | 45 match, 0 differ | Actual escaped 16B palette workspace gives nonzero stack-slot `frame_offset`. |
 | DDS1 `billInvokeCallback`, `effect/billManager` | 00151F38, 32B; JALR 00151F44 | 25 match, 0 differ | Actual callback field +28 produces an ordinary indirect call with no sibling alternative. |
 

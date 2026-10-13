@@ -37,7 +37,7 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
 extern void func_00306CD0(s32, s32, s32, s32, s32, void *, s32, s32);
 
 
-void func_00294680(MenuTerminalContext *w, s32 a1, s32 a2) {
+void mnuDrawTerminalContextEffectSprites(MenuTerminalContext *w, s32 a1, s32 a2) {
     BdWork *work;
 
     if (w->type != 2) {

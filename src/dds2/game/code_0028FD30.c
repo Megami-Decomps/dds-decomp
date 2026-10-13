@@ -622,7 +622,7 @@ static inline s32 mnuPanelFlagsWithStatus(s32 flags, s32 status) {
 extern MenuPanelPositionRecord D_003CFEB8[][37];
 
 /* Find one panel record by its script ID within a selected 37-entry row. */
-MenuPanelPositionRecord *func_00291400(s32 selector, u16 id) {
+MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32 selector, u16 id) {
     s32 offset = (selector << 7) + ((selector * 5) << 2);
     MenuPanelPositionRecord *entry =
         (MenuPanelPositionRecord *)((u8 *)D_003CFEB8 + offset);
@@ -635,7 +635,7 @@ MenuPanelPositionRecord *func_00291400(s32 selector, u16 id) {
     }
     return NULL;
 }
-extern MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
+extern MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32 selector, u16 id);
 
 
 void mnuActivatePanelSelection(MnuStatusResource *object, s8 selection) {
@@ -675,7 +675,7 @@ void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector,
 
     resource = object->menu.resource;
     position = mnuGetMantraPanelPositionRecord(id);
-    record = func_00291400(selector, id);
+    record = mnuFindPanelPositionRecordByScriptId(selector, id);
     animation = mnuFindPanelSlotById(resource, id, 1);
     mnuQueuePanelAnimationTransition(animation, 1, 0);
     animation->animationTicks = 60;
@@ -691,7 +691,7 @@ void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector,
             s32 maxTier = (state->flags >> 28) & 1;
 
             if (maxTier >= ((s8)nodeFlags >> 4) && (nodeFlags & 15) == 1) {
-                record = func_00291400(selector, (*neighbor)->selector.fields.index);
+                record = mnuFindPanelPositionRecordByScriptId(selector, (*neighbor)->selector.fields.index);
                 if ((record->stateFlags & 15) == 2) {
                     changed |= 2;
                     animation = mnuFindPanelSlotById(resource, (*neighbor)->selector.fields.index, 0);
@@ -723,7 +723,7 @@ void mnuBuildMantraPanelSelectionView(MnuStatusResource *object, s32 selector, u
     s32 recordIndex;
 
     position = mnuGetMantraPanelPositionRecord((s16)id);
-    func_00291400(selector, id);
+    mnuFindPanelPositionRecordByScriptId(selector, id);
     visibleIds[6] = id;
     for (recordIndex = 0; recordIndex < 6; recordIndex++) {
         visibleIds[recordIndex] = position->neighbors[recordIndex]->id;
@@ -749,7 +749,7 @@ void mnuBuildMantraPanelSelectionView(MnuStatusResource *object, s32 selector, u
                     }
                 }
                 if (hidden) {
-                    record = func_00291400(selector, id);
+                    record = mnuFindPanelPositionRecordByScriptId(selector, id);
                     if ((record->stateFlags & 15) != 3) {
                         animation = mnuSpawnPanelSlotB(object->menu.resource, position->id, 13, (s16)panelX, 0, 0);
                         mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
@@ -774,16 +774,16 @@ void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *object, s32 selector
     mnuQueuePanelAnimationTransition(animation, 1, 0);
     i = 0;
     while (i < 3) {
-        record = func_00291400(i++, id);
+        record = mnuFindPanelPositionRecordByScriptId(i++, id);
         record->stateFlags |= 0x800;
     }
     for (k = 0; k < 3; k++) {
-        record = func_00291400(k, id);
+        record = mnuFindPanelPositionRecordByScriptId(k, id);
         record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 2);
         neighbor = position->neighbors;
         for (i = 5; i >= 0; i--, neighbor++) {
             if (*neighbor != NULL) {
-                if ((func_00291400(k, (*neighbor)->id)->flags & 1) != 0) {
+                if ((mnuFindPanelPositionRecordByScriptId(k, (*neighbor)->id)->flags & 1) != 0) {
                     record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 1);
                 }
             }
@@ -955,7 +955,7 @@ void mnuStartMantraTutorialPanelReveal(MnuStatusResource *object) {
 
     resource = object->menu.resource;
     mnuGetMantraPanelPositionRecord(0);
-    record = func_00291400(0, 8);
+    record = mnuFindPanelPositionRecordByScriptId(0, 8);
     animation = mnuFindPanelSlotById(resource, 8, 0);
     mnuQueuePanelAnimationTransition(animation, 7, 0);
     animation = mnuSpawnPanelSlotB(resource, 8, 1, 0, 0, 0);
@@ -982,7 +982,7 @@ void mnuInitializeMantraTutorialSelector(MnuStatusResource *object) {
     state->flags &= ~0x20000000;
 }
 
-void func_00292B90(MnuStatusResource *object) {
+void mnuAcquireTutorialMantraNodeAndNeighbors(MnuStatusResource *object) {
     mnuAcquireMantraAndUnlockNeighbors(object, 0, 8);
 }
 
@@ -1160,7 +1160,7 @@ void mnuCollectPanelNodeValues(MnuStatusResource *object) {
     state->savedSelection = object->menu.selectionIndex;
 }
 
-void func_002933A8(MnuStatusResource *object) {
+void mnuBeginMantraTutorialFromNormalMode(MnuStatusResource *object) {
     object->menu.flagBytes[0] = 3;
     object->menu.unk9B5 = 0;
     object->menu.unk9B6 = 0;
@@ -1324,7 +1324,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 14:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN\n");
-        func_00292B90(object);
+        mnuAcquireTutorialMantraNodeAndNeighbors(object);
         state->tutorialNextState = 15;
         state->tutorialWaitFrames = 60;
         state->flagBytes[0] = 37;
@@ -1512,7 +1512,7 @@ s32 func_00293FD0(MnuStatusResource *object, u16 id) {
         if (((state->flags >> 24) & 0xF) == selector) {
             continue;
         }
-        record = func_00291400(selector, id);
+        record = mnuFindPanelPositionRecordByScriptId(selector, id);
         if ((record->flags & 1) != 0) {
             result = selector;
             break;
@@ -1585,7 +1585,7 @@ void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining) {
     entry->framesRemaining = framesRemaining;
 }
 
-void func_002945B8(MenuTerminalContext *value) {
+void mnuSetCurrentTerminalContext(MenuTerminalContext *value) {
     D_00438FC8 = value;
 }
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);

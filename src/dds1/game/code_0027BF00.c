@@ -465,7 +465,7 @@ void mnuDrawWindowEntryDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer 
     }
 }
 
-void func_0027CA78(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
+void mnuDrawMenuEntryDecorationSprites(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
     mnuDrawWindowEntryDecorations(x, y, depth, (MenuWindowContainer *)menu, param);
 }
 
@@ -573,7 +573,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
 
     menu->list->scale = fadeScale;
     mnuDrawWindowFrameAndOverlay(x, y, depth, menu, drawArg);
-    func_0027CA78(x, y, depth, menu, drawArg);
+    mnuDrawMenuEntryDecorationSprites(x, y, depth, menu, drawArg);
     if (menu->list->count != 0) {
         mnuDrawWindowSelectionPanel(x, y, depth, menu, drawArg);
     }

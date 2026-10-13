@@ -8717,3 +8717,5 @@
 0x0021C208	mdlUpdateViewerWorkspaceSetup	inferred	confidence=high; Model-viewer three-phase input/setup publication updates equal axis scales and centered workspace offsets; existing final-use publication form retained. DDS2 0x00236D78 twin. [Namer1 batch47]
 0x0021C2E0	mdlAfterViewerWorkspaceUpdate	inferred	confidence=high; Actual retail no-op immediately after every workspace setup phase update; no invented draw/completion behavior. DDS2 0x00236E50 twin. [Namer1 batch47]
 0x0021C2E8	mdlUpdateViewerWorkspaceSetupTask	inferred	confidence=high; Task adapter invokes workspace setup and separate native no-op, returns0. DDS2 0x00236E58 twin. [Namer1 batch47]
+0x0027CA78	mnuDrawMenuEntryDecorationSprites	inferred	Forwards coordinates and MenuWindowContainer to mnuDrawWindowEntryDecorations; source: src/dds1/game/code_0027BF00.c. LiteH-2 b23.
+0x00286A00	mnuIsSolarPricedItemId	inferred	Accepts item IDs 0x60-0x7E in the staff-item path; DDS2 twin 0x002C5498 accepts the solar-price subset 0x60-0x6C. Source: src/dds1/game/code_00282850.c and code_00272D50.c. LiteH-2 b23.
