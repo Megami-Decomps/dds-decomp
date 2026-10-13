@@ -1944,7 +1944,7 @@ s32 evtBeginSelectionExitFade(KwlnTask *task) {
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
-extern void func_002CE208(s32 mode);
+extern void fileStartMemoryCardMenuForMode(s32 mode);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
@@ -1961,7 +1961,7 @@ s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     if (state->fileTaskActive == 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
         mnuReleaseResourceGroupTextureHandles((u32)state);
         fileSetPreviewLocation(state->reduced, state->slot);
-        func_002CE208(0);
+        fileStartMemoryCardMenuForMode(0);
         state->fileTaskActive = 1;
     }
     if (state->dispatchStatus == 0 && fileMenuTaskExists() == 0 &&

@@ -59,7 +59,7 @@ extern u32 kwlnDrawSurfaceIndex;
 extern s32 fileMenuOperationSucceeded(void);
 
 extern s32 fileMenuTaskExists(void);
-extern void func_002CE208(s32 mode);
+extern void fileStartMemoryCardMenuForMode(s32 mode);
 
 extern s32 fldIsFieldResourceWaitFinished(void);
 
@@ -898,7 +898,7 @@ u32 func_0010A350(void) {
 }
 
 void evtOpenFileMenuModeThree(void) {
-    func_002CE208(3);
+    fileStartMemoryCardMenuForMode(3);
 }
 
 u32 evtPollFileMenuModeThree(void) {
@@ -940,7 +940,7 @@ u32 func_0010A418(void) {
 }
 
 void evtOpenFileMenuModeOne(void) {
-    func_002CE208(1);
+    fileStartMemoryCardMenuForMode(1);
 }
 
 s32 evtCheckSelectionInput(void) {
@@ -974,7 +974,7 @@ u32 func_0010A4D0(void) {
 }
 
 void evtOpenFileMenuModeTwo(void) {
-    func_002CE208(2);
+    fileStartMemoryCardMenuForMode(2);
 }
 
 u32 evtPollFileMenuModeTwo(void) {
@@ -1410,7 +1410,7 @@ void evtOpenFileMenuFromParams(u32 unused, u32 *menuArgs) {
         menuArg = *menuArgs;
     }
     fileMenuWorkCreate(menuArg);
-    func_002CE208(4);
+    fileStartMemoryCardMenuForMode(4);
 }
 
 extern void fileReleaseMenuFlowResource();
