@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "btl_pair_camera_preset.h"
+#include "btl_camera_parameter_record.h"
 #include "common.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
@@ -4187,23 +4188,6 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     /* 001E9DA0..001E9DDC: restore saved registers, return void. */
 }
 
-typedef struct BtlCameraParameterRecord {
-    u8 flags00;
-    u8 pad01[0xF];
-    f32 value[4];
-    u8 flags20;
-    u8 pad21[0xF];
-    f32 fadeInDuration;
-    u8 pad34[0xC];
-    f32 fadeOutDuration;
-    u8 pad44[0x18];
-    f32 curveScale5C;
-    f32 curveScale60;
-    u8 pad64[0xC];
-    s8 stop;
-    u8 pad71[0xF];
-} BtlCameraParameterRecord;
-
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E9DE0);
 
 /* vu0 routine: constrain a camera pose endpoint to the enabled height planes. */
@@ -4266,8 +4250,6 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EB368);
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
-
-typedef char BtlCameraParameterRecord_size[(sizeof(BtlCameraParameterRecord) == 0x80) ? 1 : -1];
 
 extern void func_001EBE88(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,

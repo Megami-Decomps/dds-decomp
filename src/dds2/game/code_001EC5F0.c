@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "btl_pair_camera_preset.h"
+#include "btl_camera_parameter_record.h"
 #include "common.h"
 #include "mnu_title_stream.h"
 #include "eff_random_mod.h"
@@ -3083,24 +3084,6 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001FBAC0);
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001FC5E0);
-
-/* Camera parameter banks have a native 0x80-byte stride. */
-typedef struct BtlCameraParameterRecord {
-    u8 flags00;
-    u8 pad01[0xF];
-    f32 value[4];
-    u8 flags20;
-    u8 pad21[0xF];
-    f32 fadeInDuration;
-    u8 pad34[0xC];
-    f32 fadeOutDuration;
-    u8 pad44[0x18];
-    f32 curveScale5C;
-    f32 curveScale60;
-    u8 pad64[0xC];
-    s8 stop;
-    u8 pad71[0xF];
-} BtlCameraParameterRecord;
 
 extern void func_001FC5E0(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,
