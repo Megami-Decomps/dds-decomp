@@ -43,7 +43,7 @@ enum { FILE_CONFIG_SET, FILE_CONFIG_FRAME, FILE_CONFIG_X, FILE_CONFIG_Y };
 extern s16 D_003E9028[27][4];
 
 extern s32 D_00437D4C;
-extern s32 func_002C9BD0(void);
+extern s32 fileDrawFileMenuPromptAndCheckDelay(void);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct MenuWork {
@@ -661,7 +661,7 @@ s32 fileIsLoadStepComplete(void) {
 }
 
 /* Draw the expanding prompt panel and report when its input delay has elapsed. */
-s32 func_002C9BD0(void) {
+s32 fileDrawFileMenuPromptAndCheckDelay(void) {
     s32 y;
     s32 height;
     s32 value;
@@ -739,7 +739,7 @@ void func_002C9CF8(void) {
         fileSelectedSlotIndex = 0;
         D_00437D28 = 0;
         fileResetLoadContextSlide();
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8058);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8088);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E80A8);
@@ -750,7 +750,7 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 2) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8158);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8188);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E81A0);
@@ -761,21 +761,21 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 3) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82C0);
             fileDrawPulsingSaveHighlight();
             D_00437CF8 = 0;
         }
     }
     if (D_00437D3C == 4) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82D0);
             fileDrawPulsingSaveHighlight();
             D_00437CF8 = 0;
         }
     }
     if (D_00437D3C == 5) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8358);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8380);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E83A0);
@@ -786,14 +786,14 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 6) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82E0);
             fileDrawPulsingSaveHighlight();
             D_00437CF8 = 0;
         }
     }
     if (D_00437D3C == 7) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             if (mcdOriginalTitleFileMode == 0) {
                 mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8668);
                 mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8698);
@@ -806,7 +806,7 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 8) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C08);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8990);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E89B8);
@@ -816,7 +816,7 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 9) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C70);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8C98);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8CC0);
@@ -864,7 +864,7 @@ void func_002CA1F0(void) {
     }
 
     if (D_00437D38 == 1) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8200);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8220);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8238);
@@ -872,7 +872,7 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 2) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82A0);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
@@ -880,7 +880,7 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 3) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8290);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
@@ -888,14 +888,14 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 4) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8480);
             fileDrawPulsingSaveHighlight();
         }
         D_00437D04 = 1;
     }
     if (D_00437D38 == 5) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82B0);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
@@ -903,20 +903,20 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 6) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8498);
             fileDrawPulsingSaveHighlight();
         }
     }
     if (D_00437D38 == 13) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8468);
             fileDrawPulsingSaveHighlight();
         }
         D_00437D04 = 2;
     }
     if (D_00437D38 >= 20) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             switch (D_00437D38) {
             case 20:
                 mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8A48);
