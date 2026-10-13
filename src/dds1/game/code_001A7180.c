@@ -17,6 +17,7 @@
 #include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
+#include "btl_ai_table.h"
 #include "kwln.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -561,7 +562,7 @@ s32 btlRollEscapeChance(BtlUnit *actor) {
     return btlRollAiBucket() < chance;
 }
 
-extern u8 *datEnemyAiRecords;
+extern AiSpecies *datEnemyAiRecords;
 
 s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     s32 context = btlGetRuntime();
@@ -572,7 +573,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     if ((((BtlUnit *)object)->partyRecord.status & 0x2A0F) != 0) {
         return 0;
     }
-    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId * 0x15C] == 0;
+    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId].unknown00[0] == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */

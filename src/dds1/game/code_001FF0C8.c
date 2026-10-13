@@ -102,15 +102,6 @@ extern s32 btlGetRuntime(void);
 
 extern void btlBossDebugPrintf(const char *, ...);
 
-/* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
-
-typedef struct AiSpecies {
-    u8 pad00[4];
-    AiDecisionRow decisions[3];
-    AiSlot slot[25];
-    u8 pad108[0x54];
-} AiSpecies;
-
 extern AiSpecies *datEnemyAiRecords;
 
 extern u8 sdfPfsDebugMode;
