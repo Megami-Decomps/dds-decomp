@@ -9,7 +9,7 @@ extern void mnuRequestIndexedMovieResource(s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawFixedSpriteLayerGroup(void) {
-    func_00134CD8();
+    fldDrawCameraColorLayerPass();
     mnuDrawSprite(0, 0, 0, 0, 0, 8, 0x52);
     mnuDrawSprite(0, 0, 0, 0, 0, 0xC, 0x52);
     mnuDrawSprite(0, 0, 0, 0, 0, 9, 0x52);

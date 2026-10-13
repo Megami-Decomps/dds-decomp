@@ -8,7 +8,7 @@
 
 extern MovieMenuState *mnuMovieMenuState;
 
-extern void func_00134CD8(void);
+extern void fldDrawCameraColorLayerPass(void);
 
 extern void effRequestResourceByMode(const char *, const char *, u32, u32 *);
 
@@ -345,7 +345,7 @@ void mnuAdvanceMovieMenuIdleAnimation(void) {
     MenuState *state;
     f32 pulse;
 
-    func_00134CD8();
+    fldDrawCameraColorLayerPass();
 
     state = (MenuState *)mnuMovieMenuState;
     state->pulseTimer++;
