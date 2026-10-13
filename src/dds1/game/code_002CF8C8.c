@@ -7,8 +7,8 @@
 
 extern u8 D_003BD39C;
 
-extern void func_00100000(void);
-s32 D_003BD2D0 __attribute__((section(".sdata"), aligned(8))) = (s32)func_00100000;
+/* Workspace bytes passed to the console DMA setup allocation. */
+s32 D_003BD2D0 __attribute__((section(".sdata"), aligned(8))) = 0x100000;
 void (*sdfTickCallback)(void) __attribute__((section(".sdata"))) = NULL;
 
 extern void sdfSleepThreadCount(s32);

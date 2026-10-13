@@ -141,7 +141,7 @@ extern struct EffectSlotSet *mnuCampResourceHandles[2];
 
 extern u32 D_003E6848[];
 
-extern char D_0042A950[];
+extern const char D_0042A950[];
 
 
 #define MNU_STAFF_BASE_RESOURCE_COUNT 2
@@ -329,7 +329,7 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A930);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A940);
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A950);
+const char D_0042A950[] = "/camp/spr/n_min/";
 
 struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount,
                                                  u8 *menuBytes) {
