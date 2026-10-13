@@ -9,6 +9,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
+#include "btl_scene_lighting_task_args.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -119,8 +120,6 @@ extern u32 kwlnDrawControlFlags;
 
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
-
-typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
@@ -4238,13 +4237,6 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
     args->unk_10 = 0;
     return task;
 }
-
-typedef struct SceneLightTransitionArgs {
-    f32 direction[4];
-    f32 lightColor[4];
-    f32 ambientColor[4];
-    u32 value;
-} SceneLightTransitionArgs;
 
 extern u32 btlBlendColorVec(f32 *colorA, f32 *colorB, f32 blendFactor);
 
