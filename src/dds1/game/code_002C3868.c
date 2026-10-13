@@ -145,7 +145,7 @@ s8 sdfGetMapCameraTransitionFrame(void) {
     return D_003BD270;
 }
 
-void func_002C3D90(void) {
+void sdfTickMapCameraTransition(void) {
     sdfUpdateSelectedCounterMapCameraTransition();
 }
 

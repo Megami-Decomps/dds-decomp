@@ -374,7 +374,7 @@ s32 fldLmapTaskExists(void) {
     return kwlnTaskGetTaskByName(fldLocalMapTaskName) != NULL;
 }
 
-void func_002C2EF8(const char *fmt, ...) {
+void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
 }
 
 /* Field-map mode index -> track slot. Indices 7 and 12 are the only values in

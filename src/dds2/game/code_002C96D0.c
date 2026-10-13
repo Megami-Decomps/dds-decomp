@@ -137,9 +137,9 @@ extern MenuWork *fileLoadSelectionWork;
 extern void fileApplyMenuFlagsToModel(MenuWork *);
 extern void fldPrepareDeferredSceneTransition(void);
 extern void fileCopySaveHeaderNumbers(FileSavePreviewRecord *);
-extern void func_002D0AB8(void);
+extern void filePrintAccessoryLoadNotice(void);
 extern void fileSaveAndDisplayCurrentMoney(void);
-extern s32 func_002D0B08(s32);
+extern s32 fileApplyStoryStatBonuses(s32);
 extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 extern void mtrMantraEventBitReset(void);
@@ -223,7 +223,7 @@ extern s32 fileSlotSelectPoll(void);
 
 extern s32 fileBeginSlotMetadataRefresh(void);
 
-extern s32 fileStartMemoryCardDetection(void);
+extern s32 fileStartMemoryCardFormat(void);
 
 extern s32 mcResetSlotMetadata(void);
 
@@ -256,7 +256,7 @@ extern s8 D_0037F510[];
 extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(s32 result);
 
-extern void func_002C92D0(u32 context);
+extern void fileRequestMemoryCardFormat(u32 context);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -1256,7 +1256,7 @@ s32 fileSlotStatusPoll(void) {
             fileSetMenuFlowState(0);
             D_00437D3C = 0;
             D_00437D1C = 2;
-            return fileBeginPromptDialog(fileStartMemoryCardDetection, mnuSelectFileBranch, 1);
+            return fileBeginPromptDialog(fileStartMemoryCardFormat, mnuSelectFileBranch, 1);
         }
         fileSetMenuFlowState(0);
         D_00437D3C = 7;
@@ -1406,7 +1406,7 @@ s32 filePollSlotDetectionAndBranch(void) {
                 fileClearAllSlotFlags();
                 D_00437D3C = 0;
                 D_00437D1C = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
             }
             if (D_00437D3C != 7) {
                 fileClearAllSlotFlags();
@@ -1543,7 +1543,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
                 fileSetMenuFlowState(0);
                 D_00437D3C = 0;
                 D_00437D1C = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
             }
             if (D_00437D3C != 7) {
                 fileClearAllSlotFlags();
@@ -2015,10 +2015,10 @@ s32 mcHandleDetectionResult(void) {
     return fileBeginDetectionRequest((u32)fileRestartSlotScan);
 }
 
-s32 fileStartMemoryCardDetection(void) {
+s32 fileStartMemoryCardFormat(void) {
     fileSetMenuFlowState(5);
     fileSetMemoryCardOperationActive();
-    func_002C92D0(fileMemoryCardRequestIndex);
+    fileRequestMemoryCardFormat(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
 
@@ -2646,7 +2646,7 @@ extern void *memset(void *dst, s32 value, s32 size);
 struct SdfMemBlock;
 extern void fileSetMemoryCardOperationActive(void);
 extern s32 D_00437D80;
-extern void func_002CE738(KwlnTask *task);
+extern void fileDestroyMemoryCardMenuTask(KwlnTask *task);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 void fileStartMemoryCardMenuForMode(s32 mode) {
@@ -2758,7 +2758,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         memcpy(D_00437D58, (void *)(titleNamesAddress + 0x3C0), 0x780);
         sdfReleaseResourceAllocation(titleNamesAllocation);
     }
-    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, func_002CE738, 0);
+    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, fileDestroyMemoryCardMenuTask, 0);
     D_00437CE4 = 1;
     fileInitCursorPulse();
     kwlnFadeOutStart(0, 0, 0, 8);
@@ -2770,7 +2770,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     }
 }
 
-void func_002CE738(KwlnTask *task) {
+void fileDestroyMemoryCardMenuTask(KwlnTask *task) {
     fileReleaseMenuResources();
 }
 
@@ -3161,13 +3161,13 @@ s32 fileBeginFourWayDialog(u32 ready, u32 completed, u32 cancelled, u32 state) {
     return (s32)fileFourWayDialogPoll;
 }
 
-s32 func_002D0490(void) {
+s32 fileWaitAfterLoadResult(void) {
     return 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
 
-s32 func_002D0498(void) {
+s32 fileApplySelectedLoadResult(void) {
     s32 i;
 
     if (kwlnDrawControlFlags & 2) {
@@ -3178,7 +3178,7 @@ s32 func_002D0498(void) {
     D_00437D1C = 0;
     fldPrepareDeferredSceneTransition();
     if (fileLoadSelectionWork->applyLoadResult == 0) {
-        return (s32)func_002D0490;
+        return (s32)fileWaitAfterLoadResult;
     }
     if (fileLoadSelectionWork->startBranchFlag == 0) {
         mdlFlagSet(0xB8F);
@@ -3187,11 +3187,11 @@ s32 func_002D0498(void) {
         fileCopyRecordHeader(&fileLoadSelectionWork->header, &datGameState->header);
     }
     fileApplyMenuFlagsToModel(fileLoadSelectionWork);
-    func_002D0AB8();
+    filePrintAccessoryLoadNotice();
     fileSaveAndDisplayCurrentMoney();
     for (i = 0; i < 5; i++) {
         u16 activeFlag = datGameState->party[i].flags & DAT_PARTY_FLAG_OCCUPIED;
-        if (activeFlag && func_002D0B08(datGameState->party[i].unitId)) {
+        if (activeFlag && fileApplyStoryStatBonuses(datGameState->party[i].unitId)) {
             u32 maximumMp;
             u16 restoredHp;
             datGameState->party[i].maxHp =
@@ -3225,14 +3225,14 @@ s32 func_002D0498(void) {
         mdlFlagSet(0x805);
         mdlFlagSet(0x806);
     }
-    return (s32)func_002D0490;
+    return (s32)fileWaitAfterLoadResult;
 }
 
 
 s32 fileBeginFadeAndConfirmSound(void) {
     kwlnFadeInStart(0, 0, 0, 8);
     sndReleaseTrackHandle(0x310000);
-    return (s32)func_002D0498;
+    return (s32)fileApplySelectedLoadResult;
 }
 
 
@@ -3385,7 +3385,7 @@ void fileReleaseMenuFlowResource(void) {
 
 extern char D_0042B920[];
 
-void func_002D0AB8(void) {
+void filePrintAccessoryLoadNotice(void) {
     sdfDebugPrintf(D_0042B920);
 }
 
@@ -3411,7 +3411,7 @@ extern s32 sdfDebugPrintf(const char *, ...);
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */
-s32 func_002D0B08(s32 unitId) {
+s32 fileApplyStoryStatBonuses(s32 unitId) {
     s32 partyIndex;
     DatPartyRecord *party;
     s32 changed;
@@ -3625,7 +3625,7 @@ typedef struct FileConfigTask {
 } FileConfigTask;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
-extern void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list, FileConfigListNode *node, s32 drawArg);
+extern void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *list, FileConfigListNode *node, s32 drawArg);
 extern void mnuResetTitleStreamLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 extern void mnuQueueTitleSoundStreamEntry(s32);
@@ -3650,7 +3650,7 @@ s32 fileCreateConfigTask(s32 mode) {
     task->result = 0;
     list = mnuCreateListState(0, 5, 0x23);
     task->frame = list;
-    list->drawCallback = func_002D1930;
+    list->drawCallback = fileDrawConfigurationMenuEntry;
     for (i = 0; i < 5; i++) {
         node = (FileConfigListNode *)mnuListAppendNode(task->frame, NULL);
         node->resource = sdfAllocSizeClassBlock(4);
@@ -3712,7 +3712,7 @@ extern s32 fileCreateConfigTask(s32 mode);
 
 extern s32 fileStartQueuedLoad(KwlnTask *task);
 extern void fileConfigTaskDestroy(KwlnTask *task);
-extern s32 func_002D1450(KwlnTask *task);
+extern s32 fileUpdateConfigurationMenu(KwlnTask *task);
 extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
 
 extern s8 fileConfigTaskState;
@@ -3720,7 +3720,7 @@ extern s8 fileConfigTaskState;
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
-        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
         fileConfigTaskState = 1;
@@ -3758,7 +3758,7 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigLoadTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigOwnerTaskName);
 
-s32 func_002D1450(KwlnTask *task) {
+s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     s32 oldIndex;
     s32 index;
     s32 i;
@@ -3877,7 +3877,7 @@ s32 func_002D1450(KwlnTask *task) {
     return 0;
 }
 
-extern void func_002D27A0(void *);
+extern void fileDrawConfigurationMenuBackground(void *);
 
 s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
@@ -3886,7 +3886,7 @@ s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->result < 0) {
         return -1;
     }
-    func_002D27A0((void *)fileConfigTaskWork);
+    fileDrawConfigurationMenuBackground((void *)fileConfigTaskWork);
     mnuCallInitWide(0x400, 0x400, 0, (u32)((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
     return 0;
 }
@@ -4029,7 +4029,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DF0);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileConfigInputTaskName);
 
-void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
+void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
                    FileConfigListNode *node, s32 drawArg) {
     s8 labelFrames[5] = {0, 1, 2, 3, 4};
     s32 index = node->index;
@@ -4179,7 +4179,7 @@ void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
 }
 
 
-void func_002D27A0(void *arg) {
+void fileDrawConfigurationMenuBackground(void *arg) {
     s16 sprites[5][4] = {
         {0, 2, 99, -57},
         {0, 3, -31, 365},
@@ -5940,7 +5940,7 @@ extern void fileReadRecordSecondVector(u8 *, void *);
 extern void fileReadVectorPtr20(u8 *, void *);
 extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
 
-void func_002D69B8(s32 object) {
+void fileDrawLoadObjectSlots(s32 object) {
     EffGeneratedTextureDescriptor params;
     EffAnimSample sample;
     f32 transformed[4];
@@ -6211,9 +6211,9 @@ void func_002D69B8(s32 object) {
 }
 
 
-void func_002D7398(u32 objectAddr) {
+void fileUpdateLoadObjectSlots(u32 objectAddr) {
     fileAcquireLoadObjectRecord((EffectSurfaceNode *)objectAddr);
-    func_002D69B8(objectAddr);
+    fileDrawLoadObjectSlots(objectAddr);
 }
 
 void fileSendLoadObjectRecordVector(EffectSurfaceNode *obj) {

@@ -375,7 +375,7 @@ s32 fldLmapTaskExists(void) {
     return kwlnTaskGetTaskByName(fldLocalMapTaskName) != NULL;
 }
 
-void func_0030AA68(const char *fmt, ...) {
+void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
 }
 
 /* Map a local-map mode to its track-selection ordinal; unmapped modes use 1. */
@@ -826,7 +826,7 @@ s32 mdlCollectFlagBitsIntoMask(void) {
     return bits;
 }
 
-u32 func_0030B678(void) {
+u32 sdfGetInitialMapCameraTransitionState(void) {
     return 1;
 }
 
