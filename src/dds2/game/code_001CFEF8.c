@@ -1824,7 +1824,7 @@ extern s32 func_001B2630();
 
 /* Per-frame scene advance: picks the next group task (or finishes the
  * slot sequence) and dispatches it once flags 4 and 8 are set. */
-void func_001D3ED8(void) {
+void fldAdvanceSceneGroupScheduler(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     ActionStateLink *task;
     void (*hook)(void);

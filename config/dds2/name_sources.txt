@@ -8272,3 +8272,4 @@
 0x0030B1E8	fldUpdateLocalMapCounterSelection	inferred	Advances the local-map selection/counter state machine: polls input, updates countdown and map timers, advances camera/selection animation, handles overlay timeout and return fades, and queues the selected scene action when complete. Called once per task update. [code-quality cleanup, 2026-10-13]
 0x00256AE0	evtViewerDrawShadowConfigRow	inferred	Callback registered by evtViewerEditShadowProperties; draws the shadow configuration heading, mode, alpha and parameter-gated Y offset rows. [LiteH-2]
 0x00254CE0	evtDrawMotionChangeRow	inferred	Callback for evtUpdateMotionChangeRow; draws the packed motion group, motion number, loop/interpolation settings and available maximum frame. [LiteH-2]
+0x001D3ED8	fldAdvanceSceneGroupScheduler	inferred	Runs once per active battle frame; waits for scene/task blockers, dispatches the next eligible front-group task or marks the scene slots finished. [LiteH-2]
