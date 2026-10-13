@@ -359,7 +359,7 @@ void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
     }
 }
 
-void func_0025DE08(EvtRuntime *world, s32 threshold, s32 delta) {
+void mnuAdjustTimelineDurations(EvtRuntime *world, s32 threshold, s32 delta) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *key;
     s32 end = 0;
