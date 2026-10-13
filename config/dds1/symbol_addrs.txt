@@ -28,6 +28,7 @@ effMiscRand = 0x002E8340; // type:func size:0x54
 // Saved DebugTimeGrph task handle.
 kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
+sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
 ptyReturnOne = 0x0011B150; // type:func
 ptyUnitMatchesAffinityRequirement = 0x0011B158; // type:func
@@ -10007,7 +10008,6 @@ sdfMotionCaptureSecondaryTextNoOp = 0x002DD038; // type:func
 sdfBlendMotionSlotPairWeights = 0x002DD1B8; // type:func
 func_002DD608 = 0x002DD608; // type:func
 func_002DD688 = 0x002DD688; // type:func
-func_002DD708 = 0x002DD708; // type:func
 func_002DD8E8 = 0x002DD8E8; // type:func
 func_002DD968 = 0x002DD968; // type:func
 func_002DD9E8 = 0x002DD9E8; // type:func

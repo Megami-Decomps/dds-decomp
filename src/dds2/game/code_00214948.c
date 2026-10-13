@@ -1157,7 +1157,7 @@ extern f32 func_00353140(f32);
 
 extern f32 func_00353228(f32);
 
-extern void func_00336538(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
@@ -1204,7 +1204,7 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     if (command->flags & 0x200) {
         angle = -angle;
     }
-    func_00336538(angle);
+    sdfVuLoadRotationMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -3340,7 +3340,7 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     command->camera.direction[0] = 1.0f;
     btlBuildBattleUnitFramingCameraPose(command, pose, 25.0f);
     btlCopyMotionTransform(&command->backCamera, pose);
-    func_00336538(-0.87266463f);
+    sdfVuLoadRotationMatrixY(-0.87266463f);
         VU0_STORE_VF(vf10, pose->direction);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, command->backCamera.direction);
@@ -3445,9 +3445,9 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         btlBuildBattleUnitFramingCameraPose(command, &command->frontCamera, 25.0f);
         btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
         if (command->frontCamera.direction[0] > 0.0f) {
-            func_00336538(-0.87266463f);
+            sdfVuLoadRotationMatrixY(-0.87266463f);
         } else {
-            func_00336538(0.87266463f);
+            sdfVuLoadRotationMatrixY(0.87266463f);
         }
         func_00336798(-0.34906585f);
         sdfMultiplyVuMatrixInPlace();

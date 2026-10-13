@@ -248,7 +248,7 @@ INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD608);
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD688);
 
-INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD708);
+INCLUDE_ASM(const s32, "game/code_002DD038", sdfVuLoadRotationMatrixY);
 
 extern f32 func_002F9F60(f32 angle);
 extern f32 func_002FA060(f32 angle);

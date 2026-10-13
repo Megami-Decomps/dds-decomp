@@ -534,7 +534,7 @@ void effPcpSetStaggerEffectColor(EffPCPStaggered *work, u32 val) {
     work->color = val;
 }
 
-extern void func_002DD708(f32 angle);
+extern void sdfVuLoadRotationMatrixY(f32 angle);
 
 /* Spawns cross arm (i, j): rotates the model by j sixths of a turn about the axis chosen by i. */
 void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
@@ -548,9 +548,9 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     } else if (i == 1) {
         func_002DD688(-angle);
     } else if (i == 2) {
-        func_002DD708(-angle);
+        sdfVuLoadRotationMatrixY(-angle);
     } else {
-        func_002DD708(angle);
+        sdfVuLoadRotationMatrixY(angle);
     }
     VU0_STORE_MATRIX(mtx);
     effParamWorkCallback2(work->handle[i][j], mtx);
@@ -4258,7 +4258,7 @@ void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
         sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
     } else {
-        func_002DD708(work->rotationA);
+        sdfVuLoadRotationMatrixY(work->rotationA);
         func_002DD968(work->rotationB);
         sdfMultiplyVuMatrixInPlace();
         work->rotationB += work->rotationStep;

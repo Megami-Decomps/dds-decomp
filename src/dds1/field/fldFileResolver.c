@@ -2494,7 +2494,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
 }
 
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
-extern void func_002DD708(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void func_002E2680(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
@@ -2518,7 +2518,7 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     header = (DmaPacketHeader *)sdfAllocPacketAligned(0x20);
     sdfConsInitDmaPacketHeader(header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
     sdfAppendReferencePacket(command, (u32)header);
-    func_002DD708(modelData->scale);
+    sdfVuLoadRotationMatrixY(modelData->scale);
         VU0_STORE_MATRIX(mat);
 ;
     packet = (u8 *)sdfAllocPacketAligned(0x38);
