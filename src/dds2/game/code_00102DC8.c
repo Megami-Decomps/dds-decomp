@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_cons_matrix_packet.h"
@@ -129,7 +130,6 @@ extern u8 kwlnPadMotorLevels[2];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 extern void dds3AdminReleaseTaskWork(KwlnTask *task);
 extern char dds3AdminTaskName[];
-extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_0043DDA0[];
 extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;

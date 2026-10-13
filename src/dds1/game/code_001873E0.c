@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_resource.h"
@@ -57,8 +58,6 @@ extern SdfPoolNode D_003253E8;
 extern SdfPoolNode D_003253C8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern u32 kwlnGetDrawBufferIndex(void);
-
 extern s32 func_0011E278();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void *effCreateSizedDrawPacket();

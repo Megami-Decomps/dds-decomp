@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "kwln_sprite.h"
 #include "dds3Admin.h"
@@ -121,7 +122,6 @@ s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     return 0;
 }
 
-extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003808B0[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern u8 D_00380860[];

@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_cons_matrix_packet.h"
@@ -102,7 +103,6 @@ extern KwlnTask *kwlnDebugGraphTask;
 extern s32 kwlnTextureCountIncompleteResources(void);
 extern s32 func_003014F0();
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003C2620[];
 extern s32 D_003BA724;
 extern s32 kwlnDistanceBlurErrorCount;

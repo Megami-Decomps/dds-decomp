@@ -6,6 +6,7 @@
 #include "sdf_packet_builders.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
 #include "sdf_packet_header.h"
@@ -483,8 +484,6 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
         surface->append(surface, list);
     }
 }
-
-extern s32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 

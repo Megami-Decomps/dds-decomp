@@ -5,6 +5,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
@@ -2699,7 +2700,6 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
     rotation[2] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[2];
 }
 
-extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003E7960[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
