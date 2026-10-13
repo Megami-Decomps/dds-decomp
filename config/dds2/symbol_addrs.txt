@@ -20,6 +20,7 @@ D_00435D42 = 0x00435D42; // type:u16
 kwlnDebugGraphTask = 0x00438DA8;
 sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
+sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
 scrTestEntryFlagBit15 = 0x0026DB48; // type:func
 scrClearEntryFlagAtZeroBit0 = 0x0026DB70; // type:func
@@ -11315,7 +11316,6 @@ sdfMotionCreateSecondaryTextSampleBinding = 0x00335E18; // type:func
 sdfMotionCaptureSecondaryTextNoOp = 0x00335EE8; // type:func
 sdfBlendMotionSlotPairWeights = 0x00336068; // type:func
 func_003364B8 = 0x003364B8; // type:func
-func_003365B8 = 0x003365B8; // type:func
 func_00336798 = 0x00336798; // type:func
 func_00336818 = 0x00336818; // type:func
 func_00336898 = 0x00336898; // type:func

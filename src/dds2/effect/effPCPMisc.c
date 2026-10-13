@@ -319,10 +319,6 @@ extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
 
 
-extern void func_003365B8(f32 angle);
-
-
-
 /* Timer constructors copy these parameter prefixes before initializing
    the live source/target colors and frame counter. */
 typedef struct EffPCPFadeTimerParams {
@@ -776,9 +772,9 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     } else if (i == 1) {
         sdfVuLoadRotationMatrixY(-angle);
     } else if (i == 2) {
-        func_003365B8(-angle);
+        sdfVuLoadRotationMatrixZ(-angle);
     } else {
-        func_003365B8(angle);
+        sdfVuLoadRotationMatrixZ(angle);
     }
         VU0_STORE_MATRIX(mtx);
 ;
@@ -4385,7 +4381,7 @@ void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
         sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
     } else {
-        func_003365B8(work->rotationA);
+        sdfVuLoadRotationMatrixZ(work->rotationA);
         func_00336818(work->rotationB);
         sdfMultiplyVuMatrixInPlace();
         work->rotationB += work->rotationStep;
