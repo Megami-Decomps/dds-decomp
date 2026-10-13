@@ -2956,8 +2956,8 @@ extern u32 func_0020D260(u32);
 extern void func_0020D228(void);
 extern void func_0020D270(u32);
 extern void func_0020D230(void);
-extern s32 func_0011E848(s32);
-extern s32 func_0011E930(f32, s32);
+extern s32 btlGetConditionalEncounterInterval(s32);
+extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 extern void func_00230D90(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
@@ -3082,7 +3082,7 @@ s32 func_00230978(void) {
         }
     } else {
         btlBossDebugPrintfN(D_003C05E0.x + 185, D_003C05E0.y + 4, 0,
-            D_00436F98, datGameState->unk1444, func_0011E848(D_00436F64));
+            D_00436F98, datGameState->unk1444, btlGetConditionalEncounterInterval(D_00436F64));
     }
     if (sdfPadButtonStates[1] < 0) {
         D_00436F5D = 1;
@@ -3091,7 +3091,7 @@ s32 func_00230978(void) {
         return 0;
     }
     if (D_00436F5F != 0) {
-        encounter = func_0011E930(200.0f, D_00436F64);
+        encounter = btlAdvanceConditionalEncounterRoll(200.0f, D_00436F64);
         if (encounter == 0) {
             return 0;
         }

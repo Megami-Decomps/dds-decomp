@@ -7440,6 +7440,8 @@ evtCommandSetEffectUnitPosition = 0x00227090; // type:func
 evtCommandSetEffectUnitQuaternionRotation = 0x00227210; // type:func
 effResetFragmentHistory = 0x00169B70; // type:func  // dds2 0x001717C8
 
+btlGetConditionalEncounterInterval = 0x0011CAB0; // type:func
+btlAdvanceConditionalEncounterRoll = 0x0011CB90; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -8271,8 +8273,6 @@ func_0011B140 = 0x0011B140; // type:func
 func_0011B148 = 0x0011B148; // type:func
 func_0011C520 = 0x0011C520; // type:func
 func_0011C550 = 0x0011C550; // type:func
-func_0011CAB0 = 0x0011CAB0; // type:func
-func_0011CB90 = 0x0011CB90; // type:func
 func_0011CE30 = 0x0011CE30; // type:func
 func_0011CE38 = 0x0011CE38; // type:func
 func_0011CE40 = 0x0011CE40; // type:func

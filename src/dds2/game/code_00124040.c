@@ -37,7 +37,7 @@ extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32, s32);
 extern void ptyApplyFieldHpAttrition(s32);
-extern s32 func_0011E930(f32, s32);
+extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 
 extern s32 fldDeferredCommand;
 
@@ -1948,11 +1948,11 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (encounter == 0) encounter = fldAreaState.defaultEncounterId;
     D_00435F98.tableIndex = encounter;
     selection = &D_00435F98.encounterSelection;
-    if ((*selection = func_0011E930(distance, encounter)) != 0) {
+    if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) != 0) {
         encounter = fldRollEncounter();
         if (encounter != -1) {
             D_00435F98.tableIndex = encounter;
-            *selection = func_0011E930(99999.0f, encounter);
+            *selection = btlAdvanceConditionalEncounterRoll(99999.0f, encounter);
             fldAreaState.encounterMode = 1;
         }
         if (*selection != 0) {
