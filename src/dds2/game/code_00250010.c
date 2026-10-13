@@ -694,7 +694,7 @@ void evtDrawKeyboardRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ct
 }
 
 /* Draw the keyboard and edit the eight-character name when input is active. */
-s32 func_002515C8(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtEditMovieToolName(s32 x, s32 y, EvtRuntime *ctx) {
     SdfListHead *list;
     s32 input;
     s32 length;
