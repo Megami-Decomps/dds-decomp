@@ -21,6 +21,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_position_lerp_task_args.h"
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
@@ -79,8 +80,6 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
 extern s32 btlCountTasksForOwner(s64);
-
-typedef struct BtlPosLerpTaskArgs BtlPosLerpTaskArgs;
 
 extern s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *);
 
@@ -3707,15 +3706,6 @@ u8 *btlAllocateApproachTargetTask(u8 *owner, s32 index, f32 scale) {
     arguments[5] = 0;
     return task;
 }
-
-struct BtlPosLerpTaskArgs {
-    s128 from;
-    s128 to;
-    f32 rate;
-    f32 t;
-    s32 count;
-    BtlUnit *unit;
-};
 
 s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
     s128 pos;
