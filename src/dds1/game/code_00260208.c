@@ -161,7 +161,7 @@ extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 
 /* Draw the command panel through its entry, exit and stable phases. */
-s32 func_00260670(ShopScene *scene) {
+s32 mnuDrawShopCommandPanel(ShopScene *scene) {
     s32 frames;
     f32 progress;
     f32 opacity;
@@ -273,7 +273,7 @@ extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
 
 /* Draw the shop's two panels through their change and reveal phases. */
 /* Retail 0x00260BB0 and 0x00260BD4 both clamp the same transition progress. */
-s32 func_00260AB0(ShopScene *scene) {
+s32 mnuDrawShopPanelTransition(ShopScene *scene) {
     s32 categoryMap[2] = {0, 2};
     s32 category;
     s32 frames;

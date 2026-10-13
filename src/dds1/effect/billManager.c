@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "bill_state_packet.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -178,17 +179,6 @@ void billFlushPendingChildPackets(void) {
     }
     D_003BD7F4 = NULL;
 }
-
-typedef struct BillStatePacket {
-    u64 dmaTag;
-    u64 vifCommands;
-    u64 gifTag;
-    u64 gifRegisters;
-    u64 test;
-    u64 testRegister;
-    u64 alpha;
-    u64 alphaRegister;
-} BillStatePacket;
 
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];

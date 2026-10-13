@@ -28,7 +28,7 @@ INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBC0);
 
 INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowEntries);
 
-INCLUDE_ASM(const s32, "game/code_002665E0", func_00266908);
+INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowUnitInfo);
 
 void brsUpdateResultPortraitFade(s32 a0, s32 a1, s32 a2, BrsSkillPackageWork *work, s32 a4, s32 a5, s32 index) {
     s32 remaining = 0x100 - work->fadeProgress;

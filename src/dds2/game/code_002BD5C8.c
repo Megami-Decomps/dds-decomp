@@ -8,11 +8,11 @@
 #include "mnu.h"
 #include "mdl_flag_api.h"
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD5C8);
+INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuGetPanelWindowTransitionState);
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BD710);
 
 s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *window, s32 arg4) {
-    s32 result = func_002BD5C8(window, arg4);
+    s32 result = mnuGetPanelWindowTransitionState(window, arg4);
 
     switch (result) {
     case 1:

@@ -3625,6 +3625,7 @@
 0x0023DA48	evtStartUnitModeWithValue	inferred	Stores a nonzero unit value, clears its counter and enters mode four. [names_reviewed8.tsv]
 0x0023E178	evtResetUnitVectorSlots	inferred	Initializes each vector slot and clears its state and object id. [names_reviewed7.tsv]
 0x0023E220	evtSetSlotVectors	inferred	DDS1 twin 0x002235E8 [names_M52_EvtEff.tsv]
+0x0023E350	evtCopyUnitVectorSlotEndpoint	inferred	Searches 10 event unit-vector slots for a unit-bound ID, falls back to the first shared-state slot, copies endpoint XYZ to out, and reports success. Paired with 0x00223718. [code-quality cleanup, 2026-10-13]
 0x0023E460	evtApplyMatchingUnitSlotEndpoints	inferred	Finds active matching or fallback slot, clamps color and applies its endpoints to unit. [names_reviewed7.tsv]
 0x0023E648	evtFindUnitSlotAuxCoordinates	inferred	Returns auxiliary x and y from matching active slot or first fallback slot. [names_reviewed7.tsv]
 0x0023E718	evtGetWorldObjectId	inferred	Byte-identical dds1 twin 0x00223AE0; Gets the primary world object's ID at offset 0x04, uses -1 if absent and writes the result to the script command result. [names_conflicts.tsv]
@@ -3736,6 +3737,7 @@
 0x002438F0	evtPrepareSolarOverlayTestState	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:85:func_002438F0; Configures GS alpha/test state around a zero-color full-screen solar-overlay rectangle, then installs the final test state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00243EE8	evtDrawIndexedSolarOverlayLayers	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:100:func_00243EE8; Draws the selected suffix of the solar sprite table between overlay setup/finalization passes, draws the shared layer and restores its test state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00243FD8	evtDrawPartialSolarOverlay	inferred	QP9: twin of dds1
+0x00244408	evtAdvanceLongSolarNoiseLayers	inferred	Updates the long-duration solar-noise layers, spawns from the 15-point position/scale table under the mirrored phase cap, and expires active layers through the long timer. Paired with DDS1 0x00229750. [code-quality cleanup, 2026-10-13]
 0x002446C8	evtDrawShortSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:185:func_002446C8; Draws active solar-noise layers with a sine envelope over sixty frames and a narrow width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00244828	evtDrawLongSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:210:func_00244828; Draws active solar-noise layers with a sine envelope over eighty frames and a wider width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00244988	evtActivateNextSolarPoint	inferred	M141; sources=names_pending_main.tsv; twin=0x00229CD0, input-family pairing. [names_qp10.tsv]
@@ -6693,6 +6695,7 @@
 0x00342600	sndTransitionBgm	inferred	Calls the paired BGM transition command 0xE0 plus the packed track channel; evtTransitionBgm supplies the encoded track and fade.
 0x00342688	sdfSoundIsCommandBusy	inferred	Returns the same nonzero command flag that blocks sdfSoundSendNamedCommand.
 0x00342690	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds2/game/code_003425B0.c:208:func_00342690; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x003426B8	sndSendChannelGroupCommand110	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x110, and sends an empty sound command packet. Paired with DDS1 0x002E9810. [code-quality cleanup, 2026-10-13]
 0x00342728	sdfSoundTryQueueCommand	inferred	Rejects a command while the sound device is busy; otherwise stores and returns the requested command.
 0x00342790	sdfSoundGetCommandStatus	inferred	Returns the sound command status stored at D_00438B8C.
 0x00342B28	sdfSoundSetTableEntry	inferred	Sets a sound-table entry; DDS1 twin. [names_qp9.tsv]
@@ -8218,6 +8221,27 @@
 0x002111E8	btlFilterCommandTargetsByUnitId	inferred	confidence=high; invokes btlFilterTargetListByUnitId(context,value). Corrects prior false mode-selector twin attribution; signature preserved. [Namer1 naming batch45]
 0x003413F0	effMiscReadCachedClockTime	inferred	Reads and caches the SDF CD clock, validates its status, BCD-decodes date/time fields into ClockTime, and reports read success; called by effMiscSeedRandomFromClock. Paired with DDS1 0x002E8548. [code-quality cleanup, 2026-10-13]
 0x002D7B58	effUpdateGridRecordSlotHistory	inferred	Advances per-instance grid-record history, fades shifted trail colors, and interpolates trailing position, scale, angle, and color samples using linear or Catmull-Rom motion. Reused by seven effect emitter update paths; paired with DDS1 0x00297658. [exact-matched source]
+0x00289BA0	mnuInitializeMantraSelectionWork	inferred	Initializes party selection work, validates mantra profile entries, builds the source list, and creates the panel pool. [LiteH menu naming batch 22]
+0x0028B738	mnuUpdateMantraPanelVisualState	inferred	Updates mantra-panel visuals under entry/exit/stable opacity phases; invoked by mnuDrawMantraPhaseOpacity. [LiteH menu naming batch 22]
+0x0028DC08	mnuFindCompatibleMantraNeighbor	inferred	Returns a neighboring node selected by active edges and model-flag compatibility; mode 3 also accepts empty slots. [LiteH menu naming batch 22]
+0x0028F380	mnuFindMantraSourceCandidate	inferred	Selects a source candidate in the 0x8000 mantra-source record mode. [LiteH menu naming batch 22]
+0x0028FEF0	mnuHandleMantraSourceDialogResult	inferred	Consumes the source-dialog result; its return selects the next menu state and may identify the chosen node. [LiteH menu naming batch 22]
+0x00290C20	mnuDrawMantraNodeDetails	inferred	Draws the selected mantra node's details in the mantra interface. [LiteH menu naming batch 22]
+0x0029E220	brsDrawProgressRowUnitInfo	inferred	Draws unit information within each active progress row; DDS1 twin 0x00266908. [LiteH menu naming batch 22]
+0x002BD5C8	mnuGetPanelWindowTransitionState	inferred	Returns a panel transition state used for pending-flag clearing and for selecting a blended surface. [LiteH menu naming batch 22]
+0x002BF660	mnuUpdateAndDrawPartyCommandQueue	inferred	Updates/draws queued party commands; called by the party-member command-panel renderer. [LiteH menu naming batch 22]
+0x002BF830	mnuDrawPartyMemberCommandPanel	inferred	Mode-1 callback from mnuDispatchListPanel; DDS1 twin 0x00281D40 renders the same party-member command panel. [LiteH menu naming batch 22]
+0x00227288	btlRunLinkedPairUpdateHook	inferred	confidence=high; Mode312 afterUnitUpdate delegate to linked-pair transform pass; twin=0x00205EE0. Native callback slots differ by game. Namer1 batch46.
+0x002272A0	btlChooseLinkedPairMotion	inferred	confidence=high; chooseMotion callback remaps linked-pair codes by effect phase/counterpart quarter-value tests; twin=0x00205EF8; native unit IDs retained. Namer1 batch46.
+0x00227DA8	btlQueueLinkedPairModelSwapTasks	inferred	confidence=high; Mode170/189 preActionHook queues paired model transitions and sound/camera/fade dependencies; twin=0x002069C0. Retains PurC16612aa69 trace-derived task epochs/barriers/staging. Namer1 batch46.
+0x00228B08	btlSetLinkedPairActionCamera	inferred	confidence=high; Mode312 cameraPoseBlendHook handles171/189 paired action cameras; twin=0x00207718. DDS2 also resets188 progress while returning0; native result joins retained. Namer1 batch46.
+0x00228F48	btlAdvanceMarkedLinkedActionCamera	inferred	confidence=high; Mark readiness advances188 camera progress; at25 choose random fixed keys and clear command state. Namer1 batch46.
+0x002292D8	btlPromoteSeraForSmallParty	inferred	confidence=high; Mode345 promotes occupied non-frontline actor2 if occupied count<4/frontline count<3. actor-name2=Sera; roster unitId indexes displayed names in prfCapPresentMessages. Namer1 batch46.
+0x00229478	btlPromoteRolandToFrontline	inferred	confidence=high; Mode32D calls ptyRebalanceFrontline(7); actor-name7=Roland and roster IDs index actor names. Namer1 batch46.
+0x00229490	btlPromoteSerphArgillaGaleToFrontline	inferred	confidence=high; Mode321 calls frontline promotion for1/4/5 in order; actor-name1=Serph,4=Argilla,5=Gale; ignored results retained. Namer1 batch46.
+0x002294B8	btlPromoteSeraphToFrontline	inferred	confidence=high; Mode344 calls ptyRebalanceFrontline(8); actor-name8=Seraph and roster IDs index actor names. Namer1 batch46.
+0x00342798	sdfSoundStopMoviePlayback	inferred	confidence=high; Command100 stop for movie stream cancellation when pacEnabled, same opcode as named-playback stop; twin=0x002E98F0. Namer1 batch46.
+0x003457F8	sdfPrintTextLine	inferred	confidence=high; Native incoming-a0 forwarding to libc puts0035B7D8; strlen/string-plus-newline I/O vectors and newline byte0A at00431BE0 prove output. Zero-formal void signature retained; twin=0x002EC950. Namer1 batch46.
 0x00331C80	sdfModelBuildVisibleNodePackets	inferred	Iterates the model node table, skips disabled or clipped nodes, and builds per-workspace lighting and indexed-asset packet lists; sets the model packet-state bit when any workspace receives packets. Paired with DDS1 0x002D8DD0. [code-quality cleanup, 2026-10-13]
 0x003320E8	sdfModelBuildNodeResourcePackets	inferred	Traverses model nodes and their filtered resource-entry chains, clip-tests node transforms, and builds per-context packet lists for the visible node resources; sets the packet-state bit when packet lists are populated. Called by model update/render paths; paired with DDS1 0x002D9238. [code-quality cleanup, 2026-10-13]
 0x00231E28	mdlCreateDevSlotList	inferred	Releases existing model device slots and, for a positive capacity, allocates and initializes the context MdlDevList owner with slot geometry, byte count, color, and color-step data from the viewer stream record. Called by mdlLoadViewerStreamRecord; paired with DDS1 0x00217310. [code-quality cleanup, 2026-10-13]

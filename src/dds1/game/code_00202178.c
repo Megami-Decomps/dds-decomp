@@ -1527,7 +1527,7 @@ extern void btlInitializeEffectVectorsFromSourceRecords();
  * position and rotation, the 0x107 unit copies them and both reload their effect vectors; a 0x108 unit with
  * flags 0xE0 (and a 0x107 unit without) is moved 400 units away. With an effect running the 0x107 unit is
  * moved aside and rebuilt as the active body. */
-void func_00205BD8(void) {
+void btlUpdateLinkedEffectUnitTransforms(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *first = NULL;
     BtlUnit *second = NULL;
@@ -1609,13 +1609,16 @@ void func_00205BD8(void) {
     }
 }
 
-void func_00205EE0(void) {
-    func_00205BD8();
+/* Run the linked-pair transform pass from the battle's update hook. */
+void btlRunLinkedPairUpdateHook(void) {
+    btlUpdateLinkedEffectUnitTransforms();
 }
 
 extern s32 btlHasEffectActor(void);
 
-s32 func_00205EF8(BtlUnit *unit, s32 code, s32 unused) {
+/* Remap the linked pair's motion using effect phase and quarter-value tests.
+ * Non-group-400 units keep code; inactive group-400 units return -1. */
+s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
     BtlState *battle;
     BattleEffectState *effect;
     BtlUnit *actor;
@@ -1944,7 +1947,9 @@ extern s32 btlGetSlotRateKind(u8 *, s32);
 extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
                                  f32, f32, f32, f32, f32, f32, f32, f32);
 
-void func_002069C0(BtlTask *action, s32 mode, u64 refreshBarrier, u64 effectBarrier, u64 soundBarrier) {
+/* Queue model transitions and their sound/camera/fade dependencies for modes
+ * 0x170/0x189. Preserve the native barriers and trace-derived task epochs. */
+void btlQueueLinkedPairModelSwapTasks(BtlTask *action, s32 mode, u64 refreshBarrier, u64 effectBarrier, u64 soundBarrier) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     s32 flags;
@@ -2425,7 +2430,9 @@ extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
 
-s32 func_00207718(BtlLinkedCommand *command) {
+/* Set the linked-pair camera for actions 0x171/0x189; return 1 when handled.
+ * Other actions return 0 without the DDS2-only progress reset. */
+s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
     BtlTask *scene;
 
     if (command->actionCode != 0x171) {

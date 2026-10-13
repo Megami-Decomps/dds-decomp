@@ -570,7 +570,7 @@ s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00256540);
+INCLUDE_ASM(const s32, "game/code_00254B30", itfUpdateDisplayListNode);
 
 MnuSceneListNode *mnuAllocateDisplayListNode(void) {
     MnuSceneListNode *node = sdfAllocSizeClassBlock(0x14);
@@ -610,7 +610,7 @@ void mnuReleaseDisplayListNodes(MnuSceneListHead *head) {
     }
 }
 
-extern s32 func_00256540(MnuSceneListNode *, s32, s32);
+extern s32 itfUpdateDisplayListNode(MnuSceneListNode *, s32, s32);
 
 /* Advance the display list's timer and release completed nodes in order. */
 s32 itfAdvanceDisplayList(MnuSceneListHead *head, s32 scale, s32 context) {
@@ -627,7 +627,7 @@ s32 itfAdvanceDisplayList(MnuSceneListHead *head, s32 scale, s32 context) {
         return 1;
     }
     do {
-        s32 completed = func_00256540(node, index, context);
+        s32 completed = itfUpdateDisplayListNode(node, index, context);
 
         index++;
         if (completed != 0) {

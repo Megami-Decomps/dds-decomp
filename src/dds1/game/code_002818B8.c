@@ -119,7 +119,7 @@ void mnuDrawAndAdvancePanelFades(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 s
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002818B8", func_00281D40);
+INCLUDE_ASM(const s32, "game/code_002818B8", mnuDrawPartyMemberCommandPanel);
 
 INCLUDE_RODATA(const s32, "game/code_002818B8", D_003B23D8);
 

@@ -1011,7 +1011,115 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
 void func_001DE5F0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DCD00", func_001DE5F8);
+void func_001DE5F8(BtlLinkedCommand *action) {
+    BtlUnit *unit;
+    BtlIndexList *list;
+    u32 listCount;
+    s8 hasUnready;
+    s32 hasFlag200;
+    s32 hasFlag400;
+    s32 singleIsTarget;
+    s32 matchingActorCount;
+    BtlState *runtime;
+    BtlTask *link;
+    u32 i;
+    u32 listResult;
+
+    runtime = (BtlState *)btlGetRuntime();
+    link = action->task;
+    if (link->indexWork.phase < 0 || link->state != 7) {
+        return;
+    }
+    list = btlAllocateIndexList(0xD);
+    listResult = btlSelectCommandTargetPolicy(link, list, 0);
+    listCount = btlGetIndexListCount(list);
+    if (listCount != 0) {
+        hasUnready = 0;
+        hasFlag200 = 0;
+        hasFlag400 = 0;
+        for (i = 0; i < listCount; i++) {
+            u32 flags = ((BtlUnit *)btlGetIndexListEntry(list, i))->status.flags;
+            if ((flags & 1) == 0) {
+                hasUnready = 1;
+            }
+            if (flags & 0x200) {
+                hasFlag200 = 1;
+            }
+            if (flags & 0x400) {
+                hasFlag400 = 1;
+            }
+        }
+        singleIsTarget = 0;
+        if (listCount == 1) {
+            singleIsTarget = link->unit == btlGetIndexListEntry(list, 0);
+        }
+        matchingActorCount = 0;
+        for (unit = runtime->units; unit != 0; unit = unit->next) {
+            u32 flags = unit->status.flags;
+            if ((flags & 1) != 0 || hasUnready != 0) {
+                if (flags & 0x200) {
+                    matchingActorCount++;
+                }
+            }
+        }
+        if (matchingActorCount == 3) {
+            /* Native SDK samples; see docs/idioms.md,
+             * "Camera target dispatcher: two retained position samples". */
+            f32 positions[2][4];
+
+            btlUnitGetMuzzlePosVU(link->unit);
+            /* Retail 001DE74C keeps this SDK snapshot at SP+0x10. */
+            VU0_STORE_VF(vf10, positions[1]);
+            for (unit = runtime->units; unit != 0; unit = unit->next) {
+                if (unit != link->unit) {
+                    u32 flags = unit->status.flags;
+                    if ((flags & 1) != 0) {
+                        if ((flags & 0x200) != 0) {
+                            btlUnitGetMuzzlePosVU(unit);
+                            /* Retail 001DE794 keeps the ally snapshot at SP+0. */
+                            VU0_STORE_VF(vf10, positions[0]);
+                        }
+                    }
+                }
+            }
+        }
+        if (action->actionKind != 9 && (action->flags & 0x40000) == 0) {
+            btlApplyMarkedUnitActionCamera(action, &action->camera, link->unit, 0);
+        }
+        if (hasFlag200 != 1) {
+            if (hasFlag400 == 1 && (action->flags & 0x40000) != 0) {
+                btlCopyMotionTransform(&action->frontCamera, &action->camera);
+                btlApplyMarkedUnitActionCamera(action, &action->backCamera, link->unit, 0);
+                action->motionParameter = 10.0f;
+                action->state = 0;
+                action->flags = (action->flags | 0x41) & 0xFFFBFFFF;
+            }
+        } else if (hasFlag400 != hasFlag200) {
+            if (singleIsTarget == 0) {
+                if (action->actionKind != 9 && (action->flags & 0x40000) == 0) {
+                    btlBuildActorSetCameraPose(action, &action->camera, link->unit, list, hasUnready);
+                } else {
+                    btlCopyMotionTransform(&action->frontCamera, &action->camera);
+                    btlBuildActorSetCameraPose(action, &action->backCamera, link->unit, list, hasUnready);
+                    action->motionParameter = 10.0f;
+                    action->state = 0;
+                    action->flags = (action->flags | 0x41) & 0xFFFBFFFF;
+                }
+            }
+        } else if (listResult != 2) {
+            if (action->actionKind == 9 || (action->flags & 0x40000) != 0) {
+                btlCopyMotionTransform(&action->frontCamera, &action->camera);
+                btlSetDefaultActionCameraPose(action, &action->backCamera);
+                action->motionParameter = 10.0f;
+                action->state = 0;
+                action->flags = (action->flags | 0x41) & 0xFFFBFFFF;
+            } else {
+                btlSetDefaultActionCameraPose(action, &action->camera);
+            }
+        }
+        btlFreeIndexList(list);
+    }
+}
 
 void func_001DE958(void) {
 }

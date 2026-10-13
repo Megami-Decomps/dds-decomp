@@ -464,8 +464,8 @@
   ],
   "redirects": [
     {
-      "symbol": "func_00101BD8",
-      "wrapper": "__wrap_func_00101BD8",
+      "symbol": "sdfInitializeRuntimeAndStartMainLoop",
+      "wrapper": "__wrap_sdfInitializeRuntimeAndStartMainLoop",
       "old_vaddr": "0x00101BD8",
       "expected_relocations": 1
     }

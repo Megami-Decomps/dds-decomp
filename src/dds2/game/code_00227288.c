@@ -92,14 +92,17 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value);
 extern BtlRuntimeTask *btlCreateFadeInTask(u32 value);
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
 
-void func_00227288(void) {
+/* Run the linked-pair transform pass from the battle's update hook. */
+void btlRunLinkedPairUpdateHook(void) {
     btlUpdateLinkedEffectUnitTransforms();
 }
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *unit, f32 amount);
 
-s32 func_002272A0(BtlUnit *unit, s32 code, s32 unused) {
+/* Remap the linked pair's motion using effect phase and quarter-value tests.
+ * Non-group-400 units keep code; inactive group-400 units return -1. */
+s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
     BtlState *battle;
     BattleLinkedEffectState *effect;
     BtlUnit *actor;
@@ -407,7 +410,9 @@ extern s32 btlGetSlotRateKind(u8 *, s32);
 extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
                                  f32, f32, f32, f32, f32, f32, f32, f32);
 
-void func_00227DA8(ActionStateLink *action, s32 mode, u64 refreshBarrier, u64 effectBarrier, u64 soundBarrier) {
+/* Queue model transitions and their sound/camera/fade dependencies for modes
+ * 0x170/0x189. Preserve the native barriers and trace-derived task epochs. */
+void btlQueueLinkedPairModelSwapTasks(ActionStateLink *action, s32 mode, u64 refreshBarrier, u64 effectBarrier, u64 soundBarrier) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     s32 flags;
@@ -873,7 +878,9 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     return 1;
 }
 
-s32 func_00228B08(BtlLinkedCommand *command) {
+/* Set the linked-pair camera for actions 0x171/0x189; return 1 when handled.
+ * Action 0x188 resets progress but returns 0. Keep the two native result joins. */
+s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
     ActionStateLink *scene;
 
     switch (command->actionCode) {
@@ -980,7 +987,9 @@ s32 btlIsSpecialActionKind(BtlLinkedCommand *command) {
     return 0;
 }
 
-s32 func_00228F48(BtlLinkedCommand *command) {
+/* Action 0x188 advances when a marked entry is ready, choosing camera keys at
+ * step 25. It returns 1 even while waiting; other actions return 0. */
+s32 btlAdvanceMarkedLinkedActionCamera(BtlLinkedCommand *command) {
     u32 choice;
 
     if (command->actionCode != 0x188) {
@@ -1092,6 +1101,7 @@ void btlArmEventResourceTrigger(void) {
     trigger->consumed = 0;
 }
 
+/* Mode 0x313's scene callback returns unsigned -1; its interpretation is unknown. */
 u32 func_00229278(void) {
     return 0xffffffff;
 }
@@ -1112,7 +1122,9 @@ s32 btlConsumeReadyEventScriptResource(void) {
     return result;
 }
 
-void func_002292D8(void) {
+/* Promote Sera when present but not frontline, with fewer than four occupied
+ * entries and fewer than three frontline entries. */
+void btlPromoteSeraForSmallParty(void) {
     u16 flags;
     DatPartyRecord *entry;
     u32 markedCount;
@@ -1177,21 +1189,25 @@ void btlInitializeSpecialUnitHpOverride(BtlUnit *unit) {
     }
 }
 
+/* Mode 0x336's fixed value 6 is not proven to be an actor ID. */
 u32 func_00229470(void) {
     return 6;
 }
 
-void func_00229478(void) {
+/* Attempt to promote Roland for scene 0x32D; retain the ignored result. */
+void btlPromoteRolandToFrontline(void) {
     ptyRebalanceFrontline(7);
 }
 
-void func_00229490(void) {
+/* Attempt to promote Serph, Argilla and Gale in the native order. */
+void btlPromoteSerphArgillaGaleToFrontline(void) {
     ptyRebalanceFrontline(1);
     ptyRebalanceFrontline(4);
     ptyRebalanceFrontline(5);
 }
 
-void func_002294B8(void) {
+/* Attempt to promote Seraph for scene 0x344; retain the ignored result. */
+void btlPromoteSeraphToFrontline(void) {
     ptyRebalanceFrontline(8);
 }
 
@@ -1481,7 +1497,7 @@ extern s32 func_00225778(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 func_00225BF8(BtlLinkedCommand *, s32, s32);
 extern s32 func_00227528(BtlUnit *);
 extern void func_002279F0(void);
-extern void func_00227DA8(ActionStateLink *, s32, u64, u64, u64);
+extern void btlQueueLinkedPairModelSwapTasks(ActionStateLink *, s32, u64, u64, u64);
 
 /* Copy the verified four-byte EE callback representation into its actual slot.
  * Some callback slots remain byte storage or carry older shared prototypes. */
@@ -1894,13 +1910,13 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = commandFlags | 0x100001;
         battle->commandRestrictFlags = commandFlags | 0x200000;
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetEffectState);
-        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002272A0);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlChooseLinkedPairMotion);
         BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsEffectPhaseInRange);
         BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, func_00227528);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, func_00226C98);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlCheckActiveEffectForSpecialTarget);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlUpdateLinkedEffectUnitTransforms);
-        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, func_00227288);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRunLinkedPairUpdateHook);
         BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlRemapEffectActiveCombatantAction);
         BTL_INSTALL_CALLBACK(battle->findModelActor, 0x0, btlFindFlaggedSpecialSpeciesUnit);
         BTL_INSTALL_CALLBACK(battle->selectEntryModelVariant, 0x0, btlGetCanonicalCombatantKind);
@@ -1908,7 +1924,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, func_002279F0);
         BTL_INSTALL_CALLBACK(battle->actionStateSelectionHook, 0x0, btlGetEffectTaskActorMatchCode);
         BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlEffectTaskStartFinale);
-        BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, func_00227DA8);
+        BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlQueueLinkedPairModelSwapTasks);
         BTL_INSTALL_CALLBACK(battle->pad694, 0x4, btlIsEffectActor);
         BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlGetSoleTargetKind);
         BTL_INSTALL_CALLBACK(battle->actorEligibilityOverride, 0x0, btlHasDifferentActiveTarget);
@@ -1916,10 +1932,10 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlSetLinkFlagOn);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueLinkedActorModelStateTasks);
         BTL_INSTALL_CALLBACK(battle->unk61C, 0x0, btlTryScheduleMarkedUnitTask);
-        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_00228B08);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSetLinkedPairActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlIsSpecialActionKind);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, func_00228F48);
+        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceMarkedLinkedActionCamera);
         allocation = sdfAllocateBlockBySizeThreshold(0x18);
         battle->effect = allocation;
         memset(allocation, 0, 0x18);
@@ -1952,7 +1968,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         u32 commandFlags;
         commandFlags = battle->commandRestrictFlags;
         battle->commandRestrictFlags = commandFlags | 0x4000;
-        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_002292D8);
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlPromoteSeraForSmallParty);
         BTL_INSTALL_CALLBACK(battle->actionStateSelectionHook, 0x0, btlClearEffectNodeRuntimeFlagForActiveUnits);
         BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlMarkBattleUnitEntryForActiveKind);
         break;
@@ -1967,15 +1983,15 @@ void btlInitializeBossCallbacks(s32 mode) {
         break;
     }
     case 0x32D: {
-        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_00229478);
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlPromoteRolandToFrontline);
         break;
     }
     case 0x321: {
-        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_00229490);
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlPromoteSerphArgillaGaleToFrontline);
         break;
     }
     case 0x344: {
-        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_002294B8);
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlPromoteSeraphToFrontline);
         break;
     }
     case 0x318:
