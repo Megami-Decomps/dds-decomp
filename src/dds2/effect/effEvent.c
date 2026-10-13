@@ -1041,16 +1041,6 @@ SoundMixer *effEventCloneSoundMixer(SoundMixer *source) {
 void effEventReleaseSoundMixerVoices(SoundMixer *mixer) {
     sndReleaseAllVoices(mixer);
 }
-/* Copied event parameters: position, quaternion and aim dimensions (0x30). */
-typedef struct EffEventInit {
-    f32 position[4];       /* 0x00 */
-    f32 orientation[4];    /* 0x10 */
-    f32 range;             /* 0x20 */
-    f32 height;            /* 0x24 */
-    f32 param;             /* 0x28 */
-    u32 color;             /* 0x2C */
-} EffEventInit;
-
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
 struct EffEventWork {
     EffEventInit init;
