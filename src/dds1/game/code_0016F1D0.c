@@ -1,5 +1,6 @@
 #include "eff_packet_params.h"
 #include "common.h"
+#include "eff_ring_color_slot.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "sdf_asset_state.h"
@@ -152,11 +153,6 @@ void effCopyRingTransformMatrix(EffRingWork *work, void *matrixSource) {
     VU0_LOAD_MATRIX(matrixSource);
     VU0_STORE_MATRIX(work->recordPool->matrix);
 }
-
-/* Each five-vertex fan group has one packed color word per vertex. */
-typedef struct EffRingColorSlot {
-    s32 colors[EFF_FAN_VERTEX_COUNT];
-} EffRingColorSlot;
 
 /* Fill five fan-vertex colors; odd and even groups use different alpha values. */
 void effFlashWriteRingColorSlots(EffRingWork *work, s32 index, s32 modulationColor) {
