@@ -3477,7 +3477,7 @@ typedef struct FldMenuState {
     u16 pending;
 } FldMenuState;
 
-s32 func_00144028(void *task) {
+s32 fldUpdateTitleBannerTask(void *task) {
     FldMenuState *menu;
 
     if (D_00389780[0] >= 200) {
@@ -3527,7 +3527,7 @@ s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     node[2] = 0;
     node[3] = 0;
     kwlnTaskSetUserValue(task, (u32)node);
-    return (s32)func_00144028;
+    return (s32)fldUpdateTitleBannerTask;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436174);
