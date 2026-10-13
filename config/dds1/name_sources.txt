@@ -6992,6 +6992,7 @@
 0x002E9600	sndGetTrackSlotTable	inferred	confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; Returns sndTrackBalanceEntries unchanged; semantic DDS2 counterpart is already sndGetTrackSlotTable in game/code_00341FE8.c.; source=names_R_Names36.tsv:13 [names_qp11.tsv]
 0x002E9690	sndStartTrackExtended	inferred	Prepares a track ID and sends command 0x20 with setting 0x17f.
 0x002E96D8	sndReleaseTrackHandle	inferred	Stores the supplied track handle in word 0 and sends the 16-byte command 0xD0 packet.
+0x002E9758	sndTransitionBgm	inferred	Calls BGM transition command 0xE0 plus the packed track channel; evtTransitionBgm supplies the encoded track and fade.
 0x002E9788	sdfSoundSendNamedCommand	inferred	copies command name into shared buffer and sends selected status command
 0x002E97E8	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds1/game/code_002E9708.c:181:func_002E97E8; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002E9840	sdfSoundSetChannelCount	inferred	Clamps a channel count to one through sixteen and sends its encoded sound command.
