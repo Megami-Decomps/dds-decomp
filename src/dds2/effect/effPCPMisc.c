@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_model.h"
@@ -2938,7 +2939,6 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u32 func_001695C8(void);
 extern f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern void btlUnitGetMuzzlePosVU(void *unit);
 extern f32 sdfAtan2(f32 y, f32 x);
 
 /* On the first frame, center the sweep on the battle group's direction.
@@ -2963,7 +2963,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     if (func_001695C8() && work->frame == 0) {
         btlMeasureFilteredUnitGroupBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
-        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
+        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF(vf10, muzzle);
         look[0] = center[0] - muzzle[0];
         look[2] = center[2] - muzzle[2];
@@ -3923,7 +3923,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     u8 *params;
 
     if (func_001695C8() != 0) {
-        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetVariantSelector());
+        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
         VU0_LOAD_VF(vf11, work->pos);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();

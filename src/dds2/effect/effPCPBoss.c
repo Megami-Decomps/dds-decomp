@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
@@ -23,7 +24,6 @@ extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern u32 func_001695C8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern u8 D_003B1FF0[];
 
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
@@ -231,7 +231,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
 
     if (func_001695C8() != 0) {
         if (work->frame == 0) {
-            btlUnitGetMuzzlePosVU(effBTLFieldColorGetVariantSelector());
+            btlUnitGetMuzzlePosVU((struct BtlUnit *)effBTLFieldColorGetVariantSelector());
             VU0_STORE_VF(vf10, work->position);
         }
         direction = work->parameterVector;

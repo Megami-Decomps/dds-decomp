@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_pcp_event_place.h"
@@ -2344,7 +2345,6 @@ void effReleaseGroupSlotsAndResources(EffPcpThunderGroup *group) {
     sdfReleaseResourceAllocation(group->allocation);
 }
 
-struct BtlUnit;
 /* The event holder consumes the same packed 0x30-byte record as effEvent.c. */
 typedef struct {
     u8 bytes[0x30];
@@ -2353,7 +2353,6 @@ typedef struct {
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);

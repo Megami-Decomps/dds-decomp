@@ -24,7 +24,6 @@ extern void dds3LoadCameraVectorVU(struct EffWorldNode *object);
 extern f32 D_00352890[];
 extern f32 D_003528A8[];
 extern void func_002DD688(f32 angle);
-extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];

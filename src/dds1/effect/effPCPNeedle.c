@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "sdf_quaternion.h"
 #include "par_cell_api.h"
@@ -14,7 +15,6 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
 
 extern f32 sdfViewEyeVector[4];
@@ -82,7 +82,7 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
     viewOffset[2] = value;
 
     if (func_001619E8() != 0) {
-        btlUnitGetMuzzlePosVU(effBTLFieldColorGetOriginalSelector());
+        btlUnitGetMuzzlePosVU((struct BtlUnit *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         sdfVuBuildLookAtBasis(work->params.position, position, D_00354C00);
         sdfInvertRigidVuTransform();
