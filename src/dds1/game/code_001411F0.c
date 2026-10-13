@@ -39,6 +39,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 
+extern void sndQueueNoPayloadCommand1A0(void);
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
 extern f32 sdfViewEyeVector[4];
@@ -580,7 +581,7 @@ void fldReleaseCurrentBgm(void) {
 }
 
 void func_00141D80(void) {
-    func_002E8E00();
+    sndQueueNoPayloadCommand1A0();
 }
 
 void fldPlayCurrentBgmSound(void) {

@@ -51,6 +51,8 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 
+extern void sndQueueNoPayloadCommand1A0(void);
+extern void sndQueueNoPayloadCommand210(void);
 extern f32 D_00359EE0[4];
 
 extern s32 func_003014F0(char *dst, const char *format, ...);
@@ -6720,8 +6722,8 @@ void btlAdvanceTitleState(void) {
 
 void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
-    func_002E8E28();
-    func_002E8E00();
+    sndQueueNoPayloadCommand210();
+    sndQueueNoPayloadCommand1A0();
 }
 
 void btlAdvanceTitleStateTask(void) {

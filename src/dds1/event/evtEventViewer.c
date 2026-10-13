@@ -825,7 +825,7 @@ extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern void evtTransitionBgm(s32, s32);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
-extern void func_002E8E00(void);
+extern void sndQueueNoPayloadCommand1A0(void);
 extern void kwlnFadeSetupFrames(s32, s32);
 extern s32 itfMesSelectTableItemText(s32, s32, s32);
 extern void itfMesBuildOptionList(s32, s32);
@@ -920,7 +920,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             sndStopReducedBgm();
             break;
         case 6:
-            func_002E8E00();
+            sndQueueNoPayloadCommand1A0();
             break;
         }
         break;

@@ -7003,6 +7003,8 @@
 0x002E8D10	sndStartTrackDefault	inferred	Prepares a track ID and sends command 0x20 with setting 0x7f.
 0x002E8D58	sndSendSingleWordControlPacket	inferred	Submits a 16-byte command packet whose first word is the provided value. [names_reviewed21.tsv]
 0x002E8D88	sndStartTrackAlternate	inferred	Prepares the same track ID and sends alternate command 0x130 with setting 0x7f.
+0x002E8E00	sndQueueNoPayloadCommand1A0	inferred	Queues command 0x1A0 with zero arguments, no payload, and length zero; selected by the event viewer command case 6. [DDS1 source/caller analysis, 2026-10-14]
+0x002E8E28	sndQueueNoPayloadCommand210	inferred	Queues command 0x210 with zero arguments, no payload, and length zero; battle title-state cleanup queues it before command 0x1A0. [DDS1 source/caller analysis, 2026-10-14]
 0x002E8E50	sndQueueNoPayloadCommand40	inferred	Queues fixed command 0x40 with no payload; DDS2 twin 0x00341CF8. [LiteH menu naming batch 18]
 0x002E8E78	sndDispatchCommandWithoutPayload	inferred	Byte-identical dds2 twin 0x00341D20; OR caller command with 0x50 and dispatch with null payload and zero length. [names_conflicts.tsv]
 0x002E8EA0	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
