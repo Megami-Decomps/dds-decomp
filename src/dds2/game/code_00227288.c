@@ -1423,7 +1423,7 @@ extern u32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit);
 extern void btlUpdateLinkedEffectUnitTransforms(void);
 extern void btlUpdateSpecialActorChunkFade(void);
 extern void effBTLFieldColorSetFlags(u32 bits);
-extern void func_00217EB8(ActionStateLink *action);
+extern void btlQueueBossScriptResourceAndSound(ActionStateLink *action);
 extern s32 func_00218150(void);
 extern void func_00218250(void);
 extern s32 func_00218690(void);
@@ -1512,7 +1512,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     switch (mode) {
     case 0x300: {
         BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlStartUnitActionIfPairedSelected);
-        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, func_00217EB8);
+        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueBossScriptResourceAndSound);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSelectionEmptyValue);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlShiftUnitUpForScriptAction);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
