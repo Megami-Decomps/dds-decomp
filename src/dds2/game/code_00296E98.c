@@ -2,6 +2,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_list.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
@@ -13,7 +14,6 @@
 extern u8 brsUiUpdateAllowed;
 
 
-extern s32 kwlnFadeIsActive(void);
 
 extern s32 func_002C6CE8(void);
 

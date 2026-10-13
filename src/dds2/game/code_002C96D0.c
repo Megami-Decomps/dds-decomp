@@ -116,6 +116,7 @@ extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "fpu.h"
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
@@ -3370,7 +3371,6 @@ s32 mcdContinueLoadSelection(void) {
     return next;
 }
 
-extern s32 kwlnFadeIsActive(void);
 extern void kwlnFadeStartIn(s32);
 extern s32 fileBeginLoadOrAbortDialog(void);
 

@@ -7,6 +7,7 @@
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
@@ -20,7 +21,6 @@ extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
-extern s32 kwlnFadeIsActive(void);
 
 extern char mnuCampInputTaskName[]; /* "camp" */
 

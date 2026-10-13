@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "mnu_title_effect.h"
 #include "mnu.h"
 #include "file.h"
@@ -905,7 +906,6 @@ typedef struct SlideBarPair {
 } SlideBarPair;
 
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern s32 kwlnFadeIsActive(void);
 extern void kwlnFadeClear(void);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern u8 mnuHasSpriteHandle(void);
