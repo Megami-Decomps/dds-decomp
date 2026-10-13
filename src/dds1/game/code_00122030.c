@@ -629,7 +629,7 @@ extern void fldParseMixLb(void);
 
 extern void fldLoadBattleSkyAndFilter(void);
 
-extern void func_001426E0(void);
+extern void fldResetSceneResourceTables(void);
 
 void fldInitializeDisplayAndTables(void) {
     func_003003F0(D_003BAB70);
@@ -645,7 +645,7 @@ void fldInitializeDisplayAndTables(void) {
     func_003003F0(D_003BAB98);
     fldLoadBattleSkyAndFilter();
     func_003003F0(D_003BABA0);
-    func_001426E0();
+    fldResetSceneResourceTables();
     func_003003F0(D_003BABA8);
     fldLoadFieldTables();
     func_003003F0(D_003BABB0);

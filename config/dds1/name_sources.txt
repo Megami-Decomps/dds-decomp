@@ -1117,6 +1117,7 @@
 0x001425F8	fldSetSceneRecordChunk	inferred	relocates scene record chunk and caches count plus rows [names_R_FuncNames2.tsv]
 0x00142658	fldInitSceneMapLabels	inferred	initializes scene map label lengths and associated data [names_R_FuncNames2.tsv]
 0x001426A8	fldReleaseSceneRecordChunk	inferred	frees stored transfer resource and clears record pointers [names_R_FuncNames2.tsv]
+0x001426E0	fldResetSceneResourceTables	inferred	resets the scene-record state and clears the title-specific scene model/slot tables during field display initialization; counterpart 0x00145818 (DDS2)
 0x00142758	fldSetEmitterPosition	inferred	builds (x,y,z,1) vector, stores via COP2 into emitter+0x50 and restarts it
 0x00142C00	fldFindRecordItem	inferred	scans D_003BAEDC 0x14-stride records/0x1C-stride items for (record, itemIndex), returns item+0x10 value +1 or 1
 0x00142D18	fldGetMaxItemValue	inferred	scans D_003BAEDC table for maximum item+0x10 value via movn update, returns max+1

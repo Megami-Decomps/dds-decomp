@@ -861,6 +861,7 @@
 0x00145730	fldSetSceneRecordChunk	inferred	DDS1 001425F8 twin; relocates scene record chunk and caches count plus rows [names_R_FuncNames2.tsv]
 0x00145790	fldInitSceneMapLabels	inferred	DDS1 00142658 twin; initializes scene map label lengths and associated data [names_R_FuncNames2.tsv]
 0x001457E0	fldReleaseSceneRecordChunk	inferred	DDS1 001426A8 twin; frees stored transfer resource and clears record pointers [names_R_FuncNames2.tsv]
+0x00145818	fldResetSceneResourceTables	inferred	resets the scene-record state and clears the title-specific scene model/slot tables during field display initialization; counterpart 0x001426E0 (DDS1)
 0x00149C38	fldReleaseResourceSlots	inferred	frees the four resource pointers in D_0044F7F0 with func_0032BBB0 and drains the queue
 0x00149CE0	fldReleaseSceneDevSlotsAndTextures	inferred	confidence=high; matched-C; src/dds2/game/code_001442D0.c:1175:func_00149CE0; requires-symbol-registration; Releases scene device slots and texture references, clears slot arrays, waits for pending work, and clears scene ready state.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00149E08	fldEnterSceneCamera	inferred	DDS1 func_00145EA0 twin [names_reviewed2.tsv]
