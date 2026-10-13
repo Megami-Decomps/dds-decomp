@@ -454,5 +454,5 @@ void func_00319388(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319A58(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319E48(MenuRuntimeRecord *);
 void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *, MenuWorkEntry *, struct MnuShootingWork *);
-void func_0031A638(MenuRuntimeRecord *, MenuRuntimeRecord *, struct MnuShootingWork *);
+void mnuAdvanceShootingProgressFromRecord(MenuRuntimeRecord *, MenuRuntimeRecord *, struct MnuShootingWork *);
 #endif
