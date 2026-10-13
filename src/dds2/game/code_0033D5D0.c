@@ -687,7 +687,7 @@ extern s32 sdfDevSeekFile(s32, s32, s32);
 
 extern s32 func_0035A828(s32);
 
-extern s32 func_0036A1B0(s32, s32, s32);
+extern s32 sdfDevReadFileBytes(s32, s32, s32);
 
 extern s32 func_00369DF8(s32);
 
@@ -704,7 +704,7 @@ void sdfDevLoadWholeFile(const char *fileName) {
     sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
     bufferAddress = func_0035A828(fileBytes);
     D_004391A4 = bufferAddress;
-    func_0036A1B0(fileHandle, bufferAddress, fileBytes);
+    sdfDevReadFileBytes(fileHandle, bufferAddress, fileBytes);
     func_00369DF8(fileHandle);
 }
 
@@ -1199,7 +1199,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_READING;
-            result = func_0036A1B0(state->resourceId, (s32)state->requestData,
+            result = sdfDevReadFileBytes(state->resourceId, (s32)state->requestData,
                            state->requestExtra);
             if (result < 0) {
                 sdfDevDeactivate(state, result);
@@ -1277,7 +1277,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
                 }
                 state->requestData = buffer;
                 state->state = SDF_DEV_STATE_READING;
-                transferResult = func_0036A1B0(state->resourceId, (s32)buffer, transferResult);
+                transferResult = sdfDevReadFileBytes(state->resourceId, (s32)buffer, transferResult);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
