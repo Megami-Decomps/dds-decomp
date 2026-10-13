@@ -13,6 +13,7 @@
 #include "sdf_asset_state.h"
 #include "sdf_pending.h"
 #include "sdf_draw.h"
+#include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
 
 extern u32 sdfForcedAssetTextureMode;
@@ -435,11 +436,11 @@ void sdfResourceListRelease(DevRequest *list, s32 releaseItems) {
     sdfDestroyDevRequest(list);
 }
 
-void sdfAppendResourceListItem(DevRequest *list, u32 item) {
+void sdfAppendResourceListItem(DevRequest *list, SdfTex *texture) {
     if (list->usedCount >= (s16)list->capacity) {
         sdfDevBufferedRequestGrow(list);
     }
-    ((u32 *)list->buffer)[list->usedCount] = item;
+    ((u32 *)list->buffer)[list->usedCount] = (u32)texture;
     list->usedCount++;
 }
 
