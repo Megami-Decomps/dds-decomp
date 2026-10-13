@@ -22,6 +22,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pairing import RETAIL, ROOT, load_segments, off_to_va, va_to_off  # noqa: E402
+from symbol_aliases import load_symbol_aliases  # noqa: E402
 from resolved_code import (  # noqa: E402
     hi_lo_addend,
     instruction_shape_matches,
@@ -227,12 +228,14 @@ def _retail_nobits_inventory(start, size, syms):
 
 
 def nobits_ownership_problems(
-        yaml_text, unit, section_name, section_size, emitted, syms):
+        yaml_text, unit, section_name, section_size, emitted, syms, aliases=()):
     """Explain why emitted NOBITS does not exactly implement its retail span.
 
     The YAML owns the bounded address range.  Every ``symbol_addrs`` fact in
     that range forms the canonical retail inventory, including same-address
-    aliases.  The object must emit that inventory one-for-one with each name
+    object aliases. Validated non-owning interior aliases are checked against
+    their primary object's extent and do not split or allocate storage.
+    The object must emit the remaining inventory one-for-one with each name
     at the derived address and size as STT_OBJECT.  This deliberately fails
     closed when the retail inventory is absent or does not begin at the span.
     """
@@ -245,14 +248,26 @@ def nobits_ownership_problems(
         problems.append(
             f"section size 0x{section_size:X}, retail span 0x{expected_size:X}"
         )
+    local_aliases = [alias for alias in aliases
+                     if alias.unit == unit and alias.section == section_name]
+    alias_names = {alias.name for alias in local_aliases}
     inventory, inventory_problems = _retail_nobits_inventory(
-        start, expected_size, syms
+        start, expected_size, {name: addr for name, addr in syms.items()
+                               if name not in alias_names}
     )
     problems.extend(inventory_problems)
     canonical = {
         name: (offset, size)
         for offset, size, name in inventory
     }
+
+    for alias in local_aliases:
+        owner = canonical.get(alias.owner)
+        if owner is None:
+            problems.append(f"{alias.name}: primary owner {alias.owner} is outside this span")
+        elif not 0 <= alias.offset < owner[1] \
+                or start + owner[0] + alias.offset != alias.address:
+            problems.append(f"{alias.name}: not inside native {alias.owner} at its declared offset")
 
     seen_names = set()
     for offset, size, name, is_object in sorted(
@@ -544,6 +559,8 @@ def main():
     version = unit.relative_to(ROOT / "src").parts[0]
     unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
     syms = symbols(version)
+    aliases = load_symbol_aliases(ROOT, version)
+    syms.update({alias.name: alias.address for alias in aliases})
     sys.path.insert(0, str(ROOT / "tools"))
     from eeas_compat import lit4_range
     lit4_lo, lit4_hi = lit4_range((ROOT / RETAIL[version]).read_bytes())
@@ -1148,7 +1165,7 @@ def main():
             continue
         problems = nobits_ownership_problems(
             yaml_text, unit_name, section, emitted[section],
-            explicit_nobits[section], syms
+            explicit_nobits[section], syms, aliases
         )
         if problems and not args.func:
             for problem in problems:
