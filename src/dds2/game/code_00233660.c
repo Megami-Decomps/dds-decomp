@@ -1932,7 +1932,46 @@ u32 mdlUpdateViewerScaleTask(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00236D78);
+extern s8 D_0040B7D9[];
+extern u8 D_00438FA0;
+extern s8 D_00438A50;
+extern f32 D_00438A54;
+extern f32 D_00438A58;
+extern f32 D_00438A5C;
+extern f32 D_00438A60;
+
+/* Final workspace publication: see docs/idioms.md, "Publishing viewer workspace". */
+void func_00236D78(void) {
+    s32 initialPhase = 1;
+
+    switch (mdlViewerState.unk48) {
+    case 0:
+        if (D_0040B7D9[0] < 0) {
+            f32 scale = mdlViewerState.unk4A;
+
+            mdlViewerState.yawStepMode = initialPhase;
+            mdlViewerState.unk50 = 0;
+            mdlViewerState.unk52 = 0;
+            mdlViewerState.taskPhase = -1;
+            D_00438FA0 = mdlViewerState.unitStepMode;
+            mdlViewerState.unitStepMode = initialPhase;
+            D_00438A50 = initialPhase;
+            D_00438A58 = D_00438A54 = scale;
+            mdlViewerState.unk48 = initialPhase;
+        }
+        break;
+    case 1:
+        D_00438A5C = mdlViewerState.unk4C * 0x100 -
+                   mdlViewerState.unk50 * 0x200 - 0x100;
+        D_00438A60 = mdlViewerState.unk4E * 0x70 -
+                   mdlViewerState.unk52 * 0xE0 - 0x70;
+        mdlViewerState.unk48 = 2;
+        break;
+    case 2:
+        /* 0x00236D88..0x00236D98: completed phase retained in retail dispatch. */
+        break;
+    }
+}
 
 void func_00236E50(void) {
 }
