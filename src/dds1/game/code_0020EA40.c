@@ -2,6 +2,7 @@
 #include "common.h"
 #include "btl_state.h"
 #include "btl_command.h"
+#include "btl_action.h"
 #include "dat_state.h"
 #include "ee_mmi.h"
 #include "sdf_resource.h"
@@ -22,15 +23,6 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-/* Action-animation records are distinct from the 0x38-byte command metadata. */
-typedef struct BtlActionTableRow {
-    u8 pad00[3];
-    u8 enabled;
-    u8 pad04[0x18];
-    u16 flags;
-    u8 pad1E[2];
-} BtlActionTableRow;
-
 extern void btlSelectRandomDefeatCamera(BtlLinkedCommand *);
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
@@ -40,7 +32,7 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command);
 /* Dispatch the command's animation-camera flags. Clearing +0x110 resets command
  * state; it does not clear a BtlUnit's active flags. Returns 1 when handled. */
 s32 btlDispatchActionAnimation(BtlLinkedCommand *command) {
-    u16 flags = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].flags;
+    u16 flags = ((BtlActionTableEntry *)datActionAnimationRecords)[command->actionCode].flags;
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {

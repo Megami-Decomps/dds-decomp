@@ -61,21 +61,12 @@ extern void btlChooseRandomPresetCameraKeys();
 
 extern void btlSetLinkedCameraForCommandMode(BtlLinkedCommand *, BtlUnit *);
 
-/* 0x20-byte action metadata entries referenced by a unit's action index. */
-typedef struct BtlActionTableRow {
-    u8 pad00[3];
-    u8 enabled; /* 0x03: zero rejects the action */
-    u8 pad04[0x18];
-    u16 flags;  /* 0x1C: special animation selection bits */
-    u8 pad1E[2];
-} BtlActionTableRow;
-
 extern void btlClearRuntimeFlag2000(void);
 
 /* Dispatch linked-camera animation metadata; +0x110 resets command state, not
  * unit flags. Returns 1 when a camera path is handled, otherwise 0. */
 s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
-    u16 flags = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].flags;
+    u16 flags = ((BtlActionTableEntry *)datActionAnimationRecords)[command->actionCode].flags;
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
@@ -301,7 +292,7 @@ s32 btlGetEnabledEnemyActionResponse(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
+    if (((BtlActionTableEntry *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->partyRecord.unitId == 0x114) {
@@ -314,7 +305,7 @@ s32 func_0020D598(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
+    if (((BtlActionTableEntry *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->partyRecord.unitId == 0x111) {
@@ -360,7 +351,7 @@ s32 func_0020D690(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
+    if (((BtlActionTableEntry *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->partyRecord.unitId == 0x109) {
@@ -482,7 +473,7 @@ s32 func_0020D9F8(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (((BtlActionTableRow *)datActionAnimationRecords)[action].enabled == 0) {
+    if (((BtlActionTableEntry *)datActionAnimationRecords)[action].enabled == 0) {
         return -1;
     }
     if (unit->partyRecord.unitId == 0x113) {
@@ -672,7 +663,7 @@ s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
             command->flags |= 0x800;
             return 1;
         }
-        kind = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].pad00[0];
+        kind = ((BtlActionTableEntry *)datActionAnimationRecords)[command->actionCode].kind;
         if (kind < 8) {
             if (kind >= 6) {
                 btlSetupCameraPoseAimUnit(command, &command->frontCamera,
@@ -840,7 +831,7 @@ s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command) {
 }
 
 s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command) {
-    u16 flags = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].flags;
+    u16 flags = ((BtlActionTableEntry *)datActionAnimationRecords)[command->actionCode].flags;
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
