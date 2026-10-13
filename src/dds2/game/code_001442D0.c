@@ -4432,7 +4432,6 @@ extern struct FileRequest *D_004363A0;
 extern u32 D_004363A4;
 extern u32 D_004363A8;
 extern void func_0026C900(void);
-extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void *effObjCreateEventNode(void *, void *, void *);
 extern void effObjClearFlags(struct EffectObj *, u32);

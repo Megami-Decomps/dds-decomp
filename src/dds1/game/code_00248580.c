@@ -948,7 +948,6 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
 
 
 
-extern s32 evtGetMessageWindowControlState(void);
 
 
 

@@ -134,7 +134,6 @@ typedef struct EffectPair {
 
 extern EffectPair D_00437878[];
 
-extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 fldGetModeFrameRecordIndex(s32);
 

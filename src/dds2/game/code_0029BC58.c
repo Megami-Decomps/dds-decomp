@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
 #include "eff_random.h"
@@ -121,7 +122,6 @@ extern s32 frFontDrawGlyphChain();
 
 
 extern void evtStageTestUpdateCamera(void);
-extern s32 evtGetMessageWindowControlState(void);
 extern char D_003D6458[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */

@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "kwln.h"
 #include "kwln_fade.h"
@@ -21,7 +22,6 @@ extern void mnuDrawTerminalBackdrop(s32);
 
 extern void func_0026C900(void);
 
-extern s32 evtGetMessageWindowControlState(void);
 
 
 extern char D_003CE848[];

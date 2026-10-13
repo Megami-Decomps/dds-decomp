@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -39,7 +40,6 @@ typedef struct FieldResourceRecord {
 extern FieldResourceRecord *D_00435E18;
 extern s32 fldGetSparkRewardProfileIndex(void);
 extern s16 fldGetSparkPickupCount(void);
-extern s32 evtGetMessageWindowControlState(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
 extern void sndQueueNoPayloadCommand40(void);

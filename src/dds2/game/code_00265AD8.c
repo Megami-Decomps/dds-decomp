@@ -99,7 +99,6 @@ extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
 extern s32 func_00265A60(MenuTerminalContext *);
 extern void dspSetActive(s32);
-extern s32 evtGetMessageWindowControlState(void);
 extern u32 func_00260460(void);
 extern s32 mnuCampFindActiveSlot(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);

@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "sdf_chip.h"
 #include "snd_sequence_volume_pan.h"
