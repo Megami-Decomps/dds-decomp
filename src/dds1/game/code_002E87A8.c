@@ -31,7 +31,7 @@ extern u32 sndReserveIopWorkMemory(s32 size);
 extern s8 D_003BDA80;
 extern s32 D_003BDA8C;
 extern s32 sceSifInitIopHeap(void);
-extern s32 func_002E8700(void);
+extern s32 sndStartIopCommandAndRpcWorkers(void);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
 extern SndRingPacket D_003FB080[SND_COMMAND_RING_ENTRY_COUNT];
@@ -213,7 +213,7 @@ void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 b
     D_003BDA80 = 1;
     sndLoadIopSoundModules();
     sceSifInitIopHeap();
-    func_002E8700();
+    sndStartIopCommandAndRpcWorkers();
     sndMidiTrackState.iopBufferAddress = sndReserveIopWorkMemory(0x4000);
     sndMidiTrackState.iopBufferBytes = 0x4000;
     sndInitializeChannelAndTrackState(unused, header);

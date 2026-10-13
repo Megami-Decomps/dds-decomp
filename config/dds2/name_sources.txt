@@ -6712,6 +6712,7 @@
 0x003414D0	sndReserveIopWorkMemory	inferred	readability/matching review (QP16)
 0x003414E8	sndTryDispatchQueuedCommand	inferred	Attempts to submit the command at the IOP ring read cursor; returns zero and advances the cursor on success, otherwise returns one for an empty queue or failed SIF submission. Producer and worker callers use this contract to drain queued commands.
 0x00341570	sdfServiceUnblockedWorkerThread	inferred	Sleeps until signaled, then services worker requests while the gate is clear. [names_reviewed10.tsv]
+0x003415A8	sndStartIopCommandAndRpcWorkers	inferred	Waits until SIF event 31 is available, starts the IOP command-dispatch worker, then creates and starts the sound RPC-server worker; returns the RPC thread start result. Called during IOP sound-system initialization after IOP heap setup. Paired across DDS1/DDS2 by the same caller position and worker startup sequence. [provider and caller dataflow, 2026-10-13]
 0x00341958	sndInitializeChannelAndTrackState	inferred	confidence=high; src/dds2/game/code_00341650.c:func_00341958; Initializes sixteen sound channels, allocates channel-zero storage, and resets thirteen track slots to unused ids. [names_qp9.tsv]
 0x00341A00	sndAllocateAlignedIopBuffers	inferred	queued
 0x00341AD8	sndInitializeIopSoundSystem	inferred	Loads IOP sound modules, initializes the IOP heap and channel/track state, allocates aligned buffers, transfers sound state to IOP, then clears the init gate; paired with 0x002E8C30. [names_reviewed8.tsv]
