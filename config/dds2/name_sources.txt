@@ -2687,6 +2687,7 @@
 0x001E2F78	btlSeekUnitModelFrameZero	inferred	calls frame-setting helper on unit model with zero [names_R_FuncNames2.tsv]
 0x001E3040	btlIsUnitModelStateFive	inferred	tests unit model state byte=5 when unit mode two [names_R_FuncNames2.tsv]
 0x001E3088	btlSetUnitPosition	inferred	stores vec at +0x60, adds work offset, pushes to effObjSetInnerFirstVec
+0x001E3108	btlCopyUnitCurrentPosition	inferred	Copies a BtlUnit currentPosition vector to the caller output; unlike btlGetUnitWorldPos, it does not add the battle origin. Used by battle action, effect, and camera consumers. [code-quality cleanup, 2026-10-13]
 0x001E3120	btlGetUnitWorldPos	inferred	unit+0x60 vector plus work origin vector
 0x001E31F0	btlSetActorEffectParameterOrMuzzlePosition	inferred	Falls back to muzzle position if btlSetActorEffectParameter returns zero. [names_R_FuncNames3.tsv]
 0x001E33A8	btlSetAlternateEffectParameterOrMuzzlePosition	inferred	Falls back to muzzle position when alternate effect parameter setter returns zero. [names_R_FuncNames3.tsv]

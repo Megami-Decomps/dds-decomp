@@ -4310,7 +4310,7 @@ extern s32 fldGetActiveSceneGroupValue(void);
 extern void func_0026C900(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u64 btlStartTask(void *);
-extern void func_001E3108(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(void *, f32 *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s32 dspStartEntry(s32);
@@ -4451,7 +4451,7 @@ s32 btlUpdateMajinTutorialTask(KwlnTask *task) {
                     break;
                 }
                 if (handled) {
-                    func_001E3108(unit, battle->cameraCommand.translation);
+                    btlCopyUnitCurrentPosition(unit, battle->cameraCommand.translation);
                     btlCopyUnitRotationQuaternion(unit, battle->cameraCommand.rotation);
                 }
             }
