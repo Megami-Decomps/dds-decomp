@@ -8012,6 +8012,7 @@
 0x0022E490	btlIsFadeOutCompleteOrIdle	inferred	True for inactive runtime, state0 or state4 after outgoing phase3 fade, before cleanup. DDS1 twin0x00213B90. [Namer1 batch33 high]
 0x00230960	btlResetDebugEncounterSelection	inferred	Clears selector launch confirmation and dds3 work; scene refresh invokes it before polling. DDS1 twin0x00215FE0. [Namer1 batch33 high]
 0x00230978	btlUpdateDebugEncounterSelector	inferred	Input-driven encounter/pack selection, preview party/enemy names, battle parameters and launch-ready return; native test encNo diagnostic. DDS1 twin0x00215FF8. [Namer1 batch33 high]
+0x00230D90	btlApplyDebugEncounterPartySelection	inferred	Called when the battle debug selector launches its chosen encounter. Copies the selected debug party into game state, optionally replaces skill entries, applies party flags/order and HP/MP, resets inventory to the debug defaults, and updates model/world flags. [DDS2 caller/provider analysis, 2026-10-13]
 0x002AA9D8	mnuDrawCampGridFrameAndLabel	inferred	Draws the selected camp grid frame pieces and optional caption. [LiteH menu naming batch 14]
 0x002AB0E0	mnuDrawCampFieldSkillPage	inferred	Camp task draw callback; waits for resource readiness, renders selected field-skill page and advances the panel transition. [LiteH menu naming batch 14]
 0x002ABED8	mnuRefreshStaffBulletItemList	inferred	Rebuilds/reorders the staff bullet-item window after inventory/equipment changes; DDS1 twin 0x00273220. [LiteH menu naming batch 14]

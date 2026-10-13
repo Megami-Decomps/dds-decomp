@@ -2947,7 +2947,7 @@ extern void func_0020D270(u32);
 extern void func_0020D230(void);
 extern s32 btlGetConditionalEncounterInterval(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
-extern void func_00230D90(void);
+extern void btlApplyDebugEncounterPartySelection(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
@@ -3090,7 +3090,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         D_00436F68 = encounter & 0xFFFF;
         btlBossDebugPrintf("btl:test encNo = %X\n", D_00436F68);
     }
-    func_00230D90();
+    btlApplyDebugEncounterPartySelection();
     state->battleMode = D_00436F68;
     if (datBattleSceneRecords[D_00436F68].unk1C != 0 &&
         datBattleSceneRecords[D_00436F68].unk1E != 0) {
@@ -3112,7 +3112,7 @@ extern s32 D_003C3248[5][24];
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
-void func_00230D90(void) {
+void btlApplyDebugEncounterPartySelection(void) {
     u32 i;
     u32 n;
 
