@@ -1053,7 +1053,7 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F10);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F20);
 
-void func_00268380(s32 reduced, s32 slot) {
+void mnuCreateTerminalSceneTasks(s32 reduced, s32 slot) {
     u8 *scene = mnuTerminalCreateScene(reduced, slot);
     KwlnTask *drawTask;
     KwlnTask *fadeTask;
