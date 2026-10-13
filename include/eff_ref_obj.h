@@ -25,5 +25,7 @@ typedef char RefObjAllocationOffsetCheck[
 RefObj *effCreateSharedTextureReference(struct SdfTextureFileHeader *source);
 RefObj *effCloneSharedReferenceWithValue(struct SdfTextureFileHeader *source, u32 textureIndex);
 void effReleaseSharedReference(RefObj *obj);
+/* Retain returns the same object after incrementing its object and shared-texture counts. */
+RefObj *effRetainSharedReference(RefObj *obj);
 
 #endif
