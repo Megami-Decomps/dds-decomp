@@ -29,7 +29,7 @@ extern void mnuTransitionActivePanelAnimations(MantraPanelPool *, s32);
 extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSetMantraFadeState(struct MantraDrawPool *pool, u16, u16);
-extern void func_0028F8A8(MnuStatusResource *);
+extern void mnuUpdateSelectedMantraLimitLineState(MnuStatusResource *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 /* Work block at object+0x240; the node IDs fill the eight slots before
@@ -113,7 +113,7 @@ static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, Mant
         mnuSetMantraFadeState(object->menu.selectionController, 5, 0);
         mnuSetMantraFadeState(object->menu.selectionController, 6, 5);
     }
-    func_0028F8A8(object);
+    mnuUpdateSelectedMantraLimitLineState(object);
 }
 
 void mnuSelectPreviousMantraUnit(MnuStatusResource *object) {
@@ -211,7 +211,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
             object->menu.selectionController);
-        func_0028F8A8(object);
+        mnuUpdateSelectedMantraLimitLineState(object);
     }
 }
 
@@ -268,7 +268,7 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
             object->menu.selectionController);
-        func_0028F8A8(object);
+        mnuUpdateSelectedMantraLimitLineState(object);
     }
 }
 
