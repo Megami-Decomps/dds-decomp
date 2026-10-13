@@ -654,13 +654,7 @@ typedef struct FldSpawnEvent {
     u32 reserved[2];
 } FldSpawnEvent;
 
-/* Type-10 placement records have a fixed four-word serialized header. */
-typedef struct FldPlacementData {
-    u32 kind;
-    s32 event;
-    u32 visible;
-    void *parameters;
-} FldPlacementData;
+#include "fld_placement_data.h"
 
 typedef struct FldSpecialPoint {
     u32 kind;
