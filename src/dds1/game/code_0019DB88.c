@@ -43,7 +43,7 @@ extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface)
 
 extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 
-extern void func_0019F770(UiSprite *sprite);
+extern void itfQueueSpriteQuadPacket(UiSprite *sprite);
 
 extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *seq);
 
@@ -584,7 +584,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
         }
     }
     if (D_00357D88[0] != 0 && D_00357D88[0]->owner == panel && place != 0) {
-        func_0019F770(place->sprite);
+        itfQueueSpriteQuadPacket(place->sprite);
     }
 }
 
@@ -754,7 +754,7 @@ extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];
 extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
-void func_0019F770(UiSprite *sprite) {
+void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     s32 vertices[4][2] = {
         {sprite->left, sprite->top},
         {sprite->right, sprite->top},

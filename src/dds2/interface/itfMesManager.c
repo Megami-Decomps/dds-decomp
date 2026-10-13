@@ -1563,7 +1563,7 @@ extern UiOwnerRef *D_003B4778[];
 
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
 
-extern void func_001A7798(UiSprite *sprite);
+extern void itfQueueSpriteQuadPacket(UiSprite *sprite);
 
 
 /* Enable context rendering for every font object in the linked chain. */
@@ -2097,7 +2097,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
         }
     }
     if (D_003B4778[0] != 0 && D_003B4778[0]->owner == panel && place != 0) {
-        func_001A7798(place->sprite);
+        itfQueueSpriteQuadPacket(place->sprite);
     }
 }
 
@@ -2269,7 +2269,7 @@ extern u8 D_00436638[5];
 
 extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
-void func_001A7798(UiSprite *sprite) {
+void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     s32 vertices[4][2] = {
         {sprite->left, sprite->top},
         {sprite->right, sprite->top},
