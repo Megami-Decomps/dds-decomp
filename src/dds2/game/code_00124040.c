@@ -86,7 +86,7 @@ extern void func_001512D8(void);
 
 extern KwlnTask *kwlnTaskFindByPriority(u32);
 
-extern s32 func_00153560(s32, s32);
+extern s32 fldCanUseTargetGuideInCurrentScene(s32, s32);
 
 extern void fldResetSecondaryArchiveLoadPhase(void);
 
@@ -1095,7 +1095,7 @@ void fldRebuildFieldScene(void) {
             VU0_STORE_VF(vf10, transform + 4);
         }
         fldSpawnPlayerUnits(transform);
-        if (func_00153560(fldAreaState.area, fldAreaState.floor + 1)) {
+        if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1)) {
             fldCreateChaseCameraObject();
             fldAreaState.unk13C = 1;
         }
@@ -2306,7 +2306,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
                     fldStartTitleBgmIfSelected();
                 }
             }
-            if (func_00153560(fldAreaState.area, fldAreaState.floor + 1) != 0) {
+            if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1) != 0) {
                 fldResetSecondaryArchiveLoadPhase();
                 controller->stage = 8;
             } else {

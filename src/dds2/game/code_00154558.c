@@ -413,7 +413,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
     }
     fldSetTitleBannerChoice(scrReadIntParameter(0));
     fldSetTitleBannerPending(1);
-    result = func_001442D0();
+    result = fldResolvePendingTitleBanner();
     switch (result) {
     case 1:
         scrSetIntegerReturnValue(1);
@@ -447,7 +447,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     }
     fldSetTitleBannerChoice(scrReadIntParameter(0));
     fldSetTitleBannerPending(1);
-    result = func_001442D0();
+    result = fldResolvePendingTitleBanner();
     switch (result) {
     case 1:
         scrSetIntegerReturnValue(1);
@@ -469,7 +469,7 @@ s32 fldCmdReadSceneStatus(void) {
 
     fldSetTitleBannerChoice(scrReadIntParameter(0));
     fldSetTitleBannerPending(1);
-    result = func_001442D0();
+    result = fldResolvePendingTitleBanner();
     if (result == -1) {
         scrSetIntegerReturnValue(-1);
         return 1;

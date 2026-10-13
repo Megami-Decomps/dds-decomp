@@ -2171,7 +2171,7 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2A0);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2A8);
 
-void func_00239E30(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
+void evtDrawMotionChangeRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     s32 i;
     s32 count = 0;
     s32 style = 0;
@@ -2219,7 +2219,7 @@ void func_00239E30(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
 
 
 
-extern void func_00239E30();
+extern void evtDrawMotionChangeRow();
 
 /* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
 s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
@@ -2230,7 +2230,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = sdfCreateResetPacketList();
     model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
-    evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, (u8 *)ctx, mnuDrawMotionChangeLabel, func_00239E30);
+    evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, (u8 *)ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x10) {
         return 0;
@@ -2768,7 +2768,7 @@ void evtDrawShadowSettingsRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRun
 
 /* Shadow-configuration menu: draw it, move the row cursor, and step the
  * selected row's mode, alpha or Y offset; confirm returns 1, cancel -1. */
-s32 func_0023BE40(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeChild *node = evtEventViewerGetPendingNode(ctx);
     SdfListHead *list = sdfCreateResetPacketList();
     s32 lastRow = 0;
@@ -4410,7 +4410,7 @@ extern s32 mnuCampFindMatchingEntryIndex(void *, EvtRuntime *, s32);
 
 
 
-s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
+s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime) {
     char motionName[64];
     EvtWorldTable *worldTable;
     s32 soundRowsPresent;
@@ -5291,7 +5291,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     work = evtGetPolygonMovieWorkData2(D_003BBE78, D_003BBE7A, mode);
     if (work != NULL) {
         runtime->windowContext = work;
-        func_0023EF90(work, runtime);
+        evtPopulateViewerTimelineFromMovie(work, runtime);
         return 1;
     }
     return 0;

@@ -3564,7 +3564,7 @@ s32 evtViewerAdvanceUpdate(KwlnTask *task) {
                 return 0;
             }
         }
-        func_0025A280(viewer->windowContext, viewer);
+        evtPopulateViewerTimelineFromMovie(viewer->windowContext, viewer);
         kwlnDrawControlFlags |= 0x2000000;
         return (s32)(u32)evtViewerScheduleFrameVariableTask;
     }

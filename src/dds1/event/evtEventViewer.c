@@ -3407,7 +3407,7 @@ void *evtViewerAdvanceUpdate(KwlnTask *task) {
             kwlnDrawControlFlags |= 0x2000000;
             return 0;
         }
-        func_0023EF90(viewer->windowContext, viewer);
+        evtPopulateViewerTimelineFromMovie(viewer->windowContext, viewer);
         kwlnDrawControlFlags |= 0x2000000;
         return (void *)evtViewerScheduleFrameVariableTask;
     }
