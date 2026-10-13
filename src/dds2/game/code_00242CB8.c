@@ -56,7 +56,7 @@ s32 evtIsBgmLoaded(s32 id);
 extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
-s32 func_00242CB8(void) {
+s32 evtCommandWaitLightResourceScale(void) {
     s32 status = evtCheckWorldObjectResourceScale(
         evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0)));
 
