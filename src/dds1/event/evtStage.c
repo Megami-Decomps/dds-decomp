@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -28,7 +29,6 @@ extern void dds3SetWorldSecondaryObject(void *);
 extern void dds3SetWorldObject(void *);
 extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
                                                        const SdfTextureOffsetListHeader *, u32);
-extern void fldFormatAreaDirectory(char *, s32, s32);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32);

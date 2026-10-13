@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -137,7 +138,6 @@ extern u32 D_003C91D0[];
 extern u32 D_003C91F0[];
 extern char D_003BAC40[];
 extern void *memset(void *, int, unsigned int);
-extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern EffWorldNode *effObjCreateResourceKindZero(const char *, void *, s32);
 extern EffWorldNode *effObjCreateResourceKindOne(const char *, void *, s32);
@@ -1211,7 +1211,6 @@ void fldSetPendingAreaAndFloor(u32 area, u32 floor) {
 
 extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
 extern s32 func_003014F0(char *, const char *, ...);
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 s32 fldLoadAreaResource(void) {
     char directory[64];
@@ -7458,10 +7457,8 @@ s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
     return value;
 }
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 
 extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */

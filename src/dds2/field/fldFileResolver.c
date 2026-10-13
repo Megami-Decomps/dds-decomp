@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -137,7 +138,6 @@ extern u32 D_00444920[];
 extern u32 D_00444940[];
 extern char D_00435FD0[];
 extern void *memset(void *, int, unsigned int);
-extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern struct EffectObj *effObjCreateResourceKindZero(const char *, void *, s32);
 extern struct EffectObj *effObjCreateResourceKindOne(const char *, void *, s32);
@@ -547,15 +547,12 @@ extern char D_004130D8[]; /* "%sf%03d_%03d.LB" */
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 

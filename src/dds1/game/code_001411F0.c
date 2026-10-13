@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
 #include "sdf_motion.h"
@@ -806,7 +807,6 @@ void fldCacheMapLabelLengths(s32 map) {
 
 extern s32 mdlFlagTest(s32);
 extern s32 func_003014F0(char *, const char *, ...);
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 /* The base format occupies the first 16-byte-aligned AMB format record. */
 const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
@@ -3137,7 +3137,6 @@ void fldFireRoomEffects(void) {
 
 extern u8 D_003D44A0[0x200];
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 func_003014F0(char *, const char *, ...);
 
