@@ -667,8 +667,8 @@ extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
 extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
-extern void func_00323748(MenuWorkEntry *, MnuShootingWork *);
-extern s32 func_003233E8(s32);
+extern void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *, MnuShootingWork *);
+extern s32 mnuUpdateActiveMenuWorkEntries(s32);
 extern void func_003223F8(void);
 extern s32 func_00324840(void);
 extern s32 func_0031A0B8(MnuShootingWork *);
@@ -731,9 +731,9 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     if (work->phase == 2) mnuAdvanceCursorStepUntilThreshold();
     mnuTriggerProgressResourceRecords(mnuGetResourceProgressStepState());
     mnuVisitActiveRecords((s32)work);
-    func_00323748(&D_0040ABF8, work);
-    if (work->phase == 2) func_003233E8(0);
-    else func_003233E8(1);
+    mnuProcessMenuWorkEntryLifecycle(&D_0040ABF8, work);
+    if (work->phase == 2) mnuUpdateActiveMenuWorkEntries(0);
+    else mnuUpdateActiveMenuWorkEntries(1);
     func_003223F8();
     memset(&input, 0, sizeof(input));
     if (!((work->flags >> 2) & 1)) {
@@ -1130,7 +1130,7 @@ s32 func_0031A0B8(MnuShootingWork *work) {
         mode = entry->flagsBits.mode;
         if (entry->flagsBits.finished && mode >= 2) {
             mode = mode >= 3 ? mode - 2 : mode - 1;
-            func_003242D0(entry, mode);
+            mnuRebuildMenuWorkEntryCallbackRecords(entry, mode);
         }
         entry->flags = ((mode & 0xF) << 15) | 0x4001;
         work->unkAC = 0;
