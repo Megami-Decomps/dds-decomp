@@ -84,7 +84,7 @@ extern u32 kwlnDrawControlFlags;
 
 extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 
-extern s32 func_00104260(KwlnTask *task);
+extern s32 kwlnTaskNoopCallback(KwlnTask *task);
 
 extern void fldStartSequenceRecord(void);
 
@@ -896,7 +896,7 @@ void evtSelStateDestroy(void) {
 }
 
 s32 evtStartSelCreate(void) {
-    return kwlnTaskCreate(D_0039E1F0, 0x2AF9, 0, 0, (s32)func_00104260, 0, 0);
+    return kwlnTaskCreate(D_0039E1F0, 0x2AF9, 0, 0, (s32)kwlnTaskNoopCallback, 0, 0);
 }
 
 u32 evtStartSelDestroy(void) {

@@ -210,7 +210,7 @@ extern void evtUpdateSelectionStateInterpolation(void);
 extern u8 D_0037F590[];
 
 
-extern s32 func_00104150(KwlnTask *task);
+extern s32 kwlnTaskNoopCallback(KwlnTask *task);
 
 extern s32 evtPendingEventSelection;
 
@@ -885,7 +885,7 @@ void evtSelStateDestroy(void) {
 }
 
 KwlnTask *evtStartSelCreate(void) {
-    return kwlnTaskCreate(D_00411370, 0x2AF9, 0, 0, func_00104150, 0, 0);
+    return kwlnTaskCreate(D_00411370, 0x2AF9, 0, 0, kwlnTaskNoopCallback, 0, 0);
 }
 
 u32 evtStartSelDestroy(void) {

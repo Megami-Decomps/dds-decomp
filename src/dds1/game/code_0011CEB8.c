@@ -5,7 +5,7 @@
 
 extern s32 scrReadIntParameter(s32);
 /* The native VM commands pass operands to these parameterless party stubs. */
-extern u32 func_0011B140();
+extern u32 ptyReturnZero();
 extern u32 func_0011B148();
 extern u32 ptyReturnOne();
 
@@ -26,7 +26,7 @@ u32 func_0011CEF0(void) {
 
     firstOperand = scrReadIntParameter(0);
     secondOperand = scrReadIntParameter(1);
-    firstOperand = func_0011B140(firstOperand, secondOperand);
+    firstOperand = ptyReturnZero(firstOperand, secondOperand);
     scrSetIntegerReturnValue(firstOperand);
     return 1;
 }

@@ -171,7 +171,7 @@ INCLUDE_ASM(const s32, "game/code_001A9780", func_001A9780);
 
 extern const f32 D_003A1D28[9];
 extern const char D_003A1D50[];
-extern void func_0011CE48(s32 chance);
+extern void btlSurpriseChanceHook(s32 chance);
 
 /* Roll the level/ability-scaled surprise chance, including scene overrides. */
 s32 btlRollSurpriseAttack(void) {
@@ -247,7 +247,7 @@ s32 btlRollSurpriseAttack(void) {
     }
     chance = (s32)((f32)chance * ratio);
     btlBossDebugPrintf(D_003A1D50, chance, difference, ratio);
-    func_0011CE48(chance);
+    btlSurpriseChanceHook(chance);
     return (s32)btlRollAiBucket() < chance;
 }
 

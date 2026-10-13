@@ -1066,7 +1066,7 @@ s32 ptyRemoveUnit(s32 unitId) {
     return 1;
 }
 
-u32 func_0011B140(void) {
+u32 ptyReturnZero(void) {
     return 0;
 }
 
@@ -1724,11 +1724,11 @@ void evtPushLevelValueB(void) {
     scrSetFloatReturnValue(datBattleParameters->levelValuesB[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
-void func_0011C520(void) {
+void evtPushLevelValueCCommand18D(void) {
     scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
-void func_0011C550(void) {
+void evtPushLevelValueCCommand18E(void) {
     scrSetFloatReturnValue(datBattleParameters->levelValuesC[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
@@ -2040,14 +2040,14 @@ void dds3WorkClear(void) {
 void func_0011CE30(void) {
 }
 
-void func_0011CE38(void) {
+void btlPreemptiveChanceHook(void) {
 }
 
-void func_0011CE40(void) {
+void btlSerialBattleChanceHook(void) {
 }
 
 /* The surprise-probability diagnostic hook receives the final chance. */
-void func_0011CE48(s32 chance) {
+void btlSurpriseChanceHook(s32 chance) {
 }
 
 s32 evtPushRequestedRosterPresence(void) {

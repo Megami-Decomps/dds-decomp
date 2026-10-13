@@ -1370,7 +1370,7 @@ void ptyRemoveUnit(u32 arg0) {
     ptyRemoveUnitWithFlags(arg0, 0);
 }
 
-u32 func_0011C698(void) {
+u32 ptyReturnZero(void) {
     return 0;
 }
 
@@ -2132,14 +2132,14 @@ s32 evtPushLevelValueB(void) {
     return 1;
 }
 
-s32 func_0011E198(void) {
+s32 evtPushLevelValueCCommand18D(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesC[levelIndex - 1]);
     return 1;
 }
 
-s32 func_0011E1D0(void) {
+s32 evtPushLevelValueCCommand18E(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesC[levelIndex - 1]);
@@ -2484,13 +2484,13 @@ void dds3WorkClear(void) {
 void func_0011EBE0(void) {
 }
 
-void func_0011EBE8(void) {
+void btlPreemptiveChanceHook(void) {
 }
 
-void func_0011EBF0(void) {
+void btlSerialBattleChanceHook(void) {
 }
 
-void func_0011EBF8(s32 chance) {
+void btlSurpriseChanceHook(s32 chance) {
 }
 
 /* Mode zero queries presence; nonzero mode selects/moves the entry into the
