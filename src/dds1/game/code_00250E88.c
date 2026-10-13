@@ -342,13 +342,13 @@ INCLUDE_ASM(const s32, "game/code_00250E88", mnuUpdateMantraSceneTaskState);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", mnuDrawMantraSceneFrame);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00252CE8);
+INCLUDE_ASM(const s32, "game/code_00250E88", mnuSelectMantraGridLeftCell);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00252E38);
+INCLUDE_ASM(const s32, "game/code_00250E88", mnuSelectMantraGridRightCell);
 
 extern u8 D_0036B410[17][15];
 
-extern s32 func_00252CE8(SdfGrid *, s32, s32, u32);
+extern s32 mnuSelectMantraGridLeftCell(SdfGrid *, s32, s32, u32);
 extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
 
 /* Select the connected left neighbor, or fall back to the previous filled cell. */
@@ -363,7 +363,7 @@ s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
             return 1;
         }
     } else if ((D_0036B410[y][x - 1] & 0x1C) != 0) {
-        if (func_00252CE8(grid, x - 1, y, 1) != 0) {
+        if (mnuSelectMantraGridLeftCell(grid, x - 1, y, 1) != 0) {
             return 1;
         }
     } else {
@@ -374,7 +374,7 @@ s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
     return 0;
 }
 
-extern s32 func_00252E38(SdfGrid *, s32, s32, u32);
+extern s32 mnuSelectMantraGridRightCell(SdfGrid *, s32, s32, u32);
 extern SdfGridCell *sdfGridCursorRightToFilledCell(SdfGrid *);
 
 s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
@@ -387,7 +387,7 @@ s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
 
     if ((x != 10 || scene->boundsFlags == 0) &&
         (D_0036B410[y][x] & 0x3C) != 0) {
-        if (func_00252E38(grid, x, y, 0) != 0) {
+        if (mnuSelectMantraGridRightCell(grid, x, y, 0) != 0) {
             return 1;
         }
     } else {

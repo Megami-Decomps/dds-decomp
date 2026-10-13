@@ -200,7 +200,7 @@ extern s32 D_00437CBC;
 extern SdfPoolNode D_00380708;
 extern s8 D_0037F510[];
 
-extern s32 func_002BD5C8(MenuPageWindow *window, s32 mode);
+extern s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 mode);
 extern void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount);
 
 /* Draw the window surface; while the window is in selection state 1, blend its second resource in. */
@@ -208,7 +208,7 @@ void mnuDrawPanelWindowSurface(s32 x, s32 y, s32 z, MenuPageWindow *window, s32 
     EffectSlotSet *resource;
     s32 blendState = 1;
 
-    if (func_002BD5C8(window, mode) == blendState) {
+    if (mnuGetPanelWindowTransitionState(window, mode) == blendState) {
         mnuBlendPanelSlots(resources[1], resources[0], window->fade);
         resource = resources[1];
     } else {
@@ -404,19 +404,19 @@ typedef struct MenuQueuedRenderContext {
 typedef char MenuQueuedRenderContext_size_check[
     sizeof(MenuQueuedRenderContext) == 0x18 ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF660);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuUpdateAndDrawPartyCommandQueue);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF830);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartyMemberCommandPanel);
 
 extern const s32 D_0042B130[4];
 extern const s32 D_0042B140[4];
 extern const s32 D_00437C70[];
-extern char D_00437C68[]; /* "%2d", shared with func_002BF830. */
+extern char D_00437C68[]; /* "%2d", shared with mnuDrawPartyMemberCommandPanel. */
 struct MenuPageSpriteSlot;
 extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
-extern void func_002BF660(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
+extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
 extern void func_002BD710(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
 /* Both native page renderers also forward the surface word; the
  * selection helper consumes only its first five arguments. */
@@ -476,7 +476,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     commandArgs.origin.y = 0;
     commandArgs.extent.x = framePositions[2];
     commandArgs.extent.y = framePositions[3];
-    func_002BF660(x, y, z, panel->commands, &commandArgs, surface);
+    mnuUpdateAndDrawPartyCommandQueue(x, y, z, panel->commands, &commandArgs, surface);
     uiDrawSurfaceAtNearDepth(surface);
     uiDrawActiveSurfaceRegion(surface);
     func_00306CD0(x + framePositions[0], y + framePositions[1],
@@ -521,7 +521,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 
 
 
-extern void func_002BF830(s32, s32, s32, MenuPageWindow *, s32, s32);
+extern void mnuDrawPartyMemberCommandPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
 void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 param) {
@@ -536,7 +536,7 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
     }
     switch (mode) {
     case 1:
-        func_002BF830(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberCommandPanel(x, y, z, menu, panelIndex, param);
         return;
     case 2:
         mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, param);

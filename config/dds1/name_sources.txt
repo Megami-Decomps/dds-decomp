@@ -8672,3 +8672,14 @@
 0x00289380	fileHandleChunkedWriteEvent	inferred	Kind-two device callback advances chunked writes from the supplied address and queues job completion after the final reply.
 0x002C1548	uiPrepareMenuBackgroundSurface	inferred	Menu backdrop callers use this between textured grid layers and the background draw; dispatches the prepared texture packet and sets GS TEST 0x50000 plus ALPHA 0x54 for the selected surface.
 0x00297658	effUpdateGridRecordSlotHistory	inferred	Advances per-instance grid-record history, fades shifted trail colors, and interpolates trailing position, scale, angle, and color samples using linear or Catmull-Rom motion. Reused by five effect emitter update paths; paired with DDS2 0x002D7B58. [matched C]
+0x00244658	mnuShopHasExtraOption	inferred	Queried while initializing active shop state; its result supplies ShopScene.extraOption before the option list is initialized. [LiteH menu naming batch 22]
+0x00252CE8	mnuSelectMantraGridLeftCell	inferred	Called for the mapped left-adjacent mantra cell; the caller falls back to the previous filled cell when no linked cell accepts the move. [LiteH menu naming batch 22]
+0x00252E38	mnuSelectMantraGridRightCell	inferred	Called for the right-adjacent mantra cell after bounds and adjacency tests; the caller otherwise advances to the next filled cell. [LiteH menu naming batch 22]
+0x00256540	itfUpdateDisplayListNode	inferred	Called per node by itfAdvanceDisplayList; a nonzero result releases that node and advances the list head. [LiteH menu naming batch 22]
+0x00257270	mnuDrawMantraPulseGridEntry	inferred	Mantra pulse-grid entry renderer; no cross-title twin asserted. [LiteH menu naming batch 22]
+0x00258258	mnuDrawMantraPrerequisiteLink	inferred	Draws a prerequisite edge for a graph cell using its dimensions, direction, and computed flags/color. [LiteH menu naming batch 22]
+0x0025CA50	mnuDrawMantraProfileGridEntry	inferred	Called for each populated profile-grid cell at half alpha before the status-overlay pass. [LiteH menu naming batch 22]
+0x00260670	mnuDrawShopCommandPanel	inferred	Draws the shop command panel through its entry, exit, and stable action phases. [LiteH menu naming batch 22]
+0x00260AB0	mnuDrawShopPanelTransition	inferred	Draws shop panels through category-change/reveal phases; used by three staged dispatch-start paths. [LiteH menu naming batch 22]
+0x00266908	brsDrawProgressRowUnitInfo	inferred	Draws unit information within each active progress row; DDS2 twin 0x0029E220. [LiteH menu naming batch 22]
+0x00281D40	mnuDrawPartyMemberCommandPanel	inferred	Mode-1 callback from mnuDispatchListPanel; DDS2 twin 0x002BF830 renders the same party-member command panel. [LiteH menu naming batch 22]

@@ -507,7 +507,7 @@ extern void brsUpdateLevelProgressIndicator(s32, s32, s32, BrsSkillPackageWork *
 extern void brsDrawLevelProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsUpdateProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_0029E220(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsDrawProgressRowUnitInfo(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern s32 brsPollResultCounterCompletion(void);
 extern void func_00341C78(u32 sound);
 
@@ -545,7 +545,7 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
             brsDrawLevelProgressIndicator(x, rowY, z, work, row, context, i);
             brsUpdateProfileProgressIndicator(x, rowY, z, work, row, context, i);
             brsDrawProfileProgressIndicator(x, rowY, z, work, row, context, i);
-            func_0029E220(x, y, z, work, row, context, i);
+            brsDrawProgressRowUnitInfo(x, y, z, work, row, context, i);
             count = list->count;
         }
         unit = list->rows[i].unit;

@@ -47,7 +47,7 @@ struct MenuListNode {
 extern MenuList *mtrBuildUnitSelectionList(void);
 extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void func_00289BA0(struct MnuStatusResource *);
+extern void mnuInitializeMantraSelectionWork(struct MnuStatusResource *);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 extern s32 mtrDrawUnitSelectionOverlay(struct MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
@@ -769,7 +769,7 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
             selectionState->state = 3;
             kwlnFadeInStart(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
-        func_00289BA0(resourceWork);
+        mnuInitializeMantraSelectionWork(resourceWork);
         if (resourceWork->menu.src != 0 || resourceWork->menu.drawBits.hasQueuedMastery) {
             if (resourceWork->menu.drawBits.hasQueuedMastery) {
                 for (unitIndex = 0; unitIndex < MTR_UNIT_ENTRY_COUNT; unitIndex++) {

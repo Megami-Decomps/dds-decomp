@@ -111,7 +111,7 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FD30);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FEF0);
+INCLUDE_ASM(const s32, "game/code_0028FD30", mnuHandleMantraSourceDialogResult);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275B0);
 
@@ -428,7 +428,7 @@ u16 mnuGetPanelValueAt(MnuStatusResource *object, s32 index) {
                     (s32)object->menu.slots[object->list->cursor->index]->flags);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290C20);
+INCLUDE_ASM(const s32, "game/code_0028FD30", mnuDrawMantraNodeDetails);
 
 
 typedef struct MantraModelFlag {
