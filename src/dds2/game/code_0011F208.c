@@ -730,7 +730,7 @@ extern u8 D_0039A1D0[], D_003A41A8[], D_003A47E8[], D_003A55F0[], D_0038A3B8[], 
 
 extern u32 D_003899F0[];
 
-extern void *fldCameraSettings;
+extern FldCameraSetting *fldCameraSettings;
 
 /* Load the field tables and index each stage by the coordinate-row count
  * preceding its first record. */
