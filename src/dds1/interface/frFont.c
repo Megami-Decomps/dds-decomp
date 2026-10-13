@@ -4,6 +4,7 @@
 #include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
+#include "itf_resource_segments.h"
 #include "kwln.h"
 
 
@@ -399,21 +400,12 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
     return cachedItem;
 }
 
-typedef struct FrFontSegments {
-    void *first;
-    void *second;
-    void *third;
-} FrFontSegments;
-
-extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
-extern void itfDecodePackedResourceEntry(void *decodedBytes, s32 entryIndex, void *resourceBase, FrFontSegments *segments);
-
 /* Decode one packed font-resource entry into a fixed-size clone.
  * Neither allocation nor entry index is checked. */
 void *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
     FrFontEntry *entry = &frFontWork.entries[fontIndex];
     void *clonedResource = sdfAllocSizeClassBlock(FR_FONT_RESOURCE_CLONE_BYTES);
-    FrFontSegments segments;
+    ItfPackedResourceSegments segments;
 
     itfSplitRelativeSegments(entry->resource, &segments);
     itfDecodePackedResourceEntry(clonedResource, entryIndex, entry->resource, &segments);

@@ -8,6 +8,7 @@
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mem_node.h"
+#include "itf_resource_segments.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
 #include "sdf_texture_file.h"
@@ -84,20 +85,6 @@ typedef struct MemRingHeader {
     SdfMemBlock *allocation;
     MemNode first;
 } MemRingHeader;
-
-/* Field block split by itfSplitRelativeSegments. */
-typedef struct MemBlock {
-    s32 firstOffset; /* 0x0 */
-    s32 secondDelta; /* 0x4 */
-    u8 pad08[0x10]; /* 0x8 */
-    s32 thirdDelta; /* 0x18 */
-} MemBlock;
-
-typedef struct MemOut {
-    void *first; /* 0x0 */
-    void *second; /* 0x4 */
-    void *third; /* 0x8 */
-} MemOut;
 
 /* Two consecutive entries in the four-byte-stride offset table bound a span. */
 typedef struct ItfBitRange {
@@ -904,14 +891,14 @@ u32 func_00198030(u32 value) {
 }
 
 /* Resolve three signed, cumulative relative offsets without validating bounds. */
-void itfSplitRelativeSegments(MemBlock *block, MemOut *out) {
+void itfSplitRelativeSegments(ItfRelativeSegmentResourceView *block, ItfPackedResourceSegments *out) {
     s32 firstOffset = block->firstOffset;
     s32 secondOffset = firstOffset + block->secondDelta;
     s32 thirdOffset = secondOffset + block->thirdDelta;
 
-    out->first = (u8 *)block + firstOffset;
-    out->second = (u8 *)block + secondOffset;
-    out->third = (u8 *)block + thirdOffset;
+    out->treeNodes = (u8 *)block + firstOffset;
+    out->entryBitOffsets = (u8 *)block + secondOffset;
+    out->packedBitstream = (u8 *)block + thirdOffset;
 }
 
 /* Read the opaque header word at 0x10; its role is not established. */
@@ -922,10 +909,10 @@ u32 itfGetPackedResourceHeaderWord(u32 resourceBase) {
 /* Decode entryIndex's bit span through the resource's six-byte prefix-tree records.
  * Write terminal bytes to decodedBytes and return/cache the count. The font atlas
  * uses these bytes as pixels; neither entry nor output bounds are checked. */
-s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, u32 resourceBase, MemOut *segments) {
+s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, void *resourceBase, ItfPackedResourceSegments *segments) {
     ItfBitRange range;
     s32 produced;
-    u8 *table = segments->first;
+    u8 *table = segments->treeNodes;
     u16 *bitWords;
     u32 wordIndex;
     u32 start;
@@ -934,12 +921,12 @@ s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, u32 resourceB
     u16 *root;
     u16 *node;
 
-    memcpy(&range.start, (u8 *)segments->second + entryIndex * 4, 4);
-    memcpy(&range.end, (u8 *)segments->second + entryIndex * 4 + 4, 4);
+    memcpy(&range.start, (u8 *)segments->entryBitOffsets + entryIndex * 4, 4);
+    memcpy(&range.end, (u8 *)segments->entryBitOffsets + entryIndex * 4 + 4, 4);
     produced = 0;
-    func_00198030(resourceBase);
+    func_00198030((u32)resourceBase);
     start = range.start;
-    bitWords = segments->third;
+    bitWords = segments->packedBitstream;
     wordIndex = start >> 4;
     remaining = range.end - start;
     state = (bitWords[wordIndex] | 0x10000) >> (start & 0xF);

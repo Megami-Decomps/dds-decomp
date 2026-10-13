@@ -4,6 +4,7 @@
 #include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
+#include "itf_resource_segments.h"
 #include "kwln.h"
 
 
@@ -33,15 +34,6 @@ extern u8 D_00436578[];
 
 extern s32 frFontDefaultGlyphCellSize;
 
-
-typedef struct FrFontSegments {
-    void *first;
-    void *second;
-    void *third;
-} FrFontSegments;
-
-extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
-extern void itfDecodePackedResourceEntry(void *decodedBytes, s32 entryIndex, void *resourceBase, FrFontSegments *segments);
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
@@ -436,7 +428,7 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
 void *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
     FrFontEntry *entry = &frFontWork.entries[fontIndex];
     void *clonedResource = sdfAllocSizeClassBlock(FR_FONT_RESOURCE_CLONE_BYTES);
-    FrFontSegments segments;
+    ItfPackedResourceSegments segments;
 
     itfSplitRelativeSegments(entry->resource, &segments);
     itfDecodePackedResourceEntry(clonedResource, entryIndex, entry->resource, &segments);
