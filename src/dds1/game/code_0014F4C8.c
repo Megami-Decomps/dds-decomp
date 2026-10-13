@@ -1,5 +1,7 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "kwln_task_create.h"
+#include "eff_manager_task.h"
 #include "eff_random.h"
 
 extern u32 sdfSoundIsCommandBusy(void);
@@ -125,14 +127,6 @@ extern void effInitializeBillResourceOwners(void);
 extern void parSysReset(void);
 
 extern void effSeedEmitterDelayRandomState(void);
-
-extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
-
-extern void effSubmitFieldBlendStateTask(void);
-
-extern void effManagerUpdateAndDispatch(void);
-
-extern void effManagerInitializeSubsystems(void);
 
 extern void func_0018CE38(void);
 
