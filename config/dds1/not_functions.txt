@@ -3,7 +3,7 @@
 0x00101010  # reads $18 before setting it
 0x00101880  # branched into from func_00101880
 0x00103DFC  # reads $16 before setting it
-0x00104914  # branched into from func_00104810
+0x00104914  # branched into from kwlnDrawTextureResourceDetails
 0x00104918  # reads $17 before setting it
 0x00108010  # branched into from func_00107FD8
 0x00108038  # branched into from func_00108010

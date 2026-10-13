@@ -3,7 +3,7 @@
 0x00101010  # restores $31 from a frame it did not push
 0x00101880  # branched into from func_00101880
 0x00103CEC  # reads $16 before setting it
-0x00104804  # branched into from func_00104700
+0x00104804  # branched into from kwlnDrawTextureResourceDetails
 0x00104808  # reads $17 before setting it
 0x00108C8C  # reads $18 before setting it
 0x0010D2C0  # reads $16 before setting it

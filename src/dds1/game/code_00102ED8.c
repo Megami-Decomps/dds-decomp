@@ -800,7 +800,7 @@ extern char D_0039E188[];
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
 
-void func_00104810(SdfListHead *packetList, SdfTex *texture) {
+void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
     char text[0x70];
     s32 formatIndex = 0;
     s32 formatMode = 0;
@@ -941,7 +941,7 @@ void kwlnDrawTextureViewerFrame(void *data, s32 handle) {
     sdfAppendPacket(packetList, (u32)func_0011D3E8(0x7160, 0x7A50, 0x0FFFFF7F, 0x1040, 0x820, 0x80000000, 0x80806020));
     kwlnDrawImageOutline(packetList, image);
     sdfAppendPacket(packetList, (u32)func_0011D3E8(0x7160, 0x8290, 0x0FFFFF7F, 0x1040, 0xE0, 0x80000000, 0x80806020));
-    func_00104810(packetList, image);
+    kwlnDrawTextureResourceDetails(packetList, image);
 
     if (D_003BA890 != 0) {
         kwlnDrawTextureListDiagnostic(packetList, 0x8240, 0x7A60);
