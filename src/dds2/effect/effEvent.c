@@ -17,6 +17,7 @@
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "eff_event_bill.h"
+#include "eff_event_bill_batch.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_texture_primary_buffer_api.h"
@@ -1351,16 +1352,6 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateBillboardParticles);
-
-/* Fifteen billboard records are packed into each compact VIF batch. */
-typedef struct EffEventBillBatch {
-    u128 positions[15];
-    u32 colors[15];
-    s16 uv[15][8];
-    f32 corners[15][8];
-    s32 count;
-} EffEventBillBatch;
-typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -1];
 
 struct DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
