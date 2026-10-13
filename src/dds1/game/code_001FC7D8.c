@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_command_effect.h"
 #include "btl_ai_slot.h"
 #include "dds3obj.h"
 #include "btl_resource_name.h"
@@ -387,13 +388,6 @@ s32 btlGetStatusActionEffectId(BtlTask *task) {
         return -1;
     }
 }
-
-typedef struct BtlCommandEffect {
-    s32 command;
-    s16 effect;
-    u8 adjustSide;
-    u8 pad07;
-} BtlCommandEffect;
 
 extern BtlCommandEffect D_00360468[];
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
