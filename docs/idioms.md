@@ -10353,3 +10353,45 @@ anchors. Its named transparency and mirror callers supply packed
 `color`. Types, packet values, statement order and rendering calls remain
 unchanged.
 
+## Publishing viewer workspace
+
+DDS1 `func_0021C208` (0x0021C208, 216B, `game/code_00218B48`) and DDS2
+`func_00236D78` (0x00236D78, 216B, `game/code_00233660`) configure the same
+three-phase model-viewer workspace. Native 0x0021C218–0x0021C228 and
+0x00236D88–0x00236D98 retain the completed-phase case: test one, compare
+against two, then reject a nonzero initial phase. The working phase
+publishes two, so the empty completed case represents observed retail
+control flow, not an invented dead arm.
+
+**P / deciding pass:** sched1's `reg_weight` tier needs the phase publication
+to be the genuine final use of the workspace owner and phase value, and the
+Y-scale assignment to be the genuine final use of the shared scale.
+Configuring the workspace before publishing its phase is ordinary state
+management; `scaleY = scaleX = scale` expresses the two equal axis scales
+without an extra value or operation.
+
+In the parity-checked DDS1 exact form, phase publication uid86 consumes
+both phase pseudo84 and owner154 (`reg_weight = -2`). It wins equal-priority
+comparisons against the enable store uid74 and halfword resets uid47/52.
+In the failing form, the enable store instead kills the phase value and
+issues too early. The chained scale's Y store uid81 kills scale90
+(`reg_weight = -1`), whereas X store uid79 does not (`0`); Y therefore
+issues first despite being the outer assignment. These are live values
+with actual stores, not artificial final-use markers.
+
+The same publication rule fixes the next phase: retaining owner154 through
+phase publication uid172 removes the dead-owner advantage from the
+`unk52` read uid150. The equal-priority `unk4E` read uid134 now precedes it,
+recovering the native coordinate operand homes without indexed copies.
+The form that publishes the phase first and uses separate Y-then-X scale
+stores retains 14 of 54 differing words in both games; final publication
+and the shared assignment close both functions.
+
+The fixed repository `cc1probe` verified hooked/unhooked assembly and every
+RTL dump using compiler SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+Full log paths are recorded in PurD's renewal54 ledger and scratch receipts.
+Final whole-unit gates were DDS1 109 match / 0 differ and DDS2 110 match /
+0 differ, with no safety diagnostics. No owner type, ABI, compiler flag,
+helper or assembly primitive changed.
+
