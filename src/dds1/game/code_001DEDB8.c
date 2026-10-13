@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "btl_tint_transition.h"
 #include "eff_random.h"
 #include "btl_camera_timed_instruction.h"
 #include "snd_sequence_volume_pan.h"
@@ -4999,15 +5000,6 @@ void btlStepTintTransition(void) {
         fldSetSkyDrawState(cmd->resource);
     }
 }
-
-typedef struct BtlTintTransition {
-    u32 currentColor;
-    u8 unk_04[0x14];
-    u32 sourceColor;
-    u32 targetColor;
-    u16 framesRemaining;
-    u16 durationFrames;
-} BtlTintTransition;
 
 void btlQueueTintTransition(u32 color, u16 frames) {
     BtlTintTransition *transition;
