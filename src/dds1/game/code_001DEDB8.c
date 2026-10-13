@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "btl_camera_timed_instruction.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
@@ -118,15 +119,6 @@ typedef char BtlCameraCursorExtentCheck[
     (sizeof(BtlCameraCursor) == sizeof(BtlCameraCursorView)) ? 1 : -1];
 
 extern BtlCameraCursor D_0035F100;
-
-/* Serialized camera instructions advance by 0x10 in 001E9DE0. */
-typedef struct BtlCameraTimedInstruction {
-    s32 kind;
-    s16 parameterIndex;
-    u8 pad06[2];
-    f32 startFrame;
-    f32 duration;
-} BtlCameraTimedInstruction;
 
 extern const BtlCameraTimedInstruction *D_0035D9F0[];
 
@@ -4286,8 +4278,6 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EB368);
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
-
-typedef char BtlCameraTimedInstruction_size[(sizeof(BtlCameraTimedInstruction) == 0x10) ? 1 : -1];
 
 typedef char BtlCameraParameterRecord_size[(sizeof(BtlCameraParameterRecord) == 0x80) ? 1 : -1];
 
