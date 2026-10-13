@@ -7110,6 +7110,7 @@ evtCommandSetEffectUnitQuaternionRotation = 0x00241E70; // type:func
 mnuDrawMantraPanelBTransition = 0x0027E360; // type:func
 btlGetConditionalEncounterInterval = 0x0011E848; // type:func
 btlAdvanceConditionalEncounterRoll = 0x0011E930; // type:func
+kwlnDrawTextureResourceDetails = 0x00104700; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -8977,7 +8978,6 @@ kwlnResetPadInputAndMotorState = 0x001038D0; // type:func
 kwlnUpdatePadInputState = 0x00103A00; // type:func
 func_00104058 = 0x00104058; // type:func
 func_00104150 = 0x00104150; // type:func
-func_00104700 = 0x00104700; // type:func
 kwlnInitializeFrameDrawPackets = 0x00105070; // type:func
 kwlnInitHeldTextureScenePackets = 0x00105290; // type:func
 func_001057B0 = 0x001057B0; // type:func

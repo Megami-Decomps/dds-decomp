@@ -54,6 +54,7 @@
 0x00104180	kwlnDebugGraphUpdate	inferred	DebugTimeGrph update callback; native body returns signed zero scheduler control and ignores the incoming task argument.
 0x001044E8	kwlnDebugGraphTaskDestroy	inferred	No-op destroy callback registered for the DebugTimeGrph task.
 0x00104568	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104678, input-family pairing. [names_qp10.tsv]
+0x00104700	kwlnDrawTextureResourceDetails	inferred	Appends formatted texture dimensions, pixel-format label, resource key and battle-texture slot to the viewer packet list; DDS1 twin 0x00104810.
 0x00104898	kwlnTextureCountIncompleteResources	inferred	counts D_004389F8 list nodes whose ready flag pointer is NULL or points to 0 [names_M39_SmallSweep7.tsv]
 0x00104900	kwlnTextureGetPageIndex	inferred	Returns the texture viewer's global page index, as in the DDS1 counterpart.
 0x00104908	kwlnSelectIncompleteResourceAtPageIndex	inferred	Selects the reached incomplete-texture page, stores its resource pointer and returns the reached index; DDS1 twin 0x00104A18. DDS2 skips clone-source entries at the head before applying the requested index.
