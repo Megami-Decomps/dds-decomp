@@ -27,6 +27,17 @@ typedef struct Dds3PathKeyframes {
     u32 *frames;
 } Dds3PathKeyframes;
 
+/* The path object's variable-length curve table starts with this count. */
+typedef struct Dds3PathCurveEntry {
+    u32 kind;
+    Dds3PathKeyframes *keys;
+} Dds3PathCurveEntry;
+
+typedef struct Dds3PathCurveTable {
+    u32 count;
+    Dds3PathCurveEntry entries[1];
+} Dds3PathCurveTable;
+
 /* Complete 0x24-byte state allocated by dds3CreatePathCurveWork. */
 typedef struct Dds3PathCurveWork {
     s32 direction; /* 0 counts up, 1 counts down; other values do not step. */
@@ -42,6 +53,12 @@ typedef struct Dds3PathCurveWork {
 
 typedef char Dds3PathKeyframes_size_must_be_0x0C[
     (sizeof(Dds3PathKeyframes) == 0x0C) ? 1 : -1];
+typedef char Dds3PathCurveEntry_size_must_be_8[
+    (sizeof(Dds3PathCurveEntry) == 0x08) ? 1 : -1];
+typedef char Dds3PathCurveEntry_keys_at_4[
+    ((u32)&((Dds3PathCurveEntry *)0)->keys == 0x04) ? 1 : -1];
+typedef char Dds3PathCurveTable_entries_at_4[
+    ((u32)&((Dds3PathCurveTable *)0)->entries == 0x04) ? 1 : -1];
 typedef char Dds3PathCurveWork_size_must_be_0x24[
     (sizeof(Dds3PathCurveWork) == 0x24) ? 1 : -1];
 
