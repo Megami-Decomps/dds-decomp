@@ -1525,18 +1525,18 @@ void sdfSoundInitIpuStream(void) {
 
 extern s32 D_004391FC;
 extern s32 D_00439200;
-extern void func_00328668();
+extern void sdfRemoveHandler();
 extern s32 func_00366850();
 
 /* Remove both IPU handlers and forward the final completion-source disable result. */
 s32 sdfSoundShutdownIpuStreamHandlers(void) {
     if (D_004391FC != 0) {
-        func_00328668(D_004391FC);
+        sdfRemoveHandler(D_004391FC);
         D_004391FC = 0;
     }
     func_00366850(3);
     if (D_00439200 != 0) {
-        func_00328668(D_00439200);
+        sdfRemoveHandler(D_00439200);
         D_00439200 = 0;
     }
     return func_00366850(4);

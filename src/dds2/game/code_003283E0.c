@@ -68,7 +68,7 @@ void sdfPanicHaltPrintf(const char *format, ...) {
 
 INCLUDE_ASM(const s32, "game/code_003283E0", sdfAddHandler);
 
-void func_00328668(SdfHandlerNode *target) {
+void sdfRemoveHandler(SdfHandlerNode *target) {
     SdfHandlerNode **link = &D_004389BC;
     SdfHandlerNode *node = *link;
 
@@ -99,6 +99,6 @@ void func_00328668(SdfHandlerNode *target) {
 void sdfDrainPendingHandlers(void) {
     SdfHandlerNode *current;
     while ((current = D_004389BC) != 0) {
-        func_00328668(current);
+        sdfRemoveHandler(current);
     }
 }
