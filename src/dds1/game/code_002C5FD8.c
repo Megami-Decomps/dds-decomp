@@ -31,7 +31,7 @@ extern MapRequestState *D_003BD988;
 
 extern MapRequestState *D_003BD98C;
 void fldReleaseMapRequestQueue(MapRequestState *);
-extern void func_002C7C58(MapRequestState *);
+extern void fldDispatchMapRequestCallbacks(MapRequestState *);
 extern f32 sdfCounterGetScaledValue(void);
 extern f32 D_0038FE30[][4];
 
@@ -531,7 +531,7 @@ void fldDrawCounterMapMarker(void) {
     if (remaining > 0.0f) {
         opacity = remaining;
     }
-    func_002C7C58(D_003BD98C);
+    fldDispatchMapRequestCallbacks(D_003BD98C);
     fldProjectPointToGridCell(&x, &y, D_0038FE30[index][0], D_0038FE30[index][1], D_0038FE30[index][2]);
     fldDrawScaledAuxMapTexture(x, y, MAP_GREY_COLOR(opacity * 32.0f), 5.0f);
 }
@@ -653,7 +653,7 @@ done:
 }
 
 /* Report normalized progress for each active request in the ring. */
-void func_002C7C58(MapRequestState *ring) {
+void fldDispatchMapRequestCallbacks(MapRequestState *ring) {
     MapRequestNode *node;
     s32 remaining;
     s32 end;
