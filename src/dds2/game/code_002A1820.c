@@ -904,7 +904,7 @@ extern u8 mnuHasSpriteHandle(void);
 extern void mnuDrawMovieMenuSpriteSlot1F(s32);
 extern void mnuDrawMovieMenuSpriteSlot20(u32);
 extern void mnuDrawMovieMenuSpriteSlot21(u32);
-extern u8 func_002A8028(void);
+extern u8 mnuGetMovieDrawState(void);
 extern s32 mnuCheckMovieDecoderStatus(void);
 extern void mnuClearGlobalMenuStateFields(void);
 extern s32 mnuPollMovieMenuInputAndTimeout(void);
@@ -968,7 +968,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     case 3:
         if (mnuIsTitleMovieDrawActive() == 0) {
             mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-        } else if (func_002A8028() != 0) {
+        } else if (mnuGetMovieDrawState() != 0) {
             mnuMovieMenuState->state = 4;
             mnuMovieMenuState->cursor = 0;
         }
@@ -1106,7 +1106,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         break;
     }
     case 16:
-        if (func_002A8028() != 0) {
+        if (mnuGetMovieDrawState() != 0) {
             mnuMovieMenuState->state = 17;
         }
         break;
@@ -1143,7 +1143,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         }
         break;
     case 20:
-        if (func_002A8028() != 0) {
+        if (mnuGetMovieDrawState() != 0) {
             mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
             mnuMovieMenuState->state = 21;
             mnuMovieMenuState->cursor = 0;

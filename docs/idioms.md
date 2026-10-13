@@ -2878,7 +2878,7 @@ units rejoined, the function matches as written.
 Check API contracts before treating a park as one-word-close. For DDS2
 `func_0024D430`, combining the genuine glyph-increment eligibility in the
 completion-first layout removes the old `+0x21C` branch residual. Using
-the existing producer's `u8 func_002A8028(void)` contract leaves three
+the existing producer's `u8 mnuGetMovieDrawState(void)` contract leaves three
 different words at `+0x258/+0x260/+0x264`, not the older park's one word
 with its `s32 (s32)` declaration. A global-byte getter's native body alone
 does not prove its original return width or distinguish zero parameters

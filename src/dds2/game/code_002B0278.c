@@ -1745,7 +1745,7 @@ void mnuSelectSkillSelectionVisuals(u32 context) {
     mnuSwitchCampVisualCategory(1, context);
 }
 
-void func_002B4290(s32 context) {
+void mnuNoOpItemSelectionTeardown(s32 context) {
 }
 
 extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
@@ -2069,7 +2069,7 @@ s32 mnuCloseItemSelectionState(KwlnTask *selection) {
     if (menu[9] != 0) {
         mnuDestroySelectedPartyWindow(selection);
     }
-    func_002B4290(context);
+    mnuNoOpItemSelectionTeardown(context);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu[0]));
     return 1;
 }
