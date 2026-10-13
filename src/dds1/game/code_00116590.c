@@ -16,7 +16,7 @@ extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
 
 
 
-u32 func_00116590(void) {
+u32 dds3LightObjectDrawNoop(void) {
     return 1;
 }
 

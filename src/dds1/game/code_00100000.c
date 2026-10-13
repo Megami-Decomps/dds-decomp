@@ -116,7 +116,7 @@ s32 kwlnInitializeRuntime(void) {
     kwlnDebugTaskCreate();
     func_003003F0(D_003BA7E0);
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
-    func_001035F0();
+    kwlnRuntimeStartupHook();
     func_003003F0(D_003BA7E8);
     kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, kwlnUpdateDevelopmentDumpTask, 0, 0);
     func_003003F0(D_003BA7F0);

@@ -287,7 +287,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnConfigureNamedSlotMode1);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnConfigureNamedSlotMode2);
 
-void func_001034E0(void) {
+void kwlnRuntimeStartupHook(void) {
 }
 
 extern s8 D_0037F510[64];

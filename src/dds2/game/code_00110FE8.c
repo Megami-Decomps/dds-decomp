@@ -137,7 +137,7 @@ void dds3DestroyObjectPointerChains(EffWorldNode *object) {
     sdfReleaseChipBlock(indexNodes);
 }
 
-u32 func_001112F8(void) {
+u32 dds3WorldIndexUpdateNoop(void) {
     return 1;
 }
 

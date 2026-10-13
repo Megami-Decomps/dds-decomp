@@ -73,7 +73,7 @@ s32 kwlnInitializeRuntime(void) {
     kwlnInitMagicState();
     kwlnDebugTaskCreate();
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
-    func_001034E0();
+    kwlnRuntimeStartupHook();
     kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, kwlnUpdateDevelopmentDumpTask, 0, 0);
     kwlnFadeClear();
     evtEnsureSolarOverlayTaskAndResetPhase();
