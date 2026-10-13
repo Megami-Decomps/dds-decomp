@@ -2611,6 +2611,7 @@
 0x0019A200	itfDrawSevenColorPanelQuads	inferred	confidence=high; matched-C; src/dds1/game/code_00199AD8.c:271:func_0019A200; F2; source=names_pending_main.tsv:97; review=Copies panel alpha into seven color records, then emits wide and ordinary indexed quad lists. [names_qp11.tsv]
 0x0019A310	itfDrawFiveColorPanelQuads	inferred	confidence=high; matched-C; src/dds1/game/code_00199AD8.c:289:func_0019A310; F2; source=names_pending_main.tsv:98; review=Copies panel alpha into five color records, then emits wide and ordinary indexed quad lists. [names_qp11.tsv]
 0x0019A568	itfDrawPanelQuadWithCommand	inferred	Applies panel color state and draws a flat quadrilateral packet. [names_reviewed10.tsv]
+0x0019A420	itfDrawPanelWithThreeInsetQuads	inferred	Builds three progressively inset quads from the panel's four payload vertices, emits the base flat quad, then draws the three inset strips.
 0x0019A5A0	itfEmitPanelQuadPacket	inferred	Emits panel quad geometry with its stored tint and packet state. [names_reviewed8.tsv]
 0x0019AC68	itfDrawTintedPanelRect	inferred	Builds a panel rectangle and draws it with scaled stored tint. [names_reviewed9.tsv]
 0x0019ACE0	itfAppendGsPanelStatePacket	inferred	Builds and appends a packet carrying GS panel state registers. [names_reviewed9.tsv]

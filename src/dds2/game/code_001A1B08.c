@@ -456,7 +456,7 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     }
 }
 
-void func_001A2450(UiSprite *panel, SdfListHead *command) {
+void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
     PanelVert vertices[12];
     PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
