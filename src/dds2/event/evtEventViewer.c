@@ -731,7 +731,7 @@ extern void func_00341CA8(void);
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern void kwlnFadeSetupFrames(s32 mode, s32 frames);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
-extern void func_002A7F98(s32 value);
+extern void mnuStartMoviePlaybackByResourceIndex(s32 value);
 extern s32 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(s32 enabled);
 extern void fldBeginTitleAnimation(void);
@@ -909,7 +909,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (evtViewerHasUpdateFlag(viewer) == 1 || position != key->frame) {
             break;
         }
-        func_002A7F98(key->p08.sh[0]);
+        mnuStartMoviePlaybackByResourceIndex(key->p08.sh[0]);
         viewer->timedStart = key->frame;
         if (key->duration == 0) {
             if (key->p0C.sb[0] == 0) {
@@ -3427,7 +3427,7 @@ extern s8 D_0037F510[];
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void evtUpdateViewerMessageWindow(EvtRuntime *);
 extern void mnuAdvanceShopMenuState();
-extern u8 func_002A8028(void);
+extern u8 mnuGetMovieDrawState(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
@@ -3496,7 +3496,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
                 evtViewerDispatchFlagMode(viewer);
             }
         } else if (viewer->timedActive == 1) {
-            if (func_002A8028() == 2) {
+            if (mnuGetMovieDrawState() == 2) {
                 viewer->curFrame++;
             }
         } else {

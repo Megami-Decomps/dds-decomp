@@ -489,7 +489,7 @@ MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback
 
 void mnuSelectSkillSelectionVisuals(u32 context);
 
-void func_002B4290(s32 context);
+void mnuNoOpItemSelectionTeardown(s32 context);
 
 
 
