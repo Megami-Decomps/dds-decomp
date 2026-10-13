@@ -571,7 +571,7 @@ extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
 extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, u32);
 
-extern u32 func_001B1350(BtlUnit *, BtlUnit *, u32, s32, s32);
+extern u32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, u32, s32, s32);
 
 extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
@@ -921,7 +921,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
                 break;
             }
         }
-        addedStatus = func_001B1350(source, recipient, command, press, kind);
+        addedStatus = btlGetCommandAddedStatus(source, recipient, command, press, kind);
         removedStatus = btlQueryUnitChannelFlags(source, recipient, command, press, kind);
         if (group->reflected) {
             addedStatus &= ~6;

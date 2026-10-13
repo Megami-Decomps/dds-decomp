@@ -2799,6 +2799,7 @@
 0x001A6A50	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001A6B40	btlResolveSkillCategory	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001A6F98	btlDistributeRandomTargetHits	inferred	L13
+0x001A7180	btlGetCommandAddedStatus	inferred	Resolves the command channel value for attacker/defender records, then applies command mode, status and guard filters; the caller stores the result as addedStatus. DDS2 twin 0x001B1350 has title-specific guard handling.
 0x001A73A0	btlQueryUnitChannelFlags	inferred	Returns channel flags for two units, adding a status-dependent bit. [names_reviewed8.tsv]
 0x001A7AD8	btlCalculateEnemyExperienceReward	inferred	Scales enemy experience points by the acquirer ratio and special multiplier. [names_reviewed12.tsv]
 0x001A7D38	btlGetEnemyMoney	inferred	returns the money value (entry+0x28, x100 when entry flag 0x2000) logged as "btl:money=%d"; 0 unless enemy flags & 0x400 and acquirer is alive-ish [names_reviewed2.tsv]

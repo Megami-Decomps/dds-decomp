@@ -119,7 +119,7 @@ s32 btlFlagToElementIndex(s32 flag);
 extern s32 sdfQueryChannelValue(s32, DatPartyRecord *, DatPartyRecord *);
 extern s32 func_003003F0(const char *, ...);
 
-s32 func_001A7180(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
+s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
     DatPartyRecord *record;
     s32 value;
     s32 guard;
