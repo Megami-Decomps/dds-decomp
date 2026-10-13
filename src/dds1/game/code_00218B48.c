@@ -789,7 +789,7 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s3
 }
 
 void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
-    func_00217310(owner, record->payload.stream.selectorA,
+    mdlCreateDevSlotList(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
 }
