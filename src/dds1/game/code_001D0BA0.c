@@ -83,8 +83,6 @@ typedef struct BtlPosLerpTaskArgs BtlPosLerpTaskArgs;
 
 extern s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *);
 
-extern void btlUnitGetMuzzlePosVU(void *);
-
 typedef struct BtlRotationTaskArgs BtlRotationTaskArgs;
 
 extern s32 btlStepUnitRotationNlerp(BtlRotationTaskArgs *);
@@ -6140,7 +6138,7 @@ void btlAimLinkedUnitAtMuzzle(u8 *action) {
     if (count != 0) {
         target = *(BtlUnit **)(*(s32 *)(action + 0xF4) + 0x18);
         if (count == 1) {
-            btlUnitGetMuzzlePosVU(btlGetIndexListEntry(*(struct BtlIndexList **)(action + 0x118), 0));
+            btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(*(struct BtlIndexList **)(action + 0x118), 0));
         } else {
             func_001F6E28(*(BtlIndexList **)(action + 0x118), 0, 0);
         }
