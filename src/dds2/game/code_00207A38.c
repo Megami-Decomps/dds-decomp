@@ -197,7 +197,7 @@ extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 
-extern void func_0021F3E8(s32);
+extern void btlChoosePartyDerivedShadowSkill(s32);
 
 extern void btlCmdAppendCurrentUnitIdToCommandIndices(s32);
 
@@ -1251,7 +1251,7 @@ u32 btlScriptSelectByKind(void) {
     context->commandMode = 2;
     context->commandValue = commandId;
     if (commandId == 0x196) {
-        selectionValue = func_0021F698();
+        selectionValue = btlChoosePartyMemberShadowId();
     }
     context->pendingValue = selectionValue;
     context->selectedValue = selectionValue;
@@ -1288,7 +1288,7 @@ u32 btlScriptSelectDirect(void) {
 
 /* Select a permitted party-derived shadow skill, or retain the empty command. */
 s32 btlScriptSelectShadowSkill(void) {
-    func_0021F3E8(scrGetCurrentCommandWork());
+    btlChoosePartyDerivedShadowSkill(scrGetCurrentCommandWork());
     return 1;
 }
 
