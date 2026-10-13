@@ -238,7 +238,19 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5890);
+extern void sndStartTrackExtended(s32 trackId);
+
+void func_002A5890(void) {
+    MenuTitleState *state = mnuMovieMenuState;
+
+    state->phase = 0;
+    state->selectedPage = 0;
+    state->sequenceTimer = 0;
+    sndStartTrackExtended(0x310000);
+    /* Retire the local title cursor; see docs/idioms.md,
+     * "Post-call local cleanup: title menu cursor". */
+    state = NULL;
+}
 
 void mnuClearGlobalMenuStateFields(void) {
     MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
