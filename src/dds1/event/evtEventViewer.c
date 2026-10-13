@@ -20,6 +20,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_object.h"
+#include "eff_object_dispatch_api.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
 #include "evt_viewer_group_record.h"
@@ -565,7 +566,6 @@ struct EffNodeDescriptor;
 extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern s32 effObjCreateBillboardFromFactory(s32 arg, f32 *vec0, f32 *vec1);
 extern struct EffectObj *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
-extern void effObjDispatchReadyState(s32 obj);
 extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
                                                struct EffectObj *second, struct EffectObj *third,
                                                struct EffectObj *fourth);
@@ -600,7 +600,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *cmd, EvtRuntime
             handle = effObjCreateBillboardFromFactory((s32)cmd->resourceData, vec0, vec1);
         }
         if (params->p0C.sb[0] != 0) {
-            effObjDispatchReadyState(handle);
+            effObjDispatchReadyState((EffWorldNode *)handle);
         }
         if (cmd->metadata.extra1 == 0) {
             evtViewerBindNamedOwner((EffWorldNode *)handle, params->p0C.sh[1], params->p0C.sb[1], params->frame, viewer);
@@ -624,7 +624,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *cmd, EvtRuntime
         effObjCopyMagatuhiSourceParameters((struct EffectObj *)handle, n0, n1, n2,
                                            evtEventViewerGetNameObject(params->p0C.sb[3], viewer));
         if (params->p08.sb[1] != 0) {
-            effObjDispatchReadyState(handle);
+            effObjDispatchReadyState((EffWorldNode *)handle);
         }
         break;
     }

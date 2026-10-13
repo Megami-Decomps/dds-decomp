@@ -14,6 +14,7 @@
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "eff_object.h"
+#include "eff_object_dispatch_api.h"
 #include "eff_event.h"
 #include "scr.h"
 #include "scr_arg_read.h"
@@ -66,7 +67,6 @@ extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
-extern void effObjDispatchReadyState(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 extern void evtScaleValueByMultiplier(s32, f32);
@@ -1571,7 +1571,7 @@ u32 func_00225D80(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchReadyState(obj);
+        effObjDispatchReadyState((EffWorldNode *)obj);
     }
     return 1;
 }
@@ -1583,7 +1583,7 @@ u32 func_00225DC0(void) {
     id = scrReadIntParameter(0);
     obj = evtFindWorldObjectByIdAndKind(7, id);
     if (obj != NULL) {
-        effObjDispatchReadyState(obj);
+        effObjDispatchReadyState((EffWorldNode *)obj);
     }
     return 1;
 }
