@@ -3565,7 +3565,7 @@ extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
-extern void func_001EFEE8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern s32 btlCanUseActorCategoryFlag2(s32);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
@@ -3681,7 +3681,7 @@ s32 func_0021CF18(BtlLinkedCommand *command, s8 side, s8 targetSide) {
         }
         if (count >= 2 && side == 0 && targetSide == 1) {
             if (btlCanUseActorCategoryFlag4(command)) {
-                func_001EFEE8(command, &command->frontCamera, &command->backCamera);
+                btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
                 goto flag_defeat_candidates;
             }
             if (btlCanUseLinkedActor(command)) {
