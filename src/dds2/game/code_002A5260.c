@@ -1648,7 +1648,7 @@ s32 mnuCheckMovieDecoderStatus(void) {
 
 extern u8 D_003E563C[];
 
-u8 func_002A8028(void) {
+u8 mnuGetMoviePlaybackMode(void) {
     return D_003E563C[0];
 }
 

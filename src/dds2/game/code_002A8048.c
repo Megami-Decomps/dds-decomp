@@ -104,11 +104,11 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
     return 1;
 }
 
-extern u8 func_002A8028(void);
+extern u8 mnuGetMoviePlaybackMode(void);
 extern u8 func_002A8038(void);
 
 s32 mnuCanDrawMovie(void) {
-    if (func_002A8028() == 2) {
+    if (mnuGetMoviePlaybackMode() == 2) {
         if (func_002A8038() != 0) {
             return 1;
         }
