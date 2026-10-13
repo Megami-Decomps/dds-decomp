@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
@@ -1047,8 +1048,6 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Rotate an offset in degrees, apply screen aspect correction, and add the supplied center. */
 void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY, f32 angle) {

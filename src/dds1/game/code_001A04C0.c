@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
@@ -11,6 +12,7 @@
 #include "kwln_task_lifecycle.h"
 #include "itf_mes_resource.h"
 #include "sdf_sif_command.h"
+#include "mdl_flag_api.h"
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {
@@ -28,7 +30,6 @@ typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 D_003BD824;
 extern UiQuadColor D_00358390;
-extern f32 sdfSinPoly(f32);
 extern u64 *itfCreateVerticalGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -41,7 +42,6 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern void btlUpdateScene(void);
 
-extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 

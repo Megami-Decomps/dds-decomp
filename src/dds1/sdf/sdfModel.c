@@ -173,7 +173,7 @@ SdfDmaTagHeader *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexe
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildIndexedCommandPackets);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8130);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildClippedCommandPackets);
 
 /* Prepend a chip-allocated command node to one buffered draw list. */
 SdfCommandNode *sdfDrawNodePrependCommandNode(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
@@ -387,11 +387,11 @@ void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 w
     sdfInstallPoolNodeReleaseCallbacks(work);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8CB8);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTestTransformedClipVectors);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8DD0);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildVisibleNodePackets);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D9238);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildNodeResourcePackets);
 
 /* Copy the destination's declared number of 16-byte object entries. */
 void sdfModelCopyData(DevRequest *dst, DevRequest *src) {

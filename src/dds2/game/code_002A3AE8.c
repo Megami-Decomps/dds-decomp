@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "fpu.h"
 #include "mnu.h"

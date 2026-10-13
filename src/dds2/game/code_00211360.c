@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "btl_ai_slot.h"
 #include "sdf_chip.h"
 #include "sdf.h"
@@ -16,9 +17,8 @@
 #include "dat_command.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "mdl_flag_api.h"
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *state);
 
 #define BTL_AI_SLOT_COUNT 5
 
@@ -150,7 +150,6 @@ extern u16 btlReadUnitStatusMask(DatPartyRecord *);
 
 extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *, s32);
 
-extern s32 mdlFlagTest(s32);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 

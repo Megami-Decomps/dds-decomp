@@ -1,6 +1,8 @@
 #include "btl_command.h"
+#include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
 #include "sdf_chip.h"
@@ -806,8 +808,6 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern f32 func_003532E8(f32, f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern u128 D_003BE0D0;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */

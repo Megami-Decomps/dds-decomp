@@ -1,4 +1,5 @@
 #include "mnu_mantra.h"
+#include "snd_sequence_volume_pan.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -7,6 +8,7 @@
 #include "prf_profile_cap.h"
 #include "dsp_name.h"
 #include "sdf_task_work.h"
+#include "mdl_flag_api.h"
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08
@@ -45,7 +47,6 @@ struct MenuListNode {
 };
 
 extern MenuList *mtrBuildUnitSelectionList(void);
-extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuInitializeMantraSelectionWork(struct MnuStatusResource *);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
@@ -429,10 +430,6 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
     evtPrintDeveloperConsoleMessage("mtrMantraEquipRelease\n");
 }
 
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
 extern DspUnitName *D_00435E48;
 extern DspMantraName *D_00435E50;
 extern s8 D_0037F510[];
@@ -450,7 +447,6 @@ extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);
 extern void mnuShowMantraUnitPanel(struct MantraDrawPool *pool);
@@ -913,8 +909,6 @@ extern s8 D_0037F510[];
 extern MenuListNode *mnuRetreatListCursorDefault(MenuList *);
 extern MenuListNode *mnuAdvanceListCursorDefault(MenuList *);
 extern void mnuClearListFlagsOneAndTwo(MenuList *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 /* Move the mantra selection, rebuild its panel, or report confirm/cancel. */
 s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     s32 sound = 0;

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_chip.h"
 #include "dat_command.h"
 #include "fr_font.h"
@@ -25,6 +27,7 @@
 #include "fld.h"
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -86,7 +89,6 @@ typedef struct CampFlagRow {
 
 extern CampFlagRow D_003C9A40[];
 
-extern s32 mdlFlagTest(u32);
 
 
 extern u8 D_003CE658[];
@@ -141,7 +143,6 @@ extern s32 evtGetMessageWindowControlState(void);
 
 extern u8 D_003CD8D0[];
 
-extern u32 effMiscRand(void *);
 
 extern u8 D_003CDA8C[];
 
@@ -2451,7 +2452,6 @@ extern s32 D_003CE14C[];
 extern u8 D_003CE620[];
 extern u8 D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
-extern s32 mdlFlagTest();
 extern s32 dspStartEntry(s32);
 
 
@@ -3276,7 +3276,6 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
 }
 
 extern s32 mnuTickCommandWaitPhase(MenuTerminalContext *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_003CE594[];
 
 /* Poll command phases, adjust the idle quantity selection, and play UI sounds. */
@@ -3676,8 +3675,6 @@ extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
 extern u32 mnuCampChooseSolarWeightedOption(s32 row);
 extern u8 mnuCampChooseWeightedTableValue(void);
 extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 s32 func_00264710(KwlnTask *task) {
     MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     struct MenuList *activeList = scene->window->list;
@@ -3999,7 +3996,6 @@ void mnuSetFlagForMenuEntry(s32 index) {
 #include "dat_state.h"
 #include "mnu_list.h"
 
-extern s32 mdlFlagTest(u32);
 
 
 extern void func_0026C900(void);

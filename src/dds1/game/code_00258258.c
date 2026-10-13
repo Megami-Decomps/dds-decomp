@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_task_work.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_profile_progress.h"
@@ -150,10 +151,6 @@ void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *state, u32 mode) {
     state->mode = mode;
     state->frame = 0;
 }
-
-void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
-
 /* Step the notification frame (wraps at 31); mode 1 plays the cue once at frame 0.
  * Its unused implicit-int result preserves the call's non-sibling epilogue. */
 mnuAdvanceMantraGridFeedback(MnuGridFeedbackState *voice) {

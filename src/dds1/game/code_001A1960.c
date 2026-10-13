@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "btl_item_drop.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -21,6 +22,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -94,7 +96,6 @@ extern void *D_00358408[];
 
 extern void *D_00358450[];
 
-extern s32 mdlFlagTest(s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -965,7 +966,7 @@ extern s8 effSharedRandomState[];
 s32 btlSelectActorAction(s32 object) {
     s32 result = btlSelectEnemyDropItem(object, 1);
     if (result == 0) {
-        result = (effMiscRand(effSharedRandomState) & 1) != 0 ? 2 : 7;
+        result = (effMiscRand((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
     }
     return result;
 }

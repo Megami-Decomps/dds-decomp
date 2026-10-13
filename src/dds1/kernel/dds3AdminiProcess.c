@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "dds3Admin.h"
 #include "kwln.h"
+#include "dds3_admin_dispatch.h"
 
 extern char dds3AdminTaskName[];
 extern void *memcpy(void *, void *, s32);
@@ -67,15 +68,6 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
     }
 }
 
-/* One dispatch row per mode: three function pointers, 12 bytes each. The three
- * columns are consecutive symbols, ddsAdminModeCallbacks / D_003297D4 / D_003297D8. */
-typedef struct AdminDispatch {
-    void (*entry)(s32 restoring, void *data);
-    s32 (*destroy)(void);
-    s32 (*cleanup)(void);
-} AdminDispatch;
-
-extern AdminDispatch ddsAdminModeCallbacks[];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 
 /* Configure administrative state from three caller-supplied parameters. */

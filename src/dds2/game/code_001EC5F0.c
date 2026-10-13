@@ -1,6 +1,9 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "eff_random.h"
+#include "btl_camera_timed_instruction.h"
+#include "snd_sequence_volume_pan.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
@@ -40,6 +43,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "mdl_flag_api.h"
 
 extern f32 D_003B6DC0[4];
 
@@ -99,7 +103,6 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
-extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 
@@ -175,22 +178,11 @@ extern u32 btlTintTransitionHoldCount;
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern void effMiscQuaternionToMatrixVU(void);
 
 extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
-
-typedef struct BtlCameraTimedInstruction {
-    s32 kind;
-    s16 parameterIndex;
-    u8 pad06[2];
-    f32 startFrame;
-    f32 duration;
-} BtlCameraTimedInstruction;
 
 extern const BtlCameraTimedInstruction *D_003BBF70[];
 
@@ -939,7 +931,6 @@ INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EDFB8);
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EE458);
 
-extern u32 effMiscRand(void *state);
 
 void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
 f32 angle, f32 blend) {
@@ -1019,7 +1010,7 @@ f32 angle, f32 blend) {
         btlSetDefaultActionCameraPose(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (effMiscRand((EffRandState *)effSharedRandomState) & 1))) {
         unit = first;
         first = last;
         last = unit;

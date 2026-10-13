@@ -1,14 +1,15 @@
 #include "common.h"
+#include "eff_random.h"
 #include "ui_color.h"
 #include "fr_font_context.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_result.h"
 #include "kwln.h"
+#include "mdl_flag_api.h"
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
-extern s32 mdlFlagTest(u32);
 
 typedef struct LevelStep {
     u8 threshold;
@@ -347,7 +348,6 @@ typedef struct PartyStatGrowthBank {
 } PartyStatGrowthBank;
 
 extern PartyStatGrowthBank D_0036D4C8[];
-extern u32 effMiscRand(void *state);
 
 void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit) {
     s32 eligible[DAT_BASE_STAT_COUNT];

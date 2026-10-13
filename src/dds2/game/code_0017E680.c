@@ -2,6 +2,7 @@
 #include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -145,8 +146,6 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     D_003B1630[work->mode]->append(D_003B1630[work->mode], packet);
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor, u32 outerColor,
                    f32 radiusScale, f32 height) {

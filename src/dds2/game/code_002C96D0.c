@@ -1,4 +1,6 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "eff_scale_params.h"
 #include "ee_mmi.h"
 #include "eff_random.h"
@@ -33,6 +35,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "sdf.h"
+#include "mdl_flag_api.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -114,7 +117,6 @@ typedef struct FileStatBonus {
 } FileStatBonus;
 extern MdlFlagPair D_003E8CE8[];
 extern FileStatBonus D_003E8D10[24];
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
@@ -252,7 +254,6 @@ extern s32 fileOnAllWritten(void);
 
 extern void fileSetMemoryCardOperationActive(void);
 extern s8 D_0037F510[];
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(s32 result);
 
@@ -520,7 +521,6 @@ extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
 
 extern f32 fileSaveHighlightPhase;
 
-extern f32 sdfSinPoly(f32);
 
 
 extern u8 sdfPfsDebugMode;
@@ -6651,9 +6651,7 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
 }
 
 
-struct EffRandState;
 extern struct EffRandState effSharedRandomState;
-extern u32 effMiscRand(struct EffRandState *state);
 extern f32 fabsf(f32);
 extern void effUpdateGridRecordSlotHistory(FileSlotTable *, FileSlot *);
 
@@ -7121,7 +7119,6 @@ typedef struct FileCircularMotion {
     f32 angleMultiplier;
 } FileCircularMotion;       /* 0x44, ordinary word alignment */
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
 void effUpdateCircularEmitterSlots(FileSlotTable *record) {

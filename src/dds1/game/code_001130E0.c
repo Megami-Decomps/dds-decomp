@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_model.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
@@ -249,7 +250,6 @@ extern void effObjInnerVecInit(EffLocalNode *);
 extern s32 func_00222ED8(EffLocalNode *, EffWorldNode *);
 
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
-extern f32 sdfSinPoly(f32);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effMiscQuatMultiplyVU(void);

@@ -6,6 +6,8 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
@@ -23,6 +25,7 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -1611,9 +1614,7 @@ typedef struct FldEncEntry {
 
 extern FldEncEntry *fldEncounterRollTable;
 
-extern s32 mdlFlagTest();
 
-extern s32 effMiscRand();
 
 enum {
     FIELD_ENCOUNTER_ROLL_ENTRY_COUNT = 16
@@ -1654,7 +1655,6 @@ extern s32 ptyAnyUnitFlagMatch(u32,s32);
 extern void ptyApplyFieldHpAttrition(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32,s32);
 extern void dds3WorkClear(void);
-extern void sndSetSequenceVolumePan(s32,s32,s32);
 extern void kwlnFadeOutStart(s32,s32,s32,s32);
 extern char D_0039FCA0[], D_0039FCB0[];
 
@@ -1838,9 +1838,6 @@ extern void evtSetSolarOverlayFullyVisible(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 
 extern void fldApplySkyLightSetToPlayerVU(void);
-
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 extern void fldClearSceneLifecycleFlags(u32);
 
 extern u8 fldTestSceneLifecycleFlags(u32);

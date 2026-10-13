@@ -22,6 +22,7 @@
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_chip.h"
+#include "mdl_flag_api.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -1812,6 +1813,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4,
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
 #include "kwln.h"
@@ -2450,7 +2452,6 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
 
 extern s32 mnuTickCommandWaitPhase(ShopScene *);
 extern void mnuSetQuantityListTransition(struct MenuList *, u32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_0036AB10[];
 
 s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
@@ -3114,7 +3115,6 @@ typedef struct FlagEntry {
 
 extern void mdlFlagSet(s32);
 
-extern s32 mdlFlagTest(s32);
 
 typedef struct FlagPair {
     s32 first;

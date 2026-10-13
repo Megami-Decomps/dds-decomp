@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -9,6 +10,7 @@
 #include "fld_resource_resolver.h"
 #include "fld_transfer_chunk.h"
 #include "fld.h"
+#include "fld_scene_request.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
@@ -17,6 +19,7 @@
 #include "sdf_texture_offset_list.h"
 #include "evt_script_model.h"
 #include "sdf_model.h"
+#include "mdl_flag_api.h"
 
 
 extern FldFileResource *D_003BD7B8;
@@ -487,8 +490,6 @@ extern s32 D_003BAD28;
 
 extern f32 D_00330650[];
 extern f32 D_00330660[];
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void btlActivateRuntime(s32 mode);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
@@ -658,31 +659,6 @@ extern FldIndexPair D_0032EFE0[];
 extern s32 D_003BAE54;
 extern s32 D_003BAE5C;
 extern s32 D_003BAE60;
-
-/* Four resource references are copied into the scene's load queue in order. */
-typedef struct FldLoadRecord {
-    u32 unk_0;
-    u32 displayState;
-    void *resourceA;
-    void *resourceB;
-    void *resourceC;
-    void *resourceD;
-} FldLoadRecord;
-
-typedef struct FldLoadRequest {
-    u32 unk_0;
-    u32 unk_4;
-    FldLoadRecord *record;
-} FldLoadRequest;
-
-/* Layout shared by the two field-request dispatch paths. */
-typedef struct FldSceneRequest {
-    u32 primaryValue;
-    u32 secondaryValue;
-    FldLoadRecord *record;
-    u32 spawnCount;
-    FldActionSpawn *spawnList;
-} FldSceneRequest;
 
 extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
 extern char D_003BAC40[];
@@ -1144,7 +1120,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             }
         }
     }
-    fldSpawnSceneResourceBatches((FldSpawnBatch *)request->unk_4, request->unk_0);
+    fldSpawnSceneResourceBatches(request->spawnBatches, request->spawnBatchCount);
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */
@@ -1153,12 +1129,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 0);
+    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 1);
+    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 1);
 }
 
 s32 fldGetTransferChunkPayload(s32 record) {
@@ -1379,7 +1355,6 @@ struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destina
     return NULL;
 }
 
-extern s32 mdlFlagTest(s32);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE08);
 
@@ -4450,7 +4425,6 @@ void fldUploadSkyBuffer(void *src) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0100);
 
 void fldUpdateSwayOffset(void) {
@@ -7472,7 +7446,6 @@ void fldStartSelectedActorTask(void) {
     D_003308B0[slot] = evtStartSceneResourceTask(dds3GetWorldObject(), actor);
 }
 
-extern s32 mdlFlagTest(s32);
 extern u8 D_003369B0[];
 extern u8 D_003369C0[];
 extern u8 D_003369D0[];

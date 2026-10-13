@@ -1,11 +1,13 @@
 #include "mnu_mantra.h"
 #include "prf_requirement.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "mnu_list.h"
 #include "dat_state.h"
+#include "dsp_name.h"
+#include "mdl_flag_api.h"
 
 extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
-extern s32 mdlFlagTest(s32);
 extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
 extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
@@ -506,8 +508,6 @@ s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *object) {
 extern s8 D_0037F510[64];
 extern s32 mnuNavigateMantraSelector(MnuStatusResource *, s8);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 s32 mnuPollMantraNodeNavigation(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     s32 sound = 0;
@@ -634,7 +634,6 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
     return 0;
 }
 
-typedef struct DspUnitName { u8 encodedText[17]; } DspUnitName;
 extern DspUnitName *D_00435E48;
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern s32 dspStartEntry(s32);

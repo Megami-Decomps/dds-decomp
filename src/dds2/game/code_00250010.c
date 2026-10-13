@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "dat_state.h"
 #include "sdf_texture_offset_list.h"
 #include "itf_mes_window.h"
@@ -140,9 +141,6 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 extern void sndStartTrackExtended(s32 track);
 
 extern void sndReleaseTrackHandle(u32 sound);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern void func_00341C78(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, EvtRuntime *);
@@ -323,7 +321,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_004233F0);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423400);
 
-void func_00250558(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawFloatValueEditorRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
         sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_004233B0,
@@ -351,7 +349,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     f32 step;
 
     list = sdfCreateResetPacketList();
-    evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, func_00250558);
+    evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, evtDrawFloatValueEditorRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 8) {
         return 0;

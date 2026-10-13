@@ -2,6 +2,8 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
@@ -22,13 +24,13 @@
 #include "kwln_fade.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
  * step-before-index, and all callers are verified. */
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void *dds3GetWorldObject(void);
 extern void func_00133F08(void);
@@ -338,9 +340,7 @@ typedef struct FldEncEntry {
 
 extern FldEncEntry *fldEncounterRollTable;
 
-extern s32 mdlFlagTest(s32 flag);
 
-extern s32 effMiscRand();
 
 /* Mode 14 copies this eight-byte request. The packed selection contains
  * group:8, entry:8, and scene:16; its consumer reads both words as signed. */
@@ -2045,9 +2045,6 @@ extern void mnuCreateCampTasks(void);
 extern void evtSetSolarOverlayFullyVisible(void);
 
 extern void fldApplySkyLightSetToPlayerVU(void);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern void fldClearSceneLifecycleFlags(u32 mask);
 
 extern u8 fldTestSceneLifecycleFlags(u32 mask);

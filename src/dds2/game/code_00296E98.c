@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_list.h"
 #include "kwln.h"
@@ -1007,7 +1008,6 @@ void mnuStaffCopyPanelBlock(DatPartyRecord *src, BrsSkillPackageWork *base) {
     base->previewUnit = *src;
 }
 
-extern s32 effMiscRand(s32);
 extern s32 D_003D6308[];
 
 /* Choose a reward bucket using this mode's cumulative thresholds. */

@@ -1,6 +1,8 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
 #include "snd_pad.h"
 #include "btl_item_drop.h"
 #include "itf_mes_window.h"
@@ -28,6 +30,7 @@
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern s32 func_001ABB10(BtlUnit *, s32);
 
@@ -144,7 +147,6 @@ extern f32 D_003B4E28[];
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-extern s32 mdlFlagTest(s32);
 
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 
@@ -724,7 +726,6 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
     return entry;
 }
 
-extern f32 sdfSinPoly(f32);
 
 extern u64 *sdfCreateGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
 
@@ -2299,7 +2300,7 @@ s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *status, u32 value) {
 s32 btlSelectActorAction(s32 state) {
     s32 selection = btlSelectEnemyDropItem(state, 1);
     if (selection == 0) {
-        selection = (effMiscRand((s32)effSharedRandomState) & 1) ? 2 : 9;
+        selection = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
     }
     return selection;
 }

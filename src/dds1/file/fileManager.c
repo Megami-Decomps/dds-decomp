@@ -3,6 +3,7 @@
 #include "sdf_pac_state.h"
 #include "file_request_api.h"
 #include "sdf_dev_state.h"
+#include "file_manager_views.h"
 
 /* Intrusive list node threaded through +0x4. */
 typedef struct FileNode {
@@ -13,48 +14,7 @@ typedef struct FileNode {
     u32 unk14;             /* 0x14 */
 } FileNode;
 
-/* Request fields initialized before a node joins FileManWork's queue. */
-typedef struct FileQueueEntry {
-    u8 kind;
-    u8 pad01[3];
-    FileNode *next;
-    char *name;
-    u8 pad0C[0xC];
-    void *callback;
-    void *userData;
-} FileQueueEntry;
-
-/* Work record behind the fileManager getters below. */
-typedef struct FileWork {
-    u8 unk0[0x10];   /* 0x0 */
-    u32 unk10;       /* 0x10 */
-    u32 size;        /* 0x14: loaded resource size */
-    FileNode *head;  /* 0x18 */
-    u8 unk1C[4];     /* 0x1C */
-    u32 resourceHandle; /* 0x20: released with sdfReleaseResourceAllocation */
-    u32 loadedDataAddress; /* 0x24: returned to packed-resource relocation callers */
-} FileWork;
-
-typedef struct FileRequest {
-    u8 kind; /* 0x00: kind 1 uses the conditional readiness path */
-    u8 state; /* 0x01: ready when 6 */
-    u8 pad02[0xA];
-    u32 handle; /* 0x0C */
-    s32 size; /* 0x10 */
-    u8 pad14[0x54];
-    u16 readinessEnabled; /* 0x68: enables the gated state == 6 readiness check */
-    u16 slot; /* 0x6A */
-} FileRequest;
-
 FileManWork fileManagerWork __attribute__((section(".bss")));
-
-typedef struct FileCleanup {
-    u8 kind;
-    u8 state;
-    u8 pad02[6];
-    void *requestNameCopy; /* 0x08: name duplicated by fileManQueueNamedRequest */
-    u32 handle;
-} FileCleanup;
 
 extern s32 btlDestroyStageTask(void *);
 
@@ -306,16 +266,6 @@ void fileWaitIdle(void) {
         fileManUpdate();
     }
 }
-
-typedef struct FileWindowSlot {
-    u8 pad00[0x10];
-    s32 secondValueCopy; /* 0x10 */
-    s32 secondValue;     /* 0x14 */
-    u8 pad18[0xC];
-    s32 firstValue;      /* 0x24 */
-    s32 firstValueCopy;  /* 0x28 */
-    u8 pad2C[4];
-} FileWindowSlot; /* 0x30 */
 
 /* Create a kind-two request with the caller's output buffer and byte count.
  * The buffer address is stored in the existing value word at +0x24. */

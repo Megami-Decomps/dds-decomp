@@ -7,6 +7,7 @@
 #include "itf_grid_text.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void fldShutdownLmapResources(void);
 
@@ -21,7 +22,6 @@ extern u32 D_003BD970;
 
 extern s32 D_003BD974;
 
-extern s32 mdlFlagTest(u32);
 extern u32 sdfCounterGetDisplayWordPointer(void);
 extern void func_003014F0(char *, char *, s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -634,7 +635,6 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
     }
 }
 
-extern u32 effMiscRand(void *state);
 extern void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action);
 extern void func_001EE458(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -686,7 +686,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
         if (link->unit->status.flags & 0x200) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         func_001EE458(action, &action->frontCamera, &action->backCamera);
                     } else {
                         func_001EDFB8(action, &action->frontCamera, &action->backCamera);
@@ -727,7 +727,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
                     action->stepKind = 1;
                 } else {
-                    action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 1 : 2;
+                    action->stepKind = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 1 : 2;
                 }
                 switch (action->stepKind) {
                 case 1:
@@ -760,13 +760,13 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
-                        ((effMiscRand(effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
+                        ((effMiscRand((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
                 func_001EE458(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
                     btlCanUseActorCategoryFlag4(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
-                    action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 4 : 5;
+                    action->stepKind = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 4 : 5;
                 } else {
                     action->stepKind = 4;
                 }
@@ -1001,7 +1001,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             if (btlCanUseActorCategoryFlag4(action)) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
-                       ((effMiscRand(effSharedRandomState) & 1) ||
+                       ((effMiscRand((EffRandState *)effSharedRandomState) & 1) ||
                         btlCanUseActorCategoryFlag2(action))) {
                 func_001EDC38(action, &action->frontCamera, &action->backCamera);
                 action->motionParameter = 30.0f;
@@ -1020,7 +1020,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (btlCanUseActorCategoryFlag4(action)) {
             btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
-                   ((effMiscRand(effSharedRandomState) & 1) ||
+                   ((effMiscRand((EffRandState *)effSharedRandomState) & 1) ||
                     btlCanUseActorCategoryFlag2(action))) {
             func_001EDFB8(action, &action->frontCamera, &action->backCamera);
         } else {

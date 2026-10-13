@@ -6221,7 +6221,8 @@ has been matched: its current honest C candidate still differs.
 
 ## Shooting input tilt is integer storage with floating-point arithmetic
 
-DDS2's `00318660` controller reads shooting work `+90` as a signed word,
+DDS2's `mnuUpdateShootingWork` controller reads shooting work `+90` as a signed
+word,
 converts it to float, changes it by `1.0f` against the `+/-20.0f` limits,
 then converts back to a word. Keep that field as `s32`, not `f32`.
 The adjacent `+94` selector is a signed halfword populated from the menu
@@ -9786,7 +9787,7 @@ new native lifetime requirement.
 
 ### Shooting-input controller: source last uses can reverse independent pairs
 
-DDS2 `game/code_00316E08::func_00318660` (1,440 bytes) closes the
+DDS2 `game/code_00316E08::mnuUpdateShootingWork` (1,440 bytes) closes the
 KiB/PiM/Brass reconstruction and released Sable continuation. Its last four
 mismatching words were two exchanged pairs, not missing behavior: pause-choice
 2's result/phase halfword stores and the signed action-input loads at 0x22/0x23.

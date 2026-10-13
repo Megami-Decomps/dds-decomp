@@ -19,6 +19,7 @@
 #include "mdl_resource_table.h"
 #include "mdl_grouped_parts_api.h"
 #include "file_request_api.h"
+#include "mdl_flag_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -44,7 +45,7 @@ extern s32 D_003C88C0[];
 extern s32 D_003C88C8[];
 
 
-extern void func_00103388(s32, s32, s32, s32);
+extern void kwlnConfigureNamedSlotMode1(s32, s32, s32, s32);
 
 
 
@@ -846,7 +847,7 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s3
 }
 
 void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
-    func_00231E28(owner, record->payload.stream.selectorA,
+    mdlCreateDevSlotList(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
 }
@@ -2855,7 +2856,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     def = D_003C8890;
     do {
         if (kwlnTaskGetTaskByName(def->name) == NULL) {
-            func_00103388(def->name, def->arg, 0, 0);
+            kwlnConfigureNamedSlotMode1(def->name, def->arg, 0, 0);
         }
         i++;
         def++;

@@ -2,6 +2,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
@@ -487,8 +488,6 @@ struct EffGeneratedTextureDescriptor {
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern void func_002E2680(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
 void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescriptor *source) {
@@ -955,8 +954,6 @@ typedef struct EffRingEmitter {
     f32 speedRange;  /* 0x174 */
 } EffRingEmitter;
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 
 /* Seed one ring packet's phase, radius and vertical motion, then its subeffect. */
@@ -1145,7 +1142,6 @@ typedef struct EffDiscEmitter {
     f32 jitterB;     /* 0x174 */
 } EffDiscEmitter;
 
-extern u32 effMiscRand(void *state);
 
 /* Seed a random planar position and direction; radialDistance may be negative. */
 void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
@@ -1182,7 +1178,7 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->jitterA + (1.0f - effect->jitterA));
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -1468,7 +1464,7 @@ void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
         }
         break;
     }
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -1794,7 +1790,7 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
 
     packet += packetIndex;
     packet->color = 0;
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
     directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
@@ -2026,7 +2022,7 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
-    packet->age = ~(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = ~(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -2394,7 +2390,7 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
         packet->vel[2] = angleSin * cone * speed;
         packet->f38 = gravity;
     }
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -2956,7 +2952,7 @@ void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 ind
         }
         break;
     }
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -3144,7 +3140,7 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;

@@ -1,6 +1,8 @@
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
@@ -8,6 +10,7 @@
 #include "sdf_resource.h"
 #include "file_request_api.h"
 #include "mnu_mantra_position_api.h"
+#include "mdl_flag_api.h"
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
@@ -41,7 +44,6 @@ extern char D_00425118[];
 extern char mnuMantraNumberFormat[]; /* "%d" */
 extern char D_004378B0[]; /* "---" */
 extern s32 mnuGetMantraSourceValue(u16);
-extern f32 sdfSinPoly(f32);
 extern u32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern u32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
@@ -3772,7 +3774,6 @@ void mnuInitMantraPanelCTransition(void) {
 void mnuReleaseMantraPanelCTransition(void) {
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern s32 mnuDrawMantraPanelOrbitingEffect(s32, s32, s32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 
 /* Mantra panel C transition / appear draw: kinds 6..9 fade the panel in or out over its frame counter, kind 0
@@ -6171,7 +6172,6 @@ void mnuFreeMantraSparkleEmitter(MantraSparkleEmitter *sprite) {
     }
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *emitter, s32 packet) {
     MantraSparkle *spark;

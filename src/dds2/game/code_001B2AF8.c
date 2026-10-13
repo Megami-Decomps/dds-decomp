@@ -1,6 +1,8 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
 #include "snd_pad.h"
 #include "btl_roster_pair.h"
 #include "fr_font_measure.h"
@@ -16,6 +18,7 @@
 #include "itf_panel_draw.h"
 #include "btl_state.h"
 #include "btl_ui.h"
+#include "btl_phase_panel_work.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "btl_action.h"
@@ -31,6 +34,7 @@
 #include "btl.h"
 #include "btl_command.h"
 #include "fr_font.h"
+#include "mdl_flag_api.h"
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x30];
@@ -100,7 +104,6 @@ extern s8 effSharedRandomState[];
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-extern s32 mdlFlagTest(s32);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
@@ -141,7 +144,6 @@ extern char D_00436680[];
 
 extern char D_00436688[];
 
-extern f32 sdfSinPoly(f32);
 
 extern char D_004366F0[];
 
@@ -1032,7 +1034,6 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
     return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
 
-extern s32 effMiscRand(void *);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415840);
 
@@ -1067,7 +1068,7 @@ u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     }
     flags = record->huntPenaltyFlags;
     if (flags == 0x18) {
-        return (effMiscRand(effSharedRandomState) & 1) ? 0x10 : 8;
+        return (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 0x10 : 8;
     }
     return flags & 0x18;
 }
@@ -2482,43 +2483,6 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
     }
     return 0;
 }
-
-/* B8368 allocates 0x138 bytes. The strip renderer uses the first three rows;
- * the later panel updater handles the other five points and their fades. */
-typedef struct BattlePhasePanelWork {
-    s32 frames;
-    s32 mode;
-    s8 phase;
-    s8 secondaryPhase;
-    u8 pad0A[2];
-    s32 echoCount;
-    u8 pad10[5];
-    s8 flags[2];
-    u8 pad17;
-    s32 waitCounter; /* 0x18: delay before the first slide */
-    u8 pad1C[8];
-    s32 counter;
-    s32 angle;
-    u8 pad2C[0xC];
-    BattleSelectionPosition current[8]; /* 0x38 */
-    BattleSelectionPosition saved[8];   /* 0x78 */
-    s32 fade[8][4];                    /* 0xB8 */
-} BattlePhasePanelWork;
-
-typedef char BattlePhasePanelWork_size_must_be_0x138[
-    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_waitCounter_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_current_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_saved_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_fade_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
 
 typedef struct BtlPsechgPositions {
     BattleSelectionPosition points[5];
@@ -5445,7 +5409,6 @@ void btlDrawActorPanelCursor(BtlUnit *unusedUnit, BattleActorPanelWork *work, s3
     }
 }
 
-extern f32 sdfSinPoly(f32);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004167E0);
 
@@ -7201,7 +7164,6 @@ typedef struct SceneGlobalState {
     s32 fadeKindB;
 } SceneGlobalState;
 
-extern s32 mdlFlagTest();
 
 extern s32 btlGetTaskState6();
 

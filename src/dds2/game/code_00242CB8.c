@@ -8,6 +8,7 @@
 #include "evt_event_pack.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void fldSetFadeTarget(s32, s32, s32);
 extern void evtBeginSkyParameterTransition(s32, s32);
@@ -400,7 +401,6 @@ extern void fldConsumePrimarySceneFlag(void);
 extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagClear(s32);
 
 /* Advance the enabled solar clock and expire its associated field controls. */

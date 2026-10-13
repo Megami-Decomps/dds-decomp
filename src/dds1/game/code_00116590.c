@@ -82,20 +82,6 @@ void evtEndUnitValueTransitionForObject(EffWorldNode *object, s32 duration) {
 
     evtEndUnitValueTransition((struct EvtUnit *)data->transitionWork, duration);
 }
-
-
-typedef struct WorldTransformData {
-    f32 position[3];    /* 0x00 */
-    f32 positionW;      /* 0x0C */
-    u8 pad10[0x30];
-    f32 scale[3];       /* 0x40 */
-    f32 scaleW;         /* 0x4C */
-    f32 rotation[4];    /* 0x50 */
-    u32 mode;           /* 0x60 */
-    u32 flags;          /* 0x64 */
-} WorldTransformData;
-
-
 /* Load flags, mode and the transform block from a setup record. */
 void dds3LoadWorldTransformSetup(EffWorldNode *object, WorldTransformSetup *setup) {
     WorldTransformData *data = object->data;

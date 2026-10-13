@@ -12,6 +12,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void *D_00435E80;
 
@@ -265,7 +266,6 @@ extern SdfMemBlock *D_00438EA0;
 extern SdfMemBlock *D_00438EA4;
 extern SdfMemBlock *D_00438EA8;
 extern u32 D_00438EAC;
-extern s32 mdlFlagTest(s32 flag);
 extern void ptySaveActivePartyTemplates(void);
 extern SdfMemBlock *mtrMantraEventBitPush(void);
 

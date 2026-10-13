@@ -7,6 +7,8 @@
 #include "eff.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
+#include "eff_random.h"
+#include "mdl_flag_api.h"
 
 struct MenuSlotState;
 extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
@@ -39,12 +41,6 @@ typedef struct PartyFlagPair {
 } PartyFlagPair;
 
 
-/* Encoded name-table rows; keep byte storage and the retail table strides. */
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
-
 extern SceneFlagEntry mnuSceneFlagEventEntries[4];
 extern PartyFlagPair mnuPartyFlagEventEntries[];
 extern s32 D_00435E5C;
@@ -52,7 +48,6 @@ extern DspMantraName *D_00435E50;
 extern s32 D_00435E4C;
 extern DspUnitName *D_00435E48;
 
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -283,7 +278,6 @@ void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
     }
 }
 
-extern u32 effMiscRand(void *state);
 
 /* Give each scrolling strip a random speed in the requested range. */
 void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum) {

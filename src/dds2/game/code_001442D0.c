@@ -3,6 +3,9 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_model_scalars.h"
@@ -27,6 +30,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "sdf_textured_rect.h"
+#include "mdl_flag_api.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
 extern void mnuMarkTitleStreamResetPending(void);
@@ -66,8 +70,6 @@ extern u32 fldGetSceneReadyFlag(void);
 extern void kwlnFadeStartOut(s32);
 extern void kwlnFadeStartIn(s32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 typedef struct EffNode EffNode;
 
 extern u8 fldTestSceneControlFlags(u32);
@@ -382,7 +384,6 @@ extern void func_00145698(void);
 
 extern s32 fldStageSoundBaseTable[];
 
-extern s32 mdlFlagTest();
 
 typedef struct {
     s16 id;
@@ -471,8 +472,6 @@ typedef struct FieldPair48 {
 
 extern FieldPair48 fldSparkSlots[];
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *state);
 
 
 typedef struct FldVec4 {
@@ -551,7 +550,7 @@ extern SdfPoolNode *D_00380838[4];
 extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
 
-extern void func_003320E8(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 s32 func_001442D0(void) {
     FldTitleBannerMenu *menu;
@@ -1207,7 +1206,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    func_003320E8(D_00380838, emitter);
+    sdfModelBuildNodeResourcePackets(D_00380838, emitter);
 }
 
 extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32,
@@ -1226,7 +1225,7 @@ typedef struct {
 extern FldProjectedSprite D_0039A0E0[];
 
 /* Convert projected GS coordinates to the field's centered sprite origin. */
-void func_00145948(f32 x, f32 y, s32 index, u32 color) {
+void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
     FldProjectedSprite *sprite = &D_0039A0E0[index];
     s32 anchorY = sprite->anchorY;
     s16 u = sprite->u;
@@ -1370,7 +1369,6 @@ extern void func_00145A08(s32, f32, f32, f32);
 extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
-extern f32 sdfSinPoly(f32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
@@ -1794,7 +1792,7 @@ void func_00146250(void) {
                                 if (offsetX < 80000.0f && offsetZ < 80000.0f) {
                                     fldProjectPointSetupAlt(&projectedX, &projectedY,
                                                             x, D_00436290, z);
-                                    func_00145948(projectedX, projectedY,
+                                    fldDrawProjectedMapIcon(projectedX, projectedY,
                                                   spriteIndex, 0x80808080);
                                 }
                             }
@@ -2018,7 +2016,6 @@ extern f32 D_00384790[16];
 extern f32 sdfViewMatrix[16];
 extern SdfTex *D_0044F7F8[8];
 extern void sdfInvertScaledVuTransform(void);
-extern f32 sdfSinPoly(f32 angle);
 extern void func_00148188(f32 centerX, f32 centerY, f32 angle);
 extern void fldSelectDisplayBuffer(u32 buffer);
 extern void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17);
@@ -3299,7 +3296,6 @@ extern void fldSelectDisplayBuffer(u32);
 extern void fldSetGsAlphaBlendEquation(s32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
-extern f32 sdfSinPoly(f32);
 extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32,
                           u32, u32, u32, SdfTex *);
 extern f32 D_0043634C;
@@ -5039,8 +5035,6 @@ void fldTickTargetGuideCounter(void) {
 }
 
 extern void func_001519E8(s32);
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern FieldGridCoordPair D_00438EF8;
 
 void fldUpdateTargetGuideFastRoute(void) {

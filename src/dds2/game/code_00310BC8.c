@@ -1,6 +1,8 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
@@ -36,9 +38,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 extern f32 func_003532B8(f32);
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
@@ -432,10 +432,8 @@ u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u
 }
 
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 

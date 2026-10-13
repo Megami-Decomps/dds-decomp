@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
@@ -29,6 +30,7 @@
 #include "mdl_asset_request.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "mdl_flag_api.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 

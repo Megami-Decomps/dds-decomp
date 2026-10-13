@@ -1,4 +1,6 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "eff_scale_params.h"
 #include "ee_mmi.h"
 #include "eff_random.h"
@@ -30,6 +32,7 @@
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
+#include "mdl_flag_api.h"
 
 #include "sdf.h"
 extern void *memset(void *dst, s32 value, s32 size);
@@ -216,7 +219,6 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
-extern s32 mdlFlagTest(s32 flag);
 extern u32 D_003BD8F4;
 extern u32 D_003BD8F8;
 
@@ -313,8 +315,6 @@ extern void dds3DispatchIndexedCallback(void *callback);
 extern void func_002966D8(s32 object);
 
 extern s32 fileResetSelection(void);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 extern s32 D_003BC818;
 extern s32 D_003BC820;
 extern void fileSetMenuValueAndInitializeFlags(u32 value);
@@ -589,7 +589,6 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 }
 
 extern f32 fileSaveHighlightPhase;
-extern f32 sdfSinPoly(f32);
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
 void fileDrawPulsingSaveHighlight(void) {
@@ -5966,9 +5965,7 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
 }
 
 
-struct EffRandState;
 extern struct EffRandState effSharedRandomState;
-extern u32 effMiscRand(struct EffRandState *state);
 extern f32 fabsf(f32);
 extern void effUpdateGridRecordSlotHistory(FileSlotTable *, FileSlot *);
 
@@ -6438,7 +6435,6 @@ typedef struct FileCircularMotion {
     f32 angleMultiplier;
 } FileCircularMotion;       /* 0x44, ordinary word alignment */
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
 void effUpdateCircularEmitterSlots(FileSlotTable *record) {

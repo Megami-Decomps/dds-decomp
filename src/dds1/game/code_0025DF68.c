@@ -1,4 +1,6 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -130,7 +132,6 @@ void mnuDrawShopPanelWithPulsingIcon(s32 x, s32 y, s32 z, ShopScene *scene, s32 
     mnuDrawPulsingMenuIcon(scene, 0x100, mode);
 }
 
-extern f32 sdfSinPoly(f32);
 
 void mnuDrawPulsingMenuIcon(ShopScene *object, s32 scale, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
@@ -464,9 +465,6 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
     effDrawSpriteWithCornerFade(x + (D_0036C728[26][BRS_ICON_X] << 4), y + (D_0036C728[26][BRS_ICON_Y] << 3), z, b, 0, D_003BC520, D_0036C728[26][BRS_ICON_ID], c);
 }
-
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;

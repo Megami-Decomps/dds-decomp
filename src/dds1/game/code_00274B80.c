@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -15,6 +16,8 @@
 #include "itf.h"
 #include "sdf_chip.h"
 #include "mnu_panel_state.h"
+#include "dsp_name.h"
+#include "eff_random.h"
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
@@ -210,7 +213,6 @@ typedef struct MenuSpriteArguments {
 } MenuSpriteArguments;
 
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void sndSetSequenceVolumePan();
 extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
 extern void mnuClearWindowListSelectionFlags(s32);
 
@@ -1208,7 +1210,6 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
-extern u32 effMiscRand(s32);
 extern s32 evtStageTestHasPendingMotion();
 extern u32 evtStageTestCountFlags(s32);
 extern void evtStageTestQueueMotion(s32, u32);
@@ -1323,10 +1324,6 @@ typedef struct MenuListDefaultRecord {
     MenuListDefaults defaults;
     u32 unk0C;
 } MenuListDefaultRecord;
-
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
 
 extern const MenuListDefaultRecord D_003B22E0;
 extern DspUnitName *D_003BAA8C;

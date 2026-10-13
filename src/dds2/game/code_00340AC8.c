@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "pcp_vu0.h"
 
@@ -7,9 +8,7 @@
 extern EffRandState D_0040BAE8;
 
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
-extern f32 sdfSinPoly(f32 angle);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 
 extern f32 sdfAtan2(f32 y, f32 x);
 
@@ -82,7 +81,7 @@ void effMiscQuaternionToMatrixVU(void)
     VU0_QUAT_TO_MATRIX_VF10();
 }
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340CB0);
+INCLUDE_ASM(const s32, "game/code_00340AC8", sdfConvertWrappedEulerAnglesToQuaternionVU);
 
 INCLUDE_ASM(const s32, "game/code_00340AC8", sdfConvertEulerAnglesToQuaternionVU);
 
