@@ -978,6 +978,7 @@
 0x001315C0	fldQueueCameraHeadingFromVector	inferred	Byte-identical dds2 twin 0x00133DF8; Computes a degree heading from the X/Z vector and marks the camera heading override pending. [names_conflicts.tsv]
 0x00131600	fldApplyCameraFacingPoint	inferred	Converts X/Z target difference to an angle and advances faceState to two.
 0x00131660	fldApplyPendingCameraHeading	inferred	Byte-identical dds2 twin 0x00133EE0; Copies the pending target heading to the current heading and advances the pending state. [names_conflicts.tsv]
+0x00131688	fldUpdateSmoothedCameraPose	inferred	Advances pending camera heading, fetches player position, smooths position except during vertical steps, and publishes the resulting position/rotation vectors.
 0x00131A88	fldLoadBattleSkyAndFilter	inferred	U3
 0x00131CC0	fldLoadSkyResource	inferred	loads <dir>F%03d.SKY, and rain.tmx for areas 2..99
 0x00131D88	fldReleaseSkyResources	inferred	Releases retained sky texture and resource handles and resets sky resource state. [names_reviewed5.tsv]

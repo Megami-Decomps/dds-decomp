@@ -1642,7 +1642,7 @@ s16 fldRollEncounter(void) {
 
 extern f32 D_0032F250[4];
 extern void *dds3GetWorldObject(void);
-extern void func_00131688(void);
+extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 extern void func_00228930(f32);
 extern void evtUpdateFlaggedStats(void);
@@ -1700,7 +1700,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (fldAreaState.consumedFlags & 15) {
         fldResetPlayerSceneObjectState();
         evtStartSceneResourceTask(dds3GetWorldObject(), D_0039FCA0);
-        func_00131688();
+        fldUpdateSmoothedCameraPose();
         return 0;
     }
     if (!(fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) &&
@@ -1820,7 +1820,7 @@ extern void kwlnFadeStartIn(s32);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
-extern void func_00131688(void);
+extern void fldUpdateSmoothedCameraPose(void);
 
 extern u8 fldHasPendingSceneFlags(void);
 
@@ -1889,7 +1889,7 @@ s32 func_00124F58(void) {
         sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
         fldSetSceneLifecycleFlags(1);
         fldResetPlayerSceneObjectState();
-        func_00131688();
+        fldUpdateSmoothedCameraPose();
         evtSetSolarOverlayFullyTransparent();
         scene->sceneMode = 4;
         scene->sceneState = 5;
@@ -1962,7 +1962,7 @@ s32 fldUpdateNextFloorTransition(void) {
                 scene->sceneMode = 4;
                 scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
-                func_00131688();
+                fldUpdateSmoothedCameraPose();
                 kwlnFadeInStart(0, 0, 0, 4);
                 D_003BABF0 = 5;
                 fldSetCameraNodeModeWithTen();
@@ -2137,7 +2137,7 @@ s32 fldProcSequence(void) {
             return 0;
         }
     }
-    if (fldTestSceneControlFlags(0x40) == 0) func_00131688();
+    if (fldTestSceneControlFlags(0x40) == 0) fldUpdateSmoothedCameraPose();
     switch (controller->stage) {
     case 0:
         D_003BABE8 = 0;
