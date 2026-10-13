@@ -10528,3 +10528,25 @@ return and literal; the already-named DDS2 counterpart retains its signed
 return. Only the identifiers align: their native 76-byte-record storage
 formula and 16-byte rounding are not rewritten.
 
+
+## Post-call guide mode cleanup
+
+DDS2 `func_001525F0` (`0x001525F0`, `code_001442D0`) dispatches the
+existing guide mode. Its eight explicit cases return through sibling jumps;
+the default fast-route phase instead uses native `jal` at `0x001526A0`,
+followed by the saved-return-address epilogue.
+
+The real mode selector is cached for the switch and retired with `mode = 0`
+after that phase. A vendor-cc1 trace with hooked/unhooked assembly and all RTL
+identical shows reset uid135 of switch pseudo84 surviving `01.sibling` and
+`11.cfg`, after the normal call uid131, then disappearing in `13.life`.
+Thus the deciding property is actual phase cleanup present during sibling-call
+selection but deleted afterward. Without the reset, the default call becomes
+a sibling jump (188B instead of the native 196B extent, first difference
+`+0xB0`). The early return arms are unchanged.
+
+This is the documented post-call exception for a genuinely used local
+phase/mode value, not permission to construct a dummy reset variable or reset
+an incoming formal in a one-call wrapper. The whole-unit gate was
+175 match, 0 differ, with no context/data/unresolved-symbol findings.
+
