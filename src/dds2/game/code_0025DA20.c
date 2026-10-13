@@ -1309,10 +1309,10 @@ void mnuShopLoadSpriteAssets(MenuTerminalContext *scene) {
     scene->effectSlots[3] = effLoadIndexedResource(
         "/facility/spr/shop/", D_003CE488[mnuFirstPresentMainCharacterIndex()], 0);
     mnuInitScrollingStripState(firstPanel, 0, scene->effectSlots[0], 0x46, 0x43);
-    func_0026BE28(firstPanel, 1, 0x10, 0x20);
+    mnuSetScrollingStripSpeedsRandomly(firstPanel, 1, 0x10, 0x20);
     mnuInitScrollingStripState(secondPanel, 0, scene->effectSlots[0], 0x46, 0x43);
-    func_0026BE28(secondPanel, 0, 0x10, 0x20);
-    func_0026BEB0(secondPanel, 0x1150, 0xCB8, 0);
+    mnuSetScrollingStripSpeedsRandomly(secondPanel, 0, 0x10, 0x20);
+    mnuSetScrollingStripOverlayPosition(secondPanel, 0x1150, 0xCB8, 0);
     scene->windowResource = mnuCreateWindowSpriteResources(
         0, 0, 0, scene->effectSlots[0], indices, 3);
 }
@@ -4018,7 +4018,7 @@ extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];
 extern char D_00437840[];
 extern void mdlFlagClear();
-extern void func_0026C7F8();
+extern void dspAdvanceMessageWindowControl();
 extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -4092,7 +4092,7 @@ s32 func_00265360(KwlnTask *callback) {
 
 s32 evtFinishPopupAfterMenuConfiguration(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_0026C7F8(1, 0);
+    dspAdvanceMessageWindowControl(1, 0);
     return evtMenuSetHandler((void *)context, 2, (void *)callback);
 }
 

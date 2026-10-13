@@ -8489,3 +8489,8 @@
 0x00221858	btlAllowBrahmanDefeatCandidateClear	inferred	confidence=high; Brahman mode315 clear-veto callback excludes the same model resource. Actual flag-clear consumer proves role; separate native body retained. [Namer1 b59]
 0x00221F40	btlBoostEternalZeroActorEntries	inferred	confidence=high; Commands178/17D/19D all native Eternal Zero; masks1/4/10/40/100 apply+127 to actor entries0..4, alwaysreturn0. Unused actor argument retained. [Namer1 b59]
 0x00226670	btlSelectNoBossScriptArgument	inferred	confidence=high; selectScriptArg provider returns original u32FFFFFFFF; code001CFEF8 accepts only signed nonnegative arguments before choosing fallback scene script. [Namer1 b59]
+0x0026BD38	mnuGetScrollingStripCountForLayout	inferred	confidence=high; Layout 1 uses four scrolling strips; all other layouts use six, as consumed by strip initialization and drawing. [LiteH b28]
+0x0026BE28	mnuSetScrollingStripSpeedsRandomly	inferred	confidence=high; Assigns each of six strip records a random speed in the requested magnitude range, negated when requested. [LiteH b28]
+0x0026BEB0	mnuSetScrollingStripOverlayPosition	inferred	confidence=high; Stores the position pair used by the alternate-direction overlay draw path. [LiteH b28]
+0x0026BEC0	mnuDrawAndAdvanceScrollingStrips	inferred	confidence=high; Draws each layout strip and advances its horizontal offset with wraparound. [LiteH b28]
+0x0026C7F8	dspAdvanceMessageWindowControl	inferred	confidence=high; Paired DDS1 0x0024DC98 control-state advance; DDS2's extra refresh argument gates the option-value reset that DDS1 performs unconditionally. [LiteH b28]
