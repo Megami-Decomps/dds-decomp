@@ -780,7 +780,7 @@ extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value);
 extern void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1);
 extern u32 mnuIsTitleMovieDrawActive(void);
-extern void func_002A50F8(void *work);
+extern void mnuResetMovieWorkState(void *work);
 
 /* Title-menu event handler (proposed mnuHandleTitleMenuEvent): drives the menu's slide bars, the background
  * movie and its fade for menu events 2..32; returns 1 once the movie has stopped after event 32. */
@@ -817,7 +817,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
         mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
-        func_002A50F8(mnuMovieMenuState->movie);
+        mnuResetMovieWorkState(mnuMovieMenuState->movie);
         sdfSetStreamFrameDrawMode(0);
         mnuStopTitleMovieDraw();
         break;
@@ -883,7 +883,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
         mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
-        func_002A50F8(mnuMovieMenuState->movie);
+        mnuResetMovieWorkState(mnuMovieMenuState->movie);
         mnuStopTitleMovieDraw();
         sdfSetStreamFrameDrawMode(0);
         break;

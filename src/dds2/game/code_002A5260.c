@@ -112,7 +112,7 @@ extern void func_002A5260(s32, s32);
 
 extern void mnuDrawMovieChoiceTransition(s32, s32);
 
-extern void func_002A50E8(s32, s32, u8);
+extern void mnuSetMovieWorkFlag(s32, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
@@ -213,11 +213,11 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
                 opening->phase = 1;
                 opening->selectedPage = 0;
             }
-            func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 1);
+            mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 1);
             return 0;
         }
         sndSetSequenceVolumePan(8, 127, 63);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 0);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
         return 1;
     case 1:
         if (state->selectedPage < 90) {
@@ -227,7 +227,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             sndSetSequenceVolumePan(8, 127, 63);
-            func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 0);
+            mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
             return 1;
         }
         state = (MenuTitleState *)mnuMovieMenuState;
@@ -332,11 +332,11 @@ void mnuDrawTitleSceneForPhase(void) {
     case 1:
         func_002A5260(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
         mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 0:
         mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 2:
         mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)mnuMovieMenuState)->selectionList, 0x53);
@@ -344,7 +344,7 @@ void mnuDrawTitleSceneForPhase(void) {
     case 3:
     case 4:
         mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 0);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 0);
         break;
     }
 }

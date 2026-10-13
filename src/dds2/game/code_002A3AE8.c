@@ -645,11 +645,11 @@ void mnuDrawMovieMenuSlideBar(SlideBarTimed *primary, SlideBar *secondary, s32 d
     mnuDrawSprite(0, 0, 0, x, 0, 0x1D, drawContext);
 }
 
-void func_002A50E8(s32 buffer, s32 index, u8 value) {
+void mnuSetMovieWorkFlag(s32 buffer, s32 index, u8 value) {
     *(u8 *)(buffer + index) = value;
 }
 
-void func_002A50F8(u8 *work) {
+void mnuResetMovieWorkState(u8 *work) {
     u32 i;
     for (i = 0; i < 2; i++) {
         work[i] = 0;
