@@ -6242,7 +6242,7 @@
 0x00322F00	mnuDeactivateWorkEntry	inferred	Clears active bit and releases its callback handle.
 0x00322F48	mnuAdvanceRegistryWorkEntry	inferred	readability/matching review (QP16)
 0x003236B0	mnuVisitActiveWorkAndEffectEntry	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:425:func_003236B0; Visits active menu work pool and separate active effect entry with callback.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
-0x003238A0	mnuVisitActiveRecords	inferred	Invokes func_00323748 on each flagged 0x48-byte record in the global record array.
+0x003238A0	mnuVisitActiveRecords	inferred	Invokes mnuProcessMenuWorkEntryLifecycle on each active MenuWorkEntry in the pool.
 0x00323918	mnuSetWorkEntryStartCallback	inferred	stores the work-entry callback invoked when pendingStart is set
 0x00323920	mnuSetWorkEntryFinishOrDeactivateCallback	inferred	stores the work-entry callback invoked on finished and pendingDeactivate paths
 0x00323928	mnuSetActiveWorkVisitor	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:464:func_00323928; Stores active menu-work visitor callback.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -8548,3 +8548,6 @@
 0x0026DBD8	scrTestEntryFlagAtZeroBit1	inferred	Calls scrTestEntryFlag(context, entryId=0, bit=1) and discards the return value.
 0x002890A8	mnuGetSelectedMantraUnitIndex	inferred	Returns the selected list cursor index used to select the current mantra-unit slot across node eligibility, panel rendering, and unit-selection flows. [provider body and caller dataflow, 2026-10-14]
 0x0028D070	mnuSpawnMantraPanelsFromSelectedUnitFlags	inferred	Walks the mantra node-position table, reads the selected unit slot flags, classifies eligible nodes, and spawns or queues their panel animations. Called after unit selection changes, tutorial updates, and mantra equipment flow. [provider body and caller dataflow, 2026-10-14]
+0x003233E8	mnuUpdateActiveMenuWorkEntries	inferred	Walks active MenuWorkEntry records, advances timed registry work, updates movement-effect scale, marks out-of-bounds entries for deactivation, and optionally submits runtime positions according to the caller context. [provider and caller dataflow, 2026-10-13]
+0x00323748	mnuProcessMenuWorkEntryLifecycle	inferred	Consumes pending-start, updated, finished, and pending-deactivate state; invokes the configured start/finish callbacks and deactivates entries when requested. Called for active pool entries and the active effect entry. [provider and caller dataflow, 2026-10-13]
+0x003242D0	mnuRebuildMenuWorkEntryCallbackRecords	inferred	Replaces a work entry callback list while preserving any existing 0x44-tagged base record, then appends mode-specific named records. Called by shooting hit handling and active-effect transition paths. [provider and caller dataflow, 2026-10-13]

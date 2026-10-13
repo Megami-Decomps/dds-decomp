@@ -412,7 +412,7 @@ void func_003232A0(MenuWorkEntry *entry, MenuShortRecordList *list) {
 
 extern f32 sdfVectorLength(const f32 *vector);
 
-s32 func_003233E8(s32 context) {
+s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
     MenuRuntimeList *runtimeList = func_00321EC8();
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
     s32 entryIndex;
@@ -488,7 +488,7 @@ void mnuVisitActiveWorkAndEffectEntry(s32 context) {
     mnuActiveWorkVisitorCallback(mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
 }
 
-void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
+void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *entry, struct MnuShootingWork *context) {
     MenuRegistry *registry;
 
     if (entry->flagsBits.pendingStart) {
@@ -530,7 +530,7 @@ void mnuVisitActiveRecords(s32 context) {
         do {
             MenuWorkEntry *entry = (MenuWorkEntry *)(mnuWorkEntryPool + byteOffset);
             if ((entry->flags & MNU_WORK_ACTIVE) != 0) {
-                func_00323748(entry, (struct MnuShootingWork *)context);
+                mnuProcessMenuWorkEntryLifecycle(entry, (struct MnuShootingWork *)context);
             }
             entryIndex++;
             byteOffset += 0x48;
@@ -845,11 +845,11 @@ MenuWorkEntry *mnuGetActiveEffectWorkEntry(void) {
     return mnuActiveEffectEntry;
 }
 
-s32 func_003242D0(MenuWorkEntry *entry, u32 mode);
+s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode);
 
 void mnuInitializeActiveEffectWorkEntry(MenuWorkEntry *entry) {
     memset(entry, 0, 0x48);
-    func_003242D0(entry, 0);
+    mnuRebuildMenuWorkEntryCallbackRecords(entry, 0);
     entry->flags |= 0x4010;
     entry->tag = MNU_WORK_TAG_MOVEMENT_TABLE;
     entry->remaining = 1;
@@ -857,7 +857,7 @@ void mnuInitializeActiveEffectWorkEntry(MenuWorkEntry *entry) {
     mnuActiveEffectEntry = entry;
 }
 
-s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
+s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
     MenuStateRecord savedRecord;
     MenuInitialTag tag;
     MenuStateRecord *record;
@@ -1159,7 +1159,7 @@ s32 mnuAdvanceWorkEntryEntrance(MenuWorkEntry *entry) {
         if (flags.bits.finished) {
             if (mode >= 2) {
                 mode--;
-                func_003242D0(entry, mode);
+                mnuRebuildMenuWorkEntryCallbackRecords(entry, mode);
             }
         }
         entry->flags = ((mode & 0xF) << 15) | 0x4001;
