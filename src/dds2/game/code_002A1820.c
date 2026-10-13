@@ -421,7 +421,7 @@ extern MnuTitleStreamEntry D_003E0B60[];
 extern char D_00428650[];
 
 /* Load the named sound stream for the requested entry format under the lock. */
-void func_002A2200(s32 soundEntryIndex) {
+void mnuLoadIndexedTitleSoundStream(s32 soundEntryIndex) {
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -612,7 +612,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
 /* Install an in-memory ATRAC stream and configure the decoder for its frame
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
-void func_002A27A8(void *compressedData, s32 dataBytes, s32 format) {
+void mnuLoadTitleSoundBufferFromMemory(void *compressedData, s32 dataBytes, s32 format) {
     struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     s32 frameCount;
@@ -711,7 +711,7 @@ void mnuReleaseSoundBufferLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-void func_002A2AA0(void) {
+void mnuPrepareMovieMenuResources(void) {
     mnuLoadMovieMenuResourceSlots();
     mnuEnsureMovieMenuSpriteHandle(1);
 }
@@ -746,7 +746,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
         mnuSelectMenuListCursorByAdvance(1);
     }
     mnuMovieMenuState->mode = mode;
-    func_002A2AA0();
+    mnuPrepareMovieMenuResources();
     D_00435CBC = 0x80000000;
     return kwlnTaskCreate(D_00428680, 0x2B19, 1, 0, mnuUpdateTitleMenuTask, 0, 0);
 }
@@ -780,7 +780,7 @@ extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value);
 extern void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1);
 extern u32 mnuIsTitleMovieDrawActive(void);
-extern void func_002A50F8(void *work);
+extern void mnuResetPairedMovieMenuSlideBars(void *work);
 
 /* Title-menu event handler (proposed mnuHandleTitleMenuEvent): drives the menu's slide bars, the background
  * movie and its fade for menu events 2..32; returns 1 once the movie has stopped after event 32. */
@@ -817,7 +817,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
         mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
-        func_002A50F8(mnuMovieMenuState->movie);
+        mnuResetPairedMovieMenuSlideBars(mnuMovieMenuState->movie);
         sdfSetStreamFrameDrawMode(0);
         mnuStopTitleMovieDraw();
         break;
@@ -883,7 +883,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 2, 0);
         mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
-        func_002A50F8(mnuMovieMenuState->movie);
+        mnuResetPairedMovieMenuSlideBars(mnuMovieMenuState->movie);
         mnuStopTitleMovieDraw();
         sdfSetStreamFrameDrawMode(0);
         break;
@@ -920,7 +920,7 @@ extern void mnuUpdateTitlePageByMode(void);
 extern void mnuTitleResetSequenceTimers(void);
 extern void mnuDrawTitleSceneForPhase(void);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
-extern s32 func_002A5C58(void);
+extern s32 mnuUpdateMovieMenuInputState(void);
 extern void func_002A5890(void);
 extern void func_002A5F80(void);
 extern void sndReleaseTrackHandle(u32);
@@ -1227,7 +1227,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         break;
     case 31:
         mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
-        menuAction = func_002A5C58();
+        menuAction = mnuUpdateMovieMenuInputState();
         switch (menuAction) {
         case 1:
             mnuDrawTitleSceneForPhase();
@@ -1301,7 +1301,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     return 0;
 }
 
-u32 func_002A3A50(s32 mode) {
+u32 mnuOpenTitleMenu(s32 mode) {
     mnuCreateTitleMenuTask(mode);
     return 0xffffffff;
 }
@@ -1312,7 +1312,7 @@ s32 mnuDestroyTitleMenuTask(void) {
     return 0;
 }
 
-u32 func_002A3AA0(void) {
+u32 mnuOpenDefaultTitleMenu(void) {
     mnuCreateTitleMenuTask(0);
     return 0;
 }

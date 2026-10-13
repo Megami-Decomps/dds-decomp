@@ -57,7 +57,7 @@ extern void mnuRequestIndexedMovieResource(s32 index);
 extern s32 func_00270088(void);
 extern s32 mnuCheckMovieDecoderStatus(void);
 extern void sdfSoundSetChannelCount(u32 channelCount);
-extern void func_0026DD10(void);
+extern void mnuRequestDefaultMovieResource(void);
 extern void mnuDrawMovieMenuSpriteLayers(s32 context);
 extern void mnuResetMovieMenuOpeningAnimation(void);
 extern void mnuSwapStateWords(void);
@@ -70,7 +70,7 @@ extern void mnuSelectMenuListCursorByAdvance(s32 amount);
 extern void mnuTitleResetSequenceTimers(void);
 extern void sndReleaseTrackHandle(u32 trackId);
 extern void func_0026CAB0(void);
-extern s32 func_0026D660(void);
+extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuDrawMovieChoiceTransition(void);
 extern void mnuClearGlobalMenuStateFields(void);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
@@ -285,7 +285,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         if ((s8)mnuMovieMenuState->pad38[4] != 0) {
             mnuMovieMenuState->state = 0x16;
         } else {
-            func_0026DD10();
+            mnuRequestDefaultMovieResource();
             mnuMovieMenuState->state = 0x13;
         }
         break;
@@ -394,7 +394,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
     case 30:
         mnuUpdateMovieMenuEffects();
         func_0026CAB0();
-        menuAction = func_0026D660();
+        menuAction = mnuUpdateMovieMenuInputState();
         switch (menuAction) {
         case 1:
             mnuDrawMovieChoiceTransition();
@@ -502,8 +502,8 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
     return 0;
 }
 
-u32 func_0026BCE8(void) {
-    func_0026B050();
+u32 mnuOpenTitleMenu(void) {
+    mnuCreateTitleMenuTask();
     return 0xffffffff;
 }
 
@@ -513,7 +513,7 @@ s32 mnuDestroyTitleMenuTask(void) {
     return 0;
 }
 
-u32 func_0026BD38(void) {
-    func_0026B050(0);
+u32 mnuOpenDefaultTitleMenu(void) {
+    mnuCreateTitleMenuTask(0);
     return 0;
 }

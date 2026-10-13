@@ -3655,7 +3655,7 @@ extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list, FileConfigListNode *node, s32 drawArg);
 extern void mnuResetTitleStreamLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern void func_002A2200(s32);
+extern void mnuLoadIndexedTitleSoundStream(s32);
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern char D_00437DF0[];
 extern char *D_003E9000[];
@@ -3689,7 +3689,7 @@ s32 fileCreateConfigTask(s32 mode) {
             effRequestResourceByMode(D_00437DF0, D_003E9000[5 + i], 0, (u32 *)&task->slots[i]);
         }
         mnuResetTitleStreamLocked();
-        func_002A2200(0x14);
+        mnuLoadIndexedTitleSoundStream(0x14);
         mnuResetTitleStreamAfterFileIdle();
         kwlnFadeOutStart(0, 0, 0, 0xF);
         break;

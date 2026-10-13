@@ -101,7 +101,7 @@ void mnuTitleResetSequenceTimers(void) {
     mnuMovieMenuState->unk1C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D660);
+INCLUDE_ASM(const s32, "game/code_0026D270", mnuUpdateMovieMenuInputState);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
