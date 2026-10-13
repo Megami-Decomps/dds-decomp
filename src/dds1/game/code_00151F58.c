@@ -2,6 +2,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -45,7 +46,6 @@ typedef struct EffParticleRecord {
 } EffParticleRecord;
 
 extern u8 effDefaultRandomState[];
-extern f32 effMiscRandUnitFloat(void *);
 
 extern EffectConfig D_0034DF54[];
 

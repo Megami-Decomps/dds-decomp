@@ -1,5 +1,6 @@
 #include "dsp_name.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "mnu_scene.h"
@@ -329,7 +330,6 @@ void itfDspSignalE(void) {
     dspStartEntry(7);
 }
 
-extern f32 effMiscRandUnitFloat(s32);
 
 
 

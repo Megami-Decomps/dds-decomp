@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "evt_solar.h"
 
@@ -56,7 +57,6 @@ void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 void uiDrawUniformColorRect(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 void uiDrawActiveSurfaceRegion(s32 object);
-f32 effMiscRandUnitFloat(s32 seed);
 u32 effMiscRand(s32 seed);
 
 extern char D_003BBDD0[];

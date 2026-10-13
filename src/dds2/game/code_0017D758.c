@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -171,7 +172,6 @@ void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
 
 extern void parDispatchSub(u32, s32, s32, s32);
 extern u32 effMiscRand(void *);
-extern f32 effMiscRandUnitFloat(void *);
 extern u8 effDefaultRandomState[];
 
 /* effNeedleCreateWork */

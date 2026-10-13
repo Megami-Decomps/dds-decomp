@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_resource.h"
 #include "mnu_work.h"
 #include "file.h"
@@ -372,7 +373,6 @@ typedef struct MnuEffectBurstPreset {
 } MnuEffectBurstPreset;
 
 extern MnuEffectBurstPreset D_0040AC50[];
-extern f32 effMiscRandUnitFloat(void *);
 
 /* Start a burst of positioned effect records with random offsets and a sound each. */
 s32 func_0031BA28(MnuEffectList *list, MnuEffectPositionStep *step, s32 baseDelay, s32 id, f32 x, f32 y, f32 z) {

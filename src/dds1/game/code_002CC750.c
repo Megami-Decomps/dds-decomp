@@ -1,6 +1,7 @@
 #include "dsp_name.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "eff_curve.h"
@@ -1288,7 +1289,6 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 extern f32 sdfViewTargetVector[4];
 extern void vuBuildLookAtBasis(void);
 extern f32 sdfAtan2Poly(f32 ratio);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
 extern u8 effSharedRandomState[];
 

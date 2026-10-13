@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -4640,7 +4641,6 @@ BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *owner) {
 
 extern char D_003A3CA0[];
 
-extern f32 effMiscRandUnitFloat(void *);
 
 typedef struct BtlDamageShakeArgs {
     BtlUnit *unit;

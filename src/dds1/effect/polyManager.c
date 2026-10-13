@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -408,7 +409,6 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
 
 
 extern u8 effDefaultRandomState[];
-extern f32 effMiscRandUnitFloat(void *state);
 
 /* Randomize record `index`: pick jittered start and end radii, derive the per-frame radius step, and lay the ring out. */
 void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {

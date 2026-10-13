@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
@@ -6138,7 +6139,6 @@ INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D7B58);
 struct EffRandState;
 extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRand(struct EffRandState *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern f32 fabsf(f32);
 extern void func_002D7B58(FileSlotTable *, FileSlot *);
 

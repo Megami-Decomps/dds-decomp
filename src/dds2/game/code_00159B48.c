@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -977,7 +978,6 @@ typedef struct EffPacket {
 
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 effMiscRandUnitFloat(void *);
 extern u8 effDefaultRandomState[];
 extern u32 effMiscRand(void *state);
 extern u32 parEvaluateColorRampAtAge(void *fade, u32 color, s32 age);
@@ -2720,7 +2720,6 @@ void effFreeSingleParticleTemplate(void *effect) {
 }
 
 extern u8 effDefaultRandomState[];
-extern f32 effMiscRandUnitFloat(void *);
 
 /* Initialize the first record at frame -1; speed draws RNG, angle draws it only for nonzero jitter. */
 void effInitParticleRecord(effect)

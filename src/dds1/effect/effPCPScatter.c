@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -74,7 +75,6 @@ extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resId);
 extern u32 effMiscRand(void *table);
 extern u8 effDefaultRandomState[];
-extern f32 effMiscRandUnitFloat(void *state);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);

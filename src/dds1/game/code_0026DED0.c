@@ -1,11 +1,11 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf.h"
 #include "mnu_sprite_resource.h"
 
 
 
 extern SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *, SpriteSpawnNode *, s8);
-extern f32 effMiscRandUnitFloat(void *);
 extern u32 effMiscRandMod(void *, u32);
 
 void func_0026DED0(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {

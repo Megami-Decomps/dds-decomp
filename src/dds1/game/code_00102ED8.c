@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
@@ -1236,7 +1237,6 @@ SdfTex *kwlnTextureGetHeldReference(void) {
 
 extern f32 D_00324590[];
 extern f32 D_003BA940[];
-extern f32 effMiscRandUnitFloat(s32 mode);
 extern f32 fabsf(f32 value);
 
 /* Advance the two bounded shake offsets and taper finite-duration amplitudes. */

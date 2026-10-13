@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -52,7 +53,6 @@ extern s32 btlIsUnitInActiveList(void *unit);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 effSharedRandomState[];
 

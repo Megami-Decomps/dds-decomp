@@ -1,11 +1,11 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf.h"
 #include "mnu_sprite_resource.h"
 
 
 
 extern SpriteSpawnNode *mnuCreateSpriteSpawnNode(MnuSpriteResourceGroup *, SpriteSpawnNode *, s8);
-extern f32 effMiscRandUnitFloat(void *);
 
 void func_0025BA20(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {
     SpriteSpawnNode *parent = parentData;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_model.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
@@ -410,11 +411,9 @@ extern void effPcpSpanSetHeadVector(void *dst, void *src);
 
 
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 effDefaultRandomState[];
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 effDefaultRandomState[];
 

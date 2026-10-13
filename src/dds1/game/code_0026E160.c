@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -13,7 +14,6 @@ extern MnuStaffMovieWork *mnuMovieWork;
 
 
 
-extern f32 effMiscRandUnitFloat(s32);
 
 extern void *memset(void *, s32, u32);
 

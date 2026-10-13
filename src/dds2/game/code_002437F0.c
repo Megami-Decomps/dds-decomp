@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "evt_solar.h"
 
@@ -71,7 +72,6 @@ typedef struct SolarLayerTimer {
 } SolarLayerTimer;
 
 
-f32 effMiscRandUnitFloat(s32 seed);
 u32 effMiscRand(s32 seed);
 
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite) {
