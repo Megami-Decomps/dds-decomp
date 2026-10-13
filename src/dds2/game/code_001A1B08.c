@@ -169,7 +169,7 @@ void itfPanelSetFourColumnVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, 
 extern s32 D_003B44D8[4];
 
 /* Emit the outer frame grid, then the table-spaced top/bottom edge rows. */
-void func_001A1BB0(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfBuildPanelBorderVertexGrid(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -213,7 +213,7 @@ void func_001A1BB0(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Emit the outer frame grid, then the close top/bottom edge rows. */
-void func_001A1D20(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetInsetFrameVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
