@@ -401,7 +401,7 @@ void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target);
 
 void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale);
 
-void func_001E3108(void *object, f32 *dst);
+void btlCopyUnitCurrentPosition(void *object, f32 *dst);
 
 extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
@@ -1707,7 +1707,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
             flags = unit->status.flags;
         } else {
             if (unit->lookupId != 1) {
-                func_001E3108(unit, vectors.position);
+                btlCopyUnitCurrentPosition(unit, vectors.position);
                 vectors.position[2] = unit->position[2] - 45.0f;
                 btlSetUnitPosition(unit, vectors.position);
             }
@@ -2498,7 +2498,7 @@ void btlAdvanceActorCameraPreset(BtlLinkedCommand *action) {
         action->flags &= ~1;
         action->flags &= ~0x80000;
     } else {
-        func_001E3108(user, action->translation);
+        btlCopyUnitCurrentPosition(user, action->translation);
         btlCopyUnitRotationQuaternion(user, action->rotation);
     }
 

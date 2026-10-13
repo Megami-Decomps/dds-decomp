@@ -245,7 +245,7 @@ extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
 extern u64 btlStartTask(void *);
 
-extern void func_001E3108(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(void *, f32 *);
 
 extern void btlSetUnitPosition(BtlUnit *, f32 *);
 
@@ -1496,7 +1496,7 @@ s32 btlShiftUnitUpForScriptAction(BtlLinkedCommand *command) {
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
-                func_001E3108(user, pos);
+                btlCopyUnitCurrentPosition(user, pos);
                 pos[2] += 350.0f;
                 btlSetUnitPosition(user, pos);
             }
@@ -2029,7 +2029,7 @@ s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
-                func_001E3108(user, pos);
+                btlCopyUnitCurrentPosition(user, pos);
                 pos[2] += 1250.0f;
                 btlSetUnitPosition(user, pos);
             }
@@ -2589,7 +2589,7 @@ void btlRecenterActorsAroundLead(void) {
         }
     }
     if (lead != 0) {
-        func_001E3108(lead, pos);
+        btlCopyUnitCurrentPosition(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
         PCP_COPY_VECTOR(lead->position, pos);
@@ -2598,7 +2598,7 @@ void btlRecenterActorsAroundLead(void) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != lead) {
-                        func_001E3108(unit, pos);
+                        btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
                         PCP_COPY_VECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
@@ -4406,7 +4406,7 @@ void btlCenterMarkedFormationAroundLead(void) {
         }
     }
     if (lead != 0) {
-        func_001E3108(lead, pos);
+        btlCopyUnitCurrentPosition(lead, pos);
         pos[2] = 200.0f;
         shift = -pos[0];
         pos[0] = 0;
@@ -4416,7 +4416,7 @@ void btlCenterMarkedFormationAroundLead(void) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != lead) {
-                        func_001E3108(unit, pos);
+                        btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
                         PCP_COPY_VECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
@@ -4839,7 +4839,7 @@ s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command) {
             if (unit == NULL) {
                 return 0;
             }
-            func_001E3108(unit, position);
+            btlCopyUnitCurrentPosition(unit, position);
             originalPosition = position[2];
             if (command->actionCode == 0x103) {
                 adjustedPosition = originalPosition + 400.0f;
@@ -6393,7 +6393,7 @@ extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamS
 
 extern void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void func_001E3108(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(void *, f32 *);
 
 s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     BtlState *battle;
@@ -6438,7 +6438,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
             }
         }
         if (unit != NULL) {
-            func_001E3108(unit, position);
+            btlCopyUnitCurrentPosition(unit, position);
             z = position[2];
             if (command->actionCode == 0x105) {
                 adjustedZ = z + -400.0f;
@@ -7184,7 +7184,7 @@ s32 func_00226598(BtlLinkedCommand *command) {
             s32 slot = command->link->indexWork.slot;
             kind = *(s16 *)(table + slot * 0x14 + 0x2C);
             if (kind == 2 || kind == 7) {
-                func_001E3108(unit, pos);
+                btlCopyUnitCurrentPosition(unit, pos);
                 pos[2] += 400.0f;
                 btlSetUnitPosition(unit, pos);
             }
@@ -7502,7 +7502,7 @@ extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 
 extern void btlBeginEffectActorFadeOut(void);
 
-extern void func_001E3108(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(void *, f32 *);
 
 extern void btlRestoreLinkedEffectUnitPose(BtlUnit *);
 
@@ -7562,14 +7562,14 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
         btlBeginEffectActorFadeOut();
         if ((mainUnit->status.flags & 0xE0) && !(twin->status.flags & 0xE0) &&
             mainUnit->resourceIndex == 0x12E && (mainUnit->status.flags & 2)) {
-            func_001E3108(mainUnit, position);
+            btlCopyUnitCurrentPosition(mainUnit, position);
             position[1] += 1000000.0f;
             effObjSetInnerPosition(mainUnit->effectObject,
                 (u128 *)position);
         }
         if ((twin->status.flags & 0xE0) && !(mainUnit->status.flags & 0xE0) &&
             twin->resourceIndex == 0x12F && (twin->status.flags & 2)) {
-            func_001E3108(twin, position);
+            btlCopyUnitCurrentPosition(twin, position);
             position[1] += 1000000.0f;
             effObjSetInnerPosition(twin->effectObject,
                 (u128 *)position);

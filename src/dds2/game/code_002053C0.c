@@ -145,7 +145,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target);
 
-void func_001E3108(void *object, f32 *dst);
+void btlCopyUnitCurrentPosition(void *object, f32 *dst);
 
 s32 sndLoadAndPlayStationedSe(u32 soundId);
 
@@ -553,7 +553,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
         if ((other->status.flags & 1) && (other->status.flags & mask) && other != link->unit) {
             btlClearUnitDefeatCandidate(other);
             if ((btlUnitStatusPair(other) & 0x102) == 0x102) {
-                func_001E3108(other, pos);
+                btlCopyUnitCurrentPosition(other, pos);
                 pos[1] += 1000000.0f;
                 pos[0] = 0;
                 effObjSetInnerPosition(other->effectObject, (u128 *)pos);
@@ -561,7 +561,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
             }
         }
     }
-    func_001E3108(link->unit, pos);
+    btlCopyUnitCurrentPosition(link->unit, pos);
     pos[0] = 0;
     btlSetUnitPosition(link->unit, pos);
 }
@@ -871,7 +871,7 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
             offset = 0.0f;
         }
         for (i = 0; i < 3; i++) {
-            func_001E3108(slot[i], position);
+            btlCopyUnitCurrentPosition(slot[i], position);
             position[0] += offsetX;
             position[2] += offset;
             btlSetUnitPosition(slot[i], position);
