@@ -10147,3 +10147,43 @@ That earlier canonical pair remains unchanged; the second DDS2 copy at
 No normalization, type, layout, cast, arithmetic or statement-order changes
 are part of this naming closure.
 
+## Deleted sampling workspace: asymmetric final calls
+
+DDS2 `func_0031C940` at 0x0031C940 (208B, `game/code_0031C940`)
+looks up the model's motion node and samples either a random frame or the
+supplied frame. Retail restores its frame and jumps to the random sampler
+at 0x0031C9E4, but calls the direct sampler with JAL at 0x0031C9F0 and then
+executes its epilogue. Both calls use the genuine void sampler contract;
+the random branch's early return and `frame < 0.0f` test are preserved,
+including the original behavior for NaN.
+
+**P / deciding pass:** the direct arm must contain non-return work after
+its call when the first sibling-call pass examines CALL_PLACEHOLDER.
+One reset of the existing sampling workspace, `motion = NULL`, after
+only that arm's final call supplies P. No extra local, return-value fiction,
+prototype change, compiler flag or visibility boundary is involved.
+
+The parity-checked vendor trace selects random call uid112 as SIBLING,
+but direct call uid133 as NORMAL because its block has non-return work.
+The reset is uid136, assigning zero to the real motion-pointer pseudo86.
+It remains in `00.rtl`, `01.sibling` and every later available dump through
+`11.cfg`; its first absence is `13.life`. Thus the store disappears
+**after**, not before, the sibling decision and emits no instruction.
+Hooked and unhooked assembly and every RTL dump were identical; compiler
+SHA-256 was `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+Exact log and deletion-table paths are retained in PurD's renewal52 ledger.
+
+This reconstruction uses the explicit post-call own-state exception in
+`docs/CONTRIBUTING.md`: retail JAL plus epilogue, trace-proven late deletion,
+and a single reset of the function's already-used sampling workspace.
+The trace demonstrates the compiler mechanism, **not independent proof
+that Atlus wrote this particular cleanup statement**. It is not a license
+for dummy locals, multiple tail blockers or unrelated dead stores.
+
+The ordinary void form and the earlier implicit-int transfer each retained
+7/51 differing compared words plus one absent word (204B versus 208B);
+implicit-int alone left both calls eligible for siblings. Complementary
+mode tests preserved another comparison and grew the frame. The single
+workspace reset instead passed the authoritative whole-unit gate:
+`1 match, 0 differ`, 208B, with no CONTEXT/RODATA/UNDEF diagnostics.
+
