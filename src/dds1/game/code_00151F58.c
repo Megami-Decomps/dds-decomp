@@ -17,6 +17,7 @@
 
 extern void *sdfCreateAssetWithDrawEntries();
 #include "eff.h"
+#include "eff_look_at_ring.h"
 #include "eff_track_poly_list.h"
 #include "par_table.h"
 #include "par_kind_api.h"
@@ -64,8 +65,6 @@ extern void *memcpy(void *dest, const void *src, u32 n);
 
 
 void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
-
-typedef struct EffLookAtRingEmitter EffLookAtRingEmitter;
 
 void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index);
 
@@ -1608,16 +1607,6 @@ void effFreeLookAtRingTemplate(u32 effect) {
     effDestroyResources();
     sdfReleaseChipBlock(effect);
 }
-
-struct EffLookAtRingEmitter {
-    EffEmitterHead head;
-    u8 mode;         /* 0x150 */
-    u8 loop;         /* 0x151 */
-    u8 pad152[10];
-    u32 period;      /* 0x15C */
-    f32 f160;
-    f32 f164;
-};
 
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
