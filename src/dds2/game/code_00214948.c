@@ -1166,7 +1166,7 @@ extern f32 btlUnitGetTopY(BtlUnit *);
 
 /* Frame one unit approaching its target: out->position sits between the muzzle positions, pulled back along the
    line by 0.6 of the gap; angle (degrees) swings the pull-back, mirrored when the command faces left (0x200). */
-void func_00217470(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift, f32 angle) {
+void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift, f32 angle) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -1209,7 +1209,8 @@ void func_00217470(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f
     VU0_STORE_VF(vf10, out->direction);
 }
 
-void func_00217650(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, f32 sideScale, f32 backLift) {
+/* Build reciprocal target-focused cameras with a side offset and optional plane adjustment. */
+void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, f32 sideScale, f32 backLift) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -1321,7 +1322,8 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     btlUnitFaceTarget(target, user);
 }
 
-void func_00217B20(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 targetSideScale, f32 userSideScale, f32 backLift, f32 frontLift) {
+/* Build reciprocal cameras with independent unit-side offsets and optional role exchange. */
+void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 targetSideScale, f32 userSideScale, f32 backLift, f32 frontLift) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -1418,10 +1420,10 @@ void btlStartUnitActionIfPairedSelected(void) {
     }
 }
 
-/* Queue the matching boss's resource/sound pair once its status mask passes.
+/* Queue Vetala's resource/sound pair once its status mask passes.
  * Condition 5 lets the sound start when that task runs or is already gone.
  */
-void func_00217EB8(ActionStateLink *action) {
+void btlQueueVetalaResourceAndSoundOnce(ActionStateLink *action) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     s8 *state = (s8 *)scene->state;
     BtlUnit *unit;
@@ -1746,8 +1748,8 @@ extern void btlFlagAllUnitDefeatCandidatesTask();
 
 extern void btlBossDebugPrintf(const char *, ...);
 
-/* Choose one of the special action's three camera paths. */
-s32 func_00218798(BtlLinkedCommand *command) {
+/* Choose one of three camera paths for unmarked nonparty action 0x211; report whether selected. */
+s32 btlSelectAction211CameraPair(BtlLinkedCommand *command) {
     ActionStateLink *link = command->link;
     if (btlIsActorCategoryMarked(command) || (link->unit->status.flags & 0x200)) {
         return 0;
@@ -2414,7 +2416,7 @@ s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command) {
             if (target->partyRecord.unitId != 0x136) {
                 return 0;
             }
-            func_00217470(command, &command->camera, 0.0f, 0.1499999911f, 35.0f);
+            btlBuildAngledApproachCameraPose(command, &command->camera, 0.0f, 0.1499999911f, 35.0f);
             command->camera.distance += 150.0f;
             btlAdjustCameraDirectionForDefaultPlane(&command->camera);
             return 1;
@@ -2452,7 +2454,7 @@ s32 btlSetupHariActionCameraPair(BtlLinkedCommand *command, s32 unusedGroup200, 
     if (command->actionCode != 0x17E) {
         goto rejected;
     }
-    func_00217B20(command, &command->frontCamera, &command->backCamera,
+    btlBuildInsetExchangeCameraPair(command, &command->frontCamera, &command->backCamera,
                   0, 0, 1.0f, 2.5f, 0.5f, 0.075f);
     command->frontCamera.distance += 100.0f;
     command->backCamera.distance += 150.0f;
@@ -3398,7 +3400,8 @@ s32 rotate;
     return 1;
 }
 
-s32 func_0021C7F8(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+/* Forward the linked defeat preset, preserving its signed result and consumed-command staging. */
+s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetLinkedDefeatCameraPresetA(command, camera, rotate);
     /* Retail 0021C800 uses JAL plus restores. This consumed-command reset
      * is the function-owned state exception in CONTRIBUTING: qualified
@@ -3418,7 +3421,7 @@ extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
 /* VURI boss action camera: when this actor is the defeat target, pick a randomized camera key pair (or a
  * randomized action pose) by boss form (unit mode 0x110/0x111/0x112) and action code; otherwise frame the
  * actor from a fixed pose turned 50 degrees toward its facing side. */
-s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
+s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSide) {
     ActionStateLink *link = command->link;
 
     if (btlIsActorCategoryMarked(command) || (link->unit->status.flags & 0x200)) {
@@ -3668,7 +3671,7 @@ s32 func_0021CF18(BtlLinkedCommand *command, s8 side, s8 targetSide) {
                 btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
             } else {
                 btlBossDebugPrintf("VURI:IT-1 ++++\n");
-                func_00217650(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
+                btlBuildTargetFocusedCameraPair(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
                 command->frontCamera.distance += 150.0f;
                 command->backCamera.distance += 300.0f;
                 command->motionParameter = 30.0f;
@@ -4063,7 +4066,8 @@ flag_defeat_candidates:
     return 0;
 }
 
-s32 func_0021E778(BtlLinkedCommand *command) {
+/* Select Vritra action framing from animation-camera flags; return zero for unhandled paths. */
+s32 btlSetupVritraCameraFromActionFlags(BtlLinkedCommand *command) {
     u32 flags = datActionAnimationRecords[command->actionCode].flags;
 
     if (flags & 0x1000) {
@@ -4079,7 +4083,7 @@ s32 func_0021E778(BtlLinkedCommand *command) {
     if (flags & 0x2000) {
         if (btlGetIndexListCount(command->link->indexWork.indices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_00217650(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
+            btlBuildTargetFocusedCameraPair(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
             command->frontCamera.distance += 150.0f;
             command->backCamera.distance += 300.0f;
             command->motionParameter = 30.0f;
@@ -4260,13 +4264,13 @@ extern void btlUnitSetCameraOffset(BtlLinkedCommand *);
 
 extern void btlRaiseActionCameraPoints(BtlLinkedCommand *);
 
-extern void func_00224EE8(BtlLinkedCommand *);
+extern void btlSetupSatanExchangeCameraPair(BtlLinkedCommand *);
 
 extern void btlChooseBrahmaGroupCamera(u32);
 
-extern void func_002240C0(u32);
+extern void btlSetRaisedActionFixedCamera(u32);
 
-extern void func_00224F88(u32);
+extern void btlSetSatanFixedActionCamera(u32);
 
 extern void btlApplyMaskedActorEntryAdjustments(u32, u32, u32);
 
@@ -4274,7 +4278,7 @@ extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern void btlSetSpecialEnemyGeometry(void);
 
-extern s32 func_00222450(BtlLinkedCommand *, BtlCamState *, s32);
+extern s32 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *, BtlCamState *, s32);
 
 
 typedef struct BattleActionFlagState {
@@ -5788,7 +5792,8 @@ typedef struct BtlBossCameraPreset {
 
 extern BtlBossCameraPreset D_003BF768[5][3];
 
-s32 func_00222450(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+/* Select party/formation presets for five Brahman forms; return one even without a matching preset. */
+s32 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *target;
     BtlUnit *candidate;
@@ -5880,8 +5885,9 @@ done:
     return 1;
 }
 
-s32 btlUnitWrapA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
-    s32 result = func_00222450(command, camera, rotate);
+/* Forward the Brahman preset, retaining its signed result and native consumed-mode reset. */
+s32 btlUpdateBrahmanDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetBrahmanPartyCameraPreset(command, camera, rotate);
     /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
      * mode reset survives sibling-call selection and disappears in CSE. */
     rotate = 0;
@@ -6038,7 +6044,7 @@ s32 btlLiftTowardLinkedTarget(BtlLinkedCommand *object) {
                 if ((state->unit->status.flags & 0x1000) == 0) {
                     return 0;
                 }
-                func_00217470(object, &object->camera, -0.8f, 0.5f, 35.0f);
+                btlBuildAngledApproachCameraPose(object, &object->camera, -0.8f, 0.5f, 35.0f);
                 object->camera.distance += 500.0f;
                 return 1;
             }
@@ -6135,7 +6141,7 @@ s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
     if (btlIsActorCategoryMarked(command) == 0) {
         if (command->link->unit->status.flags & 0x200) {
             if (command->stepKind == 14) {
-                func_00217470(command, &command->camera, -1.4f, 0.67f, 25.0f);
+                btlBuildAngledApproachCameraPose(command, &command->camera, -1.4f, 0.67f, 25.0f);
                 command->camera.distance += 1250.0f;
                 return 1;
             }
@@ -6231,7 +6237,7 @@ s32 func_00223DD8(BtlLinkedCommand *unit) {
         unit->state = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_00222450(unit, &unit->camera, 0);
+        btlSetBrahmanPartyCameraPreset(unit, &unit->camera, 0);
     } else if (flags & 0x8) {
         if (btlGetIndexListCount(unit->link->indexWork.indices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
@@ -6324,7 +6330,8 @@ void btlRaiseActionCameraPoints(BtlLinkedCommand *unit) {
     btlAdjustCameraDirectionForDefaultPlane(&unit->backCamera);
 }
 
-void func_002240C0(u32 unit) {
+/* Install the fixed raised-action pose into the passed camera word. */
+void btlSetRaisedActionFixedCamera(u32 unit) {
     btlInitMotionTransformFromComponents((BtlCamState *)unit, -851.6f, -144.4f, -2098.0f, -0.068f,
                     -0.141f, -0.004f, 0.979f, 40.0f);
 }
@@ -6363,7 +6370,7 @@ s32 btlAimLinkedTargetOrSetCameraTransform(BtlLinkedCommand *object) {
         }
     } else {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_002240C0((u32)object);
+        btlSetRaisedActionFixedCamera((u32)object);
         return 1;
     }
     return 0;
@@ -6379,7 +6386,7 @@ s32 btlLiftLinkedTargetAndUpdateMotion(BtlLinkedCommand *object) {
                 if ((state->unit->status.flags & 0x1000) == 0) {
                     return 0;
                 }
-                func_00217470(object, &object->camera, -0.8f, 0.225f, 35.0f);
+                btlBuildAngledApproachCameraPose(object, &object->camera, -0.8f, 0.225f, 35.0f);
                 object->camera.distance += 500.0f;
                 btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)object);
                 return 1;
@@ -6455,8 +6462,8 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
     return 1;
 }
 
-/* Update linked motion only for a group-0x200 owner with request 0xE; return 1 on update. */
-s32 func_00224500(s32 object) {
+/* Update a party owner's approach camera on request 0xE; return one only on update. */
+s32 btlUpdatePartyApproachCameraStep(s32 object) {
     s32 state;
     s32 battler;
 
@@ -6465,7 +6472,7 @@ s32 func_00224500(s32 object) {
         battler = (s32)((ActionStateLink *)state)->unit;
         if ((((BtlUnit *)battler)->status.flags & 0x200) != 0) {
             if (((BtlLinkedCommand *)object)->stepKind == 0xE) {
-                func_00217470((BtlLinkedCommand *)object, (BtlCamState *)object, -0.8f, 0.225f, 35.0f);
+                btlBuildAngledApproachCameraPose((BtlLinkedCommand *)object, (BtlCamState *)object, -0.8f, 0.225f, 35.0f);
                 ((BtlLinkedCommand *)object)->camera.distance += 500.0f;
                 btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)object);
                 return 1;
@@ -6553,9 +6560,9 @@ s32 btlSelectRaisedCameraFromActionFlags(BtlLinkedCommand *unit) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
         if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
-            func_002240C0((u32)unit);
+            btlSetRaisedActionFixedCamera((u32)unit);
         } else {
-            func_002240C0((u32)unit);
+            btlSetRaisedActionFixedCamera((u32)unit);
         }
         return 1;
     }
@@ -6566,22 +6573,23 @@ s32 btlSelectRaisedCameraFromActionFlags(BtlLinkedCommand *unit) {
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        func_002240C0((u32)unit);
+        btlSetRaisedActionFixedCamera((u32)unit);
         return 1;
     }
     return 0;
 }
 
-s32 func_00224DF0(BtlLinkedCommand *unit) {
+/* Finish flag-selected raised-action camera paths; clear runtime flag 0x2000 when handled. */
+s32 btlFinishRaisedActionCamera(BtlLinkedCommand *unit) {
     u32 flags = datActionAnimationRecords[unit->actionCode].flags;
 
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
         if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
-            func_002240C0((u32)unit);
+            btlSetRaisedActionFixedCamera((u32)unit);
         } else {
-            func_002240C0((u32)unit);
+            btlSetRaisedActionFixedCamera((u32)unit);
         }
         unit->state = 0;
     } else if (flags & 0x8000) {
@@ -6594,7 +6602,7 @@ s32 func_00224DF0(BtlLinkedCommand *unit) {
             unit->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_002240C0((u32)unit);
+            btlSetRaisedActionFixedCamera((u32)unit);
         }
     } else {
         return 0;
@@ -6603,7 +6611,8 @@ s32 func_00224DF0(BtlLinkedCommand *unit) {
     return 1;
 }
 
-void func_00224EE8(BtlLinkedCommand *unit) {
+/* Build exchanged linked cameras with extended distances and default-plane adjustment. */
+void btlSetupSatanExchangeCameraPair(BtlLinkedCommand *unit) {
     btlBuildLinkedCommandCameraPair(unit, &unit->frontCamera, &unit->backCamera, 0.8f, 1.0f, 0.3f, 0, 1);
     unit->frontCamera.distance += 750.0f;
     unit->backCamera.distance += 750.0f;
@@ -6613,7 +6622,8 @@ void func_00224EE8(BtlLinkedCommand *unit) {
     btlAdjustCameraDirectionForDefaultPlane(&unit->backCamera);
 }
 
-void func_00224F88(u32 unit) {
+/* Install the fixed Satan action pose into the passed camera word. */
+void btlSetSatanFixedActionCamera(u32 unit) {
     btlInitMotionTransformFromComponents((BtlCamState *)unit, 81.4f, -37.8f, -1866.2f, -0.112f,
                     0.01f, -0.017f, 0.982f, 40.0f);
 }
@@ -6623,7 +6633,7 @@ extern void btlFlagAllUnitsDefeatCandidate(void);
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
-extern void func_00224EE8(BtlLinkedCommand *);
+extern void btlSetupSatanExchangeCameraPair(BtlLinkedCommand *);
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 
@@ -6654,9 +6664,10 @@ extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
 
 extern char D_0041B3B8[];
 
+/* Choose one of three SATAN:ATTACK camera key pairs after marking all defeat candidates. */
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B3B8);
 
-void func_00224FC0(s32 actor) {
+void btlChooseSatanAttackCamera(s32 actor) {
     btlFlagAllUnitDefeatCandidatesTask();
     switch (effMiscRandMod(NULL, 3)) {
     case 0:
@@ -6681,7 +6692,8 @@ void func_00224FC0(s32 actor) {
 }
 
 
-void func_002251A0(s32 actor) {
+/* Choose Satan keys; cases zero/one mark all candidates, case two marks only the linked group. */
+void btlChooseSatanGroupAwareCamera(s32 actor) {
     switch (effMiscRandMod(NULL, 3)) {
     case 0:
         btlBossDebugPrintf("SATAN:I-0 ++++\n");
@@ -6818,7 +6830,8 @@ s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-s32 func_00225778(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+/* Forward the Satan preset, retaining its signed result and native consumed-mode reset. */
+s32 btlUpdateSatanDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetSpecialDefeatCameraPreset(command, camera, rotate);
     /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
      * mode reset survives sibling-call selection and disappears in CSE. */
@@ -6838,7 +6851,7 @@ u32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit) {
                 return 0;
             }
             btlFlagAllUnitsDefeatCandidate();
-            func_00224EE8(unit);
+            btlSetupSatanExchangeCameraPair(unit);
             unit->state = 0;
             return 1;
         }
@@ -6846,7 +6859,7 @@ u32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit) {
     return 0;
 }
 
-extern void func_00224F88(u32);
+extern void btlSetSatanFixedActionCamera(u32);
 
 s32 btlHandleTargetDirectionOrAction(BtlLinkedCommand *unit) {
     ActionStateLink *actor = unit->link;
@@ -6863,13 +6876,13 @@ s32 btlHandleTargetDirectionOrAction(BtlLinkedCommand *unit) {
         }
     } else {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_00224F88((u32)unit);
+        btlSetSatanFixedActionCamera((u32)unit);
         return 1;
     }
     return 0;
 }
 
-extern void func_00217470(BtlLinkedCommand *, BtlCamState *, f32, f32, f32);
+extern void btlBuildAngledApproachCameraPose(BtlLinkedCommand *, BtlCamState *, f32, f32, f32);
 
 s32 btlLiftUnitForLinkedTarget(BtlLinkedCommand *object) {
     ActionStateLink *actor = object->link;
@@ -6881,7 +6894,7 @@ s32 btlLiftUnitForLinkedTarget(BtlLinkedCommand *object) {
                 if ((actor->unit->status.flags & 0x1000) == 0) {
                     return 0;
                 }
-                func_00217470((BtlLinkedCommand *)object, (BtlCamState *)object, 1.25f, 0.0f, 30.0f);
+                btlBuildAngledApproachCameraPose((BtlLinkedCommand *)object, (BtlCamState *)object, 1.25f, 0.0f, 30.0f);
                 object->camera.distance += 150.0f;
                 btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)object);
                 return 1;
@@ -6895,7 +6908,8 @@ extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamS
 
 extern void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
+/* Select Satan linked-action framing from actor side, effect trigger, and animation-camera kind. */
+s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     s32 cameraKind;
     u32 shot;
 
@@ -6924,7 +6938,7 @@ s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     }
     if (modeA != 1 || modeB == 1) {
         command->flags |= 0x800;
-        func_002251A0((s32)command);
+        btlChooseSatanGroupAwareCamera((s32)command);
         return 1;
     }
     if (command->actionCode == 0x109) {
@@ -6935,7 +6949,7 @@ s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     switch (shot) {
     case 0:
     case 1:
-        func_002251A0((s32)command);
+        btlChooseSatanGroupAwareCamera((s32)command);
         break;
     case 2:
         btlPrepareRandomizedActionCameraPose((s32)command, (s32)&command->frontCamera, (s32)&command->backCamera);
@@ -6949,11 +6963,12 @@ extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 
 extern void btlSetRuntimeFlag2000(void);
 
-s32 func_00225B48(BtlLinkedCommand *unit) {
+/* Update party approach at step 14; nonparty action 0x109 also sets runtime flag 0x2000. */
+s32 btlUpdateSatanApproachCameraStep(BtlLinkedCommand *unit) {
     if (btlIsActorCategoryMarked(unit) == 0) {
         if (unit->link->unit->status.flags & 0x200) {
             if (unit->stepKind == 14) {
-                func_00217470((BtlLinkedCommand *)unit, (BtlCamState *)unit, -0.8f, 0.225f, 35.0f);
+                btlBuildAngledApproachCameraPose((BtlLinkedCommand *)unit, (BtlCamState *)unit, -0.8f, 0.225f, 35.0f);
                 unit->camera.distance += 500.0f;
                 btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)unit);
                 return 1;
@@ -6975,20 +6990,20 @@ s32 btlDispatchActionByResourceFlags(BtlLinkedCommand *unit) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
         if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
-            func_00224F88((u32)unit);
+            btlSetSatanFixedActionCamera((u32)unit);
         } else {
-            func_00224F88((u32)unit);
+            btlSetSatanFixedActionCamera((u32)unit);
         }
         return 1;
     }
     if (flags & BTL_ANIMATION_TARGET_DEFEAT_CAMERA) {
         if (btlGetIndexListCount(unit->link->indexWork.indices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_00224EE8(unit);
+            btlSetupSatanExchangeCameraPair(unit);
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        func_00224F88((u32)unit);
+        btlSetSatanFixedActionCamera((u32)unit);
         return 1;
     }
     return 0;
@@ -6996,16 +7011,17 @@ s32 btlDispatchActionByResourceFlags(BtlLinkedCommand *unit) {
 
 extern s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *, BtlCamState *, s32);
 
-s32 func_002261A8(BtlLinkedCommand *unit) {
+/* Finish flag-selected Satan camera paths; clear runtime flag 0x2000 when handled. */
+s32 btlFinishSatanActionCamera(BtlLinkedCommand *unit) {
     u16 flags = datActionAnimationRecords[unit->actionCode].flags;
 
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* Both arms are identical in retail; kept as written. */
         if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
-            func_00224F88((u32)unit);
+            btlSetSatanFixedActionCamera((u32)unit);
         } else {
-            func_00224F88((u32)unit);
+            btlSetSatanFixedActionCamera((u32)unit);
         }
         unit->state = 0;
     } else if (flags & 0x8000) {
@@ -7014,11 +7030,11 @@ s32 func_002261A8(BtlLinkedCommand *unit) {
     } else if (flags & 0x8) {
         if (btlGetIndexListCount(unit->link->indexWork.indices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_00224EE8(unit);
+            btlSetupSatanExchangeCameraPair(unit);
             unit->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_00224F88((u32)unit);
+            btlSetSatanFixedActionCamera((u32)unit);
         }
     } else {
         return 0;

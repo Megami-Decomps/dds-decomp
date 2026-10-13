@@ -3278,7 +3278,7 @@
 0x00219488	btlSetSubtaskControlEnabled	inferred	Dispatch actions 0x129 and 0x12A set or clear the subtask control byte.
 0x002194E8	btlStartReadyUnitActionCopy	inferred	identical loop/body to func_00218320 [names_M42_BattleMid.tsv]
 0x00219848	btlGetSubtaskActorMotionClass	inferred	maps subtask actor mode (0x10A/0x132/0x135 -> 0x63, 0x133/0x136 -> 0x62, else 0x64) [names_reviewed2.tsv]
-0x002199C8	btlTriggerLinkedActionMotionAlternate	inferred	sibling of btlTriggerLinkedActionMotion, calls func_00217378 instead of func_00217470 [names_reviewed2.tsv]
+0x002199C8	btlTriggerLinkedActionMotionAlternate	inferred	sibling of btlTriggerLinkedActionMotion, calls func_00217378 instead of btlBuildAngledApproachCameraPose [names_reviewed2.tsv]
 0x00219A70	btlTriggerLinkedActionMotion	inferred	When action owner has flags 0x400 and code 0x136 with bound actor state 0x1200, applies an effect vector, raises motion coordinate 150, and refreshes actor effect state.
 0x00219B48	btlStartLinkedActionMotionPrimary	inferred	actionCode 0x17E branch of btlSetupHariActionCameraPair sibling [names_M86_BattleAct.tsv]
 0x00219CC8	btlAdvanceTimedActionState	inferred	For action 0x10C, increments its frame counter when accepted; after frame 18 calls func_001E9890 and invokes btlBuildBattleUnitFramingCameraPose with a zero float.
@@ -3367,7 +3367,7 @@
 0x00222298	btlActionResourceTypeToMotionId	inferred	maps the action table byte at +3 (types 3..7) to motion ids 0xF/0x13/0x12/0x10/0x11, default 0xB; sibling of btlMapBossEntryKindToIndex [names_M69_Battle3.tsv]
 0x00222330	btlRefreshSpecialActionUnits	inferred	Walks all active units in special-action modes, refreshes each with the supplied data and clears status bit 0x80000.
 0x002223D8	btlOffsetSpecialActionValue	inferred	Adds zero through four hundred to a base according to the active unit's special-action mode.
-0x002226D0	btlUnitWrapA	inferred	tail-call style wrapper around func_00222450
+0x002226D0	btlUpdateBrahmanDefeatCamera	inferred	confidence=high; Corrected placeholder/tail-call description: scene315 defeatCameraHook forwards five-form Brahman preset, captures signed result; retail JAL/epilogue and consumed rotate reset remain intact. Cedar released6138676534/6138683107; Sable/Tidal reconstruction retained. [Namer1 b54]
 0x002226F0	btlUnitSetCameraOffset	inferred	calls func_00217898 then offsets +0x50/+0xE0 by 650.0 and sets flag 0x41
 0x00222768	btlChooseBrahmaIndividualCamera	inferred	Randomly chooses an individual BRAHMA camera key set and flags defeat candidates. [names_reviewed13.tsv]
 0x002228C0	btlChooseBrahmaGroupCamera	inferred	Randomly chooses one of the BRAHMA group camera key sets. [names_reviewed13.tsv]
@@ -8403,3 +8403,23 @@
 0x0029C878	brsNoOpMessageInputCallback	inferred	confidence=high; Empty callback used when the message-input step has no message window; DDS1 counterpart 0x002650C0. [LiteH b25]
 0x002ACB38	mnuNoOpStaffDisplayTeardown	inferred	confidence=high; Empty staff-display teardown hook before releasing the owner allocation; DDS1 counterpart 0x002733B0. [LiteH b25]
 0x002B9FB8	mnuSpinForWindowListCount	inferred	confidence=high; Busy-spins by decrementing the window list count to zero; DDS1 counterpart 0x0027CEE8. [LiteH b25]
+0x00217470	btlBuildAngledApproachCameraPose	inferred	confidence=high; Fixed0.6 pull-back and supplied degree angle; unlike DDS1 progress-derived builder, no timeline interpolation/default-plane adjustment. [Namer1 b54]
+0x00217650	btlBuildTargetFocusedCameraPair	inferred	confidence=high; Target-muzzle front position, user-height/side inset, back distance+250, optional plane adjustment and reciprocal facing. [Namer1 b54]
+0x00217B20	btlBuildInsetExchangeCameraPair	inferred	confidence=high; Independent user/target side insets and vertical fractions, optional role swap, reciprocal facing and back distance+250. [Namer1 b54]
+0x00217EB8	btlQueueVetalaResourceAndSoundOnce	inferred	confidence=high; Scene300 latch gates activeenemy101/statusE0 resource64 and task-conditioned sound; indexed enemy257=Vetala. [Namer1 b54]
+0x00218798	btlSelectAction211CameraPair	inferred	confidence=high; Unmarked nonparty action211 selects three fixed camera-key pairs with3SIK:LKG diagnostics. Numeric action identifier avoids unproved skill or boss attribution. [Namer1 b54]
+0x0021C7F8	btlUpdateLinkedDefeatCamera	inferred	confidence=high; Scene30B defeatCameraHook forwards presetA, captures s32 result and preserves consumed-command NULL staging; paired DDS1 scene10E adapter shares observable behavior despite different boss/preset data. Cedar released6137278646; body unchanged. [Namer1 b54]
+0x0021C818	btlSelectVritraActionCamera	inferred	confidence=high; VURI/VURI_A/VURI_B diagnostics and enemy110/111/112 indexed Vritra/Tentacle; actor-side gate chooses fixed facing pose or randomized species/action camera keys. [Namer1 b54]
+0x0021E778	btlSetupVritraCameraFromActionFlags	inferred	confidence=high; Scene30B actionCameraSetupHook; flags1000/2000 select defeat frame or single-target pair, distance offsets150/300, duration30 and flags41. Identical native arms retained. [Namer1 b54]
+0x00222450	btlSetBrahmanPartyCameraPreset	inferred	confidence=high; Scene315 cameraArrangementHook selects three poses for five enemy11D..121 forms indexed Brahman One..Final from target/formation; native tail-list no-camera quirk retained. [Namer1 b54]
+0x002240C0	btlSetRaisedActionFixedCamera	inferred	confidence=high; Fixed pose(-851.6,-144.4,-2098) in raised-action flag/target dispatch. No guessed boss identity. [Namer1 b54]
+0x00224500	btlUpdatePartyApproachCameraStep	inferred	confidence=high; Unmarked party owner step0xE uses angled helper(-0.8,.225,35), distance+500 and plane adjustment; other paths0. [Namer1 b54]
+0x00224DF0	btlFinishRaisedActionCamera	inferred	confidence=high; Scene31A hook selects fixed/preset/raised camera paths from flags4000/8000/8, retaining native state resets/runtime2000 clear and unhandled0. [Namer1 b54]
+0x00224EE8	btlSetupSatanExchangeCameraPair	inferred	confidence=high; Scene31B exchange path builds pair(.8,1,.3,0,1), adds750 to both distances, sets41/duration30 and adjusts plane. [Namer1 b54]
+0x00224F88	btlSetSatanFixedActionCamera	inferred	confidence=high; Fixed pose(81.4,-37.8,-1866.2) used by scene31B Satan action-flag/target dispatch. [Namer1 b54]
+0x00224FC0	btlChooseSatanAttackCamera	inferred	confidence=high; LiteralSATAN:ATTACK diagnostics and three randomized camera-key pairs after marking all defeat candidates. [Namer1 b54]
+0x002251A0	btlChooseSatanGroupAwareCamera	inferred	confidence=high; LiteralSATAN:I diagnostics do not establish Idle; random cases0/1 mark all defeat candidates, case2 clears all/marks linkedgroup only. DuplicateI-0 labels unchanged. [Namer1 b54]
+0x00225778	btlUpdateSatanDefeatCamera	inferred	confidence=high; Scene31B defeatCameraHook forwards special preset, captures s32 result and preserves consumed rotate reset; provider enemy127 indexed Satan plus adjacent SATAN diagnostics. Cedar released6138676534/6138683107; Sable/Tidal reconstruction retained. [Namer1 b54]
+0x002259A0	btlSelectSatanLinkedActionCamera	inferred	confidence=high; Scene31B cameraPoseBlendHook gates actor side/linked effect trigger/animation-camera kinds, then uses Satan group-aware/random keys or linked framing. [Namer1 b54]
+0x00225B48	btlUpdateSatanApproachCameraStep	inferred	confidence=high; Scene31B party decimal14=0xE camera branch parallels party approach; nonparty action109 also sets runtime2000. Not request0x14. [Namer1 b54]
+0x002261A8	btlFinishSatanActionCamera	inferred	confidence=high; Scene31B flag-tail camera hook selects Satan fixed/special/exchange paths, preserves state resets/runtime2000 clear and unhandled0. [Namer1 b54]

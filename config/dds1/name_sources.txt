@@ -8816,3 +8816,5 @@
 0x00277DF0	mnuNoOpItemSelectionTeardown	inferred	confidence=high; Empty item-selection teardown hook before releasing its allocation. [LiteH b25]
 0x0027CEE8	mnuSpinForWindowListCount	inferred	confidence=high; Busy-spins by decrementing the window list count to zero; DDS2 counterpart 0x002B9FB8. [LiteH b25]
 0x00289D50	fileSubmitMemoryCardDetectionRequest	inferred	confidence=high; Submits fileMemoryCardRequestIndex to the file request runner when card detection starts. [LiteH b25]
+0x002045E8	btlBuildProgressiveApproachCameraPose	inferred	confidence=high; Motion/scale-derived progress capped above1 interpolates0.55..0.60 pull-back; zero-coefficient35-degree expression and default-plane adjustment retained. Differs from DDS2 explicit-angle builder. [Namer1 b54]
+0x0020B560	btlUpdateLinkedDefeatCamera	inferred	confidence=high; Scene10E defeatCameraHook forwards presetA, captures s32 result and preserves consumed-command NULL staging; paired DDS2 scene30B adapter uses the same generic name despite different boss/preset data. Cedar released6137278646; body unchanged. [Namer1 b54]

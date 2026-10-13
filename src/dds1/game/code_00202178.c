@@ -791,9 +791,9 @@ extern f32 func_002FA148(f32);
 extern void func_002DD688(f32);
 
 
-/* Frame one unit approaching its target (DDS2 func_00217470 without the explicit angle): the pull-back and the
-   swing angle interpolate with how far the command's state has advanced (ratio, capped at 1). */
-void func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift) {
+/* Pull-back uses 0.55 + ratio * (0.60 - 0.55), with progress capped only above 1.
+ * Retain the zero-coefficient angle expression and plane adjustment, unlike btlBuildAngledApproachCameraPose. */
+void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -4397,7 +4397,8 @@ s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-s32 func_0020B560(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+/* Forward the linked defeat preset, preserving its signed result and consumed-command staging. */
+s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetLinkedDefeatCameraPresetA(command, camera, rotate);
     /* Retail 0020B568 uses JAL plus restores. This consumed-command reset
      * is the function-owned state exception in CONTRIBUTING: qualified
@@ -4445,22 +4446,22 @@ s32 btlUpdateSpecialTargetCamera(BtlLinkedCommand *command) {
             }
             switch (target->partyRecord.unitId) {
             case 0x11B:
-                func_002045E8(command, &command->camera, 0.5f, -0.1f);
+                btlBuildProgressiveApproachCameraPose(command, &command->camera, 0.5f, -0.1f);
                 return 1;
             case 0x13D:
             case 0x13E:
                 if (command->state == 0) {
-                    func_002045E8(command, &command->camera, 1.25f, 1.0f);
+                    btlBuildProgressiveApproachCameraPose(command, &command->camera, 1.25f, 1.0f);
                     btlFlagAllUnitDefeatCandidatesTask();
                 }
                 return 1;
             case 0x13F:
             case 0x140:
-                func_002045E8(command, &command->camera, 0.5f, 0.0f);
+                btlBuildProgressiveApproachCameraPose(command, &command->camera, 0.5f, 0.0f);
                 return 1;
             case 0x141:
             case 0x142:
-                func_002045E8(command, &command->camera, -0.5f, 0.0f);
+                btlBuildProgressiveApproachCameraPose(command, &command->camera, -0.5f, 0.0f);
                 return 1;
             }
         }
