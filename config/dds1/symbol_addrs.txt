@@ -7465,6 +7465,7 @@ itfReturnThirdCallbackValue = 0x00198020; // type:func
 kwlnDrawTextureResourceDetails = 0x00104810; // type:func
 kwlnUnregisterNamedSlot = 0x00103218; // type:func
 kwlnInitHeldTextureScenePackets = 0x00105370; // type:func
+kwlnDrawBackgroundFadeBands = 0x00106368; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -8216,7 +8217,6 @@ func_00104260 = 0x00104260; // type:func
 kwlnInitializeFrameDrawPackets = 0x00105150; // type:func
 func_00105890 = 0x00105890; // type:func
 func_00105DD8 = 0x00105DD8; // type:func
-func_00106368 = 0x00106368; // type:func
 func_001083F8 = 0x001083F8; // type:func
 evtSubmitPrimaryFramePacket = 0x00108E60; // type:func
 evtSubmitAlternateFramePacket = 0x00108F00; // type:func

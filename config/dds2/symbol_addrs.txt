@@ -7112,6 +7112,7 @@ btlGetConditionalEncounterInterval = 0x0011E848; // type:func
 btlAdvanceConditionalEncounterRoll = 0x0011E930; // type:func
 kwlnDrawTextureResourceDetails = 0x00104700; // type:func
 kwlnUnregisterNamedSlot = 0x00103108; // type:func
+kwlnDrawBackgroundFadeBands = 0x00106288; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -8982,7 +8983,6 @@ kwlnInitializeFrameDrawPackets = 0x00105070; // type:func
 kwlnInitHeldTextureScenePackets = 0x00105290; // type:func
 func_001057B0 = 0x001057B0; // type:func
 func_00105CF8 = 0x00105CF8; // type:func
-func_00106288 = 0x00106288; // type:func
 func_00108318 = 0x00108318; // type:func
 evtSubmitPrimaryFramePacket = 0x00108D80; // type:func
 evtSubmitAlternateFramePacket = 0x00108E20; // type:func

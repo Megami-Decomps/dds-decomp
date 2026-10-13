@@ -1679,7 +1679,7 @@ void kwlnStepBackgroundFade(void) {
     }
 }
 
-void func_00106288(void) {
+void kwlnDrawBackgroundFadeBands(void) {
     s16 firstRamp = 0;
     s16 secondRamp = 0;
     s32 fade;
