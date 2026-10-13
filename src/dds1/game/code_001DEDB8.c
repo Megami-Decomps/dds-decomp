@@ -232,7 +232,7 @@ extern s32 mdlFlagTest(u32);
 
 extern void func_001DEFE0(BtlLinkedCommand *, BtlCamState *, f32);
 
-extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
@@ -546,7 +546,7 @@ s32 func_001DEFA0(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001DEFE0);
 
-void func_001DF358(BtlLinkedCommand *command, BtlCamState *pose) {
+void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
     func_001DEFE0(command, pose, 27.5f);
 }
 
@@ -1044,7 +1044,7 @@ f32 angle, f32 blend) {
         }
     }
     if (first == NULL || last == NULL) {
-        func_001DF358(command, pose);
+        btlSetDefaultActionCameraPose(command, pose);
         return;
     }
     if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
@@ -1155,7 +1155,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
 
     user = action->task->unit;
     if (btlGetIndexListCount(action->targetList) >= 2U) {
-        func_001DF358(action, out);
+        btlSetDefaultActionCameraPose(action, out);
         return;
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
@@ -1419,7 +1419,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     if (!(user->status.flags & target->status.flags & 0x600)) {
         btlFlagAllUnitsDefeatCandidate();
     } else {
-        func_001DF358(command, &command->camera);
+        btlSetDefaultActionCameraPose(command, &command->camera);
         return;
     }
     btlFrameSingleTargetActionCamera(command, &command->frontCamera);
@@ -1969,7 +1969,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
             break;
         }
     }
-    func_001DF358(command, out);
+    btlSetDefaultActionCameraPose(command, out);
     btlCopyMotionTransform(pose, out);
     span = func_001F66D8(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;

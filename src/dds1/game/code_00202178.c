@@ -3443,7 +3443,7 @@ void func_00209528(void) {
     }
 }
 
-extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 /* Event entry carrying a battle task and its action kind. */
 typedef struct BtlEventEntry {
@@ -3471,7 +3471,7 @@ s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry) {
     kind = entry->status;
     if (kind < 9) {
         if (kind >= 4) {
-            func_001DF358(entry, &entry->camera);
+            btlSetDefaultActionCameraPose(entry, &entry->camera);
             entry->flags |= 0x1000;
             return 0;
         }
