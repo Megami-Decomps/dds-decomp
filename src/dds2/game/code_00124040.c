@@ -1776,7 +1776,7 @@ u8 fldIsFlagActive(void) {
     return 1;
 }
 
-void func_00126B70(void) {
+void fldConfigureRenderCleanupMessage(void) {
     sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003807F8, (s32)D_0037FF88, (u32 *)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
 }
 
@@ -2520,7 +2520,7 @@ u8 fldIsFieldResourceWaitFinished(void) {
     return sdfCheckPendingWorkWithInterrupts() == 0;
 }
 
-void func_001285E8(void) {
+void fldApplyTerminalActorSelection(void) {
     fldSelectActorFromSceneIndexTables();
 }
 

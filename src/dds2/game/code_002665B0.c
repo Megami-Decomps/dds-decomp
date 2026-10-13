@@ -1004,7 +1004,7 @@ extern s32 dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
-extern void func_001285E8(s32 a, s32 b);
+extern void fldApplyTerminalActorSelection(s32 a, s32 b);
 extern void fldProcessDeferredSceneCommand(void);
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
@@ -1025,7 +1025,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
     }
-    func_001285E8(work->reduced, work->slot);
+    fldApplyTerminalActorSelection(work->reduced, work->slot);
     fldProcessDeferredSceneCommand();
 }
 
