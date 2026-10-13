@@ -4,29 +4,6 @@
 #include "evt_solar.h"
 
 
-typedef struct SolarNoiseDebugData {
-    const char *label;
-    u32 unused;
-    char format[4];
-} SolarNoiseDebugData;
-
-
-typedef struct SolarSpriteContext {
-    u8 pad00[0x18];
-    SolarSpriteLayer *layers;
-} SolarSpriteContext;
-
-typedef struct SolarOverlayShape {
-    s32 *primaryPositions;
-    u32 *primaryColors;
-    s32 primaryCount;
-    s32 *positions;
-    u32 *colors;
-    s32 count;
-    s32 *tailPositions;
-    s32 tailCount;
-} SolarOverlayShape;
-
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00243AD8(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
