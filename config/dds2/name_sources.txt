@@ -652,6 +652,7 @@
 0x00125F58	fldPreparePlayerSceneCameraTarget	inferred	readability/matching review (QP16)
 0x00126000	fldResetPlayerSceneObjectState	inferred	Notifies the active player object with zero, clears a scene control flag and sets the scene state to four. [names_reviewed5.tsv]
 0x001265D0	fldCreateSecondaryWorldCamera	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:1739:func_001265D0; Creates secondary-world camera and initializes vectors, transform and callback before activating it.; twin=0x001242B8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001266E0	fldGetDefaultSceneCommandValue	inferred	Returns 100, the default fldAreaState.sceneCommand value and scene-light-set index used by both command activation paths.
 0x001266E8	fldConsumeSceneCommandFlag	inferred	If scene command flag is set, clears it and records the consumed event bit. [names_reviewed5.tsv]
 0x00126730	fldClearSceneCommandFlag	inferred	Clears the field scene-command flag and its corresponding consumed state bit, plus DDS2 overlay state. [names_reviewed5.tsv]
 0x00126778	fldActivatePendingSceneCommand	inferred	When the scene command is enabled, sets its model flag, plays a sound and starts the command speed. [names_reviewed15.tsv]

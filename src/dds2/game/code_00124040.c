@@ -1617,7 +1617,7 @@ s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target) {
     return 0;
 }
 
-u32 func_001266E0(void) {
+u32 fldGetDefaultSceneCommandValue(void) {
     return 100;
 }
 
@@ -1649,7 +1649,7 @@ void fldActivatePendingSceneCommand(void) {
             fldPlayMenuSound(0x29);
         }
         mdlFlagSet(0x818);
-        value = func_001266E0();
+        value = fldGetDefaultSceneCommandValue();
         fldAreaState.sceneCommand = value;
         datGameState->world.fieldFlags |= 8;
         fldAreaState.consumedFlags &= ~1;
@@ -1679,7 +1679,7 @@ void fldUpdateSceneCommandSpeed(void) {
         }
     } else if ((datGameState->world.fieldFlags & 8) != 0) {
         if (scene->sceneCommand == 0) {
-            value = func_001266E0();
+            value = fldGetDefaultSceneCommandValue();
             scene->sceneCommand = value;
             fldApplySceneLightSet((s16)value, 0x14);
         }
