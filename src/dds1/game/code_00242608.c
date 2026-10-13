@@ -1624,7 +1624,7 @@ extern char (*D_003BAA84)[25];
 extern u32 D_00369FA0[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
 extern u32 func_002CD7F8(u32 itemId);
-extern void func_0027C788(MenuWindowContainer *window);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
 
 s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
     s32 rowIndex;
@@ -1651,7 +1651,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
                 continue;
             }
             node = mnuAppendWindowListNode(scene->window, D_003BAA84[id]);
-            func_0027C788(scene->window);
+            mnuClearWindowListSelectionFlags(scene->window);
             mnuAdvanceListCursorDefault(scene->window->list);
             params = &node->camp;
             price = func_00244D10(i, 0);
@@ -1691,7 +1691,7 @@ extern char (*D_003BAA84)[25];
 extern u32 D_00369FA0[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
 extern u32 func_002CD7F8(u32 itemId);
-extern void func_0027C788(MenuWindowContainer *window);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
 
 s32 mnuBuildShopCatalogList(ShopScene *scene) {
     u8 *entryCursor;
@@ -1714,7 +1714,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
         if (mode != 1) {
             if ((u32)(itemId - 0xA0) < 0x20) {
                 node = mnuAppendWindowListNode(scene->window, D_003BAA84[itemId]);
-                func_0027C788(scene->window);
+                mnuClearWindowListSelectionFlags(scene->window);
                 mnuAdvanceListCursorDefault(scene->window->list);
                 parameters = &node->camp;
                 price = func_00244D10(i, 0);
@@ -1878,7 +1878,7 @@ typedef struct {
 extern s32 mnuTickExtendedCommandPhase(ShopScene *);
 extern void mnuSetSelectionListTransition(struct MenuList *, u32);
 extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
-extern void func_0027C788(MenuWindowContainer *);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_0036AAF4[];
@@ -2006,7 +2006,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
                 mnuSetCommandPhase(state, 2);
                 mnuSetSelectionListTransition(list, 4);
             } else if (!(input & 0x300000)) {
-                func_0027C788(state->sprite);
+                    mnuClearWindowListSelectionFlags(state->sprite);
             } else if (input & 0x10) {
                 mnuRetreatWindowListSelection(state->sprite);
             } else if (input & 0x20) {
@@ -2123,7 +2123,7 @@ s32 func_00246220(KwlnTask *task) {
                     mnuSetCommandPhase((ShopScene *)stateAddress, 5);
                     mnuSetSelectionListTransition(linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
-                    func_0027C788(((ShopScene *)stateAddress)->window);
+                    mnuClearWindowListSelectionFlags(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
                     mnuRetreatWindowListSelection(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x20) {
@@ -2244,7 +2244,7 @@ s32 func_002465F8(KwlnTask *task) {
                     mnuSetCommandPhase((ShopScene *)stateAddress, 5);
                     mnuSetSelectionListTransition(linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
-                    func_0027C788(((ShopScene *)stateAddress)->window);
+                    mnuClearWindowListSelectionFlags(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
                     mnuRetreatWindowListSelection(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x20) {
@@ -2353,7 +2353,7 @@ s32 func_002469F0(KwlnTask *task) {
                     mnuSetCommandPhase((ShopScene *)stateAddress, 5);
                     mnuSetSelectionListTransition(linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
-                    func_0027C788(((ShopScene *)stateAddress)->window);
+                    mnuClearWindowListSelectionFlags(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
                     mnuRetreatWindowListSelection(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x20) {

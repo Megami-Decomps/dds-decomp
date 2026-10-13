@@ -209,7 +209,7 @@ void mnuReleaseStaffExtraWindow(StaffDisplayContext *context) {
 }
 
 /* Refresh the sorted bullet-item list after equipment changes. */
-s32 func_00273220(s32 itemId, s32 previousItemId, void *owner) {
+s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, void *owner) {
     s32 previousCursorId = -1;
     s32 needsInsertion = 0;
     s32 insertBefore = 0;
@@ -296,7 +296,7 @@ s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
     return 1;
 }
 
-extern void func_0027C788(MenuWindowContainer *);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0037C9C8[];
@@ -348,7 +348,7 @@ s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
         window = context->activeWindow;
         if (window != NULL) {
             if ((input & 0x300000) == 0) {
-                func_0027C788(window);
+                mnuClearWindowListSelectionFlags(window);
             }
             if (input & 0x10) {
                 mnuRetreatWindowListSelection(window);
@@ -483,7 +483,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
         window = resources->windows[0];
         if (window != NULL) {
             if ((input & 0x300000) == 0) {
-                func_0027C788(window);
+                mnuClearWindowListSelectionFlags(window);
             }
             if (input & 0x10) {
                 mnuRetreatWindowListSelection(window);

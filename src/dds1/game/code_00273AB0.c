@@ -47,8 +47,8 @@ typedef struct StaffImageChoices {
     MenuWindowContainer *list;
     s32 currentSelection; /* 0x14 */
     s32 inputState; /* 0x18: reset before input-state polling; set before cancel popup */
-    s32 itemToInsert; /* 0x1C: func_00273220 insertion key */
-    s32 inventoryItem; /* 0x20: func_00273220 inventory lookup */
+    s32 itemToInsert; /* 0x1C: mnuRefreshStaffBulletItemList insertion key */
+    s32 inventoryItem; /* 0x20: mnuRefreshStaffBulletItemList inventory lookup */
     s32 listState; /* 0x24 */
     s32 pendingItem; /* 0x28: successful staff-item use, cleared by exit */
 } StaffImageChoices;
@@ -84,7 +84,7 @@ typedef char StaffImageContext_size_check[
     sizeof(StaffImageContext) == 0x924 ? 1 : -1];
 typedef char StaffImageContext_page_list_check[
     (u32)&((StaffImageContext *)0)->pageWindow.lists[0] == 0x7D8 ? 1 : -1];
-extern s32 func_00273220(s32 itemToInsert, s32 inventoryItem, void *context);
+extern s32 mnuRefreshStaffBulletItemList(s32 itemToInsert, s32 inventoryItem, void *context);
 
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow();
@@ -95,7 +95,7 @@ extern void mnuReleaseStaffExtraWindow();
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
-extern void func_0027C788(MenuWindowContainer *);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo();
 
@@ -209,7 +209,7 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     window = menu->secondaryObject;
     if (window != NULL) {
         if (!(buttons & 0x300000)) {
-            func_0027C788(window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
             mnuRetreatWindowListSelection(window);
@@ -466,7 +466,7 @@ s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
     return 1;
 }
 
-s32 func_00274768(KwlnTask *task) {
+s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
     StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = context->menu;
     u32 buttons = mnuMapPadMaskToFlags(0x33);
@@ -490,7 +490,7 @@ s32 func_00274768(KwlnTask *task) {
 
         list = menu->list;
         if (!(buttons & 0x300000)) {
-            func_0027C788(list);
+            mnuClearWindowListSelectionFlags(list);
         }
         if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
             mnuRetreatWindowListSelection(list);
@@ -524,7 +524,7 @@ s32 func_00274768(KwlnTask *task) {
         }
         mnuPlayInputSound(0, buttons, (u32 *)list->list);
     } else {
-        if (func_00273220(menu->itemToInsert, menu->inventoryItem, context) == 0) {
+        if (mnuRefreshStaffBulletItemList(menu->itemToInsert, menu->inventoryItem, context) == 0) {
             mnuClearListFlags(0, &context->pageWindow);
             mnuSetPopupEntryFlagged(&context->popupState, (void *)D_0037C9AC);
         } else {

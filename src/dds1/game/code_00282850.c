@@ -897,7 +897,7 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284418);
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002845F8);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawAndAdvanceRatioPanel);
 
 void func_00284880(void) {
 }

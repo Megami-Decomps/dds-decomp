@@ -40,7 +40,7 @@ extern void *memset(void *, s32, u32);
 
 extern s32 mnuHandleCampFieldSkillInput(KwlnTask *);
 
-extern void func_002AB0E0();
+extern void mnuDrawCampFieldSkillPage();
 
 extern s32 mnuFinishStaffConfigPopup(s32);
 
@@ -90,7 +90,7 @@ extern void mnuDrawCampIconBackdrop(u8 *, s32);
 
 extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
-extern void func_002BB510(s32, s32, s32, s32, s32);
+extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 
 
 extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, struct EffectSlotSet *, u8 *, s32);
@@ -889,7 +889,7 @@ void mnuCreateCampTasks(void) {
 
     menuAddress = (s32)mnuCreateStaffMenuWork();
     kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
-    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002AB0E0, 0, menuAddress);
+    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawCampFieldSkillPage, 0, menuAddress);
     kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, menuAddress);
     func_00101968(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, menuAddress));
     func_00101968(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));
@@ -1029,7 +1029,7 @@ typedef struct StaffFramePiece {
 typedef char StaffFramePiece_size_check[sizeof(StaffFramePiece) == 0xC ? 1 : -1];
 extern const StaffFramePiece D_0042AC40[], D_0042AC70[];
 
-void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
+void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 context,
                    u32 drawOption, u32 textOption, u32 conditionTable,
                    u32 labelOffset, u32 layer) {
     StaffFramePiece primary[4];
@@ -1079,10 +1079,10 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
     }
 }
 
-extern void func_002AA9D8(s32, u32, u32, u32, u32, u32, u32, u32, u32);
+extern void mnuDrawCampGridFrameAndLabel(s32, u32, u32, u32, u32, u32, u32, u32, u32);
 
 void mnuDrawCampGridAndLabel(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 textOption, u32 layer) {
-    func_002AA9D8(kind, labelIndex, textTable, context, drawOption, textOption, 0, 0, layer);
+    mnuDrawCampGridFrameAndLabel(kind, labelIndex, textTable, context, drawOption, textOption, 0, 0, layer);
 }
 
 void mnuDrawCampGridAndLabelDefault(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 layer) {
@@ -1124,7 +1124,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
         break;
     }
     if (mnuInitializeCampMenuWhenResourcesReady(task) != 0) {
-        func_002BB510(-0x10, -8, 0, visual->scrollPanel, 0x53);
+        mnuDrawStaffScrollPanel(-0x10, -8, 0, visual->scrollPanel, 0x53);
         mnuDrawPanelListDefault(0, 0, 0, &visual->partyWindow, 0x53);
         mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->resources.baseResources[1], work, 0x53);
     }
