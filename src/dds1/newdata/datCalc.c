@@ -1070,7 +1070,7 @@ u32 ptyReturnZero(void) {
     return 0;
 }
 
-u32 func_0011B148(void) {
+u32 ptyReturnOneForCommand193(void) {
     return 1;
 }
 

@@ -150,7 +150,7 @@ EffWorldNode *evtSpawnActionObj11(s32 key, EvtWorldSourceTransformPrefix *source
     return obj;
 }
 
-void *func_00117648(EffWorldNode *node) {
+void *dds3GetTransformSourceData(EffWorldNode *node) {
     return node->data;
 }
 

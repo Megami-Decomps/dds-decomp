@@ -828,7 +828,7 @@ typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable)
 extern FieldAreaEncounterTable *D_003BAA38;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
 
-extern void *func_00117648(EffWorldNode *node);
+extern void *dds3GetTransformSourceData(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
@@ -882,7 +882,7 @@ void fldRebuildFieldScene(void) {
             node = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(),
                 0x11, (const u8 *)sceneWork->entryName);
             if (node != NULL) {
-                transform = func_00117648(node);
+                transform = dds3GetTransformSourceData(node);
             } else {
                 transform = fallback;
             }

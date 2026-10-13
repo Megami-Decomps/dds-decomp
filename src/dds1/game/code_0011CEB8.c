@@ -6,7 +6,7 @@
 extern s32 scrReadIntParameter(s32);
 /* The native VM commands pass operands to these parameterless party stubs. */
 extern u32 ptyReturnZero();
-extern u32 func_0011B148();
+extern u32 ptyReturnOneForCommand193();
 extern u32 ptyReturnOne();
 
 extern void frFontSetGlyphPosition(struct FrFontGlyph *glyph, u32 x, u32 y);
@@ -20,7 +20,7 @@ u32 ptyScriptRemoveUnitAndReturnResult(void) {
 }
 
 /* Evaluate a two-operand VM expression and publish its result. */
-u32 func_0011CEF0(void) {
+u32 ptyScriptSetZeroResultCommand192(void) {
     s32 firstOperand;
     s32 secondOperand;
 
@@ -31,17 +31,17 @@ u32 func_0011CEF0(void) {
     return 1;
 }
 
-u32 func_0011CF38(void) {
+u32 ptyScriptSetOneResultCommand193(void) {
     s32 firstOperand;
     s32 secondOperand;
 
     firstOperand = scrReadIntParameter(0);
     secondOperand = scrReadIntParameter(1);
-    scrSetIntegerReturnValue(func_0011B148(firstOperand, secondOperand) == 1);
+    scrSetIntegerReturnValue(ptyReturnOneForCommand193(firstOperand, secondOperand) == 1);
     return 1;
 }
 
-u32 func_0011CF88(void) {
+u32 ptyScriptSetOneResultCommand194(void) {
     scrSetIntegerReturnValue(ptyReturnOne(scrReadIntParameter(0)) == 1);
     return 1;
 }
