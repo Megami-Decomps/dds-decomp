@@ -171,7 +171,7 @@ SdfDmaTagHeader *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexe
     return payload + 1;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7FB0);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildIndexedCommandPackets);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8130);
 
