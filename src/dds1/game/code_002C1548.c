@@ -19,7 +19,8 @@ void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind);
 
 void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
-void func_002C1548(s32 unused, s32 surface) {
+/* Dispatch prepared texture data and configure the menu background surface. */
+void uiPrepareMenuBackgroundSurface(s32 unused, s32 surface) {
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
     sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
     sdfSubmitGsAlphaOneRegisterPacket(0x54, surface);

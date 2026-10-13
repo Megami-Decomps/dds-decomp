@@ -1017,7 +1017,7 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
 }
 
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
-extern void func_002C1548(s32, s32);
+extern void uiPrepareMenuBackgroundSurface(s32, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 /* Draw the filled profile bar and its animated background strips. */
 void mnuDrawProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
@@ -1047,7 +1047,7 @@ void mnuDrawProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surfa
     if (index != panel->background.index) {
         uiDrawTexturedSurfaceAtFarDepth(surface);
         itfDrawGridWithResolvedSlot(x, y, z, 0x21, slots, index, surface);
-        func_002C1548(0, surface);
+        uiPrepareMenuBackgroundSurface(0, surface);
         slots = panel->background.set;
         index = panel->background.index;
         offset = (s32)((u32)panel->phase << 7) / 0x200;
