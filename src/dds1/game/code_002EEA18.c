@@ -15,6 +15,7 @@
 #include "sdf_pac_work.h"
 #include "sdf_key_pool.h"
 #include "sdf_packet_alloc.h"
+#include "sdf_stream_state.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -400,23 +401,7 @@ void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 he
     header->unk00 = 2;
 }
 
-/* Command 34 carries a buffer address and byte count after an opaque first word. */
-typedef struct SdfStreamReadRequest {
-    u8 pad00[4];
-    s32 destinationAddress;
-    s32 byteCount;
-} SdfStreamReadRequest;
-
-typedef struct SdfStreamCfg {
-    DevState *deviceState;
-    s32 semaphore;
-    s32 readResult;
-    s32 remainingBytes;
-    s32 destinationAddress;
-    s32 transferredBytes;
-} SdfStreamCfg;
-
-extern SdfStreamCfg D_003FF340;
+extern SdfStreamState D_003FF340;
 extern u8 D_003FF4C0[];
 extern s32 D_003FF480[];
 extern DevState *sdfDevCreateCallbackState(const char *, s32 (*)(DevState *, s32, s32, s32, s32), s32);
@@ -443,7 +428,7 @@ extern s32 func_002CF930(void);
 
 s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
-    SdfStreamCfg *stream = &D_003FF340;
+    SdfStreamState *stream = &D_003FF340;
     s32 dmaId;
     s32 timer;
 
@@ -499,7 +484,7 @@ s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAdd
  * request is a scalar argument except for a read command, which carries a read-request address.
  * An unrecognized command leaves the shared reply unchanged. */
 s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
-    SdfStreamCfg *state = &D_003FF340;
+    SdfStreamState *state = &D_003FF340;
     DevState *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
@@ -555,7 +540,7 @@ extern s32 D_003BDAC4;
 extern u8 D_003FF380[];
 extern u8 sdfPfsDebugMode;
 void func_002EF698(void) {
-    SdfStreamCfg *stream = &D_003FF340;
+    SdfStreamState *stream = &D_003FF340;
     SceIoStat info;
     u8 queue[0x20];
     u8 server[0x50];
