@@ -1,5 +1,6 @@
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
+#include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_message.h"
@@ -945,22 +946,6 @@ u32 fldGetSceneStatusCode(void) {
     return sceneWork->primaryState != 0 ? 2 : 0;
 }
 
-/* Sixteen area records, each with sixty-four twelve-byte room choices. */
-typedef struct FieldAreaEncounterRow {
-    s32 defaultEncounter;
-    s16 flagA;
-    s16 valueA;
-    s16 flagB;
-    s16 valueB;
-} FieldAreaEncounterRow;
-
-typedef struct FieldAreaEncounterTable {
-    s32 area;
-    FieldAreaEncounterRow rooms[64];
-} FieldAreaEncounterTable;
-
-typedef char FieldAreaEncounterRow_size_check[(sizeof(FieldAreaEncounterRow) == 12) ? 1 : -1];
-typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable) == 0x304) ? 1 : -1];
 extern FieldAreaEncounterTable *D_00435E08;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
 
