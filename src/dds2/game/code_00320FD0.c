@@ -204,7 +204,7 @@ MenuResourceRecord *mnuGetResourceRecordByIndex(s32 recordIndex) {
     return &mnuResourceRecords[recordIndex];
 }
 
-s32 func_00321340(MenuProgressState *progressState) {
+s32 mnuTriggerProgressResourceRecords(MenuProgressState *progressState) {
     s32 i;
 
     for (i = 0; i < mnuResourceRecordCount; i++) {
