@@ -427,8 +427,8 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-extern char *func_00302240(const char *, s32);
-extern s32 func_003017A0(const char *, const char *);
+extern char *strrchr(const char *, s32);
+extern s32 strcasecmp(const char *, const char *);
 extern char D_003BBB68[];
 extern void sdfCreateSemaphoreFromOptions(void);
 extern s32 mdlRequestLoadWithCallback(s32, s32, s32, const char *, void (*)(u32), u32);
@@ -460,9 +460,9 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     selection += id;
     paths = &((MdlResourcePath *)D_00365858[selection->pathTable].entries)[selection->pathIndex];
     packedBundle = 0;
-    extension = func_00302240(paths->path, '.');
+    extension = strrchr(paths->path, '.');
     if (extension != NULL) {
-        packedBundle = func_003017A0(extension, D_003BBB68) == 0;
+        packedBundle = strcasecmp(extension, D_003BBB68) == 0;
     }
     btlAddGroupId(group, id);
     SignalSema(mdlGroupJobSemaphore);
