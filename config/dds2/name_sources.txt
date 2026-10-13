@@ -4344,6 +4344,7 @@
 0x00296B48	mnuDrawShopZeroValueIconAndText	inferred	Draws the fixed shop icon and formats a zero value during terminal transitions.
 0x00296C58	mnuDrawShopSelectedRowTotal	inferred	Draws the selected shop row's price as unit value multiplied by the requested quantity. Paired DDS1 0x0025FFC8.
 0x00296D90	mnuDrawShopCurrencyBalance	inferred	Interpolates the shop's displayed currency balance from the saved value over 20 frames, then draws it. Paired DDS1 0x00260100.
+0x00297000	mnuDrawCommandCategoryWithCompanion	inferred	Draws the selected command category sprite and its animated companion during menu transitions.
 0x002971C0	mnuStorePendingMenuCommandValue	inferred	When a menu command exists, stores its payload and puts its mode into queued state. [names_reviewed17.tsv]
 0x00297898	mnuTickExtendedCommandPhase	inferred	src/dds2/game/code_00296E98.c func_00297898: Ticks timed command phases with ten-frame thresholds and returns immediate phases unchanged. Twin of DDS1 func_002609D8. [names_reviewed24.tsv]
 0x00298570	mnuTickCommandWaitPhase	inferred	confidence=high; matched-C; src/dds2/game/code_00296E98.c:173:func_00298570; Handles wait phases nine through twelve; advances the frame counter for delayed phases and reports their mode only at the required threshold. Supersedes the earlier phase-nine-only proposal.; source=names_pending_main.tsv:125 [names_qp11.tsv]
