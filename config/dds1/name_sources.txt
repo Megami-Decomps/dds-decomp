@@ -1137,7 +1137,7 @@
 0x00146DC8	fldFindNextMarkedValue	inferred	Byte-identical dds2 twin 0x0014AD38; Scans the same floor flags and returns the least recorded value above its argument or the argument if none [names_conflicts.tsv]
 0x00146E98	fldGetSceneEntryPosition	inferred	fld field scene and resources in game/code_001411F0.c
 0x00146EE8	fldGetVisibleSceneBounds	inferred	scans visible scene item endpoints and computes X/Z extrema [names_R_FuncNames2.tsv]
-0x001470A0	fldCheckSceneReady	inferred	calls func_001462D8 when D_0032E3C0 scene < 200 and D_003BAED8 == 1; parked for jal+epilogue tail where C sibcalls
+0x001470A0	fldCheckSceneReady	inferred	calls fldUpdateAutomapInput when D_0032E3C0 scene < 200 and D_003BAED8 == 1; parked for jal+epilogue tail where C sibcalls
 0x00147118	fldResetCameraAndSceneView	inferred	re-centers camera and calls scene initialization helper [names_R_FuncNames2.tsv]
 0x00147138	fldClearAllAreaFloorFlags	inferred	zeros 13 x 64 floor flags in save work [names_R_FuncNames2.tsv]
 0x001474A0	fldLoadFieldEffectTextureSlots	inferred	loads four named field EPL resources into effect slots [names_R_FuncNames2.tsv]
@@ -8866,3 +8866,8 @@
 0x0023B200	evtEditPositionOverlaySettings	inferred	Edits event-viewer X/Y and overlay settings, applies updates through the group setter, and restores captured values on cancel. Exact DDS2 pair: 0x002560B0. [LiteH b29]
 0x001536A0	effInitializeEmitterSubsystem	inferred	confidence=medium; Empty retail startup hook called by effManagerInitializeSubsystems before particle and billboard startup. Its owning implementation contains emitter buffer/template initialization and emitter-delay RNG state. DDS2 15B290 is the same hook. [Namer1 b61]
 0x0015B250	parInitializeParticleSubsystem	inferred	confidence=high; Same empty startup hook, particle owning unit and effManagerInitializeSubsystems call position as already-named DDS2 162E40; adopts that established spelling without adding behavior. [Namer1 b61]
+0x00142D78	fldDrawAutomapScene	inferred	confidence=high; Draws selected-floor automap geometry, explored cells, icons, player marker and labels. DDS2 146250 shares the complete rendering role. [PurC readability b1]
+0x001462D8	fldUpdateAutomapInput	inferred	confidence=high; Handles automap close/reset controls and 600-unit grid panning, clamps to visible scene bounds and refreshes the overhead camera. DDS2 14A258 counterpart. [PurC readability b1]
+0x001470E0	fldDrawAutomapWhenReady	inferred	confidence=high; When fldSceneReady is exactly1, draws the backdrop and automap scene; invoked by fldProcDraw. DDS2 14B050 counterpart. [PurC readability b1]
+0x0014A298	fldSetTitleDrawMode	inferred	confidence=high; Stores the title draw mode selecting display buffer53 versus5E in fldTitle; event timeline track1E supplies the mode. DDS2 14E668 counterpart. [PurC readability b1]
+0x0014A2C8	fldBeginTitleAnimation	inferred	confidence=high; Clears the title startup countdown and selects phase1, the fade-in animation; event timeline track1E starts it. Does not reset the frame counter. DDS2 14E698 counterpart. [PurC readability b1]

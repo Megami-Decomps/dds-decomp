@@ -1373,7 +1373,7 @@ extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413700);
 
-void func_00146250(void) {
+void fldDrawAutomapScene(void) {
     s32 proposed;
     s32 selectedFloor;
     s32 itemVisible;
@@ -2344,7 +2344,7 @@ u32 fldGetSceneReadyFlag(void) {
 /* Handle automap input, clamp the grid position, and refresh its camera. */
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413788);
 
-void func_0014A258(void) {
+void fldUpdateAutomapInput(void) {
     f32 focus[4];
     f32 eye[4];
     f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
@@ -2752,14 +2752,14 @@ void fldCheckSceneReady(void) {
         return;
     }
     if (fldSceneReady == 1) {
-        func_0014A258();
+        fldUpdateAutomapInput();
     }
 }
 
-void func_0014B050(void) {
+void fldDrawAutomapWhenReady(void) {
     if (fldSceneReady == 1) {
         fldDrawScrollingLayerOverlay();
-        func_00146250();
+        fldDrawAutomapScene();
     }
 }
 
@@ -3517,7 +3517,7 @@ s32 fldGetCurrentSceneSelectionResource(void) {
     return 0;
 }
 
-void func_0014E668(u32 value) {
+void fldSetTitleDrawMode(u32 value) {
     D_00436364 = value;
 }
 
@@ -3525,7 +3525,7 @@ s32 fldTitleIsActive(void) {
     return kwlnTaskGetTaskByName(fldTitleTaskName) != 0;
 }
 
-void func_0014E698(void) {
+void fldBeginTitleAnimation(void) {
     D_0043635C = 0;
     D_00436354 = 1;
 }

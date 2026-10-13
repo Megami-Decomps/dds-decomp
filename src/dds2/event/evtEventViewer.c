@@ -733,8 +733,8 @@ extern void kwlnFadeSetupFrames(s32 mode, s32 frames);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 extern void func_002A7F98(s32 value);
 extern s32 fldTitleIsActive(void);
-extern void func_0014E668(s32 enabled);
-extern void func_0014E698(void);
+extern void fldSetTitleDrawMode(s32 enabled);
+extern void fldBeginTitleAnimation(void);
 extern void kwlnFadeSetMode(s32 mode);
 extern void kwlnFadeBackgroundStartOut(s32 duration);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
@@ -925,11 +925,11 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
     case 30:
         if (position == key->frame && fldTitleIsActive() == 1) {
             if (key->p08.sh[1] != 0) {
-                func_0014E668(1);
+                fldSetTitleDrawMode(1);
             } else {
-                func_0014E668(0);
+                fldSetTitleDrawMode(0);
             }
-            func_0014E698();
+            fldBeginTitleAnimation();
         }
         break;
     case 32:
@@ -1883,7 +1883,7 @@ extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSoundSetChannelCount(u32 channels);
 extern s32 fldTitleIsActive(void);
-extern void func_0014E668(s32 active);
+extern void fldSetTitleDrawMode(s32 active);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
 void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
@@ -1914,7 +1914,7 @@ void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
         sdfSoundSetChannelCount(10);
     }
     if (fldTitleIsActive() == 1) {
-        func_0014E668(0);
+        fldSetTitleDrawMode(0);
     }
     evtViewerCleanupMessageWindow(viewer);
 }
@@ -3598,7 +3598,7 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 extern f32 D_0037F590[];
 extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
-extern void func_0014E668();
+extern void fldSetTitleDrawMode();
 extern void kwlnCancelConfiguredFadeFrames();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
@@ -3617,7 +3617,7 @@ void evtViewerRelease(viewer)
     evtResetUnitVectorSlots();
     evtViewerCleanupMessageWindow(viewer);
     mnuCampLinkFontGlyph(viewer);
-    func_0014E668(0);
+    fldSetTitleDrawMode(0);
     kwlnCancelConfiguredFadeFrames();
     D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
     if (viewer->timedActive == 1) {

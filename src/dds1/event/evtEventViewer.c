@@ -834,8 +834,8 @@ extern s32 evtViewerTestIndexedCondition(u32);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void func_0014A298(u32);
-extern void func_0014A2C8(void);
+extern void fldSetTitleDrawMode(u32);
+extern void fldBeginTitleAnimation(void);
 extern void kwlnCancelConfiguredFadeFrames(void);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);
@@ -982,11 +982,11 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             break;
         }
         if (key->p08.sh[1] != 0) {
-            func_0014A298(1);
+            fldSetTitleDrawMode(1);
         } else {
-            func_0014A298(0);
+            fldSetTitleDrawMode(0);
         }
-        func_0014A2C8();
+        fldBeginTitleAnimation();
         break;
     case 0x20:
         if (frame != key->frame) {
@@ -1842,7 +1842,7 @@ void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
         sdfSoundSetChannelCount(10);
     }
     if (fldTitleIsActive() == 1) {
-        func_0014A298(0);
+        fldSetTitleDrawMode(0);
     }
     evtViewerCleanupMessageWindow(viewer);
 }
@@ -3438,7 +3438,7 @@ extern f32 D_00324590[];
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
-extern void func_0014A298();
+extern void fldSetTitleDrawMode();
 extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
@@ -3453,7 +3453,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
     evtResetUnitVectorSlots();
     evtViewerCleanupMessageWindow(viewer);
     mnuCampLinkFontGlyph(viewer);
-    func_0014A298(0);
+    fldSetTitleDrawMode(0);
     kwlnCancelConfiguredFadeFrames();
     D_00324590[0] = D_00324590[1] = D_00324590[2] = D_00324590[3] = 0.0f;
     if (viewer->timedActive == 1) {
