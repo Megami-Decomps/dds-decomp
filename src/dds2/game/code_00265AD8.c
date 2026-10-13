@@ -440,29 +440,22 @@ void func_00266460(struct EffectSlotSet *object, MenuEffectResources *resources)
     mnuCopyCampEffectRowData(&rows, resources);
 }
 
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D50);
+const char D_00424D50[] __attribute__((aligned(8))) = "s_k_r_bg.spr";
+const char D_00424D60[] __attribute__((aligned(8))) = "karma_bg.spr";
+const char D_00424D70[] __attribute__((aligned(8))) = "karma_01.spr";
+const char D_00424D80[] __attribute__((aligned(8))) = "sun_k_bg.spr";
+const char D_00424D90[] __attribute__((aligned(8))) = "sun_krm1.spr";
+const char D_00424DA0[] __attribute__((aligned(8))) = "bg_seraf.spr";
+const char D_00424DB0[] __attribute__((aligned(8))) = "bg_geil.spr";
+const char D_00424DC0[] __attribute__((aligned(8))) = "bg_sera.spr";
+const char D_00424DD0[] __attribute__((aligned(8))) = "bg_sarf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D60);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D70);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D80);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D90);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DA0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DB0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DC0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DD0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DE0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424E10);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424E30);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424E48);
+const CampMapArguments D_00424DE0 __attribute__((aligned(8))) = {
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+};
+const CampEffectRows D_00424E10 __attribute__((aligned(8))) = {
+    { { 0, 0, 0x200, 0 }, { 0x1000, 0, 0x200, 0 } }
+};
+const char D_00424E30[] __attribute__((aligned(8))) = "/camp/mot/bg.mot";
+const char D_00424E48[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
 
