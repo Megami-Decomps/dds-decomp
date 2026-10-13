@@ -97,7 +97,7 @@ extern const u8 (*D_00435E5C)[25];
 extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
-extern s32 func_00265A60(MenuTerminalContext *);
+extern s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *);
 extern void dspSetActive(s32);
 extern u32 func_00260460(void);
 extern s32 mnuCampFindActiveSlot(void);
@@ -138,7 +138,7 @@ s32 func_00265AD8(KwlnTask *task) {
                         state->delayFrames--;
                     } else if (evtMenuSetProgressFlag(state) != 0) {
                         state->phase = 8;
-                    } else if (func_00265A60(state) != 0) {
+                    } else if (evtMenuSetTypeProgressFlagOnce(state) != 0) {
                         state->phase = 10;
                     } else if (mdlFlagTest(4) == 0) {
                         mnuSetPopupEntryFlagged(dispatchSlot, D_003CE674);

@@ -3662,7 +3662,7 @@ extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
 extern u32 mnuCampChooseSolarWeightedOption(s32 row);
 extern u8 mnuCampChooseWeightedTableValue(void);
 extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
-s32 func_00264710(KwlnTask *task) {
+s32 evtMenuPrepareCampRewardSelection(KwlnTask *task) {
     MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     struct MenuList *activeList = scene->window->list;
     struct MenuListNode *selectedNode = scene->ownedWindows[0]->list->cursor;
@@ -4084,7 +4084,7 @@ s32 evtFinishPopupAfterMenuConfiguration(KwlnTask *callback) {
 }
 
 /* Hand out the captured slot's reward: an item (named in the window) or a currency amount. */
-s32 func_00265408(KwlnTask *task) {
+s32 evtMenuGrantSelectedProgressReward(KwlnTask *task) {
     char text[0x40];
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
@@ -4134,7 +4134,7 @@ extern s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *);
 extern s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *, s32);
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
-s32 func_002655C0(KwlnTask *callback) {
+s32 evtMenuUpdateProgressRewardPopup(KwlnTask *callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
     s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 *popup = &context->popupState;
@@ -4270,7 +4270,7 @@ void mnuAwardCampProgressCurrency(void) {
 }
 
 /* One-shot menu flag: set the object's flag the first time it is not yet set, returning 1 only then. */
-s32 func_00265A60(MenuTerminalContext *object) {
+s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *object) {
     u32 flag = D_003CE460[object->type];
     if (flag == 0) {
         return 0;
