@@ -36,7 +36,7 @@ extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 
-extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
+#include "sdf_vector_transform.h"
 
 extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
 

@@ -44,7 +44,7 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 extern f32 func_00353140(f32);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
-extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
+#include "sdf_vector_transform.h"
 extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
