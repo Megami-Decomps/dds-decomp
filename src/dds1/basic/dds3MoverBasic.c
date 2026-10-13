@@ -5,8 +5,6 @@
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 
-extern void dds3LoadWorldTransformParams(EffWorldNode *, WorldTransformParams *);
-
 extern void effObjInnerVecInit(ObjectTransform *);
 
 

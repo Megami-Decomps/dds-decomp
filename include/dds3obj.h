@@ -172,6 +172,30 @@ typedef struct WorldTransformSetup {
     WorldTransformParams transform;
 } WorldTransformSetup;
 
+/* Confirmed transform payload fields; no total allocation extent is claimed. */
+typedef struct WorldTransformData {
+    f32 position[3]; /* 0x00 */
+    f32 positionW;   /* 0x0C */
+    u8 opaque10[0x30];
+    f32 scale[3];     /* 0x40 */
+    f32 scaleW;       /* 0x4C */
+    f32 rotation[4];  /* 0x50 */
+    u32 mode;         /* 0x60 */
+    u32 flags;        /* 0x64 */
+} WorldTransformData;
+
+void dds3LoadWorldTransformSetup(EffWorldNode *object, WorldTransformSetup *setup);
+void dds3LoadWorldTransformParams(EffWorldNode *object, WorldTransformParams *params);
+
+typedef char WorldTransformData_offsets_must_match_paired_loaders[
+    ((u32)&((WorldTransformData *)0)->position == 0x00 &&
+     (u32)&((WorldTransformData *)0)->positionW == 0x0C &&
+     (u32)&((WorldTransformData *)0)->opaque10 == 0x10 &&
+     (u32)&((WorldTransformData *)0)->scale == 0x40 &&
+     (u32)&((WorldTransformData *)0)->scaleW == 0x4C &&
+     (u32)&((WorldTransformData *)0)->rotation == 0x50 &&
+     (u32)&((WorldTransformData *)0)->mode == 0x60 &&
+     (u32)&((WorldTransformData *)0)->flags == 0x64) ? 1 : -1];
 
 /* Kind-4 world-node data: cached look-at matrix and eye/up vectors (0x90). */
 typedef struct CameraData {
