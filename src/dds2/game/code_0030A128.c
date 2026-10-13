@@ -81,7 +81,7 @@ extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
 extern s32 sdfCreateMaskedCounterChannels(s32, s32);
 extern s32 func_0030B880(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
-extern void func_0030E880(void);
+extern void fldCreateMapRequestQueues(void);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
@@ -633,7 +633,7 @@ void fldInitializeLocalMapScene(void) {
     D_00438894 = index;
     sdfCreateMaskedCounterChannels(mask, index);
     sdfInitializeMapCounterSelection(D_00438894, func_0030B880(mask));
-    func_0030E880();
+    fldCreateMapRequestQueues();
     dspCloseChannel();
     D_004388A4 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
     evtCreateMessageWindowIfMissing(D_004388A8);

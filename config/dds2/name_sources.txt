@@ -5834,6 +5834,7 @@
 0x0030E180	sdfCounterStepDownAnimationValue	inferred	Subtracts two while the animation value is positive, otherwise clears it. [names_reviewed10.tsv]
 0x0030E1A0	mnuDrawAnimatedTransition	inferred	U1
 0x0030E390	fldDrawTransitionBackdrop	inferred	TaskPurist
+0x0030E880	fldCreateMapRequestQueues	inferred	Creates both local-map request queues, installs the halo and pulse callbacks, resets the update interval, and initializes the request counters; DDS1 counterpart at 0x002C7000.
 0x0030E910	fldDrawMapRequestMarker	inferred	Wave4
 0x0030EA70	sdfCommitPendingVectorAndMarkChanged	inferred	Copies a pending vector into the active vector and sets its change flag. [names_reviewed17.tsv]
 0x0030EAA8	fldUpdateMapRequestQueues	inferred	U2

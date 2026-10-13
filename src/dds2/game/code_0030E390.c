@@ -100,7 +100,7 @@ void fldDrawTransitionBackdrop(f32 progress) {
 void func_0030E878(void) {
 }
 
-void func_0030E880(void) {
+void fldCreateMapRequestQueues(void) {
     MapRequestState *state;
     state = sdfCreateLinkedRequestRing(0x14, 0xC);
     D_004390AC = state;
