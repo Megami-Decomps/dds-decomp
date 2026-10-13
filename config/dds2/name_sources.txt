@@ -6649,6 +6649,7 @@
 0x00341C30	sndStartTrackAlternate	inferred	Prepares the same track ID and sends alternate command 0x130 with setting 0x7f.
 0x00341D20	sndDispatchCommandWithoutPayload	inferred	OR caller command with 0x50 and dispatch with null payload and zero length.
 0x00341D48	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
+0x00341D90	sndSubmitTextCommandPayloadWithCommandBits60	inferred	Calculates text byte length and dispatches the payload through sndSendCommandPacket with command ORed with 0x60; paired title counterpart. [code-quality cleanup, 2026-10-13]
 0x00341FE8	sndSendSpatialPosition	inferred	quiet3 twin unification
 0x00342040	sndUpdateScaledListenerState	inferred	src/dds2/game/code_00341FE8.c func_00342040: Converts six values to one-tenth-scale integers and transmits listener packet only when changed. Twin of DDS1 func_002E9198. [names_reviewed24.tsv]
 0x00342168	sndFindPackedTrackLoadStatus	inferred	confidence=high; src/dds2/game/code_00341FE8.c:func_00342168; Synchronizes sound state, searches track slots by the packed high-word id, and distinguishes a loaded slot from the pending id. [names_qp9.tsv]
