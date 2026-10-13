@@ -6149,6 +6149,7 @@
 0x002C3D88	sdfGetMapCameraTransitionFrame	inferred	confidence=high; matched-C; src/dds1/game/code_002C3868.c:179:func_002C3D88; Returns the signed frame counter used by the selected local-map camera transition interpolation and advanced until the transition completes.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002C3DB0	sdfUpdateSelectedCounterMapCameraTransition	inferred	When map-counter selection is active, eases the camera position and quaternion toward the selected counter preset for 45 frames and advances the transition frame.
 0x002C3F78	sdfStepSelectedMapCameraTransition	inferred	confidence=high; matched-C; src/dds1/game/code_002C3868.c:189:func_002C3F78; F3; source=names_pending_main.tsv:99; review=Interpolates the selected local-map camera position and quaternion during a 45-step transition; installs selected vectors otherwise. [names_qp11.tsv]
+0x002C4160	fldAdvanceLocalMapCameraTransition	inferred	Steps the local-map camera position and quaternion through a 45-frame eased transition toward fixed preset index 3; DDS2 counterpart at 0x0030C0C0.
 0x002C42F0	sdfCreateMaskedCounterChannels	inferred	confidence=high; src/dds1/game/code_002C3868.c:func_002C42F0; Creates the counter runtime, then appends one channel per set bit of the mask (max 10), each with its own display record and completion flag. [names_qp9.tsv]
 0x002C44D0	sdfResolveSceneCounterInfo	inferred	readability/matching review (QP16)
 0x002C45C8	sdfCounterDestroyRuntime	inferred	Frees each channel display and timer before destroying counter list state. [names_reviewed8.tsv]
