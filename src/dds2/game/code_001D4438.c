@@ -904,7 +904,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
-extern void func_00211360();
+extern void btlSelectAndRunModeAiAction();
 extern s32 btlGetStatusActionEffectId();
 
 
@@ -1023,19 +1023,19 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
         }
         switch (unit->partyRecord.status & 0x7FFF) {
         case 0x200:
-            func_00211360(task, 0);
+            btlSelectAndRunModeAiAction(task, 0);
             btlDispatchStateHandler(task, 0xC);
             break;
         case 0x20:
             if (((ActionStateLink *)task)->unit->status.flags & 0x200) {
-                func_00211360(task, 2);
+                btlSelectAndRunModeAiAction(task, 2);
             } else {
-                func_00211360(task, 3);
+                btlSelectAndRunModeAiAction(task, 3);
             }
             btlDispatchStateHandler(task, 0xC);
             break;
         case 0x40:
-            func_00211360(task, 4);
+            btlSelectAndRunModeAiAction(task, 4);
             btlDispatchStateHandler(task, 0xC);
             break;
         case 1:
@@ -1409,9 +1409,9 @@ void btlCommandStartSoundTasks(u8 *task) {
         }
         if ((((BtlUnit *)unit)->partyRecord.status & 0x7FFF) == 0x20) {
             if (((ActionStateLink *)task)->unit->status.flags & 0x200) {
-                func_00211360(task, 2);
+                btlSelectAndRunModeAiAction(task, 2);
             } else {
-                func_00211360(task, 3);
+                btlSelectAndRunModeAiAction(task, 3);
             }
             btlDispatchStateHandler(task, 0xC);
         }

@@ -3173,6 +3173,7 @@
 0x00211018	btlShiftActorStateHistory	inferred	Shifts the actor state history and inserts a source-dependent new value. [names_reviewed11.tsv]
 0x00211108	btlCmdAppendCurrentUnitIdToCommandIndices	inferred	Appends the current unit ID to the command index list with default mode zero; called by btlScriptAppendSelectedOrCurrentTarget. [code-quality cleanup, 2026-10-13]
 0x002112C8	btlRunWeightedAiAction	inferred	unified with DDS1 twin (was btlRunAiTableEntry)
+0x00211360	btlSelectAndRunModeAiAction	inferred	Maps the supplied mode to an enemy AI record table and variant, selects a conditional route and weighted action for the task unit, executes it, and releases temporary scratch; mode 2 also advances its follow-up state. Called from command-status branches before state dispatch. [2026-10-13]
 0x00211D20	btlPickWeightedAiSlot	inferred	sums u8 slot weights (5 per row of the 0x15C-byte per-species table D_00435DF4) until the total reaches the roll from func_00211DE0; logs "AI_BUGBUGBUG.." and returns 0 when no slot qualifies [names_M42_BattleMid.tsv]
 0x00211DE0	btlRollAiBucket	inferred	unified with DDS1 twin (was btlRollAiWeight)
 0x002122D8	btlIsUnitAtOrBelowHealthRate	inferred	Compares current health times one hundred against maximum health times the requested rate.

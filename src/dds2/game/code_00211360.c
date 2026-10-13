@@ -206,7 +206,7 @@ extern AiSpecies D_003BEDD0[];
 
 s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow);
 
-void func_00211360(ActionStateLink *task, u32 mode) {
+void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     BtlAiScratchWork *work;
     BtlUnit *unit;
     s32 table;
