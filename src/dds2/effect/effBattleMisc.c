@@ -2,6 +2,7 @@
 #include "dds3obj.h"
 #include "btl_effect_position.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "btl.h"
 #include "eff.h"
@@ -28,7 +29,6 @@ extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfInvertRigidVuTransform(void);
 extern void func_003364B8(f32 value);
 extern void func_00336818(f32 value);
 extern void sdfMultiplyVuMatrixInPlace(void);

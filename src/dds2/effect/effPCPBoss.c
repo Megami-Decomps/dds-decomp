@@ -7,6 +7,7 @@
 #include "eff_param.h"
 #include "eff_pcp_boss.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
@@ -23,7 +24,6 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 extern u32 func_001695C8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
-extern void sdfInvertRigidVuTransform(void);
 extern u8 D_003B1FF0[];
 
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);

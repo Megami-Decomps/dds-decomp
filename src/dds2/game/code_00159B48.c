@@ -11,6 +11,7 @@
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
 #include "sdf_projection.h"
 
@@ -1655,7 +1656,6 @@ struct EffLookAtRingEmitter {
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfInvertRigidVuTransform(void);
 
 /* Seed a view-oriented ring packet and initialize its subeffect. */
 void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
