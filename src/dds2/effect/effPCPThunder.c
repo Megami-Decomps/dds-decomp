@@ -2194,7 +2194,7 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
 extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32, s32);
 extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *, u32 *);
 
-EffPcpThunderGroup *func_0016F850(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
+EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
 {
     u32 count = src->groupCount;
     SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
@@ -2260,7 +2260,7 @@ void effApplyParamBlockPair(void *table) {
 
     firstBlock = effParamTableGetBlock(table, 0);
     secondBlock = effParamTableGetBlock(table, 1);
-    func_0016F850(firstBlock, secondBlock);
+    effThunderCreateCurveGroup(firstBlock, secondBlock);
 }
 
 EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
