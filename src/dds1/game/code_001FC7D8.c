@@ -892,7 +892,8 @@ BtlRuntimeTask *btlCreateEffObjC(BtlUnit *owner, s32 messageId) {
     return task;
 }
 
-u32 func_001FE658(void) {
+/* Return completion on the first poll; this effect task has no per-frame work. */
+u32 btlCompleteEffectTaskImmediately(void) {
     return 1;
 }
 
@@ -905,7 +906,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->taskId = 0x3E;
     task->ownerId = owner->identity;
-    task->callback = func_001FE658;
+    task->callback = btlCompleteEffectTaskImmediately;
     link = btlGetTaskArguments(task);
     link->owner = owner;
     *(u16 *)&link->arg = arg;

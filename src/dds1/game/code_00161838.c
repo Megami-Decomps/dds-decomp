@@ -62,7 +62,8 @@ u32 effBTLFieldColorGetEntryWord(s32 index) {
     return D_0034E730[index].packedColor;
 }
 
-u32 func_001619E8(void) {
+/* Enable actor-selector paths in effect consumers; retail always returns one. */
+u32 effBTLFieldColorUsesActorSelectors(void) {
     return 1;
 }
 

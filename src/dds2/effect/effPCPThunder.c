@@ -2347,7 +2347,7 @@ typedef struct {
     u8 bytes[0x30];
 } __attribute__((packed)) FileRecordHeader;
 
-extern u32 func_001695C8(void);
+extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
@@ -2412,7 +2412,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
     place.payload[8] = 100.0f;
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
-    if (func_001695C8()) {
+    if (effBTLFieldColorUsesActorSelectors()) {
         u32 actor;
         if (mode == 3) actor = effBTLFieldColorGetVariantSelector();
         else actor = effBTLFieldColorGetOriginalSelector();

@@ -305,7 +305,7 @@ void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vert
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void uiDrawSurfaceAtNearDepth(s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
-extern void func_00308F78(s32, s32);
+extern void itfConfigureSurfaceAlphaBlendMode(s32, s32);
 typedef struct DspStripVerticalOffsets {
     s8 values[2][2][6];
 } DspStripVerticalOffsets;
@@ -342,10 +342,10 @@ void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrol
         stripY = y + strip->verticalOffset + (offsets[i] << 3);
         resource = strip->resource;
         frameIndex = strip->frameIndex;
-        func_00308F78(0, surfaceIndex);
+        itfConfigureSurfaceAlphaBlendMode(0, surfaceIndex);
         itfDrawGridWithResolvedSlot(stripX, stripY, z, 0x60, resource, frameIndex, surfaceIndex);
         wrapOffset = strip->scrollSpeed < 0 ? 0x2000 : -0x2000;
-        func_00308F78(0, surfaceIndex);
+        itfConfigureSurfaceAlphaBlendMode(0, surfaceIndex);
         resource->descriptions[frameIndex].flags &= ~4;
         itfDrawGridWithResolvedSlot(stripX + wrapOffset, stripY, z, 0x60,
             resource, frameIndex, surfaceIndex);

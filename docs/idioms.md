@@ -606,9 +606,9 @@ functions use trampolines and are a different case.
   `u64` parameter gives the same `dsrl` but then needs `dsll32/dsra32` before a
   `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
   `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
-  0x110, 0, 0, 0); }` matches (DDS1 `func_002E9810`/`func_002E9918`/
-  `func_002E94E0`/`func_002E9510`, DDS2 `sndSendChannelGroupCommand110`/`sndSendChannelGroupCommand140`/
-  `sndSendChannelGroupCommand150`).
+  0x110, 0, 0, 0); }` matches (DDS1 `sndSendChannelGroupCommand110`/`func_002E9918`/
+  `sndSendChannelGroupCommand140`/`sndSendChannelGroupCommand150`, with the same
+  three named commands in DDS2).
 - Preserve a 32-bit packet field's unsigned width when storing it through a
   wider lvalue. `u32 descriptor = 0x20000000 | (quadwords & 0xFFFF);` followed
   by `header[0] = descriptor;` and the equivalent direct store
@@ -623,9 +623,10 @@ functions use trampolines and are a different case.
   the `return;` makes the epilogue label a jump target, so the call that jumps
   to it stays a sibcall but a call that merely falls into the label is not.
   A second `if (v) { f(0x58); }` after `if (v == 0) { f(0x54); return; }` gives
-  `j` then `jal` (DDS2 `func_00308F78` matches that way), but that second test is
-  redundant and folded away, so it is a codegen lever and is NOT accepted as
-  source; the function stays INCLUDE_ASM until a real shape is found. The same
+  `j` then `jal`, but that second test is redundant and folded away: it is
+  a codegen lever and is NOT accepted as source. The now-matched
+  `itfConfigureSurfaceAlphaBlendMode` retains its native-supported consumed-mode
+  reset instead (see "Actor selectors, task hooks and surface-alpha modes"). The same
   call in `if/else` without `return;` gives `j` for both, and in a non-void
   `if/else` without returns `jal` for both.
   Toy results (callee extern void, 3 prior calls): early `return;` + fall-through
@@ -11410,3 +11411,29 @@ Camera-relative mode subtracts the view target when generating stored
 vertices, then adds the current target back at draw time. Clearing the mode
 keeps world coordinates. The mode's raw SDATA-owned global and include path
 remain intact; only the four accessor/mode function names and callers change.
+
+## Actor selectors, task hooks and surface-alpha modes
+
+`effBTLFieldColorUsesActorSelectors` returns one in both games. Its real effect
+consumers select original/variant actor muzzle positions and status flags
+instead of fixed positions or existing resource matrices. This is not a
+battle-active check, nor does it validate either stored selector.
+
+The empty `sdfRuntimeTaskTeardownHook` runs after the GBWK hierarchy is
+destroyed and before the backing allocation is released. It remains empty.
+`btlCompleteEffectTaskImmediately` reports completion without per-frame work:
+the scheduler enters its end-delay phase on a nonzero callback result.
+Its creator has native task ID 0x3E in DDS1 and 0x41 in DDS2; the different
+existing callback signatures are intentionally unchanged.
+
+`itfConfigureSurfaceAlphaBlendMode` prepares the selected texture surface,
+submits GS TEST value 0x5000D and chooses ALPHA value 0x54 for mode zero or
+0x58 otherwise. Its existing consumed-mode reset is retained: the native
+zero-mode call is a tail J, while the nonzero-mode call is JAL plus epilogue.
+The adapter's recorded cc1probe evidence keeps that reset through
+01.sibling and 11.cfg and removes it in 13.life. Naming does not alter this
+previously admitted source form or introduce a new matching lever.
+
+The channel-group 0x140/0x150 senders now share the existing DDS2 names in
+both games. Preserve their u8 parameters, bits-3-to-6 extraction and empty
+packet payloads; the opcode alone does not establish an IOP-side operation.
