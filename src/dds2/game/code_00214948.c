@@ -978,7 +978,8 @@ u32 btlAppendEffectActorToCommandIndices(s32 task) {
     return 1;
 }
 
-u32 btlAppendCurrentUnitIdToCommandIndices(s32 task) {
+/* Append the selected/current actor pointer to this command's indices; return success. */
+u32 btlAppendSelectedOrCurrentActorTarget(s32 task) {
     BtlUnit *unit;
 
     unit = btlGetSelectedOrCurrentActor();

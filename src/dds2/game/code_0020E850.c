@@ -23,17 +23,17 @@
 
 extern u32 btlRandomState;
 
-extern void btlCmdSimpleB(s32, s32);
+extern void btlPickCommandElementCheckedTarget(s32, s32);
 
-extern void btlCmdSimpleA(s32, s32);
+extern void btlPickCommandLowestHpBlockTarget(s32, s32);
 
-extern void btlCmdSimpleD(s32, s32);
+extern void btlPickCommandTargetWithoutStatusMask(s32, s32);
 
 extern void btlFilterCommandTargetsByUnitId(s32, s32);
 
-extern void btlCmdSimpleJ(s32, s32);
+extern void btlPickCommandElementBlockTarget(s32, s32);
 
-extern void btlCmdSimpleC(s32, s32);
+extern void btlPickCommandTargetWithStatusMask(s32, s32);
 
 
 
@@ -66,7 +66,7 @@ extern s32 btlSelectTargetsExcludingActorUnit(s32);
 
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 
-extern void btlAppendCurrentUnitIdToCommandIndices(s32, s32);
+extern void btlAppendSelectedOrCurrentActorTarget(s32, s32);
 
 extern void btlSelectTargetsByMode();
 
@@ -1264,15 +1264,18 @@ void btlShiftActorStateHistory(ActionStateLink *obj, s8 flag) {
     }
 }
 
-void btlCmdWithArgA(s32 context) {
+/* Choose command-record-driven targets; retain the native zero mode argument. */
+void btlChooseCommandActionTargets(s32 context) {
     func_002152D8(context, 0);
 }
 
-void btlCmdWithArgB(s32 context) {
+/* Delegate minimum nonzero-current-HP selection for this command, with mode zero. */
+void btlPickCommandLowestHpTarget(s32 context) {
     func_00215C70(context, 0);
 }
 
-void btlCmdWithArgC(s32 context) {
+/* Delegate minimum HP-percentage selection without changing native fallback modes. */
+void btlPickCommandLowestHpRatioTarget(s32 context) {
     btlSelectLowestHealthRateTarget(context, 0);
 }
 
@@ -1281,17 +1284,20 @@ void btlSelectCommandTargetsByMode(void) {
     btlSelectTargetsByMode();
 }
 
+/* Append the selected/current actor pointer with the native zero mode argument. */
 void btlCmdAppendCurrentUnitIdToCommandIndices(s32 context) {
-    btlAppendCurrentUnitIdToCommandIndices(context, 0);
+    btlAppendSelectedOrCurrentActorTarget(context, 0);
 }
 
 extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
 
-void btlCmdSimpleA(s32 context, s32 value) {
+/* Select a lowest-HP element-block candidate using the supplied query input. */
+void btlPickCommandLowestHpBlockTarget(s32 context, s32 value) {
     btlSelectLowestHealthElementBlockTarget(context, value);
 }
 
-void btlCmdWithArgD(s32 context) {
+/* Forward command selection with its native zero second argument. */
+void btlPickCommandLowestLevelTarget(s32 context) {
     btlSelectLowestRankTarget(context, 0);
 }
 
@@ -1301,19 +1307,22 @@ void btlCmdWithArgE(s32 context) {
 
 extern s32 btlSelectTargetsPassingCheck(s32, s32);
 
-void btlCmdSimpleB(s32 context, s32 value) {
+/* Select by group element checks; value is the query input, not a status mask. */
+void btlPickCommandElementCheckedTarget(s32 context, s32 value) {
     btlSelectTargetsPassingCheck(context, value);
 }
 
 extern void btlSelectTargetsByActionMask(s32, s32);
 
-void btlCmdSimpleC(s32 context, s32 value) {
+/* Select by status-mask presence, preserving native fallback and list-copy modes. */
+void btlPickCommandTargetWithStatusMask(s32 context, s32 value) {
     btlSelectTargetsByActionMask(context, value);
 }
 
 extern void btlSelectTargetsWithoutActionMask(s32, s32);
 
-void btlCmdSimpleD(s32 context, s32 value) {
+/* Select by status-mask absence, preserving native fallback and list-copy modes. */
+void btlPickCommandTargetWithoutStatusMask(s32 context, s32 value) {
     btlSelectTargetsWithoutActionMask(context, value);
 }
 
@@ -1334,21 +1343,25 @@ void btlPickLinkedCommandTarget(void) {
     btlPickLinkedPartyTarget();
 }
 
-void btlCmdSimpleH(void) {
+/* Append the command's own actor after the native scan; keep short-arity forwarding. */
+void btlAppendActorToCommandTargets(void) {
     btlAppendSelfAfterTargetScan();
 }
 
-void btlCmdSimpleI(s32 context, s32 unused) {
+/* Default selection excludes the actor, with native self fallback; unused stays unused. */
+void btlPickCommandTargetExcludingActor(s32 context, s32 unused) {
     btlSelectTargetsExcludingActorUnit(context);
 }
 
-void btlCmdWithArgF(s32 context) {
+/* Append the global effect actor, distinct from this command's own actor. */
+void btlAddEffectActorTargetToCommand(s32 context) {
     btlAppendEffectActorToCommandIndices(context, 0);
 }
 
 extern void btlSelectTargetsBlockingElement(s32, s32);
 
-void btlCmdSimpleJ(s32 context, s32 value) {
+/* Select element-block candidates using the supplied query input. */
+void btlPickCommandElementBlockTarget(s32 context, s32 value) {
     btlSelectTargetsBlockingElement(context, value);
 }
 
