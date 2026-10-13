@@ -35,7 +35,6 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_dev_slot_api.h"
 #include "sdf_dma_tag.h"
 
-extern u32 sdfReadTimerCount(void);
 extern s32 EIntr(void);
 extern u16 D_00438A24;
 extern s32 D_00438A30;

@@ -367,8 +367,6 @@ extern s32 func_0034DE68(SifClient *, s32, s32, void *, s32, void *, s32, void (
 extern s32 func_00367B60(const char *, ...);
 
 
-extern s32 sdfReadTimerCount(void);
-
 
 extern s32 sceSifMBindRpc(void *, s32, s32);
 

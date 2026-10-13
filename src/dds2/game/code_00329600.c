@@ -274,8 +274,6 @@ s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data
 extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
 extern void func_0034D8E0(s32 arg);
-extern s32 sdfReadTimerCount(void);
-
 /* Load the optional module first, then the required one; bind retries wait in timer ticks. */
 void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath) {
     s32 retryStartTick;

@@ -76,7 +76,6 @@
 #define SDF_VIF_FLUSHE_HALFWORD 0x1000
 #define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
 
-extern u32 sdfReadTimerCount(void);
 extern s32 EIntr(void);
 extern u16 D_003BD334;
 extern s32 D_003BD340;
