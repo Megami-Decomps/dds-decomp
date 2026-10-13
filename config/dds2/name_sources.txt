@@ -8440,3 +8440,7 @@
 0x00279148	mnuSpawnMantraIconWithShortLoop	inferred	confidence=high; Mode 0x22 selects the special-node state and sets the short-loop flag without changing coordinates. [LiteH b26]
 0x002A1338	mnuNoOpTitleAudio	inferred	confidence=high; Empty title-audio helper adjacent to the sound-busy query and effect-frame getter; DDS1 twin 0x00269728 is also empty. [LiteH b26]
 0x002A1478	sndOpAlwaysSucceeds	inferred	confidence=high; Sound script operation returns 1 without side effects; callers consume the result as success. DDS1 twin 0x00269868. [LiteH b26]
+0x001575B0	effParamNodeOptionalFlagNoOp	inferred	confidence=high; Empty native effNodeTypeOperations type4 dispatchOptionalFlag slot003AA828; row003AA808 factory is effParamWorkCreate. Typed consumer establishes role. Shared twin0014FA10. [Namer1 b56]
+0x001575B8	effParamNodeOptionalQueryAlwaysTrue	inferred	confidence=high; Native parameter-node type4 queryOptional slot003AA82C returns1; optional-query consumer also defaults to1. Original u32 and zero-formal surface retained. Shared twin0014FA18. [Namer1 b56]
+0x001575C0	effParamNodeRestartNoOp	inferred	confidence=high; Empty native parameter-node type4 restart slot003AA814, invoked by effRestartNodeInstance. Shared twin0014FA20. [Namer1 b56]
+0x001575C8	effParamNodeConditionAlwaysTrue	inferred	confidence=high; Native parameter-node type4 queryCondition slot003AA818 returns1; typed condition consumer establishes acceptance role. Original u32 and zero-formal surface retained. Shared twin0014FA28. [Namer1 b56]

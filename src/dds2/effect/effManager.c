@@ -74,17 +74,21 @@ s32 effManagerUpdateAndDispatch(KwlnTask *task) {
     return 0;
 }
 
-void func_001575B0(void) {
+/* Parameter-node optional flag callback; the retail implementation is empty. */
+void effParamNodeOptionalFlagNoOp(void) {
 }
 
-u32 func_001575B8(void) {
+/* Parameter-node optional query always returns one. Keep its u32 surface. */
+u32 effParamNodeOptionalQueryAlwaysTrue(void) {
     return 1;
 }
 
-void func_001575C0(void) {
+/* Parameter-node restart callback; the retail implementation is empty. */
+void effParamNodeRestartNoOp(void) {
 }
 
-u32 func_001575C8(void) {
+/* Parameter-node condition callback always accepts the instance. */
+u32 effParamNodeConditionAlwaysTrue(void) {
     return 1;
 }
 
