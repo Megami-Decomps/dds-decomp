@@ -6,6 +6,7 @@
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_task_queue_query.h"
 #include "kwln_task_state.h"
 #include "sdf_texture_offset_list.h"
 
@@ -121,8 +122,6 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3,
 extern void func_0035C860(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
-extern KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index);
-extern s32 kwlnTaskGetStateList(u32 state);
 extern void func_0035B6E0(const char *format, ...);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
