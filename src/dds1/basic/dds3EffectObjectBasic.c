@@ -14,6 +14,7 @@
 #include "evt_world_source_transform.h"
 #include "sdf_draw.h"
 #include "btl_sound.h"
+#include "dds3_world_counter.h"
 
 #define EFF_OBJ_KIND EFF_WORLD_KIND_EFFECT_OBJECT
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -58,7 +59,6 @@ extern void *effCreateNodeFromParameter(void);
 
 
 struct EffNode;
-extern u32 dds3AdvanceWorldCounter(void);
 extern void effCopyVector(void *source, void *destination);
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);

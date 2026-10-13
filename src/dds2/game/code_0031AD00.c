@@ -2,8 +2,8 @@
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "mnu_shooting.h"
+#include "dds3_world_counter.h"
 struct EffWorldNode;
-extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);

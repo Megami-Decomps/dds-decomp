@@ -6,6 +6,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "pcp_vu0.h"
+#include "dds3_world_counter.h"
 
 struct EvtScaledValue;
 extern u32 sdfGetFloatCounterDirection(u32 *handle);
@@ -58,7 +59,6 @@ void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
     }
 }
 
-extern u32 dds3AdvanceWorldCounter(void);
 extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 extern void effObjSetInnerFloat(s32 obj, f32 value);
 

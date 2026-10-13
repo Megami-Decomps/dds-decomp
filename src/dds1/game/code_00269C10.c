@@ -1,3 +1,4 @@
+#include "dds3_world_counter.h"
 /* Transport definitions stay in the predecessor; see docs/idioms.md,
  * "Title-audio controller transport boundary". */
 
@@ -30,7 +31,6 @@
 #define MNU_STREAM_COMMIT_READY 3
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 

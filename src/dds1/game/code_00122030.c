@@ -27,6 +27,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -143,7 +144,6 @@ void fldDispatchDeferredFieldCommand(void);
 
 extern FieldPlayerSceneWork D_0032F1A0;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern void dds3WorkClear(void);
 

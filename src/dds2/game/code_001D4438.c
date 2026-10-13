@@ -20,6 +20,7 @@
 #include "active_sound_node.h"
 #include "btl_scene_initializer.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
@@ -396,7 +397,6 @@ extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 
 extern u32 D_00436AD4;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 

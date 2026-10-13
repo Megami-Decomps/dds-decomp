@@ -34,6 +34,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
@@ -3742,7 +3743,6 @@ typedef struct FldSparkEntryInfo {
     s16 modelId;
 } FldSparkEntryInfo;
 
-extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerScale(EffWorldNode *node, u128 *vector);

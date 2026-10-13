@@ -22,6 +22,7 @@
 #include "mdl_grouped_parts_api.h"
 #include "file_request_api.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -168,7 +169,6 @@ typedef struct MdlCountNode {
 
 extern void *memset(void *dst, s32 value, u32 size);
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 world, void *pos, void *rot);
 
