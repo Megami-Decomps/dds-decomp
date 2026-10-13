@@ -30,7 +30,7 @@ extern s32 D_003BD984;
 extern MapRequestState *D_003BD988;
 
 extern MapRequestState *D_003BD98C;
-void func_002C7B38(MapRequestState *);
+void fldReleaseMapRequestQueue(MapRequestState *);
 extern void func_002C7C58(MapRequestState *);
 extern f32 sdfCounterGetScaledValue(void);
 extern f32 D_0038FE30[][4];
@@ -405,8 +405,8 @@ void fldCreateMapRequestQueues(void) {
 
 /* Release both map request queues. */
 void fldReleaseMapRequestQueues(void) {
-    func_002C7B38(D_003BD988);
-    func_002C7B38(D_003BD98C);
+    fldReleaseMapRequestQueue(D_003BD988);
+    fldReleaseMapRequestQueue(D_003BD98C);
 }
 
 /* Draw the auxiliary map texture centred on the requested position. */
@@ -570,7 +570,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     return state;
 }
 
-void func_002C7B38(MapRequestState *state) {
+void fldReleaseMapRequestQueue(MapRequestState *state) {
     if (state != NULL) {
         sdfQueueGeneralAllocationRelease(state->allocation);
     }

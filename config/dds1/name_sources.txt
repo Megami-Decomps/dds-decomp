@@ -6186,13 +6186,14 @@
 0x002C6428	sdfCounterStepDownAnimationValue	inferred	Subtracts two while the animation value is positive, otherwise clears it. [names_reviewed10.tsv]
 0x002C6448	fldDrawLocalMapTransition	inferred	TaskPurist
 0x002C7000	fldCreateMapRequestQueues	inferred	allocates the two MapRequestState queues (func_002C7A60(0x14,0xC/0x18)) and installs func_002C7180/func_002C7430 as their +0x18 callbacks [names_L5_LiteSweep.tsv]
-0x002C7058	fldReleaseMapRequestQueues	inferred	releases both queues through func_002C7B38; returns the second release's status [names_L5_LiteSweep.tsv]
+0x002C7058	fldReleaseMapRequestQueues	inferred	releases both queue allocations through fldReleaseMapRequestQueue [names_L5_LiteSweep.tsv]
 0x002C7080	fldDrawScaledAuxMapTexture	inferred	readability/matching review (QP16)
 0x002C7180	fldDrawMapRequestHalo	inferred	readability/matching review (QP16)
 0x002C7430	fldDrawMapRequestPulse	inferred	readability/matching review (QP16)
 0x002C7700	sdfCommitPendingVectorAndMarkChanged	inferred	Copies a pending vector into the active vector and sets its change flag. [names_reviewed17.tsv]
 0x002C7950	fldDrawCounterMapMarker	inferred	readability/matching review (QP16)
 0x002C7A60	sdfCreateLinkedRequestRing	inferred	confidence=medium; src/dds1/game/code_002C5FB8.c:func_002C7A60; Allocates and clears request-ring storage, connects nodes into a circular doubly linked list, and initializes ring metadata. [names_qp9.tsv]
+0x002C7B38	fldReleaseMapRequestQueue	inferred	Releases one map-request queue by returning its general allocation. [map-request queue teardown]
 0x002C7B58	fldAdvanceMapRequest	inferred	Writes queued map request values when its interval elapses and marks the node active.
 0x002C7BA8	fldSetMapRequestInterval	inferred	Sets the interval controlling when a queued map request advances.
 0x002C7D18	fldLoadMapResource	inferred	fld field scene and resources in game/code_002C5FB8.c
