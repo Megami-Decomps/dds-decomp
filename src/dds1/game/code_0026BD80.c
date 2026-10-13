@@ -385,7 +385,7 @@ void mnuStartMovieMenuSfxGroup(void) {
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0xF, 0x53);
 }
 
-void func_0026CAB0(void) {
+void mnuRunMovieMenuIdleFrame(void) {
     mnuAdvanceMovieMenuIdleAnimation();
 }
 
@@ -404,7 +404,7 @@ void mnuSwapStateWords(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CB10);
+INCLUDE_ASM(const s32, "game/code_0026BD80", mnuUpdateMovieMenuCameraOrbit);
 
 void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
     f32 delta[4];

@@ -45,7 +45,7 @@ extern void brsStepAnimDecay(BrsSkillPackageWork *);
 extern void brsDrawActiveUnitProgressRows(s32, s32, s32, s32, BrsActiveProgressList *, s32);
 
 extern void func_00264B08();
-extern void func_00264D90();
+extern void mnuDrawItemPanelStatusIcons();
 
 void mnuRefreshPanelLayer(BrsSkillPackageWork *work) {
     s32 y = 0x100 - work->fadeProgress;
@@ -53,7 +53,7 @@ void mnuRefreshPanelLayer(BrsSkillPackageWork *work) {
     itfUpdateFadeColor(work);
     mnuDrawTitleFadeSprites(work);
     func_00264B08(work);
-    func_00264D90(work);
+    mnuDrawItemPanelStatusIcons(work);
     brsDrawActiveUnitProgressRows(0x2C0, 0x3D8, 0, y, &work->partyProgress, 0x53);
     mnuTitleDrawFadeMenuEntries(work);
 }
@@ -503,9 +503,9 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
 extern char D_003AFBA0[];
 extern u8 D_00324510[2][2][16];
 extern void brsUpdateResultBackgroundFade(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00266668(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsDrawProgressRowEntries(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsUpdateResultPortraitFade(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00266BC0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsDrawProgressRowOverlays(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsUpdateLevelProgressAnimation(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsUpdateProfileProgressAnimation(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawLevelProgressDetails(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
@@ -538,9 +538,9 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
             BrsProgressRow *row = &list->rows[i];
 
             brsUpdateResultBackgroundFade(x, y, z, work, row, context, i);
-            func_00266668(x, y, z, work, row, context, i);
+            brsDrawProgressRowEntries(x, y, z, work, row, context, i);
             brsUpdateResultPortraitFade(x, y, z, work, row, context, i);
-            func_00266BC0(x, y, z, work, row, context, i);
+            brsDrawProgressRowOverlays(x, y, z, work, row, context, i);
             mnuBlendNeutralColorAlpha(x, y, z, alpha, row, context);
             brsUpdateLevelProgressAnimation(x, y, z, work, row, context, i);
             brsUpdateProfileProgressAnimation(x, y, z, work, row, context, i);

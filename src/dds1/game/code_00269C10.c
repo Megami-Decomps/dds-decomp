@@ -78,7 +78,7 @@ s32 sndCopyWordsToIopSynchronously(u32 sourceAddress, u32 iopAddress, u32 wordCo
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount);
 
-s32 func_00269B80(u32 source, u32 words);
+s32 mnuCopySoundStreamOnStatusChange(u32 source, u32 words);
 
 /* The argument is a word count, not a source address; both use the EE buffer. */
 void sndUploadStreamToBothIopBuffers(u32 wordCount) {
@@ -174,7 +174,7 @@ void mnuUpdateTitleAudioStreams(void) {
     }
 
     if (mnuTitleStreamStatus.control == 2 && mnuTitleSoundBufferState.control == 2) {
-        D_003BC5C0 = func_00269B80((u32)D_003DA1C0, 0x400);
+        D_003BC5C0 = mnuCopySoundStreamOnStatusChange((u32)D_003DA1C0, 0x400);
         source = (u8 *)mnuTitleStreamStatus.samples;
         memcpy(D_003DA1C0, source, 0x1000);
         if (D_003BC5C4 != 0) {
@@ -185,16 +185,16 @@ void mnuUpdateTitleAudioStreams(void) {
     }
 
     if (D_003BC5C4 == 0) {
-        func_00269A68(0x400);
+        mnuConfigureTitleAudioStream(0x400);
     }
     D_003BC5C4 = 1;
 
     if (mnuTitleStreamStatus.control != 2 && mnuTitleSoundBufferState.control == 2) {
-        D_003BC5C0 = func_00269B80((u32)mnuTitleStreamStatus.samples, 0x400);
+        D_003BC5C0 = mnuCopySoundStreamOnStatusChange((u32)mnuTitleStreamStatus.samples, 0x400);
         memcpy(D_00378E50, mnuTitleStreamStatus.samples, 0x1000);
     } else {
         sndMixSampleBuffers((s16 *)D_00378E50, &mnuTitleSoundBufferState, &mnuTitleStreamStatus);
-        D_003BC5C0 = func_00269B80((u32)D_00378E50, 0x400);
+        D_003BC5C0 = mnuCopySoundStreamOnStatusChange((u32)D_00378E50, 0x400);
     }
 
     if (mnuTitleStreamStatus.control == 0) {

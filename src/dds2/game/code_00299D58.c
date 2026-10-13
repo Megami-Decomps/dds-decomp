@@ -12,7 +12,7 @@ extern s32 dspStartEntry(s32 index);
 
 
 
-extern u32 func_0029D790(DatPartyRecord *, PrfSkillList *);
+extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
 
 extern void func_0026C900(void);
 
@@ -158,7 +158,7 @@ void mnuApplyCompletedProfile(BrsSkillPackageWork *state) {
 /* Build the capped skill list and cache its pending count; return 1. */
 u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     u32 skillCount;
-    skillCount = func_0029D790(scene->selectedRewardRow->unit, &scene->skillList);
+    skillCount = brsBuildProfileSkillList(scene->selectedRewardRow->unit, &scene->skillList);
     scene->pendingSkillCount = skillCount;
     mnuApplyCompletedProfile(scene);
     return 1;
