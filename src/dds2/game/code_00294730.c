@@ -18,7 +18,7 @@ enum {
 extern MenuIconPlacement D_003D03F0[];
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
                           struct EffectSlotSet *, s32, s32);
-extern void func_00294680(MenuTerminalContext *, s32, s32);
+extern void mnuDrawType2PanelEffects(MenuTerminalContext *, s32, s32);
 extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 
 extern void mnuDrawFadingValueListRow();
@@ -70,7 +70,7 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
                   D_003D03F0[32][MENU_ICON_FRAME], 0x53);
     func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
     func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
-    func_00294680(object, scale, 0x53);
+    mnuDrawType2PanelEffects(object, scale, 0x53);
 
     frameCount = frames - 5;
     if (frameCount < 0) {
@@ -116,7 +116,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
                   D_003D03F0[32][MENU_ICON_FRAME], 0x53);
     func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
     func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
-    func_00294680(object, scale, 0x53);
+    mnuDrawType2PanelEffects(object, scale, 0x53);
 
     frameCount = (s32)elapsed;
     alpha = (f32)frameCount / 20.0f;
@@ -148,7 +148,7 @@ void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContex
                   D_003D03F0[32][MENU_ICON_FRAME], option);
     func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], option);
     func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], option);
-    func_00294680(object, scale, option);
+    mnuDrawType2PanelEffects(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
     effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
                   0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
