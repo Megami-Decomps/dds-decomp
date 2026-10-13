@@ -784,7 +784,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->progress = 0;
         work->completed = 0;
         work->currentScore = 0;
-        func_0031E8E8(&work->gauge, 0);
+        itfSetFadeGaugeDisplayValue(&work->gauge, 0);
         work->round = 0;
         return 1;
     case 2:
@@ -797,7 +797,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->progress = 0;
         work->completed = 0;
         work->unk94 = mode;
-        func_0031E8E8(&work->gauge, 0);
+        itfSetFadeGaugeDisplayValue(&work->gauge, 0);
         mnuClearRuntimeRecordStorage(func_00321ED8());
         func_0031A090();
         if (work->round >= 3) {

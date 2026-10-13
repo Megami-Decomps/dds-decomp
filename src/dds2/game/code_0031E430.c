@@ -174,7 +174,7 @@ void itfSetFadeSecondaryParameter(FadeGauge *entry, u32 parameter) {
     entry->secondaryParameter = parameter;
 }
 
-void func_0031E8E8(FadeGauge *entry, u32 displayValue) {
+void itfSetFadeGaugeDisplayValue(FadeGauge *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
