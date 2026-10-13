@@ -65,7 +65,7 @@ void mnuActivateMantraNode(MnuStatusResource *menu, u16 nodeId) {
     mnuStorePanelEntry(0x20009, 0x14);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028E638);
+INCLUDE_ASM(const s32, "game/code_0028E568", mnuUpdateMantraNodeState);
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427218);
 
@@ -79,7 +79,7 @@ INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427278);
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272C8);
 
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028EF50);
+INCLUDE_ASM(const s32, "game/code_0028E568", mnuBuildMantraSourceList);
 
 extern s32 mdlFlagTest(s32);
 extern void *memcpy(void *, const void *, u32);
@@ -343,7 +343,7 @@ void func_0028F8A8(MnuStatusResource *object) {
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004274B0);
 
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028F9A0);
+INCLUDE_ASM(const s32, "game/code_0028E568", mnuScanMantraSourceCandidates);
 
 u32 func_0028FD08(void) {
     return 0;

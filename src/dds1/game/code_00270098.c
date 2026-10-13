@@ -150,7 +150,7 @@ void mnuClearMovieList(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00270098", func_002702A0);
+INCLUDE_ASM(const s32, "game/code_00270098", mnuBuildMovieViewerList);
 
 MovieListNode *mnuGetMovieListNodeAtOffset(void) {
     MovieListNode *entry = mnuMovieList.head;
@@ -276,7 +276,7 @@ s32 mnuMovieViewer(void) {
 }
 
 void mnuCreateMovieViewerTask(void) {
-    func_002702A0();
+    mnuBuildMovieViewerList();
     mnuMovieList.task = kwlnTaskCreate(mnuMovieViewerTaskName, 0x2b02, 1, 0,
                                        (TaskUpdate)mnuMovieViewer, 0, 0);
 }

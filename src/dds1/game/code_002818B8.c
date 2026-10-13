@@ -123,7 +123,7 @@ INCLUDE_ASM(const s32, "game/code_002818B8", func_00281D40);
 
 INCLUDE_RODATA(const s32, "game/code_002818B8", D_003B23D8);
 
-INCLUDE_ASM(const s32, "game/code_002818B8", func_00282360);
+INCLUDE_ASM(const s32, "game/code_002818B8", mnuDrawPartyMemberStatusPanel);
 
 INCLUDE_SDATA(const s32, "game/code_002818B8", D_003BC750);
 

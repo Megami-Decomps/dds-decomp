@@ -8109,3 +8109,13 @@
 0x001EC868	btlBuildBattleUnitFramingCameraPose	inferred	Walk the active battle-unit list, filter status flags, accumulate scaled reach and vertical bounds, and build the output camera pose using the requested angle; paired callers use it for action framing. DDS1 twin 0x001DEFE0.
 0x00341650	sndQueueCommandPacket	inferred	Reserve a sound-command ring slot, stamp its sequence, copy payload, pack command/channel/quadword count, advance the producer cursor, wake the consumer and return the sequence; DDS1 twin 0x002E87A8. This is the queue producer beneath sndSendCommandPacket.
 0x00306DC8	effDrawRepeatedSpriteTiles	inferred	blends the slot’s four corner colors with alpha cleared, initializes a complete tile width from sourceWidth * 16, and draws length / tileWidth repeated tiles.
+0x0028E638	mnuUpdateMantraNodeState	inferred	confidence=high; updates mantra node flags and queues panel transitions. [LiteH menu naming batch 19]
+0x0028EF50	mnuBuildMantraSourceList	inferred	confidence=high; builds source records from event flags and candidate data. [LiteH menu naming batch 19]
+0x0028F9A0	mnuScanMantraSourceCandidates	inferred	confidence=high; scans and marks available mantra-source candidates. [LiteH menu naming batch 19]
+0x002A8268	mnuBuildMovieViewerList	inferred	confidence=high; clears and builds the movie list from pfs0:/movie directories; DDS1 semantic twin 0x002702A0. [LiteH menu naming batch 19]
+0x002AB690	mnuDrawCampGridEntry	inferred	confidence=high; draws a camp grid resource slot and its label/text. [LiteH menu naming batch 19]
+0x002AC050	mnuDrawOrderedStaffItemEntry	inferred	confidence=high; draw callback for ordered staff-list entries, including owned/blocked and duplicate-item details. [LiteH menu naming batch 19]
+0x002AF2E0	mnuDrawStaffValueGrid	inferred	confidence=high; draws the five-entry staff-value grid. [LiteH menu naming batch 19]
+0x002B06A8	mnuApplyRandomStatItemEffect	inferred	confidence=high; chooses a nonzero stat option and weighted bonus, updates the supplied party entry, recalculates max HP/MP and consumes the item; returns whether at least two options were available. [LiteH menu naming batch 19]
+0x002B2C88	mnuConfigurePartyPanelPage	inferred	confidence=high; configures/resets page state and fade for page modes 0-3. [LiteH menu naming batch 19]
+0x002BE730	mnuInitializeQueuedCommandEffect	inferred	confidence=high; copies effect templates and initializes queued-command effect entries with randomized values. [LiteH menu naming batch 19]

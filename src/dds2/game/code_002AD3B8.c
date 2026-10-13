@@ -29,7 +29,7 @@ extern char D_003E7202[];
 extern void mnuDestroyStaffBulletItemWindow(s32);
 extern void mnuDestroyOrderedStaffItemWindow(s32);
 extern void mnuDestroyOwnedCatalogItemWindow(s32);
-extern void func_002B2C88(MenuPageWindow *, s32, u32, s32);
+extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, u32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuSetStateValue(u32 *, u32);
@@ -435,7 +435,7 @@ s32 mnuInitializeSelectedStaffPage(KwlnTask *task) {
                                                  context->resources.baseResources[0]);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
-    func_002B2C88(window, 1, 0, 0);
+    mnuConfigurePartyPanelPage(window, 1, 0, 0);
     menu->firstListState = 0;
     mnuBeginWindowFadeTransition(menu->windows[2], &context->fade);
     return 1;
@@ -447,7 +447,7 @@ s32 mnuReleaseSelectedStaffPageResources(KwlnTask *task) {
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     mnuDestroyStaffBulletItemWindow(context);
-    func_002B2C88(entryList, 0, 0, 0);
+    mnuConfigurePartyPanelPage(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
@@ -700,7 +700,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
                                                  context->resources.baseResources[0]);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
-    func_002B2C88(window, 1, 0, 0);
+    mnuConfigurePartyPanelPage(window, 1, 0, 0);
     menu->secondListReset = 0;
     mnuBeginWindowFadeTransition(menu->windows[3], &context->fade);
     return 1;
@@ -712,7 +712,7 @@ s32 mnuReleaseStaffSelectionPageResources(KwlnTask *task) {
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     mnuDestroyOrderedStaffItemWindow(context);
-    func_002B2C88(entryList, 0, 0, 0);
+    mnuConfigurePartyPanelPage(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
@@ -898,12 +898,12 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF2E0);
+INCLUDE_ASM(const s32, "game/code_002AD3B8", mnuDrawStaffValueGrid);
 
 s32 mnuDrawStaffValuePage(KwlnTask *task) {
     extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
     extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, s32, s32);
-    extern s32 func_002AF2E0(s32, s32, s32, MenuStaffContext *);
+    extern s32 mnuDrawStaffValueGrid(s32, s32, s32, MenuStaffContext *);
     extern char D_0042AD08[];
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     const u8 *slotsCaption = (const u8 *)D_0042AD08;
@@ -938,7 +938,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
         } else {
             mnuDrawCampGridAndLabelDefault(1, 0, 0, (s32)context, 1, 0x53);
         }
-        func_002AF2E0(0, 0, selectionId, context);
+        mnuDrawStaffValueGrid(0, 0, selectionId, context);
         if (owned != 0 && mdlFlagTest(0x990) != 0) {
             glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
             frFontDrawGlyphChain(glyph, 1, 0x53);
@@ -949,7 +949,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
         func_00306CD0(0x390, 0x570, 0, menu->windows[3]->fadeScale, 1,
                      context->titleFrames[0], 0x11, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, (s32)context, 1, 0x53);
-        func_002AF2E0(0, 0, 0, context);
+        mnuDrawStaffValueGrid(0, 0, 0, context);
     }
     mnuDrawStaffGridLabelsForKind(1, context->resources.baseResources[0]);
     return menuSetHandler(context, 1, task);
@@ -989,7 +989,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
                                                  context->resources.baseResources[0]);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
-    func_002B2C88(window, 1, 0, 0);
+    mnuConfigurePartyPanelPage(window, 1, 0, 0);
     menu->thirdListState = 0;
     if (menu->thirdListEnabled != 0) {
         menu->thirdListReset = 0;
@@ -1004,7 +1004,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     mnuDestroyOwnedCatalogItemWindow(context);
-    func_002B2C88(entryList, 0, 0, 0);
+    mnuConfigurePartyPanelPage(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {

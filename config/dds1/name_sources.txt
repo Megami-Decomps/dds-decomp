@@ -8588,3 +8588,8 @@
 0x001DEFE0	btlBuildBattleUnitFramingCameraPose	inferred	Walk the active battle-unit list, filter status flags, accumulate scaled reach and vertical bounds, and build the output camera pose using the requested angle; paired callers use it for action framing. DDS2 twin 0x001EC868.
 0x002E87A8	sndQueueCommandPacket	inferred	Reserve a sound-command ring slot, stamp its sequence, copy payload, pack command/channel/quadword count, advance the producer cursor, wake the consumer and return the sequence; DDS2 twin 0x00341650. This is the queue producer beneath sndSendCommandPacket.
 0x002BF5D8	effDrawRepeatedSpriteTiles	inferred	blends the slot’s four corner colors with alpha cleared, initializes a complete tile width from sourceWidth * 16, and draws length / tileWidth repeated tiles.
+0x0024FBB8	mnuUpdateResourceTaskState	inferred	confidence=high; advances MnuResourceTask through resource, page and title-stream states; callers dispatch it as a task-state callback. [LiteH menu naming batch 19]
+0x002702A0	mnuBuildMovieViewerList	inferred	confidence=high; clears the movie list and appends entries from pfs0:/movie directories; DDS2 semantic twin 0x002A8268. [LiteH menu naming batch 19]
+0x00280A90	mnuGetPartyRowDrawState	inferred	confidence=high; returns the party-row visual state consumed by frame and fade renderers. [LiteH menu naming batch 19]
+0x00282360	mnuDrawPartyMemberStatusPanel	inferred	confidence=high; renders the mode-2 party status panel; corresponds to DDS2 mnuDrawPartyMemberStatusPanel at 0x002BFEA0. [LiteH menu naming batch 19]
+0x00284C48	mnuDrawPanelItemDetail	inferred	confidence=high; draws panel-item details through mnuDrawPanelItemValue. [LiteH menu naming batch 19]

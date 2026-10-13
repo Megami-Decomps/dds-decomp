@@ -760,7 +760,7 @@ INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF780);
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024FBB8);
+INCLUDE_ASM(const s32, "game/code_0024E1C8", mnuUpdateResourceTaskState);
 
 extern void mnuDrawDisplaySpriteAndPanelMarks(s32, s32, s32);
 extern void func_002546D8(s32, s32);

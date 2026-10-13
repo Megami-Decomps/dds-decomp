@@ -171,7 +171,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 
 
-extern s32 func_002B06A8();
+extern s32 mnuApplyRandomStatItemEffect();
 
 extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord *, s32, s32);
 
@@ -441,7 +441,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void evtStageTestSelectEntry(s32, s32, s32);
-extern void func_002B2C88(s32, s32, s32, s32);
+extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
 
 s32 mnuCreatePanels(s32 callback);
 

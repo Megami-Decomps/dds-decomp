@@ -787,7 +787,7 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
 }
 
 extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *);
-extern void func_002B2C88(s32, s32, s32, s32);
+extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
 
 void mnuSetupStaffMenuProfilePage(DatPartyRecord *entry, MenuProgressHost *host) {
     MenuPageWindow *window = &host->partyWindow;
@@ -804,7 +804,7 @@ void mnuSetupStaffMenuProfilePage(DatPartyRecord *entry, MenuProgressHost *host)
     host->effectResource = mnuAllocateSimpleSprite((EffectSlotSet *)host->staffSlots.baseResources[1],
                                                   host->staffSlots.pairResources[1],
                                                   (EffectSlotSet *)host->staffSlots.baseResources[0]);
-    func_002B2C88((s32)window, 1, 1, 1);
+    mnuConfigurePartyPanelPage((s32)window, 1, 1, 1);
 }
 
 void mnuReleaseMenuVisualWorkResources(MenuProgressHost *host) {

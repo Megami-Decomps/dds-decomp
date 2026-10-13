@@ -2046,9 +2046,9 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
     mnuClearPageSelection(window);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280A90);
+INCLUDE_ASM(const s32, "game/code_0027BF00", mnuGetPartyRowDrawState);
 
-extern s32 func_00280A90(MenuPageWindow *, s32);
+extern s32 mnuGetPartyRowDrawState(MenuPageWindow *, s32);
 extern void uiDrawSurfaceAtNearDepth(s32);
 
 /* Draw the party row's frame variant and restore the near-depth surface. */
@@ -2057,7 +2057,7 @@ void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 alpha = menu->fade / 2 + 0x80;
     u16 *partyFlags = &datGameState->party[menu->records->slots[index].index].flags;
 
-    if (func_00280A90(menu, index) == 1 || force != 0) {
+    if (mnuGetPartyRowDrawState(menu, index) == 1 || force != 0) {
         if (*partyFlags & 2) {
             effDrawSpriteWithCornerFade(x + 0x150, y + 0xA8, z, alpha, 1, menu->resources, 11, context);
             effDrawSpriteWithCornerFade(x + 0x660, y + 0x110, z, alpha, 1, menu->resources, 16, context);
@@ -2074,7 +2074,7 @@ void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 }
 
 s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth, MenuPageWindow *window, s32 option) {
-    s32 result = func_00280A90(window, option);
+    s32 result = mnuGetPartyRowDrawState(window, option);
 
     switch (result) {
     case 1:
@@ -2304,7 +2304,7 @@ void mnuDrawPartyPanelSlotWithBlend(s32 x, s32 y, s32 depth, MenuPageWindow *win
     s32 alpha = window->transitionValue;
     EffectSlotSet *resource;
 
-    if (func_00280A90(window, index) == blendState) {
+    if (mnuGetPartyRowDrawState(window, index) == blendState) {
         mnuBlendPanelSlots((s32)pair[1], (s32)pair[0], window->fade);
         resource = pair[1];
     } else {

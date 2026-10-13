@@ -176,7 +176,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 
 
-extern s32 func_002B06A8();
+extern s32 mnuApplyRandomStatItemEffect();
 
 extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord *, s32, s32);
 
@@ -377,7 +377,7 @@ extern void mnuDrawStaffPartySelectionPanel(KwlnTask *task);
 extern const char *D_003E78D0[];
 extern s32 D_00435E70;
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
-extern void func_002AF2E0(s32, s32, s32, MenuContext *);
+extern void mnuDrawStaffValueGrid(s32, s32, s32, MenuContext *);
 extern void mnuSetPanelItemsFromRow(MenuPanelGroup *, s32);
 extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);
 
@@ -420,7 +420,7 @@ void mnuDrawStaffPartySelectionPanel(KwlnTask *task) {
             } else {
                 mnuDrawCampGridAndLabelDefault(3, 0, 0, context, 1, 0x53);
             }
-            func_002AF2E0(0x120, 0xC0, selection, context);
+            mnuDrawStaffValueGrid(0x120, 0xC0, selection, context);
         }
     } else {
         mnuDrawCampGridAndLabelDefault(2, 0, 0, context, 1, 0x53);
@@ -468,7 +468,7 @@ u32 func_002B06A0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B06A8);
+INCLUDE_ASM(const s32, "game/code_002B0278", mnuApplyRandomStatItemEffect);
 
 s32 mnuUpdatePartySlotAssignmentPopup(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -486,7 +486,7 @@ s32 mnuUpdatePartySlotAssignmentPopup(KwlnTask *callback) {
     if (evtGetCapturedWindowPanelValue() == 0) {
         label = ((MenuWindowContainer *)*(s32 *)(menu + 0x18))->list->cursor->sortKeySecondary;
         mnuPrepareStaffValueChangeDialog((MenuStaffContext *)context, slot, label,
-                                         func_002B06A8(menu, slot, label));
+                                         mnuApplyRandomStatItemEffect(menu, slot, label));
         mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         mnuRefreshPartyPanelBars(&((MenuContext *)context)->partyWindow);
         *(s32 *)(menu + 0x40) = label;
@@ -1296,10 +1296,10 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
+INCLUDE_ASM(const s32, "game/code_002B0278", mnuConfigurePartyPanelPage);
 
 extern void evtStageTestSelectEntry(s32, s32, s32);
-extern void func_002B2C88(MenuPageWindow *, s32, u32, s32);
+extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, u32, s32);
 
 s32 mnuCreatePanels(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -1336,7 +1336,7 @@ s32 mnuCreatePanels(KwlnTask *callback) {
         party->motionSelection = 0xA;
     }
     evtStageTestSelectEntry(data->unitId, party->motionSelection, 0);
-    func_002B2C88(window, 1, party->staffView, party->staffMode);
+    mnuConfigurePartyPanelPage(window, 1, party->staffView, party->staffMode);
     mnuBeginWindowFadeTransition(0, &((MenuContext *)context)->transition);
     return 1;
 }
@@ -1346,7 +1346,7 @@ s32 mnuDestroyPanels(KwlnTask *callback) {
     StaffMenuRuntime *menu = (StaffMenuRuntime *)((MenuContext *)context)->party;
     MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
-    func_002B2C88(window, 0, menu->staffView, menu->staffMode);
+    mnuConfigurePartyPanelPage(window, 0, menu->staffView, menu->staffMode);
     evtStageTestStop();
     mnuClearEntries(window);
     mnuReleasePartyIconBundles(window);
@@ -1434,12 +1434,12 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
         if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
             if (menuWork->staffMode == 0) {
                 menuWork->staffMode = 1;
-                func_002B2C88(&((MenuContext *)context)->partyWindow, 3, menuWork->staffView, 1);
+                mnuConfigurePartyPanelPage(&((MenuContext *)context)->partyWindow, 3, menuWork->staffView, 1);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
                                           ((MenuContext *)context)->alternateResources[0], 0, 0);
             } else {
                 menuWork->staffMode = 0;
-                func_002B2C88(&((MenuContext *)context)->partyWindow, 2, menuWork->staffView, 0);
+                mnuConfigurePartyPanelPage(&((MenuContext *)context)->partyWindow, 2, menuWork->staffView, 0);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
                                           ((MenuContext *)context)->displayResource, 0, 0);
             }
