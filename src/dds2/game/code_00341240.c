@@ -11,7 +11,7 @@ extern u16 D_0040BAC0[];
 extern EffRandState D_0040BAE8;
 
 void effMiscSeedRandom(EffRandState *state, u32 seed);
-s32 func_003413F0(ClockTime *now);
+s32 effMiscReadCachedClockTime(ClockTime *now);
 
 extern s8 D_004391E0;
 extern void *sceSifAllocIopHeap(s32);
@@ -49,7 +49,7 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
     ClockTime now;
     s32 t;
 
-    func_003413F0(&now);
+    effMiscReadCachedClockTime(&now);
     t = now.year * 0x16E + now.day + D_0040BAC0[now.month + 7] + 0xFFF4FF83;
     t = t * 0x18 + now.hour;
     t = t * 0x3C + now.min;
@@ -63,7 +63,7 @@ extern ClockTime D_00438B78;
 
 INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
 
-s32 func_003413F0(ClockTime *now) {
+s32 effMiscReadCachedClockTime(ClockTime *now) {
     SdfCdClock clock;
     s32 result = 1;
     s32 year;

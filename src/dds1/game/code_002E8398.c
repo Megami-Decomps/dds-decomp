@@ -11,7 +11,7 @@ extern void *sceSifAllocIopHeap(s32 size);
 extern EffRandState D_00398938;
 
 void effMiscSeedRandom(EffRandState *state, u32 seed);
-s32 func_002E8548(ClockTime *now);
+s32 effMiscReadCachedClockTime(ClockTime *now);
 
 extern u32 effMiscRand(void *state);
 
@@ -48,7 +48,7 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
     ClockTime now;
     s32 t;
 
-    func_002E8548(&now);
+    effMiscReadCachedClockTime(&now);
     t = now.year * 0x16E + now.day + D_00398910[now.month + 7] + 0xFFF4FF83;
     t = t * 0x18 + now.hour;
     t = t * 0x3C + now.min;
@@ -60,7 +60,7 @@ extern s32 sdfBcdStrToInt(s32);
 extern u8 D_003BD480;
 ClockTime D_003BD488 = {0};
 
-s32 func_002E8548(ClockTime *now) {
+s32 effMiscReadCachedClockTime(ClockTime *now) {
     SdfCdClock clock;
     s32 result = 1;
     s32 year;
