@@ -8,6 +8,7 @@
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_dev_state.h"
+#include "fld_transfer_chunk.h"
 #include "sdf_resource.h"
 #include "eff_transform.h"
 #include "sdf_model.h"
@@ -117,12 +118,6 @@ extern void sndReleaseTrackHandle(s32 arg0);
 
 extern s32 dds3GetWorldObject(void);
 
-
-typedef struct FldTransferChunk {
-    u32 unk0;
-    s32 offset;
-    u32 size;
-} FldTransferChunk;
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 

@@ -8,6 +8,7 @@
 #include "eff_bill.h"
 #include "eff_ribbon_work.h"
 #include "eff_class_work_api.h"
+#include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
 #include "common.h"
 #include "eff_random.h"
@@ -7807,8 +7808,7 @@ void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
     payload->selectedTargetIndex = effMiscRandMod(0, count);
 }
 
-struct FldTransferChunk;
-extern void fldRelocatePackedTransferChunk(u32, struct FldTransferChunk *);
+extern void fldRelocatePackedTransferChunk(u32, FldTransferChunk *);
 
 
 
