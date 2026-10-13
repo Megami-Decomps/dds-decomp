@@ -387,7 +387,7 @@ void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 w
     sdfInstallPoolNodeReleaseCallbacks(work);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8CB8);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTestTransformedClipVectors);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8DD0);
 
