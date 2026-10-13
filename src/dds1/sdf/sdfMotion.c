@@ -874,7 +874,8 @@ void sdfMotionApplySampleToTarget(SdfMotionIndexedTextBinding *a0, f32 t) {
     sdfCopyPrimaryTextScalars(a0->target, b.firstKey);
 }
 
-void func_002DCF60(void) {
+/* Direct primary-text sampling has an intentionally empty capturePrevious callback. */
+void sdfMotionCapturePrimaryTextNoOp(void) {
 }
 
 SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextSampleBinding(Motion *motion, s32 unused,

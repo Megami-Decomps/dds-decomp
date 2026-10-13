@@ -11,7 +11,8 @@ extern SdfMotionBindingDispatch D_003982D0;
 extern s32 (*D_00398360[])(void *a0, s32 a1);
 extern SdfMotionBindingDispatch D_00398368;
 
-void func_002DD038(void) {
+/* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
+void sdfMotionCaptureSecondaryTextNoOp(void) {
 }
 
 s32 sdfDispatchMotionCommand(void *object, s32 command) {
