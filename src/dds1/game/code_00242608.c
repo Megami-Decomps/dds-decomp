@@ -1868,7 +1868,7 @@ extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
 extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
 extern void func_00260100(ShopScene *, s32);
-extern void func_00260208(s32, u32, s32, s32);
+extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
 extern s32 D_003BC3D8[];
 
 typedef struct {
@@ -2744,10 +2744,10 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
     switch (selectedIndex) {
     case 0:
     case 1:
-        func_00260208((s32)state, 0x100, 1, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 1, 0x53);
         break;
     case 2:
-        func_00260208((s32)state, 0x100, 0, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 0, 0x53);
         break;
     }
     return func_00285670(&state->transitionWork, &state->dispatchState, 1, task);
@@ -2832,7 +2832,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         func_0025FD50(0, 0, 0, state, 0x53);
         func_00260100(state, 0xA09DC380);
-        func_00260208((s32)state, 0x100, 3, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
         if (state->stateTable == (s32)D_0036AA68) {
@@ -2840,7 +2840,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(0, 0, 0, state->sprite->list, 0x53);
             func_00260100(state, 0xA09DC380);
-            func_00260208((s32)state, 0x100, 4, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 4, 0x53);
         } else {
             func_0025E308(0, 0, 0, state, 0x100, 0x53);
             mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
@@ -2848,7 +2848,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             mnuClearWindowPanelTransitionFlag(state->sprite);
             mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)state, 0x100, 0x53);
             func_00260100(state, 0xA09DC380);
-            func_00260208((s32)state, 0x100, 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 2, 0x53);
         }
         break;
     }

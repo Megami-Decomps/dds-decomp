@@ -4667,6 +4667,7 @@
 0x0025F378	mnuDrawIfActive	inferred	mnu draws overlay when inner node active
 0x0025F408	mnuDrawListChildrenWithCountdown	inferred	confidence=high; src/dds1/game/code_0025DF68.c:func_0025F408; Decrements a nonzero shared delay counter and invokes the draw callback for each linked child up to the list count. [names_qp9.tsv]
 0x0025FE68	mnuDrawIconFixedEntry	inferred	mnu draws icon table entry 26
+0x00260208	brsDrawResultIconPairWithAlpha	inferred	Draws the selected result icon and fixed companion with matching alpha from the result icon table. [LiteH b12]
 0x0025FEB8	mnuDrawIconFixedEntryWithBadge	inferred	confidence=high; src/dds1/game/code_0025DF68.c:func_0025FEB8; Draws the fixed icon sprite plus a formatted value glyph placed at fixed offsets, with chain flag 4 and the given draw option. [names_qp9.tsv]
 0x00260530	mnuStorePendingMenuCommandValue	inferred	When a menu command exists, stores its payload and puts its mode into queued state. [names_reviewed17.tsv]
 0x002605B0	mnuSetCommandPhase	inferred	Stores a phase code in menu command work and resets its elapsed frame counter.

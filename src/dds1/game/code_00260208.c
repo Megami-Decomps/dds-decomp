@@ -35,7 +35,7 @@ extern struct EffectSlotSet *D_003BC520;
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw a selected result icon and its fixed companion at the same opacity. */
-void func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
+void brsDrawResultIconPairWithAlpha(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     f32 strength;
     struct EffectSlotSet *layer;
 
@@ -215,14 +215,14 @@ s32 func_00260670(ShopScene *scene) {
                                      (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawListChildrenWithCountdown(0, 0, 0, scene->sprite->list, 0x53);
         func_00260100(scene, 0xA09DC380);
-        func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
         break;
     case 1:
     case 3:
         mnuDrawStatusIconAndCompanion(0, 0, 0, scene, 0x100, 0x53);
         mnuDrawListChildrenWithCountdown(0, 0, 0, scene->sprite->list, 0x53);
         func_00260100(scene, 0xA09DC380);
-        func_00260208((s32)scene, 0x100, 4, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 4, 0x53);
         break;
     }
     return 0;
@@ -308,7 +308,7 @@ s32 func_00260AB0(ShopScene *scene) {
                       (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawListChildrenWithCountdown(0, 0, 0,
                                          scene->sprite->list, 0x53);
-        func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
 
         if ((f32)scene->frames > 0.0f) {
             /* Retail 0x00260CB8-0x00260CCC round-trips through a clamped integer. */
@@ -375,10 +375,10 @@ s32 func_00260AB0(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
             break;
         case 2:
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
             break;
         }
         if ((f32)scene->frames > 0.0f) {
@@ -425,12 +425,12 @@ s32 func_00260AB0(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 1, 0x53);
-            func_00260208((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
             break;
         case 2:
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 0, 0x53);
-            func_00260208((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
             break;
         }
         mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)scene, 0x100, 0x53);
@@ -462,10 +462,10 @@ s32 func_00260AB0(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260208((s32)scene, 0x100, 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 3, 0x53);
             break;
         case 2:
-            func_00260208((s32)scene, 0x100, 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 2, 0x53);
             break;
         }
         break;
@@ -539,12 +539,12 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
-            func_00260208((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
             break;
         case 2:
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
-            func_00260208((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
             break;
         }
         break;
@@ -561,12 +561,12 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260208((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
             break;
         case 2:
-            func_00260208((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
-            func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
             break;
         }
         break;
@@ -584,10 +584,10 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260208((s32)scene, 0x100, 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 1, 0x53);
             break;
         case 2:
-            func_00260208((s32)scene, 0x100, 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 0, 0x53);
             break;
         }
         break;
@@ -602,10 +602,10 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         switch (category) {
         case 0:
         case 1:
-            func_00260208((s32)scene, 0x100, 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 1, 0x53);
             break;
         case 2:
-            func_00260208((s32)scene, 0x100, 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 0, 0x53);
             break;
         }
         break;
