@@ -254,7 +254,7 @@ extern s8 D_0037F510[];
 extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(s32 result);
 
-extern void func_002C92D0(u32 context);
+extern void fileReqStartCardDetection(u32 context);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -2016,7 +2016,7 @@ s32 mcHandleDetectionResult(void) {
 s32 fileStartMemoryCardDetection(void) {
     fileSetMenuFlowState(5);
     fileSetMemoryCardOperationActive();
-    func_002C92D0(fileMemoryCardRequestIndex);
+    fileReqStartCardDetection(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
 
