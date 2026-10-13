@@ -423,8 +423,9 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-/* Build an indexed RGBA/XYZ2 packet and submit it through the selected surface. */
-void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
+/* Submit count XY pairs as a colored GS triangle fan to surfaceIndex.
+ * useFirstColor bit 0 selects colors[0] instead of a color per vertex. */
+void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
                    s32 useFirstColor, s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfDrawPacket *packet;
@@ -975,7 +976,8 @@ void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
     sdfDestroyTaskResourceWork((TaskWork *)kwlnTaskGetUserValue(task));
 }
 
-void func_002CB9B8(void) {
+/* Default empty grid draw callback; retain its retail zero-argument definition. */
+void sdfNoOpGridDrawCallback(void) {
 }
 
 
@@ -996,7 +998,8 @@ void sdfDestroyGridWork(SdfGrid *work) {
     }
 }
 
-void func_002CBB48(SdfGrid *grid) {
+/* Release all cell values and restore indices, retaining the grid header. */
+void sdfGridClear(SdfGrid *grid) {
     sdfGridReleaseAllCells(grid);
 }
 
@@ -1110,7 +1113,8 @@ typedef struct SdfGridDirections {
 } SdfGridDirections;
 extern const SdfGridDirections D_003BD298[];
 
-SdfGridCell *func_002CBE18(SdfGrid *grid) {
+/* Select an occupied cell above and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_003BD298[0];
     u32 cursorValue;
     s32 row;
@@ -1155,7 +1159,8 @@ SdfGridCell *func_002CBE18(SdfGrid *grid) {
 
 extern const SdfGridDirections D_003BD2A0[];
 
-SdfGridCell *func_002CBF60(SdfGrid *grid) {
+/* Select an occupied cell below and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_003BD2A0[0];
     u32 cursorValue;
     u32 count = grid->cellCount;
@@ -1209,7 +1214,8 @@ SdfGridCell *func_002CBF60(SdfGrid *grid) {
 
 extern const SdfGridDirections D_003BD2A8[];
 
-SdfGridCell *func_002CC0D0(SdfGrid *grid) {
+/* Select an occupied cell to the left and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_003BD2A8[0];
     SdfGridCell *cell;
     u32 index;
@@ -1251,7 +1257,8 @@ SdfGridCell *func_002CC0D0(SdfGrid *grid) {
 
 extern const SdfGridDirections D_003BD2B0[];
 
-SdfGridCell *func_002CC238(SdfGrid *grid) {
+/* Select an occupied cell to the right and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorRightToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_003BD2B0[0];
     SdfGridCell *cell;
     u32 cursorValue;

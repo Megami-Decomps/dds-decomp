@@ -349,7 +349,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00252E38);
 extern u8 D_0036B410[17][15];
 
 extern s32 func_00252CE8(SdfGrid *, s32, s32, u32);
-extern SdfGridCell *func_002CC0D0(SdfGrid *);
+extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
 
 /* Select the connected left neighbor, or fall back to the previous filled cell. */
 s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
@@ -359,7 +359,7 @@ s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
     s32 y = coordinates[entry->sceneId].y;
 
     if (x == 0) {
-        if (func_002CC0D0(grid) != NULL) {
+        if (sdfGridCursorLeftToFilledCell(grid) != NULL) {
             return 1;
         }
     } else if ((D_0036B410[y][x - 1] & 0x1C) != 0) {
@@ -367,7 +367,7 @@ s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
             return 1;
         }
     } else {
-        if (func_002CC0D0(grid) != NULL) {
+        if (sdfGridCursorLeftToFilledCell(grid) != NULL) {
             return 1;
         }
     }
@@ -375,7 +375,7 @@ s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
 }
 
 extern s32 func_00252E38(SdfGrid *, s32, s32, u32);
-extern SdfGridCell *func_002CC238(SdfGrid *);
+extern SdfGridCell *sdfGridCursorRightToFilledCell(SdfGrid *);
 
 s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
     MenuSceneWork *scene = (MenuSceneWork *)sdfGetTaskValueByKey(
@@ -391,7 +391,7 @@ s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
             return 1;
         }
     } else {
-        if (func_002CC238(grid) != NULL) {
+        if (sdfGridCursorRightToFilledCell(grid) != NULL) {
             return 1;
         }
     }
@@ -455,10 +455,10 @@ void mnuReinitializeSceneGrid(s32 sceneAddress) {
     mnuCopySceneCoordinates((MenuSceneWork *)(u32)sceneAddress);
 }
 
-extern void func_002CBB48(SdfGrid *grid);
+extern void sdfGridClear(SdfGrid *grid);
 extern void func_00253208(MenuSceneWork *work, s32 sceneId, s32 *x, s32 *y);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 x, u32 y);
-extern SdfGridCell *func_002CC0D0(SdfGrid *grid);
+extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *grid);
 
 
 void mnuRestoreMantraGridSelection(MenuSceneWork *work) {
@@ -472,13 +472,13 @@ void mnuRestoreMantraGridSelection(MenuSceneWork *work) {
     s32 scene;
     s32 field;
 
-    func_002CBB48(grid);
+    sdfGridClear(grid);
     scene = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
     func_00253208(work, *(s32 *)(field + 0x70), NULL, NULL);
     if (sdfGridSelectFilledCell(
             work->gridHandle, x, y) == NULL) {
-        func_002CC0D0(work->gridHandle);
+        sdfGridCursorLeftToFilledCell(work->gridHandle);
     }
 }
 

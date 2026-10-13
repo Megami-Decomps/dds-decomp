@@ -10422,3 +10422,38 @@ deep67 ledger and park. The pre-rename whole-unit gate is 49 match /
 0 differ; the current-name gate keeps all 49 C exact, with only the
 accepted stale rename/ASM-label artifacts pending Main's resplit.
 
+
+## SDF occupied-cell cursor searches and colored triangle fans
+
+The directional grid searches move the cursor to a cell whose `value` is
+nonzero, then call `sdfGridFollowCursorWithinMargins`. They return that cell,
+or `NULL` without moving the cursor when the search fails. Their existing
+offset-table traversal and radius limit are not a geometric-nearest search
+and remain unchanged.
+
+| DDS1 | DDS2 | Observed operation |
+| --- | --- | --- |
+| `sdfGridCursorUpToFilledCell` at `0x002CBE18` | `0x00313280` | Search decreasing rows. |
+| `sdfGridCursorDownToFilledCell` at `0x002CBF60` | `0x003133C8` | Search increasing rows. |
+| `sdfGridCursorLeftToFilledCell` at `0x002CC0D0` | `0x00313538` | Search decreasing columns. |
+| `sdfGridCursorRightToFilledCell` at `0x002CC238` | `0x003136A0` | Search increasing columns. |
+
+DDS1's mantra input handler uses the first two for its vertical input masks.
+The connected left/right neighbor selectors use the latter two as fallbacks.
+`sdfGridClear` (`0x002CBB48` / `0x00312FB0`) retains the grid header while
+releasing nonzero cell values and restoring row-major indices. Selection
+restoration clears before repopulating; this is not grid destruction.
+
+The native allocator twins install `sdfNoOpGridDrawCallback`
+(`0x002CB9B8` / `0x00312E20`) at header offset `0x18`, the asserted `drawCell`
+slot in `sdf_grid.h`. Its empty zero-argument C definitions are retained,
+as are the allocator bodies and their `INCLUDE_ASM` lines.
+
+`sdfDrawColoredTriangleFan` (`0x002CAAC8` / `0x00311F20`) submits XY pairs
+and either a shared color or per-vertex colors through `kwlnDrawSurfaces`.
+The packet-header initializer copies primitive bits directly into GIF PRIM:
+`0x14D` has low bits five, selecting a triangle **fan**, not a strip.
+The existing ITF fan/strip constants independently distinguish `0x4D` from
+`0x4C`. Color selection, coordinate scale/bias, packet values, argument types,
+legacy caller declarations and statement order are unchanged.
+
