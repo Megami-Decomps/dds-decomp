@@ -25,18 +25,6 @@
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-typedef struct SceneSlot {
-    u8 a;
-    u8 b;
-    u8 id;
-} SceneSlot;
-
-typedef struct SceneFadingRecord {
-    SceneSlot slot;
-    u8 alpha;
-    s32 target;
-} SceneFadingRecord;
-
 typedef struct BattleController {
     u8 pad_000[0x1F4];
     u32 flags;
@@ -66,12 +54,12 @@ typedef struct BattleController {
     s32 experienceEarned; /* 0x2C8 */
     s32 epEarned; /* 0x2CC */
     u8 pad2D0[4];
-    SceneSlot slots[8];
+    BtlSceneSlot slots[8];
     BtlTask *groupPrimary[20];
     BtlTask *groupSecondary[45];
     BtlTask *groupTertiary[15];
     u8 pad_42C[0x20];
-    SceneFadingRecord fadingRecords[8]; /* 0x44C */
+    BtlSceneFadingRecord fadingRecords[8]; /* 0x44C */
     u8 pad_48C[0x18];
     EffectSlotSet *resA; /* 0x4A4 */
     EffectSlotSet *resB;

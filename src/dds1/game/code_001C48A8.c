@@ -47,21 +47,6 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #define FLD_SCENE_GROUP_WORD_BYTES 4
 
 
-/* Three-byte scheduling slot. IDs move with slots; insertion renumbers them. */
-typedef struct SceneSlot {
-    u8 group;
-    u8 remaining;
-    u8 id;
-} SceneSlot;
-
-/* Native fade snapshot: slot bytes, alpha byte, then signed target word. */
-typedef struct SceneFadingRecord {
-    SceneSlot slot;
-    u8 alpha;
-    s32 target;
-} SceneFadingRecord;
-
-
 /* Primary scene controller; loading and group scheduling share this record. */
 typedef struct BattleSceneWork {
     u8 pad_000[0x1F4];
@@ -99,12 +84,12 @@ typedef struct BattleSceneWork {
     s32 spriteObject;
     u8 pad2B0[0x20];
     s32 unk2D0;
-    SceneSlot slots[8];
+    BtlSceneSlot slots[8];
     BtlTask *groupPrimary[20];
     BtlTask *groupSecondary[45];
     BtlTask *groupTertiary[15];
     BtlTask *groupHandles[8];
-    SceneFadingRecord fading[8]; /* 0x44C */
+    BtlSceneFadingRecord fading[8]; /* 0x44C */
     BtlTask *currentTask;
     u8 pad_490[0x108];
     s32 (*selectScriptArg)(void); /* 0x598 */
@@ -1461,7 +1446,7 @@ void func_001C7690(void) {
 
 /* Pop the front slot only when its remaining counter is zero. */
 void fldCompactSceneSlots(void) {
-    SceneSlot *slotCursor = ((BattleSceneWork *)btlGetRuntime())->slots;
+    BtlSceneSlot *slotCursor = ((BattleSceneWork *)btlGetRuntime())->slots;
     u32 slotIndex;
     if (slotCursor->remaining == 0) {
         for (slotIndex = 0; slotIndex < FLD_SCENE_SLOT_SHIFT_COUNT; slotIndex++) {
@@ -1583,7 +1568,7 @@ void fldSwapSceneSlots(s32 counterAmount) {
 
 /* Count slots with both group and counter; zero-counter groups can still block finish. */
 s32 fldCountSceneSlots(void) {
-    SceneSlot *slotCursor = ((BattleSceneWork *)btlGetRuntime())->slots;
+    BtlSceneSlot *slotCursor = ((BattleSceneWork *)btlGetRuntime())->slots;
     s32 occupiedSlotCount = 0;
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < FLD_SCENE_SLOT_COUNT; slotIndex++, slotCursor++) {
@@ -1597,7 +1582,7 @@ s32 fldCountSceneSlots(void) {
 /* Finished when no group remains, or the explicit finish flag is set. */
 s32 fldAreSceneSlotsFinished(void) {
     s32 scene = btlGetRuntime();
-    SceneSlot *slotCursor;
+    BtlSceneSlot *slotCursor;
     u32 slotIndex;
     if (((BattleSceneWork *)scene)->flags & FLD_SCENE_SLOTS_FINISHED_BIT) {
         return 1;
