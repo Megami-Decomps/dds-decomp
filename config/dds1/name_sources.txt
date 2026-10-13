@@ -8911,3 +8911,4 @@
 0x00310478	sceGetstat	inferred	Returns the IOP path-stat result and fills SceIoStat through operation 0x0c; stream and module loaders test success and directory mode when selecting debug PFS paths. [retail assembly and paired callers, 2026-10-13]
 0x003017A0	strcasecmp	inferred	Compares NUL-terminated strings after table-driven byte folding, returning the first differing folded-byte result; movie and model callers use it to test resource-extension equality without case sensitivity. [retail body and paired DDS2 callers, 2026-10-13]
 0x00302240	strrchr	inferred	Scans a NUL-terminated string and returns the pointer to its last matching byte or null; movie and model callers use the final period to locate resource extensions. [retail body and paired DDS2 callers, 2026-10-13]
+0x003D6E20	frFontIndexedTextSlots	inferred	32 address words cleared by frFontInitializeSystem and read by indexed encoded-text replacement paths
