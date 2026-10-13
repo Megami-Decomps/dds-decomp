@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_world_lifecycle.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "file.h"
@@ -91,8 +92,6 @@ extern void func_0031AF60();
 extern void itfClearTintAndWorkBuffers(u8 *);
 extern u32 D_00435CBC;
 extern void *dds3GetWorldSecondaryObject(void);
-struct EffWorldNode;
-extern void dds3DestroyWorldNode(struct EffWorldNode *worldNode);
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern void mnuMarkTitleStreamResetPending(void);

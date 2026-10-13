@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_lifecycle.h"
 
 extern EffWorldNode *dds3ActiveWorld;
 

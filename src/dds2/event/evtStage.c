@@ -2,6 +2,7 @@
 #include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_state.h"
@@ -19,7 +20,6 @@ extern void dds3ReplaceObjectResource(EffWorldNode *);
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 
 extern void *dds3GetWorldSecondaryObject(void);
-extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
 
 const char D_00421578[0x10] = "%sf%03d_%03d";
 
