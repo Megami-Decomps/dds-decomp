@@ -42,7 +42,7 @@ extern EffWorldNode *dds3GetWorldSecondaryObject(void);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 
-extern void func_00136718(void);
+extern void fldApplyLightSetToChaseCameraUnit(void);
 extern void func_001526B8(void);
 extern void func_00153FA0(void);
 extern EffWorldNode *D_00435F1C;
@@ -5880,7 +5880,7 @@ void fldCreateChaseCameraObject(void) {
     D_00435F20 = (MdlCtx *)dds3GetObjectBaseResourceHandle(D_00435F1C);
     mdlAddEntryFlagged(D_00435F20, 0, 0x11);
     sdfSetModelScalarOverrides(D_00435F20->inner, 15.0f, 0.0f);
-    func_00136718();
+    fldApplyLightSetToChaseCameraUnit();
     func_001526B8();
     func_00153FA0();
 }
