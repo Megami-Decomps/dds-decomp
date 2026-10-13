@@ -2241,6 +2241,7 @@
 0x001A7878	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:783:func_001A7878; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
 0x001A7B00	itfQueueOffsetTexturedRect	inferred	readability/matching review (QP16)
+0x001A85E0	itfMesScriptStartEntryAndWait	inferred	Reads script entry argument 0, starts the window entry, polls its transition and completion, then cleans up and publishes the result value.
 0x001A87E8	sndCycleTestMessageResource	inferred	Releases the previous TestMsgMng resource and cycles the four sound-test message choices, loading the next resource when present.
 0x001A8848	itfUpdateTestMessageResourceInput	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:915:func_001A8848; The TestMsgMngC task cycles its test message texture/resource when the corresponding pad state is negative, then returns zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001A8918	itfPrintTestMessageCallback	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:943:func_001A8918; The registered test-message window callback prints the fixed diagnostic marker.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
