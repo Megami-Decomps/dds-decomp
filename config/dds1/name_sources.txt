@@ -990,6 +990,7 @@
 0x00132B80	fldSetSkyAlpha	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4697; Stores the sky alpha value.; twin=0x00135588 (DDS2).
 0x00132B90	fldGetSkyAlpha	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4701; Returns the current sky alpha value.; twin=0x00135598 (DDS2).
 0x00132BD0	fldUpdateSelectedValueTransition	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4720; Advances the selected-value transition and applies live lighting edits.; twin=0x001355D8 (DDS2).
+0x00132E38	fldSetPlayerLighting	inferred	Builds the two player-unit color endpoints, initializes their transition and normalized direction, then caches the values; light-set callers supply its color/direction inputs. DDS2 extends the analogous helper to a secondary unit.
 0x00132FD0	fldApplySkyLightSet	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4872; Starts a transition to the indexed sky light set and updates display and player lighting.; twin=0x00135A68 (DDS2).
 0x00133280	fldApplyPendingSceneValueWithSpeed	inferred	Applies a queued field value when different from current with gated update speed. [names_reviewed11.tsv]
 0x001332E8	fldTransitionSkyLightSet	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4989; Applies the indexed sky light set using the requested transition mode.; twin=0x00135D80 (DDS2).
