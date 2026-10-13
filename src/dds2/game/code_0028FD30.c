@@ -113,7 +113,14 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FD30);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", mnuHandleMantraSourceDialogResult);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275B0);
+/* The dialog copies all six fixed-width attribute names before selecting one. */
+typedef struct MantraAttributeNameTable {
+    char text[6][9];
+} MantraAttributeNameTable;
+
+const MantraAttributeNameTable D_004275B0 __attribute__((aligned(8))) = {
+    {"Strength", "Vitality", "Magic", "Agility", "Luck", "ALL"}
+};
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
