@@ -1,4 +1,5 @@
 #include "fld_label_rows.h"
+#include "evt_message_window_api.h"
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -35,7 +36,6 @@
 extern void fldSetCameraNodeModeWithTen(void);
 extern void mnuMarkTitleStreamResetPending(void);
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);

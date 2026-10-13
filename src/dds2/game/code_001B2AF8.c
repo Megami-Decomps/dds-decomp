@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "evt_message_window_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "eff_random.h"
@@ -4291,7 +4292,6 @@ dialog_active:
     return 0;
 }
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *handle) {
     u8 *work = (u8 *)btlGetRuntime();

@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "fr_font.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -1915,7 +1916,6 @@ s32 evtBSetupDispatchSync(KwlnTask *request) {
 }
 
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 s32 evtClearDispatchVisualFlag(KwlnTask *task) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);

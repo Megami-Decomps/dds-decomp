@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_message_window_api.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
@@ -30,7 +31,6 @@
 
 extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 
 extern void func_001C2E90(EffectSlotSet *, s32, s32 *, s32 *, f32);

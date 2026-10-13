@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "ui_color.h"
 #include "kwln.h"
@@ -6,7 +7,6 @@
 #include "mnu_result.h"
 #include "snd_sequence_volume_pan.h"
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 
 extern void func_0024DD78(void);
