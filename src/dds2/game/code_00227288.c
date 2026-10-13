@@ -1200,7 +1200,6 @@ extern s32 btlSelectRaisedCameraFromActionFlags(BtlLinkedCommand *unit);
 extern s32 btlSelectSoleEligibleActor(void);
 extern u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action);
 extern s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *, BtlCamState *, s32);
-extern s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
 extern s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
 extern s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command);
 extern s32 btlSetSubtaskControlEnabled(s32 unused, s32 ignored, s32 action);
