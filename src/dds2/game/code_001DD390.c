@@ -2412,9 +2412,9 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 in
     BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
     if (alt->fC == 0.0f) {
         PCP_COPY_VECTOR(unit->bodyOffset, base);
-        unit->reach = base->f18;
-        unit->height = base->f1C;
-        unit->unkC0 = base->f20;
+        unit->reach = base->reach;
+        unit->height = base->height;
+        unit->unkC0 = base->cameraRadius;
     } else {
         unit->bodyOffset[0] = alt->f0;
         unit->bodyOffset[1] = alt->f4;
@@ -2424,13 +2424,13 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 in
         unit->height = alt->f14;
     }
     PCP_COPY_VECTOR(unit->muzzleOffset, base);
-    unit->unkBC = base->f18;
-    unit->unkB8 = base->f1C;
-    unit->unkC0 = base->f20;
-    unit->scale = base->f10;
-    unit->unk50 = base->f10;
-    unit->positionZOffset = base->f14;
-    unit->unk58 = base->f14;
+    unit->unkBC = base->reach;
+    unit->unkB8 = base->height;
+    unit->unkC0 = base->cameraRadius;
+    unit->scale = base->actorScale;
+    unit->unk50 = base->actorScale;
+    unit->positionZOffset = base->zOffset;
+    unit->unk58 = base->zOffset;
 }
 
 s32 btlHasMatchingModel(s32 effect, s32 model) {
