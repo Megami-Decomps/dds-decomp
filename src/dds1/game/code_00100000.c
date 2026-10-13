@@ -65,7 +65,7 @@ extern s32 dds3RunWorldPrimaryCallbacks(KwlnTask *task);
 extern s32 dds3RunWorldSecondaryCallbacks(KwlnTask *task);
 extern s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task);
 extern void frFontReleaseAll(KwlnTask *task);
-extern s32 func_001997E0(KwlnTask *task);
+extern s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task);
 
 /* Kernel startup: create the frame/draw/font tasks and initialize every subsystem, logging each step. */
 s32 kwlnInitializeRuntime(void) {
@@ -118,7 +118,7 @@ s32 kwlnInitializeRuntime(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
     func_001035F0();
     func_003003F0(D_003BA7E8);
-    kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, func_001997E0, 0, 0);
+    kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, kwlnUpdateDevelopmentDumpTask, 0, 0);
     func_003003F0(D_003BA7F0);
     kwlnFadeClear();
     evtStartSolarOverlay();

@@ -43,7 +43,7 @@ extern s32 dds3RunWorldPrimaryCallbacks(KwlnTask *task);
 extern s32 dds3RunWorldSecondaryCallbacks(KwlnTask *task);
 extern s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task);
 extern void frFontReleaseAll(KwlnTask *task);
-extern s32 func_001A1810(KwlnTask *task);
+extern s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task);
 
 s32 kwlnInitializeRuntime(void) {
     evtResetDisplayProjectionAndVectorState();
@@ -74,7 +74,7 @@ s32 kwlnInitializeRuntime(void) {
     kwlnDebugTaskCreate();
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
     func_001034E0();
-    kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, func_001A1810, 0, 0);
+    kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, kwlnUpdateDevelopmentDumpTask, 0, 0);
     kwlnFadeClear();
     evtEnsureSolarOverlayTaskAndResetPhase();
     fldCreateEncounterTask();

@@ -3032,7 +3032,8 @@ void btlSetUnitPosition(BtlUnit *object, void *position) {
     }
 }
 
-void func_001D6300(u8 *object, void *position) {
+/* Copy the stored current-position vector, without the runtime world offset. */
+void btlCopyUnitCurrentPosition(u8 *object, void *position) {
     PCP_COPY_VECTOR(position, object + 0x60);
 }
 
@@ -3140,7 +3141,7 @@ void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
 
 s32 btlIsUnitAtStoredPosition(u8 *object) {
     f32 position[3];
-    func_001D6300(object, position);
+    btlCopyUnitCurrentPosition(object, position);
     if (*(f32 *)(object + 0x30) == position[0] &&
         *(f32 *)(object + 0x34) == position[1] &&
         *(f32 *)(object + 0x38) == position[2]) {
@@ -3466,7 +3467,6 @@ s32 btlFormatUnitBedName(BtlUnit *actor, char *filename) {
 }
 
 extern u8 D_0037E110[];
-
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3BA8);
 
@@ -4641,7 +4641,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
             pos[0] += scale;
         } else {
-            func_001D6300((u8 *)actor, pos);
+            btlCopyUnitCurrentPosition((u8 *)actor, pos);
             pos[0] += scale;
             pos[2] += task->unit->zOffset;
         }
@@ -4653,7 +4653,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             effObjFetchInnerPosition(actor->effectObject);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         } else {
-            func_001D6300((u8 *)actor, pos);
+            btlCopyUnitCurrentPosition((u8 *)actor, pos);
             pos[2] += task->unit->zOffset;
         }
         effObjSetInnerPosition(task->unit->effectObject, (u128 *)pos);
@@ -4745,13 +4745,13 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         delta = task->amount * -velocity;
         task->amount -= delta;
         if (task->amount <= 0.01f) {
-            func_001D6300((u8 *)task->unit, position);
+            btlCopyUnitCurrentPosition((u8 *)task->unit, position);
             position[2] += task->unit->zOffset;
             effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
-    func_001D6300((u8 *)task->unit, position);
+    btlCopyUnitCurrentPosition((u8 *)task->unit, position);
     position[0] += offset;
     position[2] += task->unit->zOffset;
     effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);

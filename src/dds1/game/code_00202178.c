@@ -79,7 +79,7 @@ extern BtlTask *btlFindUnitByActor(BtlUnit *);
 
 extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
 
-extern void func_001D6300(void *, void *);
+extern void btlCopyUnitCurrentPosition(void *, void *);
 
 
 extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
@@ -1125,7 +1125,7 @@ void btlCenterUsasEnemyFormation(void) {
         }
     }
     if (target != NULL) {
-        func_001D6300(target, position);
+        btlCopyUnitCurrentPosition(target, position);
         shift = -position[0];
         position[0] = 0.0f;
         PCP_COPY_VECTOR(target->position, position);
@@ -1134,7 +1134,7 @@ void btlCenterUsasEnemyFormation(void) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != target) {
-                        func_001D6300(unit, position);
+                        btlCopyUnitCurrentPosition(unit, position);
                         position[0] += shift;
                         PCP_COPY_VECTOR(unit->position, position);
                         btlSetUnitPosition(unit, position);
