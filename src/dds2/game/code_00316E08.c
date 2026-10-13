@@ -61,7 +61,8 @@ extern MnuEffectRecord *D_00438930;
 
 extern MnuShootingWork *D_0043891C;
 
-extern s32 func_00317FE0(MnuShootingWork *);
+extern s32 mnuRunShootingInitCallback(MnuShootingWork *);
+extern u32 mnuRunShootingUpdateCallback(MnuShootingWork *);
 extern void mnuReleaseShootingSectionResources(MnuShootingWork *);
 extern void mnuDestroyShootingWork(MnuShootingWork *);
 
@@ -180,13 +181,13 @@ s32 mdlAdvanceViewerPackageTask(KwlnTask *task) {
     u32 result;
     s64 status;
 
-    status = func_00317FE0(D_0043891C);
+    status = mnuRunShootingInitCallback(D_0043891C);
     if (status == -1) {
         fldDispatchDeferredFieldCommand();
         result = 0xffffffff;
     }
     else {
-        func_00318068(D_0043891C);
+        mnuRunShootingUpdateCallback(D_0043891C);
         result = 0;
     }
     return result;
@@ -598,7 +599,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
 }
 
 /* Advance initialization; completing state zero releases the section resources. */
-s32 func_00317FE0(MnuShootingWork *work) {
+s32 mnuRunShootingInitCallback(MnuShootingWork *work) {
     s32 state;
 
     if (work->initialize((u8 *)work) != 0) {
@@ -619,7 +620,7 @@ s32 func_00317FE0(MnuShootingWork *work) {
 
 /* Run the current update; on a nonzero result, refresh it from the state table.
    The dispatch table keeps its original opaque byte-work callback signature. */
-u32 func_00318068(MnuShootingWork *work) {
+u32 mnuRunShootingUpdateCallback(MnuShootingWork *work) {
     s32 (*update)(u8 *work) = work->update;
 
     if (update((u8 *)work) != 0) {
