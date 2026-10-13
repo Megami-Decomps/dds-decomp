@@ -175,7 +175,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC4F0[];
 
 /* Draw the selected item quantity; bullets include matching party slot values. */
-void func_0025E6B0(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mode) {
+void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mode) {
     char text[16];
     struct EffectSlotSet *texture = D_003BC520;
     struct MenuList *list;

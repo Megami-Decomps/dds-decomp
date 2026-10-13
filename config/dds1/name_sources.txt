@@ -4664,6 +4664,7 @@
 0x0025DEC8	itfEmitSelectedGlyph	inferred	If the selected font entry is active, constructs a glyph from its u16 code and glyph table, sets color/attributes, then links it into the font glyph list.
 0x0025E508	mnuDrawStatusIconAndCompanion	inferred	readability/matching review (QP16)
 0x0025E5D8	mnuDrawIconTriple	inferred	mnu draws icon entries 18,17,22
+0x0025E6B0	mnuDrawShopItemQuantity	inferred	Draws the two shop quantity icons and the selected inventory count, using party bullet counts for bullet items.
 0x0025F378	mnuDrawIfActive	inferred	mnu draws overlay when inner node active
 0x0025F408	mnuDrawListChildrenWithCountdown	inferred	confidence=high; src/dds1/game/code_0025DF68.c:func_0025F408; Decrements a nonzero shared delay counter and invokes the draw callback for each linked child up to the list count. [names_qp9.tsv]
 0x0025FE68	mnuDrawIconFixedEntry	inferred	mnu draws icon table entry 26

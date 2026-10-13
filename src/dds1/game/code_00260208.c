@@ -262,7 +262,7 @@ s32 mnuTickExtendedCommandPhase(ShopScene *work) {
 }
 
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
-extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025F7F0(s32, s32, s32, ShopScene *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(ShopScene *, s32, s32, u32, u32);
@@ -337,7 +337,7 @@ s32 func_00260AB0(ShopScene *scene) {
         }
         mnuDrawIconTriple(0, (s32)((1.0f - position) * -48.0f) << 3, 0, (s32)scene,
                       (s32)(opacity * 256.0f), 0x53);
-        func_0025E6B0(0, 0, 0, scene, (s32)(opacity * 256.0f), 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, (s32)(opacity * 256.0f), 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(opacity * 96.0f), 0x53);
         switch (category) {
         case 0:
@@ -369,7 +369,7 @@ s32 func_00260AB0(ShopScene *scene) {
         mnuDrawIconTriple(0, (s32)(position * 64.0f) << 3, 0, (s32)scene,
                       (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
-        func_0025E6B0(0, 0, 0, scene, (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, (s32)((1.0f - progress) * 256.0f), 0x53);
         itfEmitSelectedGlyph(scene, 1, 4,
                             0xA09DC300 | (s32)((1.0f - progress) * 96.0f), 0x53);
         switch (category) {
@@ -420,7 +420,7 @@ s32 func_00260AB0(ShopScene *scene) {
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
         func_0025F7F0(0, 0, 0, scene, (u32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
-        func_0025E6B0(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(progress * 96.0f), 0x53);
         switch (category) {
         case 0:
@@ -439,7 +439,7 @@ s32 func_00260AB0(ShopScene *scene) {
     case 6:
     case 7:
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-        func_0025E6B0(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, 0x100, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
         if (scene->substate < 10) {
@@ -504,7 +504,7 @@ s32 mnuTickCommandWaitPhase(ShopScene *work) {
 extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_00260100(ShopScene *, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
-extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025F7F0(s32, s32, s32, ShopScene *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(ShopScene *, s32, s32, u32, u32);
@@ -529,7 +529,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
     switch (scene->action) {
     case 9:
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-        func_0025E6B0(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, 0x100, 0x53);
         progress = (f32)scene->frames / 10.0f;
         func_0025F7F0(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
@@ -550,7 +550,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         break;
     case 10:
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-        func_0025E6B0(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, 0x100, 0x53);
         progress = (f32)scene->frames / 10.0f;
         progress = 1.0f - progress;
         func_0025F7F0(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
@@ -577,7 +577,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         func_0025FFC8(0, 0, 0, scene, 0x53);
         progress = (f32)scene->frames / 10.0f;
         progress = 1.0f - progress;
-        func_0025E6B0(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         itfEmitSelectedGlyph(scene, 1, 4,
                             0xA09DC300 | (s32)(progress * 96.0f), 0x53);
         func_0025FC38(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
@@ -593,7 +593,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         break;
     case 11:
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-        func_0025E6B0(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, scene, 0x100, 0x53);
         func_0025F680(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
