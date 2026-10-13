@@ -41,7 +41,7 @@ void itfDispatchObjectFadeSequenceMode(MnuShootingWork *object) {
     }
 }
 
-void func_0031ADD8(MnuShootingWork *object) {
+void mnuSetShootingNodeModelDepthsToZero(MnuShootingWork *object) {
     MnuNodeList *entries = object->modelWork->groups;
     s32 i = 0;
 
@@ -55,7 +55,7 @@ void func_0031ADD8(MnuShootingWork *object) {
     }
 }
 
-void func_0031AE48(MnuShootingWork *object) {
+void mnuRestoreShootingNodeModelDepths(MnuShootingWork *object) {
     MnuNodeList *entries = object->modelWork->groups;
     s32 i = 0;
 
@@ -79,14 +79,14 @@ void func_0031AEB8(MnuShootingWork *object) {
     if (object->unk70Bit0) {
         func_0031AF58(object);
         mnuPauseEffectQueueFrameAdvance();
-        func_0031ADD8(object);
+        mnuSetShootingNodeModelDepthsToZero(object);
         itfSetFadeMode(&object->pauseFade.fade, 1, 8);
         return;
     }
     if (!object->unk70Bit0) {
         func_0031AF60();
         mnuResumeEffectQueueFrameAdvance();
-        func_0031AE48(object);
+        mnuRestoreShootingNodeModelDepths(object);
         itfSetFadeMode(&object->pauseFade.fade, 0, 8);
     }
 }
