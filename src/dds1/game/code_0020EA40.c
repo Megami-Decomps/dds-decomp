@@ -275,7 +275,7 @@ void func_00209EB8(BtlTask *);
 s32 func_0020A860(void);
 s32 func_0020AB08(DatPartyRecord *, s32);
 s32 func_0020B560(BtlLinkedCommand *, BtlCamState *, s32);
-void func_0020CCC0(void);
+void btlUpdateBossUnitScaleTransition(void);
 s32 func_0020D668(BtlLinkedCommand *, s32, s32);
 s32 func_0020DE50(BtlLinkedCommand *, BtlCamState *, s32);
 
@@ -501,7 +501,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlChooseDefeatCameraByActionAndTargets);
         BTL_INSTALL_CALLBACK(battle->commandSoundDelay, 0x0, func_0020CB28);
         BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlDispatchActionAnimationB);
-        BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, func_0020CCC0);
+        BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlInitializeBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->postTargetHook, 0x0, btlStartPairedActorCommandEffect);
         BTL_INSTALL_CALLBACK(battle->pad680, 0x0, btlAllowsSpeciesCondition);
