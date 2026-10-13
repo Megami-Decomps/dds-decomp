@@ -35,13 +35,13 @@ extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
 extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
-extern void func_0026E8D8(void);
+extern void mnuInitializeMovieRollEntry(void);
 extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
 extern void func_002ECCF8(void *, SdfPoolNode *);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026EC90);
+INCLUDE_ASM(const s32, "game/code_0026EC90", mnuDrawAnimatedMovieRollEntry);
 
-extern void func_0026E798(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set, s32 index, f32 scaleX, f32 scaleY, s32 option, s32 texture);
+extern void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set, s32 index, f32 scaleX, f32 scaleY, s32 option, s32 texture);
 
 /* Draw an active roll entry with its sprite-specific slot index; alpha follows the staff movie's scroll fade. */
 void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 texture) {
@@ -56,13 +56,13 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
         alpha = alpha * 0.6f;
         switch (entry->sprite) {
         case 0:
-            func_0026E798(x, y, 0x64, alpha, set, 0xD, 8.0f, 8.0f, 0x60, texture);
+            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 0xD, 8.0f, 8.0f, 0x60, texture);
             return;
         case 1:
-            func_0026E798(x, y, 0x64, alpha, set, 0xE, 8.0f, 8.0f, 0x60, texture);
+            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 0xE, 8.0f, 8.0f, 0x60, texture);
             return;
         case 2:
-            func_0026E798(x, y, 0x64, alpha, set, 0xF, 8.0f, 8.0f, 0x60, texture);
+            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 0xF, 8.0f, 8.0f, 0x60, texture);
             break;
         }
     }
@@ -92,7 +92,7 @@ extern u8 D_0037B980[];
 
 extern u8 D_0037C388[];
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F230);
+INCLUDE_ASM(const s32, "game/code_0026EC90", mnuDrawStaffRollFrame);
 
 void mnuPrepareStaffRollText(void) {
     mnuLoadStaffFonts();
@@ -297,7 +297,7 @@ void mnuAdvanceStaffImageSequence(void) {
 s32 mnuStaffImageProc(void) {
     mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);
     mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, D_0037AF70[mnuMovieWork->imageIndex], 0, 0x53);
-    func_0026F230(0x53);
+    mnuDrawStaffRollFrame(0x53);
     mnuAdvanceStaffImageSequence();
     return 0;
 }
@@ -335,7 +335,7 @@ void mnuInitializeMovieRollViewport(void) {
     sdfSetStreamFrameDrawMode(1);
     sdfSetGridScaledDrawBounds(0x68, 0x69, 0x180, 0xEE, 0x80808080);
     for (i = 0; i < 32; i++) {
-        func_0026E8D8();
+        mnuInitializeMovieRollEntry();
         D_003DC1E0[i].active = 0;
     }
 }
@@ -348,7 +348,7 @@ extern char D_003B1168[];
 
 
 
-extern void func_0026A5F0(s32);
+extern void mnuLoadIndexedTitleSoundStream(s32);
 
 extern s32 mnuUpdateStaffRoll(KwlnTask *task);
 
@@ -365,7 +365,7 @@ void mnuMovieCreateTask(void) {
     movie->allocation = allocation;
     movie->phase = 0;
     movie->scrollTicks = 0;
-    func_0026A5F0(0x13);
+    mnuLoadIndexedTitleSoundStream(0x13);
     mnuMovieTaskState = 1;
     kwlnTaskCreate(D_003B1168, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }

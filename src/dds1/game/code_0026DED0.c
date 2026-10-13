@@ -8,7 +8,7 @@
 extern SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *, SpriteSpawnNode *, s8);
 extern u32 effMiscRandMod(void *, u32);
 
-void func_0026DED0(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {
+void mnuSpawnMovieParticleNodes(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {
     SpriteSpawnNode *parent = parentData;
     SpriteSpawnNode *node;
     f32 chance;

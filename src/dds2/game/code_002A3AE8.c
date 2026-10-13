@@ -529,9 +529,9 @@ void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
     }
 }
 
-extern void func_002A4B70(PickList *, s32);
+extern void mnuDrawMovieMenuSlideBarPath(PickList *, s32);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4B70);
+INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuDrawMovieMenuSlideBarPath);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
@@ -540,7 +540,7 @@ void mnuAdvanceSlideBar(PickList *bar, s32 drawContext) {
         mnuTitlePickRandomSlot(bar);
         mnuDrawMovieMenuSpritePickList(bar, drawContext);
         mnuDrawSprite(0, 0, 0, bar->control.pos, 0, 0x16, drawContext);
-        func_002A4B70(bar, drawContext);
+        mnuDrawMovieMenuSlideBarPath(bar, drawContext);
         if (bar->control.active != 0) {
             bar->control.pos += 8;
         } else {
@@ -645,11 +645,11 @@ void mnuDrawMovieMenuSlideBar(SlideBarTimed *primary, SlideBar *secondary, s32 d
     mnuDrawSprite(0, 0, 0, x, 0, 0x1D, drawContext);
 }
 
-void func_002A50E8(s32 buffer, s32 index, u8 value) {
+void mnuSetMovieMenuStateFlag(s32 buffer, s32 index, u8 value) {
     *(u8 *)(buffer + index) = value;
 }
 
-void func_002A50F8(u8 *work) {
+void mnuResetPairedMovieMenuSlideBars(u8 *work) {
     u32 i;
     for (i = 0; i < 2; i++) {
         work[i] = 0;

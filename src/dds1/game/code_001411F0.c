@@ -4127,7 +4127,7 @@ void fldFinishEventFieldState(void) {
 extern void func_0024DD78(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void fldAddCameraModelEntry(s32);
-extern void func_0026A5F0(s32);
+extern void mnuLoadIndexedTitleSoundStream(s32);
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void func_0014B688(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
@@ -4224,7 +4224,7 @@ void fldUpdateSparkMessageSequence(void) {
         }
         fldSparkControlState.unk2C++;
         if (fldStepArchiveLoad() != 0) {
-            func_0026A5F0(0x12);
+            mnuLoadIndexedTitleSoundStream(0x12);
             fldSparkControlState.dialogPhase = 3;
         }
         break;

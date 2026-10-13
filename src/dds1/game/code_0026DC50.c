@@ -16,7 +16,7 @@ void mnuDrawFixedSpriteLayerGroup(void) {
     mnuDrawSprite(0, 0, 0, 0, 0, 0xB, 0x52);
 }
 
-void func_0026DD10(void) {
+void mnuRequestDefaultMovieResource(void) {
     mnuRequestIndexedMovieResource(0);
 }
 
@@ -54,7 +54,7 @@ SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, Sprit
     return node;
 }
 
-void func_0026DEA8(s32 unused, void *data) {
+void mnuReleaseMovieParticleWork(s32 unused, void *data) {
     if (data != NULL) {
         sdfReleaseChipBlock(data);
     }

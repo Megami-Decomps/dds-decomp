@@ -403,7 +403,7 @@ extern char D_003AFCF0[];
 
 
 /* Load the named sound stream for the requested entry format under the lock. */
-void func_0026A5F0(s32 soundEntryIndex) {
+void mnuLoadIndexedTitleSoundStream(s32 soundEntryIndex) {
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -591,7 +591,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
 /* Install an in-memory ATRAC stream and configure the decoder for its frame
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
-void func_0026ABA8(void *compressedData, s32 dataBytes, s32 format) {
+void mnuLoadTitleSoundBufferFromMemory(void *compressedData, s32 dataBytes, s32 format) {
     struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     s32 frameCount;
@@ -689,7 +689,7 @@ void mnuReleaseSoundBufferLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-void func_0026AEB0(void) {
+void mnuPrepareMovieMenuResources(void) {
     mnuLoadMovieMenuResourceSlots();
 }
 

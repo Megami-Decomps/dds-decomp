@@ -19,14 +19,14 @@ extern void *memset(void *, s32, u32);
 
 extern u8 D_003BC620[];
 
-void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
+void mnuDrawMovieParticleSprite(s32 a, s32 b, s32 c, s32 d, s32 value) {
     mnuDrawSprite(a, b, c, d, 0x60, 0x1b, value);
 }
 
 
-extern void func_0026DED0(MnuSpriteResourceGroup *, SdfList *, void *, s8);
+extern void mnuSpawnMovieParticleNodes(MnuSpriteResourceGroup *, SdfList *, void *, s8);
 
-extern void func_0026DEA8();
+extern void mnuReleaseMovieParticleWork();
 
 SdfList *mnuTickMovieGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
     SdfListNode *list = group->head;
@@ -40,7 +40,7 @@ SdfList *mnuTickMovieGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
         node = list->value;
         node->framesLeft = node->framesLeft - 1;
         if (node->framesLeft == node->duration - 5 && node->generations != 0) {
-            func_0026DED0(owner, group, node, node->mode);
+            mnuSpawnMovieParticleNodes(owner, group, node, node->mode);
         }
         if (node->framesLeft == 0) {
             list = sdfListRemoveNode(group, list);
@@ -59,8 +59,8 @@ void mnuUpdateMovieSpriteResourceGroup(MnuSpriteResourceGroup *resources) {
     if (resources->spawnCountdown == 0) {
         if (resources->activeCount < 10) {
             group = sdfCreateTaskHeader(0);
-            group->onRemove = func_0026DEA8;
-            func_0026DED0(resources, group, NULL, 0);
+            group->onRemove = mnuReleaseMovieParticleWork;
+            mnuSpawnMovieParticleNodes(resources, group, NULL, 0);
             for (i = 0; i < 10; i++) {
                 if (resources->tasks[i] == 0) {
                     resources->tasks[i] = group;
@@ -114,12 +114,12 @@ void mnuDrawMovieSpriteGroup(s32 a0, s32 a1, s32 a2, s32 a3, MnuSpriteResourceGr
             case 0:
                 /* retail arm 0x0026E448 */
                 scaled = (s32)((f32)a3 * wave);
-                func_0026E160(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
+                mnuDrawMovieParticleSprite(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
                 break;
             case 1:
                 /* retail arm 0x0026E478 */
                 scaled = (s32)((f32)a3 * wave);
-                func_0026E160(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
+                mnuDrawMovieParticleSprite(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
                 break;
             }
             node = node->next;
@@ -184,7 +184,7 @@ void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *sprit
     effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), flag, sprite, mode, param);
 }
 
-void func_0026E798(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set,
+void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set,
                    s32 index, f32 scaleX, f32 scaleY, s32 option, s32 texture) {
     set->workEntries[index].geometry.bounds[2] = (s32)(scaleX * set->workEntries[index].sourceWidth) << 4;
     set->workEntries[index].geometry.bounds[3] = (s32)(scaleY * set->workEntries[index].sourceHeight) << 3;
@@ -198,7 +198,7 @@ void mnuLoadMovieRollSprite(void) {
     mnuMovieWork->spriteSet = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E8D8);
+INCLUDE_ASM(const s32, "game/code_0026E160", mnuInitializeMovieRollEntry);
 
 extern s32 effMiscRandMod(s32, s32);
 

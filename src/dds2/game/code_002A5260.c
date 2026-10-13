@@ -108,11 +108,11 @@ void mnuMarkTitleStreamResetPending(void);
 
 void mnuResetTitleStreamLocked(void);
 
-extern void func_002A5260(s32, s32);
+extern void mnuDrawTitleMenuFadeOverlay(s32, s32);
 
 extern void mnuDrawMovieChoiceTransition(s32, s32);
 
-extern void func_002A50E8(s32, s32, u8);
+extern void mnuSetMovieMenuStateFlag(s32, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
@@ -124,7 +124,7 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 extern f32 sdfSinPoly(f32);
 
-void func_002A5260(s32 mode, s32 frame) {
+void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     f32 factor;
     f32 alpha;
 
@@ -267,11 +267,11 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
                 opening->phase = 1;
                 opening->selectedPage = 0;
             }
-            func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 1);
+            mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 0, 1);
             return 0;
         }
         sndSetSequenceVolumePan(8, 127, 63);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 0);
+        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 0, 0);
         return 1;
     case 1:
         if (state->selectedPage < 90) {
@@ -281,7 +281,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             sndSetSequenceVolumePan(8, 127, 63);
-            func_002A50E8((s32)&mnuMovieMenuState->movie, 0, 0);
+            mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 0, 0);
             return 1;
         }
         state = (MenuTitleState *)mnuMovieMenuState;
@@ -307,10 +307,10 @@ void mnuUpdateTitlePageByMode(void) {
 
     switch (title->phase) {
     case 0:
-        func_002A5260(0, title->selectedPage);
+        mnuDrawTitleMenuFadeOverlay(0, title->selectedPage);
         return;
     case 1:
-        func_002A5260(1, title->selectedPage);
+        mnuDrawTitleMenuFadeOverlay(1, title->selectedPage);
         break;
     case 2:
         break;
@@ -377,20 +377,20 @@ void mnuTitleResetSequenceTimers(void) {
     title->sequenceTimer = title->selectedPage = 0;
 }
 
-extern s32 func_002A5C58(void);
+extern s32 mnuUpdateMovieMenuInputState(void);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5C58);
+INCLUDE_ASM(const s32, "game/code_002A5260", mnuUpdateMovieMenuInputState);
 
 void mnuDrawTitleSceneForPhase(void) {
     switch (((MenuTitleState *)mnuMovieMenuState)->phase) {
     case 1:
-        func_002A5260(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        mnuDrawTitleMenuFadeOverlay(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
         mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 0:
         mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 2:
         mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)mnuMovieMenuState)->selectionList, 0x53);
@@ -398,7 +398,7 @@ void mnuDrawTitleSceneForPhase(void) {
     case 3:
     case 4:
         mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 0);
+        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 1, 0);
         break;
     }
 }
@@ -1014,7 +1014,7 @@ s32 mnuStaffImageProc(void) {
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern void func_002A2200(s32);
+extern void mnuLoadIndexedTitleSoundStream(s32);
 
 void mnuUpdateStaffRollStreamState(void)
 {
@@ -1031,7 +1031,7 @@ void mnuUpdateStaffRollStreamState(void)
         switch (mnuPollTitleStreamStateLocked()) {
         case 0: /* MNU_STREAM_LOAD_IDLE */
             mnuMovieWork->streamPhase = 2;
-            func_002A2200(23);
+            mnuLoadIndexedTitleSoundStream(23);
             break;
         case 1: /* MNU_STREAM_LOAD_PENDING */
             break;
@@ -1194,7 +1194,7 @@ void mnuFadeSetStateOff(StaffSparkleState *state, u32 mode) {
 struct EffRandState;
 extern u32 effMiscRand(struct EffRandState *);
 
-void func_002A6D68(StaffSparkleState *state) {
+void mnuUpdateStaffSparkleEffects(StaffSparkleState *state) {
     EffectSlotSet *sprite = mnuMovieWork->sprite;
     s32 i;
     s32 j;
@@ -1232,7 +1232,7 @@ void func_002A6D68(StaffSparkleState *state) {
 extern void uiDrawActiveSurfaceWithTestMode(u32 context);
 extern void uiConfigureSurfaceAlphaState(s32 context);
 extern void uiDrawSurfaceAtNearDepth(u32 context);
-extern void func_002A6D68(StaffSparkleState *state);
+extern void mnuUpdateStaffSparkleEffects(StaffSparkleState *state);
 
 void mnuDrawScrollingStaffBackdrop(StaffSparkleState *state) {
     EffectSlotSet *sprites = mnuMovieWork->sprite;
@@ -1281,7 +1281,7 @@ void mnuDrawScrollingStaffBackdrop(StaffSparkleState *state) {
     }
 
     uiConfigureSurfaceAlphaState(0x53);
-    func_002A6D68(state);
+    mnuUpdateStaffSparkleEffects(state);
     uiDrawSurfaceAtNearDepth(0x53);
 
     if (state->mode == 0) {

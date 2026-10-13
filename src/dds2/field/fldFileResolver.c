@@ -4108,7 +4108,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_00131B50);
 /* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_001321F8);
 
-extern void func_002A2200(s32 soundEntryIndex);
+extern void mnuLoadIndexedTitleSoundStream(s32 soundEntryIndex);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
@@ -4124,7 +4124,7 @@ s32 fldUpdateFieldTransition(void) {
         node = model->current.h.motionIndex;
         if (node != 7) {
             kwlnFadeStartIn(8);
-            func_002A2200(0x26);
+            mnuLoadIndexedTitleSoundStream(0x26);
             model = fldPlayerModelContext;
             model->first->frameStep = 1.0f;
             mdlAddEntryPlain(model, 0, 7);

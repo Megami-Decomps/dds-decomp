@@ -10,7 +10,7 @@ extern void mnuStopMovieDrawTask(void);
 extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
-extern void func_0026AEB0(void);
+extern void mnuPrepareMovieMenuResources(void);
 extern MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32, u8, u8);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 extern s32 mnuUpdateMovieMenuTask(KwlnTask *);
@@ -19,7 +19,7 @@ extern char D_003AFD80[];
 
 extern MovieMenuState *mnuMovieMenuState;
 
-KwlnTask *func_0026B050(s32 mode) {
+KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     struct SdfMemBlock *allocation;
 
     kwlnFadeBackgroundStartOut(0);
@@ -41,7 +41,7 @@ KwlnTask *func_0026B050(s32 mode) {
     }
 
     mnuMovieMenuState->mode = mode;
-    func_0026AEB0();
+    mnuPrepareMovieMenuResources();
     mnuMovieMenuState->resources = mnuCreateMovieSpriteResource(0x3C, 8, 0);
     D_003BA8EC = 0x80000000;
     return kwlnTaskCreate(D_003AFD80, 0x2B19, 1, 0, mnuUpdateMovieMenuTask, 0, 0);

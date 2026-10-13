@@ -929,10 +929,10 @@ u8 evtWaitFileMenuTaskThree(void) {
 
 void evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *value) {
     if (value == 0) {
-        func_002A3A50(0);
+        mnuOpenTitleMenu(0);
         return;
     }
-    func_002A3A50(*value);
+    mnuOpenTitleMenu(*value);
 }
 
 u32 evtCloseTitleMenu(void) {
