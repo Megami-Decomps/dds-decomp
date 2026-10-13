@@ -10877,3 +10877,43 @@ worker loops retain their opposite continuation conditions.
 `sndSubmitTextCommandPayloadWithCommandBits80` forwards `strlen` bytes with command bit 0x80,
 excluding the terminating NUL.
 
+
+## Camera target dispatcher: two retained position samples
+
+DDS1 `func_001DE5F8` and DDS2 `func_001EBE30` retain two 16-byte SDK
+position samples in an 0x80-byte frame. The actor's sample is written to
+SP+0x10 at 001DE74C / 001EBF84; the other eligible actor's sample is written
+to SP+0 at 001DE794 / 001EBFCC. These are actual retail `sqc2` stores, not
+padding or invented dead stores. A two-row `f32 positions[2][4]` workspace
+expresses that native layout, with the partner row first and the actor row
+second. The existing `VU0_STORE_VF` SDK macro provides the native COP2 store;
+no new inline assembly or macro contract was added.
+
+The deciding compiler mechanism is global allocation followed by reload.
+With separate arrays in the opposite homes, the repeated partner sample needs
+a persistent SP+0x10 address pseudo that occupies $19; the single-target
+predicate spills, moving the runtime and target-policy result to SP+0x24 and
+SP+0x28. **Property P:** the repeated loop store must use SP directly, leaving
+$19 available for the single-target predicate. Grouping the genuine samples
+in their native row order achieves P. The parity-verified final trace allocates
+predicate pseudo 91 to $19, and reload places runtime pseudo 93 at SP+0x20 and
+policy-result pseudo 96 at SP+0x24. This is a real native-used workspace,
+not a declaration-order search or an unused-frame-gap exception.
+
+Two independent control-flow details finish the body: separate nested tests
+for readiness bit 1 and actor-class bit 0x200 retain retail's two predicates
+instead of folding them into a 0x201 comparison; the final default-camera
+case checks the transition-needed condition first, then falls back to the
+direct camera update. Zero target count still exits without freeing the list,
+as retail does. No sentinel, repeated artificial arm, helper, or goto is used.
+
+The rebase began at 143/214 differing words; native sample grouping improved
+that to 127/214. Nested predicates alone exceeded the target extent.
+The transition-first final branch then closed both 864-byte bodies:
+DDS1 **40 match, 0 differ**, DDS2 **44 match, 0 differ**, with every surrounding
+matched function and data object unchanged. Traces were recorded with
+`tools/cc1probe.sh <candidate> --as-unit <unit> --version <game> --func <target>
+--all`; hooked and unhooked assembly and RTL outputs agree. Exact log paths,
+allocation line references, individual gate logs, and the full step history
+are retained in the agent's ledger.
+
