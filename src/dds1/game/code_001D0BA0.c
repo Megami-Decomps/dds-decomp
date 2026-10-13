@@ -2536,13 +2536,13 @@ void btlReleaseActorModelResources(BtlUnit *object) {
         if (model != 0) {
             dds3RemoveWorldObjectNode(model);
             object->effectObject = 0;
-            *(s32 *)((u8 *)object + 0x320) = 0;
+            object->ext = 0;
         }
     } else {
         *(s32 *)((u8 *)object + 0x308) = 0;
         *(s32 *)((u8 *)object + 0x324) = 0;
         object->effectObject = 0;
-        *(s32 *)((u8 *)object + 0x320) = 0;
+        object->ext = 0;
     }
     state = *(u32 *)((u8 *)object + 0x118) & ~1;
     flags = (u32)object->status.flags & ~2;
@@ -2790,8 +2790,8 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     context = (u8 *)btlGetRuntime();
     if (*(u32 *)((u8 *)unit + 0xE8) & 2) {
         color = (*(u32 *)((u8 *)unit + 0x84) & 0xFFFFFF) | 0x80000000;
-        evtSetUnitRgbTransition(*(struct EvtUnit **)((u8 *)unit + 0x320), 0, color);
-        evtSetUnitAlphaTransition(*(struct EvtUnit **)((u8 *)unit + 0x320), 0, color);
+        evtSetUnitRgbTransition(unit->ext, 0, color);
+        evtSetUnitAlphaTransition(unit->ext, 0, color);
         *(u32 *)((u8 *)unit + 0x84) = color;
         *(u32 *)((u8 *)unit + 0xE8) &= ~4;
         *(u32 *)((u8 *)unit + 0xE8) &= ~2;
@@ -2853,8 +2853,8 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     speed = rate * (30.0f / ((BtlState *)context)->timingRate);
     speed *= *(f32 *)(context + 0x494);
     *(s32 *)((u8 *)unit + 0xFC) = index;
-    evtUnitSetStoredParameter(*(struct EvtUnit **)((u8 *)unit + 0x320), index);
-    evtSetTransitionMotionScale(*(struct EvtUnit **)((u8 *)unit + 0x320), speed);
+    evtUnitSetStoredParameter(unit->ext, index);
+    evtSetTransitionMotionScale(unit->ext, speed);
     mode = 1;
     if (index == 11) {
         mode = 2;
@@ -3186,7 +3186,7 @@ void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     if ((u32)unit->status.flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
         *(u32 *)((u8 *)unit + 0x54) = (*(u32 *)((u8 *)unit + 0x54) & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition((EvtUnit *)*(u32 *)((u8 *)unit + 0x320), mode, color);
+        evtSetUnitRgbTransition(unit->ext, mode, color);
     }
 }
 
@@ -3198,7 +3198,7 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
         base = (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
         *(u32 *)((u8 *)unit + 0x84) = (*(u32 *)((u8 *)unit + 0x84) & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition((EvtUnit *)*(u32 *)((u8 *)unit + 0x320), mode, blended);
+        evtSetUnitRgbTransition(unit->ext, mode, blended);
     }
 }
 
@@ -3846,7 +3846,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         btlBindActorModel(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            evtSetUnitAlphaTransition((EvtUnit *)*(u32 *)((u8 *)object + 0x320), 0, 0);
+            evtSetUnitAlphaTransition(object->ext, 0, 0);
             *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_003A3BC8, effect, model);
@@ -3875,7 +3875,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        evtSetUnitAlphaTransition((EvtUnit *)*(u32 *)((u8 *)object + 0x320), 0, 0);
+        evtSetUnitAlphaTransition(object->ext, 0, 0);
         *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
     }
     *(u32 *)((u8 *)object + 0x118) = (*(u32 *)((u8 *)object + 0x118) & ~1) | 2;
@@ -4372,12 +4372,12 @@ u32 btlStepUnitExitFade(u32 *arguments) {
     case 0:
         if (arguments[2] == 1) {
             btlFlagUnitDefeatCandidate(unit);
-            evtSetUnitRgbTransition(*(struct EvtUnit **)((u8 *)unit + 0x320),
+            evtSetUnitRgbTransition(unit->ext,
                                     10, 0x80000000);
         } else if (arguments[2] == 10) {
-            evtSetUnitRgbTransition(*(struct EvtUnit **)((u8 *)unit + 0x320),
+            evtSetUnitRgbTransition(unit->ext,
                                     0, 0x80000000);
-            evtSetUnitAlphaTransition(*(struct EvtUnit **)((u8 *)unit + 0x320), 6, 0);
+            evtSetUnitAlphaTransition(unit->ext, 6, 0);
             unit->status.flags = (u32)unit->status.flags | (0x200000);
         }
         if (((u32)unit->status.flags & 0x200000) == 0 &&
