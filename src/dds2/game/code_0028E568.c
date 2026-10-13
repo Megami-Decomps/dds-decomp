@@ -317,7 +317,7 @@ extern void mnuQueueMantraLimitLineFlags(struct MantraDrawPool *pool, u32 flags)
 
 extern void mnuSetMantraBackgroundSelection(struct MantraDrawPool *pool, u32 value);
 
-void func_0028F8A8(MnuStatusResource *object) {
+void mnuUpdateSelectedMantraLimitLineState(MnuStatusResource *object) {
     u16 limitIds[18] = {
         0x61, 0x3B, 0x5B, 0x23, 0x40, 0x62,
         0x53, 0x5E, 0x1C, 0x5A, 0x63, 0x54,
