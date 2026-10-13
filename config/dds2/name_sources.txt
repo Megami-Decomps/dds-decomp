@@ -2375,6 +2375,7 @@
 0x001B3900	btlAverageFilteredCurrentForMask	inferred	confidence=high; src/dds2/game/code_001A5BB8.c:func_001B3900; Selects the current-value average with flag-0x20 actors excluded. [names_qp9.tsv]
 0x001B3918	btlAverageAllCurrentForMask	inferred	confidence=high; src/dds2/game/code_001B2AF8.c; selects current-HP average without excluding flag-0x20 actors. Native24B wrapper restores ra/sp then tail-jumps to s32 btlAverageCurrentValueForMask; datCalc caller consumes v0. Truthful s32 return closure Namer1 batch26; prior name source names_qp9.tsv. DDS1 twin0x001A93B8.
 0x001B3930	btlAverageMaskedActorStat	inferred	Averages an actor stat over eligible actors matching an entry mask. [names_reviewed11.tsv]
+0x001B39E8	btlAverageLevelsForMaskExcludingStatus20	inferred	Returns the masked mean of party-record levels through btlAverageMaskedActorStat with mode 1, excluding units whose status.flags contains 0x20; four clients use it as an average level. DDS1 0x001A9488.
 0x001B3A18	btlSumOrAverageActorAttribute	inferred	Sums a selected attribute across matching actors and divides by actor count only when two or more actors match.
 0x001B3AF8	btlAverageFilteredActorAttribute	inferred	confidence=high; src/dds2/game/code_001A5BB8.c:func_001B3AF8; Uses the masked actor-attribute aggregation path that excludes flag-0x20 actors; it averages whenever at least two actors qualify. [names_qp9.tsv]
 0x001B45C8	btlHasSpecialAbilityOrModelFlag	inferred	Checks a matching special ability or its alternative model flag. [names_reviewed14.tsv]

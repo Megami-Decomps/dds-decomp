@@ -86,7 +86,7 @@ extern s32 btlGetRuntime(void);
 
 extern s32 effMiscRandMod(s32, s32);
 
-extern s32 func_001A9488(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
 
@@ -264,7 +264,7 @@ f32 btlGetRewardLevelMultiplier(u8 *acquirer, u8 *enemy, s32 rewardKind) {
         return 1.0f;
     }
     if (acquirer == NULL) {
-        level = func_001A9488(4);
+        level = btlAverageLevelsForMaskExcludingStatus20(4);
     } else {
         level = ((BtlUnit *)acquirer)->partyRecord.level;
     }
@@ -914,7 +914,7 @@ s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
     return 1;
 }
 
-s32 func_001A9488(u32 arg0) {
+s32 btlAverageLevelsForMaskExcludingStatus20(u32 arg0) {
     return btlAverageMaskedActorStat(arg0, 1);
 }
 
