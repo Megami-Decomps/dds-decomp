@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
@@ -43,7 +44,6 @@ extern void mdlFlagSet(s32 flag);
 
 extern void dspCloseChannel(void);
 
-extern s32 dspStartEntry(s32 entry);
 
 extern void evtCreateMessageWindowIfMissing(void *text);
 

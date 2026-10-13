@@ -1,5 +1,6 @@
 #include "fld_label_rows.h"
 #include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -342,7 +343,6 @@ extern u8 D_003A9EB0[];
 
 extern void evtCreateMessageWindowIfMissing(void *arg0);
 
-extern s32 dspStartEntry(s32 arg0);
 
 extern void fldResetPlayerSceneObjectState(void);
 
