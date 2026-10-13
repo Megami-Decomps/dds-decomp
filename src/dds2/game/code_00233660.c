@@ -174,8 +174,6 @@ extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 extern void dds3RebuildObjectModelContext(EffWorldNode *obj, s32 a, s32 b);
 
-extern void dds3SetObjectSlot1MoverCallback(EffWorldNode *obj, Dds3MoverUpdate a);
-
 extern void *dds3GetWorldSecondaryObject(void);
 
 extern s8 D_00453560[];
