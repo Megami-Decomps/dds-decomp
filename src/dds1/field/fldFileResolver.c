@@ -4249,7 +4249,7 @@ extern const PcpVectorCopyF32 D_003A00A8;
 
 /* Advance a pending heading, retain position history, and export the player's
  * smoothed position and rotation. Vertical movement bypasses position damping. */
-void func_00131688(void) {
+void fldUpdateSmoothedCameraPose(void) {
     f32 position[4];
     f32 smoothed[4];
     union {
