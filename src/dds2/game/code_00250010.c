@@ -1081,7 +1081,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B60);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B70);
 
-void func_00252378(SdfListHead *list, s32 x, s32 y, s32 color,
+void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, EvtRuntime *ctx) {
     char name[32];
     s32 type;
@@ -1434,7 +1434,7 @@ void func_00252378(SdfListHead *list, s32 x, s32 y, s32 color,
     }
 }
 
-extern void func_00252378(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
+extern void evtDrawFrameListKeyValues(SdfListHead *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
 
 /* Draw an indexed child of the selected group, or its trailing new-frame row. */
 s32 evtDrawFrameListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
@@ -1460,7 +1460,7 @@ s32 evtDrawFrameListRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *
             color = 0;
         }
         if (node != NULL) {
-            func_00252378(list, x, y, color, node, ctx);
+            evtDrawFrameListKeyValues(list, x, y, color, node, ctx);
         } else {
             sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
