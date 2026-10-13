@@ -10386,8 +10386,8 @@ unchanged.
 
 ## Publishing viewer workspace
 
-DDS1 `func_0021C208` (0x0021C208, 216B, `game/code_00218B48`) and DDS2
-`func_00236D78` (0x00236D78, 216B, `game/code_00233660`) configure the same
+DDS1 `mdlUpdateViewerWorkspaceSetup` (0x0021C208, 216B, `game/code_00218B48`) and DDS2
+`mdlUpdateViewerWorkspaceSetup` (0x00236D78, 216B, `game/code_00233660`) configure the same
 three-phase model-viewer workspace. Native 0x0021C218–0x0021C228 and
 0x00236D88–0x00236D98 retain the completed-phase case: test one, compare
 against two, then reject a nonzero initial phase. The working phase
@@ -10811,7 +10811,7 @@ is changed.
 
 ## Fresh SDK allocator results
 
-DDS2 `func_0031F168` allocates an eight-byte named reference and a separate
+DDS2 `dds3AllocateNamedReference` allocates an eight-byte named reference and a separate
 64-byte name buffer, initializes the value word, and clears the first four name
 bytes. Its SDK allocator `func_0035A828` returns a fresh live block: the underlying
 allocator unlinks a free chunk and marks it in use. The truthful
@@ -10962,4 +10962,33 @@ entry. Its reentrant worker builds two I/O vectors for the input string
 and one newline byte; the literal is `0x0A` at DDS1 `0x003B7AA0` and DDS2
 `0x00431BE0`. The zero-formal, void C definitions are deliberately retained
 for matching; this naming closure does not repair that source-level ABI.
+
+## Roster hooks, viewer setup and packed-list ownership names
+
+`btlOnPartyRosterChange` is an actual retail no-op after actor insertion,
+removal or swap, not a swap-specific callback. Keep it separate at every call
+site. `btlQueryClampedProfileAdjustedStat` tail-jumps the profile-adjusted
+stat backend in native code and forwards its result in `$v0`; its existing
+void C signature and call expression remain unchanged for matching.
+`btlApplyMaskedActorEntryAdjustments` applies mask-selected signed deltas
+before positive-only or negative-only entry clearing; do not reorder these
+operations. The `btlUpdateActiveActorModelState` and
+`btlPrepareSavedCommandTargets` twins retain their game-specific state fields,
+command bounds and target acceptance/rejection conditions.
+
+`mdlUpdateViewerWorkspaceSetup` retains the final-use/publication form
+documented in "Publishing viewer workspace". Its separate
+`mdlAfterViewerWorkspaceUpdate` is a native no-op after every update, not a
+completion-only or drawing action. `mdlUpdateViewerWorkspaceSetupTask`
+still runs both and returns zero.
+
+`dds3CreatePackedObject` owns three callback-bearing collections and an initial
+packed buffer. `dds3AllocateNamedReference` retains its four-byte partial name
+clear and the SDK allocator's existing fresh-result declaration.
+`dds3AppendIndexedListNode` assigns the old count as the new index;
+`dds3InsertIndexedListNodeAfter` accepts a null predecessor and increments only
+nonzero successor indices. `dds3AppendFirstResourceListValue` adds a key-zero
+value to the first list of a two-list owner; it does not reset that list.
+These names change neither allocation layout nor cleanup ownership, index
+quirks, expression ordering, casts or types.
 

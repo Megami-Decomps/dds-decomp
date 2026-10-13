@@ -1034,7 +1034,6 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
     return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
 
-
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415840);
 
 u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
@@ -5408,7 +5407,6 @@ void btlDrawActorPanelCursor(BtlUnit *unusedUnit, BattleActorPanelWork *work, s3
                       0x53);
     }
 }
-
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004167E0);
 

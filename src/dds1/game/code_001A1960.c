@@ -235,7 +235,8 @@ s32 btlFindPartyEntryIndexForActor(s32 arg0) {
     return dds3FindEntryIndex(((BtlUnit *)arg0)->partyRecord.unitId);
 }
 
-void func_001A1CD0(void) {
+/* Retail no-op after party actor insertion, removal or roster swap. */
+void btlOnPartyRosterChange(void) {
 }
 
 BtlUnit *btlFindActiveActorByKind(s32 index) {
@@ -294,7 +295,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     unit->partyRecord.flags |= 2;
     datGameState->party[i].flags |= 2;
     unit->unk2C4 = i;
-    func_001A1CD0();
+    btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
 }
 
@@ -325,7 +326,7 @@ void btlRemovePartyActorAndShiftEntries(BtlUnit *unit) {
     unit->partyRecord.flags &= ~2;
     datGameState->party[index].flags &= ~2;
     unit->unk2C4 = 6;
-    func_001A1CD0();
+    btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index,
                        saved.unitId);
 }
@@ -342,7 +343,7 @@ void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
         actor->partyRecord.flags |= 2;
         datGameState->party[actor->unk2C4].flags |= 2;
         datGameState->party[targetIndex].flags &= ~2;
-        func_001A1CD0();
+        btlOnPartyRosterChange();
         btlBossDebugPrintf("btl:party change %d<->%d[%d<->%d]\n",
             actor->unk2C4, targetIndex, previous.unitId, actor->partyRecord.unitId);
     }
@@ -355,7 +356,9 @@ s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     return datEnemyRecords[record->unitId].flags;
 }
 
-void func_001A29B8(DatPartyRecord *unit, s32 statIndex) {
+/* Native tail jump forwards the clamped profile-adjusted stat in v0;
+ * retain the existing void C surface for matching. */
+void btlQueryClampedProfileAdjustedStat(DatPartyRecord *unit, s32 statIndex) {
     datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
@@ -1345,7 +1348,8 @@ f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
     return factor;
 }
 
-void func_001A4C68(BtlUnit *unit, u32 flags, s16 delta) {
+/* Apply mask-selected signed entry deltas, then sign-specific clears. */
+void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta) {
     if (flags == 0) {
         return;
     }

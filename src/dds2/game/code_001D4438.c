@@ -1346,12 +1346,12 @@ void btlMarkSceneTaskAfterReset(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags | 0x20;
 }
 
-extern void func_001E0CE0(ActionStateLink *, BattleIndexWork *);
+extern void btlPrepareSavedCommandTargets(ActionStateLink *, BattleIndexWork *);
 extern s32 btlAiCheckStatusRollEligibility();
 
 s32 btlCommandStateSelectB(ActionStateLink *task) {
     if (sndHasActiveActor() == 0) {
-        func_001E0CE0(task, &task->indexWork);
+        btlPrepareSavedCommandTargets(task, &task->indexWork);
         if (btlAiCheckStatusRollEligibility(task) != 0) {
             btlDispatchStateHandler(task, 0xB);
         } else {
@@ -3177,7 +3177,7 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
 extern void btlResetUnitLinks(BtlUnit *unit);
 extern void btlSyncPlayerWork(BtlUnit *unit);
 extern void btlSynchronizePartyActorRecords(BtlUnit *unit, u8 index);
-extern void func_001ADFE0(BtlUnit *unit, u32 flags, s16 delta);
+extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
 
 /* Reload the linked party unit and queue load-dependent motion, lighting and effects. */
 void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
@@ -3225,14 +3225,14 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
         unit->status.flags |= 0x20;
     }
     if (btlDoesEnabledStatusMatchCurrentId(record, 0xE8)) {
-        func_001ADFE0(unit, 0x100, 2);
-        func_001ADFE0(unit, 0x10, 2);
-        func_001ADFE0(unit, 2, 2);
-        func_001ADFE0(unit, 8, 2);
+        btlApplyMaskedActorEntryAdjustments(unit, 0x100, 2);
+        btlApplyMaskedActorEntryAdjustments(unit, 0x10, 2);
+        btlApplyMaskedActorEntryAdjustments(unit, 2, 2);
+        btlApplyMaskedActorEntryAdjustments(unit, 8, 2);
     }
     if (btlDoesEnabledStatusMatchCurrentId(record, 0xE9)) {
-        func_001ADFE0(unit, 1, 2);
-        func_001ADFE0(unit, 0x80, 2);
+        btlApplyMaskedActorEntryAdjustments(unit, 1, 2);
+        btlApplyMaskedActorEntryAdjustments(unit, 0x80, 2);
     }
     unit->modelId = 0;
     if (!(record->flags & 0x10)) {

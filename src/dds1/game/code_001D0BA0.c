@@ -233,7 +233,7 @@ void btlSetTrackedTaskDisplayMode(s32 mode);
 
 void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
 
-void func_001A4C68(BtlUnit *unit, u32 flags, s16 delta);
+void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
 
 typedef struct BtlStatArgs {
     BtlUnit *unit;
@@ -1499,7 +1499,7 @@ void *btlCreateCategoryStatDamageTask(u8 *owner, u32 value, u32 extra) {
 
 /* Apply the operand's masked entry changes; complete immediately. */
 s32 btlApplyMaskedActorEntryUpdate(BtlOperandTaskArgs *args) {
-    func_001A4C68(args->unit, args->operand.entryChangeMask, args->operand.entryChange);
+    btlApplyMaskedActorEntryAdjustments(args->unit, args->operand.entryChangeMask, args->operand.entryChange);
     return 1;
 }
 
@@ -4981,7 +4981,7 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *actor, BtlUnit *target, s3
 }
 
 /* Update motion completion, alpha transitions, and the selected-unit color pulse. */
-void func_001DA468(void) {
+void btlUpdateActiveActorModelState(void) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlActorStatusRecord *status;

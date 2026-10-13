@@ -4269,7 +4269,7 @@ extern void func_002240C0(u32);
 
 extern void func_00224F88(u32);
 
-extern void func_001ADFE0(u32, u32, u32);
+extern void btlApplyMaskedActorEntryAdjustments(u32, u32, u32);
 
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
@@ -5601,11 +5601,11 @@ u32 func_00221F40(u32 unit, u32 actor, u32 action) {
     case 0x178:
     case 0x17d:
     case 0x19d:
-        func_001ADFE0(unit, 1, 0x7f);
-        func_001ADFE0(unit, 4, 0x7f);
-        func_001ADFE0(unit, 0x10, 0x7f);
-        func_001ADFE0(unit, 0x40, 0x7f);
-        func_001ADFE0(unit, 0x100, 0x7f);
+        btlApplyMaskedActorEntryAdjustments(unit, 1, 0x7f);
+        btlApplyMaskedActorEntryAdjustments(unit, 4, 0x7f);
+        btlApplyMaskedActorEntryAdjustments(unit, 0x10, 0x7f);
+        btlApplyMaskedActorEntryAdjustments(unit, 0x40, 0x7f);
+        btlApplyMaskedActorEntryAdjustments(unit, 0x100, 0x7f);
         break;
     }
     return 0;

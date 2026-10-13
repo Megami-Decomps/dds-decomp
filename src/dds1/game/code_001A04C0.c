@@ -298,7 +298,7 @@ s32 btlUpdateActiveBattleFrame(void) {
         btlUpdateScene();
         func_001C8330();
         btlUpdateActionSeqs();
-        func_001DA468();
+        btlUpdateActiveActorModelState();
         func_001FB088();
         btlSweepFinishedTasks();
         func_001DBE68();
