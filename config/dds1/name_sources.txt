@@ -8825,3 +8825,5 @@
 0x0018CDF8	effEventSetupBeforeRecordNoOp	inferred	confidence=high; Empty entry immediately before per-record no-op in all seven setup paths/game; observable order only. Shared twin194A30. [Namer1 b55]
 0x0018CDF0	effEventSetupRecordNoOp	inferred	confidence=high; Empty entry called with setup-record address between before/after stages in all seven paths/game; zero-formal definition and pointer extern preserved. Shared twin194A28. [Namer1 b55]
 0x0018CE00	effEventSetupAfterRecordNoOp	inferred	confidence=high; Empty entry immediately after per-record no-op in all seven setup paths/game; observable order only. Shared twin194A38. [Namer1 b55]
+0x00269728	mnuNoOpTitleAudio	inferred	confidence=high; Empty title-audio helper adjacent to the sound-busy query and effect-frame getter; DDS2 twin 0x002A1338 is also empty. [LiteH b26]
+0x00269868	sndOpAlwaysSucceeds	inferred	confidence=high; Sound script operation returns 1 without side effects; callers consume the result as success. DDS2 twin 0x002A1478. [LiteH b26]

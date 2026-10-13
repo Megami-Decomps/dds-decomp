@@ -3128,7 +3128,7 @@ void mnuSpawnMantraIconAndStorePanelSoundEntry(MantraDrawPool *pool) {
     }
 }
 
-void func_00278F60(MantraDrawPool *pool) {
+void mnuSpawnAlternateMantraIconForPanelSoundEntry(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x91);
@@ -3136,7 +3136,7 @@ void func_00278F60(MantraDrawPool *pool) {
     }
 }
 
-void func_00278FA8(MantraDrawPool *pool) {
+void mnuSpawnAlternateMantraSpecialNodeIcon(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x92);
@@ -3172,14 +3172,14 @@ void mnuSpawnMantraShortLoopIconFadeOut(MantraDrawPool *pool) {
     }
 }
 
-void func_002790F0(u32 a, u32 b, MantraDrawPool *pool) {
+void mnuSpawnMantraIconAtPositionWithShortLoop(u32 a, u32 b, MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x21);
     }
 }
 
-void func_00279148(MantraDrawPool *pool) {
+void mnuSpawnMantraIconWithShortLoop(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x22);
