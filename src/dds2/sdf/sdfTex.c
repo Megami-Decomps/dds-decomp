@@ -6,6 +6,7 @@
 #include "sdf.h"
 #include "sdf_texture_submit.h"
 #include "sdf_texture_registry.h"
+#include "sdf_tex_lifetime.h"
 #include "sdf_tex_packet.h"
 #include "sdf_pending.h"
 #include "ee_mmi.h"

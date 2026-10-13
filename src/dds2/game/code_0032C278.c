@@ -8,6 +8,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_gs_geometry.h"
 #include "sdf_texture_flush.h"
+#include "sdf_tex_lifetime.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_timer.h"
@@ -279,7 +280,6 @@ SdfTex *sdfFindTextureByResourceKey(s32 resourceKey) {
 }
 
 extern SdfPendingRequest sdfTextureReleaseQueue;
-extern void sdfTexRelease(SdfTex *texture);
 
 void sdfRegisterTextureReleaseRequestHandler(void) {
     sdfInitializeSynchronizedRequest(&sdfTextureReleaseQueue, sdfTexRelease);
