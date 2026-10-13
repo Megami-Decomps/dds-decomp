@@ -322,7 +322,7 @@ extern void mdlSetListedObjectFlag(void);
 
 extern void effResetSlots(void);
 
-extern void func_00209078(void);
+extern void btlRefreshUnitEffects(void);
 
 extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
@@ -414,7 +414,7 @@ void btlUpdateEventPlayback(void) {
             if (frame == 1) {
                 battle->battleFlags &= ~0x40000;
                 if ((battle->commandRestrictFlags & 0x40000) == 0) {
-                    func_00209078();
+                    btlRefreshUnitEffects();
                 }
                 btlClearRuntimeFlag2000();
                 btlResetActiveUnitList();

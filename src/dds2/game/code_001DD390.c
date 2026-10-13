@@ -4607,7 +4607,7 @@ BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void) {
 }
 
 u32 btlUpdateCommandSoundTaskSecondary(void) {
-    func_00209078();
+    btlRefreshUnitEffects();
     return 1;
 }
 

@@ -760,7 +760,7 @@ extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 extern u32 kwlnDrawControlFlags;
 
 /* Refresh active actor lighting and restore eligible enemy colors. */
-void func_00209078(void) {
+void btlRefreshUnitEffects(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit = state->units;
     struct EvtUnit *effect;
@@ -2287,7 +2287,8 @@ u32 btlScriptReturnSceneSlotCount(void) {
     return 1;
 }
 
-u32 btlScriptReturnWorkParameter(void) {
+/* Publish the battle turn count to the script integer result; return VM success. */
+u32 btlScriptReturnTurnCount(void) {
     s32 battle;
 
     battle = btlGetRuntime();
@@ -2295,7 +2296,8 @@ u32 btlScriptReturnWorkParameter(void) {
     return 1;
 }
 
-u32 btlCmdReturnActorActionTime(void) {
+/* Publish the actor's roster-record level, not an action timer; return VM success. */
+u32 btlScriptReturnActorLevel(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
