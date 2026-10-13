@@ -230,7 +230,7 @@ extern s32 btlSetActorEffectParameter();
 
 extern s32 mdlFlagTest(u32);
 
-extern void func_001DEFE0(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
@@ -544,10 +544,10 @@ s32 func_001DEFA0(s32 actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001DEFE0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", btlBuildBattleUnitFramingCameraPose);
 
 void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
-    func_001DEFE0(command, pose, 27.5f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 27.5f);
 }
 
 extern void func_002DD688(f32 angle);
@@ -557,7 +557,7 @@ BtlLinkedCommand *command;
 BtlCamState *pose;
 BtlCamState *out;
 {
-    func_001DEFE0(command, pose, 20.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 20.0f);
     btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
         func_002DD688(-(20.0f * 0.017453293f));
@@ -841,7 +841,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
         btlFlagAllUnitsDefeatCandidate();
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
-            func_001DEFE0(action, from, 17.5f);
+            btlBuildBattleUnitFramingCameraPose(action, from, 17.5f);
             btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
@@ -2091,7 +2091,7 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
 }
 
 void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
-    func_001DEFE0(command, pose, 0.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 0.0f);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E4AC0);

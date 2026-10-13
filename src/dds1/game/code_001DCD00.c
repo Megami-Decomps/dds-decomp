@@ -775,7 +775,7 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001DEFE0(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -894,7 +894,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
                 }
             } else {
-                func_001DEFE0(action, &action->camera, 20.0f);
+                btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
             }
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
             if (func_001DD488(action)) {
@@ -970,7 +970,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             action->flags |= 0x41;
         }
     } else {
-        func_001DEFE0(action, &action->camera, 20.0f);
+        btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
     }
 }
 

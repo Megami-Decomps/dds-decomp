@@ -3266,7 +3266,7 @@
 0x002199C8	btlTriggerLinkedActionMotionAlternate	inferred	sibling of btlTriggerLinkedActionMotion, calls func_00217378 instead of func_00217470 [names_reviewed2.tsv]
 0x00219A70	btlTriggerLinkedActionMotion	inferred	When action owner has flags 0x400 and code 0x136 with bound actor state 0x1200, applies an effect vector, raises motion coordinate 150, and refreshes actor effect state.
 0x00219B48	btlStartLinkedActionMotionPrimary	inferred	actionCode 0x17E branch of btlSetupHariActionCameraPair sibling [names_M86_BattleAct.tsv]
-0x00219CC8	btlAdvanceTimedActionState	inferred	For action 0x10C, increments its frame counter when accepted; after frame 18 calls func_001E9890 and invokes func_001EC868 with a zero float.
+0x00219CC8	btlAdvanceTimedActionState	inferred	For action 0x10C, increments its frame counter when accepted; after frame 18 calls func_001E9890 and invokes btlBuildBattleUnitFramingCameraPose with a zero float.
 0x00219D40	btlRemapCommandKind	inferred	sibling of func_00218630 style kind remap in the battle-select state [names_M86_BattleAct.tsv]
 0x00219E38	btlGetSpecialEnemyActionStatus	inferred	L13
 0x00219F58	btlRecenterActorsAroundLead	inferred	mode 0x10D lead is placed at x=0 and every other live actor is shifted by the lead's -x through btlSetUnitPosition [names_M69_Battle3.tsv]
@@ -8043,3 +8043,4 @@
 0x00315FA0	prfCheckRequirementRules	inferred	Dispatch prfReqEvaluateRules with zero extra flags and no mismatch-count output; DDS1 twin0x002CE698 retains its void definition and distinct operand types. [Namer1 batch39, high]
 0x00316020	prfReqCheckWithFallback	inferred	Align DDS1 name0x002CE710: masked requirement ID, rule evaluator with mismatch output, matching fallback group's global flags, existing unknown-ID success. [Namer1 batch39, high]
 0x001ECBF8	btlSetDefaultActionCameraPose	inferred	Paired wrapper applies the baseline action-camera pose through the three-argument camera worker at 27.5f. Multiple battle-camera paths use it as a framing fallback or starting pose before adjusting FOV, distance, and position. DDS1 twin 0x001DF358.
+0x001EC868	btlBuildBattleUnitFramingCameraPose	inferred	Walk the active battle-unit list, filter status flags, accumulate scaled reach and vertical bounds, and build the output camera pose using the requested angle; paired callers use it for action framing. DDS1 twin 0x001DEFE0.

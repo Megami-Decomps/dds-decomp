@@ -837,7 +837,7 @@ extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
 extern void func_001EF030(void *, void *);
 
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
@@ -846,7 +846,7 @@ extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 extern void func_003364B8(f32);
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlSelectActionCameraPose(BtlLinkedCommand *);
 extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);
@@ -959,7 +959,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
                 }
             } else {
-                func_001EC868(action, &action->camera, 20.0f);
+                btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
             }
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
             if (func_001EA940(action)) {
@@ -1035,7 +1035,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             action->flags |= 0x41;
         }
     } else {
-        func_001EC868(action, &action->camera, 20.0f);
+        btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
     }
 }
 
@@ -1058,7 +1058,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
             return;
         }
         if (btlIsSpecialActorCategory((s32)action) != 0) {
-            func_001EC868(action, &action->camera, 0.0f);
+            btlBuildBattleUnitFramingCameraPose(action, &action->camera, 0.0f);
             func_003364B8(-(10.0f * 0.017453293f));
             VU0_STORE_VF_UNCLOBBERED(vf10, action->camera.direction);
             VU0_ROTATE_VEC(vf10, vf10);

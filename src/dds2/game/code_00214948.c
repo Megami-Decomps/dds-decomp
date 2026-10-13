@@ -2470,7 +2470,7 @@ extern s32 btlHasMarkedEntry14();
 
 extern void btlClearRuntimeFlag2000(void);
 
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (command->actionCode != 0x10c) {
@@ -2479,7 +2479,7 @@ s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (btlHasMarkedEntry14((s32)command, 0x10c) != 0) {
         if (command->motionProgress >= 0x12) {
             btlClearRuntimeFlag2000();
-            func_001EC868(command, &command->camera, 0.0f);
+            btlBuildBattleUnitFramingCameraPose(command, &command->camera, 0.0f);
         }
         command->motionProgress++;
     }
@@ -3322,7 +3322,7 @@ void btlSetCameraPresetForBossUnitMode(BtlLinkedCommand *fx) {
 s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     BtlCamState *pose = &command->frontCamera;
     command->camera.direction[0] = 1.0f;
-    func_001EC868(command, pose, 25.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 25.0f);
     btlCopyMotionTransform(&command->backCamera, pose);
     func_00336538(-0.87266463f);
         VU0_STORE_VF(vf10, pose->direction);
@@ -3425,7 +3425,7 @@ s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
         return 0;
     }
     if (side != 1 || targetSide == side) {
-        func_001EC868(command, &command->frontCamera, 25.0f);
+        btlBuildBattleUnitFramingCameraPose(command, &command->frontCamera, 25.0f);
         btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
         if (command->frontCamera.direction[0] > 0.0f) {
             func_00336538(-0.87266463f);
@@ -5278,7 +5278,7 @@ u32 btlTickDelayedMarkedAction(BtlLinkedCommand *unit) {
     }
     if (btlHasMarkedEntry14((u32)unit) && unit->motionProgress == 0x25) {
         btlClearRuntimeFlag2000();
-        func_001EC868(unit, &unit->camera, 0.0f);
+        btlBuildBattleUnitFramingCameraPose(unit, &unit->camera, 0.0f);
     }
     ++unit->motionProgress;
     return 1;
