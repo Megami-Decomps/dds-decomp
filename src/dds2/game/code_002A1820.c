@@ -923,7 +923,7 @@ extern u32 mnuGetMovieMenuSelectionIndex(void);
 extern s32 func_002A5C58(void);
 extern void func_002A5890(void);
 extern void func_002A5F80(void);
-extern void func_00342580(u32);
+extern void sndReleaseTrackHandle(u32);
 extern void sdfSoundSetChannelCount(u32);
 extern void sndStartTrackExtended(s32);
 extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
@@ -1204,7 +1204,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             mnuMovieMenuState->state = 28;
             mnuMovieMenuState->cursor = 0;
             kwlnFadeInStart(0, 0, 0, 0xF);
-            func_00342580(0x310000);
+            sndReleaseTrackHandle(0x310000);
         }
         break;
     case 28:
@@ -1265,7 +1265,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
                 mnuMovieMenuState->state = 35;
                 break;
             case 2:
-                func_00342580(0x310000);
+                sndReleaseTrackHandle(0x310000);
                 mnuMovieMenuState->mode = selectedItem;
                 mnuMovieMenuState->cursor = 0;
                 kwlnFadeOutStart(0, 0, 0, 0xA);

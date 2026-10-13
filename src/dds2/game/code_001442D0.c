@@ -294,7 +294,7 @@ extern FldClear18 fldPendingSounds[];
 
 
 
-extern void func_00342580(s32 arg0);
+extern void sndReleaseTrackHandle(s32 arg0);
 
 extern s32 fldCurrentBgmId[];
 
@@ -798,7 +798,7 @@ void fldStartSceneBgm(void) {
             }
             if (fldAreaState.unk130 != 1) {
                 if (fldCurrentBgmHandle != handle) {
-                    func_00342580(fldCurrentBgmHandle);
+                    sndReleaseTrackHandle(fldCurrentBgmHandle);
                 }
                 fldCurrentBgmHandle = handle;
                 sndStartTrackDefault(handle);
@@ -849,7 +849,7 @@ void fldStopCurrentBgm(void) {
 }
 
 void fldReleaseCurrentBgm(void) {
-    func_00342580(fldCurrentBgmHandle);
+    sndReleaseTrackHandle(fldCurrentBgmHandle);
     if (fldAreaState.sequenceCode >= 0x80) {
         fldAreaState.sequenceCode = 1;
     }
@@ -917,7 +917,7 @@ void fldSelectBgmMode(s32 selection) {
         break;
     case 0:
         if (D_00436228 != -1) {
-            func_00342580(D_00436228);
+            sndReleaseTrackHandle(D_00436228);
             D_00436228 = -1;
         }
         break;

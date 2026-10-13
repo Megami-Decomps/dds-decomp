@@ -248,7 +248,7 @@ extern s32 fileOnAllWritten(void);
 extern void func_001004A0(void);
 extern s8 D_0037F510[];
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-extern void func_00342580(s32 command);
+extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(s32 result);
 
 extern void func_002C92D0(u32 context);
@@ -1511,7 +1511,7 @@ s32 mcdFinishFileDetection(void) {
         D_00437D3C = 0;
         D_00437CF8 = 0;
         if (mcdOriginalTitleFileMode == 0) {
-            func_00342580(0x310000);
+            sndReleaseTrackHandle(0x310000);
         }
         if (D_00439020 == (u32)-1) {
             return fileBeginWait(-1);
@@ -3257,7 +3257,7 @@ s32 func_002D0498(void) {
 
 s32 fileBeginFadeAndConfirmSound(void) {
     kwlnFadeInStart(0, 0, 0, 8);
-    func_00342580(0x310000);
+    sndReleaseTrackHandle(0x310000);
     return (s32)func_002D0498;
 }
 

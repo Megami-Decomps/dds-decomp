@@ -231,7 +231,7 @@ void sndStartTrackExtended(s32 trackId) {
     func_00341650(0x20, 0, &packet, 0x10);
 }
 
-void func_00342580(u32 value) {
+void sndReleaseTrackHandle(u32 value) {
     u32 packet[4];
 
     packet[0] = value;

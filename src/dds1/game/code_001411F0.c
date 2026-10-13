@@ -112,7 +112,7 @@ extern s32 D_0032E474[];
 
 extern s32 D_0033EB78[];
 
-extern void func_002E96D8(s32 arg0);
+extern void sndReleaseTrackHandle(s32 arg0);
 
 
 extern s32 dds3GetWorldObject(void);
@@ -532,7 +532,7 @@ void fldStartSceneBgm(void) {
         }
         if (fldAreaState.unk130 != 1) {
             if (fldCurrentBgmHandle != handle) {
-                func_002E96D8(fldCurrentBgmHandle);
+                sndReleaseTrackHandle(fldCurrentBgmHandle);
             }
             fldCurrentBgmHandle = handle;
             sndStartTrackDefault(handle);
@@ -579,7 +579,7 @@ void fldStopCurrentBgm(void) {
 }
 
 void fldReleaseCurrentBgm(void) {
-    func_002E96D8(fldCurrentBgmHandle);
+    sndReleaseTrackHandle(fldCurrentBgmHandle);
     if (fldAreaState.sequenceCode >= 0x80) {
         fldAreaState.sequenceCode = 1;
     }
@@ -633,7 +633,7 @@ extern s32 fldCurrentBgmMode;
 
 extern s32 D_0033EAE8[];
 
-extern void func_002E96D8();
+extern void sndReleaseTrackHandle();
 
 void fldSetBgmMode(s32 mode) {
     switch (mode) {
@@ -646,7 +646,7 @@ void fldSetBgmMode(s32 mode) {
     case 0:
         mode = -1;
         if (fldCurrentBgmMode != mode) {
-            func_002E96D8(fldCurrentBgmMode);
+            sndReleaseTrackHandle(fldCurrentBgmMode);
             fldCurrentBgmMode = mode;
         }
         break;

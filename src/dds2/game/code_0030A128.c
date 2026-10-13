@@ -46,7 +46,7 @@ extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern s32 fldLmapTaskUpdate(KwlnTask *);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 D_00438890;
-extern void func_00342580(u32);
+extern void sndReleaseTrackHandle(u32);
 extern void sdfReleaseAllSpriteSlots(void);
 extern void sdfDestroyActiveCounterRuntime(void);
 extern void fldReleaseMapRequestQueues(void);
@@ -430,7 +430,7 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
 }
 
 void fldShutdownLmapResources(void) {
-    func_00342580(0x400001);
+    sndReleaseTrackHandle(0x400001);
     sdfReleaseAllSpriteSlots();
     sdfDestroyActiveCounterRuntime();
     fldReleaseMapRequestQueues();

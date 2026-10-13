@@ -862,7 +862,7 @@ s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host
 
 
 extern void sndStartTrackExtended(s32);
-extern void func_00342580(s32);
+extern void sndReleaseTrackHandle(s32);
 
 /* Mode one optionally starts the BGM and releases the group; other modes use the
  * counterpart sound action and texture release. Only enable == 1 sends sound calls.
@@ -884,7 +884,7 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
         mnuReleaseResourceGroup(address);
     } else {
         if (enable == 1) {
-            func_00342580(work->bgmHandle);
+            sndReleaseTrackHandle(work->bgmHandle);
         }
         D_00437859 = 0;
         mnuReleaseMenuResourceGroup(address, 1);
@@ -968,7 +968,7 @@ void mnuApplyFadeTrackMode(s32 mode, MenuSlotState *host) {
             func_003425B0();
         }
     } else if (host->reduced == 0) {
-        func_00342580(host->bgmHandle);
+        sndReleaseTrackHandle(host->bgmHandle);
     } else {
         func_003425D8();
     }
@@ -2452,7 +2452,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
     }
     evtRememberDispatchCallback(0, (s32)context);
     context->exitState = 1;
-    func_00342580(context->bgmHandle);
+    sndReleaseTrackHandle(context->bgmHandle);
     evtClearActiveFlag(0);
     return 1;
 }

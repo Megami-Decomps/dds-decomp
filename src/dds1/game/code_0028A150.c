@@ -1367,7 +1367,7 @@ s32 mcdFinishFileDetection(void) {
         fileSetMenuFlowState(0);
         D_003BC854 = 0;
         D_003BC810 = 0;
-        func_002E96D8(0x310000);
+        sndReleaseTrackHandle(0x310000);
         if (D_003BD904 == -1) {
             return fileBeginWait((void *)-1);
         }
