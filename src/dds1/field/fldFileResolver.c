@@ -526,7 +526,6 @@ extern u32 D_003BACF8;
 
 #include "sdf_packet_alloc.h"
 
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 fldBackgroundBuffer;
 
@@ -2904,11 +2903,11 @@ s32 y;
 u32 first;
 const u8 *second;
 {
-    u32 object;
+    struct FrFontGlyph *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, first, second, 0);
     frFontDrawGlyphInDefaultMode(object);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)object);
+    frFontQueueGlyphForCurrentDrawBuffer(object);
 }
 /* Packed quad input: geometry fields precede the live packet origin and depth.
  * Preserve the unclassified words for the opaque renderer. */

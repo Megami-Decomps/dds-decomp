@@ -123,8 +123,6 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-
 extern char D_003BB450[];
 
 extern s32 datRosterDetails;
@@ -1722,7 +1720,7 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(1);
     BtlPanelTransitionWork *work;
-    u32 glyph;
+    struct FrFontGlyph *glyph;
 
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
@@ -1743,8 +1741,8 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     work->fadeLevels[2] = work->fadeLevels[0] = 0x40;
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
-    work->width = frFontMeasureLines((struct FrFontGlyph *)glyph);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+    work->width = frFontMeasureLines(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     work->initial[0].x = work->width - work->width / 2 + 0x105;
     work->initial[0].y = 0x40;
     work->initial[1].x = 0x92 - work->width / 2;
@@ -2120,7 +2118,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
     BtlState *battle;
     BtlAnalysisPanelWork *work;
     s32 row;
-    u32 glyph;
+    struct FrFontGlyph *glyph;
 
     battle = (BtlState *)btlGetRuntime();
     work = (BtlAnalysisPanelWork *)kwlnTaskGetUserValue(task);
@@ -2167,11 +2165,11 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     func_003014F0(text, D_003BB400, actor->partyRecord.level);
-                    glyph = func_001978E8((work->x + xOffset) << 4,
+                    glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
                                           (work->y - 2) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
-                    frFontDrawGlyphChain((struct FrFontGlyph *)glyph, 1, 0x53);
-                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
                     break;
                 }
                 case 1: {
@@ -2181,8 +2179,8 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         (work->x + xOffset - 6) << 4, (work->y - 8) << 3,
                         0xFF0000, 0x80808000 | (s32)work->alpha,
                         D_003BAA88 + datEnemyRecords[actor->partyRecord.unitId].pad04 * 7, 0);
-                    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
-                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    frFontDrawGlyphWithSharedFlags(glyph, 1);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
                     break;
                 }
                 case 2: {
@@ -2192,8 +2190,8 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         (work->x + xOffset + 2) << 4, (work->y - 7) << 3,
                         0xFF0000, 0x80808000 | (s32)work->alpha,
                         D_003BAA74 + actor->partyRecord.unitId * 17, 0);
-                    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
-                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    frFontDrawGlyphWithSharedFlags(glyph, 1);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
                     break;
                 }
                 case 3: {
@@ -2210,11 +2208,11 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     func_003014F0(text, D_003BB408, actor->partyRecord.hp,
                                   actor->partyRecord.maxHp);
                     func_001AFF78(work, 0, work->x, work->y, work->alpha);
-                    glyph = func_001978E8((work->x + xOffset) << 4,
+                    glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
                                           (work->y + 17) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
-                    frFontDrawGlyphChain((struct FrFontGlyph *)glyph, 1, 0x53);
-                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
                     break;
                 }
                 case 4: {
@@ -2231,11 +2229,11 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     func_003014F0(text, D_003BB408, actor->partyRecord.mp,
                                   actor->partyRecord.maxMp);
                     func_001AFF78(work, 1, work->x, work->y, work->alpha);
-                    glyph = func_001978E8((work->x + xOffset) << 4,
+                    glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
                                           (work->y + 41) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
-                    frFontDrawGlyphChain((struct FrFontGlyph *)glyph, 1, 0x53);
-                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
                     break;
                 }
                 case 5: {
@@ -2307,8 +2305,8 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                                 lineX << 4, lineY << 3,
                                 0xFF0000, 0x80808000 | (s32)work->alpha, (const u8 *)text, 0);
                         }
-                        frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
-                        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                        frFontDrawGlyphWithSharedFlags(glyph, 1);
+                        frFontQueueGlyphForCurrentDrawBuffer(glyph);
                     }
                     break;
                 }
@@ -3023,7 +3021,7 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     s16 *fade;
     s32 i;
     s32 width;
-    u32 glyph;
+    struct FrFontGlyph *glyph;
 
     if (btlGetTrackedTaskHandle(1) == 0) {
         return 0;
@@ -3063,8 +3061,8 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     width = work->width;
     glyph = itfCreateConvertedTextGlyph((0x100 - (width >> 1)) << 4, 0x220, 0xFF0000,
                                        work->fade | 0x80808000, work->text, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     colors.values[0] = work->fadeLevels[0] | 0x80808000;
     colors.values[1] = work->fadeLevels[2] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
@@ -5288,22 +5286,22 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
 extern u8 *D_003BAA8C;
 
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    s32 handle;
+    struct FrFontGlyph *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     itfSetTextDrawLimit(-1);
 }
 
 extern u8 *D_003BAA84;
 
 void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    s32 handle;
+    struct FrFontGlyph *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -5617,7 +5615,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8];
     BtlState *battle;
     s32 color;
-    s32 handle;
+    struct FrFontGlyph *handle;
 
     memcpy(text, D_003BB450, sizeof(text));
     battle = (BtlState *)btlGetRuntime();
@@ -5628,8 +5626,8 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     }
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -6224,8 +6222,8 @@ extern void btlDrawCenteredPanelSegments(s32 width);
 /* Draw selected actor names and advance the battle scene's actor panels. */
 void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     BtlUnit *unit;
-    u32 glyph;
-    u32 categoryGlyph;
+    struct FrFontGlyph *glyph;
+    struct FrFontGlyph *categoryGlyph;
     s32 width;
     s32 categoryWidth;
     s32 totalWidth;
@@ -6241,31 +6239,31 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
             if (unit->status.flags & 0x200) {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
                     D_003BAA70 + unit->partyRecord.unitId * 17, 0);
-                width = frFontMeasureLines((struct FrFontGlyph *)glyph);
+                width = frFontMeasureLines(glyph);
                 btlDrawCenteredPanelSegments(width);
-                frFontSetGlyphPosition((struct FrFontGlyph *)glyph, (0x100 - (width >> 1)) << 4, 0x220);
+                frFontSetGlyphPosition(glyph, (0x100 - (width >> 1)) << 4, 0x220);
                 frFontDrawGlyphChain(glyph, 1, 0x53);
-                frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                frFontQueueGlyphForCurrentDrawBuffer(glyph);
             } else {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
                     D_003BAA74 + unit->partyRecord.unitId * 17, 0);
-                width = frFontMeasureLines((struct FrFontGlyph *)glyph);
+                width = frFontMeasureLines(glyph);
                 categoryGlyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
                     D_003BAA88 + datEnemyRecords[unit->partyRecord.unitId].pad04 * 7, 0);
-                categoryWidth = frFontMeasureLines((struct FrFontGlyph *)categoryGlyph);
+                categoryWidth = frFontMeasureLines(categoryGlyph);
                 totalWidth = width + categoryWidth;
                 btlDrawCenteredPanelSegments(totalWidth);
-                frFontSetGlyphPosition((struct FrFontGlyph *)categoryGlyph, (0x100 - (totalWidth >> 1)) << 4, 0x220);
+                frFontSetGlyphPosition(categoryGlyph, (0x100 - (totalWidth >> 1)) << 4, 0x220);
                 frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)categoryGlyph, 1);
-                frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)categoryGlyph);
+                frFontQueueGlyphForCurrentDrawBuffer(categoryGlyph);
                 if (categoryWidth == 0) {
                     s32 centeredNameX = -(width >> 1);
-                    frFontSetGlyphPosition((struct FrFontGlyph *)glyph, (centeredNameX + 0x100) << 4, 0x220);
+                    frFontSetGlyphPosition(glyph, (centeredNameX + 0x100) << 4, 0x220);
                 } else {
-                    frFontSetGlyphPosition((struct FrFontGlyph *)glyph, (categoryWidth - (width >> 1) + 0xF8) << 4, 0x220);
+                    frFontSetGlyphPosition(glyph, (categoryWidth - (width >> 1) + 0xF8) << 4, 0x220);
                 }
                 frFontDrawGlyphChain(glyph, 1, 0x53);
-                frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                frFontQueueGlyphForCurrentDrawBuffer(glyph);
             }
         }
     }

@@ -399,7 +399,6 @@ extern s32 fldSecondarySceneObject;
 
 #include "sdf_packet_alloc.h"
 
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern u32 fldPendingArea;
 
@@ -3000,11 +2999,11 @@ void fldSubmitBackgroundDescriptorPacket(void) {
 }
 
 void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 firstPayload, const u8 *secondPayload) {
-    u32 object;
+    struct FrFontGlyph *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     frFontDrawGlyphInDefaultMode(object);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)object);
+    frFontQueueGlyphForCurrentDrawBuffer(object);
 }
 
 void fldAdvanceQuadRow(FldQuadState *quad) {

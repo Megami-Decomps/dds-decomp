@@ -315,8 +315,6 @@ void mnuReleaseMenuResourceGroup(s32 address, u32 preserveWork) {
 void mnuReleaseResourceGroupTextureHandles(u32 address) {
     mnuReleaseMenuResourceGroup(address, 0);
 }
-
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern FrFontGlyph *itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
@@ -337,7 +335,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
     } else {
         text = D_003A47E8[slot].encodedText;
     }
-    handle = (FrFontGlyph *)itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
+    handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
     frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
@@ -509,7 +507,7 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
     color = (node->flags48 & 1) ? 0xA09DC320 : 0xA09DC380;
     color = mnuBlendListNodeColorByFlags(color, node);
     color = uiBlendColors(color, color & ~0xFF, width);
-    glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
+    glyph = itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
     frFontSetChildChainFirstOption(glyph, chainFlags);
     frFontDrawGlyphChain(glyph, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);

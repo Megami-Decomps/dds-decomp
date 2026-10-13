@@ -37,9 +37,6 @@ extern void *const D_0037B950[];
 extern void *const D_0037B970[];
 
 extern void *const D_0037B980[];
-
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-
 extern const s32 D_0037C388[];
 
 #define MNU_STAFF_PANEL_COUNT 3
@@ -271,7 +268,7 @@ extern u8 *D_0037B988[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
+    FrFontGlyph *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       D_0037B988[imageIndex], 0);
     frFontDrawGlyphChain(sprite, 1, 0x54);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
