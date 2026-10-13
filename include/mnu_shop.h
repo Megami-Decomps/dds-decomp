@@ -43,6 +43,7 @@ struct MenuIconState {
 struct MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource,
                                                s32 material);
 void mnuReleaseResourceList(struct MenuIconState *list);
+void mnuClearEntryFlags(struct MenuIconState *group);
 
 typedef struct MenuWindowContainer {
     s32 id;                /* 0x00 */
@@ -115,6 +116,7 @@ typedef struct MenuPanelHandles {
 MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind,
                                               struct EffectSlotSet *resource,
                                               struct EffMappedResource *target);
+void mnuClearEntryFlags(MenuPanelHandles *group);
 
 /* The DDS1 generic window constructor allocates and clears 0x8C bytes. */
 typedef struct MenuWindowContainer {
