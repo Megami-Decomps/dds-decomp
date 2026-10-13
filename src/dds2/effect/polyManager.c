@@ -5,6 +5,8 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "poly_ring_head.h"
@@ -129,7 +131,6 @@ void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);

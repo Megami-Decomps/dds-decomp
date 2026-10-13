@@ -37,6 +37,7 @@
 #include "mdl_grouped_parts_api.h"
 #include "mdl_done_job.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -392,7 +393,6 @@ extern u8 D_0037F660[];
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 extern Motion *mdlFindNodeById(MdlCtx *, s32);
 

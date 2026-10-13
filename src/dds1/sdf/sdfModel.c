@@ -9,12 +9,12 @@
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "sdf_message.h"
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern vu8 sdfCurrentBufferIndex;
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */

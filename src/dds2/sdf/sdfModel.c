@@ -9,6 +9,7 @@
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "sdf_message.h"
 
 
@@ -43,7 +44,6 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
 
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 
 extern void *memcpy(void *dst, const void *src, u32 n);

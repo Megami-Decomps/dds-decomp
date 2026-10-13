@@ -11,6 +11,7 @@
 
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_math.h"
@@ -58,7 +59,6 @@ extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 extern u8 effDefaultRandomState[];
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
