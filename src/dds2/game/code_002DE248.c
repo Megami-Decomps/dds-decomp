@@ -10724,10 +10724,10 @@ void effApplyBattleCameraToObject(work)
 
     effComputeBattleCameraPositionVU(D_0045C270);
     VU0_STORE_VF_UNCLOBBERED(vf10, &rotation[0]);
-    fileJobInvokePositionCallback(work, &rotation[0]);
+    fileJobInvokePositionCallback(work, (f32 *)&rotation[0]);
     effMultiplyQuatWithFlag(D_0045C270);
     VU0_STORE_VF_UNCLOBBERED(vf10, &rotation[1]);
-    fileJobInvokeRotationCallback(work, &rotation[1]);
+    fileJobInvokeRotationCallback(work, (f32 *)&rotation[1]);
     fileJobInvokeScaleCallback(work, ((FileJob *)D_0045C270)->scale * effFileQueue->scaleMultiplier);
     fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
 }

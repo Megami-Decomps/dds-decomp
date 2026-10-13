@@ -328,7 +328,7 @@ typedef struct EffParamWork {
 } EffParamWork; /* 0x08 */
 
 typedef struct EffDispatchExtra {
-    void (*func)(void *, void *); /* 0x00 handler, may be NULL */
+    void (*func)(void *, f32 vector[4]); /* 0x00 vector handler, may be NULL */
     u8 pad04[0x24];
 } EffDispatchExtra;
 
@@ -4575,19 +4575,19 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
     D_003E916C[idx].cb(data);
 }
 
-void fileJobInvokePositionCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     u16 id = job->type;
 
     if (D_003E9180[id].func != NULL) {
-        D_003E9180[id].func(job->data, extra);
+        D_003E9180[id].func(job->data, position);
     }
 }
 
-void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
     u16 id = job->type;
 
     if (D_003E9184[id].func != NULL) {
-        D_003E9184[id].func(job->data, extra);
+        D_003E9184[id].func(job->data, rotation);
     }
 }
 
@@ -5086,7 +5086,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
             VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
-            fileJobInvokePositionCallback((FileJobPayload *)job->id, &pos);
+            fileJobInvokePositionCallback((FileJobPayload *)job->id, (f32 *)&pos);
         }
     }
 }
