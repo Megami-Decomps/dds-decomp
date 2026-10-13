@@ -81,7 +81,7 @@ void effMiscQuaternionToMatrixVU(void)
     VU0_QUAT_TO_MATRIX_VF10();
 }
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340CB0);
+INCLUDE_ASM(const s32, "game/code_00340AC8", sdfConvertWrappedEulerAnglesToQuaternionVU);
 
 INCLUDE_ASM(const s32, "game/code_00340AC8", sdfConvertEulerAnglesToQuaternionVU);
 
