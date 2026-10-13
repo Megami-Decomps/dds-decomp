@@ -40,7 +40,7 @@ enum {
     BTL_DIRECTORY_PATH_BYTES = 0x70,
     BTL_BUILTIN_NAME_COUNT = 8,
     BTL_DIRECTORY_FLAG_CLEAR = 0x1000,
-    BTL_RESOURCE_ENTRY_BYTES = 0x44,
+    BTL_RESOURCE_ENTRY_BYTES = sizeof(BtlResourceEntry),
     /* High-bit selectors are game-specific callback-table positions. */
     BTL_PACKED_ENEMY_COUNT_LIMIT = 0x1400000,
     BTL_PACKED_ENEMY_QUEUED_QUERY = 0x0F800000,
@@ -2594,22 +2594,6 @@ s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) 
     return strlen(reader->name);
 }
 
-
-/* Resource-browser entries are linked in scan order and occupy 0x44 bytes. */
-typedef struct BtlResourceEntry {
-    s32 category;
-    s32 value; /* Category-specific index or metadata. */
-    s32 id;
-    char name[0x30];
-    struct BtlResourceEntry *prev;
-    struct BtlResourceEntry *next;
-} BtlResourceEntry;
-
-typedef struct BtlResourceEntryList {
-    s32 count;
-    char *pathPrefix; /* Owned copy of the directory-scan path, or NULL. */
-    BtlResourceEntry *head;
-} BtlResourceEntryList;
 
 /* Build a scan-order list of built-in names and enabled resource-file categories. */
 BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {

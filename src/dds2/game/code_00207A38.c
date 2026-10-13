@@ -45,7 +45,7 @@ enum {
     BTL_DIRECTORY_PATH_BYTES = 0x70,
     BTL_BUILTIN_NAME_COUNT = 8,
     BTL_DIRECTORY_FLAG_CLEAR = 0x1000,
-    BTL_RESOURCE_ENTRY_BYTES = 0x44,
+    BTL_RESOURCE_ENTRY_BYTES = sizeof(BtlResourceEntry),
     BTL_BUTTON_ICON_SIZE = 0x40,
     /* High-bit selectors are game-specific callback-table positions. */
     BTL_PACKED_ENEMY_COUNT_LIMIT = 0x1C00000,
@@ -225,24 +225,6 @@ extern f32 D_00452FB0[];
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void evtConfigureUnitTransition(s32, s32);
-
-/* Resource-browser entries are linked in scan order and occupy 0x44 bytes. */
-typedef struct BtlResourceEntry {
-    s32 category;
-    s32 value; /* Category-specific index or metadata. */
-    s32 id;
-    char name[0x30];
-    struct BtlResourceEntry *prev;
-    struct BtlResourceEntry *next;
-} BtlResourceEntry;
-
-typedef struct BtlResourceEntryList {
-    s32 count;
-    char *pathPrefix; /* Owned copy of the directory-scan path, or NULL. */
-    BtlResourceEntry *head;
-} BtlResourceEntryList;
-
-
 
 extern u8 D_00436C50[];
 
