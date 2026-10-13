@@ -2217,7 +2217,8 @@ extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 /* Once the previous selected unit is active, queue its mode's script resource and
  * stationed sound, then an immediate task that waits for the resource task to go.
  */
-void func_002195E0(ActionStateLink *record) {
+/* MSG.TBL identifies these IDs as guns, cannons, reserve or Gate Core. */
+void btlQueueGateComponentScriptAndSound(ActionStateLink *record) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)work->sub;
     s32 resource;
@@ -2292,7 +2293,7 @@ extern f32 D_003BF6A0[];
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 /* Reset the special actor groups to their fixed facing and battle position. */
-void func_00219760(void) {
+void btlResetGateComponentTransforms(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
 
     for (; unit != NULL; unit = unit->nextActor) {
@@ -2566,7 +2567,8 @@ s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit) {
     return -1;
 }
 
-s32 func_00219F28(s32 battler, s32 action) {
+/* Gate Core alone accepts action 19 here; all other actors return false. */
+s32 btlIsGateCoreAction19Request(s32 battler, s32 action) {
     if ((((BtlUnit *)battler)->status.flags & 0x400) == 0) {
         return 0;
     }
@@ -2614,7 +2616,8 @@ void btlRecenterActorsAroundLead(void) {
     }
 }
 
-s32 func_0021A098(void) {
+/* Fade the other ready enemies when Raja Naga carries the 0x20 status flag. */
+s32 btlDisableUnitsIfSpeciesFlagged(void) {
     BtlUnit *unit = ((BattleWork *)btlGetRuntime())->actorList;
     BtlUnit *head = unit;
     s32 result = -1;
@@ -3203,7 +3206,8 @@ INCLUDE_ASM(const s32, "game/code_00214948", func_0021B828);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern BtlRuntimeTask *btlCreateUnitFaceBodyTask(BtlUnit *, BtlUnit *);
 
-void func_0021C0C8(ActionStateLink *handle, s32 unused, u64 completionOwner, u64 prerequisite) {
+/* Coordinate Vritra/tentacle effects and facing with the action's prerequisites. */
+void btlQueueVritraTentacleActionTasks(ActionStateLink *handle, s32 unused, u64 completionOwner, u64 prerequisite) {
     BtlState *battle;
     BattleActionState *state;
     BtlUnit *unit;
@@ -4503,7 +4507,7 @@ s32 btlIsSpecialMotion(BtlUnit *actor) {
 /* Pick a permitted shadow skill from the corresponding party member's list. */
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAC8);
 
-void func_0021F3E8(ActionStateLink *actor) {
+void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
     s32 choices[24];
     s32 partyId;
     DatPartyRecord *entry;
@@ -4573,7 +4577,8 @@ void func_0021F3E8(ActionStateLink *actor) {
 }
 
 extern const char D_0041AAF8[];
-s32 func_0021F698(void) {
+/* Remember a random eligible party member and return its shadow's enemy ID. */
+s32 btlChoosePartyMemberShadowId(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit = battle->units;
     BtlUnit *choices[3];
@@ -5041,7 +5046,8 @@ u32 btlActivateMarkedActionFromCommand(u32 unused1, u32 unused2, u32 action) {
 
 extern u32 btlIsLinkedActionSceneStateActive(void);
 
-s32 func_00220DD8(BtlUnit *unit, s32 command) {
+/* Select Kartikeya's linked-state motion variants; otherwise preserve the input. */
+s32 btlRemapKartikeyaMotionForLinkedState(BtlUnit *unit, s32 command) {
     if (!(unit->status.flags & 0x400)) {
         return command;
     }
@@ -5094,7 +5100,8 @@ f32 btlGetActionScaleFactor(BtlUnit *unit, BtlUnit *other) {
     return 1.0f;
 }
 
-s32 func_00220F68(BtlUnit *unit) {
+/* Return motion 0x10 or -1; a NULL input searches the active Kartikeya unit. */
+s32 btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     BtlUnit *found;
 
@@ -5675,7 +5682,8 @@ typedef struct BattleUnitReplacement {
 extern BattleUnitReplacement D_003BF930[4];
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 
-void func_00222100(ActionStateLink *link) {
+/* Replace the pending unit from the table, preserving flags, then queue its tasks. */
+void btlReplacePendingBossUnitAndQueueTasks(ActionStateLink *link) {
     BtlState *battle;
     BattleActionState *state;
     BtlRuntimeTask *script;
@@ -6168,7 +6176,8 @@ s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_00223350);
 
-s32 func_00223BD8(BtlLinkedCommand *unit) {
+/* Advance marked action timing; install the camera only on its trigger frame. */
+s32 btlAdvanceBrahmanTimedActionCamera(BtlLinkedCommand *unit) {
     s32 triggerFrame = -1;
 
     switch (unit->actionCode) {
@@ -6226,7 +6235,8 @@ s32 btlSelectActionCameraByTableFlags(BtlLinkedCommand *unit) {
     return 0;
 }
 
-s32 func_00223DD8(BtlLinkedCommand *unit) {
+/* Handle table-selected cameras and clear the runtime camera flag when handled. */
+s32 btlFinishBrahmanCameraByTableFlags(BtlLinkedCommand *unit) {
     u32 flags = datActionAnimationRecords[unit->actionCode].flags;
 
     if (flags & 0x4000) {
@@ -6297,7 +6307,8 @@ void btlSpawnBrahmaActionEffectTasks(ActionStateLink *unit, u32 action, u32 unus
     }
 }
 
-u32 func_00223FB0(BtlLinkedCommand *unit) {
+/* Chaturbhuja sets the 0x800 blend flag and reports that this hook handled it. */
+u32 btlMarkChaturbhujaCameraBlend(BtlLinkedCommand *unit) {
     if (unit->actionCode == 0x10b) {
         unit->flags = unit->flags | 0x800;
         return 1;
@@ -6305,7 +6316,8 @@ u32 func_00223FB0(BtlLinkedCommand *unit) {
     return 0;
 }
 
-u32 func_00223FE0(BtlLinkedCommand *unit) {
+/* Chaturbhuja activates the runtime camera flag; other commands return false. */
+u32 btlStartChaturbhujaCameraStep(BtlLinkedCommand *unit) {
     if (unit->actionCode == 0x10b) {
         btlSetRuntimeFlag2000();
         return 1;
@@ -6313,7 +6325,8 @@ u32 func_00223FE0(BtlLinkedCommand *unit) {
     return 0;
 }
 
-u32 func_00224010(u32 unused, s32 motion) {
+/* Override Desert Wind's effect with 0xE0; zero keeps the normal effect. */
+u32 btlGetDesertWindEffectOverride(u32 unused, s32 motion) {
     u32 result;
 
     result = 0xe0;
@@ -7064,7 +7077,8 @@ s32 btlFilterActionByUnitFlags(BtlUnit *unit, s32 action) {
     return action;
 }
 
-f32 func_00226308(BtlUnit *unit, s32 actor, s32 command, s32 mode) {
+/* Scale Satan's mode-one command amounts except the listed HP calculation types. */
+f32 btlGetSatanCommandAmountScale(BtlUnit *unit, s32 actor, s32 command, s32 mode) {
     f32 scale = 1.0f;
 
     if (mode == 1) {
@@ -7171,7 +7185,8 @@ s32 btlCheckActionUnitResourceEligibility(BtlUnit *unit, s32 type) {
     return result;
 }
 
-s32 func_00226540(u32 unused1, u32 unused2, s32 action) {
+/* Futility supplies 4500 points to the combat adjustment; other skills use 100. */
+s32 btlGetFutilityActionPoints(u32 unused1, u32 unused2, s32 action) {
     return action == 0x109 ? 0x1194 : 0x64;
 }
 
@@ -7187,7 +7202,8 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-s32 func_00226598(BtlLinkedCommand *command) {
+/* Move the Kali target +400 on Z for status-table kinds 2/7 without a trigger. */
+s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
     BtlUnit *unit = btlGetTargetUnitForLink(command);
     u8 *table;
     s32 kind;
@@ -7267,7 +7283,7 @@ s64 func_00226820(ActionStateLink *unit) {
 }
 
 /* Type 0x187 uses this frame counter for its later marked-entry motion. */
-u32 func_00226850(BtlLinkedCommand *unit) {
+u32 btlResetSpiralEdgeMotionProgress(BtlLinkedCommand *unit) {
     if (unit->actionCode == 0x187) {
         unit->motionProgress = 0;
     }
@@ -7275,7 +7291,7 @@ u32 func_00226850(BtlLinkedCommand *unit) {
 }
 
 /* After frame 0x34, repeatedly apply this fixed transform while marked. */
-u32 func_00226868(BtlLinkedCommand *unit) {
+u32 btlUpdateSpiralEdgeMarkedCamera(BtlLinkedCommand *unit) {
     if (unit->actionCode != 0x187) {
         return 0;
     }
@@ -7421,9 +7437,10 @@ void btlResetEffectState(void) {
     state->linked.actor = NULL;
 }
 
+/* Apply Rahu head/body operand damage, binding/fading and coordinated recovery. */
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B4D0);
 
-void func_00226C98(BtlUnit *unit, BtlOperandEntry *entry) {
+void btlApplyRahuOperandEffects(BtlUnit *unit, BtlOperandEntry *entry) {
     BattleActionContext *ctx = (BattleActionContext *)btlGetRuntime();
     BattleLinkedEffectState *effect = &ctx->effect->linked;
     BtlUnit *mainUnit;

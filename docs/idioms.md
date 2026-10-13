@@ -2557,7 +2557,7 @@ linked->actor = unit;
 ```
 
 This uses the existing member's address with no cast or alternate layout.
-`btlBindEffectUnitAndClearStateFlags` and `func_00226C98` match with that
+`btlBindEffectUnitAndClearStateFlags` and `btlApplyRahuOperandEffects` match with that
 payload access. A direct `ctx->effect->linked.actor` access has a different
 dependency graph. Check the active mode, allocation and other field users
 before taking such a pointer; the union remains the owner of heterogeneous
@@ -11271,3 +11271,27 @@ state-seven guard, category-driven poses and original SDK position samples.
 DDS1 adopts the already-named `btlRestoreLinkedEffectUnitPose` twin.
 No widths, signedness, casts, statement ordering, snapshot arrays or
 callback representations change with these identifier-only closures.
+
+## DDS2 boss hook names distinguish values from callback roles
+
+The remaining DDS2 boss hooks use native `MSG.TBL` identities and their
+actual installer slots. Gate-component scheduling/reset uses enemy IDs
+0x109/0x10A and 0x131..0x136 (guns, cannons, reserve and Gate Core).
+The Gate Core predicate is named for its observable action-19 test;
+the action's purpose is not inferred. Vritra/tentacle prerequisite tasks
+use IDs 0x110/0x111/0x112, and Kartikeya's linked-state motion hooks
+test ID 0x116. Shadow selection maps party IDs to the four native
+shadow enemies and retains the original default and skill exclusions.
+
+The callback consumer clarifies otherwise ambiguous constants:
+`btlGetDesertWindEffectOverride` returns an effect ID, not a bitmask,
+and `btlGetFutilityActionPoints` supplies 4500 or 100 to combat-flag
+adjustment. Kali's target offset is along Z, not upward. Spiral Edge
+keeps its repeated camera write at and after frame 52; Brahman's
+timed camera is installed only on the exact trigger frame.
+
+DDS2 adopts the existing DDS1 `btlDisableUnitsIfSpeciesFlagged` and
+`btlApplyRahuOperandEffects` names. The species IDs differ between
+games, but their flagged-lead fade and Rahu head/body operand roles
+agree. All names preserve the original declarations, callback surfaces,
+casts, state transitions and compiler-sensitive access forms.
