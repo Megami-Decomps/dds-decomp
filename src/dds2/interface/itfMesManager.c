@@ -940,7 +940,7 @@ extern char D_00436620[];
 extern char D_00436628[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern ItfMesWindowRec *func_001A7A98(ItfMesWindowRec *window);
+extern ItfMesWindowRec *itfMesFindPreviousWindowWithPanelSprite(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
 extern void sndStepIndexByPad(SndPadStepper *panel);
 
@@ -965,7 +965,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     const char *coordinateFormat;
 
     if (D_003B4770.window == NULL) {
-        ItfMesWindowRec *window = func_001A7A98(NULL);
+        ItfMesWindowRec *window = itfMesFindPreviousWindowWithPanelSprite(NULL);
 
         D_003B4770.window = window;
         if (window == NULL) {
@@ -1000,7 +1000,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
                     confirmDebug->mode = 2;
                     break;
                 case 4:
-                    confirmDebug->window = func_001A7A98(confirmDebug->window);
+                    confirmDebug->window = itfMesFindPreviousWindowWithPanelSprite(confirmDebug->window);
                     break;
                 }
             } else if (D_0037F510.cancel < 0) {
@@ -2357,7 +2357,7 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-ItfMesPoolNode *func_001A7A98(ItfMesPoolNode *node) {
+ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
     s32 index = 0;
     s32 count = itfMesWork.activeWindowCount;
 

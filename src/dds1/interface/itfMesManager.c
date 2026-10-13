@@ -952,7 +952,7 @@ extern char D_003BB220[];
 extern char D_003BB228[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern ItfMesWindowRec *func_0019FA70(ItfMesWindowRec *window);
+extern ItfMesWindowRec *itfMesFindPreviousWindowWithPanelSprite(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
 extern void sndStepIndexByPad(ItfMesBlkA4 *panel);
 
@@ -977,7 +977,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     const char *coordinateFormat;
 
     if (D_00357D80.window == NULL) {
-        ItfMesWindowRec *window = func_0019FA70(NULL);
+        ItfMesWindowRec *window = itfMesFindPreviousWindowWithPanelSprite(NULL);
 
         D_00357D80.window = window;
         if (window == NULL) {
@@ -1012,7 +1012,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
                     confirmDebug->mode = 2;
                     break;
                 case 4:
-                    confirmDebug->window = func_0019FA70(confirmDebug->window);
+                    confirmDebug->window = itfMesFindPreviousWindowWithPanelSprite(confirmDebug->window);
                     break;
                 }
             } else if (D_00324510[0x33] < 0) {

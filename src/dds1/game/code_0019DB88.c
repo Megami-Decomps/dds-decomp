@@ -854,7 +854,7 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-ItfMesPoolNode *func_0019FA70(ItfMesPoolNode *node) {
+ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
     s32 index = 0;
     s32 count = itfMesWork.activeWindowCount;
 

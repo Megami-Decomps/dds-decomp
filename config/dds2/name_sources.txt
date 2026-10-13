@@ -2242,6 +2242,7 @@
 0x001A7798	itfQueueSpriteQuadPacket	inferred	Builds a sprite's four-corner vertices, emits the indexed five-quad packet, and appends it to the message draw list.
 0x001A7878	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:783:func_001A7878; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
+0x001A7A98	itfMesFindPreviousWindowWithPanelSprite	inferred	Used by the panel layout inspector to walk backward, wrap at the active-list tail, and select a window with a non-null panel sprite.
 0x001A7B00	itfQueueOffsetTexturedRect	inferred	readability/matching review (QP16)
 0x001A85E0	itfMesScriptStartEntryAndWait	inferred	Reads script entry argument 0, starts the window entry, polls its transition and completion, then cleans up and publishes the result value.
 0x001A87E8	sndCycleTestMessageResource	inferred	Releases the previous TestMsgMng resource and cycles the four sound-test message choices, loading the next resource when present.
