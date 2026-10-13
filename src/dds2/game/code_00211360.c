@@ -190,7 +190,7 @@ extern s32 btlElementToBitIndex(s32, s32);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 func_001B2F50(void *, s32);
+extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
 
 extern s32 btlHasAdjacentActorRecordStatus(BtlUnit *);
 

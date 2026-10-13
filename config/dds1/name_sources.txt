@@ -2819,6 +2819,7 @@
 0x001A87A0	btlIsSelectedActorStatusAndRecordClear	inferred	Requires clear selected entry, actor status flags and indexed record state. [names_reviewed16.tsv]
 0x001A8818	btlAreUnitStatusAndEntryFlagsClear	inferred	Requires the matching unit status and entry permission bits both to be clear. [names_reviewed14.tsv]
 0x001A8850	btlFindCommandPartnersByAffinity	inferred	L13
+0x001A8A30	btlHasRequiredCommandAffinityPartners	inferred	Counts command affinity requirements and checks whether eligible active scene actors can satisfy the two- or three-member partner set; DDS1 callers use the result for action availability and script selection. DDS2 twin 0x001B2F50.
 0x001A8C68	btlHasAdjacentActorRecordStatus	inferred	Checks two consecutive status bytes for the indexed actor record; established DDS2 name. [names_reviewed16.tsv]
 0x001A8CC8	btlIsActorHighStateFlagClear	inferred	Returns whether the checked high actor-state bit is clear in both titles. [names_reviewed17.tsv]
 0x001A8CE0	btlCanSpawnAnotherEnemy	inferred	Returns whether active and cumulative spawn caps permit adding an enemy, applying the optional scene override. Two DDS1 callers use the result as an enemy-spawn gate; DDS2 twin 0x001B3200.
