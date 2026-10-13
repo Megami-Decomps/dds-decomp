@@ -8845,3 +8845,5 @@
 0x0020B818	btlSelectHariharaActionCamera	inferred	confidence=high; Boss-camera callback handles party aims and unitId11B fixed DERUTA/I-E key sets, otherwise randomized fallback. MSG.TBL enemy-name283 is Harihara; no guessed skill expansion. [Namer1 b57]
 0x0020CB28	btlGetMillenniaCurseSoundDelay	inferred	confidence=high; Registered commandSoundDelay returns2 only for action1D7, otherwise0. MSG.TBL skill-name471 is Millennia Curse. [Namer1 b57]
 0x001DE5F8	btlUpdateActionCameraFromTargetPolicy	inferred	confidence=high; State7/phase guard, target-policy list/category queries select actor-set/default camera or front/back blend. Paired DDS2 EBE30; retained two SDK position snapshots unchanged. [Namer1 b57]
+0x00264B08	brsAnimateSkillIconRows	inferred	confidence=high; Result-panel skill icon rows are animated through their row records and fade state; DDS2 0x0029C120 has the corresponding updater. [LiteH b27]
+0x0027A300	ptyDrawLinkageSkillEntry	inferred	confidence=high; Draws a linkage-skill entry with cost/icon and marker handling; its body is analogous, not identical, to DDS2 mnuDrawSkillCategoryEntry. [LiteH b27]

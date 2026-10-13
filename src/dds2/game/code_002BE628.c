@@ -419,7 +419,7 @@ extern char D_00437C68[]; /* "%2d", shared with mnuDrawPartyMemberCommandPanel. 
 struct MenuPageSpriteSlot;
 extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
 extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
-extern void func_002BD710(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
+extern void mnuDrawPartyStatusValuePanel(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
 /* Both native page renderers also forward the surface word; the
  * selection helper consumes only its first five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
@@ -484,7 +484,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1],
                   0xFFFFFF, alpha, 1, panel->frame[6], 0, surface);
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
-    func_002BD710(x, y, z, menu, panelIndex, 0, menu->fade, surface);
+    mnuDrawPartyStatusValuePanel(x, y, z, menu, panelIndex, 0, menu->fade, surface);
 
     labelX = x + positions[2];
     labelY = y + positions[3];

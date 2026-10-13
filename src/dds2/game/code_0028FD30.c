@@ -1502,7 +1502,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293DB0);
 
-s32 func_00293FD0(MnuStatusResource *object, u16 id) {
+s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id) {
     MantraMenuWork *state = &object->menu;
     const MenuPanelPositionRecord *record;
     s32 selector;

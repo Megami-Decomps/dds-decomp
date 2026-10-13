@@ -165,7 +165,7 @@ s32 itfRunPanelMode2(KwlnTask *request) {
     return menuSetHandler(panel, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C120);
+INCLUDE_ASM(const s32, "game/code_0029BC58", brsAnimateSkillIconRows);
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", brsPackProgressPanelColor);
 
