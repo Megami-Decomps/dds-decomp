@@ -122,8 +122,62 @@ extern void func_002A7B28(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern f32 sdfSinPoly(f32);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5260);
+void func_002A5260(s32 mode, s32 frame) {
+    f32 factor;
+    f32 alpha;
+
+    switch (mode) {
+    case 0:
+        if (frame < 10) {
+            factor = frame / 10.0f;
+            alpha = sdfSinPoly(factor * 1.5707963f) * 128.0f;
+        } else {
+            factor = (30 - frame) / 20.0f;
+            alpha = factor * 64.0f + 48.0f;
+        }
+        mnuDrawSprite(0, 0, 0, (s32)alpha, 0, 4, 0x53);
+        if (frame < 5) {
+            factor = 0.0f;
+        } else if (frame < 10) {
+            factor = (frame - 5) / 5.0f;
+            factor = sdfSinPoly(factor * 1.5707963f);
+        } else {
+            factor = (30 - frame) / 20.0f;
+        }
+        mnuDrawSprite(0, 0, 0, (s32)(factor * 128.0f), 0, 5, 0x53);
+        return;
+    case 1:
+        factor = frame / 90.0f;
+        factor = sdfSinPoly(factor * 6.2831852f - 1.5707963f);
+        factor = (factor + 1.0f) * 0.5f;
+        mnuDrawSprite(0, 0, 0, (s32)(factor * 64.0f + 48.0f), 0, 4, 0x53);
+        return;
+    }
+    if (frame < 3) {
+        factor = 1.0f;
+    } else if (frame < 20) {
+        factor = (frame - 3) / 17.0f;
+        factor = 1.0f - factor;
+    } else {
+        factor = 0.0f;
+    }
+    mnuDrawSprite(0, 0, 0, (s32)(factor * 128.0f), 0, 4, 0x53);
+    if (frame < 5) {
+        factor = frame / 5.0f;
+        factor = sdfSinPoly(factor * 1.5707963f);
+    } else if (frame < 20) {
+        factor = (frame - 5) / 15.0f;
+        factor = 1.0f - factor;
+    } else {
+        factor = 0.0f;
+    }
+    mnuDrawSprite(0, 0, 0, (s32)(factor * 128.0f), 0, 4, 0x53);
+    /* Local fade cleanup; see docs/idioms.md,
+     * "Post-call local cleanup: movie backdrop frame". */
+    frame = 0;
+}
 
 void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
     s32 i;
