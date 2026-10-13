@@ -1,15 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
-
-typedef struct {
-    u8 pad[0xC];
-    s32 (*callback)(void);
-} AreaSub;
-
-typedef struct {
-    u8 pad[0x10];
-    AreaSub *callbackRecord;
-} AreaObj;
+#include "dds3_area_callback.h"
 
 
 /* Exchange the area's slot, retaining the native selector pair (0, 5). */
@@ -19,7 +10,7 @@ s32 dds3ExchangeAreaSlot(void *areaObject) {
 }
 
 /* A missing callback returns one; otherwise propagate its return unchanged. */
-s32 dds3InvokeAreaCallback(AreaObj *areaObject) {
+s32 dds3InvokeAreaCallback(Dds3AreaObjectView *areaObject) {
     s32 (*callback)(void);
 
     callback = areaObject->callbackRecord->callback;
