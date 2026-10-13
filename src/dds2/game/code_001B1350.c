@@ -76,7 +76,7 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 extern char D_00415638[]; /* "btl:hunt mp rec[%d]\n" */
 
-extern s32 func_0035B6E0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 extern s32 evtGetMirroredSolarPhase(void);
 
@@ -198,10 +198,10 @@ u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
             btlHasSpecialAbility274(defender, element) != 0 ||
             btlHasEnabledSpecialAbilityForSlot(defender, element) != 0) {
             result = 0;
-            func_0035B6E0("btl:bad auto guard[%X]\n", element);
+            sdfDebugPrintf("btl:bad auto guard[%X]\n", element);
         } else if (btlTestSelectedItemCategoryMask(defender, element) != 0) {
             result = 0;
-            func_0035B6E0("btl:bad counter guard[%X]\n", element);
+            sdfDebugPrintf("btl:bad counter guard[%X]\n", element);
         }
     }
     if (guardAbility != -1 && (guardMask & result)) {

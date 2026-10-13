@@ -246,7 +246,7 @@ extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 extern void sndEnsureMidiBankResident(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
-extern void func_0035B6E0(const char *format, ...);
+extern void sdfDebugPrintf(const char *format, ...);
 extern MnuSectionObjectList *func_00317988(void *data);
 void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry);
 
@@ -383,28 +383,28 @@ s32 func_00317058(u8 *workBytes) {
             case 14:
                 evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->unk6C].name);
                 work->objects = func_00317988(data);
-                func_0035B6E0(D_0042D578);
+                sdfDebugPrintf(D_0042D578);
                 break;
             case 7:
             case 11:
             case 15:
-                func_0035B6E0(D_0042D588, D_0040A970[work->unk6C].name);
+                sdfDebugPrintf(D_0042D588, D_0040A970[work->unk6C].name);
                 work->playerObjects = func_00317988(data);
-                func_0035B6E0(D_0042D578);
+                sdfDebugPrintf(D_0042D578);
                 break;
             case 8:
             case 12:
             case 16:
-                func_0035B6E0(D_0042D5B0, D_0040A970[work->unk6C].name);
+                sdfDebugPrintf(D_0042D5B0, D_0040A970[work->unk6C].name);
                 work->mapObjects = func_00317988(data);
-                func_0035B6E0(D_0042D578);
+                sdfDebugPrintf(D_0042D578);
                 break;
             case 9:
             case 13:
             case 17:
-                func_0035B6E0(D_0042D5D0, D_0040A970[work->unk6C].name);
+                sdfDebugPrintf(D_0042D5D0, D_0040A970[work->unk6C].name);
                 work->drawObjects = func_00317988(data);
-                func_0035B6E0(D_0042D578);
+                sdfDebugPrintf(D_0042D578);
                 break;
             default:
                 break;
@@ -412,11 +412,11 @@ s32 func_00317058(u8 *workBytes) {
             break;
 
         case 1:
-            func_0035B6E0(D_0042D5F0, D_0040A970[work->unk6C].name);
+            sdfDebugPrintf(D_0042D5F0, D_0040A970[work->unk6C].name);
             break;
 
         case 2:
-            func_0035B6E0(D_0042D608, D_0040A970[work->unk6C].name);
+            sdfDebugPrintf(D_0042D608, D_0040A970[work->unk6C].name);
             break;
 
         case 5: {
@@ -1041,7 +1041,7 @@ create:
             instance->scale = (f32)parameters->scale / 100.0f;
             func_00319A58(entry, work);
         } else {
-            func_0035B6E0("sprite none\n");
+            sdfDebugPrintf("sprite none\n");
         }
     }
     evtPrintDeveloperConsoleMessage("---------------------create!!\n");

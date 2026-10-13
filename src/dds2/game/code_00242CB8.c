@@ -45,7 +45,7 @@ void evtBeginSolarOverlayFadeIn(s32 arg0);
 
 extern s32 fileMenuTaskExists(void);
 extern u32 func_001200E0(void);
-void func_0035B6E0(const char *fmt, ...);
+void sdfDebugPrintf(const char *fmt, ...);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
@@ -82,7 +82,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     if (work->task == NULL) {
-        func_0035B6E0(D_00421FE8);
+        sdfDebugPrintf(D_00421FE8);
         return 1;
     }
     id = scrReadIntParameter(0);
@@ -106,7 +106,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     if (work->task == NULL) {
-        func_0035B6E0(D_00422050);
+        sdfDebugPrintf(D_00422050);
         return 1;
     }
     childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));

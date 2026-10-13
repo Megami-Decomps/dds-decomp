@@ -54,7 +54,7 @@ typedef struct FileCleanup {
 } FileCleanup;
 
 extern s32 btlDestroyStageTask(void *);
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 extern void sdfPacUseHighAddressAllocator(void *);
 #define FILE_REQUEST_KIND_CALLBACK 0
 #define FILE_REQUEST_KIND_PAC 1
@@ -185,7 +185,7 @@ struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, vo
     u8 *requestWork;
     PacState *dispatchPacket;
 
-    func_0035B6E0("pac load %s\n", requestName);
+    sdfDebugPrintf("pac load %s\n", requestName);
     requestWork = sdfAllocAndClearQuadwords(FILE_PAC_REQUEST_BYTES);
     dispatchPacket = (PacState *)(requestWork + FILE_PAC_PACKET_OFFSET);
     sdfPacInitializeDispatchPacket(dispatchPacket, dispatchValue);
@@ -215,7 +215,7 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
 struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
     u8 *requestWork;
 
-    func_0035B6E0("file load %s\n", requestName);
+    sdfDebugPrintf("file load %s\n", requestName);
     requestWork = sdfAllocAndClearQuadwords(FILE_CALLBACK_REQUEST_BYTES);
     requestWork[3] = callbackMode;
     fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,

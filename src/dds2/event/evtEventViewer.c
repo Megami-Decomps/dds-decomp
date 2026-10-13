@@ -1085,7 +1085,7 @@ extern void effDisableColorRectangle(void);
 extern void evtUpdateCameraColorTrackEffect(EvtRuntime *);
 
 
-extern s32 func_0035B6E0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 /* Applies duration-scaled alpha to the selected effect for supported track
  * kinds. The key's duration is used directly, without validation here. */
@@ -1111,7 +1111,7 @@ void evtEventViewerApplyDurationScaledEffectAlpha(EvtRuntimeGroup *group, EvtRun
     if (key->duration >= elapsed) {
         node = ((EvtViewerObjectData *)viewer->objects[key->p08.sb[0]]->data)->parameterNode;
         alpha = (s32)((128.0f / key->duration) * elapsed);
-        func_0035B6E0("alpha=%d\n", alpha);
+        sdfDebugPrintf("alpha=%d\n", alpha);
         color = ((u32)alpha << 24) | 0x808080;
         effSetNodeParameterValue(node, color);
     }

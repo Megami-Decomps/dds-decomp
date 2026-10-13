@@ -6650,12 +6650,15 @@
 0x00341D20	sndDispatchCommandWithoutPayload	inferred	OR caller command with 0x50 and dispatch with null payload and zero length.
 0x00341D48	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
 0x00341D90	sndSubmitTextCommandPayloadWithCommandBits60	inferred	Calculates text byte length and dispatches the payload through sndSendCommandPacket with command ORed with 0x60; paired title counterpart. [code-quality cleanup, 2026-10-13]
+0x00341E80	sndSetSpatialSequenceVolumePan	inferred	Normalizes the listener-relative angle, derives sequence pan and angle-based volume, attenuates for distance above one, then sends both through sndSetSequenceVolumePan; DDS1/DDS2 paired implementation.
 0x00341FE8	sndSendSpatialPosition	inferred	quiet3 twin unification
 0x00342040	sndUpdateScaledListenerState	inferred	src/dds2/game/code_00341FE8.c func_00342040: Converts six values to one-tenth-scale integers and transmits listener packet only when changed. Twin of DDS1 func_002E9198. [names_reviewed24.tsv]
 0x00342168	sndFindPackedTrackLoadStatus	inferred	confidence=high; src/dds2/game/code_00341FE8.c:func_00342168; Synchronizes sound state, searches track slots by the packed high-word id, and distinguishes a loaded slot from the pending id. [names_qp9.tsv]
 0x003421E8	sndEnsureMidiBankResident	inferred	src/dds2/game/code_00341FE8.c func_003421E8: Queries packed track status, formats MIDI bank path and requests load or waits on current bank. Twin of DDS1 func_002E9340. [names_reviewed24.tsv]
 0x003422C0	sndSendFilenameCommand	inferred	Byte-identical DDS1 counterpart: Sends the filename and its byte length in a sound command packet.
 0x00342358	sndSendChannelControlCommand	inferred	Packs the caller-selected sound channel into a channel-control command. [names_reviewed19.tsv]
+0x00342440	sndGetTrackBalanceFirstComponent	inferred	Returns raw byte 0x4 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x5. No callers currently have recovered C names, so the two component roles remain positional.
+0x00342458	sndGetTrackBalanceSecondComponent	inferred	Returns raw byte 0x5 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x4. No callers currently have recovered C names, so the two component roles remain positional.
 0x00342470	sndGetNonnegativeEntryBalance	inferred	Returns the nonnegative difference between two sound-system entry counters; agrees with established DDS1 name. [names_reviewed17.tsv]
 0x003424A8	sndGetTrackSlotTable	inferred	medium confidence; src/dds2/game/code_00341FE8.c func_003424A8: Returns the 8-byte sound track-slot table; D_0047ABD0 equals the slot-array address D_0047AA40 + 0x190 used by track lookup. [names_reviewed25.tsv]
 0x00342538	sndStartTrackExtended	inferred	Prepares a track ID and sends command 0x20 with setting 0x17f.
@@ -6772,6 +6775,7 @@
 0x003572F0	dpmul	inferred	soft-double multiply libcall
 0x00357708	litodp	inferred	Fam-3
 0x00357890	dptofp	inferred	libgcc fp-bit double->float, follows fptodp; func_003269F0 wraps a double sqrt in it
+0x0035B6E0	sdfDebugPrintf	inferred	Variadic diagnostic output helper; callers pass format strings and debug/error messages across scheduler and event systems. [caller cohort review, 2026-10-13]
 0x00360E78	sdfVFormatString	inferred	formats text into a destination buffer from a va_list and returns the formatted character count; DDS1 counterpart 0x00305B08.
 0x0036DE70	DIntr	inferred	Binary Ninja: reads COP0 Status IE; returns 0 if already disabled, otherwise executes DI/SYNC until disabled and returns 1 for conditional EIntr restoration.
 0x0037F550	effSharedRandomState	inferred	confidence=high; src/dds2/game/code_00102DC8.c:D_0037F550; type=PRNG state storage (u8[]); refs=kwlnInitMagicState,btlSelectActorAction; Seeded with a fixed value and passed to random generators for effect frame, position and scale variation. [names_qp9.tsv]
@@ -7259,7 +7263,7 @@
 0x004681F8	sdfTextureQueueWork	inferred	high confidence; src/dds2/game/code_00329F60.c sdfTexEnqueuePacketWithSemaphore(): SdfSemaObj *obj = &D_004681F8; Instruction-aligned data counterpart of DDS1 D_003EB848 in the matched sdfTexEnqueuePacketWithSemaphore() twin. Semaphore-protected texture packet/release queues, including head and tail fields. [names_reviewed26.tsv]
 0x00476480	sdfPadPorts	inferred	high confidence; src/dds2/game/code_00336B48.c sdfPadUpdatePorts(): sdfPadUpdatePort(&D_00476480[i]); Instruction-aligned data counterpart of DDS1 D_003F9B00 in the matched sdfPadUpdatePorts() twin. Two pad-port work records updated by the pad polling loop. [names_reviewed26.tsv]
 0x0047AA40	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds2/game/code_00341650.c:func_00341958, src/dds2/game/code_00341FE8.c:func_00342168; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
-0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
+0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceFirstComponent,sndGetTrackBalanceSecondComponent,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x0020DFC8	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
 0x002EB968	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.
 0x00157AC8	effConvertLegacyNodeDescriptor	inferred	Converts legacy version 1.0/1.01 effect descriptor payload sizes and type-1 scalar before node creation.

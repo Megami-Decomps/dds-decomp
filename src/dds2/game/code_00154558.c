@@ -230,7 +230,7 @@ extern s32 D_003897C0[];
 extern void *dds3GetWorldSecondaryObject(void);
 
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern s32 D_003897C8[];
 
@@ -745,7 +745,7 @@ s32 fldFindSearchId(const char *name) {
     if (entry != 0) {
         return entry->key;
     }
-    func_0035B6E0("field SEARCH_ID NotFound:[%s]\n", name);
+    sdfDebugPrintf("field SEARCH_ID NotFound:[%s]\n", name);
     return -1;
 }
 
