@@ -1,11 +1,8 @@
 #include "common.h"
+#include "sdf_mat4.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
 #include "sdf_resource.h"
-
-typedef struct SdfMat4 {
-    f32 m[16];
-} SdfMat4;
 
 typedef struct SdfVec4 {
     f32 x;
