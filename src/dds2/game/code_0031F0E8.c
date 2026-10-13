@@ -28,7 +28,8 @@ extern void (*sdfTickCallback)(void);
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 typedef struct SdkFileStream SdkFileStream;
-extern void *func_0035A828(u32 bytes);
+/* SDK malloc wrapper: a successful result owns a fresh allocation. */
+extern void *func_0035A828(u32 bytes) __attribute__((malloc));
 extern void func_0035A880(void *memory);
 extern SdkFileStream *func_00359A98(const char *name, const char *mode);
 extern u32 func_00359B18(void *data, u32 size, u32 count, SdkFileStream *stream);
@@ -146,7 +147,17 @@ void dds3ReleasePackedValueBuffer(u32 node) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F168);
+extern void *memset(void *, s32, u32);
+
+/* Allocate the named reference and its writable name. Native clears the first
+ * four name bytes, then returns the record through the existing address word. */
+u32 func_0031F168(void) {
+    DdsNamedRecord *record = func_0035A828(sizeof(DdsNamedRecord));
+    record->name = func_0035A828(DDS_NAMED_RECORD_NAME_BYTES);
+    record->value = 0;
+    memset(record->name, 0, sizeof(record->name));
+    return (u32)record;
+}
 
 /* Release a named reference's owned name buffer and the reference record. */
 void dds3ReleaseNamedReference(u32 referenceAddress) {
