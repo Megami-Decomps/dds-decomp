@@ -98,7 +98,7 @@ extern vu16 D_004391E2;
 extern vu16 D_004391E4;
 extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
 
-s32 func_003414E8(void) {
+s32 sndTryDispatchQueuedCommand(void) {
     s32 readIndex = (s16)D_004391E2;
     SndRingPacket *packet;
 
@@ -119,7 +119,7 @@ void sdfServiceUnblockedWorkerThread(void) {
         do {
             SleepThread();
         } while (D_004391E0 != 0);
-        while (func_003414E8() == 0) {
+        while (sndTryDispatchQueuedCommand() == 0) {
         }
     }
 }
