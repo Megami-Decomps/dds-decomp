@@ -11228,3 +11228,20 @@ DDS2's unprototyped externs; the shared word-returning declaration is
 otherwise identical. Unregistered stubs, all-zero admin-mode request
 forwarders and the unknown control-byte reader remain unnamed.
 
+## Parameter-node default callbacks
+
+The retail `effNodeTypeOperations` type-four rows start at DDS1
+0x0034DED8 and DDS2 0x003AA808. Their factory is `effParamWorkCreate`,
+which allocates compact parameter work and creates its kind-specific payload.
+The names of the four manager stubs follow their actual `EffTypeOps` slots:
+`effParamNodeRestartNoOp` at +0x0C, `effParamNodeConditionAlwaysTrue`
+at +0x10, `effParamNodeOptionalFlagNoOp` at +0x20, and
+`effParamNodeOptionalQueryAlwaysTrue` at +0x24. The typed consumers in
+`effManager.c` establish these roles; the two query callbacks return one,
+and the restart/flag callbacks are empty.
+
+Keep the original zero-formal definitions and unsigned return surfaces.
+Naming the registered callback does not justify changing it to the table's
+signed, instance-taking prototype. Unregistered empty or constant-returning
+neighbors still lack enough evidence for role-based names.
+
