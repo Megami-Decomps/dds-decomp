@@ -31,6 +31,7 @@
 #include "btl_state.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
+#include "btl_field_load_task_args.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
 #include "actor_effect_task.h"
@@ -5209,18 +5210,6 @@ typedef struct BtlFieldArchiveRequest {
     BtlFieldArchiveNode *resources;
 } BtlFieldArchiveRequest;
 
-typedef struct BtlFieldLoadArgs {
-    s32 stage;
-    s32 variant;
-    BtlFieldArchiveRequest *request;
-    u8 pad0C[0xC];
-    void *fieldF1;
-    void *fieldF2;
-    void *fieldTB;
-    s32 frame;
-} BtlFieldLoadArgs;
-
-
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
                                             const SdfTextureOffsetListHeader *, s32);
 
@@ -5291,20 +5280,20 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
     return 0;
 }
 
-s32 fldCreateSceneTileTask(u32 soundId, u32 variant) {
+s32 fldCreateSceneTileTask(u32 stage, u32 variant) {
     u8 *task = btlAllocTask(40);
-    u32 *arguments;
+    BtlFieldLoadArgs *args;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(u16 *)(task + 0x20) = 1;
     *(void **)(task + 0x4C) = btlPollFieldArchiveLoad;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
-    arguments = btlGetTaskArguments(task);
-    memset(arguments, 0, 40);
-    arguments[0] = soundId;
-    arguments[1] = variant;
-    arguments[9] = 0;
+    args = (BtlFieldLoadArgs *)btlGetTaskArguments(task);
+    memset(args, 0, 40);
+    args->stage = stage;
+    args->variant = variant;
+    args->frame = 0;
     return (s32)task;
 }
 

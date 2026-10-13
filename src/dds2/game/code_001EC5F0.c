@@ -28,6 +28,7 @@
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
+#include "btl_field_load_task_args.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
 #include "actor_effect_task.h"
@@ -4082,17 +4083,6 @@ typedef struct BtlFieldArchiveRequest {
     BtlFieldArchiveNode *resources;
 } BtlFieldArchiveRequest;
 
-typedef struct BtlFieldLoadArgs {
-    s32 stage;
-    s32 variant;
-    BtlFieldArchiveRequest *request;
-    u8 pad0C[0xC];
-    void *fieldF1;
-    void *fieldF2;
-    void *fieldTB;
-    s32 frame;
-} BtlFieldLoadArgs;
-
 u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
 {
@@ -4160,17 +4150,17 @@ extern u32 btlPollFieldArchiveLoad();
 
 BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0x28);
-    BtlRuntimeTaskArgs *args;
+    BtlFieldLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 1;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFieldArchiveLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    args = btlGetTaskArguments(task);
+    args = (BtlFieldLoadArgs *)btlGetTaskArguments(task);
     memset(args, 0, 0x28);
-    args->value = value;
-    args->option = option;
-    args->unk_24 = 0;
+    args->stage = value;
+    args->variant = option;
+    args->frame = 0;
     return task;
 }
 
