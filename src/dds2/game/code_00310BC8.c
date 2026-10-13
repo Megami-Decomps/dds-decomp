@@ -53,7 +53,7 @@ extern f32 func_00353140(f32);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
-extern void func_0030F8D0(f32 *);
+extern void sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
@@ -109,7 +109,7 @@ void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
     axis[3] = 1.0f;
     a = fsqrtf((1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) * 0.5f);
     b = fsqrtf((1.0f + sdfEvaluateCosineViaSinePhaseShift(angle)) * 0.5f);
-    func_0030F8D0(axis);
+    sdfVec3NormalizeInPlaceAndGetLength(axis);
     out[0] = axis[0] * a;
     out[1] = axis[1] * a;
     out[2] = axis[2] * a;
@@ -121,8 +121,8 @@ void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
     f32 cross[4];
     f32 scale;
 
-    func_0030F8D0(from);
-    func_0030F8D0(to);
+    sdfVec3NormalizeInPlaceAndGetLength(from);
+    sdfVec3NormalizeInPlaceAndGetLength(to);
     fldNormalizedVectorCross(cross, from, to);
     scale = fsqrtf(2.0f * (fldNormalizedVectorDot(from, to) + 1.0f));
     out[0] = cross[0] / scale;
@@ -289,7 +289,7 @@ void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     vector[2] = 1.0f;
     sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(vector, matrix);
-    func_0030F8D0(vector);
+    sdfVec3NormalizeInPlaceAndGetLength(vector);
     memcpy(out, vector, sizeof(vector));
 }
 
@@ -326,7 +326,7 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(forward, matrix);
     dot = fldNormalizedVectorDot(up, forward);
-    func_0030F8D0(forward);
+    sdfVec3NormalizeInPlaceAndGetLength(forward);
     dist = plane[1];
     if (dist < 0.0f) {
         dist = -dist / dot;

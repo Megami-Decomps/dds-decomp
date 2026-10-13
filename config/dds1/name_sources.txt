@@ -6202,6 +6202,7 @@
 0x002C7BA8	fldSetMapRequestInterval	inferred	Sets the interval controlling when a queued map request advances.
 0x002C7BB0	fldAdvanceMapRequestAges	inferred	Increments active map-request node ages and releases nodes at the queue lifetime limit. [map-request queue lifecycle]
 0x002C7C58	fldDispatchMapRequestCallbacks	inferred	Traverses active map-request nodes and invokes the queue callback with payload and normalized progress. [map-request queue callbacks]
+0x002C84F0	sdfVec3NormalizeInPlaceAndGetLength	inferred	Computes vector magnitude, divides xyz in place by that magnitude, and returns it; no zero-length guard. DDS2 twin 0x0030F8D0.
 0x002C7D18	fldLoadMapResource	inferred	fld field scene and resources in game/code_002C5FB8.c
 0x002C7D80	fldReleaseMapResource	inferred	Releases and clears the first-word resource handle of a map resource.
 0x002C7DC0	fldProjectPointToGridCell	inferred	confidence=high; matched-C; src/dds1/game/code_002C5FB8.c:446:func_002C7DC0; M141; source=names_pending_main.tsv:105; review=Transforms a world point by view/projection, perspective-divides and converts screen coordinates to GS grid coordinates. [names_qp11.tsv]

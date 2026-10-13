@@ -5851,6 +5851,7 @@
 0x0030F390	fldRotateVectorAroundY	inferred	Recomputes X and Z with sine and cosine of angle; Y is unchanged. [names_reviewed21.tsv]
 0x0030F420	fldRotateVectorAroundZ	inferred	Recomputes X and Y with sine and cosine of angle; Z is unchanged. [names_reviewed21.tsv]
 0x0030F4B8	fldRotateVectorAroundAxis	inferred	Rotates a vector around an axis; DDS1 twin. [names_qp9.tsv]
+0x0030F8D0	sdfVec3NormalizeInPlaceAndGetLength	inferred	Computes vector magnitude, divides xyz in place by that magnitude, and returns it; no zero-length guard. DDS1 twin 0x002C84F0.
 0x0030FA28	fldNormalizedVectorCross	inferred	confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:389:func_0030FA28; confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:389:func_0030FA28; Field-math routine copies and normalizes both inputs before their three-component cross product; matches DDS1 0x002C8648 and neighboring fldNormalizedVectorDot. Retains sdfCrossNormalizedVectors on SDK duplicate 0x00326B00.; resolution=rename; source=names_qp11_conflicts.tsv:6 [names_qp11.tsv]
 0x00310320	sdfTransformDirectionByMatrix	inferred	Multiplies a direction vector by the rotation portion of a matrix. [names_reviewed10.tsv]
 0x00310608	sdfPowFloatByTruncatedExponent	inferred	Multiplies a base for the whole-number portion of a float exponent. [names_reviewed8.tsv]

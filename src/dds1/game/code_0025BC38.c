@@ -513,7 +513,7 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, context);
 }
 
-extern f32 func_002C84F0(f32 *);
+extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern s32 D_003BC4E0;
 
 /* Ease the live cursor toward the selected scene row and track whether it moved. */
@@ -536,7 +536,7 @@ void func_0025D628(MenuSceneWork *work) {
     memset(direction, 0, sizeof(direction));
     direction[0] = targetX - work->entryPosition.x;
     direction[1] = targetY - work->entryPosition.y;
-    func_002C84F0(direction);
+    sdfVec3NormalizeInPlaceAndGetLength(direction);
 
     current = work->entryPosition.x;
     difference = targetX - current;
