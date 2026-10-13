@@ -1846,7 +1846,7 @@ extern u8 fldTestSceneLifecycleFlags(u32);
 
 extern s16 D_0032E4D8[];
 
-s32 func_00124F58(void) {
+s32 fldUpdateCampMenuTransition(void) {
     FldAreaWork *scene;
     s32 control;
 
@@ -2134,7 +2134,7 @@ s32 fldProcSequence(void) {
     mode = fldGetCampSceneControlMode();
     if (mode < 3) {
         if (mode > 0) {
-            func_00124F58();
+            fldUpdateCampMenuTransition();
             return 0;
         }
     }
@@ -2241,7 +2241,7 @@ s32 fldProcSequence(void) {
             fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.unkC0,
                          fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_0032E570[0] == 0) {
-            func_00124F58();
+            fldUpdateCampMenuTransition();
             if (fldTestSceneControlFlags(0x20) == 0) break;
             if (D_0032E570[0] == 0) fldUpdateNextFloorTransition();
         }
