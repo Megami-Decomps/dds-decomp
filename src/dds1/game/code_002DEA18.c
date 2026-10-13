@@ -311,7 +311,7 @@ void sdfVuEmitSelectedNodePacket(VuWork *work) {
 }
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */
-void func_002E02D8(u32 workAddress) {
+void sdfVuUpdateSelectedNodeGeometry(u32 workAddress) {
     VuWork *work = (VuWork *)workAddress;
     SdfAssetEntry *node;
     u32 mode;
