@@ -5851,6 +5851,8 @@
 0x0030AAB0	fldLocalMapTrackSlotFromMode	inferred	Maps the local-map mode to the track-selection ordinal consumed by fldCountMaskBitsBeforeOrdinal; paired with DDS1 002C2F40 with title-specific mode encodings.
 0x0030AB20	fldInitializeLmapTaskVariant	inferred	Clears task state and chooses variant 1..3 from mdlFlagTest(0x1c) and mdlFlagTest(0x13).
 0x0030AB88	fldShutdownLmapResources	inferred	DDS1 twin 002C2FF8 [names_M33_SmallSweep2.tsv]
+0x0030ABF0	fldUpdateLmapResourceLoad	inferred	Steps local-map resource loading once and reports completion; fldLmapTaskUpdate uses the result to enter scene initialization.
+0x0030AC10	fldAdvanceLmapResourceLoad	inferred	Advances the six-entry local-map resource request/readiness/cleanup state machine, installs loaded sprite slots, and reports completion.
 0x0030B078	fldInitializeLocalMapScene	inferred	confidence=high; matched-C; src/dds2/game/code_0030A128.c:403:func_0030B078; Semantic local-map setup counterpart: selects stage mode from story flags, installs the camera/counter/map/message/light resources and starts music/fade. DDS2 adds a third stage mode and chooses black/white fade from story state.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0030B470	fldDrawLocalMapOverlay	inferred	Draws the local-map frame then state-specific selected marker and transition UI; paired behavior with DDS1 002C3420.
 0x0030B568	fldPackLocalMapFlagStates	inferred	confidence=medium; matched-C; src/dds2/game/code_0030A128.c:451:func_0030B568; Packs the queried eight flag states into a permuted byte mask in the local-map scene unit.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
