@@ -28,6 +28,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "actor_effect_task.h"
 #include "eff_field_color.h"
 #include "file.h"
 #include "eff_update_flags.h"
@@ -4675,14 +4676,6 @@ BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *s
     args->targetSelector = target;
     return task;
 }
-
-typedef struct ActorEffectTaskArgs {
-    SoundResourceNode *source;
-    BattleEffect *effect;
-    ActorEffectOwner owner;
-    u32 duration;
-    s32 counter;
-} ActorEffectTaskArgs;
 
 void sndStartEffectTask(ActorEffectTaskArgs *args) {
     SoundResourceNode *source;
