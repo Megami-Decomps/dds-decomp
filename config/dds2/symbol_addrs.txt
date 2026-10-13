@@ -6469,6 +6469,7 @@ effMiscQuaternionDotVU = 0x00340B78; // type:func
 effMiscAxisAngleToQuaternionVU = 0x00340BA0; // type:func
 effMiscAxisAngleToQuaternionVf11 = 0x00340BF0; // type:func
 effMiscQuaternionToMatrixVU = 0x00340C40; // type:func
+sdfConvertWrappedEulerAnglesToQuaternionVU = 0x00340CB0; // type:func  // dds1 0x002E7E08
 sdfConvertEulerAnglesToQuaternionVU = 0x00340DC8; // type:func
 effMiscSlerpQuaternionVu = 0x00341028; // type:func
 effMiscQuaternionNlerpVU = 0x00341120; // type:func
