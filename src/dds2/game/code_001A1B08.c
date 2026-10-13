@@ -36,7 +36,7 @@ typedef struct PktRec {
     s32 unkC; /* 0xC */
 } PktRec;
 
-/* Rectangle corners as consumed by the border-drawing routine func_001A09C0. */
+/* Rectangle corners as consumed by the border-drawing routine itfDrawThreePanelBorderBands. */
 typedef struct PanelRect {
     s32 x0; /* 0x0 */
     s32 y0; /* 0x4 */
@@ -116,7 +116,7 @@ extern void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag);
 extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
 extern u8 D_004365D8[8];
 extern u8 D_004365E0[8];
-extern void func_001A09C0(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
+extern void itfDrawThreePanelBorderBands(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
@@ -524,14 +524,14 @@ void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) 
     rect.y0 = panel->top;
     rect.x1 = panel->right;
     rect.y1 = panel->bottom;
-    func_001A09C0(&rect, D_003B4690, panel->unk0C, 0x490, command);
+    itfDrawThreePanelBorderBands(&rect, D_003B4690, panel->unk0C, 0x490, command);
     alpha = panel->unk38 * 38 / 128;
     D_003B4690[7] = alpha;
     rect.x0 = panel->left + 0x720;
     rect.y0 = panel->top;
     rect.x1 = panel->left + 0x17E0;
     rect.y1 = panel->bottom;
-    func_001A09C0(&rect, &D_003B4690[4], panel->unk0C, 0x680, command);
+    itfDrawThreePanelBorderBands(&rect, &D_003B4690[4], panel->unk0C, 0x680, command);
     rect.x0 = panel->left - 0x140;
     rect.y0 = panel->top + 0x48;
     rect.x1 = panel->left + 0xB40;
@@ -671,7 +671,7 @@ void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
     rect.y0 = panel->top;
     rect.x1 = panel->right;
     rect.y1 = panel->bottom;
-    func_001A09C0(&rect, D_003B4760, panel->unk0C, ITF_PANEL_TINT_BORDER_WIDTH, command);
+    itfDrawThreePanelBorderBands(&rect, D_003B4760, panel->unk0C, ITF_PANEL_TINT_BORDER_WIDTH, command);
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */

@@ -590,7 +590,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
 
 extern DrawColorRec D_00357FC8[];
 #include "sdf_packet_alloc.h"
-extern void func_00198990(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfDrawThreePanelBorderBands(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 extern void itfSendTablePacket(SdfListHead *, s32, s32);
@@ -621,7 +621,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     bounds[0].y = y + 0x10;
     bounds[1].x = x + frFontMeasureGlyphStripWidth(selected, selection->glyphChain) + 0x1D0;
     bounds[1].y = bounds[0].y + 0x80;
-    func_00198990(bounds, D_00357FC8, panel->renderValue, 0x1D0, list);
+    itfDrawThreePanelBorderBands(bounds, D_00357FC8, panel->renderValue, 0x1D0, list);
 
     bounds[0].x = x;
     bounds[0].y = y + 8;
