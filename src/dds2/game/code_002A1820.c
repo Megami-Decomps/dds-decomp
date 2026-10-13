@@ -1312,7 +1312,7 @@ s32 mnuDestroyTitleMenuTask(void) {
     return 0;
 }
 
-u32 func_002A3AA0(void) {
+u32 mnuOpenTitleMenuDefaultMode(void) {
     mnuCreateTitleMenuTask(0);
     return 0;
 }

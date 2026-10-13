@@ -4472,6 +4472,7 @@
 0x002A2BD0	mnuReleaseTitleMenuAssetsAndMarkClosed	inferred	Releases title menu resources and sprite handles, then marks the title menu closed. [names_reviewed15.tsv]
 0x002A2C28	mnuHandleTitleMenuEvent	inferred	TaskPurist
 0x002A3A50	mnuOpenTitleMenuForMode	inferred	Creates the title-menu task in the requested mode and returns 0xFFFFFFFF; event callers use zero or the optional mode value.
+0x002A3AA0	mnuOpenTitleMenuDefaultMode	inferred	Script-table callback that creates the title menu in mode zero and returns zero; DDS1 peer 0x0026BD38.
 0x002A3A70	mnuDestroyTitleMenuTask	inferred	Performs title menu cleanup and destroys the task literally named titleProc. [names_reviewed15.tsv]
 0x002A3AC0	mnuRestartRuntimeAfterViewer	inferred	Destroys secondary viewer world then restarts runtime task. [names_reviewed8.tsv]
 0x002A3AE8	mnuSpriteGraphicHandle	inferred	returns work->gfx[D_003E3790[index].gfx]: graphic handle of sprite table entry (8-byte entries {gfx,unk2,x,y})
