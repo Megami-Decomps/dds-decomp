@@ -23,7 +23,7 @@ extern void dds3LoadCameraVectorVU(struct EffWorldNode *object);
 
 extern f32 D_003AF1C0[];
 extern f32 D_003AF1D8[];
-extern void func_00336538(f32 angle);
+extern void sdfVuLoadRotationMatrixY(f32 angle);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
@@ -208,7 +208,7 @@ void effBattleMiscQueryMaskedTargetPosition(u32 flags, EffectVectorRequest *para
         } else {
             dir[2] = -1.0f;
         }
-        func_00336538(D_003AF1D8[sub]);
+        sdfVuLoadRotationMatrixY(D_003AF1D8[sub]);
         VU0_LOAD_VF(vf10, dir);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, dir);
@@ -280,7 +280,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
         dir[0] = 0;
         dir[1] = 0;
         dir[2] = (unit->status.flags & 0x200) ? 1.0f : -1.0f;
-        func_00336538(D_003AF1D8[sub]);
+        sdfVuLoadRotationMatrixY(D_003AF1D8[sub]);
         VU0_LOAD_VF(vf10, dir);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, dir);
