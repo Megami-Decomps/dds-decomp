@@ -46,7 +46,7 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
-extern void func_00341CF8(void);
+extern void sndQueueNoPayloadCommand40(void);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern char D_003D64E4[];
 extern char D_003D6458[];
@@ -310,7 +310,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
             }
             brsStartPartyPanelResourcesOnce((s32)scene);
             mnuSetPopupEntryFlagged(dispatchStatus, D_003D6458);
-            func_00341CF8();
+            sndQueueNoPayloadCommand40();
         }
         result = 0;
     }

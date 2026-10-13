@@ -664,7 +664,7 @@ extern void mnuCreateTitleEffectTask(void);
 
 void mnuInitializeTitleAudioAndEffects(void) {
     if (D_003BC58C != 0) {
-        func_002E8E50();
+        sndQueueNoPayloadCommand40();
         return;
     }
     D_003BC58C = 1;
@@ -780,7 +780,7 @@ u32 sndOpSetTrackDefaultVolumePan(void) {
 }
 
 u32 sndOpSendTitleAudioCommand(void) {
-    func_002E8E50();
+    sndQueueNoPayloadCommand40();
     return 1;
 }
 
