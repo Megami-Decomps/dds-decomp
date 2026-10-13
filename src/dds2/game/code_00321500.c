@@ -46,7 +46,7 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
-void func_003214D0(u32, u32);
+void mnuReleaseResourceBlockCallback(u32, u32);
 
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
@@ -56,7 +56,7 @@ extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *recor
 
 MnuCallbackList *mnuCreateReleaseCallbackNode(void) {
     MnuCallbackList *node = mnuCreateCallbackNode(0);
-    node->onRemove = func_003214D0;
+    node->onRemove = mnuReleaseResourceBlockCallback;
     return node;
 }
 extern void mnuClearResourceList(MnuCallbackList *list);

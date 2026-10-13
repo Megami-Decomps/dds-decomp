@@ -241,7 +241,7 @@ void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback) {
     mnuRuntimeRecordInitializationCallback = callback;
 }
 
-void func_003214D0(u32 unusedFirstWord, u32 resourceWord) {
+void mnuReleaseResourceBlockCallback(u32 unusedFirstWord, u32 resourceWord) {
     if (resourceWord != 0) {
         mnuFreeOptionalBlock(resourceWord);
         return;
