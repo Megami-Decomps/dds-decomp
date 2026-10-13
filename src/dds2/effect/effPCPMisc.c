@@ -41,6 +41,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "bill_object_api.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
@@ -1693,7 +1694,6 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 value) {
 
 extern void func_003364B8(f32 angle);
 extern void func_00336898(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern EffSpawnParams D_003B1890[];
 
 /* 8 pieces flung sideways from below; the rotation matrix is composed by the

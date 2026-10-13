@@ -3,6 +3,7 @@
 #include "rw_matrix.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 
 typedef float f32;
@@ -37,7 +38,6 @@ void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
 extern void func_00336898(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
 void sdfRotateVuMatrixAboutX(f32 angle)

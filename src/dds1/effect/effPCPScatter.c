@@ -10,6 +10,7 @@
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_math.h"
@@ -76,7 +77,6 @@ extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resId);
 extern u8 effDefaultRandomState[];
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);

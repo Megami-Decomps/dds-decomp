@@ -28,6 +28,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "fpu.h"
@@ -6679,7 +6680,6 @@ typedef struct FileOrientedRingMotion {
 
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
 void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {

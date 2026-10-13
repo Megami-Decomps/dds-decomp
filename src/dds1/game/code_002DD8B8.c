@@ -3,6 +3,7 @@
 #include "rw_matrix.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 
 typedef float f32;
 
@@ -64,7 +65,6 @@ void sdfRotateVuMatrixAboutZ(f32 angle)
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
 extern void func_002DD9E8(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* Compose the three axis rotations of a per-axis angle vector into the VU0 matrix. */
 void vu0RotMatrixXYZFromVec3(const RwV3d *rot)

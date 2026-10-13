@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "btl.h"
 #include "eff.h"
 
@@ -30,7 +31,6 @@ extern u8 sdfViewUpVector[];
 extern void func_002DD608(f32 value);
 extern void func_002DD968(f32 value);
 extern f32 func_001F6970(u32 mask, s32 a, s32 b);
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern u32 effFieldColorFlags;
 
 /* The selected position provider leaves its vector in vf10. */

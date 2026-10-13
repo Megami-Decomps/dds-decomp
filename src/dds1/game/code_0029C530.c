@@ -47,6 +47,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 
 
 
@@ -5221,7 +5222,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern void func_002DD608(f32);
 extern void func_002DD968(f32);
 extern f32 func_002FA1D8(f32);

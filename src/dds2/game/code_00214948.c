@@ -11,6 +11,7 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -3426,7 +3427,6 @@ s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, 
 
 extern void func_00336798(f32);
 
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 
