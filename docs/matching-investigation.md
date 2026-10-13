@@ -72,6 +72,12 @@ full owned `.sdata` span and its source objects, including objects with no local
 function consumer. A full retail link remains required to validate placement
 and alignment across unit boundaries.
 
+Explicit readonly objects can likewise be consumed only by other units or data
+tables. For nonrelocated objects with native symbol addresses, the checker
+verifies their full-unit section offsets, widths and bytes in both compilation
+contexts before accepting their source-owned extents. Unreferenced literals
+and relocated tables retain their existing checks.
+
 ## Find the first causal difference
 
 Keep a baseline and one source change justified by the current evidence.

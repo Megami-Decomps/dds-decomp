@@ -459,13 +459,13 @@ def owns_rodata(version, unit, section="rodata"):
     return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
 
 
-def owned_sdata_rom_range(yaml_text, unit):
-    """Bound an explicit per-unit .sdata subsegment by its next sibling."""
+def owned_rom_range(yaml_text, unit, section):
+    """Bound one explicit per-unit initialized section by its next sibling."""
     items = list(YAML_ITEM.finditer(yaml_text))
     ranges = []
     for index, item in enumerate(items):
         match = re.fullmatch(
-            rf"\[0x([0-9A-Fa-f]+),\s*\.sdata,\s*{re.escape(unit)}\]",
+            rf"\[0x([0-9A-Fa-f]+),\s*{re.escape(section)},\s*{re.escape(unit)}\]",
             item.group("body").strip())
         if match is None:
             continue
@@ -553,7 +553,8 @@ def main():
     retail = (ROOT / RETAIL[version]).read_bytes()
     segs = load_segments(retail)
     yaml_text = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
-    sdata_range = owned_sdata_rom_range(yaml_text, unit_name)
+    sdata_range = owned_rom_range(yaml_text, unit_name, ".sdata")
+    rodata_range = owned_rom_range(yaml_text, unit_name, ".rodata")
 
     with tempfile.TemporaryDirectory() as tmp:
         obj = Path(tmp) / "unit.o"
@@ -587,7 +588,7 @@ def main():
             str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)
         )
         has_nobits = any(emitted.get(section) for section in (".sbss", ".bss"))
-        needs_object_symbols = has_nobits or bool(emitted.get(".sdata"))
+        needs_object_symbols = has_nobits or bool(emitted.get(".sdata") or emitted.get(".rodata"))
         object_symbols = run(
             str(BIN / "mips-ps2-decompals-objdump"), "-t", str(obj)
         ) if needs_object_symbols else ""
@@ -596,6 +597,7 @@ def main():
             for section in (".sbss", ".bss")
         }
         sdata_symbols = section_symbols(object_symbols, ".sdata")
+        rodata_symbols = section_symbols(object_symbols, ".rodata")
         funcs = []
         for line in defined_symbols.splitlines():
             parts = line.split()
@@ -609,6 +611,7 @@ def main():
         # as the build compiles it, relocated fields masked.
         context = {}
         data_context = []
+        owned_rodata = []
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         ro_diff = None    # first retail address where the full unit's .rodata differs
         full = Path(tmp) / "full.o"
@@ -707,6 +710,40 @@ def main():
                             data_context.append(
                                 f"{name}: full-unit .sdata bytes/relocations differ from retail"
                                 + (f" ({'; '.join(problems)})" if problems else ""))
+            if rodata_symbols and rodata_range:
+                full_rodata = {
+                    name: (off, size) for off, size, name in section_symbols(
+                        run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".rodata")
+                }
+                fro_off, fro_size = fsecs.get(".rodata", (0, 0))
+                full_ro_relocs = relocations(full)[".rodata"]
+                start, end = rodata_range
+                for skip_off, size, name in rodata_symbols:
+                    addr = address(name, syms)
+                    retail_off = va_to_off(segs, addr) if addr is not None else None
+                    actual = full_rodata.get(name)
+                    # Relocated objects retain the existing pointer/table checks.
+                    if retail_off is None or any(
+                            skip_off <= off < skip_off + size for off in rodata_relocs):
+                        continue
+                    if actual is None:
+                        data_context.append(f"{name}: not STT_OBJECT in the full unit's .rodata")
+                        continue
+                    off, full_size = actual
+                    if any(off <= reloc_off < off + full_size for reloc_off in full_ro_relocs):
+                        continue
+                    if not start <= retail_off < end or retail_off + size > end:
+                        data_context.append(f"{name}: outside the unit's retail .rodata span")
+                    elif actual != (retail_off - start, size):
+                        data_context.append(f"{name}: full-unit .rodata offset/size differs from retail")
+                    elif off + size > fro_size or skip_off + size > ro_size or (
+                            fdata[fro_off + off:fro_off + off + size]
+                            != retail[retail_off:retail_off + size]) or (
+                            rodata[skip_off:skip_off + size]
+                            != retail[retail_off:retail_off + size]):
+                        data_context.append(f"{name}: source-owned .rodata bytes differ from retail")
+                    else:
+                        owned_rodata.append((skip_off, skip_off + size))
             fro_off, fro_size = fsecs.get(".rodata", (0, 0))
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
                                  (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
@@ -1053,6 +1090,8 @@ def main():
     for b in set(bounds) | pointed:
         if 0 <= b < len(rodata):
             covered.update(range(b, next(s for s in starts if s > b)))
+    for start, end in owned_rodata:
+        covered.update(range(start, end))
     stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]
