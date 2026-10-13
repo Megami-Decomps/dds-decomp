@@ -816,7 +816,7 @@ u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
-extern void func_0019E048(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
 
 /* Refresh changed panel values only when both content-status pairs are clear.
  * The first value is stored as a halfword; release the old primitive afterward. */
@@ -827,7 +827,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
         if (mes->unk12 != firstValue || panelBlock->fadeLimit != secondValue) {
             mes->unk12 = firstValue;
-            func_0019E048(panelBlock, firstValue, secondValue);
+            itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, firstValue, secondValue);
             if (panelBlock->sprite != NULL) {
                 itfPanelReleasePrimitiveResources(panelBlock->sprite);
                 panelBlock->sprite = NULL;
