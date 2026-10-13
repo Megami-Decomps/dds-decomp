@@ -1421,7 +1421,7 @@ void btlStartUnitActionIfPairedSelected(void) {
 /* Queue the matching boss's resource/sound pair once its status mask passes.
  * Condition 5 lets the sound start when that task runs or is already gone.
  */
-void func_00217EB8(ActionStateLink *action) {
+void btlQueueBossScriptResourceAndSound(ActionStateLink *action) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     s8 *state = (s8 *)scene->state;
     BtlUnit *unit;
