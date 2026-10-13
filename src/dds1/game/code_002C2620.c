@@ -584,7 +584,7 @@ extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32,
 extern void sdfAdjustCounterValueAndRedraw(s32);
 extern void fldDrawCounterMapMarker(void);
 extern void fldDrawLocalMapTransition(s32);
-extern s32 func_00134CD8(void);
+extern s32 fldDrawCameraColorLayerPass(void);
 
 void fldDrawLocalMapOverlay(void) {
     fldDrawSkyGradient();
@@ -613,7 +613,7 @@ void fldDrawLocalMapOverlay(void) {
         break;
     }
     if (D_003BD260 != 0) {
-        func_00134CD8();
+        fldDrawCameraColorLayerPass();
     }
 }
 

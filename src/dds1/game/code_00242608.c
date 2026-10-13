@@ -815,7 +815,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", fldApplyCameraColorKeyWords);
 void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
     evtApplyCameraColorTrackAtFrame(scene);
     if (scene->cameraColorActive == 1) {
-        func_00134CD8();
+        fldDrawCameraColorLayerPass();
         return;
     }
 }

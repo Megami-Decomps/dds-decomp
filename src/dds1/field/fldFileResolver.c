@@ -5426,7 +5426,7 @@ void fldInitializeCameraColorResource(void) {
     fldCameraColorEnabled = 1;
 }
 
-void func_00134CD8(void) {
+void fldDrawCameraColorLayerPass(void) {
     func_00134348();
 }
 
