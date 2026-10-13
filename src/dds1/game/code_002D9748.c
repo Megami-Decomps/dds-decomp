@@ -15,6 +15,7 @@
 #include "sdf_draw.h"
 #include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
+#include "sdf_draw_packet_groups.h"
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
 #define SDF_ASSET_LIST_MIN_CAPACITY 0x20
@@ -92,31 +93,6 @@ extern u16 D_00398198[];
 extern SdfTex *sdfTexClone(SdfTex *);
 extern void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *, s32, f32);
 
-/* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
- * Each blend builder fills the 0x40-byte packet area after the list head. */
-typedef struct SdfDrawPacketGroup {
-    SdfListHead list;
-    union {
-        SdfGsBlendPacket blend;
-        SdfDmaTagHeader dma;
-    } packet;
-} SdfDrawPacketGroup;
-
-typedef struct SdfDrawPacketGroups {
-    SdfDrawPacketGroup groups[4];
-    SdfListHead syncList;
-    u64 unk1A0;
-    u64 unk1A8;
-} SdfDrawPacketGroups;
-
-typedef char SdfDrawPacketGroup_size_must_be_0x60[
-    (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];
-typedef char SdfDrawPacketGroup_packet_at_0x20[
-    ((u32)&((SdfDrawPacketGroup *)0)->packet == 0x20) ? 1 : -1];
-typedef char SdfDrawPacketGroups_size_must_be_0x1B0[
-    (sizeof(SdfDrawPacketGroups) == 0x1B0) ? 1 : -1];
-
-
 typedef struct SdfPacketOwner {
     u8 pad00[0x10];
     void (*sync)(struct SdfPacketOwner *, void *);
@@ -192,9 +168,9 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);
-    ctx->unk1A0 = 0;
-    ctx->unk1A8 = 0x13000000;
-    sdfAppendPacket(&ctx->syncList, (u32)&ctx->unk1A0);
+    ctx->syncPacketWords[0] = 0;
+    ctx->syncPacketWords[1] = 0x13000000;
+    sdfAppendPacket(&ctx->syncList, (u32)&ctx->syncPacketWords[0]);
 }
 
 /* Submit the four draw lists, then the trailing list to the fourth owner. */
