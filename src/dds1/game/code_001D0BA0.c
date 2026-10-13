@@ -5444,15 +5444,18 @@ void btlInterpolateVectorStep(f32 *src) {
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
-u32 func_001DB358(BtlLinkedCommand *command) {
+/* Complete native camera flag-0x08 mode without changing command state. */
+u32 btlCompleteCameraFlag08Mode(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001DB360(BtlLinkedCommand *command) {
+/* Complete native camera flag-0x20 mode without changing command state. */
+u32 btlCompleteCameraFlag20Mode(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001DB368(BtlLinkedCommand *command) {
+/* Complete native camera flag-0x80 mode without changing command state. */
+u32 btlCompleteCameraFlag80Mode(BtlLinkedCommand *command) {
     return 1;
 }
 

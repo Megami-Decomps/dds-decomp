@@ -2405,10 +2405,10 @@ extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, u32);
 extern void btlDebugDrawScaledPositionGuide(f32 *, u32, s32, f32);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
-extern void func_0020D228(void);
-extern void func_0020D230(void);
-extern u32 func_0020D260(u32);
-extern void func_0020D270(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuAfterRecordNoOp(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuRecordNoOp(u32);
 extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern s32 D_003BFB50[], D_003BFB70[];
@@ -2588,10 +2588,10 @@ s32 btlUpdateActorDebugEditor(void) {
         D_004530B0[5] = unit->entrySlots[5].code;
         D_004530B0[6] = unit->entrySlots[6].code;
         D_00438F8C = unit->selectedEntryIndex;
-        func_0020D260((u32)&D_003BFE40);
-        func_0020D228();
-        func_0020D270((u32)&D_003BFE40);
-        func_0020D230();
+        btlReturnDebugMenuSetupWord((u32)&D_003BFE40);
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003BFE40);
+        btlDebugMenuAfterRecordNoOp();
         btlDrawUnitAffinityDebug(unit, 256, 32);
         if (sdfPadButtonStates[0] & 2) {
             health = D_004530C0.hp >> 1;
@@ -2678,16 +2678,16 @@ s32 btlUpdateActorDebugEditor(void) {
             break;
         }
         PCP_COPY_VECTOR(D_00453290, unit->position);
-        func_0020D260((u32)&D_003BFEC0);
+        btlReturnDebugMenuSetupWord((u32)&D_003BFEC0);
         if (sdfPadButtonStates[2] < 0) {
             D_00453290[0] = 0.0f;
             D_00453290[1] = 0.0f;
             D_00453290[2] = 0.0f;
             D_00453290[3] = 0.0f;
         }
-        func_0020D228();
-        func_0020D270((u32)&D_003BFEC0);
-        func_0020D230();
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003BFEC0);
+        btlDebugMenuAfterRecordNoOp();
         PCP_COPY_VECTOR(unit->position, D_00453290);
         btlSetUnitPosition(unit, unit->position);
         break;
@@ -2714,10 +2714,10 @@ s32 btlUpdateActorDebugEditor(void) {
             parameters->position[2] = record->position[2];
         }
         memcpy(&D_004532A0, parameters, sizeof(BtlDebugTransformParameters));
-        func_0020D260((u32)&D_003BFF88);
-        func_0020D228();
-        func_0020D270((u32)&D_003BFF88);
-        func_0020D230();
+        btlReturnDebugMenuSetupWord((u32)&D_003BFF88);
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003BFF88);
+        btlDebugMenuAfterRecordNoOp();
         memcpy(parameters, &D_004532A0, sizeof(BtlDebugTransformParameters));
         savedScale = parameters->scaleOverride;
         parameters->scaleOverride = 1.0f;
@@ -2731,10 +2731,10 @@ s32 btlUpdateActorDebugEditor(void) {
         record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
         memcpy(&D_004532C0, record, sizeof(BtlActorStatusRecord));
         memcpy(&D_00453530, &record->motions[D_00436E58], sizeof(BtlActorMotionSlot));
-        func_0020D260((u32)&D_003C0260);
-        func_0020D228();
-        func_0020D270((u32)&D_003C0260);
-        func_0020D230();
+        btlReturnDebugMenuSetupWord((u32)&D_003C0260);
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003C0260);
+        btlDebugMenuAfterRecordNoOp();
         memcpy(record, &D_004532C0, sizeof(BtlActorStatusRecord));
         if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_00436E58) {
             memcpy(&record->motions[D_00436E58], &D_00453530, sizeof(BtlActorMotionSlot));
@@ -2843,7 +2843,7 @@ extern s32 func_00369DF8(s32);
 extern s32 func_0036BCD0(const char *, s32);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
-void func_002303D0(void) {
+void btlWriteActorModelTableFile(void) {
     BtlUnit *unit = D_00436D90;
     BtlActorStatusRecord *record;
     BtlActorMotionSlot *motion;
@@ -2944,13 +2944,13 @@ extern u32 D_00436F74, D_00436F78;
 extern const char *D_00436F80, *D_00436F84;
 extern char D_00436F98[];
 extern DatPartyRecord D_003C0620[][5];
-extern u32 func_0020D260(u32);
-extern void func_0020D228(void);
-extern void func_0020D270(u32);
-extern void func_0020D230(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuRecordNoOp(u32);
+extern void btlDebugMenuAfterRecordNoOp(void);
 extern s32 btlGetConditionalEncounterInterval(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
-extern void func_00230D90(void);
+extern void btlApplyDebugEncounterPartySelection(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
@@ -3045,12 +3045,12 @@ s32 btlUpdateDebugEncounterSelector(void) {
         BattleDebugWindow *window = &D_003C05E0;
         D_00436F78 = state->unk220;
         D_00436F74 = state->battleFlags;
-        func_0020D260((u32)window);
+        btlReturnDebugMenuSetupWord((u32)window);
         state->battleFlags = D_00436F74;
         state->unk220 = D_00436F78;
-        func_0020D228();
-        func_0020D270((u32)window);
-        func_0020D230();
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)window);
+        btlDebugMenuAfterRecordNoOp();
     }
     if (D_00436F5F == 0) {
         for (i = 0; i < 5 && (unitId = D_003C0620[D_00436F61][i].unitId) != 0; i++) {
@@ -3093,7 +3093,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         D_00436F68 = encounter & 0xFFFF;
         btlBossDebugPrintf("btl:test encNo = %X\n", D_00436F68);
     }
-    func_00230D90();
+    btlApplyDebugEncounterPartySelection();
     state->battleMode = D_00436F68;
     if (datBattleSceneRecords[D_00436F68].unk1C != 0 &&
         datBattleSceneRecords[D_00436F68].unk1E != 0) {
@@ -3115,7 +3115,8 @@ extern s32 D_003C3248[5][24];
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
-void func_00230D90(void) {
+/* Apply the debug party bank/preset, refreshed HP/MP and inventory flags. */
+void btlApplyDebugEncounterPartySelection(void) {
     u32 i;
     u32 n;
 

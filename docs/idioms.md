@@ -11471,3 +11471,49 @@ operation rows; their native callees and existing signatures stay intact.
 The flag-list enable/disable pair now shares the upstream DDS1
 `ViewTargetRelativeMode` spelling: generation subtracts the retained view
 target and drawing adds it back, without changing the raw SDATA word.
+
+## Debug-menu stages, MP choices and completion-only camera modes
+
+The actor, encounter, file and camera debug menus repeat four provider stages:
+setup, before-record, per-context record, then after-record. The three shared
+`btlDebugMenuBeforeRecordNoOp`, `btlDebugMenuRecordNoOp` and
+`btlDebugMenuAfterRecordNoOp` entries are empty in retail. "Record" names
+their observed sequence position, not a recording or rendering side effect.
+DDS1's `btlDebugMenuSetupNoOp` ignores its pointer, whereas DDS2's
+`btlReturnDebugMenuSetupWord` returns the actual `u32` word unchanged.
+Keep that difference, each existing extern, and the interleaved caller stores.
+
+`btlDebugDrawOrientedExtentGuide` receives the camera's start point, two
+float extents, packed color and genuine orientation matrix. It remains empty;
+those arguments do not establish a box, sphere or missing rasterizer algorithm.
+Native mapping editors pass span geometry and two endpoint colors to
+`btlDebugDrawMappingColorSpan`, while `btlDebugDrawLine2D` receives plot-guide
+endpoints and a packed color. The alpha plot uses a sixteen-pixel-high span
+and a gray center line from `(200, 360)` to `(200, 384)`. Preserve DDS1's
+legacy `void(void)` drawing boundaries and DDS2's existing full signatures.
+
+The three `btlCompleteCameraFlag08Mode`, `btlCompleteCameraFlag20Mode` and
+`btlCompleteCameraFlag80Mode` entries return one without changing state.
+Native dispatchers 0x001DBE68/0x001E9130 select them under masks 0x08, 0x20
+and 0x80, then clear active bit 1 and reset the counter on completion.
+The names describe that dispatch/completion contract, not an inferred camera
+motion. The neighboring real pose and frame blends are unchanged.
+
+`btlWriteActorModelTableFile` writes the selected model header and 29 motion
+rows to `model/table.txt`, using either `pfs0:` or the developer base path.
+It allocates, formats, writes, closes and releases storage; it does not draw.
+The corrected DDS1 local name keeps its original R1 naming credit.
+`btlApplyDebugEncounterPartySelection` adopts upstream's DDS2 spelling in
+both games, preserving DDS1's fixed-five preset behavior and DDS2's bank,
+variable-count and conditional-copy behavior.
+
+The packed action dispatcher shifts by 22 and masks the argument to 22 bits.
+DDS1 prefix 0x06000000 selects handler 24 at 0x00360D70; DDS2 prefix
+0x07000000 selects handler 28 at 0x003BF510. Both table entries compare
+current MP against a percentage of skill-adjusted maximum MP.
+`btlCmdStoreActorMpCheckChoice` publishes that Boolean and retains
+`choicesA[1]`/validity bit 2 only on success, while still returning command
+completion one. Preserve DDS1's repeated parameter reads and statement order.
+DDS2's `btlCmdStoreActorMpCheckChoiceUnregistered` is identical to the
+registered 0x0020A580 entry and has no registry/call reference; the suffix
+describes observed linkage, not a behavioral variant.
