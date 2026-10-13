@@ -1,6 +1,7 @@
 #include "dsp_name.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_thread_workspace_api.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
 #include "sdf.h"

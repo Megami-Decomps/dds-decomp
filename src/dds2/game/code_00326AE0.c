@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_thread_workspace_api.h"
 #include "sdf_mat4.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"

@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf_thread_workspace_api.h"
 #include "sdf.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
@@ -374,7 +375,6 @@ extern s32 func_0034DE68(SifClient *, s32, s32, void *, s32, void *, s32, void (
 
 extern s32 func_00367B60(const char *, ...);
 
-extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
 
 extern s32 func_003287E0(void);
 
