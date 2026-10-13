@@ -6105,6 +6105,7 @@ sdfFindGeneralBlockByAddress = 0x00329930; // type:func
 sdfGetGeneralHeapStats = 0x00329A00; // type:func
 sdfFindGeneralBlockContaining = 0x00329AA8; // type:func
 sdfSendNamedResourceRequest = 0x00329B18; // type:func
+sdfLoadModulesAndBindNamedResourceRpc = 0x00329C20; // type:func
 sdfGraphSetDisplayMode = 0x00329D38; // type:func
 sdfGraphReleaseBuffers = 0x00329D70; // type:func
 sdfGraphRecreateBuffers = 0x00329DB8; // type:func

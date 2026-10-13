@@ -280,7 +280,7 @@ extern void func_002F4A38(s32 arg);
 extern s32 func_002CF930(void);
 
 /* Load the optional module first, then the required one; bind retries wait in timer ticks. */
-void func_002D0D70(const char *modulePath, const char *optionalModulePath) {
+void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath) {
     s32 retryStartTick;
 
     if (optionalModulePath != NULL) {
