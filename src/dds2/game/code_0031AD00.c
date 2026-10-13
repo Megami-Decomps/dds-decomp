@@ -104,7 +104,7 @@ extern SoundSlot *dds3ClaimSoundSlot(u32 sequence, u32 frames);
 extern s8 D_0037F510[];
 
 /* Clamp cursor movement before confirm/cancel override the navigation sound. */
-s32 func_0031AF68(MnuShootingWork *object) {
+s32 mnuPollPauseChoiceInput(MnuShootingWork *object) {
     s32 result = -1;
     s32 sound = 0;
 
