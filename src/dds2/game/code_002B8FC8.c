@@ -123,8 +123,6 @@ extern s32 D_00435E48;
 
 
 
-extern void func_002C10F0();
-
 extern void mnuDrawSlotIcons();
 
 extern void frFontAddSharedGlyphFlags();

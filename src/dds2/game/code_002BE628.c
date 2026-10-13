@@ -963,7 +963,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPanelItemValueMeter);
 
 /* Create the DDS2 simple sprite state from its three resource sets. */
 MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,

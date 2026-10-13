@@ -129,7 +129,7 @@ extern void evtStageTestQueueMotion();
 extern s32 D_00435E48;
 
 
-extern void func_002C10F0();
+extern void mnuDrawPanelItemValueMeter();
 
 extern void mnuDrawSlotIcons();
 
@@ -1496,7 +1496,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
     mnuApplyPackedGroupValues(packedGroup, entry->itemId);
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
-    func_002C10F0(0, 0, 0, entry, group, spriteFlags);
+    mnuDrawPanelItemValueMeter(0, 0, 0, entry, group, spriteFlags);
     mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, D_00435E48 + entry->unitId * 0x11 + 0x110, spriteFlags);
     mnuDrawSlotIcons(0x14a, id);
 }
