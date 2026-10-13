@@ -79,7 +79,7 @@ extern s32 sdfOpenDiscFileRecord;
 
 extern u32 sdfDiscSemaphore;
 
-extern s32 func_0033E008(u32, u8 *, u32);
+extern s32 sdfDevFindDiscFileRecordByPath(u32, u8 *, u32);
 
 extern u32 sdfDevControlReplyValue;
 
@@ -544,7 +544,7 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DE60);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E008);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevFindDiscFileRecordByPath);
 
 extern s32 D_004391AC;
 
@@ -561,7 +561,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 request[4];
     s32 file;
 
-    file = func_0033E008((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
+    file = sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
         D_004391AC = *(s32 *)(file + 8);
@@ -659,7 +659,7 @@ u32 sdfPacketExists(index)
     s64 packet;
     u8 buffer[16];
 
-    packet = func_0033E008(index, buffer, 0);
+    packet = sdfDevFindDiscFileRecordByPath(index, buffer, 0);
     return packet != 0;
 }
 
@@ -667,7 +667,7 @@ s32 sdfPktQuery(u32 index) {
     u8 buffer[16];
     SifCommand *packet;
 
-    packet = (SifCommand *)func_0033E008(index, buffer, 0);
+    packet = (SifCommand *)sdfDevFindDiscFileRecordByPath(index, buffer, 0);
     if (packet != 0) {
         return packet->argument;
     }
