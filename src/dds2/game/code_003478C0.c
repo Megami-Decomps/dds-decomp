@@ -64,7 +64,7 @@ extern DevState *sdfDevCreateCallbackState(const char *, s32 (*)(DevState *, s32
 extern s32 sdfDevQueueControlRequest();
 extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
-extern s32 func_003482B0(DevState *, s32, s32, s32, s32);
+extern s32 sdfStreamHandleDeviceEvent(DevState *, s32, s32, s32, s32);
 
 
 
@@ -458,7 +458,7 @@ extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
 extern s32 func_003287E0(void);
 
-s32 func_003482B0(DevState *deviceState, s32 command, s32 sourceAddress,
+s32 sdfStreamHandleDeviceEvent(DevState *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
     SdfStreamCfg *stream = &D_0047BCC0;
     s32 dmaId;
@@ -520,7 +520,7 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     DevState *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
-        state->deviceState = sdfDevCreateCallbackState((const char *)request, func_003482B0, 0);
+        state->deviceState = sdfDevCreateCallbackState((const char *)request, sdfStreamHandleDeviceEvent, 0);
         if (state->deviceState != 0) {
             WaitSema(state->semaphore);
             deviceState = state->deviceState;
