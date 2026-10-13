@@ -42,6 +42,8 @@ EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 inde
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 void dds3RemoveWorldObjectNode(EffWorldNode *node);
+/* Store the source object address used by a slot's later path replacement. */
+void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
 EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *camera);
 EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);

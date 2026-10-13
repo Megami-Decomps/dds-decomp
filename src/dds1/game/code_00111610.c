@@ -43,6 +43,7 @@ void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update) {
 }
 
 /* Cache the source object address for the next curve-work replacement. */
+/* Cache the source address consumed by the slot's later path replacement. */
 void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject) {
     Dds3SlotResource *resource = object->data;
 
