@@ -10743,7 +10743,7 @@ an unsupported interpretation of the trailing word.
 
 ## Trace-justified task roles: special pre-action callbacks
 
-DDS1 `func_002069C0` and DDS2 `func_00227DA8` are 1,400-byte callbacks for
+The DDS1/DDS2 `btlQueueLinkedPairModelSwapTasks` routines are 1,400-byte callbacks for
 the `0x170` and `0x189` modes. Their task records have one primary
 `BtlRuntimeTask` type. `timedTask` carries the real custom-sound and fade
 records that receive an `endDelay`; `task` carries the other queued records.
@@ -10916,4 +10916,49 @@ matched function and data object unchanged. Traces were recorded with
 --all`; hooked and unhooked assembly and RTL outputs agree. Exact log paths,
 allocation line references, individual gate logs, and the full step history
 are retained in the agent's ledger.
+
+
+## Linked encounter hooks, roster IDs and native text forwarding
+
+The linked encounter's update hooks are `btlRunLinkedPairUpdateHook`; their
+shared transform pass is `btlUpdateLinkedEffectUnitTransforms`. The DDS1
+and DDS2 native callback slots and defeated-body handling differ, so names
+describe the paired transforms without asserting identical update timing.
+`btlChooseLinkedPairMotion` uses effect phase and both units' quarter-value
+tests. Its native pair IDs remain `0x107/0x108` in DDS1 and `0x12E/0x12F`
+in DDS2.
+
+`btlQueueLinkedPairModelSwapTasks` preserves the task-role staging described
+in "Trace-justified task roles: special pre-action callbacks" above. Naming
+does not change the barriers, timed-task pointer epochs, rate-kind/effect-scale
+staging, parameter types, or declaration/statement order.
+
+`btlSetLinkedPairActionCamera` handles actions `0x171/0x189`. The DDS2
+`0x188` arm also resets progress while returning unhandled `0`; DDS1 does
+not perform that reset. The handled/unhandled result joins remain distinct.
+`btlAdvanceMarkedLinkedActionCamera` advances `0x188` only when the marked
+entry is ready and chooses fixed camera keys at step 25.
+
+The DDS2 frontline hooks use actor IDs, not enemy-name IDs. The decoded
+`data/battle/msg.tblasm` actor-name rows identify 1=Serph, 2=Sera, 4=Argilla,
+5=Gale, 7=Roland and 8=Seraph. `prfCapPresentMessages` indexes displayed
+names by `DatPartyRecord.unitId`; `ptyRebalanceFrontline` promotes that
+selected roster entry. Thus the hooks name their actual promoted actors.
+The fixed return-6 callback remains unnamed: sharing a slot with a
+target-kind callback does not prove that 6 means actor Cielo.
+
+The DDS1 enabled-action classifiers use a different namespace:
+enemy-name 265=Metatron, 273=Beelzebub and 275=Huang Long. Each returns
+11 only for its group-400 enemy and an enabled action record, otherwise -1.
+The names do not guess what category 11 means to the consumer.
+
+`sdfSoundStopMoviePlayback` sends command `0x100` during enabled movie-sound
+stream cancellation. It remains a distinct entry point from the standalone
+named-playback stop, despite using the same packet.
+
+`sdfPrintTextLine` forwards the native incoming `$a0` to libc's `puts`
+entry. Its reentrant worker builds two I/O vectors for the input string
+and one newline byte; the literal is `0x0A` at DDS1 `0x003B7AA0` and DDS2
+`0x00431BE0`. The zero-formal, void C definitions are deliberately retained
+for matching; this naming closure does not repair that source-level ABI.
 

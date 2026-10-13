@@ -8683,3 +8683,13 @@
 0x00260AB0	mnuDrawShopPanelTransition	inferred	Draws shop panels through category-change/reveal phases; used by three staged dispatch-start paths. [LiteH menu naming batch 22]
 0x00266908	brsDrawProgressRowUnitInfo	inferred	Draws unit information within each active progress row; DDS2 twin 0x0029E220. [LiteH menu naming batch 22]
 0x00281D40	mnuDrawPartyMemberCommandPanel	inferred	Mode-1 callback from mnuDispatchListPanel; DDS2 twin 0x002BF830 renders the same party-member command panel. [LiteH menu naming batch 22]
+0x00205BD8	btlUpdateLinkedEffectUnitTransforms	inferred	confidence=high; Paired-unit position/rotation/body-offset synchronization; DDS2 canonical twin=0x00226F58, game-specific body-removal paths retained. Namer1 batch46.
+0x00205EE0	btlRunLinkedPairUpdateHook	inferred	confidence=high; Mode312 update-hook delegate to linked-pair transform pass; twin=0x00227288. Native callback slots differ by game. Namer1 batch46.
+0x00205EF8	btlChooseLinkedPairMotion	inferred	confidence=high; chooseMotion callback remaps linked-pair codes by effect phase/counterpart quarter-value tests; twin=0x002272A0; native unit IDs retained. Namer1 batch46.
+0x002069C0	btlQueueLinkedPairModelSwapTasks	inferred	confidence=high; Mode170/189 preActionHook queues paired model transitions and sound/camera/fade dependencies; twin=0x00227DA8. Retains PurC16612aa69 trace-derived task epochs/barriers/staging. Namer1 batch46.
+0x00207718	btlSetLinkedPairActionCamera	inferred	confidence=high; Mode312 cameraPoseBlendHook handles171/189 paired action cameras; twin=0x00228B08. DDS2-only188 progress reset retained there. Namer1 batch46.
+0x0020D598	btlClassifyBeelzebubAction	inferred	confidence=high; Group400 matching unit111 and enabled action-table record yield11, else-1; msg.tblasm enemy-name273=Beelzebub. Result category not guessed. Namer1 batch46.
+0x0020D690	btlClassifyMetatronAction	inferred	confidence=high; Group400 matching unit109 and enabled action-table record yield11, else-1; msg.tblasm enemy-name265=Metatron. Namer1 batch46.
+0x0020D9F8	btlClassifyHuangLongAction	inferred	confidence=high; Group400 matching unit113 and enabled action-table record yield11, else-1; msg.tblasm enemy-name275=Huang Long. Namer1 batch46.
+0x002E98F0	sdfSoundStopMoviePlayback	inferred	confidence=high; Command100 stop for movie stream cancellation when pacEnabled, same opcode as named-playback stop; twin=0x00342798. Namer1 batch46.
+0x002EC950	sdfPrintTextLine	inferred	confidence=high; Native incoming-a0 forwarding to libc puts003004E8; strlen/string-plus-newline I/O vectors and newline byte0A at003B7AA0 prove output. Zero-formal void signature retained; twin=0x003457F8. Namer1 batch46.
