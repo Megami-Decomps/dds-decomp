@@ -666,7 +666,8 @@ FrFontGlyph *parent;
     return handle;
 }
 
-FrFontGlyph *func_00197748(s32 x, s32 y, s32 depth, s32 colors,
+/* Create positioned, colored text with measured spacing and link it to parent. */
+FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
                            const char *text, FrFontGlyph *parent) {
     return frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent);
 }
@@ -723,7 +724,8 @@ FrFontGlyph *func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
     return glyph;
 }
 
-FrFontGlyph *func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
+/* Build text with font index 3; retain the existing glyph chain's spacing. */
+FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
@@ -736,7 +738,8 @@ FrFontGlyph *func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFo
     return glyph;
 }
 
-FrFontGlyph *func_00197A98(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
+/* Build font-index-3 text with signed spacing -2 and return its glyph chain. */
+FrFontGlyph *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);

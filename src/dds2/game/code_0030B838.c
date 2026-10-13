@@ -783,7 +783,7 @@ s32 frMeasureAndQueueCounterText(const char *text) {
     struct FrFontGlyph *glyph;
     s32 width;
 
-    glyph = func_0019F448(0, 0, 0, 0, text, NULL);
+    glyph = itfCreateMeasuredTextGlyph(0, 0, 0, 0, text, NULL);
     width = frFontMeasureLines(glyph);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     return width;

@@ -824,7 +824,7 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
 void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *text) {
     struct FrFontGlyph *glyph;
 
-    glyph = func_00197748(width << 4, height << 3, 0, colors, text, NULL);
+    glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }

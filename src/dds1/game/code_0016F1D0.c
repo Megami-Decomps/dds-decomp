@@ -497,12 +497,12 @@ void effSetVectorIncrementBits(EffRecordPool *group, u32 incrementBits) {
 }
 
 /* Store the record pool's packed modulation color. */
-void func_0016FF40(EffRecordPool *group, u32 value) {
+void effSetFanRecordPoolColor(EffRecordPool *group, u32 value) {
     group->color = value;
 }
 
 /* Set the pool scale. */
-void func_0016FF48(EffRecordPool *work, f32 scale) {
+void effSetFanRecordPoolScale(EffRecordPool *work, f32 scale) {
     work->scale = scale;
 }
 

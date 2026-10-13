@@ -3379,7 +3379,7 @@
 0x001F86E8	btlScriptCmdWithArgD	inferred	Calls btlCmdWithArgD on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x001F8710	btlScriptCmdSimpleC	inferred	Reads first script parameter and passes it to btlCmdSimpleC; returns script success. [names_R_FuncNames3.tsv]
 0x001F8750	btlScriptCmdSimpleD	inferred	Reads first script parameter and passes it to btlCmdSimpleD; returns script success. [names_R_FuncNames3.tsv]
-0x001F8790	btlScriptCmdSimpleE	inferred	Reads first script parameter and passes it to btlCmdSimpleE; returns script success. [names_R_FuncNames3.tsv]
+0x001F8790	btlScriptSelectTargetsByMode	inferred	confidence=high; reads script parameter0 and current command context, then invokes btlSelectCommandTargetsByMode; actual DDS2 twin0x0020A3F0. Corrects prior generic E-label attribution. [Namer1 naming batch45]
 0x001F87F8	btlScriptCmdSimpleF	inferred	Calls btlCmdSimpleF on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x001F8828	btlScriptCmdSimpleG	inferred	Calls btlCmdSimpleG on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x001F8858	btlScriptCmdSimpleH	inferred	Calls btlCmdSimpleH on current command context; returns script success. [names_R_FuncNames3.tsv]
@@ -3535,7 +3535,7 @@
 0x001FEEF0	btlCmdSimpleB	inferred	jal+epilogue passthrough wrapper of func_002041A0
 0x001FEF10	btlCmdSimpleC	inferred	jal+epilogue passthrough wrapper of func_002033C0
 0x001FEF30	btlCmdSimpleD	inferred	jal+epilogue passthrough wrapper of func_002034D0
-0x001FEF50	btlCmdSimpleE	inferred	jal+epilogue passthrough wrapper of func_002035E0
+0x001FEF50	btlSelectCommandTargetsByMode	inferred	confidence=high; invokes btlSelectTargetsByMode through the native zero-formal bridge; actual DDS2 twin0x002110E8, not the unit-ID filter at0x002111E8. Corrects prior E-label twin attribution. [Namer1 naming batch45]
 0x001FEF70	btlCmdSimpleF	inferred	jal+epilogue passthrough wrapper of func_00204008
 0x001FEF90	btlCmdSimpleG	inferred	jal+epilogue passthrough wrapper of func_00204028
 0x001FEFB0	btlCmdSimpleH	inferred	jal+epilogue passthrough wrapper of func_00203F98
@@ -8651,3 +8651,11 @@
 0x0024C7E8	mnuDrawTerminalSelectionPanel	inferred	Draws the terminal backdrop state, frame/gauge and selected slots while advancing the panel dispatcher; DDS2 twin 0x0026AEB0. [LiteH menu naming batch 21]
 0x00250B60	mnuHandleMantraGridInput	inferred	Handles mantra-grid directions, confirm/cancel/page transitions and input-feedback sounds; DDS2 twin 0x0028C8F8. [LiteH menu naming batch 21]
 0x00270218	mnuCanDrawMovie	inferred	Returns whether the movie draw state equals 2; DDS2 twin 0x002A81C8 also checks the associated movie callback state. [LiteH menu naming batch 21]
+0x00197748	itfCreateMeasuredTextGlyph	inferred	confidence=high; public positioned/colored text interface uses measured glyph creation and parent linkage; DDS2 twin0x0019F448; signature preserved. [Namer1 naming batch45]
+0x001979C8	itfCreateFont3TextGlyph	inferred	confidence=high; builds text with fontIndex3, shared-flag staging and supplied position/depth/colors; DDS2 twin0x0019F6C8. [Namer1 naming batch45]
+0x00197A98	itfCreateTightFont3TextGlyph	inferred	confidence=high; fontIndex3 construction additionally stores spacing-2 and remeasures glyphs; DDS2 twin0x0019F798. [Namer1 naming batch45]
+0x0016FF40	effSetFanRecordPoolColor	inferred	confidence=high; stores five-position fan pool modulation color, distinct from the triple-vertex pool setter; DDS2 twin0x00177B98. [Namer1 naming batch45]
+0x0016FF48	effSetFanRecordPoolScale	inferred	confidence=high; stores five-position fan pool scale; DDS2 twin0x00177BA0; native parameter types retained. [Namer1 naming batch45]
+0x002E8548	sdfReadCachedClockTime	inferred	confidence=high; copies cached ClockTime and conditionally refreshes BCD fields through a20-tick gate; returns0/-1/1 for valid/failed/reused refresh; month-as-year quirk retained; DDS2 twin0x003413F0. [Namer1 naming batch45]
+0x002E8640	sndTrySendQueuedCommandPacket	inferred	confidence=high; attempts one SIF send from the32-entry sound ring and advances read index only on acceptance; returns0 for sent,1 for empty/rejected; DDS2 twin0x003414E8. [Namer1 naming batch45]
+0x002E8F30	sndSendTextCommandPacket	inferred	confidence=high; sets command bit0x80 and sends text with strlen bytes, excluding its terminator; DDS2 twin0x00341DD8. [Namer1 naming batch45]

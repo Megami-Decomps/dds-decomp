@@ -136,7 +136,7 @@ extern void btlCmdSimpleA(s32, u16);
 
 extern void btlCmdSimpleD(s32, u16);
 
-extern void btlCmdSimpleE(s32, u16);
+extern void btlFilterCommandTargetsByUnitId(s32, u16);
 
 extern void btlCmdSimpleJ(s32, u16);
 
@@ -202,7 +202,7 @@ extern void func_0021F3E8(s32);
 
 extern void func_00211108(s32);
 
-extern void func_002110E8(s32, u16);
+extern void btlSelectCommandTargetsByMode(s32, u16);
 
 extern void btlSetSpecialBattleEffectActorByte(u8);
 
@@ -1378,10 +1378,11 @@ u32 btlScriptCmdSimpleD(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleE(void) {
+/* Apply script parameter 0 as the target unit-ID filter; return VM success. */
+u32 btlScriptFilterTargetsByUnitId(void) {
     s32 context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleE(context, value);
+    btlFilterCommandTargetsByUnitId(context, value);
     return 1;
 }
 
@@ -1405,9 +1406,10 @@ u32 btlScriptCmdSimpleH(void) {
     return 1;
 }
 
-s32 func_0020A3F0(void) {
+/* Apply script parameter 0 as the command target-selection mode; return VM success. */
+s32 btlScriptSelectTargetsByMode(void) {
     s32 context = scrGetCurrentCommandWork();
-    func_002110E8(context, scrReadIntParameter(0));
+    btlSelectCommandTargetsByMode(context, scrReadIntParameter(0));
     return 1;
 }
 

@@ -501,12 +501,12 @@ void effSetVectorIncrementBits(EffRecordPool *pool, u32 controlBits) {
 }
 
 /* This pool view uses the control word as a packed modulation color. */
-void func_00177B98(EffRecordPool *pool, u32 color) {
+void effSetFanRecordPoolColor(EffRecordPool *pool, u32 color) {
     pool->color = color;
 }
 
 /* Set the pool scale without changing the native byte-pointer interface. */
-void func_00177BA0(u8 *work, f32 scale) {
+void effSetFanRecordPoolScale(u8 *work, f32 scale) {
     ((EffRecordPool *)work)->scale = scale;
 }
 
