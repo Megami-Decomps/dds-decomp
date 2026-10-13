@@ -6,6 +6,7 @@
 #include "kwln_task_flags.h"
 #include "sdf.h"
 #include "sdf_thread.h"
+#include "sdf_thread_sleep.h"
 #include "sdf_linked_packet.h"
 
 struct EffWorldNode;
@@ -66,7 +67,6 @@ extern void sdfDevSetDefaultDeviceWorker(s8);
 extern void sdfEnsureDeviceWorkerThreadStarted(s32);
 extern void func_00329C20(const char *, const char *);
 extern void sdfStartAndSuspendWorkerThread(void);
-extern s32 sdfThreadSleepSelf(void);
 extern void kwlnRunMainLoop(void);
 
 extern const char D_004110A8[];

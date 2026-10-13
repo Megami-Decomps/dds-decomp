@@ -7,6 +7,7 @@
 #include "kwln_task_flags.h"
 #include "sdf.h"
 #include "sdf_thread.h"
+#include "sdf_thread_sleep.h"
 
 struct EffWorldNode;
 extern struct EffWorldNode *dds3ActiveWorld;
@@ -66,7 +67,6 @@ extern void sdfDevSetDefaultDeviceWorker(s32);
 extern void sdfEnsureDeviceWorkerThreadStarted(s32);
 extern void func_002D0D70(const char *, const char *);
 extern void sdfStartAndSuspendWorkerThread(void);
-extern s32 sdfThreadSleepSelf(void);
 extern void kwlnRunMainLoop(void);
 
 extern char D_0039DF28[]; /* "cdrom0:\IRX\IOPRP255.IMG;1" */
