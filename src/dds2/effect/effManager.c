@@ -147,7 +147,7 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
     return effNodeTypeOperations[node->type].queryOptional(node->instance);
 }
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 typedef struct EffNodeInstance {
     u8 pad00[0x20];
@@ -162,7 +162,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
     EffNodeInstance *instance;
 
     if (descriptor->version < 1.03f) {
-        func_0035B6E0("old version!![%f]\n", descriptor->version);
+        sdfDebugPrintf("old version!![%f]\n", descriptor->version);
         effConvertLegacyNodeDescriptor(descriptor);
     }
     node = effCreateNode((u16)descriptor->type, (u16)descriptor->arg, (s32)descriptor->payload);
@@ -178,7 +178,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
             EE_MMI_UNIT_MATRIX(instance->matrix20);
             break;
         }
-        func_0035B6E0("effManager:set Identity matrix\n");
+        sdfDebugPrintf("effManager:set Identity matrix\n");
     }
     return node;
 }
@@ -192,7 +192,7 @@ struct EffNode *effLoadResourceNode(const char *resource) {
     struct SdfMemBlock *resourceHandle;
     struct EffNode *node;
 
-    func_0035B6E0("d3p file read...[%s]\n", resource);
+    sdfDebugPrintf("d3p file read...[%s]\n", resource);
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
     node = effCreateNodeFromDescriptor((EffNodeDescriptor *)resolvedId);
     sdfReleaseResourceAllocation(resourceHandle);

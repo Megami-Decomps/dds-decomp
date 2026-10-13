@@ -419,7 +419,7 @@ s32 func_00214C78(BtlUnit *actor, s32 command, BtlUnit **outFirst, BtlUnit **out
     return 0;
 }
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern u32 fldCountSceneSlots(void);
 
@@ -443,15 +443,15 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
     if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
         if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) && !(datBattleSceneRecords[state->battleMode].flags & 1)) {
             if (datCommandSelectors[command].kind != 1) {
-                func_0035B6E0(D_00419C80);
+                sdfDebugPrintf(D_00419C80);
                 return 0;
             }
             if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
-                func_0035B6E0(D_00419CB0);
+                sdfDebugPrintf(D_00419CB0);
                 return 0;
             }
             if (fldCountSceneSlots() < btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
-                func_0035B6E0(D_00419CD8);
+                sdfDebugPrintf(D_00419CD8);
                 return 0;
             }
             if (btlFindCommandPartnersByAffinity(unit, command, &members[1], &members[2]) != 0) {
@@ -485,7 +485,7 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
             return 1;
         }
     }
-    func_0035B6E0(D_00419D00);
+    sdfDebugPrintf(D_00419D00);
     return 0;
 }
 

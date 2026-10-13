@@ -62,7 +62,7 @@ extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 s32 evtPolygonMovieTestFlag(KwlnTask *task) {
     EvtGlobal *state;
@@ -655,7 +655,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
         case 21:
             work->subEntry21Data = (u8 *)sub + work->subEntries[i].offset;
             work->unk_F8 = work->subEntries[i].value;
-            func_0035B6E0("object table set ok.\n");
+            sdfDebugPrintf("object table set ok.\n");
             break;
         case 25:
             work->subEntry25Data = (u8 *)sub + work->subEntries[i].offset;
@@ -711,7 +711,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work) {
         if (mnuQueryTitleSoundBusy() == 1) {
             mnuStopTitleVoicePlayback();
         }
-        func_0035B6E0("sound stop all. \n");
+        sdfDebugPrintf("sound stop all. \n");
         sdfReleaseChipBlock(work);
     }
 }
@@ -800,12 +800,12 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     PolyMovieWork *work;
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
-    func_0035B6E0(D_004232C0);
+    sdfDebugPrintf(D_004232C0);
     handle1 = sdfReadNamedResource(path1, &address1, 0);
     if (address1 == 0) {
         return NULL;
     }
-    func_0035B6E0(D_004232E0);
+    sdfDebugPrintf(D_004232E0);
     if (mode == 0) {
         handle2 = sdfReadNamedResource(path2, &address2, 0);
     } else {
@@ -813,17 +813,17 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     }
     if (mode == 0 && sdfPathExists(path3) == 1) {
         handle3 = sdfReadNamedResource(path3, &address3, 0);
-        func_0035B6E0(D_00423300);
+        sdfDebugPrintf(D_00423300);
     } else {
         handle3 = (SdfMemBlock *)evtPolygonMovieSynthesizePmd3Header((u8 **)&address3);
     }
-    func_0035B6E0(D_00423320);
+    sdfDebugPrintf(D_00423320);
     work = evtPolygonMovieAllocWork();
     evtPolygonMovieInitWork(work, (PmdHeader *)address1, (PmdHeader *)address2, (PmdHeader *)address3);
     if (work == NULL) {
         return NULL;
     }
-    func_0035B6E0(D_00423340);
+    sdfDebugPrintf(D_00423340);
     work->mainResource.handle = handle1;
     work->secondaryResource.handle = handle2;
     work->tertiaryResource.handle = handle3;
