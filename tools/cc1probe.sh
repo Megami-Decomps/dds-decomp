@@ -160,7 +160,8 @@ fi
 cat >"$out/probe.gdb" <<EOF
 set pagination off
 set confirm off
-set startup-with-shell off
+# --args quotes cc.sh's multiword -D values; the shell must interpret those quotes.
+set startup-with-shell on
 set disable-randomization on
 unset environment LINES
 unset environment COLUMNS
