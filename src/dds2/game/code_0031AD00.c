@@ -143,7 +143,7 @@ s32 mnuPollPauseChoiceInput(MnuShootingWork *object) {
 }
 
 /* Update and draw the pause-menu choice fade. */
-void func_0031B080(MnuShootingWork *object) {
+void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *object) {
     FadeNumber *fade = &object->pauseFade;
 
     mnuSetPauseFadeChoice(fade, object->choiceIndex);

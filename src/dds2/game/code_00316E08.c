@@ -842,7 +842,7 @@ extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
 struct SdfPoolNode;
 extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
-extern void func_0031B080(MnuShootingWork *work);
+extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
 extern struct SdfPoolNode *D_00380788[13][4];
 
@@ -977,7 +977,7 @@ s32 func_00318C00(MnuShootingWork *work) {
 
     itfDrawFullExtentWorkPanels(work);
     itfDispatchObjectFadeSequenceMode(work);
-    func_0031B080(work);
+    mnuUpdateAndDrawPauseChoiceFade(work);
     return 0;
 }
 
