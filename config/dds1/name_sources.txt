@@ -240,6 +240,7 @@
 0x0010B428	evtDrawHeapUsageOverlay	inferred	readability/matching review (QP16)
 0x0010B558	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
 0x0010B590	evtDrawResourceCountDebugTask	inferred	DDS2 twin 0x0010B7B8; draws parent/child glyph counts and effect-font resource count.
+0x0010B6A8	evtResourceCountDebugTaskDestroy	inferred	Empty destroy callback registered by evtToggleAlternateDebugTimeGraphTask for the DebugTimeGrph task that draws font, text and GS resource counts; paired DDS2 callback at 0x0010B8D0.
 0x0010B6B0	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:1192:func_0010B6B0; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0010B728	evtLinkWorkNode	inferred	Appends a work node to the doubly linked event list and increments its count.
 0x0010B768	evtUnlinkWorkNode	inferred	Unlinks a work node from the doubly linked event list and decrements its count.

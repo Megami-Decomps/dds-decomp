@@ -1743,17 +1743,17 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     return 0;
 }
 
-void func_0010B8D0(void) {
+void evtResourceCountDebugTaskDestroy(void) {
 }
 
 extern s32 evtDrawResourceCountDebugTask(KwlnTask *task);
-extern void func_0010B8D0(void);
+extern void evtResourceCountDebugTaskDestroy(void);
 extern s32 D_00438E68;
 extern char D_004113B8[]; /* "DebugTimeGrph" */
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)evtDrawResourceCountDebugTask, func_0010B8D0, NULL);
+        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy((void *)D_00438E68, 0);
     }
