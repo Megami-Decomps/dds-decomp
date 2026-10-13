@@ -1784,7 +1784,6 @@ u32 evtBeginSelectionExitFade(KwlnTask *task) {
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
-extern void fileSetPreviewLocation();
 extern void fileEnterMcPackScene(s32 mode);
 
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
