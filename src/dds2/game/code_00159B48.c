@@ -17,7 +17,6 @@
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern s32 effEmitterDelayRandomState[];
-extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 #include "eff_track_poly_list.h"
 #include "par_table.h"
@@ -798,7 +797,7 @@ void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *
 
 /* Seed the generator used for per-particle launch delays. */
 void effSeedEmitterDelayRandomState(void) {
-    effMiscSeedRandomFromClock(effEmitterDelayRandomState);
+    effMiscSeedRandomFromClock((EffRandState *)effEmitterDelayRandomState);
 }
 
 void func_0015B290(void) {

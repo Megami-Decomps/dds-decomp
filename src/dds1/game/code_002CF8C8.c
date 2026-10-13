@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_timer.h"
 #include "sdf.h"
 #include "sdf_thread.h"
@@ -27,7 +28,6 @@ extern void sdfPadInit(void);
 extern s32 sdfStartQueuedThreadWakeWorker(void);
 extern void sdfInitializeResourceQueuesAndTextureWords();
 extern void sdfConsUploadDmaProgram(s32 size);
-extern void effMiscSeedRandomFromClock(void *state);
 extern void sdfRunTickWorkerThread(void);
 extern SdfThreadNode D_003BD990;
 extern u8 D_003DFEF0[0x2000];

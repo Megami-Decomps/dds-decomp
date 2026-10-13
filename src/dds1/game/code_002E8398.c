@@ -52,7 +52,7 @@ void effMiscSeedRandom(EffRandState *state, u32 seed) {
 }
 
 /* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
-void effMiscSeedRandomFromClock(void *state) {
+void effMiscSeedRandomFromClock(EffRandState *state) {
     ClockTime now;
     s32 t;
 

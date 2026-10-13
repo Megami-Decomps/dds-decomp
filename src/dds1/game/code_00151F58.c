@@ -768,7 +768,7 @@ void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *
 
 /* Seed the generator used for per-particle launch delays. */
 void effSeedEmitterDelayRandomState(void) {
-    effMiscSeedRandomFromClock(&effEmitterDelayRandomState);
+    effMiscSeedRandomFromClock((EffRandState *)&effEmitterDelayRandomState);
 }
 
 void func_001536A0(void) {
