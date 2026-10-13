@@ -1,6 +1,8 @@
 #include "btl_command.h"
+#include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
 #include "sdf_chip.h"
@@ -136,7 +138,7 @@ extern void btlCmdSimpleA(s32, u16);
 
 extern void btlCmdSimpleD(s32, u16);
 
-extern void btlCmdSimpleE(s32, u16);
+extern void btlFilterCommandTargetsByUnitId(s32, u16);
 
 extern void btlCmdSimpleJ(s32, u16);
 
@@ -202,7 +204,7 @@ extern void func_0021F3E8(s32);
 
 extern void btlCmdAppendCurrentUnitIdToCommandIndices(s32);
 
-extern void func_002110E8(s32, u16);
+extern void btlSelectCommandTargetsByMode(s32, u16);
 
 extern void btlSetSpecialBattleEffectActorByte(u8);
 
@@ -806,8 +808,6 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern f32 func_003532E8(f32, f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern u128 D_003BE0D0;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
@@ -1378,10 +1378,11 @@ u32 btlScriptCmdSimpleD(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleE(void) {
+/* Apply script parameter 0 as the target unit-ID filter; return VM success. */
+u32 btlScriptFilterTargetsByUnitId(void) {
     s32 context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleE(context, value);
+    btlFilterCommandTargetsByUnitId(context, value);
     return 1;
 }
 
@@ -1405,9 +1406,10 @@ u32 btlScriptCmdSimpleH(void) {
     return 1;
 }
 
+/* Apply script parameter 0 as the command target-selection mode; return VM success. */
 s32 btlScriptCmdSelectTargetsByMode(void) {
     s32 context = scrGetCurrentCommandWork();
-    func_002110E8(context, scrReadIntParameter(0));
+    btlSelectCommandTargetsByMode(context, scrReadIntParameter(0));
     return 1;
 }
 

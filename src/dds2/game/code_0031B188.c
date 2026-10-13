@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
 #include "mnu_work.h"

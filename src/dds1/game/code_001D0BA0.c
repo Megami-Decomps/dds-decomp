@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
 #include "snd_pad.h"
 #include "eff_random.h"
@@ -138,9 +139,6 @@ typedef struct SoundTask {
 } SoundTask;
 
 extern SndPad D_00324510;
-
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern u32 kwlnDrawControlFlags;
@@ -3270,7 +3268,7 @@ extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
-extern void func_002D9238(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 extern u64 D_00359CF0[4];
 
@@ -3324,7 +3322,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     } else {
         overlay->lighting = NULL;
     }
-    func_002D9238(surfaces, overlay);
+    sdfModelBuildNodeResourcePackets(surfaces, overlay);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);

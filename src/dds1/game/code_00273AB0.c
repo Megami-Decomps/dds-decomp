@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_shop.h"
@@ -96,7 +97,6 @@ extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo();
 
 s32 mnuStaffImageEnterA(KwlnTask *task) {

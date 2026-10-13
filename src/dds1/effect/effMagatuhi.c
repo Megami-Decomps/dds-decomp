@@ -1,4 +1,5 @@
 #include "eff.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_math.h"
 #include "sdf_resource.h"
@@ -137,7 +138,6 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiDrawHistoryTrails);
 extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 sdfSinPoly(f32 angle);
 
 void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vectorArg) {
     f32 (*newSlot)[4];
@@ -253,8 +253,6 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
 extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-extern f32 sdfSinPoly(f32 angle);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 
 
 void effMagatuhiResetValueHistorySlot(EffMagatuhiValueWork *valueWork, s32 index) {
@@ -272,7 +270,6 @@ typedef struct {
 } EffMagatuhiRingParticle;
 
 
-extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Clone the first-family parameters; return the work after its state array.
@@ -296,7 +293,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -465,7 +462,7 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, point);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -506,7 +503,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond 
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        *delays++ = -(effMiscRand(effDefaultRandomState) % spread);
+        *delays++ = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
     }
     return work;
 }
@@ -653,7 +650,7 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (frame >= life && respawn) {
-            *delays = -(effMiscRand(effDefaultRandomState) % spread);
+            *delays = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             (*delays)++;
         }
@@ -696,7 +693,7 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
 
     for (i = 0; i < count; i += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
         effMagatuhiBuildBezierControlPointsVU(work, i);
-        *ages = effMiscRand(effDefaultRandomState) % lifetimeFrames;
+        *ages = effMiscRand((EffRandState *)effDefaultRandomState) % lifetimeFrames;
         slot = effMathGetSlotAt(work->mathResource, i);
         if (historyFrames < *ages) {
             slot->t = slot->step * (f32)(*ages - historyFrames);
@@ -795,7 +792,7 @@ EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -886,7 +883,7 @@ void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -944,7 +941,7 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitParticleA(work, i);
-                frameOffset = effMiscRand(effDefaultRandomState) % frames;
+                frameOffset = effMiscRand((EffRandState *)effDefaultRandomState) % frames;
                 particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
@@ -1044,7 +1041,7 @@ EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -1138,7 +1135,7 @@ void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -1197,7 +1194,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitOrbitParticle(work, i);
-                frameOffset = effMiscRand(effDefaultRandomState) % frames;
+                frameOffset = effMiscRand((EffRandState *)effDefaultRandomState) % frames;
                 particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
@@ -1268,7 +1265,7 @@ EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     work->managedResource = effCloneMagatuhiWithColorResource(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         particle++;
     }
     return work;
@@ -1381,7 +1378,7 @@ void effMagatuhiUpdateDriftParticles(EffMagatuhiDriftWork *work) {
             effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(effMiscRand(effDefaultRandomState) % spread);
+            particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         } else {
             particle->age++;
         }
@@ -1438,7 +1435,7 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagatuhiInitializeDriftParticle(work, i);
-                frameOffset = effMiscRand(effDefaultRandomState) % frames;
+                frameOffset = effMiscRand((EffRandState *)effDefaultRandomState) % frames;
                 particle->age = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */

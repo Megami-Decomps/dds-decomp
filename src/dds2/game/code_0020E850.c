@@ -27,7 +27,7 @@ extern void btlCmdSimpleA(s32, s32);
 
 extern void btlCmdSimpleD(s32, s32);
 
-extern void btlCmdSimpleE(s32, s32);
+extern void btlFilterCommandTargetsByUnitId(s32, s32);
 
 extern void btlCmdSimpleJ(s32, s32);
 
@@ -1283,7 +1283,8 @@ void btlCmdWithArgC(s32 context) {
     btlSelectLowestHealthRateTarget(context, 0);
 }
 
-void func_002110E8(void) {
+/* Forward mode selection while retaining the native zero-formal C surface. */
+void btlSelectCommandTargetsByMode(void) {
     btlSelectTargetsByMode();
 }
 
@@ -1325,7 +1326,8 @@ void btlCmdSimpleD(s32 context, s32 value) {
 
 extern s32 btlFilterTargetListByUnitId(s32, s32);
 
-void btlCmdSimpleE(s32 context, s32 value) {
+/* Filter the command's target list by the requested unit ID. */
+void btlFilterCommandTargetsByUnitId(s32 context, s32 value) {
     btlFilterTargetListByUnitId(context, value);
 }
 

@@ -1207,7 +1207,8 @@ void btlCmdSimpleD(void) {
     btlSelectTargetsWithoutActionMask();
 }
 
-void btlCmdSimpleE(void) {
+/* Forward mode selection while retaining the native zero-formal C surface. */
+void btlSelectCommandTargetsByMode(void) {
     btlSelectTargetsByMode();
 }
 

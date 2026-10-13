@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "dds3obj.h"
 #include "mdl_motion_api.h"
 #include "btl_effect_position.h"
@@ -3266,9 +3267,7 @@ void btlTriggerSpecialUnitAction(void) {
     }
 }
 
-struct EffRandState;
 
-extern u32 effMiscRand(struct EffRandState *);
 
 extern char D_003A5D98[];
 

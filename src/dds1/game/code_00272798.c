@@ -167,7 +167,7 @@ u32 func_00272BB8(void) {
 }
 
 /* Draw the item quantity when present, otherwise show both staff-item slots. */
-void mnuDrawStaffBulletItemQuantity(s32 x, s32 y, s32 z, struct MenuList *list,
+void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
                   struct MenuListNode *node, s32 drawArg) {
     StaffMenuWork *context = (StaffMenuWork *)list->context;
     u32 itemId = node->sortKeySecondary;

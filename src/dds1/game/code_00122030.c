@@ -6,6 +6,9 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -824,7 +827,7 @@ typedef char FieldAreaEncounterRow_size_check[(sizeof(FieldAreaEncounterRow) == 
 typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable) == 0x304) ? 1 : -1];
 extern FieldAreaEncounterTable *D_003BAA38;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
-extern s32 evtCreateWorldObjectForKey(s32 area, s32 room);
+
 extern void *func_00117648(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
@@ -1612,7 +1615,6 @@ extern FldEncEntry *fldEncounterRollTable;
 
 extern s32 mdlFlagTest();
 
-extern s32 effMiscRand();
 
 enum {
     FIELD_ENCOUNTER_ROLL_ENTRY_COUNT = 16
@@ -1653,7 +1655,6 @@ extern s32 ptyAnyUnitFlagMatch(u32,s32);
 extern void ptyApplyFieldHpAttrition(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32,s32);
 extern void dds3WorkClear(void);
-extern void sndSetSequenceVolumePan(s32,s32,s32);
 extern void kwlnFadeOutStart(s32,s32,s32,s32);
 extern char D_0039FCA0[], D_0039FCB0[];
 
@@ -1837,9 +1838,6 @@ extern void evtSetSolarOverlayFullyVisible(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 
 extern void fldApplySkyLightSetToPlayerVU(void);
-
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 extern void fldClearSceneLifecycleFlags(u32);
 
 extern u8 fldTestSceneLifecycleFlags(u32);

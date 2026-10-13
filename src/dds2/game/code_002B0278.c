@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -13,6 +14,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "eff_random.h"
 struct MenuListNode;
 struct StaffMenuRuntime;
 #include "fpu.h"
@@ -117,7 +119,6 @@ extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32)
 
 extern s32 D_00435E54;
 
-extern u32 effMiscRand();
 
 extern u32 evtStageTestCountFlags();
 
@@ -210,9 +211,6 @@ extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003E75E0[];
 extern char D_003E75A8[];
-
-extern void sndSetSequenceVolumePan();
-
 typedef struct MenuPanelDrawEntry {
     s32 slotIndex;
     s32 x;

@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -74,9 +75,6 @@ void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char
 void sdfPrintFormattedDevMessage(const char *msg, ...);
 
 s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId);
-
-
-void evtCreateWorldObjectForKey(s32 highPart, s32 lowPart);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 

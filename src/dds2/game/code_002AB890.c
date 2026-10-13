@@ -26,11 +26,11 @@ extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 extern u8 mnuGetItemRequirementCount(s32 index);
 
 
-void func_002AB890(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+void mnuDrawStaffBulletItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     mnuDrawCampGridEntry(arg0, arg1, arg2, 0, arg3, arg4, arg5);
 }
 
-void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+void mnuDrawStaffItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     mnuDrawCampGridEntry(arg0, arg1, arg2, 0x200, arg3, arg4, arg5);
 }
 
@@ -64,7 +64,7 @@ void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
     mnuSetWindowPanelBounds(window, owner->unkF8, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->resources.baseResources[1], 0xD, 7);
     window->list->context = owner;
-    window->list->drawCallback = func_002AB8C0;
+    window->list->drawCallback = mnuDrawStaffItemListEntry;
 
     for (itemId = 1; itemId < 0x100; itemId++) {
         if (datGameState->inventory.counts[itemId] != 0 && (datItemSkillRecords[itemId].flags & 3) != 0 &&
@@ -164,7 +164,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->resources.baseResources[1], 0xC, 7);
     window->list->context = owner;
-    window->list->drawCallback = func_002AB890;
+    window->list->drawCallback = mnuDrawStaffBulletItemListEntry;
     do {
         if (datGameState->inventory.counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
             node = mnuAppendWindowListNode(window, (char *)D_00435E5C + textOffset);
@@ -371,7 +371,7 @@ void mnuDrawOwnedCatalogListNode(s32 x, s32 y, s32 depth, struct MenuList *list,
                           owner->resources.baseResources[1], 0xA, 0x53);
         }
     } else {
-        func_002AB890(x, y, depth, (s32)list, (s32)node, drawArg);
+        mnuDrawStaffBulletItemListEntry(x, y, depth, (s32)list, (s32)node, drawArg);
     }
 }
 

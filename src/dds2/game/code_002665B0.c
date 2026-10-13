@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
@@ -315,7 +316,7 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 }
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern FrFontGlyph *func_0019F6C8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
@@ -1812,7 +1813,7 @@ void mnuDispatchTransitionHostCallbacks(MenuSlotState *host) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269B80);
+INCLUDE_ASM(const s32, "game/code_002665B0", mnuBeginTerminalSlotSelection);
 
 u32 func_00269C48(void) {
     return 1;
@@ -2155,7 +2156,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->progressList->scale);
     }
-    font = func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
+    font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
     frFontDrawGlyphChain(font, 1, 0x52);
     frFontQueueGlyphForCurrentDrawBuffer(font);
 }
@@ -2370,7 +2371,7 @@ s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
     return result;
 }
 
-s32 func_0026AEB0(KwlnTask *request) {
+s32 mnuDrawTerminalSelectionPanel(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);

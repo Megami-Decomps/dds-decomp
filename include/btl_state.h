@@ -472,7 +472,10 @@ typedef struct BtlState {
     BtlBackgroundId background; /* 0x2AC */
     s32 loadStep;
     u8 specialEncounterBlocked; /* 0x2B4: scene setup latch blocks special encounter rolls. */
-    u8 pad2B5[0xF];
+    u8 pad2B5[3];
+    s32 fieldF1ResourceId; /* 0x2B8: retained field archive handle, released by btlFreeFieldBlocks. */
+    s32 fieldF2ResourceId; /* 0x2BC */
+    s32 fieldTBResourceId; /* 0x2C0 */
     struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetCurrentActor */
     s32 boundTask; /* 0x2CC */
@@ -613,6 +616,12 @@ typedef char BtlSceneLightOffset4[((unsigned int)&((BtlState *)0)->lightColor ==
 typedef char BtlSceneLightOffset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
 typedef char BtlLinkageDelayHookOffset[((unsigned int)&((BtlState *)0)->unk65C == 0x65C) ? 1 : -1];
 typedef char BtlLinkageNextHookOffset[((unsigned int)&((BtlState *)0)->cameraPoseBlendHook == 0x660) ? 1 : -1];
+typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x2B8) ? 1 : -1];
+typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x2BC) ? 1 : -1];
+typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x2C0) ? 1 : -1];
+typedef char BtlFieldResourceIdsSpanCheck[
+    (((unsigned int)&((BtlState *)0)->scriptOwner -
+      (unsigned int)&((BtlState *)0)->fieldF1ResourceId) == 0xC) ? 1 : -1];
 typedef char BtlDebugMenuWorkOffset[((unsigned int)&((BtlState *)0)->debug == 0x728) ? 1 : -1];
 typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];

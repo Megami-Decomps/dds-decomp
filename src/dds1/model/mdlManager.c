@@ -33,6 +33,7 @@
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "btl_group_id_entry.h"
+#include "mdl_grouped_parts_api.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -535,7 +536,7 @@ void mdlUnlinkGroupEntry(MdlCtx *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00217310);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlCreateDevSlotList);
 
 extern void sdfReleaseDevSlot(void *, s32, s32);
 
@@ -635,7 +636,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
 
 struct SdfPoolNode;
 extern void mdlUpdateDevSlotTransforms(MdlCtx *, struct SdfPoolNode **);
-extern void func_002D9238(struct SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
@@ -658,7 +659,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfa
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_002D9238(surfaces, inner);
+    sdfModelBuildNodeResourcePackets(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -743,7 +744,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, 
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_002D9238(surfaces, inner);
+    sdfModelBuildNodeResourcePackets(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -1216,7 +1217,6 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
 }
 
 
-extern PacWork *mdlApplyGroupedPartPackets(PacWork *, s32, s32, s32);
 typedef struct MdlPartTagRecord {
     u32 tag;
     u8 state;

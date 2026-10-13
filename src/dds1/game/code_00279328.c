@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -276,8 +277,6 @@ s32 mnuCloseSelectionAndReleasePartyPanel(KwlnTask *selection) {
 }
 
 extern void mnuClearListFlagsOneAndTwo();
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 s32 ptySkillMenuHandlePageSwitch(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     s32 changed = 0;

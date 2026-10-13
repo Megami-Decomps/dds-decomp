@@ -1,5 +1,8 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
@@ -120,9 +123,7 @@ extern void *memset(void *, s32, u32);
 extern void func_00345BA0(void *, SdfPoolNode *);
 extern void func_002A7B28(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
-extern f32 sdfSinPoly(f32);
 
 void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     f32 factor;
@@ -240,7 +241,7 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
 
 extern void sndStartTrackExtended(s32 trackId);
 
-void func_002A5890(void) {
+void mnuResetTitleMovieMenuStateAndStartTrack(void) {
     MenuTitleState *state = mnuMovieMenuState;
 
     state->phase = 0;
@@ -341,7 +342,6 @@ mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct
 
 extern s8 D_0037F510[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 
 s32 mnuHandleMovieMenuInput(void) {
@@ -1076,7 +1076,7 @@ extern s32 mnuCheckMovieDecoderStatus(void);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
-void func_002A6858(void) {
+void mnuAdvanceStaffImageSequence(void) {
     s32 x = D_003E4A80[D_00437AB4].x;
     s32 y = D_003E4A80[D_00437AB4].y;
     s32 width = D_003E4A80[D_00437AB4].width;
@@ -1203,8 +1203,6 @@ void mnuFadeSetStateOff(StaffSparkleState *state, u32 mode) {
     state->mode = mode;
 }
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 
 void mnuUpdateStaffSparkleEffects(StaffSparkleState *state) {
     EffectSlotSet *sprite = mnuMovieWork->sprite;
@@ -1471,7 +1469,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
     mnuDrawScrollingStaffBackdrop(&mnuMovieWork->backdropState);
     mnuDrawAndAdvanceStaffImageBlend(&mnuMovieWork->paletteTransition);
     mnuAdvanceStaffTextScroll(&mnuMovieWork->scrollTransition);
-    func_002A6858();
+    mnuAdvanceStaffImageSequence();
     return 0;
 }
 

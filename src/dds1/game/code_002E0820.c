@@ -8,7 +8,7 @@
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_header.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "sdf_primitive.h"
@@ -233,33 +233,17 @@ u32 sdfConsGetTextureDrawPacketSize(SdfTex *texture) {
 
 /* Texture draw packet: three resource-derived values alternate with their
  * GS register addresses after the GIF tag and payload header. */
-typedef struct SdfDrawPacket {
-    u16 quadwords;
-    u8 pad02[6];
-    u32 reservedWord;
-    u32 command;
-    u64 gifTag;
-    u64 payloadHeader;
-    u64 textureWordA;
-    u64 registerAddressA;
-    u64 textureWordB;
-    u64 registerAddressB;
-    u64 textureWordC;
-    u64 registerAddressC;
-} SdfDrawPacket;
-
-
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 /* Fill TEX1, TEX0 and CLAMP A+D writes; contextOffset 0/1 selects GS context. */
-SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
-    drawPacket->quadwords = 4;
-    drawPacket->gifTag = 0x1000000000008003ULL;
-    drawPacket->command = 0x50000004;
-    drawPacket->reservedWord = 0;
-    drawPacket->payloadHeader = SDF_GIF_REGISTER_AD;
+SdfTextureDrawPacket *sdfConsInitTextureDrawPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
+    drawPacket->header.quadwords = 4;
+    drawPacket->header.gifTag = 0x1000000000008003ULL;
+    drawPacket->header.command = 0x50000004;
+    drawPacket->header.pad08 = 0;
+    drawPacket->header.payloadHeader = SDF_GIF_REGISTER_AD;
     drawPacket->textureWordA = sdfTexGetPrimarySamplingState(texture);
     drawPacket->registerAddressA = contextOffset + 0x14;
     drawPacket->textureWordB = sdfTexGetPrimaryTextureState(texture);
@@ -272,7 +256,7 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, SdfTex *t
 /* Allocate and append texture state; return its packet address. */
 s32 sdfConsCreateDrawPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
     s32 packetBytes = sdfConsGetTextureDrawPacketSize(texture);
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(packetBytes);
+    SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfAllocPacketAligned(packetBytes);
     s32 packetAddress = (s32)sdfConsInitTextureDrawPacket(packet, texture, contextOffset);
     sdfAppendPacket(packetList, packetAddress);
     return packetAddress;
@@ -295,7 +279,7 @@ s32 sdfConsMeasurePacketWithHeader(s32 payloadBytes) {
 }
 
 /* Build packed GIF NLOOP/NREG/PRIM fields and its VIF DIRECT command. */
-void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount) {
+SdfDrawPacket *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount) {
     s32 packetQuadwords = registerCount * loopCount + 1;
     s64 gifTag = loopCount | ((s64)registerCount << SDF_GIF_NREG_SHIFT);
 
@@ -304,7 +288,7 @@ void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 reg
     packet->gifTag = gifTag;
     packet->command = packetQuadwords | SDF_VIF_DIRECT_COMMAND;
     packet->payloadHeader = registerList;
-    packet->reservedWord = 0;
+    packet->pad08 = 0;
     packet->quadwords = packetQuadwords;
     return packet;
 }

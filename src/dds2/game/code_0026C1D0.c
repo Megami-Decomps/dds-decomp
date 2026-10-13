@@ -1,3 +1,4 @@
+#include "evt_world_object_api.h"
 #include "kwln.h"
 #include "mnu_list.h"
 #include "kwln_task_state.h"
@@ -7,6 +8,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"
+#include "eff_random.h"
 
 typedef struct SdfTex SdfTex;
 
@@ -63,9 +65,6 @@ typedef struct {
 } ActiveList;
 
 extern void *dds3GetWorldSecondaryObject(void);
-
-
-extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Recreate the secondary world selection only when its packed key changes.
  * Preserve the signed shift/add rather than treating this as an unsigned OR. */
@@ -173,7 +172,6 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
     return retainedCount;
 }
 
-extern u32 effMiscRand();
 
 /* Perform the requested number of random swaps, not a Fisher-Yates shuffle.
  * Positive swapCount requires nonzero length; equal positions are allowed. */

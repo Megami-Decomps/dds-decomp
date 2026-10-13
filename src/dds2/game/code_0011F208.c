@@ -2,6 +2,7 @@
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -536,9 +537,7 @@ u32 func_001200E0(void) {
     return 0;
 }
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 

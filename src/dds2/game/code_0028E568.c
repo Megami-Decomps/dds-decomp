@@ -89,7 +89,7 @@ extern const u16 D_00427340[8][2];
 extern const u16 D_00427360[8][2];
 extern const s8 D_00427380[9];
 
-s32 func_0028F128(u16 nodeId, s8 member) {
+s32 mnuIsMantraNodeModelFlagSetForMember(u16 nodeId, s8 member) {
     u16 memberFlags[14][2];
     u16 flagsA[4][2];
     u16 flagsB[8][2];

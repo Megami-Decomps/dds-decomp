@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "fr_font_context.h"
 #include "kwln.h"
@@ -27,9 +28,7 @@ extern void sdfGridReleaseAllCells(SdfGrid *);
 
 extern f32 func_003532B8(f32);
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
@@ -54,7 +53,7 @@ extern void frFontDrawGlyphChain(u64, s32, s32);
 extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
-extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);
+extern u64 itfCreateTightFont3TextGlyph(s32, s32, u64, u64, u64, u64);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 

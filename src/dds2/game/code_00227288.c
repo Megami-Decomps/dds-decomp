@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "dds3obj.h"
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
@@ -16,9 +17,7 @@
 
 extern void btlInterpolateVectorStep();
 
-struct EffRandState;
 extern struct EffRandState effSharedRandomState;
-extern u32 effMiscRand(struct EffRandState *);
 extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, f32, f32, f32, s8, s8);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);

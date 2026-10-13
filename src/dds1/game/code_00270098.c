@@ -126,7 +126,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
     return 1;
 }
 
-u8 func_00270218(void) {
+u8 mnuCanDrawMovie(void) {
     s64 movieState;
 
     movieState = mnuGetMovieDrawState();

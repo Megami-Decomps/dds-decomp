@@ -4,7 +4,6 @@
 #include "clock_time.h"
 #include "sdf_cd_clock.h"
 
-extern u32 effMiscRand(void *state);
 
 extern u16 D_0040BAC0[];
 
@@ -61,6 +60,8 @@ extern s32 sdfBcdStrToInt(s32);
 extern u8 D_00438B70;
 extern ClockTime D_00438B78;
 
+/* Copy cached time to now; return 0 for a valid refresh, -1 for failure, or 1 for reuse.
+ * The native 20-tick refresh gate and month-as-year conversion are retained. */
 INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
 
 s32 effMiscReadCachedClockTime(ClockTime *now) {
@@ -98,6 +99,7 @@ extern vu16 D_004391E2;
 extern vu16 D_004391E4;
 extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
 
+/* Attempt one queued SIF packet: 0 means sent, 1 means empty or rejected. */
 s32 sndTryDispatchQueuedCommand(void) {
     s32 readIndex = (s16)D_004391E2;
     SndRingPacket *packet;

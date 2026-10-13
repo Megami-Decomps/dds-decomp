@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_task_work.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_profile_progress.h"
@@ -11,7 +12,7 @@ extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 
 extern u32 D_003E274C[];
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_00258258);
+INCLUDE_ASM(const s32, "game/code_00258258", mnuDrawMantraPrerequisiteLink);
 
 u32 mnuGetMantraPrerequisiteFlags(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
     MantraPrerequisiteRecord *record = &D_0036AE80[scene->sceneId];
@@ -45,7 +46,7 @@ extern u32 mnuGetSelectedNodeValue(void);
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern void func_00258258(s32, s32, s32, s32, s32, u32, s32, MnuMantraGridEntry *, MnuMantraNodeState *, s32);
+extern void mnuDrawMantraPrerequisiteLink(s32, s32, s32, s32, s32, u32, s32, MnuMantraGridEntry *, MnuMantraNodeState *, s32);
 
 void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
     u32 prerequisiteFlags[4];
@@ -82,7 +83,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
                 if (prerequisiteFlags[i] & 2) {
                     color = 0x80808080;
                 }
-                func_00258258(x, y, z, cellWidth, cellHeight, color, i, scene, states, surface);
+                mnuDrawMantraPrerequisiteLink(x, y, z, cellWidth, cellHeight, color, i, scene, states, surface);
             }
         }
     }
@@ -150,10 +151,6 @@ void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *state, u32 mode) {
     state->mode = mode;
     state->frame = 0;
 }
-
-void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
-
 /* Step the notification frame (wraps at 31); mode 1 plays the cue once at frame 0.
  * Its unused implicit-int result preserves the call's non-sibling epilogue. */
 mnuAdvanceMantraGridFeedback(MnuGridFeedbackState *voice) {

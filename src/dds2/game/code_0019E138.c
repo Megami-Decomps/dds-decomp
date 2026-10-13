@@ -1,6 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_header.h"
 #include "fr_font.h"
 #include "kwln.h"
 #include "kwln_task_state.h"
@@ -11,7 +11,6 @@
 #include "itf_panel_draw.h"
 #include "sdf_texture_file.h"
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 
 #define ITF_BYTE_MASK 0xFF
 #define ITF_NODE_HEADER_BYTES 8
@@ -42,13 +41,12 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 #include "sdf_packet_alloc.h"
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
 extern s32 D_00435E6C;
 extern s32 D_00435E70;
 extern void itfSetTextDrawLimit(s32);
-extern FrFontGlyph *func_0019FA08(s32, s32, s32, u16, FrFontTextBank *, s32);
+extern FrFontGlyph *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
 extern void kwlnTaskCreate(const char *, s32, s32, s32, u32 (*)(void), void (*)(void), void *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
@@ -680,7 +678,8 @@ FrFontGlyph *frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
     return handle;
 }
 
-FrFontGlyph *func_0019F448(s32 x, s32 y, s32 depth, s32 colors,
+/* Create positioned, colored text with measured spacing and link it to parent. */
+FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
                            const char *text, FrFontGlyph *parent) {
     return frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent);
 }
@@ -737,7 +736,8 @@ FrFontGlyph *func_0019F5E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
     return glyph;
 }
 
-FrFontGlyph *func_0019F6C8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
+/* Build text with font index 3; retain the existing glyph chain's spacing. */
+FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_00436580, 0, 0, 0, previousGlyph);
@@ -750,7 +750,8 @@ FrFontGlyph *func_0019F6C8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
     return glyph;
 }
 
-FrFontGlyph *func_0019F798(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
+/* Build font-index-3 text with signed spacing -2 and return its glyph chain. */
+FrFontGlyph *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_00436580, 0, 0, 0, previousGlyph);
@@ -826,7 +827,9 @@ extern s32 frFontCountGlyphBands(FrFontGlyph *text);
 extern s32 frFontMeasureLineWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
-FrFontGlyph *func_0019FA08(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
+/* Cycle a segment counter every 30 calls, but draw the full bank text stream.
+ * Return NULL for absent text; optionally center the resulting glyph chain. */
+FrFontGlyph *itfDrawBankTextWithSegmentCounter(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
     char buffer[0x80];
     u8 *text;
     u32 mode;
@@ -944,13 +947,13 @@ FrFontGlyph *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMod
     itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
-        result = func_0019FA08(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
+        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
         break;
     case 1:
-        result = func_0019FA08(x, y, depth, textId, (FrFontTextBank *)D_00435E70, flags);
+        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)D_00435E70, flags);
         break;
     case 2:
-        result = func_0019FA08(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
+        result = itfDrawBankTextWithSegmentCounter(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
         break;
     }
     itfSetTextDrawLimit(-1);

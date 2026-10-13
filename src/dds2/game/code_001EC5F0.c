@@ -1,6 +1,9 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "eff_random.h"
+#include "btl_camera_timed_instruction.h"
+#include "snd_sequence_volume_pan.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
@@ -175,22 +178,11 @@ extern u32 btlTintTransitionHoldCount;
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern void effMiscQuaternionToMatrixVU(void);
 
 extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
-
-typedef struct BtlCameraTimedInstruction {
-    s32 kind;
-    s16 parameterIndex;
-    u8 pad06[2];
-    f32 startFrame;
-    f32 duration;
-} BtlCameraTimedInstruction;
 
 extern const BtlCameraTimedInstruction *D_003BBF70[];
 
@@ -229,13 +221,6 @@ extern char D_00418C58[];
 extern s32 sndHasActiveFileLoad(void);
 
 extern void func_003422F8(s32, s32);
-
-typedef struct BattleFieldBlocks {
-    u8 unk_00[0x2B8];
-    s32 fieldF1;
-    s32 fieldF2;
-    s32 fieldTB;
-} BattleFieldBlocks;
 
 extern f32 *D_0037F770[];
 
@@ -946,7 +931,6 @@ INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EDFB8);
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EE458);
 
-extern u32 effMiscRand(void *state);
 
 void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
 f32 angle, f32 blend) {
@@ -1026,7 +1010,7 @@ f32 angle, f32 blend) {
         btlSetDefaultActionCameraPose(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (effMiscRand((EffRandState *)effSharedRandomState) & 1))) {
         unit = first;
         first = last;
         last = unit;
@@ -3801,25 +3785,25 @@ void btlWaitForPendingWorkAndReleaseBuffers(void) {
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418C58);
 
 void btlFreeFieldBlocks(void) {
-    BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
+    BtlState *blocks = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
-    if (blocks->fieldTB != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
-        blocks->fieldTB = 0;
+    if (blocks->fieldTBResourceId != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
+        blocks->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_00418C58);
     }
-    if (blocks->fieldF2 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF2);
-        blocks->fieldF2 = 0;
+    if (blocks->fieldF2ResourceId != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF2ResourceId);
+        blocks->fieldF2ResourceId = 0;
         btlBossDebugPrintf("btl:free field F2\n");
     }
-    if (blocks->fieldF1 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF1);
-        blocks->fieldF1 = 0;
+    if (blocks->fieldF1ResourceId != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF1ResourceId);
+        blocks->fieldF1ResourceId = 0;
         btlBossDebugPrintf("btl:free field F1\n");
     }
-    blocks = (BattleFieldBlocks *)btlGetRuntime();
-    ((BtlState *)blocks)->battleFlags &= ~2;
+    blocks = (BtlState *)btlGetRuntime();
+    blocks->battleFlags &= ~2;
 }
 
 void btlInitializeSceneLightingAndTint(void) {
@@ -4124,7 +4108,7 @@ typedef struct BtlFieldLoadArgs {
 u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
 {
-    BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
+    BtlState *blocks = (BtlState *)btlGetRuntime();
     char directory[0x80];
     char path[0x80];
     BtlFieldArchiveNode *node;
@@ -4147,15 +4131,15 @@ u32 btlPollFieldArchiveLoad(args)
             while (node != NULL) {
                 switch (i) {
                 case 0:
-                    blocks->fieldTB = node->handle;
+                    blocks->fieldTBResourceId = node->handle;
                     args->fieldTB = node->data;
                     break;
                 case 1:
-                    blocks->fieldF2 = node->handle;
+                    blocks->fieldF2ResourceId = node->handle;
                     args->fieldF2 = node->data;
                     break;
                 case 2:
-                    blocks->fieldF1 = node->handle;
+                    blocks->fieldF1ResourceId = node->handle;
                     args->fieldF1 = node->data;
                     break;
                 }
@@ -4170,12 +4154,12 @@ u32 btlPollFieldArchiveLoad(args)
                                              args->fieldF1, args->fieldF2,
                                              (const SdfTextureOffsetListHeader *)args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
-            if (blocks->fieldTB != 0) {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
-                blocks->fieldTB = 0;
+            if (blocks->fieldTBResourceId != 0) {
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
+                blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_00418C58);
             }
-            ((BtlState *)blocks)->battleFlags |= 2;
+            blocks->battleFlags |= 2;
             btlBossDebugPrintf("btl:field load end[f%03d_%03d]\n", args->stage, args->variant);
             return 1;
         }

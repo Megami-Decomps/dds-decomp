@@ -59,7 +59,6 @@ typedef struct EffEmit {
 typedef struct SdfMemBlock SdfMemBlock;
 extern void effSamplePrimitiveCurveVertex(EffVert *arg0, EffPrimitiveCurve *arg1, s32 arg2, f32 arg3);
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
-extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
@@ -100,7 +99,7 @@ EffChanWork *effChanWorkCreate(EffChanSource *source) {
         delayModulus = work->head.spread;
         for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
             recordCursor->param = effParamWorkDuplicate(parameterTemplate);
-            recordCursor->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+            recordCursor->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
             recordCursor++;
         }
     }
@@ -275,7 +274,7 @@ void effUpdateChannelWork(EffChanWork *work) {
         if (recordTime < activeSteps) {
             recordCursor->delay++;
         } else if (cycleEnabled != 0) {
-            recordCursor->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+            recordCursor->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         } else {
             recordCursor->delay++;
         }
@@ -325,7 +324,7 @@ void effFillRandRecords(EffEmit *emitter) {
     }
     do {
         effJitterChannelControlPoints(channelWork, recordIndex);
-        recordCursor->delay = effMiscRand(&effDefaultRandomState) % stepModulus;
+        recordCursor->delay = effMiscRand((EffRandState *)effDefaultRandomState) % stepModulus;
         bezierSlot = effMathGetSlotAt(channelWork->slots, recordIndex);
         recordIndex++;
         randomStep = recordCursor->delay;

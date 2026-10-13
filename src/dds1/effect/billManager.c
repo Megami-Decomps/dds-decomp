@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
@@ -26,8 +27,6 @@ extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 D_0034E010[4];
 extern f32 D_0034E020[4];
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 extern f64 fabs(f64 value);
 extern BillChildPayload *D_003BD7F4;
 

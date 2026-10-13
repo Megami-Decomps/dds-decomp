@@ -922,7 +922,7 @@ extern void mnuTitleResetSequenceTimers(void);
 extern void mnuDrawTitleSceneForPhase(void);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 extern s32 mnuUpdateMovieMenuInputState(void);
-extern void func_002A5890(void);
+extern void mnuResetTitleMovieMenuStateAndStartTrack(void);
 extern void func_002A5F80(void);
 extern void sndReleaseTrackHandle(u32);
 extern void sdfSoundSetChannelCount(u32);
@@ -1185,7 +1185,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
         mnuMovieMenuState->cursor = 0;
         mnuMovieMenuState->state++;
-        func_002A5890();
+        mnuResetTitleMovieMenuStateAndStartTrack();
         break;
     case 26:
         mnuHandleTitleMenuEvent(mnuMovieMenuState->state);

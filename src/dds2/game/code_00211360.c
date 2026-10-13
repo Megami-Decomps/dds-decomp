@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "btl_ai_slot.h"
 #include "sdf_chip.h"
 #include "sdf.h"
@@ -17,8 +18,6 @@
 #include "evt_unit.h"
 #include "mdl.h"
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *state);
 
 #define BTL_AI_SLOT_COUNT 5
 

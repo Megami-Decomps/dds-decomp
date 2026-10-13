@@ -2,6 +2,9 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -27,7 +30,6 @@
  * step-before-index, and all callers are verified. */
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void *dds3GetWorldObject(void);
 extern void func_00133F08(void);
@@ -339,7 +341,6 @@ extern FldEncEntry *fldEncounterRollTable;
 
 extern s32 mdlFlagTest(s32 flag);
 
-extern s32 effMiscRand();
 
 /* Mode 14 copies this eight-byte request. The packed selection contains
  * group:8, entry:8, and scene:16; its consumer reads both words as signed. */
@@ -973,7 +974,7 @@ typedef char FieldAreaEncounterRow_size_check[(sizeof(FieldAreaEncounterRow) == 
 typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable) == 0x304) ? 1 : -1];
 extern FieldAreaEncounterTable *D_00435E08;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
-extern s32 evtCreateWorldObjectForKey(s32 area, s32 room);
+
 extern void *func_001178B0(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
@@ -2044,9 +2045,6 @@ extern void mnuCreateCampTasks(void);
 extern void evtSetSolarOverlayFullyVisible(void);
 
 extern void fldApplySkyLightSetToPlayerVU(void);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern void fldClearSceneLifecycleFlags(u32 mask);
 
 extern u8 fldTestSceneLifecycleFlags(u32 mask);

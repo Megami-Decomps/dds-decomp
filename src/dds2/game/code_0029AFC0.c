@@ -1,7 +1,9 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "eff_random.h"
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -32,7 +34,6 @@ extern u8 brsGetLevelStepForValue(s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void dspSetActive(s32);
 extern s32 dspStartEntry(s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern char D_004379B0[];
 extern char D_004379B8[];
 
@@ -274,7 +275,6 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
-extern u32 effMiscRand(void *);
 extern u16 D_003D6332[][17];
 extern s32 mdlFlagTest(s32);
 

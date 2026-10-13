@@ -153,11 +153,11 @@ struct FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
 s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *glyph);
 
 #ifdef VERSION_DDS1
-struct FrFontGlyph *func_00197748(s32 x, s32 y, s32 depth, s32 colors,
+struct FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
     const char *text, struct FrFontGlyph *parent);
 #endif
 #ifdef VERSION_DDS2
-struct FrFontGlyph *func_0019F448(s32 x, s32 y, s32 depth, s32 colors,
+struct FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
     const char *text, struct FrFontGlyph *parent);
 #endif
 

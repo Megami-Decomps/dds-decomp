@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "mnu.h"
 #include "sdf_task_work.h"
 #include "mnu_scene_work.h"
@@ -11,7 +12,6 @@ extern s32 mnuDrawMantraSparkScene();
 extern void mnuDrawScaledPlacedSprite(s32, s32, s32, s32, s32, s32, f32, f32);
 extern void mnuDrawMantraProfileSelectionSurface(s32, s32, s32, s32, MenuSceneWork *, s32);
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
-extern f32 sdfSinPoly(f32 angle);
 extern void mnuDrawMantraScenePlacementSprite(s32, s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00253E58", mnuHandleMantraSceneInput);

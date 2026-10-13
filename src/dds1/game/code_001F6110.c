@@ -1,6 +1,8 @@
 #include "btl_command.h"
+#include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
 #include "sdf_chip.h"
@@ -57,7 +59,7 @@ extern s32 D_003BD854;
 extern void btlCmdSimpleB(s32, s32);
 extern void btlCmdSimpleI(s32, s32);
 extern void btlCmdSimpleA(s32, u16);
-extern void btlCmdSimpleE(s32, u16);
+extern void btlSelectCommandTargetsByMode(s32, u16);
 extern void btlCmdSimpleD(s32, u16);
 extern void btlCmdSimpleJ(s32, u16);
 extern void btlRunWeightedAiAction(s32, u16);
@@ -711,8 +713,6 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern f32 func_002FA1F0(f32, f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern u128 D_0035F9E0;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
@@ -1246,10 +1246,11 @@ u32 btlScriptCmdSimpleD(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleE(void) {
+/* Apply script parameter 0 as the command target-selection mode; return VM success. */
+u32 btlScriptCmdSelectTargetsByMode(void) {
     s32 context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleE(context, value);
+    btlSelectCommandTargetsByMode(context, value);
     return 1;
 }
 
@@ -2379,7 +2380,8 @@ void func_001FB170(void) {
 void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
-void func_001FB180(void) {
+/* Retail diagnostic stub: two extents, a start point, color and matrix. */
+void func_001FB180(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
 }
 
 void func_001FB188(const f32 *position, u32 color, s32 mode, f32 scale) {

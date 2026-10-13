@@ -1,4 +1,6 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "eff_scale_params.h"
 #include "ee_mmi.h"
 #include "eff_random.h"
@@ -313,8 +315,6 @@ extern void dds3DispatchIndexedCallback(void *callback);
 extern void func_002966D8(s32 object);
 
 extern s32 fileResetSelection(void);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 extern s32 D_003BC818;
 extern s32 D_003BC820;
 extern void fileSetMenuValueAndInitializeFlags(u32 value);
@@ -589,7 +589,6 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 }
 
 extern f32 fileSaveHighlightPhase;
-extern f32 sdfSinPoly(f32);
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
 void fileDrawPulsingSaveHighlight(void) {
@@ -5806,7 +5805,7 @@ void fileCopyAndInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
 }
 
 /* vu0 routine: shifts one slot's history and interpolates its trailing samples. */
-void func_00297658(FileSlotTable *record, FileSlot *slot) {
+void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
     f32 points[4][4];
     f32 color[4];
     f32 colorStep[4];
@@ -5966,11 +5965,9 @@ void func_00297658(FileSlotTable *record, FileSlot *slot) {
 }
 
 
-struct EffRandState;
 extern struct EffRandState effSharedRandomState;
-extern u32 effMiscRand(struct EffRandState *state);
 extern f32 fabsf(f32);
-extern void func_00297658(FileSlotTable *, FileSlot *);
+extern void effUpdateGridRecordSlotHistory(FileSlotTable *, FileSlot *);
 
 typedef struct FileWaveMotion {
     f32 axis[4];             /* 0x00: xyz only */
@@ -6187,7 +6184,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -6394,7 +6391,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -6438,7 +6435,6 @@ typedef struct FileCircularMotion {
     f32 angleMultiplier;
 } FileCircularMotion;       /* 0x44, ordinary word alignment */
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
 void effUpdateCircularEmitterSlots(FileSlotTable *record) {
@@ -6638,7 +6634,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -6875,7 +6871,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -7083,7 +7079,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }

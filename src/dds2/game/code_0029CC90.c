@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "ui_color.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -349,7 +350,6 @@ typedef struct PartyStatGrowthBank {
 } PartyStatGrowthBank;
 
 extern PartyStatGrowthBank D_003D6518[];
-extern u32 effMiscRand(void *state);
 
 void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit) {
     s32 eligible[DAT_BASE_STAT_COUNT];
