@@ -101,7 +101,7 @@ extern s32 kwlnTextureViewerHandlePad(void);
 
 extern s8 sdfPadButtonStates[32];
 
-extern s32 func_00104908(s32);
+extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 
 extern void func_00104AA8(void *data, s32 handle);
 
@@ -823,7 +823,7 @@ u32 kwlnTextureGetPageIndex(void) {
 
 /* DDS2 first skips clone-source entries at the head, even for requested index zero.
  * This assumes a nonempty list; initial exhaustion returns 0 before selection writes. */
-s32 func_00104908(s32 requestedIndex) {
+s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
     SdfTex *texture = sdfResourceListHead;
     SdfTex *previousTexture;
     s32 visitedIndex = 0;
@@ -873,7 +873,7 @@ s32 kwlnTextureViewerHandlePad(void) {
     } else if ((sdfPadButtonStates[0x1A] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x1B] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
-    kwlnTextureViewerPageIndex = func_00104908(kwlnTextureViewerPageIndex);
+    kwlnTextureViewerPageIndex = kwlnSelectIncompleteResourceAtPageIndex(kwlnTextureViewerPageIndex);
     if (sdfPadButtonStates[0x12] < 0) {
         D_00435C60 ^= 1;
     }

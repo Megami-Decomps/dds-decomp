@@ -105,7 +105,7 @@ extern s32 D_003BA724;
 extern s32 kwlnDistanceBlurErrorCount;
 extern s32 kwlnRippleBlurErrorCount;
 extern s8 sdfPadButtonStates[32];
-extern s32 func_00104A18(s32);
+extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 extern SdfPoolNode D_00325708;
 
 
@@ -804,7 +804,7 @@ u32 kwlnTextureGetPageIndex(void) {
 
 /* Clamp a negative request and return the reached index. DDS1 index zero
  * selects the head without scanning clone-source links; tail exits retain prior writes. */
-s32 func_00104A18(s32 requestedIndex) {
+s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
     SdfTex *texture = sdfResourceListHead;
     SdfTex *previousTexture;
     s32 visitedIndex = 0;
@@ -847,7 +847,7 @@ s32 kwlnTextureViewerHandlePad(void) {
     } else if ((sdfPadButtonStates[0x1A] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x1B] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
-    kwlnTextureViewerPageIndex = func_00104A18(kwlnTextureViewerPageIndex);
+    kwlnTextureViewerPageIndex = kwlnSelectIncompleteResourceAtPageIndex(kwlnTextureViewerPageIndex);
     if (sdfPadButtonStates[0x12] < 0) {
         D_003BA890 ^= 1;
     }
