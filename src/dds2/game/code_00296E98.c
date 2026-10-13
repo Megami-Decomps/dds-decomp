@@ -6,6 +6,7 @@
 #include "mnu_result.h"
 #include "mnu_list.h"
 #include "mnu_staff.h"
+#include "brs_task.h"
 #include "kwln_task_lifecycle.h"
 
 

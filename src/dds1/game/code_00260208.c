@@ -2,6 +2,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_list.h"
 #include "mnu_staff.h"
+#include "brs_task.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"

@@ -18,6 +18,7 @@
 #include "sdf_sif_command.h"
 #include "scr.h"
 #include "kwln_task_lifecycle.h"
+#include "brs_task.h"
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
@@ -61,8 +62,6 @@ extern s32 fldIsFieldResourceWaitFinished(void);
 extern u32 D_00435BB0;
 
 extern s32 mnuAcknowledgeCampState(void);
-
-extern s32 brsTaskConsumeDone(void);
 
 extern s32 fileConsumeConfigTaskReady(void);
 
