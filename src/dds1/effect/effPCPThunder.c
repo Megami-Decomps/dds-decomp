@@ -1934,7 +1934,7 @@ void effThunderGroupRelease(EffThunderGroup *group) {
     sdfReleaseChipBlock(group);
 }
 
-u32 func_001673C0(u32 arg0) {
+u32 effGetPairedBlurResourceVectorRecordAddress(u32 arg0) {
     return arg0;
 }
 
