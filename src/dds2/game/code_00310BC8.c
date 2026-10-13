@@ -41,8 +41,6 @@ extern f32 func_003532B8(f32);
 
 
 
-extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
-
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern void sdfGridFollowCursorWithinMargins(u8 *);

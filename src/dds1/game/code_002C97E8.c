@@ -32,8 +32,6 @@ extern f32 func_002FA1C0(f32);
 
 
 
-extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
-
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 
 #include "sdf_vector_transform.h"

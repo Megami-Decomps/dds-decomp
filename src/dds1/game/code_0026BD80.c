@@ -54,7 +54,6 @@ extern void sdfQuaternionNormalize(f32 *);
 extern void sdfQuatForwardVector(f32 *, f32 *);
 extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern void sdfQuatFromEuler(f32 *, f32, f32, f32);
-extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 
 typedef struct {
