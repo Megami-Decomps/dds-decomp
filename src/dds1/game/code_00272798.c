@@ -113,7 +113,7 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
 }
 
 /* Submit a request to the active menu dispatcher in mode 2. */
-s32 func_002729C8(KwlnTask *request) {
+s32 mnuFinishStaffConfigPopup(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }

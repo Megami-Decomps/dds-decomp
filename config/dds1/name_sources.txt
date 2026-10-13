@@ -7787,6 +7787,7 @@
 0x0026F118	mnuDrawMovieRollEntry	inferred	Inferred from the current C implementation in game/code_0026EC90.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0026F918	mnuAdvanceStaffImageSequence	inferred	Inferred from the current C implementation in game/code_0026EC90.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002728F8	mnuDrawStaffCampImageScreen	inferred	Inferred from the current C implementation in game/code_00272798.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002729C8	mnuFinishStaffConfigPopup	inferred	Completes the staff configuration popup by submitting its task-owned menu context and callback in dispatcher mode 2; paired DDS2 role is 0x002AB1B0.
 0x00272BC0	mnuDrawStaffBulletItemQuantity	inferred	Inferred from the current C implementation in game/code_00272798.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00272D50	mnuCreateStaffItemWindow	inferred	Inferred from the current C implementation in game/code_00272D50.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00274050	mnuHandleStaffItemUseInput	inferred	Inferred from the current C implementation in game/code_00273AB0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

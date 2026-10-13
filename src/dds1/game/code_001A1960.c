@@ -173,7 +173,7 @@ void func_001A1990(DatPartyRecord *entry, s32 index) {
     for (i = count; i < 24; i++) {
         entry->effectData[i] = 0;
     }
-    entry->unk20 = count;
+    entry->effectDataCount = count;
     entry->maxHp = datEnemyRecords[index].maxHp;
     entry->hp = datEnemyRecords[index].hp;
     entry->maxMp = datEnemyRecords[index].maxMp;
