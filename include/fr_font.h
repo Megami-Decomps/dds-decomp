@@ -150,6 +150,8 @@ struct FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct FrFontGlyph *previousGlyph);
 /* Update the first-option byte of every child on this glyph chain. */
 void frFontSetChildChainFirstOption(struct FrFontGlyph *glyph, u8 firstOption);
+/* Replace each child render word along the borrowed glyph chain. */
+void frFontSetChildColors(struct FrFontGlyph *parentNode, u32 colorWord);
 
 /* Decode encoded text and append the resulting glyph to an optional parent. */
 struct FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth,

@@ -2,6 +2,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "itf.h"
+#include "fr_font.h"
 
 extern s32 D_003BAA9C;
 
