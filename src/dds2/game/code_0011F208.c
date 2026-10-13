@@ -2,6 +2,7 @@
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_activation_entry.h"
 #include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
@@ -717,13 +718,7 @@ INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412BB8);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00120B88);
 
-typedef struct FieldActivationRecord {
-    s32 kind;
-    s16 parameter;
-    u8 pad06[0xA];
-} FieldActivationRecord;
-
-extern FieldActivationRecord D_003A8EB0[];
+extern FldActivationEntry D_003A8EB0[];
 
 extern u8 D_0039A1D0[], D_003A41A8[], D_003A47E8[], D_003A55F0[], D_0038A3B8[], D_0038A480[], D_0038A9B0[], fldCameraFollowRows[], D_00389A70[], D_00391FA0[];
 

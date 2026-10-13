@@ -5,6 +5,7 @@
 #include "kwln_task_create.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "fld_activation_entry.h"
 #include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
@@ -78,13 +79,7 @@ extern void fldSetCameraMoveMode(s32);
 extern u32 fldGetSceneReadyFlag(void);
 
 
-typedef struct FieldActivationRecord {
-    s32 kind;
-    s16 parameter;
-    u8 pad06[0xA];
-} FieldActivationRecord;
-
-extern FieldActivationRecord D_0034C8F0[256];
+extern FldActivationEntry D_0034C8F0[256];
 
 extern void fldActivateObjectById(s32);
 
