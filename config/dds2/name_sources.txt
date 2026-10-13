@@ -2120,6 +2120,7 @@
 0x0019FC38	itfDrawBankTextWithLayoutFlags	inferred	readability/matching review (QP16)
 0x0019FE00	itfDrawTextWithSelectedFontMode	inferred	Draws a text ID with the resource chosen by font mode. [names_reviewed8.tsv]
 0x0019FEF8	itfDrawUnderscoreTextSegment	inferred	confidence=high; matched-C; src/dds2/game/code_0019E138.c:433:func_0019FEF8; Extracts the requested underscore-delimited segment into a 0x200-byte local buffer and passes it to the text renderer; returns zero for overlong input or no selected segment.; source=names_pending_main.tsv:140 [names_qp12_apply.tsv]
+0x001A0038	itfReturnZero	inferred	Returns literal zero; no direct C/assembly callers or registration found. Paired with DDS1 0x00198008.
 0x001A0050	itfReturnThirdCallbackValue	inferred	high confidence; src/dds2/game/code_0019E138.c func_001A0050: Ignores the first two callback arguments and returns the third unchanged. [names_reviewed25.tsv]
 0x001A0068	itfSplitRelativeSegments	inferred	Computes three segment pointers by cumulatively adding offset words within the source block.
 0x001A01D8	itfCreateMemNodeRing	inferred	Allocates payload nodes and links the count plus one node headers into a ring; first-game twin 001981A8.
