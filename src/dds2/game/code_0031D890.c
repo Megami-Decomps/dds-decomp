@@ -255,7 +255,7 @@ extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 extern void itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 scale);
 
-void func_0031E020(CompactSlotPool *pool, u32 flags) {
+void itfUpdateAndDrawSpriteHitEffects(CompactSlotPool *pool, u32 flags) {
     CompactSlot *slot;
     s32 i;
     f32 phase;

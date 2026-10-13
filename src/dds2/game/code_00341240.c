@@ -1,6 +1,7 @@
 #include "snd_ring.h"
 #include "common.h"
 #include "eff_random.h"
+#include "eff_random_mod.h"
 #include "clock_time.h"
 #include "sdf_cd_clock.h"
 
@@ -22,7 +23,7 @@ f32 effMiscRandUnitFloat(void *state) {
     return (f32)value * 5.9604644775390625e-8f;
 }
 
-u32 effMiscRandMod(void *state, u32 modulus) {
+u32 effMiscRandMod(EffRandState *state, u32 modulus) {
     return effMiscRand(state) % modulus;
 }
 

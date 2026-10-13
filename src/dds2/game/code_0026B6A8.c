@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "kwln.h"
 #include "kwln_fade.h"
 #include "itf_draw_grid.h"

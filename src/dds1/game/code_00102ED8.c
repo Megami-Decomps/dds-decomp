@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
@@ -93,7 +94,6 @@ extern void sdfGraphSetDisplayMode(s32 arg0);
 #include "sdf_packet_alloc.h"
 extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
 extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
-extern s32 effMiscRandMod(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 typedef s32 (*KwlnTaskUpdateCallback)();
 typedef void (*KwlnTaskDestroyCallback)();

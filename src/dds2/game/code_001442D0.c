@@ -1165,7 +1165,7 @@ void fldReleaseSceneRecordChunk(void) {
     fldSceneRecordCount = 0;
 }
 
-void func_00145818(void) {
+void fldResetSceneResourceTables(void) {
     s32 i;
 
     fldAreaState.unkC4 = -1;
@@ -1345,7 +1345,7 @@ extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
-extern s32 func_00123EE0(s32, f32, f32);
+extern s32 fldIsStageExplorationCellMarked(s32, f32, f32);
 extern s32 fldGetFloorFlag(s32, s32, s32);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
 typedef struct FrFontGlyph FrFontGlyph;
@@ -1361,7 +1361,7 @@ extern void fldSetGsAlphaBlendEquation(s32);
 extern void fldSelectDisplayBuffer(u32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
-extern s32 func_00123EE0(s32, f32, f32);
+extern s32 fldIsStageExplorationCellMarked(s32, f32, f32);
 extern s32 fldGetFloorFlag(s32, s32, s32);
 extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_00145A08(s32, f32, f32, f32);
@@ -1463,7 +1463,7 @@ void func_00146250(void) {
                  i++, sceneX += step) {
                 if (sceneX < (f32)D_00436250 - 11400.0f) continue;
                 if (sceneX > (f32)D_00436250 + 11400.0f) break;
-                if (func_00123EE0(D_00436288, sceneX, sceneZ)) {
+                if (fldIsStageExplorationCellMarked(D_00436288, sceneX, sceneZ)) {
                     if (run == 0) { left = sceneX - 50.0f; top = sceneZ + 50.0f; }
                     bottom = sceneZ - step - 50.0f;
                     right = sceneX + step + 50.0f;
@@ -1579,7 +1579,7 @@ void func_00146250(void) {
                 if ((f32)D_00436250 + 11400.0f < sceneX) {
                     break;
                 }
-                if (func_00123EE0(D_00436288, sceneX, sceneZ) != 0) {
+                if (fldIsStageExplorationCellMarked(D_00436288, sceneX, sceneZ) != 0) {
                     if (run == 0) {
                         left = sceneX - 50.0f;
                         top = sceneZ + 50.0f;
@@ -1655,7 +1655,7 @@ void func_00146250(void) {
                             switch (icon->kind) {
                             case 1:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 8;
@@ -1664,7 +1664,7 @@ void func_00146250(void) {
                                 break;
                             case 2:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 9;
@@ -1673,7 +1673,7 @@ void func_00146250(void) {
                                 break;
                             case 3:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 10;
@@ -1682,7 +1682,7 @@ void func_00146250(void) {
                                 break;
                             case 4:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 5;
@@ -1691,7 +1691,7 @@ void func_00146250(void) {
                                 break;
                             case 5:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 2;
@@ -1700,7 +1700,7 @@ void func_00146250(void) {
                                 break;
                             case 6:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 4;
@@ -1709,7 +1709,7 @@ void func_00146250(void) {
                                 break;
                             case 7:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 6;
@@ -1718,7 +1718,7 @@ void func_00146250(void) {
                                 break;
                             case 8:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 7;
@@ -1727,7 +1727,7 @@ void func_00146250(void) {
                                 break;
                             case 9:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 3;
@@ -1736,7 +1736,7 @@ void func_00146250(void) {
                                 break;
                             case 10:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 12;
@@ -1745,7 +1745,7 @@ void func_00146250(void) {
                                 break;
                             case 11:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 11;
@@ -1754,7 +1754,7 @@ void func_00146250(void) {
                                 break;
                             case 12:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 13;
@@ -1763,7 +1763,7 @@ void func_00146250(void) {
                                 break;
                             case 13:
                                 if (D_00436240 != 0 ||
-                                    func_00123EE0(D_00436288,
+                                    fldIsStageExplorationCellMarked(D_00436288,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 14;

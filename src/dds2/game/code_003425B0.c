@@ -16,6 +16,7 @@
 #include "sdf_texture_queue.h"
 #include "sdf_stream_input_dma.h"
 #include "sdf_sound_rpc_records.h"
+#include "snd_midi_state_views.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -93,15 +94,6 @@ extern char D_0042E5C8[];
 extern char D_0042E5F0[];
 extern char D_0042E610[];
 extern char *D_0040BB18[];
-
-typedef struct MidiChannel {
-    u8 pad00[0x19];
-    u8 index;
-    u8 enabled;
-    u8 pad1B[5];
-    u32 earlierEntries[2];
-    u32 entries[8];
-} MidiChannel;
 
 extern char D_0040BAF8[];
 
@@ -1368,7 +1360,7 @@ s32 sdfCompleteIpuInputFeedDma(void) {
 }
 
 /* Return the indexed earlier entry only when enabled; the byte index is unchecked. */
-u32 sdfMidiPreviousEntry(MidiChannel *channel) {
+u32 sdfMidiPreviousEntry(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
     if (channel->enabled != 0) {
         selectedEntry = channel->earlierEntries[channel->index];
@@ -1377,7 +1369,7 @@ u32 sdfMidiPreviousEntry(MidiChannel *channel) {
 }
 
 /* Return the indexed current entry only when enabled; the byte index is unchecked. */
-u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
+u32 sndGetSelectedChannelEntry(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
     if (channel->enabled != 0) {
         selectedEntry = channel->entries[channel->index];

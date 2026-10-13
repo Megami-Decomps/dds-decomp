@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "snd_sequence_volume_pan.h"
 #include "mnu_input.h"
@@ -52,7 +53,6 @@ extern s32 D_00435E48;
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 dspStartEntry(s32);
 extern void ptyAdjustItemQuantity();
 extern void mnuRefreshStaffWindowDescription();
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);

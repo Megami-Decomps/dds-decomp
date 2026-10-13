@@ -195,7 +195,7 @@ extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 
-extern f32 func_00208750(BtlIndexList *list, f32 *maxTop, f32 *minTop);
+extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 
 extern void func_0021F3E8(s32);
 
@@ -452,9 +452,9 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
     return -position[1] - unit->height * unit->scale * 0.5f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208000);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureFilteredUnitGroupBounds);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208298);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureEffectTargetGroupBounds);
 
 /* Maximum top bound among active units matching any mask bit; zero if none. */
 f32 btlGetMaxUnitTop(u32 mask) {
@@ -532,7 +532,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
     return extremeZ;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208750);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureUnitIndexListBounds);
 
 /* Compare VU-computed distances from the target's muzzle to eligible units. */
 BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {

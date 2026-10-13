@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "mdl_flag_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
@@ -753,7 +754,6 @@ typedef struct BtlFlagSlot {
 
 extern BtlFlagSlot D_003BF960[];
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 /* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to scrSetIntegerReturnValue. */
 s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {

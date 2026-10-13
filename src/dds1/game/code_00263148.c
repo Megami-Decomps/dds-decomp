@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "ui_color.h"
 #include "kwln.h"
@@ -15,8 +16,6 @@ extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
 
 extern void dspSetActive(s32);
-
-extern s32 dspStartEntry(s32);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 

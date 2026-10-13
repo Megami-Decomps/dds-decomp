@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_sound.h"
 #include "btl_task_condition.h"
@@ -1405,7 +1406,6 @@ s32 fldGetSceneGroupIndexByActorFlags(u8 *task) {
 }
 
 extern struct EffRandState effSharedRandomState;
-extern u32 effMiscRandMod(void *, u32);
 extern void fldInitSceneFadeRecords(void);
 
 /* Initialize scene slots from selected actors and mode-specific modifiers. */

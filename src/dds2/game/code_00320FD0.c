@@ -204,7 +204,7 @@ MenuResourceRecord *mnuGetResourceRecordByIndex(s32 recordIndex) {
     return &mnuResourceRecords[recordIndex];
 }
 
-s32 func_00321340(MenuProgressState *progressState) {
+s32 mnuTriggerProgressResourceRecords(MenuProgressState *progressState) {
     s32 i;
 
     for (i = 0; i < mnuResourceRecordCount; i++) {
@@ -241,7 +241,7 @@ void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback) {
     mnuRuntimeRecordInitializationCallback = callback;
 }
 
-void func_003214D0(u32 unusedFirstWord, u32 resourceWord) {
+void mnuReleaseResourceBlockCallback(u32 unusedFirstWord, u32 resourceWord) {
     if (resourceWord != 0) {
         mnuFreeOptionalBlock(resourceWord);
         return;

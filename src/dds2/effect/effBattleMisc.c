@@ -43,7 +43,7 @@ void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *param, u128 *o
 extern u32 effBTLFieldColorGetOverrideSelector(void);
 extern u32 effBTLFieldColorGetFinalSelector(void);
 extern void effBattleComputeTargetPosition();
-extern f32 func_00208298(u32 mask, s32 a, s32 b);
+extern f32 btlMeasureEffectTargetGroupBounds(u32 mask, s32 a, s32 b);
 extern f32 btlGetMaxUnitTop(u32 mask);
 extern f32 btlGetExtremeUnitY(u32 mask);
 
@@ -155,7 +155,7 @@ void effBattleMiscQueryMaskedTargetPosition(u32 flags, EffectVectorRequest *para
     u32 kind = param->count;
     u32 sub = param->size;
 
-    func_00208298(flags, 0, 0);
+    btlMeasureEffectTargetGroupBounds(flags, 0, 0);
     VU0_STORE_VF(vf10, pos);
     length = 500.0f;
     vertical = -btlGetMaxUnitTop(flags);
@@ -306,14 +306,14 @@ f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *param) {
         break;
     case 1:
         other = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
-        result = func_00208298(other->status.flags & 0x600, 0, 0);
+        result = btlMeasureEffectTargetGroupBounds(other->status.flags & 0x600, 0, 0);
         break;
     case 2:
         other = (BtlUnit *)effBTLFieldColorGetVariantSelector();
-        result = func_00208298(other->status.flags & 0x600, 0, 0);
+        result = btlMeasureEffectTargetGroupBounds(other->status.flags & 0x600, 0, 0);
         break;
     case 3:
-        result = func_00208298(0x600, 0, 0);
+        result = btlMeasureEffectTargetGroupBounds(0x600, 0, 0);
         break;
     case 6:
         other = (BtlUnit *)effBTLFieldColorGetOverrideSelector();

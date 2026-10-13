@@ -1,3 +1,4 @@
+#include "dsp_entry_api.h"
 #include "common.h"
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
@@ -27,7 +28,6 @@ extern u32 sdfCounterGetDisplayWordPointer(void);
 extern void func_003014F0(char *, char *, s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
-extern void dspStartEntry(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
 extern s32 evtGetMessageWindowControlState(void);

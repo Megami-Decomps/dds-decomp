@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "kwln_task_create.h"
 #include "eff_manager_task.h"
@@ -271,7 +272,6 @@ extern s32 fldIsSceneStateEight(void);
 
 extern void func_00123DE8(s32, s32, s32, s32, s32, s32);
 
-extern u32 effMiscRandMod(void *stream, u32 modulus);
 
 extern s32 evtGetMirroredSolarPhase(void);
 
@@ -1744,7 +1744,7 @@ s32 fldCmdGetPendingSceneParam(void) {
     return 1;
 }
 
-s32 fldCmdSetTargetGuideMode(void) {
+s32 fldCmdSetTargetGuideEnabled(void) {
     if (scrReadIntParameter(0) == 2) {
         fldSetTargetGuideEnabled(0);
         D_003898B0[0] = 0;
@@ -1758,7 +1758,7 @@ s32 fldCmdSetTargetGuideMode(void) {
 
 extern void fldSetTargetGuideMode(s32);
 
-s32 func_00157308(void) {
+s32 fldCmdSetTargetGuideMode(void) {
     fldSetTargetGuideMode(scrReadIntParameter(0));
     return 1;
 }

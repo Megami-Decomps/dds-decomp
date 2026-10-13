@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
+#include "sif_rpc_client_prefix.h"
 
 #define SDF_HEAP_BLOCK_FREE 0
 #define SDF_HEAP_BLOCK_USED 1
@@ -241,12 +242,7 @@ SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
 }
 
 extern s32 func_002F4FD8(void *, s32, s32, void *, s32, void *, s32, s32, s32);
-typedef struct SifRpcClientData {
-    u8 pad00[0x24];
-    void *server; /* 0x24: set once the bind succeeded */
-} SifRpcClientData;
-
-extern SifRpcClientData D_003E2770;
+extern SifRpcClientDataPrefix D_003E2770;
 
 /* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
 s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSize) {
@@ -276,7 +272,7 @@ s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSi
 }
 
 extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
-extern s32 sceSifMBindRpc(SifRpcClientData *client, s32 id, s32 mode);
+extern s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
 extern void func_002F4A38(s32 arg);
 extern s32 sdfReadTimerCount(void);
 
