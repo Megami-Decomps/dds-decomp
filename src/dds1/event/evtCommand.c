@@ -828,7 +828,6 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
 
 
 extern void dds3EnsureSlotData(void *);
-extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];

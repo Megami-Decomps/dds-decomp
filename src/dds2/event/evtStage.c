@@ -16,7 +16,6 @@ extern void sdfFreezeFloatCounter(struct EvtScaledValue *);
 extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *);
 
 
-extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
