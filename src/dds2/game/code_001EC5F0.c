@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "btl_camera_cursor.h"
 #include "common.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
@@ -78,7 +79,7 @@ extern void func_001F2758(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern BattleSoundArchiveEntry D_003BDE18[BTL_SOUND_ENTRY_COUNT];
 
-extern u8 D_003BD7D0[];
+extern BtlCameraCursorView D_003BD7D0;
 
 /* Two camera vectors are written at work+0x50 and work+0x60 by btlInitializeSceneLightingAndTint. */
 typedef struct BtlCameraVectors {
@@ -221,30 +222,7 @@ extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
 
 extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
-typedef struct SoundCursor {
-    u16 unk_00;
-    s16 frame;
-    s16 mode;
-    s16 index;
-    union {
-        u16 unk_08;
-        s8 category;
-    };
-    s16 unk_0A;
-    s16 unk_0C;
-    u16 unk_0E;
-    u8 pad10[4];
-    s8 busy; /* 0x14: nonzero suspends camera endpoint updates. */
-    u8 pad15[0xB];
-    f32 pathEnd[4]; /* 0x20 */
-    f32 pathStart[4]; /* 0x30 */
-    u8 pad40[0x40];
-    f32 direction[4]; /* 0x80 */
-    f32 distance; /* 0x90 */
-    u8 pad94[0x9C];
-} SoundCursor;
-
-#define CURSOR ((SoundCursor *)D_003BD7D0)
+#define CURSOR (&D_003BD7D0)
 
 extern char D_00418C58[];
 
@@ -3539,7 +3517,7 @@ s32 btlCountUnitsByFlags(u32 mask) {
 /* Reset the shared cursor and select camera setup by the linked actor's unit ID.
  * Preserve the legacy implicit return type and the callers' existing signatures. */
 btlInitializeCameraCursorForActorId(BtlLinkedCommand *action, BtlCamState *state) {
-    memset(D_003BD7D0, 0, sizeof(SoundCursor));
+    memset(&D_003BD7D0, 0, sizeof(D_003BD7D0));
     switch (action->link->unit->partyRecord.unitId) {
     case 1:
         func_001FA480(action, state, D_003BC0A0[4]);
@@ -3606,7 +3584,7 @@ void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *action, BtlCamState *stat
 }
 
 void btlClearCommandCursorAndRunAction(BtlLinkedCommand *action) {
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     btlFlagUserAndTargetDefeat(action, action);
 }
 
@@ -3626,7 +3604,7 @@ void btlAdvanceCommandCursorOrAction(BtlLinkedCommand *action, BtlCamState *stat
 }
 
 void btlInitCommandCursorForCategory(BtlLinkedCommand *action, BtlCamState *state) {
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     switch (action->link->unit->partyRecord.unitId) {
     case 1:
         func_001F5868(action, state, 4, 0);
@@ -3705,7 +3683,7 @@ void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
 void btlInitLinkedUnitActionCursor(ActionStateLink *linkState) {
     BtlLinkedCommand *scene = &((BtlState *)btlGetRuntime())->cameraCommand;
     scene->link = linkState;
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     CURSOR->unk_0A = 0;
     CURSOR->unk_0E = 0;
     btlRefreshUnitEffectMotionAndEntry(linkState->unit);
@@ -3728,7 +3706,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
 
     memset(offset, 0, sizeof(offset));
     offset[2] = 1.0f;
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     func_001F5868(action, state, 2, 3);
     func_001F5320(action, state, 0, 0);
     btlConstrainCameraEndpointHeight(action, state, 0, 1);
@@ -3761,7 +3739,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
 
 s32 btlInitCursorAndApplyAction(BtlLinkedCommand *action, BtlCamState *state) {
     s32 result;
-    memset(D_003BD7D0, 0, 0x130);
+    memset(&D_003BD7D0, 0, 0x130);
     func_001F5868(action, state, 2, 6);
     func_001F5320(action, state, 0, 0);
     result = btlConstrainCameraEndpointHeight(action, state, 0, 1);
