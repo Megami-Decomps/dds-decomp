@@ -2775,6 +2775,7 @@
 0x001A66B8	btlTestActorStatusPredicate	inferred	Checks an optional battle predicate, then tests actor status bits. [names_reviewed8.tsv]
 0x001A6708	btlComputeStatusPenaltyFifth	inferred	Returns a negative fifth of the actor metric for specified status categories. [names_reviewed10.tsv]
 0x001A6778	btlRollFearChance	inferred	Checks battle and actor fear exclusions, selects 30 or 40 percent by option bits, logs the fear ratio and compares a random roll.
+0x001A6968	btlSelectCommandHitCount	inferred	Honors the command hit-count override or selects from the command's inclusive hit range, using roster bounds for affected kind-5 commands.
 0x001A6A50	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001A6B40	btlResolveSkillCategory	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001A6F98	btlDistributeRandomTargetHits	inferred	L13

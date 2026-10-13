@@ -2309,6 +2309,7 @@
 0x001B08A8	btlTestActorStatusPredicate	inferred	Checks an optional battle predicate, then tests actor status bits. [names_reviewed8.tsv]
 0x001B08F8	btlComputeStatusPenaltyFifth	inferred	Returns a negative fifth of the actor metric for specified status categories. [names_reviewed10.tsv]
 0x001B09F0	btlRollAllFearChance	inferred	readability/matching review (QP16)
+0x001B0B30	btlSelectCommandHitCount	inferred	Honors the command hit-count override or selects from the command's inclusive hit range, using roster bounds for affected kind-5 commands. Paired DDS1 0x001A6968.
 0x001B0C18	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001B0D28	btlMapActionCode	inferred	Maps action codes 0x31-0x33 and 0x185 to 0x35, 0x186 to 0x1E, 0x193 to 0x25, otherwise consults category table
 0x001B1640	btlQueryUnitChannelFlags	inferred	Returns channel flags for two units, adding a status-dependent bit. [names_reviewed8.tsv]

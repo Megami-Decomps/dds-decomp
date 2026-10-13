@@ -625,7 +625,7 @@ extern s32 btlGetActionRecordLookupValue(s32);
 
 extern s32 func_001A7548(BtlUnit *, BtlUnit *, s32);
 
-extern u8 func_001A6968(BtlUnit *, s32);
+extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
 extern s32 func_001A5958(BtlUnit *, BtlUnit *, s32);
 
@@ -875,7 +875,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
                 if (randomTargets) {
                     hitCount = group->count;
                 } else {
-                    hitCount = func_001A6968(source, command);
+                    hitCount = btlSelectCommandHitCount(source, command);
                 }
                 maxHits = datCommandRecords[command].rangeMax;
             }

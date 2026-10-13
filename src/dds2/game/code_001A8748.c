@@ -3531,7 +3531,7 @@ f32 func_001B0B20(void) {
 }
 
 
-u8 func_001B0B30(BtlUnit *unit, s32 command) {
+u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
     BattleController *controller = (BattleController *)btlGetRuntime();
     s32 result;
     s32 minimum;
@@ -3731,7 +3731,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     i = 0;
     btlCopyIndexList(copy, targets);
     btlClearIndexList(targets);
-    hitCount = func_001B0B30(unit, command);
+    hitCount = btlSelectCommandHitCount(unit, command);
     memset(selected, 0, sizeof(selected));
     while (i < hitCount) {
         index = effMiscRandMod(0, targetCount);
