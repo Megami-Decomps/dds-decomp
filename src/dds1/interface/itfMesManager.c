@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad_step.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -954,7 +955,7 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern ItfMesWindowRec *itfMesFindPreviousWindowWithPanelSprite(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
-extern void sndStepIndexByPad(ItfMesBlkA4 *panel);
+extern void sndStepIndexByPad(SndPadStepper *panel);
 
 /* Run and draw the interactive message-layout inspector. */
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A1480);
@@ -1026,7 +1027,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
             }
             break;
         case 2:
-            sndStepIndexByPad(panel);
+            sndStepIndexByPad((SndPadStepper *)panel);
             if (D_00324510[0x33] < 0) {
                 D_00357D80.mode = 0;
             }
