@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "common.h"
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
@@ -32,7 +33,6 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_0024DD78(void);
-extern u32 evtFinishMessageWindowAndNotify(void);
 extern void sndReleaseTrackHandle(u32);
 extern s32 fldReleaseLocalMapResources(void);
 extern s64 sdfDestroyActiveCounterRuntime(void);

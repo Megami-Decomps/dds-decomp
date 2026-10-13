@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "evt_world.h"
 #include "eff_resource_slots.h"
@@ -1638,7 +1639,6 @@ void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
 
 
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void func_0024DD78(void);
 

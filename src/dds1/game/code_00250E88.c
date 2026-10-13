@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "dsp_name.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -509,7 +510,6 @@ s32 mnuBeginMantraProfileSelection(void) {
 extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
 extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, u32);
-extern u32 evtFinishMessageWindowAndNotify(void);
 void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 

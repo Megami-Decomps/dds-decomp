@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
 #include "kwln_fade.h"
@@ -7,7 +8,6 @@
 #include "mnu_flag_snapshot.h"
 #include "mdl_flag_api.h"
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 
 

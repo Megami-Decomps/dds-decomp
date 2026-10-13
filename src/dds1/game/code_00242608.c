@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "itf_mes_window.h"
 #include "fr_font.h"
@@ -2876,7 +2877,6 @@ u32 func_00247D50(void) {
 
 extern const char D_003AF528[];
 extern s32 evtIsActiveFlagSet(s32);
-extern u32 evtFinishMessageWindowAndNotify(void);
 extern void dspSetActive(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);

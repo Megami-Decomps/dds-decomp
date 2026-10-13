@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
@@ -149,7 +150,6 @@ extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 evtGetMessageWindowControlState(void);
-extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void *effObjCreateEventNode(void *, f32 *, f32 *);

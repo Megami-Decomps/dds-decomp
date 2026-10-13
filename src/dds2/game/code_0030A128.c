@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "common.h"
 #include "evt_world_object_api.h"
 #include "file_pac.h"
@@ -72,7 +73,6 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
 extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void dds3SetWorldObject(void *);
 extern void *dds3GetWorldSecondaryObject(void);
