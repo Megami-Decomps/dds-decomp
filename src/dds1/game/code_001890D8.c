@@ -21,7 +21,7 @@ void effReleaseMagatuhiOwner(EffMagatuhiOwner *resource) {
     sdfReleaseChipBlock(resource);
 }
 
-void func_001891A8(EffMagatuhiOwner *resource) {
+void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *resource) {
     effMagatuhiDrawHistoryTrails(resource->valueWork);
 }
 

@@ -7754,6 +7754,7 @@
 0x00168978	effBattleUpdate	inferred	Processes the active BattleEffect frame and entries, dispatches frame callbacks, then advances and returns currentFrame; paired DDS1 0x00160D88.
 0x00185950	effPcpBlockSetUpdate	inferred	Updates block-set frame, grouped cell transforms and colors; invoked for each rotate child after its start threshold. Paired DDS1 0x0017DCF8.
 0x0018C820	effBossUpdateGeometry	inferred	Rebuilds boss grouped trail geometry and colors from the per-cell state, then advances the owner frame; called by effBossUpdateGeometryCallback. Paired DDS1 0x00184BC8.
+0x00190DE0	effMagatuhiDrawOwnerHistoryTrails	inferred	Forwards owner->valueWork to effMagatuhiDrawHistoryTrails; DDS1 twin 0x001891A8.
 0x00191010	effMagatuhiDrawHistoryTrails	inferred	Builds batched compact-vertex packets from the Magatuhi value-work history slots and submits them for drawing; paired DDS1 0x001893D8.
 0x00191450	effMagatuhiUpdateValueHistorySlot	inferred	Copies a new vector into the rolling slot history, advances phase/noise, perturbs replay history, clamps displacement, and advances the saturated valid count; DDS1 twin 0x00189818.
 0x002A1928	mnuUpdateTitleAudioStreams	inferred	Advances title stream states, decodes and mixes sample frames, and updates both stream frame indices. Paired DDS1 0x00269D18. [LiteH b12]
