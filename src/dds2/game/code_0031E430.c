@@ -132,7 +132,7 @@ void itfDrawEightDigitFadeValue(s32 x, s32 y, s32 extent, u32 value) {
     }
 }
 
-void func_0031E7C8(FadeNumber *entry, u32 displayValue) {
+void itfSetLowerFadeNumberDisplayValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -149,7 +149,7 @@ void itfDrawLowerFadeGlyphPair(FadeNumber *entry) {
     }
 }
 
-void func_0031E850(FadeNumber *entry, u32 displayValue) {
+void itfSetUpperFadeNumberDisplayValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
@@ -269,7 +269,7 @@ void itfDrawFadeGlyphTriplet(FadeEntry *entry) {
     }
 }
 
-void func_0031F040(FadeNumber *entry, u32 displayValue) {
+void itfSetFrameFadeDisplayValue(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
