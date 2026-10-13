@@ -45,7 +45,7 @@ extern void mnuDrawTitleFadeSprites(BrsSkillPackageWork *);
 extern void brsStepAnimDecay(BrsSkillPackageWork *);
 extern void brsDrawActiveUnitProgressRows(s32, s32, s32, s32, BrsActiveProgressList *, s32);
 
-extern void func_00264B08();
+extern void brsAnimateSkillIconRows();
 extern void mnuDrawItemPanelStatusIcons();
 
 void mnuRefreshPanelLayer(BrsSkillPackageWork *work) {
@@ -53,7 +53,7 @@ void mnuRefreshPanelLayer(BrsSkillPackageWork *work) {
 
     itfUpdateFadeColor(work);
     mnuDrawTitleFadeSprites(work);
-    func_00264B08(work);
+    brsAnimateSkillIconRows(work);
     mnuDrawItemPanelStatusIcons(work);
     brsDrawActiveUnitProgressRows(0x2C0, 0x3D8, 0, y, &work->partyProgress, 0x53);
     mnuTitleDrawFadeMenuEntries(work);

@@ -50,7 +50,7 @@ void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
 
     itfUpdateFadeColor(work);
     brsDrawResultPanelSprites(work);
-    func_0029C120(work);
+    brsAnimateSkillIconRows(work);
     brsPackProgressPanelColor(work);
     mnuDrawUnitProgressRows(0x1D0, 0x3B8, 0, remaining, &work->partyProgress, 0x53);
     mnuTitleDrawFadeMenuEntries(work);

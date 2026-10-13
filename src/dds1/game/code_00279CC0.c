@@ -269,7 +269,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027A300);
+INCLUDE_ASM(const s32, "game/code_00279CC0", ptyDrawLinkageSkillEntry);
 
 
 /* Collect up to max pointers to occupied, frontline party slots. */

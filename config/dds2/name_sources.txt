@@ -8471,3 +8471,6 @@
 0x00226850	btlResetSpiralEdgeMotionProgress	inferred	confidence=high; cameraPoseBlendHook resets motionProgress onlyaction187, native skill-name391 Spiral Edge, alwaysreturns0. [Namer1 b58]
 0x00226868	btlUpdateSpiralEdgeMarkedCamera	inferred	confidence=high; Marked Spiral Edge187 advances counter and repeatedly applies fixed camera at/after52, clearing runtime2000; returns1 for matching action evenwithout marker. [Namer1 b58]
 0x00226C98	btlApplyRahuOperandEffects	inferred	confidence=high; Adopts DDS1 205918 twin: operand40/80 bind/fade, RAHU damage tally, coordinated head/body recovery. DDS2 native enemy-name302/303 identify body12E/head12F versus DDS1 body108/head107. [Namer1 b58]
+0x00293FD0	mnuFindOtherPanelSelectorForScriptId	inferred	confidence=high; Skips the active selector, checks selector records for the script ID, and returns the first other selector whose flags include bit 1. [LiteH b27]
+0x0029C120	brsAnimateSkillIconRows	inferred	confidence=high; Updates result-panel skill icon rows using their row records and fade state; DDS1 0x00264B08 has the corresponding updater. [LiteH b27]
+0x002BD710	mnuDrawPartyStatusValuePanel	inferred	confidence=high; Blends and draws the party status value rows using the panel position and fade inputs. [LiteH b27]

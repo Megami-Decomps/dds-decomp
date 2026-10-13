@@ -412,7 +412,7 @@ s32 itfRunPanelMode2(KwlnTask *request) {
     return menuRunPanel(panel, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264B08);
+INCLUDE_ASM(const s32, "game/code_00263EB0", brsAnimateSkillIconRows);
 INCLUDE_ASM(const s32, "game/code_00263EB0", mnuDrawItemPanelStatusIcons);
 
 
