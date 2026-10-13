@@ -4334,6 +4334,7 @@
 0x00294C68	mnuDrawPulsingMenuIcon	inferred	queued
 0x00296018	mnuDrawListChildrenWithCountdown	inferred	confidence=high; src/dds2/game/code_00294730.c:func_00296018; Decrements a nonzero shared delay counter and invokes the draw callback for each linked child up to the list count. [names_qp9.tsv]
 0x00296AF8	mnuDrawIconFixedEntry	inferred	confidence=high; src/dds2/game/code_00294730.c:func_00296AF8; Draws the fixed icon sprite at the shared offset table's position with the current icon resource and entry kind. [names_qp9.tsv]
+0x00296D90	mnuDrawShopCurrencyBalance	inferred	Interpolates the shop's displayed currency balance from the saved value over 20 frames, then draws it. Paired DDS1 0x00260100.
 0x002971C0	mnuStorePendingMenuCommandValue	inferred	When a menu command exists, stores its payload and puts its mode into queued state. [names_reviewed17.tsv]
 0x00297898	mnuTickExtendedCommandPhase	inferred	src/dds2/game/code_00296E98.c func_00297898: Ticks timed command phases with ten-frame thresholds and returns immediate phases unchanged. Twin of DDS1 func_002609D8. [names_reviewed24.tsv]
 0x00298570	mnuTickCommandWaitPhase	inferred	confidence=high; matched-C; src/dds2/game/code_00296E98.c:173:func_00298570; Handles wait phases nine through twelve; advances the frame counter for delayed phases and reports their mode only at the required threshold. Supersedes the earlier phase-nine-only proposal.; source=names_pending_main.tsv:125 [names_qp11.tsv]

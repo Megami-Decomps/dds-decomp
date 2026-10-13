@@ -59,7 +59,7 @@ void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
                   0, scale, 0, texture, D_0036C728[0][BRS_ICON_ID], 0x53);
 }
 
-extern void func_00260100(ShopScene *, s32);
+extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
 extern void mnuDrawPulsingMenuIcon(ShopScene *, s32, s32);
 
 /* Fade the shop frame, then its currency and pulsing foreground icon. */
@@ -99,7 +99,7 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
         fraction = 1.0f;
     }
     fraction = 1.0f - fraction;
-    func_00260100(scene, (s32)(fraction * 128.0f) | 0xA09DC300);
+    mnuDrawShopCurrencyBalance(scene, (s32)(fraction * 128.0f) | 0xA09DC300);
     {
         s32 x = D_0036C728[0][BRS_ICON_X] << 4;
         s32 y = D_0036C728[0][BRS_ICON_Y] << 3;
@@ -503,7 +503,7 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
 }
 
 
-void func_00260100(ShopScene *state, s32 style) {
+void mnuDrawShopCurrencyBalance(ShopScene *state, s32 style) {
     char text[16];
 
     if (datGameState->header.currency != state->previousValue) {

@@ -1867,7 +1867,7 @@ extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
 extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
-extern void func_00260100(ShopScene *, s32);
+extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
 extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
 extern s32 D_003BC3D8[];
 
@@ -2735,7 +2735,7 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
     }
 
     func_0025E308(0, 0, 0, state, 0x100, 0x53);
-    func_00260100(state, 0xA09DC380);
+    mnuDrawShopCurrencyBalance(state, 0xA09DC380);
     mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
     mnuDrawShopSelectedRowDetails(0, 0, 0, state, 0x53);
     mnuDrawIfActive(0, 0, 0, state->window, 0x53);
@@ -2831,7 +2831,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         func_0025FD50(0, 0, 0, state, 0x53);
-        func_00260100(state, 0xA09DC380);
+        mnuDrawShopCurrencyBalance(state, 0xA09DC380);
         brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
@@ -2839,7 +2839,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             func_0025E308(0, 0, 0, state, 0x100, 0x53);
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(0, 0, 0, state->sprite->list, 0x53);
-            func_00260100(state, 0xA09DC380);
+            mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             brsDrawResultIconPairWithAlpha((s32)state, 0x100, 4, 0x53);
         } else {
             func_0025E308(0, 0, 0, state, 0x100, 0x53);
@@ -2847,7 +2847,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
             mnuClearWindowPanelTransitionFlag(state->sprite);
             mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)state, 0x100, 0x53);
-            func_00260100(state, 0xA09DC380);
+            mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             brsDrawResultIconPairWithAlpha((s32)state, 0x100, 2, 0x53);
         }
         break;

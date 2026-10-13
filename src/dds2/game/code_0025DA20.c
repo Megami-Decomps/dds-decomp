@@ -3598,7 +3598,7 @@ extern void func_002969D8(s32, s32, s32, void *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
 extern void func_00296B48(s32, s32, s32, s32, s32, s32);
-extern void func_00296D90(void *, s32);
+extern void mnuDrawShopCurrencyBalance(void *, s32);
 extern void func_00296E98(s32, u32, s32, s32);
 
 /* Draw the active dispatch mode before advancing its callback state. */
@@ -3613,7 +3613,7 @@ s32 func_00264480(KwlnTask *callbackContext) {
         func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         func_002969D8(0, 0, 0, state, 0x53);
-        func_00296D90(state, 0xA09DC380);
+        mnuDrawShopCurrencyBalance(state, 0xA09DC380);
         func_00296E98((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
@@ -3622,7 +3622,7 @@ s32 func_00264480(KwlnTask *callbackContext) {
             func_00294D50(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(
                 0, 0, 0, (u8 *)state->ownedWindows[0]->list, 0x53);
-            func_00296D90(state, 0xA09DC380);
+            mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             func_00296E98((s32)state, 0x100, 4, 0x53);
         } else {
             func_00294B40(0, 0, 0, state, 0x100, 0x53);
@@ -3630,7 +3630,7 @@ s32 func_00264480(KwlnTask *callbackContext) {
             func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
             func_00296B48(0, 0, 0, (s32)state, 0x100, 0x53);
-            func_00296D90(state, 0xA09DC380);
+            mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             func_00296E98((s32)state, 0x100, 2, 0x53);
         }
         break;

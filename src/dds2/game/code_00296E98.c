@@ -25,7 +25,7 @@ extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
 
 extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
 extern void func_00294B40(s32, s32, s32, MenuTerminalContext *, s32, s32);
-extern void func_00296D90(MenuTerminalContext *, s32);
+extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void func_00295030(s32, s32, s32, MenuTerminalContext *, s32, s32, s32);
 extern void func_00296430(s32, s32, s32, MenuTerminalContext *, u32, s32);
@@ -262,7 +262,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
 
     category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
     func_00294B40(0, 0, 0, scene, 0x100, 0x53);
-    func_00296D90(scene, 0xA09DC380);
+    mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->phase) {
     case 4:
         if ((f32)scene->commandFrames > 0.0f) {
@@ -493,7 +493,7 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
 
     category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
     func_00294B40(0, 0, 0, scene, 0x100, 0x53);
-    func_00296D90(scene, 0xA09DC380);
+    mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->phase) {
     case 9:
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
