@@ -2,6 +2,7 @@
 #include "eff_random.h"
 #include "sdf_timer.h"
 #include "sdf.h"
+#include "sdf_alarm.h"
 #include "sdf_thread.h"
 
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
