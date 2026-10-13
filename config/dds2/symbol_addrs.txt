@@ -21,6 +21,8 @@ kwlnDebugGraphTask = 0x00438DA8;
 sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sdfGetFlagListAlphaSurfaceIndex = 0x00316E28; // type:func
+sdfSetFlagListAlphaSurfaceIndex = 0x00316E30; // type:func
 kwlnInitializeRuntime = 0x001001D8; // type:func
 kwlnRequestMainLoopExit = 0x001003E8; // type:func
 kwlnGetDrawBufferIndex = 0x00100400; // type:func
@@ -11119,8 +11121,6 @@ sdfCreateFlagListWork = 0x00316528; // type:func
 sdfUpdateFlagListEntries = 0x00316680; // type:func
 sdfDrawFlagListVertices = 0x00316C88; // type:func
 sdfSampleFlagListStartColor = 0x00316DE0; // type:func
-func_00316E28 = 0x00316E28; // type:func
-func_00316E30 = 0x00316E30; // type:func
 func_00316E60 = 0x00316E60; // type:func
 func_00316E70 = 0x00316E70; // type:func
 func_00316FA8 = 0x00316FA8; // type:func
