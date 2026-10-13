@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "par_draw.h"
 #include "par_kind_api.h"
+#include "par_cell_api.h"
 #include "bill_object_api.h"
 #include "par_color_ramp.h"
 
