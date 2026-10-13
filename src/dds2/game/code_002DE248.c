@@ -716,8 +716,6 @@ void effDestroyModelContext(MdlCtx *owner);
 
 void effInitModelVUState(MdlCtx *model);
 
-RefObj *effRetainSharedReference(RefObj *obj);
-
 typedef struct EffFadeHeaderWork {
     s32 frame;
     s32 payload[2];
