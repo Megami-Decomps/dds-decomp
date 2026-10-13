@@ -28,45 +28,56 @@ u32 func_00184440(void) {
     return 0;
 }
 
-u32 func_00184448(void) {
+/* Kind 88's registered factory returns zero; its semantic effect class is unknown. */
+u32 effPcpKind88CreateDisabled(void) {
     return 0;
 }
 
-u32 func_00184450(void) {
+/* Kind 88's registered duplicate operation returns zero. */
+u32 effPcpKind88DuplicateDisabled(void) {
     return 0;
 }
 
-void func_00184458(void) {
+/* Kind 88's registered release operation does nothing. */
+void effPcpKind88ReleaseNoOp(void) {
 }
 
-void func_00184460(void) {
+/* Kind 88's registered per-work dispatch does nothing. */
+void effPcpKind88DispatchNoOp(void) {
 }
 
-void func_00184468(void) {
+/* Kind 88's optional scale operation is present but does nothing. */
+void effPcpKind88ScaleNoOp(void) {
 }
 
-void func_00184470(void) {
+/* Kind 88's optional value operation is present but does nothing. */
+void effPcpKind88ValueNoOp(void) {
 }
 
 u32 func_00184478(void) {
     return 0;
 }
 
-u32 func_00184480(void) {
+/* Kind 95's registered factory returns zero; its semantic effect class is unknown. */
+u32 effPcpKind95CreateDisabled(void) {
     return 0;
 }
 
-u32 func_00184488(void) {
+/* Kind 95's registered duplicate operation returns zero. */
+u32 effPcpKind95DuplicateDisabled(void) {
     return 0;
 }
 
-void func_00184490(void) {
+/* Kind 95's registered release operation does nothing. */
+void effPcpKind95ReleaseNoOp(void) {
 }
 
-void func_00184498(void) {
+/* Kind 95's registered per-work dispatch does nothing. */
+void effPcpKind95DispatchNoOp(void) {
 }
 
-void func_001844A0(void) {
+/* Kind 95's optional value operation is present but does nothing. */
+void effPcpKind95ValueNoOp(void) {
 }
 
 u32 func_001844A8(void) {

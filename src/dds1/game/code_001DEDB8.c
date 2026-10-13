@@ -8160,7 +8160,8 @@ void btlAlignTripleFormationWithTarget(BtlTask *link, BtlUnit *first, BtlUnit *s
     }
 }
 
-void func_001F5D00(BtlTask *link, BtlUnit *first, BtlUnit *second) {
+/* Enemy formation row kind 7 deliberately leaves the supplied participants unchanged. */
+void btlEnemyMode7FormationNoOp(BtlTask *link, BtlUnit *first, BtlUnit *second) {
 }
 
 enum {
@@ -8230,7 +8231,7 @@ u32 btlApplyLinkageFormation(BattleFormationActionArgs *args) {
               args->actionId * sizeof(BattleFormationActionRow) -
               BATTLE_FORMATION_ACTION_FIRST * sizeof(BattleFormationActionRow));
         if (row->kind == 7) {
-            func_001F5D00(args->link, first, args->second);
+            btlEnemyMode7FormationNoOp(args->link, first, args->second);
         }
         return 1;
     }
