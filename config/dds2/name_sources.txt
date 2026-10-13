@@ -6192,6 +6192,7 @@
 0x00321308	mnuResetResourceProgressCounters	inferred	high confidence; src/dds2/game/code_00320FD0.c func_00321308: Clears both the cadence index and accumulated total while retaining limit and step. [names_reviewed25.tsv]
 0x00321318	mnuBindResourceRecordTable	inferred	confidence=high; matched-C; src/dds2/game/code_00320FD0.c:225:func_00321318; Stores the externally owned resource-record table pointer and its count; the neighboring indexed accessor uses twenty-eight-byte records.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00321328	mnuGetResourceRecordByIndex	inferred	Returns address at the externally stored resource table base plus 28 bytes per index; record fields remain unknown.
+0x00321340	mnuTriggerProgressResourceRecords	inferred	Scans configured menu resource records, marks each newly reached threshold, and initializes an available work entry with progress offset and angle; special registry kind 0x22 adds its larger threshold margin and control flags. Called during the shooting-work progress update.
 0x003214C8	mnuSetRuntimeRecordInitializationCallback	inferred	stores the callback invoked immediately after a runtime record is allocated and initialized
 0x00321500	mnuCreateReleaseCallbackNode	inferred	Creates a callback node whose callback frees a nonzero supplied pointer.
 0x003218A0	mnuCreateNamedRecord	inferred	Allocates and clears a 0x22-byte record and copies an eight-byte identifier to offset 0xA.

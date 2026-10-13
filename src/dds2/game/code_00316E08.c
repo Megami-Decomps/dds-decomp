@@ -665,7 +665,7 @@ extern u8 D_0037F510[2][2][16];
 extern void func_0031AEB8(MnuShootingWork *);
 extern s32 func_0031AF68(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
-extern s32 func_00321340(MenuProgressState *);
+extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
 extern void func_00323748(MenuWorkEntry *, MnuShootingWork *);
 extern s32 func_003233E8(s32);
@@ -729,7 +729,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         return 0;
     }
     if (work->phase == 2) mnuAdvanceCursorStepUntilThreshold();
-    func_00321340(mnuGetResourceProgressStepState());
+    mnuTriggerProgressResourceRecords(mnuGetResourceProgressStepState());
     mnuVisitActiveRecords((s32)work);
     func_00323748(&D_0040ABF8, work);
     if (work->phase == 2) func_003233E8(0);
