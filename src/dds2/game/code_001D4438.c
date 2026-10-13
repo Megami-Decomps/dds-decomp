@@ -421,8 +421,6 @@ extern u32 kwlnDrawControlFlags;
 
 
 
-extern s32 D_00435E0C;
-
 typedef struct SoundSceneEntry {
     u8 pad00[0x24];
     u16 unk24;

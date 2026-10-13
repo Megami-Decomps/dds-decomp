@@ -1079,35 +1079,6 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     return 0;
 }
 
-typedef struct BattleAdjustmentEntry {
-    u16 sceneIndex;
-    u16 weight;
-    s8 value;
-    u8 unk05;
-} BattleAdjustmentEntry;
-
-typedef struct BattleAdjustmentGroup {
-    s32 interval;
-    BattleAdjustmentEntry entries[20];
-} BattleAdjustmentGroup;
-
-typedef struct BattleAdjustmentRecord {
-    u16 encounterParamA; /* +0x00: serialized background major ID. */
-    u16 encounterParamB; /* +0x02: serialized background minor ID. */
-    u8 pad04[4];
-    u32 conditions[3];
-    u8 variantCodes[8];
-    BattleAdjustmentGroup groups[3];
-} BattleAdjustmentRecord;
-
-extern BattleAdjustmentRecord *D_00435E0C;
-
-typedef char BattleAdjustmentRecord_size_check[sizeof(BattleAdjustmentRecord) == 0x190 ? 1 : -1];
-
-typedef char BattleAdjustmentRecord_parameter_a_offset_check[((u32)&((BattleAdjustmentRecord *)0)->encounterParamA == 0) ? 1 : -1];
-
-typedef char BattleAdjustmentRecord_parameter_b_offset_check[((u32)&((BattleAdjustmentRecord *)0)->encounterParamB == 2) ? 1 : -1];
-
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 extern void btlSetScene(s32);
