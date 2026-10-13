@@ -16,7 +16,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);

@@ -18,7 +18,7 @@ extern s32 func_0030AC10(LmapTaskState *);
 
 extern void fldDrawSkyGradient(void);
 extern void func_00137888(void);
-extern void func_0030C8E8(s32);
+extern void sdfAdjustCounterValueAndRedraw(s32);
 extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawAnimatedTransition(s32);
 extern void fldDrawSelectedMapMarker(void);
@@ -81,7 +81,7 @@ extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
 extern s32 sdfCreateMaskedCounterChannels(s32, s32);
 extern s32 func_0030B880(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
-extern void func_0030E880(void);
+extern void fldCreateMapRequestQueues(void);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
@@ -290,7 +290,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_0011F250();
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
@@ -633,7 +633,7 @@ void fldInitializeLocalMapScene(void) {
     D_00438894 = index;
     sdfCreateMaskedCounterChannels(mask, index);
     sdfInitializeMapCounterSelection(D_00438894, func_0030B880(mask));
-    func_0030E880();
+    fldCreateMapRequestQueues();
     dspCloseChannel();
     D_004388A4 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
     evtCreateMessageWindowIfMissing(D_004388A8);
@@ -662,7 +662,7 @@ extern s32 D_00439094;
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
-extern s32 func_0030BD10(void);
+extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void evtBeginSolarOverlayFadeIn(s32);
 /* Legacy calls pass the RGB bytes as promoted integer arguments. */
@@ -733,7 +733,7 @@ s32 func_0030B1E8(void) {
                 sdfLatchBaseVectorsForSelection();
             }
         }
-        func_0030BD10();
+        sdfUpdateSelectedCounterMapCameraTransition();
         break;
     case 4:
         result = evtGetCapturedWindowPanelValue();
@@ -778,17 +778,17 @@ void fldDrawLocalMapOverlay(void) {
     switch (D_004388AC) {
     case 1:
     case 2:
-        func_0030C8E8(1);
+        sdfAdjustCounterValueAndRedraw(1);
         fldDrawSelectedMapMarker();
         mnuDrawAnimatedTransition(0);
         break;
     case 3:
-        func_0030C8E8(0);
+        sdfAdjustCounterValueAndRedraw(0);
         fldDrawSelectedMapMarker();
         mnuDrawAnimatedTransition(1);
         break;
     case 4:
-        func_0030C8E8(0);
+        sdfAdjustCounterValueAndRedraw(0);
         mnuDrawAnimatedTransition(1);
         break;
     case 5:

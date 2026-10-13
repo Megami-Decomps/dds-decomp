@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mem_node.h"
@@ -27,7 +28,6 @@ extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
 extern void fmGslReleaseActiveResourceBuffers(void);
 
-extern void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 extern u32 frFontSlotLoadedFlags[];
 

@@ -99,7 +99,7 @@ void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {
     inputVector.y = vector[1];
     inputVector.z = vector[2];
     scratch = inputVector;
-    func_002C84F0(&normalizedAxis.x);
+    sdfVec3NormalizeInPlaceAndGetLength(&normalizedAxis.x);
     rotationMatrix[0] = normalizedAxis.x * normalizedAxis.x * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + sdfEvaluateCosineViaSinePhaseShift(angle);
     rotationMatrix[1] = normalizedAxis.x * normalizedAxis.y * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) - normalizedAxis.z * sdfSinPoly(angle);
     rotationMatrix[2] = normalizedAxis.x * normalizedAxis.z * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + normalizedAxis.y * sdfSinPoly(angle);
@@ -144,7 +144,7 @@ void sdfVec3ScaleInPlace(float scale, float *dst) {
     dst[2] = dst[2] * scale;
 }
 
-float func_002C84F0(float *vector) {
+float sdfVec3NormalizeInPlaceAndGetLength(float *vector) {
     float length = fldVectorLength(vector);
 
     vector[0] = vector[0] / length;
@@ -165,8 +165,8 @@ float fldNormalizedVectorDot(float *left, float *right) {
 
     normalizedLeft = *(Vector4 *)left;
     normalizedRight = *(Vector4 *)right;
-    func_002C84F0(&normalizedLeft.x);
-    func_002C84F0(&normalizedRight.x);
+    sdfVec3NormalizeInPlaceAndGetLength(&normalizedLeft.x);
+    sdfVec3NormalizeInPlaceAndGetLength(&normalizedRight.x);
     return normalizedLeft.x * normalizedRight.x + normalizedLeft.y * normalizedRight.y + normalizedLeft.z * normalizedRight.z;
 }
 
@@ -181,8 +181,8 @@ void fldNormalizedVectorCross(float *output, float *left, float *right) {
 
     normalizedLeft = *(Vector4 *)left;
     normalizedRight = *(Vector4 *)right;
-    func_002C84F0(&normalizedLeft.x);
-    func_002C84F0(&normalizedRight.x);
+    sdfVec3NormalizeInPlaceAndGetLength(&normalizedLeft.x);
+    sdfVec3NormalizeInPlaceAndGetLength(&normalizedRight.x);
     output[0] = normalizedLeft.y * normalizedRight.z - normalizedLeft.z * normalizedRight.y;
     output[1] = normalizedLeft.z * normalizedRight.x - normalizedLeft.x * normalizedRight.z;
     output[2] = normalizedLeft.x * normalizedRight.y - normalizedLeft.y * normalizedRight.x;

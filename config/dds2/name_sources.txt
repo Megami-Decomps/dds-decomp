@@ -362,6 +362,8 @@
 0x00112230	dds3SetObjectModeAndDefaultWeight	inferred	src/dds2/basic/dds3ObjectBase.c func_00112230: Sets supported mode and its default weight: modes zero, four and five use one, others zero. Twin of DDS1 func_00112008. [names_reviewed24.tsv]
 0x001122E8	dds3RegisterObjectInHandlerIndex	inferred	readability/matching review (QP16)
 0x00112978	dds3EnsureSlotData	inferred	Creates and attaches slot-one data only when the object has no existing slot-one entry.
+0x001129C8	dds3SetObjectSlot1MoverCallback	inferred	Forwards a mover callback to an object's slot-1 handler; current camera/viewer callers pass NULL to clear it.
+0x001129E8	dds3SetSlot1HandlerCallback	inferred	Looks up the object's slot-1 handler, stores the supplied Dds3MoverUpdate callback there, and reports whether the handler exists.
 0x00112AB0	dds3GetObjectOwnedHandle	inferred	DDS2 twin of DDS1 0x00112888 (same subtype byte, same six getters) [names_L13_FinishUnits.tsv]
 0x00112B58	dds3SetOwnedWorldInnerValue	inferred	Stores a value in the owned inner world-object state. [names_reviewed10.tsv]
 0x00112B80	dds3CreateCameraData	inferred	Camera kind-4 creation callback: creates the node transform, allocates CameraData, attaches its ObjBase handle and clears the pending-FOV flag.
@@ -1294,6 +1296,7 @@
 0x0016EFA8	effThunderGroupRelease	inferred	Releases each thunder handle and the group work; DDS1 twin. [names_qp9.tsv]
 0x0016F020	effSetResourceBlendColor	inferred	confidence=high; matched-C; src/dds2/game/code_0016EDD0.c:93:func_0016F020; Writes the resource handle blend-color word consumed by the blur resource caller; no per-channel conversion or multiplication occurs.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x0016F6D0	effThunderUpdateChainSegments	inferred	confidence=high; matched-C; src/dds2/game/code_0016EDD0.c:99:func_0016F6D0; Propagates adjacent parent point pairs into each thunder child segment, seeds later child fragment histories from the preceding segment, multiplies parent/child colors, advances the child counter and queues its particle system.; source=names_P5.tsv:14 [names_qp11.tsv]
+0x0016F850	effThunderCreateCurveGroup	inferred	Allocates a curve group, clones its mixer, initializes fragment-history slots and creates one event per group slot; called by effApplyParamBlockPair.
 0x0016FAD0	effApplyParamBlockPair	inferred	Obtains blocks zero and one from the effect parameter table and passes the pair to the handler.
 0x0016FD90	effReleaseGroupSlotsAndResources	inferred	Walks group slots releasing resource arrays and effect nodes before group cleanup. [names_reviewed21.tsv]
 0x00171580	effCopyResourceGroupVector	inferred	high confidence; src/dds2/game/code_0016EDD0.c func_00171580: Copies one 16-byte vector in the effect resource-group unit. [names_reviewed25.tsv]
@@ -2189,6 +2192,7 @@
 0x001A48B8	itfMesSetSubResource	inferred	swaps ItfMesSub of a window, returns previous, reads MSG1 magic
 0x001A4940	itfMesGetEntryTableItem	inferred	Gets the indexed message entry's table and reads its selected item.
 0x001A4988	itfMesSetWindowPageAndRefresh	inferred	M141; sources=names_pending_main.tsv; twin=0x0019C968, input-family pairing. [names_qp10.tsv]
+0x001A4A10	itfMesSetOptionValue	inferred	Rejects IDs >= 16 and reserved IDs 1, 6, and 7; replaces an existing option or appends within the 15-entry limit, storing the selected ID/value. Paired DDS1 implementation at 0x0019C9F0.
 0x001A4AD8	itfMesMeasureEntryItem	inferred	twin [names_M67_Named.tsv]
 0x001A4B98	itfMesSetEntryLastColorChannel	inferred	confidence=high; matched-C; src/dds2/interface/itfMesManager.c:889:func_001A4B98; Stores the fourth color channel used when entry glyphs are built; leaves the field layout and other channels unchanged.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x001A4BB8	itfMesSetWindowCallbackAddress	inferred	Stores a callback address on the specified window. [names_reviewed6.tsv]
@@ -2224,15 +2228,24 @@
 0x001A5F18	btlReleaseEffectResourceHandles	inferred	Releases and clears all three BattleEffect resource handles, then clears their effect flag bits.
 0x001A5FA0	itfReleaseUiResourceSlotHandles	inferred	Releases and clears handles in every UI resource slot. [names_reviewed10.tsv]
 0x001A5FF0	txtFormatNumberU16	inferred	writes decimal digits as (digit<<8)-0x6F80 u16 glyph codes, returns end pointer
+0x001A6078	itfMesConfigurePanelBoundsAndFadeLimit	inferred	Selects the panel-layout branch from mode, writes the four bounds, clamps/stores fadeLimit, and initializes related panel fields. Paired title implementation.
 0x001A6128	itfUpdateBattleDisplayAndFadeIndicator	inferred	Runs the display update stages and advances the battle fade indicator. [names_reviewed16.tsv]
 0x001A6160	itfMesUpdatePanelFades	inferred	U2
 0x001A67E0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]
+0x001A6AB8	itfMesFindPressedOptionRank	inferred	Checks option buttons and returns the selectable row rank for the pressed option, or -1 when no registered choice is eligible.
 0x001A6B48	btlUpdateFadeIndicator	inferred	BtlFade {kind,dir,alpha,timer} at unit+0x1D0 pulses alpha 0x20/0x40..0xFF
 0x001A6BF8	itfUpdateSoundSelectorPanel	inferred	U1
 0x001A6DA8	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
+0x001A6E88	itfDrawSelectedSoundRow	inferred	Draws the selected sound row and its timed expanding fade outline; completes the DDS1 paired role.
+0x001A7120	itfDrawSoundSelectorOptionPanel	inferred	Mode-3 path in itfUpdateSoundSelectorPanel; emits option-row geometry and panel quads for the selector.
+0x001A7688	itfUpdateActiveMessageWindows	inferred	CalcMsgMng task update: walks active message windows and advances each window's fade, display and selection state.
+0x001A76C8	itfUpdateSoundSelectorPanels	inferred	Registered DrawMsgMng update task gates on pending work, updates active sound-selector panels, advances the message tick, and returns zero.
+0x001A7798	itfQueueSpriteQuadPacket	inferred	Builds a sprite's four-corner vertices, emits the indexed five-quad packet, and appends it to the message draw list.
 0x001A7878	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:783:func_001A7878; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
+0x001A7A98	itfMesFindPreviousWindowWithPanelSprite	inferred	Used by the panel layout inspector to walk backward, wrap at the active-list tail, and select a window with a non-null panel sprite.
 0x001A7B00	itfQueueOffsetTexturedRect	inferred	readability/matching review (QP16)
+0x001A85E0	itfMesScriptStartEntryAndWait	inferred	Reads script entry argument 0, starts the window entry, polls its transition and completion, then cleans up and publishes the result value.
 0x001A87E8	sndCycleTestMessageResource	inferred	Releases the previous TestMsgMng resource and cycles the four sound-test message choices, loading the next resource when present.
 0x001A8848	itfUpdateTestMessageResourceInput	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:915:func_001A8848; The TestMsgMngC task cycles its test message texture/resource when the corresponding pad state is negative, then returns zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001A8918	itfPrintTestMessageCallback	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:943:func_001A8918; The registered test-message window callback prints the fixed diagnostic marker.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -3619,6 +3632,9 @@
 0x002410D0	evtCommandClearSelectedEffectNode	inferred	confidence=high; matched-C; src/dds2/event/evtCommand.c:217:func_002410D0; Resolves script operand zero as a kind-seven world object and dispatches its supported inner-node clear callback with flag zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00241110	evtCommandAttachLightToUnitPath	inferred	Resolves unit-path and light object; attaches light to path when both exist. [names_reviewed6.tsv]
 0x00241218	evtCommandReadSecondaryWorldIdValue	inferred	Looks up named ID in secondary world and returns node value or zero with warning. [names_reviewed6.tsv]
+0x002412B0	evtCommandOpenTitleMenu	inferred	Requests admin mode 2, whose dispatch opens the title menu.
+0x002412E0	evtCommandOpenMemoryCardMenu	inferred	Requests admin mode 0xC, whose dispatch enters the memory-card pack scene.
+0x00241310	evtCommandStartStaffMovie	inferred	Requests admin mode 4, whose dispatch starts the staff movie.
 0x00241340	evtCommandSubmitPairedAdminRequest	inferred	Passes two script parameters to administrative request queue and sets script return to zero. [names_reviewed6.tsv]
 0x00241390	evtCommandDeferFieldTransition	inferred	Logs CALL_NEXT arguments and saves two of them as deferred field command. [names_reviewed6.tsv]
 0x00241460	evtCommandSignalAdminAtTimerZero	inferred	Signals administrative flag when script command timer equals zero. [names_reviewed6.tsv]
@@ -3875,9 +3891,11 @@
 0x0025F640	mnuEvaluateCubicBezierPoint	inferred	Evaluates cubic Bernstein weights for four X and Y control points at the supplied parameter and returns the integer point.
 0x0025F708	mnuSolveCubicBezierYForX	inferred	Bisects the parameter until the cubic Bezier X coordinate approaches the target, then returns the corresponding Y coordinate.
 0x0025F7F0	mnuInitializeShopStatusBatches	inferred	Allocates and initializes the shop scene status graphics batches. [names_reviewed10.tsv]
+0x0025F8B8	mnuInitializeCampEffectResources	inferred	Loads the camp map resource, initializes its map packet, installs the mapped handle, copies effect rows and sets packet flags.
 0x0025FA10	mnuShopDestroyNestedEffectBatch	inferred	Destroys the effect batch referenced by the nested shop scene object. [names_reviewed15.tsv]
 0x0025FC08	mnuShopLoadMessageResource	inferred	readability/matching review (QP16)
 0x0025FCD8	mnuShopReleaseWindowAndEffectResources	inferred	Releases window textures and effect slot sets, including the mode-dependent nested batch. [names_reviewed15.tsv]
+0x0025FD78	mnuDrawShopPanelDecorations	inferred	Draws the standard shop slot decorations or the camp icon backdrop according to the shop layout type.
 0x0025FE70	mnuCampHasEligibleOwnedItems	inferred	Scans owned non-bullet items and reports whether any pass the menu eligibility flags. [names_reviewed15.tsv]
 0x0025FF18	mnuCreateEnabledCampEntryWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:func_0025FF18; Creates a camp list containing enabled source indices and copies selected settings into retained list work. [names_qp9.tsv]
 0x00260138	mnuCampResolveFlagRowValue	inferred	Returns the value paired with the highest-index active flag in a camp row, otherwise its default. [names_reviewed15.tsv]
@@ -4464,14 +4482,18 @@
 0x002A24A0	mnuCommitTitleStreamReadyState	inferred	Under semaphore, changes ready stream state to next state and clears buffer marker. [names_reviewed7.tsv]
 0x002A2550	mnuResetTitleStreamLocked	inferred	Resets title stream while holding its semaphore. [names_reviewed8.tsv]
 0x002A2580	mnuInitializeTitleSoundBuffer	inferred	confidence=high; Paired title sound-buffer/decoder initializer; title-stream synchronization and AT3 resource load.; sources=names_M143.tsv; twin=0x0026A980, input-family pairing. [names_qp10.tsv]
+0x002A27A8	mnuInstallTitleSoundBufferFromData	inferred	Allocates the format-sized title sound buffer, copies compressed audio data, initializes frame state, and configures the ATRAC decoder. Paired title implementation.
 0x002A2928	mnuGetSoundBufferStateLocked	inferred	Returns one of three sound-buffer states under semaphore based on two status words. [names_reviewed7.tsv]
 0x002A2998	mnuClearInactiveSoundBufferState	inferred	Clears a sound-buffer state unless it indicates the currently active buffer. [names_reviewed15.tsv]
 0x002A29D8	mnuResetSoundBuffer	inferred	Resets stream state fields D_00455D70[1,4] then releases the active buffer through func_002A2A00.
 0x002A2A40	mnuResetSoundBufferLocked	inferred	Resets sound buffer while holding sound semaphore. [names_reviewed8.tsv]
 0x002A2A70	mnuReleaseSoundBufferLocked	inferred	Releases sound buffer while holding sound semaphore. [names_reviewed8.tsv]
+0x002A2AA0	mnuLoadTitleMenuAssets	inferred	Loads the title menu's resource slots and ensures its movie-menu sprite handle before the menu task starts.
 0x002A2AC0	mnuCreateTitleMenuTask	inferred	L13
 0x002A2BD0	mnuReleaseTitleMenuAssetsAndMarkClosed	inferred	Releases title menu resources and sprite handles, then marks the title menu closed. [names_reviewed15.tsv]
 0x002A2C28	mnuHandleTitleMenuEvent	inferred	TaskPurist
+0x002A3A50	mnuOpenTitleMenuForMode	inferred	Creates the title-menu task in the requested mode and returns 0xFFFFFFFF; event callers use zero or the optional mode value.
+0x002A3AA0	mnuOpenTitleMenuDefaultMode	inferred	Script-table callback that creates the title menu in mode zero and returns zero; DDS1 peer 0x0026BD38.
 0x002A3A70	mnuDestroyTitleMenuTask	inferred	Performs title menu cleanup and destroys the task literally named titleProc. [names_reviewed15.tsv]
 0x002A3AC0	mnuRestartRuntimeAfterViewer	inferred	Destroys secondary viewer world then restarts runtime task. [names_reviewed8.tsv]
 0x002A3AE8	mnuSpriteGraphicHandle	inferred	returns work->gfx[D_003E3790[index].gfx]: graphic handle of sprite table entry (8-byte entries {gfx,unk2,x,y})
@@ -4481,8 +4503,8 @@
 0x002A3C90	mnuSelectMenuListCursorByAdvance	inferred	Resets a menu list cursor and advances it the requested count. [names_reviewed8.tsv]
 0x002A3CE0	mnuIsAnyMenuInputPressed	inferred	Tests whether any of the configured menu input keys are pressed. [names_reviewed9.tsv]
 0x002A3DE8	mnuReleaseMenuResourceSlots	inferred	Releases both menu resource slots and clears their handles. [names_reviewed8.tsv]
-0x002A3F28	mnuStartMovieMenuSfx17	inferred	same shape as mnuStartMovieMenuSfx16 with item 0x20, context 0x53
-0x002A3F60	mnuStartMovieMenuSfx18	inferred	same shape with item 0x21, context 0x53
+0x002A3F28	mnuDrawMovieMenuSpriteSlot20	inferred	mnuDrawSprite uses table slot 0x20 with caller-supplied alpha; DDS1 counterpart uses slot 0x17
+0x002A3F60	mnuDrawMovieMenuSpriteSlot21	inferred	mnuDrawSprite uses table slot 0x21 with caller-supplied alpha; DDS1 counterpart uses slot 0x18
 0x002A3F98	mnuSlideBarSetState	inferred	mode 2 = reset to closed (pos 0), 3 = open (pos 0x200), else store mode
 0x002A3FE0	mnuDrawAndAdvanceMovieMenuBar	inferred	readability/matching review (QP16)
 0x002A40C8	mnuSlideBarSetStateB	inferred	identical to func_002A3F98 (separate copy in retail)
@@ -4499,6 +4521,7 @@
 0x002A48F0	mnuSlidePathPoint	inferred	interpolates between two points of the D_003E38A0 path (segment from func_002A47E8, lengths via func_002A4770/func_002A4870)
 0x002A49C0	mnuStartRandomMovieMenuPulse	inferred	LeverAudit
 0x002A4A68	mnuDrawMovieMenuPulses	inferred	LeverAudit
+0x002A4B70	mnuDrawAndAdvanceMovieMenuSlidePath	inferred	Draws the movie-menu slide path, starts and renders pulse effects, and advances/wraps pathProgress at 0x1000.
 0x002A4D28	mnuAdvanceSlideBar	inferred	Draws and advances the position of a single active slide bar, clamping its travel.
 0x002A4DF0	mnuTimedSlideBarSetState	inferred	timer>0 stores the request id; otherwise mode 2/3 reset/open like SetState (pos 0x200)
 0x002A4E48	mnuAdvanceTimedSlideBar	inferred	Counts down a slide bar timer, then draws and advances its position.
@@ -5798,15 +5821,20 @@
 0x0030BC58	sdfCycleForward	inferred	advances D_004388B8 with wrap to 0, mirror of func_0030BCA8
 0x0030BCA8	sdfCycleBackward	inferred	Decrements the selected index with wraparound to count minus one
 0x0030BCE8	sdfGetMapCameraTransitionFrame	inferred	confidence=high; matched-C; src/dds2/game/code_0030B838.c:276:func_0030BCE8; Returns the signed frame counter used by the selected local-map camera transition interpolation and advanced until the transition completes.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x0030BD10	sdfUpdateSelectedCounterMapCameraTransition	inferred	When map-counter selection is active, eases the camera position and quaternion toward the selected counter preset for 45 frames and advances the transition frame.
 0x0030BED8	sdfStepSelectedMapCameraTransition	inferred	confidence=high; matched-C; src/dds2/game/code_0030B838.c:284:func_0030BED8; F3; source=names_pending_main.tsv:97; review=Interpolates the selected local-map camera position and quaternion during a 45-step transition; installs selected vectors otherwise. [names_qp11.tsv]
+0x0030C250	sdfSetLocalMapCounterMarkerState	inferred	Selects the fixed local-map marker model for a counter index and writes its marker state byte; callers use states 10 and 11 while moving selection and 0xB when initializing the selected marker.
 0x0030C378	sdfCreateMaskedCounterChannels	inferred	Allocates counter display entries for enabled mask bits and selects the requested channel. [names_reviewed15.tsv]
 0x0030C568	sdfResolveSceneCounterInfo	inferred	Selects scene-specific counter information, with flag-dependent alternate scene records. [names_reviewed15.tsv]
 0x0030C5D8	sdfCounterDestroyRuntime	inferred	Frees each channel display and timer before destroying counter list state. [names_reviewed8.tsv]
 0x0030C640	sdfDestroyActiveCounterRuntime	inferred	Destroys the global counter runtime and its allocated channel displays and timer. [names_reviewed15.tsv]
 0x0030C660	sdfCounterTickCountdownAndMapTimers	inferred	Ticks the counter countdown and map timers before updating its state. [names_reviewed10.tsv]
+0x0030C8E8	sdfAdjustCounterValueAndRedraw	inferred	Adjusts the selected counter value by one, redraws the selected value and cursor, and refreshes the selection fade; paired with DDS1 0x002C4850.
 0x0030C9A0	sdfCounterGetDisplayWordPointer	inferred	Byte-identical DDS1 counterpart: Returns the word pointer in the active counter display reached through its runtime channel.
 0x0030C9B8	sdfCounterGetDisplayValue	inferred	Returns the signed display value of the currently selected counter channel.
 0x0030C9D0	sdfGetCounterChannelValueAtIndex	inferred	Follows a number of counter channel links and returns that channel display value. [names_reviewed15.tsv]
+0x0030CA38	sdfCounterDrawLabelPlateRow	inferred	Draws the counter label-plate row by invoking the channel draw callback for three spaced channels, then submits the timer-faded full-width depth gradient; paired with DDS1 0x002C4A58.
+0x0030CC68	sdfDrawCounterMapSelectionRow	inferred	Draws one local-map counter row with its map number, completion, active-selection and timer-pulse indicators; paired with DDS1 0x002C4C88.
 0x0030CEF0	sdfCounterDrawChannelPlate	inferred	Draws the counter channel plate; DDS1 twin. [names_qp9.tsv]
 0x0030D300	mnuSetMapTimerFlags	inferred	Starts or clears two 16-bit map timers according to flag bits zero and one.
 0x0030D350	mnuTickMapTimers	inferred	Decrements two positive map timers and reloads each from 60 on reaching zero.
@@ -5826,6 +5854,7 @@
 0x0030DAA0	sdfInstallNonzeroSpriteSlots	inferred	Installs only nonzero sprite slot handles from a slot set into the active resource table. [names_reviewed15.tsv]
 0x0030DAE8	sdfReleaseAllSpriteSlots	inferred	Destroys each active sprite resource slot and clears every table entry. [names_reviewed15.tsv]
 0x0030DB40	sdfDrawPositionedSlotImage	inferred	Fam
+0x0030DBF0	sdfDrawSlotGridWithCornerColors	inferred	Temporarily applies four corner colors to a resolved sprite slot, draws the grid slot at the placement-table offset, then restores the saved colors.
 0x0030DE08	sdfDrawScaledCenteredSlotImage	inferred	Fam
 0x0030E010	sdfDrawUniformlyScaledSlotImage	inferred	medium confidence; src/dds2/game/code_0030B838.c func_0030E010: Supplies equal horizontal and vertical scales to the slot-backed image renderer, which temporarily changes quad dimensions and restores them after submission. [names_reviewed25.tsv]
 0x0030E130	sdfCounterInitializeDisplayAnimation	inferred	Initializes the counter display value and animation count. [names_reviewed10.tsv]
@@ -5833,17 +5862,24 @@
 0x0030E180	sdfCounterStepDownAnimationValue	inferred	Subtracts two while the animation value is positive, otherwise clears it. [names_reviewed10.tsv]
 0x0030E1A0	mnuDrawAnimatedTransition	inferred	U1
 0x0030E390	fldDrawTransitionBackdrop	inferred	TaskPurist
+0x0030E880	fldCreateMapRequestQueues	inferred	Creates both local-map request queues, installs the halo and pulse callbacks, resets the update interval, and initializes the request counters; DDS1 counterpart at 0x002C7000.
 0x0030E910	fldDrawMapRequestMarker	inferred	Wave4
+0x0030E940	fldDrawMapRequestHalo	inferred	Draws the first local-map request ring's grey halo callback with progress-based scale and alpha; DDS1 counterpart at 0x002C7180.
+0x0030E958	fldDrawMapRequestPulse	inferred	Draws a map request pulse, scaling and fading the current request while enlarging and fading requests that are not current; DDS1 counterpart at 0x002C7430.
 0x0030EA70	sdfCommitPendingVectorAndMarkChanged	inferred	Copies a pending vector into the active vector and sets its change flag. [names_reviewed17.tsv]
 0x0030EAA8	fldUpdateMapRequestQueues	inferred	U2
 0x0030ECC0	fldDrawSelectedMapMarker	inferred	U3
 0x0030EE40	sdfCreateLinkedRequestRing	inferred	confidence=medium; src/dds2/game/code_0030E1A0.c:func_0030EE40; Allocates and clears request-ring storage, connects nodes into a circular doubly linked list, and initializes ring metadata. [names_qp9.tsv]
+0x0030EF18	fldReleaseMapRequestQueue	inferred	Releases one map-request queue by returning its general allocation. [map-request queue teardown]
+0x0030EF90	fldAdvanceMapRequestAges	inferred	Increments active map-request node ages and releases nodes at the queue lifetime limit. [map-request queue lifecycle]
+0x0030F038	fldDispatchMapRequestCallbacks	inferred	Traverses active map-request nodes and invokes the queue callback with payload and normalized progress. [map-request queue callbacks]
 0x0030F1A0	fldProjectPointToGridCell	inferred	confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:225:func_0030F1A0; M141; source=names_pending_main.tsv:104; review=Transforms a world point by view/projection, perspective-divides and converts screen coordinates to GS grid coordinates. [names_qp11.tsv]
 0x0030F2A8	sdfCounterDrawGlyphAtGridCell	inferred	Creates and draws a glyph at scaled grid coordinates. [names_reviewed10.tsv]
 0x0030F2F8	fldRotateVectorAroundX	inferred	Recomputes Y and Z with sine and cosine of angle; X is unchanged. [names_reviewed21.tsv]
 0x0030F390	fldRotateVectorAroundY	inferred	Recomputes X and Z with sine and cosine of angle; Y is unchanged. [names_reviewed21.tsv]
 0x0030F420	fldRotateVectorAroundZ	inferred	Recomputes X and Y with sine and cosine of angle; Z is unchanged. [names_reviewed21.tsv]
 0x0030F4B8	fldRotateVectorAroundAxis	inferred	Rotates a vector around an axis; DDS1 twin. [names_qp9.tsv]
+0x0030F8D0	sdfVec3NormalizeInPlaceAndGetLength	inferred	Computes vector magnitude, divides xyz in place by that magnitude, and returns it; no zero-length guard. DDS1 twin 0x002C84F0.
 0x0030FA28	fldNormalizedVectorCross	inferred	confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:389:func_0030FA28; confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:389:func_0030FA28; Field-math routine copies and normalizes both inputs before their three-component cross product; matches DDS1 0x002C8648 and neighboring fldNormalizedVectorDot. Retains sdfCrossNormalizedVectors on SDK duplicate 0x00326B00.; resolution=rename; source=names_qp11_conflicts.tsv:6 [names_qp11.tsv]
 0x00310320	sdfTransformDirectionByMatrix	inferred	Multiplies a direction vector by the rotation portion of a matrix. [names_reviewed10.tsv]
 0x00310608	sdfPowFloatByTruncatedExponent	inferred	Multiplies a base for the whole-number portion of a float exponent. [names_reviewed8.tsv]
@@ -7795,6 +7831,7 @@
 0x00191450	effMagatuhiUpdateValueHistorySlot	inferred	Copies a new vector into the rolling slot history, advances phase/noise, perturbs replay history, clamps displacement, and advances the saturated valid count; DDS1 twin 0x00189818.
 0x002A1928	mnuUpdateTitleAudioStreams	inferred	Advances title stream states, decodes and mixes sample frames, and updates both stream frame indices. Paired DDS1 0x00269D18. [LiteH b12]
 0x002A1E58	mnuInitializeTitleAudioStreams	inferred	Initializes the title stream and sound-buffer decoder states and starts the stream thread. Paired DDS1 0x0026A248. [LiteH b12]
+0x002A2200	mnuQueueTitleSoundStreamEntry	inferred	Selects the indexed title sound stream format and loop point, configures decoder state, then queues its file path for asynchronous loading. Paired title implementation.
 0x002A2628	mnuLoadTitleSoundBufferEntry	inferred	Allocates and loads the indexed title sound-buffer entry according to its format; paired DDS1 0x0026AA28. [LiteH b12]
 0x001B20C8	btlGetRewardLevelMultiplier	inferred	high confidence; normal/hunt EP callers select reward kinds 1/0; cap acquirer level at 60, clamp enemy-level difference to [-15,15], read the interleaved level multiplier table. Paired DDS1 0x001A7C20. [Namer1 batch 31]
 0x001B4040	btlRollMajinEncounter	inferred	high confidence; Majin encounter chance debug strings, story/scene gates, mirrored solar-phase rate, attempt scaling, party override and final random roll consumed by field scene entry. [Namer1 batch 31]
@@ -7877,8 +7914,11 @@
 0x002A3C78	mnuGetMovieMenuSelectionIndex	inferred	Returns the current selection-list cursor index; DDS1 twin 0x0026BED0. [LiteH menu naming batch 10]
 0x002A3D70	mnuLoadMovieMenuResourceSlots	inferred	Loads both indexed movie-menu resource slots; DDS1 twin 0x0026BFC8. [LiteH menu naming batch 10]
 0x002A3E38	mnuEnsureMovieMenuSpriteHandle	inferred	Loads or requests the movie-menu sprite handle depending on mode; DDS1 twin 0x0026C098. [LiteH menu naming batch 10]
+0x002A3EF0	mnuDrawMovieMenuSpriteSlot1F	inferred	mnuDrawSprite uses table slot 0x1F with caller-supplied alpha; DDS1 counterpart uses slot 0x16
 0x002A44C0	mnuDrawMovieMenuSpritePickList	inferred	Draws and advances the sprite entries in the movie-menu pick list, removing entries after their fade sequence. [LiteH menu naming batch 10]
 0x002A5040	mnuDrawMovieMenuSlideBar	inferred	Draws the movie-menu slide bar using the active fade amount or primary/secondary slide position. [LiteH menu naming batch 10]
+0x002A50E8	mnuSetMovieWorkFlag	inferred	Writes the selected byte in the title movie work block; callers set or clear flag bytes 0 and 1 during input and phase drawing.
+0x002A50F8	mnuResetMovieWorkState	inferred	Clears movie work flag bytes 0 and 1 plus the words at offsets 4 and 8; called when title movie work is reset/stopped.
 0x002A55B8	mnuDrawMovieChoiceTransition	inferred	Draws the title-menu choice sprites and their selection highlight with frame-driven fades. [LiteH menu naming batch 10]
 0x002A5A78	mnuDrawMovieMenuListItem	inferred	Draws a row's base sprite and selection highlight; DDS1 twin 0x0026D480. [LiteH menu naming batch 10]
 0x00182458	effPcpSetExpandingThunderFadeInput	inferred	Store the expanding-thunder fade variant's retained f32 input; observed updater does not read it. DDS1 twin 0x0017A800. [Namer1 batch 35, high]
@@ -7915,14 +7955,6 @@
 0x001E38F0	btlDrawUnitTransparencyPasses	inferred	Three GS TEST passes on four surfaces render transparency overlay and update anchors; named transparency callers supply overlayColor, not a frame index. DDS1 twin 0x001D6A80. [Namer1 batch 36, high]
 0x001E6790	btlFinishNoOpTask	inferred	Zero-argument kind-0x20 callback returns scheduler completion one unconditionally, without sound or state changes. DDS1 twin 0x001D97D0. [Namer1 batch 36, high]
 0x001E6798	btlCreateNoOpTask	inferred	Create zero-argument kind-0x20 task with ALWAYS start, NEVER end and unconditional completion callback; preserve BtlRuntimeTask pointer type. DDS1 twin 0x001D97D8. [Namer1 batch 36, high]
-0x002A2200	mnuLoadIndexedTitleSoundStream	inferred	Loads indexed title-stream metadata, configures ATRAC frame layout, builds the request path under the semaphore; DDS1 twin 0x0026A5F0. [LiteH menu naming batch 16]
-0x002A27A8	mnuLoadTitleSoundBufferFromMemory	inferred	Copies compressed sound data into an allocated decoder buffer and resets frame state under semaphore; DDS1 twin 0x0026ABA8. [LiteH menu naming batch 16]
-0x002A2AA0	mnuPrepareMovieMenuResources	inferred	Loads title-menu resource slots and ensures the movie sprite handle; DDS1 twin 0x0026AEB0. [LiteH menu naming batch 16]
-0x002A3A50	mnuOpenTitleMenu	inferred	Opens the title menu and returns the script's all-ones result; DDS1 twin 0x0026BCE8. [LiteH menu naming batch 16]
-0x002A3AA0	mnuOpenDefaultTitleMenu	inferred	Opens the title menu with mode zero; DDS1 twin 0x0026BD38. [LiteH menu naming batch 16]
-0x002A4B70	mnuDrawMovieMenuSlideBarPath	inferred	Draws the path and pulse treatment for a movie-menu slide bar. [LiteH menu naming batch 16]
-0x002A50E8	mnuSetMovieMenuStateFlag	inferred	Stores the indexed flag byte in the movie-menu state. [LiteH menu naming batch 16]
-0x002A50F8	mnuResetPairedMovieMenuSlideBars	inferred	Clears both active bytes and positions in the paired movie-menu slide-bar state. [LiteH menu naming batch 16]
 0x002A5260	mnuDrawTitleMenuFadeOverlay	inferred	Draws the title-menu phase/frame fade overlay sprites. [LiteH menu naming batch 16]
 0x002A5C58	mnuUpdateMovieMenuInputState	inferred	Processes movie-menu input and returns the resulting menu action; DDS1 twin 0x0026D660. [LiteH menu naming batch 16]
 0x002A6D68	mnuUpdateStaffSparkleEffects	inferred	Spawns, draws, ages and removes the staff-roll sparkle entries. [LiteH menu naming batch 16]

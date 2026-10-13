@@ -60,7 +60,7 @@ struct MovieCueNode {
     u8 enabled;           /* 0x12 */
 };
 
-extern void func_0025BA20(MnuSpriteResourceGroup *, SdfList *, void *, s8);
+extern void mnuAppendSpriteNodesForCueMode(MnuSpriteResourceGroup *, SdfList *, void *, s8);
 
 SdfList *mnuTickResourceGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
     SdfListNode *list = group->head;
@@ -75,7 +75,7 @@ SdfList *mnuTickResourceGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
         node->framesLeft = node->framesLeft - 1;
         /* Fire an enabled cue five frames before its node expires. */
         if (node->framesLeft == node->duration - 5 && node->enabled != 0) {
-            func_0025BA20(owner, group, node, node->cueIndex);
+            mnuAppendSpriteNodesForCueMode(owner, group, node, node->cueIndex);
         }
         if (node->framesLeft == 0) {
             list = sdfListRemoveNode(group, list);
@@ -94,7 +94,7 @@ void func_0025BDD0(MnuSpriteResourceGroup *resources) {
         if (resources->activeCount < 10) {
             group = sdfCreateTaskHeader(0);
             group->onRemove = mnuReleaseOptionalDrawAllocation;
-            func_0025BA20(resources, group, NULL, 0);
+            mnuAppendSpriteNodesForCueMode(resources, group, NULL, 0);
             for (i = 0; i < 10; i++) {
                 if (resources->tasks[i] == 0) {
                     resources->tasks[i] = group;
@@ -513,7 +513,7 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, context);
 }
 
-extern f32 func_002C84F0(f32 *);
+extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern s32 D_003BC4E0;
 
 /* Ease the live cursor toward the selected scene row and track whether it moved. */
@@ -536,7 +536,7 @@ void func_0025D628(MenuSceneWork *work) {
     memset(direction, 0, sizeof(direction));
     direction[0] = targetX - work->entryPosition.x;
     direction[1] = targetY - work->entryPosition.y;
-    func_002C84F0(direction);
+    sdfVec3NormalizeInPlaceAndGetLength(direction);
 
     current = work->entryPosition.x;
     difference = targetX - current;

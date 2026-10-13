@@ -30,8 +30,8 @@ extern s32 D_003BD984;
 extern MapRequestState *D_003BD988;
 
 extern MapRequestState *D_003BD98C;
-void func_002C7B38(MapRequestState *);
-extern void func_002C7C58(MapRequestState *);
+void fldReleaseMapRequestQueue(MapRequestState *);
+extern void fldDispatchMapRequestCallbacks(MapRequestState *);
 extern f32 sdfCounterGetScaledValue(void);
 extern f32 D_0038FE30[][4];
 
@@ -405,8 +405,8 @@ void fldCreateMapRequestQueues(void) {
 
 /* Release both map request queues. */
 void fldReleaseMapRequestQueues(void) {
-    func_002C7B38(D_003BD988);
-    func_002C7B38(D_003BD98C);
+    fldReleaseMapRequestQueue(D_003BD988);
+    fldReleaseMapRequestQueue(D_003BD98C);
 }
 
 /* Draw the auxiliary map texture centred on the requested position. */
@@ -482,7 +482,7 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 }
 
 extern s8 D_003BD281;
-extern void func_002C7BB0(MapRequestState *);
+extern void fldAdvanceMapRequestAges(MapRequestState *);
 
 void fldUpdateMapRequestQueues(s32 enabled) {
     s8 index = sdfCounterGetDisplayValue() - 1;
@@ -514,8 +514,8 @@ void fldUpdateMapRequestQueues(s32 enabled) {
         D_003DFED0[1] = (s32)D_0038FE30[index][1];
         D_003DFED0[2] = (s32)D_0038FE30[index][2];
     }
-    func_002C7BB0(D_003BD988);
-    func_002C7BB0(D_003BD98C);
+    fldAdvanceMapRequestAges(D_003BD988);
+    fldAdvanceMapRequestAges(D_003BD98C);
 }
 
 void fldDrawCounterMapMarker(void) {
@@ -531,7 +531,7 @@ void fldDrawCounterMapMarker(void) {
     if (remaining > 0.0f) {
         opacity = remaining;
     }
-    func_002C7C58(D_003BD98C);
+    fldDispatchMapRequestCallbacks(D_003BD98C);
     fldProjectPointToGridCell(&x, &y, D_0038FE30[index][0], D_0038FE30[index][1], D_0038FE30[index][2]);
     fldDrawScaledAuxMapTexture(x, y, MAP_GREY_COLOR(opacity * 32.0f), 5.0f);
 }
@@ -570,7 +570,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     return state;
 }
 
-void func_002C7B38(MapRequestState *state) {
+void fldReleaseMapRequestQueue(MapRequestState *state) {
     if (state != NULL) {
         sdfQueueGeneralAllocationRelease(state->allocation);
     }
@@ -600,7 +600,7 @@ void fldSetMapRequestInterval(MapRequestState *state, u16 interval) {
 }
 
 /* Advance active ring nodes, retiring each node when it reaches the queue limit. */
-void func_002C7BB0(MapRequestState *ring) {
+void fldAdvanceMapRequestAges(MapRequestState *ring) {
     s32 remaining;
     s32 pending;
     u16 limit;
@@ -653,7 +653,7 @@ done:
 }
 
 /* Report normalized progress for each active request in the ring. */
-void func_002C7C58(MapRequestState *ring) {
+void fldDispatchMapRequestCallbacks(MapRequestState *ring) {
     MapRequestNode *node;
     s32 remaining;
     s32 end;

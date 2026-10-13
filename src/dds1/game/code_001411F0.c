@@ -8,6 +8,7 @@
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_dev_state.h"
+#include "fld_transfer_chunk.h"
 #include "sdf_resource.h"
 #include "eff_transform.h"
 #include "sdf_model.h"
@@ -117,12 +118,6 @@ extern void sndReleaseTrackHandle(s32 arg0);
 
 extern s32 dds3GetWorldObject(void);
 
-
-typedef struct FldTransferChunk {
-    u32 unk0;
-    s32 offset;
-    u32 size;
-} FldTransferChunk;
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 
@@ -4127,7 +4122,7 @@ void fldFinishEventFieldState(void) {
 extern void func_0024DD78(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void fldAddCameraModelEntry(s32);
-extern void mnuLoadIndexedTitleSoundStream(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void func_0014B688(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
@@ -4224,7 +4219,7 @@ void fldUpdateSparkMessageSequence(void) {
         }
         fldSparkControlState.unk2C++;
         if (fldStepArchiveLoad() != 0) {
-            mnuLoadIndexedTitleSoundStream(0x12);
+            mnuQueueTitleSoundStreamEntry(0x12);
             fldSparkControlState.dialogPhase = 3;
         }
         break;

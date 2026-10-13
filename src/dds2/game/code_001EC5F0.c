@@ -122,7 +122,7 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern void mnuResetTitleStreamLocked(void);
 
-extern void mnuLoadIndexedTitleSoundStream(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 D_00435E0C;
 
@@ -307,7 +307,7 @@ extern SdfFlagListParams D_003BDCC8;
 
 extern void mnuReleaseSoundBufferLocked(void);
 
-extern void mnuLoadTitleSoundBufferFromMemory(s32, s32, u8);
+extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
 
 extern s32 btlGetLoggedIndexedCommandItem(s32);
 
@@ -5664,9 +5664,9 @@ void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
         mnuResetTitleStreamLocked();
     }
     if (v == 5) {
-        mnuLoadIndexedTitleSoundStream(4);
+        mnuQueueTitleSoundStreamEntry(4);
     } else {
-        mnuLoadIndexedTitleSoundStream(v - 1);
+        mnuQueueTitleSoundStreamEntry(v - 1);
     }
 }
 
@@ -6198,7 +6198,7 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
             }
             data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->unk_08]);
             size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->unk_08]);
-            mnuLoadTitleSoundBufferFromMemory(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
             work->unk288 = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");

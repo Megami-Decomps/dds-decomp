@@ -41,7 +41,7 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
@@ -112,19 +112,6 @@ typedef struct MemRingHeader {
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
-typedef struct TextPoolNode {
-    struct TextPoolNode *previous;
-    struct TextPoolNode *next;
-    s32 index;
-} TextPoolNode;
-
-typedef struct TextPool {
-    TextPoolNode *activeHead;
-    TextPoolNode *activeTail;
-    TextPoolNode *freeHead;
-    TextPoolNode *freeTail;
-} TextPool;
-
 typedef struct TextVector {
     s32 x;
     s32 y;
@@ -1222,15 +1209,15 @@ u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
 
 /* Initialize a FIFO free list and empty active list.
  * Native do/while writes at least two nodes; the s8 index can wrap. */
-void itfInitPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
+void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride) {
     s8 index = 0;
-    TextPoolNode *previous = NULL;
-    TextPoolNode *node = nodes;
-    TextPoolNode *next;
+    ItfMesPoolNode *previous = NULL;
+    ItfMesPoolNode *node = nodes;
+    ItfMesPoolNode *next;
 
     do {
         count--;
-        next = (TextPoolNode *)((u8 *)node + stride);
+        next = (ItfMesPoolNode *)((u8 *)node + stride);
         node->previous = previous;
         node->index = index;
         index++;
@@ -1241,16 +1228,16 @@ void itfInitPool(TextPool *pool, TextPoolNode *nodes, s32 count, s32 stride) {
     node->previous = previous;
     node->index = index;
     node->next = NULL;
-    pool->freeTail = node;
-    pool->freeHead = nodes;
+    pool->lastFree = node;
+    pool->firstFree = nodes;
     pool->activeTail = NULL;
     pool->activeHead = NULL;
 }
 
 /* Move the free-list head to the active-list tail; exhausted pools return NULL. */
-TextPoolNode *itfAcquirePoolNode(TextPool *pool) {
-    TextPoolNode *node = pool->freeHead;
-    TextPoolNode *next;
+ItfMesPoolNode *itfAcquirePoolNode(ItfMesPool *pool) {
+    ItfMesPoolNode *node = pool->firstFree;
+    ItfMesPoolNode *next;
 
     if (node == NULL) {
         return NULL;
@@ -1268,16 +1255,16 @@ TextPoolNode *itfAcquirePoolNode(TextPool *pool) {
     if (next != NULL) {
         next->previous = NULL;
     } else {
-        pool->freeTail = NULL;
+        pool->lastFree = NULL;
     }
-    pool->freeHead = next;
+    pool->firstFree = next;
     return node;
 }
 
 /* Unlink an active node and append it to the free-list tail; membership is trusted. */
-void itfReleasePoolNode(TextPoolNode *node, TextPool *pool) {
-    TextPoolNode *previous = node->previous;
-    TextPoolNode *next = node->next;
+void itfReleasePoolNode(ItfMesPoolNode *node, ItfMesPool *pool) {
+    ItfMesPoolNode *previous = node->previous;
+    ItfMesPoolNode *next = node->next;
 
     if (previous != NULL) {
         previous->next = next;
@@ -1291,15 +1278,15 @@ void itfReleasePoolNode(TextPoolNode *node, TextPool *pool) {
     }
     node->next = NULL;
     {
-        TextPoolNode *freeTail = pool->freeTail;
-        node->previous = freeTail;
-        if (freeTail != NULL) {
-            freeTail->next = node;
+        ItfMesPoolNode *lastFree = pool->lastFree;
+        node->previous = lastFree;
+        if (lastFree != NULL) {
+            lastFree->next = node;
         }
     }
-    pool->freeTail = node;
-    if (pool->freeHead == NULL) {
-        pool->freeHead = node;
+    pool->lastFree = node;
+    if (pool->firstFree == NULL) {
+        pool->firstFree = node;
     }
 }
 
@@ -1627,7 +1614,6 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, (u32)packet);
 }
 
-extern s32 sdfAllocPacketAligned(s32);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 /* The packet builder returns a 0x30-byte command with two trailing qwords. */

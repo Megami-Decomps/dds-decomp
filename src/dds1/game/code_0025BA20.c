@@ -7,7 +7,7 @@
 
 extern SpriteSpawnNode *mnuCreateSpriteSpawnNode(MnuSpriteResourceGroup *, SpriteSpawnNode *, s8);
 
-void func_0025BA20(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {
+void mnuAppendSpriteNodesForCueMode(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {
     SpriteSpawnNode *parent = parentData;
     SpriteSpawnNode *node;
     f32 chance;

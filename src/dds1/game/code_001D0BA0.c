@@ -1,5 +1,7 @@
+#include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_pad.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -134,16 +136,6 @@ typedef struct SoundTask {
     u8 pad68[8];
 } SoundTask;
 
-typedef struct SndPad {
-    u8 pad00[0x21];
-    s8 confirm;
-    s8 edge22;
-    s8 edge23;
-    u8 pad24[2];
-    s8 prev;
-    s8 next;
-} SndPad;
-
 extern SndPad D_00324510;
 
 extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
@@ -258,17 +250,6 @@ typedef struct BtlFxSrcA {
     f32 f10;
     f32 f14;
 } BtlFxSrcA;
-
-typedef struct BtlEffectResource {
-    s128 vec0;
-    f32 f10;
-    f32 f14;
-    f32 f18;
-    f32 f1C;
-    f32 f20;
-    u8 pad24[8];
-    BtlEffectNode nodes[1];
-} BtlEffectResource;
 
 typedef struct BtlApproachTaskArgs {
     BtlUnit *unit;
@@ -1855,13 +1836,13 @@ void btlUpdateAutoMusic(void) {
         return;
     }
     if (flags & 0x8000) {
-        if (D_00324510.edge22 < 0 || D_00324510.edge23 < 0) {
+        if (D_00324510.unk22 < 0 || D_00324510.unk23 < 0) {
             *(u32 *)(context + 0x1F4) = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_003A3A40);
         }
-    } else if (D_00324510.edge22 < 0) {
+    } else if (D_00324510.unk22 < 0) {
         *(u32 *)(context + 0x1F4) = flags | 0x8000;
         sndSetSequenceVolumePan(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);
@@ -2551,17 +2532,17 @@ void btlReleaseActorModelResources(BtlUnit *object) {
             *(s32 *)((u8 *)object + 0x324) = 0;
             btlBossDebugPrintf(D_003A3AD0, object);
         }
-        model = *(EffWorldNode **)((u8 *)object + 0x31C);
+        model = object->effectObject;
         if (model != 0) {
             dds3RemoveWorldObjectNode(model);
-            *(s32 *)((u8 *)object + 0x31C) = 0;
-            *(s32 *)((u8 *)object + 0x320) = 0;
+            object->effectObject = 0;
+            object->ext = 0;
         }
     } else {
         *(s32 *)((u8 *)object + 0x308) = 0;
         *(s32 *)((u8 *)object + 0x324) = 0;
-        *(s32 *)((u8 *)object + 0x31C) = 0;
-        *(s32 *)((u8 *)object + 0x320) = 0;
+        object->effectObject = 0;
+        object->ext = 0;
     }
     state = *(u32 *)((u8 *)object + 0x118) & ~1;
     flags = (u32)object->status.flags & ~2;
@@ -2807,13 +2788,13 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     }
     entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
     context = (u8 *)btlGetRuntime();
-    if (*(u32 *)((u8 *)unit + 0xE8) & 2) {
-        color = (*(u32 *)((u8 *)unit + 0x84) & 0xFFFFFF) | 0x80000000;
-        evtSetUnitRgbTransition(*(struct EvtUnit **)((u8 *)unit + 0x320), 0, color);
-        evtSetUnitAlphaTransition(*(struct EvtUnit **)((u8 *)unit + 0x320), 0, color);
-        *(u32 *)((u8 *)unit + 0x84) = color;
-        *(u32 *)((u8 *)unit + 0xE8) &= ~4;
-        *(u32 *)((u8 *)unit + 0xE8) &= ~2;
+    if (unit->updateFlags & 2) {
+        color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
+        evtSetUnitRgbTransition(unit->ext, 0, color);
+        evtSetUnitAlphaTransition(unit->ext, 0, color);
+        unit->overlayColor = color;
+        unit->updateFlags &= ~4;
+        unit->updateFlags &= ~2;
     }
     index = 0;
     if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0 &&
@@ -2872,8 +2853,8 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     speed = rate * (30.0f / ((BtlState *)context)->timingRate);
     speed *= *(f32 *)(context + 0x494);
     *(s32 *)((u8 *)unit + 0xFC) = index;
-    evtUnitSetStoredParameter(*(struct EvtUnit **)((u8 *)unit + 0x320), index);
-    evtSetTransitionMotionScale(*(struct EvtUnit **)((u8 *)unit + 0x320), speed);
+    evtUnitSetStoredParameter(unit->ext, index);
+    evtSetTransitionMotionScale(unit->ext, speed);
     mode = 1;
     if (index == 11) {
         mode = 2;
@@ -3053,7 +3034,7 @@ void btlSetUnitPosition(BtlUnit *object, void *position) {
     VU0_STORE_VF(vf10, world);
     if (((u32)object->status.flags & 2) != 0) {
         world[2] += *(f32 *)((u8 *)object + 0x88);
-        effObjSetInnerPosition(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)world);
+        effObjSetInnerPosition(object->effectObject, (u128 *)world);
     }
 }
 
@@ -3193,7 +3174,7 @@ void btlSetUnitRotation(BtlUnit *object, void *rotation) {
     effMiscQuatMultiplyVU();
     VU0_STORE_VF_UNCLOBBERED(vf10, vector);
     if (((u32)object->status.flags & 2) != 0) {
-        effObjSetInnerRotation(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)vector);
+        effObjSetInnerRotation(object->effectObject, (u128 *)vector);
     }
 }
 
@@ -3204,8 +3185,8 @@ void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst) {
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     if ((u32)unit->status.flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
-        *(u32 *)((u8 *)unit + 0x54) = (*(u32 *)((u8 *)unit + 0x54) & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition((EvtUnit *)*(u32 *)((u8 *)unit + 0x320), mode, color);
+        unit->baseColor = (unit->baseColor & 0xFF000000) | (color & 0xFFFFFF);
+        evtSetUnitRgbTransition(unit->ext, mode, color);
     }
 }
 
@@ -3214,10 +3195,10 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     u32 blended;
     if ((u32)unit->status.flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
-        base = (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF) | 0x80000000;
+        base = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
-        *(u32 *)((u8 *)unit + 0x84) = (*(u32 *)((u8 *)unit + 0x84) & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition((EvtUnit *)*(u32 *)((u8 *)unit + 0x320), mode, blended);
+        unit->overlayColor = (unit->overlayColor & 0xFF000000) | (color & 0xFFFFFF);
+        evtSetUnitRgbTransition(unit->ext, mode, blended);
     }
 }
 
@@ -3284,7 +3265,7 @@ void btlCopyUnitStats(s32 arg0, s32 arg1) {
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
@@ -3429,7 +3410,6 @@ extern SdfPoolNode *D_00359D20[];
 
 extern SdfPoolNode *D_00359D30[];
 
-extern s32 sdfAllocPacketAligned(s32 size);
 
 /* Draw the unit's transparency model into its mirror's packet buffer, then draw the mirror from it. Either
  * model is created (and the update ends) on the first frame it is missing. */
@@ -3866,8 +3846,8 @@ void btlRequestModelOrReuse(u32 *arguments) {
         btlBindActorModel(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            evtSetUnitAlphaTransition((EvtUnit *)*(u32 *)((u8 *)object + 0x320), 0, 0);
-            *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
+            evtSetUnitAlphaTransition(object->ext, 0, 0);
+            object->overlayColor = object->baseColor & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_003A3BC8, effect, model);
     } else {
@@ -3895,8 +3875,8 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        evtSetUnitAlphaTransition((EvtUnit *)*(u32 *)((u8 *)object + 0x320), 0, 0);
-        *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
+        evtSetUnitAlphaTransition(object->ext, 0, 0);
+        object->overlayColor = object->baseColor & 0xFFFFFF;
     }
     *(u32 *)((u8 *)object + 0x118) = (*(u32 *)((u8 *)object + 0x118) & ~1) | 2;
     return 1;
@@ -4348,13 +4328,13 @@ u32 btlStepUnitDefeatFadeOut(u32 *arguments) {
     }
     if ((s32)arguments[2] >= (s32)arguments[1]) {
         unit->status.flags = (u32)unit->status.flags & (~0x20000);
-        *(u32 *)((u8 *)unit + 0x84) = *(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF;
+        unit->overlayColor = unit->baseColor & 0xFFFFFF;
         return 1;
     }
     unit->status.flags = (u32)unit->status.flags | (0x20000);
     alpha = (u32)((1.0f - (f32)(s32)arguments[2] / (f32)(s32)arguments[1]) * 128.0f);
     alpha <<= 24;
-    *(u32 *)((u8 *)unit + 0x84) = alpha | (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF);
+    unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
     arguments[2]++;
     return 0;
 }
@@ -4392,12 +4372,12 @@ u32 btlStepUnitExitFade(u32 *arguments) {
     case 0:
         if (arguments[2] == 1) {
             btlFlagUnitDefeatCandidate(unit);
-            evtSetUnitRgbTransition(*(struct EvtUnit **)((u8 *)unit + 0x320),
+            evtSetUnitRgbTransition(unit->ext,
                                     10, 0x80000000);
         } else if (arguments[2] == 10) {
-            evtSetUnitRgbTransition(*(struct EvtUnit **)((u8 *)unit + 0x320),
+            evtSetUnitRgbTransition(unit->ext,
                                     0, 0x80000000);
-            evtSetUnitAlphaTransition(*(struct EvtUnit **)((u8 *)unit + 0x320), 6, 0);
+            evtSetUnitAlphaTransition(unit->ext, 6, 0);
             unit->status.flags = (u32)unit->status.flags | (0x200000);
         }
         if (((u32)unit->status.flags & 0x200000) == 0 &&
@@ -4409,13 +4389,13 @@ u32 btlStepUnitExitFade(u32 *arguments) {
     case 1:
         if ((s32)arguments[2] >= 8) {
             unit->status.flags = (u32)unit->status.flags & (~0x20000);
-            *(u32 *)((u8 *)unit + 0x84) = *(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF;
+            unit->overlayColor = unit->baseColor & 0xFFFFFF;
             finished = 1;
         } else {
             unit->status.flags = (u32)unit->status.flags | (0x20000);
             alpha = (u32)((1.0f - (f32)(s32)arguments[2] * 0.125f) * 128.0f);
             alpha <<= 24;
-            *(u32 *)((u8 *)unit + 0x84) = alpha | (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF);
+            unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
         }
         break;
     }
@@ -5808,7 +5788,7 @@ extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 extern void dds3EnsureSlotData(void *);
 
-extern void func_001127A0(EffWorldNode *, s32);
+extern void dds3SetObjectSlot1MoverCallback(EffWorldNode *, Dds3MoverUpdate);
 
 /* vu0 routine: add the battle origin to the default camera position. */
 void btlInitializeWorldCamera(void) {
@@ -5834,7 +5814,7 @@ void btlInitializeWorldCamera(void) {
     camera->value = (const char *)D_003BB660;
     effObjSetInnerFloat(camera, 10.0f);
     dds3EnsureSlotData(camera);
-    func_001127A0(camera, 0);
+    dds3SetObjectSlot1MoverCallback(camera, 0);
     dds3SetCameraFieldOfView(camera, 0.6981317f);
     dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
     battle->cameraObject = camera;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -52,18 +53,6 @@ extern s32 btlGetEffectActive(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
-
-typedef struct SndPad {
-    u8 pad00[0x21];
-    s8 confirm;
-    s8 edge22;
-    s8 edge23;
-    s8 unk24;
-    s8 unk25;
-    s8 prev;
-    s8 next;
-    u8 pad28[0x18]; /* The kernel snapshot contains four 16-byte input sets. */
-} SndPad;
 
 extern SndPad D_00324510;
 
@@ -3352,7 +3341,22 @@ s32 btlHasUnmarkedLinkageSkill(BtlUnit *unit) {
 
 extern s32 btlGetTaskState6(void);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", btlGetTaskState6);
+s32 btlGetTaskState6(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    BattleSceneObject *scene;
+    s32 count;
+
+    if (task == NULL) {
+        return 0;
+    }
+    scene = (BattleSceneObject *)kwlnTaskGetUserValue(task);
+    count = btlHasUnmarkedLinkageSkill(scene->owner->unit);
+    /* Retail tails 001B54AC/001C0144 use JAL plus an epilogue.
+     * cc1probe retains this local-reference reset through 01.sibling
+     * and 11.cfg, then deletes it in 13.life. */
+    scene = NULL;
+    return count;
+}
 
 
 extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
@@ -3855,7 +3859,7 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                 sndSetStationedSeVolume(8);
                 command->state = 8;
                 command->commandData->phase = 9;
-            } else if (D_00324510.edge23 < 0) {
+            } else if (D_00324510.unk23 < 0) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
@@ -5148,7 +5152,7 @@ INCLUDE_ASM(const s32, "game/code_001A9780", func_001BC540);
 
 extern SdfPoolNode D_003255A8;
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
@@ -6140,7 +6144,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         return;
     }
 
-    if (D_00324510.edge23 < 0) {
+    if (D_00324510.unk23 < 0) {
         work->state = 4;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {

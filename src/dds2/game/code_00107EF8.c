@@ -161,7 +161,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 
 
@@ -929,10 +929,10 @@ u8 evtWaitFileMenuTaskThree(void) {
 
 void evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *value) {
     if (value == 0) {
-        mnuOpenTitleMenu(0);
+        mnuOpenTitleMenuForMode(0);
         return;
     }
-    mnuOpenTitleMenu(*value);
+    mnuOpenTitleMenuForMode(*value);
 }
 
 u32 evtCloseTitleMenu(void) {

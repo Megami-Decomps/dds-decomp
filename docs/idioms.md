@@ -10090,13 +10090,13 @@ Matched `billInvokeCallback` invokes `obj->callback()` using the real `BillObj` 
 
 As the earlier synthetic callback controls demonstrate, an indirect call may later become a direct target without acquiring a sibling alternative. Those synthetic controls are not matched in-tree evidence. Recover an actual generic callback abstraction before transferring this mechanism; do not invent a one-off inline or pointer solely to manufacture a JAL.
 
-### Remaining parks classified against these controls
+### Park status after these controls
 
-- **Sampler wrapper, DDS2 0031C940:** native random-arm J/direct-arm JAL require an arm-specific source or exit property. The single implicit-int transfer above fails.
+- **Sampler wrapper, DDS2 0031C940:** resolved in `613546c7b` under the post-call exception. One reset of the existing frame parameter after the direct sample keeps its JAL; the random arm returns by J. Qualified RTL retains the reset through `11.cfg` and deletes it in `13.life`; the complete 208-byte owner is exact.
 - **`evtDrawFadingSolarOverlayFrame`, DDS1 0022A248 / DDS2 00244F00, 1544B:** fresh DDS2 F29 trace selects uid1188 hot-final and uid1229 default as SIBLING via bb26; uid1139 first hot draw is NORMAL because real work follows. Retail requires only the default call to remain JAL. The true void seven-argument API and save-only frame do not supply that distinction. Already-measured return-void-expression, provider-visibility and early-return forms were not repeated.
 - **Script lookup, DDS2 002181E8, 104B:** uid100 final lookup remains SIBLING via bb9. `btlFindScriptResource` has a genuine s32/-1 contract; no truthful narrow result, surviving post-call work or escaped local was found. Current candidate is 108B OVER.
 - **`mnuBuildCampTitleEffectResourceList`, DDS2 002A9908, 312B:** final uid256 selects SIBLING, successor EXIT. `effAppendListEntry` returns u32 `++list->count`; its destination is heap-owned workspace, not escaped stack storage. Raw-bank GCSE/PRE and closing-call eligibility remain distinct problems.
-- **`btlGetTaskState6`, DDS1 001B5480 / DDS2 001C0118, 64B:** fresh actual DDS2 parked baseline selects final uid67 SIBLING via bb3. The provider has a s32 count/0/1 contract. Retail JAL shares the null-task zero-return epilogue. The prior real boolean carrier blocked sibling selection but grew/mislaid the code; it was not repeated. This standalone eligibility probe is not a new whole-unit gate.
+- **`btlGetTaskState6`, DDS1 001B5480 / DDS2 001C0118, 64B:** resolved in `613546c7b` under the post-call exception. Capture the real predicate count, clear the consumed local scene reference, then return that count. Qualified RTL retains the reset through `11.cfg` and deletes it in `13.life`. Both full owners are exact; the null-task path still returns zero.
 
 All thirteen new read-only vendor-hook traces had hooked/unhooked assembly and every RTL dump identical, against mirror links explicitly resolved to the live repository. Deciding tier is the first sibling RTL pass unless the expansion already lacks an alternative. Compiler SHA-256 was `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`; exact trace paths and the unsuccessful trial receipt are retained in PurD's renewal50 ledger/report and wrapper park. No flags, prototypes, owners or live bodies were changed by this study.
 

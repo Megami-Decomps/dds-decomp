@@ -12,7 +12,7 @@
 extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0040B7DB[];
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 extern void *sdfConsAllocateColumnPacket(s32 count);

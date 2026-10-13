@@ -75,7 +75,7 @@ void effBlurReleaseSecondResource(EffBlurScaleWork *work) {
 extern SdfPoolNode D_003253E8;
 extern SdfPoolNode D_003253C8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern u32 kwlnGetDrawBufferIndex(void);
 
 extern s32 func_0011E278();

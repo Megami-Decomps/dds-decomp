@@ -118,7 +118,7 @@ extern u8 D_004365D8[8];
 extern u8 D_004365E0[8];
 extern void func_001A09C0(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
 extern u32 D_003B4760[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);

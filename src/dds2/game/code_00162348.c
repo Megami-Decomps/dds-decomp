@@ -116,7 +116,7 @@ extern void effBillSetEntryValue(s32, s32, u32);
 extern void func_001638D8(s32, s32);
 
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 struct SdfListHead;
 

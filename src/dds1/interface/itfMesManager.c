@@ -89,18 +89,13 @@ s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 extern void frFontLoadTemporaryEntry(u32 arg0);
 
 
-
-extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
-
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-extern s32 sndVisitQueuedResources(void);
+extern s32 itfUpdateActiveMessageWindows(void);
 
 extern void sndFlushMessageQueue(void);
 
-extern s32 func_0019F6A0(KwlnTask *task);
-
-extern struct ItfMesPoolNode *itfAcquirePoolNode();
+extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
 extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
@@ -821,7 +816,7 @@ u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
-extern void func_0019E048(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
 
 /* Refresh changed panel values only when both content-status pairs are clear.
  * The first value is stored as a halfword; release the old primitive afterward. */
@@ -832,7 +827,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
         if (mes->unk12 != firstValue || panelBlock->fadeLimit != secondValue) {
             mes->unk12 = firstValue;
-            func_0019E048(panelBlock, firstValue, secondValue);
+            itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, firstValue, secondValue);
             if (panelBlock->sprite != NULL) {
                 itfPanelReleasePrimitiveResources(panelBlock->sprite);
                 panelBlock->sprite = NULL;
@@ -921,8 +916,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)sndVisitQueuedResources, (TaskDestroy)sndFlushMessageQueue, 0);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, func_0019F6A0, (TaskDestroy)sndFlushMessageQueue, 0);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)itfUpdateActiveMessageWindows, (TaskDestroy)sndFlushMessageQueue, 0);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)sndFlushMessageQueue, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
@@ -957,7 +952,7 @@ extern char D_003BB220[];
 extern char D_003BB228[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern ItfMesWindowRec *func_0019FA70(ItfMesWindowRec *window);
+extern ItfMesWindowRec *itfMesFindPreviousWindowWithPanelSprite(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
 extern void sndStepIndexByPad(ItfMesBlkA4 *panel);
 
@@ -982,7 +977,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     const char *coordinateFormat;
 
     if (D_00357D80.window == NULL) {
-        ItfMesWindowRec *window = func_0019FA70(NULL);
+        ItfMesWindowRec *window = itfMesFindPreviousWindowWithPanelSprite(NULL);
 
         D_00357D80.window = window;
         if (window == NULL) {
@@ -1017,7 +1012,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
                     confirmDebug->mode = 2;
                     break;
                 case 4:
-                    confirmDebug->window = func_0019FA70(confirmDebug->window);
+                    confirmDebug->window = itfMesFindPreviousWindowWithPanelSprite(confirmDebug->window);
                     break;
                 }
             } else if (D_00324510[0x33] < 0) {
@@ -1095,7 +1090,6 @@ extern void btlReleaseEffectResourceHandles();
 extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
 
 
-extern void itfReleasePoolNode();
 
 /* Tear down installed content/resources, return the pool record and decrement
  * the pool-array-relative counter. An empty record is a no-op. */
@@ -1111,7 +1105,7 @@ void itfMesDestroyWindow(s32 window) {
         mes->flags = 0;
         sdfReleaseResourceAllocation((struct SdfMemBlock *)windowRecord->handle);
         windowRecord->mes = NULL;
-        itfReleasePoolNode(windowRecord, (u8 *)D_003D6EC0 - 0x10);
+        itfReleasePoolNode(windowRecord, (ItfMesPool *)((u8 *)D_003D6EC0 - 0x10));
         ((ItfMesGlobals *)((u8 *)D_003D6EC0 - 0x20))->activeWindowCount -= 1;
     }
 }

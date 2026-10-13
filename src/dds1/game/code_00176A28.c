@@ -43,7 +43,7 @@ typedef struct {
 extern EffResourceRenderState D_003D65E0;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void *memset(void *, s32, u32);
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
 extern f32 D_00354C10[][4];
 extern u32 D_00354CD0[];

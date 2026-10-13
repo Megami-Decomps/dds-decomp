@@ -1,3 +1,4 @@
+#include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "eff_random.h"
@@ -65,18 +66,6 @@ extern struct SdfPoolNode *D_00380788[13][4];
 extern SdfPoolNode *D_003B6BD0[];
 
 typedef struct BtlUnit BtlUnit;
-
-typedef struct BtlEffectResource {
-    s128 vec0;
-    f32 f10;
-    f32 f14;
-    f32 f18;
-    f32 f1C;
-    f32 f20;
-    u8 pad24[6];
-    u16 unk2A;
-    BtlEffectNode nodes[1];
-} BtlEffectResource;
 
 typedef struct BtlFxSrcA {
     f32 f0;
@@ -3339,7 +3328,7 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
     btlRefreshUnitMaximumMpAndClampCurrentMp(stats);
 }
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
@@ -3480,7 +3469,6 @@ extern SdfPoolNode *D_003B6BE0[];
 
 extern SdfPoolNode *D_003B6BF0[];
 
-extern s32 sdfAllocPacketAligned(s32);
 
 /* Emit the mirror model's transparency packets using its overlay color. */
 void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
@@ -5970,7 +5958,7 @@ extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 extern void dds3EnsureSlotData(void *);
 
-extern void func_001129C8(EffWorldNode *, s32);
+extern void dds3SetObjectSlot1MoverCallback(EffWorldNode *, Dds3MoverUpdate);
 
 /* vu0 routine: add the battle origin to the default camera position. */
 void btlInitializeWorldCamera(void) {
@@ -5996,7 +5984,7 @@ void btlInitializeWorldCamera(void) {
     camera->value = (const char *)D_00436A98;
     effObjSetInnerFloat(camera, 10.0f);
     dds3EnsureSlotData(camera);
-    func_001129C8(camera, 0);
+    dds3SetObjectSlot1MoverCallback(camera, 0);
     dds3SetCameraFieldOfView(camera, 0.6981317f);
     dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
     battle->cameraObject = camera;

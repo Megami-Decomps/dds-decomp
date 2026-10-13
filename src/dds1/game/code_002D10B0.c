@@ -8,6 +8,7 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
@@ -57,7 +58,6 @@ extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 arg1);
-void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
 

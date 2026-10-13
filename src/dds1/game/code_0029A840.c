@@ -175,7 +175,7 @@ extern struct SdfPoolNode *D_00325828[4];
 
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern SdfPoolNode *D_00325788[13][4];
 extern u64 D_0037E5B0[];
 

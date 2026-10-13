@@ -69,7 +69,7 @@ extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
-extern void mnuLoadIndexedTitleSoundStream(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern MnuSpriteResourceGroup *mnuCreateSpriteResource(s32, u8, u8);
 extern MenuProgressHost *mnuCreateWorkBlock(void);
@@ -565,7 +565,7 @@ MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
                                                   &resourceWork->messageResourceInfo2, 0);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
-    mnuLoadIndexedTitleSoundStream(0x10);
+    mnuQueueTitleSoundStreamEntry(0x10);
     mnuTitleStreamUpdateAndLogBgm();
     memset(D_0036C698, 0, sizeof(D_0036C698[0]) * MNU_MANTRA_RESOURCE_SLOT_COUNT);
     mnuRequestMantraResources(resourceWork);

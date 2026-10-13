@@ -10,6 +10,7 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 
 #include "sdf.h"
+#include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
@@ -60,7 +61,6 @@ extern SdfTexResource *sdfTextureListHead;
 extern void (*D_004389F4)(s32 size, s32 allocationMode);
 extern s32 DIntr(void);
 
-void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *block);
 
 
 extern SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);

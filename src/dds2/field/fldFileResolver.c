@@ -6,6 +6,7 @@
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
+#include "fld_transfer_chunk.h"
 #include "fld.h"
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
@@ -409,7 +410,7 @@ extern s32 fldSecondarySceneObject;
 
 
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
@@ -517,13 +518,6 @@ extern f32 sdfAtan2(f32 y, f32 x);
 extern f32 fldLookAtNearPoint[];
 
 extern f32 fldLookAtFarPoint[];
-
-/* Data transfer descriptor: source-relative byte offset and transfer size. */
-typedef struct FldTransferChunk {
-    u32 unk0;
-    s32 offset;
-    u32 size;
-} FldTransferChunk;
 
 /* Four resource references are copied into the scene's load queue in order. */
 typedef struct FldLoadRecord {
@@ -4108,7 +4102,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_00131B50);
 /* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_001321F8);
 
-extern void mnuLoadIndexedTitleSoundStream(s32 soundEntryIndex);
+extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
@@ -4124,7 +4118,7 @@ s32 fldUpdateFieldTransition(void) {
         node = model->current.h.motionIndex;
         if (node != 7) {
             kwlnFadeStartIn(8);
-            mnuLoadIndexedTitleSoundStream(0x26);
+            mnuQueueTitleSoundStreamEntry(0x26);
             model = fldPlayerModelContext;
             model->first->frameStep = 1.0f;
             mdlAddEntryPlain(model, 0, 7);

@@ -15,6 +15,7 @@
 #include "eff_object.h"
 #include "eff_event.h"
 #include "scr.h"
+#include "scr_arg_read.h"
 
 
 
@@ -87,7 +88,6 @@ extern u8 D_003AC480[];
 extern void *memset(void *dst, s32 c, u32 n);
 extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 
-extern f32 bfWaitReadArgFloat(s32 idx);
 
 /* World object views used by the model-parameter opcodes. */
 typedef struct EvtModelHeader {

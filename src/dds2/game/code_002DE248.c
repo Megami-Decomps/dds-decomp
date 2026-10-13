@@ -8,6 +8,7 @@
 #include "eff_bill.h"
 #include "eff_ribbon_work.h"
 #include "itf_draw_grid.h"
+#include "fld_transfer_chunk.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
@@ -83,7 +84,7 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
     surface->append(surface, list);
 }
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern u32 D_003E9D80[];
 extern SdfPoolNode *D_003E9DC0[];
@@ -8150,8 +8151,7 @@ void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
     payload->selectedTargetIndex = effMiscRandMod(0, count);
 }
 
-struct FldTransferChunk;
-extern void fldRelocatePackedTransferChunk(u32, struct FldTransferChunk *);
+extern void fldRelocatePackedTransferChunk(u32, FldTransferChunk *);
 
 
 EffCopiedPayload *effCreateAndInitializeCopiedPayload(u32 owner, u32 unused, const void *source, s32 size) {

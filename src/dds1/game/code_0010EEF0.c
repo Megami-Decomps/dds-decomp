@@ -65,7 +65,7 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
 
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern s32 dds3DrawWorldNodeTransformDiagnostic();
 extern SdfPoolNode D_00325708;
 extern s8 D_00324543[];

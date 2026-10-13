@@ -100,7 +100,7 @@ extern void mnuTickMapTimers(void);
 
 extern void sdfCounterTickPositionTransition(void);
 
-extern s32 func_0030BD10();
+extern s32 sdfUpdateSelectedCounterMapCameraTransition();
 
 extern u8 D_00400BB0[];
 
@@ -129,8 +129,8 @@ extern s32 mdlCollectFlagBitsIntoMask(void);
 extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern s16 sdfGetCounterChannelValueAtIndex(s32);
-extern void func_0030C250(s32, s32);
-extern void func_0030CC68(s32, s32, s32, SdfCounterRuntime *, SdfCounterChannel *, s32);
+extern void sdfSetLocalMapCounterMarkerState(s32, s32);
+extern void sdfDrawCounterMapSelectionRow(s32, s32, s32, SdfCounterRuntime *, SdfCounterChannel *, s32);
 extern u8 D_00400AF0[];
 
 extern void sdfCounterIncrease(void);
@@ -220,11 +220,11 @@ s8 sdfGetMapCameraTransitionFrame(void) {
 }
 
 void func_0030BCF0(void) {
-    func_0030BD10();
+    sdfUpdateSelectedCounterMapCameraTransition();
 }
 
 /* Apply the selected camera pose while the map-camera transition is active. */
-s32 func_0030BD10(void) {
+s32 sdfUpdateSelectedCounterMapCameraTransition(void) {
     f32 t;
 
     if (D_004388C1 == 0) return 1;
@@ -318,7 +318,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Fixed-width names identify the corresponding local-map model chain. */
-void func_0030C250(s32 index, s32 value) {
+void sdfSetLocalMapCounterMarkerState(s32 index, s32 value) {
     char names[7][16] = {
         "md_01all_02",
         "md_01all_03",
@@ -353,7 +353,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     sdfActiveCounterRuntime = (s32)mnuCreateListState(0, 8, 0x16);
     ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = sdfAllocSizeClassBlock(0x24);
     memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
-    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = func_0030CC68;
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = sdfDrawCounterMapSelectionRow;
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
@@ -388,7 +388,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
         ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x7E;
     }
     sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime, index);
-    func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 0xB);
+    sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 0xB);
     return 1;
 }
 
@@ -451,8 +451,8 @@ s32 sdfPollCounterSelectionInput(void) {
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
                 index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
-            func_0030C250(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
@@ -463,8 +463,8 @@ s32 sdfPollCounterSelectionInput(void) {
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
                 index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
-            func_0030C250(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
@@ -474,8 +474,8 @@ s32 sdfPollCounterSelectionInput(void) {
         if (D_00438894 != index) {
             sdfCounterSelectChannelByIndex((SdfCounterRuntime *)sdfActiveCounterRuntime,
                 D_00438894);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 10);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 10);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
         }
         sdfSetSelectedIndex(D_00438894);
         sndSetSequenceVolumePan(10, 127, 63);
@@ -497,9 +497,9 @@ s32 sdfPollCounterSelectionInput(void) {
 
 
 /* Adjust the selected counter value, then redraw its label and cursor. */
-s32 func_0030C8E8(s32 decrease) {
+s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     /* Untouched retail 32-byte slot: frame 0x30 rather than 0x10.
-     * DDS1 func_002C4850 has the same 32-byte frame gap. */
+     * DDS1 sdfAdjustCounterValueAndRedraw has the same 32-byte frame gap. */
     s32 drawScratch[8];
     s32 x = (s32)(((f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value / 10.0f) *
                     -32.0f);
@@ -544,7 +544,7 @@ float sdfCounterGetScaledValue(void) {
 }
 
 /* Draw the counter's three label plates and submit the frame gradient. */
-void func_0030CA38(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
+void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
     SdfCounterChannel *channelCursor;
     f32 fade;
     s32 plateIndex;
@@ -578,7 +578,7 @@ void func_0030CA38(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
 
 extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
 
-void func_0030CC68(s32 unusedX, s32 unusedY, s32 unused, SdfCounterRuntime *runtime, SdfCounterChannel *channel, s32 unusedMode) {
+void sdfDrawCounterMapSelectionRow(s32 unusedX, s32 unusedY, s32 unused, SdfCounterRuntime *runtime, SdfCounterChannel *channel, s32 unusedMode) {
     SdfCounterTimer *timer = runtime->timer;
     f32 frame = (f32)timer->value;
     f32 fade = 1.0f - frame / 10.0f;
@@ -921,7 +921,7 @@ void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
                   context);
 }
 
-void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2,
+void sdfDrawSlotGridWithCornerColors(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2,
                   u32 color3, s32 placementIndex, u32 flags, u32 context) {
     SDF_SPRITE(placementIndex)->geometry.cornerColors[0] = color0;
     SDF_SPRITE(placementIndex)->geometry.cornerColors[1] = color1;

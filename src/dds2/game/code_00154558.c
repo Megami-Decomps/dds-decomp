@@ -515,13 +515,13 @@ s32 fldCmdRestoreCameraNodeMode(void) {
 
 extern s32 D_003898B0[];
 
-extern s32 dds3InvokeSlot1Handler(void *object, Dds3MoverUpdate update);
+extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 s32 fldCmdReleaseCurrentObject(void) {
     if (fldPlayerObject == 0) {
         return 1;
     }
-    dds3InvokeSlot1Handler((void *)fldPlayerObject, 0);
+    dds3SetSlot1HandlerCallback((void *)fldPlayerObject, 0);
     fldSetCameraNodeModeWithTen();
     fldPreparePlayerSceneCameraTarget();
     D_003898B0[0] = 0;

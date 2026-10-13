@@ -216,7 +216,7 @@ extern u32 evtCheckSelectionState(void);
 extern void func_001083F8(void);
 extern void func_001248D0(void);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, KwlnDrawVectorParams *);
 typedef struct SdfMsg {
     s32 firstWord, work, thirdWord, fourthWord;

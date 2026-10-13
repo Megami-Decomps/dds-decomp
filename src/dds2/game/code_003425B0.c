@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "sdf_packed_resource.h"
 #include "sdf.h"
+#include "sdf_texture_lists.h"
 #include "sdf_draw.h"
 #include "ee_mmi.h"
 #include "sdf_stream_read.h"
@@ -139,11 +140,9 @@ extern char sdfGsMemoryTypeFormat[]; /* "%d" */
 
 extern char *D_0040BBD8[];
 
-extern SdfTexResource *sdfGetTextureListHead(void);
 
 extern char *D_0040BBE8[];
 
-extern SdfTexResource *sdfGetTextureBlockListHead(void);
 
 void func_003425B0(void) {
     func_00341650(0x180, 0, 0, 0);

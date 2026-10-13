@@ -2194,7 +2194,7 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
 extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32, s32);
 extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *, u32 *);
 
-EffPcpThunderGroup *func_0016F850(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
+EffPcpThunderGroup *effThunderCreateCurveGroup(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
 {
     u32 count = src->groupCount;
     SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
@@ -2260,7 +2260,7 @@ void effApplyParamBlockPair(void *table) {
 
     firstBlock = effParamTableGetBlock(table, 0);
     secondBlock = effParamTableGetBlock(table, 1);
-    func_0016F850(firstBlock, secondBlock);
+    effThunderCreateCurveGroup(firstBlock, secondBlock);
 }
 
 EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
@@ -2932,7 +2932,7 @@ void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u12
 
 
 extern SdfPoolNode *D_003B1210[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */

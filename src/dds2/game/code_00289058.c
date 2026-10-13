@@ -343,7 +343,7 @@ extern s32 func_0028E858(MnuStatusResource *object);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 
 extern void evtStageTestInit(s32);
-extern void mnuLoadIndexedTitleSoundStream(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 const char D_00426360[16] = "AT3 LOAD!!\n";
 
@@ -373,7 +373,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     evtPrintDeveloperConsoleMessage(D_00426360);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
-    mnuLoadIndexedTitleSoundStream(16);
+    mnuQueueTitleSoundStreamEntry(16);
     mnuResetTitleStreamAfterFileIdle();
 }
 

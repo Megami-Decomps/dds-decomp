@@ -20,7 +20,7 @@
 #include "sdf_primitive.h"
 #include "sdf_packet_append.h"
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_0033B050(SdfPrimitiveRequest *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
@@ -218,7 +218,6 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags,
                                      s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packet);
 
-extern s32 sdfAllocPacketAligned(s32);
 
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */
@@ -993,7 +992,19 @@ void uiDrawTexturedSurfaceAtFarDepth(u32 context) {
     uiDrawActiveSurfaceRegion(context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308F78);
+void func_00308F78(s32 mode, s32 surface) {
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    sdfSubmitGsTestOneRegisterPacket(0x5000D, surface);
+    if (mode == 0) {
+        sdfSubmitGsAlphaOneRegisterPacket(0x54, surface);
+        return;
+    }
+    sdfSubmitGsAlphaOneRegisterPacket(0x58, surface);
+    /* Retail 00308FC0 is a tail J, while 00308FC8 uses JAL plus an epilogue.
+     * cc1probe retains this consumed-mode reset through 01.sibling and
+     * 11.cfg, then deletes it in 13.life; the zero-mode call stays a sibling. */
+    mode = 0;
+}
 
 void uiDrawActiveSurfaceWithTestMode(u32 context) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, context);

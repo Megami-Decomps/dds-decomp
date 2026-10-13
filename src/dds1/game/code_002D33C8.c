@@ -129,7 +129,7 @@ void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 desti
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
 void sdfDestroyObjectList(SdfModel *owner);
-s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
 

@@ -142,7 +142,22 @@ s32 func_0031AF68(MnuShootingWork *object) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031B080);
+/* Update and draw the pause-menu choice fade. */
+void func_0031B080(MnuShootingWork *object) {
+    FadeNumber *fade = &object->pauseFade;
+
+    func_0031ED68(fade, object->choiceIndex);
+    if (object->unk70Bit0) {
+        itfSetFadeMode(&fade->fade, 1, 8);
+    } else {
+        itfSetFadeMode(&fade->fade, 0, 8);
+    }
+    mnuDrawFadeSequenceThree(fade);
+    /* End the local fade borrow after drawing. Retail JAL 0031B0DC:
+     * 01.sibling keeps ordinary call94 and reset98; reset98 survives
+     * 11.cfg, then disappears in 13.life. Without it, call90 is a sibling. */
+    fade = NULL;
+}
 
 void func_0031B0F8(void) {
     s32 world;

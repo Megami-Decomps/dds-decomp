@@ -6,6 +6,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "mnu_mantra_position_api.h"
+#include "file_request_api.h"
 
 #define EVT_PARTY_SLOT_COUNT 5
 
@@ -38,17 +39,12 @@ typedef struct EvtMantraNodePositionRecord {
 
 INCLUDE_ASM(const s32, "game/code_0026CD50", func_0026CD50);
 
-extern s32 fileQueueDefaultCallbackRequest(const char *path);
-extern s32 fileIsRequestReadyInCurrentMode(s32 request);
-extern u32 fileGetLoadedDataAddress(s32 request);
-extern s32 fileGetResourceHandle(s32 request);
-extern void filePollEntryCleanup(s32 request);
 extern void func_00315A50(void);
 void mnuLoadMantraNodePositionTable(u32 resourceId);
 
 /* Load the mantra node-position table synchronously and release the request. */
 void mtrLoadMantraNodePositions(void) {
-    s32 request;
+    struct FileRequest *request;
 
     evtPrintDeveloperConsoleMessage("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
     request = fileQueueDefaultCallbackRequest("/facility/data/mtrMantraBlockData.tbl");

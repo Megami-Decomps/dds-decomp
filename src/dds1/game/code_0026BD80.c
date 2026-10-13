@@ -52,7 +52,7 @@ extern void fldRotateVectorAroundY(f32 *, f32);
 extern void sdfVec3AddInPlace(f32 *, f32 *);
 extern void sdfQuaternionNormalize(f32 *);
 extern void sdfQuatForwardVector(f32 *, f32 *);
-extern f32 func_002C84F0(f32 *);
+extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern void sdfQuatFromEuler(f32 *, f32, f32, f32);
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
@@ -184,20 +184,20 @@ void mnuReleaseSpriteHandle(void) {
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-/* These entry points differ only in the selected menu sound identifier. */
-void mnuStartMovieMenuSfx16(s32 parameter) {
+/* These entry points draw distinct movie-menu sprite table slots. */
+void mnuDrawMovieMenuSpriteSlot16(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
 }
 
-void mnuStartMovieMenuSfx17(s32 parameter) {
+void mnuDrawMovieMenuSpriteSlot17(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
 }
 
-void mnuStartMovieMenuSfx18(s32 parameter) {
+void mnuDrawMovieMenuSpriteSlot18(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
 }
 
-void func_0026C1F8(s32 parameter) {
+void mnuDrawMovieMenuSpriteSlot1A(s32 parameter) {
     mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
 }
 
@@ -413,13 +413,13 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
 
     if (D_00324510[0x36] != 0) {
         sdfQuatForwardVector(rotation, forward);
-        func_002C84F0(forward);
+        sdfVec3NormalizeInPlaceAndGetLength(forward);
         position[0] += forward[0] * 20.0f;
         position[2] += forward[2] * 20.0f;
     }
     if (D_00324510[0x37] != 0) {
         sdfQuatForwardVector(rotation, forward);
-        func_002C84F0(forward);
+        sdfVec3NormalizeInPlaceAndGetLength(forward);
         position[0] -= forward[0] * 20.0f;
         position[2] -= forward[2] * 20.0f;
     }

@@ -351,6 +351,13 @@ typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(ItfMesPoolNode) == 0x14) ?
 typedef char ItfMesPool_size_must_be_0x10[(sizeof(ItfMesPool) == 0x10) ? 1 : -1];
 typedef char ItfMesGlobals_size_must_be_0x520[(sizeof(ItfMesGlobals) == 0x520) ? 1 : -1];
 
+/* Message-window pool operations move nodes between the free and active lists.
+ * Acquire returns NULL when the free list is empty; release expects an active
+ * node belonging to the supplied pool and appends it to the free-list tail. */
+void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
+ItfMesPoolNode *itfAcquirePoolNode(ItfMesPool *pool);
+void itfReleasePoolNode(ItfMesPoolNode *node, ItfMesPool *pool);
+
 /* Return a retained texture handle after releasing the temporary asset allocation. */
 SdfTex *itfLoadTextureFromAsset(const char *path);
 
