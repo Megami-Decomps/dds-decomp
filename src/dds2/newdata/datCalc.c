@@ -502,7 +502,7 @@ extern u8 btlIsRuntimeAllocated(void);
 
 extern f32 btlGetEncounterAdjustmentScale(void);
 
-extern u32 func_001ADA10(void);
+extern u32 btlGetEscapeAttemptCount(void);
 
 extern s32 D_00435E8C;
 
@@ -2065,7 +2065,7 @@ s32 evtPushAvailableIntegerValue(void) {
     s32 value = 0;
 
     if (battleAvailable != 0) {
-        value = func_001ADA10();
+        value = btlGetEscapeAttemptCount();
     }
     scrSetIntegerReturnValue(value);
     return 1;

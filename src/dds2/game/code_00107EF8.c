@@ -233,7 +233,7 @@ extern void sdfDevConsSetTextAttribute(s32 arg0, s32 arg1);
 
 extern void dds3AdminSetControlFlag(void);
 
-extern void func_001A9F30(s32 arg0, s32 arg1, s32 arg2);
+extern void btlStart(s32 mode, s32 pack, s32 encounter);
 
 
 extern s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *);
@@ -1142,10 +1142,10 @@ u8 evtWaitConfigTaskDone(void) {
 void evtDispatchSelectionCommand(s32 commandSource, s32 *commandParams) {
     if (commandSource == 0) {
         if (commandParams == NULL) {
-            func_001A9F30(1, 0, 0);
+            btlStart(1, 0, 0);
         }
         else {
-            func_001A9F30(0, commandParams[0], commandParams[1]);
+            btlStart(0, commandParams[0], commandParams[1]);
         }
     }
     else {

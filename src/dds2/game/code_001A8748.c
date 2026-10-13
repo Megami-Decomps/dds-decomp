@@ -397,7 +397,7 @@ extern char D_00436688[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
-s32 func_001A8BD0(void) {
+s32 kwlnUpdateBlurDebugMenu(void) {
     SifCommand packet;
     SdfListHead *list;
     s32 row;
@@ -859,12 +859,13 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
     return 0;
 }
 
-void func_001A9AA8(KwlnTask *task) {
+/* Empty destructor callback for the active battle-frame task. */
+void btlReleaseActiveBattleFrameTask(KwlnTask *task) {
 }
 
 extern char D_004366F0[];
 
-extern void func_001A9AA8(KwlnTask *task);
+extern void btlReleaseActiveBattleFrameTask(KwlnTask *task);
 
 extern s32 btlUpdateBattleFieldPresentation(KwlnTask *task);
 
@@ -873,7 +874,7 @@ extern s32 btlUpdateActiveBattleFrame(KwlnTask *task);
 void btlCreateDrawTasks(void) {
     BattleController *battle = (BattleController *)btlRuntime;
     KwlnTask *draw;
-    draw = kwlnTaskCreate(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A9AA8, 0);
+    draw = kwlnTaskCreate(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
     battle->drawTask = draw;
     kwlnTaskAddChild(draw, kwlnTaskCreate("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
@@ -942,7 +943,8 @@ extern char D_003B4D90[];
 
 extern char D_003B4DA8[];
 
-void func_001A9B80(void) {
+/* Allocate/reset battle work, initialize windows and queue shared resources. */
+void btlInitializeBattleRuntime(void) {
     SdfMemBlock *allocation;
     u32 seed;
     u8 *runtime;
@@ -1117,6 +1119,7 @@ extern void itfMesSetFlags(u32);
 
 extern s32 btlResolveQueuedSceneRequestParameters(s32 *, s32 *);
 
+/* Start the requested battle mode with its encounter and background parameters. */
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F48);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F68);
@@ -1127,12 +1130,12 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F98);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414FB0);
 
-void func_001A9F30(s32 mode, s32 pack, s32 encounter) {
+void btlStart(s32 mode, s32 pack, s32 encounter) {
     struct { s32 code; s32 parameter; } req;
     u16 paramA;
     u16 paramB;
 
-    func_001A9B80();
+    btlInitializeBattleRuntime();
     btlCreateDrawTasks();
     switch (mode) {
     case 0:
@@ -2536,7 +2539,8 @@ f32 btlGetEncounterAdjustmentScale(void) {
     return datBattleParameters->adjustmentScale[adjustment + 3];
 }
 
-u32 func_001ADA10(void) {
+/* Read the counter incremented by the escape-attempt result callback. */
+u32 btlGetEscapeAttemptCount(void) {
     s32 controller;
 
     controller = btlGetRuntime();

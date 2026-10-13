@@ -3309,10 +3309,11 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
 }
 
 
-void btlRecordLinkedActorOutcome(ActionStateLink *unit) {
+/* Count an escape attempt and record its chance-test result in battle flags. */
+void btlRecordEscapeAttemptOutcome(ActionStateLink *link) {
     BtlState *work = (BtlState *)btlGetRuntime();
     work->unk278 = work->unk278 + 1;
-    if (btlTryEscapeWithPhaseAdjustment(unit->unit) != 0) {
+    if (btlTryEscapeWithPhaseAdjustment(link->unit) != 0) {
         work->battleFlags |= 0x2000;
     } else {
         work->battleFlags |= 0x1000;

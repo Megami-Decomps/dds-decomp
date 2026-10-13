@@ -2532,9 +2532,10 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
 
 extern s32 btlRollEscapeChance(BtlUnit *);
 
-void btlRecordLinkedActorOutcome(BtlTask *object) {
+/* Count an escape attempt and record its chance-test result in battle flags. */
+void btlRecordEscapeAttemptOutcome(BtlTask *task) {
     s32 context = btlGetRuntime();
-    BtlUnit *target = object->unit;
+    BtlUnit *target = task->unit;
     *(s32 *)(context + 0x254) += 1;
     if (btlRollEscapeChance(target)) {
         *(u32 *)(context + 0x1F4) |= 0x2000;
