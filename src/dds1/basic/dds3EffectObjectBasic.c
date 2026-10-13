@@ -505,15 +505,6 @@ void effObjCreateBillboardFromFactory(u32 unused, void *firstVector, s32 secondV
     effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress);
 }
 
-/* This 48-byte event record has ordinary word alignment. Its first two
- * vectors use the SDK quadword-copy primitive; the full record uses memcpy. */
-typedef struct EffectEventVectorParameters {
-    f32 firstVector[4];
-    f32 secondVector[4];
-    f32 parameters[3];
-    u32 color;
-} EffectEventVectorParameters;
-
 extern const EffectEventVectorParameters D_0039F7D0;
 
 EffectObj *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)

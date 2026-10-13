@@ -15,6 +15,24 @@ typedef char DdsSlotResourceBlock_size_must_be_0x10[(sizeof(DdsSlotResourceBlock
 struct SoundMixer;
 typedef struct EffEventWork EffEventWork;
 
+/* Copied from the per-title event-node template after its vector pair is
+ * replaced by caller inputs; the trailing parameters and color are preserved. */
+typedef struct EffectEventVectorParameters {
+    f32 firstVector[4];
+    f32 secondVector[4];
+    f32 parameters[3];
+    u32 color;
+} EffectEventVectorParameters;
+
+typedef char EffectEventVectorParameters_size_must_be_0x30[
+    (sizeof(EffectEventVectorParameters) == 0x30) ? 1 : -1];
+typedef char EffectEventVectorParameters_secondVector_at_0x10[
+    ((u32)&((EffectEventVectorParameters *)0)->secondVector == 0x10) ? 1 : -1];
+typedef char EffectEventVectorParameters_parameters_at_0x20[
+    ((u32)&((EffectEventVectorParameters *)0)->parameters == 0x20) ? 1 : -1];
+typedef char EffectEventVectorParameters_color_at_0x2C[
+    ((u32)&((EffectEventVectorParameters *)0)->color == 0x2C) ? 1 : -1];
+
 /* The event constructor copies a serialized, caller-specific 0x30-byte
  * parameter record. Its retained work owner is opaque to external users. */
 EffEventWork *effEventCreate(struct SoundMixer *owner, u16 kind, const void *params);
