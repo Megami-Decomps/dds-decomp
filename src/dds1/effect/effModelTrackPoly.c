@@ -10,20 +10,8 @@
 #include "mdl.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
+#include "eff_track_poly_data.h"
 
-/* Polygon-track data: its ring position wraps against the entry count. */
-typedef struct EffTrackPolyData {
-    u32 kind;           /* 0x00: draw-target selector */
-    u32 color;          /* 0x04 */
-    s32 count;          /* 0x08: vertex slots, including the reserved first pair */
-    s32 activePointCount; /* 0x0C */
-    s32 position;       /* 0x10 */
-    s32 step;           /* 0x14 */
-    u128 *points;      /* 0x18 */
-    u32 *colors;        /* 0x1C: per-vertex gradient table after the points */
-    SdfAsset *nodeHandle;   /* 0x20: owned draw asset */
-    SdfMemBlock *resourceHandle; /* 0x24: allocation containing points/colors/data */
-} EffTrackPolyData; /* 0x28 */
 /* Draw-state record read by effCreateVertexDrawPacket (same layout as ParDrawState in code_0015A758). */
 typedef struct EffTrackPolyDraw {
     u16 width;      /* 0x00 */
