@@ -6985,6 +6985,7 @@
 0x002E8EA0	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
 0x002E8EE8	sndSubmitTextCommandPayloadWithCommandBits60	inferred	Calculates text byte length and dispatches the payload through sndSendCommandPacket with command ORed with 0x60; paired title counterpart. [code-quality cleanup, 2026-10-13]
 0x002E8F78	sndSetSequenceVolumePan	inferred	snd sound tasks and playback in game/code_002E8E00.c
+0x002E8FD8	sndSetSpatialSequenceVolumePan	inferred	Normalizes the listener-relative angle, derives sequence pan and angle-based volume, attenuates for distance above one, then sends both through sndSetSequenceVolumePan; DDS1/DDS2 paired implementation.
 0x002E9140	sndSendSpatialPosition	inferred	wrong or missing short module prefix; DDS2 twin already named [names_audit.tsv]
 0x002E9198	sndUpdateScaledListenerState	inferred	src/dds1/game/code_002E9140.c func_002E9198: Converts six values to one-tenth-scale integers and transmits listener packet only when changed. [names_reviewed24.tsv]
 0x002E92C0	sndFindPackedTrackLoadStatus	inferred	confidence=high; src/dds1/game/code_002E9140.c:func_002E92C0; Synchronizes sound state, searches track slots by the packed high-word id, and distinguishes a loaded slot from the pending id. [names_qp9.tsv]
