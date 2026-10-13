@@ -127,5 +127,49 @@ void sdfServiceUnblockedWorkerThread(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00341240", func_003415A8);
+/* Native CreateThread storage has six modeled fields and an untouched tail.
+ * The static descriptor and sdfCreateThread's cleared workspace both span 0x30.
+ * _gp is the linker's GP address, as in the EE kernel API. */
+typedef struct {
+    s32 status;
+    void (*entry)(void);
+    void *stack;
+    s32 stackSize;
+    void *gp;
+    s32 priority;
+    u8 opaque18[0x18];
+} SdfKernelThreadParam; /* native descriptor storage: 0x30 bytes */
+
+extern SdfKernelThreadParam D_00477980;
+extern u8 D_00478A00[];
+extern u8 D_00479A40[];
+extern void *_gp;
+extern s32 D_004391E8;
+extern s32 D_00438B94;
+extern s32 func_00367BF0(s32);
+extern s32 CreateThread(SdfKernelThreadParam *);
+extern s32 _StartThread(s32, s32);
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+extern void sdfSoundStartRpcServer(void);
+
+void func_003415A8(void) {
+    s32 threadId;
+
+    while (func_00367BF0(31) == 0) {
+    }
+
+    D_00477980.entry = sdfServiceUnblockedWorkerThread;
+    D_00477980.stack = D_00478A00;
+    D_00477980.stackSize = 0x1000;
+    D_00477980.priority = 0x42;
+    D_00477980.gp = &_gp;
+    D_004391E2 = 0;
+    D_004391E4 = 0;
+    threadId = CreateThread(&D_00477980);
+    D_004391E8 = threadId;
+    _StartThread(threadId, 0);
+    threadId = sdfCreateThread(sdfSoundStartRpcServer, D_00479A40, 0x1000, 0x43);
+    D_00438B94 = threadId;
+    _StartThread(threadId, 0);
+}
 
