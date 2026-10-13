@@ -1789,7 +1789,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
     btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
-extern f32 func_00208750(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 extern f32 func_00353040(f32);
 
@@ -1877,7 +1877,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     if (mode == 0) {
         span = btlMeasureFilteredUnitGroupBounds((s32)sideFlags, &height, &depth);
     } else {
-        span = func_00208750(indices, &height, &depth);
+        span = btlMeasureUnitIndexListBounds(indices, &height, &depth);
     }
     btlDefeatCameraStoreVector(vectors.center);
     if (mode == 0 || runtime->unk268 == 3) {
