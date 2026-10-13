@@ -101,6 +101,7 @@
 0x00105C48	kwlnFadeIsActive	inferred	tests fade flag bits 0-1
 0x00105C58	kwlnFadeUpdate	inferred	per-frame step of the D_003BD6C0/D_003BD6C2 fade counter, writes the alpha byte D_003BA923 and clears the two direction bits when done [names_reviewed2.tsv]
 0x00105D00	kwlnDrawBlurErrorCounters	inferred	prints the DISTBLUR_NUMERR / RIPBLUR_NUMERR counters (D_003BA934/D_003BA938) when D_003BA724 is set [names_reviewed2.tsv]
+0x00105DD8	kwlnQueueBackgroundFadeOverlayPacket	inferred	Reads the active frame-buffer index and background-fade alpha; when visible, initializes and appends the current surface overlay packet. Paired DDS2 provider at 0x00105CF8.
 0x00106088	kwlnFadeResetBackground	inferred	clears background fade color and restores default dimensions
 0x001060C8	kwlnFadeBackgroundStartOut	inferred	sets the background fade bytes, arms D_003BD6C4/6C6 with the duration and D_003245EC[2] = 2048.0 [names_reviewed2.tsv]
 0x00106160	kwlnFadeBackgroundStartIn	inferred	mirror of func_001060C8 (alpha 0x80, D_003245EC[2] = 2041.0) [names_reviewed2.tsv]
