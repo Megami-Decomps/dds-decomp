@@ -2794,7 +2794,7 @@ void mdlFreeViewResources(void) {
 }
 
 
-extern void func_00103498(const char *name, s32, s32, s32);
+extern void kwlnConfigureNamedSlotMode1(const char *name, s32, s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void) {
     s32 i;
@@ -2804,7 +2804,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ABF88, 0);
     for (i = 0; i != 3; i++) {
         if (kwlnTaskGetTaskByName(D_00367AE0[i].name) == NULL) {
-            func_00103498(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
+            kwlnConfigureNamedSlotMode1(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
         }
     }
 }

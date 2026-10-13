@@ -281,11 +281,11 @@ s32 kwlnUnregisterNamedSlot(const char *name) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001032F0);
+INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnConfigureNamedSlotMode3);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103388);
+INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnConfigureNamedSlotMode1);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103430);
+INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnConfigureNamedSlotMode2);
 
 void func_001034E0(void) {
 }

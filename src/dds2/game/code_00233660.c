@@ -44,7 +44,7 @@ extern s32 D_003C88C0[];
 extern s32 D_003C88C8[];
 
 
-extern void func_00103388(s32, s32, s32, s32);
+extern void kwlnConfigureNamedSlotMode1(s32, s32, s32, s32);
 
 
 
@@ -2855,7 +2855,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     def = D_003C8890;
     do {
         if (kwlnTaskGetTaskByName(def->name) == NULL) {
-            func_00103388(def->name, def->arg, 0, 0);
+            kwlnConfigureNamedSlotMode1(def->name, def->arg, 0, 0);
         }
         i++;
         def++;
