@@ -6683,6 +6683,7 @@
 0x0033DCA8	sdfDevSignalPendingSemaphore	inferred	If a pending-device flag is set, signals its semaphore and clears the pending flag.
 0x0033DCD0	sdfDevSeekDiscWithRequestGate	inferred	Marks request pending and waits on an additional request gate before synchronized disc seek. [names_reviewed8.tsv]
 0x0033DD90	sdfDevReadDiscUntilComplete	inferred	Retries disc reads until requested byte count succeeds and advances position. [names_reviewed8.tsv]
+0x0033E008	sdfDevFindDiscFileRecordByPath	inferred	Recognizes the cdrom mount and looks up a disc file record by path, returning the record and writing its data pointer; non-disc paths use the alternate path handler. [retail HLIL, file-open and path-exists callers, 2026-10-13]
 0x0033E1C0	sdfDevOpenDiscFileAndGetSize	inferred	Finds the disc file, selects its seek path and returns its byte size. [names_reviewed8.tsv]
 0x0033E490	sdfServicePendingOperationUnderSemaphore	inferred	Runs a pending operation under a semaphore then clears its pending flag. [names_reviewed10.tsv]
 0x0033E550	sdfDevLoadWholeFile	inferred	confidence=high; src/dds2/game/code_0033D5D0.c:func_0033E550; Opens the file, reads its size, allocates a buffer, reads it whole and closes; reports the name through the panic printf if the open fails. [names_qp9.tsv]
