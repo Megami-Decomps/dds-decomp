@@ -44,6 +44,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
@@ -126,7 +127,6 @@ typedef struct BtlActiveSlot {
     void *unit;         /* 0x18 */
 } BtlActiveSlot;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 extern void btlRaisePartyRecordStatusValue(void *, s32);

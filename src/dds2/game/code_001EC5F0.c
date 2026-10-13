@@ -46,6 +46,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 extern f32 D_003B6DC0[4];
 
@@ -99,7 +100,6 @@ extern struct BtlRuntimeTask *btlCreateHookedUnitSoundTask();
 
 extern u32 D_00436AD4;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 

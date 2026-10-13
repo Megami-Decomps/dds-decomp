@@ -21,13 +21,13 @@
 #include "evt_script_model.h"
 #include "sdf_model.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern void *dds3GetWorldSecondaryObject(void);
 struct EffWorldNode;
-extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
 extern s32 fldGetRecordValueById(s32 id);

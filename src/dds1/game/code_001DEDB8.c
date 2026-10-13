@@ -45,6 +45,7 @@
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 extern f32 D_00359EE0[4];
 
@@ -222,7 +223,6 @@ extern u8 D_0035F5D0[];
 
 extern char D_003BB6B0[];
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 

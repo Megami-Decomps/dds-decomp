@@ -32,6 +32,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_textured_rect.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
 extern void mnuMarkTitleStreamResetPending(void);
@@ -39,7 +40,6 @@ extern void mnuMarkTitleStreamResetPending(void);
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
-extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
 extern EffWorldNode *dds3GetWorldSecondaryObject(void);

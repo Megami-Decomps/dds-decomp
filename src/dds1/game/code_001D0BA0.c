@@ -44,6 +44,7 @@
 #include "file_request_api.h"
 #include "dat_affinity.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
@@ -148,7 +149,6 @@ extern void btlDestroyUnit(u8 *);
 
 extern void func_001D4E60(BtlUnit *, BtlUnit *);
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 btlSetActorEffectParameter();
 

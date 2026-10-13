@@ -22,6 +22,7 @@
 #include "mdl_resource_table.h"
 #include "mdl_grouped_parts_api.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -3328,7 +3329,6 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern EffWorldNode *dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 

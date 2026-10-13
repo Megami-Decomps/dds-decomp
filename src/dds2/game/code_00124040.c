@@ -26,6 +26,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
@@ -250,8 +251,6 @@ extern u32 fldGetResourceReadyFlag(void);
 extern void fldFreeDisplayObjects(void);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
-
-extern u32 dds3AdvanceWorldCounter(void);
 
 struct EffWorldNode;
 
