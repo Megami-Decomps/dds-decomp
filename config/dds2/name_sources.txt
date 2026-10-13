@@ -7972,3 +7972,20 @@
 0x0033BA68	sdfBuildPairedQuadVifPacket	inferred	Build10-register quad payload from center positions, two child colors and paired UV sets plus four-corner offsets supplied by billFlushPairedQuadStreams. DDS1 twin 0x002E2BB8. [Namer1 batch 38, high]
 0x0033BE18	sdfBuildVertexColorQuadVifPacket	inferred	Build13-register quad payload with four per-corner RGBA values, UV pairs and XY offset pairs; preserve native allocation formula and byte/count reuse, without asserting Gouraud shading. DDS1 twin 0x002E2F68. [Namer1 batch 38, high]
 0x0033CBE8	sdfDevConsGetGlyphUvTable	inferred	Return the96-entry packed glyph-UV table indexed by character-0x20 in sdfDevConsDrawGlyphGrid. DDS1 twin 0x002E3D38. [Namer1 batch 38, high]
+0x0026F8A0	mnuDrawMantraSelectionListAndCost	inferred	src/dds2/game/code_0026DBF8.c:890; draws queued display nodes and the current cost icon, offset icon, and badge after the list empties.
+0x0026FAA8	mnuResetMantraListFadeDelay	inferred	src/dds2/game/code_0026DBF8.c:931; resets the 30-frame fade window used while the display list is empty.
+0x002712E0	mnuCreateMantraLimitLineFadeData	inferred	src/dds2/game/code_0026DBF8.c:1559; allocates and seeds the draw data from the kind-1 item's flags.
+0x00271510	mnuDrawMantraLimitLine	inferred	src/dds2/game/code_0026DBF8.c:1632; draws limit-line frames, highlighted links, glows, and node markers.
+0x002747F0	mnuResetMantraUnitPanelFadeDelay	inferred	src/dds2/game/code_0026DBF8.c:2420; resets the unit-panel list's empty-list fade window.
+0x00274FF8	mnuDrawMantraRecordPanel	inferred	src/dds2/game/code_0026DBF8.c:2582; draws the record panel and its mode-dependent currency counter tween.
+0x00277F38	mnuDrawMantraShortLoopIcon	inferred	src/dds2/game/code_0026DBF8.c:2949; draws the non-variant Mantra icon's short-loop states.
+0x002799D8	mnuCreateMantraPanelPool	inferred	src/dds2/game/code_0026DBF8.c:3446; allocates the pool and initializes its fourteen draw, init, and release callbacks.
+0x0027AFE0	mnuDrawMantraPanelOrbitingEffect	inferred	src/dds2/game/code_0026DBF8.c:3917; draws the panel base, rotating three-sprite ring, moving accents, and pulse.
+0x0027FDC8	mnuDrawMantraNodeMasteryFlash	inferred	src/dds2/game/code_0026DBF8.c:5310; draws the node mastery pulse/flash and three orbiting sparks.
+0x002803A8	mnuDrawMantraPanelOrbitingSymbols	inferred	src/dds2/game/code_0026DBF8.c:5408; draws the panel base, two rotating symbols, and ID-selected emblem.
+0x002817C8	mnuDrawMantraSingleCyclePanel	inferred	src/dds2/game/code_0026DBF8.c:5700; draws the single-cycle panel with two orbiting accents and its ID-selected symbol.
+0x00282B68	mnuDrawMantraPanelFourIconEffect	inferred	src/dds2/game/code_0026DBF8.c:5820; draws panel decoration, rotating icons, and a pulse selected from the four-entry icon table.
+0x00283090	mnuDrawMantraFourIconPanelTransition	inferred	src/dds2/game/code_0026DBF8.c:5890; animates the four-icon panel transition with split panels, bursts, and orbiting symbols.
+0x00283FA8	mnuDrawMantraDualCyclePanel	inferred	src/dds2/game/code_0026DBF8.c:6079; draws the dual-cycle panel with two orbiting accents.
+0x00284508	mnuUpdateAndDrawMantraSparkleEmitter	inferred	src/dds2/game/code_0026DBF8.c:6176; advances the emitter and spawns and draws active sparkle particles.
+0x00285788	mnuUpdateAndDrawMantraSparkEffect	inferred	src/dds2/game/code_0026DBF8.c:6450; ticks the eight spark particles and prepares their effect surface.
