@@ -1365,7 +1365,7 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
 /* The shop layouts use slot 1 as their background and slot 3 as the rotated portrait. */
-void func_0025FD78(MenuTerminalContext *scene) {
+void mnuDrawShopPanelDecorations(MenuTerminalContext *scene) {
     switch (scene->type) {
     case 0:
     case 2:
@@ -2609,7 +2609,7 @@ s32 func_00261F48(KwlnTask *task) {
 
 s32 func_00262190(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     func_00297320(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -2736,7 +2736,7 @@ s32 func_00262330(KwlnTask *task) {
 
 s32 func_00262598(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -2853,7 +2853,7 @@ s32 func_00262740(KwlnTask *task) {
 
 s32 func_002629A8(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -2973,7 +2973,7 @@ s32 func_00262B50(KwlnTask *callbackContext) {
 
 s32 func_00262DB8(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3077,7 +3077,7 @@ s32 func_00262F78(KwlnTask *task) {
 
 s32 func_00263180(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3141,7 +3141,7 @@ s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
 
 s32 func_002633F0(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     func_00297320(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3173,7 +3173,7 @@ s32 func_002635E8(KwlnTask *callbackContext) {
 
 s32 func_00263658(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     func_00297320(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3216,7 +3216,7 @@ s32 evtQueryStateProgress(KwlnTask *callbackContext) {
 
 s32 evtDispatchProgressCallback(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawSpriteMenuFadeOut(stateAddress, ((MenuTerminalContext *)stateAddress)->retryFrames);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3328,7 +3328,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
 
 s32 func_00263B98(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCommandClosePhase((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3527,7 +3527,7 @@ s32 func_00264120(KwlnTask *task) {
 
 s32 evtDispatchSceneReadyFollowup(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     if (((MenuTerminalContext *)stateAddress)->sceneReady == 1) {
         mnuDrawCampCommandTransition(stateAddress);
     } else {
@@ -3605,7 +3605,7 @@ extern void func_00296E98(s32, u32, s32, s32);
 s32 func_00264480(KwlnTask *callbackContext) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(callbackContext);
 
-    func_0025FD78(state);
+    mnuDrawShopPanelDecorations(state);
     switch (state->dispatchMode) {
     case 1:
         mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
@@ -3781,7 +3781,7 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
 
 s32 func_00264AB8(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3837,7 +3837,7 @@ s32 evtOpenSlotAdvancePopupWhenIdle(KwlnTask *callbackContext) {
 
 s32 func_00264CE0(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -3904,7 +3904,7 @@ s32 evtTriggerProgressGateThenOpenPopup(KwlnTask *callbackContext) {
 
 s32 func_00264F98(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0025FD78((MenuTerminalContext *)stateAddress);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
@@ -4064,7 +4064,7 @@ s32 evtMenuPollWindow(KwlnTask *callback) {
 
 s32 func_00265360(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_0025FD78((MenuTerminalContext *)context);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     mnuDrawCampCommandTransition((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
@@ -4194,7 +4194,7 @@ s32 func_002655C0(KwlnTask *callback) {
 
 s32 func_002657F8(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_0025FD78((MenuTerminalContext *)context);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     mnuDrawCampCommandTransition((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
