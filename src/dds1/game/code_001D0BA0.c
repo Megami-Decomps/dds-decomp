@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_world_camera_view.h"
 #include "snd_pad.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -5948,21 +5949,6 @@ u32 btlIsRuntimeFlag2000Clear(void) {
     temp_v0 = btlGetRuntime();
     return ((*(s32 *)(temp_v0 + 0x160) >> 0xd) ^ 1U) & 1;
 }
-
-typedef struct WorldObjectSub {
-    u8 pad0[0x34];
-    s32 handle;
-} WorldObjectSub;
-
-typedef struct WorldObjectHead {
-    u8 pad0[8];
-    WorldObjectSub *sub;
-} WorldObjectHead;
-
-typedef struct WorldObj {
-    u8 pad0[0x18];
-    WorldObjectHead *head;
-} WorldObj;
 
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *);
 
