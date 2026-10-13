@@ -354,7 +354,7 @@ s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
     return btlGetIndexListCount(actor->targetList) == 1;
 }
 
-u32 func_001DD2C0(BtlLinkedCommand *actor) {
+u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
     s32 index;
     if (btlCanUseLinkedActor(actor) == 0) {
         return 0;
@@ -632,7 +632,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             return;
         }
         if (task->unit->status.flags & 0x200) {
-            if ((hasFlag200 == 1 || hasFlag400 != 1) && func_001DD2C0(action) == 0) {
+            if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
                     if (effMiscRand(effSharedRandomState) & 1) {
                         func_001E0B68(action, &action->frontCamera, &action->backCamera);
@@ -669,7 +669,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 }
                 action->flags |= 0x800;
             } else {
-                if (btlCanUseActorCategoryFlag2(action) != 0 || func_001DD2C0(action) != 0 ||
+                if (btlCanUseActorCategoryFlag2(action) != 0 || btlCanUseActorCategoryFlag4(action) != 0 ||
                     btlIsLinkedFireOfSinaiCommand(action) != 0) {
                     action->stepKind = 1;
                 } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
@@ -702,7 +702,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else if (btlHasSingleLinkedResource(action) != 0 && btlHasLinkedEffectNodeTrigger(action) != 0) {
                 action->stepKind = 5;
                 btlBuildDistanceClampedActionCameraBlend(action, &action->frontCamera, &action->backCamera);
-            } else if (func_001DD2C0(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
+            } else if (btlCanUseActorCategoryFlag4(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
                 func_001E2578(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
@@ -712,7 +712,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
-                    func_001DD2C0(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
+                    btlCanUseActorCategoryFlag4(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
                     action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 4 : 5;
                 } else {
                     action->stepKind = 4;
@@ -855,7 +855,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 if (btlIsActorCategoryMarked(action)) {
                     btlInitCommandCursorForFirstActor(action, &action->camera);
                     action->stepKind = 12;
-                } else if (func_001DD2C0(action)) {
+                } else if (btlCanUseActorCategoryFlag4(action)) {
                     func_001E2578(action, &action->frontCamera, &action->backCamera);
                 } else {
                     choice = btlChooseLinkedCameraVariant(action, &reduceDistance);
@@ -879,7 +879,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     }
                 }
             } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
-                if (func_001DD2C0(action)) {
+                if (btlCanUseActorCategoryFlag4(action)) {
                     func_001E2578(action, &action->frontCamera, &action->backCamera);
                 } else if (btlMatchFirstLinkedActorFlags(action)) {
                     func_001E0398(action, &action->frontCamera, &action->backCamera);
@@ -902,7 +902,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
             if (btlIsLinkedFireOfSinaiCommand(action)) {
                 btlInitTargetCursorAndFacing(action, &action->camera);
-            } else if (func_001DD2C0(action)) {
+            } else if (btlCanUseActorCategoryFlag4(action)) {
                 func_001E2578(action, &action->frontCamera, &action->backCamera);
             } else {
                 choice = btlChooseLinkedCameraVariant(action, NULL);
@@ -921,7 +921,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 }
             }
         } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
-            if (func_001DD2C0(action)) {
+            if (btlCanUseActorCategoryFlag4(action)) {
                 func_001E2578(action, &action->frontCamera, &action->backCamera);
             } else {
                 func_001E0718(action, &action->frontCamera, &action->backCamera);
@@ -933,7 +933,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         }
     } else if (hasFlag200 == 1 && hasFlag400 != 1) {
         if (btlHasSingleLinkedResource(action)) {
-            if (func_001DD2C0(action)) {
+            if (btlCanUseActorCategoryFlag4(action)) {
                 func_001E2578(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
                        ((effMiscRand(effSharedRandomState) & 1) ||
@@ -952,7 +952,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 action->backCamera.distance = distance + 150.0f;
                 btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
             }
-        } else if (func_001DD2C0(action)) {
+        } else if (btlCanUseActorCategoryFlag4(action)) {
             func_001E2578(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
                    ((effMiscRand(effSharedRandomState) & 1) ||
@@ -965,7 +965,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             action->flags |= 0x41;
         }
     } else if (hasFlag200 != 1 && hasFlag400 == 1) {
-        if (func_001DD2C0(action)) {
+        if (btlCanUseActorCategoryFlag4(action)) {
             func_001E2578(action, &action->frontCamera, &action->backCamera);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
