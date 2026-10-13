@@ -9,8 +9,6 @@
 
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
-extern void sdfFreeNodeLists(SdfDrawNode *node);
-extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 extern void sdfMultiplyVuMatrixInPlace(void);

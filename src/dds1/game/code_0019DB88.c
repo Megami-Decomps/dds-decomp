@@ -13,6 +13,7 @@
 
 
 
+#include "sdf.h"
 extern ItfMesGlobals itfMesWork;
 
 
@@ -87,7 +88,6 @@ extern u32 sndTestMessageResourceIndex;
 
 extern SdfTex *sndTestMessageTexture;
 
-extern SdfTex *itfLoadTextureFromAsset(const char *);
 
 
 void frFontEnableNodeContextModes(FrFontGlyph *node) {
@@ -749,9 +749,6 @@ s32 sndVisitQueuedResources(void) {
 }
 
 extern void itfMesDestroyWindow(s32 window);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern u32 func_0011E278(void);
 
 s32 func_0019F6A0(KwlnTask *task) {

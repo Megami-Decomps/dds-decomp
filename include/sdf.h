@@ -264,6 +264,8 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFo
 s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
 s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
 void sdfAdvanceStreamPlayback(s32 cadence);
+/* Store the stream-frame draw-path word unchanged; 1 selects the alternate path. */
+void sdfSetStreamFrameDrawMode(u32 mode);
 
 typedef struct SdfMovieDescriptor {
     u16 unk00;
@@ -377,6 +379,20 @@ typedef struct SdfTex {
     s32 unk38;
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
+
+/* Release one caller-owned texture reference. The direct form releases the
+ * texture immediately when this is the last reference; the handler form queues
+ * that final release for deferred processing. Neither function consumes more
+ * than the single reference represented by the supplied pointer. */
+void sdfTexReleaseReference(SdfTex *texture);
+void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
+
+/* Texture resource accessors and palette helpers shared by both title providers. */
+u8 sdfTexGetPaletteCount(SdfTex *texture);
+u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
+u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
+s32 sdfTexFormatSizeHint(s32 format);
+void sdfTexAllocatePaletteData(SdfTex *texture);
 
 /* Return the packed 64-bit TEX0 state from the texture's primary GS packet. */
 u64 sdfTexGetPrimaryTextureState(SdfTex *texture);

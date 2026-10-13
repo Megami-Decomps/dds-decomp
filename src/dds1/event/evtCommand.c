@@ -124,7 +124,7 @@ u32 fldGetPlayerSceneState(void);
 
 
 
-extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
 
@@ -1028,7 +1028,7 @@ s32 evtCommandWaitForCampTask(void) {
         message = D_003AC958;
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
-        func_00101A80(commandWork->task, mnuCampCreateTask(taskId));
+        kwlnTaskAddChild(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
     if (evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
@@ -1053,7 +1053,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage(D_003AC978, taskId);
-    func_00101A80(commandWork->task, mnuCampCreateTask(taskId));
+    kwlnTaskAddChild(commandWork->task, mnuCampCreateTask(taskId));
     return 1;
 }
 
@@ -1106,7 +1106,7 @@ s32 evtCommandStartPolygonMovie(void) {
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage(D_003AC9E0, scrReadIntParameter(0), scrReadIntParameter(1));
-    func_00101A80(commandWork->task, movieTask);
+    kwlnTaskAddChild(commandWork->task, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
@@ -1141,7 +1141,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    func_00101A80(commandWork->task, movieTask);
+    kwlnTaskAddChild(commandWork->task, movieTask);
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
 }

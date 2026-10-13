@@ -5,6 +5,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_track_poly_list.h"
 #include "mdl.h"
 #include "sdf.h"
@@ -248,8 +249,6 @@ void effTrackPolyInitData(EffTrackPolyData *data) {
 void effTrackPolySetDrawKind(EffTrackPolyData *data, u32 kind) {
     data->kind = kind;
 }
-
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 void effTrackPolyFillGradientColors(EffTrackPolyData *data, u32 *gradientColors) {
     f32 t = 0.0f;

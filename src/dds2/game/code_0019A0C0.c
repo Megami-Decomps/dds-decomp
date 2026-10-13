@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_param.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -138,7 +139,6 @@ void effDestroyChannelWork(EffChanWork *work) {
 
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 effMiscRandUnitFloat(void *);
 
 /* vu0 routine: Jitter four control points normal to the path and viewing direction.
  * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */

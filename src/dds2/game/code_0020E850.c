@@ -1227,13 +1227,6 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
     return result;
 }
 
-/* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
-typedef struct AiSpecies {
-    u8 pad00[0x40];
-    AiSlot slot[25];
-    u8 pad108[0x54];
-} AiSpecies;
-
 extern AiSpecies *datEnemyAiRecords;
 extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 arg);
 extern u32 btlPickWeightedAiSlot();

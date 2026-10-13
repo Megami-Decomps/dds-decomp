@@ -1,7 +1,7 @@
 #include "common.h"
+#include "ui_color.h"
 #include "mnu_result.h"
 
-extern u32 uiBlendColors(u32, u32, s32);
 
 
 void brsUpdateResultBackgroundFade(s32 a0, s32 a1, s32 a2, BrsSkillPackageWork *work, s32 a4, s32 a5, s32 index) {
@@ -515,7 +515,6 @@ typedef struct BrsResultWork {
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 prfGetCapValue(u16);
-extern u32 uiBlendColors(u32, u32, s32);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 extern void mnuSetTitleSequenceVolumePan(u32);
 

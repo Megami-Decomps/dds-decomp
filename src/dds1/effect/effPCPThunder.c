@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
@@ -10,6 +11,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_thunder_fragment.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
@@ -21,7 +23,6 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern u32 effMiscRand(void *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Keep literal types and arithmetic associations identical to the native code. */
@@ -2877,9 +2878,6 @@ void effResetFragmentHistory(EffPcpThunderFragmentResources *history) {
     history->color = 0x80808080;
     history->activePointCount = 0;
 }
-
-
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *history, u32 *gradientColors) {
     f32 t = 0.0f;

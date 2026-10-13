@@ -585,7 +585,7 @@ s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
 }
 
 /* Flag-range items have one slot; every quantity range caps at 99. */
-s32 func_0011A220(s32 itemId) {
+s32 ptyIsInventoryItemAtCapacity(s32 itemId) {
     s32 quantity = datGameState->inventory.counts[itemId];
 
     if (itemId >= 0xA0) {
@@ -638,7 +638,7 @@ s8 ptyReadSignedRosterStatByte(s32 statIndex) {
 extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32);
 
 /* Event penalties affect living roster slots, then optionally raise a status channel. */
-void func_0011A328(s32 mode) {
+void ptyApplyEventPenalty(s32 mode) {
     s32 nextHp, loss, slotIndex;
     if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
         DatPartyRecord *entry = datGameState->party;
@@ -696,7 +696,7 @@ void func_0011A328(s32 mode) {
 
 
 /* Apply field HP attrition without allowing a living roster entry to reach zero. */
-void func_0011A510(s32 mode) {
+void ptyApplyFieldHpAttrition(s32 mode) {
     s32 nextHp, loss, slotIndex;
     if (mode == 1) {
         DatPartyRecord *entry = datGameState->party;
@@ -1083,7 +1083,7 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
 extern void func_00286BA8(void *record);
 
 /* Consume a saved template, optionally raise its level, then mark its item owned. */
-void func_0011B4B0(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
+void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1163,7 +1163,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
 /* Clone template 7 into roster 3 and inherit its mantra state. After optional
  * post-initialization, mark any assigned item owned. Level-flag precedence is
  * the same as the adjacent initializer; flag mask 2 skips the optional call. */
-void func_0011B9A0(DatPartyRecord *entry, s32 initFlags) {
+void ptyCloneTemplateSevenToRosterUnitThree(DatPartyRecord *entry, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1284,7 +1284,7 @@ extern s32 D_00386048[][4];
 /* Add a roster member to the first free party slot: initialise it from its saved template or by
  * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
  * slot, -1 if the member is already present or -2 if the party is full. */
-s32 func_0011C0B0(s32 rosterIndex, s32 initFlags) {
+s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     DatPartyRecord *entry;
     DatPartyRecord *party;
     s32 slotIndex;
@@ -1309,14 +1309,14 @@ s32 func_0011C0B0(s32 rosterIndex, s32 initFlags) {
     memset(entry, 0, sizeof(*entry));
     if ((datGameState->templates[rosterIndex].flags & 1) != 0 &&
         datGameState->templates[rosterIndex].level != 0) {
-        func_0011B4B0(entry, rosterIndex, initFlags);
+        ptyRestoreUnitFromSavedTemplate(entry, rosterIndex, initFlags);
     } else {
         switch (rosterIndex) {
         case 2:
             ptyInitRosterAndClearItem(entry, initFlags);
             break;
         case 3:
-            func_0011B9A0(entry, initFlags);
+            ptyCloneTemplateSevenToRosterUnitThree(entry, initFlags);
             break;
         case 8:
             ptyMergeSavedUnitTemplates(entry);
@@ -1361,14 +1361,14 @@ s32 func_0011C0B0(s32 rosterIndex, s32 initFlags) {
     return slotIndex;
 }
 
-void func_0011C328(u32 arg0) {
-    func_0011C0B0(arg0, 0);
+void ptyAddUnit(u32 arg0) {
+    ptyAddUnitWithFlags(arg0, 0);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011C340);
+INCLUDE_ASM(const s32, "newdata/datCalc", ptyRemoveUnitWithFlags);
 
-void func_0011C680(u32 arg0) {
-    func_0011C340(arg0, 0);
+void ptyRemoveUnit(u32 arg0) {
+    ptyRemoveUnitWithFlags(arg0, 0);
 }
 
 u32 func_0011C698(void) {
@@ -1584,7 +1584,7 @@ void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
     }
 }
 
-void func_0011D0D8(void) {
+void ptyClearItemF8FromPartyAndInventory(void) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
@@ -1600,8 +1600,8 @@ void func_0011D0D8(void) {
 }
 
 /* Save occupied active entries to stock; clear the absent special-character slots. */
-extern void func_0011D130(void);
-void func_0011D130(void) {
+extern void ptySaveActivePartyTemplates(void);
+void ptySaveActivePartyTemplates(void) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
@@ -2074,14 +2074,14 @@ s32 evtPushAvailableIntegerValue(void) {
 
 /* The paired DDS1 readers identify the halfword index as the entry's level.
  * The shared coefficient arrays start at level one. */
-s32 func_0011DFE0(void) {
+s32 evtPushLevelMaxHpGrowth(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[levelIndex - 1]);
     return 1;
 }
 
-s32 func_0011E018(void) {
+s32 evtPushLevelMaxMpGrowth(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[levelIndex - 1]);
@@ -2119,14 +2119,14 @@ s32 evtSelectStatGrade(void) {
     return 1;
 }
 
-s32 func_0011E128(void) {
+s32 evtPushLevelValueA(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesA[levelIndex - 1]);
     return 1;
 }
 
-s32 func_0011E160(void) {
+s32 evtPushLevelValueB(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesB[levelIndex - 1]);
@@ -2202,7 +2202,7 @@ s32 evtSelectFineStatGrade(void) {
     return 1;
 }
 
-s32 func_0011E3A0(void) {
+s32 evtPushLevelRelativeStatGradeScale(void) {
     DatPartyRecord *unit = (DatPartyRecord *)D_0043E5C0.first;
     u16 level = unit->level;
     s32 grade = datGetStatWithStatusOverride(unit, 4);
@@ -2396,7 +2396,7 @@ s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
 }
 
 /* Reuse an active interval, or seed one for a nonempty encounter group. */
-s32 func_0011E848(s32 index) {
+s32 btlGetConditionalEncounterInterval(s32 index) {
     s32 variant;
     s32 total;
     s32 i;
@@ -2428,7 +2428,7 @@ extern s32 D_00435E94;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
-s32 func_0011E930(f32 step, s32 index) {
+s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
     s32 group;
     s32 interval;
     s32 count;
@@ -2443,7 +2443,7 @@ s32 func_0011E930(f32 step, s32 index) {
         return 0;
     }
     group = btlSelectConditionalEncounterGroup(index);
-    interval = func_0011E848(index);
+    interval = btlGetConditionalEncounterInterval(index);
     if (interval == 0) {
         return interval;
     }
@@ -2519,7 +2519,7 @@ void func_0011EBF8(s32 chance) {
  * frontline group. The latter is not a pure presence test: its retail
  * callee changes flag mask 2 and swaps roster records. Preserve the short-arity
  * presence call and push whether the operation returned exactly one. */
-s32 func_0011EC00(void) {
+s32 ptyScriptCheckOrRebalanceFrontline(void) {
     s32 rosterIndex = scrReadIntParameter(0);
     s32 result;
     if (scrReadIntParameter(1) == 0) {

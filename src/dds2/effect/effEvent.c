@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
 #include "sdf_resource.h"
@@ -15,6 +16,8 @@
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_projection.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
 #define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
@@ -254,7 +257,6 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfAllocPacketAligned(s32);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
-extern void sdfProjectVuVectorToScreen();
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
 void effDrawMarkerBoxAtPoint(f32 *position) {
@@ -369,7 +371,6 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 extern void func_003364B8(f32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *func_00348158(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
@@ -812,7 +813,7 @@ EffScreenDrawParams *effGetLoadDescA(void) {
 }
 
 /* Replace the screen-draw source prefix while preserving the trailing bytes. */
-void func_001975F8(void *parameters) {
+void effSetLoadDescA(void *parameters) {
     memcpy(&D_003B22D0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
@@ -921,7 +922,7 @@ EffScreenDrawParams *effGetLoadDescD(void) {
 }
 
 /* Replace this screen-draw source prefix without changing trailing bytes. */
-void func_00197980(void *parameters) {
+void effSetLoadDescD(void *parameters) {
     memcpy(&D_003B2778, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
@@ -1056,7 +1057,7 @@ struct EffEventWork {
     void *actor;          /* Linked model/event owner; concrete identity is unknown. */
     BattleEffect *effect;
 };
-extern void func_00169168(BattleEffect *, f32);
+extern void effBattleSetScale(BattleEffect *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
@@ -1066,7 +1067,7 @@ EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
     memcpy(work, init, sizeof(*init));
     work->actor = NULL;
     work->effect = func_00168548(owner, kind, 0, 0);
-    func_00169168(work->effect, init->param);
+    effBattleSetScale(work->effect, init->param);
     return work;
 }
 
@@ -1104,7 +1105,7 @@ void effEventCopySerializedRecord(const FileRecordHeader *source, FileRecordHead
 
 /* Forward the effect's scale value without modifying the record's init prefix. */
 void effEventSetScale(EffEventWork *work, f32 scale) {
-    func_00169168(work->effect, scale);
+    effBattleSetScale(work->effect, scale);
 }
 
 void effEventSetState(EffEventWork *work, void *actor) {
@@ -1191,11 +1192,9 @@ extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00336818(f32 angle);
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
@@ -1387,7 +1386,6 @@ void effEventReleaseSharedResources(EffEventBillSet *work) {
 }
 
 extern u32 effMiscRand(void *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
@@ -1453,7 +1451,6 @@ typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -
 
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 struct DmaPacketHeader;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);
@@ -1468,7 +1465,7 @@ extern SdfPoolNode D_003802A8;
 /* DDS2 event-bill renderer, reconstructed from the native owner and its
  * current providers. The VIF position stream consumes XYZ only: native never
  * initializes the temporary position's W before its full-vector add/copy. */
-void func_00199118(EffEventBillSet *work) {
+void effEventDrawBillSet(EffEventBillSet *work) {
     EffEventBillBatch primary, secondary;
     f32 matrix[4][4];
     f32 position[4], origin[4], lateral[4];

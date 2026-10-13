@@ -121,7 +121,6 @@ s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 
 extern void frFontLoadTemporaryEntry(u32);
 
-extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
 
@@ -1553,8 +1552,6 @@ typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 
 extern const UiQuadColor D_00414D50;
 
-extern SdfTex *itfLoadTextureFromAsset(const char *path);
-
 typedef struct EncBgEntry {
     s32 unk00;
     s16 unk04;
@@ -1566,9 +1563,6 @@ typedef struct EncBgEntry {
 extern ItfMesGlobals itfMesWork;
 
 extern void itfMesDestroyWindow(s32 arg0);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern s32 sdfAllocPacketAligned(s32 size);
 
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);

@@ -16,14 +16,12 @@ void *memcpy(void *arg0, void *arg1, u32 arg2);
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
-u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
-u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,
     u32 primaryResourceWord, s32 pixelFormat, u32 secondaryResourceWord,
     s32 clutFormat, s32 textureColorComponents, s32 maxMipLevel,
     s32 lodParameters, s32 clampMode, s32 variant);
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
-s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
+s32 __attribute__((const)) sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
     s32 colorsPerPalette;
 
@@ -35,7 +33,12 @@ s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCo
     return colorsPerPalette * bytesPerColor * paletteCount;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexAllocatePaletteData);
+void sdfTexAllocatePaletteData(SdfTex *texture) {
+    s32 size = sdfTexGetPaletteByteSize(texture->pixelFormat, texture->clutFormat,
+                                      texture->paletteCount);
+    texture->paletteDataSize = size;
+    texture->paletteData = sdfAllocateBlockBySizeThreshold(size);
+}
 
 /* Copy retained palette bytes without changing the texture resource metadata. */
 void *sdfTexCopyImageData(SdfTex *texture, void *source) {
@@ -154,10 +157,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 }
 
 extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
-extern u8 sdfTexGetPaletteCount(SdfTex *);
-extern void sdfTexAllocatePaletteData(SdfTex *);
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
-extern s32 sdfTexFormatSizeHint(s32);
 extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
 
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {

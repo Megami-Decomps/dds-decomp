@@ -6,9 +6,9 @@
 
 extern u32 mtrHasEnoughOwnedMantras(void);
 
-extern s32 func_0011C0B0(s32 param0, s32 param1);
+extern s32 ptyAddUnitWithFlags(s32 param0, s32 param1);
 
-extern s32 func_0011C340(s32 param0, s32 param1);
+extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
 extern s32 scrReadIntParameter(s32 idx);
 
@@ -28,28 +28,28 @@ extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
 s32 ptyScriptRemoveUnitAndReturnResult(void) {
     s32 unitId = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(func_0011C680(unitId) == 1);
+    scrSetIntegerReturnValue(ptyRemoveUnit(unitId) == 1);
     return 1;
 }
 
 /* Evaluate a two-operand VM expression and publish its result. */
-s32 func_0011ECC8(void) {
+s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
     s32 firstOperand = scrReadIntParameter(0);
     s32 secondOperand = scrReadIntParameter(1);
 
-    scrSetIntegerReturnValue(func_0011C0B0(firstOperand, secondOperand));
+    scrSetIntegerReturnValue(ptyAddUnitWithFlags(firstOperand, secondOperand));
     return 1;
 }
 
-s32 func_0011ED10(void) {
+s32 ptyScriptRemoveUnitWithFlagsAndReturnResult(void) {
     s32 firstOperand = scrReadIntParameter(0);
     s32 secondOperand = scrReadIntParameter(1);
 
-    scrSetIntegerReturnValue(func_0011C340(firstOperand, secondOperand) == 1);
+    scrSetIntegerReturnValue(ptyRemoveUnitWithFlags(firstOperand, secondOperand) == 1);
     return 1;
 }
 
-s32 func_0011ED60(void) {
+s32 scrCmdHasEnoughOwnedMantras(void) {
     scrSetIntegerReturnValue(mtrHasEnoughOwnedMantras());
     return 1;
 }

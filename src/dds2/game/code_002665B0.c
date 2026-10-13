@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "ui_color.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -31,7 +32,7 @@
 #define MNU_COLOR_LOW_BYTE_MASK 0xFF
 
 extern KwlnTask *kwlnTaskCreate();
-extern void func_00101968(KwlnTask *, KwlnTask *);
+extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
 extern s32 func_00268550(KwlnTask *task);
 extern s32 func_00268588(KwlnTask *task);
@@ -118,7 +119,6 @@ extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 uiBlendColors(u32, u32, u32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];
@@ -862,7 +862,7 @@ s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host
 
 
 extern void sndStartTrackExtended(s32);
-extern void func_00342580(s32);
+extern void sndReleaseTrackHandle(s32);
 
 /* Mode one optionally starts the BGM and releases the group; other modes use the
  * counterpart sound action and texture release. Only enable == 1 sends sound calls.
@@ -884,7 +884,7 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
         mnuReleaseResourceGroup(address);
     } else {
         if (enable == 1) {
-            func_00342580(work->bgmHandle);
+            sndReleaseTrackHandle(work->bgmHandle);
         }
         D_00437859 = 0;
         mnuReleaseMenuResourceGroup(address, 1);
@@ -968,7 +968,7 @@ void mnuApplyFadeTrackMode(s32 mode, MenuSlotState *host) {
             func_003425B0();
         }
     } else if (host->reduced == 0) {
-        func_00342580(host->bgmHandle);
+        sndReleaseTrackHandle(host->bgmHandle);
     } else {
         func_003425D8();
     }
@@ -1065,7 +1065,7 @@ void func_00268380(s32 reduced, s32 slot) {
         func_00268588, mnuReleaseTerminalWorkAndResumeField, (u32)scene);
     fadeTask = kwlnTaskCreate("term_fade", 0x2B15, 1, 0,
         mnuUpdateTerminalMessageWindowIndicator, NULL, (u32)scene);
-    func_00101968(drawTask, fadeTask);
+    kwlnTaskAddChild(drawTask, fadeTask);
     mnuTerminalTaskState = 1;
 }
 
@@ -2452,7 +2452,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
     }
     evtRememberDispatchCallback(0, (s32)context);
     context->exitState = 1;
-    func_00342580(context->bgmHandle);
+    sndReleaseTrackHandle(context->bgmHandle);
     evtClearActiveFlag(0);
     return 1;
 }

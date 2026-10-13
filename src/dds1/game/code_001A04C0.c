@@ -372,7 +372,7 @@ void btlCreateDrawTasks(void) {
     mainTask = kwlnTaskCreate((u32)D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A0E38, 0);
     *(u32 *)(state + 0x29C) = mainTask;
     drawTask = kwlnTaskCreate((u32)D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
-    func_00101A80(mainTask, drawTask);
+    kwlnTaskAddChild(mainTask, drawTask);
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {

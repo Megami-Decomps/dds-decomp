@@ -61,7 +61,7 @@ extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);
-extern void func_00289540(void);
+extern void fileStartOrResumeQueuedJob(void);
 extern DevState *sdfDevCreateCallbackState(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
 extern DevState *sdfDevCreateModeState(const char *path,
@@ -112,7 +112,7 @@ s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         }
         saved = D_003BC7D8;
         D_003BC7D8 = 1;
-        func_00289540();
+        fileStartOrResumeQueuedJob();
         D_003BC7D8 = saved;
         break;
     case SDF_DEV_EVENT_CLOSED:
@@ -198,7 +198,7 @@ s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             sdfDevQueueActiveOperation(deviceRequest);
             saved = D_003BC7D8;
             D_003BC7D8 = 2;
-            func_00289540();
+            fileStartOrResumeQueuedJob();
             D_003BC7D8 = saved;
         } else {
             SignalSema(work->sema);
@@ -269,7 +269,7 @@ s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             sdfDevQueueActiveOperation(deviceRequest);
             saved = D_003BC7D8;
             D_003BC7D8 = 3;
-            func_00289540();
+            fileStartOrResumeQueuedJob();
             D_003BC7D8 = saved;
         } else {
             SignalSema(work->sema);
@@ -298,7 +298,7 @@ s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
 }
 
 /* Start or resume the read, PAC, or write job at the head of the queue. */
-void func_00289540(void) {
+void fileStartOrResumeQueuedJob(void) {
     FileManWork *work = &fileManagerWork;
     FileTransferJob *job;
     s32 locked;
@@ -424,7 +424,7 @@ s32 fileManUpdate(void) {
             activeSlots = work->activeSlots;
         }
     }
-    func_00289540();
+    fileStartOrResumeQueuedJob();
     link = (FilePacRequest **)&work->unk14;
     while ((request = *link) != NULL) {
         if (request->state == 6) {

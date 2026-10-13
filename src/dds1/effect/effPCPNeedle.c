@@ -1,9 +1,11 @@
+#include "sdf_projection.h"
 #include "common.h"
 #include "sdf_quaternion.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "eff.h"
+#include "eff_math.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -11,11 +13,9 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
-extern void sdfVuBuildLookAtBasis(void *origin, void *target, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 blend);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
 
 extern f32 sdfViewEyeVector[4];

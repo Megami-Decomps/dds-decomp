@@ -68,7 +68,7 @@ s32 kwlnInitializeRuntime(void) {
     sdfCreateRuntimeTask();
     D_00435B88 = 0;
     D_00435B80 = 0;
-    func_0010FE50(0x2710);
+    dds3CreateActiveWorldWithValueCapacity(0x2710);
     kwlnInitMagicState();
     kwlnDebugTaskCreate();
     dds3AdminSubmitModeRequest(0, 0, 0, 0);

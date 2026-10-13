@@ -259,7 +259,7 @@ extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effMiscQuatMultiplyVU(void);
 extern void effObjInnerVecBackup(ObjectTransform *);
-extern void func_00113D18(EffWorldNode *);
+extern void effUpdateValueTransitionProximity(EffWorldNode *);
 extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
 extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
 extern void *dds3GetWorldNodeData(EffWorldNode *node);
@@ -331,7 +331,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
         effObjInnerVecBackup(obj->inner);
     }
     if (!dds3TestObjectFlags(obj, 0x100)) {
-        func_00113D18(obj);
+        effUpdateValueTransitionProximity(obj);
     }
     if (dds3TestObjectFlags(obj, 0x2000)) {
         if (data->pendingTargetKey != 0) {
@@ -437,8 +437,8 @@ typedef struct EffectValueObject {
 } EffectValueObject;
 
 struct WorldIndexNode;
-extern s32 func_0010FBD0(f32 *, f32 *);
-void func_00113D18(EffWorldNode *object) {
+extern s32 dds3IsPointWithinObjectRadius(f32 *, f32 *);
+void effUpdateValueTransitionProximity(EffWorldNode *object) {
     EffectObjectData *data = object->data;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
     struct WorldIndexNode *list;
@@ -461,7 +461,7 @@ void func_00113D18(EffWorldNode *object) {
             other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
-                func_0010FBD0(((f32 *)object->inner), other->source) == 0 &&
+                dds3IsPointWithinObjectRadius(((f32 *)object->inner), other->source) == 0 &&
                 data->activeId == other->valueId) {
                 evtEndUnitValueTransitionForObject(object, 10);
                 data->activeId = -1;
@@ -479,7 +479,7 @@ void func_00113D18(EffWorldNode *object) {
             other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
-                func_0010FBD0(((f32 *)object->inner), other->source) != 0) {
+                dds3IsPointWithinObjectRadius(((f32 *)object->inner), other->source) != 0) {
                 goto attach_transition;
             }
         } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
@@ -525,7 +525,7 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
 }
 
 
-void func_00113FD0(EffWorldNode *node) {
+void effObjRemoveWorldNode(EffWorldNode *node) {
     dds3RemoveWorldObjectNode(node);
 }
 

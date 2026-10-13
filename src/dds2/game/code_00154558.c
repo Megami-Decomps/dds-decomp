@@ -1533,7 +1533,7 @@ void func_00156C78(void) {
     scrSetIntegerReturnValue(func_0013F790(1));
 }
 
-s32 func_00156C98(void) {
+s32 fldCmdStartSelectedActorTask(void) {
     fldStartSelectedActorTask();
     return 1;
 }

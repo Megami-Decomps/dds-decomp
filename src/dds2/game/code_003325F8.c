@@ -100,7 +100,7 @@ extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
 extern void sdfModelCopyData(DevRequest *, DevRequest *);
 
-void func_003325F8(SdfModel *destination, SdfModel *source) {
+void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     SdfDrawNode **destinationNodes;
     SdfDrawNode **sourceNodes;
     s32 count;
@@ -260,7 +260,7 @@ s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
 
 extern const char D_0040B338[];
 
-const char *func_00332AD8(SdfModel *model, s32 nameId) {
+const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId) {
     SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
     const u8 *name;
     const u8 *end;

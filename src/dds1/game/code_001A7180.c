@@ -17,24 +17,13 @@
 #include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
+#include "btl_ai_table.h"
 #include "kwln.h"
 #include "dat_state.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 
 extern void btlBossDebugPrintf(const char *format, ...);
-
-typedef struct SceneSlot {
-    u8 a;
-    u8 b;
-    u8 id;
-} SceneSlot;
-
-typedef struct SceneFadingRecord {
-    SceneSlot slot;
-    u8 alpha;
-    s32 target;
-} SceneFadingRecord;
 
 typedef struct BattleController {
     u8 pad_000[0x1F4];
@@ -65,12 +54,12 @@ typedef struct BattleController {
     s32 experienceEarned; /* 0x2C8 */
     s32 epEarned; /* 0x2CC */
     u8 pad2D0[4];
-    SceneSlot slots[8];
+    BtlSceneSlot slots[8];
     BtlTask *groupPrimary[20];
     BtlTask *groupSecondary[45];
     BtlTask *groupTertiary[15];
     u8 pad_42C[0x20];
-    SceneFadingRecord fadingRecords[8]; /* 0x44C */
+    BtlSceneFadingRecord fadingRecords[8]; /* 0x44C */
     u8 pad_48C[0x18];
     EffectSlotSet *resA; /* 0x4A4 */
     EffectSlotSet *resB;
@@ -123,7 +112,7 @@ u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1);
 
 s8 btlGetLinkageSlotCost(s32 command);
 
-s32 func_001A2F50(BtlUnit *battler, s32 element);
+s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 
 s32 btlFlagToElementIndex(s32 flag);
 
@@ -205,7 +194,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     if ((selection & 0xE0000) != 0) {
         return 100;
     }
-    value = func_001A2F50(unit, index);
+    value = btlGetUnitElementAffinity(unit, index);
     ratio = btlGetAbilityAttributeMultiplierPercent(unit, index);
     if (ratio != 100) {
         ratio = (u16)value * ratio / 100;
@@ -561,7 +550,7 @@ s32 btlRollEscapeChance(BtlUnit *actor) {
     return btlRollAiBucket() < chance;
 }
 
-extern u8 *datEnemyAiRecords;
+extern AiSpecies *datEnemyAiRecords;
 
 s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     s32 context = btlGetRuntime();
@@ -572,7 +561,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
     if ((((BtlUnit *)object)->partyRecord.status & 0x2A0F) != 0) {
         return 0;
     }
-    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId * 0x15C] == 0;
+    return datEnemyAiRecords[((BtlUnit *)object)->partyRecord.unitId].unknown00[0] == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */

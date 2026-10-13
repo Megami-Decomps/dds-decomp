@@ -28,7 +28,7 @@ extern char D_00437208[];
 
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-void func_00101968(KwlnTask *parent, KwlnTask *child);
+void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 
 char *scrReadStringParameter(s32 idx);
@@ -92,7 +92,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     task = evtCreateTaskWithValue(0x2AFE, entry);
-    func_00101968(work->task, task);
+    kwlnTaskAddChild(work->task, task);
     scrSetIntegerReturnValue((s32)task);
     return 1;
 }
@@ -110,7 +110,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));
-    func_00101968(work->task, childTask);
+    kwlnTaskAddChild(work->task, childTask);
     scrSetIntegerReturnValue((s32)childTask);
     return 1;
 }

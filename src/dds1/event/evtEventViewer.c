@@ -33,7 +33,7 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
-void func_00101A80(s32 arg0, s32 arg1);
+void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
@@ -124,10 +124,9 @@ typedef struct EvtGroupRec {
 
 
 void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 
-EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
+EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 void effInitCh71Id(void);
 void effInitCh72Id(void);
 void effInitCh76Id(void);
@@ -146,7 +145,7 @@ char *strcpy(char *dst, const char *src);
 
 EvtRuntimeChild *func_0022BE28(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer)
 {
-    return func_0022B7A0(group, frame, viewer);
+    return evtCreateTrackKeyAtFrame(group, frame, viewer);
 }
 
 /* Return the pending node at position (count A + count B) in the queue entry, or NULL. */
@@ -1025,7 +1024,7 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
-void func_00101A80(s32 arg0, s32 arg1);
+void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
@@ -2778,7 +2777,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         break;
                     }
                     case 13:
-                        func_0018F9C0(key->payload);
+                        effSetLoadDescA(key->payload);
                         viewer->blurRectangleEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -2801,7 +2800,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 27:
-                        func_0018FD48(key->payload);
+                        effSetLoadDescD(key->payload);
                         viewer->framebufferQuadEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -3379,7 +3378,7 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
 
     viewer = (void *)kwlnTaskGetUserValue((KwlnTask *)task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
-    func_00101A80(task, evtCreateFrameVariableTask());
+    kwlnTaskAddChild(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (void *)evtViewerUpdateFrame;
 }
@@ -3518,7 +3517,7 @@ void evtEventViewerDestroyActiveAlternate(KwlnTask *task) {
 
 extern void mnuCampInitFontResource(EvtRuntime *viewer);
 
-void func_00232D48(EvtRuntime *viewer) {
+void evtEventViewerInitCampFontResource(EvtRuntime *viewer) {
     mnuCampInitFontResource(viewer);
 }
 
@@ -3537,8 +3536,8 @@ void evtViewerCreateTaskWithSky(void) {
     memset(viewer, 0, 0x2490);
     viewer->resourceHandle = viewerHandle;
     viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    func_00101A80((s32)viewerTask, evtCreateSkyTask());
-    func_00232D48(viewer);
+    kwlnTaskAddChild((s32)viewerTask, evtCreateSkyTask());
+    evtEventViewerInitCampFontResource(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {

@@ -1,6 +1,8 @@
+#include "sdf_projection.h"
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -44,7 +46,6 @@ typedef struct EffParticleRecord {
 } EffParticleRecord;
 
 extern u8 effDefaultRandomState[];
-extern f32 effMiscRandUnitFloat(void *);
 
 extern EffectConfig D_0034DF54[];
 
@@ -799,7 +800,7 @@ void effReleaseBufferAllocation(EffectBufferTail *buffer) {
 
 struct ParColorRamp;
 extern void parInitColorRamp(struct ParColorRamp *, s32);
-extern ParTable *func_00159C08(u32, u16, BillObj **);
+extern ParTable *parCreateHistorySlotTable(u32, u16, BillObj **);
 extern u32 func_0015B220(u16);
 extern void parDispatchSub(void *, s32, void *, void *);
 
@@ -820,7 +821,7 @@ void effInitializeEmitterHead(void *effect) {
     parInitColorRamp((struct ParColorRamp *)owner->fade, owner->lifetimeFrames);
     switch (owner->sub.kind) {
     case 1:
-        owner->sub.value.table = func_00159C08(owner->particleCount,
+        owner->sub.value.table = parCreateHistorySlotTable(owner->particleCount,
                                              owner->sub.templateEntryCount,
                                              &owner->billboard);
         break;
@@ -1013,7 +1014,7 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
-extern u32 func_00159AB8(void *fade, u32 color, s32 age);
+extern u32 parEvaluateColorRampAtAge(void *fade, u32 color, s32 age);
 extern u32 effParModulateColors(u32 color, u32 mask);
 
 /* Advance ring motion and ages; repeat by tagging packets for the next update.
@@ -1053,7 +1054,7 @@ void effEmitterRingUpdate(EffRingEmitter *effect) {
             f32 theta;
             f32 radius;
 
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1241,7 +1242,7 @@ void effEmitterDiscUpdate(EffDiscEmitter *effect) {
             f32 previousWaveValue;
             f32 factor;
 
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1532,7 +1533,7 @@ void effEmitterBallisticUpdate(EffBallisticEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1632,7 +1633,6 @@ struct EffLookAtRingEmitter {
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
 /* Seed a view-oriented ring packet and initialize its subeffect. */
@@ -1713,7 +1713,7 @@ void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
         f32 angle;
 
         if (age >= 0) {
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -1898,7 +1898,7 @@ void effEmitterBurstUpdate(EffBurstEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -2097,7 +2097,7 @@ void effEmitterSphereUpdate(EffSphereEmitter *effect) {
             f32 previousWaveValue;
             f32 factor;
 
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -2277,7 +2277,7 @@ void effEmitterExpandRingUpdate(EffExpandingRingEmitter *effect) {
             f32 phaseCos;
             f32 phaseSin;
 
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -2457,7 +2457,7 @@ void effEmitterConeUpdate(EffConeEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -2606,7 +2606,7 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 PCP_COPY_VECTOR(previousPosition, packet->pos);
@@ -3026,7 +3026,7 @@ void effEmitterOffsetGravityUpdate(EffOffsetGravityEmitter *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);
@@ -3220,7 +3220,7 @@ void effEmitterDiscAuxUpdate(EffDiscAuxEmitter *effect) {
             f32 previousWaveValue;
             f32 factor;
 
-            packet->color = func_00159AB8(effect->head.fade, packet->color, age);
+            packet->color = parEvaluateColorRampAtAge(effect->head.fade, packet->color, age);
             packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, packet);

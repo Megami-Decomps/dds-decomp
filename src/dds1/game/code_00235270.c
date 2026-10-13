@@ -50,7 +50,7 @@ extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
 extern void func_002E9758(s32 sequence);
 extern void func_003003F0(char *fmt, ...);
-extern void func_002E96D8(u32 sequence);
+extern void sndReleaseTrackHandle(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
@@ -4385,7 +4385,7 @@ extern void mdlLoadViewerPackage(s32 packageId, s32 partId, s32 flags, void *dat
 extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 key);
 extern s32 evtStageRelinkOwnedNodeResource(void *target, void *owner);
-extern EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
+extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
 extern s32 evtPreloadBgm(s32 id);
 extern s32 evtIsBgmLoaded(s32 id);
 extern s32 fldTitleIsActive(void);
@@ -4401,7 +4401,7 @@ typedef struct { u8 bytes[0x2C]; } EvtRowPayload2C;
 typedef struct { u8 bytes[0x30]; } EvtRowPayload30;
 typedef struct { u8 bytes[0x40]; } EvtRowPayload40;
 
-extern EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *, s32, EvtRuntime *);
+extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *, s32, EvtRuntime *);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
@@ -4600,7 +4600,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                     key->p08.b[0] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                     key->p0C.i = *(s32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                     nameIndex = evtGetRowVariant(work, row);
@@ -4643,7 +4643,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                     key->p08.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                     key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                     {
@@ -4672,7 +4672,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                     switch (evtGetRowValue(work, row)) {
                     case 3: case 0x1A:
                         key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -4738,7 +4738,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                     key->duration = evtGetRowFlags(work, row);
                     key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
                     if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x0) < 0) {
@@ -4761,7 +4761,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
         for (row = 0; row < (s32)work->unk_A0; row++) {
             if (evtGetRowValue(work, row) == 0xA &&
                 *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) == secondaryIndex) {
-                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                 key->p08.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                 key->p0C.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                 key->p10.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
@@ -4798,7 +4798,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0xB) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4812,7 +4812,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0xC, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0xC) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -4837,7 +4837,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x16, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x16) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
     }
@@ -4847,7 +4847,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0xD) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4862,7 +4862,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0xE) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4886,7 +4886,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0xF) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4910,7 +4910,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x17) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4934,7 +4934,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x1B) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4949,7 +4949,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x10) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4965,7 +4965,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x11) {
             s32 ordinal;
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(u16 *)data;
@@ -4991,7 +4991,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
         group = evtEventViewerCreateEntry(4, runtime);
         for (row = 0; row < (s32)work->unk_A0; row++) {
             if (evtGetRowValue(work, row) == 4) {
-                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                 key->duration = evtGetRowFlags(work, row);
                 key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                 key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -5011,12 +5011,12 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
         if (work->sub->kind < 6) {
             if (evtGetRowValue(work, row) == 5) {
                 soundRowsPresent = 1;
-                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                 key->p08.h[0] = *(u16 *)evtGetRowPayloadAddress(work, row);
             }
         } else if (((EvtExtendedRow *)work->secondEntry4Data)[row].value == 5) {
             soundRowsPresent = 1;
-            key = func_0022B7A0(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
+            key = evtCreateTrackKeyAtFrame(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
             key->p08.h[0] = *(u16 *)((EvtExtendedRow *)work->secondEntry4Data)[row].payload;
         }
     }
@@ -5030,13 +5030,13 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
         if (work->sub->kind < 6) {
             if (evtGetRowValue(work, row) == 0x13) {
                 soundRowsPresent = 1;
-                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                 key->p08.h[0] = *(u16 *)evtGetRowPayloadAddress(work, row);
                 key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 2);
             }
         } else if (((EvtExtendedRow *)work->secondEntry4Data)[row].value == 0x13) {
             soundRowsPresent = 1;
-            key = func_0022B7A0(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
+            key = evtCreateTrackKeyAtFrame(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
             key->p08.h[0] = *(u16 *)((EvtExtendedRow *)work->secondEntry4Data)[row].payload;
             key->p08.h[1] = *(u16 *)(((EvtExtendedRow *)work->secondEntry4Data)[row].payload + 2);
         }
@@ -5046,7 +5046,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x6, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x6) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
@@ -5056,7 +5056,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x7, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x7) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
@@ -5066,7 +5066,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x8, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x8) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
@@ -5082,7 +5082,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
                     key->p08.b[0] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                     key->p08.b[1] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x1);
                     key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
@@ -5102,7 +5102,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x19, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x19) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
@@ -5126,7 +5126,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x1C, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x1C) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -5137,7 +5137,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x1D, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x1D) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
@@ -5149,7 +5149,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     timeiId = -1;
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x1E) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             data = (u8 *)evtGetRowPayloadAddress(work, row);
             timeiId = key->p08.sh[0];
@@ -5162,7 +5162,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     group = evtEventViewerCreateEntry(0x20, runtime);
     for (row = 0; row < (s32)work->unk_A0; row++) {
         if (evtGetRowValue(work, row) == 0x20) {
-            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
@@ -5368,7 +5368,7 @@ s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_002E96D8(sound);
+    sndReleaseTrackHandle(sound);
     return sound;
 }
 
@@ -5446,8 +5446,6 @@ void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
     }
     return NULL;
 }
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern void effSetCh72Id(SdfTex *);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {

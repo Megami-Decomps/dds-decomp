@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "mnu.h"
 
 void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
@@ -14,7 +15,6 @@ void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
     } while (-1 < remaining);
 }
 
-extern u32 uiBlendColors(u32, u32, u32);
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 

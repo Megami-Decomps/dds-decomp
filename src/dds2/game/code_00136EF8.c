@@ -161,8 +161,6 @@ extern u8 D_00391F84[];
 extern s32 D_004361FC;
 
 extern s32 fldRainTextureResource;
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 extern char D_00413350[];
 
 extern u32 fldRainTextureData;
@@ -1280,7 +1278,7 @@ void fldUpdatePositionZoneHits(f32 *input) {
 
 /* Indexed fields retain index-first addresses; see docs/idioms.md,
  * "Trace-justified indexed field addresses: relative zone motion". */
-void func_00139950(f32 *position) {
+void fldApplyRelativeZoneMotion(f32 *position) {
     f32 newPosition[3];
     f32 previous[3];
     f32 movement[4];
@@ -1530,7 +1528,7 @@ s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     return found;
 }
 
-s32 func_0013B0D0(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];

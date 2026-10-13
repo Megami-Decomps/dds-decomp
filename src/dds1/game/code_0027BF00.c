@@ -14,6 +14,8 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "itf.h"
+#include "menu_fade_entry.h"
+#include "ui_color.h"
 struct MenuListNode;
 
 enum MenuPanelKind {
@@ -1100,23 +1102,16 @@ void mnuFreeListEntries(s32 *list) {
 void mnuAppendFadingWindowEntry(s32 activeValue, s32 windowAddress, s32 *list) {
     u32 slotIndex = *list;
     s32 *slot = list + slotIndex;
-    s32 *entry;
+    MenuFadeEntry *entry;
 
     if (slotIndex < MNU_FADING_MUTATION_THRESHOLD) {
         return;
     }
-    entry = (s32 *)slot[1];
+    entry = (MenuFadeEntry *)slot[1];
     *list = slotIndex + 1;
-    entry[0] = activeValue;
-    entry[4] = windowAddress;
+    entry->active = activeValue;
+    entry->window = (struct MenuWindowContainer *)windowAddress;
 }
-
-typedef struct MenuFadeEntry {
-    u32 active;
-    u32 pad4[3];
-    void *window;
-    u32 pad14;
-} MenuFadeEntry;
 
 /* Native removal only accepts indices at least five. Propagate the tail
  * record backward to the target, clearing each source's window pointer. */
@@ -1145,8 +1140,8 @@ void mnuRemoveFadingWindowEntry(s32 *list, u32 index) {
 void mnuDrawFadingWindows(s32 depth, s32 *list, s32 drawArg) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < (u32)list[0]; slotIndex++) {
-        s32 *entry = (s32 *)list[slotIndex + 1];
-        mnuDrawWindowContainer(entry[2], entry[3], depth, (MenuWindowContainer *)entry[4], drawArg);
+        MenuFadeEntry *entry = (MenuFadeEntry *)list[slotIndex + 1];
+        mnuDrawWindowContainer(entry->x, entry->y, depth, entry->window, drawArg);
     }
 }
 
@@ -1155,9 +1150,9 @@ void mnuDrawFadingWindows(s32 depth, s32 *list, s32 drawArg) {
 void mnuUpdateFade(s32 *list) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_FADING_SLOT_COUNT; slotIndex++) {
-        s32 *entry = (s32 *)list[slotIndex + 1];
-        if (entry[5] != 0) {
-            entry[5] -= MNU_FADING_WORD_STEP;
+        MenuFadeEntry *entry = (MenuFadeEntry *)list[slotIndex + 1];
+        if (entry->fade != 0) {
+            entry->fade -= MNU_FADING_WORD_STEP;
         } else {
             mnuRemoveFadingWindowEntry(list, slotIndex);
         }
@@ -2297,7 +2292,7 @@ void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
     for (i = 0; i < 4; i++) {
         s32 result = uiBlendColors(((MenuBlendColors *)ctx)->input[i],
                                    ((MenuBlendColors *)((MenuBlendOwner *)src)->colorState)->input[i],
-                                   (s32)amount / 2 + 0x80, ctx);
+                                   (s32)amount / 2 + 0x80);
         s32 current = ((MenuBlendOwner *)dst)->colorState;
         ctx = current;
         ((MenuBlendColors *)current)->output[i] = result;

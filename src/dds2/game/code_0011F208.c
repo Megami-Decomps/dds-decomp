@@ -78,7 +78,7 @@ extern u8 fldGetCampSceneControlMode(void);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void func_0012BE18(s32);
+extern void fldSetGsAlphaBlendEquation(s32);
 
 extern void func_00136EF8(void);
 
@@ -568,7 +568,7 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
     } else {
         fldSelectDisplayBuffer(0x39);
     }
-    func_0012BE18(5);
+    fldSetGsAlphaBlendEquation(5);
     fade = fade / 2;
     color = (fade * 7 * 16 / 128) & 0xFF;
     if (color > 0x70) {
@@ -596,7 +596,7 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
                             x + sinA, y - 2.0f, z + cosA,
                             x + sinB, y - 2.0f, z + cosB);
     }
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 s32 fldTestDrawUpdate(KwlnTask *task) {
@@ -608,7 +608,7 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
     }
     fldSelectDisplayBuffer(0x53);
     fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     func_00136EF8();
     fldDrawSkyGradient();
     if (D_00389988[9] != 0) {
@@ -621,10 +621,10 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
     }
     fldSelectDisplayBuffer(0x27);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     return 0;
 }
 

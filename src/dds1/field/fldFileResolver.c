@@ -468,7 +468,7 @@ extern void fldUpdateCameraMoveOscillation(void);
 extern u8 fldTestSceneControlFlags(u32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
 extern void fldClearCameraModelColor(void);
-extern void func_00131290(void);
+extern void fldSetCameraObjectTransitionFlag(void);
 extern void fldClearCameraObjectTransitionFlags(void);
 typedef struct {
     f32 dist;
@@ -577,7 +577,6 @@ extern u32 D_003BD7C0;
 extern u8 D_0032F260[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void fldResetRecordState(void);
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
@@ -1471,7 +1470,7 @@ void fldLoadAreaPackedResources(void) {
         fldFormatAreaResourceName(name);
         strcpy(D_003C9200, name);
         fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
-        func_00288C50(fldAreaPackedArchive);
+        fileWaitForRequestReady(fldAreaPackedArchive);
         request = (FilePacRequest *)fldAreaPackedArchive;
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
@@ -1630,7 +1629,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
             func_003014F0(path, D_0039FE38, directory, area, room);
             request = fileQueuePlainDispatchRequest(path);
             D_003BAC38 = request;
-            func_00288C50(request);
+            fileWaitForRequestReady(request);
         }
         index = 0;
         D_003BAC14 = NULL;
@@ -2125,7 +2124,7 @@ void fldSubmitFrameQuad(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 
 }
 
 /* Write the selected blend equation to GS ALPHA_1. */
-void func_00129900(s32 mode) {
+void fldSetGsAlphaBlendEquation(s32 mode) {
     SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 packet;
     u64 *data;
@@ -2879,7 +2878,7 @@ void fldDrawMarkerQuad(f32 *pos) {
     packet.scale = 0.0f;
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
@@ -2910,7 +2909,7 @@ void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     packet.scale = 0.0f;
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
@@ -2921,7 +2920,7 @@ void fldDrawStretchableFrame(s32 x, s32 y, s32 width, s32 height) {
     fldSubmitSpriteRect(x + 0x10, y, width - 0x20, height, 0x10, 0, 1, 0x20, 0x60000040, fldMarkerTexture);
     fldSubmitSpriteRect(x + width - 0x10, y, 0x10, height, 0x10, 0, 0x10, 0x20, 0x60000040, fldMarkerTexture);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 void fldAllocateBackgroundBuffer(void) {
@@ -3202,7 +3201,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     if (fade != 0) {
         color = fade & 0xFF;
         fldSelectDisplayBuffer(0x39);
-        func_00129900(5);
+        fldSetGsAlphaBlendEquation(5);
         if (color > 0x80) {
             color = 0x80;
         }
@@ -3228,7 +3227,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
                                 x + sinA, y - 2.0f, z + cosA,
                                 x + sinB, y - 2.0f, z + cosB);
         }
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 }
 
@@ -3370,7 +3369,7 @@ void fldUpdateLookAtSegmentDistance(void) {
     *distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
 }
 
-extern f32 func_00122A00(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
+extern f32 fldGetTriangleHeightAtXZ(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* Probe the support surface under the camera's focus and its mirrored heading. */
 void fldProbeCameraSupportSurface(void) {
@@ -3416,10 +3415,10 @@ void fldProbeCameraSupportSurface(void) {
     ys[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][1] + offset[1];
     zs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][2] + offset[2];
     x = cam->x - sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk5C = cam->y - func_00122A00(x,
+    cam->unk5C = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     x = cam->x - sdfSinPoly(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk170 = cam->y - func_00122A00(x,
+    cam->unk170 = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfEvaluateCosineViaSinePhaseShift(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     if (cam->overrideSupportRecordIndex == -1) {
         cam->unk5C = 0.0f;
@@ -3625,7 +3624,7 @@ void fldUpdateCameraProximity(void) {
             fldClearCameraObjectTransitionFlags();
             fldClearCameraObjectHighlightFlag();
         } else {
-            func_00131290();
+            fldSetCameraObjectTransitionFlag();
             if (fldAreaState.mode == 1 || fldAreaState.mode == 3) {
                 fldClearCameraObjectHighlightFlag();
             } else if (fldAreaState.dist < 100.0f) {
@@ -3935,7 +3934,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
 }
 
 extern s32 D_003BAB50;
-extern void func_00136DA0(f32 *);
+extern void fldApplyRelativeZoneMotion(f32 *);
 
 /* Probe the current player position; consume a pending target into work/object state. */
 
@@ -3952,7 +3951,7 @@ void fldUpdateCameraTarget(void) {
         cur[0] = st->x;
         cur[1] = st->y;
         cur[2] = st->z;
-        func_00136DA0(cur);
+        fldApplyRelativeZoneMotion(cur);
         if (st->positionPending != 0) {
             st->x = st->targetX;
             st->y = st->targetY;
@@ -4139,7 +4138,7 @@ void fldRestoreCameraModelColor(void) {
     fldPlayerModelContext->inner->color = 0x80808080;
 }
 
-void func_00131290(void) {
+void fldSetCameraObjectTransitionFlag(void) {
     dds3SetObjectFlags(fldPlayerObject, 0x200);
 }
 
@@ -4150,7 +4149,7 @@ void fldClearCameraObjectTransitionFlags(void) {
 
 extern void func_001372D0(f32 *);
 extern void effObjClearNodeFlags(void *, s32);
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_001312D8);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraObjectPose);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
@@ -4249,7 +4248,7 @@ extern const PcpVectorCopyF32 D_003A00A8;
 
 /* Advance a pending heading, retain position history, and export the player's
  * smoothed position and rotation. Vertical movement bypasses position damping. */
-void func_00131688(void) {
+void fldUpdateSmoothedCameraPose(void) {
     f32 position[4];
     f32 smoothed[4];
     union {
@@ -4317,7 +4316,7 @@ void func_00131688(void) {
                 PCP_COPY_VECTOR(((EffWorldNode *)player)->inner->smoothedPosition,
                                 ((EffWorldNode *)player)->inner->position);
             } else {
-                func_00131290();
+                fldSetCameraObjectTransitionFlag();
                 PCP_COPY_VECTOR_F32(smoothed, ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition);
                 if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
                     ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
@@ -4531,13 +4530,13 @@ void fldDrawSkyGradient(void) {
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
     switch (D_003BAD74[current].mode) {
     case 0:
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         break;
     case 1:
-        func_00129900(1);
+        fldSetGsAlphaBlendEquation(1);
         break;
     case 2:
-        func_00129900(2);
+        fldSetGsAlphaBlendEquation(2);
         break;
     }
 
@@ -4659,7 +4658,7 @@ void fldDrawSkyGradient(void) {
         }
     }
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 extern s32 D_003BAD58;
@@ -4776,7 +4775,7 @@ void fldUpdateSelectedValueTransition(void) {
 }
 
 /* VU0 direction setters consume vf10, as in the DDS2 lighting routine. */
-void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                    f32 redB, f32 greenB, f32 blueB,
                    f32 x, f32 y, f32 z) {
     EvtUnit *player;
@@ -4864,7 +4863,7 @@ extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
 extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
 extern u32 D_003BADA8;
-extern void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                           f32 redB, f32 greenB, f32 blueB, f32 x, f32 y, f32 z);
 
 /* Start fading to the sky light set at index. A zero scene command also applies the set to the
@@ -4945,7 +4944,7 @@ void fldApplySkyLightSet(u32 index, s32 mode) {
             vec[2] = light->finalVectorZ;
             vec[3] = 1.0f;
             kwlnSetBackgroundColorTarget(duration, vec);
-            func_00132E38(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+            fldSetPlayerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
                           light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
                           light->unitLightDirection[0], light->unitLightDirection[1],
                           light->unitLightDirection[2]);
@@ -5078,7 +5077,7 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
                 vec[2] = light->finalVectorZ;
                 vec[3] = 1.0f;
                 kwlnSetBackgroundColorTarget(duration, vec);
-                func_00132E38(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                fldSetPlayerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
                               light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
                               light->unitLightDirection[0], light->unitLightDirection[1],
                               light->unitLightDirection[2]);
@@ -5104,7 +5103,7 @@ extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
 extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
 extern u32 D_003BADDC;
-extern void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                           f32 redB, f32 greenB, f32 blueB, f32 x, f32 y, f32 z);
 
 void fldApplySceneLightSet(s32 index, s32 mode) {
@@ -5185,7 +5184,7 @@ void fldApplySceneLightSet(s32 index, s32 mode) {
             vec[2] = light->finalVectorZ;
             vec[3] = 1.0f;
             kwlnSetBackgroundColorTarget(duration, vec);
-            func_00132E38(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+            fldSetPlayerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
                           light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
                           light->unitLightDirection[0], light->unitLightDirection[1],
                           light->unitLightDirection[2]);
@@ -6430,7 +6429,7 @@ void fldUpdatePositionZoneHits(f32 *input) {
 
 /* Indexed fields retain index-first addresses; see docs/idioms.md,
  * "Trace-justified indexed field addresses: relative zone motion". */
-void func_00136DA0(f32 *position) {
+void fldApplyRelativeZoneMotion(f32 *position) {
     f32 newPosition[3];
     f32 previous[3];
     f32 movement[4];
@@ -6677,7 +6676,7 @@ s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     return found;
 }
 
-s32 func_001384E8(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];

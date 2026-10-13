@@ -39,9 +39,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 #define ITF_TRIANGLE_STRIP_PRIMITIVE_BITS 0x4C
 #define ITF_LINE_STRIP_PRIMITIVE_BITS 0x14A
 #define ITF_LINES_PRIMITIVE_BITS 0x49
-
-
-extern void sdfTexReleaseReference(SdfTex *);
 extern s32 dds3AdminGetActiveMode(void);
 extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);

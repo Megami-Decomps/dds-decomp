@@ -9,6 +9,7 @@
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "sdf.h"
+#include "btl_scene_initializer.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -73,12 +74,6 @@ extern void btlRequestSceneEventResources();
 extern void btlInitializeBossCallbacks();
 
 extern void btlSelectSceneAudioTrack();
-
-typedef struct {
-    void (*initialize)(s32);
-    s32 (*update)(s32);
-    s32 flags;
-} SceneInitializer;
 
 typedef struct BattleEffectParams {
     f32 position[4];

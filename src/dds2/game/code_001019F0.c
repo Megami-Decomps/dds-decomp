@@ -214,7 +214,6 @@ extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
 extern void func_00108318(void);
 extern void func_00126B70(void);
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, KwlnDrawVectorParams *);

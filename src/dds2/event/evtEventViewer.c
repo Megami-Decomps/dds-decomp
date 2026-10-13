@@ -51,7 +51,6 @@ typedef struct EvtGroupRec {
 
 
 void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 void effInitCh71Id(void);
 void effInitCh72Id(void);
@@ -999,7 +998,7 @@ void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3)
 
 s32 evtViewerUpdateFrame(KwlnTask *task);
 
-void func_00101968(s32 arg0, s32 arg1);
+void kwlnTaskAddChild(s32 arg0, s32 arg1);
 
 s32 evtCreateFrameVariableTask(void);
 
@@ -1090,7 +1089,7 @@ extern s32 func_0035B6E0(const char *, ...);
 
 /* Applies duration-scaled alpha to the selected effect for supported track
  * kinds. The key's duration is used directly, without validation here. */
-void func_00247DE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s32 unused3, EvtRuntime *viewer) {
+void evtEventViewerApplyDurationScaledEffectAlpha(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s32 unused3, EvtRuntime *viewer) {
     s32 elapsed;
     struct EffNode *node;
     s32 alpha;
@@ -1443,7 +1442,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
                 (difference > 0 && time >= child->frame &&
                  time < child->frame + difference)) {
                 evtEventViewerApplyTimelineKey(group, child, time, difference, viewer);
-                func_00247DE0(group, child, time, difference, viewer);
+                evtEventViewerApplyDurationScaledEffectAlpha(group, child, time, difference, viewer);
             } else {
                 evtEventViewerFadeEffectSlot(group, child, time, difference, viewer);
             }
@@ -2493,8 +2492,8 @@ extern const char D_004373A8[];
 extern const char D_004373B0[];
 extern u8 D_00438A34;
 extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
-extern void func_001975F8(void *parameters);
-extern void func_00197980(void *parameters);
+extern void effSetLoadDescA(void *parameters);
+extern void effSetLoadDescD(void *parameters);
 extern void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters);
 extern void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters);
 extern void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters);
@@ -2908,7 +2907,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         break;
                     }
                     case 13:
-                        func_001975F8(key->payload);
+                        effSetLoadDescA(key->payload);
                         viewer->blurRectangleEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -2931,7 +2930,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 27:
-                        func_00197980(key->payload);
+                        effSetLoadDescD(key->payload);
                         viewer->framebufferQuadEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -3522,7 +3521,7 @@ s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
 
     viewer = (void *)kwlnTaskGetUserValue(task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
-    func_00101968(task, evtCreateFrameVariableTask());
+    kwlnTaskAddChild(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (s32)(u32)evtViewerUpdateFrame;
 }
@@ -3679,7 +3678,7 @@ void evtEventViewerDestroyActiveAlternate(KwlnTask *task) {
 
 extern void mnuCampInitFontResource(EvtRuntime *viewer);
 
-void func_0024DAE0(EvtRuntime *viewer) {
+void evtEventViewerInitCampFontResource(EvtRuntime *viewer) {
     mnuCampInitFontResource(viewer);
 }
 
@@ -3696,8 +3695,8 @@ void evtViewerCreateTaskWithSky(void) {
     memset(viewer, 0, 0x24BC);
     viewer->resourceHandle = viewerHandle;
     viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    func_00101968((s32)viewerTask, evtCreateSkyTask());
-    func_0024DAE0(viewer);
+    kwlnTaskAddChild((s32)viewerTask, evtCreateSkyTask());
+    evtEventViewerInitCampFontResource(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {

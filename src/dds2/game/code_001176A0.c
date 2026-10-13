@@ -36,7 +36,7 @@ extern void ptyAssignPartyRosterItemsAndMarkOwned(void);
 extern void mdlFlagClear(s32 flag);
 extern void mdlFlagSet(s32 flag);
 extern void sdfSaveResetSnapshot(void);
-extern void func_00118008(void);
+extern void sdfRestoreResetSnapshot(void);
 
 s32 sdfBumpTickCounters(void);
 
@@ -266,7 +266,7 @@ extern SdfMemBlock *D_00438EA4;
 extern SdfMemBlock *D_00438EA8;
 extern u32 D_00438EAC;
 extern s32 mdlFlagTest(s32 flag);
-extern void func_0011D130(void);
+extern void ptySaveActivePartyTemplates(void);
 extern SdfMemBlock *mtrMantraEventBitPush(void);
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
@@ -304,7 +304,7 @@ void sdfSaveResetSnapshot(void) {
     D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileBanks));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E98);
     memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
-    func_0011D130();
+    ptySaveActivePartyTemplates();
     D_00438E9C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E9C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
@@ -322,9 +322,9 @@ extern void mnuMarkEntryBlocked(s32);
 extern void mtrMantraEventBitPop(SdfMemBlock *);
 extern void dds3ForEachFlagged(void);
 extern void ptyClearSelectedSkillFlagsFromActiveEntries(void);
-extern void func_0011D0D8(void);
+extern void ptyClearItemF8FromPartyAndInventory(void);
 
-void func_00118008(void) {
+void sdfRestoreResetSnapshot(void) {
     DatMantraBitmap *mantra;
     DatProfileBank *profiles;
     DatPartyRecord *templates;
@@ -371,7 +371,7 @@ void func_00118008(void) {
     mtrMantraEventBitPop(D_00438EA8);
     dds3ForEachFlagged();
     ptyClearSelectedSkillFlagsFromActiveEntries();
-    func_0011D0D8();
+    ptyClearItemF8FromPartyAndInventory();
     datGameState->world.slotFlags = D_00438EAC;
 }
 
@@ -400,11 +400,11 @@ void sdfResetGameRuntime(s32 fullReset) {
     dds3ForEachEntry();
     ptyAssignPartyRosterItemsAndMarkOwned();
     if (fullReset == 1) {
-        func_00118008();
+        sdfRestoreResetSnapshot();
     }
 }
 
-void func_00118680(void) {
+void evtInitializeWorkScriptTask(void) {
     dds3WorkInit(D_00435E80);
 }
 
@@ -433,7 +433,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     s32 i;
 
     /* Nested helper retains the outer file cursor and reports one 16-byte-aligned segment span. */
-    s32 func_001186F8(void **slot, u32 unused) {
+    s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
         u32 blocks;
         u32 advance;
 
@@ -461,7 +461,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     sdfDevQueueReadAndWait(command, address, size);
     sdfDevWaitThenReleaseCommandState(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
-        address += func_001186F8(table->entries[i].slot, table->entries[i].unused);
+        address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
     sdfReleaseResourceAllocation(block);
     func_0035B6E0(D_00412AB0, table->path);
@@ -474,7 +474,7 @@ void sdfResetChannels(void) {
     for (i = 0; i < 8; i++) {
         sdfReloadChannelSegments(&D_00385A90[i]);
     }
-    func_00118680();
+    evtInitializeWorkScriptTask();
 }
 
 /* Enemy vitals use their base record; party vitals use level growth and bonuses. */
@@ -566,16 +566,16 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     return result;
 }
 
-s32 func_00118C58(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 evtRunCommandContext10(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     return evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
 }
 
-s32 func_00118C80(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 evtRunCommandContext7(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     return evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
 }
 
 s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    return func_00118C80(unitIndex, scriptArg, contextArg, (u8)mode);
+    return evtRunCommandContext7(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 
@@ -599,7 +599,7 @@ f32 sdfGetHpBracketScale(DatPartyRecord *unit) {
     return datBattleParameters->partyHpScale[band];
 }
 
-s32 func_00118D60(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
+s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
     s32 healing;
     s32 damage;
     u16 current;
@@ -660,7 +660,7 @@ s32 func_00118D60(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 
             healing = sdfDispatchCmd(channel, queryArg, (u32)item, vital);
             break;
         case 1:
-            healing = func_00118C58(channel, queryArg, (u32)item, vital);
+            healing = evtRunCommandContext10(channel, queryArg, (u32)item, vital);
             break;
         }
         healing += base;
@@ -726,7 +726,7 @@ s32 func_00118D60(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 
         }
         break;
     case 6:
-        damage = func_00118C80(channel, queryArg, (u32)item, vital) + base;
+        damage = evtRunCommandContext7(channel, queryArg, (u32)item, vital) + base;
         if (damage == 0) {
             damage = 1;
         }
@@ -867,8 +867,8 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 bits;
 
     if (queryArg != 0 && item != NULL) {
-        hpDelta = func_00118D60(channel, queryArg, item, 1, 1);
-        mpDelta = func_00118D60(channel, queryArg, item, 1, 2);
+        hpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 1);
+        mpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 2);
         value = sdfQueryChannelValue(channel, queryArg, item);
         bits = sdfQueryChannelBits(channel, queryArg, item);
         if (hpDelta == 0 && mpDelta == 0 && value == 0 && bits == 0) {

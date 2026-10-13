@@ -4,6 +4,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
 #include "pcp_vu0.h"
@@ -65,7 +66,7 @@ extern SdfPoolNode D_00380248;
 extern s32 sdfAllocPacketAligned(s32);
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
-extern void func_001781F8(EffRecordPool *pool);
+extern void effReleaseRingRecordPool(EffRecordPool *pool);
 extern u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
 
 
@@ -146,7 +147,7 @@ void func_00177098(void) {
 
 /* Release the matrix pool's resources before the ring's backing allocation. */
 void effReleaseRingResources(EffRingWork *ring) {
-    func_001781F8(ring->recordPool);
+    effReleaseRingRecordPool(ring->recordPool);
     sdfReleaseResourceAllocation(ring->allocationHandle);
 }
 
@@ -268,11 +269,9 @@ void effAdvanceVectorRecord(EffRingWork *work, s32 index) {
     part = &work->vertices[index];
     part->angle = part->angle + work->increment;
 }
-
-extern u32 effBlendColor(u32, u32, f32);
 extern void effDrawTransformedRecordPool(EffRecordPool *);
 
-void func_00177408(EffRingWork *work)
+void effUpdateOrbitingRingFan(EffRingWork *work)
 {
     s32 index;
     s32 count;
@@ -701,7 +700,7 @@ EffRecordPool *effAllocateIdentityMatrixWork(u32 fanCount) {
     return pool;
 }
 
-void func_001781F8(EffRecordPool *work) {
+void effReleaseRingRecordPool(EffRecordPool *work) {
     effReleaseRecordGroupAssetAndHandle(work);
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
@@ -27,6 +28,7 @@
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
+#include "sdf.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -180,7 +182,6 @@ extern s32 D_00437D60;
 extern s32 D_00437D5C;
 extern u8 (*D_00437D54)[32];
 extern u8 (*D_00437D58)[32];
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern s32 dds3GetWorldObject(void);
 
 
@@ -247,7 +248,7 @@ extern s32 fileOnAllWritten(void);
 extern void func_001004A0(void);
 extern s8 D_0037F510[];
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-extern void func_00342580(s32 command);
+extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(s32 result);
 
 extern void func_002C92D0(u32 context);
@@ -1510,7 +1511,7 @@ s32 mcdFinishFileDetection(void) {
         D_00437D3C = 0;
         D_00437CF8 = 0;
         if (mcdOriginalTitleFileMode == 0) {
-            func_00342580(0x310000);
+            sndReleaseTrackHandle(0x310000);
         }
         if (D_00439020 == (u32)-1) {
             return fileBeginWait(-1);
@@ -2668,7 +2669,6 @@ void fileResetMenuFlowState(void) {
 extern void *memset(void *dst, s32 value, s32 size);
 
 struct SdfMemBlock;
-struct SdfTex;
 extern void func_001004A0(void);
 extern s32 D_00437D80;
 extern void func_002CE738(void);
@@ -2684,7 +2684,7 @@ void func_002CE208(s32 mode) {
 
     func_001004A0();
     request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
-    func_002C81D0((struct FileRequest *)request);
+    fileWaitForRequestReady((struct FileRequest *)request);
     node = request->packet.queueHead;
     while (node != NULL) {
         switch (index) {
@@ -3256,7 +3256,7 @@ s32 func_002D0498(void) {
 
 s32 fileBeginFadeAndConfirmSound(void) {
     kwlnFadeInStart(0, 0, 0, 8);
-    func_00342580(0x310000);
+    sndReleaseTrackHandle(0x310000);
     return (s32)func_002D0498;
 }
 
@@ -6138,7 +6138,6 @@ INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D7B58);
 struct EffRandState;
 extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRand(struct EffRandState *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern f32 fabsf(f32);
 extern void func_002D7B58(FileSlotTable *, FileSlot *);
 

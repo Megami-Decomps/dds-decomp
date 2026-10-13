@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -9,10 +10,11 @@
 #include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
+#include "sdf_projection.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
-extern void func_0018C820(void *work);
+extern void effBossUpdateGeometry(void *work);
 extern void effBossSetPosition(void *dst, void *src);
 extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
@@ -21,7 +23,6 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 extern u32 func_001695C8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
-extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern u8 D_003B1FF0[];
 
@@ -30,7 +31,6 @@ extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
 extern u32 effMiscRand(void *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 extern f32 D_004334C4;
 extern void effBossInitializeModelGroups(EffBossWork *work);
@@ -169,7 +169,7 @@ void effBossDestroy(EffBossWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_0018C820);
+INCLUDE_ASM(const s32, "effect/effPCPBoss", effBossUpdateGeometry);
 
 void effBossSetPosition(void *dst, void *src)
 {
@@ -466,7 +466,7 @@ void effBossReleaseWorkCallback(void *work) {
 }
 
 void effBossUpdateGeometryCallback(void *work) {
-    func_0018C820(work);
+    effBossUpdateGeometry(work);
 }
 
 void effBossSetPositionCallback(void *work, void *position) {

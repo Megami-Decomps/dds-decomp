@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "ui_color.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "fpu.h"

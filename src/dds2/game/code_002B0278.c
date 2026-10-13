@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu_input.h"
@@ -17,6 +18,7 @@ struct StaffMenuRuntime;
 #include "fpu.h"
 #include "sdf.h"
 #include "itf.h"
+#include "menu_fade_entry.h"
 
 extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
@@ -80,7 +82,6 @@ extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 typedef struct MenuList MenuList;
 typedef struct MenuIconState MenuIconState;
 
-extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern s32 mnuGetRangeEntryFlatValue(s32);
@@ -1300,7 +1301,6 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
-extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(MenuPageWindow *, s32, u32, s32);
 
@@ -4020,13 +4020,6 @@ void mnuFreeListEntries(s32 *list);
 /* Store the active word and window address in the header-selected slot.
  * Preserve the native below-five early return; it is not an upper capacity bound. */
 void mnuAppendFadingWindowEntry(s32 activeValue, s32 windowAddress, s32 *list);
-
-typedef struct MenuFadeEntry {
-    u32 active;
-    u32 pad4[3];
-    void *window;
-    u32 pad14;
-} MenuFadeEntry;
 
 /* Native removal only accepts indices at least five. Propagate the tail
  * record backward to the target, clearing each source's window pointer. */

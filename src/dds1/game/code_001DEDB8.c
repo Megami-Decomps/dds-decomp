@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -146,18 +147,6 @@ extern void btlUnitGetMuzzlePosVU(void *);
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT = 0x2C };
-
-/* Tagged scheduler predicate, embedded for task entry and exit. */
-typedef struct TaskCondition {
-    u8 kind; /* 0 never, 1 always, 2 counter threshold, 3-10 task queries. */
-    u8 pad01[7];
-    union {
-        s32 count;    /* Kind 2: signed threshold for the supplied counter. */
-        u64 handle;   /* Kinds 3-5: task handle. */
-        u64 owner;    /* Kinds 6-8: task owner; queries select its oldest task. */
-        u16 taskKind; /* Kinds 9-10: registered task kind. */
-    } value;
-} TaskCondition;
 
 /* Generic scheduler header; task-specific arguments follow at byte 0x70.
  * next/prev link registration order, independently of the deferred queue. */
@@ -342,7 +331,7 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-extern void func_00160D88(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 extern f32 *D_00324770[];
 
@@ -4911,27 +4900,6 @@ void btlInitializeSceneLightingAndTint(void) {
     *(u32 *)(context + 0x698) = 0x807E5C5E;
 }
 
-typedef struct BtlActionTableEntry {
-    u8 kind;
-    u8 pad01[2];
-    u8 resourceType;
-    u8 pad04[4];
-    f32 lightColorMode;
-    f32 lightColor[3];
-    s32 defaultValue;
-    u16 flags;
-    u8 pad1E[2];
-} BtlActionTableEntry;
-
-typedef struct BtlSceneLightParams {
-    f32 position[3];
-    f32 unk0C;
-    f32 color[3];
-    f32 unk1C;
-    f32 secondaryColor[3];
-    f32 unk2C;
-} BtlSceneLightParams;
-
 void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     u8 *work = (u8 *)btlGetRuntime();
     BtlActionTableEntry *action;
@@ -5794,7 +5762,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
         }
     }
     if (args->effect != NULL && (owner->status.flags & 2)) {
-        func_00160D88(args->effect);
+        effBattleUpdate(args->effect);
     }
     return 0;
 }
@@ -5897,7 +5865,7 @@ s32 sndUpdateActorEffectTask(ActorEffectTaskArgs *args) {
         args->effect->flags &= ~8;
     }
     if (unit->status.flags & 2) {
-        func_00160D88((u8 *)args->effect);
+        effBattleUpdate((u8 *)args->effect);
     }
     args->counter++;
     return 0;
@@ -6145,7 +6113,7 @@ s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
         args->effect->flags &= ~8;
     }
     if (flags & 2) {
-        func_00160D88(args->effect);
+        effBattleUpdate(args->effect);
     }
     args->frameCount++;
     return 0;
@@ -6290,7 +6258,7 @@ s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
 }
 
 s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
-    return func_00160858(effect->resourceHandle, option);
+    return sndGetMixerBankCallbackFrame(effect->resourceHandle, option);
 }
 
 s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
@@ -6558,7 +6526,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         EE_MMI_RGBA_PACK(packed);
         blended[0] = packed;
         link->effectHandle->color = blended[0];
-        func_00160D88((u8 *)link->effectHandle);
+        effBattleUpdate((u8 *)link->effectHandle);
     }
 }
 
@@ -6611,7 +6579,7 @@ void sndLoadSysEffLb(void) {
     s32 node;
     u32 i;
 
-    func_00288C50((struct FileRequest *)archive);
+    fileWaitForRequestReady((struct FileRequest *)archive);
     btlBossDebugPrintf(D_003A5020, path);
     node = *(s32 *)(archive + 0x60);
     i = 0;

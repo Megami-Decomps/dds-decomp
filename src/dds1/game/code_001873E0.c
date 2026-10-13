@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_frame_draw_buffer.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "eff_blur.h"
@@ -71,16 +72,9 @@ void effBlurReleaseSecondResource(EffBlurScaleWork *work) {
     sdfReleaseResourceAllocation(work->allocation);
 }
 
-
-/* Per-frame packet storage; only its leading 0x40-byte DMA packet is copied here. */
-typedef struct {
-    u8 dmaPacket[0x40];
-    u8 pad40[0x1F00];
-} BlurFramePacketRecord;
-
 extern SdfPoolNode D_003253E8;
 extern SdfPoolNode D_003253C8;
-extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern s32 sdfAllocPacketAligned(s32);
 extern u32 kwlnGetDrawBufferIndex(void);
 
@@ -205,7 +199,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
+        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, tag);
         samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;

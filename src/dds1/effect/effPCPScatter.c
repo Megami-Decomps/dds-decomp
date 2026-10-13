@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -6,8 +7,10 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
 #include "eff_pcp_scatter_spin_ribbon.h"
@@ -16,6 +19,7 @@
 #include "fpu.h"
 #include "sdf_texture_file.h"
 
+#include "sdf.h"
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
 /* Keep these spellings distinct: HALF_TURN * 2.0f rounds differently. */
@@ -49,13 +53,9 @@
 
 
 extern void *effParamTableGetBlock(void *data, s32 index);
-
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
@@ -73,7 +73,6 @@ extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resId);
 extern u32 effMiscRand(void *table);
 extern u8 effDefaultRandomState[];
-extern f32 effMiscRandUnitFloat(void *state);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);
@@ -190,7 +189,6 @@ void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
 extern u128 *effPcpScatterGetRecordAddress(PcpScatterPool *, s32);
 extern u32 *effPcpScatterGetAuxRecordAddress(PcpScatterPool *, s32);
 extern void effPcpScatterDrawPool(PcpScatterPool *);
-extern u32 effBlendColor(u32, u32, f32);
 extern f32 sdfAtan2Poly(f32 ratio);
 
 /* Advance radial particles and build each six-vertex strip in the shared pool. */
@@ -1390,7 +1388,6 @@ void effScatterRingUpdate(PcpScatterInstanceA *work, s32 index)
 }
 
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effScatterDrawObject(PcpScatterDraw *object);
 /* Advance delayed particles and submit the ring drawable.
  * Age zero seeds geometry without writing color; expired particles clear color and freeze.

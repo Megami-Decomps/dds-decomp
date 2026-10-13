@@ -96,7 +96,7 @@ s32 filePollEntryCleanup(struct FileRequest *request) {
 }
 
 extern char *sdfStrDup(const char *text);
-extern s32 func_00289540(void);
+extern s32 fileStartOrResumeQueuedJob(void);
 
 /* Duplicate the request name, narrow kind to a byte and append under the
  * semaphore. Start processing only after an empty-to-nonempty transition.
@@ -126,7 +126,7 @@ void fileManQueueNamedRequest(FileQueueEntry *request, s32 kind, const char *req
     SignalSema(work->sema);
 
     if (startsQueue != 0) {
-        func_00289540();
+        fileStartOrResumeQueuedJob();
     }
 }
 
@@ -293,7 +293,7 @@ void fileWaitReady(FileRequest *request) {
 }
 
 /* Forward the opaque request pointer to the readiness wait, without cleanup. */
-void func_00288C50(FileRequest *request) {
+void fileWaitForRequestReady(FileRequest *request) {
     fileWaitReady(request);
 }
 

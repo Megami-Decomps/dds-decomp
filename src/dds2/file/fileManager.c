@@ -90,7 +90,7 @@ s32 filePollEntryCleanup(struct FileRequest *request) {
 }
 
 extern char *sdfStrDup(const char *text);
-extern s32 func_002C8AC0(void);
+extern s32 fileStartOrResumeQueuedJob(void);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
@@ -122,7 +122,7 @@ void fileManQueueNamedRequest(FileQueueEntry *request, s32 kind, const char *req
     SignalSema(work->sema);
 
     if (startsQueue != 0) {
-        func_002C8AC0();
+        fileStartOrResumeQueuedJob();
     }
 }
 
@@ -292,7 +292,7 @@ void fileWaitReady(FileRequest *request) {
 }
 
 /* Forward the opaque request pointer to the readiness wait, without cleanup. */
-void func_002C81D0(FileRequest *request) {
+void fileWaitForRequestReady(FileRequest *request) {
     fileWaitReady(request);
 }
 

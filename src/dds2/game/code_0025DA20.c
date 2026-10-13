@@ -58,7 +58,7 @@
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
 
-extern void func_00101968(KwlnTask *, KwlnTask *);
+extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPreparePopupAndDispatchSelection(KwlnTask *task);
 extern s32 mnuAdvanceCampPopup(KwlnTask *task);
 extern s32 mnuFinishCampPopup(KwlnTask *task);
@@ -102,7 +102,7 @@ extern s32 D_003C99B8[];
 extern void evtViewerCleanupMessageWindow();
 
 
-extern KwlnTask *func_00101820(u32 priority);
+extern KwlnTask *kwlnTaskFindByPriority(u32 priority);
 
 
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
@@ -220,7 +220,7 @@ void mnuCampDestroyTaskById(s32 taskId) {
 void mnuCampDestroyAllTasks(void) {
     KwlnTask *task;
 
-    while (task = func_00101820(CAMP_TASK_PRIORITY), task != NULL) {
+    while (task = kwlnTaskFindByPriority(CAMP_TASK_PRIORITY), task != NULL) {
         kwlnTaskDestroyWithHierarchy(task, 0);
     }
 }
@@ -1654,7 +1654,7 @@ void func_00260708(const s32 *stockGroup) {
         mnuFinishCampPopup, mnuTerminalReleaseContextAndResources, (u32)scene);
     fadeTask = kwlnTaskCreate("shop_fade", 0x2B13, 1, 0,
         mnuTerminalSyncMessageWindowControl, NULL, (u32)scene);
-    func_00101968(drawTask, fadeTask);
+    kwlnTaskAddChild(drawTask, fadeTask);
     mnuPanelTaskCompletionState = 1;
 }
 
@@ -3589,16 +3589,16 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
     return result;
 }
 
-extern void func_00294B40(s32, s32, s32, void *, s32, s32);
+extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, void *, s32, s32);
 extern void func_00294D50(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, void *, s32, s32);
 extern void func_00295030(s32, s32, s32, void *, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
-extern void func_002969D8(s32, s32, s32, void *, s32);
+extern void mnuDrawShopPricePlaceholder(s32, s32, s32, void *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
-extern void func_00296B48(s32, s32, s32, s32, s32, s32);
-extern void func_00296D90(void *, s32);
+extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawShopCurrencyBalance(void *, s32);
 extern void func_00296E98(s32, u32, s32, s32);
 
 /* Draw the active dispatch mode before advancing its callback state. */
@@ -3608,29 +3608,29 @@ s32 func_00264480(KwlnTask *callbackContext) {
     func_0025FD78(state);
     switch (state->dispatchMode) {
     case 1:
-        func_00294B40(0, 0, 0, state, 0x100, 0x53);
+        mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
         func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
-        func_002969D8(0, 0, 0, state, 0x53);
-        func_00296D90(state, 0xA09DC380);
+        mnuDrawShopPricePlaceholder(0, 0, 0, state, 0x53);
+        mnuDrawShopCurrencyBalance(state, 0xA09DC380);
         func_00296E98((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
         if (state->stateTable == (s32)D_003CE498) {
-            func_00294B40(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             func_00294D50(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(
                 0, 0, 0, (u8 *)state->ownedWindows[0]->list, 0x53);
-            func_00296D90(state, 0xA09DC380);
+            mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             func_00296E98((s32)state, 0x100, 4, 0x53);
         } else {
-            func_00294B40(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
             func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
-            func_00296B48(0, 0, 0, (s32)state, 0x100, 0x53);
-            func_00296D90(state, 0xA09DC380);
+            mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)state, 0x100, 0x53);
+            mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             func_00296E98((s32)state, 0x100, 2, 0x53);
         }
         break;

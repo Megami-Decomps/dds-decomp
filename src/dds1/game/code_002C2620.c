@@ -31,7 +31,7 @@ extern char D_003BD250[];
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_0024DD78(void);
 extern u32 evtFinishMessageWindowAndNotify(void);
-extern void func_002E96D8(u32);
+extern void sndReleaseTrackHandle(u32);
 extern s32 fldReleaseLocalMapResources(void);
 extern s64 sdfDestroyActiveCounterRuntime(void);
 extern void fldReleaseMapRequestQueues(void);
@@ -429,7 +429,7 @@ void fldInitializeLmapState(void) {
 }
 
 void fldShutdownLmapResources(void) {
-    func_002E96D8(0x400001);
+    sndReleaseTrackHandle(0x400001);
     fldReleaseLocalMapResources();
     sdfDestroyActiveCounterRuntime();
     fldReleaseMapRequestQueues();

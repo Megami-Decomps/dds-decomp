@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "ui_color.h"
 #include "kwln.h"
 #include "mnu_result.h"
 
@@ -270,7 +271,7 @@ extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 extern u32 mnuInitializeItemSelectionExtent(KwlnTask *task);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void func_002E96D8(u32);
+extern void sndReleaseTrackHandle(u32);
 extern char D_0036D424[];
 extern char D_0036D45C[];
 
@@ -316,7 +317,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
             }
             mnuSetPopupEntry(dispatchStatus, D_0036D45C);
         } else {
-            func_002E96D8(0x50001);
+            sndReleaseTrackHandle(0x50001);
             kwlnFadeInStart(0, 0, 0, 0xF);
             mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
         }
@@ -331,7 +332,6 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern u32 uiBlendColors(u32, u32, s32);
 extern u32 func_001979C8(s32, s32, s32, u32, char *, s32);
 extern void frFontDrawGlyphChain(u32, s32, s32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {

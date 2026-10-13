@@ -9,9 +9,7 @@
 #include "file_request_api.h"
 #include "eff_node_descriptor.h"
 
-struct SdfTex;
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
-
+#include "sdf.h"
 EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
     EffNode *copy = (EffNode *)sdfAllocSizeClassBlock(0x10);
     u32 argument = (u32)source->instance;
@@ -102,7 +100,7 @@ void effInitializeBillResourceOwners(void) {
 
     D_00438EFC = 0;
     archive = (EffBillResourceArchive *)fileQueuePlainDispatchRequest(D_004142B0);
-    func_002C81D0((struct FileRequest *)archive);
+    fileWaitForRequestReady((struct FileRequest *)archive);
     node = archive->nodes;
     if (node != NULL) {
         configTable = (u8 *)D_003AA880;

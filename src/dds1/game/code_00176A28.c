@@ -6,6 +6,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
 
@@ -43,7 +44,6 @@ extern EffResourceRenderState D_003D65E0;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void *memset(void *, s32, u32);
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
 extern f32 D_00354C10[][4];
 extern u32 D_00354CD0[];

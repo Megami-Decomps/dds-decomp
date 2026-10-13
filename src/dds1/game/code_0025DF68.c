@@ -59,7 +59,7 @@ void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
                   0, scale, 0, texture, D_0036C728[0][BRS_ICON_ID], 0x53);
 }
 
-extern void func_00260100(ShopScene *, s32);
+extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
 extern void mnuDrawPulsingMenuIcon(ShopScene *, s32, s32);
 
 /* Fade the shop frame, then its currency and pulsing foreground icon. */
@@ -99,7 +99,7 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
         fraction = 1.0f;
     }
     fraction = 1.0f - fraction;
-    func_00260100(scene, (s32)(fraction * 128.0f) | 0xA09DC300);
+    mnuDrawShopCurrencyBalance(scene, (s32)(fraction * 128.0f) | 0xA09DC300);
     {
         s32 x = D_0036C728[0][BRS_ICON_X] << 4;
         s32 y = D_0036C728[0][BRS_ICON_Y] << 3;
@@ -112,7 +112,7 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
 }
 
 /* Draw the fixed shop frame, then its pulsing icon. */
-void func_0025E308(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
+void mnuDrawShopPanelWithPulsingIcon(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
 
     effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,
@@ -175,7 +175,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC4F0[];
 
 /* Draw the selected item quantity; bullets include matching party slot values. */
-void func_0025E6B0(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mode) {
+void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mode) {
     char text[16];
     struct EffectSlotSet *texture = D_003BC520;
     struct MenuList *list;
@@ -277,7 +277,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
 
 
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
-extern void func_0025F4E0(s32, s32, s32, s32, MenuWindowContainer *, s32);
+extern void mnuDrawListFlagIndicatorsWithFade(s32, s32, s32, s32, MenuWindowContainer *, s32);
 
 
 /* Draw the child and its container only while the child is active. */
@@ -286,7 +286,7 @@ void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuWindowContainer *object, s32 drawA
 
     if (inner->count != 0) {
         mnuDrawListChildrenWithCountdown(x, y, z, inner, drawArg);
-        func_0025F4E0(x, y, z, 0, object, drawArg);
+        mnuDrawListFlagIndicatorsWithFade(x, y, z, 0, object, drawArg);
         object->flags |= 4;
     }
 }
@@ -314,7 +314,7 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, struct MenuList *list
     }
 }
 
-void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object, s32 option) {
+void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object, s32 option) {
     struct MenuList *inner = object->list;
     struct EffectSlotSet *texture = D_003BC520;
     s32 *delay = inner->context;
@@ -344,7 +344,7 @@ void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object,
 }
 
 /* Draw the selected shop row's two markers, its icon and its count text. */
-void func_0025F680(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
+void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_003BC520;
     struct MenuList *list = scene->window->list;
@@ -370,7 +370,7 @@ void func_0025F680(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
     }
 }
 
-void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
+void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
     struct EffectSlotSet *texture = D_003BC520;
@@ -408,7 +408,7 @@ void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 opt
     }
 }
 
-void func_0025FB30(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
+void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
     struct EffectSlotSet *texture = D_003BC520;
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
@@ -423,7 +423,7 @@ void func_0025FB30(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
     }
 }
 
-void func_0025FC38(s32 x, s32 y, s32 z, ShopScene *panel, s32 scale, s32 option) {
+void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, ShopScene *panel, s32 scale, s32 option) {
     struct EffectSlotSet *texture = D_003BC520;
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
@@ -440,7 +440,7 @@ void func_0025FC38(s32 x, s32 y, s32 z, ShopScene *panel, s32 scale, s32 option)
 
 extern char D_003BC508[];
 
-void func_0025FD50(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
+void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_003BC520;
     MenuWindowContainer *object = panel->window;
@@ -481,7 +481,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
-void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
+void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_003BC520;
     MenuWindowContainer *object = panel->window;
@@ -503,7 +503,7 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
 }
 
 
-void func_00260100(ShopScene *state, s32 style) {
+void mnuDrawShopCurrencyBalance(ShopScene *state, s32 style) {
     char text[16];
 
     if (datGameState->header.currency != state->previousValue) {

@@ -45,7 +45,7 @@ extern s32 dds3FindEntryIndex();
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
-extern KwlnTask *func_00101820(u32 priority);
+extern KwlnTask *kwlnTaskFindByPriority(u32 priority);
 
 extern const char *D_003B4CF8[];
 
@@ -53,7 +53,6 @@ extern u32 sndTestMessageResourceIndex;
 
 extern SdfTex *sndTestMessageTexture;
 
-extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern u64 D_004366E8;
 
@@ -69,7 +68,7 @@ extern s32 D_00435DF8;
 
 extern s32 btlGetRuntime(void);
 
-extern void func_00101968(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern s8 D_0037F530[];
 
@@ -155,9 +154,6 @@ extern s32 evtCheckValueThreshold(s32, s32);
 extern void mdlFlagSet(s32);
 
 extern void mdlFlagClear(s32);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern s32 sndUpdateTestMsgTask(KwlnTask *task);
 
 extern SdfPoolNode D_003805A8;
@@ -904,13 +900,13 @@ void btlCreateDrawTasks(void) {
     KwlnTask *draw;
     draw = kwlnTaskCreate(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A9AA8, 0);
     battle->drawTask = draw;
-    func_00101968(draw, kwlnTaskCreate("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
+    kwlnTaskAddChild(draw, kwlnTaskCreate("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     KwlnTask *task;
 
-    task = func_00101820(0x3f9);
+    task = kwlnTaskFindByPriority(0x3f9);
     if (task != 0) {
         BattleController *battle = (BattleController *)btlRuntime;
         kwlnTaskDestroyWithHierarchy(battle->drawTask, 1);
@@ -1829,7 +1825,7 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 
-s32 func_001ABF50(BtlUnit *battler, s32 element) {
+s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride((s32)&battler->partyRecord.flags, element);
 }
 
@@ -3532,7 +3528,7 @@ f32 func_001B0B20(void) {
 }
 
 
-u8 func_001B0B30(BtlUnit *unit, s32 command) {
+u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
     BattleController *controller = (BattleController *)btlGetRuntime();
     s32 result;
     s32 minimum;
@@ -3732,7 +3728,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     i = 0;
     btlCopyIndexList(copy, targets);
     btlClearIndexList(targets);
-    hitCount = func_001B0B30(unit, command);
+    hitCount = btlSelectCommandHitCount(unit, command);
     memset(selected, 0, sizeof(selected));
     while (i < hitCount) {
         index = effMiscRandMod(0, targetCount);

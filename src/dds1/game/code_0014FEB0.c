@@ -7,9 +7,7 @@
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
 
-struct SdfTex;
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
-
+#include "sdf.h"
 extern s32 D_003BD7F4;
 extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);

@@ -13,8 +13,10 @@
 #include "mdl.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -45,15 +47,6 @@ typedef struct BtlActionTask {
     struct BtlActionTask *next; /* 0x16C, same link as BtlTask */
 } BtlActionTask;
 
-/* Native 0x10-byte AI selection scratch. Its producer retains the command
- * actor and species/mode; the conditional-action dispatcher uses +8 as a
- * table row and +0xC as its query selector. This is not the singleton battle work. */
-typedef struct BtlAiScratchWork {
-    BtlActionTask *actor;
-    s32 speciesId;
-    s32 rowIndex;
-    s32 conditionKind;
-} BtlAiScratchWork;
 
 extern BtlAiScratchWork *btlActionScratchWork;
 
@@ -99,15 +92,6 @@ extern void btlSetUnitRotation(BtlUnit *, void *);
 extern void effMiscQuatMultiplyVU(void);
 
 extern const s32 D_003A5D50[];
-
-/* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
-
-typedef struct AiSpecies {
-    u8 pad00[4];
-    AiDecisionRow decisions[3];
-    AiSlot slot[25];
-    u8 pad108[0x54];
-} AiSpecies;
 
 extern AiSpecies *datEnemyAiRecords;
 
@@ -4158,7 +4142,6 @@ extern void func_002DD608(f32);
 
 extern void func_002DD968(f32);
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();

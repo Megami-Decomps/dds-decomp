@@ -12,6 +12,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -82,15 +83,6 @@ typedef struct BtlActionTask {
     struct BtlActionTask *next; /* 0x16C, same link as BtlTask */
 } BtlActionTask;
 
-/* Native 0x10-byte AI selection scratch. Its producer retains the command
- * actor and species/mode; the conditional-action dispatcher uses +8 as a
- * table row and +0xC as its query selector. This is not the singleton battle work. */
-typedef struct BtlAiScratchWork {
-    BtlActionTask *actor;
-    s32 speciesId;
-    s32 rowIndex;
-    s32 conditionKind;
-} BtlAiScratchWork;
 
 extern BtlAiScratchWork *btlActionScratchWork;
 
@@ -101,15 +93,6 @@ extern s8 D_003A5AA8[];
 extern s32 btlGetRuntime(void);
 
 extern void btlBossDebugPrintf(const char *, ...);
-
-/* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
-
-typedef struct AiSpecies {
-    u8 pad00[4];
-    AiDecisionRow decisions[3];
-    AiSlot slot[25];
-    u8 pad108[0x54];
-} AiSpecies;
 
 extern AiSpecies *datEnemyAiRecords;
 
@@ -1003,7 +986,7 @@ s32 btlElementToBitIndex(s32 mask, s32 index) {
     return -1;
 }
 
-extern s32 func_001A2F50(BtlUnit *, s32);
+extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
     s32 i;
@@ -1014,7 +997,7 @@ s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
             if (value == 0x80) {
                 continue;
             }
-            value = func_001A2F50(unit, value);
+            value = btlGetUnitElementAffinity(unit, value);
             if ((u16)value < 100) {
                 continue;
             }
@@ -1024,7 +1007,7 @@ s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
         }
         return 0;
     }
-    value = func_001A2F50(unit, mask);
+    value = btlGetUnitElementAffinity(unit, mask);
     if ((u16)value >= 100) {
         if (value < 0) {
             return 1;
@@ -1381,7 +1364,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
                         if (index == 0x80) {
                             continue;
                         }
-                        value = func_001A2F50(unit, index);
+                        value = btlGetUnitElementAffinity(unit, index);
                         if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0 || (value & 0x20000) ||
                             (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, index) != 0)) {
                             return 1;
@@ -1389,7 +1372,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
                     }
                     return 0;
                 }
-                value = func_001A2F50(unit, action);
+                value = btlGetUnitElementAffinity(unit, action);
                 if (btlHasEnabledSpecialAbilityForSlot(unit, action) != 0 || (value & 0x20000) ||
                     (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, action) != 0)) {
                     return 1;

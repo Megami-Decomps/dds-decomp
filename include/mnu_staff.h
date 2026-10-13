@@ -3,6 +3,10 @@
 
 #include "mnu.h"
 
+/* Classify signed, truncated (amount * 100) / divisor: below 25 returns 2,
+ * below 50 returns 1, otherwise 0. A zero divisor also returns 0. */
+s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
+
 /* Staff-list nodes with unavailable entries carry this lifecycle flag. */
 #define MNU_STAFF_NODE_UNAVAILABLE 1
 

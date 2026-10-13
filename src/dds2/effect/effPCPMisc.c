@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_model.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
@@ -16,6 +17,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "eff_thunder_fragment.h"
@@ -23,6 +25,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
+#include "eff_pcp_map_events.h"
 #include "eff_pcp_block_set.h"
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
@@ -32,7 +35,9 @@
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "bill_object_api.h"
+#include "sdf_projection.h"
 extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -69,7 +74,6 @@ extern u8 D_003B1A88[];
 extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, EffNodeDescriptor *param1);
 
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 extern void func_00336538(f32 scale);
 extern void func_00336818(f32 angle);
@@ -408,11 +412,9 @@ extern void effPcpSpanSetHeadVector(void *dst, void *src);
 
 
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 effDefaultRandomState[];
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 effDefaultRandomState[];
 
@@ -1827,7 +1829,6 @@ void *effAllocateThunderHandleWork(void) {
 }
 
 extern void effThunderCopyVectorOrigin(void *destination, void *source);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 /* Scales the target over the first 22 frames, fades the colour out from frame 45. */
 void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
@@ -2253,7 +2254,6 @@ void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void sdfProjectVuVectorToScreen();
 extern void effResourceRectDrawPixels(EffResourceRectWork *work);
 
 /* Both compact fade renderers interpolate their extent with integer truncation. */
@@ -3122,7 +3122,6 @@ void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 sdfViewUpVector[];
 
 /* vu0 routine: place three staggered groups in the camera-relative basis. */
@@ -3316,7 +3315,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185950);
+INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpBlockSetUpdate);
 
 void effPcpCopyVector60(EffPCPBlockSetWork *work, void *src) {
     PCP_COPY_VECTOR(work->params.position, src);
@@ -3478,7 +3477,7 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
     frame = work->frame;
     do {
         if (work->params.startFrame[i] <= frame) {
-            func_00185950((u32)work->blockSets[i]);
+            effPcpBlockSetUpdate((u32)work->blockSets[i]);
             frame = work->frame;
         }
         i = i + 1;
@@ -4163,7 +4162,6 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
 extern u8 D_003B1F70[];
 extern SdfPoolNode *D_003B1FB8[];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(EffPCPBeamDrawParams *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
@@ -5771,37 +5769,7 @@ void effPcpSetSpawnRangeColor(EffPCPSpawnRangeWork *work, u32 value) {
     work->color = value;
 }
 
-/* One event per model-map position: latch movement, then run its frame interval. */
-typedef struct {
-    f32 initialPosition[4];
-    u8 hasMoved;
-    u8 pad11[3];
-    s32 age;
-    s32 frameLimit;
-    EffEventWork *event;
-} EffPCPMapEventEntry;
 
-/* Serialized model placement and fade parameters (0x1C bytes). */
-typedef struct {
-    f32 position[4];
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 frameStep;
-} EffPCPEventParamHead;
-
-/* The 0x40 owner and its separate entry allocation serve create/clone/release. */
-typedef struct {
-    EffPCPEventParamHead params;
-    EffPCPMapEventEntry *entries;
-    SdfMemBlock *entriesHandle;
-    SoundMixer *owner;
-    EffParamWork *modelResource;
-    f32 scale;
-    s32 frame;
-    s32 frameLimit;
-    u32 count;
-    u32 color;
-} EffPCPMapEventWork;
 
 void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;

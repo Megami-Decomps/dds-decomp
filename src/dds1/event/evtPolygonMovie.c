@@ -12,6 +12,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "dds3obj.h"
+#include "itf.h"
 
 /* Global event state behind kwlnTaskGetUserValue; the polygon-movie word at 0x0 and
  * the pointer to the shared flag word at 0x8. */
@@ -785,7 +786,6 @@ SdfMemBlock *evtPolygonMovieCreateHeader(void **out)
 #include "file_request_api.h"
 #include "kwln_task_lifecycle.h"
 
-extern SdfTex *itfLoadTextureFromAsset(const char *);
 
 
 
@@ -879,7 +879,7 @@ extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
 extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
-extern void func_00232D48(EvtRuntime *viewer);
+extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */
 
 /* Create the event viewer task `taskId` for event `event`/scene `id` and request its movie files. */
@@ -915,7 +915,7 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     task = kwlnTaskCreate(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, evtEventViewerDestroyActiveAlternate, (u32)viewer);
     viewer->windowContext = work;
     work->task = task;
-    func_00232D48(viewer);
+    evtEventViewerInitCampFontResource(viewer);
     return task;
 }
 

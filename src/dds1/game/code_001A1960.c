@@ -24,18 +24,6 @@
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-typedef struct SceneSlot {
-    u8 a;
-    u8 b;
-    u8 id;
-} SceneSlot;
-
-typedef struct SceneFadingRecord {
-    SceneSlot slot;
-    u8 alpha;
-    s32 target;
-} SceneFadingRecord;
-
 typedef struct BattleController {
     u8 pad_000[0x1F4];
     u32 flags;
@@ -65,12 +53,12 @@ typedef struct BattleController {
     s32 experienceEarned; /* 0x2C8 */
     s32 epEarned; /* 0x2CC */
     u8 pad2D0[4];
-    SceneSlot slots[8];
+    BtlSceneSlot slots[8];
     BtlTask *groupPrimary[20];
     BtlTask *groupSecondary[45];
     BtlTask *groupTertiary[15];
     u8 pad_42C[0x20];
-    SceneFadingRecord fadingRecords[8]; /* 0x44C */
+    BtlSceneFadingRecord fadingRecords[8]; /* 0x44C */
     u8 pad_48C[0x18];
     EffectSlotSet *resA; /* 0x4A4 */
     EffectSlotSet *resB;
@@ -525,7 +513,7 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index) {
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
 
-s32 func_001A2F50(BtlUnit *battler, s32 element) {
+s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride((s32)&battler->partyRecord, element);
 }
 
@@ -1823,7 +1811,7 @@ f32 func_001A6958(void) {
 
 
 
-u8 func_001A6968(BtlUnit *unit, s32 command) {
+u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
     BtlState *context = (BtlState *)btlGetRuntime();
     s32 result;
     s32 minimum;
@@ -2041,7 +2029,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     i = 0;
     btlCopyIndexList(copy, targets);
     btlClearIndexList(targets);
-    hitCount = func_001A6968(unit, command);
+    hitCount = btlSelectCommandHitCount(unit, command);
     memset(selected, 0, sizeof(selected));
     while (i < hitCount) {
         index = effMiscRandMod(0, targetCount);

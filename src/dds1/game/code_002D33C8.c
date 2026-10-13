@@ -26,6 +26,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "sdf_model.h"
 
 /* DMAC tag IDs occupy the high nibble of the header byte at offset three. */
 #define SDF_DMA_TAG_NEXT_BYTE 0x20
@@ -101,7 +102,7 @@ extern s32 sdfPacketCursor;
 extern s32 sdfPacketBufferEnd;
 
 extern u64 sdfGraphHasPendingWork(void);
-extern s32 func_00312C08(void);
+extern s32 DIntr(void);
 
 extern s32 sdfPendingQueueSemaphore;
 extern s32 sdfCreateSemaphore(u32, u32, u32);
@@ -507,7 +508,7 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
     s64 interruptState;
     u64 pendingWork;
 
-    interruptState = func_00312C08();
+    interruptState = DIntr();
     pendingWork = sdfGraphHasPendingWork();
     if (interruptState != 0) {
         EIntr();
@@ -1088,7 +1089,7 @@ void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
     while (sdfPacketSlotIndex != 0) {
     }
     D_003BD334 = sdfGetElapsedTimerTicks(start);
-    interrupts = func_00312C08();
+    interrupts = DIntr();
     index = D_003BD338 + 1;
     if (index == 3) {
         index = 0;

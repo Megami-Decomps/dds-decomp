@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_light_params.h"
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "btl_task_condition.h"
@@ -15,6 +16,7 @@
 #include "sdf_resource.h"
 #include "mdl.h"
 #include "active_sound_node.h"
+#include "btl_scene_initializer.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
@@ -26,7 +28,7 @@ extern void btlDispatchStateHandler(void *obj, s32 kind);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
-extern void func_00101968(s32, s32);
+extern void kwlnTaskAddChild(s32, s32);
 extern s32 btlGetTrackedTaskHandle(s32);
 extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 btlHasRegisteredGuidePanelTask(void);
@@ -57,13 +59,6 @@ extern s32 btlRollSurpriseAttack();
 extern void btlRequestSceneEventResources();
 extern void btlInitializeBossCallbacks();
 extern void btlSelectSceneAudioTrack();
-
-typedef struct {
-    void (*initialize)(s32);
-    s32 (*update)(s32);
-    s32 flags;
-} SceneInitializer;
-
 
 typedef struct SceneControl {
     u8 mode;
@@ -266,18 +261,6 @@ typedef struct BtlUnit BtlUnit;
 /* Action-sequence +0x20 is the SDK BattleIndexWork payload. Its parent
  * allocation is 0x180 bytes, distinct from the world-actor BtlUnit. */
 extern void btlAdvanceHistoryCounter(ActionStateLink *);
-
-
-/* Metadata records reached through the battle table pointers. */
-typedef struct BtlActionTableEntry {
-    u8 kind;               /* 0x00 */
-    u8 pad01[2];
-    u8 resourceType;       /* 0x03 */
-    u8 pad04[0x14];
-    s32 defaultValue;      /* 0x18 */
-    u16 flags;             /* 0x1C */
-    u8 pad1E[2];
-} BtlActionTableEntry;
 
 
 typedef struct BtlStateHandler {
@@ -644,8 +627,6 @@ extern s32 btlCreateUnitExitFadeTask(s32 owner, s32 option);
 extern void btlDebugPrintf(s32 tag, ...);
 
 extern void fldCreateSceneSpriteTask(s32 sourceTask);
-
-extern void fldAppendTaskToGroup(ActionStateLink *task);
 
 extern void fldUpdateSceneGroupTask(ActionStateLink *task);
 
@@ -2020,11 +2001,6 @@ INCLUDE_ASM(const s32, "game/code_001D4438", func_001D7230);
 void btlEnterLinkageActionState(void) {
 }
 
-typedef struct BtlSceneLightParams {
-    f32 position[3]; f32 unk0C;
-    f32 color[3]; f32 unk1C;
-    f32 secondaryColor[3]; f32 unk2C;
-} BtlSceneLightParams;
 extern char D_00417398[];
 extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
