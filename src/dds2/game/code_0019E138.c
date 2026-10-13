@@ -999,7 +999,7 @@ FrFontGlyph *itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex
     return 0;
 }
 
-u32 func_001A0038(void) {
+u32 itfReturnZero(void) {
     return 0;
 }
 
