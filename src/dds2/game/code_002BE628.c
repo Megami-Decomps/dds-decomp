@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "evt_stage_model_scale.h"
 #include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -2930,7 +2931,9 @@ f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
     f32 scaleVector[4];
 
     if (useTable != 0) {
-        scale = *(f32 *)(D_00435DF0 + evtStageTestState.queue.slot[0].modelId * EVT_STAGE_MODEL_RECORD_BYTES + 0x10);
+        scale = ((EvtStageModelScalePrefix *)((u8 *)D_00435DF0 +
+                                              evtStageTestState.queue.slot[0].modelId * EVT_STAGE_MODEL_RECORD_BYTES))
+                    ->scaleFactor;
     }
     scaleVector[0] = scale;
     scaleVector[1] = scale;
