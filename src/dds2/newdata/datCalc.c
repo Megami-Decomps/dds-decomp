@@ -1584,7 +1584,7 @@ void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
     }
 }
 
-void func_0011D0D8(void) {
+void ptyClearItemF8FromPartyAndInventory(void) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
@@ -1600,8 +1600,8 @@ void func_0011D0D8(void) {
 }
 
 /* Save occupied active entries to stock; clear the absent special-character slots. */
-extern void func_0011D130(void);
-void func_0011D130(void) {
+extern void ptySaveActivePartyTemplates(void);
+void ptySaveActivePartyTemplates(void) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {

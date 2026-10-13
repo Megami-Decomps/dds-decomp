@@ -536,6 +536,8 @@
 0x0011C6A8	ptyUnitMatchesAffinityRequirement	inferred	Tests whether a party unit satisfies one encoded affinity participant requirement by skill, effect stat, unit id, or skill-set membership; paired DDS1 implementation at 0x0011B158.
 0x0011C868	ptyMatchAffinityPermutation	inferred	confidence=high; matched-C; src/dds2/game/code_0011A118.c:443:func_0011C868; Counts required affinity slots, checks the six gameplay actor orders, and succeeds when the occupied actors match all requirements; no compiler-order search is performed.; source=names_P5.tsv:5 [names_qp11.tsv]
 0x0011D050	ptyClearSelectedSkillFlagsFromActiveEntries	inferred	Clears a selected skill-flag group from every active party entry. [names_reviewed16.tsv]
+0x0011D0D8	ptyClearItemF8FromPartyAndInventory	inferred	After reset-snapshot restoration, clears item ID 0xF8 from each occupied party entry and clears its inventory count.
+0x0011D130	ptySaveActivePartyTemplates	inferred	Copies each occupied active party entry to its roster-indexed template and clears templates for absent special roster IDs 3 and 7; called while saving a reset snapshot.
 0x0011D2D8	evtClearRandomStatusFlags	inferred	RNG-gated clearing of status mask 0x5D0 on qualified occupied roster entries.
 0x0011D360	ptyGetCombinedRecordAndSlotValue	inferred	Adds the indexed record value and selected slot bonus value. [names_reviewed16.tsv]
 0x0011D3B8	ptyAddClampedEntryValue	inferred	Adds an amount to the selected entry byte and clamps it to the zero-to-99 range. [names_reviewed16.tsv]
