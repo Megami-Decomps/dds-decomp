@@ -154,8 +154,6 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
 extern BattleSoundArchiveEntry D_0035F748[BTL_SOUND_ENTRY_COUNT];
 
-extern void btlUnitGetMuzzlePosVU(void *);
-
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT = 0x2C };
 
@@ -294,10 +292,6 @@ typedef struct BattleVoiceEntry {
 } BattleVoiceEntry;
 
 #define CURSOR (&D_0035F100)
-
-extern void sndFreeResourceNode(SoundResourceNode *);
-
-extern void sndFreeListNode(ActiveSoundNode *);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern void *btlAllocTask(s32);
@@ -687,7 +681,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         span = func_001F66D8(flags & 0x600, 0, 0) * 1.25f;
         VU0_STORE_VF(vf10, from->position);
         if (btlSampleActorModelPositionVU(unit, 1) == 0) {
-            btlUnitGetMuzzlePosVU((u8 *)unit);
+            btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF(vf10, to->position);
         VU0_LOAD_VF(vf11, from->position);

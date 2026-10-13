@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_packet_list.h"
+#include "sdf_draw_packet_groups.h"
 #include "kwln_sprite.h"
 #include "dds3Admin.h"
 #include "sdf_linked_packet.h"
@@ -386,7 +387,6 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
 }
 
 
-extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void kwlnDrawBlurErrorCounters(void);
@@ -415,7 +415,7 @@ extern s8 D_003BD330;
  * vignette, then flush pools. The skip bit suppresses one packet-slot publication. */
 s32 kwlnRenderFrame(KwlnTask *task) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
-    u8 *groupHeads;
+    SdfPoolNode **groupHeads;
     u8 *packetGroups;
     SdfListHead *packetList;
     u64 *texturePacket;
@@ -432,11 +432,11 @@ s32 kwlnRenderFrame(KwlnTask *task) {
     kwlnFadeUpdate();
     kwlnQueueBackgroundFadeOverlayPacket();
     kwlnAdvanceDrawFadesAndTransitions();
-    groupHeads = D_00325788;
+    groupHeads = (SdfPoolNode **)D_00325788;
     packetGroups = D_003258B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
     for (i = KWLN_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
         sdfSubmitDrawPacketGroups(groupHeads, packetGroups);
-        groupHeads += KWLN_FRAME_GROUP_HEAD_BYTES;
+        groupHeads += KWLN_FRAME_GROUP_HEAD_BYTES / sizeof(*groupHeads);
         packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
     if (kwlnDrawOverlayEnabled != 0 && func_0011E278() == 0) {

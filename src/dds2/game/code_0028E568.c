@@ -42,7 +42,7 @@ extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
 struct MantraPanelPool;
 struct MantraPanelAnimation;
-extern u32 func_002890A8(struct MnuStatusResource *);
+extern u32 mnuGetSelectedMantraUnitIndex(struct MnuStatusResource *);
 extern struct MantraPanelAnimation *mnuSpawnPanelSlotA(struct MantraPanelPool *, s32, s8, s16, s16, u32);
 extern void mnuOffsetPanelAndSetVisualParams(struct MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
 extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
@@ -56,7 +56,7 @@ void mnuActivateMantraNode(MnuStatusResource *menu, u16 nodeId) {
     struct MantraPanelAnimation *panel;
 
     mnuGetMantraNodePositionRecord((s16)nodeId);
-    selected = func_002890A8(menu);
+    selected = mnuGetSelectedMantraUnitIndex(menu);
     slot = menu->menu.slots[selected];
     entry = slot->flags + nodeId;
     *entry = (*entry & 0xFFF0) | 1;
@@ -311,7 +311,7 @@ void mnuSelectMantraLimitLine(MnuStatusResource *object, u16 id) {
 
 
 
-extern u32 func_002890A8(struct MnuStatusResource *);
+extern u32 mnuGetSelectedMantraUnitIndex(struct MnuStatusResource *);
 
 extern void mnuQueueMantraLimitLineFlags(struct MantraDrawPool *pool, u32 flags);
 
@@ -324,7 +324,7 @@ void func_0028F8A8(MnuStatusResource *object) {
         0x15, 0x44, 0x64, 0x07, 0x5C, 0x0E
     };
     MnuStatusResource *menu = object;
-    u32 selected = func_002890A8(object);
+    u32 selected = mnuGetSelectedMantraUnitIndex(object);
     MantraFlagResource *slot = menu->menu.slots[selected];
     u32 flags = 0;
     s32 i;

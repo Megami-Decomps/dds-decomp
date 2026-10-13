@@ -12,7 +12,7 @@ void func_00341CA8(void) {
     sndQueueCommandPacket(0x1a0, 0, 0, 0);
 }
 
-void func_00341CD0(void) {
+void sndQueueNoPayloadCommand210(void) {
     sndQueueCommandPacket(0x210, 0, 0, 0);
 }
 

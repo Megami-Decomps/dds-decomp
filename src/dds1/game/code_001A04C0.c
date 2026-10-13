@@ -14,6 +14,7 @@
 #include "itf_mes_resource.h"
 #include "sdf_sif_command.h"
 #include "mdl_flag_api.h"
+#include "btl_enc_bg_entry.h"
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {
@@ -672,19 +673,6 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
 }
 
 
-typedef struct EncBgEntry {
-    s32 unk00;
-    s16 unk04;
-    s16 unk06;
-    s16 unk08;
-    s16 unk0A;
-} EncBgEntry;
-
-typedef struct EncBgRow {
-    s32 mapIdBase;
-    EncBgEntry entries[64];
-} EncBgRow;
-
 extern EncBgRow *D_003BAA44;
 
 extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
@@ -701,17 +689,17 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
             continue;
         }
         *outCode = D_003BAA44[i].mapIdBase + 0xC8;
-        if (D_003BAA44[i].entries[buffer[1]].unk08 != -1 &&
-            mdlFlagTest(D_003BAA44[i].entries[buffer[1]].unk08) != 0) {
-            *outParameter = D_003BAA44[i].entries[buffer[1]].unk0A;
+        if (D_003BAA44[i].entries[buffer[1]].flagB != -1 &&
+            mdlFlagTest(D_003BAA44[i].entries[buffer[1]].flagB) != 0) {
+            *outParameter = D_003BAA44[i].entries[buffer[1]].parameterB;
             return 1;
         }
-        if (D_003BAA44[i].entries[buffer[1]].unk04 != -1 &&
-            mdlFlagTest(D_003BAA44[i].entries[buffer[1]].unk04) != 0) {
-            *outParameter = D_003BAA44[i].entries[buffer[1]].unk06;
+        if (D_003BAA44[i].entries[buffer[1]].flagA != -1 &&
+            mdlFlagTest(D_003BAA44[i].entries[buffer[1]].flagA) != 0) {
+            *outParameter = D_003BAA44[i].entries[buffer[1]].parameterA;
             return 1;
         }
-        *outParameter = D_003BAA44[i].entries[buffer[1]].unk00;
+        *outParameter = D_003BAA44[i].entries[buffer[1]].fallbackParameter;
         return 1;
     }
     return 0;

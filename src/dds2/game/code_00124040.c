@@ -54,9 +54,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 
 
 
-extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
-
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+#include "dds3_object_payload.h"
 
 extern u32 D_00435F60;
 
@@ -339,11 +337,7 @@ extern FldEncEntry *fldEncounterRollTable;
 
 /* Mode 14 copies this eight-byte request. The packed selection contains
  * group:8, entry:8, and scene:16; its consumer reads both words as signed. */
-typedef struct FieldEncounterRequest {
-    s32 tableIndex;
-    s32 encounterSelection;
-} FieldEncounterRequest;
-typedef char FieldEncounterRequest_size_check[(sizeof(FieldEncounterRequest) == 8) ? 1 : -1];
+#include "fld_encounter_request.h"
 extern FieldEncounterRequest D_00435F98;
 
 extern void fldResetEventSceneState(void);

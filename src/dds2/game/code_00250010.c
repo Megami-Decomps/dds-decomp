@@ -1521,7 +1521,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 
-extern EffWorldNode *dds3GetWorldObject();
+#include "dds3_world_selection.h"
 extern char D_004374D8[]; /* " %s" */
 
 void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
@@ -1541,7 +1541,7 @@ void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRu
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)dds3GetWorldObject()->data)->slots[i].head; node != NULL; node = node->next) {
+            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[i].head; node != NULL; node = node->next) {
                 if (((char *)node->value) != NULL) {
                     count++;
                     if (count == index) {
@@ -1564,7 +1564,7 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)dds3GetWorldObject()->data)->slots[i].head;
+            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[i].head;
                  node != NULL; node = node->next) {
                 if (node->value != NULL) {
                     count++;
@@ -2559,10 +2559,10 @@ extern char D_004375D0[];
 extern u8 D_00438A34;
 extern f32 D_00438A48;
 extern f32 D_00438A4C;
-extern void func_0023E320(s32 vectorSlot, f32 x, f32 y);
+extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
-s32 evtEditPositionOverlaySettings(s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
     SdfListHead *list;
     EvtRuntimeGroup *group;
     const EvtFloatPanelRow *row;
@@ -2708,15 +2708,15 @@ s32 evtEditPositionOverlaySettings(s32 x, s32 y, EvtRuntime *runtime) {
 
             D_00438A48 = currentX;
             D_00438A4C = currentY;
-            func_0023E320(group->setterId, currentX, currentY);
+            evtSetSlotVector(group->setterId, currentX, currentY);
             break;
         }
         case 2:
-            func_0023E320(group->setterId, runtime->floatEditX,
+            evtSetSlotVector(group->setterId, runtime->floatEditX,
                           runtime->floatEditY);
             break;
         case 3:
-            func_0023E320(group->setterId, runtime->floatEditX,
+            evtSetSlotVector(group->setterId, runtime->floatEditX,
                           runtime->floatEditY);
             break;
         }
@@ -2731,15 +2731,15 @@ s32 evtEditPositionOverlaySettings(s32 x, s32 y, EvtRuntime *runtime) {
 
                 D_00438A48 = savedX;
                 D_00438A4C = savedY;
-                func_0023E320(group->setterId, savedX, savedY);
+                evtSetSlotVector(group->setterId, savedX, savedY);
                 break;
             }
             case 2:
-                func_0023E320(group->setterId, runtime->savedFloatEditX,
+                evtSetSlotVector(group->setterId, runtime->savedFloatEditX,
                               runtime->savedFloatEditY);
                 break;
             case 3:
-                func_0023E320(group->setterId, runtime->savedFloatEditX,
+                evtSetSlotVector(group->setterId, runtime->savedFloatEditX,
                               runtime->savedFloatEditY);
                 break;
             }

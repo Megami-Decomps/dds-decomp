@@ -55,7 +55,7 @@ extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, 
 
 extern f32 D_00415F80[4];
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern u32 D_004367F8;
 
@@ -359,7 +359,104 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", btlHasRequiredCommandAffinityPartners);
+extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
+
+s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 result;
+    u32 availableSlots;
+    u32 requiredCount;
+    u32 i;
+    s32 *requirement;
+    ActionStateLink *entry;
+    BtlUnit *partner;
+    u32 flags;
+
+    if (datCommandSelectors[command].kind != 1) {
+        return 0;
+    }
+    if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
+        return 0;
+    }
+    availableSlots = fldCountSceneSlots();
+    if (availableSlots < (u32)btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
+        return 0;
+    }
+    requiredCount = 0;
+    requirement = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
+    for (i = 0; i < 3; i++) {
+        if (*requirement++ != -1) {
+            requiredCount++;
+        }
+    }
+    if (requiredCount < 2) {
+        return 0;
+    }
+    if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) &&
+        !(datBattleSceneRecords[battle->battleMode].flags & 1)) {
+        result = btlFindCommandPartnersByAffinity(unit, command, NULL, NULL);
+    } else {
+        if (requiredCount == 3) {
+            i = 1;
+            do {
+                u32 loopFlags;
+
+                entry = (ActionStateLink *)fldGetSceneGroupEntry(i++);
+                if (entry == NULL) {
+                    return 0;
+                }
+                partner = entry->unit;
+                loopFlags = partner->status.flags;
+                {
+                    u32 inactiveFlags = loopFlags & 0xE0;
+                    loopFlags &= 0x400;
+                    if (!loopFlags) {
+                        return 0;
+                    }
+                    if (inactiveFlags) {
+                        return 0;
+                    }
+                }
+                result = partner->partyRecord.status & 0x2A0E;
+                if (result) {
+                    result = 0;
+                    break;
+                }
+                if (i >= requiredCount) {
+                    result = 1;
+                    break;
+                }
+            } while (1);
+            return result;
+        }
+        if (requiredCount == 2) {
+            entry = (ActionStateLink *)fldGetSceneGroupEntry(2);
+            if (entry == NULL ||
+                (entry->unit->partyRecord.status & 0x2A0E) != 0 ||
+                (btlUnitStatusPair(entry->unit) & 0x4E0) != 0x400) {
+                entry = (ActionStateLink *)fldGetSceneGroupEntry(1);
+                if (entry == NULL) {
+                    return 0;
+                }
+                partner = entry->unit;
+                flags = partner->status.flags;
+                if ((flags & 0x400) == 0) {
+                    return 0;
+                }
+                if (flags & 0xE0) {
+                    return 0;
+                }
+                if (partner->partyRecord.status & 0x2A0E) {
+                    return 0;
+                }
+            }
+        } else {
+            return 0;
+        }
+        result = 1;
+    }
+    return result;
+}
 
 s32 btlHasAdjacentActorRecordStatus(BtlUnit *object) {
     u8 *status = datEnemyRecords[object->partyRecord.unitId].unk3E;
@@ -436,7 +533,7 @@ s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
                 continue;
             }
         }
-        if (func_001ABB10((BtlUnit *)actorAddress, value) != 0) {
+        if (btlGetCommandUseError((BtlUnit *)actorAddress, value) != 0) {
             continue;
         }
         if (choices != NULL) {
@@ -6897,7 +6994,7 @@ typedef struct SceneCheckArgs {
     BtlUnit *second;
 } SceneCheckArgs;
 
-extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlCheckCommandVitalCost(BtlUnit *, s32);
 
@@ -6907,9 +7004,9 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
     s32 base;
     s32 resultA = 0;
     s32 resultB = 0;
-    base = func_001ABDE8(self, self, args->first, args->second, args->mode);
+    base = btlGetPartnerCommandUseError(self, self, args->first, args->second, args->mode);
     if (args->first != 0) {
-        resultA = func_001ABDE8(args->first, args->first, self, args->second, args->mode);
+        resultA = btlGetPartnerCommandUseError(args->first, args->first, self, args->second, args->mode);
         if (resultA == 6 && base == 0) {
             if (btlCheckCommandVitalCost(args->first, args->mode) == 0) {
                 resultA = 0;
@@ -6917,7 +7014,7 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
         }
     }
     if (args->second != 0) {
-        resultB = func_001ABDE8(args->second, args->second, self, args->first, args->mode);
+        resultB = btlGetPartnerCommandUseError(args->second, args->second, self, args->first, args->mode);
         if (resultB == 6 && base == 0) {
             if (btlCheckCommandVitalCost(args->second, args->mode) == 0) {
                 resultB = 0;

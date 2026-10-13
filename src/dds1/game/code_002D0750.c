@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
+#include "sdf_named_resource_request_api.h"
 #include "sif_rpc_client_prefix.h"
 
 #define SDF_HEAP_BLOCK_FREE 0
@@ -245,7 +246,7 @@ extern s32 func_002F4FD8(void *, s32, s32, void *, s32, void *, s32, s32, s32);
 extern SifRpcClientDataPrefix D_003E2770;
 
 /* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
-s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSize) {
+s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data, s32 *outSize) {
     u8 replyScratch[0x50];
     s32 nameLength = strlen(name);
     s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;

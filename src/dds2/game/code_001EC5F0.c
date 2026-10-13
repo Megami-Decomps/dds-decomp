@@ -67,7 +67,7 @@ extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
 extern s64 mnuGetSoundBufferStateLocked(void);
 
-extern void func_00336538(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 
 extern void func_003364B8(f32);
 
@@ -218,7 +218,6 @@ extern f32 *D_0037F770[];
 
 struct FileQueue;
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
@@ -292,10 +291,6 @@ extern void func_002034A8(struct SoundResourceLink *);
 extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
 extern void *memset(void *, s32, u32);
-
-extern void sndFreeResourceNode(struct SoundResourceNode *);
-
-extern void sndFreeListNode(struct ActiveSoundNode *);
 
 extern f32 btlUnitGetTopY(BtlUnit *);
 
@@ -519,9 +514,9 @@ void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *command, BtlCamState *
     btlBuildBattleUnitFramingCameraPose(command, pose, 20.0f);
     btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
-        func_00336538(-(20.0f * 0.017453293f));
+        sdfVuLoadRotationMatrixY(-(20.0f * 0.017453293f));
     } else {
-        func_00336538(20.0f * 0.017453293f);
+        sdfVuLoadRotationMatrixY(20.0f * 0.017453293f);
     }
     VU0_STORE_VF(vf10, pose->direction);
     VU0_ROTATE_VEC(vf10, vf10);
@@ -1354,7 +1349,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     if (action->flags & 0x200) {
         angle = -angle;
     }
-    func_00336538(angle);
+    sdfVuLoadRotationMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -1467,7 +1462,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         if (!(action->flags & 0x200)) {
             angle = -0.34906585f;
         }
-        func_00336538(angle);
+        sdfVuLoadRotationMatrixY(angle);
         VU0_LOAD_VF(vf10, dir);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, out->direction);
@@ -1897,9 +1892,9 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     }
     if (mode == 0) {
         if (action->camera.direction[0] > 0.0f) {
-            func_00336538(27.5f * 0.017453293f);
+            sdfVuLoadRotationMatrixY(27.5f * 0.017453293f);
         } else {
-            func_00336538(-(27.5f * 0.017453293f));
+            sdfVuLoadRotationMatrixY(-(27.5f * 0.017453293f));
         }
     }
 
@@ -2020,7 +2015,7 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
     from->distance = length + selected->unkC0 * selected->scale * 3.5f /
                               func_00353228(fov * 0.5f);
     btlCopyMotionTransform(to, from);
-    func_00336538(-(45.0f * 0.017453293f));
+    sdfVuLoadRotationMatrixY(-(45.0f * 0.017453293f));
     VU0_LOAD_VF(vf10, to->direction);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
@@ -2231,7 +2226,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     if (action->flags & 0x200) {
         angle = -angle;
     }
-    func_00336538(angle);
+    sdfVuLoadRotationMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -2478,9 +2473,9 @@ void btlAdvanceActorCameraPreset(BtlLinkedCommand *action) {
         btlBuildApproachCamera(action, &action->camera);
 
         if (selectedMode != 0) {
-            func_00336538((1.0f - action->progress) * 0.27925268f);
+            sdfVuLoadRotationMatrixY((1.0f - action->progress) * 0.27925268f);
         } else {
-            func_00336538((1.0f - action->progress) * -0.27925268f);
+            sdfVuLoadRotationMatrixY((1.0f - action->progress) * -0.27925268f);
         }
         VU0_LOAD_VF(vf10, action->camera.direction);
         VU0_APPLY_MATRIX(vf10, vf10);
@@ -3175,7 +3170,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
                     if (command->flags & 0x200) value[1] = -value[1];
-                    func_00336538(value[1]);
+                    sdfVuLoadRotationMatrixY(value[1]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -3187,7 +3182,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     break;
                 case 2:
                     if (command->flags & 0x200) value[1] = -value[1];
-                    func_00336538(value[1]);
+                    sdfVuLoadRotationMatrixY(value[1]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -5637,7 +5632,7 @@ void btlAdvanceTitleState(void) {
 
 void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
-    func_00341CD0();
+    sndQueueNoPayloadCommand210();
     func_00341CA8();
 }
 

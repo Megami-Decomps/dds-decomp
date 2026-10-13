@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "mdl_motion_api.h"
@@ -229,7 +230,6 @@ extern s32 sdfNamedChunkFindId(SdfModel *, const char *);
 
 extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
 
@@ -427,12 +427,12 @@ extern s32 btlFindCommandPartnersByAffinity(BtlUnit *, s32, BtlUnit **, BtlUnit 
 
 extern s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
-extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
 
 /* Whether unit can start combo command cmd with two partners, none of which may be
- * blocked by action mask 0x10 or by func_001ABDE8 against the other two. */
+ * blocked by action mask 0x10 or by btlGetPartnerCommandUseError against the other two. */
 s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
     BtlUnit *members[3];
     BtlState *state;
@@ -463,7 +463,7 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
                 }
                 for (i = 0; i < 3; i++) {
                     if (members[i % 3] != NULL &&
-                        func_001ABDE8(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                        btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
                         return 0;
                     }
                 }
@@ -478,7 +478,7 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
             }
             for (i = 0; i < 3; i++) {
                 if (members[i % 3] != NULL &&
-                    func_001ABDE8(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                    btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
                     return 0;
                 }
             }
@@ -1157,7 +1157,7 @@ extern f32 func_00353140(f32);
 
 extern f32 func_00353228(f32);
 
-extern void func_00336538(f32);
+extern void sdfVuLoadRotationMatrixY(f32);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
@@ -1204,7 +1204,7 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     if (command->flags & 0x200) {
         angle = -angle;
     }
-    func_00336538(angle);
+    sdfVuLoadRotationMatrixY(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -2358,7 +2358,7 @@ extern char D_0041A378[]; /* "md_01all_02" */
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+#include "dds3_object_payload.h"
 
 /* Before marking a gate enemy, notify md_01all_02 with payload word 1; always allow. */
 s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
@@ -3340,7 +3340,7 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     command->camera.direction[0] = 1.0f;
     btlBuildBattleUnitFramingCameraPose(command, pose, 25.0f);
     btlCopyMotionTransform(&command->backCamera, pose);
-    func_00336538(-0.87266463f);
+    sdfVuLoadRotationMatrixY(-0.87266463f);
         VU0_STORE_VF(vf10, pose->direction);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, command->backCamera.direction);
@@ -3445,9 +3445,9 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         btlBuildBattleUnitFramingCameraPose(command, &command->frontCamera, 25.0f);
         btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
         if (command->frontCamera.direction[0] > 0.0f) {
-            func_00336538(-0.87266463f);
+            sdfVuLoadRotationMatrixY(-0.87266463f);
         } else {
-            func_00336538(0.87266463f);
+            sdfVuLoadRotationMatrixY(0.87266463f);
         }
         func_00336798(-0.34906585f);
         sdfMultiplyVuMatrixInPlace();

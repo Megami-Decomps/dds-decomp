@@ -273,6 +273,8 @@ void sdfTransposeMatrix(SdfMat4 *destination, SdfMat4 *source) {
 }
 
 /* Transform XYZ without translation. Matching quirk: the fourth copied output word is uninitialized. */
+#include "sdf_vector_transform.h"
+
 f32 *sdfTransformDirectionByMatrix(f32 *direction, f32 *matrix) {
     f32 transformed[4];
     f32 x = direction[0];

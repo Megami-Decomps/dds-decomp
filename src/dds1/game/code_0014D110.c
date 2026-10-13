@@ -15,12 +15,6 @@ extern void func_0013DF60(const char *name);
 
 
 
-typedef struct FldVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-} FldVec3;
-
 extern u64 fldEvaluateCameraMoveTracking(void);
 
 extern s32 fldGetRowValue(s32);
@@ -364,9 +358,9 @@ s32 fldCmdFocusCameraOnObject(void) {
     return 1;
 }
 
-extern FldVec3 fldLookAtNearPoint;
+extern FldPoint fldLookAtNearPoint;
 
-extern FldVec3 fldLookAtFarPoint;
+extern FldPoint fldLookAtFarPoint;
 
 
 
@@ -378,8 +372,8 @@ extern void func_0012CB48();
 
 s32 fldUpdateLookAtSegment(void) {
     FldAreaWork *cam = &fldAreaState;
-    FldVec3 near;
-    FldVec3 far;
+    FldPoint near;
+    FldPoint far;
 
     cam->mode = 0;
     cam->negatedAngle = -cam->angle;
@@ -408,8 +402,8 @@ s32 fldCmdSetScenePhaseThree(void) {
 
 s32 fldCmdSetLookAtHeading(void) {
     FldAreaWork *cam;
-    FldVec3 near;
-    FldVec3 far;
+    FldPoint near;
+    FldPoint far;
 
     if (scrReadIntParameter(0) < 0) {
         fldAreaState.negatedAngle = -fldAreaState.angle;
@@ -612,7 +606,7 @@ extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 
 
 
-extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
+#include "dds3_object_payload.h"
 
 s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;

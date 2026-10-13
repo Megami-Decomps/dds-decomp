@@ -3634,6 +3634,7 @@
 0x0023DA48	evtStartUnitModeWithValue	inferred	Stores a nonzero unit value, clears its counter and enters mode four. [names_reviewed8.tsv]
 0x0023E178	evtResetUnitVectorSlots	inferred	Initializes each vector slot and clears its state and object id. [names_reviewed7.tsv]
 0x0023E220	evtSetSlotVectors	inferred	DDS1 twin 0x002235E8 [names_M52_EvtEff.tsv]
+0x0023E320	evtSetSlotVector	inferred	DDS1 twin 0x002236E8; stores the supplied coordinates in evtUnitVectorSlots[slotIndex].auxX/auxY after the ten-slot bounds check. Callers in code_00250010 pass the UI editor slot and current/saved coordinate pair.
 0x0023E350	evtCopyUnitVectorSlotEndpoint	inferred	Searches 10 event unit-vector slots for a unit-bound ID, falls back to the first shared-state slot, copies endpoint XYZ to out, and reports success. Paired with 0x00223718. [code-quality cleanup, 2026-10-13]
 0x0023E460	evtApplyMatchingUnitSlotEndpoints	inferred	Finds active matching or fallback slot, clamps color and applies its endpoints to unit. [names_reviewed7.tsv]
 0x0023E648	evtFindUnitSlotAuxCoordinates	inferred	Returns auxiliary x and y from matching active slot or first fallback slot. [names_reviewed7.tsv]
@@ -3880,6 +3881,7 @@
 0x00254678	evtDrawGroupPropertyTable	inferred	U3
 0x00254F80	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state; DDS1 twin. [names_qp9.tsv]
 0x00255360	evtDrawGroupListRow	inferred	DDS1 twin 0x0023A4B0 [names_M95_Event.tsv]
+0x002560B0	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds2/game/code_00250010.c:2565; Paired implementation draws and handles X/Y slot-vector edits through evtSetSlotVector and restores saved values on cancel. DDS1 twin 0x0023B200.
 0x002566F8	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
 0x002569D0	evtViewerDrawGroupWindow	inferred	Light1d2
 0x002570B8	evtPollRuntimeControlReady	inferred	Returns negative and clears runtime control state if external control poll is false. [names_reviewed7.tsv]
@@ -4008,6 +4010,8 @@
 0x00262AC8	mnuResetCommandStepAndSelectPhase	inferred	confidence=high; src/dds2/game/code_00261E10.c:func_00262AC8; Selects command phases from stateCode, conditionally installs a secondary scene callback and resets stateStep. [names_qp9.tsv]
 0x00262B50	mnuShopPollRangeFilteredCommandSelection	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2897; Polls range-filtered shop selection, processing dispatch phase, popup, no-capacity state table and input flags. DDS1 filtered-shop poller analogue 0x002465F8.
 0x00262EF0	evtEnterProgressCommandPhase	inferred	high confidence; src/dds2/game/code_00261E10.c func_00262EF0: Selects command phase 3 or 9 according to stateCode, optionally installs a scene callback, and resets stateStep. [names_reviewed25.tsv]
+0x00263180	mnuRunCampCommandPrimaryTransition	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3103; Draws shop-panel decorations and the camp-command transition, then dispatches EVT_DISPATCH_OPERATION_PRIMARY through evtMenuSetHandler.
+0x002631D8	mnuRunCampCommandSecondaryTransition	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3110; Runs the paired close hook and dispatches EVT_DISPATCH_OPERATION_SECONDARY through evtMenuSetHandler.
 0x00263220	evtGetRemainingSlotThreshold	inferred	Returns the positive difference between the indexed threshold and current progress, zero when passed, or -1 for invalid or absent thresholds.
 0x00263270	evtShowResultText	inferred	formats and prints counter/label texts with func_0026C918 then plays a sound
 0x00263380	evtOpenProgressResultPopupWhenIdle	inferred	Waits for dispatch and message-window idle before opening the progress result popup. [names_reviewed15.tsv]
@@ -6038,6 +6042,7 @@
 0x00315138	scrCountSlots	inferred	curated DDS1 twin 0x002CDCA0; Counts nonzero identifiers among the twenty-four script slots.
 0x00315170	scrSetSlot	inferred	curated DDS1 twin 0x002CDCD8; Stores a new slot ID at the requested index and returns the previous ID.
 0x003151F8	prfGetRequiredProfileLevel	inferred	Reads the per-profile level threshold checked by the minimum-level condition. [names_reviewed13.tsv]
+0x00315220	prfGetProfileParameterByte5	inferred	Returns byte 5 from the unchecked profile parameter row; ptyProfileCountAtLeast compares the same row byte against its requirement operand. Paired DDS1 getter 0x002CDD88.
 0x00315248	prfGetIndexedProfileByte	inferred	Reads an indexed byte from the fixed-stride per-profile descriptor table. [names_reviewed13.tsv]
 0x003152D8	prfGetSkillAtIndex	inferred	DDS1 twin 0x002CDE20 prfGetSkillAtIndex; u16 skill id at index 0..7 of profile row (stride 0x24) [names_M62_Menus.tsv]
 0x00315350	scrClearPairedEntryOutput	inferred	Clears both words of a caller-provided entry output buffer. [names_reviewed13.tsv]
@@ -6071,7 +6076,11 @@
 0x00317010	evtCallShooting	inferred	confidence=high; src/dds2/game/code_00316E08.c:func_00317010; Prints the call_shooting console line, submits admin mode 0x1D and destroys the named script processes. [names_qp9.tsv]
 0x00317958	mdlLoadViewerPackageFromWork	inferred	medium confidence; src/dds2/game/code_00316E08.c func_00317958: Reads the work package ID and two resource values, then loads viewer kind 5 with fixed options 0x101. [names_reviewed25.tsv]
 0x00317988	mnuLoadSectionObjectListWithRelocations	inferred	Copies the section-object payload into retained storage, applies relocation offsets from its trailing table, and returns the MnuSectionObjectList descriptor; used for object, player, map, and draw lists. [DDS2 BN analysis, 2026-10-13]
+0x00317AD0	mnuInitializeShootingScene	inferred	Called after mdlAllocateViewerPackageWork by mdlCreateViewerPackageTask; creates and selects the shooting world object, configures scene lights/background and draw-vector targets, allocates sprite/effect/model work, and registers work-entry callbacks.
 0x00317E48	mnuDestroyShootingWork	inferred	U2
+0x00317FE0	mnuRunShootingInitCallback	inferred	Invokes the current MnuShootingWork initialization callback, advances its init-state callback table, and installs update callback 0 after init state 0; the caller routes -1 to deferred field dispatch.
+0x00318068	mnuRunShootingUpdateCallback	inferred	Invokes the current MnuShootingWork update callback and refreshes it from the update-state table when it returns nonzero. Called by mdlAdvanceViewerPackageTask after initialization succeeds.
+0x003180B8	mnuInitializeShootingWorkResources	inferred	Referenced by the shooting initialization callback table at 0x0040ABE4; binds menu/movement/resource registries, initializes section model/effect work and per-section state, and logs stgInit_Section.
 0x00318570	mnuReleaseShootingSectionResources	inferred	Deactivates the shooting work entry, releases section object allocations, and destroys model node contexts during initialization completion and shutdown. [DDS2 source/caller analysis, 2026-10-13]
 0x00318660	mnuUpdateShootingWork	inferred	Reads input, updates shooting records and score progress, advances round phases, and updates sound slots; retail callback table entry 0x0040ABE8 points to this function. [DDS2 source/BN/caller analysis, 2026-10-13]
 0x00319FF0	mnuUpdateTimedEffectPosition	inferred	TaskPurist4
@@ -6233,7 +6242,7 @@
 0x00322F00	mnuDeactivateWorkEntry	inferred	Clears active bit and releases its callback handle.
 0x00322F48	mnuAdvanceRegistryWorkEntry	inferred	readability/matching review (QP16)
 0x003236B0	mnuVisitActiveWorkAndEffectEntry	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:425:func_003236B0; Visits active menu work pool and separate active effect entry with callback.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
-0x003238A0	mnuVisitActiveRecords	inferred	Invokes func_00323748 on each flagged 0x48-byte record in the global record array.
+0x003238A0	mnuVisitActiveRecords	inferred	Invokes mnuProcessMenuWorkEntryLifecycle on each active MenuWorkEntry in the pool.
 0x00323918	mnuSetWorkEntryStartCallback	inferred	stores the work-entry callback invoked when pendingStart is set
 0x00323920	mnuSetWorkEntryFinishOrDeactivateCallback	inferred	stores the work-entry callback invoked on finished and pendingDeactivate paths
 0x00323928	mnuSetActiveWorkVisitor	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:464:func_00323928; Stores active menu-work visitor callback.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -8534,14 +8543,11 @@
 0x002FB428	effSetActiveSlotPrimaryRecordVector	inferred	confidence=high; Selects retained EffectSlotNode80 record and invokes its primary16B-vector setter; underlying mnuRecordSetVector stores record data0's first vector. Abbreviated native definition/call unchanged. [Namer1 b60]
 0x002FB440	effSetActiveSlotSecondaryRecordVector	inferred	confidence=high; Selects retained EffectSlotNode80 record and invokes its secondary16B-vector setter; underlying fileSetRecordSecondVector stores data0's next vector. Abbreviated native definition/call unchanged. [Namer1 b60]
 0x00255650	evtRotateViewerPositionFromPad	inferred	Rotates the event-viewer position by the pad-selected camera-axis steps. Exact DDS1 pair: 0x0023A7A0. [LiteH b29]
-0x002560B0	evtEditPositionOverlaySettings	inferred	Edits event-viewer X/Y and overlay settings, applies updates through the group setter, and restores captured values on cancel. Exact DDS1 pair: 0x0023B200. [LiteH b29]
 0x002570F8	evtEditEffectSpriteFrame	inferred	Edits the pending event key's position, color, blend mode and scale. [LiteH b29]
 0x00258700	evtUpdateEffectViewerGroup	inferred	Routes viewer group types to their editors and destroys the control task after the active editor completes. [LiteH b29]
 0x0026D710	mnuUpdateMantraNeighborNodeStates	inferred	Marks the selected mantra node and updates the state of each of its six neighbors. [LiteH b29]
 0x0026D7E8	mnuCheckMantraNeighborRequirements	inferred	Checks all six mantra-neighbor conditions across active party profiles. [LiteH b29]
 0x0026DB28	scrClearPartyProfileEntryBit15	inferred	Clears bit 15 for the supplied party profile entry. [LiteH b29]
-0x0026DB48	scrIsPartyProfileEntryBit15Set	inferred	Tests bit 15 for the supplied party profile entry. [LiteH b29]
-0x0026DB90	scrIsFirstPartyProfileEntryBitZeroSet	inferred	Tests bit zero of profile entry zero. [LiteH b29]
 0x0026BAF8	mnuUpdateTerminalPanelPopupWhenIdle	inferred	Advances the terminal panel transition and queues the popup only while idle and unfaded. [LiteH b29]
 0x0026AC90	mnuPrepareTerminalPanelForInput	inferred	Draws and advances the terminal panel, then installs its input handler. [LiteH b29]
 0x0015B290	effInitializeEmitterSubsystem	inferred	confidence=medium; Empty retail startup hook called by effManagerInitializeSubsystems before particle and billboard startup. Its owning implementation contains emitter buffer/template initialization and emitter-delay RNG state. DDS1 1536A0 is the same hook. [Namer1 b61]
@@ -8553,11 +8559,8 @@
 0x0031DA38	itfUpdateAndDrawSpriteNumbers	inferred	confidence=high; Formats the slot value as decimal digits, draws digit and optional tag images with age-dependent opacity and rise, and releases age>=91; bit0 pauses age increment. [Namer1 b61]
 0x0031DEB8	itfCreateSpriteHitEffectWorkPool	inferred	confidence=high; Allocates and clears count*16+12 bytes for header plus compact records; native debug string is Sprite HitEffect Work Crate Size[%d]. Records are consumed by itfUpdateAndDrawSpriteHitEffects. [Namer1 b61]
 0x0031DF48	itfReleaseSpriteHitEffectWorkPool	inferred	confidence=high; Releases the allocation retained by the sprite hit-effect pool constructor; mnuDestroyShootingWork frees this alongside the sprite-number pool. [Namer1 b61]
-0x0031E7C8	itfSetLowerFadeValue	inferred	confidence=high; Writes displayValue. itfDrawFullExtentWorkPanels pairs this setter on lowerNumber with the lower eight-digit drawer and supplies currentScore; original draw-before-set ordering retained. [Namer1 b61]
-0x0031E850	itfSetUpperFadeValue	inferred	confidence=high; Writes displayValue. itfDrawFullExtentWorkPanels pairs this setter on upperNumber with the upper eight-digit drawer and supplies peakScore; original draw-before-set ordering retained. [Namer1 b61]
 0x0031EE28	itfSetTwoChoiceFadeSelection	inferred	confidence=high; Sets choiceFade from choiceIndex in mnuAdvanceShootingRoundPhase. itfDispatchObjectFadeSequenceMode draws this same object using the two-row sequence; clamping remains in the drawer. [Namer1 b61]
 0x0031EEE8	itfSetRoundFadeDisplayValue	inferred	confidence=high; Sets roundFade from round+1 in itfDispatchObjectFadeSequenceMode, which subsequently draws that same object using the 1..3 offset-glyph selector. [Namer1 b61]
-0x0031F040	itfSetFrameFadeGlyphSelector	inferred	confidence=high; Sets the frame object's displayValue immediately before itfDrawFadeGlyphForFrame consumes it to select optional glyphs. The caller's unkB0 stays unnamed. [Namer1 b61]
 0x0040AE28	itfIndexedImageDescriptors	inferred	confidence=high; Four signed halfwords per row encode resource-bank index, work-entry index, X offset and Y offset, as consumed by the centered and rotated indexed image drawers. Data layout and contents unchanged. [Namer1 b61]
 0x0045C840	itfIndexedImageResourceBanks	inferred	confidence=high; Seven bank address words cleared and installed by itfInstallIndexedImageResourceBanks, then indexed to select EffectSlotSet work entries for image draws. Storage and contents unchanged. [Namer1 b61]
 0x00146250	fldDrawAutomapScene	inferred	confidence=high; Draws selected-floor automap geometry, explored cells, icons, player marker and labels. DDS1 142D78 shares the complete rendering role. [PurC readability b1]
@@ -8600,3 +8603,26 @@
 0x001525F0	fldDispatchTargetGuideMotionUpdate	inferred	confidence=high; Dispatches mode-specific guide movement/wait updates; native-supported post-call phase cleanup and callback signatures unchanged. No DDS1 counterpart identified. [PurC readability b2]
 0x00153560	fldCanUseTargetGuideInCurrentScene	inferred	confidence=high; Tests current area23 floors10/13/15/17 plus story-flag exclusions; incoming area/room args remain unused. Eligibility query, not an active-object query. No DDS1 counterpart identified. [PurC readability b2]
 0x00153FA0	fldInitializeSceneGuideMarkers	inferred	confidence=high; Clears15 marker slots and selects area23 floor10/13/15 presets, including floor13 flag gate; traverses coordinate sentinel and creates markers. No DDS1 counterpart established in published release6098948195. [PurC readability b2]
+0x00146150	sdfSetModelChildChainVisibility	inferred	Sets SKIP_RENDER on the indexed SdfModel node child chain according to FldItem visibility; paired DDS1/DDS2 implementation and callers. [paired source behavior]
+0x00336538	sdfVuLoadRotationMatrixY	inferred	Loads the Y-axis rotation matrix rows into VU0 registers vf28-vf31. Paired main-register helper in DDS1; XYZ composition passes the y component. [retail assembly and callers]
+0x003365B8	sdfVuLoadRotationMatrixZ	inferred	Builds the Z-axis rotation matrix and loads its rows into primary VU0 registers vf28-vf31. The cross-arm effect selects this helper for its Z-axis cases; prior native audit records the cosine/sine, identity matrix, Z-axis replacements, and primary-matrix load. [retail assembly, callers, prior native audit]
+0x00316E28	sdfGetFlagListAlphaSurfaceIndex	inferred	Returns SdfFlagListWork.params.alpha.surfaceIndex; paired getter uses same field in DDS1.
+0x00316E30	sdfSetFlagListAlphaSurfaceIndex	inferred	Stores the supplied value in SdfFlagListWork.params.alpha.surfaceIndex; paired setter uses same field in DDS1.
+0x0026DB48	scrTestEntryFlagBit15	inferred	Returns scrTestEntryFlag(context, suppliedEntryId, 0xF). Used by the Mantra-node eligibility scan after the entry-zero bit-0 gate; the caller uses it only as a predicate.
+0x0026DB70	scrClearEntryFlagAtZeroBit0	inferred	Calls scrClearEntryFlag(context, entryId=0, bit=0); source retains the native post-call context reset.
+0x0026DB90	scrTestEntryFlagAtZeroBit0	inferred	Returns scrTestEntryFlag(context, entryId=0, bit=0). The Mantra-node eligibility scan uses it as a gate; stored-state meaning remains unspecified.
+0x0026DBB8	scrClearEntryFlagAtZeroBit1	inferred	Calls scrClearEntryFlag(context, entryId=0, bit=1); source retains the native post-call context reset.
+0x0026DBD8	scrTestEntryFlagAtZeroBit1	inferred	Calls scrTestEntryFlag(context, entryId=0, bit=1) and discards the return value.
+0x002890A8	mnuGetSelectedMantraUnitIndex	inferred	Returns the selected list cursor index used to select the current mantra-unit slot across node eligibility, panel rendering, and unit-selection flows. [provider body and caller dataflow, 2026-10-14]
+0x0028D070	mnuSpawnMantraPanelsFromSelectedUnitFlags	inferred	Walks the mantra node-position table, reads the selected unit slot flags, classifies eligible nodes, and spawns or queues their panel animations. Called after unit selection changes, tutorial updates, and mantra equipment flow. [provider body and caller dataflow, 2026-10-14]
+0x003233E8	mnuUpdateActiveMenuWorkEntries	inferred	Walks active MenuWorkEntry records, advances timed registry work, updates movement-effect scale, marks out-of-bounds entries for deactivation, and optionally submits runtime positions according to the caller context. [provider and caller dataflow, 2026-10-13]
+0x00323748	mnuProcessMenuWorkEntryLifecycle	inferred	Consumes pending-start, updated, finished, and pending-deactivate state; invokes the configured start/finish callbacks and deactivates entries when requested. Called for active pool entries and the active effect entry. [provider and caller dataflow, 2026-10-13]
+0x003242D0	mnuRebuildMenuWorkEntryCallbackRecords	inferred	Replaces a work entry callback list while preserving any existing 0x44-tagged base record, then appends mode-specific named records. Called by shooting hit handling and active-effect transition paths. [provider and caller dataflow, 2026-10-13]
+0x001ABB10	btlGetCommandUseError	inferred	Returns zero when a command passes unit/status/slot/vital-cost checks; nonzero values are rejection reasons consumed by command selection and validation callers. [provider body and caller result handling, 2026-10-13]
+0x001ABDE8	btlGetPartnerCommandUseError	inferred	Checks each supplied partner for active/status eligibility, averages their max HP into a snapshot, then returns the command-use result for that snapshot; callers reject nonzero values. [provider body and caller result handling, 2026-10-13]
+0x0031CE60	itfDrawCenteredIndexedImage	inferred	Uses the indexed resource’s table offsets and half-bounds to center its blended-corner sprite at the supplied screen coordinate; used for menu icons and numeric slot digits. [provider body and caller dataflow, 2026-10-13]
+0x0031D120	itfDrawRotatedIndexedImage	inferred	Sets the indexed sprite angle for one blended-corner draw, then resets the angle to zero; the menu indicator caller derives the angle from record direction and rotation. [provider body and caller dataflow, 2026-10-13]
+0x0031E7C8	itfSetLowerFadeNumberDisplayValue	inferred	Stores the supplied display value in the FadeNumber passed for the lowerNumber/currentScore field in the shooting fade panel. [provider body and caller field dataflow, 2026-10-13]
+0x0031E850	itfSetUpperFadeNumberDisplayValue	inferred	Stores the supplied display value in the FadeNumber passed for the upperNumber/peakScore field in the shooting fade panel. [provider body and caller field dataflow, 2026-10-13]
+0x0031F040	itfSetFrameFadeDisplayValue	inferred	Stores the supplied selector in the frame FadeNumber; the caller passes the frame field and the draw routine branches on values 1 and 2 to choose indicator glyphs. [provider body and caller dataflow, 2026-10-13]
+0x00341CD0	sndQueueNoPayloadCommand210	inferred	Queues command 0x210 with zero arguments, no payload, and length zero. The matching DDS1 helper has the same packet call; the DDS2 caller uses it during title-state audio cleanup. [DDS1/DDS2 provider and caller analysis, 2026-10-13]

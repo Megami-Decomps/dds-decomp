@@ -5,7 +5,7 @@
 
 struct CompactSlot;
 extern struct CompactSlot *itfClaimCompactSlotWithPayload(u32, u32, struct CompactSlotPool *);
-extern s32 func_003242D0(MenuWorkEntry *, s32);
+extern s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *, s32);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern u32 mnuAdvanceWorkEntry(MenuWorkEntry *, s32);
 extern void mnuUpdateShootingProgressTier(MnuShootingWork *);
@@ -27,7 +27,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
     originY = origin->y;
     if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_MOVEMENT_TABLE) {
         if ((record->state.kind & 0xF) == 3) {
-            if (func_003242D0(entry, 0) == 0) {
+            if (mnuRebuildMenuWorkEntryCallbackRecords(entry, 0) == 0) {
                 work->currentScore += 10000;
                 y = mnuEvaluateTimedValue(entry);
                 itfClaimWideSlotWithTaggedPayload((s32)(entry->currentX + (f32)originX),

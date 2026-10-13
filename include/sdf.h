@@ -840,6 +840,8 @@ void effDrawSelectionEntryVectors(SdfFlagListWork *);
 void effUpdateAndDrawSelectionEntries(SdfFlagListWork *);
 float sdfGetFlagListSpeed(SdfFlagListWork *);
 void sdfSetFlagListSpeed(SdfFlagListWork *, float);
+u32 sdfGetFlagListAlphaSurfaceIndex(SdfFlagListWork *);
+void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *, u32);
 void itfSetPackedRgbAlpha(SdfFlagListWork *, u32);
 void itfCopyColorFields(SdfFlagListWork *, const SdfFlagListParams *);
 

@@ -232,10 +232,6 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-extern void sndFreeResourceNode(SoundResourceNode *);
-
-extern void sndFreeListNode(ActiveSoundNode *);
-
 extern s32 btlCountTasksByKind(u16 kind);
 
 s32 fldCheckSceneResourcesIdle(BtlUnit *self) {

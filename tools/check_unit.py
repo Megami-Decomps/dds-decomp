@@ -41,7 +41,8 @@ AUTO = re.compile(r"^(?:func|D|jtbl)_([0-9A-F]{8})(?:\.\d+)?$")
 
 
 def symbols(version):
-    out = {}
+    # Splat's linker script supplies this absolute ABI symbol, not a C/BSS object.
+    out = {"_gp": int(VERSIONS[version]["gp"], 16)}
     for line in (ROOT / "config" / version / "symbol_addrs.txt").read_text().splitlines():
         if m := ROW.match(line):
             out.setdefault(m.group(1), int(m.group(2), 16))
@@ -193,7 +194,8 @@ def bss_symbols(objdump_text):
 def _retail_nobits_inventory(start, size, syms):
     """Derive canonical ``(offset, size, name)`` rows from symbol_addrs.
 
-    Every named address inside the exact owned span is authoritative.  Aliases
+    Every symbol_addrs address inside the exact owned span is authoritative.
+    The absolute linker _gp address is not an object boundary or alias.  Aliases
     at one address are separate required names for the same object extent;
     their spelling order is canonicalized because ELF symbol-table order is
     not a source-layout fact.
@@ -202,7 +204,7 @@ def _retail_nobits_inventory(start, size, syms):
     addressed = sorted(
         (retail, name)
         for name, retail in syms.items()
-        if start <= retail < end
+        if name != "_gp" and start <= retail < end
     )
     if not addressed:
         return [], ["retail span has no symbol_addrs inventory"]

@@ -17,7 +17,7 @@
 #include "ee_mmi.h"
 #include "sdf_projection.h"
 
-extern void *sdfCreateAssetWithDrawEntries();
+#include "sdf_asset_create.h"
 extern s32 effEmitterDelayRandomState[];
 #include "eff.h"
 #include "eff_look_at_ring.h"

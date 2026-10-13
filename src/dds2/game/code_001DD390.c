@@ -17,6 +17,7 @@
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
 #include "btl.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
@@ -195,7 +196,6 @@ extern f32 *D_0037F770[];
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
@@ -545,9 +545,9 @@ extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 
 extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
-extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
 
@@ -709,9 +709,9 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     elementMask = btlEncodeActorIndexAsSelectionMask(element);
     if (action->indexWork.phase != 4) {
         if (datCommandSelectors[command].kind != 1) {
-            costError = func_001ABB10(source, command);
+            costError = btlGetCommandUseError(source, command);
         } else {
-            costError = func_001ABDE8(source, action->unit, action->indexWork.companionA,
+            costError = btlGetPartnerCommandUseError(source, action->unit, action->indexWork.companionA,
                                     action->indexWork.companionB, command);
         }
         if (costError == 0) {
@@ -1897,7 +1897,7 @@ extern s32 fileTestSavedSlotFlags(u32);
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
@@ -1956,7 +1956,7 @@ void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work)
             work->skillId = 0;
             work->phase = 1;
         }
-        if (func_001ABB10(unit, work->skillId)) {
+        if (btlGetCommandUseError(unit, work->skillId)) {
             work->skillId = 0;
             work->phase = 1;
         }
@@ -2559,8 +2559,6 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
     }
 }
 
-extern void sdfReleaseDevSlot(s32, s32, s32);
-
 extern char D_00417940[]; /* "btl:unit transparency delete[%p]\n" */
 
 void btlReleaseActorModelResources(BtlUnit *unit) {
@@ -2570,7 +2568,7 @@ void btlReleaseActorModelResources(BtlUnit *unit) {
             unit->unk328 = 0;
         }
         if (unit->unk344 != 0) {
-            sdfReleaseDevSlot(unit->unk344, 1, 1);
+            sdfReleaseDevSlot((SdfModel *)unit->unk344, 1, 1);
             unit->unk344 = 0;
             btlBossDebugPrintf(D_00417940, unit);
         }
@@ -3436,7 +3434,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             alpha = color >> 24;
             if (!(flags & 0x20000)) {
                 if (unit->unk344 != 0) {
-                    sdfReleaseDevSlot(unit->unk344, 1, 1);
+                    sdfReleaseDevSlot((SdfModel *)unit->unk344, 1, 1);
                     unit->unk344 = 0;
                     if (unit->status.flags & 2) {
                         info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
@@ -5292,11 +5290,7 @@ BtlUnit *btlCreateUnit(void) {
     return unit;
 }
 
-extern void sndFreeResourceNode(struct SoundResourceNode *);
-
 extern void btlReleaseActorModelResources(BtlUnit *);
-
-extern void sndFreeListNode(struct ActiveSoundNode *);
 
 void btlReleaseUnitResources(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit data free[%p]\n", unit);
