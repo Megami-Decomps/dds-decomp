@@ -1522,7 +1522,8 @@ void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
     }
 }
 
-u32 mnuCampGetProgressStage(void) {
+/* The retail stub always returns zero and has no memory effects. */
+u32 __attribute__((const)) mnuCampGetProgressStage(void) {
     return 0;
 }
 
@@ -1746,7 +1747,34 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampGetRankedItemPrice);
+s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
+    u32 rowIndex;
+    u32 itemId;
+    u32 rowPercent;
+    u32 pricePercent;
+    s32 itemPrice;
+    s32 price;
+    s32 progressStage;
+
+    rowIndex = (u8)mnuCampFindActiveSlot();
+    itemId = D_003CBB70[rowIndex].entries[index].itemId;
+    if (halfPrice == 0) {
+        itemPrice = datItemSkillRecords[itemId].price;
+        rowPercent = D_003CBB70[rowIndex].pricePercent;
+        pricePercent = D_003CBB70[rowIndex].entries[index].pricePercent;
+        if (pricePercent == 0) {
+            pricePercent = rowPercent;
+        }
+        price = itemPrice * pricePercent / 100;
+        progressStage = mnuCampGetProgressStage();
+        if (progressStage != 0) {
+            price = price * (s32)D_003CD0C4[progressStage].percent / 100;
+        }
+    } else {
+        price = (u32)datItemSkillRecords[itemId].price >> 1;
+    }
+    return price;
+}
 
 s32 mnuCampFindListedItemIndex(s32 id) {
     u16 *entry = (u16 *)mnuCampListedItems;
