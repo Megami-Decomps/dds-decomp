@@ -619,7 +619,7 @@ extern s32 btlSelectActorAction(s32);
 extern s32 btlCalculateHuntEpReward(u8 *, u8 *);
 
 /* Native hunt interface passes actor and target; HP recovery is zero in this title. */
-extern u32 func_001A7ED8(BtlUnit *actor, BtlUnit *target);
+extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 
 /* Native caller supplies actor,target; concrete provider consumes only actor. */
 extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target);
@@ -975,7 +975,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
                     huntRecovered = 1;
-                    huntHpRecovery = func_001A7ED8(action->unit, target);
+                    huntHpRecovery = btlGetHuntHpRecoveryAmount(action->unit, target);
                     huntMpRecovery = btlCalculateAbilityRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
@@ -1145,7 +1145,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
                     huntRecovered = 1;
-                    group->entries[hitCount - 1].hpRecovery += func_001A7ED8(action->unit, target);
+                    group->entries[hitCount - 1].hpRecovery += btlGetHuntHpRecoveryAmount(action->unit, target);
                     group->entries[hitCount - 1].mpRecovery += btlCalculateAbilityRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {

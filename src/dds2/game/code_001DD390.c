@@ -581,7 +581,7 @@ extern s32 func_001B3B28(BtlUnit *);
 
 extern s32 btlCalculateHuntEpReward(BtlUnit *, BtlUnit *);
 
-extern u32 func_001B2380(BtlUnit *, BtlUnit *);
+extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *, BtlUnit *);
 
 extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
 
@@ -966,7 +966,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
                     huntRecovered = 1;
-                    huntHpRecovery = func_001B2380(action->unit, target);
+                    huntHpRecovery = btlGetHuntHpRecoveryAmount(action->unit, target);
                     huntMpRecovery = btlCalculateAbilityRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
@@ -1141,7 +1141,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
                     huntRecovered = 1;
-                    group->entries[hitCount - 1].hpRecovery += func_001B2380(action->unit, target);
+                    group->entries[hitCount - 1].hpRecovery += btlGetHuntHpRecoveryAmount(action->unit, target);
                     group->entries[hitCount - 1].mpRecovery += btlCalculateAbilityRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
