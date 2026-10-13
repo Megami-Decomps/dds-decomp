@@ -78,6 +78,23 @@ verifies their full-unit section offsets, widths and bytes in both compilation
 contexts before accepting their source-owned extents. Unreferenced literals
 and relocated tables retain their existing checks.
 
+## Keep interior symbols separate from NOBITS storage
+
+A native label inside a BSS object can name a field or array element without
+owning another allocation. `config/<version>/symbol_aliases.json` records these
+non-owning symbols as a primary owner plus byte offset, unit and NOBITS section.
+Every alias must agree with its independently known native address. Configure
+writes relative `PROVIDE` expressions and tracks the metadata as a generation
+input, including when an existing split is reused.
+
+The NOBITS checker removes only the validated aliases from object-boundary
+inference, checks each alias lies inside its primary extent, and still requires
+the exact section span and complete source `STT_OBJECT` inventory. Allocating
+another C object for an alias remains an error. The paired `ItfMesGlobals` banks
+are each one 0x520-byte object; `itfWindowSlots` aliases the first node's state
+word at +0x2C. Real-field offset guards validate the other mixed-code aliases.
+These BSS storage extents are distinct from initialized retail bytes.
+
 ## Find the first causal difference
 
 Keep a baseline and one source change justified by the current evidence.
