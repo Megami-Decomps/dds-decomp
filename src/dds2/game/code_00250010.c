@@ -126,7 +126,7 @@ extern char D_004374F8[]; /* "%3d" */
 extern char D_00437500[]; /* "   CUT" */
 extern char D_00437508[]; /* "%03d" */
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
-extern s32 func_002521C8();
+extern s32 evtDrawFrameListColumnHeadings();
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
 extern void sndEnsureMidiBankResident(s32 sound);
@@ -996,7 +996,7 @@ extern s8 D_003C9520[];
 extern char D_00437518[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 func_002521C8(SdfListHead *list, s32 x, s32 y, u8 *data) {
+s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *data) {
     EvtRuntime *ctx = (EvtRuntime *)data;
     s32 type = ctx->frameGroup->type;
     s32 i;
@@ -1485,7 +1485,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 39, 21, ctx->frameCursor,
-                 group->childCount + 1, ctx, func_002521C8, evtDrawFrameListRow);
+                 group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, evtDrawFrameListRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 5) {
         return 0;

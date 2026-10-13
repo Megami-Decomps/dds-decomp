@@ -8113,3 +8113,4 @@
 0x00306C28	effDrawSpriteWithCornerColors	inferred	draws the indexed slot using caller-supplied corner colors and the resolved slot work; paired DDS1 helper is effDrawSpriteWithCornerColors at 0x002BF438.
 0x00306678	effDrawTexturedRectBorderStrips	inferred	draws each enabled border strip around a textured rectangle, deriving edge colors and temporary texture coordinates before restoring the original coordinates; called by the lower textured-slot drawer.
 0x003482B0	sdfStreamHandleDeviceEvent	inferred	Handles paired stream-device lifecycle and read events: records size replies, DMA-copies read replies and advances chunked reads, then signals synchronous waiters on completion. [code-quality cleanup, 2026-10-13]
+0x002521C8	evtDrawFrameListColumnHeadings	inferred	Draws the frame editor header row by formatting one heading for each column in the selected group type; registered as evtUpdateFrameListDialog's menu header callback. [code-quality cleanup, 2026-10-13]

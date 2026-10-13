@@ -24,7 +24,7 @@
 #include "sdf_texture_file.h"
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
-extern s32 func_00237428();
+extern s32 evtDrawFrameListColumnHeadings();
 
 extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
@@ -951,7 +951,7 @@ extern s8 D_00368750[];
 extern char D_003BC0D0[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 func_00237428(SdfListHead *list, s32 x, s32 y, u8 *data) {
+s32 evtDrawFrameListColumnHeadings(SdfListHead *list, s32 x, s32 y, u8 *data) {
     EvtRuntime *ctx = (EvtRuntime *)data;
     s32 type = ctx->frameGroup->type;
     s32 i;
@@ -1388,7 +1388,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     }
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
-                 group->childCount + 1, (u8 *)ctx, func_00237428, evtDrawFrameListRow);
+                 group->childCount + 1, (u8 *)ctx, evtDrawFrameListColumnHeadings, evtDrawFrameListRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 5) {
         return 0;
