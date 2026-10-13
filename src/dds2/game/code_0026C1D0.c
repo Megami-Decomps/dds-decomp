@@ -348,7 +348,7 @@ s32 dspCaptureWindowSecondPanelValue(void) {
 
 extern s8 itfPanelGetStatus(s32 index);
 
-extern s32 func_001A4A10(s32 window, s32 first, s32 second);
+extern s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
 
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
@@ -370,7 +370,7 @@ void func_0026C7F8(s32 notify, s32 refresh) {
     case DSP_WINDOW_CONTROL_GATED:
         if (D_00437888 >= 0) {
             if (refresh != 0) {
-                func_001A4A10(handle, 3, 1);
+                itfMesSetOptionValue(handle, 3, 1);
                 handle = dspWindowHandle;
             }
             itfMesCountClearBits(handle, evtMessageWindowOption);

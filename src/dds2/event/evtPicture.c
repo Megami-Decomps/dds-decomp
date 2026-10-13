@@ -8,7 +8,7 @@ extern u8 D_003C9498[];
 extern u8 D_003C94A8[];
 extern u8 D_003C94B8[];
 extern SdfPoolNode D_003805A8;
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern void itfSendTablePacket(SdfListHead *packet, s32 index, s32 flag);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 

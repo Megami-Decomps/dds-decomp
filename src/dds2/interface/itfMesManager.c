@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -32,32 +33,6 @@ void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int 
 extern u32 itfMessageFlags;
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct SndPad {
-    u8 pad00[0x20];
-    union {
-        s8 buttons[0x20];
-        struct {
-            u8 pad20;
-            s8 confirm;
-            u8 pad22[4];
-            s8 prev;
-            s8 next;
-            u8 pad28[9];
-            s8 unk31;
-            s8 unk32;
-            s8 cancel;
-            s8 coarseDown;
-            s8 coarseUp;
-            s8 unk36;
-            s8 unk37;
-            s8 fineDown;
-            u8 pad39;
-            s8 fineUp;
-            u8 pad3B[5];
-        };
-    };
-} SndPad;
-
 extern SndPad D_0037F510;
 
 typedef struct SndPadStepTarget {
@@ -107,7 +82,7 @@ void func_00154F18(s32);
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
-s32 func_001A4A10(s32 window, s32 first, s32 second);
+s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
@@ -122,17 +97,13 @@ s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 extern void frFontLoadTemporaryEntry(u32);
 
 
-extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
-
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
-extern s32 sndVisitQueuedResources(void);
+extern s32 itfUpdateActiveMessageWindows(void);
 
 extern void sndFlushMessageQueue(void);
 
-extern s32 func_001A76C8(void);
-
-extern struct ItfMesPoolNode *itfAcquirePoolNode();
+extern s32 itfUpdateSoundSelectorPanels(void);
 
 extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
@@ -374,7 +345,7 @@ s32 itfMesScriptSetMessageRange(void) {
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    func_001A4A10(window, first, second);
+    itfMesSetOptionValue(window, first, second);
     return 1;
 }
 
@@ -841,7 +812,7 @@ u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
-extern void func_001A6078(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
 
 /* Refresh changed panel values only when both content-status pairs are clear.
  * The first value is stored as a halfword; release the old primitive afterward. */
@@ -852,7 +823,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
         if (mes->unk12 != firstValue || panelBlock->fadeLimit != secondValue) {
             mes->unk12 = firstValue;
-            func_001A6078(panelBlock, firstValue, secondValue);
+            itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, firstValue, secondValue);
             if (panelBlock->sprite != NULL) {
                 itfPanelReleasePrimitiveResources(panelBlock->sprite);
                 panelBlock->sprite = NULL;
@@ -862,7 +833,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
 }
 
 /* Set or append a window option; reserved and out-of-range IDs are rejected. */
-s32 func_001A4A10(s32 window, s32 id, s32 value) {
+s32 itfMesSetOptionValue(s32 window, s32 id, s32 value) {
     ItfMesBlk40 *optionBlock = &itfWindowSlots[window].mes->blk40;
     ItfMesOption *option = NULL;
     s32 index;
@@ -941,8 +912,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))sndVisitQueuedResources, sndFlushMessageQueue, NULL);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, func_001A76C8, sndFlushMessageQueue, NULL);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))itfUpdateActiveMessageWindows, sndFlushMessageQueue, NULL);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, sndFlushMessageQueue, NULL);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
@@ -969,7 +940,7 @@ extern char D_00436620[];
 extern char D_00436628[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern ItfMesWindowRec *func_001A7A98(ItfMesWindowRec *window);
+extern ItfMesWindowRec *itfMesFindPreviousWindowWithPanelSprite(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
 extern void sndStepIndexByPad(SndPadStepper *panel);
 
@@ -994,7 +965,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
     const char *coordinateFormat;
 
     if (D_003B4770.window == NULL) {
-        ItfMesWindowRec *window = func_001A7A98(NULL);
+        ItfMesWindowRec *window = itfMesFindPreviousWindowWithPanelSprite(NULL);
 
         D_003B4770.window = window;
         if (window == NULL) {
@@ -1029,7 +1000,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
                     confirmDebug->mode = 2;
                     break;
                 case 4:
-                    confirmDebug->window = func_001A7A98(confirmDebug->window);
+                    confirmDebug->window = itfMesFindPreviousWindowWithPanelSprite(confirmDebug->window);
                     break;
                 }
             } else if (D_0037F510.cancel < 0) {
@@ -1102,7 +1073,6 @@ void itfMesClearGlobalWords(void) {
 extern ItfMesWindowRec D_00452960[];
 extern void btlReleaseEffectResourceHandles();
 extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
-extern void itfReleasePoolNode();
 
 /* Tear down installed content/resources, return the pool record and decrement
  * the pool-array-relative counter. An empty record is a no-op. */
@@ -1117,7 +1087,7 @@ void itfMesDestroyWindow(s32 window) {
         mes->flags = 0;
         sdfReleaseResourceAllocation((struct SdfMemBlock *)windowRecord->resourceHandle);
         windowRecord->stateAddress = 0;
-        itfReleasePoolNode(windowRecord, (u8 *)D_00452960 - 0x10);
+        itfReleasePoolNode(windowRecord, (ItfMesPool *)((u8 *)D_00452960 - 0x10));
         ((ItfMesGlobals *)((u8 *)D_00452960 - 0x20))->activeWindowCount -= 1;
     }
 }
@@ -1563,7 +1533,7 @@ typedef struct EncBgEntry {
 extern ItfMesGlobals itfMesWork;
 
 extern void itfMesDestroyWindow(s32 arg0);
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
@@ -1581,7 +1551,7 @@ extern void sndSetSequenceVolumePan();
 
 extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
 
-extern s32 func_001A6AB8(ItfMesBlk40 *);
+extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *);
 
 extern void itfResetBattleFadeState(BtlFade *, s32);
 
@@ -1593,7 +1563,7 @@ extern UiOwnerRef *D_003B4778[];
 
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
 
-extern void func_001A7798(UiSprite *sprite);
+extern void itfQueueSpriteQuadPacket(UiSprite *sprite);
 
 
 /* Enable context rendering for every font object in the linked chain. */
@@ -1678,13 +1648,13 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->optionCount = 0;
 }
 
-extern void func_001A6078(ItfMesBlkA4 *, s32, s32);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *, s32, s32);
 
 void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
     block->frame = NULL;
     block->sprite = NULL;
     block->overlay = NULL;
-    func_001A6078(block, 0, 0);
+    itfMesConfigurePanelBoundsAndFadeLimit(block, 0, 0);
 }
 
 /* Clear 32 words, from the end back toward the beginning of the buffer. */
@@ -1766,7 +1736,7 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
     return out;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A6078);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesConfigurePanelBoundsAndFadeLimit);
 
 void itfMesUpdatePanelFades(ItfMesState *panel);
 
@@ -1966,7 +1936,7 @@ s32 sndSeqSelectPoll(ItfMesState *panel) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         return 1;
     }
-    if (sel->optionCount > 0 && (index = func_001A6AB8(sel)) >= 0) {
+    if (sel->optionCount > 0 && (index = itfMesFindPressedOptionRank(sel)) >= 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         if (index != sel->selectedIndex) {
             itfMesSetRowItemFlag(sel->glyphChain, sel->selectedIndex, sel->rowCount, 0);
@@ -1999,7 +1969,7 @@ void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir) {
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);
 }
 
-s32 func_001A6AB8(ItfMesBlk40 *selection) {
+s32 itfMesFindPressedOptionRank(ItfMesBlk40 *selection) {
     s32 i;
 
     for (i = 0; i < selection->optionCount; i++) {
@@ -2059,9 +2029,9 @@ extern void itfMesRenderActivePanelSprites(ItfMesState *);
 
 extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
 
-extern void func_001A7120(ItfMesState *);
+extern void itfDrawSoundSelectorOptionPanel(ItfMesState *);
 
-extern void func_001A6E88(ItfMesState *);
+extern void itfDrawSelectedSoundRow(ItfMesState *);
 
 void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     u32 flags = panel->flags;
@@ -2104,9 +2074,9 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     }
     if (panel->fade.kind & 2) {
         if (panel->unk12 == 3) {
-            func_001A7120(panel);
+            itfDrawSoundSelectorOptionPanel(panel);
         } else {
-            func_001A6E88(panel);
+            itfDrawSelectedSoundRow(panel);
         }
     }
 }
@@ -2127,7 +2097,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
         }
     }
     if (D_003B4778[0] != 0 && D_003B4778[0]->owner == panel && place != 0) {
-        func_001A7798(place->sprite);
+        itfQueueSpriteQuadPacket(place->sprite);
     }
 }
 
@@ -2138,7 +2108,7 @@ extern void func_001A09C0(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *)
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 
 /* Draw the selected sound row and its expanding fade outline. */
-void func_001A6E88(ItfMesState *panel) {
+void itfDrawSelectedSoundRow(ItfMesState *panel) {
     DrawColorRec uv;
     DrawColorRec color;
     DrawVertex bounds[2];
@@ -2210,7 +2180,7 @@ void func_001A6E88(ItfMesState *panel) {
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A7120);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfDrawSoundSelectorOptionPanel);
 
 extern u8 D_003B49F8[];
 
@@ -2254,7 +2224,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
     surface->append(surface, packet);
 }
 
-s32 sndVisitQueuedResources(void) {
+s32 itfUpdateActiveMessageWindows(void) {
     ItfMesPoolNode *node;
     for (node = itfMesWork.pool.activeHead; node != 0; node = node->next) {
         itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
@@ -2264,7 +2234,7 @@ s32 sndVisitQueuedResources(void) {
 
 extern s32 func_001200E0(void);
 
-s32 func_001A76C8(void) {
+s32 itfUpdateSoundSelectorPanels(void) {
     ItfMesPoolNode *node;
 
     if (func_001200E0() != 0) {
@@ -2299,7 +2269,7 @@ extern u8 D_00436638[5];
 
 extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
-void func_001A7798(UiSprite *sprite) {
+void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     s32 vertices[4][2] = {
         {sprite->left, sprite->top},
         {sprite->right, sprite->top},
@@ -2387,7 +2357,7 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-ItfMesPoolNode *func_001A7A98(ItfMesPoolNode *node) {
+ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
     s32 index = 0;
     s32 count = itfMesWork.activeWindowCount;
 
@@ -2452,7 +2422,7 @@ extern u8 D_00452E60[0x10];
 extern s8 D_0037F531[];
 
 /* Start the window entry, then poll completion and restore its normal flags. */
-s32 func_001A85E0(void) {
+s32 itfMesScriptStartEntryAndWait(void) {
     s32 window = scrGetWindow();
     ItfMesState *state;
     s32 entry;

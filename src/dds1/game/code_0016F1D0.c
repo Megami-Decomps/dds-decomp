@@ -73,7 +73,7 @@ extern SdfPoolNode *D_003549E8[];
 extern SdfPoolNode *D_00354A48[];
 extern u32 D_00354A00[];
 extern SdfPoolNode D_00325248;
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
 

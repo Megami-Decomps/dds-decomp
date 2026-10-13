@@ -13,7 +13,6 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 extern SdfPendingRequest sdfTextureReleaseQueue;
 
 void *memcpy(void *arg0, void *arg1, u32 arg2);
-void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
 void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,

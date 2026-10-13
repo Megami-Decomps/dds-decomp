@@ -15,10 +15,10 @@ extern u32 D_0045C7B0[];
 
 
 
-extern void func_0030E940(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestHalo(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 
-extern void func_0030E958(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestPulse(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 extern MapRequestState *D_004390AC;
 
@@ -34,7 +34,7 @@ extern void *memset(void *, s32, u32);
 
 
 extern s32 D_0043909C;
-extern void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2, u32 color3, s32 image, s32 flags,
+extern void sdfDrawSlotGridWithCornerColors(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2, u32 color3, s32 image, s32 flags,
                           s32 depth);
 extern void sdfDrawPositionedSlotImage(s32 x, s32 y, s32 z, s32 alpha, s32 image, s32 flags, s32 depth);
 
@@ -57,7 +57,7 @@ void fldDrawTransitionBackdrop(f32 progress) {
     } else {
         fade = 1.0f;
     }
-    func_0030DBF0(0, 0, 0, (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
+    sdfDrawSlotGridWithCornerColors(0, 0, 0, (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
                   (u32)(fade * 128.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000, 0x1F, 0, depth);
     if (progress < 0.3f) {
         alpha = 0.0f;
@@ -75,7 +75,7 @@ void fldDrawTransitionBackdrop(f32 progress) {
             sdfDrawPositionedSlotImage(0, -2, 0, (s32)(alpha * 128.0f), D_0043909C + 0x2D, 0, depth);
             break;
         case 3:
-            func_0030DBF0(0, -2, 0, (u32)(alpha * 128.0f) | 0x80808000, (u32)(alpha * 104.0f) | 0x80808000,
+            sdfDrawSlotGridWithCornerColors(0, -2, 0, (u32)(alpha * 128.0f) | 0x80808000, (u32)(alpha * 104.0f) | 0x80808000,
                           (u32)(alpha * 104.0f) | 0x80808000, (u32)(alpha * 128.0f) | 0x80808000,
                           D_0043909C + 0x35, 0, depth);
             break;
@@ -100,14 +100,14 @@ void fldDrawTransitionBackdrop(f32 progress) {
 void func_0030E878(void) {
 }
 
-void func_0030E880(void) {
+void fldCreateMapRequestQueues(void) {
     MapRequestState *state;
     state = sdfCreateLinkedRequestRing(0x14, 0xC);
     D_004390AC = state;
-    D_004390AC->callback = func_0030E940;
+    D_004390AC->callback = fldDrawMapRequestHalo;
     fldSetMapRequestInterval(state, 0);
     D_004390B0 = sdfCreateLinkedRequestRing(0x14, 0x18);
-    D_004390B0->callback = func_0030E958;
+    D_004390B0->callback = fldDrawMapRequestPulse;
     D_004390A8 = 5;
     D_004390A4 = 0;
 }
@@ -116,21 +116,21 @@ extern void sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32, f
 
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
-void func_0030EF18(MapRequestState *state);
+void fldReleaseMapRequestQueue(MapRequestState *state);
 
 void fldReleaseMapRequestQueues(void) {
-    func_0030EF18(D_004390AC);
-    func_0030EF18(D_004390B0);
+    fldReleaseMapRequestQueue(D_004390AC);
+    fldReleaseMapRequestQueue(D_004390B0);
 }
 
 void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
     sdfDrawUniformlyScaledSlotImage(x, y, 0, alpha, 0x20, 0, 0x54, scale);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E940);
+INCLUDE_ASM(const s32, "game/code_0030E390", fldDrawMapRequestHalo);
 
 /* The current request pulses; other requests enlarge and fade in later. */
-void func_0030E958(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
+void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
     s32 gridX;
     s32 gridY;
     f32 scale = (1.0f - progress) * 3.0f + progress;
@@ -160,7 +160,7 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 extern s32 sdfCounterGetDisplayValue(void);
 extern f32 D_00400700[][4];
 extern s8 D_004388D1;
-extern void func_0030EF90(MapRequestState *);
+extern void fldAdvanceMapRequestAges(MapRequestState *);
 
 void fldUpdateMapRequestQueues(s32 enabled) {
     s8 index = sdfCounterGetDisplayValue() - 1;
@@ -192,12 +192,12 @@ void fldUpdateMapRequestQueues(s32 enabled) {
         D_0045C7A0[1] = (s32)D_00400700[index][1];
         D_0045C7A0[2] = (s32)D_00400700[index][2];
     }
-    func_0030EF90(D_004390AC);
-    func_0030EF90(D_004390B0);
+    fldAdvanceMapRequestAges(D_004390AC);
+    fldAdvanceMapRequestAges(D_004390B0);
 }
 
 extern f32 sdfCounterGetScaledValue(void);
-extern void func_0030F038(MapRequestState *);
+extern void fldDispatchMapRequestCallbacks(MapRequestState *);
 
 /* Draw the selected map marker and overlay its highlight twice. */
 void fldDrawSelectedMapMarker(void) {
@@ -217,7 +217,7 @@ void fldDrawSelectedMapMarker(void) {
     } else if (remaining > 0.0f) {
         alpha = remaining;
     }
-    func_0030F038(D_004390B0);
+    fldDispatchMapRequestCallbacks(D_004390B0);
     fldProjectPointToGridCell(&gridX, &gridY, D_00400700[index][0], D_00400700[index][1], D_00400700[index][2]);
     opacity = alpha * 32.0f;
     sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x20, 0, 0x54, 2.0f);
@@ -257,7 +257,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     return ring;
 }
 
-void func_0030EF18(MapRequestState *state) {
+void fldReleaseMapRequestQueue(MapRequestState *state) {
     if (state != NULL) {
         sdfQueueGeneralAllocationRelease(state->allocation);
     }
@@ -286,7 +286,7 @@ void fldSetMapRequestInterval(MapRequestState *queue, u16 interval) {
 }
 
 /* Advance active ring nodes, retiring each node when it reaches the queue limit. */
-void func_0030EF90(MapRequestState *ring) {
+void fldAdvanceMapRequestAges(MapRequestState *ring) {
     s32 remaining;
     s32 pending;
     u16 limit;
@@ -339,7 +339,7 @@ done:
 }
 
 /* Report normalized progress for each active request in the ring. */
-void func_0030F038(MapRequestState *ring) {
+void fldDispatchMapRequestCallbacks(MapRequestState *ring) {
     MapRequestNode *node;
     s32 remaining;
     s32 end;

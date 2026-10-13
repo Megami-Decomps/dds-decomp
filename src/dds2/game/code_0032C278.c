@@ -139,7 +139,7 @@ extern s8 sdfPendingQueueRotationActive;
 
 extern s32 sdfPendingQueueSlots[2];
 
-s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 
 void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,

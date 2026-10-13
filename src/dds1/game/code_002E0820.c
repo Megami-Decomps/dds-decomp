@@ -14,6 +14,7 @@
 #include "sdf_primitive.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "sdf_request.h"
 #include "sdf_model.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
@@ -169,7 +170,7 @@ extern SdfTex *D_003BD380;
 
 extern SdfTex *D_003BD390;
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern s32 D_003BDA20;
 
@@ -564,10 +565,6 @@ extern u8 D_00317C20[];
 
 extern u8 D_0031BC60[];
 
-extern void sdfInitializeObjectListRequest(void);
-
-extern void sdfRegisterResourceQueueCallbacks(void);
-
 extern void func_002E1D60(void);
 
 extern u64 D_003BD388;
@@ -581,10 +578,6 @@ extern s32 D_00324214[];
 extern u8 D_00317C20[];
 
 extern u8 D_0031BC60[];
-
-extern void sdfInitializeObjectListRequest(void);
-
-extern void sdfRegisterResourceQueueCallbacks(void);
 
 /* Acquire texture resources, split their TEX0 words, and initialize queues. */
 void sdfInitializeResourceQueuesAndTextureWords(void) {

@@ -112,7 +112,7 @@ extern void mnuDrawTitleMenuFadeOverlay(s32, s32);
 
 extern void mnuDrawMovieChoiceTransition(s32, s32);
 
-extern void mnuSetMovieMenuStateFlag(s32, s32, u8);
+extern void mnuSetMovieWorkFlag(s32, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
@@ -279,11 +279,11 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
                 opening->phase = 1;
                 opening->selectedPage = 0;
             }
-            mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 0, 1);
+            mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 1);
             return 0;
         }
         sndSetSequenceVolumePan(8, 127, 63);
-        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 0, 0);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
         return 1;
     case 1:
         if (state->selectedPage < 90) {
@@ -293,7 +293,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             sndSetSequenceVolumePan(8, 127, 63);
-            mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 0, 0);
+            mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 0, 0);
             return 1;
         }
         state = (MenuTitleState *)mnuMovieMenuState;
@@ -398,11 +398,11 @@ void mnuDrawTitleSceneForPhase(void) {
     case 1:
         mnuDrawTitleMenuFadeOverlay(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
         mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 0:
         mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 1, 1);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 2:
         mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)mnuMovieMenuState)->selectionList, 0x53);
@@ -410,7 +410,7 @@ void mnuDrawTitleSceneForPhase(void) {
     case 3:
     case 4:
         mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        mnuSetMovieMenuStateFlag((s32)&mnuMovieMenuState->movie, 1, 0);
+        mnuSetMovieWorkFlag((s32)&mnuMovieMenuState->movie, 1, 0);
         break;
     }
 }
@@ -1026,7 +1026,7 @@ s32 mnuStaffImageProc(void) {
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern void mnuLoadIndexedTitleSoundStream(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 
 void mnuUpdateStaffRollStreamState(void)
 {
@@ -1043,7 +1043,7 @@ void mnuUpdateStaffRollStreamState(void)
         switch (mnuPollTitleStreamStateLocked()) {
         case 0: /* MNU_STREAM_LOAD_IDLE */
             mnuMovieWork->streamPhase = 2;
-            mnuLoadIndexedTitleSoundStream(23);
+            mnuQueueTitleSoundStreamEntry(23);
             break;
         case 1: /* MNU_STREAM_LOAD_PENDING */
             break;
@@ -1398,7 +1398,7 @@ void mnuFadeSetStateB(StaffScrollTransition *state, u32 mode) {
 
 extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
-extern void func_00308F78(s32, u32);
+extern void func_00308F78(s32, s32);
 void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 fade = state->opacity / 2;
@@ -1566,7 +1566,6 @@ extern char D_0042A380[];
 
 extern u32 D_00437AD0;
 extern u32 sdfSoundGetCommandStatus(void);
-extern void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 extern SdfMovieDescriptor D_00457DB0;
 extern char D_00457DC8[];
 extern char D_0042A3B0[];

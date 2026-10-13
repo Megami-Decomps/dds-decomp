@@ -6691,7 +6691,7 @@ void sndSetStationedSeHighVolume(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
-extern void mnuLoadIndexedTitleSoundStream(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern void mnuResetTitleStreamLocked(void);
 
@@ -6718,10 +6718,10 @@ void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
         mnuResetTitleStreamLocked();
     }
     if (selection == 5) {
-        mnuLoadIndexedTitleSoundStream(D_0035F998[D_003BB6A8 % 5]);
+        mnuQueueTitleSoundStreamEntry(D_0035F998[D_003BB6A8 % 5]);
         D_003BB6A8++;
     } else {
-        mnuLoadIndexedTitleSoundStream(selection - 1);
+        mnuQueueTitleSoundStreamEntry(selection - 1);
     }
 }
 
@@ -7314,7 +7314,7 @@ extern void mnuReleaseSoundBufferLocked(void);
 
 extern void mnuPrintTitleDebugBanner(void);
 
-extern void mnuLoadTitleSoundBufferFromMemory(u32, u32, s32);
+extern void mnuInstallTitleSoundBufferFromData(u32, u32, s32);
 
 extern s32 func_003003F0(const char *, ...);
 
@@ -7366,7 +7366,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
             }
             data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->slot]);
             size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->slot]);
-            mnuLoadTitleSoundBufferFromMemory(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size, 2);
             func_003003F0("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
             work->unk264 = 0;
@@ -7572,7 +7572,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         data = sdfResourceRetainAddress(resource);
         size = (s32)fileGetResourceSize(args->request);
         filePollEntryCleanup(args->request);
-        mnuLoadTitleSoundBufferFromMemory(data, size, D_00377650[args->entryIndex].volume);
+        mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].volume);
         sdfReleaseResourceAllocation(resource);
         btlBossDebugPrintf(D_003A5358);
         return 1;
@@ -7645,7 +7645,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
             data = sdfResourceRetainAddress(args->resourceAllocation);
             size = (s32)fileGetResourceSize(args->request);
             filePollEntryCleanup(args->request);
-            mnuLoadTitleSoundBufferFromMemory(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuPrintTitleDebugBanner();
             func_003003F0(D_003A5390);
             btlBossDebugPrintf(D_003A53B0);

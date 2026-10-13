@@ -14,6 +14,7 @@
 #include "sdf_primitive.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "sdf_request.h"
 #include "sdf_model.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
@@ -200,15 +201,11 @@ extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern u8 D_0040B730[];
 
 extern void func_0033AC10(void);
-
-extern void sdfInitializeObjectListRequest(void);
-
-extern void sdfRegisterResourceQueueCallbacks(void);
 
 extern u8 D_00372C00[];
 

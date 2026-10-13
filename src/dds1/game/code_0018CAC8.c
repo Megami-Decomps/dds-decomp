@@ -39,7 +39,7 @@ typedef char EffDirEnt_size_must_be_0x144[(sizeof(EffDirEnt) == 0x144) ? 1 : -1]
 extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0039862B[];
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern EffHandler D_00355734[];
 extern EffHandler D_00355738[];

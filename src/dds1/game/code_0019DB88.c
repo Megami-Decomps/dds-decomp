@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad.h"
 #include "itf_mes_window.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
@@ -29,35 +30,6 @@ extern s32 frFontMeasureGlyphStripWidth();
 extern UiSprite *func_00199828(s32, u32);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct SndPad {
-    u8 pad00[0x20];
-    union {
-        s8 buttons[0x20];
-        struct {
-            u8 pad20;
-            s8 confirm;
-            s8 edge22;
-            s8 edge23;
-            u8 pad24[2];
-            s8 prev;
-            s8 next;
-            u8 pad28[9];
-            s8 unk31;
-            u8 unk32;
-            s8 cancel;
-            s8 coarseDown;
-            s8 coarseUp;
-            s8 unk36;
-            s8 unk37;
-            s8 fineDown;
-            u8 pad39;
-            s8 fineUp;
-            u8 pad3B[5]; /* Complete two-port current/edge byte storage. */
-        };
-    };
-} SndPad;
-
-
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
 
 extern SndPad D_00324510;
@@ -71,9 +43,9 @@ extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface)
 
 extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 
-extern void func_0019F770(UiSprite *sprite);
+extern void itfQueueSpriteQuadPacket(UiSprite *sprite);
 
-extern s32 func_0019EA88(ItfMesBlk40 *seq);
+extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *seq);
 
 extern void itfMesSetRowItemFlag(FrFontGlyph *sequence, s32 index, s32 count, s32 selected);
 
@@ -172,14 +144,14 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->optionCount = 0;
 }
 
-void func_0019E048(ItfMesBlkA4 *block, s32 mode, s32 value);
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 value);
 
 
 void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
     block->frame = NULL;
     block->sprite = NULL;
     block->overlay = NULL;
-    func_0019E048(block, 0, 0);
+    itfMesConfigurePanelBoundsAndFadeLimit(block, 0, 0);
 }
 
 void itfClearDrawStateWords(ItfMesTextSlots *slots) {
@@ -260,7 +232,7 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
     return out;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E048);
+INCLUDE_ASM(const s32, "game/code_0019DB88", itfMesConfigurePanelBoundsAndFadeLimit);
 
 void itfMesUpdatePanelFades(ItfMesState *panel);
 void btlUpdateFadeIndicator(ItfMesState *panel);
@@ -449,7 +421,7 @@ s32 sndSeqSelectPoll(ItfMesState *panel) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         return 1;
     }
-    if (sel->optionCount > 0 && (index = func_0019EA88(sel)) >= 0) {
+    if (sel->optionCount > 0 && (index = itfMesFindPressedOptionRank(sel)) >= 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         if (index != sel->selectedIndex) {
             itfMesSetRowItemFlag(sel->glyphChain, sel->selectedIndex, sel->rowCount, 0);
@@ -485,7 +457,7 @@ void sndStepSequenceIndex(ItfMesBlk40 *obj, s32 dir) {
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);
 }
 
-s32 func_0019EA88(ItfMesBlk40 *selection) {
+s32 itfMesFindPressedOptionRank(ItfMesBlk40 *selection) {
     s32 i;
 
     for (i = 0; i < selection->optionCount; i++) {
@@ -545,7 +517,7 @@ void btlUpdateFadeIndicator(ItfMesState *panel) {
 extern void itfMesRenderActivePanelSprites(ItfMesState *);
 extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
 extern void itfDrawSelectedSoundRow(ItfMesState *);
-extern void func_0019F0F8(ItfMesState *);
+extern void itfDrawSoundSelectorOptionPanel(ItfMesState *);
 
 /* Draw the panel's glyph layers, advance its selection state and fade. */
 void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
@@ -589,7 +561,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     }
     if (panel->fade.kind & 2) {
         if (panel->unk12 == 3) {
-            func_0019F0F8(panel);
+            itfDrawSoundSelectorOptionPanel(panel);
         } else {
             itfDrawSelectedSoundRow(panel);
         }
@@ -612,12 +584,12 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
         }
     }
     if (D_00357D88[0] != 0 && D_00357D88[0]->owner == panel && place != 0) {
-        func_0019F770(place->sprite);
+        itfQueueSpriteQuadPacket(place->sprite);
     }
 }
 
 extern DrawColorRec D_00357FC8[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void func_00198990(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
@@ -693,12 +665,11 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F0F8);
+INCLUDE_ASM(const s32, "game/code_0019DB88", itfDrawSoundSelectorOptionPanel);
 
 extern u8 D_00358008[];
 extern u8 D_00357FF8[];
 extern s32 D_00358018[];
-extern s32 sdfAllocPacketAligned(s32);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void itfSendTablePacket(SdfListHead *, s32, s32);
 
@@ -739,7 +710,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
 }
 
 
-s32 sndVisitQueuedResources(void) {
+s32 itfUpdateActiveMessageWindows(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     while (node != 0) {
         itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
@@ -751,7 +722,7 @@ s32 sndVisitQueuedResources(void) {
 extern void itfMesDestroyWindow(s32 window);
 extern u32 func_0011E278(void);
 
-s32 func_0019F6A0(KwlnTask *task) {
+s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     ItfMesPoolNode *node;
 
     if (func_0011E278() != 0) {
@@ -781,10 +752,9 @@ extern SdfPoolNode D_00325708;
 extern s32 D_00358028[];
 extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];
-extern s32 sdfAllocPacketAligned(s32 size);
 extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
-void func_0019F770(UiSprite *sprite) {
+void itfQueueSpriteQuadPacket(UiSprite *sprite) {
     s32 vertices[4][2] = {
         {sprite->left, sprite->top},
         {sprite->right, sprite->top},
@@ -884,7 +854,7 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     }
 }
 
-ItfMesPoolNode *func_0019FA70(ItfMesPoolNode *node) {
+ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
     s32 index = 0;
     s32 count = itfMesWork.activeWindowCount;
 
@@ -1005,7 +975,7 @@ extern ItfFovPanelWork D_003D73C0;
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
-s32 func_0019FCC8(void) {
+s32 btlEditCameraFieldOfView(void) {
     SifCommand packet;
     SdfListHead *list;
     f32 radiansToDegrees = 57.2957795f;

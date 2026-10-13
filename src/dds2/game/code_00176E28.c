@@ -63,7 +63,7 @@ extern SdfPoolNode *D_003B1318[];
 extern SdfPoolNode *D_003B1378[];
 extern u32 D_003B1330[];
 extern SdfPoolNode D_00380248;
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
 extern void effReleaseRingRecordPool(EffRecordPool *pool);

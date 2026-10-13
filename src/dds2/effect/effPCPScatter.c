@@ -124,7 +124,7 @@ extern EffPacketParams D_00452020[];
 extern u32 D_003B13A0[];
 extern u32 D_003B13F0[];
 extern SdfPoolNode *D_003B14B0[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);

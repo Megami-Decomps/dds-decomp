@@ -16,6 +16,7 @@
 #include "eff_event.h"
 #include "eff_node_descriptor.h"
 #include "scr.h"
+#include "scr_arg_read.h"
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_004371F0;
@@ -79,7 +80,6 @@ extern void evtResetObjectPendingValue(EffWorldNode *object);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-extern f32 bfWaitReadArgFloat(s32 idx);
 
 /* World object views used by the model-parameter opcodes. */
 typedef struct EvtModelHeader {

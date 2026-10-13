@@ -84,7 +84,7 @@ extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern void mnuReleaseSoundBufferLocked(void);
 
-extern void mnuLoadTitleSoundBufferFromMemory(s32, s32, u8);
+extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
 
 extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
@@ -213,7 +213,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         data = sdfResourceRetainAddress(resource);
         size = (s32)fileGetResourceSize(args->request);
         filePollEntryCleanup(args->request);
-        mnuLoadTitleSoundBufferFromMemory(data, size, D_003E0F60[args->entryIndex].volume);
+        mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].volume);
         sdfReleaseResourceAllocation(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
         return 1;
@@ -277,7 +277,7 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
             data = sdfResourceRetainAddress(args->resourceAllocation);
             size = (s32)fileGetResourceSize(args->request);
             filePollEntryCleanup(args->request);
-            mnuLoadTitleSoundBufferFromMemory(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
             btlBossDebugPrintf("btl:ATRAC3 dead load end\n");
         }

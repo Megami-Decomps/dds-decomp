@@ -77,11 +77,11 @@ extern void fldUpdateMapRequestQueues(s32);
 extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
 extern s32 sdfStepSelectedMapCameraTransition(void);
-extern s32 func_002C4160(void);
+extern s32 fldAdvanceLocalMapCameraTransition(void);
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
-extern s32 func_002C3DB0(void);
+extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s32 evtGetCapturedWindowPanelValue(void);
 /* The retail caller passes color bytes as promoted ints; the callee narrows them. */
 extern void kwlnFadeInStart(s32, s32, s32, s32);
@@ -300,7 +300,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_0011D3E8();
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
@@ -529,7 +529,7 @@ s32 fldUpdateLocalMapController(void) {
             sdfLatchBaseVectorsForSelection();
             sdfCounterInitializeDisplayAnimation();
         }
-        func_002C4160();
+        fldAdvanceLocalMapCameraTransition();
         if (result == 0) {
             D_003BD25C = 1;
             sdfLatchBaseVectorsForSelection();
@@ -549,7 +549,7 @@ s32 fldUpdateLocalMapController(void) {
                 sdfLatchBaseVectorsForSelection();
             }
         }
-        func_002C3DB0();
+        sdfUpdateSelectedCounterMapCameraTransition();
         break;
     case 4:
         result = evtGetCapturedWindowPanelValue();
@@ -582,7 +582,7 @@ extern void fldDrawSkyGradient(void);
 extern void evtSetDrawSurfaceIndex(s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32, s32);
-extern void func_002C4850(s32);
+extern void sdfAdjustCounterValueAndRedraw(s32);
 extern void fldDrawCounterMapMarker(void);
 extern void fldDrawLocalMapTransition(s32);
 extern s32 func_00134CD8(void);
@@ -596,17 +596,17 @@ void fldDrawLocalMapOverlay(void) {
     switch (D_003BD25C) {
     case 1:
     case 2:
-        func_002C4850(1);
+        sdfAdjustCounterValueAndRedraw(1);
         fldDrawCounterMapMarker();
         fldDrawLocalMapTransition(0);
         break;
     case 3:
-        func_002C4850(0);
+        sdfAdjustCounterValueAndRedraw(0);
         fldDrawCounterMapMarker();
         fldDrawLocalMapTransition(1);
         break;
     case 4:
-        func_002C4850(0);
+        sdfAdjustCounterValueAndRedraw(0);
         fldDrawLocalMapTransition(1);
         break;
     case 5:

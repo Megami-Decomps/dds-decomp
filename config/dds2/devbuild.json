@@ -96,9 +96,7 @@
       "object": "build/dds2/dev/code_002C83F0.o",
       "expected_symbols": 24,
       "expected_shifted_symbols": 23,
-      "fallback_symbols": [
-        "fileReqInit"
-      ],
+      "fallback_symbols": [],
       "retained_sections": [
         {
           "section": ".data",

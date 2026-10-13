@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "sdf_packed_resource.h"
 #include "sdf.h"
+#include "sdf_texture_lists.h"
 #include "sdf_draw.h"
 #include "sdf_stream_read.h"
 #include "sdf_dev_event.h"
@@ -679,9 +680,7 @@ extern char sdfGsMemoryDumpHeader[]; /* " <<< GS memory information >>>..." */
 extern char sdfGsMemoryDumpRowFormat[]; /* " %08X : %08X %08X %8s %08X %d\n" */
 extern char sdfGsMemoryTypeFormat[]; /* "%d" */
 extern char *D_00398A28[];
-extern SdfTexResource *sdfGetTextureListHead(void);
 extern char *D_00398A38[];
-extern SdfTexResource *sdfGetTextureBlockListHead(void);
 
 void sdfDumpGsMemoryForward(void) {
     char buf[8];

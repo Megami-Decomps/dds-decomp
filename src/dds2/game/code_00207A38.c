@@ -18,6 +18,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
+#include "scr_arg_read.h"
 #include "sdf.h"
 #include "btl_resource_name.h"
 #include "dat_command.h"
@@ -210,7 +211,6 @@ typedef struct BtlVec3 {
     f32 x, y, z;
 } BtlVec3;
 
-extern f32 bfWaitReadArgFloat(s32);
 
 extern BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -1036,7 +1036,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 
 struct RefObj;
 extern SdfTex *func_002DDD60(void *, struct RefObj *);
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern s32 D_003BE0E0[];
 
 /* Draw an indexed glyph with independently sized geometry and fixed atlas UVs. */

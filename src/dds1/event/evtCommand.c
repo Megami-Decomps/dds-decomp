@@ -11,6 +11,7 @@
 #include "evt_world.h"
 #include "evt_event_pack.h"
 #include "scr.h"
+#include "scr_arg_read.h"
 #include "evt_solar.h"
 
 /* Fixed dispatch payload sizes and the native six-kind world-object scan. */
@@ -97,7 +98,6 @@ void evtDestroySecondaryWorldNode(void);
 
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
-f32 bfWaitReadArgFloat(s32 idx);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
@@ -375,19 +375,19 @@ s32 evtCommandReadSecondaryWorldIdValue(void) {
     return 1;
 }
 
-s32 func_00226650(void)
+s32 evtCommandOpenTitleMenu(void)
 {
     dds3AdminSubmitModeRequest(2, 0, 0, 0);
     return 1;
 }
 
-s32 func_00226680(void)
+s32 evtCommandOpenMemoryCardMenu(void)
 {
     dds3AdminSubmitModeRequest(0xc, 0, 0, 0);
     return 1;
 }
 
-s32 func_002266B0(void)
+s32 evtCommandStartStaffMovie(void)
 {
     dds3AdminSubmitModeRequest(4, 0, 0, 0);
     return 1;

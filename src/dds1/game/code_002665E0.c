@@ -823,7 +823,7 @@ u32 func_00269868(void) {
 
 s32 movCheckStartupSoundState(void) {
     if (mnuPollTitleStreamStateLocked() == 0) {
-        mnuLoadIndexedTitleSoundStream(scrReadIntParameter(0));
+        mnuQueueTitleSoundStreamEntry(scrReadIntParameter(0));
         return 0;
     }
     return mnuPollTitleStreamStateLocked() != 1;

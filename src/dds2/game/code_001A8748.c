@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "snd_pad.h"
 #include "btl_item_drop.h"
 #include "itf_mes_window.h"
 #include "fr_font_measure.h"
@@ -164,39 +165,13 @@ extern u8 D_003B4D18[];
 
 extern u8 D_003B4D28[];
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct SndPad {
-    u8 pad00[0x20];
-    union {
-        s8 buttons[0x20];
-        struct {
-            u8 pad20;
-            s8 confirm;
-            u8 pad22[4];
-            s8 prev;
-            s8 next;
-            u8 pad28[9];
-            s8 unk31;
-            s8 unk32;
-            s8 cancel;
-            s8 coarseDown;
-            s8 coarseUp;
-            s8 unk36;
-            s8 unk37;
-            s8 fineDown;
-            u8 pad39;
-            s8 fineUp;
-            u8 pad3B[5];
-        };
-    };
-} SndPad;
-
 extern SndPad D_0037F510;
 
 extern SdfPoolNode kwlnDrawSurfaces[];

@@ -9,6 +9,7 @@
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_offset_triangle.h"
 #include "eff_packet_params.h"
 
 extern void *sdfConsAllocateColumnPacket(s32);
@@ -29,7 +30,7 @@ extern void (*D_003AAFC0[])();
 
 extern BillDispatch effBillConstructorEntries[];
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void effBattleReleaseParameterBanks(SoundMixer *);
@@ -156,35 +157,34 @@ void func_00167300(EffectDispatchState *effect, u32 value) {
 }
 
 /* Append position, position+(0,5,0), position+(0,5,5), with optional normals/color. */
-void effAppendOffsetTriangle(void *buffer, const f32 *position) {
-    u8 *work = buffer;
-    s32 count = *(s32 *)(work + 0xC);
+void effAppendOffsetTriangle(EffOffsetTriangleView *work, const f32 *position) {
+    s32 count = work->count;
     f32 point[4] __attribute__((aligned(16)));
     f32 (*positions)[4];
     u16 flags;
 
     PCP_COPY_VECTOR(point, position);
-    positions = (f32 (*)[4])(((u32)count << 4) + (u32)*(f32 (**)[4])(work + 0x44));
+    positions = (f32 (*)[4])(((u32)count << 4) + (u32)work->positions);
     PCP_COPY_VECTOR(positions[0], point);
     point[1] += 5.0f;
     PCP_COPY_VECTOR(positions[1], point);
     point[2] += 5.0f;
     PCP_COPY_VECTOR(positions[2], point);
-    flags = *(u16 *)work;
+    flags = work->flags;
     if (flags & 2) {
-        f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + (u32)*(f32 (**)[4])(work + 0x4C));
+        f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + (u32)work->normals);
         PCP_COPY_VECTOR(normals[0], D_003AAEB0);
         PCP_COPY_VECTOR(normals[1], D_003AAEB0);
         PCP_COPY_VECTOR(normals[2], D_003AAEB0);
     }
     if (flags & 4) {
-        u32 *colors = (u32 *)(((u32)count << 2) + (u32)*(u32 **)(work + 0x50));
+        u32 *colors = (u32 *)(((u32)count << 2) + (u32)work->colors);
         colors[0] = 0x80000080;
         colors[1] = 0x80000080;
         colors[2] = 0x80000080;
-        count = *(s32 *)(work + 0xC);
+        count = work->count;
     }
-    *(s32 *)(work + 0xC) = count + 3;
+    work->count = count + 3;
 }
 
 void effBillSetEntryValue(EffectDispatchState *effect, s32 index, u32 value) {

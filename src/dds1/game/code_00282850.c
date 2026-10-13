@@ -2648,7 +2648,7 @@ void *evtCreateBattleStageTestCamera(void) {
 extern SdfPoolNode D_00325708;
 extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Draw the battle-stage selector; confirmation creates the selected world object

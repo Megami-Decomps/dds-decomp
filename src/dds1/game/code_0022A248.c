@@ -162,7 +162,7 @@ void *evtGetTestTaskUpdateCallback(void) {
     return (void *)evtUpdateScriptTestSelection;
 }
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern s32 func_003014F0(char *, const char *, ...);
 extern s32 sdfPathExists(char *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);

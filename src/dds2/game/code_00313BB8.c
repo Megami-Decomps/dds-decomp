@@ -1564,7 +1564,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
 
 
 extern SdfPoolNode *D_0040A958[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_00348158(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.

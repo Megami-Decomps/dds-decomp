@@ -75,7 +75,7 @@ typedef struct ScatterRenderState {
 extern ScatterRenderState D_003D65B0;
 extern u8 D_00354B90[];
 extern SdfPoolNode *D_00354BF0[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(ScatterRenderState *);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);

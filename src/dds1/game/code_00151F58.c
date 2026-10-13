@@ -54,7 +54,7 @@ extern s32 effBillResourceOwners[];
 
 extern s32 effEmitterDelayRandomState[];
 
-s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 
 typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
