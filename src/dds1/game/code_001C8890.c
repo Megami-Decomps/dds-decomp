@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -155,7 +156,6 @@ s32 btlGetLoggedIndexedCommandItem(s32 index);
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 

@@ -3,6 +3,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
@@ -102,7 +103,6 @@ extern void btlBossDebugPrintf(const char *, ...);
 
 extern s8 effSharedRandomState[];
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);

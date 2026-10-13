@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "btl_item_drop.h"
 #include "sdf_packet_list.h"
@@ -79,7 +80,6 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern s32 btlCollectAvailableOptionSkills(s32, s32 *);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 

@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
@@ -240,7 +241,6 @@ extern void btlReleaseUnitResources(BtlUnit *);
 
 extern void btlInitUnitFxDefaults(BtlUnit *);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern void btlClearPartyRecordStatusBits(void *, s32);
 
@@ -1898,7 +1898,6 @@ void btlUpdateAutoMusic(void) {
 
 extern s32 fileTestSavedSlotFlags(u32);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
