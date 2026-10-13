@@ -351,7 +351,7 @@ extern s32 filePollSlotRequestAndResumeFlow(void);
 
 extern u32 D_003BC804;
 
-extern void func_001005B8(void);
+extern void fileSetMemoryCardOperationActive(void);
 
 extern void func_00289D50(u32 handle);
 
@@ -2150,7 +2150,7 @@ s32 mcHandleDetectionResult(void) {
     if (status == MC_POLL_PENDING) {
         return 0;
     }
-    func_001005B0();
+    fileClearMemoryCardOperationActive();
     if (status < 0) {
         fileSetMenuFlowState(0);
         D_003BC854 = 6;
@@ -2162,7 +2162,7 @@ s32 mcHandleDetectionResult(void) {
 
 s32 fileStartMemoryCardDetection(void) {
     fileSetMenuFlowState(5);
-    func_001005B8();
+    fileSetMemoryCardOperationActive();
     func_00289D50(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
@@ -2749,7 +2749,7 @@ void fileReleaseMenuResources(void) {
         }
         sdfReleaseMemorySlot((s32 *)&D_003BD910);
         kwlnTaskDestroyWithHierarchyByName(D_003B26C8, 1);
-        func_001005B0();
+        fileClearMemoryCardOperationActive();
     }
 }
 

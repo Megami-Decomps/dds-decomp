@@ -182,11 +182,11 @@ void func_001005A0(void) {
 void func_001005A8(void) {
 }
 
-void func_001005B0(void) {
+void fileClearMemoryCardOperationActive(void) {
     D_003BA709 = 0;
 }
 
-void func_001005B8(void) {
+void fileSetMemoryCardOperationActive(void) {
     D_003BA709 = 1;
 }
 

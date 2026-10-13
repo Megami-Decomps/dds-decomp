@@ -13,6 +13,8 @@
 0x00100548	kwlnSetTaskPauseCount	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:152; Stores a pause countdown and enables pause mode.; twin=0x00100430 (DDS2).
 0x00100560	kwlnSetFrameControlParameters	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:158; Stores two frame-control values and snapshots the loop counter.; twin=0x00100448 (DDS2).
 0x00100588	kwlnResetFrameControl	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:171; Clears frame-control state and sets the stored value to four.; twin=0x00100470 (DDS2).
+0x001005B0	fileClearMemoryCardOperationActive	inferred	Clears the file-menu memory-card operation state after polling completes; called when memory-card detection resolves.
+0x001005B8	fileSetMemoryCardOperationActive	inferred	Marks a file-menu memory-card operation active before detection or memory-card package loading begins.
 0x001005C8	kwlnRunMainLoop	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:207; Runs input and scheduler updates until the exit flag, then loads the exit executable.; twin=0x001004B0 (DDS2).
 0x001006E0	kwlnTaskRemoveFromStateQueue	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:107:func_001006E0; M141; source=names_pending_main.tsv:112; review=Unlinks a task from its delayed-start, active or delayed-destroy state queue, repairing head/tail and neighboring links. [names_qp11.tsv]
 0x00100858	kwlnTaskInsertIntoOrderedStateQueue	inferred	confidence=high; src/dds1/game/code_00100000.c:func_00100858; Selects the queue from task state, inserts by ascending comparison key, repairs links and increments that queue count. [names_qp9.tsv]
