@@ -2,6 +2,7 @@
 #include "sdf_dev_cons.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
 #include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
@@ -1595,14 +1596,6 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     }
 }
 
-/* Copy heap metadata before drawing can allocate more packets. */
-typedef struct HeapOverlayBlock {
-    u32 address;
-    u8 state;
-    u8 padding[3];
-    s32 size;
-} HeapOverlayBlock;
-
 extern s32 sdfGetPacketCursor(void);
 extern void sdfSetPacketCursorAligned(s32);
 extern s32 DIntr(void);
@@ -1612,8 +1605,8 @@ extern SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *);
 extern void EIntr(void);
 
 void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
-    HeapOverlayBlock *snapshot;
-    HeapOverlayBlock *entry;
+    SdfHeapOverlayBlock *snapshot;
+    SdfHeapOverlayBlock *entry;
     SdfMemBlock *block;
     u32 count;
     u32 i;
@@ -1623,7 +1616,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     s32 markerX;
     s32 markerY;
 
-    snapshot = (HeapOverlayBlock *)sdfGetPacketCursor();
+    snapshot = (SdfHeapOverlayBlock *)sdfGetPacketCursor();
     restoreInterrupts = DIntr();
     block = (SdfMemBlock *)sdfGetFirstGeneralHeapBlock();
     entry = snapshot;
