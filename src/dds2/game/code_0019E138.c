@@ -1404,7 +1404,7 @@ void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
 
 /* Draw three adjacent quads using zero-alpha/source-alpha edge color records.
  * Border widths and resulting signed middle width are not clamped. */
-void func_001A09C0(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, SdfListHead *command) {
+void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, SdfListHead *command) {
     DrawVertex vertices[ITF_QUAD_VERTEX_COUNT];
     DrawColorRec colors[2];
     s32 middleWidth;

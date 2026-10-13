@@ -2103,7 +2103,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
 
 extern DrawColorRec D_003B49B8[];
 
-extern void func_001A09C0(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfDrawThreePanelBorderBands(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
 
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 
@@ -2136,7 +2136,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     bounds[0].y = y + 0x20;
     bounds[1].x = x + frFontMeasureLineWidth(selected, selection->glyphChain) + 0x1D0;
     bounds[1].y = bounds[0].y + 0x90;
-    func_001A09C0(bounds, D_003B49B8, panel->renderValue, 0x1D0, list);
+    itfDrawThreePanelBorderBands(bounds, D_003B49B8, panel->renderValue, 0x1D0, list);
 
     bounds[0].x = x;
     bounds[0].y = y + 8;

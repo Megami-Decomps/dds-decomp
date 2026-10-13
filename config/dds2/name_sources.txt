@@ -2131,6 +2131,7 @@
 0x001A0438	itfReleaseFontTestTaskResources	inferred	Advances fading font glyphs and releases the background sprite. [names_reviewed8.tsv]
 0x001A0458	itfDrawBackgroundAndGetTaskReadyMask	inferred	Draws background then returns 0xFFFFFFFF only when registered task state equals three; first-game twin 00198428.
 0x001A0710	itfLoadTextureFromAsset	inferred	Loads named asset, obtains its texture reference from the resource handle, then releases temporary allocation; first-game twin 001986E0.
+0x001A09C0	itfDrawThreePanelBorderBands	inferred	Partitions the rectangle into left, center and right border bands and emits three flat quads with transparent/source-alpha color records; center width is unclamped.
 0x001A0CA0	itfQueueTextureBoundQuadPacket	inferred	confidence=high; matched-C; src/dds2/game/code_0019E138.c:815:func_001A0CA0; Builds the GS textured rectangle/quad packet from two vertex corners, UVs, color and depth, binds the supplied texture, and appends the packet to the caller chain; packet primitive/state bits are 0x156.; source=names_P5.tsv:13 [names_qp11.tsv]
 0x001A0E20	itfQueueColoredTexturedQuadPacket	inferred	Builds a two-vertex textured GS packet with UV and RGBA values and appends it. [names_reviewed14.tsv]
 0x001A0F88	itfEmitColoredLinePacket	inferred	Builds a two-vertex packet with supplied colors and appends it. [names_reviewed8.tsv]

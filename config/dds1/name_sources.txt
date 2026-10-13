@@ -2588,6 +2588,7 @@
 0x001986E0	itfLoadTextureFromAsset	inferred	Loads named asset, obtains its texture reference from the resource handle, then releases temporary allocation; sequel twin 001A0710.
 0x00198730	itfDrawTriFlat3	inferred	same packet builder for 3 vertices with x/y offsets, type 0x4B
 0x00198858	itfDrawQuadFlat4	inferred	flat-color quad packet: 4 vertices/colors, packet type 0x4D size (2,4)
+0x00198990	itfDrawThreePanelBorderBands	inferred	Partitions the rectangle into left, center and right border bands and emits three flat quads with transparent/source-alpha color records; center width is unclamped.
 0x00198B30	itfDrawQuadTextured4	inferred	textured quad packet with uv floats, type 0x5D|flag<<9
 0x00198C70	itfQueueTextureBoundQuadPacket	inferred	confidence=high; matched-C; src/dds1/game/code_00196478.c:786:func_00198C70; Builds the GS textured rectangle/quad packet from two vertex corners, UVs, color and depth, binds the supplied texture, and appends the packet to the caller chain; packet primitive/state bits are 0x156.; source=names_P5.tsv:13 [names_qp11.tsv]
 0x00198DF0	itfQueueColoredTexturedQuadPacket	inferred	Builds a two-vertex textured GS packet with UV and RGBA values and appends it. [names_reviewed14.tsv]
