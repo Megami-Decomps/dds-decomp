@@ -57,7 +57,7 @@ extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern f32 func_00208000(s32, f32 *, f32 *);
+extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
@@ -372,7 +372,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             }
         }
     }
-    func_00208000(0x400, 0, 0);
+    btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, target);
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
@@ -583,7 +583,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     slot[link->unit->lookupId] = link->unit;
     slot[first->lookupId] = first;
     slot[second->lookupId] = second;
-    radius = func_00208000(0x400, 0, 0) + 200.0f;
+    radius = btlMeasureFilteredUnitGroupBounds(0x400, 0, 0) + 200.0f;
     VU0_STORE_VF_UNCLOBBERED(vf10, center);
     pos[0] = center[0];
     pos[1] = 0.0f;
@@ -782,7 +782,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     } else {
         btlUnitGetMuzzlePosVU(front);
         VU0_STORE_VF(vf10, &vec[0]);
-        func_00208000(target->status.flags & 0x600, 0, 0);
+        btlMeasureFilteredUnitGroupBounds(target->status.flags & 0x600, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
         if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)&vec[1]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
