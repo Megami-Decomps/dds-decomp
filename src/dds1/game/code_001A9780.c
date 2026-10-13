@@ -3341,7 +3341,22 @@ s32 btlHasUnmarkedLinkageSkill(BtlUnit *unit) {
 
 extern s32 btlGetTaskState6(void);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", btlGetTaskState6);
+s32 btlGetTaskState6(void) {
+    KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    BattleSceneObject *scene;
+    s32 count;
+
+    if (task == NULL) {
+        return 0;
+    }
+    scene = (BattleSceneObject *)kwlnTaskGetUserValue(task);
+    count = btlHasUnmarkedLinkageSkill(scene->owner->unit);
+    /* Retail tails 001B54AC/001C0144 use JAL plus an epilogue.
+     * cc1probe retains this local-reference reset through 01.sibling
+     * and 11.cfg, then deletes it in 13.life. */
+    scene = NULL;
+    return count;
+}
 
 
 extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
