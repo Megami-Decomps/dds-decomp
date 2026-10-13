@@ -18,6 +18,7 @@
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
 #include "evt_action_object.h"
 #include "sdf_texture_offset_list.h"
 #include "evt_script_model.h"
@@ -2500,8 +2501,6 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     descriptor->append(descriptor, command);
 }
 
-extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *);
-extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 extern void func_002DD708(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
