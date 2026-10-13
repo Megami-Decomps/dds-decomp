@@ -399,7 +399,7 @@ extern void mnuReleaseMenuVisualWorkResources(MenuProgressHost *);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern void mnuSpawnMantraIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraShortLoopIconFadeIn(struct MantraDrawPool *);
-extern void func_002790F0(u32, u32, struct MantraDrawPool *);
+extern void mnuSpawnMantraIconAtPositionWithShortLoop(u32, u32, struct MantraDrawPool *);
 extern void mnuSpawnMantraIconAndStorePanelSoundEntry(struct MantraDrawPool *);
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426208);
@@ -419,7 +419,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
         func_0026DBB0(mnuGetSelectedNodeValue(resource));
         selectedRecord = mnuGetSelectedNodeValue(resource);
         position = mnuGetMantraNodePositionRecord((s16)scrGetSelectedScriptEntryId(selectedRecord));
-        func_002790F0((s32)(((f32)position->x / 10.0f) * 40.0f),
+        mnuSpawnMantraIconAtPositionWithShortLoop((s32)(((f32)position->x / 10.0f) * 40.0f),
                       (s32)(((f32)position->y / 10.0f) * 39.0f),
                       resource->menu.selectionController);
         mnuSpawnMantraIconAndStorePanelSoundEntry(resource->menu.selectionController);

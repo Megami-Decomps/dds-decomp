@@ -67,8 +67,8 @@ typedef struct MantraPanelAnimation {
 
 extern u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *, u32, s16);
 extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
-extern void func_00278FA8(struct MantraDrawPool *pool);
-extern void func_00279148(struct MantraDrawPool *pool);
+extern void mnuSpawnAlternateMantraSpecialNodeIcon(struct MantraDrawPool *pool);
+extern void mnuSpawnMantraIconWithShortLoop(struct MantraDrawPool *pool);
 extern void mnuStorePanelEntry(s32, s32);
 
 extern MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *, s32, s8, s16, s16, u32);
@@ -703,8 +703,8 @@ void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector,
             }
         }
     }
-    func_00278FA8(object->menu.selectionController);
-    func_00279148(object->menu.selectionController);
+    mnuSpawnAlternateMantraSpecialNodeIcon(object->menu.selectionController);
+    mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
     if (changed & 1) {
         mnuStorePanelEntry(0x20004, 5);
     }
@@ -789,8 +789,8 @@ void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *object, s32 selector
             }
         }
     }
-    func_00278FA8(object->menu.selectionController);
-    func_00279148(object->menu.selectionController);
+    mnuSpawnAlternateMantraSpecialNodeIcon(object->menu.selectionController);
+    mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
     mnuStorePanelEntry(0x20007, 20);
 }
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291DD0);
@@ -804,12 +804,12 @@ extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, struct MantraDrawPoo
 extern void mnuSpawnMantraIconAtPosition(s32, s32, struct MantraDrawPool *pool);
 extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
-extern void func_00278F60(struct MantraDrawPool *pool);
+extern void mnuSpawnAlternateMantraIconForPanelSoundEntry(struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconFadeIn(struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconFadeOut(struct MantraDrawPool *pool);
 extern void mnuSpawnMantraShortLoopIconFadeIn(struct MantraDrawPool *pool);
 extern void mnuSpawnMantraShortLoopIconFadeOut(struct MantraDrawPool *pool);
-extern void func_002790F0(s32, s32, struct MantraDrawPool *pool);
+extern void mnuSpawnMantraIconAtPositionWithShortLoop(s32, s32, struct MantraDrawPool *pool);
 extern void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *, s32, u16);
 extern void func_00291DD0(MnuStatusResource *, s32);
 extern void mnuHideMantraInfo(struct MantraDrawPool *pool);
@@ -848,8 +848,8 @@ s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
         return 0;
     case 1:
         position = mnuGetMantraPanelPositionRecord((s16)id);
-        func_00278F60(object->menu.selectionController);
-        func_002790F0((s32)((f32)position->x / 10.0f * 40.0f),
+        mnuSpawnAlternateMantraIconForPanelSoundEntry(object->menu.selectionController);
+        mnuSpawnMantraIconAtPositionWithShortLoop((s32)((f32)position->x / 10.0f * 40.0f),
                      (s32)((f32)position->y / 10.0f * 39.0f),
                      object->menu.selectionController);
         return 0;
@@ -987,14 +987,14 @@ void mnuAcquireTutorialMantraNodeAndNeighbors(MnuStatusResource *object) {
 }
 
 
-extern void func_00278F60(struct MantraDrawPool *pool);
-extern void func_002790F0(s32, s32, struct MantraDrawPool *pool);
+extern void mnuSpawnAlternateMantraIconForPanelSoundEntry(struct MantraDrawPool *pool);
+extern void mnuSpawnMantraIconAtPositionWithShortLoop(s32, s32, struct MantraDrawPool *pool);
 void itfPositionMantraSelectionController(MnuStatusResource *object) {
     MantraNodePos *record;
 
     record = mnuGetMantraPanelPositionRecord(8);
-    func_00278F60(object->menu.selectionController);
-    func_002790F0((s32)((f32)record->x / 10.0f * 40.0f), (s32)((f32)record->y / 10.0f * 39.0f), object->menu.selectionController);
+    mnuSpawnAlternateMantraIconForPanelSoundEntry(object->menu.selectionController);
+    mnuSpawnMantraIconAtPositionWithShortLoop((s32)((f32)record->x / 10.0f * 40.0f), (s32)((f32)record->y / 10.0f * 39.0f), object->menu.selectionController);
 }
 
 extern void itfInstallDefaultMantraSelector(MnuStatusResource *);

@@ -659,11 +659,11 @@ extern void mnuHideMantraScrollCursor(struct MantraDrawPool *);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *);
 extern void mnuHideMantraUnitPanel(struct MantraDrawPool *);
 extern void mnuShowMantraUnitPanel(struct MantraDrawPool *);
-extern void func_00278F60(struct MantraDrawPool *);
-extern void func_00278FA8(struct MantraDrawPool *);
+extern void mnuSpawnAlternateMantraIconForPanelSoundEntry(struct MantraDrawPool *);
+extern void mnuSpawnAlternateMantraSpecialNodeIcon(struct MantraDrawPool *);
 extern void mnuSpawnMantraSpecialNodeIcon(struct MantraDrawPool *);
-extern void func_002790F0(u32, u32, struct MantraDrawPool *);
-extern void func_00279148(struct MantraDrawPool *);
+extern void mnuSpawnMantraIconAtPositionWithShortLoop(u32, u32, struct MantraDrawPool *);
+extern void mnuSpawnMantraIconWithShortLoop(struct MantraDrawPool *);
 extern void mtrDrawRankPass(s32, u16);
 extern void mnuSpawnMantraMapPanels(MnuStatusResource *, u16, u16);
 /* The following three declarations remain inferred from native callers. */
@@ -833,7 +833,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         if (work->src->bits & 0x8000) {
             position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
             mnuSpawnMantraSpecialNodeIcon(object->menu.selectionController);
-            func_00279148(object->menu.selectionController);
+            mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
             mdlFlagSet(work->src->unk02);
             work->alternateSelector = work->defaultSelector;
             work->defaultSelector = position;
@@ -845,8 +845,8 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
                 (s32)((f32)position->x / 10.0f * 40.0f),
                 (s32)((f32)position->y / 10.0f * 39.0f),
                 object->menu.selectionController);
-            func_00278FA8(object->menu.selectionController);
-            func_00279148(object->menu.selectionController);
+            mnuSpawnAlternateMantraSpecialNodeIcon(object->menu.selectionController);
+            mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
             work->alternateSelector = work->defaultSelector;
             work->defaultSelector = position;
         } else {
@@ -855,8 +855,8 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
                 (s32)((f32)position->x / 10.0f * 40.0f),
                 (s32)((f32)position->y / 10.0f * 39.0f),
                 object->menu.selectionController);
-            func_00278FA8(object->menu.selectionController);
-            func_00279148(object->menu.selectionController);
+            mnuSpawnAlternateMantraSpecialNodeIcon(object->menu.selectionController);
+            mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
             work->alternateSelector = work->defaultSelector;
             work->defaultSelector = position;
         }
@@ -904,10 +904,10 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
                    (work->src->bits & 0xF00) == 0x400) {
             mnuSelectMantraLimitLine(object, work->src->fields.unitIndex);
         }
-        func_00278F60(object->menu.selectionController);
+        mnuSpawnAlternateMantraIconForPanelSoundEntry(object->menu.selectionController);
         position = mnuGetMantraNodePositionRecord(
             (s16)scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
-        func_002790F0((s32)((f32)position->x / 10.0f * 40.0f),
+        mnuSpawnMantraIconAtPositionWithShortLoop((s32)((f32)position->x / 10.0f * 40.0f),
                       (s32)((f32)position->y / 10.0f * 39.0f),
                       object->menu.selectionController);
         work->drawBits.sourceKind = 11;

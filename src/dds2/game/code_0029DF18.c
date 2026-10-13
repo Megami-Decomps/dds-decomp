@@ -795,7 +795,7 @@ s32 mnuQueryTitleSoundBusy(void) {
     return sdfSoundIsCommandBusy();
 }
 
-void func_002A1338(void) {
+void mnuNoOpTitleAudio(void) {
 }
 
 s32 mnuGetTitleEffectFrameCounter(void) {
@@ -846,7 +846,7 @@ u32 sndOpPushCommandBusyState(void) {
     return 1;
 }
 
-u32 func_002A1478(void) {
+u32 sndOpAlwaysSucceeds(void) {
     return 1;
 }
 
