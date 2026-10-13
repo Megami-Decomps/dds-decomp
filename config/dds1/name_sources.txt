@@ -7020,6 +7020,7 @@
 0x002E9758	sndTransitionBgm	inferred	Calls BGM transition command 0xE0 plus the packed track channel; evtTransitionBgm supplies the encoded track and fade.
 0x002E9788	sdfSoundSendNamedCommand	inferred	copies command name into shared buffer and sends selected status command
 0x002E97E8	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds1/game/code_002E9708.c:181:func_002E97E8; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x002E9810	sndSendChannelGroupCommand110	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x110, and sends an empty sound command packet. Paired with DDS2 0x003426B8. [code-quality cleanup, 2026-10-13]
 0x002E9840	sdfSoundSetChannelCount	inferred	Clamps a channel count to one through sixteen and sends its encoded sound command.
 0x002E9948	sdfSoundHandleRpcEvent	inferred	switch dispatches sound RPC events and signals waiting semaphore
 0x002E9BE8	sdfSoundStartRpcServer	inferred	registers RPC server 0x54524E53 and enters sceSifRpcLoop

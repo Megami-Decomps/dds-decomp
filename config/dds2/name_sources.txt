@@ -6694,6 +6694,7 @@
 0x00342600	sndTransitionBgm	inferred	Calls the paired BGM transition command 0xE0 plus the packed track channel; evtTransitionBgm supplies the encoded track and fade.
 0x00342688	sdfSoundIsCommandBusy	inferred	Returns the same nonzero command flag that blocks sdfSoundSendNamedCommand.
 0x00342690	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds2/game/code_003425B0.c:208:func_00342690; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x003426B8	sndSendChannelGroupCommand110	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x110, and sends an empty sound command packet. Paired with DDS1 0x002E9810. [code-quality cleanup, 2026-10-13]
 0x00342728	sdfSoundTryQueueCommand	inferred	Rejects a command while the sound device is busy; otherwise stores and returns the requested command.
 0x00342790	sdfSoundGetCommandStatus	inferred	Returns the sound command status stored at D_00438B8C.
 0x00342B28	sdfSoundSetTableEntry	inferred	Sets a sound-table entry; DDS1 twin. [names_qp9.tsv]
