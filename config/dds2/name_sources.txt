@@ -3898,6 +3898,7 @@
 0x002610E8	mnuCampCountRemainingUses	inferred	Per-mode remaining count (99 or 1 minus the flag byte) clamped at zero. [names_M44_Mid3.tsv]
 0x00261198	mnuCampGetCurrentRowQuantityLimit	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1980; Caps the current row quantity by currency and remaining uses for purchase rows, or by owned inventory and currency for the sell row.
 0x00261310	mnuCampDisableUnavailableItemEntries	inferred	readability/matching review (QP16)
+0x002613C8	mnuCampScalePriceByTier	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2072; Applies the first price percentage tier covering the selected quantity; selector zero uses the current progress-slot percentage.
 0x00261480	mnuCampAdvanceCounter	inferred	Adds a delta to the scene counter, clamps to [1, max] and flags saturation; mode 3 also rescales the record value. [names_M44_Mid3.tsv]
 0x00261D78	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]
 0x00261E10	evtIsFadeDispatchIdle	inferred	Returns true only when no fade is active and the associated dispatch-status function returns zero.
