@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_gradient_rect.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
@@ -366,7 +367,6 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
-extern void evtSubmitGradientRectAtDepth();
 struct SdfPoolNode;
 extern struct SdfPoolNode *D_00325818[4];
 

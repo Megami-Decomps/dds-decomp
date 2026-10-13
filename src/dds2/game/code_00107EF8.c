@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
