@@ -4674,6 +4674,7 @@
 0x0025F7F0	mnuDrawShopSelectedRowDetailsWithAlpha	inferred	Crossfades the selected shop row's marker pair, item icon and formatted counter using caller alpha.
 0x0025FB30	mnuDrawShopLimitArrows	inferred	Draws the selected shop row's up/down arrows at full alpha when the panel is not at its corresponding limit.
 0x0025FC38	mnuDrawShopLimitArrowsScaled	inferred	Draws the selected shop row's up/down arrows at caller-supplied scale when the panel is not at its corresponding limit.
+0x0025FD50	mnuDrawShopPricePlaceholder	inferred	Draws the shop currency markers and a zero-valued formatted price in the initial shop state.
 0x0025FE68	mnuDrawIconFixedEntry	inferred	mnu draws icon table entry 26
 0x0025FFC8	mnuDrawShopSelectedRowTotal	inferred	Draws the selected shop row's price as unit value multiplied by the requested quantity.
 0x00260100	mnuDrawShopCurrencyBalance	inferred	Interpolates the shop's displayed currency balance from the saved value over 20 frames, then draws it.
