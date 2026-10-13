@@ -687,7 +687,7 @@ void func_0031A090(void);
 extern void func_0031A730(MnuShootingWork *);
 extern void dds3UpdateSoundSlots(void);
 
-s32 func_00318660(MnuShootingWork *work) {
+s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     MenuInputActionSnapshot input;
     MenuRuntimeRecord *record;
     MnuModelNode *node;
