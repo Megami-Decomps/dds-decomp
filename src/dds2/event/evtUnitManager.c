@@ -522,7 +522,7 @@ void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
     }
 }
 
-/* vu0 routine: as above for the second colour (flag 0x200) and the vectors at +0x40 */
+/* vu0 routine: load the target info secondColor vector when unit-owned. */
 void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
     EvtTargetInfo *info = 0;
     s32 ownVector = 0;
@@ -540,7 +540,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
         color = unit->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-        VU0_LOAD_VF(vf10, (u8 *)info + 0x40);
+        VU0_LOAD_VF(vf10, info->secondColor);
     } else {
         VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
     }
