@@ -165,27 +165,6 @@ extern u32 effMiscRandMod(void *state, u32 modulus);
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
-typedef struct BattleAdjustmentEntry {
-    u16 sceneIndex;
-    u16 weight;
-    s8 value;
-    u8 unk05;
-} BattleAdjustmentEntry;
-
-typedef struct BattleAdjustmentGroup {
-    s32 interval;
-    BattleAdjustmentEntry entries[20];
-} BattleAdjustmentGroup;
-
-typedef struct BattleAdjustmentRecord {
-    u8 pad00[8];
-    u32 conditions[3];
-    u8 variantCodes[8];
-    BattleAdjustmentGroup groups[3];
-} BattleAdjustmentRecord;
-
-extern BattleAdjustmentRecord *D_00435E0C;
-
 extern u32 effMiscRandMod(void *, u32);
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);

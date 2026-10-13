@@ -117,8 +117,6 @@ extern u32 kwlnDrawControlFlags;
 
 
 
-extern s32 D_00435E0C;
-
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
 typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
@@ -5601,7 +5599,7 @@ void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
     s32 work = (s32)(u32)btlGetRuntime();
     u32 v = 0;
     if (soundIndex != 0) {
-        v = *(u16 *)(D_00435E0C + soundIndex * 0x190 + 4);
+        v = D_00435E0C[soundIndex].opaque04[0];
     }
     if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
         v = datBattleSceneRecords[sceneIndex].unk24;
