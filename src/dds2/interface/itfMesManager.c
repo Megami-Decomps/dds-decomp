@@ -1746,7 +1746,7 @@ void func_001A6528(ItfMesState *panel);
 
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
     itfMesUpdatePanelFades(panel);
-    func_001A6350(panel);
+    itfMesAdvanceEntryText(panel);
     func_001A6528(panel);
     btlUpdateFadeIndicator(panel);
 }
@@ -1818,7 +1818,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A6350);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesAdvanceEntryText);
 
 extern void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue);
 

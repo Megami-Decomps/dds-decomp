@@ -239,7 +239,7 @@ void btlUpdateFadeIndicator(ItfMesState *panel);
 
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *object) {
     itfMesUpdatePanelFades(object);
-    func_0019E320(object);
+    itfMesAdvanceEntryText(object);
     itfUpdateSoundSelectionTransition(object);
     btlUpdateFadeIndicator(object);
 }
@@ -311,7 +311,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E320);
+INCLUDE_ASM(const s32, "game/code_0019DB88", itfMesAdvanceEntryText);
 
 void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     ItfMesBlk40 *selection = &panel->blk40;
