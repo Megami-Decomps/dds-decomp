@@ -32,7 +32,7 @@ typedef struct PacAlloc {
 
 extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
-extern char *func_0035D5B0(const char *text, s32 delimiter);
+extern char *strrchr(const char *text, s32 delimiter);
 extern s32 strcasecmp(const char *text, const char *suffix);
 extern s32 D_00438D08;
 extern s32 D_0043921C;
@@ -50,7 +50,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
 
     memset(owner, 0, 0xB0);
     owner->active = 1;
-    extension = func_0035D5B0(name, '.');
+    extension = strrchr(name, '.');
     isPac = 0;
     if (extension != NULL) {
         isPac = strcasecmp(extension, (const char *)&D_00438D28) == 0;

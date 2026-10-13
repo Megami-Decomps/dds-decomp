@@ -455,7 +455,7 @@ extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 extern s32 btlGroupContainsId(s32, s32);
 extern void btlAddGroupId(s32, s32);
 extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);
-extern char *func_0035D5B0(const char *, s32);
+extern char *strrchr(const char *, s32);
 extern s32 strcasecmp(const char *, const char *);
 extern const char D_00436FA8[];
 extern void sdfCreateSemaphoreFromOptions(void);
@@ -489,7 +489,7 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     selection = &((MdlResourceSelection *)D_003C86B0[group].entries)[id];
     path = &((MdlResourcePath *)D_003C6588[selection->pathTable].entries)[selection->pathIndex];
     packed = 0;
-    extension = func_0035D5B0(path->path, '.');
+    extension = strrchr(path->path, '.');
     if (extension != NULL) {
         packed = strcasecmp(extension, D_00436FA8) == 0;
     }
