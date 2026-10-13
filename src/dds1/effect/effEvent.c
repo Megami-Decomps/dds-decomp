@@ -1418,7 +1418,7 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     particle->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
+INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateBillboardParticles);
 
 /* Fifteen billboard records are packed into each compact VIF batch. */
 typedef struct EffEventBillBatch {
