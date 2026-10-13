@@ -28,7 +28,7 @@ void dds3ReleaseObjectResource(EffWorldNode *object);
 
 
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
-void func_00111480(EffWorldNode *slot, EffWorldNode *owner);
+void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *slot, EffWorldNode *owner);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
 
@@ -51,7 +51,7 @@ void dds3DestroyObjectBase(ObjBase *base) {
     owner = base->slots[DDS3_OBJECT_OWNER_SLOT];
     handler = dds3GetSlot(owner, DDS3_OBJECT_HANDLER_SLOT);
     if (handler != NULL) {
-        func_00111480(handler, owner);
+        dds3RemoveObjectFromOwnerWorldIndex(handler, owner);
     }
     for (slotIndex = 0; slotIndex < DDS3_OBJECT_SLOT_COUNT; slotIndex++) {
         if (slotIndex < DDS3_OBJECT_WORLD_SLOT_LIMIT) {

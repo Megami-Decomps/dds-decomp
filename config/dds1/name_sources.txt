@@ -469,6 +469,7 @@
 0x00111130	dds3InvokeAreaCallback	inferred	Calls the callback at area subobject offset 0xC if present; otherwise returns success.
 0x00111188	evtSpawnActionObj2	inferred	constructor for type 2
 0x001111C8	dds3EnsureWorldNodeInSlot	inferred	src/dds1/game/code_00111160.c func_001111C8: Selects slot by node kind and appends node only if cursor search does not find it. [names_reviewed24.tsv]
+0x00111258	dds3RemoveObjectFromOwnerWorldIndex	inferred	src/dds1/game/code_00111258.c func_00111258: Selects the owner world-index slot by node kind and removes the matching node entry.
 0x001112C0	dds3CopyFilteredWorldSlot	inferred	src/dds1/game/code_00111160.c func_001112C0: Copies slot values accepted by optional filter into new index node; destroys empty result. [names_reviewed24.tsv]
 0x00111388	dds3GetFirstWorldObjectNodeOfKind2	inferred	Returns the first node in world-list kind 2 through a temporary indexed chain.
 0x00111400	dds3AllocateClearedObjectWork	inferred	Allocates and zeroes the work block attached to an object. [names_reviewed10.tsv]
