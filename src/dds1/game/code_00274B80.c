@@ -1154,10 +1154,10 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page
     mnuDrawSlotIcons(-0x16, page);
 }
 
-extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawProfilePanelAndSprite(s32 obj, s32 unused1, s32 spriteGroup, s32 drawGroup, s32 unused4, s32 spriteFlags) {
-    func_00283838(0, 0, 0, obj, ((MenuSpriteArguments *)obj)->variant, spriteGroup, spriteFlags);
+    mnuDrawPartyProfilePanelContents(0, 0, 0, obj, ((MenuSpriteArguments *)obj)->variant, spriteGroup, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0x1200, 0x730, 0, drawGroup, spriteFlags);
 }
 

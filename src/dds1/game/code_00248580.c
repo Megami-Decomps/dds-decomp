@@ -122,7 +122,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
-extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, s32, s32, s32, s32);
 extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
 extern char mnuNumberSpriteFormat[];
@@ -232,7 +232,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
+INCLUDE_ASM(const s32, "game/code_00248580", mnuDrawTerminalRecoveryListEntry);
 
 
 
@@ -292,7 +292,7 @@ typedef struct MenuProgressList {
 
 extern s32 mnuTerminalScoreBox(DatPartyRecord *unit);
 
-extern s32 func_00248810(s32);
+extern s32 mnuDrawTerminalRecoveryListEntry(s32);
 
 /* Build recovery-cost nodes for active party slots with a nonzero computed cost.
  * Node values are party indices here, unlike the command-list builder below. */
@@ -303,7 +303,7 @@ void mnuBuildTerminalNodeList(MenuTerminalWork *host) {
     list = (MenuProgressList *)mnuCreateListState(0, MNU_PARTY_SLOT_COUNT, 0x24);
     list->callback = (s32)host;
     *(s32 *)&host->list = (s32)list;
-    list->updateCallback = (s32)func_00248810;
+    list->updateCallback = (s32)mnuDrawTerminalRecoveryListEntry;
     list->visible = 0;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         DatPartyRecord *unit = &datGameState->party[partyIndex];
@@ -729,7 +729,7 @@ s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {
     work->partyWindow.flags |= 0x500;
     mnuDrawStageTestList(0, 0, 0, ((s8 *)control)[0x55],
         &work->partyWindow, context);
-    func_00283838(0, 0, 0, (s32)control, ((s8 *)control)[0x55],
+    mnuDrawPartyProfilePanelContents(0, 0, 0, (s32)control, ((s8 *)control)[0x55],
         (s32)work->effectResource, context);
     return 1;
 }
@@ -963,8 +963,8 @@ extern s32 D_003BC3E4;
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(KwlnTask *), void (*)(KwlnTask *), void *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
-extern s32 func_0024A138(KwlnTask *task);
-extern s32 func_0024A170(KwlnTask *task);
+extern s32 evtRunTerminalPanel(KwlnTask *task);
+extern s32 evtRunTerminalPanelSync(KwlnTask *task);
 extern void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task);
 
 /* Create the terminal update/draw/exit tasks sharing one scene.
@@ -974,8 +974,8 @@ s32 mnuTerminalCreateTasks(void) {
     void *work = mnuTerminalCreateScene();
 
     D_003BC3E4 = kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, work);
-    kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, func_0024A138, 0, work);
-    result = kwlnTaskCreate(D_003AF678, 0x5210, 1, 1, func_0024A170, mnuReleaseTerminalWorkAndResumeField, work);
+    kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, evtRunTerminalPanel, 0, work);
+    result = kwlnTaskCreate(D_003AF678, 0x5210, 1, 1, evtRunTerminalPanelSync, mnuReleaseTerminalWorkAndResumeField, work);
     mnuTerminalTaskState = 1;
     return result;
 }
@@ -1015,14 +1015,14 @@ s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *value) {
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
-s32 func_0024A138(KwlnTask *value) {
+s32 evtRunTerminalPanel(KwlnTask *value) {
     s32 context = kwlnTaskGetUserValue(value);
 
     return menuRunPanel((void *)context, 1, (void *)value);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
-s32 func_0024A170(KwlnTask *value) {
+s32 evtRunTerminalPanelSync(KwlnTask *value) {
     s32 context = kwlnTaskGetUserValue(value);
 
     return menuRunPanel((void *)context, 2, (void *)value);
@@ -1079,7 +1079,7 @@ void fldSaveSceneOptionsAndClearFlags(DatPartyRecord *option) {
 
 extern s32 mnuDrawMantraPulseAndSparks(void *, s32, s32);
 
-s32 func_0024A2D8(s32 state) {
+s32 mnuDrawTerminalEffectIfAvailable(s32 state) {
     MenuTerminalWork *work = (MenuTerminalWork *)state;
     s32 result = D_003BC3E1;
 
@@ -1739,7 +1739,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
 s32 evtDispatchSelectionAfterFieldFrameGate(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
 
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     mnuDrawAndStepTerminalPanelFade(0, state);
     if (fldClassifyRemainingFrames(state) != 2) {
         return 0;
@@ -1899,7 +1899,7 @@ s32 mnuUpdateTerminalSelectionInput(KwlnTask *input) {
 
 s32 mnuUpdateAndDrawTerminalScene(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     mnuDrawAndStepTerminalPanelFade(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
@@ -2014,7 +2014,7 @@ extern void mnuDrawTerminalAmountText(s32, s32);
 
 s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     mnuDrawAndStepTerminalPanelFade(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
@@ -2070,7 +2070,7 @@ s32 mnuBeginTerminalExitTransition(KwlnTask *item) {
         mnuAnimateTerminalSelection(2, (MenuTerminalWork *)state);
         ((MenuTerminalWork *)state)->exitPending = 1;
     }
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     if (((MenuTerminalWork *)state)->reduced == 0) {
         mnuDrawAndStepTerminalPanelFade(1, state);
     } else if (mnuGetTerminalFrameFade((MenuTerminalWork *)state) == 0) {
@@ -2171,7 +2171,7 @@ s32 evtPollTerminalResourceTransition(KwlnTask *request) {
 s32 evtBPollSelectionChainPanel(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
 
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     if (fldClassifyRemainingFrames((MenuTerminalWork *)state) != 0) {
         if (((MenuTerminalWork *)state)->reduced == 0) {
             mnuDrawAndStepTerminalPanelFade(1, state);
@@ -2253,7 +2253,7 @@ s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
 
 s32 func_0024C7E8(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     mnuDrawAndStepTerminalPanelFade(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
@@ -2303,7 +2303,7 @@ s32 evtBContinueDispatchOrRestoreTable(KwlnTask *input) {
 
 s32 mnuPrepareDispatchStateAndBindHandler(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     mnuDrawAndStepTerminalPanelFade(0, state);
     mnuDispatchTransitionHostCallbacks(state);
     mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
@@ -2399,7 +2399,7 @@ s32 func_0024CB80(KwlnTask *input) {
 s32 evtBDispatchSyncD2(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
 
-    func_0024A2D8(state);
+    mnuDrawTerminalEffectIfAvailable(state);
     if (mnuGetTerminalFrameFade((MenuTerminalWork *)state) == 0) {
         mnuDrawAndStepTerminalPanelFade(1, state);
     } else {
@@ -2441,7 +2441,7 @@ u32 func_0024CE20(void) {
 extern const char D_003AF710[];
 extern u8 D_0036AE10[];
 
-s32 func_0024CE28(KwlnTask *input) {
+s32 evtOpenTerminalActionPopupWhenReady(KwlnTask *input) {
     MenuTerminalWork *context = (MenuTerminalWork *)kwlnTaskGetUserValue(input);
     s32 *state = &context->popupState;
     s32 canOpen = 0;
@@ -2477,7 +2477,7 @@ s32 func_0024CE28(KwlnTask *input) {
 s32 evtBLateDispatchStart(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024A2D8(context);
+    mnuDrawTerminalEffectIfAvailable(context);
     return menuRunPanel((void *)context, 1, (void *)request);
 }
 

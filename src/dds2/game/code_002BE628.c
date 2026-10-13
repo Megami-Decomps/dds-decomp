@@ -1011,7 +1011,7 @@ void mnuFreeSimpleSpriteWork(MenuSpriteState *sprite) {
     sdfReleaseChipBlock(sprite);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C16F0);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartyProfilePanelContents);
 
 
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
@@ -1242,9 +1242,9 @@ extern char D_00437C88[];
 extern s32 func_0035C860(char *, const char *, ...);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawRatioPanelContents);
 
-extern void func_002C22D0(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
+extern void mnuDrawRatioPanelContents(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
 extern void mnuDrawAndSwapPageBarEffect(s32, s32, s32, u32, MenuPageBar *, u32);
 
 void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
@@ -1255,7 +1255,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
     EffectSlotSet *texture;
     BdWork *work;
 
-    func_002C22D0(x, y, depth, color, fade, value, limit, pair, flags);
+    mnuDrawRatioPanelContents(x, y, depth, color, fade, value, limit, pair, flags);
     func_00306CD0(x, y, depth, fade, 1, pair->textures[0], 0, flags);
     if (value != 0) {
         texture = pair->textures[1];

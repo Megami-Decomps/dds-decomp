@@ -4519,7 +4519,7 @@
 0x0024CCD8	evtBDispatchSyncD2	inferred	evt B dispatch sync variant with A6E8 test
 0x0024CD78	evtBDispatchSyncB	inferred	identical body to evtBDispatchSync; second occurrence in file order
 0x0024CDB0	evtBEndDispatchAndReloadEffectResource	inferred	Clears the active event and reloads its effect resource when requested. [names_reviewed13.tsv]
-0x0024CF28	evtBLateDispatchStart	inferred	calls func_0024A2D8 on state then dispatches mode 1
+0x0024CF28	evtBLateDispatchStart	inferred	calls mnuDrawTerminalEffectIfAvailable on state then dispatches mode 1
 0x0024CF78	evtBDispatchSyncC	inferred	identical body to evtBDispatchSync; third occurrence in file order
 0x0024CFB0	evtCloseDisplayChannelAndEnsureMessageWindow	inferred	Closes the display channel and creates the message window if absent. [names_reviewed10.tsv]
 0x0024CFD8	dspStartFlagEvent	inferred	tests flags 0x902/0x907, D_0036ABB8 and D_0036ABF8 flag pairs, starts the matching message entry and sets the done flag [names_M81_D1Menu.tsv]
@@ -8428,3 +8428,10 @@
 0x0017F810	effPcpCreateGlobalEffectFlag	inferred	Enable global effect flag and return zero payload; native lifecycle row at 0x00353F38 places it in creation slot. DDS2 row 0x003B0868/twin 0x00187468 independently agrees. [Namer1 batch 35, high]
 0x0017F820	effPcpCloneGlobalEffectFlag	inferred	Enable same flag and return zero without allocating/copying work; native lifecycle row identifies clone slot. DDS2 twin 0x00187478. [Namer1 batch 35, high]
 0x0017F830	effPcpGlobalEffectFlagReleaseNoOp	inferred	Existing empty release-slot callback in global-flag row; update slot is effPcpClearGlobalEffectFlag, not this function. DDS2 twin 0x00187488. [Namer1 batch 35, high]
+0x00248810	mnuDrawTerminalRecoveryListEntry	inferred	Draws terminal recovery-list status, cost and selection panels using list state; DDS2 twin 0x00266C08. [LiteH menu naming batch 15]
+0x0024A138	evtRunTerminalPanel	inferred	Dispatches terminal task work through panel mode one; DDS2 twin 0x00268550. [LiteH menu naming batch 15]
+0x0024A170	evtRunTerminalPanelSync	inferred	Dispatches terminal task work through panel mode two; DDS2 twin 0x00268588. [LiteH menu naming batch 15]
+0x0024A2D8	mnuDrawTerminalEffectIfAvailable	inferred	Draws the terminal mantra pulse/sparks only when its reduced-mode and effect-resource checks permit. [LiteH menu naming batch 15]
+0x0024CE28	evtOpenTerminalActionPopupWhenReady	inferred	Runs terminal panel mode zero and flags the popup after task/effect fade conditions permit. [LiteH menu naming batch 15]
+0x00283838	mnuDrawPartyProfilePanelContents	inferred	Draws the profile-panel party preview from the selected record and sprite state; DDS2 twin 0x002C16F0. [LiteH menu naming batch 15]
+0x00284418	mnuDrawRatioPanelContents	inferred	Draws ratio-panel bars and their values; DDS2 twin 0x002C22D0. [LiteH menu naming batch 15]
