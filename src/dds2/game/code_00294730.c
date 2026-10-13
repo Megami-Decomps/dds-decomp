@@ -499,7 +499,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 
-void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
+void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
     struct FrFontGlyph *glyph;
