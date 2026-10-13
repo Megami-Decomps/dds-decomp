@@ -1947,7 +1947,7 @@ void fldInitDisplayObjects(void) {
         D_00436064 = 1;
         object = sdfCreateAssetWithDrawEntries();
         D_0043607C = (u32)object;
-        object->unk1C = 1.0f;
+        object->primaryStateFloat = 1.0f;
         D_00438EC8 = (u32)sdfCreateAssetWithDrawEntries();
         fldMarkerTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_0038A700));
     }
