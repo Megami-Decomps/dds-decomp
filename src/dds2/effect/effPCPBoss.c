@@ -271,45 +271,56 @@ u32 func_0018D540(void) {
     return 0;
 }
 
-u32 func_0018D548(void) {
+/* Kind 87's registered factory returns zero. */
+u32 effPcpKind87CreateDisabled(void) {
     return 0;
 }
 
-u32 func_0018D550(void) {
+/* Kind 87's registered duplicate operation returns zero. */
+u32 effPcpKind87DuplicateDisabled(void) {
     return 0;
 }
 
-void func_0018D558(void) {
+/* Kind 87's registered release operation does nothing. */
+void effPcpKind87ReleaseNoOp(void) {
 }
 
-void func_0018D560(void) {
+/* Kind 87's registered per-work dispatch does nothing. */
+void effPcpKind87DispatchNoOp(void) {
 }
 
-void func_0018D568(void) {
+/* Kind 87's optional value operation is present but does nothing. */
+void effPcpKind87ValueNoOp(void) {
 }
 
 u32 func_0018D570(void) {
     return 0;
 }
 
-u32 func_0018D578(void) {
+/* Kind 89's registered factory returns zero. */
+u32 effPcpKind89CreateDisabled(void) {
     return 0;
 }
 
-u32 func_0018D580(void) {
+/* Kind 89's registered duplicate operation returns zero. */
+u32 effPcpKind89DuplicateDisabled(void) {
     return 0;
 }
 
-void func_0018D588(void) {
+/* Kind 89's registered release operation does nothing. */
+void effPcpKind89ReleaseNoOp(void) {
 }
 
-void func_0018D590(void) {
+/* Kind 89's registered per-work dispatch does nothing. */
+void effPcpKind89DispatchNoOp(void) {
 }
 
-void func_0018D598(void) {
+/* Kind 89's optional source-pointer operation is present but does nothing. */
+void effPcpKind89SourceNoOp(void) {
 }
 
-void func_0018D5A0(void) {
+/* Kind 89's optional value operation is present but does nothing. */
+void effPcpKind89ValueNoOp(void) {
 }
 
 u32 func_0018D5A8(void) {
@@ -382,21 +393,26 @@ u32 func_0018D640(void) {
     return 0;
 }
 
-u32 func_0018D648(void) {
+/* Kind 93's registered factory returns zero. */
+u32 effPcpKind93CreateDisabled(void) {
     return 0;
 }
 
-u32 func_0018D650(void) {
+/* Kind 93's registered duplicate operation returns zero. */
+u32 effPcpKind93DuplicateDisabled(void) {
     return 0;
 }
 
-void func_0018D658(void) {
+/* Kind 93's registered release operation does nothing. */
+void effPcpKind93ReleaseNoOp(void) {
 }
 
-void func_0018D660(void) {
+/* Kind 93's registered per-work dispatch does nothing. */
+void effPcpKind93DispatchNoOp(void) {
 }
 
-void func_0018D668(void) {
+/* Kind 93's optional value operation is present but does nothing. */
+void effPcpKind93ValueNoOp(void) {
 }
 
 void func_0018D670(void) {
