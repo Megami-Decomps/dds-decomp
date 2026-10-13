@@ -864,6 +864,7 @@
 0x001454C0	fldStepSecondaryArchiveLoad	inferred	confidence=high; matched-C; src/dds2/game/code_001442D0.c:955:func_001454C0; Starts or reuses fixed archive 0x690000, polls bank residency, and reports completion when the phase reaches the terminal state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00145548	fldGetCurrentBgmHandle	inferred	DDS1 001422B8 twin; returns current track handle used in BGM methods [names_R_FuncNames2.tsv]
 0x00145550	fldCacheMapLabelLengths	inferred	DDS1 001422C0 twin; measures scene names/coordinates across map label tables [names_R_FuncNames2.tsv]
+0x00145698	fldLoadSceneRecordTable	inferred	Builds the current area scene-record path, loads and relocates the packed resource, then stores its row pointer and count. Called by fldInitSceneMapLabels. [provider body and caller, 2026-10-13]
 0x00145730	fldSetSceneRecordChunk	inferred	DDS1 001425F8 twin; relocates scene record chunk and caches count plus rows [names_R_FuncNames2.tsv]
 0x00145790	fldInitSceneMapLabels	inferred	DDS1 00142658 twin; initializes scene map label lengths and associated data [names_R_FuncNames2.tsv]
 0x001457E0	fldReleaseSceneRecordChunk	inferred	DDS1 001426A8 twin; frees stored transfer resource and clears record pointers [names_R_FuncNames2.tsv]

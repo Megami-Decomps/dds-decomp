@@ -379,7 +379,7 @@ extern FieldResourceSlot D_0044FFB0[];
 
 extern void fldCacheMapLabelLengths(s32);
 
-extern void func_00145698(void);
+extern void fldLoadSceneRecordTable(void);
 
 extern s32 fldStageSoundBaseTable[];
 
@@ -1102,7 +1102,7 @@ void fldCacheMapLabelLengths(s32 world) {
     D_00438ED8 = strlen(D_0039A1D0[i].s);
 }
 
-void func_00145698(void) {
+void fldLoadSceneRecordTable(void) {
     typedef struct {
         u8 pad00[4];
         s32 rows;
@@ -1150,7 +1150,7 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
 void fldInitSceneMapLabels(void) {
     if (D_00389780[0] < 200) {
         fldCacheMapLabelLengths(D_00389780[0] % 100);
-        func_00145698();
+        fldLoadSceneRecordTable();
     }
 }
 
