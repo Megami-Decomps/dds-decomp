@@ -29,6 +29,7 @@
 #include "mdl_asset_request.h"
 #include "eff.h"
 #include "dat_state.h"
+#include "evt_stage_test.h"
 #include "kwln_task_lifecycle.h"
 
 /* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
@@ -170,41 +171,6 @@ extern u32 effMiscRand(struct EffRandState *state);
 
 extern u16 D_003E78D8[];
 
-typedef struct StageTestEntry {
-    u8 modelId;      /* 0x00 */
-    u8 motionIndex;  /* 0x01 */
-    u8 column[2][8]; /* 0x02: per-column flag bytes (0x02.. and 0x0A..) */
-    u8 pad12[6];
-    f32 frame;       /* 0x18 */
-    f32 position[3]; /* 0x1C */
-    f32 pad28;
-    f32 rotation[3]; /* 0x2C */
-    f32 pad38;
-} StageTestEntry;
-
-typedef struct StageTestSlot {
-    s32 entryIndex; /* 0x00 */
-    s32 assetResource; /* 0x04: mode-selected resource for the model request */
-    s32 modelId;    /* 0x08 */
-    s32 assetOption; /* 0x0C: third argument forwarded to mdlRequestAsset */
-    s32 initialMotionIndex; /* 0x10: negative uses the entry's motionIndex */
-    u32 flags;      /* 0x14: bit 0 suppresses the fallback motion */
-    s32 state;      /* 0x18: 0 idle, 1 queued, 2 playing, 3 fallback started, 4 forced fallback */
-    s32 motionIndex; /* 0x1C */
-    s32 blendLeadFrames; /* 0x20: negated initial motion time during blending */
-    s32 blendDurationFrames; /* 0x24: duration used to normalize the blend weight */
-} StageTestSlot;
-
-/* The request poller passes this embedded queue, beginning at the flags word.
- * Each slot is 0x28 bytes; slot 0 is active and slot 1 stages the next selection. */
-typedef struct StageTestQueue {
-    u32 flags; /* bit 0: pending slot; bit 1: request in progress; bit 2: setup complete */
-    StageTestSlot slot[2]; /* 0x04 and 0x2C */
-} StageTestQueue; /* 0x54 */
-
-/* Battle stage test viewer state. Retail addresses it partly through
- * D_00457EC8 (= &evtStageTestState.queue.slot[0], hence the negative offsets), so the
- * D_00457EB4..D_00457F1C symbols are all interior fields of this one object. */
 typedef struct StageTestState {
     s32 mode;                /* 0x00 */
     s32 assetRequest;        /* 0x04: result of mdlRequestAsset */
