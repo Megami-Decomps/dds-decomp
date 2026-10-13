@@ -430,7 +430,7 @@ void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
 }
 
 
-void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
+void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
@@ -447,7 +447,7 @@ void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) 
     }
 }
 
-void func_002968B8(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s32 option) {
+void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s32 option) {
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
