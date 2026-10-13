@@ -20,7 +20,7 @@
 #include "sdf_primitive.h"
 #include "sdf_packet_append.h"
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_0033B050(SdfPrimitiveRequest *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
@@ -218,7 +218,6 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags,
                                      s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packet);
 
-extern s32 sdfAllocPacketAligned(s32);
 
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */

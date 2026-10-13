@@ -200,7 +200,7 @@ extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern u8 D_0040B730[];
 

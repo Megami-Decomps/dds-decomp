@@ -169,7 +169,7 @@ extern SdfTex *D_003BD380;
 
 extern SdfTex *D_003BD390;
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern s32 D_003BDA20;
 

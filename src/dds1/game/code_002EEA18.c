@@ -12,6 +12,7 @@
 #include "sdf_pac_state.h"
 #include "sdf_pac_work.h"
 #include "sdf_key_pool.h"
+#include "sdf_packet_alloc.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,

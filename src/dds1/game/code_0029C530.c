@@ -73,7 +73,7 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
     surface->append(surface, list);
 }
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern u32 D_0037ECB0[];
 extern SdfPoolNode *D_0037ECF0[];

@@ -417,7 +417,7 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
 
 
 typedef struct SdfDrawPacket SdfDrawPacket;
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);

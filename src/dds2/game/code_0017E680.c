@@ -44,7 +44,7 @@ extern EffResourceRenderState D_00452080;
 void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
 extern f32 D_003B1540[][4];
 extern u32 D_003B1600[];

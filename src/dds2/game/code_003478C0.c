@@ -735,7 +735,7 @@ typedef struct SdfKeyTreeItem {
     f32 key;                      /* 0xC */
 } SdfKeyTreeItem;
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
 void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {

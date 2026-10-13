@@ -950,7 +950,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 extern s32 D_0035F9F0[16];
 struct RefObj;
 extern SdfTex *func_0029C048(void *, struct RefObj *);
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 /* Draw an indexed 64-pixel glyph with independent corner colors. */
 void func_001F7DF8(SdfPoolNode *surface, s32 x, s32 y,

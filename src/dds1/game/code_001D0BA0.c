@@ -3264,7 +3264,7 @@ void btlCopyUnitStats(s32 arg0, s32 arg1) {
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
@@ -3409,7 +3409,6 @@ extern SdfPoolNode *D_00359D20[];
 
 extern SdfPoolNode *D_00359D30[];
 
-extern s32 sdfAllocPacketAligned(s32 size);
 
 /* Draw the unit's transparency model into its mirror's packet buffer, then draw the mirror from it. Either
  * model is created (and the update ends) on the first frame it is missing. */

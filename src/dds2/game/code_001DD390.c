@@ -3327,7 +3327,7 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
     btlRefreshUnitMaximumMpAndClampCurrentMp(stats);
 }
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
@@ -3467,7 +3467,6 @@ extern SdfPoolNode *D_003B6BE0[];
 
 extern SdfPoolNode *D_003B6BF0[];
 
-extern s32 sdfAllocPacketAligned(s32);
 
 /* Emit the mirror model's transparency packets using its overlay color. */
 void btlDrawUnitMirrorTransparency(BtlUnit *unit) {

@@ -44,7 +44,7 @@ extern s32 sdfConsMeasurePacketWithHeader(s32 address);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitive, s32 registerCount,
                                      s64 registers, s32 loopCount);
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, EffectSlotSet *object, s32 index, s32 surfaceIndex) {

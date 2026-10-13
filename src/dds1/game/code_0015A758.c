@@ -95,7 +95,7 @@ struct ParListNode {
 };
 
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 struct SdfListHead;
 extern void *effCreateVertexDrawPacket(ParDrawState *);
 

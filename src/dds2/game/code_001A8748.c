@@ -165,7 +165,7 @@ extern u8 D_003B4D18[];
 
 extern u8 D_003B4D28[];
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 

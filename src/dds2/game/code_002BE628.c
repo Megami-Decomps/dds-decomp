@@ -223,7 +223,7 @@ extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern char D_0042B610[];
 
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);

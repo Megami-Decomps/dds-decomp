@@ -161,7 +161,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 
 

@@ -65,7 +65,7 @@ void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 firstValue, s32 secondVa
 }
 
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void itfAppendGsPanelStatePacket(SdfListHead *);
 extern void itfPanelDispatchHandler(UiSprite *, SdfListHead *);
 

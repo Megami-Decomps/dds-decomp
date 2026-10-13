@@ -174,7 +174,7 @@ extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void evtSetDrawSurfaceIndex(u32);

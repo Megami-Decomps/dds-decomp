@@ -119,7 +119,7 @@ void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
 }
 
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 struct SdfListHead;
 extern void effAppendBlurRenderState(void *list, s32 blendControl, struct SdfTex *resource);
 extern void effAppendBlurRectanglePackets(void *list, EffBlurQuad *quad, u8 fixedPoint);

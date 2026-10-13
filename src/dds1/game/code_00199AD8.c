@@ -92,7 +92,7 @@ extern s32 D_00357B50[];
 extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command);
 extern u8 D_003BB1C8[8];
 extern u8 D_003BB1D0[8];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern void func_00198990(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
 extern u32 D_00357D68[];

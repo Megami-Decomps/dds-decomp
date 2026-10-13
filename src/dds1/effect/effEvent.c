@@ -107,7 +107,7 @@ extern u8 D_003558A8[];
 extern u8 D_00355948[];
 extern u8 D_00355970[];
 extern SdfPoolNode kwlnPositionedTextSurface;
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
@@ -1500,7 +1500,6 @@ typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 struct DmaPacketHeader;
-extern s32 sdfAllocPacketAligned(s32 size);
 extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);
 extern s32 sdfTexGetPrimaryBufferSize(SdfTex *texture);
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);

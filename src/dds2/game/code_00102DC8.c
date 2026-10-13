@@ -55,7 +55,7 @@ extern u32 effMiscRandMod(void *stream, u32 modulus);
 
 extern void kwlnPadStartMotor(u32, u8, s32);
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 
 extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);

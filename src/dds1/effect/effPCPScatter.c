@@ -1046,7 +1046,7 @@ extern EffPacketParams D_003D6580[];
 extern u32 D_00354A70[];
 extern u32 D_00354AC0[];
 extern SdfPoolNode *D_00354B80[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
 /* Return the trailing control block after zeroing two record arrays.

@@ -2935,7 +2935,7 @@ void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u12
 
 
 extern SdfPoolNode *D_003548E0[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */
