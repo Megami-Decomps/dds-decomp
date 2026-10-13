@@ -247,7 +247,7 @@ extern void sndEnsureMidiBankResident(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
 extern void sdfDebugPrintf(const char *format, ...);
-extern MnuSectionObjectList *func_00317988(void *data);
+extern MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data);
 void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry);
 
 /* Advance the shooting package loader; only the completed state returns one. */
@@ -382,28 +382,28 @@ s32 func_00317058(u8 *workBytes) {
             case 10:
             case 14:
                 evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->unk6C].name);
-                work->objects = func_00317988(data);
+                work->objects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
             case 7:
             case 11:
             case 15:
                 sdfDebugPrintf(D_0042D588, D_0040A970[work->unk6C].name);
-                work->playerObjects = func_00317988(data);
+                work->playerObjects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
             case 8:
             case 12:
             case 16:
                 sdfDebugPrintf(D_0042D5B0, D_0040A970[work->unk6C].name);
-                work->mapObjects = func_00317988(data);
+                work->mapObjects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
             case 9:
             case 13:
             case 17:
                 sdfDebugPrintf(D_0042D5D0, D_0040A970[work->unk6C].name);
-                work->drawObjects = func_00317988(data);
+                work->drawObjects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
             default:
@@ -453,25 +453,25 @@ s32 func_00317058(u8 *workBytes) {
                     switch (entryIndex) {
                     case 0:
                         evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->unk6C].name, 0);
-                        work->drawObjects = func_00317988(entry->dataCursor);
+                        work->drawObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 1:
                         evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->unk6C].name, 1);
-                        work->playerObjects = func_00317988(entry->dataCursor);
+                        work->playerObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 2:
                         evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->unk6C].name, 2);
-                        work->objects = func_00317988(entry->dataCursor);
+                        work->objects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 3:
                         evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->unk6C].name, 3);
-                        work->mapObjects = func_00317988(entry->dataCursor);
+                        work->mapObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
@@ -535,7 +535,7 @@ void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry) {
     mdlLoadViewerPackage(5, entry->unk12, 0x101, entry->unk0C, entry->unk1C);
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317988);
+INCLUDE_ASM(const s32, "game/code_00316E08", mnuLoadSectionObjectListWithRelocations);
 
 u32 func_00317AC8(void) {
     return 0;
