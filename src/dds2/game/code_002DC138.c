@@ -42,7 +42,7 @@ extern EffModelOwner *effCreateModelOwner(void *);
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern struct SdfPoolNode *D_00380828[4];
 
@@ -385,7 +385,7 @@ void effFloorModelListPush(EffModelOwner *obj) {
 
 void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->object != NULL) {
-        func_0035B6E0("eff:floor model delete[%p]\n", node->object);
+        sdfDebugPrintf("eff:floor model delete[%p]\n", node->object);
         effDestroyModelOwner(node->object);
         node->object = NULL;
     }

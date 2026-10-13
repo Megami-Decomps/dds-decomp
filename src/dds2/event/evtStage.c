@@ -122,7 +122,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3,
 extern void func_0035C860(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
-extern void func_0035B6E0(const char *format, ...);
+extern void sdfDebugPrintf(const char *format, ...);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
 void evtCreateEventScriptProcess(s32 eventId) {
@@ -142,7 +142,7 @@ void evtKillFieldScriptTasks(void) {
         for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
             task = kwlnTaskGetByStateAndIndex(state, taskIndex);
             if (task->priority == 0x3EA) {
-                func_0035B6E0(D_004215A8, task->name);
+                sdfDebugPrintf(D_004215A8, task->name);
                 kwlnTaskDestroyWithHierarchy(task, 0);
                 /* Destruction changes the queue, so restart the current scan. */
                 goto restartStateScan;
