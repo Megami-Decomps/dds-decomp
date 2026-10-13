@@ -1099,6 +1099,13 @@ survives `01.sibling`/`02.jump` and first disappears in `03.cse`; qualified
 assembly and all 22 RTL dumps agree. Complete owner: `264 match, 0 differ`.
 This preserves the earlier Tidal and Sable forwarder reconstruction.
 
+DDS1 `func_0020DE50` (28B) uses the same consumed-rotation cleanup; its
+`func_0020D668` neighbor (40B) preserves the actual signed-byte argument
+conversions and clears the consumed command reference after the call.
+Both resets survive sibling selection and first disappear in `03.cse`;
+the complete owner is `28 match, 0 differ`. Prior Copper, Sable and Tidal
+reconstructions remain the source lineage.
+
 This does not establish a shared callback-inline API. DDS2 IDA references
 to `scrClearEntryFlag` are exactly the three direct calls above; the setter
 has no references and the tester has three direct jumps plus one direct call.
