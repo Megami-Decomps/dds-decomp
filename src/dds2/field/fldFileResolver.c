@@ -52,7 +52,7 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
     return matter;
 }
 
-void *fldResolveWorldObjectByResourceId(u32 id) {
+EffWorldNode *fldResolveWorldObjectByResourceId(u32 id) {
     u32 i = 0;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_00438EC0;
@@ -70,7 +70,7 @@ void *fldResolveWorldObjectByResourceId(u32 id) {
                     }
                 }
             } else {
-                void *object = (void *)fldGetRecordValueById(resource->id);
+                EffWorldNode *object = (EffWorldNode *)(u32)fldGetRecordValueById(resource->id);
                 if (object == NULL) {
                     object = fldCreateDummyMatter();
                     fldSetRecordValueById(resource->id, (s32)object);
@@ -82,7 +82,7 @@ void *fldResolveWorldObjectByResourceId(u32 id) {
     return NULL;
 }
 
-void *fldResolveWorldObjectByResourceEntryName(const char *name) {
+EffWorldNode *fldResolveWorldObjectByResourceEntryName(const char *name) {
     u32 i = 0;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_00438EC0;
@@ -1128,11 +1128,11 @@ void fldActivateRoomFlagObjects(void) {
             modelKey = fldFindSearchId(modelName);
             collisionKey = fldFindSearchId(collisionName);
             if (modelKey == -1) {
-                object = (EffWorldNode *)fldResolveWorldObjectByResourceId(collisionKey);
+                object = fldResolveWorldObjectByResourceId(collisionKey);
             } else {
                 object = (EffWorldNode *)dds3FindWorldObjectNodeByKey(world, modelKey, 6);
                 if (object == NULL) {
-                    object = (EffWorldNode *)fldResolveWorldObjectByResourceId(collisionKey);
+                    object = fldResolveWorldObjectByResourceId(collisionKey);
                 }
             }
             path = (EffWorldNode *)dds3FindIndexedObjectChainNodeByName(world, 0x10, (const u8 *)pathName);

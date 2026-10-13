@@ -1152,12 +1152,12 @@ s32 evtCommandSetWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        unit = (s32)(u32)fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
     }
-    evtSetWorldSlotStatusFlag(unit);
+    evtSetWorldSlotStatusFlag((void *)(u32)unit);
     return 1;
 }
 
@@ -1171,12 +1171,12 @@ s32 evtCommandClearWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        unit = (s32)(u32)fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
     }
-    evtClearWorldSlotStatusFlag(unit);
+    evtClearWorldSlotStatusFlag((void *)(u32)unit);
     return 1;
 }
 
