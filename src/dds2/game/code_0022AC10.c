@@ -1309,7 +1309,7 @@ void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
         return;
     }
     if (cacheEntry->packRequest != 0) {
-        func_002C7CE8(cacheEntry->packRequest);
+        btlStageTaskCleanupCallback(cacheEntry->packRequest);
     }
     if (cacheEntry->soundOwner != 0) {
         sndReleaseSlotOwner(cacheEntry->soundOwner);

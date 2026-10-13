@@ -355,7 +355,7 @@ u32 func_002B0D48(void);
 
 void mnuSelectPartySelectionVisuals(u32 context);
 
-void func_002B0D70(u32 callback);
+void mnuNoOpPartySelectionCleanup(u32 callback);
 
 s32 mnuIsFinalItemIndex(s32 index, s32 item);
 

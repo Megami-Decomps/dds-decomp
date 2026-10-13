@@ -3034,7 +3034,7 @@ void fldParseMixLb(void) {
             break;
         }
     }
-    func_002C7CE8(lb);
+    btlStageTaskCleanupCallback(lb);
 }
 
 extern s32 D_00438EE0;

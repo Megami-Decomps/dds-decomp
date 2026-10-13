@@ -582,7 +582,7 @@ void mnuSelectPartySelectionVisuals(u32 context) {
     mnuSwitchCampVisualCategory(4, context);
 }
 
-void func_002B0D70(u32 callback) {
+void mnuNoOpPartySelectionCleanup(u32 callback) {
 }
 
 s32 mnuIsFinalItemIndex(s32 index, s32 item) {
@@ -843,7 +843,7 @@ u32 mnuReleasePartySelectionResources(KwlnTask *task) {
     PartyMenuData *selection = (PartyMenuData *)((MenuContext *)context)->party;
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
-    func_002B0D70(context);
+    mnuNoOpPartySelectionCleanup(context);
     sdfReleaseResourceAllocation(selection->allocation);
     return 1;
 }

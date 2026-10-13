@@ -325,7 +325,7 @@ void mtrRefreshMantraStateForPartyUnit(void) {
     mtrRecomputeMantraFlagsForPartyUnit(&record);
 }
 
-void func_00286700(void) {
+void mtrRefreshMantraStateForUnit7(void) {
     DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));

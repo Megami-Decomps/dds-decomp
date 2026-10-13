@@ -332,7 +332,7 @@ extern s32 mcdFinishFileDetection(void);
 extern s32 fileSlotSelectionPollCount;
 
 
-extern s32 func_0028B508(void);
+extern s32 fileRequestDefaultMode(void);
 
 extern s32 fileRestartSlotSelection(void);
 
@@ -491,7 +491,7 @@ typedef struct LoadObj {
 extern s32 mcdHandleSaveSetupDone(void);
 
 
-extern void func_00292720(void *);
+extern void fileDrawConfigurationMenuBackground(void *);
 
 extern void mnuCallInitWide(s32, s32, s32, u32, s32);
 
@@ -968,7 +968,7 @@ s32 fileBeginSlotResetPrompt(void) {
     D_003BC854 = 0;
     D_003BC834 = 8;
     D_003BC810 = 0;
-    return fileBeginPromptDialog(&func_0028B508, &fileBeginSlotReset, 1);
+    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileBeginSlotReset, 1);
 }
 
 s32 fileReturnToSlotSelection(void) {
@@ -990,14 +990,14 @@ s32 fileBeginSlotPromptFive(void) {
     D_003BC80C = 1;
     fileSetMenuFlowState(0);
     D_003BC834 = 5;
-    return fileBeginPromptDialog(&func_0028B508, &fileRestartSlotSelection, 1);
+    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileRestartSlotSelection, 1);
 }
 
 s32 fileBeginSlotPromptSix(void) {
     D_003BC80C = 1;
     fileSetMenuFlowState(0);
     D_003BC834 = 6;
-    return fileBeginPromptDialog(&func_0028B508, &fileRestartSlotSelection, 1);
+    return fileBeginPromptDialog(&fileRequestDefaultMode, &fileRestartSlotSelection, 1);
 }
 
 s32 fileBeginSlotMetadataRefresh(void) {
@@ -1044,7 +1044,7 @@ s32 mcdEnterDefaultFileFlow(void) {
     return 0;
 }
 
-s32 func_0028B508(void) {
+s32 fileRequestDefaultMode(void) {
     return mcdEnterDefaultFileFlow();
 }
 
@@ -1202,10 +1202,10 @@ s32 fileSlotSelectPoll(void) {
     case 3:
         return fileBeginSlotPromptFive();
     case 2:
-        return func_0028B508();
+        return fileRequestDefaultMode();
     case 1:
         if (fileIsCardSpaceAboveMinimum() != 0) {
-            return func_0028B508();
+            return fileRequestDefaultMode();
         }
         return (s32)fileRestartSlotSelection();
     default:
@@ -1229,10 +1229,10 @@ s32 fileSlotSelectPollClear(void) {
     case 3:
         return fileBeginSlotPromptFive();
     case 2:
-        return func_0028B508();
+        return fileRequestDefaultMode();
     case 1:
         if (fileIsCardSpaceAboveMinimum() != 0) {
-            return func_0028B508();
+            return fileRequestDefaultMode();
         }
         return mcClearSlotMetadata();
     default:
@@ -1606,7 +1606,7 @@ s32 fileScanSlotStatesAdvance(void) {
                 fileSetMenuFlowState(0);
                 D_003BC810 = 0;
                 D_003BC854 = 0;
-                return func_0028B508();
+                return fileRequestDefaultMode();
             }
         }
     }
@@ -2683,7 +2683,7 @@ void func_0028F440(void) {
     fileReleaseMenuResources();
 }
 
-void func_0028F458(void) {
+void fileMenuReleaseNoOp(void) {
 }
 
 void fileReleaseMenuResources(void) {
@@ -2753,7 +2753,7 @@ void fileReleaseMenuResources(void) {
     }
 }
 
-u32 func_0028F5F8(void) {
+u32 fileMenuOperationSucceeded(void) {
     return 1;
 }
 
@@ -3104,7 +3104,7 @@ extern void mnuResetTitleStreamLocked(void);
 extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern s32 effRequestResourceByMode(const char *, const char *, s32, u32 *);
-extern void func_002918F8();
+extern void fileDrawConfigurationMenuEntry();
 extern char D_003BC8E0[];
 
 /* Allocate the save/config task, its five-row list and its effect resource slots. */
@@ -3130,7 +3130,7 @@ s32 fileCreateConfigTask(s32 mode) {
     task->result = 0;
     list = mnuCreateListState(0, 5, 0x23);
     task->frame = list;
-    list->drawCallback = func_002918F8;
+    list->drawCallback = fileDrawConfigurationMenuEntry;
     for (i = 0; i < 5; i++) {
         node = (FileConfigListNode *)mnuListAppendNode(task->frame, NULL);
         node->resource = sdfAllocSizeClassBlock(4);
@@ -3193,7 +3193,7 @@ void fileConfigTaskDestroy(KwlnTask *task) {
 }
 
 extern s32 fileCreateConfigTask(s32 mode);
-extern s32 func_00291418(KwlnTask *task);
+extern s32 fileUpdateConfigurationMenu(KwlnTask *task);
 
 extern s32 fileStartQueuedLoad(KwlnTask *task);
 extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
@@ -3202,7 +3202,7 @@ extern void fileConfigTaskDestroy(KwlnTask *task);
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
-        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_00291418, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
         fileConfigTaskState = 1;
@@ -3242,7 +3242,7 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigLoadTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigOwnerTaskName);
 
-s32 func_00291418(KwlnTask *task) {
+s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     s32 oldIndex;
     s32 index;
     s32 i;
@@ -3369,7 +3369,7 @@ s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->result < 0) {
         return -1;
     }
-    func_00292720((void *)fileConfigTaskWork);
+    fileDrawConfigurationMenuBackground((void *)fileConfigTaskWork);
     mnuCallInitWide(0x400, 0x400, 0, (u32)((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
     return 0;
 }
@@ -3496,7 +3496,7 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8E0);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileConfigInputTaskName);
 
-void func_002918F8(s32 x, s32 y, s32 depth, struct MenuList *list,
+void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
                    FileConfigListNode *node, s32 drawArg) {
     s8 labelFrames[5] = {0, 1, 2, 3, 4};
     s32 index = node->index;
@@ -3648,7 +3648,7 @@ void func_002918F8(s32 x, s32 y, s32 depth, struct MenuList *list,
 
 extern void mnuDrawMantraPulseAndSparks(void *resource, s32 alpha, s32 drawArg);
 
-void func_00292720(void *unused) {
+void fileDrawConfigurationMenuBackground(void *unused) {
     s16 sprites[5][4] = {
         {0, 2, 99, -57},
         {0, 3, -31, 365},

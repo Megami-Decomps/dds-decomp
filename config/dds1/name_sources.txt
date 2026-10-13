@@ -921,7 +921,7 @@
 0x001278C0	fldRelocateTransferChunkWords	inferred	Relocates packed words at transfer chunk offset using chunk size. [names_R_FuncNames6.tsv]
 0x001278E8	fldSetPendingAreaAndFloor	inferred	Byte-identical dds2 twin 0x00129EA0; Stores the area and floor identifiers subsequently consumed by fldLoadAreaResource. [names_conflicts.tsv]
 0x001278F8	fldLoadAreaResource	inferred	frees display objects and loads %sf%03d_%03d.LB for D_003BAC84/88
-0x00127AC0	fldFreeDisplayObjects	inferred	walks D_003BAC3C +0x60/next chain freeing nodes via func_002D0A10, releases head via func_00288788, zeroes display state words
+0x00127AC0	fldFreeDisplayObjects	inferred	walks D_003BAC3C +0x60/next chain freeing nodes via func_002D0A10, releases head via btlStageTaskCleanupCallback, zeroes display state words
 0x00127B30	fldPollAreaResourceLoad	inferred	While area scene state is pending, tests the resource handle and clears the pending flag and related field byte when loading completes.
 0x00127B98	fldIsAreaResourceReady	inferred	Tests the active area resource handle for completion and otherwise returns the field ready flag from D_0032E428[0].
 0x00127BD8	fldIsAreaFloorResourceReady	inferred	Byte-identical dds2 twin 0x0012A190; Checks the loaded area/floor identifiers and whether the resource file or readiness flag is ready. [names_conflicts.tsv]
@@ -5425,7 +5425,7 @@
 0x0028B3F0	fileBeginSlotMetadataRefresh	inferred	DDS2 002CABC0 twin; clears flags, begins slot request and queues next metadata step [names_R_FuncNames2.tsv]
 0x0028B430	fileResetSelection	inferred	file file requests and records in game/code_0028A0E0.c
 0x0028B4B0	fileAbortSlotFlow	inferred	aborts the current slot flow: clears the pending-mode latch and the two slot-flow flags and returns -1
-0x0028B4D8	mcdEnterDefaultFileFlow	inferred	same body and role as DDS2 mcdEnterDefaultFileFlow (0x2CACA8): issues the (2, buffer, 4, 0) memory-card request and returns 0; reached through func_0028B508 / DDS2 func_002CACF0
+0x0028B4D8	mcdEnterDefaultFileFlow	inferred	same body and role as DDS2 mcdEnterDefaultFileFlow (0x2CACA8): issues the (2, buffer, 4, 0) memory-card request and returns 0; reached through fileRequestDefaultMode in both games
 0x0028B520	mcdEnterSelectedFileFlow	inferred	Marks selected-file flow and submits mode-two slot request, matching the named DDS2 twin. [names_reviewed7.tsv]
 0x0028B560	fileRestartSlotScan	inferred	DDS2 002CAD60 twin; clears all flags and restarts fileResetSelection [names_R_FuncNames2.tsv]
 0x0028B590	fileScanSlotStates	inferred	Fills fileSlotDisplayStates[0..9] with 0/1/2 from per-slot button bits and starts a request.
@@ -8747,3 +8747,11 @@
 0x0014B688	fldCreateSparkSlotObjects	inferred	Paired DDS2 provider at 0x0014F5F0; resets the 17 spark object slots, spawns and configures the HUNT_MDL_UNIT world objects, then initializes each nested value. Called by spark-slot update and setup paths. [code-quality cleanup, 2026-10-13]
 0x002CD0D8	prfCopyMantraNamePart	inferred	Paired DDS2 provider at 0x00314500; scans encoded mantra-name bytes for delimiter 0x828A, copies the suffix for mode 1 (falling back to the full name), the prefix for mode 2, and the full name otherwise. Display callers use mode 1. [code-quality cleanup, 2026-10-13]
 0x00201900	btlActionMatchesStatMask	inferred	Paired DDS2 provider at 0x00213F58; compares the action selector stat with the supplied exact mask or each element selected by an element mask. A nonzero force argument bypasses the record-options filter; otherwise only options 1 and 2 match. Used by queued-action and actor-action queries. [code-quality cleanup, 2026-10-13]
+0x00274BA0	mnuNoOpPartySelectionCleanup	inferred	Empty callback invoked after mnuDestroyPartySelectionWindow and before releasing the menu allocation in mnuShopReleaseResources; DDS2 twin 0x002B0D70. [LiteH-2]
+0x00288788	btlStageTaskCleanupCallback	inferred	Forwards an opaque request to the stage-task destructor and returns the handled/not-handled result; DDS2 twin 0x002C7CE8. [LiteH-2]
+0x0028B508	fileRequestDefaultMode	inferred	Forwards to mcdEnterDefaultFileFlow, which submits administrator mode 2; DDS2 twin 0x002CACF0. [LiteH-2]
+0x0028F458	fileMenuReleaseNoOp	inferred	Empty file-menu completion callback invoked before fileReleaseMenuResources by event mode pollers; DDS2 twin 0x002CE750. [LiteH-2]
+0x0028F5F8	fileMenuOperationSucceeded	inferred	Returns 1; file-menu event pollers treat nonzero as operation success. DDS2 twin 0x002CE920. [LiteH-2]
+0x00291418	fileUpdateConfigurationMenu	inferred	Handles configuration-task input, including row selection and completion/cancel state. [LiteH-2]
+0x002918F8	fileDrawConfigurationMenuEntry	inferred	Renders one configuration list entry and its selected state, status indicators, and markers. [LiteH-2]
+0x00292720	fileDrawConfigurationMenuBackground	inferred	Draws the configuration screen's fixed labels/sprites and optional mantra pulse effect. [LiteH-2]

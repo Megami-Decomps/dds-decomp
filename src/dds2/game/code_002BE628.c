@@ -3269,7 +3269,7 @@ s32 btlDestroyStageTask(taskWork)
     return 1;
 }
 
-s32 func_002C7CE8(void *request) {
+s32 btlStageTaskCleanupCallback(void *request) {
     return btlDestroyStageTask(request);
 }
 

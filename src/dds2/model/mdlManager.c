@@ -1347,7 +1347,7 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
 
 /* Clean up the retained dispatch request, then release its completion job. */
 void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
-    func_002C7CE8(ownerBlock->owner);
+    btlStageTaskCleanupCallback(ownerBlock->owner);
     sdfReleaseChipBlock(ownerBlock);
 }
 

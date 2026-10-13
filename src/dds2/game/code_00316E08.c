@@ -436,7 +436,7 @@ s32 func_00317058(u8 *workBytes) {
                     entry = entry->next;
                 } while (entry != NULL);
             }
-            func_002C7CE8(work->packageDataRequest);
+            btlStageTaskCleanupCallback(work->packageDataRequest);
             work->packageDataRequest = NULL;
             break;
         }
@@ -481,7 +481,7 @@ s32 func_00317058(u8 *workBytes) {
                 entry = entry->next;
                 entryIndex++;
             }
-            func_002C7CE8(work->packageDataRequest);
+            btlStageTaskCleanupCallback(work->packageDataRequest);
             work->packageDataRequest = NULL;
             break;
         }
@@ -498,7 +498,7 @@ s32 func_00317058(u8 *workBytes) {
                 }
                 entry = entry->next;
             }
-            func_002C7CE8(work->packageDataRequest);
+            btlStageTaskCleanupCallback(work->packageDataRequest);
             work->packageDataRequest = NULL;
             break;
         }

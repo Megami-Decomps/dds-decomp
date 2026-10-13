@@ -55,7 +55,7 @@ extern u32 D_00435D28;
 
 extern u32 kwlnDrawSurfaceIndex;
 
-extern s32 func_002CE920(void);
+extern s32 fileMenuOperationSucceeded(void);
 
 extern s32 fileMenuTaskExists(void);
 extern void func_002CE208(s32 mode);
@@ -906,9 +906,9 @@ u32 evtPollFileMenuModeThree(void) {
     s64 operationResult;
     u32 status;
 
-    func_002CE750();
+    fileMenuReleaseNoOp();
     fileReleaseMenuResources();
-    operationResult = func_002CE920();
+    operationResult = fileMenuOperationSucceeded();
     status = 0xffffffff;
     if (operationResult != 0) {
         status = 0;
@@ -945,9 +945,9 @@ void evtOpenFileMenuModeOne(void) {
 }
 
 s32 evtCheckSelectionInput(void) {
-    func_002CE750();
+    fileMenuReleaseNoOp();
     fileReleaseMenuResources();
-    if (func_002CE920() != 0) {
+    if (fileMenuOperationSucceeded() != 0) {
         fldStartSequenceRecord();
         return 0;
     }
@@ -982,9 +982,9 @@ u32 evtPollFileMenuModeTwo(void) {
     s64 operationResult;
     u32 status;
 
-    func_002CE750();
+    fileMenuReleaseNoOp();
     fileReleaseMenuResources();
-    operationResult = func_002CE920();
+    operationResult = fileMenuOperationSucceeded();
     status = 0xffffffff;
     if (operationResult != 0) {
         status = 0;
@@ -1417,9 +1417,9 @@ void evtOpenFileMenuFromParams(u32 unused, u32 *menuArgs) {
 extern void fileReleaseMenuFlowResource();
 
 s32 evtPollFileMenuAndRelease(void) {
-    func_002CE750();
+    fileMenuReleaseNoOp();
     fileReleaseMenuResources();
-    if (func_002CE920() == 0) {
+    if (fileMenuOperationSucceeded() == 0) {
         return -1;
     }
     fileReleaseMenuFlowResource();

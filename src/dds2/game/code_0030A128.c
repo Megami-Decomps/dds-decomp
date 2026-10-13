@@ -470,7 +470,7 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void *sdfPacGetExtensionData(SdfPacStreamPacketHeader *);
-extern s32 func_002C7CE8(void *);
+extern s32 btlStageTaskCleanupCallback(void *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D280);
@@ -592,7 +592,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             evtPrintDeveloperConsoleMessage(D_0042D2B8);
         }
         if (load->archive != NULL) {
-            func_002C7CE8(load->archive);
+            btlStageTaskCleanupCallback(load->archive);
             load->archive = NULL;
         }
         load->entry++;

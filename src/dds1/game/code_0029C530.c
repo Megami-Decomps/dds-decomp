@@ -11282,7 +11282,7 @@ s32 effPollResourceList(EffectList *list) {
         case 2:
             if (node->state == 0 && node->length != 0) {
                 if (list->request != NULL) {
-                    func_00288788(list->request);
+                    btlStageTaskCleanupCallback(list->request);
                 }
                 list->request = (struct EffRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
@@ -11303,7 +11303,7 @@ s32 effPollResourceList(EffectList *list) {
                 }
             }
             if (list->count == 0) {
-                func_00288788(list->request);
+                btlStageTaskCleanupCallback(list->request);
                 list->request = NULL;
             }
             break;
