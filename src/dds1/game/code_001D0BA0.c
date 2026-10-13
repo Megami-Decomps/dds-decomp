@@ -29,6 +29,7 @@
 #include "btl_task_args.h"
 #include "btl_sound.h"
 #include "btl_selected_unit_effect_task_args.h"
+#include "btl_approach_task_args.h"
 #include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
@@ -246,15 +247,6 @@ typedef struct BtlFxSrcA {
     f32 f10;
     f32 f14;
 } BtlFxSrcA;
-
-typedef struct BtlApproachTaskArgs {
-    BtlUnit *unit;
-    BtlUnit *target;
-    f32 offset;
-    f32 scale;
-    s32 unk10;
-    s32 count;
-} BtlApproachTaskArgs;
 
 typedef struct BtlRotationTaskArgs {
     s128 from;
@@ -3691,7 +3683,7 @@ extern s32 btlApproachTargetTask(BtlApproachTaskArgs *);
 
 u8 *btlAllocateApproachTargetTask(u8 *owner, s32 index, f32 scale) {
     u8 *task = btlAllocTask(24);
-    u32 *arguments;
+    BtlApproachTaskArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -3700,11 +3692,11 @@ u8 *btlAllocateApproachTargetTask(u8 *owner, s32 index, f32 scale) {
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = index;
-    *(f32 *)(arguments + 3) = scale;
-    arguments[2] = 0;
-    arguments[5] = 0;
+    arguments->unit = (BtlUnit *)owner;
+    arguments->target = (BtlUnit *)(u32)index;
+    arguments->scale = scale;
+    arguments->offset = 0.0f;
+    arguments->count = 0;
     return task;
 }
 
