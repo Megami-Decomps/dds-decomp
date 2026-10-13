@@ -4692,6 +4692,7 @@
 0x00257C10	mnuDrawMantraPulseFrame	inferred	Emits multiple fixed-point Mantra draw stages around the pulsing frame sprite; established DDS2 twin agrees. [names_reviewed19.tsv]
 0x00257E78	mnuCopySceneCoordinates	inferred	Copies the signed scene-entry X/Y metadata into ten coordinate pairs.
 0x00257EB0	mnuAdvanceWrappingFrame	inferred	Increments a frame counter and wraps it to zero after frame 60.
+0x00258258	mnuDrawMantraPrerequisiteLink	inferred	Draws the prerequisite path from the active mantra node to a prerequisite node, using one vertical or three connected line segments and direction offsets. [DDS1 BN analysis, 2026-10-13]
 0x0025A680	mnuDrawMantraEntryStatus	inferred	U2
 0x0025B0F0	mnuDrawAnimatedCurrencyCounter	inferred	U3
 0x0025B7B0	mnuReleaseOptionalDrawAllocation	inferred	Releases a nonnull owned allocation passed to the menu work callback. [names_reviewed17.tsv]
