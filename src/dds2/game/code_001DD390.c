@@ -3341,7 +3341,7 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void func_003325F8(SdfModel *, SdfModel *);
+extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
 extern void func_003320E8(SdfPoolNode **, SdfModel *);
 
@@ -3393,7 +3393,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
         sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    func_003325F8(overlay, model->inner);
+    sdfModelCopyRuntimeState(overlay, model->inner);
     if (unit->status.flags & 2) {
         overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
     } else {

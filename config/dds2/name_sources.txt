@@ -6302,6 +6302,7 @@
 0x00331B18	sdfModelUpdateCurrentFrameTransforms	inferred	Invokes the root transform update with the signed frame byte in global D_004389DA.
 0x00331B38	sdfStoreMessageWordsAndNotifyConsumer	inferred	Stores four message words and invokes the consumer with the second word. [names_reviewed17.tsv]
 0x00332860	sdfInitializeDrawPacketGroups	inferred	Initializes four draw packet groups and the final sync packet. [names_reviewed8.tsv]
+0x003325F8	sdfModelCopyRuntimeState	inferred	Copies model resource/list state, flags, color, transforms and per-draw-node state into an existing overlay; DDS1 twin 0x002D9748.
 0x00332920	sdfSubmitDrawPacketGroups	inferred	Submits packet groups through their owners and synchronizes the final owner. [names_reviewed8.tsv]
 0x00332C30	sdfVuTransformMapRecordPosition	inferred	Transforms a map record position by its associated chunk matrix. [names_reviewed8.tsv]
 0x00332D08	sdfLoadMapRecordLookAtBasis	inferred	Resolves a map record by id and loads its look-at basis. [names_reviewed8.tsv]

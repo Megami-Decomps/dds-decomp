@@ -3286,7 +3286,7 @@ extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
-extern void func_002D9748(SdfModel *, SdfModel *);
+extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 
@@ -3336,7 +3336,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    func_002D9748(overlay, model->inner);
+    sdfModelCopyRuntimeState(overlay, model->inner);
     if (unit->status.flags & 2) {
         overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
     } else {

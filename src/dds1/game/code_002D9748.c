@@ -125,7 +125,7 @@ extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
 extern void sdfModelCopyData(DevRequest *, DevRequest *);
 
-void func_002D9748(SdfModel *destination, SdfModel *source) {
+void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     SdfDrawNode **destinationNodes;
     SdfDrawNode **sourceNodes;
     s32 count;
