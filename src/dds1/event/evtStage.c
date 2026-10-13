@@ -14,7 +14,6 @@ struct EvtScaledValue;
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 
 
-extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
