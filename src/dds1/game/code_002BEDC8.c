@@ -208,7 +208,7 @@ void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
     effDrawTextureSlot(x, y, depth, (s32)colors, (u32)flags, set, slotIndex, work, layer);
 }
 
-void func_002BF5D8(s32 x, s32 y, s32 z, s32 length, u32 weight, u32 flags,
+void effDrawRepeatedSpriteTiles(s32 x, s32 y, s32 z, s32 length, u32 weight, u32 flags,
                   EffectSlotSet *set, s32 slot, s32 layer) {
     u32 colors[4];
     void *draw;
