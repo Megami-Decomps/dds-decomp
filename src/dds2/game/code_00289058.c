@@ -285,7 +285,7 @@ extern void func_00315A50(void);
 extern void func_0028EF50(MnuStatusResource *);
 extern s32 func_0028F9A0(MnuStatusResource *);
 extern s32 mnuRefreshMantraSelectionResources(MnuStatusResource *);
-extern MantraPanelPool *func_002799D8(s32, MnuStatusResource *);
+extern MantraPanelPool *mnuCreateMantraPanelPool(s32, MnuStatusResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 
 const char D_00426300[] = "******************** Debug Error!!!! ********************\n";
@@ -334,7 +334,7 @@ void func_00289BA0(MnuStatusResource *object) {
     if (!(state->drawFlags & 0x10002)) {
         mnuRefreshMantraSelectionResources(object);
     }
-    state->resource = func_002799D8(0x3CE, object);
+    state->resource = mnuCreateMantraPanelPool(0x3CE, object);
 }
 
 extern s32 func_0028E858(MnuStatusResource *object);
