@@ -1361,14 +1361,14 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     return slotIndex;
 }
 
-void func_0011C328(u32 arg0) {
+void ptyAddUnit(u32 arg0) {
     ptyAddUnitWithFlags(arg0, 0);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011C340);
+INCLUDE_ASM(const s32, "newdata/datCalc", ptyRemoveUnitWithFlags);
 
-void func_0011C680(u32 arg0) {
-    func_0011C340(arg0, 0);
+void ptyRemoveUnit(u32 arg0) {
+    ptyRemoveUnitWithFlags(arg0, 0);
 }
 
 u32 func_0011C698(void) {
