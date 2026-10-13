@@ -6787,27 +6787,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_00138910);
 void func_00138C28(void) {
 }
 
-typedef struct FldRoomState {
-    f32 corner[8][4]; /* 0x00 */
-    f32 center[4];    /* 0x80 */
-    f32 plane[6][4];  /* 0x90 */
-    f32 limit[6];     /* 0xF0 */
-    s32 unk108;
-    f32 unk10C;
-    f32 unk110;
-    f32 unk114;
-    f32 unk118;
-    f32 unk11C;
-    s32 unk120;
-    u8 pad124[0xC];
-    s16 unk130;
-    s16 roomId; /* 0x132: returned by fldFindRoomByTask */
-    s16 unk134;
-    s16 mode;
-    s16 unk138;
-    s16 axisMode;
-    s32 unk13C;
-} FldRoomState; /* 0x140 bytes */
+#include "fld_room_state.h"
 
 typedef struct FldRoomPlanes {
     f32 plane[6][4];
@@ -6855,7 +6835,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
             fldRoomRecords[roomIndex].limit[vectorIndex] = 0.0f;
         }
         D_003308B0[roomIndex] = 0;
-        fldRoomRecords[roomIndex].unk108 = 0;
+        fldRoomRecords[roomIndex].worldObjectKey = 0;
         fldRoomRecords[roomIndex].unk10C = 0.0f;
         fldRoomRecords[roomIndex].unk110 = 0.0f;
         fldRoomRecords[roomIndex].unk114 = 0.0f;
@@ -6868,7 +6848,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
         fldRoomRecords[roomIndex].unk138 = -1;
         fldRoomRecords[roomIndex].unk120 = -1;
         fldRoomRecords[roomIndex].axisMode = 0;
-        fldRoomRecords[roomIndex].unk13C = 0;
+        fldRoomRecords[roomIndex].shapeKind = 0;
     }
     D_003BAE04 = -1;
     D_003BAE08 = -1;
@@ -6972,7 +6952,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
-        if (fldRoomRecords[i].unk108 == entry->key) {
+        if (fldRoomRecords[i].worldObjectKey == entry->key) {
             kind = ((FldTaskInfo *)D_003307B0[i]->data)->shape->kind;
             switch (kind) {
             case 0:
@@ -7006,7 +6986,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
                 }
                 return 1;
             case 1:
-                return fldRoomRecords[i].unk13C == kind;
+                return fldRoomRecords[i].shapeKind == kind;
             case 2:
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
@@ -7039,7 +7019,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
-        if (fldRoomRecords[i].unk108 == entry->key) {
+        if (fldRoomRecords[i].worldObjectKey == entry->key) {
             kind = ((FldTaskInfo *)D_003307B0[i]->data)->shape->kind;
             switch (kind) {
             case 0:
@@ -7068,7 +7048,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
                 }
                 return 1;
             case 1:
-                return fldRoomRecords[i].unk13C == kind;
+                return fldRoomRecords[i].shapeKind == kind;
             case 2:
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
@@ -7125,7 +7105,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position
         }
         return 1;
     case 1:
-        return fldRoomRecords[index].unk13C == kind;
+        return fldRoomRecords[index].shapeKind == kind;
     case 2:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
