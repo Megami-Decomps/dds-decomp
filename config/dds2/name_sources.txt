@@ -5842,6 +5842,7 @@
 0x0030EAA8	fldUpdateMapRequestQueues	inferred	U2
 0x0030ECC0	fldDrawSelectedMapMarker	inferred	U3
 0x0030EE40	sdfCreateLinkedRequestRing	inferred	confidence=medium; src/dds2/game/code_0030E1A0.c:func_0030EE40; Allocates and clears request-ring storage, connects nodes into a circular doubly linked list, and initializes ring metadata. [names_qp9.tsv]
+0x0030EF18	fldReleaseMapRequestQueue	inferred	Releases one map-request queue by returning its general allocation. [map-request queue teardown]
 0x0030F1A0	fldProjectPointToGridCell	inferred	confidence=high; matched-C; src/dds2/game/code_0030E1A0.c:225:func_0030F1A0; M141; source=names_pending_main.tsv:104; review=Transforms a world point by view/projection, perspective-divides and converts screen coordinates to GS grid coordinates. [names_qp11.tsv]
 0x0030F2A8	sdfCounterDrawGlyphAtGridCell	inferred	Creates and draws a glyph at scaled grid coordinates. [names_reviewed10.tsv]
 0x0030F2F8	fldRotateVectorAroundX	inferred	Recomputes Y and Z with sine and cosine of angle; X is unchanged. [names_reviewed21.tsv]

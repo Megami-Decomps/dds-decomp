@@ -116,11 +116,11 @@ extern void sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32, f
 
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
-void func_0030EF18(MapRequestState *state);
+void fldReleaseMapRequestQueue(MapRequestState *state);
 
 void fldReleaseMapRequestQueues(void) {
-    func_0030EF18(D_004390AC);
-    func_0030EF18(D_004390B0);
+    fldReleaseMapRequestQueue(D_004390AC);
+    fldReleaseMapRequestQueue(D_004390B0);
 }
 
 void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
@@ -257,7 +257,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     return ring;
 }
 
-void func_0030EF18(MapRequestState *state) {
+void fldReleaseMapRequestQueue(MapRequestState *state) {
     if (state != NULL) {
         sdfQueueGeneralAllocationRelease(state->allocation);
     }
