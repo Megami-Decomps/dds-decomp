@@ -18,7 +18,7 @@ extern u32 D_0045C7B0[];
 extern void func_0030E940(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 
-extern void func_0030E958(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestPulse(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 extern MapRequestState *D_004390AC;
 
@@ -107,7 +107,7 @@ void fldCreateMapRequestQueues(void) {
     D_004390AC->callback = func_0030E940;
     fldSetMapRequestInterval(state, 0);
     D_004390B0 = sdfCreateLinkedRequestRing(0x14, 0x18);
-    D_004390B0->callback = func_0030E958;
+    D_004390B0->callback = fldDrawMapRequestPulse;
     D_004390A8 = 5;
     D_004390A4 = 0;
 }
@@ -130,7 +130,7 @@ void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
 INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E940);
 
 /* The current request pulses; other requests enlarge and fade in later. */
-void func_0030E958(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
+void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
     s32 gridX;
     s32 gridY;
     f32 scale = (1.0f - progress) * 3.0f + progress;
