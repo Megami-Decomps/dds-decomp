@@ -92,7 +92,8 @@ extern u32 fldGetSceneReadyFlag(void);
 
 extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 
-extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+struct SdfMsg;
+extern void sdfStoreMessageWordsAndNotifyConsumer(struct SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord);
 
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
@@ -1597,7 +1598,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void func_001248D0(void) {
-    sdfStoreMessageWordsAndNotifyConsumer(D_003257F8, (s32)D_00324F88, (s32)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (s32)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
 }
 
 typedef struct FldEncEntry {
