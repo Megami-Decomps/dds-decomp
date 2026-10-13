@@ -29,10 +29,6 @@ extern void kwlnPrintTaskTreeRecursive(KwlnTask* task, s32 depth);
 
 
 
-extern void kwlnUnlinkListNode(KwlnTask* task);
-
-
-
 extern void func_003003F0();
 
 extern KwlnTask* kwlnDelayedStartTaskHead;

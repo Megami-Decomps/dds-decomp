@@ -48,6 +48,8 @@ s32 kwlnTaskGetRegisteredState(KwlnTask *task);
 void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 u32 kwlnTaskGetUserValue(KwlnTask *task);
 KwlnTask *kwlnTaskGetTaskByName(const char *name);
+/* Detach task from its parent hierarchy; scheduler queue links are unchanged. */
+void kwlnUnlinkListNode(KwlnTask *task);
 s32 kwlnTaskIsRegistered(KwlnTask *task);
 s32 kwlnTaskExists(const char *name);
 

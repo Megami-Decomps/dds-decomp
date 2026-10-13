@@ -51,10 +51,6 @@ extern void kwlnTaskRunScheduledUpdates(void);
 
 
 
-extern void kwlnUnlinkListNode(KwlnTask* task);
-
-
-
 void kwlnTaskActivate(KwlnTask* task)
 {
     kwlnTaskRemoveFromStateQueue(task);
