@@ -41,7 +41,7 @@ typedef ItfMesPoolNode ItfMesWindowRec;
 
 extern ItfMesSlot itfWindowSlots[];
 
-extern ItfMesGlobals itfMesWork;
+ItfMesGlobals itfMesWork __attribute__((section(".bss")));
 
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d

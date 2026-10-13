@@ -24,7 +24,7 @@ typedef struct ItfMesDebugState {
 
 extern ItfMesSlot itfWindowSlots[];
 
-extern ItfMesGlobals itfMesWork;
+ItfMesGlobals itfMesWork __attribute__((section(".bss")));
 
 extern ItfMesDebugState D_00357D80;
 
