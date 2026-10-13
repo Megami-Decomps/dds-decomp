@@ -172,9 +172,8 @@ extern u32 D_00437D44;
 extern u32 D_00437D3C;
 
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern u32 D_00439004;
-extern u32 D_00439008;
+extern struct FrFontGlyph *D_00439004;
+extern struct FrFontGlyph *D_00439008;
 
 extern u32 D_0043900C;
 
@@ -592,18 +591,18 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
 }
 
 void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
-    u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
+    struct FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439004);
+    frFontQueueGlyphForCurrentDrawBuffer(D_00439004);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
+    struct FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439008 = handle;
-    frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)handle, 3);
+    frFontSetChildChainFirstOption(handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439008);
+    frFontQueueGlyphForCurrentDrawBuffer(D_00439008);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {

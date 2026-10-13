@@ -151,11 +151,7 @@ extern s32 func_003014F0(char *dst, const char *fmt, ...);
 
 extern u32 fileSaveReadBuffer;
 
-extern u32 D_003BD8EC;
-
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-
-
+extern struct FrFontGlyph *D_003BD8EC;
 extern void *fileWaitContinuation;
 
 extern s32 fileWaitTicksRemaining;
@@ -567,7 +563,7 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     D_003BD8EC = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_003BD8EC);
+    frFontQueueGlyphForCurrentDrawBuffer(D_003BD8EC);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {

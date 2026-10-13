@@ -251,7 +251,6 @@ void brsNoOpMessageInputCallback(void *work) {
 }
 
 extern u32 D_004379C0[];
-extern s32 itfCreateConvertedTextGlyph();
 extern s32 itfCreateFont3TextGlyph();
 extern s32 func_0035C860();
 
@@ -263,7 +262,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
     MenuIconRef *icon = res->icons;
     u16 id;
     u8 param;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
     u32 packed;
     u32 i;
 
@@ -287,7 +286,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
             effDrawSpriteWithCornerColors(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
             func_0035C860(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
-            glyph = itfCreateFont3TextGlyph(x + 0x900, y, z, packed, name, 0);
+            glyph = (struct FrFontGlyph *)(u32)itfCreateFont3TextGlyph(x + 0x900, y, z, packed, name, 0);
             frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)glyph, 3);
             frFontDrawGlyphChain(glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);

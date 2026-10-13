@@ -7,9 +7,6 @@
 #include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
-
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-
 typedef struct Vec3 {
     float x; // 0x00
     float y; // 0x04
@@ -25,11 +22,11 @@ extern float func_002FA1C0(float);
 
 
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
-    u32 glyph;
+    struct FrFontGlyph *glyph;
 
     glyph = itfCreateConvertedTextGlyph(gridX << 4, gridY << 3, 0, style, text, 0);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 
