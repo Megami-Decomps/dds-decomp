@@ -657,7 +657,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
 
 struct SdfPoolNode;
 extern void mdlUpdateDevSlotTransforms(MdlCtx *, struct SdfPoolNode **);
-extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
@@ -680,7 +680,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfa
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_003320E8(surfaces, inner);
+    sdfModelBuildNodeResourcePackets(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -765,7 +765,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, 
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_003320E8(surfaces, inner);
+    sdfModelBuildNodeResourcePackets(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }

@@ -3333,7 +3333,7 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
-extern void func_003320E8(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
@@ -3390,7 +3390,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     } else {
         overlay->lighting = NULL;
     }
-    func_003320E8(surfaces, overlay);
+    sdfModelBuildNodeResourcePackets(surfaces, overlay);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);

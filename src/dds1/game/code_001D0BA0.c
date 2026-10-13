@@ -3270,7 +3270,7 @@ extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
-extern void func_002D9238(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 extern u64 D_00359CF0[4];
 
@@ -3324,7 +3324,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     } else {
         overlay->lighting = NULL;
     }
-    func_002D9238(surfaces, overlay);
+    sdfModelBuildNodeResourcePackets(surfaces, overlay);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
