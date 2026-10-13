@@ -7,6 +7,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "mnu_text_entry.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -156,12 +157,6 @@ void mnuReleaseBothVisualResourceTextures(MenuTerminalWork *work) {
 }
 
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
-/* Fixed-width text rows used by both font drawing and message substitution.
- * The font helper decodes single-byte and two-byte characters from this data. */
-typedef struct MenuTextEntry {
-    u8 encodedText[32];
-} MenuTextEntry;
-
 extern MenuTextEntry D_00347C68[];
 extern MenuTextEntry D_003482A8[];
 
