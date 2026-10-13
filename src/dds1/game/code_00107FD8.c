@@ -5,6 +5,7 @@
 #include "sdf_packet_builders.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
@@ -184,7 +185,6 @@ extern s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *);
 
 extern void *D_003BD764;
 
-extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32, s32, s32, s32, s32);
 
 typedef struct KwlnResourceNode {
     s32 unk0;
