@@ -6,6 +6,7 @@ extern void func_00140BC8(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3obj.h"
+#include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "scr.h"
 
@@ -23,7 +24,6 @@ extern void fldSetInputPanelStateWord2(s32);
 
 extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
 
-extern void dds3SetObjectModeAndDefaultWeight(void *, s32);
 
 extern s32 D_004362D4;
 

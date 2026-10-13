@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
