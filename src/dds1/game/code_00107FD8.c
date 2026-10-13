@@ -1477,7 +1477,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     return 0;
 }
 
-void func_0010AEE8(void) {
+void evtGeneralHeapGraphTaskDestroy(void) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E1F0);
@@ -1486,7 +1486,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E200);
 
 void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, func_0010AEE8, NULL);
+        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_003BD764, 0);
     }

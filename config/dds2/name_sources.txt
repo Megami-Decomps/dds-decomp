@@ -162,6 +162,7 @@
 0x0010AD98	evtWaitFileMenuTaskFour	inferred	polls active file task sentinel [names_R_FuncNames2.tsv]
 0x0010AE08	evtDestroyFontResourceChain	inferred	Destroys existing console font resource node and clears global handle. [names_reviewed7.tsv]
 0x0010AE38	evtPrintDeveloperConsoleMessage	inferred	src/dds2/game/code_00107EF8.c func_0010AE38: Formats variadic message into stack buffer and prints it only when developer console node exists. Twin of DDS1 func_0010AC10. [names_reviewed24.tsv]
+0x0010B110	evtGeneralHeapGraphTaskDestroy	inferred	Empty destroy callback registered for the DebugTimeGrph heap-usage task created by evtToggleDebugTimeGraphTask; paired DDS1 callback at 0x0010AEE8.
 0x0010B118	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
 0x0010B190	sdfDrawHeapSpanOverlay	inferred	U2
 0x0010B780	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
