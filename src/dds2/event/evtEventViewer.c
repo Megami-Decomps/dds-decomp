@@ -667,7 +667,7 @@ extern void effEnableFramebufferQuad(void);
 extern void effDisableFramebufferQuad(void);
 extern void effEnableColorRectangle(void);
 extern void effDisableColorRectangle(void);
-extern void func_0025EE00(EvtRuntime *);
+extern void evtUpdateCameraColorTrackEffect(EvtRuntime *);
 
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
@@ -703,7 +703,7 @@ void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     } else {
         effDisableColorRectangle();
     }
-    func_0025EE00(viewer);
+    evtUpdateCameraColorTrackEffect(viewer);
     evtViewerApplyParameterKeyTracks(viewer);
 }
 
@@ -1082,7 +1082,7 @@ extern void effEnableFramebufferQuad(void);
 extern void effDisableFramebufferQuad(void);
 extern void effEnableColorRectangle(void);
 extern void effDisableColorRectangle(void);
-extern void func_0025EE00(EvtRuntime *);
+extern void evtUpdateCameraColorTrackEffect(EvtRuntime *);
 
 
 extern s32 func_0035B6E0(const char *, ...);

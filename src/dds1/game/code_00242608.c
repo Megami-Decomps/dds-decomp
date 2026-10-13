@@ -817,7 +817,7 @@ void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
 /* The genuine three-row typed candidate remains non-matching. */
 INCLUDE_ASM(const s32, "game/code_00242608", fldApplyCameraColorKeyWords);
 
-void func_00243A18(EvtRuntime *scene) {
+void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
     evtApplyCameraColorTrackAtFrame(scene);
     if (scene->cameraColorActive == 1) {
         func_00134CD8();
