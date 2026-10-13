@@ -122,7 +122,8 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
     }
 }
 
-u64 *func_002E0618(VuWork *work) {
+/* Pad and finalize the packet; inactive or empty work returns NULL. */
+u64 *sdfVuFinalizeWorkPacket(VuWork *work) {
     u32 cursor;
     u32 start;
     s32 quadwords;

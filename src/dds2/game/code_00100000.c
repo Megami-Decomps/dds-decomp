@@ -147,7 +147,7 @@ extern s8 D_00435BB4;
 extern u16 D_00438A1E;
 extern u16 D_00438A24;
 extern u16 mnuMovieTaskState;
-extern u32 func_003287E0(void);
+extern u32 sdfReadTimerCount(void);
 extern void sdfSleepThreadCount(s32);
 extern void sdfSetNonnegativePacketIndex(s32);
 extern void sdfPadBuildButtonStates(void);
@@ -168,7 +168,7 @@ void kwlnRunMainLoop(void) {
             sdfRaiseDeviceThreadPriority();
         }
         if (D_00435B8C == 0) {
-            startTick = func_003287E0();
+            startTick = sdfReadTimerCount();
             kwlnUpdatePadInputState();
             if (kwlnTaskTickScheduler() == 0) {
                 break;

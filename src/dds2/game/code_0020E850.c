@@ -153,7 +153,7 @@ extern s32 btlPollTimedPresentationTask(void *args);
 extern s32 btlPollEffectWaitTask(void *args);
 extern s32 btlAdvanceActorEffectLabelTask(void *args);
 
-extern s32 func_0020F5E0(BtlLinkedEffectArgs *args);
+extern s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args);
 
 
 /* Set the native editor's name-length limit. */
@@ -262,7 +262,7 @@ INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
 
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419920);
 
-void func_0020EC20(BtlUnit *unit) {
+void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     s32 screen[4] __attribute__((aligned(16)));
     f32 baseline[4];
     f32 candidate[4];
@@ -360,7 +360,8 @@ void func_0020EC20(BtlUnit *unit) {
 extern s32 btlGetRuntime(void);
 extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
-void func_0020F048(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
+/* Draw a centered decimal value, using optional per-digit offsets. */
+void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     EffectSlotSet *set;
     BdWork *work;
@@ -421,7 +422,7 @@ void func_0020F048(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
 /* Select the owner's effect variant for its current condition and task action. */
-s32 func_0020F200(ActionStateLink *task) {
+s32 btlGetStatusActionEffectId(ActionStateLink *task) {
     BtlUnit *unit = task->unit;
     switch (unit->partyRecord.status & 0x7FFF) {
     case 0x2000:
@@ -546,7 +547,7 @@ s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
 extern f32 D_003BEAC8[12][2];
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
-s32 func_0020F5E0(BtlLinkedEffectArgs *args) {
+s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
     s32 screen[4] __attribute__((aligned(16)));
     s32 bounce[16];
     s32 value = args->payload.linked.value;
@@ -562,7 +563,7 @@ s32 func_0020F5E0(BtlLinkedEffectArgs *args) {
     if (args->payload.linked.elapsedTicks == 0) {
         args->payload.linked.offsetIndex = unit->firstCountdown % 12;
         unit->firstCountdown++;
-        func_0020EC20(args->unit);
+        btlSelectHpMpDisplayPositionVU(args->unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
         btlUnitGetMuzzlePosVU(args->unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, args->referencePosition);
@@ -639,7 +640,7 @@ s32 func_0020F5E0(BtlLinkedEffectArgs *args) {
         if (btlProjectForwardPositionToPackedScreen(screen) != 0) {
             screen[0] += (s32)(D_003BEAC8[args->payload.linked.offsetIndex][0] * 40.0f) << 4;
             screen[1] += ((s32)(D_003BEAC8[args->payload.linked.offsetIndex][1] * 40.0f) << 3) + 320;
-            func_0020F048(screen[0], screen[1] - rise, value, color, offsets);
+            btlDrawCenteredUnsignedNumber(screen[0], screen[1] - rise, value, color, offsets);
         }
     }
     args->payload.linked.elapsedTicks++;
@@ -674,7 +675,7 @@ BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     }
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->owner;
-    task->callback = func_0020F5E0;
+    task->callback = btlUpdateLinkedNumberDisplay;
     task->onFinish = effDecrementFirstCountdown;
     args = btlGetTaskArguments(task);
     args->payload.linked.kind = kind;

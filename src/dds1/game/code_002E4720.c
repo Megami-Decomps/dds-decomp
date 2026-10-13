@@ -404,7 +404,7 @@ extern s32 func_0030C8E0(const char *, ...);
 
 extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
 
-extern s32 func_002CF930(void);
+extern s32 sdfReadTimerCount(void);
 
 
 extern s32 sceSifMBindRpc(void *, s32, s32);
@@ -421,7 +421,7 @@ void sdfStartDevRpcServerAndBindClient(void) {
             D_003BD3C8 = 1;
             break;
         }
-        waitStart = func_002CF930();
+        waitStart = sdfReadTimerCount();
         while ((s32)sdfGetElapsedTimerTicks(waitStart) < SDF_DEV_RPC_BIND_POLL_TICKS) {
         }
     }

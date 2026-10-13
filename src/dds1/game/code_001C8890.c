@@ -579,7 +579,7 @@ void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
         btlDispatchStateHandler(arg0, 0x1A);
         break;
     }
-    count = func_001FD170(arg0);
+    count = btlGetStatusActionEffectId(arg0);
     if (count > 0) {
         task = (u8 *)btlCreateEffObjB(ctx, count);
         *(u64 *)(task + 0x40) = value;
@@ -883,7 +883,7 @@ void btlCommandStartSoundTasks(u8 *task) {
             }
             btlDispatchStateHandler(task, 0xC);
         }
-        effect = func_001FD170(task);
+        effect = btlGetStatusActionEffectId(task);
         if (effect > 0) {
             object = (u8 *)btlCreateEffObjB(unit, effect);
             *(s64 *)(object + 0x40) = ownerId;

@@ -160,7 +160,7 @@ void sdfDestroyDevRequest(DevRequest *request) {
     sdfReleaseChipBlock(request);
 }
 
-extern void func_00329600(struct SdfMemBlock *allocation, s32 size);
+extern void sdfResizeResourceAllocation(struct SdfMemBlock *allocation, s32 size);
 
 /* Grow capacity, preserving the SDK's signed 16-bit allocation-size arithmetic. */
 void sdfDevBufferedRequestGrow(DevRequest *request) {
@@ -170,7 +170,7 @@ void sdfDevBufferedRequestGrow(DevRequest *request) {
     }
     sdfDecrementAllocationReferenceCount(request->backingAllocation);
     request->capacity = request->capacity + request->growStep;
-    func_00329600(request->backingAllocation, (s16)request->capacity * request->stride);
+    sdfResizeResourceAllocation(request->backingAllocation, (s16)request->capacity * request->stride);
     request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
 }
 
@@ -191,7 +191,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     } else {
         sdfDecrementAllocationReferenceCount(request->backingAllocation);
         request->capacity = elementCount;
-        func_00329600(request->backingAllocation, request->stride * elementCount);
+        sdfResizeResourceAllocation(request->backingAllocation, request->stride * elementCount);
         request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
         if (elementCount < request->usedCount) {
             request->usedCount = elementCount;

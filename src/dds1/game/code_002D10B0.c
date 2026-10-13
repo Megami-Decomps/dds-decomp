@@ -177,7 +177,7 @@ extern s32 CancelWakeupThread(s32);
 extern s32 SleepThread(void);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern u32 func_002CF930(void);
+extern u32 sdfReadTimerCount(void);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
 extern void sdfGraphResetDeviceForCurrentMode(void);
 extern void func_002D5018(void);
@@ -194,7 +194,7 @@ void sdfRunGraphicsTransferWorker(void) {
         CancelWakeupThread(GetThreadId());
         D_003BD2F1 = 1;
         SleepThread();
-        startTicks = func_002CF930();
+        startTicks = sdfReadTimerCount();
         WaitSema(sdfGsImageUploadSemaphore);
         if (D_003BD9DC != 0) {
             D_003BD9DC = 0;

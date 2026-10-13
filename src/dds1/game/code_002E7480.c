@@ -46,7 +46,7 @@ extern u8 sdfPfsPathPrefix[];
 
 extern f32 sdfNormalizedAsinSamples[];
 
-extern void func_002D0750(struct SdfMemBlock *allocation, s32 size);
+extern void sdfResizeResourceAllocation(struct SdfMemBlock *allocation, s32 size);
 
 extern u32 strlen(const char *s);
 
@@ -164,7 +164,7 @@ void sdfDevBufferedRequestGrow(DevRequest *request) {
     }
     sdfDecrementAllocationReferenceCount(request->backingAllocation);
     request->capacity = request->capacity + request->growStep;
-    func_002D0750(request->backingAllocation, (s16)request->capacity * request->stride);
+    sdfResizeResourceAllocation(request->backingAllocation, (s16)request->capacity * request->stride);
     request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
 }
 
@@ -185,7 +185,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     } else {
         sdfDecrementAllocationReferenceCount(request->backingAllocation);
         request->capacity = elementCount;
-        func_002D0750(request->backingAllocation, request->stride * elementCount);
+        sdfResizeResourceAllocation(request->backingAllocation, request->stride * elementCount);
         request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
         if (elementCount < request->usedCount) {
             request->usedCount = elementCount;

@@ -14,7 +14,8 @@ extern u32 D_0045F0FC[];
 
 extern void *func_0035A828(u32 size);
 
-void func_00328FA8(u32 heapSize) {
+/* Allocate the chip heap and page records, initialize free pages and size classes. */
+void sdfInitChipHeap(u32 heapSize) {
     u32 recordBytes;
     s32 alignment;
     s32 remaining;
@@ -150,7 +151,8 @@ u16 sdfGetMemoryBlockState(SdfMemBlock *block) {
     return block->state;
 }
 
-u32 func_00329230(void) {
+/* Return the first general-heap block, retaining the native integer representation. */
+u32 sdfGetFirstGeneralHeapBlock(void) {
     return (u32)sdfGeneralHeap.head.next;
 }
 

@@ -65,7 +65,7 @@ extern void sdfPadRequestMode(s32, u8);
 extern void sdfDevSetCurrentDirectory(const char *);
 extern void sdfDevSetDefaultDeviceWorker(s32);
 extern void sdfEnsureDeviceWorkerThreadStarted(s32);
-extern void func_002D0D70(const char *, const char *);
+extern void sdfLoadModulesAndBindNamedResourceRpc(const char *, const char *);
 extern void sdfStartAndSuspendWorkerThread(void);
 extern void kwlnRunMainLoop(void);
 
@@ -114,7 +114,7 @@ s32 func_00101BD8(void) {
     sdfDevSetDefaultDeviceWorker(3);
     sdfEnsureDeviceWorkerThreadStarted(3);
     sdfEnsureDeviceWorkerThreadStarted(0);
-    func_002D0D70(D_0039DFD8, D_0039DFF8);
+    sdfLoadModulesAndBindNamedResourceRpc(D_0039DFD8, D_0039DFF8);
     sdfStartAndSuspendWorkerThread();
     sdfStartTrackedThread((SdfThreadNode *)((u8 *)&D_003BD680 + 8),
                           kwlnRunMainLoop, D_003BDC90, 0x4000, 0x60, 0);

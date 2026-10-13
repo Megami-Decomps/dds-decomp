@@ -920,7 +920,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern void func_00211360();
-extern s32 func_0020F200();
+extern s32 btlGetStatusActionEffectId();
 
 
 extern BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *, BtlOperandEntry *);
@@ -1096,7 +1096,7 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
             btlDispatchStateHandler(task, 0x1B);
             break;
         }
-        effect = func_0020F200(task);
+        effect = btlGetStatusActionEffectId(task);
         if (effect > 0) {
             object = btlCreateEffObjB(unit, effect);
             object->ownerId = ownerId;
@@ -1430,7 +1430,7 @@ void btlCommandStartSoundTasks(u8 *task) {
             }
             btlDispatchStateHandler(task, 0xC);
         }
-        effect = func_0020F200(task);
+        effect = btlGetStatusActionEffectId(task);
         if (effect > 0) {
             object = btlCreateEffObjB((BtlUnit *)unit, effect);
             object->ownerId = ownerId;
