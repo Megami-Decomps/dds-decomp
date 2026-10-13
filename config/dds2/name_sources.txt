@@ -3881,6 +3881,7 @@
 0x00254678	evtDrawGroupPropertyTable	inferred	U3
 0x00254F80	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state; DDS1 twin. [names_qp9.tsv]
 0x00255360	evtDrawGroupListRow	inferred	DDS1 twin 0x0023A4B0 [names_M95_Event.tsv]
+0x002560B0	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds2/game/code_00250010.c:2565; Paired implementation draws and handles X/Y slot-vector edits through evtSetSlotVector and restores saved values on cancel. DDS1 twin 0x0023B200.
 0x002566F8	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
 0x002569D0	evtViewerDrawGroupWindow	inferred	Light1d2
 0x002570B8	evtPollRuntimeControlReady	inferred	Returns negative and clears runtime control state if external control poll is false. [names_reviewed7.tsv]

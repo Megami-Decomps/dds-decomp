@@ -2446,7 +2446,7 @@ extern f32 D_003BD35C;
 extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
-s32 func_0023B200(s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
     SdfListHead *list;
     EvtRuntimeGroup *group;
     const EvtFloatPanelRow *row;
