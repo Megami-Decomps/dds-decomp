@@ -445,7 +445,7 @@ extern void ptyMergeStockSkills(DatPartyRecord *unit);
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 extern u8 btlIsRuntimeAllocated(void);
 extern f32 btlGetEncounterAdjustmentScale(void);
-extern u32 func_001A4630(void);
+extern u32 btlGetEscapeAttemptCount(void);
 extern s32 btlAverageAllMaximumForMask(u32 arg0);
 extern s32 btlAverageAllCurrentForMask(u32 arg0);
 extern s32 btlAverageAllLevelsForMask(u32 arg0);
@@ -1672,7 +1672,7 @@ s32 evtPushAvailableIntegerValue(void) {
     s32 value = 0;
 
     if (battleAvailable != 0) {
-        value = func_001A4630();
+        value = btlGetEscapeAttemptCount();
     }
     scrSetIntegerReturnValue(value);
     return 1;

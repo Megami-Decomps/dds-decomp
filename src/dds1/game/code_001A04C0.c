@@ -87,7 +87,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex);
 
 /* Draw the four color channels and handle selection and value editing. */
 /* Retail 0x001A0680 keeps the row < 4 select inside the four-row loop. */
-s32 func_001A04C0(void) {
+s32 itfEditOverlayColor(void) {
     SifCommand packet;
     SdfListHead *list;
     s32 row;
@@ -328,7 +328,8 @@ s32 btlUpdateBattleFieldPresentation(void) {
     return 0;
 }
 
-void func_001A0E38(void) {
+/* Empty destructor callback for the active battle-frame task. */
+void btlReleaseActiveBattleFrameTask(void) {
 }
 
 extern u8 D_003BB2F0[];
@@ -341,7 +342,7 @@ void btlCreateDrawTasks(void) {
     s32 state = btlRuntime;
     u32 mainTask;
     u32 drawTask;
-    mainTask = kwlnTaskCreate((u32)D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A0E38, 0);
+    mainTask = kwlnTaskCreate((u32)D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
     *(u32 *)(state + 0x29C) = mainTask;
     drawTask = kwlnTaskCreate((u32)D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
     kwlnTaskAddChild(mainTask, drawTask);
@@ -423,7 +424,8 @@ extern void func_001C45F0(void);
 
 extern void func_001FB098(void);
 
-void func_001A0F10(void) {
+/* Allocate/reset battle work, initialize windows and queue shared resources. */
+void btlInitializeBattleRuntime(void) {
     btlResetRuntimeSequenceCounter();
     D_003BB2E0 = (u32)sdfAllocGeneralBlock(0xE10);
     btlRuntime = (s32)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BB2E0));
@@ -534,12 +536,12 @@ extern void itfMesSetFlags(s32 flags);
 extern void mdlFlagSet(s32 flag);
 
 /* Start a battle: pick the scene parameters for the encounter and enter the battle scene. */
-void func_001A11F0(s32 mode, s32 pack, s32 encounter) {
+void btlStart(s32 mode, s32 pack, s32 encounter) {
     struct { s32 code; s32 parameter; } req;
     u16 paramA;
     u16 paramB;
 
-    func_001A0F10();
+    btlInitializeBattleRuntime();
     btlCreateDrawTasks();
     switch (mode) {
     case 0:

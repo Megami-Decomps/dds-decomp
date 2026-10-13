@@ -425,11 +425,13 @@ s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *node) {
     return 0;
 }
 
-u8 func_001DD488(BtlLinkedCommand *action) {
+/* Skill 0x5F is Fire of Sinai; linked-camera selection treats it specially. */
+u8 btlIsLinkedFireOfSinaiCommand(BtlLinkedCommand *action) {
     return action->actionCode == 0x5f;
 }
 
-u8 func_001DD498(BtlLinkedCommand *action) {
+/* Skill 0x1A0 is Item Drop in this game's skill-name table. */
+u8 btlIsLinkedItemDropCommand(BtlLinkedCommand *action) {
     return action->actionCode == 0x1a0;
 }
 
@@ -503,7 +505,8 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
 void func_001DD678(void) {
 }
 
-void func_001DD680(BtlLinkedCommand *command) {
+/* Prepare the embedded primary camera through the existing 27.5f provider. */
+void btlPreparePrimaryActionCamera(BtlLinkedCommand *command) {
     func_001DF358(command, &command->camera);
 }
 
@@ -667,7 +670,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else {
                 if (btlCanUseActorCategoryFlag2(action) != 0 || func_001DD2C0(action) != 0 ||
-                    func_001DD488(action) != 0) {
+                    btlIsLinkedFireOfSinaiCommand(action) != 0) {
                     action->stepKind = 1;
                 } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
                     action->stepKind = 1;
@@ -693,7 +696,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 }
             }
         } else {
-            if (func_001DD498(action) != 0) {
+            if (btlIsLinkedItemDropCommand(action) != 0) {
                 btlChooseActionPoseBlendFromActorCount(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else if (btlHasSingleLinkedResource(action) != 0 && btlHasLinkedEffectNodeTrigger(action) != 0) {
@@ -897,7 +900,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 func_001DEFE0(action, &action->camera, 20.0f);
             }
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
-            if (func_001DD488(action)) {
+            if (btlIsLinkedFireOfSinaiCommand(action)) {
                 btlInitTargetCursorAndFacing(action, &action->camera);
             } else if (func_001DD2C0(action)) {
                 func_001E2578(action, &action->frontCamera, &action->backCamera);

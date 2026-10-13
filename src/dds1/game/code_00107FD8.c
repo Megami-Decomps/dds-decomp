@@ -86,7 +86,7 @@ extern void fldStartSequenceRecord(void);
 
 extern void dds3AdminSetControlFlag(void);
 
-extern void func_001A11F0(s32 arg0, s32 arg1, s32 arg2);
+extern void btlStart(s32 mode, s32 pack, s32 encounter);
 
 extern void evtEventViewerDestroyTask(void);
 
@@ -1154,10 +1154,10 @@ u8 evtWaitConfigTaskDone(void) {
 void evtDispatchSelectionCommand(s32 commandSource, s32 *commandParams) {
     if (commandSource == 0) {
         if (commandParams == NULL) {
-            func_001A11F0(1, 0, 0);
+            btlStart(1, 0, 0);
         }
         else {
-            func_001A11F0(0, commandParams[0], commandParams[1]);
+            btlStart(0, commandParams[0], commandParams[1]);
         }
     }
     else {

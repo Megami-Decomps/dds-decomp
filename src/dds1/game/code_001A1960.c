@@ -1112,11 +1112,12 @@ f32 btlGetEncounterAdjustmentScale(void) {
     return datBattleParameters->adjustmentScale[adjustment + 3];
 }
 
-u32 func_001A4630(void) {
-    s32 temp_v0;
+/* Read the counter incremented by the escape-attempt result callback. */
+u32 btlGetEscapeAttemptCount(void) {
+    s32 battleWork;
 
-    temp_v0 = btlGetRuntime();
-    return *(u32 *)(temp_v0 + 0x254);
+    battleWork = btlGetRuntime();
+    return *(u32 *)(battleWork + 0x254);
 }
 
 /* Return a random eligible actor task, or 0 if no candidate is available. */

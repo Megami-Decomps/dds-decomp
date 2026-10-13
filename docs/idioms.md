@@ -10626,3 +10626,36 @@ now shares DDS1's existing `itfSkipEncodedTextOpcode` name, without changing its
 game-specific switch cases or stop/voice markers. Existing caller extern return
 types, including the decoder's `void` font externs, are intentionally unchanged.
 
+## Battle startup, escape counters and linked camera predicates
+
+`btlStart` is the name printed by both native startup diagnostics. It initializes
+the battle runtime and draw tasks, selects encounter/background parameters, and
+enters the requested battle scene. `btlInitializeBattleRuntime` names the
+allocation/reset/resource setup, without homogenizing either game's flags or
+resource choices. `btlReleaseActiveBattleFrameTask` is the empty destructor
+installed for the active-frame task; its original per-game signatures remain.
+
+`btlGetEscapeAttemptCount` reads runtime offset `0x254` in DDS1 and `0x278` in
+DDS2. These counters are incremented before the escape chance test, not after
+every linked-actor operation. Accordingly, `btlRecordEscapeAttemptOutcome`
+corrects the earlier generic linked-actor attribution and preserves both result
+flag bits (`0x2000`/`0x1000`), all conditions and all return/argument types.
+
+`btlIsLinkedFireOfSinaiCommand` compares action code `0x5F`, identified as
+Fire of Sinai by both skill-name tables. `btlIsLinkedItemDropCommand` compares
+`0x1A0`: the tables call it Item Drop in DDS1 and Dropped Item in DDS2.
+Their camera selectors are unchanged. `btlPreparePrimaryActionCamera` passes
+the action's embedded camera to the existing `27.5f` pose provider; this name
+does not assign an unproven field-of-view role to that constant.
+
+Debug-editor counterparts must be identified by their controls and strings,
+not by position in these differently split units. DDS1's `itfEditOverlayColor`
+aligns with the existing DDS2 FILTER editor. DDS2's `kwlnUpdateBlurDebugMenu`
+aligns with the existing DDS1 BLUR editor, which controls overlay alpha, scale
+and position. The four-row FILTER editor's unreachable row/rate branches remain.
+
+`frFontGetBankEntryText` returns encoded text after the bank entry's packed
+table and metadata word. It retains the metadata copy, unused mode parameter,
+original bounds check (including no new negative-ID guard), and every caller's
+existing signature. None of these naming changes alters parsing or codegen.
+
