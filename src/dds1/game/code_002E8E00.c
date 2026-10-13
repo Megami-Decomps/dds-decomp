@@ -1,12 +1,5 @@
 #include "common.h"
-
-typedef struct SequenceVolumePanPacket {
-    /* 0x0 */ u32 trackId;
-    /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 volume;
-    /* 0xA */ u16 pan;
-    /* 0xC */ u32 unkC;
-} SequenceVolumePanPacket;
+#include "snd_sequence_volume_pan.h"
 
 u32 sndSendCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
@@ -53,7 +46,7 @@ u32 func_002E8F30(s32 command, char *text) {
 
 /* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
 void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
-    SequenceVolumePanPacket packet;
+    SndSequenceVolumePanPacket packet;
     sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.volume = volume;
