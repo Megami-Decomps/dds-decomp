@@ -1521,7 +1521,7 @@ void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
     }
 }
 
-u32 func_00260458(void) {
+u32 mnuCampGetProgressStage(void) {
     return 0;
 }
 
@@ -1735,7 +1735,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
             pricePercent = rowPercent;
         }
         price = itemPrice * pricePercent / 100;
-        progressStage = func_00260458();
+        progressStage = mnuCampGetProgressStage();
         if (progressStage != 0) {
             price = price * (s32)D_003CD0C4[progressStage].percent / 100;
         }
@@ -2864,13 +2864,13 @@ s32 evtSetupDispatchSyncC(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-void func_00262A48(s32 stateAddress) {
+void mnuInstallNoCapacityStateTable(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
         MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), D_003CE4EC, D_003CE4EC + 0xc4);
     }
 }
 
-s32 func_00262A88(KwlnTask *task) {
+s32 evtBuildRangeFilteredShopCatalogIfActive(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
         mnuCampRebuildFilteredStockWindow(stateAddress, 3);
@@ -2894,7 +2894,7 @@ s32 mnuResetCommandStepAndSelectPhase(KwlnTask *task) {
 }
 
 
-s32 func_00262B50(KwlnTask *callbackContext) {
+s32 mnuShopPollRangeFilteredCommandSelection(KwlnTask *callbackContext) {
     MenuTerminalContext *state;
     struct MenuList *list;
     struct MenuListNode *selected;
@@ -2937,7 +2937,7 @@ s32 func_00262B50(KwlnTask *callbackContext) {
         return 0;
     }
     case 6:
-        func_00262A48((s32)state);
+        mnuInstallNoCapacityStateTable((s32)state);
         break;
     default:
         break;
@@ -3326,14 +3326,14 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
     return 0;
 }
 
-s32 func_00263B98(KwlnTask *callbackContext) {
+s32 evtAlignDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
     mnuDrawCommandClosePhase((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_00263BF0(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3342,7 +3342,7 @@ s32 func_00263BF0(KwlnTask *callbackContext) {
 extern void dspSetActive(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
-s32 func_00263C38(KwlnTask *task) {
+s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 entry = 7;
     CampWindowParams *item = &state->window->list->cursor->camp;
@@ -3489,7 +3489,7 @@ extern u8 D_003CE5CC[];
 extern u8 D_003CE5E8[];
 
 /* Complete an idle shop confirmation and queue its followup state. */
-s32 func_00264120(KwlnTask *task) {
+s32 evtDispatchShopSelectionAction(KwlnTask *task) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 *dispatchSlot = &state->popupState;
     s32 operation;
@@ -3536,7 +3536,7 @@ s32 evtDispatchSceneReadyFollowup(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_002642B8(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3602,7 +3602,7 @@ extern void mnuDrawShopCurrencyBalance(void *, s32);
 extern void func_00296E98(s32, u32, s32, s32);
 
 /* Draw the active dispatch mode before advancing its callback state. */
-s32 func_00264480(KwlnTask *callbackContext) {
+s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(callbackContext);
 
     func_0025FD78(state);
@@ -3638,7 +3638,7 @@ s32 func_00264480(KwlnTask *callbackContext) {
     return evtMenuSetHandler(state, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_002646C8(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
