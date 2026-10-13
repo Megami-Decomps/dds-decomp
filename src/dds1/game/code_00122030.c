@@ -6,6 +6,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -824,7 +825,7 @@ typedef char FieldAreaEncounterRow_size_check[(sizeof(FieldAreaEncounterRow) == 
 typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable) == 0x304) ? 1 : -1];
 extern FieldAreaEncounterTable *D_003BAA38;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
-extern s32 evtCreateWorldObjectForKey(s32 area, s32 room);
+
 extern void *func_00117648(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);

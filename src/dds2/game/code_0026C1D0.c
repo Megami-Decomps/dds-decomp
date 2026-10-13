@@ -1,3 +1,4 @@
+#include "evt_world_object_api.h"
 #include "kwln.h"
 #include "mnu_list.h"
 #include "kwln_task_state.h"
@@ -63,9 +64,6 @@ typedef struct {
 } ActiveList;
 
 extern void *dds3GetWorldSecondaryObject(void);
-
-
-extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Recreate the secondary world selection only when its packed key changes.
  * Preserve the signed shift/add rather than treating this as an unsigned OR. */
