@@ -11,6 +11,7 @@
 #include "sdf_dev_state.h"
 #include "sdf_dev_event.h"
 #include "sdf_pac_state.h"
+#include "sdf_pac_decoder.h"
 #include "sdf_pac_work.h"
 #include "sdf_key_pool.h"
 
@@ -135,17 +136,6 @@ enum {
     SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE = 0x80,
     SDF_DECODE_COMMAND_EXPAND_BYTES = 0xA0
 };
-
-typedef struct SdfPacDecoder {
-    u8 state;
-    u8 command;
-    u16 pendingBytes;
-    u8 *output;
-    u8 *input;
-    s32 inputBytes;
-    u8 backrefLow;
-    u8 pad11[3];
-} SdfPacDecoder;
 
 extern s32 D_00439220;
 extern u8 *D_0047BC80[16];
