@@ -4884,7 +4884,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 /* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
-extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
 extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 

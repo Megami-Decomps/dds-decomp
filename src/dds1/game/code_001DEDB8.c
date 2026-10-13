@@ -4274,7 +4274,6 @@ extern void func_001EBE88(BtlLinkedCommand *, BtlCamState *,
 
 extern void func_002DD608(f32);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern f32 D_0035F590[4];
 

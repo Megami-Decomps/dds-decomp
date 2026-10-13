@@ -5,6 +5,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "kwln_draw_buffer.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -190,7 +191,6 @@ typedef struct StageTestState {
 
 extern StageTestState evtStageTestState;
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern char D_0042B610[];
 

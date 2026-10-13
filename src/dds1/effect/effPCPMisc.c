@@ -4781,7 +4781,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
-extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
 extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **table, SdfModel *model);
 

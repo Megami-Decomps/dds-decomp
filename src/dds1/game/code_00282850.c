@@ -5,6 +5,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "kwln_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
@@ -128,7 +129,6 @@ extern void fldSetPrimarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
 extern void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern char D_003BC7C8[];

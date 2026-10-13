@@ -710,7 +710,6 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     return activeCount;
 }
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern f32 func_002FA1F0(f32, f32);
 extern u128 D_0035F9E0;
 

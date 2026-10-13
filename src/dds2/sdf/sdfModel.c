@@ -38,7 +38,6 @@ extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32
 
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
