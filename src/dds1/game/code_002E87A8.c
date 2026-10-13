@@ -2,6 +2,7 @@
 #include "common.h"
 #include "snd_command_packet.h"
 #include "snd_work.h"
+#include "sdf_named_resource_request_api.h"
 #include "sce_io.h"
 
 #define SND_COMMAND_RING_ENTRY_COUNT 32
@@ -130,7 +131,6 @@ submit:
 extern u8 sdfPfsDebugMode;
 extern s32 sceSifLoadModule(const char *, s32, const char *);
 extern s32 func_00310478(const char *, SceIoStat *);
-extern s32 sdfSendNamedResourceRequest(char *, s32, void *, s32 *);
 
 /* Load the sound modules; debug PFS may override only the SDF sound manager. */
 void sndLoadIopSoundModules(void) {
