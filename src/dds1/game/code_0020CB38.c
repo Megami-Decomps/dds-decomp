@@ -689,7 +689,7 @@ s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
     return 1;
 }
 
-extern u32 func_001DD2C0(BtlLinkedCommand *);
+extern u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
@@ -720,7 +720,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
         btlGetIndexListCount(task->indexWork.indices);
         if (firstSide == 1 && secondSide == 0) return 0;
         if (firstSide == 0 && secondSide == 1) {
-            if (func_001DD2C0(command) && btlCanUseLinkedActor(command)) {
+            if (btlCanUseActorCategoryFlag4(command) && btlCanUseLinkedActor(command)) {
                 btlClearAllUnitDefeatCandidatesTask();
                 btlApplyCombinedActorFlags((u8 *)command);
                 switch (effMiscRandMod(0, 2)) {
@@ -787,7 +787,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
         return 1;
     }
     if (count >= 2 && firstSide == 1 && secondSide == 0) {
-        if (func_001DD2C0(command)) {
+        if (btlCanUseActorCategoryFlag4(command)) {
             func_001E2578(command, &command->frontCamera, &command->backCamera);
             return 0;
         }

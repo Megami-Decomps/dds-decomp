@@ -4411,7 +4411,7 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
     return 1;
 }
 
-extern u32 func_001DD2C0(BtlLinkedCommand *);
+extern u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
@@ -4455,7 +4455,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
             return 1;
         }
         if (count >= 2 && selector == 0 && mode == 1) {
-            if (func_001DD2C0(command)) {
+            if (btlCanUseActorCategoryFlag4(command)) {
                 btlFlagAllUnitDefeatCandidatesTask();
                 shot = effMiscRandMod(0, 3);
                 switch (shot) {
