@@ -3597,7 +3597,7 @@ extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
 extern void mnuDrawShopPricePlaceholder(s32, s32, s32, void *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
-extern void func_00296B48(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawShopCurrencyBalance(void *, s32);
 extern void func_00296E98(s32, u32, s32, s32);
 
@@ -3629,7 +3629,7 @@ s32 func_00264480(KwlnTask *callbackContext) {
             mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
             func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
-            func_00296B48(0, 0, 0, (s32)state, 0x100, 0x53);
+            mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)state, 0x100, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             func_00296E98((s32)state, 0x100, 2, 0x53);
         }

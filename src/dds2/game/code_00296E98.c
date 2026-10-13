@@ -20,7 +20,7 @@ extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
 extern void func_00294D50(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
-extern void func_00296B48(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
 
 extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
@@ -391,7 +391,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         if (progress > 1.0f) {
             progress = 1.0f;
         }
-        func_00296B48(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIconFixedEntry(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
         break;
     case 8:
@@ -413,7 +413,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
             func_00296E98((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
             break;
         }
-        func_00296B48(0, 0, 0, (s32)scene, 0x100, 0x53);
+        mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)scene, 0x100, 0x53);
         mnuDrawIconFixedEntry(0, 0, 0, (s32)scene, 0x100, 0x53);
         break;
     case 6:
@@ -430,7 +430,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
             scene->stateStep++;
         }
         progress = (f32)scene->stateStep / 10.0f;
-        func_00296B48(0, 0, 0, (s32)scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)scene, (s32)(progress * 256.0f), 0x53);
         if (scene->stateStep < 8) {
             progress = (f32)scene->stateStep * 0.125f;
         } else {
