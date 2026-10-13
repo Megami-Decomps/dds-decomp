@@ -1512,7 +1512,7 @@ void btlDrawTexturedGridCell(SdfListHead *packets, s32 primitive, s32 x, s32 y, 
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00212998);
+INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawCapturedScreenTileOverlay);
 
 void btlInitFadeColors(void) {
     btlInitVisibilityGrid();
@@ -1531,14 +1531,14 @@ void btlInitFadeColors(void) {
 
 extern SdfPoolNode D_00325708;
 
-extern void func_00212998(SdfListHead *, u32, u32, u32, u32, s32);
+extern void btlDrawCapturedScreenTileOverlay(SdfListHead *, u32, u32, u32, u32, s32);
 
 s32 btlUpdateFadeIn(void) {
     SdfListHead *packets = sdfCreateResetPacketList();
     if ((btlRuntimeState.color18 & 0xFF000000) != 0x80000000) {
         btlRuntimeState.color18 += 0x10000000;
     }
-    func_00212998(packets, btlRuntimeState.color14, btlRuntimeState.color1C, btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
+    btlDrawCapturedScreenTileOverlay(packets, btlRuntimeState.color14, btlRuntimeState.color1C, btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
     D_00325708.append(&D_00325708, packets);
     if ((btlRuntimeState.color14 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color14 -= 0x08000000;
@@ -1599,7 +1599,7 @@ s32 btlUpdateFadeOut(void) {
         btlRuntimeState.unk_3C[0]++;
     }
     packets = sdfCreateResetPacketList();
-    func_00212998(packets, btlRuntimeState.color14, btlRuntimeState.color1C,
+    btlDrawCapturedScreenTileOverlay(packets, btlRuntimeState.color14, btlRuntimeState.color1C,
                  btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
     D_00325708.append(&D_00325708, packets);
     if ((btlRuntimeState.color10 & 0xFF000000) > 0x0C000000) {
