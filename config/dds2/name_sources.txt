@@ -3725,6 +3725,8 @@
 0x00242F48	evtOpcodeSetFadeTarget	inferred	Reads three script operands after resetting fade controls and calls fldSetFadeTarget with them.
 0x00243068	evtCommandAwaitBgmPreload	inferred	src/dds2/game/code_00242CB8.c func_00243068: Starts BGM preload at command timer zero, then polls load status on subsequent calls. Twin of DDS1 func_00228408. [names_reviewed24.tsv]
 0x00243140	evtCommandQueueBgmWithFade	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_00243140; Reads sound-id and fade script parameters and queues the validated BGM change. [names_qp9.tsv]
+0x00243180	evtOpcodeStartReducedBgm	inferred	Starts reduced-mode BGM by invoking sndStartReducedBgm, then returns script-command success. [names_qp9.tsv]
+0x002431A0	evtOpcodeStopReducedBgm	inferred	Stops reduced-mode BGM by invoking sndStopReducedBgm, then returns script-command success. [names_qp9.tsv]
 0x00243200	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_00243200; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
 0x002432A0	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_002432A0; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
 0x00243310	evtClearSolarOverlayControl	inferred	Clears the byte at solar-world-state offset 0xA43 while leaving the adjacent phase byte intact.
