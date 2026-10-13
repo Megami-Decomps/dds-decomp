@@ -5136,7 +5136,7 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
 }
 /*END fldTransitionSkyLightSet*/
 
-void func_00136098(void) {
+void fldClearCameraObjectActiveFlag(void) {
     dds3ClearObjectFlags(fldPlayerObject, 0x100);
 }
 

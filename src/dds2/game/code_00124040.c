@@ -1451,7 +1451,7 @@ extern void fldActivatePendingSceneCommand(void);
 extern s32 fldGetSceneCommandState(void);
 
 /* The scene reset ignores the command word supplied by this caller. */
-extern void func_00136098();
+extern void fldClearCameraObjectActiveFlag();
 
 
 
@@ -1574,7 +1574,7 @@ void fldSpawnPlayerUnits(f32 *input) {
                 mdlFlagClear(0x818);
                 fldAreaState.sceneCommand = 0;
             }
-            func_00136098(fldAreaState.commandEnabled);
+            fldClearCameraObjectActiveFlag(fldAreaState.commandEnabled);
         }
         func_00133B10();
         evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0038A610, (s32)(u32)D_00435F50);

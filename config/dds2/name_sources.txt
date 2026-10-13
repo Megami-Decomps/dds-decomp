@@ -757,6 +757,7 @@
 0x001355A8	fldBeginSelectedValueTransition	inferred	Stores the new value, clears transition state and applies the selected value. [names_reviewed13.tsv]
 0x00135840	fldSetPlayerAndPeerLighting	inferred	U2
 0x00135D18	fldApplyPendingSceneValueWithSpeed	inferred	Applies a queued field value when different from current with gated update speed. [names_reviewed11.tsv]
+0x00136098	fldClearCameraObjectActiveFlag	inferred	Clears flag 0x100 on the player/camera object after the field scene-command state is resolved. DDS1 fldSetCameraObjectActiveFlag pairs this clear with its enable path.
 0x00136388	fldInitializeDisplayPointerTable	inferred	Clears the field display table and installs its first two buffer pointers.
 0x001363D8	fldApplySkyLightSetToPlayerVU	inferred	confidence=high; matched-C; src/dds2/game/code_001360B8.c:141:func_001363D8; Chooses the current or override sky-light set, applies scene fade/sway and ambient/directional/background light vectors, packs the player colors, and supplies its normalized VU light direction. DDS1 counterpart is not yet matched C.; source=names_P6.tsv:6 [names_qp12_apply.tsv]
 0x00136718	fldApplyLightSetToChaseCameraUnit	inferred	src/dds2/game/code_001360B8.c func_00136718: Called by fldCreateChaseCameraObject after creating OIKAKE_UNIT; applies the current FldLightSet unit colors and normalized light direction.
