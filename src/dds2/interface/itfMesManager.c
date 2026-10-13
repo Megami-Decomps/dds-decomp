@@ -2422,7 +2422,7 @@ extern u8 D_00452E60[0x10];
 extern s8 D_0037F531[];
 
 /* Start the window entry, then poll completion and restore its normal flags. */
-s32 func_001A85E0(void) {
+s32 itfMesScriptStartEntryAndWait(void) {
     s32 window = scrGetWindow();
     ItfMesState *state;
     s32 entry;
