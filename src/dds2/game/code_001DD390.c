@@ -27,6 +27,7 @@
 #include "btl_task_args.h"
 #include "btl_sound.h"
 #include "btl_selected_unit_effect_task_args.h"
+#include "btl_approach_task_args.h"
 #include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "file.h"
@@ -3704,15 +3705,6 @@ BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-typedef struct BtlApproachTaskArgs {
-    BtlUnit *unit;
-    BtlUnit *target;
-    f32 offset;
-    f32 scale;
-    s32 unk10;
-    s32 count;
-} BtlApproachTaskArgs;
-
 /* vu0 routine: move the unit along the line to the target's muzzle, offset by reach */
 s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     BtlUnit *unit = args->unit;
@@ -3768,7 +3760,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
 
 BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(24);
-    BtlRuntimeTaskArgs *args;
+    BtlApproachTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApproachTargetTask;
@@ -3776,11 +3768,11 @@ BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scal
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->option = index;
-    args->scale2 = scale;
-    args->unk_08 = 0;
-    args->unk_14 = 0;
+    args->unit = unit;
+    args->target = (BtlUnit *)(u32)index;
+    args->scale = scale;
+    args->offset = 0.0f;
+    args->count = 0;
     return task;
 }
 
