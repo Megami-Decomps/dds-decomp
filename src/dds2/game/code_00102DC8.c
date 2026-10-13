@@ -1195,7 +1195,7 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
 
 extern void sdfGraphSetDisplayMode(s32);
 extern void kwlnInitializeFrameDrawPackets(s32);
-extern void func_001057B0(void);
+extern void evtInitializeFrameStatePacketTemplates(void);
 extern u8 D_00435BC8;
 extern void evtEnsureDrawVectorState(void);
 
@@ -1206,7 +1206,7 @@ void evtResetDisplayProjectionAndVectorState(void) {
     sdfCameraBuildProjection(&D_0037F980.camera);
     kwlnInitializeFrameDrawPackets(0);
     kwlnInitializeFrameDrawPackets(1);
-    func_001057B0();
+    evtInitializeFrameStatePacketTemplates();
     D_00435BC8 = 0;
     evtEnsureDrawVectorState();
 }
@@ -1421,7 +1421,7 @@ void kwlnCancelConfiguredFadeFrames(void) {
     D_00435CE8 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
+INCLUDE_ASM(const s32, "game/code_00102DC8", evtInitializeFrameStatePacketTemplates);
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
 SdfListHead *evtBuildFrameStatePacketList(s32 stateIndex) {
