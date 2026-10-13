@@ -4132,6 +4132,7 @@
 0x0022B620	evtInsertListNodeByOrderKey	inferred	R_Names31 B89
 0x0022B6C0	evtUnlinkListNode	inferred	Unlinks a node from the owner list and decrements its count.
 0x0022B710	evtReorderListNodes	inferred	Walks the event list and relocates nodes whose order keys are out of sequence.
+0x0022B7A0	evtCreateTrackKeyAtFrame	inferred	Allocates a track key at the requested frame, inserts it by order, and initializes kind-specific defaults from viewer state.
 0x0022BE40	evtEventViewerGetPendingNode	inferred	walks the queue entry at viewer+0x2308 by (count A + count B) nodes [names_M34_SmallSweep3.tsv]
 0x0022BEA8	evtEventViewerReleaseNode	inferred	unlinks a queued node, frees its buffer unless entry id is 0x12, frees the node [names_M34_SmallSweep3.tsv]
 0x0022BF00	evtEventViewerReleasePendingNode	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:184:evtEventViewerReleasePendingNode; Releases the pending node and consumes its position in the viewer queue.; twin=0x00246878 (DDS2).
