@@ -517,7 +517,7 @@ void btlUpdateFadeIndicator(ItfMesState *panel) {
 extern void itfMesRenderActivePanelSprites(ItfMesState *);
 extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
 extern void itfDrawSelectedSoundRow(ItfMesState *);
-extern void func_0019F0F8(ItfMesState *);
+extern void itfDrawSoundSelectorOptionPanel(ItfMesState *);
 
 /* Draw the panel's glyph layers, advance its selection state and fade. */
 void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
@@ -561,7 +561,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     }
     if (panel->fade.kind & 2) {
         if (panel->unk12 == 3) {
-            func_0019F0F8(panel);
+            itfDrawSoundSelectorOptionPanel(panel);
         } else {
             itfDrawSelectedSoundRow(panel);
         }
@@ -665,7 +665,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F0F8);
+INCLUDE_ASM(const s32, "game/code_0019DB88", itfDrawSoundSelectorOptionPanel);
 
 extern u8 D_00358008[];
 extern u8 D_00357FF8[];

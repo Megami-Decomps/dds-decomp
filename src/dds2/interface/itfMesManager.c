@@ -2029,7 +2029,7 @@ extern void itfMesRenderActivePanelSprites(ItfMesState *);
 
 extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
 
-extern void func_001A7120(ItfMesState *);
+extern void itfDrawSoundSelectorOptionPanel(ItfMesState *);
 
 extern void itfDrawSelectedSoundRow(ItfMesState *);
 
@@ -2074,7 +2074,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     }
     if (panel->fade.kind & 2) {
         if (panel->unk12 == 3) {
-            func_001A7120(panel);
+            itfDrawSoundSelectorOptionPanel(panel);
         } else {
             itfDrawSelectedSoundRow(panel);
         }
@@ -2180,7 +2180,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A7120);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfDrawSoundSelectorOptionPanel);
 
 extern u8 D_003B49F8[];
 
