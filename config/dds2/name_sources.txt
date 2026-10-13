@@ -3862,6 +3862,7 @@
 0x0025E8D0	campResolvePendingValue	inferred	unified with DDS1 twin (was mnuCampResolvePendingValue)
 0x0025E980	mnuDrawCampScaledTexture	inferred	U1
 0x0025EBC8	fldResetCampSceneEntries	inferred	Clears status of every linked camp scene entry and the scene's state at +0x240C.
+0x0025EC00	evtApplyCameraColorTrackAtFrame	inferred	Samples the type-0x19 camera-color track at the viewer frame, interpolates neighboring payloads, and applies the resulting camera-color parameters.
 0x0025EE40	mnuCampInitFontResource	inferred	Byte-identical DDS1 counterpart: Creates and configures the camp scene font resource at offset 0x2410.
 0x0025EE90	mnuCampLinkFontGlyph	inferred	Byte-identical dds1 twin 0x00243AA8; Passes the camp scene font resource to frFontGlyph list-linking and clears its slot. [names_conflicts.tsv]
 0x0025EEC0	mnuCampCheckClockDivisor	inferred	DDS2 twin of DDS1 0x00243AD8 [names_M60_EffMid.tsv]
