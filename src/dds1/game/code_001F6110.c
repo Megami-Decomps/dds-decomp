@@ -3109,8 +3109,8 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
 }
 
 /* Release the chip allocation used for an editable resource-name record. */
-void btlDestroyResourceNameRecord(void *allocation) {
-    sdfReleaseChipBlock(allocation);
+void btlDestroyResourceNameRecord(struct BtlResourceNameRecord *record) {
+    sdfReleaseChipBlock(record);
 }
 
 extern u8 D_003603A0[];
