@@ -2649,7 +2649,7 @@ extern s32 D_00437D80;
 extern void func_002CE738(KwlnTask *task);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
-void func_002CE208(s32 mode) {
+void fileStartMemoryCardMenuForMode(s32 mode) {
     FilePacRequest *request;
     PacWork *node;
     u32 index = 0;
