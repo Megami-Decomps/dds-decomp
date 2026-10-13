@@ -2347,6 +2347,7 @@
 0x001B1F80	btlCalculateEnemyExperienceReward	inferred	Scales enemy experience points by the acquirer ratio and special multiplier. [names_reviewed12.tsv]
 0x001B21E0	btlGetEnemyMoney	inferred	dds1 twin 001A7D38; logs "btl:money=%d" [names_reviewed2.tsv]
 0x001B2298	btlCalculateHuntEpReward	inferred	Scales EP reward by a computed ratio and logs it as hunt EP. [names_reviewed12.tsv]
+0x001B2380	btlGetHuntHpRecoveryAmount	inferred	Returns the per-hit hunt HP-recovery hook result; its current DDS2 body returns 0, while its two callers add the result to hunt-hit HP recovery. Paired DDS1 provider 0x001A7ED8 also returns 0.
 0x001B2388	btlCalculateAbilityRecoveryAmount	inferred	Calculates recovery from actor data under either matching special ability. [names_reviewed8.tsv]
 0x001B2430	btlIsUnitDefeatTriggeredByValueDelta	inferred	Checks immunity and battle flags before testing whether a unit value reaches zero after delta. [names_reviewed12.tsv]
 0x001B24C0	btlIsCurrentValueBelowQuarterThreshold	inferred	Compares current/max percent to a near-quarter cutoff (25 in DDS1, 26 in DDS2). [names_reviewed12.tsv]

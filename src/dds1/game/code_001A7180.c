@@ -325,7 +325,7 @@ s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy) {
 }
 
 /* Hunt-recovery interface: actor and target are passed; this title returns no HP recovery. */
-u32 func_001A7ED8(BtlUnit *actor, BtlUnit *target) {
+u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 

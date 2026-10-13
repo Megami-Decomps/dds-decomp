@@ -360,7 +360,7 @@ s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy) {
 
 /* Recovery hooks receive the acting and selected units. This HP hook is
  * inactive; the MP implementation below does not use the selected unit. */
-u32 func_001B2380(BtlUnit *actor, BtlUnit *target) {
+u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 
