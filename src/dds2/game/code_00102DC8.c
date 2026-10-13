@@ -9,6 +9,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf.h"
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"
@@ -102,9 +103,9 @@ extern s32 kwlnTextureViewerHandlePad(void);
 
 extern s8 sdfPadButtonStates[32];
 
-extern s32 func_00104908(s32);
+extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 
-extern void func_00104AA8(void *data, s32 handle);
+extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 
@@ -888,7 +889,7 @@ u32 kwlnTextureGetPageIndex(void) {
 
 /* DDS2 first skips clone-source entries at the head, even for requested index zero.
  * This assumes a nonempty list; initial exhaustion returns 0 before selection writes. */
-s32 func_00104908(s32 requestedIndex) {
+s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
     SdfTex *texture = sdfResourceListHead;
     SdfTex *previousTexture;
     s32 visitedIndex = 0;
@@ -938,7 +939,7 @@ s32 kwlnTextureViewerHandlePad(void) {
     } else if ((sdfPadButtonStates[0x1A] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x1B] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
-    kwlnTextureViewerPageIndex = func_00104908(kwlnTextureViewerPageIndex);
+    kwlnTextureViewerPageIndex = kwlnSelectIncompleteResourceAtPageIndex(kwlnTextureViewerPageIndex);
     if (sdfPadButtonStates[0x12] < 0) {
         D_00435C60 ^= 1;
     }
@@ -947,7 +948,7 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 extern s32 D_00435CB0;
 
-void func_00104AA8(void *data, s32 handle) {
+void kwlnDrawTextureViewerFrame(void *data, s32 handle) {
     SdfPoolNode *surface;
     SdfTex *image;
     SdfListHead *packetList;
@@ -995,7 +996,7 @@ s32 kwlnSwapActiveResource(s32 surfaceAddress) {
         return 0;
     }
     inputStatus = kwlnTextureViewerHandlePad();
-    func_00104AA8((void *)surfaceAddress, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame((void *)surfaceAddress, kwlnCurrentIncompleteResource);
     return inputStatus;
 }
 
@@ -1007,7 +1008,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
-    func_00104AA8(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
     return 0;
 }
 

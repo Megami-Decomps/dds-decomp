@@ -8,6 +8,7 @@ extern void func_0013DF60(const char *name);
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "scr.h"
 
@@ -726,7 +727,6 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
 
 extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
 
-extern void dds3SetObjectModeAndDefaultWeight(void *, s32);
 
 s32 fldCmdApplyRoomObjectModeZero(void) {
     s32 world;

@@ -14,6 +14,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
@@ -2394,7 +2395,6 @@ extern s32 evtAdvanceSlotFlags(void);
 extern s32 evtGetMessageWindowControlState(void);
 
 
-extern s32 kwlnFadeIsActive(void);
 
 extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);

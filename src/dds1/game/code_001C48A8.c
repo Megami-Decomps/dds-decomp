@@ -803,7 +803,7 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 extern void btlAdvanceTitleState(void);
 extern struct SoundTask *sndCreateCustomTask(u32, u32);
 extern void btlSyncPlayerWork(BtlUnit *);
-extern s32 func_001A9488(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 extern s32 btlCountAvailableParticipants(void);
 extern void brsTaskStart(void);
 
@@ -950,7 +950,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     }
 
     moneyRatio = 1.0f;
-    averageLevel = func_001A9488(4);
+    averageLevel = btlAverageLevelsForMaskExcludingStatus20(4);
     defeatedLevel = averageLevel;
     if (scene->unk26C != 0) {
         defeatedLevel = (u16)(scene->unk26E / scene->unk26C);

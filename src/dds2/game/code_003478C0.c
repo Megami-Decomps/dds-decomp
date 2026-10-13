@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_thread_workspace_api.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf.h"
@@ -65,7 +66,6 @@ extern s32 WaitSema(s32);
 extern s32 func_003482B0(DevState *, s32, s32, s32, s32);
 
 
-extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
 
 extern void _StartThread();
 

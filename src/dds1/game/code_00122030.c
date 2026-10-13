@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "sdf_model_scalars.h"
@@ -2072,7 +2073,6 @@ extern void fldUpdateSparkEncounterScene(void);
 
 extern void func_0014DAF0(s32);
 
-extern s32 kwlnFadeIsActive(void);
 
 struct KwlnTask;
 

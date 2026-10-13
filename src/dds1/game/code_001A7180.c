@@ -86,7 +86,7 @@ extern s32 btlGetRuntime(void);
 
 extern s32 effMiscRandMod(s32, s32);
 
-extern s32 func_001A9488(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 extern s32 btlCalculateEnemyExperienceReward(u8 *, u8 *);
 
@@ -119,7 +119,7 @@ s32 btlFlagToElementIndex(s32 flag);
 extern s32 sdfQueryChannelValue(s32, DatPartyRecord *, DatPartyRecord *);
 extern s32 func_003003F0(const char *, ...);
 
-s32 func_001A7180(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
+s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
     DatPartyRecord *record;
     s32 value;
     s32 guard;
@@ -264,7 +264,7 @@ f32 btlGetRewardLevelMultiplier(u8 *acquirer, u8 *enemy, s32 rewardKind) {
         return 1.0f;
     }
     if (acquirer == NULL) {
-        level = func_001A9488(4);
+        level = btlAverageLevelsForMaskExcludingStatus20(4);
     } else {
         level = ((BtlUnit *)acquirer)->partyRecord.level;
     }
@@ -325,7 +325,7 @@ s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy) {
 }
 
 /* Hunt-recovery interface: actor and target are passed; this title returns no HP recovery. */
-u32 func_001A7ED8(BtlUnit *actor, BtlUnit *target) {
+u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 
@@ -654,7 +654,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A7180", func_001A8A30);
+INCLUDE_ASM(const s32, "game/code_001A7180", btlHasRequiredCommandAffinityPartners);
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
     u8 *status = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].unk3E;
@@ -673,7 +673,7 @@ u32 btlIsActorHighStateFlagClear(s32 actor) {
 }
 
 /* Return 1 when the scene can still accept another active enemy: below the active cap and the cumulative spawn limit. */
-s32 func_001A8CE0(BtlUnit *requester) {
+s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     BattleController *controller = (BattleController *)btlGetRuntime();
     u32 limit;
     u32 active;
@@ -914,7 +914,7 @@ s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
     return 1;
 }
 
-s32 func_001A9488(u32 arg0) {
+s32 btlAverageLevelsForMaskExcludingStatus20(u32 arg0) {
     return btlAverageMaskedActorStat(arg0, 1);
 }
 

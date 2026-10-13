@@ -3,38 +3,6 @@
 #include "eff_resource_slots.h"
 #include "evt_solar.h"
 
-typedef struct SolarNoiseDebugData {
-    const char *label;
-    u32 unused;
-    char format[4];
-} SolarNoiseDebugData;
-
-typedef struct SolarSpriteLayer {
-    u8 pad00[0xC];
-    s32 drawWidth;
-    s32 drawHeight;
-    u8 pad14[0x68];
-    s32 width;
-    s32 height;
-    u8 pad84[0x1C];
-} SolarSpriteLayer;
-
-typedef struct SolarSpriteContext {
-    u8 pad00[0x18];
-    SolarSpriteLayer *layers;
-} SolarSpriteContext;
-
-typedef struct SolarOverlayShape {
-    s32 *primaryPositions;
-    u32 *primaryColors;
-    s32 primaryCount;
-    s32 *positions;
-    u32 *colors;
-    s32 count;
-    s32 *tailPositions;
-    s32 tailCount;
-} SolarOverlayShape;
-
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00228E20(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 

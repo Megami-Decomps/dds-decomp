@@ -3,6 +3,7 @@
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
 #include "evt_viewer.h"
@@ -1857,7 +1858,6 @@ extern MenuPopupEntry D_0036AA84[];
 extern MenuPopupEntry D_0036AAA0[];
 extern u8 D_0036AABC[];
 
-extern s32 kwlnFadeIsActive(void);
 
 extern s32 evtGetMessageWindowControlState(void);
 

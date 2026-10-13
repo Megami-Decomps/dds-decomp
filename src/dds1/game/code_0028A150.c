@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_scale_params.h"
 #include "ee_mmi.h"
 #include "eff_random.h"
 #include "sdf_textured_rect.h"
@@ -21,6 +22,7 @@
 #include "file_save_record.h"
 #include "dat_state.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "kwln.h"
 #include "fpu.h"
 #include "mnu_list.h"
@@ -5806,35 +5808,6 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
 }
 
 
-typedef struct ScaleEntry {
-    f32 unk0;
-    f32 value;
-} ScaleEntry;
-
-typedef struct ScaleSet {
-    u8 pad0[0x64];
-    f32 unk64;
-    f32 unk68;
-    u8 pad6C[4];
-    ScaleEntry entries[3];
-    u8 pad88[0x40];
-    f32 unkC8;
-    f32 unkCC;
-    f32 unkD0;
-    f32 unkD4;
-    f32 unkD8;
-    f32 unkDC;
-    f32 unkE0;
-    f32 unkE4;
-    u8 padE8[8];
-    f32 unkF0;
-} ScaleSet;
-
-typedef struct ScaleOwner {
-    u8 pad0[0x20];
-    ScaleSet *dst;
-    ScaleSet *src;
-} ScaleOwner;
 
 /* Scale selected wave-emitter parameters from source to destination. */
 void effScaleWaveEmitterParameters(ScaleOwner *owner, f32 scale) {

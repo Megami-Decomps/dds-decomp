@@ -82,7 +82,7 @@ extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 btlRollAiBucket(void);
 
-extern s32 func_001B39E8(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
@@ -133,7 +133,7 @@ s32 btlFlagToElementIndex(s32 flag);
 
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
-u32 func_001B1350(BtlUnit *attacker, BtlUnit *defender, u32 command,
+u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
                   s32 reaction, s32 mode) {
     u32 guardMask;
     s32 guardAbility;
@@ -303,7 +303,7 @@ f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, s32 rewardKin
         return 1.0f;
     }
     if (acquirer == NULL) {
-        level = func_001B39E8(4);
+        level = btlAverageLevelsForMaskExcludingStatus20(4);
     } else {
         level = acquirer->partyRecord.level;
     }
@@ -360,7 +360,7 @@ s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy) {
 
 /* Recovery hooks receive the acting and selected units. This HP hook is
  * inactive; the MP implementation below does not use the selected unit. */
-u32 func_001B2380(BtlUnit *actor, BtlUnit *target) {
+u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 

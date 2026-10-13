@@ -203,6 +203,16 @@ static inline void eeUnpackRGBAWord(u32 color, u32 unitBits) {
     EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
 }
 
+/* Float-input SDK form: retain the broad memory effect and let GCC transfer
+ * the binary32 scale to the unpack's GPR operand. The exact surface-grid
+ * gradient uses four such 16-byte carriers (DDS1 002A7288, DDS2 002E9840).
+ * This is distinct from the integer-bit, read-only form above. */
+static inline void eeUnpackRGBAWordFloat(u32 color, f32 unit) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, unit);
+}
+
 static inline u32 eePackRGBAWord(f32 unit) {
     u32 rgba[4];
     EE_MMI_RGBA_PACK_UNIT(rgba[0], unit);

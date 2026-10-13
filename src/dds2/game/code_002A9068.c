@@ -8,6 +8,7 @@
 #include "ui_color.h"
 #include "fr_font.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
@@ -19,7 +20,6 @@
 
 extern u32 mnuMovieShutdownCounter;
 
-extern s32 kwlnFadeIsActive(void);
 
 
 typedef struct FrFontGlyph FrFontGlyph;

@@ -16,6 +16,8 @@
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
+#include "sdf_texture_primary_buffer_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_projection.h"
 
@@ -1192,7 +1194,6 @@ extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00336818(f32 angle);
 
@@ -1452,8 +1453,6 @@ typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 struct DmaPacketHeader;
-extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);
-extern s32 sdfTexGetPrimaryBufferSize(SdfTex *texture);
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
 extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes,

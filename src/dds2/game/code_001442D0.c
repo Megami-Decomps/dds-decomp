@@ -3,6 +3,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_model_scalars.h"
 #include "sdf_motion.h"
@@ -166,7 +167,6 @@ extern s32 func_0035C860(char *, const char *, ...);
 
 extern char D_00413F20[];
 
-extern void fldFormatAreaDirectory(char *, s32, s32);
 
 
 extern SdfTex *D_0044F7F0[];

@@ -93,14 +93,14 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDes
 
 extern s32 itfUpdateActiveMessageWindows(void);
 
-extern void sndFlushMessageQueue(void);
+extern void itfMesDestroyActiveWindowsAndReleaseTexture(void);
 
 extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
 extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
 extern void *memcpy(void *destination, const void *source, u32 size);
-void func_0019D460();
+void itfMesReplaceTextSlotData();
 
 extern void itfInitializeCursorResetState();
 
@@ -112,7 +112,7 @@ extern void itfResetBattleFadeState();
 
 extern s32 frFontMeasureGlyphStripWidth();
 
-extern UiSprite *func_00199828(s32 kind, u32 payload);
+extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d
@@ -216,11 +216,11 @@ void itfMesFinishWindowAndClearStatus(s32 window) {
     mes->flags &= ITF_MES_CLEAR_SCRIPT_PANEL_BIT;
 }
 
-u32 func_0019B530(void) {
+u32 itfMesNoOpCommand4(void) {
     return 1;
 }
 
-u32 func_0019B538(void) {
+u32 itfMesNoOpCommand5(void) {
     return 1;
 }
 
@@ -465,7 +465,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     bounds[1] = 0x430;
     bounds[2] = 0x1200 + halfWidth;
     bounds[3] = 0x530 + rowsHeight;
-    panelBlock->overlay = func_00199828(9, (u32)itfMesWork.windowTexture);
+    panelBlock->overlay = itfCreateUiSpriteByKind(9, (u32)itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(panelBlock->overlay, bounds[0], bounds[1], bounds[2], bounds[3], mes->renderValue);
     itfPanelUpdateValuesAndNotify(panelBlock->overlay, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
@@ -783,13 +783,13 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
 /* Replace a text slot with a copied NUL-terminated encoded string. */
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText) {
-    func_0019D460((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
+    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
 }
 
 /* Legacy short-arity entry point: retain its one-argument copier call.
  * This function does not specify the copier's other parameters. */
 void func_0019C868(s32 window) {
-    func_0019D460((u32)itfWindowSlots[window].mes);
+    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes);
 }
 
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
@@ -916,8 +916,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)itfUpdateActiveMessageWindows, (TaskDestroy)sndFlushMessageQueue, 0);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)sndFlushMessageQueue, 0);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)itfUpdateActiveMessageWindows, (TaskDestroy)itfMesDestroyActiveWindowsAndReleaseTexture, 0);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)itfMesDestroyActiveWindowsAndReleaseTexture, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
@@ -1219,7 +1219,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
 /* Replace a retained text-slot allocation. Nonpositive byteCount copies the
  * padded string span; positive counts copy that many bytes into a zeroed block.
  * DDS1 string mode intentionally has no memset. Keep the K&R declaration form. */
-void func_0019D460(mes, slotIndex, source, byteCount)
+void itfMesReplaceTextSlotData(mes, slotIndex, source, byteCount)
     ItfMesState *mes;
     s32 slotIndex;
     const char *source;

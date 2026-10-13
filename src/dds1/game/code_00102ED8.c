@@ -9,6 +9,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf.h"
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"
@@ -76,7 +77,7 @@ extern s32 kwlnCurrentIncompleteResource;
 extern u8 effSharedRandomState[];
 extern void effMiscSeedRandom(void *data, u32 tag);
 extern s32 kwlnTextureViewerHandlePad(void);
-extern void func_00104B88(void *data, s32 handle);
+extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);
 
 extern void kwlnTextureAttachTask(SdfPoolNode *surface);
 
@@ -106,7 +107,7 @@ extern s32 D_003BA724;
 extern s32 kwlnDistanceBlurErrorCount;
 extern s32 kwlnRippleBlurErrorCount;
 extern s8 sdfPadButtonStates[32];
-extern s32 func_00104A18(s32);
+extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 extern SdfPoolNode D_00325708;
 
 
@@ -869,7 +870,7 @@ u32 kwlnTextureGetPageIndex(void) {
 
 /* Clamp a negative request and return the reached index. DDS1 index zero
  * selects the head without scanning clone-source links; tail exits retain prior writes. */
-s32 func_00104A18(s32 requestedIndex) {
+s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
     SdfTex *texture = sdfResourceListHead;
     SdfTex *previousTexture;
     s32 visitedIndex = 0;
@@ -912,7 +913,7 @@ s32 kwlnTextureViewerHandlePad(void) {
     } else if ((sdfPadButtonStates[0x1A] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x1B] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
-    kwlnTextureViewerPageIndex = func_00104A18(kwlnTextureViewerPageIndex);
+    kwlnTextureViewerPageIndex = kwlnSelectIncompleteResourceAtPageIndex(kwlnTextureViewerPageIndex);
     if (sdfPadButtonStates[0x12] < 0) {
         D_003BA890 ^= 1;
     }
@@ -921,7 +922,7 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 extern s32 D_003BA8E0;
 
-void func_00104B88(void *data, s32 handle) {
+void kwlnDrawTextureViewerFrame(void *data, s32 handle) {
     SdfPoolNode *surface;
     SdfTex *image;
     SdfListHead *packetList;
@@ -969,7 +970,7 @@ s32 kwlnSwapActiveResource(s32 surfaceAddress) {
         return 0;
     }
     inputStatus = kwlnTextureViewerHandlePad();
-    func_00104B88((void *)surfaceAddress, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame((void *)surfaceAddress, kwlnCurrentIncompleteResource);
     return inputStatus;
 }
 
@@ -981,7 +982,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
-    func_00104B88(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
     return 0;
 }
 

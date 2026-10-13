@@ -10,6 +10,8 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 
 #include "sdf.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "sdf_texture_submit.h"
 #include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
@@ -78,9 +80,6 @@ extern volatile s8 sdfBusyBufferIndex;
 extern vu8 sdfCurrentBufferIndex;
 
 extern void sdfVuClearTransformCache(void);
-
-extern u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height,
-    u32 format, u8 *pixels, s32 borrowPixels);
 
 
 void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *)) {

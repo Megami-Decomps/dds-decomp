@@ -166,8 +166,6 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void mnuFreeWindowSprites();
 
-extern void mnuClearEntryFlags();
-
 extern s32 evtGetCapturedWindowPanelValue();
 
 
