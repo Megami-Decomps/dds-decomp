@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
@@ -221,7 +222,6 @@ s32 btlGetLoggedIndexedCommandItem(s32 index);
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 

@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "evt_solar.h"
 #include "btl_item_drop.h"
 #include "itf_mes_window.h"
@@ -68,7 +69,6 @@ extern s32 D_003B4F78[];
 
 extern s32 D_003B4F74[];
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 

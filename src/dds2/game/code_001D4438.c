@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
@@ -600,7 +601,6 @@ extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
 extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);

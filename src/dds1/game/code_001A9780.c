@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
@@ -118,7 +119,6 @@ extern s32 btlGetTrackedTaskHandle(s32);
 
 extern BattleCmdPanel *btlCommandPanelWork;
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
