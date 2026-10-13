@@ -60,7 +60,7 @@ struct MovieCueNode {
     u8 enabled;           /* 0x12 */
 };
 
-extern void func_0025BA20(MnuSpriteResourceGroup *, SdfList *, void *, s8);
+extern void mnuAppendSpriteNodesForCueMode(MnuSpriteResourceGroup *, SdfList *, void *, s8);
 
 SdfList *mnuTickResourceGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
     SdfListNode *list = group->head;
@@ -75,7 +75,7 @@ SdfList *mnuTickResourceGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
         node->framesLeft = node->framesLeft - 1;
         /* Fire an enabled cue five frames before its node expires. */
         if (node->framesLeft == node->duration - 5 && node->enabled != 0) {
-            func_0025BA20(owner, group, node, node->cueIndex);
+            mnuAppendSpriteNodesForCueMode(owner, group, node, node->cueIndex);
         }
         if (node->framesLeft == 0) {
             list = sdfListRemoveNode(group, list);
@@ -94,7 +94,7 @@ void func_0025BDD0(MnuSpriteResourceGroup *resources) {
         if (resources->activeCount < 10) {
             group = sdfCreateTaskHeader(0);
             group->onRemove = mnuReleaseOptionalDrawAllocation;
-            func_0025BA20(resources, group, NULL, 0);
+            mnuAppendSpriteNodesForCueMode(resources, group, NULL, 0);
             for (i = 0; i < 10; i++) {
                 if (resources->tasks[i] == 0) {
                     resources->tasks[i] = group;

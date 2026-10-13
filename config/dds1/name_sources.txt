@@ -4649,6 +4649,7 @@
 0x0025B0F0	mnuDrawAnimatedCurrencyCounter	inferred	U3
 0x0025B7B0	mnuReleaseOptionalDrawAllocation	inferred	Releases a nonnull owned allocation passed to the menu work callback. [names_reviewed17.tsv]
 0x0025B7D8	mnuCreateSpriteResource	inferred	Allocates a 0x48-byte sprite record with owner, sprite, variant and randomized lifetime.
+0x0025BA20	mnuAppendSpriteNodesForCueMode	inferred	Appends a cue-mode-specific sprite spawn pattern; mode 1 independently gates two random child branches. [movie cue sprite groups]
 0x0025BC38	mnuDestroyMantraDrawPool	inferred	Mapped DDS2 counterpart already has established name mnuDestroyMantraDrawPool; DDS1 body independently shows matching behavior (0.93 match). [names_reviewed19.tsv]
 0x0025BCA0	mnuDrawIconAlpha	inferred	mnu draws icon with alpha converted from s32 to u32
 0x0025BD18	mnuTickResourceGroup	inferred	mnu decrements node lifetimes and releases expired ones
