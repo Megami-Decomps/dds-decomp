@@ -17,7 +17,7 @@
 #include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
 
-extern void *sdfCreateAssetWithDrawEntries();
+#include "sdf_asset_create.h"
 #include "eff.h"
 #include "eff_look_at_ring.h"
 #include "eff_track_poly_list.h"

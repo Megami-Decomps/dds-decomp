@@ -96,7 +96,7 @@ extern f32 D_00438E14;
 
 extern u16 D_00438E04;
 
-extern void *sdfCreateAssetWithDrawEntries(void);
+#include "sdf_asset_create.h"
 
 extern void *D_00438DB0;
 
