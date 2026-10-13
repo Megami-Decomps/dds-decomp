@@ -974,13 +974,13 @@ void kwlnDrawTextureViewerFrame(void *data, s32 handle) {
         counter = D_00435CB0;
         mode = (counter >> 4) & 1;
         if (image->primaryResource != NULL) {
-            func_00104D40(packetList, 0x8240, 0x7A60, image->primaryResource, mode);
+            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->primaryResource, mode);
         }
         counter = D_00435CB0;
         /* Boolean highlight selection; see docs/idioms.md, "Trace-justified boolean extraction: texture viewer highlight". */
         mode = (counter & 0x10) ? 2 : 0;
         if (image->secondaryResource != NULL) {
-            func_00104D40(packetList, 0x8240, 0x7A60, image->secondaryResource, mode);
+            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->secondaryResource, mode);
         }
         D_00435CB0++;
     }
@@ -1035,7 +1035,7 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
 /* Draw one allocation-map block in address units, choosing color by mode.
  * Only the initial partial row forces a nonzero remainder to occupy one cell;
  * the final partial row retains its truncated cell count. */
-void func_00104D40(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode) {
+void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode) {
     s32 color;
     u32 remainingUnits;
     s32 columnIndex;
@@ -1109,7 +1109,7 @@ void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
                                           0x0FFFFF7F, KWLN_MAP_BORDER_WIDTH, 0x820,
                                           0x80000000, 0x80806020));
         do {
-            func_00104D40(packetList, x, y, block, 0);
+            kwlnDrawTextureAllocationMapBlock(packetList, x, y, block, 0);
             block = block->prev;
         } while (block != NULL);
     }
