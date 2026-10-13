@@ -3,6 +3,7 @@
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
 #include "pcp_vu0.h"
@@ -88,8 +89,6 @@ void fldInitializeSequenceAndResetFlags(s32 request, s32 sequence, s32 variant, 
 void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char *name);
 
 s32 sdfCheckPendingWorkWithInterrupts(void);
-
-void *dds3GetWorldSecondaryObject(void);
 
 
 void evtCreateWorldObjectForKey(s32 highPart, s32 lowPart);

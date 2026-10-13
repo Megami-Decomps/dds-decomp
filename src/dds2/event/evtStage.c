@@ -2,6 +2,7 @@
 #include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
@@ -18,8 +19,6 @@ extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
-
-extern void *dds3GetWorldSecondaryObject(void);
 
 const char D_00421578[0x10] = "%sf%03d_%03d";
 
@@ -54,8 +53,6 @@ extern char D_003C8BA0[];
 extern char D_003C8C60[];
 extern char D_003C8C80[];
 extern EffWorldNode *dds3AppendWorldNode(void);
-extern void dds3SetWorldSecondaryObject(void *);
-extern void dds3SetWorldObject(void *);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32);
