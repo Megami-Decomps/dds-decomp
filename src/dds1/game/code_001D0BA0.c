@@ -2788,13 +2788,13 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     }
     entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
     context = (u8 *)btlGetRuntime();
-    if (*(u32 *)((u8 *)unit + 0xE8) & 2) {
-        color = (*(u32 *)((u8 *)unit + 0x84) & 0xFFFFFF) | 0x80000000;
+    if (unit->updateFlags & 2) {
+        color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, color);
         evtSetUnitAlphaTransition(unit->ext, 0, color);
-        *(u32 *)((u8 *)unit + 0x84) = color;
-        *(u32 *)((u8 *)unit + 0xE8) &= ~4;
-        *(u32 *)((u8 *)unit + 0xE8) &= ~2;
+        unit->overlayColor = color;
+        unit->updateFlags &= ~4;
+        unit->updateFlags &= ~2;
     }
     index = 0;
     if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0 &&
@@ -3185,7 +3185,7 @@ void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst) {
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     if ((u32)unit->status.flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
-        *(u32 *)((u8 *)unit + 0x54) = (*(u32 *)((u8 *)unit + 0x54) & 0xFF000000) | (color & 0xFFFFFF);
+        unit->baseColor = (unit->baseColor & 0xFF000000) | (color & 0xFFFFFF);
         evtSetUnitRgbTransition(unit->ext, mode, color);
     }
 }
@@ -3195,9 +3195,9 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     u32 blended;
     if ((u32)unit->status.flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
-        base = (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF) | 0x80000000;
+        base = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
-        *(u32 *)((u8 *)unit + 0x84) = (*(u32 *)((u8 *)unit + 0x84) & 0xFF000000) | (color & 0xFFFFFF);
+        unit->overlayColor = (unit->overlayColor & 0xFF000000) | (color & 0xFFFFFF);
         evtSetUnitRgbTransition(unit->ext, mode, blended);
     }
 }
@@ -3847,7 +3847,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
             evtSetUnitAlphaTransition(object->ext, 0, 0);
-            *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
+            object->overlayColor = object->baseColor & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_003A3BC8, effect, model);
     } else {
@@ -3876,7 +3876,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
         evtSetUnitAlphaTransition(object->ext, 0, 0);
-        *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
+        object->overlayColor = object->baseColor & 0xFFFFFF;
     }
     *(u32 *)((u8 *)object + 0x118) = (*(u32 *)((u8 *)object + 0x118) & ~1) | 2;
     return 1;
@@ -4328,13 +4328,13 @@ u32 btlStepUnitDefeatFadeOut(u32 *arguments) {
     }
     if ((s32)arguments[2] >= (s32)arguments[1]) {
         unit->status.flags = (u32)unit->status.flags & (~0x20000);
-        *(u32 *)((u8 *)unit + 0x84) = *(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF;
+        unit->overlayColor = unit->baseColor & 0xFFFFFF;
         return 1;
     }
     unit->status.flags = (u32)unit->status.flags | (0x20000);
     alpha = (u32)((1.0f - (f32)(s32)arguments[2] / (f32)(s32)arguments[1]) * 128.0f);
     alpha <<= 24;
-    *(u32 *)((u8 *)unit + 0x84) = alpha | (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF);
+    unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
     arguments[2]++;
     return 0;
 }
@@ -4389,13 +4389,13 @@ u32 btlStepUnitExitFade(u32 *arguments) {
     case 1:
         if ((s32)arguments[2] >= 8) {
             unit->status.flags = (u32)unit->status.flags & (~0x20000);
-            *(u32 *)((u8 *)unit + 0x84) = *(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF;
+            unit->overlayColor = unit->baseColor & 0xFFFFFF;
             finished = 1;
         } else {
             unit->status.flags = (u32)unit->status.flags | (0x20000);
             alpha = (u32)((1.0f - (f32)(s32)arguments[2] * 0.125f) * 128.0f);
             alpha <<= 24;
-            *(u32 *)((u8 *)unit + 0x84) = alpha | (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF);
+            unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
         }
         break;
     }
