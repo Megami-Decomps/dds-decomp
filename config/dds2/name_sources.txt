@@ -35,6 +35,7 @@
 0x001019F0	kwlnUnlinkListNode	inferred	L69; sources=names_pending_main.tsv; twin=0x00101B08, input-family pairing. [names_qp10.tsv]
 0x00101A60	dds3SetScopedObjectFlags	inferred	Calls the kernel dispatcher with set mode, object, mask and scope; its MIPS code ORs the masked bits into object flags at offset 0x1C.
 0x00101A90	dds3ClearScopedObjectFlags	inferred	Calls the same kernel dispatcher with clear mode, which ANDs the complement of the supplied flag mask into the selected object or scope.
+0x00101AC0	sdfInitializeRuntimeAndStartMainLoop	inferred	Reboots and initializes IOP/runtime services, loads system modules, starts device workers and the main-loop thread, then sleeps the bootstrap thread; also the wrapped devbuild entrypoint.
 0x00101C50	kwlnPrepareFrameDrawPackets	inferred	readability/matching review (QP16)
 0x001023C8	kwlnRenderFrame	inferred	Runs frame-level draw/update dispatch and rendering; DDS1 twin. [names_qp9.tsv]
 0x00102790	dds3GetAdminTaskWork	inferred	Finds the named admin task and returns its attached AdminWork. [names_reviewed12.tsv]
