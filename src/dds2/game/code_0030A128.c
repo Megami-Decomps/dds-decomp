@@ -14,7 +14,7 @@
 
 typedef struct SdfSlotSet SdfSlotSet;
 
-extern s32 func_0030AC10(LmapTaskState *);
+extern s32 fldAdvanceLmapResourceLoad(LmapTaskState *);
 
 extern void fldDrawSkyGradient(void);
 extern void func_00137888(void);
@@ -317,7 +317,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     drawSurface->append(drawSurface, packetList);
 }
 
-extern u8 func_0030ABF0(LmapTaskState *);
+extern u8 fldUpdateLmapResourceLoad(LmapTaskState *);
 extern void fldInitializeLocalMapScene(void);
 extern s32 func_0030B1E8(void);
 extern void fldDrawLocalMapOverlay(void);
@@ -330,7 +330,7 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
     D_0043888C = state;
     switch (phase) {
     case 0:
-        if (func_0030ABF0(state)) {
+        if (fldUpdateLmapResourceLoad(state)) {
             D_0043888C->phase = 1;
         }
         break;
@@ -448,8 +448,8 @@ void fldShutdownLmapResources(void) {
     evtDestroySecondaryWorldNode();
 }
 
-u8 func_0030ABF0(LmapTaskState *task) {
-    return func_0030AC10(task) != 0;
+u8 fldUpdateLmapResourceLoad(LmapTaskState *task) {
+    return fldAdvanceLmapResourceLoad(task) != 0;
 }
 
 typedef struct LmapFileEntry {
@@ -480,7 +480,7 @@ INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D2A8);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D2B8);
 
-s32 func_0030AC10(LmapTaskState *task)
+s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
 {
     LmapLoadState *load = &task->load;
     LmapFileEntry *files = D_00400598;
