@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_pad_entry.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "kwln.h"
@@ -118,29 +119,9 @@ extern u32 D_00439194;
 
 extern f32 D_00439190;
 
-/* Logical pad entries, sdfPadPorts[2] (0x28 bytes each). */
-typedef struct F9B00Entry {
-    /* 0x00 */ u8 port;
-    /* 0x01 */ u8 slot;
-    /* 0x02 */ u8 state;
-    /* 0x03 */ u8 pad03;
-    /* 0x04 */ u8 mode;
-    /* 0x05 */ u8 requestedMode;
-    /* 0x06 */ u16 buttons;
-    /* 0x08 */ u16 prevButtons;
-    /* 0x0A */ u8 pad0A[2];
-    /* 0x0C */ u32 repeatDeadline;
-    /* 0x10 */ u8 stick[4];
-    /* 0x14 */ u8 pressure[12];
-    /* 0x20 */ s16 smallMotor;
-    /* 0x22 */ s16 largeMotor;
-    /* 0x24 */ s16 lastSmallMotor;
-    /* 0x26 */ s16 lastLargeMotor;
-} F9B00Entry;
+extern SdfPadEntry sdfPadPorts[];
 
-extern F9B00Entry sdfPadPorts[];
-
-extern void sdfPadUpdatePort(F9B00Entry *);
+extern void sdfPadUpdatePort(SdfPadEntry *);
 
 extern u32 D_00438AB4;
 
@@ -1035,7 +1016,7 @@ extern s32 scePadSetActAlign(s32 port, s32 slot, void *data);
 
 /* Drive mode/actuator setup and normalize this pad's latest reply.
  * Motor requests are sent only when their cached values change. */
-void sdfPadUpdatePort(F9B00Entry *entry) {
+void sdfPadUpdatePort(SdfPadEntry *entry) {
     u8 reply[SDF_PAD_REPLY_BUFFER_BYTES];
     u8 actuatorData[SDF_PAD_ACTUATOR_BYTES];
     s32 port = entry->port;
@@ -1210,7 +1191,7 @@ void sdfPadBuildButtonStates(void) {
     s32 padIndex;
     s32 buttonIndex;
     for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
-        F9B00Entry *entry = &sdfPadPorts[padIndex];
+        SdfPadEntry *entry = &sdfPadPorts[padIndex];
         s32 heldButtons = entry->buttons;
         s32 previousButtons = entry->prevButtons;
         s32 newPressMask;
@@ -1264,7 +1245,7 @@ void sdfPadSetLargeMotor(s32 padIndex, u8 strength) {
 
 /* Despite the legacy console-prefixed name, set both pad motor low bytes. */
 void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor) {
-    F9B00Entry *entry = &sdfPadPorts[padIndex];
+    SdfPadEntry *entry = &sdfPadPorts[padIndex];
     entry->smallMotor = smallMotor & SDF_PAD_MOTOR_VALUE_MASK;
     sdfPadPorts[padIndex].largeMotor = largeMotor & SDF_PAD_MOTOR_VALUE_MASK;
 }
@@ -1287,7 +1268,7 @@ void sdfPadInit(void) {
     for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
         s32 port = D_00438A88[padIndex * 2];
         s32 slot = D_00438A88[padIndex * 2 + 1];
-        F9B00Entry *entry;
+        SdfPadEntry *entry;
 
         scePadPortOpen(port, slot, &sdfPadPortBuffers[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
         entry = &sdfPadPorts[padIndex];
