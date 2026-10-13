@@ -172,7 +172,7 @@ u32 dds3DispatchWorldEntryDrawCallback(EffWorldNode *obj) {
 extern EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 extern EffWorldNode *dds3ActiveWorld;
 
-EffWorldNode *func_0010FC28(s32 capacity) {
+EffWorldNode *dds3CreateActiveWorldWithValueCapacity(s32 capacity) {
     EffWorldNode *world;
     WorldInfo *info;
     struct SdfMemBlock *allocation;
