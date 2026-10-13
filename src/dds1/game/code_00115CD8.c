@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fld_bill_config.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
 #include "dds3obj.h"
@@ -31,24 +32,7 @@ extern void billSetVariantValue(struct BillObj *billboard, s32 value);
 
 /* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
  * passes its resource data pointer directly to the billboard binder. */
-typedef struct BillConfig {
-    u32 flags;   /* 0x00: bit 0 / bit 1 select the billboard mode */
-    u32 kind;    /* 0x04 */
-    u32 resourceIndex; /* 0x08 */
-    f32 width;   /* 0x0C */
-    f32 height;  /* 0x10 */
-    f32 depth;   /* 0x14 */
-    u32 projectionDistance; /* 0x18 */
-    s32 mapSelector;        /* 0x1C: flag test and map-slot byte offset */
-    union {
-        u32 entry;          /* 0x20: kind-1 entry */
-        u32 fadeStart;      /* 0x20: kind-0/3 lower fade distance */
-    };
-    u32 fadeEnd;            /* 0x24: kind-0/3 upper fade distance */
-    u32 parameters28[2];   /* 0x28..0x2C: unconsumed parameters */
-} BillConfig;
 
-typedef char BillConfig_size_must_be_0x30[(sizeof(BillConfig) == 0x30) ? 1 : -1];
 
 /* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
 void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
