@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mem_node.h"
@@ -21,7 +22,6 @@ extern u32 frFontSlotLoadedFlags[];
 extern void frFontFreeAllEntries(void);
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 extern void fmGslReleaseActiveResourceBuffers(void);
-extern void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 /* Insert after the list's fixed anchor and update the entry count. */
 void frFontListInsert(FntNode *node) {

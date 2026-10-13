@@ -12,7 +12,6 @@
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 
-void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 
 

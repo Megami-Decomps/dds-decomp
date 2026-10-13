@@ -140,6 +140,8 @@ typedef struct SdfTexResource {
 
 typedef char SdfTexResource_size_must_be_0x1C[
     (sizeof(SdfTexResource) == 0x1C) ? 1 : -1];
+/* Return a VRAM block to the free list and coalesce neighbors with interrupts masked; NULL is a no-op. */
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 /* IPU register state saved across stream callbacks (0x24 bytes). */
 typedef struct IpuDmaState {
     u32 inputAddress;

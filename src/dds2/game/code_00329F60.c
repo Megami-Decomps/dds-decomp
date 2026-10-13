@@ -60,7 +60,6 @@ extern SdfTexResource *sdfTextureListHead;
 extern void (*D_004389F4)(s32 size, s32 allocationMode);
 extern s32 DIntr(void);
 
-void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *block);
 
 
 extern SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);

@@ -17,7 +17,6 @@ extern u8 D_0043913C;
 
 extern SdfGraphObj D_0040B290;
 
-void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 
