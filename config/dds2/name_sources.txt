@@ -524,7 +524,9 @@
 0x0011B260	ptyIsRosterEntryPresent	inferred	Returns whether the specified roster entry exists. [names_reviewed10.tsv]
 0x0011B2C0	ptyGetRoundedAveragePartyLevel	inferred	Averages levels of occupied party entries, rounding fractional results up and returning zero if empty. [names_reviewed15.tsv]
 0x0011B328	ptyCloneTemplateAtPartyMaxLevel	inferred	U1
+0x0011B4B0	ptyRestoreUnitFromSavedTemplate	inferred	Consumes the saved roster template at the requested index, clears the saved slot, applies the requested level policy, refreshes derived state, and marks its assigned item owned; selected for existing saved templates by ptyAddUnitWithFlags.
 0x0011B6F0	ptyInitRosterAndClearItem	inferred	R_Names31 B92
+0x0011B9A0	ptyCloneTemplateSevenToRosterUnitThree	inferred	Special ptyAddUnitWithFlags case for roster ID 3: clones template 7, applies the requested level policy, copies mantra/profile state from slot 7, runs optional initialization, and marks its item owned.
 0x0011BC80	ptyMergeSavedUnitTemplates	inferred	Fam
 0x0011C0B0	ptyAddUnitWithFlags	inferred	Adds a roster member to the first free party slot, using the supplied initialization flags for template or kind-specific setup; restores HP/MP, applies model flags and returns the slot or duplicate/full error. DDS1 ptyAddUnit is the corresponding default-flags path.
 0x0011C328	ptyAddUnit	inferred	Calls ptyAddUnitWithFlags with initialization flags zero; DDS1 ptyAddUnit performs the corresponding default-flags roster insertion.

@@ -1083,7 +1083,7 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
 extern void func_00286BA8(void *record);
 
 /* Consume a saved template, optionally raise its level, then mark its item owned. */
-void func_0011B4B0(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
+void ptyRestoreUnitFromSavedTemplate(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1163,7 +1163,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
 /* Clone template 7 into roster 3 and inherit its mantra state. After optional
  * post-initialization, mark any assigned item owned. Level-flag precedence is
  * the same as the adjacent initializer; flag mask 2 skips the optional call. */
-void func_0011B9A0(DatPartyRecord *entry, s32 initFlags) {
+void ptyCloneTemplateSevenToRosterUnitThree(DatPartyRecord *entry, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1309,14 +1309,14 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     memset(entry, 0, sizeof(*entry));
     if ((datGameState->templates[rosterIndex].flags & 1) != 0 &&
         datGameState->templates[rosterIndex].level != 0) {
-        func_0011B4B0(entry, rosterIndex, initFlags);
+        ptyRestoreUnitFromSavedTemplate(entry, rosterIndex, initFlags);
     } else {
         switch (rosterIndex) {
         case 2:
             ptyInitRosterAndClearItem(entry, initFlags);
             break;
         case 3:
-            func_0011B9A0(entry, initFlags);
+            ptyCloneTemplateSevenToRosterUnitThree(entry, initFlags);
             break;
         case 8:
             ptyMergeSavedUnitTemplates(entry);
