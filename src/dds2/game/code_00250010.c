@@ -2559,7 +2559,7 @@ extern char D_004375D0[];
 extern u8 D_00438A34;
 extern f32 D_00438A48;
 extern f32 D_00438A4C;
-extern void func_0023E320(s32 vectorSlot, f32 x, f32 y);
+extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
 s32 func_002560B0(s32 x, s32 y, EvtRuntime *runtime) {
@@ -2708,15 +2708,15 @@ s32 func_002560B0(s32 x, s32 y, EvtRuntime *runtime) {
 
             D_00438A48 = currentX;
             D_00438A4C = currentY;
-            func_0023E320(group->setterId, currentX, currentY);
+            evtSetSlotVector(group->setterId, currentX, currentY);
             break;
         }
         case 2:
-            func_0023E320(group->setterId, runtime->floatEditX,
+            evtSetSlotVector(group->setterId, runtime->floatEditX,
                           runtime->floatEditY);
             break;
         case 3:
-            func_0023E320(group->setterId, runtime->floatEditX,
+            evtSetSlotVector(group->setterId, runtime->floatEditX,
                           runtime->floatEditY);
             break;
         }
@@ -2731,15 +2731,15 @@ s32 func_002560B0(s32 x, s32 y, EvtRuntime *runtime) {
 
                 D_00438A48 = savedX;
                 D_00438A4C = savedY;
-                func_0023E320(group->setterId, savedX, savedY);
+                evtSetSlotVector(group->setterId, savedX, savedY);
                 break;
             }
             case 2:
-                func_0023E320(group->setterId, runtime->savedFloatEditX,
+                evtSetSlotVector(group->setterId, runtime->savedFloatEditX,
                               runtime->savedFloatEditY);
                 break;
             case 3:
-                func_0023E320(group->setterId, runtime->savedFloatEditX,
+                evtSetSlotVector(group->setterId, runtime->savedFloatEditX,
                               runtime->savedFloatEditY);
                 break;
             }
