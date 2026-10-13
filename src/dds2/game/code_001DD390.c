@@ -629,7 +629,7 @@ extern s32 btlGetCommandResultKindFromFlags(u32, u32, s32);
  * aggregate press-turn result. Reflection keeps the original selected target
  * separate from the unit that actually receives the operands. */
 
-void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
+void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *work) {
     BtlUnit combinedUnit;
     BtlState *runtime;
     BtlUnit *source;
