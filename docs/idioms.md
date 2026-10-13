@@ -10722,5 +10722,5 @@ Without the attribute, four of the constructor's 19 words differ: the name-point
 store precedes the `memset` argument setup. With it, the store fills the call's
 delay slot exactly as retail does. The 76-byte body and all 39 existing functions
 in its unit match. The ordinary and observed compiler runs preserve the complete
-assembly and all 22 RTL dumps; no calling convention or compiler flag changes.
+assembly and all generated RTL dumps; no calling convention or compiler flag changes.
 
