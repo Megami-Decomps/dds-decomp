@@ -4470,7 +4470,7 @@
 0x00245D08	evtInitializeActiveMenuState	inferred	Clears event flag, creates missing menu state and copies current pending selection into its window.
 0x00245DA0	evtAdvancePhaseOne	inferred	When dispatch state is 1, sets command phase to 4; DDS2 twin func_00261F08.
 0x00246088	evtPrimeDispatchStart	inferred	calls func_00260670 on state then dispatches mode 1
-0x002460D8	evtSetupDispatchSync	inferred	calls func_0024DD78 then dispatches mode 2; first of nine identical bodies
+0x002460D8	evtSetupDispatchSync	inferred	calls dspRequestMessageWindowModeOne then dispatches mode 2; first of nine identical bodies
 0x00246120	evtInstallStateTableB	inferred	sets +0x58 to D_0036AA84 and applies +0xA8 entry when +0x84 == 1
 0x00246198	evtSelectStateAction	inferred	+0xAC selects func_002605B0 mode 3 or mode 9 plus func_00260570 setup; first of three identical bodies
 0x00246460	evtStageDispatchStart	inferred	calls func_00260AB0 on state then dispatches mode 1; first of three identical bodies
@@ -4546,7 +4546,7 @@
 0x0024B358	mnuApplyFadeTrackMode	inferred	Selects audio track start or stop based on fade mode and reduced setting. [names_reviewed8.tsv]
 0x0024B478	evtBHandleSelectionPanelInput	inferred	confidence=high; src/dds1/game/code_0024B3A8.c:func_0024B478; Polls the selection panel with mask 0x33 and, once the scene timer and list scale allow, routes the pressed button to the selected node. [names_qp9.tsv]
 0x0024B6C0	evtDispatchSelectionAfterFieldFrameGate	inferred	Prepares and dispatches a selection only at the required field-frame state. [names_reviewed10.tsv]
-0x0024B750	evtBSetupDispatchSync	inferred	e802_main twin of evtSetupDispatchSync shape; calls func_0024DD78 then dispatches mode 2
+0x0024B750	evtBSetupDispatchSync	inferred	e802_main twin of evtSetupDispatchSync shape; calls dspRequestMessageWindowModeOne then dispatches mode 2
 0x0024B798	evtBClearAndReset	inferred	runs func_0024B2D0, clears +0x3C of +0x70 block, runs func_00249C08 and func_0024DBB0
 0x0024B7E8	evtBeginSelectionExitFade	inferred	Releases visual resources, starts fade-out and installs an exit callback. [names_reviewed10.tsv]
 0x0024B958	evtBDispatchStart	inferred	e802_main plain mode 1 dispatch of state block with caller arg
@@ -6198,7 +6198,7 @@
 0x002C35C8	mdlCollectFlagBitsIntoMask	inferred	Packs six model flag predicates into their designated output bits. [names_reviewed10.tsv]
 0x002C3640	fldGetLmapStage	inferred	Selects stage two, one or zero based on successive field map flags.
 0x002C3690	fldDisplayLocalMapCounterMessage	inferred	Formats the selected counter word and starts the local-map message entry, then captures window sound mode. [names_reviewed9.tsv]
-0x002C36E8	fldLmapToggleOverlay	inferred	func_0024DC08 ? func_0024DD78 : func_0024DBB0, returns which branch ran; DDS2 0030B6D8 [names_M33_SmallSweep2.tsv]
+0x002C36E8	fldLmapToggleOverlay	inferred	func_0024DC08 ? dspRequestMessageWindowModeOne : func_0024DBB0, returns which branch ran; DDS2 0030B6D8 [names_M33_SmallSweep2.tsv]
 0x002C3738	sdfClearCounterDisplayFlags	inferred	confidence=high; src/dds1/game/code_002C2620.c:func_002C3738; Clears the per-counter mdlFlag pairs selected by the current counter display value's bit. [names_qp9.tsv]
 0x002C3800	fldCreateLocalMapCamera	inferred	Creates a world object tagged Lmap_Cam and attaches it to local-map world. [names_reviewed8.tsv]
 0x002C3AC8	sdfInitializeMapCounterSelection	inferred	readability/matching review (QP16)
@@ -8807,3 +8807,12 @@
 0x00204028	btlPickLinkedPartyTarget	inferred	confidence=high; btlSelectLinkedTargets(task,input,0) default group200 scan selects candidate with status1000; other mode shortcuts unchanged; returns1. DDS2 00216D30 twin. [Namer1 batch53]
 0x00208668	btlCerberAllowsNonPartyActor	inferred	confidence=high; Mode10A commandAvailabilityOverride returns true only without party-group200 bit; command argument unused. Same owner installs Cerber range override identified by retail CERBER string. [Namer1 batch53]
 0x00208678	btlCerberGetCommandHitCount	inferred	confidence=high; Retail003A5D78 says btl:CERBER hit count = %d; mode10A commandRangeOverride divides eligible command rangeMax by active enemy count, clamps1..count+1, zero falls back to normal range. [Namer1 batch53]
+0x00243D48	mnuShopQueueAuxiliaryTexturePacket	inferred	confidence=high; Builds the texture draw packet for the shop auxiliary resource. [LiteH b25]
+0x0024DD78	dspRequestMessageWindowModeOne	inferred	confidence=high; Calls dspAdvanceMessageWindowControl(1) to request message-window mode one; used by menu and battle flows. [LiteH b25]
+0x0025E820	mnuDrawMenuItemListRow	inferred	confidence=high; Shop list row draw callback; DDS2 counterpart 0x00295400. [LiteH b25]
+0x0025ECD0	mnuDrawCampItemListRow	inferred	confidence=high; Camp item-list row draw callback; DDS2 counterpart 0x002958B0. [LiteH b25]
+0x002650C0	brsNoOpMessageInputCallback	inferred	confidence=high; Empty callback used when the message-input step has no message window; DDS2 counterpart 0x0029C878. [LiteH b25]
+0x002733B0	mnuNoOpStaffDisplayTeardown	inferred	confidence=high; Empty staff-display teardown hook before releasing the owner allocation; DDS2 counterpart 0x002ACB38. [LiteH b25]
+0x00277DF0	mnuNoOpItemSelectionTeardown	inferred	confidence=high; Empty item-selection teardown hook before releasing its allocation. [LiteH b25]
+0x0027CEE8	mnuSpinForWindowListCount	inferred	confidence=high; Busy-spins by decrementing the window list count to zero; DDS2 counterpart 0x002B9FB8. [LiteH b25]
+0x00289D50	fileSubmitMemoryCardDetectionRequest	inferred	confidence=high; Submits fileMemoryCardRequestIndex to the file request runner when card detection starts. [LiteH b25]

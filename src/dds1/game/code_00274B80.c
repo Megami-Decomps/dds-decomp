@@ -1435,7 +1435,7 @@ void mnuSelectSkillSelectionVisuals(u32 context) {
     mnuSetStaffDisplayMode(1, context);
 }
 
-void func_00277DF0(s32 context) {
+void mnuNoOpItemSelectionTeardown(s32 context) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEntry);
@@ -1663,7 +1663,7 @@ s32 mnuCloseItemSelectionState(KwlnTask *contextArg) {
     if (menu->selectedList != 0) {
         mnuDestroySelectedPartyWindow(contextArg);
     }
-    func_00277DF0(context);
+    mnuNoOpItemSelectionTeardown(context);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->handle));
     return 1;
 }

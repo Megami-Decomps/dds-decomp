@@ -643,7 +643,7 @@ s32 mnuUpdateMantraSceneState(void) {
 }
 
 extern u32 mnuGetSelectedNodeValue(void);
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
 extern s32 mnuDrawLoadedProgressPanels(void *, MenuProgressHost *, s32);
@@ -662,7 +662,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
 
     mnuGetSelectedNodeValue();
     fldGetSceneMetadataNode();
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     mnuDrawMantraSparkScene(sceneMetadata, 0x80, 0x4A);
     mnuDrawAnimatedCurrencyCounter(0, -27, 0, 0x80, sceneMetadata, MNU_SCENE_DRAW_CONTEXT);
     if (mnuDrawLoadedProgressPanels(&sceneMetadata->attachedEffectControl, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT) != 0) {

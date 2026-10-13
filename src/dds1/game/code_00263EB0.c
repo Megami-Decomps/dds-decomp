@@ -9,7 +9,7 @@
 extern u32 evtFinishMessageWindowAndNotify(void);
 
 
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern u8 *D_003BAA70;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern u8 brsGetLevelStepCrossedBy(s32, s32);
@@ -140,7 +140,7 @@ s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
 s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)input);
 }
 
@@ -207,7 +207,7 @@ s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
 s32 mnuAdvanceStatAssignmentPanel(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)input);
 }
 
@@ -267,7 +267,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
 s32 mnuAdvanceInactiveItemPanel(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)input);
 }
 
@@ -484,7 +484,7 @@ void mnuClearTitleState(BrsSkillPackageWork *work) {
     work->fadeProgress = 0;
 }
 
-void func_002650C0(void *work) {
+void brsNoOpMessageInputCallback(void *work) {
 }
 
 extern u8 *D_003BAA84;

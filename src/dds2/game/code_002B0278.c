@@ -3897,7 +3897,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
 
 /* Draw the window, then advance its fade scale without a post-addition clamp. */
 
-void func_002B9FB8(MenuWindowContainer *window);
+void mnuSpinForWindowListCount(MenuWindowContainer *window);
 
 
 

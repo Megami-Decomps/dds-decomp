@@ -27,7 +27,7 @@ extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
 
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 /* Apply a capped selected profile and record whether the selection was applied. */
@@ -174,7 +174,7 @@ s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
 
 s32 mnuAdvanceResultPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -412,7 +412,7 @@ s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
     }
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel(context, 2, (void *)request);
 }
 

@@ -23,7 +23,7 @@ extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 
 extern void mnuDrawFadingValueListRow();
 
-extern void func_002958B0();
+extern void mnuDrawCampItemListRow();
 
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
@@ -192,9 +192,9 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00295030);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00295400);
+INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawMenuItemListRow);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_002958B0);
+INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawCampItemListRow);
 
 /* Shop list draw context: row-fade countdown and mode (same 0x10-byte buffer as DDS1). */
 typedef struct MnuShopListContext {

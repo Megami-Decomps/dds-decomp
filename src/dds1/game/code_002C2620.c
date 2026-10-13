@@ -31,7 +31,7 @@ extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
 extern s32 evtGetMessageWindowControlState(void);
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern void sndReleaseTrackHandle(u32);
 extern s32 fldReleaseLocalMapResources(void);
@@ -680,7 +680,7 @@ s32 fldLmapToggleOverlay(void) {
     s32 result = 0;
 
     if (evtGetMessageWindowControlState() != 0) {
-        func_0024DD78();
+        dspRequestMessageWindowModeOne();
     } else {
         evtFinishMessageWindowAndNotify();
         result = 1;

@@ -431,7 +431,7 @@ void mnuSelectStaffDisplayCategory(u32 arg0) {
     mnuSwitchCampVisualCategory(2, arg0);
 }
 
-void func_002ACB38(s32 object) {
+void mnuNoOpStaffDisplayTeardown(s32 object) {
 }
 
 u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
@@ -458,7 +458,7 @@ s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
     MenuStaffChoices *party = (MenuStaffChoices *)owner->menu;
 
     mnuDestroyResourceOwnerWindowContainers(owner);
-    func_002ACB38(context);
+    mnuNoOpStaffDisplayTeardown(context);
     sdfReleaseResourceAllocation(party->allocation);
     return 1;
 }

@@ -3446,7 +3446,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
             colors.values[2] = color;
             colors.values[3] = color;
             if (evtGetMessageWindowControlState() == 1) {
-                func_0024DD78();
+                dspRequestMessageWindowModeOne();
                 goto return_zero;
             }
             if (work->phase == 3) {
