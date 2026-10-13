@@ -73,7 +73,7 @@ void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00250F60);
+INCLUDE_ASM(const s32, "game/code_00250E88", mnuAdvanceMantraSceneScroll);
 
 void mnuUpdateMantraSceneScroll(MenuSceneWork *work) {
     MnuMantraGridEntry *entry =
@@ -338,9 +338,9 @@ INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF840);
 
 INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF850);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00251A38);
+INCLUDE_ASM(const s32, "game/code_00250E88", mnuUpdateMantraSceneTaskState);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00251E38);
+INCLUDE_ASM(const s32, "game/code_00250E88", mnuDrawMantraSceneFrame);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00252CE8);
 
@@ -446,7 +446,7 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
+INCLUDE_ASM(const s32, "game/code_00250E88", mnuBuildMantraGridAndGetProfileCoordinates);
 
 /* Recreate the scene's selection grid and copy its resulting coordinates. */
 void mnuReinitializeSceneGrid(s32 sceneAddress) {
@@ -456,7 +456,7 @@ void mnuReinitializeSceneGrid(s32 sceneAddress) {
 }
 
 extern void sdfGridClear(SdfGrid *grid);
-extern void func_00253208(MenuSceneWork *work, s32 sceneId, s32 *x, s32 *y);
+extern void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 sceneId, s32 *x, s32 *y);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 x, u32 y);
 extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *grid);
 
@@ -475,7 +475,7 @@ void mnuRestoreMantraGridSelection(MenuSceneWork *work) {
     sdfGridClear(grid);
     scene = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
-    func_00253208(work, *(s32 *)(field + 0x70), NULL, NULL);
+    mnuBuildMantraGridAndGetProfileCoordinates(work, *(s32 *)(field + 0x70), NULL, NULL);
     if (sdfGridSelectFilledCell(
             work->gridHandle, x, y) == NULL) {
         sdfGridCursorLeftToFilledCell(work->gridHandle);

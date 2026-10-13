@@ -83,7 +83,7 @@ void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, 
     }
 }
 
-MtrCell *func_00285E98(MtrGrid *grid, MtrCell *source, s8 mode) {
+MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
     typedef struct MtrDirections { u8 offsets[6][2]; } MtrDirections;
     extern const MtrDirections D_00425DD8;
     MtrDirections directionTable = D_00425DD8;
@@ -138,7 +138,7 @@ MtrCell *func_00285E98(MtrGrid *grid, MtrCell *source, s8 mode) {
     return cell;
 }
 
-extern MtrCell *func_00285E98(MtrGrid *, MtrCell *, s8);
+extern MtrCell *mtrCreateGridPropagationCell(MtrGrid *, MtrCell *, s8);
 
 void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
     MtrCell *cell;
@@ -147,7 +147,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
 
     switch (mode) {
     case 1:
-        cell = func_00285E98(grid, NULL, 0);
+        cell = mtrCreateGridPropagationCell(grid, NULL, 0);
         if (cell != NULL) {
             cell->state = 4;
         }
@@ -155,14 +155,14 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
     case 2:
         random = effMiscRandUnitFloat(0);
         if (random < 0.8f) {
-            cell = func_00285E98(grid, source, 0);
+            cell = mtrCreateGridPropagationCell(grid, source, 0);
             if (cell == NULL) {
                 return;
             }
             cell->state = mode;
         }
         if (random < 0.9f) {
-            cell = func_00285E98(grid, source, 1);
+            cell = mtrCreateGridPropagationCell(grid, source, 1);
             if (cell != NULL) {
                 cell->state = 3;
             }
@@ -170,7 +170,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
         break;
     case 3:
         if (effMiscRandUnitFloat(0) < 0.8f) {
-            cell = func_00285E98(grid, source, 0);
+            cell = mtrCreateGridPropagationCell(grid, source, 0);
             if (cell != NULL) {
                 cell->state = mode;
             }
@@ -178,7 +178,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
         break;
     case 4:
         for (i = 0; i < 6; i++) {
-            cell = func_00285E98(grid, source, i);
+            cell = mtrCreateGridPropagationCell(grid, source, i);
             if (cell == NULL) {
                 break;
             }

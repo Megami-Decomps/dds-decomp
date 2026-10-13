@@ -29,7 +29,7 @@ extern MnuVariantSpritePlacement D_0036B7F0[];
 extern TaskWork *mnuSceneResourceContext;
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
-extern void func_0024EC08(s32, s32, s32, s32, s32, s32, f32, f32, s32);
+extern void mnuDrawScaledScenePlacementSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern void mnuDrawMantraEntryStatusIcon(s32, s32, s32, s32, u32, f32, f32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00259498", mnuDrawMantraGridEntry);
@@ -73,18 +73,18 @@ void mnuDrawScaledMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
             s32 displayFlags = (u8)display->boundsFlags;
 
             if (displayFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
-                func_0024EC08(x, y, depth, alpha, scene->sceneId, 0x20,
+                mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, scene->sceneId, 0x20,
                               scaleX, scaleY, context);
             } else {
                 for (i = 0; i < 6; i++) {
                     if (scene->sceneId == mappedIds[i]) {
-                        func_0024EC08(x, y, depth, alpha, i + 0x59, 0x20,
+                        mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, i + 0x59, 0x20,
                                       scaleX, scaleY, context);
                         break;
                     }
                 }
                 if (i == 6) {
-                    func_0024EC08(x, y, depth, alpha, scene->sceneId, 0x20,
+                    mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, scene->sceneId, 0x20,
                                   scaleX, scaleY, context);
                 }
             }

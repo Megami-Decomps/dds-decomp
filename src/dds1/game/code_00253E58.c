@@ -12,9 +12,9 @@ extern void mnuDrawScaledPlacedSprite(s32, s32, s32, s32, s32, s32, f32, f32);
 extern void mnuDrawMantraProfileSelectionSurface(s32, s32, s32, s32, MenuSceneWork *, s32);
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
 extern f32 sdfSinPoly(f32 angle);
-extern void func_00254758(s32, s32, s32, s32, s32);
+extern void mnuDrawMantraScenePlacementSprite(s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00253E58", func_00253E58);
+INCLUDE_ASM(const s32, "game/code_00253E58", mnuHandleMantraSceneInput);
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
@@ -58,7 +58,7 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawScaledPlacedSprite(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
         mnuDrawMantraProfileSelectionSurface(0, 0, 1, scaled, scene, 0x53);
-        func_00254758(0, 0, 1, 0x80, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 0x80, 0x53);
         mnuDrawPlacedSpriteFromTable(0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteFromTable(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
@@ -72,7 +72,7 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawScaledPlacedSprite(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
         mnuDrawMantraProfileSelectionSurface(0, 0, 1, scaled, scene, 0x53);
-        func_00254758(0, 0, 0, 0x80, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 0, 0x80, 0x53);
         mnuDrawPlacedSpriteFromTable(0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteFromTable(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
@@ -91,7 +91,7 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawScaledPlacedSprite(0, 0, 0, 0x80, 0x3A, 0x53, 1.5f, 1.5f);
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, 0x80, 0x53);
         mnuDrawMantraProfileSelectionSurface(0, 0, 1, (s32)(frac * 128.0f), scene, 0x53);
-        func_00254758(0, 0, 1, 0x80, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 0x80, 0x53);
         mnuDrawPlacedSpriteFromTable(0, 0, 0, 0x80, 0xF, 0x53);
         mnuDrawPlacedSpriteFromTable(0, 0, 0, 0x80, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
@@ -113,17 +113,17 @@ void mnuDrawDisplaySpriteAndPanelMarks(s32 p0, s32 a1, s32 a2) {
 }
 
 /* Three sprite layers drawn at the origin for one draw context. */
-void func_002546D8(s32 scale, s32 context) {
+void mnuDrawMantraSceneSpriteSequence(s32 scale, s32 context) {
     mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0x4F, context);
     mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0xC, context);
     mnuDrawPlacedSpriteFromTable(0, 0, 0, scale, 0xD, context);
 }
 
-void func_00254758(s32 x, s32 y, s32 z, s32 drawContext, s32 drawArgument) {
+void mnuDrawMantraScenePlacementSprite(s32 x, s32 y, s32 z, s32 drawContext, s32 drawArgument) {
     mnuDrawPlacedSpriteFromTable(x, y, z, drawContext, 14, drawArgument);
 }
 
-void func_00254778(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4) {
+void mnuDrawMantraSceneSpriteGroup(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4) {
     mnuDrawPlacedSpriteFromTable(a0, a1, a2, a3, 0x47, a4);
     mnuDrawPlacedSpriteFromTable(a0, a1, a2, a3, 0x48, a4);
     mnuDrawPlacedSpriteFromTable(a0, a1, a2, a3, 0x49, a4);
@@ -177,7 +177,7 @@ extern u32 strlen(const char *);
 extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option);
 
 /* Draw the selected mantra's display: sprite, fade-driven effect and its name (shifted left for long names). */
-void func_00254810(s32 x, s32 y, s32 z, s32 alpha, DspTableWindowContext *windowContext, s32 drawContext) {
+void mnuDrawSelectedMantraProfile(s32 x, s32 y, s32 z, s32 alpha, DspTableWindowContext *windowContext, s32 drawContext) {
     DspUnitSpriteTable sprites = D_003BC440[0];
     DspTableUnit *unit = windowContext->unit;
     s32 *selectedValue = unit->selectedValue;
