@@ -183,7 +183,7 @@ extern void effReleaseResourceRefs(EffTrackSet *);
 extern s32 func_003014F0(char *, const char *, ...);
 
 
-extern void func_00187C08(void *);
+extern void effDrawSolidRectangle(void *);
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
@@ -1107,7 +1107,7 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     packed = eePackRGBAWord(128.0f);
     out->color = packed;
     out->blendControl = work->mode;
-    func_00187C08(out);
+    effDrawSolidRectangle(out);
 }
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);

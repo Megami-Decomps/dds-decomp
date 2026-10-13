@@ -3959,7 +3959,7 @@ void btlStepBlendColor(void) {
 void btlDrawTintIfVisible(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_003BDCA0;
     if (transition->currentColor & 0xFF000000) {
-        func_0018F840(transition);
+        effDrawSolidRectangle(transition);
     }
 }
 

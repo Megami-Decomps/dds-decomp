@@ -900,7 +900,7 @@ extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 extern void effBlurStepScaleSlotsAndDraw(void *);
 
 
-extern void func_0018F840(void *);
+extern void effDrawSolidRectangle(void *);
 
 typedef struct EffFadeConfig {
     /* Color and alpha tracks at 0x00/0x24, followed by three scalar
@@ -1267,7 +1267,7 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     packed = eePackRGBAWord(128.0f);
     out->color = packed;
     out->blendControl = work->mode;
-    func_0018F840(out);
+    effDrawSolidRectangle(out);
 }
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);

@@ -61,7 +61,7 @@ extern void sdfReleaseAllSpriteSlots(void);
 extern void sdfDestroyActiveCounterRuntime(void);
 extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
-extern void func_00316E70(void);
+extern void sdfDisableFlagListCameraRelativeMode(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern s32 dspCloseChannel(void);
 extern void evtDestroySecondaryWorldNode(void);
@@ -87,7 +87,7 @@ extern void evtCreateMessageWindowIfMissing(s32);
 extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
-extern void func_00316E60(void);
+extern void sdfEnableFlagListCameraRelativeMode(void);
 extern void sndStartTrackDefault(s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
 extern u32 kwlnDrawControlFlags;
@@ -441,7 +441,7 @@ void fldShutdownLmapResources(void) {
     sdfDestroyActiveCounterRuntime();
     fldReleaseMapRequestQueues();
     fldReleaseCameraColorEffect();
-    func_00316E70();
+    sdfDisableFlagListCameraRelativeMode();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
     sdfQueueGeneralAllocationRelease(D_004388A4);
@@ -639,7 +639,7 @@ void fldInitializeLocalMapScene(void) {
     evtCreateMessageWindowIfMissing(D_004388A8);
     evtSetSolarOverlayFullyVisible();
     fldInitializeCameraColorResource();
-    func_00316E60();
+    sdfEnableFlagListCameraRelativeMode();
     sndStartTrackDefault(0x400001);
     if (mdlFlagTest(0x13)) {
         kwlnFadeOutStart(0, 0, 0, 30);

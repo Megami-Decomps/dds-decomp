@@ -110,11 +110,13 @@ void itfSetPackedRgbAlpha(SdfFlagListWork *entry, u32 color) {
     entry->params.alpha.alpha = color >> 24;
 }
 
-u32 func_00316E28(SdfFlagListWork *entry) {
+/* Return the surface-table index consumed by sdfDrawFlagListVertices. */
+u32 sdfGetFlagListAlphaSurfaceIndex(SdfFlagListWork *entry) {
     return entry->params.alpha.surfaceIndex;
 }
 
-void func_00316E30(SdfFlagListWork *entry, u32 value) {
+/* Replace the flag list's draw-surface index without validation. */
+void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *entry, u32 value) {
     entry->params.alpha.surfaceIndex = value;
 }
 
@@ -125,11 +127,13 @@ void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
     dst->params.alpha.surfaceIndex = src->alpha.surfaceIndex;
 }
 
-void func_00316E60(void) {
+/* Store generated vertices relative to the view target and add it back at draw time. */
+void sdfEnableFlagListCameraRelativeMode(void) {
     D_00438918 = 1;
 }
 
-void func_00316E70(void) {
+/* Keep generated vertices in world coordinates instead of target-relative storage. */
+void sdfDisableFlagListCameraRelativeMode(void) {
     D_00438918 = 0;
 }
 

@@ -128,7 +128,7 @@ extern s8 effRectangleBlurEnabled;
 
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 
-extern void func_0018F840(EffSolidRectParams *arg);
+extern void effDrawSolidRectangle(EffSolidRectParams *arg);
 
 extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
 
@@ -769,7 +769,7 @@ void effDispatchActive(void) {
         effBlurDrawFramebufferQuad(&D_003B2238.source);
     }
     if (effColorRectangleEnabled) {
-        func_0018F840(&effColorRectangleParameters);
+        effDrawSolidRectangle(&effColorRectangleParameters);
     }
     if (effTexturedSquareEnabled) {
         effResourceRectDrawPixels(effTexturedSquareWork);

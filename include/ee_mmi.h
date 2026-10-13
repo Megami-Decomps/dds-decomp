@@ -394,8 +394,8 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /*
  * Gather one column of four 16-byte matrix rows into a VU register.
- * Retail: four branches each in DDS1 func_0021E450/func_0023A7A0 and DDS2
- * func_00238FC0/func_00255650 repeat the fixed $2-$5 SDK scratch sequence:
+ * Retail: four branches each in both games' mdlRotateLightEditorVectorFromPad
+ * and evtRotateViewerPositionFromPad repeat the fixed $2-$5 SDK scratch sequence:
  * lw $2/$3/$4/$5 at 0/0x10/0x20/0x30(src); pextlw $2,$3,$2;
  * pextlw $4,$5,$4; pcpyld $2,$4,$2; qmtc2.ni $2,vf.
  * Plain C float gathering was compiled first: four lwc1/swc1 pairs, a

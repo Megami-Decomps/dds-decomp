@@ -226,7 +226,7 @@ typedef struct MenuPanelDrawLayout {
 extern const MenuPanelDrawLayout D_0042AD38;
 extern const u8 D_00437BF0[];
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
-extern void func_00308650(const u32 *, const u32 *, u32, const u32 *, u32);
+extern void itfDrawVertexColoredTriangle(const u32 *, const u32 *, u32, const u32 *, u32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern u32 scrGetIndexedRecordAddress(u32, s32 *);
 extern void mnuDrawMenuTextById(s32, s32, s32, s32, s32, s32);
@@ -950,7 +950,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
     x[2] = 0xB0;
     y[2] = 0xDF8;
     colors[2] = colors[0];
-    func_00308650(x, y, 0, colors, 0x53);
+    itfDrawVertexColoredTriangle(x, y, 0, colors, 0x53);
 
     x[0] = 0;
     y[0] = 0x8C8;
@@ -961,7 +961,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
     x[2] = 0;
     y[2] = 0xE50;
     colors[2] = colors[0];
-    func_00308650(x, y, 0, colors, 0x53);
+    itfDrawVertexColoredTriangle(x, y, 0, colors, 0x53);
 
     effDrawTextureSlotWithBlendedCornerColors(0x840, 0xA28, 0, 0x100, 1, panelModels[0], 0x10, 0x53);
 

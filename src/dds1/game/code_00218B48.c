@@ -2825,8 +2825,8 @@ extern void *func_0011D6B0(s32, s32, s32, s32);
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 
-/* vu0 routine: rotate a viewer position about the camera axes selected by the pad. */
-void func_0021E450(MdlLightEditorState *context, f32 *position)
+/* vu0 routine: rotate the light editor vector by two degrees about pad-selected camera axes. */
+void mdlRotateLightEditorVectorFromPad(MdlLightEditorState *context, f32 *position)
 {
     if (context->pad->stepUpA != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
@@ -2935,7 +2935,7 @@ s32 mdlUpdateLightEditorTask(KwlnTask *task) {
             light = state->lights[state->selection >> 2];
             if (light != NULL) {
                 if ((state->selection & 3) == 3) {
-                    func_0021E450(state, light[1]);
+                    mdlRotateLightEditorVectorFromPad(state, light[1]);
                 } else {
                     fldStepValueByPad(&light[0][state->selection & 3], (u8 *)state->pad,
                                       0.0f, 2.0f, 0.1f, 0.01f);

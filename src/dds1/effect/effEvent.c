@@ -117,7 +117,7 @@ extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...)
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
-extern void func_00187C08(EffSolidRectParams *arg);
+extern void effDrawSolidRectangle(EffSolidRectParams *arg);
 extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
@@ -766,7 +766,7 @@ void effDispatchActive(void) {
         effBlurDrawFramebufferQuad(&D_00355908.source);
     }
     if (effColorRectangleEnabled) {
-        func_00187C08(&effColorRectangleParameters);
+        effDrawSolidRectangle(&effColorRectangleParameters);
     }
     if (effTexturedSquareEnabled) {
         effResourceRectDrawPixels(effTexturedSquareWork);

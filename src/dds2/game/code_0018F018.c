@@ -231,7 +231,8 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
     }
 }
 
-void func_0018F840(EffSolidRectParams *source) {
+/* Queue blend state and a uniformly colored GS quad from two source corners. */
+void effDrawSolidRectangle(EffSolidRectParams *source) {
     SdfListHead *list;
     u64 *blendPacket;
     u64 *drawPacket;
