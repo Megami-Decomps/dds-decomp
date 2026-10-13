@@ -28,6 +28,7 @@
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
+#include "sdf.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -181,7 +182,6 @@ extern s32 D_00437D60;
 extern s32 D_00437D5C;
 extern u8 (*D_00437D54)[32];
 extern u8 (*D_00437D58)[32];
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern s32 dds3GetWorldObject(void);
 
 
@@ -2669,7 +2669,6 @@ void fileResetMenuFlowState(void) {
 extern void *memset(void *dst, s32 value, s32 size);
 
 struct SdfMemBlock;
-struct SdfTex;
 extern void func_001004A0(void);
 extern s32 D_00437D80;
 extern void func_002CE738(void);

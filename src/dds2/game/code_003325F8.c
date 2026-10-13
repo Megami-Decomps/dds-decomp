@@ -93,9 +93,6 @@ void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
 
 void func_0032C278(SdfTex *texture, s32 arg, f32 value);
-
-void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
 extern void sdfModelCopyData(DevRequest *, DevRequest *);

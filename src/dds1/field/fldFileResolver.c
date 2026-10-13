@@ -577,7 +577,6 @@ extern u32 D_003BD7C0;
 extern u8 D_0032F260[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void fldResetRecordState(void);
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);

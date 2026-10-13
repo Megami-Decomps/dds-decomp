@@ -154,9 +154,6 @@ extern s32 evtCheckValueThreshold(s32, s32);
 extern void mdlFlagSet(s32);
 
 extern void mdlFlagClear(s32);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern s32 sndUpdateTestMsgTask(KwlnTask *task);
 
 extern SdfPoolNode D_003805A8;

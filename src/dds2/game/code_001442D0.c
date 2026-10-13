@@ -170,8 +170,6 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 
 
 extern SdfTex *D_0044F7F0[];
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 extern u32 D_004363C8;
 
 extern u32 D_004363CC;

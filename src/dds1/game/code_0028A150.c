@@ -27,9 +27,9 @@
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
 
+#include "sdf.h"
 extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
-struct SdfTex;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 struct EffectSlotSet;
@@ -77,7 +77,6 @@ extern s32 D_003BC870;
 extern s32 D_003BC874;
 extern s32 D_003BC878;
 extern s32 D_003BC87C;
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern s32 dds3GetWorldObject();
 
 extern u8 sdfViewTargetVector[];

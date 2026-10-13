@@ -4,9 +4,6 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "evt_picture.h"
-
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
-
 extern u8 D_003686C8[];
 extern u8 D_003686D8[];
 extern u8 D_003686E8[];

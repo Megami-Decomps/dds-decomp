@@ -1563,9 +1563,6 @@ typedef struct EncBgEntry {
 extern ItfMesGlobals itfMesWork;
 
 extern void itfMesDestroyWindow(s32 arg0);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern s32 sdfAllocPacketAligned(s32 size);
 
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);

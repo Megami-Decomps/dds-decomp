@@ -9,9 +9,7 @@
 #include "file_request_api.h"
 #include "eff_node_descriptor.h"
 
-struct SdfTex;
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
-
+#include "sdf.h"
 EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
     EffNode *copy = (EffNode *)sdfAllocSizeClassBlock(0x10);
     u32 argument = (u32)source->instance;

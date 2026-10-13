@@ -5426,8 +5426,6 @@ void *evtFindTaskResourceEntryByKey(u32 id, s32 key) {
 }
 
 extern void effSetCh72Id(SdfTex *);
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetEventPackLoadState(taskId);
     void *address = evtFindTaskResourceEntryByKey(taskId, key);

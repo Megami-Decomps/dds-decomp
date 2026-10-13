@@ -421,11 +421,6 @@ extern u128 D_004584B0[];
 extern u128 D_00458470[];
 
 extern SdfLightSources D_003E9F50;
-
-
-extern void sdfTexReleaseReference(SdfTex *texture);
-
-
 extern u8 btlIsRuntimeAllocated(void);
 
 extern MdlCtx *func_002DC1D0(void *, u32);
@@ -1586,9 +1581,6 @@ EffKindAssetHolder *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kin
     }
     return object;
 }
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 void effKindAssetReferenceRelease(EffKindAssetHolder *object) {
     object->references--;
     if (object->references == 0) {
@@ -13416,9 +13408,6 @@ void effResolveAndReleaseSelectedResource(EffectSlotSet *owner, s32 mapping) {
         sdfDecrementAllocationReferenceCount(owner->sourceAllocation);
     }
 }
-
-extern void sdfTexReleaseReference(SdfTex *texture);
-
 void effReleaseSlotTextureReferencesAndResetWork(EffectSlotSet *owner, s32 preserveWork) {
     u32 i = 0;
     u32 count = owner->textureCount;

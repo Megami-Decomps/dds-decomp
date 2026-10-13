@@ -380,6 +380,13 @@ typedef struct SdfTex {
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
 
+/* Release one caller-owned texture reference. The direct form releases the
+ * texture immediately when this is the last reference; the handler form queues
+ * that final release for deferred processing. Neither function consumes more
+ * than the single reference represented by the supplied pointer. */
+void sdfTexReleaseReference(SdfTex *texture);
+void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
+
 /* Texture resource accessors and palette helpers shared by both title providers. */
 u8 sdfTexGetPaletteCount(SdfTex *texture);
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);

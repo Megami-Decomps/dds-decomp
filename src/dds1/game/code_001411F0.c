@@ -1831,9 +1831,6 @@ extern s32 D_003BAECC;
 extern s32 D_003BAED4;
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00145B18);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern void frFontSetSharedRenderFlags(u32);

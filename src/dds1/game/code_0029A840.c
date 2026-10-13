@@ -683,9 +683,6 @@ RefObj *effCloneSharedReferenceWithValue(SdfTextureFileHeader *source, u32 textu
     copy->index = textureIndex;
     return copy;
 }
-
-extern void sdfTexReleaseReference(SdfTex *texture);
-
 void effReleaseSharedReference(RefObj *obj) {
     effSharedTextureReferenceCount--;
     if (effSharedTextureReferenceCount == 0) {

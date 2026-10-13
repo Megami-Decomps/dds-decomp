@@ -77,7 +77,6 @@ extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);
-void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 SdfAsset *sdfCreateAssetWithDrawEntries(void);
 u8 *sdfParseAssetParameterFlags(SdfAsset *, DevRequest *, u8 *);
 void sdfAppendAssetToResourceList(DevRequest *, SdfAsset *);
