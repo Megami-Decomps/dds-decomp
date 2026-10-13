@@ -1853,7 +1853,7 @@ extern char D_003BBA98[];
 
 extern char D_003BBAA0[];
 
-extern s32 func_001A2F50(BtlUnit *, s32);
+extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
@@ -1973,7 +1973,7 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
             row = ((BtlAffinityRow *)D_003BAA2C)[unit->partyRecord.unitId];
         }
         for (i = 0; i < 16; i++) {
-            row.value[i] = func_001A2F50(unit, i);
+            row.value[i] = btlGetUnitElementAffinity(unit, i);
             value = row.value[i];
             if ((value & 0xFFFF0000) != 0) {
                 switch (value & 0xFFFF0000) {
