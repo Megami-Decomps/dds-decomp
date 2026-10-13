@@ -60,7 +60,7 @@ extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern void func_00321688(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
 extern void func_00321798(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
 extern void mnuDeactivateListRecord(MenuRuntimeList *, MenuRuntimeRecord *);
-extern void func_00322418(void);
+extern void mnuAdvanceRuntimeAnimationRecords(void);
 
 /* Each packed table word contains signed X and Y hit radii. */
 extern s8 D_0040B248[][2];
@@ -1102,7 +1102,7 @@ s32 func_00324840(void) {
                   (s32)work->currentX, (s32)work->currentY, kindMask,
                   work->currentAngleRadians);
 
-    func_00322418();
+    mnuAdvanceRuntimeAnimationRecords();
 
     {
         MenuWorkFlags flags;

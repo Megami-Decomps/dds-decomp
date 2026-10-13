@@ -6230,6 +6230,7 @@
 0x00321F18	mnuAcquireRuntimeRecordSlot	inferred	Selects the first inactive 0x24-byte record in a supplied runtime list, marks it active and increments activeCount; returns null when capacity is exhausted.
 0x00321F78	mnuDeactivateListRecord	inferred	Clears the record's low active bit and decrements the enclosing list's active-record count.
 0x00321F98	mnuAdvanceMovingRuntimeRecords	inferred	Fam-3
+0x00322418	mnuAdvanceRuntimeAnimationRecords	inferred	Advances the D_0045C880 runtime animation list through mnuAdvanceMovingRuntimeRecords; the caller runs it after updating timed animation states. [provider and caller dataflow, 2026-10-13]
 0x00322438	dds3MeasureMenuRecord	inferred	Computes the 16-byte header plus both counted record-block lengths.
 0x00322480	dds3MeasureRecordBlock	inferred	Computes eight bytes per record plus eight bytes per record's first-word count.
 0x003224E0	mnuBindMenuRecordRegistry	inferred	Stores base pointer and count of the first menu-record registry; no tag semantics established. [names_reviewed18.tsv]
