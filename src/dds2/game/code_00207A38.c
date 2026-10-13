@@ -195,7 +195,7 @@ extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 
-extern f32 func_00208750(BtlIndexList *list, f32 *maxTop, f32 *minTop);
+extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 
 extern void func_0021F3E8(s32);
 
@@ -532,7 +532,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
     return extremeZ;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208750);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureUnitIndexListBounds);
 
 /* Compare VU-computed distances from the target's muzzle to eligible units. */
 BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {

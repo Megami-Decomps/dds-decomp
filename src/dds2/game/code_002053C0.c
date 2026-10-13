@@ -111,7 +111,7 @@ extern s32 D_00436AA0;
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
-extern f32 func_00208750(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 extern s16 D_00436AB0[];
 
@@ -922,7 +922,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
     if (btlGetIndexListCount(link->indexWork.indices) == 1) {
         btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0));
     } else {
-        func_00208750(link->indexWork.indices, 0, 0);
+        btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
     }
     VU0_STORE_VF(vf10, muzzle);
     VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
@@ -1018,7 +1018,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             btlUnitGetMuzzlePosVU(unit);
             reach = unit->reach * unit->scale;
         } else {
-            func_00208750(link->indexWork.indices, 0, 0);
+            btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
             reach = 0.0f;
         }
         VU0_STORE_VF(vf10, muzzle);
