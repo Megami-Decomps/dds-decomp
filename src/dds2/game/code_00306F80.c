@@ -992,7 +992,19 @@ void uiDrawTexturedSurfaceAtFarDepth(u32 context) {
     uiDrawActiveSurfaceRegion(context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308F78);
+void func_00308F78(s32 mode, s32 surface) {
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    sdfSubmitGsTestOneRegisterPacket(0x5000D, surface);
+    if (mode == 0) {
+        sdfSubmitGsAlphaOneRegisterPacket(0x54, surface);
+        return;
+    }
+    sdfSubmitGsAlphaOneRegisterPacket(0x58, surface);
+    /* Retail 00308FC0 is a tail J, while 00308FC8 uses JAL plus an epilogue.
+     * cc1probe retains this consumed-mode reset through 01.sibling and
+     * 11.cfg, then deletes it in 13.life; the zero-mode call stays a sibling. */
+    mode = 0;
+}
 
 void uiDrawActiveSurfaceWithTestMode(u32 context) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, context);
