@@ -130,7 +130,7 @@ submit:
 
 extern u8 sdfPfsDebugMode;
 extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern s32 func_00310478(const char *, SceIoStat *);
+extern s32 sceGetstat(const char *, SceIoStat *);
 
 /* Load the sound modules; debug PFS may override only the SDF sound manager. */
 void sndLoadIopSoundModules(void) {
@@ -144,7 +144,7 @@ void sndLoadIopSoundModules(void) {
     sceSifLoadModule("cdrom0:\\SOUNDIRX\\MODMSIN.IRX;1", 0, NULL);
     module = "cdrom0:\\USERIRX\\SDFSDMAN.IRX;1";
     if (sdfPfsDebugMode != 0 &&
-        func_00310478("pfs:/userirx/SDFSDMAN.IRX", &info) == 0 &&
+        sceGetstat("pfs:/userirx/SDFSDMAN.IRX", &info) == 0 &&
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs:/userirx/SDFSDMAN.IRX";
     }
