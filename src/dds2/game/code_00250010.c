@@ -88,7 +88,7 @@ extern s32 effEventAdvanceBlurTemplateSetup(void);
 extern s32 effEventAdvanceScatterBlurSetup(void);
 extern s32 effEventAdvanceScaleBlurSetup(void);
 extern s32 effEventAdvanceScreenDrawSetup(void);
-extern s32 func_002570F8(EvtRuntime *runtime);
+extern s32 evtEditEffectSpriteFrame(EvtRuntime *runtime);
 extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
 extern s32 func_002582D0(EvtRuntime *runtime);
 extern void *D_004364B0;
@@ -2498,7 +2498,7 @@ extern f32 sdfViewMatrix[];
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 
 /* vu0 routine: rotate an event-viewer position about camera axes selected by the pad. */
-void func_00255650(f32 *position)
+void evtRotateViewerPositionFromPad(f32 *position)
 {
     if (D_0037F510.incOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
@@ -2562,7 +2562,7 @@ extern f32 D_00438A4C;
 extern void func_0023E320(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
-s32 func_002560B0(s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtEditPositionOverlaySettings(s32 x, s32 y, EvtRuntime *runtime) {
     SdfListHead *list;
     EvtRuntimeGroup *group;
     const EvtFloatPanelRow *row;
@@ -3074,7 +3074,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00424230);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424240);
 
-s32 func_002570F8(EvtRuntime *runtime) {
+s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
     EvtRuntimeChild *key;
     u8 *channel;
     SdfListHead *packetList;
@@ -3609,7 +3609,7 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_002582D0);
 
-s32 func_00258700(s32 arg0, s32 arg1, EvtRuntime *runtime) {
+s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     s32 status = 1;
 
     switch (runtime->frameGroup->type) {
@@ -3644,7 +3644,7 @@ s32 func_00258700(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         }
         break;
     case 0x18:
-        status = func_002570F8(runtime);
+        status = evtEditEffectSpriteFrame(runtime);
         break;
     case 0x19:
         status = evtEditCameraColorKeyFrame(runtime);

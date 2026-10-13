@@ -2382,7 +2382,7 @@ extern f32 sdfViewMatrix[];
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 
 /* vu0 routine: apply the selected camera-axis rotations to a position. */
-void func_0023A7A0(f32 *position)
+void evtRotateViewerPositionFromPad(f32 *position)
 {
     if (D_00324510.incOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
@@ -2446,7 +2446,7 @@ extern f32 D_003BD35C;
 extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
 
 /* Draw the XY/overlay editor; cancel restores the captured values and flag. */
-s32 func_0023B200(s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtEditPositionOverlaySettings(s32 x, s32 y, EvtRuntime *runtime) {
     SdfListHead *list;
     EvtRuntimeGroup *group;
     const EvtFloatPanelRow *row;

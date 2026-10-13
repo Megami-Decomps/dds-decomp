@@ -165,7 +165,7 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
 extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
-s32 func_0026BAF8(KwlnTask *request) {
+s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     s32 *panelState = (s32 *)(state + 0x54);
     s32 result = func_002C4038((u8 *)state + 8, panelState, 0, request);

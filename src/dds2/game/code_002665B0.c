@@ -2303,7 +2303,7 @@ extern void mnuDrawTerminalFrameAndSlotLabels(s32);
 
 extern void mnuDrawTerminalSelectedSlots(s32);
 
-s32 func_0026AC90(KwlnTask *request) {
+s32 mnuPrepareTerminalPanelForInput(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);
