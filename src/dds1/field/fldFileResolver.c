@@ -4776,7 +4776,7 @@ void fldUpdateSelectedValueTransition(void) {
 }
 
 /* VU0 direction setters consume vf10, as in the DDS2 lighting routine. */
-void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                    f32 redB, f32 greenB, f32 blueB,
                    f32 x, f32 y, f32 z) {
     EvtUnit *player;
@@ -4864,7 +4864,7 @@ extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
 extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
 extern u32 D_003BADA8;
-extern void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                           f32 redB, f32 greenB, f32 blueB, f32 x, f32 y, f32 z);
 
 /* Start fading to the sky light set at index. A zero scene command also applies the set to the
@@ -4945,7 +4945,7 @@ void fldApplySkyLightSet(u32 index, s32 mode) {
             vec[2] = light->finalVectorZ;
             vec[3] = 1.0f;
             kwlnSetBackgroundColorTarget(duration, vec);
-            func_00132E38(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+            fldSetPlayerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
                           light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
                           light->unitLightDirection[0], light->unitLightDirection[1],
                           light->unitLightDirection[2]);
@@ -5078,7 +5078,7 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
                 vec[2] = light->finalVectorZ;
                 vec[3] = 1.0f;
                 kwlnSetBackgroundColorTarget(duration, vec);
-                func_00132E38(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                fldSetPlayerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
                               light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
                               light->unitLightDirection[0], light->unitLightDirection[1],
                               light->unitLightDirection[2]);
@@ -5104,7 +5104,7 @@ extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
 extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 extern void fldSetSwayMode(u32);
 extern u32 D_003BADDC;
-extern void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                           f32 redB, f32 greenB, f32 blueB, f32 x, f32 y, f32 z);
 
 void fldApplySceneLightSet(s32 index, s32 mode) {
@@ -5185,7 +5185,7 @@ void fldApplySceneLightSet(s32 index, s32 mode) {
             vec[2] = light->finalVectorZ;
             vec[3] = 1.0f;
             kwlnSetBackgroundColorTarget(duration, vec);
-            func_00132E38(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+            fldSetPlayerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
                           light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
                           light->unitLightDirection[0], light->unitLightDirection[1],
                           light->unitLightDirection[2]);
