@@ -47,7 +47,6 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 extern void mnuFreeOptionalBlock(u32);
 /* SDK malloc wrapper: a successful result owns a fresh allocation. */
 extern void *func_0035A828(u32 bytes) __attribute__((malloc));
-s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
 
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
