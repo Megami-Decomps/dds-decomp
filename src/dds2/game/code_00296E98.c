@@ -98,7 +98,7 @@ extern BrsIconRecord D_003D03F0[];
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw the selected result icon, then the fixed companion at the same alpha. */
-void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
+void brsDrawResultIconPairWithAlpha(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     f32 strength;
     struct EffectSlotSet *layer;
 
@@ -288,7 +288,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
                       (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawListChildrenWithCountdown(0, 0, 0,
                                          (u8 *)scene->ownedWindows[0]->list, 0x53);
-        func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
 
         if ((f32)scene->commandFrames > 0.0f) {
             /* Retail 0x00297B40-0x00297B54 round-trips through a clamped integer. */
@@ -357,10 +357,10 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
             break;
         case 4:
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
             break;
         }
         if ((f32)scene->commandFrames > 0.0f) {
@@ -408,12 +408,12 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 1, 0x53);
-            func_00296E98((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
             break;
         case 4:
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 0, 0x53);
-            func_00296E98((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
             break;
         }
         mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)scene, 0x100, 0x53);
@@ -450,10 +450,10 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00296E98((s32)scene, 0x100, 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 3, 0x53);
             break;
         case 4:
-            func_00296E98((s32)scene, 0x100, 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 2, 0x53);
             break;
         }
         break;
@@ -511,12 +511,12 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
-            func_00296E98((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
             break;
         case 4:
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
-            func_00296E98((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
             break;
         }
         break;
@@ -534,12 +534,12 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00296E98((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
             break;
         case 4:
-            func_00296E98((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
-            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)(progress * 256.0f), 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
             break;
         }
         break;
@@ -558,10 +558,10 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00296E98((s32)scene, 0x100, 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 1, 0x53);
             break;
         case 4:
-            func_00296E98((s32)scene, 0x100, 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 0, 0x53);
             break;
         }
         break;
@@ -577,10 +577,10 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00296E98((s32)scene, 0x100, 1, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 1, 0x53);
             break;
         case 4:
-            func_00296E98((s32)scene, 0x100, 0, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)scene, 0x100, 0, 0x53);
             break;
         }
         break;
