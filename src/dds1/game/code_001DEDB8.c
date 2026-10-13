@@ -655,7 +655,7 @@ void btlConfigureBattleCameraAction(BtlLinkedCommand *action, BtlCamState *from,
         btlAdjustCameraDirectionForDefaultPlane(from);
         btlAdjustCameraDirectionForDefaultPlane(to);
         if (btlHasMarkedEntry10((u8 *)action)) {
-            action->durationFrames = func_001D6050(unit, unit->unkEC);
+            action->durationFrames = btlGetUnitMotionDurationFrames(unit, unit->unkEC);
             action->flags |= 0x11;
         } else {
             action->flags |= 0x41;
@@ -740,7 +740,7 @@ extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
 
 extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
 
-extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 /* One aim pose: quaternion, distance multiplier, height scale and two words this aim leaves unused. */
 typedef struct CameraAimPose {
@@ -802,7 +802,7 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
         btlAdjustCameraDirectionForDefaultPlane(to);
-        action->durationFrames = func_001D6050(unit, unit->unkEC);
+        action->durationFrames = btlGetUnitMotionDurationFrames(unit, unit->unkEC);
         action->flags |= 0x815;
         action->motionProgress = 0;
     }
@@ -909,7 +909,7 @@ void btlBeginActionEndCameraPullback(BtlLinkedCommand *action, BtlCamState *pose
     if (action->motionProgress == 0 && (s32)btlGetIndexListCount(action->targetList) < 2) {
         user = action->task->unit;
         target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
-        frames = func_001D6050(user, user->unkEC);
+        frames = btlGetUnitMotionDurationFrames(user, user->unkEC);
         frames = (s32)((f32)frames / btlGetActorEffectScale(action->task));
         if (action->state == frames && (target->status.flags & 0x200)) {
             idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
@@ -1368,7 +1368,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     user = action->task->unit;
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
-    span = func_001D6050(user, user->unkEC);
+    span = btlGetUnitMotionDurationFrames(user, user->unkEC);
     span /= btlGetActorEffectScale(action->task);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {
@@ -1473,7 +1473,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     if (action->motionProgress != 0) {
         return;
     }
-    frames = func_001D6050(user, user->unkEC);
+    frames = btlGetUnitMotionDurationFrames(user, user->unkEC);
     frames = (s32)((f32)frames / btlGetActorEffectScale(action->task));
     if (action->state == frames && (target->status.flags & 0x200)) {
         idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
@@ -2212,7 +2212,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     user = action->task->unit;
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
-    span = func_001D6050(user, user->unkEC);
+    span = btlGetUnitMotionDurationFrames(user, user->unkEC);
     span /= btlGetActorEffectScale(action->task);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {
