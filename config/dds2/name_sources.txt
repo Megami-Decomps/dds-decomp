@@ -6730,6 +6730,7 @@
 0x00342690	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds2/game/code_003425B0.c:208:func_00342690; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x003426B8	sndSendChannelGroupCommand110	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x110, and sends an empty sound command packet. Paired with DDS1 0x002E9810. [code-quality cleanup, 2026-10-13]
 0x00342728	sdfSoundTryQueueCommand	inferred	Rejects a command while the sound device is busy; otherwise stores and returns the requested command.
+0x00342748	sndTrySendChannelGroupCommand120	inferred	Returns busy status when sdfSoundCommandStatus is set; otherwise sends opcode 0x120 with channel-group bits. Called by paired stream-node callbacks with byte +0x22; exact DDS1 twin at 0x002E98A0.
 0x00342790	sdfSoundGetCommandStatus	inferred	Returns the sound command status stored at D_00438B8C.
 0x00342B28	sdfSoundSetTableEntry	inferred	Sets a sound-table entry; DDS1 twin. [names_qp9.tsv]
 0x00343D60	sdfPrintChipHeapInfo	inferred	confidence=high; matched-C; src/dds2/game/code_003425B0.c:482:func_00343D60; Prints chip heap byte/page totals and used-cell counts by allocation size class.; source=reviewed-prior-QP15 [names_qp15.tsv]

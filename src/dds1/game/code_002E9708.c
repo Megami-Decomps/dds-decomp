@@ -178,7 +178,7 @@ u32 sdfSoundTryQueueCommand(u32 command) {
     return command;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002E98A0);
+INCLUDE_ASM(const s32, "game/code_002E9708", sndTrySendChannelGroupCommand120);
 
 u32 sdfSoundGetCommandStatus(void) {
     return sdfSoundCommandStatus;
