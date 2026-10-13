@@ -1206,7 +1206,7 @@ extern f32 D_00324950[4];
 extern u8 D_00329750[0x40];
 
 /* Rebuild the held-texture render target's view and both frame banks. */
-void func_00105370(void) {
+void kwlnInitHeldTextureScenePackets(void) {
     s32 i;
 
     D_00329730.width = D_003BA8FC;
@@ -1233,7 +1233,7 @@ void func_00105370(void) {
 extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
 extern void kwlnTextureReleaseHeldReference(void);
-extern void func_00105370(void);
+extern void kwlnInitHeldTextureScenePackets(void);
 extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 arg6, SdfTexResource *secondary);
 extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
@@ -1263,7 +1263,7 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     D_003247B0.camera.aspect = value;
     D_003247B0.camera.width = width;
     D_003247B0.camera.height = height;
-    func_00105370();
+    kwlnInitHeldTextureScenePackets();
     return 1;
 }
 
