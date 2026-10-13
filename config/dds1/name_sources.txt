@@ -176,6 +176,7 @@
 0x00109BC0	evtPrepareSizedDrawResource	inferred	Creates graphics resource from shifted dimensions and passes it to two preparation routines. [names_reviewed7.tsv]
 0x00109C10	evtSelStateCreate	inferred	evt allocates the 0x28-byte selection state (limit/frames/callbacks) into D_003BD760
 0x00109CC0	evtCheckSelectionState	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
+0x00109D20	evtUpdateSelectionStateInterpolation	inferred	Updates the three timed values for an active selection state, handles its mode transitions and leaves completion to evtCheckSelectionState. DDS2 twin at 0x00109E60.
 0x0010A158	evtDestroySelectionState	inferred	DDS2 0010A298 twin; calls evtSelStateDestroy [names_R_FuncNames2.tsv]
 0x0010A170	evtSelStateDestroy	inferred	evt frees D_003BD760 and clears the vector at D_00324590
 0x0010A1B0	evtStartSelCreate	inferred	creates StartSel kwln task via kwlnTaskCreate with update func_00104260; tail-calls
