@@ -43,24 +43,6 @@ extern u32 sdfSelectedCounterIndex;
 
 extern s32 sdfActiveCounterRuntime;
 
-typedef struct SdfCounterTimer {
-    s32 value;            /* 0x00 */
-    s16 countdown;        /* 0x04 */
-    s16 mode;             /* 0x06 */
-    u8 pad08[4];
-    s16 mapTimerPrimary;  /* 0x0C */
-    s16 mapTimerSecondary; /* 0x0E */
-    s32 y;                /* 0x10 */
-    s16 startX;           /* 0x14 */
-    s16 startY;           /* 0x16 */
-    s16 targetX;          /* 0x18 */
-    s16 targetY;          /* 0x1A */
-    s16 curX;             /* 0x1C */
-    s16 curY;             /* 0x1E */
-    s32 frames;           /* 0x20 */
-} SdfCounterTimer;
-
-
 typedef struct SdfCounterRuntime {
     u32 stateFlags;                 /* 0x00 */
     u32 flags;                       /* 0x04 */
