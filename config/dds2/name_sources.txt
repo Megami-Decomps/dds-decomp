@@ -3842,6 +3842,7 @@
 0x002502E0	evtUpdateFrameVariableTask	inferred	game/code_00250010: FrameVar task update; calls func_00101958 on the handle at arg0+0x44 and returns 0 [names_L14_MidUnits.tsv]
 0x00250338	evtDrawMenuFrame	inferred	TaskPurist
 0x00250508	evtAppendValueChangeDebugLabel	inferred	Appends the literal VALUE CHANGE. via the formatted SIF command to the caller packet list. [names_reviewed19.tsv]
+0x00250558	evtDrawFloatValueEditorRow	inferred	DDS1 twin at 0x002357B8; renders the current float and value-editor key instructions through the callback passed to evtDrawMenuFrame. [DDS2/DDS1 source analysis, 2026-10-13]
 0x00250718	evtViewerFloatValueUpdate	inferred	unified with DDS1 twin (was evtDrawFloatValueEntry)
 0x002508D0	evtDrawValueChangeInstructionRow	inferred	Draws configured value and directional adjustment instructions by row selection. [names_reviewed7.tsv]
 0x00250A08	evtUpdateValueChangeDialog	inferred	Draws value editor, reads action controls and adjusts displayed value by one or ten. [names_reviewed7.tsv]
