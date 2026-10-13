@@ -7,6 +7,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "sdf_chip.h"
@@ -43,7 +44,6 @@ extern void mnuCreateResourceTask(void);
 
 extern s8 D_003BC3E1;
 
-extern s32 dds3GetWorldObject(void);
 
 
 

@@ -6,6 +6,7 @@
 #include "mnu_result.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "dds3_world_value.h"
 #include "sdf_resource.h"
 #include "kwln.h"
@@ -37,7 +38,6 @@ extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
 extern void effObjSetInnerFloat(s32 object, f32 value);
 
-extern s32 dds3GetWorldSecondaryObject(void);
 
 extern u8 D_003DC1C0[];
 

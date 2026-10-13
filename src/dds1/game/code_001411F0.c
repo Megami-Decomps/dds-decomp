@@ -15,6 +15,7 @@
 #include "mdl.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "dds3_world_value.h"
 #include "sdf_dev_state.h"
 #include "fld_transfer_chunk.h"
@@ -125,7 +126,6 @@ extern s32 D_0033EB78[];
 extern void sndReleaseTrackHandle(s32 arg0);
 
 
-extern s32 dds3GetWorldObject(void);
 
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);

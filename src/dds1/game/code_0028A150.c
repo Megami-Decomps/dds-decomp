@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -87,7 +88,6 @@ extern s32 D_003BC870;
 extern s32 D_003BC874;
 extern s32 D_003BC878;
 extern s32 D_003BC87C;
-extern s32 dds3GetWorldObject();
 
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
