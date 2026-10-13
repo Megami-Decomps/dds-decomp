@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "dat_state.h"
+#include "dat_party_growth.h"
 #include "mnu_result.h"
 
 extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
@@ -343,11 +344,6 @@ s32 btlAddBaseStats(s32 *src, DatPartyRecord *seq) {
     ptyRecomputeMaxHpMp(seq);
     return 1;
 }
-
-typedef struct PartyStatGrowthBank {
-    u8 unk0[5];
-    u8 levelStats[99][DAT_BASE_STAT_COUNT];
-} PartyStatGrowthBank;
 
 extern PartyStatGrowthBank D_003D6518[];
 

@@ -4,6 +4,7 @@
 #include "fr_font_context.h"
 #include "mnu.h"
 #include "dat_state.h"
+#include "dat_party_growth.h"
 #include "mnu_result.h"
 #include "kwln.h"
 #include "mdl_flag_api.h"
@@ -341,11 +342,6 @@ s32 btlAddBaseStats(s32 *src, DatPartyRecord *obj) {
     ptyRecomputeMaxHpMp(obj);
     return 1;
 }
-
-typedef struct PartyStatGrowthBank {
-    u8 unk0[5];
-    u8 levelStats[99][DAT_BASE_STAT_COUNT];
-} PartyStatGrowthBank;
 
 extern PartyStatGrowthBank D_0036D4C8[];
 
