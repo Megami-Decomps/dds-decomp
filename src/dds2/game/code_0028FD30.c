@@ -17,7 +17,7 @@ extern void mnuBeginMantraUnitPanelExit(struct MantraDrawPool *pool);
 extern struct MantraDrawItem *mnuRegisterMantraUnitPanelDraw(struct MantraDrawPool *pool, u32);
 extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
-extern void func_0028D070(MnuStatusResource *, s32, s32);
+extern void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *, s32, s32);
 extern void mnuUpdateMantraSelectionPanelSlots(MnuStatusResource *, s16, s32, s8, s8, s32);
 extern void mnuInitializeMantraTutorialParty(MnuStatusResource *);
 extern void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *);
@@ -76,7 +76,7 @@ extern MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *, s32, s8, s16,
 extern MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
 
 
-extern u32 func_002890A8(MnuStatusResource *);
+extern u32 mnuGetSelectedMantraUnitIndex(MnuStatusResource *);
 
 
 
@@ -150,7 +150,7 @@ s32 mnuClassifyMantraNeighborStatus(MnuStatusResource *object, MantraNodePos *li
     if (list == NULL || position == -1) {
         return -1;
     }
-    selected = func_002890A8((MnuStatusResource *)object);
+    selected = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)object);
     entry = list->neighbors[position];
     result = 0;
     if (entry == NULL) {
@@ -194,7 +194,7 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
     u16 i;
     u16 id;
 
-    selected = (u16)func_002890A8((MnuStatusResource *)object);
+    selected = (u16)mnuGetSelectedMantraUnitIndex((MnuStatusResource *)object);
     if (state->navigationState == 0 || state->navigationState == 7) {
         node = state->defaultSelector;
         position = mnuGetMantraNeighborIndexForDirection(object, flags);
@@ -402,7 +402,7 @@ s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
     s32 index;
     s32 source;
 
-    index = func_002890A8((MnuStatusResource *)object);
+    index = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)object);
     source = object->list->cursor->unk70;
     if (object->menu.slots[index] != 0) {
         mnuUpdateMantraRecordFlags(object->menu.slots[index], source, 0);
@@ -1206,7 +1206,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         mnuShowMantraInfo(object->menu.selectionController);
         mnuShowMantraScrollCursor(object->menu.selectionController);
         mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
-        func_0028D070(object, 2, 0);
+        mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
         position = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
         mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
             (s32)((f32)position->y / 10.0f * 39.0f), object->menu.selectionController);
