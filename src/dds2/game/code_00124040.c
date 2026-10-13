@@ -2560,7 +2560,7 @@ extern s8 dds3AdminGetRequestedMode(void);
 
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 
-extern s32 func_00141CF0(s32, u32);
+extern s32 fldStartDeferredActorTransition(s32, u32);
 
 void fldDispatchDeferredFieldCommand(void) {
     if (fldDeferredCommand == 0) {
@@ -2572,7 +2572,7 @@ void fldDispatchDeferredFieldCommand(void) {
     if (dds3AdminGetRequestedMode() < 0 && (dds3AdminReadPreviousUnsignedSample() & 1) != 0) {
         return;
     }
-    if (func_00141CF0(fldDeferredCommand, fldDeferredCommandParameter) == 0) {
+    if (fldStartDeferredActorTransition(fldDeferredCommand, fldDeferredCommandParameter) == 0) {
         fldDeferredCommand = 0;
     }
 }
