@@ -883,7 +883,59 @@ SdfListNode *func_00320CE0(MnuCallbackList *list, s32 key, u32 valueWord) {
     return node;
 }
 
-INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320D80);
+/* A null predecessor inserts at the head; only nonzero successor indices move. */
+SdfListNode *func_00320D80(MnuCallbackList *list, SdfListNode *afterNode,
+                          s32 key, u32 valueWord) {
+    SdfListNode *node = func_0035A828(sizeof(SdfListNode));
+    SdfListNode *successor;
+    SdfListNode *it;
+    u32 count;
+
+    memset(node, 0, sizeof(SdfListNode));
+    if (afterNode == NULL) {
+        node->index = 0;
+    } else {
+        node->index = afterNode->index + 1;
+    }
+    count = list->count;
+    node->key = key;
+    node->value = (void *)valueWord;
+    list->count = count + 1;
+    if (afterNode == NULL) {
+        it = list->head;
+    } else {
+        it = afterNode->next;
+    }
+    for (; it != NULL; it = it->next) {
+        if (it->index != 0) {
+            it->index++;
+        }
+    }
+    if (afterNode == NULL) {
+        successor = list->head;
+        if (successor == NULL) {
+            /* Establish the empty list tail before publishing its head. */
+            list->tail = node;
+            list->head = node;
+        } else {
+            node->next = successor;
+            successor->prev = node;
+            list->head = node;
+        }
+    } else {
+        successor = afterNode->next;
+        node->prev = afterNode;
+        if (successor != NULL) {
+            node->next = successor;
+            successor->prev = node;
+            afterNode->next = node;
+        } else {
+            afterNode->next = node;
+            list->tail = node;
+        }
+    }
+    return node;
+}
 
 void dds3SetCallbackNodeFirstListener(MnuCallbackList *callbackNode,
                                       MnuCallbackListListener callback) {
