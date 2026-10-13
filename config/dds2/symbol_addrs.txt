@@ -7123,6 +7123,7 @@ sdfGraphResetDeviceForCurrentMode = 0x00329ED0; // type:func
 sdfGraphWakeDisplayThread = 0x00329F30; // type:func
 mdlGetSelectedRecord = 0x00237A70; // type:func
 mdlUpdateDevSlotTransforms = 0x00231FD8; // type:func  // dds1 0x002174C0
+fldUpdateTitleBannerTask = 0x00144028; // type:func
 
 // Inner-transform helpers and script transform setters (inferred names).
 effObjSetInnerPosition = 0x0010F908; // type:func  // dds1 0x0010F6E0
