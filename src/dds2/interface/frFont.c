@@ -2,6 +2,7 @@
 #include "sdf_image_upload.h"
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
+#include "fr_font_glyph_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
@@ -222,22 +223,6 @@ s32 frFontGetParentGlyphCount(void) {
 u32 func_0019C638() {
     return 0;
 }
-
-/* Metric workspace also supplies the fields shared by pooled child glyphs. */
-typedef struct FrFontGlyphMeasureWork {
-    u16 code;
-    u8 pad02[2];
-    s32 x;
-    s32 y;
-    s32 advance;
-    u8 pad10[5];
-    u8 fontIndex;
-    u8 pad16;
-    u8 mode;
-    u8 cellWidth;
-    u8 cellHeight;
-    u8 pad1A[0x16];
-} FrFontGlyphMeasureWork;
 
 extern u16 frFontGetSlotCellWidth(s32 index);
 extern s8 D_003B2DA0[];
