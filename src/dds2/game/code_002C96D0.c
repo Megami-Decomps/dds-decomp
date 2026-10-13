@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_scale_params.h"
 #include "ee_mmi.h"
 #include "eff_random.h"
@@ -520,7 +521,6 @@ extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
 
 extern f32 fileSaveHighlightPhase;
 
-extern f32 sdfSinPoly(f32);
 
 
 extern u8 sdfPfsDebugMode;
@@ -7121,7 +7121,6 @@ typedef struct FileCircularMotion {
     f32 angleMultiplier;
 } FileCircularMotion;       /* 0x44, ordinary word alignment */
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
 void effUpdateCircularEmitterSlots(FileSlotTable *record) {

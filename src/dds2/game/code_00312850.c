@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "fr_font_context.h"
 #include "kwln.h"
@@ -27,9 +28,7 @@ extern void sdfGridReleaseAllCells(SdfGrid *);
 
 extern f32 func_003532B8(f32);
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 

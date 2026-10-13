@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
@@ -729,7 +730,6 @@ void effThunderSparkInit(EffThunderSparkWork *work, s32 index) {
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Build one spark's kind-0 strip between its lowered and current positions.
  * Every iteration emits two two-vector rows into that spark's own cell.
@@ -903,7 +903,6 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
 }
 
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Advance each spark through delayed initialization, motion and alpha fades.
  * Snapshot the entry parameters and age; initialization and geometry callbacks
@@ -1072,7 +1071,6 @@ void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index) {
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Build the first strip from the work's own start point. Each step emits
  * two five-vector rows; later chain segments reuse the final row as a seed.
@@ -1377,7 +1375,6 @@ void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index) {
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Build synchronized kind-0 core and kind-1 outer strips. Each step emits
  * two rows of two core vertices and three outer vertices from the same path.
@@ -1949,7 +1946,6 @@ void effSetResourceBlendColor(u32 handle, u32 color) {
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern f32 sdfSinPoly(f32);
 
 /* Continue a strip from the preceding segment's final five-vector row.
  * Each iteration emits two rows; seed[3] is the connection anchor used by

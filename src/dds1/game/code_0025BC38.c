@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
@@ -120,7 +121,6 @@ void mnuUpdateMantraSpriteCueGroups(MnuSpriteResourceGroup *resources) {
 }
 
 
-extern f32 sdfSinPoly(f32);
 
 /* Draw every live cue in the ten task slots using its remaining-life sine fade. */
 void mnuDrawMantraSpriteCueGroups(s32 x, s32 y, s32 depth, s32 alpha,
@@ -675,7 +675,6 @@ void mnuReleaseListNodes(MnuSceneListHead *head) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
 
 s32 mnuDrawMantraSineFade(s32 frame, s32 amount, s32 drawArg) {
     f32 wave = (f32)frame / 60.0f;

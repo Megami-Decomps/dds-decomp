@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
@@ -1128,7 +1129,6 @@ extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_001428C0(s32, f32, f32, f32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
-extern f32 sdfSinPoly(f32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
@@ -1704,7 +1704,6 @@ void func_00142D78(void) {
 extern f32 D_003BAF18;
 extern f32 D_00329790[4][4];
 extern f32 sdfViewMatrix[4][4];
-extern f32 sdfSinPoly(f32);
 extern void sdfInvertScaledVuTransform(void);
 extern void sdfConsCacheTransformedNode(SdfProjectionRecord *, void *);
 extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
@@ -2975,7 +2974,6 @@ extern f32 fldBannerColorPhase;
 
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
 
-extern f32 sdfSinPoly(f32);
 
 extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
 

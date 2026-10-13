@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -130,7 +131,6 @@ void mnuDrawShopPanelWithPulsingIcon(s32 x, s32 y, s32 z, ShopScene *scene, s32 
     mnuDrawPulsingMenuIcon(scene, 0x100, mode);
 }
 
-extern f32 sdfSinPoly(f32);
 
 void mnuDrawPulsingMenuIcon(ShopScene *object, s32 scale, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;

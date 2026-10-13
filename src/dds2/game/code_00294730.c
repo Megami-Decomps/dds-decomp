@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "fr_font.h"
 #include "dat_state.h"
 #include "mnu_list.h"
@@ -153,7 +154,6 @@ void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContex
                   D_003D03F0[index][MENU_ICON_FRAME], option);
 }
 
-extern f32 sdfSinPoly(f32);
 
 void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 drawArg) {
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];

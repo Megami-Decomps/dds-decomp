@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -646,7 +647,6 @@ extern f32 fldSwayPhase;
 
 extern s32 fldSwayOffset;
 
-extern f32 sdfSinPoly(f32);
 
 extern s32 D_00389780[];
 
@@ -749,7 +749,6 @@ extern f32 D_0038BAF0[];
 
 extern f32 D_0038BB00[];
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern u32 *fldGetPlayerSceneStateAddress(void);
 

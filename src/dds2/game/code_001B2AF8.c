@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "snd_pad.h"
 #include "btl_roster_pair.h"
 #include "fr_font_measure.h"
@@ -141,7 +142,6 @@ extern char D_00436680[];
 
 extern char D_00436688[];
 
-extern f32 sdfSinPoly(f32);
 
 extern char D_004366F0[];
 
@@ -5445,7 +5445,6 @@ void btlDrawActorPanelCursor(BtlUnit *unusedUnit, BattleActorPanelWork *work, s3
     }
 }
 
-extern f32 sdfSinPoly(f32);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004167E0);
 

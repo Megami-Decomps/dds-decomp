@@ -2,6 +2,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
@@ -487,8 +488,6 @@ struct EffGeneratedTextureDescriptor {
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern void func_002E2680(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
 void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescriptor *source) {
@@ -955,8 +954,6 @@ typedef struct EffRingEmitter {
     f32 speedRange;  /* 0x174 */
 } EffRingEmitter;
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 
 /* Seed one ring packet's phase, radius and vertical motion, then its subeffect. */

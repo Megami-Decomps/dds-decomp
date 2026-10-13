@@ -1,9 +1,9 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "evt_solar.h"
 
-extern f32 sdfSinPoly(f32 angle);
 extern void evtDrawSolarNoiseLayerAtCenteredScale(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
 
@@ -237,7 +237,6 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
 }
 
 extern s32 evtGetMirroredSolarPhase(void);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void evtAdvanceSolarPhaseParticles(SolarNoiseState *state) {
     u8 phase = evtGetMirroredSolarPhase();

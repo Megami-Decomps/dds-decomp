@@ -1,5 +1,6 @@
 #include "dsp_name.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
@@ -376,7 +377,6 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
 extern void mnuDrawSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 surfaceIndex) {
@@ -555,7 +555,6 @@ void itfDspDrawPartyRecordWithLevel(s32 x, s32 y, s32 layer, DatPartyRecord *ent
                                      4, text, 0, context);
 }
 
-extern f32 sdfSinPoly(f32);
 
 s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
     f32 wave = (f32)frame / 60.0f;

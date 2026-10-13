@@ -3,6 +3,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_model_scalars.h"
@@ -1370,7 +1371,6 @@ extern void func_00145A08(s32, f32, f32, f32);
 extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
-extern f32 sdfSinPoly(f32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
@@ -2018,7 +2018,6 @@ extern f32 D_00384790[16];
 extern f32 sdfViewMatrix[16];
 extern SdfTex *D_0044F7F8[8];
 extern void sdfInvertScaledVuTransform(void);
-extern f32 sdfSinPoly(f32 angle);
 extern void func_00148188(f32 centerX, f32 centerY, f32 angle);
 extern void fldSelectDisplayBuffer(u32 buffer);
 extern void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17);
@@ -3299,7 +3298,6 @@ extern void fldSelectDisplayBuffer(u32);
 extern void fldSetGsAlphaBlendEquation(s32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
-extern f32 sdfSinPoly(f32);
 extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32,
                           u32, u32, u32, SdfTex *);
 extern f32 D_0043634C;
@@ -5039,8 +5037,6 @@ void fldTickTargetGuideCounter(void) {
 }
 
 extern void func_001519E8(s32);
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern FieldGridCoordPair D_00438EF8;
 
 void fldUpdateTargetGuideFastRoute(void) {

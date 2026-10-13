@@ -11,6 +11,7 @@
 #include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3obj.h"
@@ -2321,8 +2322,6 @@ void billReleaseQuadNode(s32 work) {
 extern s8 effSharedRandomState[];
 struct EffRandState;
 extern u32 effMiscRand(struct EffRandState *);
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void billAdvanceQuadInstances(EffClassWork *work) {
     EffBillQuadFrameConfig *config = (EffBillQuadFrameConfig *)work->payload;
@@ -3137,8 +3136,6 @@ typedef struct EffExpandingRingParams {
 
 typedef char EffExpandingRingParams_size[(sizeof(EffExpandingRingParams) == 0x6C) ? 1 : -1];
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 /* Generate the timed ring's four radial point bands; reverse-time mode is retained. */
 void effUpdateExpandingRingPoints(EffClassWork *work) {
@@ -4686,8 +4683,6 @@ void effAdvanceRadialClassResourceFrames(EffClassWork *work) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void effCopyClassResourcePosition(void *, void *);
 extern void effCopyClassResourceOrientation(void *, void *);
 extern void effSetClassResourceMatrixComponent(EffClassWork *, f32);
@@ -5748,8 +5743,6 @@ typedef struct EffBillColumnParticle {
 
 typedef char EffBillColumnParticleSizeCheck[(sizeof(EffBillColumnParticle) == 0x30) ? 1 : -1];
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Update the column's particle records and the ribbon vertices for this frame. */
 void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {

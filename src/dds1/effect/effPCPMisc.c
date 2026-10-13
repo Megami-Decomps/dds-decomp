@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_model.h"
 #include "eff_pcp_event_place.h"
@@ -1014,8 +1015,6 @@ typedef struct EffPCPThunderGroup {
 
 extern EffSpawnParams D_00354D40[];
 extern u8 D_00354D50[];
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
  * (60 degrees). Direction is normalised on the VU, scaled per axis and offset

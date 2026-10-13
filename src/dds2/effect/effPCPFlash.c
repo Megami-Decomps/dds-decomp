@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "sdf_resource.h"
@@ -31,8 +32,6 @@ extern f32 D_003B12A0[];
 extern f32 D_003B1220[];
 extern void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 index);
 extern void *effGetRecordGroupElement(EffRecordPool *pool, s32 index);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 extern u32 effMultiplyPackedColors(u32 color, u32 param);
 

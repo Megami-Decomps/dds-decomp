@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_scale_params.h"
 #include "ee_mmi.h"
 #include "eff_random.h"
@@ -589,7 +590,6 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 }
 
 extern f32 fileSaveHighlightPhase;
-extern f32 sdfSinPoly(f32);
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
 void fileDrawPulsingSaveHighlight(void) {
@@ -6438,7 +6438,6 @@ typedef struct FileCircularMotion {
     f32 angleMultiplier;
 } FileCircularMotion;       /* 0x44, ordinary word alignment */
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
 void effUpdateCircularEmitterSlots(FileSlotTable *record) {

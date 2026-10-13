@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -777,7 +778,6 @@ void btlUpdateCommandPanelRowFades(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001AB558);
 
-extern f32 sdfSinPoly(f32);
 
 typedef struct BattleCornerFadeDefaults {
     s16 values[20];

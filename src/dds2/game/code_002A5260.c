@@ -1,5 +1,6 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
@@ -122,7 +123,6 @@ extern void func_002A7B28(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
-extern f32 sdfSinPoly(f32);
 
 void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
     f32 factor;

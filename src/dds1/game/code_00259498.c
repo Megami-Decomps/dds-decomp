@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_task_work.h"
 #include "sdf_resource.h"
@@ -19,7 +20,6 @@
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 
-extern f32 sdfSinPoly(f32);
 
 extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
 

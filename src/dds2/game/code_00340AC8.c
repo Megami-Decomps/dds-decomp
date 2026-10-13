@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "pcp_vu0.h"
 
@@ -7,9 +8,7 @@
 extern EffRandState D_0040BAE8;
 
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
-extern f32 sdfSinPoly(f32 angle);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 
 extern f32 sdfAtan2(f32 y, f32 x);
 

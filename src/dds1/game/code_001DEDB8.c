@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
@@ -7723,9 +7724,7 @@ SoundTask *btlCreateAdvanceTitleStateTask(void) {
 
 extern f32 D_0035F9B0[4];
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern f32 sdfSinPoly(f32);
 
 /* Orient party actors and expand their formation when the marked count grows. */
 s32 btlExpandPartyFormationAroundCenter(f32 *center) {
@@ -7928,9 +7927,7 @@ s64 btlArrangeOpponentFormationSlots(void) {
     return btlArrangeFormationSlots(0x400);
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern f32 sdfSinPoly(f32);
 
 /* Place the three actor slots around the common battle center supplied in vf10. */
 void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit *second) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "fr_font_measure.h"
@@ -26,9 +27,7 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern f32 func_002FA1C0(f32);
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 

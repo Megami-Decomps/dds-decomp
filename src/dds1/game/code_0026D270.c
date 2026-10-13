@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "mnu.h"
 #include "mnu_list.h"
 
@@ -9,7 +10,6 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
-extern f32 sdfSinPoly(f32);
 
 void mnuDrawMovieMenuBackdrop(void) {
     f32 factor;

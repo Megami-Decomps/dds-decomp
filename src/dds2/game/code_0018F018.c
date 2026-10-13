@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -71,7 +72,6 @@ extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
-extern f32 sdfSinPoly(f32);
 
 void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     void *list;
@@ -112,8 +112,6 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void effBlurBuildSamplingQuad(source, data, fixedPoint)
     EffBlurQuad *source;

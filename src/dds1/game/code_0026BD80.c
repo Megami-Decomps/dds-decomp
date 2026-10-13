@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "sdf_quaternion.h"
@@ -7,7 +8,6 @@
 extern MovieMenuState *mnuMovieMenuState;
 
 extern void func_00134CD8(void);
-extern f32 sdfSinPoly(f32);
 
 extern void effRequestResourceByMode(const char *, const char *, u32, u32 *);
 
