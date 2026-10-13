@@ -24,7 +24,7 @@ extern void func_00296B48(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
 
 extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
-extern void func_00294B40(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void func_00295030(s32, s32, s32, MenuTerminalContext *, s32, s32, s32);
@@ -261,7 +261,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
     f32 position;
 
     category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
-    func_00294B40(0, 0, 0, scene, 0x100, 0x53);
+    mnuDrawShopPanelWithTypeGraphic(0, 0, 0, scene, 0x100, 0x53);
     mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->phase) {
     case 4:
@@ -492,7 +492,7 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
     f32 progress;
 
     category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
-    func_00294B40(0, 0, 0, scene, 0x100, 0x53);
+    mnuDrawShopPanelWithTypeGraphic(0, 0, 0, scene, 0x100, 0x53);
     mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->phase) {
     case 9:

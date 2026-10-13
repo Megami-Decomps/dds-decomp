@@ -4331,6 +4331,7 @@
 0x00294580	mnuStorePanelEntry	inferred	Obtains a free panel entry and assigns its two values.
 0x002945C0	itfEmitSelectedGlyph	inferred	L13
 0x00294730	evtSelectGraphicSlotBySpriteType	inferred	confidence=high; matched-C; src/dds2/game/code_00294730.c:16:func_00294730; Returns graphic placement slot for sprite type one or three, otherwise the default slot; consumed to index the icon placement table during sprite drawing.; source=revalidated-unapplied-names_R_Names24o.tsv:41 [names_qp13.tsv]
+0x00294B40	mnuDrawShopPanelWithTypeGraphic	inferred	Draws the shop frame, both panel-work elements and the sprite-type-selected graphic.
 0x00294C68	mnuDrawPulsingMenuIcon	inferred	queued
 0x00296018	mnuDrawListChildrenWithCountdown	inferred	confidence=high; src/dds2/game/code_00294730.c:func_00296018; Decrements a nonzero shared delay counter and invokes the draw callback for each linked child up to the list count. [names_qp9.tsv]
 0x002960F0	mnuDrawListFlagIndicatorsWithFade	inferred	Draws list flag icons 20/21 with alpha derived from the active transition mode and countdown. Paired DDS1 0x0025F4E0.

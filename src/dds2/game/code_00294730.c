@@ -137,7 +137,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
 
 
 
-void func_00294B40(s32 x, s32 y, s32 depth, MenuTerminalContext *object,
+void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContext *object,
                    s32 scale, s32 option) {
     u32 index;
 

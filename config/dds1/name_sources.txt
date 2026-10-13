@@ -8067,6 +8067,7 @@
 0x0013C7F8	fldResolveEventSetByNameKindAreaZero	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:7321; Resolves an event name for the current floor when the selected set has packed kind-area zero. twin=0x0013F3E0 (DDS2). LiteG batch 4.
 0x0013C9E0	fldResolveEventSetByNameEitherKindArea	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:7351; Resolves an event name for the current floor across either packed kind-area value below two. twin=0x0013F5C8 (DDS2). LiteG batch 4.
 0x0013DDF0	fldSelectCameraByActorName	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:7669; Finds a named actor entry on the current floor and selects its linked camera when the entry mode permits it. twin=0x00140A58 (DDS2). LiteG batch 4.
+0x0025E308	mnuDrawShopPanelWithPulsingIcon	inferred	Draws fixed shop sprites then calls mnuDrawPulsingMenuIcon.
 0x0025E420	mnuDrawPulsingMenuIcon	inferred	Draws the table-selected shop icon with a sine-scaled pulse and advances the pulse frame. twin=0x00294C68 (DDS2). LiteH menu naming batch.
 0x00260550	mnuSetSelectionListTransition	inferred	Sets the list command countdown and transition mode used by selection handlers. twin=0x002971E0 (DDS2). LiteH menu naming batch.
 0x00260570	mnuSetValueListTransition	inferred	Sets the list command countdown and mode while the shop value-row draw callback is active. twin=0x00297200 (DDS2). LiteH menu naming batch.
