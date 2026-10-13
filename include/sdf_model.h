@@ -5,17 +5,11 @@
 
 /* Native model constructor reference: AMB roots and the FLD model wrapper's
  * four-word subrecord. The item list has a variable-length body of SdfItem
- * records beginning at the firstItem marker. */
+ * records beginning at its firstItem array. */
 typedef struct SdfItemList SdfItemList;
 /* Values understood by sdfDrawNodeBuildFromItemAndCommands. */
 #define SDF_ITEM_COMMAND_SETUP_INLINE_LISTS 0
 #define SDF_ITEM_COMMAND_SETUP_NULL_TERMINATED_LIST_TABLE 1
-
-struct SdfItemList {
-    s32 count;           /* 0x00: item count */
-    u8 pad_0x04[0x0C];   /* 0x04 */
-    u8 firstItem;        /* 0x10: first item, records have a 0x50 stride */
-};
 
 /* Per-item view after packed-resource or scene relocation, applied by
  * sdfDrawNodeSetFromItem. Command-list fields hold relocated pointers. */
@@ -50,6 +44,18 @@ typedef char SdfItem_boundsCorners_at_40[
     ((u32)&((SdfItem *)0)->boundsCorners == 0x40) ? 1 : -1];
 typedef char SdfItem_commandData_at_44[
     ((u32)&((SdfItem *)0)->commandData == 0x44) ? 1 : -1];
+
+/* Variable-length serialized list: a 0x10-byte header, followed by count
+ * complete 0x50-byte items. The array contributes no bytes to the header. */
+struct SdfItemList {
+    s32 count;
+    u8 pad_0x04[0x0C];
+    SdfItem firstItem[0];
+};
+typedef char SdfItemList_header_size_must_be_0x10[
+    (sizeof(SdfItemList) == 0x10) ? 1 : -1];
+typedef char SdfItemList_firstItem_must_be_at_0x10[
+    ((u32)&((SdfItemList *)0)->firstItem == 0x10) ? 1 : -1];
 
 typedef struct SdfItemListRef {
     SdfItemList *items; /* 0x00 */
