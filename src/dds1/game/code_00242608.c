@@ -1866,7 +1866,7 @@ extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
-extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
+extern void mnuDrawShopSelectedRowTotal(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
 extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
 extern s32 D_003BC3D8[];
@@ -2739,7 +2739,7 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
     mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
     mnuDrawShopSelectedRowDetails(0, 0, 0, state, 0x53);
     mnuDrawIfActive(0, 0, 0, state->window, 0x53);
-    func_0025FFC8(0, 0, 0, state, 0x53);
+    mnuDrawShopSelectedRowTotal(0, 0, 0, state, 0x53);
 
     switch (selectedIndex) {
     case 0:

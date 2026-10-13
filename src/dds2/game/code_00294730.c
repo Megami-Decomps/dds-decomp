@@ -518,7 +518,7 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
-void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
+void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
