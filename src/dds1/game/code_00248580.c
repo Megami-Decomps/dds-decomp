@@ -14,6 +14,7 @@
 #include "mnu.h"
 #include "mnu_list.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 
@@ -738,7 +739,6 @@ extern s32 D_003BC3E4;
 extern char D_003AF590[];
 extern char D_003AF620[];
 extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern s32 kwlnFadeIsActive(void);
 extern s32 evtIsActiveFlagSet(s32);
 
 /* Wait for the terminal effect or world-menu transition to finish. */
@@ -944,7 +944,6 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
 }
 
 
-extern s32 kwlnFadeIsActive(void);
 
 
 extern s32 evtGetMessageWindowControlState(void);

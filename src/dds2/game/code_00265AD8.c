@@ -1,5 +1,6 @@
 #include "eff_resource_slots.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
@@ -47,7 +48,6 @@ extern FlagSource mnuSceneFlagEventEntries[];
 
 extern FlagPair mnuPartyFlagEventEntries[];
 
-extern s32 kwlnFadeIsActive(void);
 
 extern u8 D_003CE6AC[];
 

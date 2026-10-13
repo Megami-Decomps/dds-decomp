@@ -1,4 +1,5 @@
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "itf_draw_grid.h"
 #include "dsp_name.h"
 #include "mnu.h"
@@ -165,7 +166,6 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
     return 1;
 }
 
-extern s32 kwlnFadeIsActive(void);
 
 extern char D_003CE998[];
 

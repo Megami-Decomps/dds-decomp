@@ -9,6 +9,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf.h"
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"
