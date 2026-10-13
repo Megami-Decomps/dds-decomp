@@ -842,7 +842,7 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 /* Blend the first camera-color track at the clamped frame. Lookup includes
  * the track base, but interpolation retains the native unre-based key frames.
  * Without a future key, pass zero blend and the uninitialized fallback block. */
-void func_0025EC00(EvtRuntime *scene) {
+void evtBlendCameraColorTrack(EvtRuntime *scene) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *selectedKey;
     EvtRuntimeChild *futureKey;
@@ -894,8 +894,8 @@ void func_0025EC00(EvtRuntime *scene) {
 /* The genuine three-row typed candidate remains non-matching. */
 INCLUDE_ASM(const s32, "game/code_0025DA20", fldApplyCameraColorKeyWords);
 
-void func_0025EE00(EvtRuntime *scene) {
-    func_0025EC00(scene);
+void evtUpdateCameraColorEffect(EvtRuntime *scene) {
+    evtBlendCameraColorTrack(scene);
     if (scene->cameraColorActive == 1) {
         func_00137888();
         return;
@@ -932,9 +932,9 @@ void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
 }
 
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
-extern void func_0025EFD8(EvtRuntime *scene);
+extern void mnuShopCreateDescriptorSurface(EvtRuntime *scene);
 extern void mnuShopSubmitDescriptor(u8 *work);
-extern void func_0025F2B0(EvtRuntime *scene);
+extern void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene);
 
 /* Stages 1, 3, 4 and 5 fall through; stage 0 stops. All other stages,
  * including 2, advance once through the default arm. */
@@ -946,14 +946,14 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
         }
         scene->menuState = scene->menuState + 1;
     case 3:
-        func_0025EFD8(scene);
+        mnuShopCreateDescriptorSurface(scene);
         scene->menuState = scene->menuState + 1;
     case 4:
         mnuShopSubmitDescriptor((u8 *)scene);
         scene->menuState = scene->menuState + 1;
     case 5:
         if (scene->shopFlag == 1) {
-            func_0025F2B0(scene);
+            mnuShopQueueAuxiliaryTexture(scene);
         }
     case 0:
         break;
@@ -967,7 +967,7 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 extern SdfPoolNode D_00380708;
 extern u8 D_00380860[];
 
-void func_0025EFD8(EvtRuntime *scene) {
+void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     SdfListHead *surface;
     SdfLinkedPacketList *context;
     s32 handle;
@@ -1002,7 +1002,7 @@ void mnuShopSubmitDescriptor(u8 *scene) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F130);
 
-void func_0025F2B0(EvtRuntime *scene) {
+void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene) {
     func_0025F130(scene->auxResource);
 }
 
@@ -1745,7 +1745,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260A58);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopGetRankItemPrice);
 
 s32 mnuCampFindListedItemIndex(s32 id) {
     u16 *entry = (u16 *)mnuCampListedItems;
@@ -2144,7 +2144,7 @@ s32 func_00261538(MenuTerminalContext *scene) {
         window = scene->window;
         mnuAdvanceListCursorDefault(window->list);
         params = &node->camp;
-        price = func_00260A58(i, 0);
+        price = mnuShopGetRankItemPrice(i, 0);
         params->id = id;
         params->value = price;
         params->price = price;
@@ -2240,7 +2240,7 @@ s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
         mnuClearWindowListSelectionFlags(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
-        price = func_00260A58(i, 0);
+        price = mnuShopGetRankItemPrice(i, 0);
         params->value = price;
         params->id = id;
         params->price = price;
@@ -2519,7 +2519,7 @@ s32 evtAdvancePhaseOne(KwlnTask *task) {
 extern s32 mnuTickCommandPhase(MenuTerminalContext *);
 extern u8 D_003CE55C[];
 
-s32 func_00261F48(KwlnTask *task) {
+s32 mnuShopPollCommandSelection(KwlnTask *task) {
     MenuTerminalContext *state;
     MenuWindowContainer *window;
     struct MenuList *list;
@@ -2607,7 +2607,7 @@ s32 func_00261F48(KwlnTask *task) {
 }
 
 
-s32 func_00262190(KwlnTask *callbackContext) {
+s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
     func_00297320(stateAddress);
@@ -2626,7 +2626,7 @@ void evtInstallStateTableB(s32 stateAddress) {
     }
 }
 
-s32 func_00262270(KwlnTask *task) {
+s32 evtBuildShopCatalogIfActive(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
         func_00261670(stateAddress);
@@ -2650,7 +2650,7 @@ s32 evtSelectStateAction(KwlnTask *task) {
 }
 
 
-s32 func_00262330(KwlnTask *task) {
+s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
     MenuTerminalContext *state;
     MenuWindowContainer *window;
     struct MenuList *list;
@@ -2734,7 +2734,7 @@ s32 func_00262330(KwlnTask *task) {
     return 0;
 }
 
-s32 func_00262598(KwlnTask *callbackContext) {
+s32 evtStageDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
@@ -2753,7 +2753,7 @@ void evtInstallStateTableC(s32 stateAddress) {
     }
 }
 
-s32 func_00262678(KwlnTask *task) {
+s32 evtBuildFilteredShopCatalogIfActive(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
         func_002619A8(stateAddress, 1);
@@ -2776,7 +2776,7 @@ s32 evtSelectStateActionB(KwlnTask *task) {
     return 1;
 }
 
-s32 func_00262740(KwlnTask *task) {
+s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
     s32 dispatchResult;
     u32 inputFlags;
     MenuTerminalContext *state;
@@ -2851,14 +2851,14 @@ s32 func_00262740(KwlnTask *task) {
     return dispatchResult;
 }
 
-s32 func_002629A8(KwlnTask *callbackContext) {
+s32 evtStageDispatchStartB(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_00262A00(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncC(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -2971,14 +2971,14 @@ s32 func_00262B50(KwlnTask *callbackContext) {
     return 0;
 }
 
-s32 func_00262DB8(KwlnTask *callbackContext) {
+s32 evtStageDispatchStartC(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_00262E10(KwlnTask *callbackContext) {
+s32 evtSetupDispatchSyncD(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3013,7 +3013,7 @@ s32 evtEnterProgressCommandPhase(KwlnTask *task) {
     return 1;
 }
 
-s32 func_00262F78(KwlnTask *task) {
+s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
     s32 dispatchResult;
     u32 inputFlags;
     MenuTerminalContext *state;

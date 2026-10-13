@@ -765,7 +765,7 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 /* Blend the first camera-color track at the clamped frame. Lookup includes
  * the track base, but interpolation retains the native unre-based key frames.
  * Without a future key, pass zero blend and the uninitialized fallback block. */
-void func_00243818(EvtRuntime *scene) {
+void evtBlendCameraColorTrack(EvtRuntime *scene) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *selectedKey;
     EvtRuntimeChild *futureKey;
@@ -817,8 +817,8 @@ void func_00243818(EvtRuntime *scene) {
 /* The genuine three-row typed candidate remains non-matching. */
 INCLUDE_ASM(const s32, "game/code_00242608", fldApplyCameraColorKeyWords);
 
-void func_00243A18(EvtRuntime *scene) {
-    func_00243818(scene);
+void evtUpdateCameraColorEffect(EvtRuntime *scene) {
+    evtBlendCameraColorTrack(scene);
     if (scene->cameraColorActive == 1) {
         func_00134CD8();
         return;
@@ -857,9 +857,9 @@ void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
 
 extern SdfTex *kwlnHeldTextureReference;
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
-extern void func_00243BF0(EvtRuntime *scene);
+extern void mnuShopCreateDescriptorSurface(EvtRuntime *scene);
 extern void mnuShopSubmitDescriptor(EvtRuntime *scene);
-extern void func_00243EC8(EvtRuntime *scene);
+extern void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene);
 
 /* Stages 1, 3, 4 and 5 fall through; stage 0 stops. All other stages,
  * including 2, advance once through the default arm. */
@@ -871,14 +871,14 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
         }
         scene->menuState = scene->menuState + 1;
     case 3:
-        func_00243BF0(scene);
+        mnuShopCreateDescriptorSurface(scene);
         scene->menuState = scene->menuState + 1;
     case 4:
         mnuShopSubmitDescriptor(scene);
         scene->menuState = scene->menuState + 1;
     case 5:
         if (scene->shopFlag == 1) {
-            func_00243EC8(scene);
+            mnuShopQueueAuxiliaryTexture(scene);
         }
     case 0:
         break;
@@ -892,7 +892,7 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 extern SdfPoolNode D_00325708;
 extern u8 D_00325860[];
 
-void func_00243BF0(EvtRuntime *scene) {
+void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     SdfListHead *surface;
     SdfLinkedPacketList *context;
     s32 handle;
@@ -927,7 +927,7 @@ void mnuShopSubmitDescriptor(EvtRuntime *scene) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243D48);
 
-void func_00243EC8(EvtRuntime *scene) {
+void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene) {
     func_00243D48(scene->auxResource);
 }
 
@@ -1438,7 +1438,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-s32 func_00244D10(s32 index, s32 halfPrice) {
+s32 mnuShopGetRankItemPrice(s32 index, s32 halfPrice) {
     u32 rowOffset;
     u8 *row;
     u8 *entry;
@@ -1654,7 +1654,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
             mnuClearWindowListSelectionFlags(scene->window);
             mnuAdvanceListCursorDefault(scene->window->list);
             params = &node->camp;
-            price = func_00244D10(i, 0);
+            price = mnuShopGetRankItemPrice(i, 0);
             params->value = price;
             params->id = id;
             params->price = price;
@@ -1717,7 +1717,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
                 mnuClearWindowListSelectionFlags(scene->window);
                 mnuAdvanceListCursorDefault(scene->window->list);
                 parameters = &node->camp;
-                price = func_00244D10(i, 0);
+                price = mnuShopGetRankItemPrice(i, 0);
                 parameters->value = price;
                 parameters->id = itemId;
                 parameters->price = price;
@@ -2038,7 +2038,7 @@ void evtInstallStateTableB(ShopScene *state) {
     }
 }
 
-s32 func_00246160(KwlnTask *task) {
+s32 evtBuildShopCatalogIfActive(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (state->action == 1) {
@@ -2067,7 +2067,7 @@ s32 evtSelectStateAction(KwlnTask *task) {
 }
 
 /* Poll the dispatch slot, then process command phases and mapped input flags. */
-s32 func_00246220(KwlnTask *task) {
+s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
     s32 dispatchResult;
     s32 inputFlags;
     s32 stateAddress;
@@ -2159,7 +2159,7 @@ void evtInstallStateTableC(ShopScene *state) {
     }
 }
 
-s32 func_00246538(KwlnTask *task) {
+s32 evtBuildFilteredShopCatalogIfActive(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (state->action == 1) {
@@ -2188,7 +2188,7 @@ s32 evtSelectStateActionB(KwlnTask *task) {
 
 
 /* Poll the dispatch slot, then process command phases and mapped input flags. */
-s32 func_002465F8(KwlnTask *task) {
+s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
     s32 dispatchResult;
     s32 inputFlags;
     s32 stateAddress;
@@ -2307,7 +2307,7 @@ s32 evtSelectStateActionC(KwlnTask *task) {
 }
 
 /* Poll the dispatch slot, then process command phases and mapped input flags. */
-s32 func_002469F0(KwlnTask *task) {
+s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
     s32 dispatchResult;
     s32 inputFlags;
     s32 stateAddress;
