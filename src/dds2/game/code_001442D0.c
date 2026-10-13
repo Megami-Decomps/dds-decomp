@@ -1225,7 +1225,7 @@ typedef struct {
 extern FldProjectedSprite D_0039A0E0[];
 
 /* Convert projected GS coordinates to the field's centered sprite origin. */
-void func_00145948(f32 x, f32 y, s32 index, u32 color) {
+void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
     FldProjectedSprite *sprite = &D_0039A0E0[index];
     s32 anchorY = sprite->anchorY;
     s16 u = sprite->u;
@@ -1792,7 +1792,7 @@ void func_00146250(void) {
                                 if (offsetX < 80000.0f && offsetZ < 80000.0f) {
                                     fldProjectPointSetupAlt(&projectedX, &projectedY,
                                                             x, D_00436290, z);
-                                    func_00145948(projectedX, projectedY,
+                                    fldDrawProjectedMapIcon(projectedX, projectedY,
                                                   spriteIndex, 0x80808080);
                                 }
                             }
