@@ -701,7 +701,7 @@ extern s16 D_00438FCC;
 
 extern s32 D_00437A1C;
 
-extern void func_00341AD8(char *, s32, char *, s32);
+extern void sndInitializeIopSoundSystem(char *, s32, char *, s32);
 
 extern void sndEnsureMidiBankResident(s32);
 
@@ -715,7 +715,7 @@ void mnuInitializeTitleAudioAndEffects(void) {
         return;
     }
     D_004379FC = 1;
-    func_00341AD8(D_003E0B30, 4, D_003E0B50, 4);
+    sndInitializeIopSoundSystem(D_003E0B30, 4, D_003E0B50, 4);
     sndEnsureMidiBankResident(D_003D9D60[0]);
     D_00437A18 = 4;
     D_00438FCC = -1;

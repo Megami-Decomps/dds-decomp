@@ -6674,6 +6674,7 @@
 0x00341570	sdfServiceUnblockedWorkerThread	inferred	Sleeps until signaled, then services worker requests while the gate is clear. [names_reviewed10.tsv]
 0x00341958	sndInitializeChannelAndTrackState	inferred	confidence=high; src/dds2/game/code_00341650.c:func_00341958; Initializes sixteen sound channels, allocates channel-zero storage, and resets thirteen track slots to unused ids. [names_qp9.tsv]
 0x00341A00	sndAllocateAlignedIopBuffers	inferred	queued
+0x00341AD8	sndInitializeIopSoundSystem	inferred	Loads IOP sound modules, initializes the IOP heap and channel/track state, allocates aligned buffers, transfers sound state to IOP, then clears the init gate; paired with 0x002E8C30. [names_reviewed8.tsv]
 0x00341BB8	sndStartTrackDefault	inferred	Prepares a track ID and sends command 0x20 with setting 0x7f.
 0x00341C00	sndSendSingleWordControlPacket	inferred	Submits a 16-byte command packet whose first word is the provided value. [names_reviewed21.tsv]
 0x00341C30	sndStartTrackAlternate	inferred	Prepares the same track ID and sends alternate command 0x130 with setting 0x7f.
