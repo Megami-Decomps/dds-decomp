@@ -50,7 +50,7 @@ enum {
     BF_FLW0_SECTION_STRINGS = 4
 };
 
-extern s32 func_00316ED0(void);
+extern s32 mdlViewerPackageTaskExists(void);
 
 extern u32 D_00435D28;
 
@@ -1390,7 +1390,7 @@ void evtStartShootingGameTask(void) {
 
 /* Destroy that shooting-game task hierarchy and invoke its work callback; return native zero status. */
 u32 evtStopShootingGameTask(void) {
-    func_00316EF8();
+    mdlStopViewerPackageTask();
     return 0;
 }
 
@@ -1398,7 +1398,7 @@ u32 evtStopShootingGameTask(void) {
 u8 evtWaitShootingGameTaskGone(void) {
     s64 taskExists;
 
-    taskExists = func_00316ED0();
+    taskExists = mdlViewerPackageTaskExists();
     return taskExists == 0;
 }
 
