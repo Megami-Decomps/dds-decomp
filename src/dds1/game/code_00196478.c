@@ -884,7 +884,7 @@ void func_00198010(void) {
 void func_00198018(void) {
 }
 
-u32 func_00198020(u32 unused0, u32 unused1, u32 value) {
+u32 itfReturnThirdCallbackValue(u32 unused0, u32 unused1, u32 value) {
     return value;
 }
 

@@ -7445,6 +7445,7 @@ effResetFragmentHistory = 0x00169B70; // type:func  // dds2 0x001717C8
 
 btlGetConditionalEncounterInterval = 0x0011CAB0; // type:func
 btlAdvanceConditionalEncounterRoll = 0x0011CB90; // type:func
+itfReturnThirdCallbackValue = 0x00198020; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
