@@ -99,7 +99,7 @@ extern void frFontLoadTemporaryEntry(u32);
 
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
-extern s32 sndVisitQueuedResources(void);
+extern s32 itfUpdateActiveMessageWindows(void);
 
 extern void sndFlushMessageQueue(void);
 
@@ -912,7 +912,7 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))sndVisitQueuedResources, sndFlushMessageQueue, NULL);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))itfUpdateActiveMessageWindows, sndFlushMessageQueue, NULL);
     kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, sndFlushMessageQueue, NULL);
 }
 
@@ -2224,7 +2224,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
     surface->append(surface, packet);
 }
 
-s32 sndVisitQueuedResources(void) {
+s32 itfUpdateActiveMessageWindows(void) {
     ItfMesPoolNode *node;
     for (node = itfMesWork.pool.activeHead; node != 0; node = node->next) {
         itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
