@@ -3941,7 +3941,7 @@ s32 func_00264FF0(KwlnTask *callbackContext) {
 }
 
 /* Select the highest reached reward tier, retiring earlier tier flags first. */
-s32 func_00265038(void) {
+s32 mnuSelectUnclaimedProgressRewardTier(void) {
     DatGameState *state = datGameState;
     s32 index;
     s32 selected = -1;
@@ -4007,7 +4007,7 @@ extern s32 evtGetMessageWindowControlState(void);
 
 extern char D_003CE63C[];
 extern char D_00437850[];
-extern s32 func_00265038();
+extern s32 mnuSelectUnclaimedProgressRewardTier();
 extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);
 extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
@@ -4035,7 +4035,7 @@ struct KwlnTask;
 
 s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
-    s32 slotIndex = func_00265038();
+    s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 i;
     MnuProgressReward *reward;
     char text[0x40];
@@ -4103,7 +4103,7 @@ s32 evtFinishPopupAfterMenuConfiguration(KwlnTask *callback) {
 s32 func_00265408(KwlnTask *task) {
     char text[0x40];
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
-    s32 slotIndex = func_00265038();
+    s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 choice;
     s32 rewardValue;
 
@@ -4152,7 +4152,7 @@ extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
 s32 func_002655C0(KwlnTask *callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
-    s32 slotIndex = func_00265038();
+    s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 *popup = &context->popupState;
     s32 dispatch = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
     s32 choice;
