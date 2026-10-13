@@ -3626,7 +3626,7 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
 extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawShopCurrencyBalance(void *, s32);
-extern void func_00296E98(s32, u32, s32, s32);
+extern void brsDrawResultIconPairWithAlpha(s32, u32, s32, s32);
 
 /* Draw the active dispatch mode before advancing its callback state. */
 s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
@@ -3641,7 +3641,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         mnuDrawShopPricePlaceholder(0, 0, 0, state, 0x53);
         mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-        func_00296E98((s32)state, 0x100, 3, 0x53);
+        brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
         if (state->stateTable == (s32)D_003CE498) {
@@ -3650,7 +3650,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             mnuDrawListChildrenWithCountdown(
                 0, 0, 0, (u8 *)state->ownedWindows[0]->list, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-            func_00296E98((s32)state, 0x100, 4, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 4, 0x53);
         } else {
             mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
@@ -3658,7 +3658,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
             mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)state, 0x100, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
-            func_00296E98((s32)state, 0x100, 2, 0x53);
+            brsDrawResultIconPairWithAlpha((s32)state, 0x100, 2, 0x53);
         }
         break;
     }
