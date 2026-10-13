@@ -7,6 +7,7 @@
 #include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "sdf_model_copy.h"
 
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);

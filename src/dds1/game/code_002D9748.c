@@ -7,6 +7,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "sdf.h"
+#include "sdf_model_copy.h"
 #include "sdf_asset_state.h"
 #include "sdf_pending.h"
 #include "pcp_vu0.h"
@@ -123,7 +124,6 @@ typedef struct SdfPacketOwner {
 } SdfPacketOwner;
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
-extern void sdfModelCopyData(DevRequest *, DevRequest *);
 
 void sdfModelCopyRuntimeState(SdfModel *destination, SdfModel *source) {
     SdfDrawNode **destinationNodes;

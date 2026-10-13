@@ -7,6 +7,7 @@
 #include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "sdf_model_copy.h"
 
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
