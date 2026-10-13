@@ -3679,7 +3679,7 @@ void evtEventViewerDestroyActiveAlternate(KwlnTask *task) {
 
 extern void mnuCampInitFontResource(EvtRuntime *viewer);
 
-void func_0024DAE0(EvtRuntime *viewer) {
+void evtEventViewerInitCampFontResource(EvtRuntime *viewer) {
     mnuCampInitFontResource(viewer);
 }
 
@@ -3697,7 +3697,7 @@ void evtViewerCreateTaskWithSky(void) {
     viewer->resourceHandle = viewerHandle;
     viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
     kwlnTaskAddChild((s32)viewerTask, evtCreateSkyTask());
-    func_0024DAE0(viewer);
+    evtEventViewerInitCampFontResource(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {
