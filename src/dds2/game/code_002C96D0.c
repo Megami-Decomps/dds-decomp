@@ -858,7 +858,7 @@ extern char D_003E8B00[];
 extern char D_003E8B18[];
 extern char D_003E8B60[];
 
-void func_002CA1F0(void) {
+void fileDrawModeSpecificMemoryCardPrompt(void) {
     if (D_00437D38 == 0) {
         return;
     }
@@ -2610,7 +2610,7 @@ s32 fileDrawMenuFrame(s32 task) {
                       (alpha * 0x80 / 100 << 24) | 0x808080, (alpha * 0x80 / 100 << 24) | 0x808080,
                       (alpha * 0x80 / 100 << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D74));
     }
-    func_002CA1F0();
+    fileDrawModeSpecificMemoryCardPrompt();
     func_002CEEC0();
     func_002C9CF8();
     evtSubmitPrimaryAlphaBlendMode(0);
