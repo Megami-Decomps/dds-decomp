@@ -28,6 +28,7 @@
 #include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
 #include "mdl_resource_entries.h"
 #include "mdl_asset_request.h"
 #include "dat_command.h"
@@ -530,8 +531,6 @@ void mdlUnlinkGroupEntry(MdlCtx *ctx) {
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", mdlCreateDevSlotList);
-
-extern void sdfReleaseDevSlot(void *, s32, s32);
 
 /* Release every device slot and its list node, then the list owner. A missing
  * list is a no-op; a released list is removed from the context. */
