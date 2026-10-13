@@ -255,7 +255,7 @@ s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
 
 extern const char D_00398188[];
 
-const char *func_002D9C28(SdfModel *model, s32 nameId) {
+const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId) {
     SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
     const u8 *name;
     const u8 *end;

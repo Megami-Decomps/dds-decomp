@@ -180,7 +180,7 @@ extern const char D_00384CF8[18][20];
 extern const char D_00384E60[17][20];
 extern const char D_00384FB8[17][20];
 extern const char D_00435D98[];
-extern const char *func_00332AD8(SdfModel *model, s32 nameId);
+extern const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId);
 extern s32 strcmp(const char *left, const char *right);
 extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
 
@@ -197,7 +197,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     s32 *slot;
     const char (*boneNameRow)[20];
 
-    modelName = func_00332AD8(model->inner, 0);
+    modelName = sdfNamedChunkGetNameById(model->inner, 0);
     for (family = 0; family < 5; family++) {
         if (strcmp(modelName, D_00384B20[family]) == 0) {
             for (index = 0; index < 17; index++) {

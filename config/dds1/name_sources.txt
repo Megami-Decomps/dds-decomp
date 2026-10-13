@@ -6604,6 +6604,7 @@
 0x002D9B08	sdfChunkFindById	inferred	searches chunk list for entry id, returns entry or NULL
 0x002D9B50	sdfChunkFindByTag	inferred	finds chunk entry by tag via owner's unk90 chunk
 0x002D9B68	sdfNamedChunkFindId	inferred	Searches named records in the MNDN chunk and returns the associated ID
+0x002D9C28	sdfNamedChunkGetNameById	inferred	Returns the name paired with an ID in SDF_CHUNK_NAMED_IDS, or the model fallback string; DDS2 twin 0x00332AD8.
 0x002D9CC8	sdfCountMapPositionRecords	inferred	Counts 0x40-byte records after the MPOS chunk's 0x10-byte header.
 0x002D9D00	sdfSetLookAtBasisFromRecord	inferred	VU0 routine: builds vf28-vf31 from record+0x10/0x20/0x30 (cross product, rsqrt normalise) then func_002DDD60(chunk+0xC0) [names_M33_SmallSweep2.tsv]
 0x002D9D80	sdfVuTransformMapRecordPosition	inferred	Transforms a map record position by its associated chunk matrix. [names_reviewed8.tsv]

@@ -167,7 +167,7 @@ extern const char D_00329CE0[18][20];
 extern const char D_00329E48[17][20];
 extern const char D_00329FA0[17][20];
 extern const char D_003BA9C8[];
-extern const char *func_002D9C28(SdfModel *model, s32 nameId);
+extern const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId);
 extern s32 strcmp(const char *left, const char *right);
 extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
 
@@ -183,7 +183,7 @@ void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
     s32 *slot;
     const char (*boneNameRow)[20];
 
-    modelName = func_002D9C28(model->inner, 0);
+    modelName = sdfNamedChunkGetNameById(model->inner, 0);
     for (family = 0; family < 5; family++) {
         if (strcmp(modelName, D_00329B08[family]) == 0) {
             for (index = 0; index < 17; index++) {
