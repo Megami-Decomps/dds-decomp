@@ -177,7 +177,7 @@ extern s32 btlAnyUnitHasActionInSlots();
 
 extern s32 btlCanSpawnAnotherEnemy(s32);
 
-extern s32 func_00213F58(s32, s16, s8);
+extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
 extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
@@ -1337,7 +1337,7 @@ s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     return 0;
 }
 
-s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
+s32 btlActionMatchesStatMask(s32 mask, s16 actionId, s8 force) {
     s32 i;
     s32 value;
 
@@ -1393,7 +1393,7 @@ s32 btlAnyUnitHasActionInSlots(mask, action)
             continue;
         }
         for (i = 0; i < 8; i++) {
-            if (func_00213F58(action, actor->actions[i].actionId, 1) != 0) {
+            if (btlActionMatchesStatMask(action, actor->actions[i].actionId, 1) != 0) {
                 return 1;
             }
         }
@@ -1413,7 +1413,7 @@ s32 func_002141A8(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((btlUnitStatusPair(battler) & 0x421) == 0x401 &&
-            func_00213F58(action, battler->partyRecord.actionSlot, 0)) {
+            btlActionMatchesStatMask(action, battler->partyRecord.actionSlot, 0)) {
             return 1;
         }
     }
@@ -1426,7 +1426,7 @@ s32 func_00214230(s32 unused, s32 battler) {
         BtlUnit *target = ((ActionStateLink *)node)->unit;
         if (target != 0 &&
             (btlUnitStatusPair(target) & 0x221) == 0x201 &&
-            func_00213F58(battler, ((ActionStateLink *)node)->actions[0].actionId, 0)) {
+            btlActionMatchesStatMask(battler, ((ActionStateLink *)node)->actions[0].actionId, 0)) {
             return 1;
         }
     }
