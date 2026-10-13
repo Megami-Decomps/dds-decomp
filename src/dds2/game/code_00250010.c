@@ -4505,8 +4505,6 @@ typedef struct EvtPmdRuntimeHeader {
     s32 frameCount;
     s32 metadata;
 } EvtPmdRuntimeHeader;
-
-extern void *dds3GetWorldSecondaryObject(void);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, const SdfTextureOffsetListHeader *, s32);
 extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);

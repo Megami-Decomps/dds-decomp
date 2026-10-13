@@ -3323,10 +3323,7 @@ extern EffWorldNode *dds3CreateCameraObject(s32 counter, f32 *position, f32 *rot
 extern void effObjSetInnerFloat(EffWorldNode *object, f32 value);
 
 extern void dds3EnsureSlotData();
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
+#include "dds3_world_secondary.h"
 extern void *memset(void *dst, s32 value, u32 size);
 
 void mdlSpawnViewerWorldObject(void) {

@@ -16,9 +16,7 @@
 struct MenuSlotState;
 extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
 extern void mnuApplyFadeTrackMode(s32, struct MenuSlotState *);
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 extern void mnuDrawTerminalBackdrop(s32);
 
 extern void func_0026C900(void);

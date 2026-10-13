@@ -29,7 +29,7 @@
 
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 struct EffWorldNode;
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
@@ -938,9 +938,6 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
         }
     }
 }
-
-extern void *dds3GetWorldSecondaryObject(void);
-
 typedef struct FldActionSpawn {
     u32 unk0;
     u32 secondValue;

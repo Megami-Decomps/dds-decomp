@@ -229,10 +229,7 @@ extern s32 fldSecondaryEffectPositionPending;
 extern void fldResetPlayerSceneObjectState(void);
 
 extern s32 D_003897C0[];
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
+#include "dds3_world_secondary.h"
 extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern s32 D_003897C8[];

@@ -20,8 +20,7 @@ extern void effObjInnerVecBackup(ObjectTransform *inner);
 extern void dds3RebuildCameraBasis(EffWorldNode *obj);
 extern CameraVector D_0039F6F8;
 extern CameraVector D_0039F708;
-
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void sdfSetViewFieldOfView(f32 value);

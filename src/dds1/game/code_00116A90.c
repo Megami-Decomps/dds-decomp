@@ -14,10 +14,7 @@ typedef struct {
     u8 pad0[0x18];
     PathState *state;
 } PathObject;
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
+#include "dds3_world_secondary.h"
 typedef struct ActionSub {
     u8 unk0[0x10];
     s32 unk10;

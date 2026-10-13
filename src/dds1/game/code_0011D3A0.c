@@ -42,12 +42,7 @@ enum {
     FIELD_STAGE_INDEX_SCAN_LIMIT = 0x280,
     FIELD_STAGE_RECORD_SCAN_LIMIT = 0x60
 };
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
-
-
+#include "dds3_world_secondary.h"
 #include "sdf_packet_alloc.h"
 
 extern s32 D_003BAB08;

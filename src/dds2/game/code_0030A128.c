@@ -75,7 +75,7 @@ extern char D_004388A0[];
 extern void func_0026C900(void);
 
 extern void dds3SetWorldObject(void *);
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern void fldCreateLocalMapCamera(void);
 extern s32 fldPackLocalMapFlagStates(void);
 extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
