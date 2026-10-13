@@ -11099,3 +11099,19 @@ handler in both games. Its distinct game-specific argument types remain intact.
 The other unregistered constant-return/empty PCP entries are not assigned
 invented operation roles merely because they are adjacent.
 
+## Inactive PCP boss registry kinds
+
+The same native-table evidence identifies kind 87 at DDS1 `0x00354618` /
+DDS2 `0x003B0F48`, kind 89 at `0x00354668` / `0x003B0F98`, and kind 93 at
+`0x00354708` / `0x003B1038`. All three register zero-returning create and
+duplicate entries, empty dispatch and release entries, and a present but
+empty value slot at `+0x1C`. Kind 89 also registers an empty source-pointer
+slot at `+0x10`; this name describes its pointer-valued input, not an inferred
+position, matrix or asset operation.
+
+Each name states its numeric registration and observable behavior only.
+The semantic effect classes remain unknown, and the native zero-returning
+`u32` surfaces and empty `void` surfaces are not normalized to the table's
+callback prototypes. Separate entries and their zero-formal definitions
+are retained for matching.
+
