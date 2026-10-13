@@ -437,7 +437,7 @@ void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target);
 
 void btlUnitFaceTargetScaled(BtlUnit *object, BtlUnit *target, f32 scale);
 
-void func_001D6300(u8 *object, void *position);
+void btlCopyUnitCurrentPosition(u8 *object, void *position);
 
 /* vu0 routine: preserve the actor's primary position and rotation quaternion while * evaluating the requested model record; return the sampled vector in vf10. */ s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value);
 
@@ -518,7 +518,8 @@ void btlInitializeCursorForLinkedAction(BtlLinkedCommand *action) {
 void func_001DEF58(void) {
 }
 
-s32 func_001DEF60(s32 actor) {
+/* Run the timed camera setup hook; return its result, or zero when unset. */
+s32 btlRunTimedCameraSetupHook(s32 actor) {
     s32 context = (s32)(u32)btlGetRuntime();
     s32 (*callback)(s32) = *(void **)(context + 0x618);
     if (callback != 0) {
@@ -527,7 +528,8 @@ s32 func_001DEF60(s32 actor) {
     return 0;
 }
 
-s32 func_001DEFA0(s32 actor) {
+/* Run the timed camera finish hook; return its result, or zero when unset. */
+s32 btlRunTimedCameraFinishHook(s32 actor) {
     s32 context = (s32)(u32)btlGetRuntime();
     s32 (*callback)(s32) = *(void **)(context + 0x620);
     if (callback != 0) {
@@ -1742,7 +1744,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
             flags = unit->status.flags;
         } else {
             if (unit->lookupId != 1) {
-                func_001D6300((u8 *)unit, vectors.position);
+                btlCopyUnitCurrentPosition((u8 *)unit, vectors.position);
                 vectors.position[2] = unit->position[2] - 45.0f;
                 btlSetUnitPosition((u8 *)unit, vectors.position);
             }
@@ -8141,7 +8143,7 @@ void btlAlignTripleFormationWithTarget(BtlTask *link, BtlUnit *first, BtlUnit *s
             offsetZ = 0.0f;
         }
         for (i = 0; i < 3; i++) {
-            func_001D6300((u8 *)slot[i], position);
+            btlCopyUnitCurrentPosition((u8 *)slot[i], position);
             position[0] += offsetX;
             position[2] += offsetZ;
             btlSetUnitPosition(slot[i], position);

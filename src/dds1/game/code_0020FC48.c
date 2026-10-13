@@ -2221,7 +2221,7 @@ extern s32 fldGetSceneScriptState(void);
 extern BtlIndexList *fldGetSceneScriptValue(void);
 extern void fldMarkActiveSceneScriptState(void);
 extern void fldCreateSceneSpriteTask(s32);
-extern void func_001D6300(BtlUnit *, f32 *);
+extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern u8 *btlCreateControlObject(void);
 extern void btlCopyUnitStats(s32, s32);
@@ -2279,7 +2279,7 @@ s32 func_00214868(void) {
             BtlIndexList *list = fldGetSceneScriptValue();
             if (btlGetIndexListCount(list) == 1) {
                 unit = btlGetIndexListEntry(list, 0);
-                func_001D6300(unit, position);
+                btlCopyUnitCurrentPosition(unit, position);
                 btlBossDebugPrintfN(150, 408, 0, "FLD:[%03d_%02d]",
                     (s16)state->encounterParamA, (s16)state->encounterParamB);
                 btlBossDebugPrintfN(150, 420, 0, "POS:[%.2f,%.2f,%.2f]",

@@ -1691,7 +1691,8 @@ void itfDrawFilledBarQuadRegions(s32 value, s32 limit, s32 highlight,
 }
 
 
-s32 func_001A1810(KwlnTask *task) {
+/* Retail "DbgDevDump" task callback: perform no dump work and return zero. */
+s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task) {
     return 0;
 }
 

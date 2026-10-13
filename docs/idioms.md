@@ -11319,3 +11319,35 @@ compiler-sensitive control flow. Frontline setup uses the native actor
 names Serph (1) and True Heat (9), while Calamity and all three Eternal
 Zero entries are identified by the native skill-name rows. The remaining
 phase/status and script-result names deliberately avoid unknown meanings.
+
+## Timed camera hooks and retained retail callbacks
+
+The paired `btlRunTimedCameraSetupHook` and
+`btlRunTimedCameraFinishHook` entry points return the installed callback's
+word result, or zero when no callback is installed. Native camera-interpreter
+opcodes 39 and 43 invoke them during their instruction frame windows and
+consume nonzero results as handled/completed state. The scene installers
+separately bind single-target camera-point/transition setup and finish-camera
+behaviors. Preserve each game's existing parameter types and return staging;
+this naming closure does not change either callback ABI.
+
+`btlCopyUnitCurrentPosition` copies the stored 16-byte current-position
+vector. Unlike `btlGetUnitWorldPos`, it does not add the runtime world offset.
+The DDS1 entry adopts the existing DDS2 twin name without converting its
+original pointer arithmetic or caller prototypes.
+
+`btlFrameSingleTargetActionCamera` has the same reach/FOV framing, minimum
+distance and conditional target-rotation behavior in both games. Their
+task/link views, group-bounds provider and libm addresses differ; the camera
+algorithm does not. Its VU macros and original caller argument expressions
+remain unchanged.
+
+The two active-slot record-vector setters select the retained record before
+calling its first/second 16-byte-vector setter. Their existing abbreviated
+definitions and calls remain intact; do not infer a signature repair from
+the clearer names.
+
+Both startup functions register `kwlnUpdateDevelopmentDumpTask` with the
+literal task name `DbgDevDump` and id 0x5215. The retail callbacks return zero
+without doing any dump work. This is retained retail behavior, not unfinished
+implementation.

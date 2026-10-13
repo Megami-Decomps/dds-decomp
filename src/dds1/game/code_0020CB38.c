@@ -22,7 +22,7 @@ extern s32 datActionAnimationRecords;
 
 extern void func_003014F0();
 
-extern void func_001D6300(void *, void *);
+extern void btlCopyUnitCurrentPosition(void *, void *);
 
 extern void btlSetUnitPosition(BtlUnit *, void *);
 
@@ -426,7 +426,7 @@ void btlRecenterUnitsOnLead(void) {
         }
     }
     if (lead != 0) {
-        func_001D6300(lead, pos);
+        btlCopyUnitCurrentPosition(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
         PCP_COPY_VECTOR(lead->position, pos);
@@ -435,7 +435,7 @@ void btlRecenterUnitsOnLead(void) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x400) {
                     if (unit != lead) {
-                        func_001D6300(unit, pos);
+                        btlCopyUnitCurrentPosition(unit, pos);
                         pos[0] = pos[0] + shift;
                         PCP_COPY_VECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);

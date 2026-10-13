@@ -489,7 +489,8 @@ void btlRunDefaultActionPoseUnlessHooked(void *actor) {
     func_001F3888(actor, &((BtlLinkedCommand *)actor)->frontCamera, &((BtlLinkedCommand *)actor)->backCamera);
 }
 
-s32 func_001EC7E8(BtlUnit *unit) {
+/* Run the timed camera setup hook; return its result, or zero when unset. */
+s32 btlRunTimedCameraSetupHook(BtlUnit *unit) {
     s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk650;
     s32 result = 0;
     if (hook != 0) {
@@ -498,7 +499,8 @@ s32 func_001EC7E8(BtlUnit *unit) {
     return result;
 }
 
-s32 func_001EC828(BtlUnit *unit) {
+/* Run the timed camera finish hook; return its result, or zero when unset. */
+s32 btlRunTimedCameraFinishHook(BtlUnit *unit) {
     s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk658;
     s32 result = 0;
     if (hook != 0) {
@@ -1081,7 +1083,7 @@ extern f32 func_003532B8(f32);
 extern f32 func_00353040(f32);
 extern f32 func_00353140(f32);
 /* vu0 routine: fit the action camera around one target and its reach. */
-void func_001EF668(BtlLinkedCommand *action, BtlCamState *out) {
+void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out) {
     BtlUnit *user;
     BtlUnit *target;
     f32 targetPosition[4];
@@ -1374,7 +1376,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
         btlSetDefaultActionCameraPose(command, &command->camera);
         return;
     }
-    func_001EF668(command, command->frontCamera.position);
+    btlFrameSingleTargetActionCamera(command, command->frontCamera.position);
     btlUnitGetMuzzlePosVU(user);
     VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
     btlUnitGetMuzzlePosVU(target);

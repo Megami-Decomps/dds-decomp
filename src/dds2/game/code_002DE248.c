@@ -10450,11 +10450,13 @@ void func_002FB400(u32 node) {
     func_002FAD98(node);
 }
 
-void func_002FB428(s32 node) {
+/* Set the retained record's first vector; preserve the abbreviated native call. */
+void effSetActiveSlotPrimaryRecordVector(s32 node) {
     mnuRecordSetVector((u8 *)((EffectSlotNode80 *)node)->record);
 }
 
-void func_002FB440(s32 node) {
+/* Set the retained record's second vector; preserve the abbreviated native call. */
+void effSetActiveSlotSecondaryRecordVector(s32 node) {
     fileSetRecordSecondVector((u8 *)((EffectSlotNode80 *)node)->record);
 }
 
