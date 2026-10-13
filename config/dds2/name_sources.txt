@@ -4034,6 +4034,7 @@
 0x00264D80	evtTriggerProgressFlagGate	inferred	Tests the progress threshold, sets a model flag if still clear, and emits the associated cue.
 0x00264E18	evtShowSlotText	inferred	same text layout as func_00263270 for the current slot
 0x00264F00	evtTriggerProgressGateThenOpenPopup	inferred	Triggers the progress flag gate and opens the next popup only if no gate fires. [names_reviewed15.tsv]
+0x00265038	mnuSelectUnclaimedProgressRewardTier	inferred	Selects the highest progress threshold reached, marks all lower tier flags complete, and returns the selected tier only while its own claim flag is clear; used to populate reward labels, grant the chosen reward, and resume camp reward selection.
 0x00265130	evtIsLastSlot	inferred	compares argument+1 against the number of active EvtSlot entries
 0x00265178	mnuSetFlagForMenuEntry	inferred	Uses explicit index parameter, no selected-menu cursor is read. [names_reviewed21.tsv]
 0x002651C0	evtMenuPopulateSelectedSlotLabels	inferred	readability/matching review (QP16)
