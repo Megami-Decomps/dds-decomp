@@ -263,7 +263,7 @@ s32 mnuTickExtendedCommandPhase(ShopScene *work) {
 
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
-extern void func_0025F7F0(s32, s32, s32, ShopScene *, u32, s32);
+extern void mnuDrawShopSelectedRowDetailsWithAlpha(s32, s32, s32, ShopScene *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(ShopScene *, s32, s32, u32, u32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
@@ -418,7 +418,7 @@ s32 func_00260AB0(ShopScene *scene) {
     case 8:
         progress = (f32)scene->frames / 10.0f;
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-        func_0025F7F0(0, 0, 0, scene, (u32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         mnuDrawShopItemQuantity(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(progress * 96.0f), 0x53);
@@ -505,12 +505,12 @@ extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_00260100(ShopScene *, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
-extern void func_0025F7F0(s32, s32, s32, ShopScene *, u32, s32);
+extern void mnuDrawShopSelectedRowDetailsWithAlpha(s32, s32, s32, ShopScene *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(ShopScene *, s32, s32, u32, u32);
 extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopLimitArrowsScaled(s32, s32, s32, ShopScene *, s32, s32);
-extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
+extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopLimitArrows(s32, s32, s32, ShopScene *, s32);
 
 /* Draw the selected shop page through its entry, change and exit phases. */
@@ -531,7 +531,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
         mnuDrawShopItemQuantity(0, 0, 0, scene, 0x100, 0x53);
         progress = (f32)scene->frames / 10.0f;
-        func_0025F7F0(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
         func_0025FFC8(0, 0, 0, scene, 0x53);
@@ -553,7 +553,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawShopItemQuantity(0, 0, 0, scene, 0x100, 0x53);
         progress = (f32)scene->frames / 10.0f;
         progress = 1.0f - progress;
-        func_0025F7F0(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
         func_0025FFC8(0, 0, 0, scene, 0x53);
@@ -572,7 +572,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         break;
     case 12:
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-        func_0025F680(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowDetails(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         func_0025FFC8(0, 0, 0, scene, 0x53);
         progress = (f32)scene->frames / 10.0f;
@@ -594,7 +594,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
     case 11:
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
         mnuDrawShopItemQuantity(0, 0, 0, scene, 0x100, 0x53);
-        func_0025F680(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowDetails(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
         func_0025FFC8(0, 0, 0, scene, 0x53);
