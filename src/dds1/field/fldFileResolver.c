@@ -7,6 +7,7 @@
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
+#include "fld_npc_motion.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -403,14 +404,6 @@ typedef struct {
 extern FldActorRow fldActorSlots[];
 extern s32 D_0032E530[];
 
-typedef struct FldNpcMotion {
-    s32 defaultMotionId;
-    u8 primaryName[0x10];
-    u8 secondaryName[0x10];
-    u8 unk24[0x10];
-    u8 unk34[0x10];
-    s32 unk44;
-} FldNpcMotion; /* 0x48 bytes */
 extern FldNpcMotion D_00336A60[];
 extern void *D_003BAE44;
 extern void *D_003BAE48;

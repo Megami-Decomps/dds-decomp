@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "fld_npc_motion.h"
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -715,7 +716,8 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_00120B88);
 
 extern FldActivationEntry D_003A8EB0[];
 
-extern u8 D_0039A1D0[], D_003A41A8[], D_003A47E8[], D_003A55F0[], D_0038A3B8[], D_0038A480[], D_0038A9B0[], fldCameraFollowRows[], D_00389A70[], D_00391FA0[];
+extern u8 D_0039A1D0[], D_003A41A8[], D_003A47E8[], D_003A55F0[], D_0038A3B8[], D_0038A480[], D_0038A9B0[], fldCameraFollowRows[], D_00389A70[];
+extern FldNpcMotion D_00391FA0[];
 
 extern u32 D_003899F0[];
 
@@ -745,7 +747,7 @@ void fldLoadFieldTablesAndIndexStages(void) {
     sdfDevQueueReadAndWait(command, D_00387D70, 0x1400);
     sdfDevQueueReadAndWait(command, D_00389170, 0x600);
     sdfDevQueueReadAndWait(command, D_00389A70, 0x880);
-    sdfDevQueueReadAndWait(command, D_00391FA0, 0x1200);
+    sdfDevQueueReadAndWait(command, D_00391FA0, 0x1200); /* 64 FldNpcMotion rows */
     sdfDevWaitThenReleaseCommandState(command);
     sum = 0;
     previous = 0;
