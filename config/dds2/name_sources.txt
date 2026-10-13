@@ -4009,6 +4009,8 @@
 0x00262AC8	mnuResetCommandStepAndSelectPhase	inferred	confidence=high; src/dds2/game/code_00261E10.c:func_00262AC8; Selects command phases from stateCode, conditionally installs a secondary scene callback and resets stateStep. [names_qp9.tsv]
 0x00262B50	mnuShopPollRangeFilteredCommandSelection	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2897; Polls range-filtered shop selection, processing dispatch phase, popup, no-capacity state table and input flags. DDS1 filtered-shop poller analogue 0x002465F8.
 0x00262EF0	evtEnterProgressCommandPhase	inferred	high confidence; src/dds2/game/code_00261E10.c func_00262EF0: Selects command phase 3 or 9 according to stateCode, optionally installs a scene callback, and resets stateStep. [names_reviewed25.tsv]
+0x00263180	mnuRunCampCommandPrimaryTransition	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3103; Draws shop-panel decorations and the camp-command transition, then dispatches EVT_DISPATCH_OPERATION_PRIMARY through evtMenuSetHandler.
+0x002631D8	mnuRunCampCommandSecondaryTransition	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3110; Runs the paired close hook and dispatches EVT_DISPATCH_OPERATION_SECONDARY through evtMenuSetHandler.
 0x00263220	evtGetRemainingSlotThreshold	inferred	Returns the positive difference between the indexed threshold and current progress, zero when passed, or -1 for invalid or absent thresholds.
 0x00263270	evtShowResultText	inferred	formats and prints counter/label texts with func_0026C918 then plays a sound
 0x00263380	evtOpenProgressResultPopupWhenIdle	inferred	Waits for dispatch and message-window idle before opening the progress result popup. [names_reviewed15.tsv]
