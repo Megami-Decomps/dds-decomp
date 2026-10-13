@@ -403,7 +403,189 @@ s32 btlEffectTaskStartFinale(ActionStateLink *task) {
     return (task->unit->partyRecord.status & 0x480) ? 0x19 : 0x1B;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
+extern s32 btlGetSlotRateKind(u8 *, s32);
+extern u8 *btlCreateFloatTask29(u8 *, f32, f32, f32, f32, f32, f32, f32, f32,
+                                 f32, f32, f32, f32, f32, f32, f32, f32);
+
+void func_00227DA8(ActionStateLink *action, s32 mode, u64 refreshBarrier, u64 effectBarrier, u64 soundBarrier) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    s32 flags;
+    u64 sequence;
+    u64 nextSequence;
+    BtlRuntimeTask *task;
+    /* Timed producers have a different shared pointer conflict set; see
+     * docs/idioms.md, "Trace-justified task roles: special pre-action callbacks". */
+    BtlRuntimeTask *timedTask;
+    BtlRuntimeTask *refreshTask;
+    BtlRuntimeTask *loadTask;
+    ActionStateLink *scene;
+
+    if (mode != 0x170) {
+        if (mode != 0x189) {
+            return;
+        }
+        sequence = btlAdvanceRuntimeSequenceCounter();
+        nextSequence = btlAdvanceRuntimeSequenceCounter();
+        timedTask = sndCreateCustomTask(0x80FFFFFF, 0xC);
+        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.value.owner = soundBarrier;
+        timedTask->startDelay = 0x52;
+        timedTask->endDelay = 0xC;
+        timedTask->ownerId = sequence;
+        btlStartTask(timedTask);
+
+        for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+            s32 flags = unit->status.flags;
+            s32 unitId;
+            if ((flags & 1) == 0) {
+                continue;
+            }
+            if ((flags & 0x400) == 0) {
+                continue;
+            }
+            unitId = unit->partyRecord.unitId;
+            if (unitId >= 0x130) {
+                continue;
+            }
+            if (unitId < 0x12E) {
+                continue;
+            }
+            if (unit->resourceIndex != 0x119) {
+                continue;
+            }
+            refreshTask = btlScheduleRefreshTask(unit);
+            refreshTask->startCondition.kind = 7;
+            refreshTask->startCondition.value.owner = refreshBarrier;
+            refreshTask->ownerId = action->unit->owner;
+            btlStartTask(refreshTask);
+
+            loadTask = btlCreateModelLoadPollTask(unit, unit->resourceKind,
+                                                   unit->partyRecord.unitId, 1);
+            loadTask->startCondition.kind = 4;
+            loadTask->startCondition.value.handle = refreshTask->handle;
+            loadTask->ownerId = nextSequence;
+            btlStartTask(loadTask);
+        }
+
+        task = btlCreateCommandSoundUpdateTask();
+        task->startCondition.kind = 7;
+        task->startCondition.value.owner = nextSequence;
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+
+        task = (BtlRuntimeTask *)btlCreateFloatTask29(0, -352.6f, -398.1f, -718.1f, 0.097f,
+                                         -0.307f, -0.045f, 0.937f, -424.3f,
+                                         -352.6f, -852.0f, 0.075f, -0.307f,
+                                         -0.037f, 0.939f, 40.0f, 30.0f);
+        task->startCondition.kind = 7;
+        task->startCondition.value.owner = nextSequence;
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+
+        timedTask = btlCreateFadeInTask(0x10);
+        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.value.owner = nextSequence;
+        timedTask->endDelay = 0x3C;
+        timedTask->ownerId = action->unit->owner;
+        btlStartTask(timedTask);
+        return;
+    }
+
+    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+        flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                if (unit->partyRecord.unitId == 0x12E) {
+                    break;
+                }
+            }
+        }
+    }
+    if (unit != NULL && (flags & 0xE0) == 0) {
+        sequence = btlAdvanceRuntimeSequenceCounter();
+        nextSequence = btlAdvanceRuntimeSequenceCounter();
+        timedTask = sndCreateCustomTask(0x80FFFFFF, 0xC);
+        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.value.owner = refreshBarrier;
+        timedTask->endDelay = 0xC;
+        timedTask->ownerId = sequence;
+        btlStartTask(timedTask);
+
+        for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+            s32 flags = unit->status.flags;
+            s32 unitId;
+            if ((flags & 1) == 0) {
+                continue;
+            }
+            if ((flags & 0x400) == 0) {
+                continue;
+            }
+            unitId = unit->partyRecord.unitId;
+            if (unitId >= 0x130) {
+                continue;
+            }
+            if (unitId < 0x12E) {
+                continue;
+            }
+            if (unit->resourceIndex == 0x119) {
+                continue;
+            }
+            task = btlAllocateIndexedUnitEffectTask(unit,
+                       action->indexWork.slot,
+                       btlGetSlotRateKind((u8 *)unit, action->indexWork.slot), 1.0f);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = effectBarrier;
+            task->startDelay = 1;
+            btlStartTask(task);
+
+            refreshTask = btlScheduleRefreshTask(unit);
+            refreshTask->startCondition.kind = 7;
+            refreshTask->startCondition.value.owner = sequence;
+            refreshTask->ownerId = action->unit->owner;
+            btlStartTask(refreshTask);
+
+            loadTask = btlCreateModelLoadPollTask(unit, unit->resourceKind,
+                                                   0x119, 1);
+            loadTask->startCondition.kind = 4;
+            loadTask->startCondition.value.handle = refreshTask->handle;
+            loadTask->ownerId = nextSequence;
+            btlStartTask(loadTask);
+        }
+
+        task = btlCreateCommandSoundUpdateTask();
+        task->startCondition.kind = 7;
+        task->startCondition.value.owner = nextSequence;
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+
+        scene = fldGetSceneGroupEntry(0);
+        if (scene != NULL && (scene->pendingFlags & 8) != 0 &&
+            (scene->unit->status.flags & 0x200) != 0) {
+            /* Retail has separate publication arms at 00206E7C..00206EA0 and
+             * 00206EB0..00206ED0. */
+            task = btlCreateCommandSoundTask((s32)scene, 9);
+            task->startCondition.kind = 7;
+            task->startCondition.value.owner = nextSequence;
+            task->ownerId = action->unit->owner;
+            btlStartTask(task);
+        } else {
+            task = btlCreateCommandSoundTask(0, 3);
+            task->startCondition.kind = 7;
+            task->startCondition.value.owner = nextSequence;
+            task->ownerId = action->unit->owner;
+            btlStartTask(task);
+        }
+
+        timedTask = btlCreateFadeInTask(0x10);
+        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.value.owner = nextSequence;
+        timedTask->endDelay = 0x1F;
+        timedTask->ownerId = action->unit->owner;
+        btlStartTask(timedTask);
+    }
+}
 
 s32 btlIsEffectActor(BtlUnit *actor) {
     BattleEffectPayload *state = ((BtlState *)btlGetRuntime())->effect;
