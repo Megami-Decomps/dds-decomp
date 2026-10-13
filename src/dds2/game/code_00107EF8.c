@@ -1610,7 +1610,7 @@ typedef struct HeapOverlayBlock {
 
 extern s32 sdfGetPacketCursor(void);
 extern void sdfSetPacketCursorAligned(s32);
-extern s32 func_0036DE70(void);
+extern s32 DIntr(void);
 extern u32 func_00329230(void);
 extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
 extern SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *);
@@ -1629,7 +1629,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     s32 markerY;
 
     snapshot = (HeapOverlayBlock *)sdfGetPacketCursor();
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     block = (SdfMemBlock *)func_00329230();
     entry = snapshot;
     heapBase = sdfMemoryGetBlockAddress(block);

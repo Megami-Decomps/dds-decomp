@@ -952,7 +952,7 @@ void sdfDevSetFallbackDeviceWorker(s8 worker) {
     D_00438B1E = worker;
 }
 
-extern s64 func_0036DE70();
+extern s64 DIntr();
 
 extern void sdfEnsureDeviceWorkerThreadStarted(s32 index);
 
@@ -969,7 +969,7 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     s32 wake = 0;
     DevState *last;
 
-    interrupts = func_0036DE70(state);
+    interrupts = DIntr(state);
     worker = &sdfDeviceWorkerEntries[state->workerIndex];
     if (worker->threadId < 0) {
         sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
@@ -1012,7 +1012,7 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     DevState *next;
     s64 interrupts;
 
-    interrupts = func_0036DE70();
+    interrupts = DIntr();
     prev = state->previous;
     next = state->next;
     if (prev == NULL) {
@@ -1041,7 +1041,7 @@ void sdfDevRecycleCompletedState(DevState *state) {
     DevState *next;
     s64 interrupts;
 
-    interrupts = func_0036DE70();
+    interrupts = DIntr();
     prev = state->previous;
     next = state->next;
     if (prev == NULL) {
