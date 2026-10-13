@@ -633,6 +633,7 @@
 0x0011F170	l2dCreateOwnedColoredRectangle	inferred	src/dds2/misc/l2d.c func_0011F170: Allocates rectangle, stores position, dimensions, depth and color and registers with owner list. Twin of DDS1 func_0011D308. [names_reviewed24.tsv]
 0x0011F208	fldSetPacketArgumentPair	inferred	confidence=medium; matched-C; src/dds2/game/code_0011F208.c:345:func_0011F208; Stores the supplied pair in the packet/state argument words. Does not infer the argument meanings.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x0011F218	sdfCreateResetPacketList	inferred	Allocates an aligned 0x20-byte packet and initializes its packet-list state with sdfResetPacketList.
+0x0011F250	sdfCreateBorderedRectanglePacket	inferred	Allocates a 0x80-byte packet containing a colored rectangle and its outline corners from x/y/depth/width/height and two color words; direct packet-list callers use it for bordered panels, markers, and diagnostic rectangles. [2026-10-13]
 0x0011F928	fldStepIntByPad	inferred	int value stepped by pad press/repeat with wrap/clamp
 0x0011FAB8	fldAdjustIntegerUsingMainPad	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:481:func_0011FAB8; Passes main controller state and caller bounds/step to field integer adjustment routine.; twin=0x0011DC50, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0011FAD8	fldStepColorChannelByPad	inferred	steps one byte of a packed colour by 1/10
