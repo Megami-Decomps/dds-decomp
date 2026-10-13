@@ -21,7 +21,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pairing import RETAIL, ROOT, load_segments, va_to_off  # noqa: E402
+from pairing import RETAIL, ROOT, load_segments, off_to_va, va_to_off  # noqa: E402
 from resolved_code import (  # noqa: E402
     hi_lo_addend,
     instruction_shape_matches,
@@ -318,7 +318,7 @@ def section_symbols(objdump_text, section):
     result = []
     for line in objdump_text.splitlines():
         parts = line.split()
-        if len(parts) >= 6 and parts[-3] == section:
+        if len(parts) >= 6 and parts[-3] == section and "O" in parts[1:-3]:
             try:
                 result.append((int(parts[0], 16), int(parts[-2], 16), parts[-1]))
             except ValueError:
@@ -353,7 +353,8 @@ def relocations(obj):
     return out
 
 
-def relocate_sdata_item(item, item_offset, relocs, funcs, syms):
+def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
+                        section_bases=None):
     """Apply resolvable R_MIPS_32 relocations to one emitted .sdata item.
 
     Object files store section-relative addends for pointers into their own
@@ -379,6 +380,10 @@ def relocate_sdata_item(item, item_offset, relocs, funcs, syms):
             owner_addr = address(owner[2], syms) if owner else None
             if owner_addr is not None:
                 target = owner_addr + addend - owner[0]
+        elif section_bases and base in section_bases:
+            # Relocatable local-section references carry a section-relative
+            # addend.  Resolve them from the exact owner subsegment origin.
+            target = section_bases[base] + addend
         else:
             base_addr = address(base, syms)
             if base_addr is not None:
@@ -454,6 +459,36 @@ def owns_rodata(version, unit, section="rodata"):
     return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
 
 
+def owned_sdata_rom_range(yaml_text, unit):
+    """Bound an explicit per-unit .sdata subsegment by its next sibling."""
+    items = list(YAML_ITEM.finditer(yaml_text))
+    ranges = []
+    for index, item in enumerate(items):
+        match = re.fullmatch(
+            rf"\[0x([0-9A-Fa-f]+),\s*\.sdata,\s*{re.escape(unit)}\]",
+            item.group("body").strip())
+        if match is None:
+            continue
+        start = int(match.group(1), 16)
+        indent = len(item.group("indent"))
+        for later in items[index + 1:]:
+            later_indent = len(later.group("indent"))
+            if later_indent < indent:
+                break
+            if later_indent != indent:
+                continue
+            next_list = re.match(r"\[0x([0-9A-Fa-f]+),", later.group("body"))
+            fields = _inline_yaml_fields(later.group("body"))
+            try:
+                end = int(next_list.group(1), 16) if next_list else int(fields["start"], 0)
+            except (TypeError, KeyError, ValueError):
+                break
+            if end > start:
+                ranges.append((start, end))
+            break
+    return ranges[0] if len(ranges) == 1 else None
+
+
 def asm_literal_users(source_text, asm_dir, syms, addr):
     """Find remaining ASM consumers in the source being checked."""
     names = set(re.findall(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);', source_text, re.M))
@@ -517,6 +552,8 @@ def main():
     gp = int(VERSIONS[version]["gp"], 16)
     retail = (ROOT / RETAIL[version]).read_bytes()
     segs = load_segments(retail)
+    yaml_text = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
+    sdata_range = owned_sdata_rom_range(yaml_text, unit_name)
 
     with tempfile.TemporaryDirectory() as tmp:
         obj = Path(tmp) / "unit.o"
@@ -571,6 +608,7 @@ def main():
         # text around a function can change its code: compare each C function
         # as the build compiles it, relocated fields masked.
         context = {}
+        data_context = []
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         ro_diff = None    # first retail address where the full unit's .rodata differs
         full = Path(tmp) / "full.o"
@@ -610,6 +648,65 @@ def main():
             # retail's, in retail order. Catches string literals and
             # INCLUDE_RODATA items that come out in a different order.
             fdata, fsecs = sections(full)
+            if sdata_symbols and sdata_range:
+                full_sdata = {
+                    name: (off, size) for off, size, name in section_symbols(
+                        run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".sdata")
+                }
+                fsd_off, fsd_size = fsecs.get(".sdata", (0, 0))
+                fsd_relocs = relocations(full)[".sdata"]
+                full_funcs = [(off, size, name) for name, (off, size) in fsyms.items()]
+                start, end = sdata_range
+                sdata_origin = off_to_va(segs, start)
+                section_bases = {".sdata": sdata_origin} if sdata_origin is not None else {}
+                full_bytes, full_problems = relocate_sdata_item(
+                    fdata[fsd_off:fsd_off + fsd_size], 0, fsd_relocs, full_funcs,
+                    syms, section_bases)
+                sdata_span_matches = (
+                    fsd_size <= end - start and not full_problems
+                    and full_bytes == retail[start:start + fsd_size]
+                    and not any(retail[start + fsd_size:end]))
+                if fsd_size > end - start or full_problems or full_bytes != retail[start:start + fsd_size]:
+                    data_context.append(
+                        "full unit's .sdata bytes/relocations differ from its retail span"
+                        + (f" ({'; '.join(full_problems)})" if full_problems else ""))
+                elif any(retail[start + fsd_size:end]):
+                    data_context.append("full unit omits nonzero bytes at the end of its retail .sdata span")
+                for skip_off, size, name in sdata_symbols:
+                    addr = address(name, syms)
+                    retail_off = va_to_off(segs, addr) if addr is not None else None
+                    actual = full_sdata.get(name)
+                    if retail_off is None and sdata_span_matches and actual is not None:
+                        # Local/static C objects may have no symbol_addrs row.
+                        # Once the entire full-unit section is byte-exact at
+                        # the owned origin, its STT_OBJECT offset is a concrete
+                        # retail address fact, not an address-name guess.
+                        retail_off = start + actual[0]
+                        addr = off_to_va(segs, retail_off)
+                        if addr is not None:
+                            syms[name] = addr
+                        else:
+                            retail_off = None
+                    if retail_off is None:
+                        data_context.append(f"{name}: source-owned .sdata object has no retail address")
+                        continue
+                    if not start <= retail_off < end or retail_off + size > end:
+                        data_context.append(f"{name}: outside the unit's retail .sdata span")
+                    elif actual is None:
+                        data_context.append(f"{name}: not STT_OBJECT in the full unit's .sdata")
+                    elif actual != (retail_off - start, size):
+                        data_context.append(
+                            f"{name}: full-unit offset/size {actual}, "
+                            f"retail requires {(retail_off - start, size)}")
+                    else:
+                        off = actual[0]
+                        item = fdata[fsd_off + off:fsd_off + off + size]
+                        linked, problems = relocate_sdata_item(
+                            item, off, fsd_relocs, full_funcs, syms, section_bases)
+                        if off + size > fsd_size or problems or linked != retail[retail_off:retail_off + size]:
+                            data_context.append(
+                                f"{name}: full-unit .sdata bytes/relocations differ from retail"
+                                + (f" ({'; '.join(problems)})" if problems else ""))
             fro_off, fro_size = fsecs.get(".rodata", (0, 0))
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
                                  (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
@@ -643,6 +740,10 @@ def main():
         bad += 1
         print(f"RODATA the full unit's .rodata differs from retail at {ro_diff} (string literal "
               "or INCLUDE_RODATA order/content); the build links it there")
+    if not args.func:
+        for problem in data_context:
+            bad += 1
+            print(f"DATA CONTEXT {problem}")
     tables = []  # (offset in our .rodata, retail address, function)
     bounds = []  # .rodata items of as-built functions: they only end a neighbour
     small = []   # the same for .sdata
@@ -809,7 +910,6 @@ def main():
     retail_labels.sort()
     # The unit's retail .rodata ends where the next subsegment starts: bytes
     # between the last item and that end are the unit's own padding too.
-    yaml_text = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
     ro_rows = sorted((int(o, 16), u) for o, u in re.findall(r"\[0x([0-9A-F]+), \.?rodata(?:, ([^\]\s]+))?\]", yaml_text))
     here = next((i for i, (_, u) in enumerate(ro_rows) if u == unit_name), None)
     if here is not None and here + 1 < len(ro_rows):
@@ -956,6 +1056,16 @@ def main():
     stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
     if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
         del emitted[".rodata"]
+    # A source-owned object can be consumed exclusively from another unit.
+    # Its explicit symbol still supplies the native item address and width;
+    # full-unit placement and bytes were checked above, including ASM context.
+    if sdata_range:
+        start, end = sdata_range
+        for off, size, name in sdata_symbols:
+            addr = address(name, syms)
+            retail_off = va_to_off(segs, addr) if addr is not None else None
+            if retail_off is not None and start <= retail_off and retail_off + size <= end:
+                small.append((off, addr, name))
     sd_starts = sorted({o for o, _, _ in small} | {len(sdata)})
     sd_covered = set()
     for off, retail_addr, name in dict.fromkeys(small):
@@ -968,7 +1078,9 @@ def main():
             else trim_sdata_item(item, off, sdata_relocs)
         theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
         linked_item, relocation_problems = relocate_sdata_item(
-            item, off, sdata_relocs, funcs, syms)
+            item, off, sdata_relocs, funcs, syms,
+            {".sdata": off_to_va(segs, sdata_range[0])}
+            if sdata_range and off_to_va(segs, sdata_range[0]) is not None else None)
         if relocation_problems:
             bad += 1
             print(f"RELOC sdata of {name} (retail 0x{retail_addr:08X}): "

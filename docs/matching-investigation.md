@@ -56,6 +56,22 @@ early register uses and can later look like an allocation problem. Likewise,
 a field incorrectly stored as an integer can create a memory dependency that
 later looks like a scheduler tie.
 
+## Check data in the complete assembly context
+
+A data owner can be read only from other translation units. Check its explicit
+object address, width, relocations and bytes against its owned retail section,
+as well as its placement in the complete unit. `INCLUDE_SDATA` switches back to
+`.text`; the compiler may believe its preceding C data section remains active
+and omit a section directive for the following C object. The isolated C object
+can therefore match while the complete build places it in executable code.
+
+The paired handler registry uses real pointer heads and a separate workspace
+byte count of `0x100000`. Expressing the complete DDS2 data run in C preserves
+the existing tick callback's small-data placement. `check_unit.py` checks the
+full owned `.sdata` span and its source objects, including objects with no local
+function consumer. A full retail link remains required to validate placement
+and alignment across unit boundaries.
+
 ## Find the first causal difference
 
 Keep a baseline and one source change justified by the current evidence.
