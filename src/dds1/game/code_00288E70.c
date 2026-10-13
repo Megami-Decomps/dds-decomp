@@ -69,7 +69,7 @@ extern DevState *sdfDevCreateModeState(const char *path,
                         s32 options);
 extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
 
-s32 func_00288E70(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 fileHandleFixedSlotReadEvent(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -140,7 +140,7 @@ void fileStartChunkedReadWhenReady(FileTransferJob *job) {
 }
 
 /* Drive allocation, chunked reads, close, and completion-list handoff. */
-s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -239,7 +239,7 @@ void fileStartChunkedWriteWhenReady(FileTransferJob *job) {
 }
 
 /* Advance a chunked write, then close and queue its completion callback. */
-s32 func_00289380(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
+s32 fileHandleChunkedWriteEvent(void *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileManagerWork;
     s32 saved;
 
@@ -317,7 +317,7 @@ void fileStartOrResumeQueuedJob(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfDevCreateCallbackState(job->name, func_002890B8, job);
+            job->deviceRequest = sdfDevCreateCallbackState(job->name, fileHandleAllocatedResourceReadEvent, job);
             break;
         case 7:
             job->allocationHandle = (s32)sdfTryAllocGeneralBlock(job->totalBytes);
@@ -342,7 +342,7 @@ void fileStartOrResumeQueuedJob(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfDevCreateCallbackState(job->name, func_00288E70, job);
+            job->deviceRequest = sdfDevCreateCallbackState(job->name, fileHandleFixedSlotReadEvent, job);
             break;
         case FILE_JOB_READY:
             locked = 0;
@@ -356,7 +356,7 @@ void fileStartOrResumeQueuedJob(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfDevCreateModeState(job->name, func_00289380, job, 0x180);
+            job->deviceRequest = sdfDevCreateModeState(job->name, fileHandleChunkedWriteEvent, job, 0x180);
         }
         break;
     }

@@ -250,7 +250,7 @@ extern s32 filePrepareMainBlobWrite(void);
 
 extern s32 fileOnAllWritten(void);
 
-extern void func_001004A0(void);
+extern void fileSetMemoryCardOperationActive(void);
 extern s8 D_0037F510[];
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern void sndReleaseTrackHandle(s32 command);
@@ -2006,7 +2006,7 @@ s32 mcHandleDetectionResult(void) {
     if (status == MC_POLL_PENDING) {
         return 0;
     }
-    func_00100498();
+    fileClearMemoryCardOperationActive();
     if (status < 0) {
         fileSetMenuFlowState(0);
         D_00437D3C = 6;
@@ -2018,7 +2018,7 @@ s32 mcHandleDetectionResult(void) {
 
 s32 fileStartMemoryCardDetection(void) {
     fileSetMenuFlowState(5);
-    func_001004A0();
+    fileSetMemoryCardOperationActive();
     func_002C92D0(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
@@ -2645,7 +2645,7 @@ void fileResetMenuFlowState(void) {
 extern void *memset(void *dst, s32 value, s32 size);
 
 struct SdfMemBlock;
-extern void func_001004A0(void);
+extern void fileSetMemoryCardOperationActive(void);
 extern s32 D_00437D80;
 extern void func_002CE738(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -2658,7 +2658,7 @@ void func_002CE208(s32 mode) {
     u32 titleNamesAddress;
     s32 world;
 
-    func_001004A0();
+    fileSetMemoryCardOperationActive();
     request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
     fileWaitForRequestReady((struct FileRequest *)request);
     node = request->packet.queueHead;
@@ -2849,7 +2849,7 @@ void fileReleaseMenuResources(void) {
         }
         sdfReleaseMemorySlot((s32 *)&D_00439030);
         kwlnTaskDestroyWithHierarchyByName("FileMentCalc", 1);
-        func_00100498();
+        fileClearMemoryCardOperationActive();
     }
 }
 
@@ -6491,7 +6491,7 @@ void fileCopyAndInvalidateSlotGroup(FileSlotTable *table, FileSlot *source) {
 }
 
 /* vu0 routine: shifts one slot's history and interpolates its trailing samples. */
-void func_002D7B58(FileSlotTable *record, FileSlot *slot) {
+void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
     f32 points[4][4];
     f32 color[4];
     f32 colorStep[4];
@@ -6655,7 +6655,7 @@ struct EffRandState;
 extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRand(struct EffRandState *state);
 extern f32 fabsf(f32);
-extern void func_002D7B58(FileSlotTable *, FileSlot *);
+extern void effUpdateGridRecordSlotHistory(FileSlotTable *, FileSlot *);
 
 typedef struct FileWaveMotion {
     f32 axis[4];             /* 0x00: xyz only */
@@ -6872,7 +6872,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_002D7B58(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -7078,7 +7078,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_002D7B58(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -7321,7 +7321,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_002D7B58(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -7558,7 +7558,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_002D7B58(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -7766,7 +7766,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_002D7B58(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -7984,7 +7984,7 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_002D7B58(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -8341,7 +8341,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_002D7B58(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }

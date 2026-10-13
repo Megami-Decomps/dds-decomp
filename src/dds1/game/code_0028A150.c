@@ -351,7 +351,7 @@ extern s32 filePollSlotRequestAndResumeFlow(void);
 
 extern u32 D_003BC804;
 
-extern void func_001005B8(void);
+extern void fileSetMemoryCardOperationActive(void);
 
 extern void func_00289D50(u32 handle);
 
@@ -2150,7 +2150,7 @@ s32 mcHandleDetectionResult(void) {
     if (status == MC_POLL_PENDING) {
         return 0;
     }
-    func_001005B0();
+    fileClearMemoryCardOperationActive();
     if (status < 0) {
         fileSetMenuFlowState(0);
         D_003BC854 = 6;
@@ -2162,7 +2162,7 @@ s32 mcHandleDetectionResult(void) {
 
 s32 fileStartMemoryCardDetection(void) {
     fileSetMenuFlowState(5);
-    func_001005B8();
+    fileSetMemoryCardOperationActive();
     func_00289D50(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
@@ -2749,7 +2749,7 @@ void fileReleaseMenuResources(void) {
         }
         sdfReleaseMemorySlot((s32 *)&D_003BD910);
         kwlnTaskDestroyWithHierarchyByName(D_003B26C8, 1);
-        func_001005B0();
+        fileClearMemoryCardOperationActive();
     }
 }
 
@@ -5806,7 +5806,7 @@ void fileCopyAndInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
 }
 
 /* vu0 routine: shifts one slot's history and interpolates its trailing samples. */
-void func_00297658(FileSlotTable *record, FileSlot *slot) {
+void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
     f32 points[4][4];
     f32 color[4];
     f32 colorStep[4];
@@ -5970,7 +5970,7 @@ struct EffRandState;
 extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRand(struct EffRandState *state);
 extern f32 fabsf(f32);
-extern void func_00297658(FileSlotTable *, FileSlot *);
+extern void effUpdateGridRecordSlotHistory(FileSlotTable *, FileSlot *);
 
 typedef struct FileWaveMotion {
     f32 axis[4];             /* 0x00: xyz only */
@@ -6187,7 +6187,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -6394,7 +6394,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -6638,7 +6638,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -6875,7 +6875,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }
@@ -7083,7 +7083,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                         slot->scale *= motion->scaleMultiplier;
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
-                        func_00297658(record, slot);
+                        effUpdateGridRecordSlotHistory(record, slot);
                         slot->state = frame + 1;
                     }
                 }

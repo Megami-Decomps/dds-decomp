@@ -83,7 +83,7 @@ extern u32 sdfDiscType;
 extern u8 D_00438A8C;
 extern u32 D_00438D80;
 extern u8 D_00439410[];
-s32 func_00101AC0(void) {
+s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     func_00356F58();
     sceSifInitRpc(0);
     sceSifInitIopHeap();

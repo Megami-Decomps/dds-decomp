@@ -24,7 +24,7 @@ extern u32 D_003BDA28;
 
 extern u8 D_003F98A0[];
 
-extern void func_002DE010(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
+extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 
 extern u16 D_003BDA24;
 
@@ -200,7 +200,7 @@ void sdfVuRotateObjectBasis(void *vectors) {
 }
 
 /* vu0 routine: modulate and clamp packed colors against the reference rows. */
-void func_002DE010(SdfVuColorTransform *result, u32 reference, u32 packedColor,
+void sdfVuBuildPackedColorTransform(SdfVuColorTransform *result, u32 reference, u32 packedColor,
                    u32 firstColor, u32 secondColor,
                    f32 blend, f32 scale, f32 y) {
     f32 scaledY;
@@ -216,7 +216,7 @@ void func_002DE010(SdfVuColorTransform *result, u32 reference, u32 packedColor,
 }
 
 void sdfVuTransformWorkAtOffset(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
-    func_002DE010(out, D_003BDA28, packedColor,
+    sdfVuBuildPackedColorTransform(out, D_003BDA28, packedColor,
                   work->unk08, work->unk04,
                   work->unk1C,
                   work->x + deltaX,

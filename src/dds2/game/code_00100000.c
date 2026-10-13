@@ -133,11 +133,11 @@ void func_00100488(void) {
 void func_00100490(void) {
 }
 
-void func_00100498(void) {
+void fileClearMemoryCardOperationActive(void) {
     D_00435B89 = 0;
 }
 
-void func_001004A0(void) {
+void fileSetMemoryCardOperationActive(void) {
     D_00435B89 = 1;
 }
 

@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "btl_camera_cursor.h"
 #include "common.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
@@ -102,6 +103,17 @@ typedef struct BtlCameraCursor {
     s32 parameterIndex128;
     s32 parameterIndex12C;
 } BtlCameraCursor;
+
+typedef char BtlCameraCursorSharedPathEndOffsetCheck[
+    ((u32)&((BtlCameraCursor *)0)->pathEnd == (u32)&((BtlCameraCursorView *)0)->pathEnd) ? 1 : -1];
+typedef char BtlCameraCursorSharedPathStartOffsetCheck[
+    ((u32)&((BtlCameraCursor *)0)->pathStart == (u32)&((BtlCameraCursorView *)0)->pathStart) ? 1 : -1];
+typedef char BtlCameraCursorSharedDirectionOffsetCheck[
+    ((u32)&((BtlCameraCursor *)0)->direction == (u32)&((BtlCameraCursorView *)0)->direction) ? 1 : -1];
+typedef char BtlCameraCursorSharedDistanceOffsetCheck[
+    ((u32)&((BtlCameraCursor *)0)->distance == (u32)&((BtlCameraCursorView *)0)->distance) ? 1 : -1];
+typedef char BtlCameraCursorExtentCheck[
+    (sizeof(BtlCameraCursor) == sizeof(BtlCameraCursorView)) ? 1 : -1];
 
 extern BtlCameraCursor D_0035F100;
 

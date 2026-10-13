@@ -11,7 +11,7 @@ extern void *sceSifAllocIopHeap(s32 size);
 extern EffRandState D_00398938;
 
 void effMiscSeedRandom(EffRandState *state, u32 seed);
-s32 sdfReadCachedClockTime(ClockTime *now);
+s32 effMiscReadCachedClockTime(ClockTime *now);
 
 extern u32 effMiscRand(void *state);
 
@@ -48,7 +48,7 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
     ClockTime now;
     s32 t;
 
-    sdfReadCachedClockTime(&now);
+    effMiscReadCachedClockTime(&now);
     t = now.year * 0x16E + now.day + D_00398910[now.month + 7] + 0xFFF4FF83;
     t = t * 0x18 + now.hour;
     t = t * 0x3C + now.min;
@@ -62,7 +62,7 @@ ClockTime D_003BD488 = {0};
 
 /* Copy cached time to now; return 0 for a valid refresh, -1 for failure, or 1 for reuse.
  * The native 20-tick refresh gate and month-as-year conversion are retained. */
-s32 sdfReadCachedClockTime(ClockTime *now) {
+s32 effMiscReadCachedClockTime(ClockTime *now) {
     SdfCdClock clock;
     s32 result = 1;
     s32 year;
@@ -98,7 +98,7 @@ extern vu16 D_003BDA84;
 extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
 
 /* Attempt one queued SIF packet: 0 means sent, 1 means empty or rejected. */
-s32 sndTrySendQueuedCommandPacket(void) {
+s32 sndTryDispatchQueuedCommand(void) {
     s32 readIndex = (s16)D_003BDA82;
     SndRingPacket *packet;
 
@@ -120,7 +120,7 @@ void sdfServiceUnblockedWorkerThread(void) {
         do {
             SleepThread();
         } while (D_003BDA80 != 0);
-        while (sndTrySendQueuedCommandPacket() == 0) {
+        while (sndTryDispatchQueuedCommand() == 0) {
         }
     }
 }

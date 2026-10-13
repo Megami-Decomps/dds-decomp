@@ -2416,7 +2416,7 @@ extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
-extern void func_001AA898(DatPartyRecord *, u32);
+extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, u32);
 extern void func_0020D208(f32 *, u32, s32, f32);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 extern void func_0020D228(void);
@@ -2558,7 +2558,7 @@ s32 func_0022F180(void) {
                 }
             } else {
                 btlBossDebugPrintf("btl:id=%X\n", battle->debug.modelMenu.cursor);
-                func_001AA898(&unit->partyRecord, battle->debug.modelMenu.cursor);
+                btlInitializePartyRecordFromEnemy(&unit->partyRecord, battle->debug.modelMenu.cursor);
                 unit->partyRecord.flags |= 0x23;
             }
             battle->debug.unk00 = 10;

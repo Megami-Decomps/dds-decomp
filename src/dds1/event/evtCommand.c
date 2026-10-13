@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -89,9 +90,6 @@ void fldInitializeSequenceAndResetFlags(s32 request, s32 sequence, s32 variant, 
 void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char *name);
 
 s32 sdfCheckPendingWorkWithInterrupts(void);
-
-
-void evtCreateWorldObjectForKey(s32 highPart, s32 lowPart);
 
 void evtDestroySecondaryWorldNode(void);
 
@@ -828,7 +826,6 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
 
 
 extern void dds3EnsureSlotData(void *);
-extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];

@@ -33,6 +33,9 @@ typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
 ObjBase *dds3CreateSlotResourceState(void *owner);
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object);
 u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object);
+/* Forward a callback to the object's slot-1 handler when one is present. */
+void dds3SetObjectSlot1MoverCallback(EffWorldNode *object,
+                                     s32 (*update)(struct ObjectTransform *, struct EffWorldNode *));
 void *dds3SetSlotByKind(EffWorldNode *object, EffWorldNode *slotData);
 void *dds3ExchangeSlot(EffWorldNode *object, void *slotData, s32 slotIndex);
 void *dds3GetSlot(EffWorldNode *object, s32 slotIndex);
@@ -42,6 +45,8 @@ EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 inde
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 void dds3RemoveWorldObjectNode(EffWorldNode *node);
+/* Store the source object address used by a slot's later path replacement. */
+void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
 EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *camera);
 EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);

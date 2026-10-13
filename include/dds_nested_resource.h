@@ -45,5 +45,7 @@ typedef char DdsNestedResourceLayoutAssert[
 
 /* Measures one group header and its two counted arrays of eight-byte records. */
 s32 dds3MeasureMenuRecord(DdsNestedGroup *group);
+/* Measures count eight-byte records and the subentries they reference. */
+s32 dds3MeasureRecordBlock(DdsCountedPayload *records, s32 count);
 
 #endif /* DDS_NESTED_RESOURCE_H */

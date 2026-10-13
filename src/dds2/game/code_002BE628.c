@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
 #include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
@@ -191,7 +192,7 @@ extern char D_0042B610[];
 
 
 #include "sdf_packet_alloc.h"
-extern void evtCreateWorldObjectForKey(s32, s32);
+
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);
 extern s32 D_00437CB8;

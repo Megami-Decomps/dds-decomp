@@ -18,6 +18,7 @@
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
 #include "mdl_resource_table.h"
+#include "mdl_grouped_parts_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -214,7 +215,6 @@ void kwlnTaskAddChild(s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void);
 
-extern PacWork *mdlApplyGroupedPartPackets(PacWork *, s32, s32, s32);
 
 
 extern u32 D_003BA8EC;
@@ -3347,8 +3347,6 @@ extern void dds3EnsureSlotData();
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-
-extern void dds3SetObjectSlot1MoverCallback(EffWorldNode *object, Dds3MoverUpdate arg);
 
 extern void *memset(void *dst, s32 value, u32 size);
 

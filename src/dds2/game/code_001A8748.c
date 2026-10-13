@@ -1413,7 +1413,7 @@ void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
 }
 
 /* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */
-void func_001AA898(DatPartyRecord *entry, s32 index) {
+void btlInitializePartyRecordFromEnemy(DatPartyRecord *entry, s32 index) {
     u32 count;
     u32 i;
 

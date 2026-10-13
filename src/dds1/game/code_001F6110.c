@@ -1247,7 +1247,7 @@ u32 btlScriptCmdSimpleD(void) {
 }
 
 /* Apply script parameter 0 as the command target-selection mode; return VM success. */
-u32 btlScriptSelectTargetsByMode(void) {
+u32 btlScriptCmdSelectTargetsByMode(void) {
     s32 context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
     btlSelectCommandTargetsByMode(context, value);

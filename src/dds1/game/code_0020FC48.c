@@ -2230,7 +2230,7 @@ extern void func_001D6300(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern u8 *btlCreateControlObject(void);
 extern void btlCopyUnitStats(s32, s32);
-extern void func_001A1990(DatPartyRecord *, s32);
+extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
@@ -2342,7 +2342,7 @@ s32 func_00214868(void) {
                 }
             } else {
                 btlBossDebugPrintf("btl:id=%X\n", state->debug.modelMenu.cursor);
-                func_001A1990(&unit->partyRecord, state->debug.modelMenu.cursor);
+                btlInitializePartyRecordFromEnemy(&unit->partyRecord, state->debug.modelMenu.cursor);
                 unit->partyRecord.flags |= 0x23;
             }
             state->debug.unk00 = 10;
