@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_trig.h"
@@ -29,7 +30,6 @@ typedef struct EffBillboardParams {
 
 
 extern EffResourceRenderState D_003D65E0;
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void *memset(void *, s32, u32);
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);

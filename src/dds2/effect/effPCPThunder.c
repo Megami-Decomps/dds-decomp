@@ -5,6 +5,7 @@
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -2800,7 +2801,6 @@ void effThunderSetCurveGroupTint(s32 work, u32 value) {
 extern EffThunderDrawParams D_00451F90;
 extern EffThunderDrawParams D_00451FC0;
 
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern const f32 D_003B1190[8][4];
 extern const u32 D_003B1100[28];
 extern const u32 D_003B1170[8];
