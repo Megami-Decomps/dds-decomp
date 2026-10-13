@@ -468,7 +468,7 @@ extern void fldUpdateCameraMoveOscillation(void);
 extern u8 fldTestSceneControlFlags(u32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
 extern void fldClearCameraModelColor(void);
-extern void func_00131290(void);
+extern void fldSetCameraObjectTransitionFlag(void);
 extern void fldClearCameraObjectTransitionFlags(void);
 typedef struct {
     f32 dist;
@@ -3625,7 +3625,7 @@ void fldUpdateCameraProximity(void) {
             fldClearCameraObjectTransitionFlags();
             fldClearCameraObjectHighlightFlag();
         } else {
-            func_00131290();
+            fldSetCameraObjectTransitionFlag();
             if (fldAreaState.mode == 1 || fldAreaState.mode == 3) {
                 fldClearCameraObjectHighlightFlag();
             } else if (fldAreaState.dist < 100.0f) {
@@ -4139,7 +4139,7 @@ void fldRestoreCameraModelColor(void) {
     fldPlayerModelContext->inner->color = 0x80808080;
 }
 
-void func_00131290(void) {
+void fldSetCameraObjectTransitionFlag(void) {
     dds3SetObjectFlags(fldPlayerObject, 0x200);
 }
 
@@ -4317,7 +4317,7 @@ void func_00131688(void) {
                 PCP_COPY_VECTOR(((EffWorldNode *)player)->inner->smoothedPosition,
                                 ((EffWorldNode *)player)->inner->position);
             } else {
-                func_00131290();
+                fldSetCameraObjectTransitionFlag();
                 PCP_COPY_VECTOR_F32(smoothed, ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition);
                 if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
                     ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
