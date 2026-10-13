@@ -59,7 +59,7 @@ extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_00437C38[];
 
 void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteArg) {
@@ -79,7 +79,7 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sp
         frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
-        func_00306CD0(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
         func_0035C860(text, D_00437C38, required);
         color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
         glyph = func_0019F5E8(thresholdX, y, 0, color, text, 0);
@@ -105,9 +105,9 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 
         if (resource != NULL) {
             if (i == 2) {
-                func_00306CD0(x - 0x40, 0x10, depth, alpha, 0, page->item[2], 0, param);
+                effDrawTextureSlotWithBlendedCornerColors(x - 0x40, 0x10, depth, alpha, 0, page->item[2], 0, param);
             } else {
-                func_00306CD0(x, 0x20, depth, alpha, 0, resource, 0, param);
+                effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, resource, 0, param);
             }
         }
         i++;
@@ -124,7 +124,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, param);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     } else {
-        func_00306CD0(x, 0x20, depth, alpha, 0, page->cursor[0], 0, param);
+        effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, page->cursor[0], 0, param);
     }
 
     if (showCurrent != 0) {
@@ -142,11 +142,11 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
             frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, param);
             frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
             if (page->flags & 1) {
-                func_00306CD0(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, param);
+                effDrawTextureSlotWithBlendedCornerColors(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, param);
                 mnuDrawRemainingAndTotalCounts(x + 0x1020, 0x438, alpha, value, page->cursor[2], 0);
             }
         } else {
-            func_00306CD0(x, 0x20, depth, alpha, 0, page->cursor[1], 0, param);
+            effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, page->cursor[1], 0, param);
         }
     }
 
@@ -302,11 +302,11 @@ void mnuDrawMenuPageSpriteLayers(s32 x, s32 y, s32 z, MenuPageSpriteSlot *slot,
     memcpy(firstPosition, D_00437C50, sizeof(firstPosition));
     memcpy(alternatePositions, D_0042B028, sizeof(alternatePositions));
     if (skipSprites == 0) {
-        func_00306CD0(x + firstPosition[0], y + firstPosition[1], z,
+        effDrawTextureSlotWithBlendedCornerColors(x + firstPosition[0], y + firstPosition[1], z,
                       0x100, 1, slot->sectionResources[0], 0, spriteArg);
-        func_00306CD0(x + alternatePositions[0], y + alternatePositions[1], z,
+        effDrawTextureSlotWithBlendedCornerColors(x + alternatePositions[0], y + alternatePositions[1], z,
                       0x100, 1, slot->sectionResources[1], 0, spriteArg);
-        func_00306CD0(x + alternatePositions[coordinateSet * 2 + 2],
+        effDrawTextureSlotWithBlendedCornerColors(x + alternatePositions[coordinateSet * 2 + 2],
                       y + alternatePositions[coordinateSet * 2 + 3], z,
                       0x100, 1, slot->sectionResources[2], 0, spriteArg);
     }

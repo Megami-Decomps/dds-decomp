@@ -27,7 +27,7 @@ extern s32 D_003C8C90[][3];
 extern SolarOverlayShape D_003C90C0[];
 extern void sdfDrawColoredTriangleFan(s32 *, u32, u32 *, s32, s32, s32);
 extern void evtPrepareSolarOverlayTestState(s32);
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
 
 
 typedef struct SolarLayerTimer {
@@ -80,7 +80,7 @@ void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32
 
         sprite->drawWidth = (s32)((f32)(sprite->width * scalePercent) / 100.0f) << 4;
         sprite->drawHeight = (s32)((f32)(sprite->height * D_003C8C90[layer][2]) / 100.0f) << 3;
-        func_00306CD0((x + D_003C8C90[layer][0]) << 4,
+        effDrawTextureSlotWithBlendedCornerColors((x + D_003C8C90[layer][0]) << 4,
                       (y + D_003C8C90[layer][1]) << 3, z,
                       (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
     }
@@ -110,7 +110,7 @@ void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 l
             (s32)((scale * (f32)sprite->width * (f32)scalePercent) / 100.0f) << 4;
         sprite->drawHeight =
             (s32)((scale * (f32)sprite->height * (f32)D_003C8C90[layer][2]) / 100.0f) << 3;
-        func_00306CD0(((x + D_003C8C90[layer][0]) << 4) - (sprite->drawWidth / 2),
+        effDrawTextureSlotWithBlendedCornerColors(((x + D_003C8C90[layer][0]) << 4) - (sprite->drawWidth / 2),
                       ((y + D_003C8C90[layer][1]) << 3) - (sprite->drawHeight / 2), z,
                       (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
     }
