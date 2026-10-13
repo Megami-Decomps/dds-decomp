@@ -6,6 +6,7 @@
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_task_queue_query.h"
 #include "kwln_task_state.h"
 #include "sdf_texture_offset_list.h"
 
@@ -19,8 +20,6 @@ extern void dds3ReplaceObjectResource(EffWorldNode *);
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
 void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
-extern KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index);
-extern s32 kwlnTaskGetStateList(u32 state);
 extern const char D_003AC038[0x28];
 extern void func_003003F0(const char *format, ...);
 
