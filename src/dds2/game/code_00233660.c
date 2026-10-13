@@ -17,6 +17,7 @@
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
 #include "mdl_resource_table.h"
+#include "mdl_grouped_parts_api.h"
 #include "file_request_api.h"
 
 #include "pcp_vu0.h"
@@ -186,7 +187,6 @@ void mdlDrawViewerSelectionLabel(void);
 
 
 
-extern PacWork *mdlApplyGroupedPartPackets(PacWork *, s32, s32, s32);
 
 extern u32 D_00435CBC;
 
