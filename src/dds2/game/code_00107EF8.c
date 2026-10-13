@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "sdf_dev_cons.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "evt_gradient_rect.h"
@@ -228,9 +229,6 @@ extern void kwlnFadeBackgroundStartOut();
 
 extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-extern s32 sdfDevConsSetControlByte(s32 arg0, s32 arg1);
-
-extern void sdfDevConsSetTextAttribute(s32 arg0, s32 arg1);
 
 extern void dds3AdminSetControlFlag(void);
 
@@ -1440,8 +1438,8 @@ u8 evtWaitFileMenuTaskFour(void) {
 u32 evtEnsureFontResourceChain(void) {
     if (evtConsoleFontResourceChain == 0) {
         evtConsoleFontResourceChain = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
-        sdfDevConsSetControlByte(evtConsoleFontResourceChain, 2);
-        sdfDevConsSetTextAttribute(evtConsoleFontResourceChain, 7);
+        sdfDevConsSetControlByte((DevConsState *)evtConsoleFontResourceChain, 2);
+        sdfDevConsSetTextAttribute((DevConsState *)evtConsoleFontResourceChain, 7);
     }
     return 0;
 }

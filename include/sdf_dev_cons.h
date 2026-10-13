@@ -31,6 +31,10 @@ typedef struct ConsBuf {
     u16 rowStep; /* 0x1E: added when the renderer advances to the next row */
 } ConsBuf;
 
+/* Update the console state stored at the corresponding field offsets. */
+void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte);
+void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute);
+
 typedef char DevConsState_size_must_be_0x20[(sizeof(DevConsState) == 0x20) ? 1 : -1];
 typedef char DevConsState_cells_at_0x1C[((u32)&((DevConsState *)0)->cells == 0x1C) ? 1 : -1];
 typedef char ConsBuf_size_must_be_0x20[(sizeof(ConsBuf) == 0x20) ? 1 : -1];
