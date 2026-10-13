@@ -1504,11 +1504,11 @@ void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
     dst->params.alpha.surfaceIndex = src->alpha.surfaceIndex;
 }
 
-void func_002CF420(void) {
+void sdfEnableFlagListViewTargetRelativeMode(void) {
     D_003BD2C8 = 1;
 }
 
-void func_002CF430(void) {
+void sdfDisableFlagListViewTargetRelativeMode(void) {
     D_003BD2C8 = 0;
 }
 
