@@ -2863,7 +2863,7 @@ extern char *D_003C98F8[];
 /* Draw one row of the shadow-configuration menu. */
 INCLUDE_RODATA(const s32, "game/code_00250010", D_004241C0);
 
-void func_00256AE0(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtViewerDrawShadowConfigRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeChild *node;
     s32 color;
 
@@ -2895,7 +2895,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     s32 lastRow = 0;
     s32 lastMode = 0;
 
-    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, func_00256AE0);
+    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, evtViewerDrawShadowConfigRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x16) {
         return 0;
