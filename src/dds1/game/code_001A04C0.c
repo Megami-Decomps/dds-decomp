@@ -629,16 +629,16 @@ void btlResetActorEntryState(void) {
     s32 context = btlRuntime;
     DatPartyRecord *entries = datGameState->party;
     u32 i;
-    *(s32 *)(context + 0x2C0) = 0;
-    *(s32 *)(context + 0x2C4) = 0;
-    *(s32 *)(context + 0x2C8) = 0;
-    *(s32 *)(context + 0x2CC) = 0;
-    *(s32 *)(context + 0x2D0) = 0;
+    ((BtlState *)context)->moneyEarned = 0;
+    ((BtlState *)context)->moneyTotal = 0;
+    ((BtlState *)context)->experienceEarned = 0;
+    ((BtlState *)context)->epEarned = 0;
+    ((BtlState *)context)->unk2D0 = 0;
     for (i = 0; i < 5; i++) {
         entries[i].huntExp = 0;
 
     }
-    memset((void *)(btlRuntime + 0x2B4), 0, 12);
+    memset(((BtlState *)btlRuntime)->itemDrops, 0, sizeof(((BtlState *)btlRuntime)->itemDrops));
 }
 
 extern const char D_003A1698[];
