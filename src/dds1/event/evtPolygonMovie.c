@@ -22,23 +22,6 @@ typedef struct EvtGlobal {
     u32 *flags;     /* 0x8 */
 } EvtGlobal;
 
-/* Polygon-movie clip: time is stored as a float, but compared as whole frames. */
-typedef struct PolyMovieClip {
-    u8 pad[8];       /* 0x0 */
-    f32 duration;    /* 0x8 */
-    f32 position;    /* 0xc */
-} PolyMovieClip;
-
-typedef struct PolyMovieState {
-    u8 pad[4];
-    PolyMovieClip *clip;
-} PolyMovieState;
-
-typedef struct PolyMovieObject {
-    u8 pad[0x18];
-    PolyMovieState *state;
-} PolyMovieObject;
-
 /* Polygon-movie event parameter blocks blended by the functions below.
  * Each field is named for how the blend functions use it:
  *   lerpN  -> evtMovieInterpolateFloatIfEnabled, the float lerp
