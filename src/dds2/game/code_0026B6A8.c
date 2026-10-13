@@ -253,7 +253,7 @@ s32 mnuFirstPresentMainCharacterIndex(void) {
     return 0;
 }
 
-s32 func_0026BD38(s32 index) {
+s32 mnuGetScrollingStripCountForLayout(s32 index) {
     return index == 1 ? 4 : 6;
 }
 
@@ -265,7 +265,7 @@ void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
 
     memset(state, 0, sizeof(*state));
     state->layout = layout;
-    count = func_0026BD38(layout);
+    count = mnuGetScrollingStripCountForLayout(layout);
     state->resource = resource;
     state->layer = layer;
     state->unk8 = 0;
@@ -280,7 +280,7 @@ void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
 
 
 /* Give each scrolling strip a random speed in the requested range. */
-void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum) {
+void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum) {
     /* scrollSpeed is the final word in each five-word strip record. */
     s32 *offsets = &state->strips[0].scrollSpeed;
     s32 range = maximum - minimum;
@@ -297,7 +297,7 @@ void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 m
     }
 }
 
-void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused) {
+void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused) {
     state->unk14 = vertical;
     state->unk18 = horizontal;
 }
@@ -312,7 +312,7 @@ typedef struct DspStripVerticalOffsets {
 
 extern const DspStripVerticalOffsets D_00425018;
 
-void func_0026BEC0(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex) {
+void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex) {
     DspStripVerticalOffsets verticalOffsets = D_00425018;
     DspScrollingStrip *strip;
     EffectSlotSet *resource;
@@ -324,7 +324,7 @@ void func_0026BEC0(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *sta
     s32 i;
     s32 count;
 
-    count = func_0026BD38(state->layout);
+    count = mnuGetScrollingStripCountForLayout(state->layout);
     for (i = 0; i < count; i++) {
         strip = &state->strips[i];
         uiDrawTexturedSurfaceAtFarDepth(surfaceIndex);

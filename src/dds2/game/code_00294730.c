@@ -68,8 +68,8 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
                   D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
                   D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], 0x53);
-    func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
-    func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
+    mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], 0x53);
+    mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
     mnuDrawType2PanelEffects(object, scale, 0x53);
 
     frameCount = frames - 5;
@@ -114,8 +114,8 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
                   D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
                   D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], 0x53);
-    func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
-    func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
+    mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], 0x53);
+    mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
     mnuDrawType2PanelEffects(object, scale, 0x53);
 
     frameCount = (s32)elapsed;
@@ -146,8 +146,8 @@ void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContex
     effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
                   0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], option);
-    func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], option);
-    func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], option);
+    mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], option);
+    mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], option);
     mnuDrawType2PanelEffects(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
     effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,

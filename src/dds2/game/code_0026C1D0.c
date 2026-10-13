@@ -352,7 +352,7 @@ extern s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
 /* Advance the singleton window through its active, gated and cleanup phases. */
-void func_0026C7F8(s32 notify, s32 refresh) {
+void dspAdvanceMessageWindowControl(s32 notify, s32 refresh) {
     s32 handle = dspWindowHandle;
 
     if (handle < 0) {
@@ -394,7 +394,7 @@ void func_0026C7F8(s32 notify, s32 refresh) {
 
 /* Pass the supplied value to mode one of the existing message-window worker. */
 void func_0026C8E8(u32 value) {
-    func_0026C7F8(value, 1);
+    dspAdvanceMessageWindowControl(value, 1);
 }
 
 /* Request value one from the existing mode-one message-window worker. */

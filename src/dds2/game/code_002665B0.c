@@ -236,11 +236,11 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
         effResolveAndReleaseResource(scene->resourceBank[3]);
         mnuInitScrollingStripState(&scene->panels[0], 0,
             scene->resourceBank[0], 0x46, 0x43);
-        func_0026BE28(&scene->panels[0], 1, 0x10, 0x20);
+        mnuSetScrollingStripSpeedsRandomly(&scene->panels[0], 1, 0x10, 0x20);
         mnuInitScrollingStripState(&scene->panels[1], 0,
             scene->resourceBank[0], 0x46, 0x43);
-        func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
-        func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
+        mnuSetScrollingStripSpeedsRandomly(&scene->panels[1], 0, 0x10, 0x20);
+        mnuSetScrollingStripOverlayPosition(&scene->panels[1], 0x1470, 0xCB8, 0);
         func_00266460(scene->resourceBank[2], &scene->campEffect.resources);
     } else {
         for (i = 0; i < 2; i++) {
@@ -250,11 +250,11 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
         }
         mnuInitScrollingStripState(&scene->panels[0], 1,
             scene->resourceBank[0], 0x46, 0x43);
-        func_0026BE28(&scene->panels[0], 1, 0x10, 0x20);
+        mnuSetScrollingStripSpeedsRandomly(&scene->panels[0], 1, 0x10, 0x20);
         mnuInitScrollingStripState(&scene->panels[1], 1,
             scene->resourceBank[0], 0x46, 0x43);
-        func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
-        func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
+        mnuSetScrollingStripSpeedsRandomly(&scene->panels[1], 0, 0x10, 0x20);
+        mnuSetScrollingStripOverlayPosition(&scene->panels[1], 0x1470, 0xCB8, 0);
     }
     scene->alternateBatch = effCreateResourceSlotSet(scene->resourceBank[0], 7, 1);
 }
@@ -1240,8 +1240,8 @@ void mnuDrawAndStepTerminalPanelFade(s32 decrement, MenuSlotState *state) {
             state->panelFade = 0;
         }
     }
-    func_0026BEC0(0, 0, 0, state->panelFade, &state->panels[0], 0x52);
-    func_0026BEC0(0, 0xCF8, 0, state->panelFade, &state->panels[1], 0x52);
+    mnuDrawAndAdvanceScrollingStrips(0, 0, 0, state->panelFade, &state->panels[0], 0x52);
+    mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, state->panelFade, &state->panels[1], 0x52);
 }
 
 /* Classify panel fade: zero, nonzero below sixty, or at least sixty.
