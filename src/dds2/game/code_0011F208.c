@@ -44,7 +44,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 
 
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 extern void func_00122E50(void);
 

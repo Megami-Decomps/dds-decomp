@@ -92,7 +92,7 @@ typedef struct EffScaledRecord {
 
 extern s32 effBillResourceOwners[];
 
-s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 
 typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;

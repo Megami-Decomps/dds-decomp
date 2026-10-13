@@ -442,7 +442,7 @@ void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, 
 
 extern s32 strcmp(const char *a, const char *b);
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern s32 D_00368BA8[4];

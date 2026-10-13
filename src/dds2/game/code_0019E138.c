@@ -41,7 +41,7 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
@@ -1627,7 +1627,6 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, (u32)packet);
 }
 
-extern s32 sdfAllocPacketAligned(s32);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 /* The packet builder returns a 0x30-byte command with two trailing qwords. */

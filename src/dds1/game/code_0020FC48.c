@@ -1327,7 +1327,7 @@ void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern s32 kwlnGetDrawBufferIndex(void);
 
@@ -1643,7 +1643,6 @@ void btlReleaseRuntimeResource(void) {
     kwlnTextureReleaseHeldReference();
 }
 
-extern s32 sdfAllocPacketAligned(s32);
 
 extern u8 D_00325860[];
 

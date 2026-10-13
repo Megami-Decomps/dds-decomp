@@ -1036,7 +1036,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 
 struct RefObj;
 extern SdfTex *func_002DDD60(void *, struct RefObj *);
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern s32 D_003BE0E0[];
 
 /* Draw an indexed glyph with independently sized geometry and fixed atlas UVs. */

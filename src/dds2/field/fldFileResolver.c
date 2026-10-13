@@ -410,7 +410,7 @@ extern s32 fldSecondarySceneObject;
 
 
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 

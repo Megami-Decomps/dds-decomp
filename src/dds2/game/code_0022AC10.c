@@ -296,7 +296,7 @@ extern void frFontDrawGlyphChain(void *, s32, s32);
 
 extern void func_0020D1C0(s32, s32, s32, s32, u32, u32);
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 

@@ -29,7 +29,7 @@ extern void (*D_003AAFC0[])();
 
 extern BillDispatch effBillConstructorEntries[];
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void effBattleReleaseParameterBanks(SoundMixer *);

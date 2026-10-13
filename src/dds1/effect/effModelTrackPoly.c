@@ -433,7 +433,7 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src) {
 
 extern SdfPoolNode *D_00355710[];
 extern SdfPoolNode D_00325248;
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffTrackPolyDraw *);
 
 /* Walk at most two ring runs. Each full strip consumes 16 vertices, with

@@ -108,7 +108,7 @@ struct SdfDmaNode;
 
 extern SdfPoolNode D_003253E8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 

@@ -290,7 +290,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 extern void *func_0011F250();
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */

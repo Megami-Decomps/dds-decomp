@@ -54,7 +54,7 @@ extern u64 D_003BB2E8;
 
 extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct ItfColorPanelWork {

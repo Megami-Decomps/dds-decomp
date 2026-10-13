@@ -6205,7 +6205,7 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C7760);
 
 
 extern SdfPoolNode D_003805A8;
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,

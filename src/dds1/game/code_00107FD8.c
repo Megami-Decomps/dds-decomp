@@ -377,7 +377,7 @@ typedef struct EvtGsCommand {
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-extern s32 sdfAllocPacketAligned(s32);
+#include "sdf_packet_alloc.h"
 
 
 typedef struct SdfDrawPacket SdfDrawPacket;

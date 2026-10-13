@@ -11,7 +11,7 @@
 #include "kwln.h"
 
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern void effObjectListCountersReset(void);
 
 

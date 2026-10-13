@@ -4030,7 +4030,7 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
 
 extern u8 D_00355640[];
 extern SdfPoolNode *D_00355688[];
-extern s32 sdfAllocPacketAligned(s32 size);
+#include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPCPBeamDrawParams *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
