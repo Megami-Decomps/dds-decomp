@@ -115,7 +115,7 @@ struct SdfListHead *sdfCreateResetPacketList(void) {
 }
 
 /* Build the 0x80-byte bordered rectangle packet: the rectangle with its two color words, then its outline corners. */
-void *func_0011D3E8(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
+void *sdfCreateBorderedRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
     u64 *packet;
     s32 right;
     s32 bottom;
@@ -402,7 +402,7 @@ void fldFormatSecondsText(char *text, f32 value) {
     text[4] = 0;
 }
 
-extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
@@ -430,7 +430,7 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
         }
         color |= 0x80000000;
     }
-    sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x510, y + 0x18,
+    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x510, y + 0x18,
                      0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y,
@@ -469,7 +469,7 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
     const char *label;
 
     color = (color & 0xFFFFFF) | 0x80000000;
-    sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x510, y + 0x18,
+    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x + 0x510, y + 0x18,
                     0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
         switch (i) {

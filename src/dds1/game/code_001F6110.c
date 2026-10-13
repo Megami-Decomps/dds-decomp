@@ -2791,7 +2791,7 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
 extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0039862B[];
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern SdfTex *effGetBillResourceTexture(s32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
@@ -2924,13 +2924,13 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
 
     packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packetList);
-    sdfAppendPacket(packetList, (u32)func_0011D3E8(
+    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(
         (descriptor->originX << 4) + 0x7000,
         (descriptor->originY << 3) + 0x7900,
         0xFEFFFF, 0xCC0, 0x740, descriptor->fillColor, descriptor->borderColor));
 
     if (descriptor->previewActive != 0) {
-        sdfAppendPacket(packetList, (u32)func_0011D3E8(
+        sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(
             (descriptor->originX << 4) + 0x7000,
             (descriptor->originY << 3) + 0x8050,
             0xFEFFFF, 0x800, 0x400, 0, descriptor->borderColor));
