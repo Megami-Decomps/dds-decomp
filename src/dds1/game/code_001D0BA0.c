@@ -2532,16 +2532,16 @@ void btlReleaseActorModelResources(BtlUnit *object) {
             *(s32 *)((u8 *)object + 0x324) = 0;
             btlBossDebugPrintf(D_003A3AD0, object);
         }
-        model = *(EffWorldNode **)((u8 *)object + 0x31C);
+        model = object->effectObject;
         if (model != 0) {
             dds3RemoveWorldObjectNode(model);
-            *(s32 *)((u8 *)object + 0x31C) = 0;
+            object->effectObject = 0;
             *(s32 *)((u8 *)object + 0x320) = 0;
         }
     } else {
         *(s32 *)((u8 *)object + 0x308) = 0;
         *(s32 *)((u8 *)object + 0x324) = 0;
-        *(s32 *)((u8 *)object + 0x31C) = 0;
+        object->effectObject = 0;
         *(s32 *)((u8 *)object + 0x320) = 0;
     }
     state = *(u32 *)((u8 *)object + 0x118) & ~1;
@@ -3034,7 +3034,7 @@ void btlSetUnitPosition(BtlUnit *object, void *position) {
     VU0_STORE_VF(vf10, world);
     if (((u32)object->status.flags & 2) != 0) {
         world[2] += *(f32 *)((u8 *)object + 0x88);
-        effObjSetInnerPosition(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)world);
+        effObjSetInnerPosition(object->effectObject, (u128 *)world);
     }
 }
 
@@ -3174,7 +3174,7 @@ void btlSetUnitRotation(BtlUnit *object, void *rotation) {
     effMiscQuatMultiplyVU();
     VU0_STORE_VF_UNCLOBBERED(vf10, vector);
     if (((u32)object->status.flags & 2) != 0) {
-        effObjSetInnerRotation(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)vector);
+        effObjSetInnerRotation(object->effectObject, (u128 *)vector);
     }
 }
 
