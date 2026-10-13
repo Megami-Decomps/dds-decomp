@@ -2706,7 +2706,8 @@ void func_0020D1F0(void) {
 void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
-void func_0020D200(void) {
+/* Retail stub for the two extents and orientation submitted by camera diagnostics. */
+void func_0020D200(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
 }
 
 void func_0020D208(f32 *position, u32 color, s32 mode, f32 scale) {
