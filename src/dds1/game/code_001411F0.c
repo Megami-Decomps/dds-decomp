@@ -939,7 +939,7 @@ extern SdfTex *D_003D40A0[4];
 extern SdfModel *D_00348F30[];
 extern FldSlot D_003D40B0[];
 
-void func_001426E0(void) {
+void fldResetSceneResourceTables(void) {
     s32 i;
 
     fldAreaState.unkC4 = -1;

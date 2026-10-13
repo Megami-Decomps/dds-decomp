@@ -1165,7 +1165,7 @@ void fldReleaseSceneRecordChunk(void) {
     fldSceneRecordCount = 0;
 }
 
-void func_00145818(void) {
+void fldResetSceneResourceTables(void) {
     s32 i;
 
     fldAreaState.unkC4 = -1;

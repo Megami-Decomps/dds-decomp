@@ -783,7 +783,7 @@ extern void fldParseMixLb();
 
 extern void fldLoadBattleSkyAndFilter();
 
-extern void func_00145818();
+extern void fldResetSceneResourceTables();
 
 extern void fldLoadFieldTablesAndIndexStages();
 
@@ -796,7 +796,7 @@ void fldInitializeDisplayAndSceneSound(void) {
     effMiscSeedRandom(D_0038A6E0, 0x1E240);
     fldParseMixLb();
     fldLoadBattleSkyAndFilter();
-    func_00145818();
+    fldResetSceneResourceTables();
     fldLoadFieldTablesAndIndexStages();
 }
 
