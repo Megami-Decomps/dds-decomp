@@ -396,6 +396,15 @@ parks. A broad sweep that mostly returns negatives still narrows the method's
 scope. Small word counts do not promise easy closure, while one real owner
 correction can unlock several larger bodies and their twins.
 
+The checker's `DIFF` count is **differing** words, not matching words. Its
+`text prefix` line gives both counts explicitly and, when the native assembly
+header is available, reports emitted/native sizes and uncovered/excess bytes.
+Repeated relocation diagnostics for one instruction count once in that line.
+An `OVER` body still fails even if its bounded prefix agrees: the checker shows
+differences only up to the next retail-function boundary. These instruction
+counts use the existing relocation comparison rules and do not grant partial
+matching credit or replace the whole-unit and linked-image gates.
+
 ## Qualify the retained source state
 
 Follow [Contributing](CONTRIBUTING.md): whole touched units must be clean and

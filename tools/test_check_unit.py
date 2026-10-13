@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Focused tests for relocation-aware unit verification."""
 
+import contextlib
+import io
 import struct
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+
+import check_unit
 
 from check_unit import (
     address,
@@ -25,7 +31,88 @@ from check_unit import (
     source_owned_item_size,
     symbols,
     trim_sdata_item,
+    native_function_size,
+    text_comparison_extent,
+    text_residual_summary,
 )
+
+
+class TextResidualTests(unittest.TestCase):
+    def test_agreeing_overrun_prefix_still_fails_the_complete_checker(self):
+        compiled = struct.pack("<III", 0x03E00008, 0, 0x24020001)
+        retail = struct.pack("<III", 0x03E00008, 0, 0xDEADBEEF)
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root / "src/dds1/game/unit.c"
+            unit.parent.mkdir(parents=True)
+            unit.write_text("void target(void) {}\n")
+            config = root / "config/dds1"
+            config.mkdir(parents=True)
+            (config / "symbol_addrs.txt").write_text(
+                "target = 0x1000; // type:func\nnext = 0x1008; // type:func\n")
+            (config / "SLUS_209.74.yaml").write_text("")
+            original = root / check_unit.RETAIL["dds1"]
+            original.parent.mkdir(parents=True)
+            original.write_bytes(retail)
+            assembly = root / "asm/dds1/nonmatchings/game/unit/target.s"
+            assembly.parent.mkdir(parents=True)
+            assembly.write_text("nonmatching target, 0x8\n")
+            stack.enter_context(patch.object(check_unit, "ROOT", root))
+            stack.enter_context(patch.object(check_unit.sys, "argv", ["check_unit.py", str(unit)]))
+            stack.enter_context(patch("eeas_compat.lit4_range", return_value=(0, 0)))
+            stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
+            stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
+            stack.enter_context(patch.object(check_unit, "text_section", return_value=compiled))
+            stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
+            stack.enter_context(patch.object(check_unit, "relocations", return_value={".text": {}, ".rodata": {}, ".sdata": {}}))
+            stack.enter_context(patch.object(check_unit, "run", side_effect=lambda *args: "0 c T target\n" if "-S" in args else ""))
+            stack.enter_context(patch.object(check_unit.subprocess, "run", return_value=SimpleNamespace(returncode=0, stderr="")))
+            output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            self.assertEqual(stopped.exception.code, 1)
+            report = output.getvalue()
+            self.assertIn("OVER target", report)
+            self.assertIn("text prefix: 2 matching, 0 differing words", report)
+            self.assertIn("0 match, 1 differ", report)
+            self.assertNotIn("DIFF target", report)
+            self.assertNotIn("OK   target", report)
+
+    def test_nonzero_overrun_compares_only_the_native_prefix(self):
+        text = struct.pack("<IIII", 0xFFFFFFFF, 0x03E00008, 0, 0x24020001)
+        self.assertEqual(text_comparison_extent(text, 4, 12, 0x1000, 0x1008),
+                         (8, True))
+        # An agreeing prefix still reports excess code, not an exact function.
+        self.assertEqual(text_residual_summary(12, 8, [], 8),
+                         "text prefix: 2 matching, 0 differing words; 12 emitted bytes, "
+                         "8 native bytes; 0 uncovered, 4 excess bytes")
+
+    def test_zero_padding_preserves_the_original_comparison_path(self):
+        text = struct.pack("<III", 0x03E00008, 0, 0)
+        self.assertEqual(text_comparison_extent(text, 0, 12, 0x1000, 0x1008),
+                         (12, False))
+        self.assertEqual(text_comparison_extent(text, 0, 12, 0x1000, None),
+                         (12, False))
+
+    def test_repeated_relocation_diagnostics_do_not_double_count_a_word(self):
+        diffs = [(0, 1, 2, "HI16 pair one"), (0, 1, 2, "HI16 pair two"),
+                 (8, 3, 4, "outside the native function")]
+        self.assertEqual(text_residual_summary(12, 12, diffs, 8),
+                         "text prefix: 1 matching, 1 differing words; 12 emitted bytes, "
+                         "8 native bytes; 0 uncovered, 4 excess bytes")
+
+    def test_short_candidate_reports_uncovered_native_code(self):
+        diffs = [(4, 1, 2, "")]
+        self.assertEqual(text_residual_summary(8, 8, diffs, 12),
+                         "text prefix: 1 matching, 1 differing words; 8 emitted bytes, "
+                         "12 native bytes; 4 uncovered, 0 excess bytes")
+
+    def test_missing_or_unaligned_extent_is_not_invented(self):
+        self.assertIsNone(native_function_size("nonmatching other, 0x10\n", "target"))
+        self.assertIsNone(native_function_size("nonmatching target, 0x11\n", "target"))
+        self.assertEqual(native_function_size("nonmatching target, 0x25C\n", "target"), 604)
+        self.assertEqual(text_residual_summary(8, 8, [(0, 1, 2, "")]),
+                         "text prefix: 1 matching, 1 differing words; 8 emitted bytes")
 
 
 class LinkerSymbolTests(unittest.TestCase):

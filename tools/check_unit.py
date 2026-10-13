@@ -463,6 +463,38 @@ def asm_literal_users(source_text, asm_dir, syms, addr):
                   and pat.search((asm_dir / f"{n}.s").read_text()))
 
 
+def text_comparison_extent(text, offset, size, address, next_address):
+    """Keep the existing overrun gate, but allow its bounded prefix to be shown."""
+    if next_address is not None and address + size > next_address:
+        boundary = next_address - address
+        if any(text[offset + boundary:offset + size]):
+            return boundary, True
+    # Zero padding keeps the original comparison and acceptance rules.
+    return size, False
+
+
+def native_function_size(assembly, name):
+    """Read the function's own extent, excluding padding before its neighbour."""
+    match = re.search(rf"^nonmatching\s+{re.escape(name)},\s*(0x[0-9A-Fa-f]+)\b",
+                      assembly, re.M)
+    size = int(match[1], 16) if match else None
+    return size if size and size % 4 == 0 else None
+
+
+def text_residual_summary(size, comparison_size, diffs, native_size=None):
+    """Report distinct differing words and coverage, without granting match credit."""
+    prefix_size = min(comparison_size, native_size) if native_size is not None else comparison_size
+    different = len({offset for offset, *_ in diffs if offset < prefix_size})
+    matching = prefix_size // 4 - different
+    summary = (f"text prefix: {matching} matching, {different} differing words; "
+               f"{size} emitted bytes")
+    if native_size is not None:
+        summary += (f", {native_size} native bytes; "
+                    f"{max(native_size - size, 0)} uncovered, "
+                    f"{max(size - native_size, 0)} excess bytes")
+    return summary
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("unit", type=Path)
@@ -642,15 +674,14 @@ def main():
         # A function may not run into the next retail function: that means the
         # retail "start" there is really part of this one (tools/find_fragments.py).
         nxt = next((a for a in func_starts if a > addr), None)
-        if nxt is not None and addr + size > nxt and any(
-                struct.unpack_from("<I", text, off + (nxt - addr) + j)[0] for j in range(0, off + size - (off + nxt - addr), 4)):
+        comparison_size, overrun = text_comparison_extent(text, off, size, addr, nxt)
+        if overrun:
             print(f"OVER {name} @ 0x{addr:08X}: runs past the next function at 0x{nxt:08X}")
             bad += 1
-            continue
         pending_hi = {}
         rodata_hi = sdata_hi = None
         text_hi = {}  # lui destination register -> (index, mine, want)
-        for i in range(0, size, 4):
+        for i in range(0, comparison_size, 4):
             mine = struct.unpack_from("<I", text, off + i)[0]
             want = struct.unpack_from("<I", retail, roff + i)[0]
             rel = relocations_at = relocs.get(off + i)
@@ -751,9 +782,14 @@ def main():
                 if (hi[2] & 0xFFFF) != linked_hi_field(hi[5], hi_lo_addend(hi[1], 0)):
                     diffs.append(hi[:3] + (f"{hi[3]} {hi[4]} (unpaired HI16)",))
         if diffs:
-            bad += 1
-            print(f"DIFF {name} @ 0x{addr:08X}: {len(diffs)} of {size // 4} words differ"
+            if not overrun:
+                bad += 1
+            print(f"DIFF {name} @ 0x{addr:08X}: {len(diffs)} of {comparison_size // 4} words differ"
                   f" (first at +0x{diffs[0][0]:X})")
+        if diffs or overrun:
+            assembly = ROOT / "asm" / version / "nonmatchings" / unit_name / f"{name}.s"
+            native_size = native_function_size(assembly.read_text(), name) if assembly.exists() else None
+            print("       " + text_residual_summary(size, comparison_size, diffs, native_size))
             for i, mine, want, note in (diffs if args.verbose else diffs[:3]):
                 print(f"       +0x{i:03X} mine {mine:08X} retail {want:08X} {note}")
         else:
