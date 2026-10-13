@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_voice_resource_path_api.h"
 #include "sdf_resource.h"
 #include "sdf_packed_resource.h"
 #include "sdf.h"
@@ -234,7 +235,6 @@ extern SdfSoundRpcRequest *D_004391D4;
 extern s32 D_004391D8;
 extern DevState *D_004391DC;
 extern SdfSoundResidentBuffer D_0047B418;
-extern char *mnuBuildVoiceResourcePath(char *, char *);
 extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sndCopyToIopAndWait(s32, void *, s32);
