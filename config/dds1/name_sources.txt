@@ -6406,7 +6406,7 @@
 0x002CDCF0	scrRemoveSlot	inferred	scr script flags and VM helpers in game/code_002CC750.c
 0x002CDD38	prfGetMantraDisplayParameter	inferred	Corrected legacy offset-derived getter name: read profile metadata byte value04, promoted to s32 in DDS1; actual styled-label consumers narrow to u8 and select D0036C490[label-1]. DDS2 twin0x003151D0 uses the byte as a repeated marker count, not the same UI role. [Namer1 batch39, medium]
 0x002CDD60	prfGetRequiredProfileLevel	inferred	Mirrors DDS2; returns the per-profile level threshold compared with the unit's current level.
-0x002CDD88	prfGetParamWord7b5	inferred	legacy ProfileId_GetParamWord_7b5: profile row param word at +0x7B5
+0x002CDD88	prfGetProfileParameterByte5	inferred	Returns the profile parameter row byte at offset 5; the mantra-grid entry builder copies this value into its value05 field. The paired DDS2 getter reads the same offset.
 0x002CDDB8	scrCallIfOperandReady	inferred	calls func_002CD7B8 twice then forwards selected index to func_002CDDB0 stub
 0x002CDE20	prfGetSkillAtIndex	inferred	legacy ProfileId_GetSkillAtIndex: profile skill id at index 0..7
 0x002CDE68	ptyCheckLevelAtLeastProfileParam7b6	inferred	legacy PartyUnit_CheckLevelAtLeastProfileParam7b6: unit level >= profile param word 0x7B6

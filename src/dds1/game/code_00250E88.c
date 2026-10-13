@@ -395,7 +395,7 @@ s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
 
 extern s32 prfReqCheckWithFallback(ScrVmOperand *, u16);
 extern u16 prfGetRequiredProfileLevel(u16);
-extern u8 prfGetParamWord7b5(u16);
+extern u8 prfGetProfileParameterByte5(u16);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
 extern u32 prfGetCapValue(u16);
 extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
@@ -418,7 +418,7 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
     memset(entry, 0, sizeof(MnuMantraGridEntry));
     entry->sceneId = profileId;
     entry->requiredLevel = prfGetRequiredProfileLevel(entry->sceneId);
-    entry->value05 = prfGetParamWord7b5(entry->sceneId);
+    entry->value05 = prfGetProfileParameterByte5(entry->sceneId);
     prfBuildRawSkillList(entry->sceneId, &entry->skills);
     entry->cap = prfGetCapValue(entry->sceneId);
     entry->frame = 0x3C;

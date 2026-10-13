@@ -806,8 +806,8 @@ u16 prfGetRequiredProfileLevel(u16 profileId) {
     return D_003907B0[profileId].requiredLevel;
 }
 
-/* Read a byte parameter from the unchecked profile row. */
-u8 prfGetParamWord7b5(u16 profileId) {
+/* Read byte 5 from the unchecked profile parameter row. */
+u8 prfGetProfileParameterByte5(u16 profileId) {
     return D_003907B0[profileId].value05;
 }
 
