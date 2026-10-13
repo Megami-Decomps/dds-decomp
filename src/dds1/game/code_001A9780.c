@@ -13,6 +13,7 @@
 #include "btl_resource.h"
 #include "pcp_vu0.h"
 #include "btl_ui.h"
+#include "btl_phase_panel_work.h"
 #include "btl_roster_pair.h"
 #include "sdf.h"
 #include "btl.h"
@@ -1627,43 +1628,6 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
     }
     return 0;
 }
-
-/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
- * the later panel updater handles the other five points and their fades. */
-typedef struct BattlePhasePanelWork {
-    s32 frames;
-    s32 mode;
-    s8 phase;
-    s8 secondaryPhase;
-    u8 pad0A[2];
-    s32 echoCount;
-    u8 pad10[5];
-    s8 flags[2];
-    u8 pad17;
-    s32 waitCounter; /* 0x18: delay before the first slide */
-    u8 pad1C[8];
-    s32 counter;
-    s32 angle;
-    u8 pad2C[0xC];
-    BattleSelectionPosition current[8]; /* 0x38 */
-    BattleSelectionPosition saved[8];   /* 0x78 */
-    s32 fade[8][4];                    /* 0xB8 */
-} BattlePhasePanelWork;
-
-typedef char BattlePhasePanelWork_size_must_be_0x138[
-    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_waitCounter_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_current_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_saved_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_fade_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
 
 typedef struct BtlPsechgPositions {
     BattleSelectionPosition points[5];
