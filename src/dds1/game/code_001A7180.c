@@ -654,7 +654,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A7180", func_001A8A30);
+INCLUDE_ASM(const s32, "game/code_001A7180", btlHasRequiredCommandAffinityPartners);
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
     u8 *status = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].unk3E;

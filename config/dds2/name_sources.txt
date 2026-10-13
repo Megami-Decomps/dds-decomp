@@ -2361,6 +2361,7 @@
 0x001B29A8	btlGetSelectedUnitProperty	inferred	Looks up selected unit index and resolves alternate property from D_003B4F74 table.
 0x001B2CC0	btlIsSelectedActorStatusAndRecordClear	inferred	Requires clear selected entry, actor status flags and indexed record state. [names_reviewed16.tsv]
 0x001B2D38	btlAreUnitStatusAndEntryFlagsClear	inferred	Requires the matching unit status and entry permission bits both to be clear. [names_reviewed14.tsv]
+0x001B2F50	btlHasRequiredCommandAffinityPartners	inferred	Counts command affinity requirements and checks whether eligible active scene actors can satisfy the two- or three-member partner set; DDS2 callers use the result for action availability and script selection. DDS1 twin 0x001A8A30.
 0x001B3188	btlHasAdjacentActorRecordStatus	inferred	Checks two neighboring status bytes for the selected actor record. [names_reviewed14.tsv]
 0x001B31E8	btlIsActorHighStateFlagClear	inferred	Returns whether the checked high actor-state bit is clear in both titles. [names_reviewed17.tsv]
 0x001B3200	btlCanSpawnAnotherEnemy	inferred	Returns whether active and cumulative spawn caps permit adding an enemy, applying the optional scene override. Two DDS2 callers use the result as an enemy-spawn gate; DDS1 twin 0x001A8CE0.
@@ -2979,7 +2980,7 @@
 0x00209DD8	btlScriptSelectModeDValueOne	inferred	Twin of dds1 0x001F8388; Writes commandMode 0xD and commandValue 1. [names_R_FuncNames3.tsv]
 0x00209E08	btlCmdSetContextFlagOne	inferred	DDS1 func_001F8508 twin; ORs flag one in command context [names_R_FuncNames.tsv]
 0x00209E38	btlScriptSelectModeAValueOne	inferred	Twin of dds1 0x001F83B8; Writes commandMode 10 and commandValue 1. [names_R_FuncNames3.tsv]
-0x00209E68	btlScriptSelectActionEntry	inferred	reads a script parameter, probes action table via func_001B2F50/func_001ACD10 and sets command mode 1/2/3 [names_M36_SmallSweep5.tsv]
+0x00209E68	btlScriptSelectActionEntry	inferred	reads a script parameter, probes action table via btlHasRequiredCommandAffinityPartners/func_001ACD10 and sets command mode 1/2/3 [names_M36_SmallSweep5.tsv]
 0x00209F28	btlScriptSelectByKind	inferred	command mode 2, kind 0x196 substitutes func_0021F698() [names_M36_SmallSweep5.tsv]
 0x00209FA0	btlScriptSelectWeightedEntry	inferred	calls btlPickWeightedEntry on the script parameter [names_M36_SmallSweep5.tsv]
 0x00209FF8	btlScriptSelectDirect	inferred	command mode 5 with the raw script parameter [names_M36_SmallSweep5.tsv]
