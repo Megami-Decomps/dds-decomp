@@ -290,7 +290,7 @@ void func_002441F8(SolarNoiseState *state) {
 
 INCLUDE_SDATA(const s32, "game/code_002437F0", D_00437210);
 
-void func_00244408(SolarNoiseState *state) {
+void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
     u8 phase = evtGetMirroredSolarPhase();
     u16 spawns[15][3] = {
         {57, 62, 50}, {50, 66, 20}, {52, 62, 50}, {52, 60, 100},
