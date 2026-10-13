@@ -1744,7 +1744,7 @@ s32 fldCmdGetPendingSceneParam(void) {
     return 1;
 }
 
-s32 fldCmdSetTargetGuideMode(void) {
+s32 fldCmdSetTargetGuideEnabled(void) {
     if (scrReadIntParameter(0) == 2) {
         fldSetTargetGuideEnabled(0);
         D_003898B0[0] = 0;
@@ -1758,7 +1758,7 @@ s32 fldCmdSetTargetGuideMode(void) {
 
 extern void fldSetTargetGuideMode(s32);
 
-s32 func_00157308(void) {
+s32 fldCmdSetTargetGuideMode(void) {
     fldSetTargetGuideMode(scrReadIntParameter(0));
     return 1;
 }
