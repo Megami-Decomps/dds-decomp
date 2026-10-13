@@ -91,7 +91,7 @@ extern void frFontLoadTemporaryEntry(u32 arg0);
 
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-extern s32 sndVisitQueuedResources(void);
+extern s32 itfUpdateActiveMessageWindows(void);
 
 extern void sndFlushMessageQueue(void);
 
@@ -916,7 +916,7 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)sndVisitQueuedResources, (TaskDestroy)sndFlushMessageQueue, 0);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)itfUpdateActiveMessageWindows, (TaskDestroy)sndFlushMessageQueue, 0);
     kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)sndFlushMessageQueue, 0);
 }
 

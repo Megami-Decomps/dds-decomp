@@ -710,7 +710,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
 }
 
 
-s32 sndVisitQueuedResources(void) {
+s32 itfUpdateActiveMessageWindows(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     while (node != 0) {
         itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
