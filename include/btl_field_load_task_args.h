@@ -3,13 +3,13 @@
 
 #include "common.h"
 
-struct BtlFieldArchiveRequest;
+struct FilePacRequest;
 
 /* Complete 0x28-byte payload allocated by the paired field-load task creators. */
 typedef struct BtlFieldLoadArgs {
     s32 stage;                         /* 0x00: area used to form the field path */
     s32 variant;                       /* 0x04: field variant used in the path */
-    struct BtlFieldArchiveRequest *request; /* 0x08: pending archive request */
+    struct FilePacRequest *request; /* 0x08: pending PAC archive request */
     u8 pad0C[0xC];                     /* 0x0C: opaque state retained by the task */
     void *fieldF1;                     /* 0x18: loaded F1 resource */
     void *fieldF2;                     /* 0x1C: loaded F2 resource */
