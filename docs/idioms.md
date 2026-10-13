@@ -607,8 +607,8 @@ functions use trampolines and are a different case.
   `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
   `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
   0x110, 0, 0, 0); }` matches (DDS1 `func_002E9810`/`func_002E9918`/
-  `func_002E94E0`/`func_002E9510`, DDS2 `func_003426B8`/`func_00342388`/
-  `func_003423B8`).
+  `func_002E94E0`/`func_002E9510`, DDS2 `sndSendChannelGroupCommand110`/`sndSendChannelGroupCommand140`/
+  `sndSendChannelGroupCommand150`).
 - Preserve a 32-bit packet field's unsigned width when storing it through a
   wider lvalue. `u32 descriptor = 0x20000000 | (quadwords & 0xFFFF);` followed
   by `header[0] = descriptor;` and the equivalent direct store
