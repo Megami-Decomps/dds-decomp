@@ -12,7 +12,7 @@ s32 sdfDevQueueActiveOperation(DevState *state);
 s32 WaitSema(s32 semaphore);
 s32 SignalSema(s32 semaphore);
 void *memcpy(void *destination, const void *source, u32 size);
-s32 func_0036DE70(void);
+s32 DIntr(void);
 s32 EIntr(void);
 extern s32 D_00438D08;
 
@@ -85,7 +85,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
         break;
     case SDF_MOVIE_STATE_DATA_READ:
         if (operation == SDF_DEV_EVENT_READ_REPLY) {
-            restoreInterrupts = func_0036DE70();
+            restoreInterrupts = DIntr();
             stream->bufferedBytes += bytesRead;
             movie->remainingBytes -= bytesRead;
             if (restoreInterrupts != 0) {
@@ -212,7 +212,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
                     }
                     SignalSema(D_00438D08);
                 } else {
-                    s32 restoreInterrupts = func_0036DE70();
+                    s32 restoreInterrupts = DIntr();
 
                     writeOffset = stream->pacReadOffset + stream->pacBufferedBytes;
                     writeOffset += (writeOffset > 0xFFFF) * -0x10000;

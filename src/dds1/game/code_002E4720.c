@@ -135,7 +135,7 @@ extern DevState *sdfDevCreateCallbackState(const char *path,
 
 extern s32 func_0030EB78(s32 arg0);
 
-extern s32 func_00312C08(DevState *arg0);
+extern s32 DIntr(DevState *arg0);
 
 extern void func_003110C8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
@@ -978,7 +978,7 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     s32 wake = 0;
     DevState *last;
 
-    interrupts = func_00312C08(state);
+    interrupts = DIntr(state);
     worker = &sdfDeviceWorkerEntries[state->workerIndex];
     if (worker->threadId < 0) {
         sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
@@ -1013,7 +1013,7 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     DevState *next;
     s64 interrupts;
 
-    interrupts = func_00312C08(state);
+    interrupts = DIntr(state);
     prev = state->previous;
     next = state->next;
     if (prev == NULL) {
@@ -1042,7 +1042,7 @@ void sdfDevRecycleCompletedState(DevState *state) {
     DevState *next;
     s64 interrupts;
 
-    interrupts = func_00312C08(state);
+    interrupts = DIntr(state);
     prev = state->previous;
     next = state->next;
     if (prev == NULL) {

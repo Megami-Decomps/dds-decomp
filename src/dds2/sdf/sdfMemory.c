@@ -20,7 +20,7 @@ SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *block) {
     return nextBlock;
 }
 
-extern s32 func_0036DE70(void);
+extern s32 DIntr(void);
 
 extern void EIntr(void);
 
@@ -29,7 +29,7 @@ s32 sdfMemoryGetBlockSize(SdfMemBlock *block) {
     s32 blockBytes;
     s32 restoreInterrupts;
 
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     blockBytes = block->next->address - block->address;
     if (restoreInterrupts) {
         EIntr();
@@ -52,7 +52,7 @@ SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
     s32 restoreInterrupts;
     SdfMemBlock *block;
 
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {
@@ -96,7 +96,7 @@ SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
     s32 restoreInterrupts;
     SdfMemBlock *block;
 
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     for (block = heap->tail.prev;; block = block->prev) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {
@@ -139,7 +139,7 @@ SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes) {
     s32 restoreInterrupts;
     SdfMemBlock *block;
 
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {

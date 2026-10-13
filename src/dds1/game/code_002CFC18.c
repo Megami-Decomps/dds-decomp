@@ -144,7 +144,7 @@ SdfChipCell *sdfAllocFromNewChipPage(SdfChipClass *sizeClass) {
     return sdfAllocFreshChipCell(sizeClass, page);
 }
 
-extern s32 func_00312C08(void);
+extern s32 DIntr(void);
 extern void EIntr(void);
 
 /* Allocate a block of `size` bytes from the size class that covers it (classes are powers of two from 16 bytes up); each class hands out from its own slot list. */
@@ -159,7 +159,7 @@ void *sdfAllocSizeClassBlock(s32 size) {
         index = 27 - (index & 0xFF);
     }
     sizeClass = &sdfChipClassTable.classes[index];
-    interruptsDisabled = func_00312C08();
+    interruptsDisabled = DIntr();
     if (sizeClass->currentPage == NULL) {
         result = sdfAllocFromNewChipPage(sizeClass);
     } else {

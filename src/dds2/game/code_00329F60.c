@@ -58,7 +58,7 @@ extern SdfTexResource *sdfTextureBlockListHead;
 extern SdfTexResource *sdfTextureListHead;
 
 extern void (*D_004389F4)(s32 size, s32 allocationMode);
-extern s32 func_0036DE70(void);
+extern s32 DIntr(void);
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *block);
 
@@ -400,7 +400,7 @@ SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
     SdfTexResource *allocated;
     s32 interruptsEnabled;
 
-    interruptsEnabled = func_0036DE70();
+    interruptsEnabled = DIntr();
     for (block = sdfTextureListHead;; block = block->prev) {
         if (block == NULL) {
             if (interruptsEnabled != 0) {
@@ -446,7 +446,7 @@ SdfTexResource *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
     SdfTexResource *allocated;
     s32 interruptsEnabled;
 
-    interruptsEnabled = func_0036DE70();
+    interruptsEnabled = DIntr();
     for (block = sdfTextureBlockListHead;; block = block->next) {
         if (block == NULL) {
             if (interruptsEnabled != 0) {
@@ -548,7 +548,7 @@ void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock) {
     if (textureBlock == NULL) {
         return;
     }
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     textureBlock->allocationMode = 0;
     sdfCoalesceUnusedTextureBlocks(textureBlock);
     nextBlock = textureBlock->next;

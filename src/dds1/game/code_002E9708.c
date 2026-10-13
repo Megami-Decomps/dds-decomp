@@ -91,7 +91,7 @@ typedef struct MidiChannel {
     u32 earlierEntries[2];
     u32 entries[8];
 } MidiChannel;
-extern s32 func_00312C08(void);
+extern s32 DIntr(void);
 extern void sdfDispatchNextStreamNode(s32);
 extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
@@ -910,7 +910,7 @@ void sdfStreamNodeUnlink(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
     SdfStreamFrameNode *previousNode;
     SdfStreamFrameNode *nextNode;
     if (skipInterruptGuard == 0) {
-        interruptsEnabled = func_00312C08();
+        interruptsEnabled = DIntr();
     }
     if (node->queued != 0) {
         previousNode = node->streamPrev;
@@ -936,7 +936,7 @@ void sdfStreamNodeUnlink(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
 void sdfStreamNodeAppend(SdfStreamFrameNode *node, s32 skipInterruptGuard) {
     s32 interruptsEnabled = 0;
     if (skipInterruptGuard == 0) {
-        interruptsEnabled = func_00312C08();
+        interruptsEnabled = DIntr();
     }
     if (node->queued != 0) {
         sdfStreamNodeUnlink(node, 1);
@@ -1045,7 +1045,7 @@ void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddr
     node->height = ((SdfStreamFrameHeader *)frameBytes)->height;
     sdfAllocateStreamFrameBuffers(node);
     sdfBuildStreamInputDmaChain(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
-    interruptsEnabled = func_00312C08();
+    interruptsEnabled = DIntr();
     sdfStreamNodeAppend(node, 0);
     if (interruptsEnabled != 0) {
         EIntr();
@@ -1108,7 +1108,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
         node->resourceWord = texture->word;
     }
     sdfAllocateStreamFrameBuffers(node);
-    interruptsEnabled = func_00312C08();
+    interruptsEnabled = DIntr();
     sdfStreamNodeAppend(node, 0);
     if (interruptsEnabled != 0) {
         EIntr();
@@ -1124,7 +1124,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     s32 wasActive;
     u32 dmaEnable;
 
-    interruptsEnabled = func_00312C08();
+    interruptsEnabled = DIntr();
     wasActive = 0;
     node->drained = 1;
     sdfSoundRemoveNode(node);
@@ -1272,7 +1272,7 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
         return;
     }
     if (skipInterruptGuard == 0) {
-        interruptsEnabled = func_00312C08();
+        interruptsEnabled = DIntr();
     }
 
     node = sdfStreamNodeListHead;
@@ -1326,7 +1326,7 @@ void sdfIpuDmaCompletionWorker(void) {
             }
         }
         if (work->drained == 0) {
-            interruptsEnabled = func_00312C08();
+            interruptsEnabled = DIntr();
             sdfStreamNodeAppend(work, 0);
             if (interruptsEnabled != 0) {
                 EIntr();
@@ -1385,7 +1385,7 @@ u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
 
 /* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
 void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
-    s32 interruptsEnabled = func_00312C08();
+    s32 interruptsEnabled = DIntr();
     s32 pendingBuffers = node->completedBufferCount;
     s32 remainingBuffers = pendingBuffers - 1;
     if (pendingBuffers > 0) {
@@ -1457,7 +1457,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
             sdfStreamInitializeFromHeader(node);
             if (D_003BD614 != 1) {
                 if (node->filledSlots < SDF_STREAM_RING_SLOTS) {
-                    interruptsEnabled = func_00312C08();
+                    interruptsEnabled = DIntr();
                     sndFillStreamFeedRing(node);
                     if (interruptsEnabled != 0) {
                         EIntr();

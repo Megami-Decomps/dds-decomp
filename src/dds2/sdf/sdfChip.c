@@ -16,7 +16,7 @@ SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)))
 extern void *sdfClearQuadwords(void *memory, s32 quadwordCount);
 
 
-s32 func_0036DE70(void);
+s32 DIntr(void);
 s32 EIntr(void);
 void sdfSelectNextChipPage(SdfChipClass *sizeClass);
 
@@ -45,7 +45,7 @@ void sdfReleaseChipBlock(void *memory) {
     }
     page = (SdfChipPage *)((u8 *)sdfChipPages + (index >> 12) * sizeof(SdfChipPage));
     sizeClass = page->sizeClass;
-    interrupts = func_0036DE70();
+    interrupts = DIntr();
     count = page->usedCells;
     page->usedCells = count - 1;
     if (page->usedCells == 0) {
