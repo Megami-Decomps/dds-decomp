@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3_vu_transform.h"

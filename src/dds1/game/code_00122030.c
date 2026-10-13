@@ -18,6 +18,7 @@
 #include "evt_solar.h"
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "mdl.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
@@ -147,7 +148,6 @@ extern char D_0039FBC0[]; /* "fldProcSequence" */
 
 struct EffWorldNode;
 
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern u8 D_003BAB3C;
 

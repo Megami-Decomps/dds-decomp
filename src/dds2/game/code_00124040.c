@@ -16,6 +16,7 @@
 #include "evt_solar.h"
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "kwln.h"
 #include "kwln_fade.h"
 #include "dat_state.h"
@@ -250,7 +251,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 struct EffWorldNode;
 
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
 
