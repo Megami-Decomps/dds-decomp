@@ -685,6 +685,7 @@
 0x001275D0	fldGetSceneReadyOrPendingState	inferred	Returns pending state when outstanding work exists or the scene-ready flag otherwise. [names_reviewed10.tsv]
 0x00127600	fldUpdateNextFloorTransition	inferred	readability/matching review (QP16)
 0x001277D8	fldDispatchPendingSceneResource	inferred	Selects override, scene-work or fallback script resource and starts a secondary-world event task. [names_reviewed5.tsv]
+0x001278D0	fldUpdateFieldSceneTask	inferred	Task callback advances the field-scene lifecycle from resource loading through active scene updates and exit/reset handling; registered by fldStartFieldSceneTasks.
 0x00128340	fldSetSceneLifecycleFlags	inferred	ORs the supplied mask into the lifecycle flag word used when advancing scenes. [names_reviewed5.tsv]
 0x00128358	fldClearSceneLifecycleFlags	inferred	Clears the supplied mask from the scene lifecycle flag word. [names_reviewed5.tsv]
 0x00128370	fldTestSceneLifecycleFlags	inferred	Tests a mask against the scene lifecycle flag word. [names_reviewed5.tsv]
