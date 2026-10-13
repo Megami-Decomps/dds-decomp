@@ -103,7 +103,7 @@ extern s8 sdfPadButtonStates[32];
 
 extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 
-extern void func_00104AA8(void *data, s32 handle);
+extern void kwlnDrawTextureViewerFrame(void *data, s32 handle);
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 
@@ -882,7 +882,7 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 extern s32 D_00435CB0;
 
-void func_00104AA8(void *data, s32 handle) {
+void kwlnDrawTextureViewerFrame(void *data, s32 handle) {
     SdfPoolNode *surface;
     SdfTex *image;
     SdfListHead *packetList;
@@ -930,7 +930,7 @@ s32 kwlnSwapActiveResource(s32 surfaceAddress) {
         return 0;
     }
     inputStatus = kwlnTextureViewerHandlePad();
-    func_00104AA8((void *)surfaceAddress, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame((void *)surfaceAddress, kwlnCurrentIncompleteResource);
     return inputStatus;
 }
 
@@ -942,7 +942,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
-    func_00104AA8(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
     return 0;
 }
 

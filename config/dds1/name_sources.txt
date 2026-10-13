@@ -69,7 +69,8 @@
 0x00104798	kwlnTextureDrawPageCounter	inferred	formats TEX VIEWER page counter and submits rendered text
 0x00104A18	kwlnSelectIncompleteResourceAtPageIndex	inferred	Selects the reached incomplete-texture page, stores its resource pointer and returns the reached index; DDS2 twin 0x00104908. DDS1 treats requested index zero as the head directly; DDS2 skips clone-source entries at the head first.
 0x00104A98	kwlnTextureViewerHandlePad	inferred	pad bits 0x14/0x15/0x18/0x19/0x1A/0x1B move the TEX VIEWER page by -1/+1/-10/+10, then kwlnSelectIncompleteResourceAtPageIndex clamps it; D_003BA890 toggles on unk12<0 [names_reviewed2.tsv]
-0x00104D20	kwlnSwapActiveResource	inferred	checks active state then forwards supplied resource and handle to func_00104B88
+0x00104B88	kwlnDrawTextureViewerFrame	inferred	Builds the texture-viewer packet list with page counter, image outline/info and optional allocation-map diagnostics, then submits it to the supplied surface; DDS2 twin 0x00104AA8.
+0x00104D20	kwlnSwapActiveResource	inferred	checks active state then draws and submits the supplied texture through kwlnDrawTextureViewerFrame
 0x00104D70	kwlnLoadDefaultResource	inferred	checks active state then loads D_00325748 with active handle
 0x00104DB8	kwlnTextureFindIncompleteResource	inferred	scans resource nodes and returns follow-up callback for incomplete entry
 0x00105010	kwlnDrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:406:func_00105010; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00104F30, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
