@@ -3100,14 +3100,14 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
     return dispatchResult;
 }
 
-s32 func_00263180(KwlnTask *callbackContext) {
+s32 mnuRunCampCommandPrimaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_002631D8(KwlnTask *callbackContext) {
+s32 mnuRunCampCommandSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
