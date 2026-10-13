@@ -6472,6 +6472,7 @@
 0x002D0B50	sdfGetGeneralHeapStats	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:128:func_002D0B50; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
 0x002D0BF8	sdfFindGeneralBlockContaining	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:130:func_002D0BF8; Returns the used general-heap block containing the supplied address in its half-open range, or NULL when the end marker is reached.; source=names_pending_main.tsv:131 [names_qp11.tsv]
 0x002D0C68	sdfSendNamedResourceRequest	inferred	Allocates a request containing name length, name and payload for transfer. [names_reviewed21.tsv]
+0x002D0D70	sdfLoadModulesAndBindNamedResourceRpc	inferred	Loads the optional IOP module if supplied, then the required module; invokes the optional setup callback and retries binding SDF_NAMED_RESOURCE_RPC_ID until its server is ready, waiting by timer ticks between attempts. Paired DDS1/DDS2 implementation.
 0x002D0E30	sdfGraphApplyModeDefaults	inferred	Selects the display-mode row, initializes its dimensions and formats, and optionally clears the buffer pointers.
 0x002D0EC0	sdfGraphReleaseBuffers	inferred	Releases and clears three graph buffer pointers.
 0x002D0F08	sdfGraphRecreateBuffers	inferred	Releases existing graph buffers and allocates three using dimensions and modes from the graph.
@@ -6985,6 +6986,7 @@
 0x002E8EA0	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
 0x002E8EE8	sndSubmitTextCommandPayloadWithCommandBits60	inferred	Calculates text byte length and dispatches the payload through sndSendCommandPacket with command ORed with 0x60; paired title counterpart. [code-quality cleanup, 2026-10-13]
 0x002E8F78	sndSetSequenceVolumePan	inferred	snd sound tasks and playback in game/code_002E8E00.c
+0x002E8FD8	sndSetSpatialSequenceVolumePan	inferred	Normalizes the listener-relative angle, derives sequence pan and angle-based volume, attenuates for distance above one, then sends both through sndSetSequenceVolumePan; DDS1/DDS2 paired implementation.
 0x002E9140	sndSendSpatialPosition	inferred	wrong or missing short module prefix; DDS2 twin already named [names_audit.tsv]
 0x002E9198	sndUpdateScaledListenerState	inferred	src/dds1/game/code_002E9140.c func_002E9198: Converts six values to one-tenth-scale integers and transmits listener packet only when changed. [names_reviewed24.tsv]
 0x002E92C0	sndFindPackedTrackLoadStatus	inferred	confidence=high; src/dds1/game/code_002E9140.c:func_002E92C0; Synchronizes sound state, searches track slots by the packed high-word id, and distinguishes a loaded slot from the pending id. [names_qp9.tsv]
@@ -6992,6 +6994,8 @@
 0x002E9418	sndSendFilenameCommand	inferred	Sends the filename and its byte length in a sound command packet.
 0x002E94B0	sndSendChannelControlCommand	inferred	Packs the caller-selected sound channel into a channel-control command. [names_reviewed19.tsv]
 0x002E9540	sndReleaseMidiTrack	inferred	snd sound tasks and playback in game/code_002E9140.c
+0x002E9598	sndGetTrackBalanceFirstComponent	inferred	Returns raw byte 0x4 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x5. No callers currently have recovered C names, so the two component roles remain positional.
+0x002E95B0	sndGetTrackBalanceSecondComponent	inferred	Returns raw byte 0x5 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x4. No callers currently have recovered C names, so the two component roles remain positional.
 0x002E95C8	sndGetNonnegativeEntryBalance	inferred	Returns the nonnegative difference between two sound-system entry counters. [names_reviewed16.tsv]
 0x002E9600	sndGetTrackSlotTable	inferred	confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; Returns sndTrackBalanceEntries unchanged; semantic DDS2 counterpart is already sndGetTrackSlotTable in game/code_00341FE8.c.; source=names_R_Names36.tsv:13 [names_qp11.tsv]
 0x002E9690	sndStartTrackExtended	inferred	Prepares a track ID and sends command 0x20 with setting 0x17f.
@@ -7614,6 +7618,7 @@
 0x003F9B90	sdfDevRpcBuffer	inferred	confidence=high; src/dds1/game/code_002E4720.c:sdfDevStartRpcServer; Receive buffer registered with the device RPC server. [names_qp9.tsv]
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceMinuend; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
+0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceFirstComponent,sndGetTrackBalanceSecondComponent; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
 0x001FBF30	btlSetResourceBrowserPosition	inferred	Sets the browser descriptor origin used by list and preview rendering.
 0x001FBF48	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
@@ -8615,8 +8620,6 @@
 0x00254778	mnuDrawMantraSceneSpriteGroup	inferred	confidence=high; draws fixed placement entries 0x47 through 0x49 at the supplied coordinates and alpha. [LiteH menu naming batch 20]
 0x00254810	mnuDrawSelectedMantraProfile	inferred	confidence=high; draws the selected unit's profile sprite and fade effect, then queues its profile name. [LiteH menu naming batch 20]
 0x001F7DF8	btlDrawButtonIconFixed64	inferred	confidence=high; indexed 64-pixel glyph with independent corner colors and a 16-bit atlas index; same observable fixed-size operation as existing DDS2 0x00209978. [Namer1 naming batch 44]
-0x002E9598	sndGetTrackBalanceMinuend	inferred	confidence=high; returns the byte used as the minuend by sndGetNonnegativeEntryBalance; no additional audio meaning asserted; DDS2 twin 0x00342440. [Namer1 naming batch 44]
-0x002E95B0	sndGetTrackBalanceSubtrahend	inferred	confidence=high; returns the byte subtracted by sndGetNonnegativeEntryBalance; no additional audio meaning asserted; DDS2 twin 0x00342458. [Namer1 naming batch 44]
 0x002E95F0	sndGetMidiChannelTable	inferred	confidence=high; returns sndMidiTrackState+0x10, the channels array identified by SndWork layout assertions and startup initialization; existing return type retained; DDS2 twin 0x00342498. [Namer1 naming batch 44]
 0x002E9610	sndGetMidiStateWordPair	inferred	confidence=high; returns the opaque MIDI word at +0x208 and optionally writes the adjacent +0x20C word; meanings remain opaque; DDS2 twin 0x003424B8. [Namer1 naming batch 44]
 0x002E9630	sndCopyGroupedMidiStateBytes	inferred	confidence=high; packs two 24-byte state groups into caller storage, ignoring NULL output; DDS2 twin 0x003424D8. [Namer1 naming batch 44]

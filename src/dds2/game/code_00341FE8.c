@@ -154,12 +154,12 @@ void sndReleaseMidiTrack(s32 id) {
 }
 
 /* Read the byte used as the minuend by the nonnegative balance query. */
-u8 sndGetTrackBalanceMinuend(s32 index) {
+u8 sndGetTrackBalanceFirstComponent(s32 index) {
     return sndTrackBalanceEntries[index].unk4;
 }
 
 /* Read the byte subtracted by the nonnegative balance query. */
-u8 sndGetTrackBalanceSubtrahend(s32 index) {
+u8 sndGetTrackBalanceSecondComponent(s32 index) {
     return sndTrackBalanceEntries[index].unk5;
 }
 
