@@ -9,6 +9,7 @@
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_message.h"
 
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
@@ -379,15 +380,8 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
     sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
 }
 
-typedef struct SdfMsg {
-    s32 firstWord;
-    s32 work;
-    s32 thirdWord;
-    s32 fourthWord;
-} SdfMsg; /* 0x10 */
-
 /* Store the message words and install release callbacks on its work pointer. */
-void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord) {
+void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, u32 *work, s32 thirdWord, s32 fourthWord) {
     message->fourthWord = fourthWord;
     message->firstWord = firstWord;
     message->thirdWord = thirdWord;

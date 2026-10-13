@@ -7,6 +7,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_message.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -100,8 +101,6 @@ extern u32 fldGetSceneReadyFlag(void);
 
 extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 
-struct SdfMsg;
-extern void sdfStoreMessageWordsAndNotifyConsumer(struct SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord);
 
 
 extern u32 fldPlayerObject;
@@ -1602,7 +1601,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void func_001248D0(void) {
-    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (s32)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (u32 *)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
 }
 
 typedef struct FldEncEntry {

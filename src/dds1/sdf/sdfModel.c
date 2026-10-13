@@ -9,8 +9,8 @@
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_message.h"
 
-extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
@@ -37,13 +37,6 @@ typedef struct {
     } vifCodes;
 } SdfPacket; /* 0x10 */
 
-
-typedef struct SdfMsg {
-    s32 firstWord;
-    s32 work;
-    s32 thirdWord;
-    s32 fourthWord;
-} SdfMsg; /* 0x10 */
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
@@ -379,7 +372,7 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
 }
 
 /* Store the message words and install release callbacks on its work pointer. */
-void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord) {
+void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, u32 *work, s32 thirdWord, s32 fourthWord) {
     message->fourthWord = fourthWord;
     message->firstWord = firstWord;
     message->thirdWord = thirdWord;

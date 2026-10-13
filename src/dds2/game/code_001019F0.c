@@ -216,11 +216,8 @@ extern void kwlnUpdateDrawParameterTransitions(void);
 extern void func_00126B70(void);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 #include "sdf_packet_alloc.h"
+#include "sdf_message.h"
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, KwlnDrawVectorParams *);
-typedef struct SdfMsg {
-    s32 firstWord, work, thirdWord, fourthWord;
-} SdfMsg;
-extern void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *, s32, s32, s32, s32);
 extern void sdfConsSetDefaultFirstReference(u32);
 extern void sdfConsSetDefaultSecondReference(u32);
 extern SdfListHead *evtBuildFrameStatePacketList(s32);
@@ -316,41 +313,41 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
             (SdfLinkedPacketList *)(D_003820F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         messageData = (u8 *)kwlnDrawSurfaces + 7 * sizeof(SdfPoolNode);
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788),
-            (s32)(messageData + 0x400), (s32)(messageData + 0x420),
+            (s32)(messageData + 0x400), (u32 *)(messageData + 0x420),
             (s32)(messageData + 0x600), (s32)(messageData + 0x620));
         func_00126B70();
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x80),
-            (s32)(messageData + 0x6E0), (s32)(messageData + 0x700),
+            (s32)(messageData + 0x6E0), (u32 *)(messageData + 0x700),
             (s32)(messageData + 0x720), (s32)(messageData + 0x740));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x90),
-            (s32)(messageData + 0x860), (s32)(messageData + 0x880),
+            (s32)(messageData + 0x860), (u32 *)(messageData + 0x880),
             (s32)(messageData + 0x8A0), (s32)(messageData + 0x8C0));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x10),
-            (s32)(messageData + 0x20), (s32)(messageData + 0x40),
+            (s32)(messageData + 0x20), (u32 *)(messageData + 0x40),
             (s32)(messageData + 0x60), (s32)(messageData + 0x80));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x20),
-            (s32)(messageData + 0xC0), (s32)(messageData + 0xE0),
+            (s32)(messageData + 0xC0), (u32 *)(messageData + 0xE0),
             (s32)(messageData + 0x100), (s32)(messageData + 0x120));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x30),
-            (s32)(messageData + 0x160), (s32)(messageData + 0x180),
+            (s32)(messageData + 0x160), (u32 *)(messageData + 0x180),
             (s32)(messageData + 0x1A0), (s32)(messageData + 0x1C0));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x40),
-            (s32)(messageData + 0x200), (s32)(messageData + 0x220),
+            (s32)(messageData + 0x200), (u32 *)(messageData + 0x220),
             (s32)(messageData + 0x240), (s32)(messageData + 0x260));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x50),
-            (s32)(messageData + 0x2A0), (s32)(messageData + 0x2C0),
+            (s32)(messageData + 0x2A0), (u32 *)(messageData + 0x2C0),
             (s32)(messageData + 0x2E0), (s32)(messageData + 0x300));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x60),
-            (s32)(messageData + 0x4A0), (s32)(messageData + 0x4C0),
+            (s32)(messageData + 0x4A0), (u32 *)(messageData + 0x4C0),
             (s32)(messageData + 0x4E0), (s32)(messageData + 0x500));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0xA0),
-            (s32)(messageData + 0x540), (s32)(messageData + 0x560),
+            (s32)(messageData + 0x540), (u32 *)(messageData + 0x560),
             (s32)(messageData + 0x5C0), (s32)(messageData + 0x5E0));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0xB0),
-            (s32)(messageData + 0x9E0), (s32)(messageData + 0xA00),
+            (s32)(messageData + 0x9E0), (u32 *)(messageData + 0xA00),
             (s32)(messageData + 0xA20), (s32)(messageData + 0xA40));
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0xC0),
-            (s32)(messageData - 0xA0), (s32)(messageData - 0x80),
+            (s32)(messageData - 0xA0), (u32 *)(messageData - 0x80),
             (s32)(messageData - 0x60), (s32)(messageData - 0x40));
         sdfConsSetDefaultFirstReference((u32)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
         sdfConsSetDefaultSecondReference((u32)viewFrustum);
