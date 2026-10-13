@@ -59,7 +59,7 @@ extern MnuEffectRecord *D_00438930;
 extern MnuShootingWork *D_0043891C;
 
 extern s32 func_00317FE0(MnuShootingWork *);
-extern void func_00318570(MnuShootingWork *);
+extern void mnuReleaseShootingSectionResources(MnuShootingWork *);
 extern void mnuDestroyShootingWork(MnuShootingWork *);
 
 extern u32 D_00438918;
@@ -578,7 +578,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     }
     slot = work->resourceSlots;
     mnuUpdateHighScoreFlag(work);
-    func_00318570(work);
+    mnuReleaseShootingSectionResources(work);
     func_0031AF60(work);
     itfClearTintAndWorkBuffers((u8 *)work);
     for (i = 6; i >= 0; i--, slot++) {
@@ -606,7 +606,7 @@ s32 func_00317FE0(MnuShootingWork *work) {
     if (work->initialize((u8 *)work) != 0) {
         state = work->state;
         if (state == 0) {
-            func_00318570(work);
+            mnuReleaseShootingSectionResources(work);
             state = work->state;
             work->initialized = 1;
             work->update = D_0040ABF0[0];
@@ -632,7 +632,7 @@ u32 func_00318068(MnuShootingWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_003180B8);
 
-void func_00318570(MnuShootingWork *work) {
+void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
     s32 i;
 
     mnuDeactivateWorkEntry(&D_0040ABF8);
