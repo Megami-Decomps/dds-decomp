@@ -216,11 +216,11 @@ void itfMesFinishWindowAndClearStatus(s32 window) {
     mes->flags &= ITF_MES_CLEAR_SCRIPT_PANEL_BIT;
 }
 
-u32 func_0019B530(void) {
+u32 itfMesNoOpCommand4(void) {
     return 1;
 }
 
-u32 func_0019B538(void) {
+u32 itfMesNoOpCommand5(void) {
     return 1;
 }
 
