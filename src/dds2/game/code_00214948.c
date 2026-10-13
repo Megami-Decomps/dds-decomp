@@ -162,7 +162,7 @@ typedef struct BattleWork {
     u8 pad26A[2];
     u16 phase;
     u8 pad26E[2];
-    u16 phaseControl; /* 0x270: required phase in func_00218150 */
+    u16 phaseControl; /* 0x270: required phase in btlCheckPhaseOnePartyStatusGate */
     u8 pad272[2];
     s32 turnCount;
     u8 pad278[4];
@@ -1519,7 +1519,8 @@ s64 btlRestoreEnemyUnitWhenModelFlagSet(BtlUnit *battler, BtlOperandEntry *resou
     }
 }
 
-s32 func_00218150(void) {
+/* Phase one requires a nonempty ready party whose status words all contain 0x2000. */
+s32 btlCheckPhaseOnePartyStatusGate(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BtlUnit *battler;
     s32 count;
@@ -1703,7 +1704,8 @@ s32 btlOverrideSpecialModeCheckResult(BtlUnit *unit, s32 kind, s32 fallback) {
     return fallback;
 }
 
-s32 func_00218690(void) {
+/* The script-return hook distinguishes mode 0x303 from its alternate mode. */
+s32 btlGetBossModeScriptReturnCode(void) {
     return ((BattleWork *)btlGetRuntime())->mode == 0x303 ? 1 : 2;
 }
 
@@ -1783,7 +1785,8 @@ s32 btlSelectAction211CameraPair(BtlLinkedCommand *command) {
     return 0;
 }
 
-void func_00218968(void) {
+/* Native actor-name 1 is Serph; the setup hook promotes his roster entry. */
+void btlPromoteSerphToFrontline(void) {
     ptyRebalanceFrontline(1);
 }
 
@@ -2091,7 +2094,8 @@ void btlResetActionEffectOnUnit(void) {
     }
 }
 
-void func_00219278(void) {
+/* Reapply Abaddon's selected effect-unit presentation after the unit update. */
+void btlRefreshAbaddonPresentationAfterUnitUpdate(void) {
     btlResetActionEffectOnUnit();
 }
 
@@ -2356,7 +2360,8 @@ extern void *dds3GetWorldSecondaryObject(void);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
-s32 func_002198D8(u8 *unit) {
+/* Before marking a gate enemy, notify md_01all_02 with payload word 1; always allow. */
+s32 btlPrepareGateDefeatCandidateSet(u8 *unit) {
     EffWorldNode *object;
     if (!(((BtlUnit *)unit)->status.flags & 0x400)) {
         return 1;
@@ -2372,7 +2377,8 @@ s32 func_002198D8(u8 *unit) {
     return 1;
 }
 
-s32 func_00219950(u8 *unit) {
+/* Before clearing that mark, notify the same model with word 2; always allow. */
+s32 btlPrepareGateDefeatCandidateClear(u8 *unit) {
     EffWorldNode *object;
     if (!(((BtlUnit *)unit)->status.flags & 0x400)) {
         return 1;
@@ -3051,7 +3057,8 @@ void btlResetSpecialActionActorPresentation(void) {
     btlUpdateSpecialActorFormation();
 }
 
-void func_0021B4A8(void) {
+/* The after-unit-update hook restores Vritra and tentacle presentation/formation. */
+void btlRefreshVritraPresentationAfterUnitUpdate(void) {
     btlResetSpecialActionActorPresentation();
 }
 
@@ -3589,7 +3596,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5E0);
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5F8);
 
-s32 func_0021CF18(BtlLinkedCommand *command, s8 side, s8 targetSide) {
+s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 targetSide) {
     ActionStateLink *link;
     BtlState *runtime;
     BattleGuardState *sub;
@@ -4485,7 +4492,8 @@ s32 btlMapActorMotionId(u32 id) {
     }
 }
 
-u8 func_0021F3A0(s32 arg0) {
+/* Calamity alone returns false; retain the native byte-sized predicate result. */
+u8 btlIsNonCalamityAction(s32 arg0) {
     return arg0 != 0x196;
 }
 
@@ -4893,7 +4901,8 @@ u32 btlGetMarkedCommandRequestedState(void) {
     return 0;
 }
 
-void func_00220998(void) {
+/* Native actor-name 9 is True Heat, not the ordinary Heat roster entry. */
+void btlPromoteTrueHeatToFrontline(void) {
     ptyRebalanceFrontline(9);
 }
 
@@ -5391,14 +5400,16 @@ void btlDestroyActionActor(void) {
     }
 }
 
-u32 func_00221828(u32 unit) {
+/* Brahman's mark veto excludes model resource (kind 1, index 0x10B), not an enemy ID. */
+u32 btlAllowBrahmanDefeatCandidateSet(u32 unit) {
     if (((BtlUnit *)unit)->resourceKind == 1 && ((BtlUnit *)unit)->resourceIndex == 0x10b) {
         return 0;
     }
     return 1;
 }
 
-u32 func_00221858(u32 unit) {
+/* The clear veto excludes the same resource; the two native hooks stay separate. */
+u32 btlAllowBrahmanDefeatCandidateClear(u32 unit) {
     if (((BtlUnit *)unit)->resourceKind == 1 && ((BtlUnit *)unit)->resourceIndex == 0x10b) {
         return 0;
     }
@@ -5611,7 +5622,8 @@ void btlPrepareSpecialActionSelection(BtlUnit *unit, BtlOperandEntry *entry) {
     }
 }
 
-u32 func_00221F40(u32 unit, u32 actor, u32 action) {
+/* The three Eternal Zero entries apply +127 to actor entries 0 through 4. */
+u32 btlBoostEternalZeroActorEntries(u32 unit, u32 actor, u32 action) {
     switch (action) {
     case 0x178:
     case 0x17d:
@@ -7228,7 +7240,8 @@ s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
     return 0;
 }
 
-u32 func_00226670(void) {
+/* Negative script arguments reject the fallback scene-script path. */
+u32 btlSelectNoBossScriptArgument(void) {
     return 0xffffffff;
 }
 
