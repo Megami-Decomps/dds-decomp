@@ -6685,6 +6685,8 @@
 0x003421E8	sndEnsureMidiBankResident	inferred	src/dds2/game/code_00341FE8.c func_003421E8: Queries packed track status, formats MIDI bank path and requests load or waits on current bank. Twin of DDS1 func_002E9340. [names_reviewed24.tsv]
 0x003422C0	sndSendFilenameCommand	inferred	Byte-identical DDS1 counterpart: Sends the filename and its byte length in a sound command packet.
 0x00342358	sndSendChannelControlCommand	inferred	Packs the caller-selected sound channel into a channel-control command. [names_reviewed19.tsv]
+0x00342388	sndSendChannelGroupCommand140	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x140, and sends an empty sound command packet. [code-quality cleanup, 2026-10-13]
+0x003423B8	sndSendChannelGroupCommand150	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x150, and sends an empty sound command packet. [code-quality cleanup, 2026-10-13]
 0x00342440	sndGetTrackBalanceFirstComponent	inferred	Returns raw byte 0x4 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x5. No callers currently have recovered C names, so the two component roles remain positional.
 0x00342458	sndGetTrackBalanceSecondComponent	inferred	Returns raw byte 0x5 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x4. No callers currently have recovered C names, so the two component roles remain positional.
 0x00342470	sndGetNonnegativeEntryBalance	inferred	Returns the nonnegative difference between two sound-system entry counters; agrees with established DDS1 name. [names_reviewed17.tsv]
