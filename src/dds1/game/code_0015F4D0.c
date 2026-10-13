@@ -10,6 +10,7 @@
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 
 extern void *sdfConsAllocateColumnPacket(s32);
@@ -43,18 +44,6 @@ extern s32 D_003BA900;
 extern s8 D_003BB018;
 extern u32 D_003BB01C;
 extern u32 D_003BB020;
-
-typedef struct EffectDispatchState {
-    u8 pad00[0x60];
-    u32 value60;
-    u8 pad64[0x4C];
-    u16 handler;
-    u16 valueB2;
-} EffectDispatchState;
-
-
-
-
 
 typedef struct BillWork {
     u8 pad00[0x64];

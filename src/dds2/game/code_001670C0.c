@@ -10,6 +10,7 @@
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 #include "eff_packet_params.h"
 
@@ -54,20 +55,6 @@ typedef struct EffectEntry {
     u8 pad00[0x10];
     u32 value;
 } EffectEntry;
-
-typedef struct EffectDispatchState {
-    u8 pad00[0x14];
-    EffectEntry *entries;
-    u8 pad18[4];
-    u32 value1C;
-    u8 matrix20[0x40];
-    u32 value60;
-    u8 value64;
-    u8 pad65[0xB];
-    u8 matrix70[0x40];
-    u16 handler;
-    u16 valueB2;
-} EffectDispatchState;
 
 typedef struct BillWork {
     u8 pad00[0x64];
