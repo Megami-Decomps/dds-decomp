@@ -8007,8 +8007,6 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
     EffectVectorRequest request;
     EffFieldColorConfig *config;
     u32 handle;
-    s32 color1[4];
-    s32 color2[4];
 
     btlGetRuntime();
     config = work->payload;
@@ -8050,12 +8048,10 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
         if (handle != 0) {
             effBattleMiscQueryPosition((void *)handle, &request, D_004584B0);
         }
-        color1[0] = config->firstColor;
-        EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
+        eeUnpackRGBAWordFloat(config->firstColor, 1.0f / 128.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, D_00458460);
         ((f32 *)D_00458460)[3] = 1.0f;
-        color2[0] = config->secondColor;
-        EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
+        eeUnpackRGBAWordFloat(config->secondColor, 1.0f / 128.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, D_004584A0);
         ((f32 *)D_004584A0)[3] = 1.0f;
         D_00437E94 = 1;
