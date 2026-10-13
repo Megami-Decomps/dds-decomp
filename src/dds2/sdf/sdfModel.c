@@ -8,6 +8,7 @@
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
+#include "sdf_vu_matrix.h"
 
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
@@ -35,7 +36,6 @@ extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32
 
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 
-extern void effMiscQuaternionToMatrixVU(void);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);

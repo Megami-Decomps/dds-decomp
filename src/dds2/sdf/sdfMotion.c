@@ -8,6 +8,7 @@
 #include "sdf_draw.h"
 #include "sdf_motion_bindings.h"
 #include "sdf_motion.h"
+#include "sdf_vu_matrix.h"
 
 
 
@@ -15,7 +16,6 @@
 
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 extern void effMiscQuaternionNlerpVU(f32 amount);
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern s32 (*D_0040B368[])(void *a0, s32 a1);
 

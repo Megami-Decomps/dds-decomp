@@ -8,6 +8,7 @@
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
+#include "sdf_vu_matrix.h"
 
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
@@ -44,7 +45,6 @@ typedef struct SdfMsg {
     s32 fourthWord;
 } SdfMsg; /* 0x10 */
 
-extern void effMiscQuaternionToMatrixVU(void);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);

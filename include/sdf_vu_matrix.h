@@ -8,6 +8,10 @@
  * DDS1 game/code_002DD8B8.c and DDS2 game/code_00336768.c. */
 void sdfComposeVuMatrixFromRegisters(void);
 
+/* Convert the quaternion in vf10 into the primary matrix bank vf28-vf31.
+ * Providers: DDS1 game/code_002E7C20.c and DDS2 game/code_00340AC8.c. */
+void effMiscQuaternionToMatrixVU(void);
+
 /* Build the camera basis from the global view target, eye, and up vectors.
  * The resulting basis rows replace VU0 registers vf28-vf31 in place. */
 void vuBuildLookAtBasis(void);

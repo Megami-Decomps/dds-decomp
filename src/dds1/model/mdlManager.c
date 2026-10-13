@@ -35,6 +35,7 @@
 #include "btl_group_id_entry.h"
 #include "mdl_grouped_parts_api.h"
 #include "mdl_done_job.h"
+#include "sdf_vu_matrix.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -912,7 +913,6 @@ void mdlLoadRotationQuaternionVU(MdlCtx *ctx) {
     VU0_LOAD_VF_MEMORY(vf10, ctx->inner->rotationQuaternion);
 }
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: consume vf10 as a quaternion, preserve it in the model,
  * then store the resulting basis rows from vf28-vf30. No C argument supplies vf10. */

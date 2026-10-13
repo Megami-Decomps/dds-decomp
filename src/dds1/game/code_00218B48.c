@@ -23,6 +23,7 @@
 #include "mdl_grouped_parts_api.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -1564,7 +1565,6 @@ u32 mdlRunViewerAssetSelectionTask(void) {
 extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
 extern f32 sdfViewMatrix[];
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
 void mdlUpdateViewerCameraFromPad(void) {
@@ -2835,7 +2835,6 @@ extern void fldDrawRgbEditor(void *, s32, s32, s32, f32 *);
 extern void *func_0011D6B0(s32, s32, s32, s32);
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: rotate a viewer position about the camera axes selected by the pad. */
 void func_0021E450(MdlLightEditorState *context, f32 *position)

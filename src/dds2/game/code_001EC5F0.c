@@ -47,6 +47,7 @@
 #include "dat_command.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 extern f32 D_003B6DC0[4];
 
@@ -167,7 +168,6 @@ extern u32 btlTintTransitionHoldCount;
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -287,7 +287,6 @@ typedef struct {
     u16 objectId;
 } BattleEntryHeader;
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effBattleUpdate(BattleEffect *);
 

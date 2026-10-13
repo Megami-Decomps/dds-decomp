@@ -4414,7 +4414,6 @@ extern f32 func_003532B8(f32);
 extern f32 func_003532E8(f32, f32);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target sdfViewEyeVector and up sdfViewUpVector */
 void vuBuildLookAtBasis(void)

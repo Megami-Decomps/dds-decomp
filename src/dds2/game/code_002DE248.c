@@ -26,6 +26,7 @@
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "file_request_api.h"
+#include "sdf_vu_matrix.h"
 
 #include "dds3_path.h"
 #include "eff_transform.h"
@@ -328,7 +329,6 @@ typedef struct BillCellDrawWork {
 } BillCellDrawWork;
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effSetCurveEmitterStartPosition(s32, void *);
 

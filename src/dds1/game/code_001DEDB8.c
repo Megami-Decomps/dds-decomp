@@ -46,6 +46,7 @@
 #include "file_request_api.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 extern f32 D_00359EE0[4];
 
@@ -321,9 +322,7 @@ extern s32 btlAimHorizontalDirectionClampedVU(void *, void *, f32);
 
 extern u8 D_0037E110[];
 
-extern void effMiscQuaternionToMatrixVU(void);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effBattleUpdate(BattleEffect *);
 
@@ -331,7 +330,6 @@ extern f32 *D_00324770[];
 
 extern u8 kwlnDefaultColorVector[];
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void btlClearRuntimeFlag2000(void);
 

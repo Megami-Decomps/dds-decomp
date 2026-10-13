@@ -15,6 +15,7 @@
 #include "sdf_draw.h"
 #include "btl_sound.h"
 #include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 #define EFF_OBJ_KIND EFF_WORLD_KIND_EFFECT_OBJECT
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -94,7 +95,6 @@ extern s32 billGetKindOneParameter(struct EffNode *bill);
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
-extern void effMiscQuaternionToMatrixVU(void);
 extern void effMiscNormalizeVU(void);
 extern void sdfMultiplyVuMatrixInPlace(void);
 

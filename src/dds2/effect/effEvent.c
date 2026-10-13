@@ -1174,7 +1174,6 @@ extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00336818(f32 angle);
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.

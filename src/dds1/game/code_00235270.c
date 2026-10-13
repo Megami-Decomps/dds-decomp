@@ -5,6 +5,7 @@
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "evt_viewer_rows.h"
+#include "sdf_vu_matrix.h"
 
 #include "evt_world.h"
 #include "evt_picture.h"
@@ -2379,7 +2380,6 @@ void func_0023A798(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *runtime
 
 extern f32 sdfViewMatrix[];
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: apply the selected camera-axis rotations to a position. */
 void func_0023A7A0(f32 *position)

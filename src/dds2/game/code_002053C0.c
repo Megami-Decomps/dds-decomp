@@ -35,6 +35,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "sdf_vu_matrix.h"
 
 extern void btlClearAllUnitDefeatCandidates(void);
 
@@ -68,7 +69,6 @@ extern u32 btlTintTransitionHoldCount;
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern u8 D_003E9130[];
 

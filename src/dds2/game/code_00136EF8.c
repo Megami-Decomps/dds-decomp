@@ -8,6 +8,7 @@
 #include "fld_waypoint.h"
 #include "fld_inf.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_vu_matrix.h"
 extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -1719,7 +1720,6 @@ s32 fldPushDisplayValue(u32 value, EffWorldNode *unusedObject) {
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013BAB8);
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     f32 dir[4];

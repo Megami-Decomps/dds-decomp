@@ -1,8 +1,8 @@
 #include "common.h"
 #include "dds3_vu_transform.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: build the world matrix in vf28-vf31 from rotation (quaternion),
    per-row scale and translation. */
