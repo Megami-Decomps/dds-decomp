@@ -6599,6 +6599,7 @@
 0x002D8A90	sdfModelCreateWithAlternateItems	inferred	Creates a model, sets bit 4 and attaches items with the alternate setup function.
 0x002D8C88	sdfStoreMessageWordsAndNotifyConsumer	inferred	Stores four message words and invokes the consumer with the second word. [names_reviewed17.tsv]
 0x002D9718	sdfModelCopyData	inferred	null-checked memcpy of count*16 bytes between model buffers
+0x002D9748	sdfModelCopyRuntimeState	inferred	Copies model resource/list state, flags, color, transforms and per-draw-node state into an existing overlay; DDS2 twin 0x003325F8.
 0x002D99B0	sdfInitializeDrawPacketGroups	inferred	Initializes four draw packet groups and the final sync packet. [names_reviewed8.tsv]
 0x002D9A70	sdfSubmitDrawPacketGroups	inferred	Submits packet groups through their owners and synchronizes the final owner. [names_reviewed8.tsv]
 0x002D9B08	sdfChunkFindById	inferred	searches chunk list for entry id, returns entry or NULL
