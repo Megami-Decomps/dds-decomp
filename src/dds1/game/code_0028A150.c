@@ -2689,7 +2689,7 @@ void fileMenuReleaseNoOp(void) {
 void fileReleaseMenuResources(void) {
     s32 *slot;
     s32 i;
-    s32 world;
+    void *world;
     s32 handle;
 
     if (D_003BC7FC != 0) {

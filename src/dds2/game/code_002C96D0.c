@@ -2655,7 +2655,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     u32 index = 0;
     struct SdfMemBlock *titleNamesAllocation;
     u32 titleNamesAddress;
-    s32 world;
+    void *world;
 
     fileSetMemoryCardOperationActive();
     request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
@@ -2780,7 +2780,7 @@ void fileMenuReleaseNoOp(void) {
 void fileReleaseMenuResources(void) {
     s32 *slot;
     s32 i;
-    s32 world;
+    void *world;
     s32 handle;
 
     if (D_00437CE4 != 0) {
