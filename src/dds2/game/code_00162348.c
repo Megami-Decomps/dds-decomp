@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -522,12 +523,11 @@ u32 func_00162E10(u16 pointCapacity) {
 
 extern u8 D_00451F50[];
 
-extern void effMiscSeedRandomFromClock();
 
 void parSysReset(void) {
     parRecordListHead = 0;
     parControlInit();
-    effMiscSeedRandomFromClock(D_00451F50);
+    effMiscSeedRandomFromClock((EffRandState *)D_00451F50);
 }
 
 void func_00162E40(void) {

@@ -4,6 +4,59 @@
 #include "common.h"
 #include "kwln.h"
 
+/* Sprite resource layer stride used by the paired solar render helpers. */
+typedef struct SolarSpriteLayer {
+    u8 pad00[0x0C];
+    s32 drawWidth;
+    s32 drawHeight;
+    u8 pad14[0x68];
+    s32 width;
+    s32 height;
+    u8 pad84[0x1C];
+} SolarSpriteLayer;
+
+/* Debug text bundle initialized with the solar-noise camera label and "%s". */
+typedef struct SolarNoiseDebugData {
+    const char *label;
+    u32 opaque04;
+    char format[4];
+} SolarNoiseDebugData;
+
+/* Resource context with the sprite-layer array pointer at +0x18. */
+typedef struct SolarSpriteContext {
+    u8 opaque00[0x18];
+    SolarSpriteLayer *layers;
+} SolarSpriteContext;
+
+/* Indexed triangle-fan table view: position/color arrays and their count. */
+typedef struct SolarOverlayShape {
+    u8 opaque00[0x0C];
+    s32 *positions;
+    u32 *colors;
+    s32 count;
+    u8 opaque18[8];
+} SolarOverlayShape;
+
+typedef char SolarNoiseDebugDataFormatOffsetAssert[
+    ((u32)&((SolarNoiseDebugData *)0)->format == 8) ? 1 : -1];
+typedef char SolarSpriteContextLayersOffsetAssert[
+    ((u32)&((SolarSpriteContext *)0)->layers == 0x18) ? 1 : -1];
+typedef char SolarOverlayShapeDrawFieldsOffsetAssert[
+    ((u32)&((SolarOverlayShape *)0)->positions == 0x0C &&
+     (u32)&((SolarOverlayShape *)0)->colors == 0x10 &&
+     (u32)&((SolarOverlayShape *)0)->count == 0x14) ? 1 : -1];
+
+typedef char SolarSpriteLayer_size_must_be_0xA0[
+    (sizeof(SolarSpriteLayer) == 0xA0) ? 1 : -1];
+typedef char SolarSpriteLayer_drawWidth_offset_check[
+    ((u32)&((SolarSpriteLayer *)0)->drawWidth == 0x0C) ? 1 : -1];
+typedef char SolarSpriteLayer_drawHeight_offset_check[
+    ((u32)&((SolarSpriteLayer *)0)->drawHeight == 0x10) ? 1 : -1];
+typedef char SolarSpriteLayer_width_offset_check[
+    ((u32)&((SolarSpriteLayer *)0)->width == 0x7C) ? 1 : -1];
+typedef char SolarSpriteLayer_height_offset_check[
+    ((u32)&((SolarSpriteLayer *)0)->height == 0x80) ? 1 : -1];
+
 typedef struct SolarNoiseLayer {
     s16 x;
     s16 y;

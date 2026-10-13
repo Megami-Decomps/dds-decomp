@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff_node.h"
 #include "dds3obj.h"
+#include "dds3_object_mode.h"
 #include "dds3_path.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -104,7 +105,6 @@ void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
 
 
 extern EffWorldNode *dds3GetWorldObject(void);
-extern void dds3SetObjectModeAndDefaultWeight(void *node, s32 value);
 
 s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
     EffWorldNode *world = dds3GetWorldObject();

@@ -2429,7 +2429,7 @@ void btlAddItemDrop(u16 item) {
     }
 }
 
-extern s32 func_001B39E8(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
@@ -2448,7 +2448,7 @@ extern char D_00415250[];
 void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     BattleController *controller = (BattleController *)btlGetRuntime();
     DatEnemyRecord *record = &datEnemyRecords[enemy->partyRecord.unitId];
-    s32 level = func_001B39E8(4);
+    s32 level = btlAverageLevelsForMaskExcludingStatus20(4);
     s32 enemyLevel = record->level;
     s32 allowance = datBattleParameters->rewardLevelAllowance;
     s32 reward;

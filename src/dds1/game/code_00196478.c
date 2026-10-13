@@ -874,7 +874,7 @@ FrFontGlyph *itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex
     return 0;
 }
 
-u32 func_00198008(void) {
+u32 itfReturnZero(void) {
     return 0;
 }
 
@@ -884,7 +884,7 @@ void func_00198010(void) {
 void func_00198018(void) {
 }
 
-u32 func_00198020(u32 unused0, u32 unused1, u32 value) {
+u32 itfReturnThirdCallbackValue(u32 unused0, u32 unused1, u32 value) {
     return value;
 }
 
@@ -1283,7 +1283,7 @@ void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
 
 /* Draw three adjacent quads using zero-alpha/source-alpha edge color records.
  * Border widths and resulting signed middle width are not clamped. */
-void func_00198990(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, SdfListHead *command) {
+void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, SdfListHead *command) {
     DrawVertex vertices[ITF_QUAD_VERTEX_COUNT];
     DrawColorRec colors[2];
     s32 middleWidth;
@@ -1591,7 +1591,7 @@ void mnuReportCampProcessHalted(void) {
 
 extern s32 D_00357AB8[];
 
-UiSprite *func_00199828(s32 kind, u32 value) {
+UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 value) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
     UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
 

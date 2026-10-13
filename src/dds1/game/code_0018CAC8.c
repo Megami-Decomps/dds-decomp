@@ -14,6 +14,7 @@
 #include "eff_math.h"
 #include "sdf_texture_file.h"
 #include "sdf_projection.h"
+#include "eff_dirent.h"
 
 #include "sdf.h"
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
@@ -25,16 +26,6 @@
 #define EFF_COLOR_UNPACK_SCALE_BITS 0x3C000000
 #define EFF_SLOT_BYTES 0x38
 #define EFF_SLOT_HEADER_BYTES 0xC
-
-/* The SDK directory completion copies 0x140 bytes and one trailing word.
- * Names begin at 0x40; this transmitted record has ordinary word alignment. */
-typedef struct EffDirEnt {
-    u32 flags;      /* 0x00: bit 12 cleared */
-    u8 pad04[0x3C]; /* 0x04 */
-    char name[0x100]; /* 0x40: SDK directory-name buffer */
-    void *privateData; /* 0x140 */
-} EffDirEnt;
-typedef char EffDirEnt_size_must_be_0x144[(sizeof(EffDirEnt) == 0x144) ? 1 : -1];
 
 extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0039862B[];

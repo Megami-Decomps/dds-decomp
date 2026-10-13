@@ -8,6 +8,8 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "sdf_texture_submit.h"
 #include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
@@ -1003,9 +1005,6 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
     sdfTexQueueImageUpload(&request);
     return pixels + imageBytes;
 }
-
-extern u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height,
-    u32 format, u8 *pixels, s32 borrowPixels);
 
 /* Upload the CLUT as 16x16 for 8-bit indexed formats, otherwise 8x2; forward pixel ownership. */
 u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels) {

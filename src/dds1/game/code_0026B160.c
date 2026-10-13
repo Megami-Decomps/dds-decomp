@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "kwln_task_lifecycle.h"
 #include "mnu.h"
@@ -51,7 +52,6 @@ extern void sndStartTrackExtended(s32 trackId);
 extern void mnuDrawMovieMenuSpriteSlot16(s32 volume);
 extern void mnuDrawMovieMenuSpriteSlot17(s32 volume);
 extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
-extern s32 kwlnFadeIsActive(void);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void mnuRequestIndexedMovieResource(s32 index);
 extern s32 func_00270088(void);

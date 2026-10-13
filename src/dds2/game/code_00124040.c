@@ -17,6 +17,7 @@
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 
@@ -158,7 +159,6 @@ extern void func_0013DDC0(EffWorldNode *);
 
 extern void func_0014D0E8(void);
 
-extern s32 kwlnFadeIsActive(void);
 
 extern void mnuMarkTitleStreamResetPending(void);
 

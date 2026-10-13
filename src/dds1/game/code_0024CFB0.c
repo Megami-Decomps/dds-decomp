@@ -4,6 +4,7 @@
 #include "mnu_list.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "dat_state.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
@@ -233,7 +234,6 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
     return 1;
 }
 
-extern s32 kwlnFadeIsActive(void);
 extern s32 evtIsActiveFlagSet(s32);
 extern char D_003AF710[];
 extern char D_0036AE48[];

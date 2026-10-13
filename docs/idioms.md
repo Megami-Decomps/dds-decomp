@@ -10284,6 +10284,16 @@ variants have different operand contracts and keep their existing macros.
 The animated-frame body remains ASM; it is not counted as a matched helper
 consumer.
 
+The float-input unpack has its own `eeUnpackRGBAWordFloat(color, unit)`
+carrier. It retains the existing general-register float operand and broad
+memory clobber; it does not inherit the integer-bit helper's read-only
+contract. The exact surface-grid gradient (DDS1 0x002A7288 / DDS2
+0x002E9840) has four such input workspaces at SP+0x40/0x50/0x60/0x70.
+The unrelated field-light initializer (0x002B3178 / 0x002F67D8) has two at
+SP+0x10/0x20 and now uses the helper in both games. Only the initialized
+first word is read. Retail corroborates the workspace extent and the
+float-to-GPR transfer, without proving an original helper name or spelling.
+
 Whole-unit gates after the actual header and source edits:
 `247 match, 0 differ` and `290 match, 0 differ` for the sampler units;
 `542 match, 0 differ` and `686 match, 0 differ` for the billboard units.

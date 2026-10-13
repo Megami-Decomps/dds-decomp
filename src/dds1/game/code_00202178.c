@@ -219,12 +219,12 @@ s32 btlActionMatchesUnit(u8 *unit, s32 action) {
     return 0;
 }
 
-extern s32 func_001A8A30(void *, s32);
+extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
 
 s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     btlGetRuntime();
     if ((btlUnitStatusPair(((BtlUnit *)unit)) & 0x421) == 0x401) {
-        if (func_001A8A30(unit, action) != 0) {
+        if (btlHasRequiredCommandAffinityPartners(unit, action) != 0) {
             return 1;
         }
     }

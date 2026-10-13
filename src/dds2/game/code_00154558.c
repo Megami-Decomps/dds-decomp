@@ -1,11 +1,13 @@
 #include "fld_area_work.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "eff_random.h"
 #include "dds3_path.h"
 extern void func_00140BC8(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3obj.h"
+#include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "scr.h"
 
@@ -23,7 +25,6 @@ extern void fldSetInputPanelStateWord2(s32);
 
 extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
 
-extern void dds3SetObjectModeAndDefaultWeight(void *, s32);
 
 extern s32 D_004362D4;
 
@@ -1763,7 +1764,6 @@ s32 func_00157308(void) {
     return 1;
 }
 
-extern void effMiscSeedRandomFromClock(void *);
 
 extern void effLoadCommonTexturesAndResetRenderFlags(void);
 
@@ -1790,7 +1790,7 @@ extern u8 effDefaultRandomState[];
 extern char D_004363F8[];
 
 void fldCreateFieldEffectTask(void) {
-    effMiscSeedRandomFromClock(effDefaultRandomState);
+    effMiscSeedRandomFromClock((EffRandState *)effDefaultRandomState);
     effLoadCommonTexturesAndResetRenderFlags();
     effInitializeBillResourceOwners();
     parSysReset();

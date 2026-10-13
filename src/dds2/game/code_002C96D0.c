@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_scale_params.h"
 #include "ee_mmi.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
@@ -25,6 +26,7 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
@@ -116,6 +118,7 @@ extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "fpu.h"
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
@@ -464,35 +467,6 @@ extern void fileQueueInitTransform(void *queue);
 
 extern FileJob *fileJobCreate(void);
 
-typedef struct ScaleEntry {
-    f32 unk0;
-    f32 value;
-} ScaleEntry;
-
-typedef struct ScaleSet {
-    u8 pad0[0x64];
-    f32 unk64;
-    f32 unk68;
-    u8 pad6C[4];
-    ScaleEntry entries[3];
-    u8 pad88[0x40];
-    f32 unkC8;
-    f32 unkCC;
-    f32 unkD0;
-    f32 unkD4;
-    f32 unkD8;
-    f32 unkDC;
-    f32 unkE0;
-    f32 unkE4;
-    u8 padE8[8];
-    f32 unkF0;
-} ScaleSet;
-
-typedef struct ScaleOwner {
-    u8 pad0[0x20];
-    ScaleSet *dst;
-    ScaleSet *src;
-} ScaleOwner;
 
 extern s32 fileBeginSlotResetPrompt(void);
 
@@ -3370,7 +3344,6 @@ s32 mcdContinueLoadSelection(void) {
     return next;
 }
 
-extern s32 kwlnFadeIsActive(void);
 extern void kwlnFadeStartIn(s32);
 extern s32 fileBeginLoadOrAbortDialog(void);
 
@@ -4299,7 +4272,6 @@ void mnuProjectViewPoint(void) {
 }
 
 extern u8 sdfViewTargetVector[];
-extern void sdfInvertRigidVuTransform(void);
 
 /* vu0 routine: tests whether vf10 projects within the camera's forward cone. */
 s32 sdfProjectPointInForwardConeVU(void) {

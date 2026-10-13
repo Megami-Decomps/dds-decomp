@@ -56,6 +56,8 @@
 0x00104568	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104678, input-family pairing. [names_qp10.tsv]
 0x00104898	kwlnTextureCountIncompleteResources	inferred	counts D_004389F8 list nodes whose ready flag pointer is NULL or points to 0 [names_M39_SmallSweep7.tsv]
 0x00104900	kwlnTextureGetPageIndex	inferred	Returns the texture viewer's global page index, as in the DDS1 counterpart.
+0x00104908	kwlnSelectIncompleteResourceAtPageIndex	inferred	Selects the reached incomplete-texture page, stores its resource pointer and returns the reached index; DDS1 twin 0x00104A18. DDS2 skips clone-source entries at the head before applying the requested index.
+0x00104AA8	kwlnDrawTextureViewerFrame	inferred	Builds the texture-viewer packet list with page counter, image outline/info and optional allocation-map diagnostics, then submits it to the supplied surface; DDS1 twin 0x00104B88.
 0x00104F30	kwlnDrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:425:func_00104F30; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00105010, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
 0x00105240	evtResetDisplayProjectionAndVectorState	inferred	Sets display mode, rebuilds both projections and ensures draw-vector state. [names_reviewed9.tsv]
 0x001053F0	kwlnCreateHeldTextureBuffer	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:648:func_001053F0; Replaces the held texture reference, allocates the requested image buffer and texture, initializes texture state and returns one only after both allocations succeed.; source=names_pending_main.tsv:124 [names_qp11.tsv]
@@ -2120,6 +2122,7 @@
 0x0019FC38	itfDrawBankTextWithLayoutFlags	inferred	readability/matching review (QP16)
 0x0019FE00	itfDrawTextWithSelectedFontMode	inferred	Draws a text ID with the resource chosen by font mode. [names_reviewed8.tsv]
 0x0019FEF8	itfDrawUnderscoreTextSegment	inferred	confidence=high; matched-C; src/dds2/game/code_0019E138.c:433:func_0019FEF8; Extracts the requested underscore-delimited segment into a 0x200-byte local buffer and passes it to the text renderer; returns zero for overlong input or no selected segment.; source=names_pending_main.tsv:140 [names_qp12_apply.tsv]
+0x001A0038	itfReturnZero	inferred	Returns literal zero; no direct C/assembly callers or registration found. Paired with DDS1 0x00198008.
 0x001A0050	itfReturnThirdCallbackValue	inferred	high confidence; src/dds2/game/code_0019E138.c func_001A0050: Ignores the first two callback arguments and returns the third unchanged. [names_reviewed25.tsv]
 0x001A0068	itfSplitRelativeSegments	inferred	Computes three segment pointers by cumulatively adding offset words within the source block.
 0x001A01D8	itfCreateMemNodeRing	inferred	Allocates payload nodes and links the count plus one node headers into a ring; first-game twin 001981A8.
@@ -2131,17 +2134,21 @@
 0x001A0438	itfReleaseFontTestTaskResources	inferred	Advances fading font glyphs and releases the background sprite. [names_reviewed8.tsv]
 0x001A0458	itfDrawBackgroundAndGetTaskReadyMask	inferred	Draws background then returns 0xFFFFFFFF only when registered task state equals three; first-game twin 00198428.
 0x001A0710	itfLoadTextureFromAsset	inferred	Loads named asset, obtains its texture reference from the resource handle, then releases temporary allocation; first-game twin 001986E0.
+0x001A09C0	itfDrawThreePanelBorderBands	inferred	Partitions the rectangle into left, center and right border bands and emits three flat quads with transparent/source-alpha color records; center width is unclamped.
 0x001A0CA0	itfQueueTextureBoundQuadPacket	inferred	confidence=high; matched-C; src/dds2/game/code_0019E138.c:815:func_001A0CA0; Builds the GS textured rectangle/quad packet from two vertex corners, UVs, color and depth, binds the supplied texture, and appends the packet to the caller chain; packet primitive/state bits are 0x156.; source=names_P5.tsv:13 [names_qp11.tsv]
 0x001A0E20	itfQueueColoredTexturedQuadPacket	inferred	Builds a two-vertex textured GS packet with UV and RGBA values and appends it. [names_reviewed14.tsv]
 0x001A0F88	itfEmitColoredLinePacket	inferred	Builds a two-vertex packet with supplied colors and appends it. [names_reviewed8.tsv]
 0x001A1490	itfSendBlendPacket	inferred	twin 0x00199460: packet cmd 0x47/0x48
 0x001A1508	itfSendTablePacket	inferred	twin 0x001994D8: packet cmd 0x42/0x43 with table value
+0x001A1858	itfCreateUiSpriteByKind	inferred	Allocates a UiSprite and kind-sized payload, initializes texture-bearing payloads 6-9 from the supplied value; DDS1 twin 0x00199828.
 0x001A1930	itfPanelReleasePrimitiveResources	inferred	Releases panel primitive record handle when present and always releases base handle. [names_reviewed6.tsv]
 0x001A1980	itfSetPanelLayoutAndNotify	inferred	Stores panel layout fields and invokes its kind-specific handler when present, complementing named incremental layout updater. [names_reviewed19.tsv]
 0x001A19C8	itfAdvancePanelLayoutAndNotify	inferred	Adds input deltas to a panel layout and notifies its handler. [names_reviewed8.tsv]
 0x001A1A50	itfPanelUpdateValuesAndNotify	inferred	src/dds2/interface/itfPanel.c:func_001A1A50; Stores four supplied panel values and invokes the kind-specific notification callback with panel context when present. Fully-C unit; corresponding retail matching artifact present. [names_qp9.tsv]
 0x001A1A98	itfBuildAndSubmitPanelPacket	inferred	Allocates panel draw list, appends GS state, dispatches panel handler and submits list via supplied callback. [names_reviewed19.tsv]
 0x001A1B38	itfPanelSetFourColumnVertices	inferred	Writes eight vertices in four columns at x0, x0+0x200, x1-0x200 and x1, collapsing middle columns if they cross. [names_R_Structs24.tsv]
+0x001A1BB0	itfBuildPanelBorderVertexGrid	inferred	Builds the panel's outer border vertex grid and table-spaced rows above and below it; pairs with DDS1 0x00199B80.
+0x001A1D20	itfPanelSetInsetFrameVertices	inferred	Builds the panel's outer border vertex grid and adds three fixed 8-unit inset rows above and below; pairs with DDS1 0x00199CF0.
 0x001A1E68	itfPanelSetRectVerts	inferred	writes the 4 corner vertices of a rect (x0,y0,x1,y1) into a panel record
 0x001A1E98	itfSetPanelCornerGrid	inferred	Writes two rows of three panel coordinates using supplied bounds. [names_reviewed8.tsv]
 0x001A1F08	itfSetPanelInsetVertexColumns	inferred	Writes panel vertex columns at fixed horizontal and inset vertical coordinates. [names_reviewed9.tsv]
@@ -2160,12 +2167,19 @@
 0x001A2C98	itfDrawTintedPanelRect	inferred	Builds a panel rectangle and draws it with scaled stored tint. [names_reviewed9.tsv]
 0x001A2D10	itfAppendGsPanelStatePacket	inferred	Builds and appends a packet carrying GS panel state registers. [names_reviewed9.tsv]
 0x001A2D80	itfPanelStartEntry	inferred	DDS1 twin 0019AD50 [names_M33_SmallSweep2.tsv]
+0x001A2450	itfDrawPanelWithThreeInsetQuads	inferred	Builds three progressively inset quads from the panel's four payload vertices, emits the base flat quad, then draws the three inset strips.
+0x001A2658	itfDrawFramedPanelWithTextureStrips	inferred	Draws two alpha-scaled border bands and six texture-bound strips from the live panel rectangle; installed in the panel callback table.
+0x001A29D8	itfDrawThreePieceTexturedPanel	inferred	Draws a textured left cap, colored center section, and reversed right cap from panel bounds; installed in the panel callback table.
 0x001A2EA8	itfPanelAcquireHold	inferred	DDS1 twin 0019AE78 [names_M33_SmallSweep2.tsv]
 0x001A2F08	itfPanelReleaseHold	inferred	DDS1 twin 0019AED8 [names_M33_SmallSweep2.tsv]
 0x001A2F60	itfCommandQueueHeldPanelEntry	inferred	src/dds2/game/code_001A1B08.c func_001A2F60: Reads three script integers into held panel queue, ignoring absent hold or full queue. Twin of DDS1 func_0019AF30. [names_reviewed24.tsv]
+0x001A3008	itfStepHeldPanelMessages	inferred	DDS1 twin 0x0019AFD8; starts queued panel entries on matching frames, closes entries at deadlines, and releases the held panel after the final deadline.
+0x001A3138	itfMesScriptWaitForOptionSelection	inferred	Message script command table slot 3: builds the selected entry's option list, yields while selection is pending, and returns the chosen clear-bit count before resetting the window.
 0x001A31E0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
 0x001A3458	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x001A34D0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]
+0x001A3560	itfMesNoOpCommand4	inferred	Script dispatch table slot 4: performs no state change and returns 1, so the wait dispatcher continues without yielding.
+0x001A3568	itfMesNoOpCommand5	inferred	Script dispatch table slot 5: performs no state change and returns 1, so the wait dispatcher continues without yielding.
 0x001A3570	itfMesScriptSetTextSlotFromValue	inferred	Reads script slot, value and selector arguments and installs the selected text in the active message window.
 0x001A38A0	itfMesGetWindowTexture	inferred	Returns the retained SdfTex pointer stored as the message window's texture; it does not return a scalar manager word.
 0x001A38D8	itfMesCreateWindow	inferred	twin of DDS1 0x0019B8A8: acquires a pool node, allocates the 0x1E0-byte message state, installs the sub resource, resets the sub blocks and bumps the window count at D_00452940 [names_M71_ItfBlur.tsv]
@@ -2202,6 +2216,7 @@
 0x001A50D8	itfMesDestroyWindow	inferred	frees window mes state, effect handles, releases pool node
 0x001A5228	itfMesGetWindowEntryItems	inferred	Returns the selected window entry's item list. [names_reviewed6.tsv]
 0x001A52B8	itfMesBuildEntryGlyph	inferred	builds the glyph for the current entry (E800), registers hooks and sets entry state
+0x001A5480	itfMesReplaceTextSlotData	inferred	Releases any previous retained text-slot allocation, allocates aligned storage, retains its address, and copies a string span or requested byte count into it.
 0x001A55B0	itfMesInitCharTable	inferred	calls func_0019E8F0 for each of 32 table words
 0x001A5600	itfMesGetNextEntrySelectedItem	inferred	Gets the message subrecord's next entry and reads the item at the window block's selected index.
 0x001A5670	itfMesBuildNodeRows	inferred	twin [names_M67_Named.tsv]
@@ -2231,6 +2246,8 @@
 0x001A6078	itfMesConfigurePanelBoundsAndFadeLimit	inferred	Selects the panel-layout branch from mode, writes the four bounds, clamps/stores fadeLimit, and initializes related panel fields. Paired title implementation.
 0x001A6128	itfUpdateBattleDisplayAndFadeIndicator	inferred	Runs the display update stages and advances the battle fade indicator. [names_reviewed16.tsv]
 0x001A6160	itfMesUpdatePanelFades	inferred	U2
+0x001A6350	itfMesAdvanceEntryText	inferred	Advances a message entry's timed text state, rebuilds the current glyph and panel frame, and signals when the entry is exhausted.
+0x001A6528	itfUpdateSoundSelectionTransition	inferred	Pairs with the DDS1 state machine: advances selector phases, polls the selected option, trims rows and completes the fade/slide transition.
 0x001A67E0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]
 0x001A6AB8	itfMesFindPressedOptionRank	inferred	Checks option buttons and returns the selectable row rank for the pressed option, or -1 when no registered choice is eligible.
 0x001A6B48	btlUpdateFadeIndicator	inferred	BtlFade {kind,dir,alpha,timer} at unit+0x1D0 pulses alpha 0x20/0x40..0xFF
@@ -2240,6 +2257,7 @@
 0x001A7120	itfDrawSoundSelectorOptionPanel	inferred	Mode-3 path in itfUpdateSoundSelectorPanel; emits option-row geometry and panel quads for the selector.
 0x001A7688	itfUpdateActiveMessageWindows	inferred	CalcMsgMng task update: walks active message windows and advances each window's fade, display and selection state.
 0x001A76C8	itfUpdateSoundSelectorPanels	inferred	Registered DrawMsgMng update task gates on pending work, updates active sound-selector panels, advances the message tick, and returns zero.
+0x001A7738	itfMesDestroyActiveWindowsAndReleaseTexture	inferred	Task-destroy callback closes every active message window, releases the shared window texture and clears its owner field.
 0x001A7798	itfQueueSpriteQuadPacket	inferred	Builds a sprite's four-corner vertices, emits the indexed five-quad packet, and appends it to the message draw list.
 0x001A7878	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:783:func_001A7878; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
@@ -2326,11 +2344,13 @@
 0x001B0B30	btlSelectCommandHitCount	inferred	Honors the command hit-count override or selects from the command's inclusive hit range, using roster bounds for affected kind-5 commands. Paired DDS1 0x001A6968.
 0x001B0C18	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001B0D28	btlMapActionCode	inferred	Maps action codes 0x31-0x33 and 0x185 to 0x35, 0x186 to 0x1E, 0x193 to 0x25, otherwise consults category table
+0x001B1350	btlGetCommandAddedStatus	inferred	Resolves the command channel value for attacker/defender records, then applies command mode, status and guard filters; the caller stores the result as addedStatus. DDS1 twin 0x001A7180.
 0x001B1640	btlQueryUnitChannelFlags	inferred	Returns channel flags for two units, adding a status-dependent bit. [names_reviewed8.tsv]
 0x001B16B0	btlGetAdjustedSlotAffinity	inferred	Light1b
 0x001B1F80	btlCalculateEnemyExperienceReward	inferred	Scales enemy experience points by the acquirer ratio and special multiplier. [names_reviewed12.tsv]
 0x001B21E0	btlGetEnemyMoney	inferred	dds1 twin 001A7D38; logs "btl:money=%d" [names_reviewed2.tsv]
 0x001B2298	btlCalculateHuntEpReward	inferred	Scales EP reward by a computed ratio and logs it as hunt EP. [names_reviewed12.tsv]
+0x001B2380	btlGetHuntHpRecoveryAmount	inferred	Returns the per-hit hunt HP-recovery hook result; its current DDS2 body returns 0, while its two callers add the result to hunt-hit HP recovery. Paired DDS1 provider 0x001A7ED8 also returns 0.
 0x001B2388	btlCalculateAbilityRecoveryAmount	inferred	Calculates recovery from actor data under either matching special ability. [names_reviewed8.tsv]
 0x001B2430	btlIsUnitDefeatTriggeredByValueDelta	inferred	Checks immunity and battle flags before testing whether a unit value reaches zero after delta. [names_reviewed12.tsv]
 0x001B24C0	btlIsCurrentValueBelowQuarterThreshold	inferred	Compares current/max percent to a near-quarter cutoff (25 in DDS1, 26 in DDS2). [names_reviewed12.tsv]
@@ -2343,8 +2363,10 @@
 0x001B29A8	btlGetSelectedUnitProperty	inferred	Looks up selected unit index and resolves alternate property from D_003B4F74 table.
 0x001B2CC0	btlIsSelectedActorStatusAndRecordClear	inferred	Requires clear selected entry, actor status flags and indexed record state. [names_reviewed16.tsv]
 0x001B2D38	btlAreUnitStatusAndEntryFlagsClear	inferred	Requires the matching unit status and entry permission bits both to be clear. [names_reviewed14.tsv]
+0x001B2F50	btlHasRequiredCommandAffinityPartners	inferred	Counts command affinity requirements and checks whether eligible active scene actors can satisfy the two- or three-member partner set; DDS2 callers use the result for action availability and script selection. DDS1 twin 0x001A8A30.
 0x001B3188	btlHasAdjacentActorRecordStatus	inferred	Checks two neighboring status bytes for the selected actor record. [names_reviewed14.tsv]
 0x001B31E8	btlIsActorHighStateFlagClear	inferred	Returns whether the checked high actor-state bit is clear in both titles. [names_reviewed17.tsv]
+0x001B3200	btlCanSpawnAnotherEnemy	inferred	Returns whether active and cumulative spawn caps permit adding an enemy, applying the optional scene override. Two DDS2 callers use the result as an enemy-spawn gate; DDS1 twin 0x001A8CE0.
 0x001B33C8	btlHasAvailableOption	inferred	Tests whether collecting selectable battle options yields any choices. [names_reviewed10.tsv]
 0x001B33E8	btlChooseRandomAvailableOption	inferred	Selects a random member of the object-generated options, or negative one. [names_reviewed8.tsv]
 0x001B3430	btlChooseEligibleSkill	inferred	Filters an actor ability list by category and flags before choosing at random. [names_reviewed14.tsv]
@@ -2359,6 +2381,7 @@
 0x001B3900	btlAverageFilteredCurrentForMask	inferred	confidence=high; src/dds2/game/code_001A5BB8.c:func_001B3900; Selects the current-value average with flag-0x20 actors excluded. [names_qp9.tsv]
 0x001B3918	btlAverageAllCurrentForMask	inferred	confidence=high; src/dds2/game/code_001B2AF8.c; selects current-HP average without excluding flag-0x20 actors. Native24B wrapper restores ra/sp then tail-jumps to s32 btlAverageCurrentValueForMask; datCalc caller consumes v0. Truthful s32 return closure Namer1 batch26; prior name source names_qp9.tsv. DDS1 twin0x001A93B8.
 0x001B3930	btlAverageMaskedActorStat	inferred	Averages an actor stat over eligible actors matching an entry mask. [names_reviewed11.tsv]
+0x001B39E8	btlAverageLevelsForMaskExcludingStatus20	inferred	Returns the masked mean of party-record levels through btlAverageMaskedActorStat with mode 1, excluding units whose status.flags contains 0x20; four clients use it as an average level. DDS1 0x001A9488.
 0x001B3A18	btlSumOrAverageActorAttribute	inferred	Sums a selected attribute across matching actors and divides by actor count only when two or more actors match.
 0x001B3AF8	btlAverageFilteredActorAttribute	inferred	confidence=high; src/dds2/game/code_001A5BB8.c:func_001B3AF8; Uses the masked actor-attribute aggregation path that excludes flag-0x20 actors; it averages whenever at least two actors qualify. [names_qp9.tsv]
 0x001B45C8	btlHasSpecialAbilityOrModelFlag	inferred	Checks a matching special ability or its alternative model flag. [names_reviewed14.tsv]
@@ -2959,7 +2982,7 @@
 0x00209DD8	btlScriptSelectModeDValueOne	inferred	Twin of dds1 0x001F8388; Writes commandMode 0xD and commandValue 1. [names_R_FuncNames3.tsv]
 0x00209E08	btlCmdSetContextFlagOne	inferred	DDS1 func_001F8508 twin; ORs flag one in command context [names_R_FuncNames.tsv]
 0x00209E38	btlScriptSelectModeAValueOne	inferred	Twin of dds1 0x001F83B8; Writes commandMode 10 and commandValue 1. [names_R_FuncNames3.tsv]
-0x00209E68	btlScriptSelectActionEntry	inferred	reads a script parameter, probes action table via func_001B2F50/func_001ACD10 and sets command mode 1/2/3 [names_M36_SmallSweep5.tsv]
+0x00209E68	btlScriptSelectActionEntry	inferred	reads a script parameter, probes action table via btlHasRequiredCommandAffinityPartners/func_001ACD10 and sets command mode 1/2/3 [names_M36_SmallSweep5.tsv]
 0x00209F28	btlScriptSelectByKind	inferred	command mode 2, kind 0x196 substitutes func_0021F698() [names_M36_SmallSweep5.tsv]
 0x00209FA0	btlScriptSelectWeightedEntry	inferred	calls btlPickWeightedEntry on the script parameter [names_M36_SmallSweep5.tsv]
 0x00209FF8	btlScriptSelectDirect	inferred	command mode 5 with the raw script parameter [names_M36_SmallSweep5.tsv]
@@ -7874,6 +7897,7 @@
 0x0022B288	btlBindEventEffectResources	inferred	Binds available event keys50–64 into slots11–25; native invoke effect diagnostics establish resource role. DDS1 twin0x002101C8. [Namer1 batch33 high]
 0x0022CE30	btlDrawScaledHeldTextureQuad	inferred	Binds kwlnHeldTextureReference and queues centered scaled textured quad with supplied primitive, color and depth. DDS1 twin0x00211A60. [Namer1 batch33 high]
 0x0022D2F8	btlDrawCapturedScreenTileOverlay	inferred	Held-texture tile overlay uses radial VU rotation, staggered delay/age/displacement/alpha advancement and completion return. [Namer1 batch33 high]
+0x0022E450	btlGetRuntimeResult	inferred	Returns the signed battle runtime result byte used by fldGetEncounterRuntimeResult.
 0x0022E460	btlIsFadeInPhaseOrIdle	inferred	True for inactive runtime, state0 or state2 initial fade phase; does not claim fading is complete. DDS1 twin0x00213B60. [Namer1 batch33 high]
 0x0022E490	btlIsFadeOutCompleteOrIdle	inferred	True for inactive runtime, state0 or state4 after outgoing phase3 fade, before cleanup. DDS1 twin0x00213B90. [Namer1 batch33 high]
 0x00230960	btlResetDebugEncounterSelection	inferred	Clears selector launch confirmation and dds3 work; scene refresh invokes it before polling. DDS1 twin0x00215FE0. [Namer1 batch33 high]

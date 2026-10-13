@@ -176,7 +176,7 @@ extern u8 sdfPfsDebugMode;
 
 extern s32 btlAnyUnitHasActionInSlots();
 
-extern s32 func_001B3200(s32);
+extern s32 btlCanSpawnAnotherEnemy(s32);
 
 extern s32 func_00213F58(s32, s16, s8);
 
@@ -190,7 +190,7 @@ extern s32 btlElementToBitIndex(s32, s32);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 func_001B2F50(void *, s32);
+extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
 
 extern s32 btlHasAdjacentActorRecordStatus(BtlUnit *);
 
@@ -204,7 +204,7 @@ extern char D_00419B88[];
 
 extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
-extern u32 func_001B39E8(s32);
+extern u32 btlAverageLevelsForMaskExcludingStatus20(s32);
 
 extern AiSpecies D_003BEDD0[];
 
@@ -1035,7 +1035,7 @@ s32 btlCheckCounterLimit(s32 unused, u32 minimumCount) {
 
 /* Return whether counter query 4 has reached the requested inclusive lower bound. */
 s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
-    if (func_001B39E8(4) < minimumCount) {
+    if (btlAverageLevelsForMaskExcludingStatus20(4) < minimumCount) {
         return 0;
     }
     return 1;
@@ -1158,7 +1158,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit) {
     s16 bucketRoll;
     ActionStateLink *context = btlActionScratchWork->actor;
     u16 actionTime = unit->partyRecord.level;
-    s32 delayPending = func_001B39E8(4) < (u32)(actionTime + BTL_LOW_HP_ACTION_DELAY);
+    s32 delayPending = btlAverageLevelsForMaskExcludingStatus20(4) < (u32)(actionTime + BTL_LOW_HP_ACTION_DELAY);
 
     if (context->lowHpActionHold <= 0) {
         if (delayPending == 0 && unit->partyRecord.hp * BTL_HEALTH_RATE_SCALE / unit->partyRecord.maxHp < BTL_LOW_HP_PERCENT_LIMIT && btlIsGroup400CountAtMost(unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
@@ -1639,7 +1639,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
 }
 
 s32 func_00214928(void) {
-    return func_001B3200(0);
+    return btlCanSpawnAnotherEnemy(0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419B38);

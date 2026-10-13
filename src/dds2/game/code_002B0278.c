@@ -171,8 +171,6 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void mnuFreeWindowSprites();
 
-extern void mnuClearEntryFlags();
-
 extern s32 evtGetCapturedWindowPanelValue();
 
 
@@ -3917,9 +3915,6 @@ void func_002B9FB8(MenuWindowContainer *window);
 
 
 
-
-/* Reset low sprite flags only for a present first sprite and a supported panel kind. */
-void mnuClearEntryFlags(MenuIconState *group);
 
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
 typedef struct MenuPos {

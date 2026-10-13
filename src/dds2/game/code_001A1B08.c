@@ -36,7 +36,7 @@ typedef struct PktRec {
     s32 unkC; /* 0xC */
 } PktRec;
 
-/* Rectangle corners as consumed by the border-drawing routine func_001A09C0. */
+/* Rectangle corners as consumed by the border-drawing routine itfDrawThreePanelBorderBands. */
 typedef struct PanelRect {
     s32 x0; /* 0x0 */
     s32 y0; /* 0x4 */
@@ -116,7 +116,7 @@ extern void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag);
 extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command);
 extern u8 D_004365D8[8];
 extern u8 D_004365E0[8];
-extern void func_001A09C0(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
+extern void itfDrawThreePanelBorderBands(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
@@ -169,7 +169,7 @@ void itfPanelSetFourColumnVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, 
 extern s32 D_003B44D8[4];
 
 /* Emit the outer frame grid, then the table-spaced top/bottom edge rows. */
-void func_001A1BB0(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfBuildPanelBorderVertexGrid(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -213,7 +213,7 @@ void func_001A1BB0(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Emit the outer frame grid, then the close top/bottom edge rows. */
-void func_001A1D20(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetInsetFrameVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -456,7 +456,7 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     }
 }
 
-void func_001A2450(UiSprite *panel, SdfListHead *command) {
+void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
     PanelVert vertices[12];
     PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
@@ -503,7 +503,7 @@ void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
     itfSendTablePacket(command, 0, 0);
 }
 
-/*BEGIN func_001A2658*/
+/*BEGIN itfDrawFramedPanelWithTextureStrips*/
 extern u32 D_003B4690[];
 extern DrawColorRec D_003B4700;
 extern DrawColorRec D_003B4710;
@@ -511,7 +511,7 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 
 /* Draw the framed panel: two bordered bands, then six texture-bound strips whose
  * rectangles are rebuilt from the live panel bounds. */
-void func_001A2658(UiSprite *panel, SdfListHead *command) {
+void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) {
     PanelRect rect;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
     s32 *color = &panel->unk2C;
@@ -524,14 +524,14 @@ void func_001A2658(UiSprite *panel, SdfListHead *command) {
     rect.y0 = panel->top;
     rect.x1 = panel->right;
     rect.y1 = panel->bottom;
-    func_001A09C0(&rect, D_003B4690, panel->unk0C, 0x490, command);
+    itfDrawThreePanelBorderBands(&rect, D_003B4690, panel->unk0C, 0x490, command);
     alpha = panel->unk38 * 38 / 128;
     D_003B4690[7] = alpha;
     rect.x0 = panel->left + 0x720;
     rect.y0 = panel->top;
     rect.x1 = panel->left + 0x17E0;
     rect.y1 = panel->bottom;
-    func_001A09C0(&rect, &D_003B4690[4], panel->unk0C, 0x680, command);
+    itfDrawThreePanelBorderBands(&rect, &D_003B4690[4], panel->unk0C, 0x680, command);
     rect.x0 = panel->left - 0x140;
     rect.y0 = panel->top + 0x48;
     rect.x1 = panel->left + 0xB40;
@@ -573,7 +573,7 @@ void func_001A2658(UiSprite *panel, SdfListHead *command) {
     rect.x0 = x - 0x1220;
     itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->unk0C, payload->texture, 0, command);
 }
-/*END func_001A2658*/
+/*END itfDrawFramedPanelWithTextureStrips*/
 
 extern DrawColorRec D_003B4720;
 extern DrawColorRec D_003B4730;
@@ -582,7 +582,7 @@ extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, Draw
 
 /* Bind the texture for the left cap, then draw the center and reversed right
  * cap. Insets are captured before the first submission; Y bounds are live. */
-void func_001A29D8(UiSprite *panel, SdfListHead *command) {
+void itfDrawThreePieceTexturedPanel(UiSprite *panel, SdfListHead *command) {
     DrawVertex rect[2];
     DrawColorRec *color = (DrawColorRec *)&panel->unk2C;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
@@ -671,7 +671,7 @@ void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
     rect.y0 = panel->top;
     rect.x1 = panel->right;
     rect.y1 = panel->bottom;
-    func_001A09C0(&rect, D_003B4760, panel->unk0C, ITF_PANEL_TINT_BORDER_WIDTH, command);
+    itfDrawThreePanelBorderBands(&rect, D_003B4760, panel->unk0C, ITF_PANEL_TINT_BORDER_WIDTH, command);
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
@@ -786,7 +786,7 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     return 1;
 }
 
-s32 func_001A3008(void) {
+s32 itfStepHeldPanelMessages(void) {
     s32 frame;
     s32 latest = -1;
     s32 i;
@@ -825,7 +825,7 @@ s32 func_001A3008(void) {
 }
 
 
-s32 func_001A3138(void) {
+s32 itfMesScriptWaitForOptionSelection(void) {
     s32 window;
     s32 entry;
     PanelRec *record;

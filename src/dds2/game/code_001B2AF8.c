@@ -163,7 +163,7 @@ extern s32 btlRollAiBucket(void);
 
 extern u32 effMiscRandMod(void *state, u32 modulus);
 
-extern s32 func_001B39E8(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 typedef struct BattleAdjustmentEntry {
     u16 sceneIndex;
@@ -379,7 +379,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B2F50);
+INCLUDE_ASM(const s32, "game/code_001B2AF8", btlHasRequiredCommandAffinityPartners);
 
 s32 btlHasAdjacentActorRecordStatus(BtlUnit *object) {
     u8 *status = datEnemyRecords[object->partyRecord.unitId].unk3E;
@@ -397,7 +397,7 @@ u32 btlIsActorHighStateFlagClear(BtlUnit *actor) {
     return (((s32)actor->status.flags >> 0x1a) ^ 1U) & 1;
 }
 
-s32 func_001B3200(BtlUnit *requester) {
+s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 limit;
     u32 active;
@@ -689,7 +689,7 @@ s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
     return 1;
 }
 
-s32 func_001B39E8(u32 mask) {
+s32 btlAverageLevelsForMaskExcludingStatus20(u32 mask) {
     return btlAverageMaskedActorStat(mask, 1);
 }
 

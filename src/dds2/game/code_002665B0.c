@@ -9,6 +9,7 @@
 #include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "evt_world.h"
 #include "mnu_list.h"
 #include "eff.h"
@@ -135,7 +136,6 @@ extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 fldGetModeFrameRecordIndex(s32);
 
-extern s32 kwlnFadeIsActive(void);
 
 
 extern void mnuDrawTerminalBackdrop(s32);

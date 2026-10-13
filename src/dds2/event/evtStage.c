@@ -1,8 +1,12 @@
 #include "common.h"
+#include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
+#include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_task_queue_query.h"
 #include "kwln_task_state.h"
 #include "sdf_texture_offset_list.h"
 
@@ -16,9 +20,6 @@ extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
-
-extern void *dds3GetWorldSecondaryObject(void);
-extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
 
 const char D_00421578[0x10] = "%sf%03d_%03d";
 
@@ -53,9 +54,6 @@ extern char D_003C8BA0[];
 extern char D_003C8C60[];
 extern char D_003C8C80[];
 extern EffWorldNode *dds3AppendWorldNode(void);
-extern void dds3SetWorldSecondaryObject(void *);
-extern void dds3SetWorldObject(void *);
-extern void fldFormatAreaDirectory(char *, s32, s32);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32);
@@ -124,8 +122,6 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3,
 extern void func_0035C860(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
-extern KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index);
-extern s32 kwlnTaskGetStateList(u32 state);
 extern void func_0035B6E0(const char *format, ...);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */

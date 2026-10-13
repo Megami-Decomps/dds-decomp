@@ -1,7 +1,7 @@
 #include "snd_ring.h"
 #include "common.h"
 #include "snd_command_packet.h"
-#include "snd_track_slot.h"
+#include "snd_work.h"
 #include "sce_io.h"
 
 #define SND_COMMAND_RING_ENTRY_COUNT 32
@@ -25,34 +25,6 @@ u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 size);
 void sndEnsureMidiBankResident(s32 trackId);
 
 /* Sound command work block: header, 16 channels/buffers, 13 track slots (see code_002E9140). */
-typedef struct SndChannel {
-    u8 index;     /* 0x0 */
-    u8 unk1;      /* 0x1 */
-    s16 unk2;     /* 0x2 */
-    u32 unk4;     /* 0x4 */
-    u32 unk8;     /* 0x8 */
-    u32 unkC;     /* 0xC */
-} SndChannel;
-
-typedef struct SndIopBuffer {
-    s32 size;
-    u32 address;
-} SndIopBuffer;
-
-typedef struct SndWork {
-    s32 header;                /* 0x000 */
-    s32 bufferCount;           /* 0x004 */
-    u32 unk008;              /* 0x008 */
-    u32 unk00C;              /* 0x00C */
-    SndChannel channels[SND_CHANNEL_COUNT];   /* 0x010 */
-    SndIopBuffer buffers[SND_IOP_BUFFER_COUNT];  /* 0x110 */
-    SndTrackSlot slots[SND_TRACK_SLOT_COUNT];    /* 0x190 */
-    u32 unk1F8;              /* 0x1F8 */
-    u32 unk1FC;              /* 0x1FC */
-    u32 unk200;                /* 0x200 */
-    u32 unk204;                /* 0x204 */
-} SndWork;
-
 extern SndWork sndMidiTrackState;
 extern u32 sndReserveIopWorkMemory(s32 size);
 extern s8 D_003BDA80;
@@ -125,13 +97,6 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
 }
 
 /* Descriptor consumed by sceSifSetDma: EE source, IOP destination, byte size, attributes. */
-typedef struct SifDmaTransfer {
-    u32 source;
-    s32 destination;
-    s32 size;
-    s32 attributes;
-} SifDmaTransfer;
-
 extern SifDmaTransfer D_003FD080;
 
 /* Transfer an EE buffer to IOP memory, retrying submission and waiting for completion. */
@@ -202,8 +167,8 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
         channel++;
     }
     sndMidiTrackState.channels[0].unk8 = sndReserveIopWorkMemory(0x21600);
-    sndMidiTrackState.unk200 = 0;
-    sndMidiTrackState.unk204 = 0;
+    sndMidiTrackState.opaque200 = 0;
+    sndMidiTrackState.opaque204 = 0;
     for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
         sndMidiTrackState.slots[i].id = -1;
         sndMidiTrackState.slots[i].unknown_04[0] = 0;
@@ -249,13 +214,13 @@ void func_002E8C30(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
     sndLoadIopSoundModules();
     sceSifInitIopHeap();
     func_002E8700();
-    sndMidiTrackState.unk008 = sndReserveIopWorkMemory(0x4000);
-    sndMidiTrackState.unk00C = 0x4000;
+    sndMidiTrackState.iopBufferAddress = sndReserveIopWorkMemory(0x4000);
+    sndMidiTrackState.iopBufferBytes = 0x4000;
     sndInitializeChannelAndTrackState(unused, header);
     sndAllocateAlignedIopBuffers(bufferSizes, bufferCount);
     D_003BDA8C = sndReserveIopWorkMemory(0x8D0);
-    sndMidiTrackState.unk1F8 = (u32)&sndMidiTrackState;
-    sndMidiTrackState.unk1FC = 0x8D0;
+    sndMidiTrackState.opaque1F8 = (u32)&sndMidiTrackState;
+    sndMidiTrackState.opaque1FC = 0x8D0;
     sndCopyToIopAndWait(D_003BDA8C, &sndMidiTrackState, 0x8D0);
     sndSendCommandPacket(0, 0, &D_003BDA8C, 4);
     D_003BDA80 = 0;

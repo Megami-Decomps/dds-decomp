@@ -14,6 +14,7 @@
 #include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "kwln.h"
 #include "scr.h"
 #include "scr_arg_read.h"
@@ -205,7 +206,6 @@ extern f32 sdfViewTargetVector[];
 extern f32 sdfViewMatrix[];
 extern f32 sdfProjectionMatrix[];
 extern f32 D_00324660[];
-extern void sdfInvertRigidVuTransform(void);
 extern void sdfPostmultiplyVuMatrixFromMemory(f32 *);
 
 /* vu0 routine: forward-cone projection from vf10 to integer screen XY */
@@ -1123,7 +1123,7 @@ typedef struct BtlActionProbe {
     void *actionProbeSecond;   /* 0x08 */
 } BtlActionProbe;
 
-extern s32 func_001A8A30(void *, s32);
+extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
 extern s32 func_001A3CE0(void *, s32, BtlActionProbe *);
 
 /* Resolve a command-table entry through its probe, or store the direct command id. */
@@ -1135,7 +1135,7 @@ u32 btlScriptSelectActionEntry(void) {
     context = (BtlCmdCtx *)scrGetCurrentCommandWork();
     commandId = scrReadIntParameter(0);
     if (datCommandSelectors[commandId].kind == 1) {
-        if (func_001A8A30(context->unit, commandId) != 0 &&
+        if (btlHasRequiredCommandAffinityPartners(context->unit, commandId) != 0 &&
             func_001A3CE0(context->unit, commandId, &probe) != 0) {
             context->actionProbeFirst = probe.actionProbeFirst;
             context->commandMode = 3;

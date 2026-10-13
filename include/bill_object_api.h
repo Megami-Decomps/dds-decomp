@@ -20,6 +20,7 @@ struct BillObj *billCloneObjectRetainingSharedData(struct BillObj *source);
 void billInitializeCommonDrawState(struct BillObj *billboard);
 struct BillChildPayload *billCreateChildPayloadFromTextureResource(void *resource);
 void billMarkKindOneFlag(struct BillObj *billboard);
+void billSetChildParameter(struct BillObj *billboard, u32 parameter);
 void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
 void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
 /* Radian rotation of the billboard quad in its plane. */

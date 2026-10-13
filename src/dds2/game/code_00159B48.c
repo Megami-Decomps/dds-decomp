@@ -11,12 +11,12 @@
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
 #include "sdf_projection.h"
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern s32 effEmitterDelayRandomState[];
-extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 #include "eff_track_poly_list.h"
 #include "par_table.h"
@@ -797,7 +797,7 @@ void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *
 
 /* Seed the generator used for per-particle launch delays. */
 void effSeedEmitterDelayRandomState(void) {
-    effMiscSeedRandomFromClock(effEmitterDelayRandomState);
+    effMiscSeedRandomFromClock((EffRandState *)effEmitterDelayRandomState);
 }
 
 void func_0015B290(void) {
@@ -1655,7 +1655,6 @@ struct EffLookAtRingEmitter {
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfInvertRigidVuTransform(void);
 
 /* Seed a view-oriented ring packet and initialize its subeffect. */
 void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {

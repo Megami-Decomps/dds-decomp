@@ -222,7 +222,7 @@ extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
 extern s32 btlGroup400UnitHasAction(void *, s32);
 
-extern s32 func_001B2F50(void *, s32);
+extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
 
 extern s8 D_00438F84;
 
@@ -337,7 +337,7 @@ s32 btlActionMatchesUnit(s32 unit, s32 action) {
 s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     btlGetRuntime();
     if ((btlUnitStatusPair((BtlUnit *)unit) & 0x421) == 0x401) {
-        if (func_001B2F50(unit, action) != 0) {
+        if (btlHasRequiredCommandAffinityPartners(unit, action) != 0) {
             return 1;
         }
     }

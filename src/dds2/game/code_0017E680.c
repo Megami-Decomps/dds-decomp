@@ -9,6 +9,7 @@
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_resource_render_state.h"
 
 
 /* Billboard set allocated by effCreateBillboardResourceWork. */
@@ -26,19 +27,6 @@ typedef struct EffBillboardParams {
 } EffBillboardParams;
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-typedef struct {
-    u16 parameterCount;
-    u16 vertexCount;
-    u16 flags;
-    u8 pad06[2];
-    u32 color;
-    void *parameters;
-    f32 (*positions)[4];
-    f32 (*normals)[4];
-    u8 pad18[8];
-    u32 *colors;
-    u8 pad24[8];
-} EffResourceRenderState;
 extern EffResourceRenderState D_00452080;
 
 void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
@@ -83,7 +71,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
         } while (i < index);
     }
     memset(&D_00452080, 0, sizeof(D_00452080));
-    D_00452080.flags = 0x4000;
+    D_00452080.primitive = 0x4000;
     return work;
 }
 

@@ -19,6 +19,7 @@
 #include "sdf_sif_command.h"
 #include "scr.h"
 #include "kwln_task_lifecycle.h"
+#include "brs_task.h"
 
 extern void mnuCreateConfigTasks(s32 mode);
 
@@ -59,8 +60,6 @@ extern s32 mnuPollTaskState(void);
 extern u32 D_003BA958;
 
 extern s32 fileConsumeConfigTaskReady(void);
-
-extern s32 brsTaskConsumeDone(void);
 
 extern s32 mnuAcknowledgeCampState(void);
 

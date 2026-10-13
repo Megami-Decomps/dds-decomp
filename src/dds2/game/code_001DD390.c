@@ -571,7 +571,7 @@ extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
 extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, u32);
 
-extern u32 func_001B1350(BtlUnit *, BtlUnit *, u32, s32, s32);
+extern u32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, u32, s32, s32);
 
 extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
@@ -581,7 +581,7 @@ extern s32 func_001B3B28(BtlUnit *);
 
 extern s32 btlCalculateHuntEpReward(BtlUnit *, BtlUnit *);
 
-extern u32 func_001B2380(BtlUnit *, BtlUnit *);
+extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *, BtlUnit *);
 
 extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
 
@@ -921,7 +921,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
                 break;
             }
         }
-        addedStatus = func_001B1350(source, recipient, command, press, kind);
+        addedStatus = btlGetCommandAddedStatus(source, recipient, command, press, kind);
         removedStatus = btlQueryUnitChannelFlags(source, recipient, command, press, kind);
         if (group->reflected) {
             addedStatus &= ~6;
@@ -966,7 +966,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
                     huntRecovered = 1;
-                    huntHpRecovery = func_001B2380(action->unit, target);
+                    huntHpRecovery = btlGetHuntHpRecoveryAmount(action->unit, target);
                     huntMpRecovery = btlCalculateAbilityRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
@@ -1141,7 +1141,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
                     huntRecovered = 1;
-                    group->entries[hitCount - 1].hpRecovery += func_001B2380(action->unit, target);
+                    group->entries[hitCount - 1].hpRecovery += btlGetHuntHpRecoveryAmount(action->unit, target);
                     group->entries[hitCount - 1].mpRecovery += btlCalculateAbilityRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {

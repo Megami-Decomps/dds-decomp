@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_vector4.h"
 #include "sdf_mat4.h"
 #include "fr_font.h"
 #include "sdf_resource.h"
@@ -75,18 +76,12 @@ void fldRotateVectorAroundZ(f32 *vector, f32 angle) {
     vector[1] = rotated[1];
 }
 
-typedef struct Vector4 {
-    float x;
-    float y;
-    float z;
-    float w;
-} Vector4;
 
 /* Rotate XYZ about a normalized copy of axis; copy inputs before writing XYZ and leave W untouched. */
 void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {
-    Vector4 normalizedAxis;
-    Vector4 scratch;
-    Vector4 inputVector;
+    SdfMathVector4 normalizedAxis;
+    SdfMathVector4 scratch;
+    SdfMathVector4 inputVector;
     float rotationMatrix[9];
 
     memset(&scratch, 0, sizeof(scratch));
@@ -160,11 +155,11 @@ float fldVectorLength(float *vector) {
 
 /* Normalize copies of the input vectors; callers' vectors stay untouched. */
 float fldNormalizedVectorDot(float *left, float *right) {
-    Vector4 normalizedLeft;
-    Vector4 normalizedRight;
+    SdfMathVector4 normalizedLeft;
+    SdfMathVector4 normalizedRight;
 
-    normalizedLeft = *(Vector4 *)left;
-    normalizedRight = *(Vector4 *)right;
+    normalizedLeft = *(SdfMathVector4 *)left;
+    normalizedRight = *(SdfMathVector4 *)right;
     sdfVec3NormalizeInPlaceAndGetLength(&normalizedLeft.x);
     sdfVec3NormalizeInPlaceAndGetLength(&normalizedRight.x);
     return normalizedLeft.x * normalizedRight.x + normalizedLeft.y * normalizedRight.y + normalizedLeft.z * normalizedRight.z;
@@ -176,11 +171,11 @@ float fldVec3AngleBetween(float *left, float *right) {
 
 /* Cross the normalized input copies; the result itself is not normalized. */
 void fldNormalizedVectorCross(float *output, float *left, float *right) {
-    Vector4 normalizedLeft;
-    Vector4 normalizedRight;
+    SdfMathVector4 normalizedLeft;
+    SdfMathVector4 normalizedRight;
 
-    normalizedLeft = *(Vector4 *)left;
-    normalizedRight = *(Vector4 *)right;
+    normalizedLeft = *(SdfMathVector4 *)left;
+    normalizedRight = *(SdfMathVector4 *)right;
     sdfVec3NormalizeInPlaceAndGetLength(&normalizedLeft.x);
     sdfVec3NormalizeInPlaceAndGetLength(&normalizedRight.x);
     output[0] = normalizedLeft.y * normalizedRight.z - normalizedLeft.z * normalizedRight.y;
@@ -299,19 +294,19 @@ extern float sdfPowFloatByTruncatedExponent(float base, float exponent);
 
 /* Sample a Bezier curve of the given degree: binomial coefficients first, then the Bernstein
  * weighted sum of the control points for sampleCount + 1 evenly spaced parameters. */
-struct SdfMemBlock *sdfSampleBernsteinCurve(Vector4 *controlPoints, s32 degree, s32 sampleCount) {
+struct SdfMemBlock *sdfSampleBernsteinCurve(SdfMathVector4 *controlPoints, s32 degree, s32 sampleCount) {
     struct SdfMemBlock *outputBlock;
     struct SdfMemBlock *coefficientBlock;
     f32 *coefficients;
-    Vector4 *output;
-    Vector4 *sample;
+    SdfMathVector4 *output;
+    SdfMathVector4 *sample;
     s32 i;
     s32 j;
 
     coefficientBlock = sdfAllocGeneralBlock(degree + 1);
     coefficients = (f32 *)sdfMemoryGetBlockAddress(coefficientBlock);
     outputBlock = sdfAllocGeneralBlock(sampleCount + 2);
-    output = (Vector4 *)sdfMemoryGetBlockAddress(outputBlock);
+    output = (SdfMathVector4 *)sdfMemoryGetBlockAddress(outputBlock);
 
     for (i = 0; i <= degree; i++) {
         coefficients[i] = 1.0f;
@@ -335,7 +330,7 @@ struct SdfMemBlock *sdfSampleBernsteinCurve(Vector4 *controlPoints, s32 degree, 
 
             j = 0;
             if (degree >= 0) {
-                Vector4 *point = controlPoints;
+                SdfMathVector4 *point = controlPoints;
                 f32 *coefficient = coefficients;
                 do {
                     f32 powers = sdfPowFloatByTruncatedExponent(t, (f32)j);

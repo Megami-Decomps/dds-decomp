@@ -101,14 +101,14 @@ extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*
 
 extern s32 itfUpdateActiveMessageWindows(void);
 
-extern void sndFlushMessageQueue(void);
+extern void itfMesDestroyActiveWindowsAndReleaseTexture(void);
 
 extern s32 itfUpdateSoundSelectorPanels(void);
 
 extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
-void func_001A5480();
+void itfMesReplaceTextSlotData();
 
 extern void itfInitializeCursorResetState();
 
@@ -122,7 +122,7 @@ extern void func_0019DD48();
 
 extern s32 frFontMeasureLineWidth();
 
-extern UiSprite *func_001A1858(s32 kind, u32 payload);
+extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
 #define ITF_MES_LOWER_STATUS_PAIR_MASK 0x300
@@ -224,11 +224,11 @@ void itfMesFinishWindowAndClearStatus(s32 window) {
     mes->flags &= ITF_MES_CLEAR_SCRIPT_PANEL_BIT;
 }
 
-u32 func_001A3560(void) {
+u32 itfMesNoOpCommand4(void) {
     return 1;
 }
 
-u32 func_001A3568(void) {
+u32 itfMesNoOpCommand5(void) {
     return 1;
 }
 
@@ -473,7 +473,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     bounds[1] = 0x430;
     bounds[2] = 0x1200 + halfWidth;
     bounds[3] = 0x530 + rowsHeight;
-    panelBlock->overlay = func_001A1858(9, (u32)itfMesWork.windowTexture);
+    panelBlock->overlay = itfCreateUiSpriteByKind(9, (u32)itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(panelBlock->overlay, bounds[0], bounds[1], bounds[2], bounds[3], mes->renderValue);
     itfPanelUpdateValuesAndNotify(panelBlock->overlay, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
@@ -780,13 +780,13 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
 /* Replace a text slot with a copied NUL-terminated encoded string. */
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText) {
-    func_001A5480((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
+    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
 }
 
 /* Legacy short-arity entry point: retain its one-argument copier call.
  * This function does not specify the copier's other parameters. */
 void func_001A4888(s32 window) {
-    func_001A5480((u32)itfWindowSlots[window].mes);
+    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes);
 }
 
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
@@ -912,8 +912,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))itfUpdateActiveMessageWindows, sndFlushMessageQueue, NULL);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, sndFlushMessageQueue, NULL);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))itfUpdateActiveMessageWindows, itfMesDestroyActiveWindowsAndReleaseTexture, NULL);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, itfMesDestroyActiveWindowsAndReleaseTexture, NULL);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
@@ -1216,7 +1216,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
 /* Replace a retained text-slot allocation. Nonpositive byteCount copies the
  * padded string span; positive counts copy that many bytes into a zeroed block.
  * DDS2 also zeroes string-mode blocks first. Keep the K&R declaration form. */
-void func_001A5480(mes, slotIndex, source, byteCount)
+void itfMesReplaceTextSlotData(mes, slotIndex, source, byteCount)
     ItfMesState *mes;
     s32 slotIndex;
     const char *source;
@@ -1541,7 +1541,7 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 
 extern s32 frFontMeasureLineWidth(s32 row, FrFontGlyph *glyph);
 
-extern UiSprite *func_001A1858(s32, u32);
+extern UiSprite *itfCreateUiSpriteByKind(s32, u32);
 
 extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 
@@ -1578,7 +1578,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 top;
     if (place->sprite == 0) {
-        place->sprite = func_001A1858(6, (u32)itfMesWork.windowTexture);
+        place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
             place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureLineWidth(0, panel->blk14.glyphChain);
         }
@@ -1596,7 +1596,7 @@ void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel) {
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
-            place->frame = func_001A1858(7, (u32)itfMesWork.windowTexture);
+            place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesWork.windowTexture);
             itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->renderValue);
             itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
@@ -1742,12 +1742,12 @@ void itfMesUpdatePanelFades(ItfMesState *panel);
 
 void btlUpdateFadeIndicator(ItfMesState *panel);
 
-void func_001A6528(ItfMesState *panel);
+void itfUpdateSoundSelectionTransition(ItfMesState *panel);
 
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
     itfMesUpdatePanelFades(panel);
-    func_001A6350(panel);
-    func_001A6528(panel);
+    itfMesAdvanceEntryText(panel);
+    itfUpdateSoundSelectionTransition(panel);
     btlUpdateFadeIndicator(panel);
 }
 
@@ -1818,7 +1818,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A6350);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesAdvanceEntryText);
 
 extern void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue);
 
@@ -1828,7 +1828,7 @@ extern s32 sndSeqSelectPoll(ItfMesState *panel);
 
 extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
 
-void func_001A6528(ItfMesState *panel) {
+void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     ItfMesBlk40 *selection = &panel->blk40;
     ItfMesEntryBlock *entry = &panel->entryBlock;
     u32 flags = panel->flags;
@@ -2103,7 +2103,7 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
 
 extern DrawColorRec D_003B49B8[];
 
-extern void func_001A09C0(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfDrawThreePanelBorderBands(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
 
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 
@@ -2136,7 +2136,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     bounds[0].y = y + 0x20;
     bounds[1].x = x + frFontMeasureLineWidth(selected, selection->glyphChain) + 0x1D0;
     bounds[1].y = bounds[0].y + 0x90;
-    func_001A09C0(bounds, D_003B49B8, panel->renderValue, 0x1D0, list);
+    itfDrawThreePanelBorderBands(bounds, D_003B49B8, panel->renderValue, 0x1D0, list);
 
     bounds[0].x = x;
     bounds[0].y = y + 8;
@@ -2247,7 +2247,7 @@ s32 itfUpdateSoundSelectorPanels(void) {
     return 0;
 }
 
-void sndFlushMessageQueue(void) {
+void itfMesDestroyActiveWindowsAndReleaseTexture(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     s32 message;
     while (node != 0) {

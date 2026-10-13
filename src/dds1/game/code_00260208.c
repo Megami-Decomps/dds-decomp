@@ -2,7 +2,9 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_list.h"
 #include "mnu_staff.h"
+#include "brs_task.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
@@ -12,7 +14,6 @@
 extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *);
 extern s32 evtStageTestPollModelRequest(void);
 
-extern s32 kwlnFadeIsActive(void);
 
 extern s8 brsPendingRowsLatched;
 

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_queue_query.h"
 #include "kwln_task_create.h"
 #include "kwln_task_flags.h"
 #include "kwln_task_state.h"
@@ -33,15 +34,15 @@ extern void func_003003F0();
 
 extern KwlnTask* kwlnDelayedStartTaskHead;
 
-extern void* kwlnDelayedStartTaskCount;
+extern s32 kwlnDelayedStartTaskCount;
 
 extern KwlnTask* kwlnDelayedDestroyTaskHead;
 
-extern void* kwlnDelayedDestroyTaskCount;
+extern s32 kwlnDelayedDestroyTaskCount;
 
 extern KwlnTask* kwlnActiveTaskHead;
 
-extern void* kwlnActiveTaskCount;
+extern s32 kwlnActiveTaskCount;
 
 extern KwlnTask *kwlnExecutingTask;
 
@@ -272,7 +273,7 @@ void kwlnTaskUpdateFlagsScoped(s32 setFlags, KwlnTask *task, u32 flags, s32 scop
     }
 }
 
-void* kwlnTaskGetStateList(u32 state)
+s32 kwlnTaskGetStateList(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
