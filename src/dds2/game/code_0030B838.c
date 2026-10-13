@@ -17,6 +17,7 @@
 #include "mnu_list.h"
 #include "dds3obj.h"
 #include "fld_map_resource.h"
+#include "mdl_flag_api.h"
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;

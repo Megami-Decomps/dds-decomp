@@ -8,6 +8,7 @@
 #include "fld_waypoint.h"
 #include "fld_inf.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -50,7 +51,6 @@ static inline f32 fldNormalizeProbeVector(void) {
 
 extern void *dds3GetWorldObject(void);
 
-extern s32 mdlFlagTest(s32);
 extern int strcmp(const char *, const char *);
 
 extern void evtSetDrawSurfaceIndex();

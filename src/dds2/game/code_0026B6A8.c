@@ -8,6 +8,7 @@
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "eff_random.h"
+#include "mdl_flag_api.h"
 
 struct MenuSlotState;
 extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
@@ -47,7 +48,6 @@ extern DspMantraName *D_00435E50;
 extern s32 D_00435E4C;
 extern DspUnitName *D_00435E48;
 
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);

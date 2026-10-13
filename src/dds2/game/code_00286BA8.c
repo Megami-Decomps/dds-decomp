@@ -8,6 +8,7 @@
 #include "prf_profile_cap.h"
 #include "dsp_name.h"
 #include "sdf_task_work.h"
+#include "mdl_flag_api.h"
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08
@@ -46,7 +47,6 @@ struct MenuListNode {
 };
 
 extern MenuList *mtrBuildUnitSelectionList(void);
-extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void func_00289BA0(struct MnuStatusResource *);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);

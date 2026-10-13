@@ -22,6 +22,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -95,7 +96,6 @@ extern void *D_00358408[];
 
 extern void *D_00358450[];
 
-extern s32 mdlFlagTest(s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 

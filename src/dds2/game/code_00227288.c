@@ -14,6 +14,7 @@
 #include "eff_transform.h"
 #include "dat_state.h"
 #include "sdf_resource.h"
+#include "mdl_flag_api.h"
 
 extern void btlInterpolateVectorStep();
 
@@ -25,7 +26,6 @@ extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
 
 
 
-extern s32 mdlFlagTest(s32);
 
 
 extern s32 btlGetRuntime(void);

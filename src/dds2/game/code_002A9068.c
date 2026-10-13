@@ -17,6 +17,7 @@
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern u32 mnuMovieShutdownCounter;
 
@@ -96,7 +97,6 @@ extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 
 extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, struct EffectSlotSet *, u8 *, s32);
 
-extern s32 mdlFlagTest(s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 

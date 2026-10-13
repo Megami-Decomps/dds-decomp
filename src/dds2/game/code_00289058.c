@@ -5,9 +5,9 @@
 #include "mnu_list.h"
 #include "dat_state.h"
 #include "dsp_name.h"
+#include "mdl_flag_api.h"
 
 extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
-extern s32 mdlFlagTest(s32);
 extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
 extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);

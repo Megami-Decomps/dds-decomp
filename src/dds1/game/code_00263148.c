@@ -2,6 +2,7 @@
 #include "ui_color.h"
 #include "kwln.h"
 #include "mnu_result.h"
+#include "mdl_flag_api.h"
 
 #include "mnu.h"
 #include "prf_profile_cap.h"
@@ -11,7 +12,6 @@ extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
-extern s32 mdlFlagTest(u32);
 
 
 extern void dspSetActive(s32);

@@ -15,6 +15,7 @@
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
 
 extern u32 D_0037C248[][2];
 
@@ -154,7 +155,6 @@ void func_00271B40(void) {
 void func_00271B48(void) {
 }
 
-extern s32 mdlFlagTest(s32);
 
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 

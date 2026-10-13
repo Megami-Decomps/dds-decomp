@@ -1,9 +1,9 @@
 #include "common.h"
 #include "scr.h"
+#include "mdl_flag_api.h"
 
 
 extern s32 scrReadIntParameter(s32);
-extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern void scrSetIntegerReturnValue(s32);
