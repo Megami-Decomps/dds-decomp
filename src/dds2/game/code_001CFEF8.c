@@ -360,7 +360,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
             if (!(unit->status.stateFlags & 0x800) && !(scene->commandRestrictFlags & 0x100008)) {
                 if (!(scene->commandRestrictFlags & 4) && btlIsActorModeActionCodeAllowed(unit)) {
-                    lastFade = func_001E5FF8(unit, 8);
+                    lastFade = btlCreateUnitDefeatFadeInTask(unit, 8);
                 } else {
                     lastFade = btlCreateUnitFadeInTask(unit, 4, 6);
                 }
@@ -383,7 +383,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
                     delay += 10;
                 }
             } else {
-                lastFade = func_001E5FF8(unit, 0);
+                lastFade = btlCreateUnitDefeatFadeInTask(unit, 0);
                 lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startCondition.value.handle = chain;
                 lastFade->startDelay = delay;
@@ -439,7 +439,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
                     btlStartTask(task);
                 }
             } else {
-                lastFade = func_001E5FF8(unit, 0);
+                lastFade = btlCreateUnitDefeatFadeInTask(unit, 0);
                 lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startDelay = 1;
                 lastFade->startCondition.value.handle = light->handle;

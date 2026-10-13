@@ -3141,7 +3141,7 @@ void btlCancelCurrentSubtask(void) {
  */
 u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BtlRuntimeTask *task = func_001E5FF8(battle->effect->guard.unit, 0xC);
+    BtlRuntimeTask *task = btlCreateUnitDefeatFadeInTask(battle->effect->guard.unit, 0xC);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
@@ -5323,7 +5323,7 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     light->startCondition.value.handle = load->handle;
     light->ownerId = owner;
     btlStartTask(light);
-    fade = func_001E5FF8(effect->actor, 0);
+    fade = btlCreateUnitDefeatFadeInTask(effect->actor, 0);
     fade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     fade->startCondition.value.handle = light->handle;
     fade->ownerId = owner;

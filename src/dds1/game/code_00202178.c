@@ -2726,7 +2726,7 @@ void btlDestroySpecialUnitSlot(void) {
  */
 u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     u8 *subtaskSlot = (u8 *)((BtlState *)btlGetRuntime())->effect;
-    BtlRuntimeTask *task = (BtlRuntimeTask *)func_001D9038(*(void **)subtaskSlot, 12);
+    BtlRuntimeTask *task = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask(*(void **)subtaskSlot, 12);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
