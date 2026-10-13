@@ -786,7 +786,7 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     return 1;
 }
 
-s32 func_001A3008(void) {
+s32 itfStepHeldPanelMessages(void) {
     s32 frame;
     s32 latest = -1;
     s32 i;
