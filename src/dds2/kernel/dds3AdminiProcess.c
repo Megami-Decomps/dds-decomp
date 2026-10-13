@@ -39,26 +39,26 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
 
     if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
         work = dds3GetAdminTaskWork();
-        previousData = work->unk1C;
-        work->unk09 = requestedMode;
+        previousData = work->requestData;
+        work->requestedMode = requestedMode;
         flags = work->flags;
         flags |= DDS3_ADMIN_REQUEST_PENDING_BIT;
         flags &= ~DDS3_ADMIN_KEEP_HISTORY_SLOT_BIT;
         flags &= ~DDS3_ADMIN_RESTORE_HISTORY_BIT;
         work->flags = flags;
-        work->unk21 = DDS3_ADMIN_REQUEST_DELAY;
+        work->modeTransitionDelay = DDS3_ADMIN_REQUEST_DELAY;
         if (previousData != NULL) {
             sdfReleaseChipBlock(previousData);
-            work->unk1C = NULL;
-            work->unk20 = 0;
+            work->requestData = NULL;
+            work->requestSizeLowByte = 0;
         }
         if (requestData != NULL) {
-            work->unk1C = sdfAllocSizeClassBlock(dataBytes);
-            memcpy(work->unk1C, requestData, dataBytes);
-            work->unk20 = dataBytes;
+            work->requestData = sdfAllocSizeClassBlock(dataBytes);
+            memcpy(work->requestData, requestData, dataBytes);
+            work->requestSizeLowByte = dataBytes;
         } else {
-            work->unk1C = NULL;
-            work->unk20 = 0;
+            work->requestData = NULL;
+            work->requestSizeLowByte = 0;
         }
         if (markHistory != 0) {
             work->flags |= DDS3_ADMIN_MARK_HISTORY_BIT;
@@ -91,12 +91,12 @@ void dds3AdminSetControlFlag(void)
 
 s8 dds3AdminGetActiveMode(void)
 {
-    return dds3GetAdminTaskWork()->unk08;
+    return dds3GetAdminTaskWork()->activeMode;
 }
 
 s8 dds3AdminGetRequestedMode(void)
 {
-    return dds3GetAdminTaskWork()->unk09;
+    return dds3GetAdminTaskWork()->requestedMode;
 }
 
 /* Read the signed sample immediately before the ring buffer's write index. */
@@ -124,13 +124,13 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
     s32 restoring;
     void (*entry)(s32, void *);
 
-    if ((flags & 1) != 0 && work->unk09 >= 0) {
-        if (work->unk21 != 0) {
-            work->unk21--;
+    if ((flags & 1) != 0 && work->requestedMode >= 0) {
+        if (work->modeTransitionDelay != 0) {
+            work->modeTransitionDelay--;
             return 0;
         }
-        work->unk08 = work->unk09;
-        work->unk09 = -1;
+        work->activeMode = work->requestedMode;
+        work->requestedMode = -1;
         work->flags &= ~1;
         work->flags &= ~2;
         work->value = 0;
@@ -150,21 +150,22 @@ s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
                 work->historyIndex = (work->historyIndex + 1) & 7;
             }
         }
-        work->signedHistory[work->historyIndex] = work->unk08;
+        work->signedHistory[work->historyIndex] = work->activeMode;
         work->unsignedHistory[work->historyIndex] = 0;
-        entry = ddsAdminModeCallbacks[work->unk08].entry;
+        entry = ddsAdminModeCallbacks[work->activeMode].entry;
         if (entry != NULL) {
-            entry(restoring, work->unk1C);
+            entry(restoring, work->requestData);
         }
     }
     return (s32)dds3AdminPollModeCompletion;
 }
 
-/* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
-   cleared. Return the next update address as a signed scheduler control word, or zero on failure. */
+/* Run the mode's destroy callback; a non-negative result is stored (+1) as
+   the transition delay and the mode cleared. Return the next update address
+   as a signed scheduler control word, or zero on failure. */
 s32 dds3AdminPollModeDestruction(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
-    s32 mode = work->unk08;
+    s32 mode = work->activeMode;
     s32 (*destroy)(void);
     s32 result;
 
@@ -175,8 +176,8 @@ s32 dds3AdminPollModeDestruction(KwlnTask *task) {
             if (result < 0) {
                 return 0;
             }
-            work->unk21 = result + 1;
-            work->unk08 = -1;
+            work->modeTransitionDelay = result + 1;
+            work->activeMode = -1;
         }
     }
     return (s32)dds3AdminActivateRequestedMode;
@@ -189,8 +190,8 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
     s32 previous;
 
     if ((flags & 2) == 0) {
-        if (work->unk08 >= 0) {
-            cleanup = ddsAdminModeCallbacks[work->unk08].cleanup;
+        if (work->activeMode >= 0) {
+            cleanup = ddsAdminModeCallbacks[work->activeMode].cleanup;
             if (cleanup != NULL && cleanup() != 0) {
                 work->flags |= 2;
             }
@@ -198,19 +199,19 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
         }
         flags = work->flags;
     }
-    if ((flags & 2) && work->unk08 >= 0) {
+    if ((flags & 2) && work->activeMode >= 0) {
         previous = (work->historyIndex + 7) & 7;
         if (work->signedHistory[previous] >= 0 && (work->unsignedHistory[previous] & 1)) {
-            void *data = work->unk1C;
+            void *data = work->requestData;
 
             work->flags |= 0x10001;
-            work->unk09 = work->signedHistory[previous];
-            work->unk21 = 2;
+            work->requestedMode = work->signedHistory[previous];
+            work->modeTransitionDelay = 2;
             work->flags &= ~4;
             if (data != NULL) {
                 sdfReleaseChipBlock(data);
-                work->unk1C = NULL;
-                work->unk20 = 0;
+                work->requestData = NULL;
+                work->requestSizeLowByte = 0;
             }
         }
         if ((work->flags & 1) == 0) {
@@ -218,7 +219,7 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
         }
         work->flags &= ~2;
     }
-    if ((work->flags & 1) != 0 && work->unk09 >= 0) {
+    if ((work->flags & 1) != 0 && work->requestedMode >= 0) {
         return (s32)dds3AdminPollModeDestruction;
     }
     return 0;
@@ -228,7 +229,7 @@ s32 dds3AdminPollModeCompletion(KwlnTask *task) {
  * attached data block and the task's AdminWork block. */
 void dds3AdminReleaseTaskWork(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
-    s32 mode = work->unk08;
+    s32 mode = work->activeMode;
 
     if (mode >= 0) {
         s32 (*destroy)(void) = ddsAdminModeCallbacks[mode].destroy;
@@ -237,8 +238,8 @@ void dds3AdminReleaseTaskWork(KwlnTask *task) {
             destroy();
         }
     }
-    if (work->unk1C != NULL) {
-        sdfReleaseChipBlock(work->unk1C);
+    if (work->requestData != NULL) {
+        sdfReleaseChipBlock(work->requestData);
     }
     sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
 }

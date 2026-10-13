@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "dds3Admin.h"
 #include "kwln_draw_buffer.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -138,36 +139,23 @@ extern u8 effSharedRandomState[];
 
 extern void effMiscSeedRandom(void *data, u32 tag);
 
-typedef struct KwlnDebugWork {
-    s32 unk0;
-    s32 unk4;
-    s8 unk8;
-    s8 unk9;
-    s8 unkA;
-    u8 padB;
-    s8 slotA[8];
-    s8 slotB[8];
-    s32 unk1C;
-    s8 unk20;
-} KwlnDebugWork;
-
 void kwlnDebugTaskCreate(void) {
-    KwlnDebugWork *work;
+    AdminWork *work;
     s32 i;
 
     if (kwlnTaskGetTaskByName(dds3AdminTaskName) == NULL) {
         work = sdfAllocSizeClassBlock(0x24);
-        work->unk0 = 0;
-        work->unk4 = 0;
-        work->unk8 = -1;
-        work->unk9 = -1;
-        work->unkA = 0;
+        work->flags = 0;
+        work->value = 0;
+        work->activeMode = -1;
+        work->requestedMode = -1;
+        work->historyIndex = 0;
         for (i = 0; i < 8; i++) {
-            work->slotA[i] = -1;
-            work->slotB[i] = 0;
+            work->signedHistory[i] = -1;
+            work->unsignedHistory[i] = 0;
         }
-        work->unk1C = 0;
-        work->unk20 = 0;
+        work->requestData = 0;
+        work->requestSizeLowByte = 0;
         kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, (u32)work);
     }
 }
