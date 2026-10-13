@@ -466,7 +466,7 @@ void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, MenuTerminalContext *pane
 
 extern char D_00437980[];
 
-void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
+void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;

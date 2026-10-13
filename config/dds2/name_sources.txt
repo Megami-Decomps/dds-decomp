@@ -4336,6 +4336,7 @@
 0x002960F0	mnuDrawListFlagIndicatorsWithFade	inferred	Draws list flag icons 20/21 with alpha derived from the active transition mode and countdown. Paired DDS1 0x0025F4E0.
 0x002967A0	mnuDrawShopLimitArrows	inferred	Draws selected-row up/down arrows at full alpha unless the shop is at the matching item or quantity limit. Paired DDS1 0x0025FB30.
 0x002968B8	mnuDrawShopLimitArrowsScaled	inferred	Draws selected-row up/down arrows at caller-supplied scale unless the shop is at the matching item or quantity limit. Paired DDS1 0x0025FC38.
+0x002969D8	mnuDrawShopPricePlaceholder	inferred	Draws the shop currency markers and a zero-valued formatted price in the initial shop state. Paired DDS1 0x0025FD50.
 0x00296AF8	mnuDrawIconFixedEntry	inferred	confidence=high; src/dds2/game/code_00294730.c:func_00296AF8; Draws the fixed icon sprite at the shared offset table's position with the current icon resource and entry kind. [names_qp9.tsv]
 0x00296C58	mnuDrawShopSelectedRowTotal	inferred	Draws the selected shop row's price as unit value multiplied by the requested quantity. Paired DDS1 0x0025FFC8.
 0x00296D90	mnuDrawShopCurrencyBalance	inferred	Interpolates the shop's displayed currency balance from the saved value over 20 frames, then draws it. Paired DDS1 0x00260100.

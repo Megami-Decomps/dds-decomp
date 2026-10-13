@@ -2817,7 +2817,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
 
 extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
-extern void func_0025FD50(s32, s32, s32, ShopScene *, s32);
+extern void mnuDrawShopPricePlaceholder(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
 
@@ -2830,7 +2830,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
         mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
-        func_0025FD50(0, 0, 0, state, 0x53);
+        mnuDrawShopPricePlaceholder(0, 0, 0, state, 0x53);
         mnuDrawShopCurrencyBalance(state, 0xA09DC380);
         brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
