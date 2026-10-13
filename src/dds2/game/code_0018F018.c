@@ -5,6 +5,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "eff_blur.h"
+#include "eff_blur_draw_data.h"
 #include "eff_event_draw.h"
 
 
@@ -113,22 +114,6 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     }
 }
 
-typedef struct EffBlurDrawVertex {
-    f32 u;
-    f32 v;
-    u8 pad08[8];
-    s32 x;
-    s32 y;
-    u32 unk18;
-    u16 unk1C;
-    u16 pad1E;
-} EffBlurDrawVertex;
-
-typedef struct EffBlurDrawData {
-    u32 color[4];
-    EffBlurDrawVertex vertices[4];
-} EffBlurDrawData;
-
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
@@ -181,14 +166,14 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
         data->vertices[3].u = data->vertices[2].u;
         data->vertices[3].v = data->vertices[1].v;
     }
-    data->vertices[0].unk18 = 0;
-    data->vertices[0].unk1C = 0;
-    data->vertices[1].unk18 = 0;
-    data->vertices[1].unk1C = 0;
-    data->vertices[2].unk18 = 0;
-    data->vertices[2].unk1C = 0;
-    data->vertices[3].unk18 = 0;
-    data->vertices[3].unk1C = 0;
+    data->vertices[0].opaque18 = 0;
+    data->vertices[0].opaque1C = 0;
+    data->vertices[1].opaque18 = 0;
+    data->vertices[1].opaque1C = 0;
+    data->vertices[2].opaque18 = 0;
+    data->vertices[2].opaque1C = 0;
+    data->vertices[3].opaque18 = 0;
+    data->vertices[3].opaque1C = 0;
 }
 
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
