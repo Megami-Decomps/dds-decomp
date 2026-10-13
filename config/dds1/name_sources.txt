@@ -6830,6 +6830,7 @@
 0x002DDE88	sdfVuConfigureWorkRingDma	inferred	Configures VU work ring and wrap DMA addresses according to count. [names_reviewed8.tsv]
 0x002DDF58	sdfInitializeVuWorkParameters	inferred	Unpacks the parameter header, masks its flags, stores the payload pointer and clears work state.
 0x002DDFB0	sdfVuRotateObjectBasis	inferred	Rotates three vectors by the selected matrix and stores the original vectors. [names_reviewed8.tsv]
+0x002DE010	sdfVuBuildPackedColorTransform	inferred	Clamps scale to at least 1, stores scale and y*scale in SdfVuColorTransform, then builds its packed VU color transform; called by sdfVuTransformWorkAtOffset and the effect work updater. Paired with DDS2 0x00336EC0. [code-quality cleanup, 2026-10-13]
 0x002DE0D8	sdfVuTransformWorkAtOffset	inferred	Passes work parameters and supplied XY offsets into the transform. [names_reviewed8.tsv]
 0x002DE8C8	sdfVuBlendNodeXY	inferred	For each linked blend node, interpolates the XY coordinates at source offset 0x30 and writes the blended vector to node offset 0x30.
 0x002DE918	sdfVuBlendNodeVectors	inferred	For each linked blend node, interpolates source vectors at offsets 0x30 and 0x20 into the corresponding node vectors using the VU.

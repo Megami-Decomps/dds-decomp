@@ -6557,6 +6557,7 @@
 0x00336D30	sdfConfigureScratchpadRingTransfer	inferred	Sets DMA ring source and wrap counts based on the requested scratchpad chunk count. [names_reviewed22.tsv]
 0x00336D38	sdfVuConfigureWorkRingDma	inferred	Configures VU work ring and wrap DMA addresses according to count. [names_reviewed8.tsv]
 0x00336E60	sdfVuRotateObjectBasis	inferred	Rotates three vectors by the selected matrix and stores the original vectors. [names_reviewed8.tsv]
+0x00336EC0	sdfVuBuildPackedColorTransform	inferred	Clamps scale to at least 1, stores scale and y*scale in SdfVuColorTransform, then builds its packed VU color transform; called by sdfVuTransformWorkAtOffset and the effect work updater. Paired with DDS1 0x002DE010. [code-quality cleanup, 2026-10-13]
 0x00336F88	sdfVuTransformWorkAtOffset	inferred	Passes work parameters and supplied XY offsets into the transform. [names_reviewed8.tsv]
 0x00338D78	sdfBuildChunkedVuNodeTransfer	inferred	Writes VIF and GIF transfer packets for geometry nodes in bounded chunks. [names_reviewed10.tsv]
 0x00339160	sdfVuEmitSelectedNodePacket	inferred	Chooses one of two node-packet writers based on selected flags. [names_reviewed8.tsv]

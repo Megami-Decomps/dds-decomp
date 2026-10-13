@@ -90,7 +90,7 @@ typedef struct VuGeomRef {
 
 extern VuGeomRef D_00468210[];
 
-extern void func_00336EC0(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
+extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 
 extern void sdfVuEmitSelectedNodePacket(s32 workAddress);
 
@@ -352,7 +352,7 @@ void func_00339188(u32 workAddress) {
             if (param8 != paramC) {
                 u128 parameters[3];
 
-                func_00336EC0((SdfVuColorTransform *)parameters, D_00439188, work->packedColor,
+                sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, D_00439188, work->packedColor,
                               paramC, asset->unk04, asset->unk1C,
                               asset->x + work->offsetX, asset->y + work->offsetY);
                 func_00337830(work, parameters);
