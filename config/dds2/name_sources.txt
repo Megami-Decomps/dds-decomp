@@ -6071,6 +6071,7 @@
 0x0031A920	mnuTickScoreProgressState	inferred	readability/matching review (QP16)
 0x0031AA10	mnuAdvanceShootingRoundPhase	inferred	U1
 0x0031AD00	itfDispatchObjectFadeSequenceMode	inferred	confidence=high; src/dds2/game/code_0031AD00.c:func_0031AD00; Chooses initial fade setup, sequence-offset drawing, glyph-triplet drawing or a paired sequence from object mode. [names_qp9.tsv]
+0x0031B188	mnuUpdateShootingCameraVectors	inferred	Restores the shooting camera eye and position from saved vectors, runs its update callback, and restores local/world up vectors; called each frame by mnuUpdateShootingWork.
 0x0031B1F8	dds3InitSoundSlotPool	inferred	Releases an existing pool, allocates and zeros 100 timed sound-sequence slots.
 0x0031B268	dds3ReleaseSoundSlotPool	inferred	Releases the global sound slot pool handle and clears its pointer.
 0x0031B290	dds3FindFreeSoundSlot	inferred	readability/matching review (QP16)

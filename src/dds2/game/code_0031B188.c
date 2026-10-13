@@ -73,7 +73,7 @@ extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 
 /* Reload the camera vectors, invoke its update callback, then restore both copies
  * of the final vector in the camera data. */
-void func_0031B188(void) {
+void mnuUpdateShootingCameraVectors(void) {
     CameraData *cameraData;
     EffWorldNode *camera;
 

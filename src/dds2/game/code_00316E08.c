@@ -677,7 +677,7 @@ extern s32 func_00323BB8(MnuShootingWork *);
 extern s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *);
 extern MenuRuntimeList *func_00321ED8(void);
 extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
-extern void func_0031B188(void);
+extern void mnuUpdateShootingCameraVectors(void);
 extern void mnuTickScoreProgressState(MnuShootingWork *);
 extern s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *);
 extern void func_0031A7F8(MnuShootingWork *);
@@ -772,7 +772,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         if (work->phase < 3) mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
     }
     mnuDispatchRuntimeWorkOverlaps(func_00321ED8(), work);
-    func_0031B188();
+    mnuUpdateShootingCameraVectors();
     mnuTickScoreProgressState(work);
     switch (mnuAdvanceShootingRoundPhase(work)) {
     case 0:
