@@ -786,7 +786,7 @@ extern void btlUpdateMotionSoundLoading(void);
 
 extern s32 btlUpdateScene(void);
 
-extern s32 func_001D3ED8(void);
+extern s32 fldAdvanceSceneGroupScheduler(void);
 
 extern s32 btlUpdateActionSeqs(void);
 
@@ -810,7 +810,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         btlUpdateTintAndWorldLight();
         btlUpdateMotionSoundLoading();
         btlUpdateScene();
-        func_001D3ED8();
+        fldAdvanceSceneGroupScheduler();
         btlUpdateActionSeqs();
         btlUpdateActiveActorModelState();
         func_0020D108();
