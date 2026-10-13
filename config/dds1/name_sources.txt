@@ -8285,6 +8285,8 @@
 0x0026B160	mnuReleaseMovieMenuState	inferred	Stops movie-menu drawing, releases its resource slots/list/group/allocation and clears the state pointer; called by mnuDestroyTitleMenuTask. [LiteH menu naming batch 10]
 0x0026B1C0	mnuUpdateMovieMenuEffects	inferred	Updates the menu's effect object and applies/ticks its inner effects. [LiteH menu naming batch 10]
 0x0026B1F0	mnuUpdateMovieMenuTask	inferred	Dispatches the movie-menu state machine and advances its task. [LiteH menu naming batch 10]
+0x0026BCE8	mnuOpenTitleMenuForMode	inferred	Creates a title-menu task using the mode supplied by the event wrapper and returns 0xFFFFFFFF.
+0x0026BD38	mnuOpenTitleMenuDefaultMode	inferred	Script-table callback that creates the title menu in mode zero and returns zero.
 0x0026BED0	mnuGetMovieMenuSelectionIndex	inferred	Returns the current selection-list cursor index; DDS2 twin 0x002A3C78. [LiteH menu naming batch 10]
 0x0026BFC8	mnuLoadMovieMenuResourceSlots	inferred	Loads both indexed movie-menu resource slots; DDS2 twin 0x002A3D70. [LiteH menu naming batch 10]
 0x0026C098	mnuEnsureMovieMenuSpriteHandle	inferred	Loads or requests the movie-menu sprite handle depending on mode; DDS2 twin 0x002A3E38. [LiteH menu naming batch 10]

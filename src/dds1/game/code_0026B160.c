@@ -502,7 +502,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
     return 0;
 }
 
-u32 func_0026BCE8(void) {
+u32 mnuOpenTitleMenuForMode(void) {
     func_0026B050();
     return 0xffffffff;
 }
@@ -513,7 +513,7 @@ s32 mnuDestroyTitleMenuTask(void) {
     return 0;
 }
 
-u32 func_0026BD38(void) {
+u32 mnuOpenTitleMenuDefaultMode(void) {
     func_0026B050(0);
     return 0;
 }
