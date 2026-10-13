@@ -504,7 +504,7 @@ f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
     return (f32)(angle % 360);
 }
 
-INCLUDE_ASM(const s32, "game/code_00122030", func_00122A00);
+INCLUDE_ASM(const s32, "game/code_00122030", fldGetTriangleHeightAtXZ);
 
 f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     f32 dx = ax - bx;

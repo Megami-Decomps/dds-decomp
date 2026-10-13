@@ -645,6 +645,7 @@
 0x001244A8	fldSnapAngleToCompassOctant	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:1203:func_001244A8; Normalizes degrees and snaps to nearest of eight compass directions.; twin=0x00122498, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00124720	fldSnapAngleToCardinalDirection	inferred	Normalizes degrees and returns the nearest cardinal direction. [names_reviewed9.tsv]
 0x001249B8	fldGetNormalizedComplementaryAngle	inferred	Converts the source angle to its complementary wrapped angle in degrees. [names_reviewed10.tsv]
+0x00124A10	fldGetTriangleHeightAtXZ	inferred	Interpolates the support triangle's Y coordinate at camera-follow X/Z samples; paired DDS1 helper is 0x00122A00.
 0x00124BF0	fldToggleWorldNodeState	inferred	Walks world-secondary nodes of kind six and switches nodes currently in state four to state three or zero according to the supplied mode.
 0x00124CC8	fldPrepareDeferredSceneTransition	inferred	Synchronizes file slot flags and model state before queueing a deferred field command. [names_reviewed10.tsv]
 0x00124D70	fldStartSequenceRecord	inferred	confidence=high; src/dds2/game/code_0011F208.c:func_00124D70; Submits admin mode 0x1E when a selection is pending, otherwise resets the sequence state, sets flag 0xC0F, clears the deferred command and submits mode 5 with the built record. [names_qp9.tsv]
