@@ -1378,9 +1378,9 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 
 extern u32 effGetWindTextureHandle(void);
 
-extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
-extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 extern u32 btlMulColor(u32, u32);
 
@@ -1397,7 +1397,7 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
@@ -1432,7 +1432,7 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
     tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
 }
 

@@ -108,7 +108,7 @@ extern SdfPoolNode D_003803E8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void func_0032DB78(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
@@ -314,7 +314,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
     }
 }
 
-extern void func_0032DB30(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant);
+extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
 {
@@ -324,7 +324,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
     void *tag;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_0032DB30((s32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], framePacket, 1);
+    sdfBuildMaskedFrameRegisterReference((s32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], framePacket, 1);
     sdfAppendDmaTagToList(list, (u32)framePacket);
 
     blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
@@ -406,7 +406,7 @@ void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPoint
 void effDrawBlurListWithFramePacket(void *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
 
-    func_0032DB78((s32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
+    sdfBuildFrameRegisterReference((s32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, (u32)packet);
     D_003803E8.append(&D_003803E8, list);
 }

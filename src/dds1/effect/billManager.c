@@ -194,7 +194,7 @@ typedef struct BillStatePacket {
 
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void func_002D4C80(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant);
+extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 extern SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture);
 extern s32 sdfTexGetSecondaryBufferSize(SdfTex *texture);
 extern f32 D_0034E040[4];
@@ -224,7 +224,7 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
         node->packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(node->packetList);
         framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-        func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+        sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
         sdfAppendDmaTagToList(node->packetList, (u32)framePacket);
         state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
         state->dmaTag = 3;
@@ -397,7 +397,7 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
 }
 
 extern SdfPoolNode D_00325228;
-extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = D_003BD7F8;
@@ -419,7 +419,7 @@ void billFlushPendingRenderPairs(void) {
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     packet = (BillStatePacket *)sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;

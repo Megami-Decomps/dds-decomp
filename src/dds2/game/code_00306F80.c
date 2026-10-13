@@ -56,7 +56,7 @@ extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
-extern void func_0032DB30(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 
 typedef struct GridAngleTable {
@@ -976,7 +976,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_0032DB30((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
@@ -984,7 +984,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     }
 }
 
-extern void func_0032DB78(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     s32 surfaceIndex;
@@ -993,7 +993,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_0032DB78((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];

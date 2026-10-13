@@ -1293,7 +1293,7 @@ transfers its bits to a GPR; it does not convert the float to an integer.
 in a GPR, pass the actual float value through that constraint rather than
 introducing a separate C integer temporary with an `mfc1` output block.
 
-The distinction closed DDS2 `func_0032C278`, the 400-byte texture palette
+The distinction closed DDS2 `sdfTexBlendPaletteToTintedIntensityVU`, the 400-byte texture palette
 blender. Explicit transfer outputs created GPR quantities whose expanded
 local-allocation intervals occupied `$3` and `$4`, moving the subsequent CLUT
 branch operand to `$5`. Direct float inputs remained float pseudos through
@@ -6811,8 +6811,8 @@ The owner migration leaves both 600-byte creator bodies byte-exact.
 
 ## DMA formatter output buffers are CPU pointers
 
-DDS1 `func_002D4C80` / `func_002D4CC8` and DDS2 `func_0032DB30` /
-`func_0032DB78` build reference-chain tags in a caller-provided
+Both games' `sdfBuildMaskedFrameRegisterReference` /
+`sdfBuildFrameRegisterReference` build reference-chain tags in a caller-provided
 `SdfDmaReferenceChainPacket *`. Their first argument is different:
 it remains the SDK source-address word, with the native
 offsets added before `sdfBuildDmaReferenceChain` encodes it. All C
@@ -10101,4 +10101,49 @@ As the earlier synthetic callback controls demonstrate, an indirect call may lat
 All thirteen new read-only vendor-hook traces had hooked/unhooked assembly and every RTL dump identical, against mirror links explicitly resolved to the live repository. Deciding tier is the first sibling RTL pass unless the expansion already lacks an alternative. Compiler SHA-256 was `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`; exact trace paths and the unsuccessful trial receipt are retained in PurD's renewal50 ledger/report and wrapper park. No flags, prototypes, owners or live bodies were changed by this study.
 
 The contemporary source explains the alternate-exit whitelist but is not asserted to be the exact Sony revision: [GCC sibcall.c](https://github.com/gcc-mirror/gcc/blob/fd442cef30223941cf09068241580e3d8f3fb7ae/gcc/sibcall.c), [GCC calls.c](https://github.com/gcc-mirror/gcc/blob/fd442cef30223941cf09068241580e3d8f3fb7ae/gcc/calls.c). Actual vendor-hook decisions, parity and whole-unit gates ground the controls above.
+
+## Graphics SDK queue and frame-reference names
+
+The graphics-worker and image-upload units share their observable API names
+between DDS1 and DDS2. `sdfInitializeRuntimeServices` initializes heaps,
+textures, pad, graphics/resource services, the DMA program and tick worker.
+`sdfInitializeGraphicsWorkers` sizes each packet-buffer half and starts the
+transfer/buffer workers. Their `packetBufferBytes` parameter is a byte count:
+`sdfResizeDoubleBuffer` rounds it to 128 bytes, allocates twice that size,
+and places the second half that many bytes after the first.
+
+`sdfTexQueueImageUpload` builds GS transfer setup and chunked IMAGE/REF DMA,
+then queues source-ownership metadata. `sdfFlushImageUploadQueue` detaches
+one batch under its semaphore, waits for DMA completion, and releases that
+batch's owned allocations. `sdfWakeImageUploadThreadOnDmac` is the registered
+wakeup callback and retains the native -1 result. `sdfWalkTextureListEndpoints`
+only walks the two endpoints; it neither changes the heads nor returns a node.
+
+`sdfTexBlendPaletteToTintedIntensityVU` blends cloned palette RGB toward
+intensity-scaled tint, preserving alpha, then queues secondary upload.
+The retained intensity map uses RGB weights 77, 150 and 29. The existing
+VU0 operands, accumulation order and both CLUT-format loops are unchanged.
+`sdfInitPacketPoolNodeChain` initializes adjacent pool entries and links them;
+the native positive-count requirement and existing control flow remain intact.
+
+`sdfBuildMaskedFrameRegisterReference` references the FRAME write at scene
+offset 0x180 or 0x190; `sdfBuildFrameRegisterReference` references the ordinary
+context FRAME write at 0x70 or 0xB0. In both APIs, zero selects GS context one
+and all other values select context two. The native `sdfRefreshSceneNodePackets`
+stores register IDs FRAME_1/2 at 0x188/0x198 and ORs the alternate values with
+0x00FFFFFF00000000, establishing FBMSK 0x00FFFFFF. Source addresses remain SDK
+words, output packets remain CPU pointers, and the one-quadword DMA encoding,
+offset arithmetic and caller submission order are unchanged.
+
+The DDS2 scalar matrix unit now exposes `sdfMat4RotateX`, `sdfMat4RotateY`,
+`sdfMat4RotateZ`, `sdfMat4FromQuaternion` and
+`sdfConvertEulerAnglesToQuaternionScalar`. The rotation callers supply matching
+axis angles; translation and the unaffected basis group are retained.
+Euler conversion preserves the native negated radian half angles.
+`sdfMat4FromQuaternion` is a second SDK copy of the earlier
+`sdfConvertQuaternionRotationMatrix` at DDS1 0x002C94A8 / DDS2 0x00310888.
+That earlier canonical pair remains unchanged; the second DDS2 copy at
+0x00328018 keeps a distinct same-unit Mat4-style name rather than colliding.
+No normalization, type, layout, cast, arithmetic or statement-order changes
+are part of this naming closure.
 

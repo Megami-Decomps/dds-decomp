@@ -610,8 +610,8 @@ typedef char EffCompositeGsDescriptor_size_must_be_0x68[
 
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
-extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void func_002E2A00(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
@@ -628,7 +628,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     f32 cornerX, cornerY;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
     sdfAppendDmaTagToList(list, (u32)framePacket);
 
     state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
@@ -739,7 +739,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     sdfAppendPacket(list, (u32)geometry);
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
     sdfAppendDmaTagToList(list, (u32)framePacket);
 
     state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);

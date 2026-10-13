@@ -2590,8 +2590,8 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
 
 extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
-extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
+extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 void fldSubmitPrimaryFramePacket(void) {
     SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -2599,7 +2599,7 @@ void fldSubmitPrimaryFramePacket(void) {
     SdfPoolNode *descriptor;
     sdfInitPacketList(command);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -2611,7 +2611,7 @@ void fldSubmitAlternateFramePacket(void) {
     SdfPoolNode *descriptor;
     sdfInitPacketList(command);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);

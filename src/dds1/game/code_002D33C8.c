@@ -138,8 +138,8 @@ extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 extern void sdfTexBuildIntensityMap(SdfTex *texture);
 extern void sdfTexUploadSecondaryResource(SdfTex *texture);
 
-/* vu0 routine: blend each palette color toward its weighted source intensity. */
-void func_002D33C8(SdfTex *texture, s32 tint, f32 amount) {
+/* vu0 routine: blend clone-source palette RGB toward intensity-scaled tint, preserving alpha. */
+void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 tint, f32 amount) {
     SdfTex *source = texture->reference->cloneSource;
     u32 count;
     u8 *intensity;
@@ -687,10 +687,10 @@ s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
 }
 
 
-extern void func_002D4240(SdfPoolNode *, s32);
+extern void sdfInitPacketPoolNodeChain(SdfPoolNode *, s32);
 
-/* Initialise a run of pool nodes and chain each to the next; the last node ends the chain. */
-void func_002D4240(SdfPoolNode *nodes, s32 count) {
+/* Initialize and link count pool nodes, terminating the last; count must be at least one. */
+void sdfInitPacketPoolNodeChain(SdfPoolNode *nodes, s32 count) {
     SdfPoolNode *node = nodes;
     SdfPoolNode *next;
     s32 remaining = count - 1;
@@ -1015,16 +1015,18 @@ void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *lin
     sdfAppendPacket(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
 
-void func_002D4C80(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant) {
-    if (variant == 0) {
+/* Reference the masked FRAME write (FBMSK 0x00FFFFFF); zero selects GS context one, otherwise two. */
+void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+    if (gsContext == 0) {
         sdfBuildDmaReferenceChain(packet, source + 0x180, 1);
         return;
     }
     sdfBuildDmaReferenceChain(packet, source + 400, 1);
 }
 
-void func_002D4CC8(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant) {
-    if (variant == 0) {
+/* Reference the unmasked FRAME write; zero selects GS context one, otherwise two. */
+void sdfBuildFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+    if (gsContext == 0) {
         sdfBuildDmaReferenceChain(packet, source + 0x70, 1);
         return;
     }

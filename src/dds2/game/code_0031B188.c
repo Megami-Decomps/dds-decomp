@@ -31,9 +31,9 @@ typedef struct SdfMat4 {
 
 extern f32 sdfViewTargetVector[4];
 extern void *memset(void *, s32, u32);
-extern void func_00326BC8(SdfMat4 *, f32);
-extern void func_003270C8(SdfMat4 *, f32);
-extern void func_003275C8(SdfMat4 *, f32);
+extern void sdfMat4RotateX(SdfMat4 *, f32);
+extern void sdfMat4RotateY(SdfMat4 *, f32);
+extern void sdfMat4RotateZ(SdfMat4 *, f32);
 extern void sdfMat4Transpose(SdfMat4 *, SdfMat4 *);
 extern void sdfMatrixToQuaternion(f32 *, SdfMat4 *);
 
@@ -52,7 +52,7 @@ extern u32 *dds3SoundSlotPool;
 extern u32 fileClearRenderFlag(u32 mask);
 
 
-extern void func_00328160(f32 *out, f32 x, f32 y, f32 z);
+extern void sdfConvertEulerAnglesToQuaternionScalar(f32 *out, f32 x, f32 y, f32 z);
 
 
 
@@ -437,9 +437,9 @@ void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) 
     mnuSetBasisRow(basis.m + 4, up[0], up[1], up[2], 0.0f);
     mnuSetBasisRow(basis.m + 8, vector[0], vector[1], vector[2], 0.0f);
     mnuSetBasisRow(basis.m + 12, 0.0f, 0.0f, 0.0f, 1.0f);
-    func_00326BC8(&basis, xAngle);
-    func_003270C8(&basis, yAngle);
-    func_003275C8(&basis, zAngle);
+    sdfMat4RotateX(&basis, xAngle);
+    sdfMat4RotateY(&basis, yAngle);
+    sdfMat4RotateZ(&basis, zAngle);
     sdfMat4Transpose(&basis, &basis);
     sdfMatrixToQuaternion(quaternion, &basis);
     vector[0] = quaternion[0];
@@ -711,7 +711,7 @@ void mnuTranslateNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z) {
 void mnuRefreshNodeSecondaryVector(u8 *node, f32 xAngle, f32 yAngle, f32 zAngle) {
     f32 quaternion[4];
 
-    func_00328160(quaternion, xAngle, yAngle, zAngle);
+    sdfConvertEulerAnglesToQuaternionScalar(quaternion, xAngle, yAngle, zAngle);
     ((MnuModelNode *)node)->rotationQuaternion[0] = quaternion[0];
     ((MnuModelNode *)node)->rotationQuaternion[1] = quaternion[1];
     ((MnuModelNode *)node)->rotationQuaternion[2] = quaternion[2];
@@ -742,9 +742,9 @@ void func_0031C688(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
     mnuSetBasisRow(basis.m + 4, up[0], up[1], up[2], 0.0f);
     mnuSetBasisRow(basis.m + 8, vector[0], vector[1], vector[2], 0.0f);
     mnuSetBasisRow(basis.m + 12, 0.0f, 0.0f, 0.0f, 1.0f);
-    func_00326BC8(&basis, xAngle);
-    func_003270C8(&basis, yAngle);
-    func_003275C8(&basis, zAngle);
+    sdfMat4RotateX(&basis, xAngle);
+    sdfMat4RotateY(&basis, yAngle);
+    sdfMat4RotateZ(&basis, zAngle);
     sdfMat4Transpose(&basis, &basis);
     sdfMatrixToQuaternion(quaternion, &basis);
     vector[0] = quaternion[0];

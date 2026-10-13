@@ -50,7 +50,8 @@ void sdfCrossNormalizedVectors(float *out, float *left, float *right) {
     out[2] = a.x * b.y - a.y * b.x;
 }
 
-void func_00326BC8(SdfMat4 *matrix, f32 angle) {
+/* Rotate the Y/Z basis groups in place, retaining X and translation; angle is in radians. */
+void sdfMat4RotateX(SdfMat4 *matrix, f32 angle) {
     SdfMat4 rotated;
 
     rotated.m[0] = matrix->m[0];
@@ -72,7 +73,8 @@ void func_00326BC8(SdfMat4 *matrix, f32 angle) {
     *matrix = rotated;
 }
 
-void func_003270C8(SdfMat4 *matrix, f32 angle) {
+/* Rotate the X/Z basis groups in place, retaining Y and translation; angle is in radians. */
+void sdfMat4RotateY(SdfMat4 *matrix, f32 angle) {
     SdfMat4 rotated;
 
     rotated.m[0] = matrix->m[0] * cos(angle) + matrix->m[8] * -sin(angle);
@@ -94,7 +96,8 @@ void func_003270C8(SdfMat4 *matrix, f32 angle) {
     *matrix = rotated;
 }
 
-void func_003275C8(SdfMat4 *matrix, f32 angle) {
+/* Rotate the X/Y basis groups in place, retaining Z and translation; angle is in radians. */
+void sdfMat4RotateZ(SdfMat4 *matrix, f32 angle) {
     SdfMat4 rotated;
 
     rotated.m[0] = matrix->m[0] * cos(angle) + matrix->m[4] * sin(angle);
@@ -196,7 +199,9 @@ void sdfMatrixToQuaternion(f32 *out, SdfMat4 *matrix) {
     }
 }
 
-void func_00328018(SdfMat4 *out, SdfVec4 *q) {
+/* Build homogeneous rotation from XYZW without normalization; out must not overlap q.
+ * This is the second SDK copy; see docs/idioms.md, "Graphics SDK queue and frame-reference names". */
+void sdfMat4FromQuaternion(SdfMat4 *out, SdfVec4 *q) {
     f32 xx = q->x * q->x;
     f32 yy = q->y * q->y;
     f32 zz = q->z * q->z;
@@ -222,8 +227,8 @@ void func_00328018(SdfMat4 *out, SdfVec4 *q) {
     out->m[15] = 1.0f;
 }
 
-/* Quaternion from Euler angles using negated half angles. */
-void func_00328160(f32 *out, f32 x, f32 y, f32 z) {
+/* Write an XYZW quaternion from radian Euler angles using the retail negated half angles. */
+void sdfConvertEulerAnglesToQuaternionScalar(f32 *out, f32 x, f32 y, f32 z) {
     f32 half;
     f32 cx;
     f32 sx;

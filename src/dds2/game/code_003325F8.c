@@ -92,7 +92,7 @@ void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 
 void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
 
-void func_0032C278(SdfTex *texture, s32 arg, f32 value);
+void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 arg, f32 value);
 
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
@@ -490,7 +490,7 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
         SdfTex *texture = ((SdfTex **)list->buffer)[itemIndex];
 
         if (texture->paletteCount != 0) {
-            func_0032C278(texture, arg, value);
+            sdfTexBlendPaletteToTintedIntensityVU(texture, arg, value);
         }
     }
 }
