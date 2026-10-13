@@ -178,7 +178,7 @@ INCLUDE_RODATA(const s32, "game/code_001FC7D8", D_003A57E0);
 
 INCLUDE_RODATA(const s32, "game/code_001FC7D8", D_003A57F0);
 
-void func_001FCBA0(BtlUnit *unit) {
+void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     s32 screen[4] __attribute__((aligned(16)));
     f32 baseline[4];
     f32 candidate[4];
@@ -333,7 +333,8 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
 }
 
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
-s32 func_001FD170(BtlTask *task) {
+/* Select a side-adjusted effect ID from the current status/action; -1 means none. */
+s32 btlGetStatusActionEffectId(BtlTask *task) {
     BtlUnit *unit = task->unit;
     s32 status = unit->partyRecord.status & 0x7FFF;
 
@@ -476,7 +477,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
     if (args->payload.linked.elapsedTicks == 0) {
         args->payload.linked.offsetIndex = unit->firstCountdown % 12;
         unit->firstCountdown++;
-        func_001FCBA0(args->unit);
+        btlSelectHpMpDisplayPositionVU(args->unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
         btlUnitGetMuzzlePosVU(args->unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, args->referencePosition);

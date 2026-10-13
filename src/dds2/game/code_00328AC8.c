@@ -13,14 +13,14 @@
 
 s32 sdfThreadWakeTick __attribute__((section(".sdata"), aligned(8))) = 0;
 
-extern void func_003289C8(SdfThreadNode *node);
+extern void sdfDeleteTrackedThread(SdfThreadNode *node);
 
 /* The negative lookup selector selects the calling thread's tracked entry. */
 void sdfUnlinkAndDeleteCurrentThread(void) {
     SdfThreadNode *threadNode;
 
     threadNode = sdfFindThreadNode(SDF_CURRENT_THREAD_SELECTOR);
-    func_003289C8(threadNode);
+    sdfDeleteTrackedThread(threadNode);
 }
 
 extern s32 sdfThreadWakeWorkerId;

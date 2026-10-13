@@ -83,7 +83,7 @@ typedef struct SdfDmaTag {
     u64 vifCommands;
 } SdfDmaTag;
 
-extern u32 func_002CF930(void);
+extern u32 sdfReadTimerCount(void);
 extern s32 EIntr(void);
 extern u16 D_003BD334;
 extern s32 D_003BD340;
@@ -1081,7 +1081,7 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source, u32 fra
 }
 
 void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
-    u32 start = func_002CF930();
+    u32 start = sdfReadTimerCount();
     s32 interrupts;
     s32 index;
     SdfPacketSlot *slot;

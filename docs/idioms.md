@@ -617,7 +617,7 @@ functions use trampolines and are a different case.
   the `u64` element uses sign-extension. Even when the value is always positive,
   that changes local-allocator quantity grouping and can rotate otherwise
   unrelated registers. Use the typed local or cast only when the field really
-  is unsigned 32-bit (DDS1 `func_002E0618`, DDS2 `func_003394C8`).
+  is unsigned 32-bit (`sdfVuFinalizeWorkPacket` in DDS1 and DDS2).
 - Mixed `j` and `jal` tails inside one function (one arm `ld...; j f`, the last
   arm `jal f` + shared `jr`) come from an explicit `return;` in an earlier arm:
   the `return;` makes the epilogue label a jump target, so the call that jumps
@@ -10709,4 +10709,35 @@ builder uses the same convention and preserves the existing bounds modes.
 `sdfSetVectorComponents` stores three supplied scalar components in both games.
 DDS1 takes its vector first, while this DDS2 copy takes it last. The shared name
 does not normalize their calling conventions, types or argument order.
+
+## HP/MP presentation, chip heaps and work-packet finalization
+
+`btlSelectHpMpDisplayPositionVU` leaves the selected visible HP/MP anchor in
+`vf10`. The height/cylinder alternatives and `btl:hpmp clip` strings identify
+the operation. `btlGetStatusActionEffectId` dispatches on the current status and
+action and applies the owner-side effect-ID adjustment. The games retain their
+different `0x2000` cases, including DDS1's discarded auxiliary lookup.
+
+DDS2's `btlDrawCenteredUnsignedNumber` and `btlUpdateLinkedNumberDisplay` now
+share their established DDS1 twin names. Their resource selectors, status gates
+and number-display animation remain game-specific.
+
+`sdfInitChipHeap` initializes the page records, free pages, size classes and
+release callback. `sdfGetFirstGeneralHeapBlock` exposes the existing general-heap
+head link as `u32`; naming it does not change that representation.
+`sdfResizeResourceAllocation` retains descriptor identity while resizing its
+backing storage. `sdfDeleteTrackedThread` unlinks the tracked node and selects
+self deletion versus terminating/deleting another thread; it does not imply
+that the node itself is freed.
+
+`sdfReadTimerCount` reads EE timer0 count at `0x10000000`. The existing callers'
+signed and unsigned declarations remain unchanged. Its timing use also supports
+`sdfLoadModulesAndBindNamedResourceRpc`: optional/required IOP module loading
+followed by retries of the named-resource RPC binding.
+
+`sdfVuFinalizeWorkPacket` pads active nonempty work, updates its cursor, writes
+its descriptor and trailing header word, and returns the packet header.
+Inactive or empty work returns `NULL`. Keep the descriptor explicitly `u32`,
+as discussed in the packet-field width idiom above; the name does not assert
+an unsupported interpretation of the trailing word.
 

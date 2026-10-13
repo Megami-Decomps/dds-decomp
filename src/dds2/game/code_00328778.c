@@ -28,7 +28,7 @@ extern void sdfPadBuildButtonStates(void);
 
 extern void sdfTickThreadPriorityOverride(void);
 
-extern void func_00328FA8(u32 heapSize);
+extern void sdfInitChipHeap(u32 heapSize);
 extern void sdfInitializeGraphicsWorkers(u32 resourceAddress);
 extern void sdfInitGeneralHeap(u32 heapSize);
 extern void sdfTexInitializeLists(void);
@@ -56,7 +56,7 @@ void sdfSleepWithAlarm(u32 delay) {
 }
 
 /* Read EE timer 0's free-running count register. */
-u32 func_003287E0(void) {
+u32 sdfReadTimerCount(void) {
     return *(volatile u32 *)0x10000000;
 }
 
@@ -87,7 +87,7 @@ void sdfRunTickWorkerThread(void) {
 void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes) {
     *(volatile u32 *)0x10000010 = 0x83;
     *(volatile u32 *)0x10000000 = 0;
-    func_00328FA8(initialHeapSize);
+    sdfInitChipHeap(initialHeapSize);
     sdfInitGeneralHeap(heapSize);
     sdfTexInitializeLists();
     sdfTexInitializeSemaphore();
@@ -129,7 +129,8 @@ extern void ExitDeleteThread(void);
 extern s32 TerminateThread(s32 threadId);
 extern s32 DeleteThread(s32 threadId);
 
-void func_003289C8(SdfThreadNode *node) {
+/* Unlink the tracked thread, then delete self or terminate/delete another thread. */
+void sdfDeleteTrackedThread(SdfThreadNode *node) {
     SdfThreadNode **link;
     SdfThreadNode *current;
     s32 threadId;

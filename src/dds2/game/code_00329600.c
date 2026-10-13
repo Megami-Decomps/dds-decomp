@@ -24,7 +24,8 @@ extern SdfPendingRequest D_00439128;
 
 extern void *memcpy(void *destination, const void *source, unsigned int bytes);
 
-void func_00329600(SdfMemBlock *allocation, s32 size) {
+/* Resize backing storage while preserving this resource's allocation descriptor. */
+void sdfResizeResourceAllocation(SdfMemBlock *allocation, s32 size) {
     SdfMemBlock *nextBlock;
     SdfMemBlock *replacement;
     s32 temporaryAddress;
@@ -276,10 +277,10 @@ s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSi
 extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern s32 sceSifMBindRpc(SifRpcClientData *client, s32 id, s32 mode);
 extern void func_0034D8E0(s32 arg);
-extern s32 func_003287E0(void);
+extern s32 sdfReadTimerCount(void);
 
 /* Load the optional module first, then the required one; bind retries wait in timer ticks. */
-void func_00329C20(const char *modulePath, const char *optionalModulePath) {
+void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath) {
     s32 retryStartTick;
 
     if (optionalModulePath != NULL) {
@@ -296,7 +297,7 @@ void func_00329C20(const char *modulePath, const char *optionalModulePath) {
         if (D_0045F120.server != NULL) {
             break;
         }
-        retryStartTick = func_003287E0();
+        retryStartTick = sdfReadTimerCount();
         while ((s32)sdfGetElapsedTimerTicks(retryStartTick) < SDF_RPC_BIND_RETRY_TICKS) {
         }
     }
