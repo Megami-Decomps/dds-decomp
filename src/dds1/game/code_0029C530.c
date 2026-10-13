@@ -12,6 +12,7 @@
 #include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_object_node.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -209,12 +210,6 @@ typedef struct EffectObjectFlag {
     u8 pad04[8];
     u32 flags;
 } EffectObjectFlag;
-
-typedef struct EffectObjectNode {
-    EffectObjectFlag *object;
-    struct EffectObjectNode *prev;
-    struct EffectObjectNode *next;
-} EffectObjectNode;
 
 extern EffectObjectNode *effFloorModelListHead;
 

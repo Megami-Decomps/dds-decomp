@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_object_node.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -68,12 +69,6 @@ typedef struct EffectObjectFlag {
     u8 pad00[0xC];
     u32 flags;
 } EffectObjectFlag;
-
-typedef struct EffectObjectNode {
-    EffectObjectFlag *object;
-    struct EffectObjectNode *prev;
-    struct EffectObjectNode *next;
-} EffectObjectNode;
 
 extern EffectObjectNode *effFloorModelListHead;
 
