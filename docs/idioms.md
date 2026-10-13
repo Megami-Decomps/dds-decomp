@@ -1086,7 +1086,20 @@ justify inventing an abstraction solely to inhibit sibling calls. Recover a
 real shared callback helper/API from headers, source, or independent callers
 before applying this explanation to a retail function.
 
-The independent-evidence follow-up remains **unresolved**. DDS2 IDA references
+The callback-inline hypothesis remains **unresolved**. The entry-zero clear
+wrappers `func_0026DB70` and `func_0026DBB8` instead match under the approved
+post-final-call cleanup exception: clear the consumed context parameter after
+the true void provider call. Qualified cc1 RTL retains reset uid30 through
+`01.sibling` and `02.jump`, then deletes it in `03.cse`; both retail bodies
+retain JAL and epilogue. Their complete owner is `7 match, 0 differ`.
+The same exception resolves DDS2 `btlUnitWrapA` (0x002226D0), `btlUnitWrapB`
+(0x002247B0), and `func_00225778` (28B each). They clear the consumed signed
+rotation mode after capturing the true signed provider result. Reset uid38
+survives `01.sibling`/`02.jump` and first disappears in `03.cse`; qualified
+assembly and all 22 RTL dumps agree. Complete owner: `264 match, 0 differ`.
+This preserves the earlier Tidal and Sable forwarder reconstruction.
+
+This does not establish a shared callback-inline API. DDS2 IDA references
 to `scrClearEntryFlag` are exactly the three direct calls above; the setter
 has no references and the tester has three direct jumps plus one direct call.
 No aligned literal pointer to any of these three operation addresses occurs

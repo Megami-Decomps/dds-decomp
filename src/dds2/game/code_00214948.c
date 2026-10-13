@@ -5880,7 +5880,13 @@ done:
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlUnitWrapA);
+s32 btlUnitWrapA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = func_00222450(command, camera, rotate);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
+     * mode reset survives sibling-call selection and disappears in CSE. */
+    rotate = 0;
+    return result;
+}
 
 void btlUnitSetCameraOffset(BtlLinkedCommand *unit) {
     btlBuildLinkedCommandCameraPair(unit, &unit->frontCamera, &unit->backCamera, 0.8f, -0.65f, 0.5f, 0, 1);
@@ -6530,7 +6536,13 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlUnitWrapB);
+s32 btlUnitWrapB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetLinkedDefeatCameraPresetB(command, camera, rotate);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
+     * mode reset survives sibling-call selection and disappears in CSE. */
+    rotate = 0;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_002247D0);
 
@@ -6810,7 +6822,13 @@ s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00225778);
+s32 func_00225778(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetSpecialDefeatCameraPreset(command, camera, rotate);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
+     * mode reset survives sibling-call selection and disappears in CSE. */
+    rotate = 0;
+    return result;
+}
 
 /* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
  * and clear the action transition. Other owner/target combinations do nothing. */
