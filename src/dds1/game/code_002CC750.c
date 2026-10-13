@@ -455,7 +455,7 @@ void func_002CD0D8(u16 scriptId, s32 mode, char *destination) {
 
 extern u8 *D_0037CDF8 __attribute__((section(".data")));
 
-s32 func_002CD240(u16 profileId, u8 **out) {
+s32 prfResolveMantraNameOrFallback(u16 profileId, u8 **out) {
     u8 *text;
 
     if (mdlFlagTest(0x902)) {
