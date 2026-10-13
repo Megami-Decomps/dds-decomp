@@ -454,7 +454,7 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureFilteredUnitGroupBounds);
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208298);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureEffectTargetGroupBounds);
 
 /* Maximum top bound among active units matching any mask bit; zero if none. */
 f32 btlGetMaxUnitTop(u32 mask) {
