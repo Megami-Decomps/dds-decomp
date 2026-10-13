@@ -97,7 +97,7 @@ void mnuUpdateMantraSceneScroll(MenuSceneWork *work) {
     work->scrollY = position[1];
 }
 
-extern f32 func_002C84F0(f32 *vector);
+extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
 extern s32 D_003BC424;
 
 void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
@@ -135,7 +135,7 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     memset(vector, 0, sizeof(vector));
     vector[0] = (f32)(targetX - work->cursorPosition.x);
     vector[1] = (f32)(targetY - work->cursorPosition.y);
-    func_002C84F0(vector);
+    sdfVec3NormalizeInPlaceAndGetLength(vector);
 
     deltaX = targetX - work->cursorPosition.x;
     if (deltaX != 0) {
@@ -160,7 +160,7 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     memset(vector, 0, sizeof(vector));
     vector[0] = (f32)(targetX - work->entryPosition.x);
     vector[1] = (f32)(targetY - work->entryPosition.y);
-    func_002C84F0(vector);
+    sdfVec3NormalizeInPlaceAndGetLength(vector);
 
     deltaX = targetX - work->entryPosition.x;
     if (deltaX != 0) {

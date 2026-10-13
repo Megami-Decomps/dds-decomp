@@ -52,7 +52,7 @@ extern void fldRotateVectorAroundY(f32 *, f32);
 extern void sdfVec3AddInPlace(f32 *, f32 *);
 extern void sdfQuaternionNormalize(f32 *);
 extern void sdfQuatForwardVector(f32 *, f32 *);
-extern f32 func_002C84F0(f32 *);
+extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern void sdfQuatFromEuler(f32 *, f32, f32, f32);
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
@@ -413,13 +413,13 @@ void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
 
     if (D_00324510[0x36] != 0) {
         sdfQuatForwardVector(rotation, forward);
-        func_002C84F0(forward);
+        sdfVec3NormalizeInPlaceAndGetLength(forward);
         position[0] += forward[0] * 20.0f;
         position[2] += forward[2] * 20.0f;
     }
     if (D_00324510[0x37] != 0) {
         sdfQuatForwardVector(rotation, forward);
-        func_002C84F0(forward);
+        sdfVec3NormalizeInPlaceAndGetLength(forward);
         position[0] -= forward[0] * 20.0f;
         position[2] -= forward[2] * 20.0f;
     }
