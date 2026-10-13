@@ -380,6 +380,13 @@ typedef struct SdfTex {
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
 
+/* Texture resource accessors and palette helpers shared by both title providers. */
+u8 sdfTexGetPaletteCount(SdfTex *texture);
+u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
+u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
+s32 sdfTexFormatSizeHint(s32 format);
+void sdfTexAllocatePaletteData(SdfTex *texture);
+
 /* Return the packed 64-bit TEX0 state from the texture's primary GS packet. */
 u64 sdfTexGetPrimaryTextureState(SdfTex *texture);
 
