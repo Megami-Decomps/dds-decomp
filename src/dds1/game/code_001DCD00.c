@@ -1002,7 +1002,8 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
 void func_001DE5F0(void) {
 }
 
-void func_001DE5F8(BtlLinkedCommand *action) {
+/* Update the action camera from target-policy results once the link reaches state seven. */
+void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
     BtlUnit *unit;
     BtlIndexList *list;
     u32 listCount;

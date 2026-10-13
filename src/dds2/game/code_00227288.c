@@ -1425,12 +1425,12 @@ extern void btlUpdateSpecialActorChunkFade(void);
 extern void effBTLFieldColorSetFlags(u32 bits);
 extern void btlQueueVetalaResourceAndSoundOnce(ActionStateLink *action);
 extern s32 func_00218150(void);
-extern void func_00218250(void);
+extern void btlClearClaimedCommandUnit(void);
 extern s32 func_00218690(void);
-extern s32 func_002186C0(BtlUnit *unit, s32 action);
+extern s32 btlRemapEnemyMotionForHealthAndForm(BtlUnit *unit, s32 action);
 extern s32 btlSelectAction211CameraPair(BtlLinkedCommand *command);
 extern void func_00218968(void);
-extern void func_00218BA8(BtlUnit *unit, u8 *arg1);
+extern void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1);
 extern void func_00219278(void);
 extern void func_002195E0(ActionStateLink *record);
 extern void func_00219760(void);
@@ -1548,10 +1548,10 @@ void btlInitializeBossCallbacks(s32 mode) {
             battle->commandRestrictFlags = commandFlags | 0x804;
         }
         BTL_INSTALL_CALLBACK(battle->unk6F0, 0x0, btlPrepareUnitMotionWithSavedOverride);
-        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002186C0);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapEnemyMotionForHealthAndForm);
         BTL_INSTALL_CALLBACK(battle->unk6FC, 0x0, btlOverrideSpecialModeCheckResult);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, func_00218690);
-        BTL_INSTALL_CALLBACK(battle->pad634, 0x0, func_00218250);
+        BTL_INSTALL_CALLBACK(battle->pad634, 0x0, btlClearClaimedCommandUnit);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlClaimCommandSlot);
         BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlStartReadyUnitAction);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlStartPrevUnitScriptAction);
@@ -1575,7 +1575,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = battle->commandRestrictFlags;
         battle->commandRestrictFlags = commandFlags | 0x100004;
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetUnitSelectionStateAndSetMode);
-        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, func_00218BA8);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlApplyAbaddonOperandEffects);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlFlagAbadonHpMpTrigger);
         BTL_INSTALL_CALLBACK(battle->actionStateSelectionHook, 0x0, btlCheckActionRecordUnit);
         BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlStartActionRecordTasks);

@@ -230,28 +230,28 @@ extern s32 btlUpdateSpecialTargetCamera(BtlLinkedCommand *command);
 extern void effBTLFieldColorSetFlags(u32 flags);
 extern u32 func_00204AC0(void);
 extern u32 func_00204B40(void);
-extern void func_00205070(void);
+extern void btlCenterUsasEnemyFormation(void);
 extern u32 func_002055F0(void);
-extern s32 func_002055F8(void);
-extern void func_00205918(BtlUnit *actor, BtlOperandEntry *operand);
+extern s32 btlSetFirstCriticalHpUnitSideFlag(void);
+extern void btlApplyRahuOperandEffects(BtlUnit *actor, BtlOperandEntry *operand);
 extern void btlUpdateLinkedEffectUnitTransforms(void);
 extern void btlRunLinkedPairUpdateHook(void);
 extern s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused);
-extern void func_00206450(void);
+extern void btlUpdateRahuEffectActorHeights(void);
 extern s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command);
-extern void func_00207E68(void);
-extern s32 func_00207FF0(BtlUnit *unit, s32 animation);
+extern void btlAlignCerberusPartTransforms(void);
+extern s32 btlChooseCerberusPartMotion(BtlUnit *unit, s32 animation);
 extern u32 func_00208660(void);
 extern s32 btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command);
 extern s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command);
-extern void func_00208860(s32 unit, BtlScaleStageSource *source);
-extern void func_00208A50(void);
+extern void btlAdvanceNidhoggrScaleStage(s32 unit, BtlScaleStageSource *source);
+extern void btlUpdateNidhoggrScaleAndPosition(void);
 extern void func_00208C20(void);
-extern void func_00208E10(BtlUnit *unit);
+extern void btlConfigureRavanaUnitDimensions(BtlUnit *unit);
 extern void func_00208EA8(BtlUnit *unit);
-extern void func_00209528(void);
-extern s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b);
-extern u32 func_0020CB28(s32 action);
+extern void btlRefreshRavanaUnitModelsAndPose(void);
+extern s32 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b);
+extern u32 btlGetMillenniaCurseSoundDelay(s32 action);
 extern void func_0020CCA8(void);
 extern void btlInitializeBossUnitScaleTransition(BtlUnit *unit);
 extern u32 func_0020D548(void);
@@ -331,7 +331,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     }
     case 0x105:
         battle->commandRestrictFlags = (battle->commandRestrictFlags | 1) & ~2;
-        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, func_00205070);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlCenterUsasEnemyFormation);
         BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlDisableUnitsIfSpeciesFlagged);
         break;
     case 0x107:
@@ -341,7 +341,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->bossCleanup, 0x0, btlRestoreSlotEntriesFromEffect);
         BTL_INSTALL_CALLBACK(battle->pad5C0, 0x0, btlInitializeUnitDisplaySpeciesAndFlags);
         BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlNormalizeDefaultPlayerDisplaySpecies);
-        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, func_002055F8);
+        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlSetFirstCriticalHpUnitSideFlag);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlInitializeResources);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlInitResourcesWrap);
         if (mode == 0x107) {
@@ -359,14 +359,14 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlChooseLinkedPairMotion);
         BTL_INSTALL_CALLBACK(battle->pad5A4, 0x4, btlIsEffectPhaseInRange);
         BTL_INSTALL_CALLBACK(battle->pad5A4, 0x0, func_00206180);
-        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, func_00205918);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlApplyRahuOperandEffects);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlCheckActiveEffectForSpecialTarget);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlUpdateLinkedEffectUnitTransforms);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlRunLinkedPairUpdateHook);
         BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlAdjustDamageKind);
         BTL_INSTALL_CALLBACK(battle->findReusableUnit, 0x0, btlFindFlaggedSpecialSpeciesUnit);
         BTL_INSTALL_CALLBACK(battle->callback5CC, 0x0, btlGetAdjustedUnitDisplaySpecies);
-        BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, func_00206450);
+        BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateRahuEffectActorHeights);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x4, func_00206608);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x8, btlGetEffectTaskActorMatchCode);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x10, btlEffectTaskStartFinale);
@@ -390,8 +390,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         u32 commandFlags;
         commandFlags = battle->commandRestrictFlags;
         battle->commandRestrictFlags = commandFlags | 1;
-        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_00207FF0);
-        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, func_00207E68);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlChooseCerberusPartMotion);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlAlignCerberusPartTransforms);
         BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlAdjustSpeciesAnimation);
         BTL_INSTALL_CALLBACK(battle->pad5C0, 0x0, btlMarkSpecialUnit);
         BTL_INSTALL_CALLBACK(battle->findReusableUnit, 0x0, btlGetReadyUnitForSpecies);
@@ -410,9 +410,9 @@ void btlInitializeBossCallbacks(s32 mode) {
     }
     case 0x116:
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapSpecialUnitCommandIndex);
-        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, func_00208860);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlAdvanceNidhoggrScaleStage);
         BTL_INSTALL_CALLBACK(battle->prepareModelUnit, 0x0, btlTriggerSpecialUnitActionAndResetPose);
-        BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, func_00208A50);
+        BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateNidhoggrScaleAndPosition);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, func_00208C20);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlTriggerSpecialUnitAction);
         BTL_INSTALL_CALLBACK(battle->actionPointsOverride, 0x0, btlIsInSpecialModeRange);
@@ -426,7 +426,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         battle->commandRestrictFlags = commandFlags | 0x51;
         BTL_INSTALL_CALLBACK(battle->pad590, 0x0, btlInitRandomBossSelection);
         BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlFilterBossCommandBySelection);
-        BTL_INSTALL_CALLBACK(battle->pad5C0, 0x0, func_00208E10);
+        BTL_INSTALL_CALLBACK(battle->pad5C0, 0x0, btlConfigureRavanaUnitDimensions);
         BTL_INSTALL_CALLBACK(battle->findReusableUnit, 0x0, btlFindActiveMember);
         BTL_INSTALL_CALLBACK(battle->callback5C8, 0x0, btlEnsureEffectUnitModelLoadTask);
         BTL_INSTALL_CALLBACK(battle->cleanup, 0x0, btlDestroyActiveMemberSlot);
@@ -437,7 +437,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlSwapRandomBossSelection);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x0, btlFindSubsequentTurnScript);
         BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlCheckSelectedBossUnitFlag);
-        BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, func_00209528);
+        BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlRefreshRavanaUnitModelsAndPose);
         battle->cameraModeInitializePredicate = btlDispatchEligibleBossEvent;
         BTL_INSTALL_CALLBACK(battle->pad668, 0x0, btlCheckAttachedMember);
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlCheckBossOptionAllowed);
@@ -492,10 +492,10 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->cameraStateChangePredicate, 0x0, btlTryStartTargetFacingActionEffect);
         BTL_INSTALL_CALLBACK(battle->pad614, 0x0, btlUpdateSpecialTargetCamera);
         BTL_INSTALL_CALLBACK(battle->pad614, 0x4, btlHandleTargetedDefeatAction);
-        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_0020B818);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectHariharaActionCamera);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectSpecialDefeatCameraPose);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlChooseDefeatCameraByActionAndTargets);
-        BTL_INSTALL_CALLBACK(battle->commandSoundDelay, 0x0, func_0020CB28);
+        BTL_INSTALL_CALLBACK(battle->commandSoundDelay, 0x0, btlGetMillenniaCurseSoundDelay);
         BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlDispatchActionAnimationB);
         BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlInitializeBossUnitScaleTransition);
