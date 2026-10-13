@@ -408,7 +408,7 @@ void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 opt
     }
 }
 
-void func_0025FB30(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
+void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
     struct EffectSlotSet *texture = D_003BC520;
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
@@ -423,7 +423,7 @@ void func_0025FB30(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
     }
 }
 
-void func_0025FC38(s32 x, s32 y, s32 z, ShopScene *panel, s32 scale, s32 option) {
+void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, ShopScene *panel, s32 scale, s32 option) {
     struct EffectSlotSet *texture = D_003BC520;
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;

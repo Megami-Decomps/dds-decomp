@@ -509,9 +509,9 @@ extern void func_0025F7F0(s32, s32, s32, ShopScene *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(ShopScene *, s32, s32, u32, u32);
 extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
-extern void func_0025FC38(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawShopLimitArrowsScaled(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
-extern void func_0025FB30(s32, s32, s32, ShopScene *, s32);
+extern void mnuDrawShopLimitArrows(s32, s32, s32, ShopScene *, s32);
 
 /* Draw the selected shop page through its entry, change and exit phases. */
 s32 mnuDrawCommandClosePhase(ShopScene *scene) {
@@ -535,7 +535,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
         func_0025FFC8(0, 0, 0, scene, 0x53);
-        func_0025FC38(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 0:
         case 1:
@@ -557,7 +557,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
         func_0025FFC8(0, 0, 0, scene, 0x53);
-        func_0025FC38(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 0:
         case 1:
@@ -580,7 +580,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawShopItemQuantity(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         itfEmitSelectedGlyph(scene, 1, 4,
                             0xA09DC300 | (s32)(progress * 96.0f), 0x53);
-        func_0025FC38(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 0:
         case 1:
@@ -598,7 +598,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
         func_0025FFC8(0, 0, 0, scene, 0x53);
-        func_0025FB30(0, 0, 0, scene, 0x53);
+        mnuDrawShopLimitArrows(0, 0, 0, scene, 0x53);
         switch (category) {
         case 0:
         case 1:
