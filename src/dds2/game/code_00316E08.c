@@ -663,7 +663,7 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
 
 extern u8 D_0037F510[2][2][16];
 extern void func_0031AEB8(MnuShootingWork *);
-extern s32 func_0031AF68(MnuShootingWork *);
+extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
 extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
@@ -702,7 +702,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         func_0031AEB8(work);
     }
     if (work->unk70Bit0) {
-        result = func_0031AF68(work);
+        result = mnuPollPauseChoiceInput(work);
         switch (result) {
         case -1:
             break;
