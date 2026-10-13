@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_command_partner_output.h"
+#include "btl_enc_bg_entry.h"
 #include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
 #include "evt_solar.h"
@@ -84,19 +85,6 @@ extern u8 D_003B4DC0[];
 extern s32 D_00435E00;
 
 extern void *D_003B4E88[];
-
-typedef struct EncBgEntry {
-    s32 unk00;
-    s16 unk04;
-    s16 unk06;
-    s16 unk08;
-    s16 unk0A;
-} EncBgEntry;
-
-typedef struct EncBgRow {
-    s32 unk00;
-    EncBgEntry entries[64];
-} EncBgRow;
 
 extern EncBgRow *D_00435E14;
 
@@ -1268,21 +1256,21 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
         return 0;
     }
     for (i = 0; i < 0x10; i++) {
-        if (D_00435E14[i].unk00 + 0xC8 != buffer[0]) {
+        if (D_00435E14[i].mapIdBase + 0xC8 != buffer[0]) {
             continue;
         }
-        *outCode = D_00435E14[i].unk00 + 0xC8;
-        if (D_00435E14[i].entries[buffer[1]].unk08 != -1 &&
-            mdlFlagTest(D_00435E14[i].entries[buffer[1]].unk08) != 0) {
-            *outParameter = D_00435E14[i].entries[buffer[1]].unk0A;
+        *outCode = D_00435E14[i].mapIdBase + 0xC8;
+        if (D_00435E14[i].entries[buffer[1]].flagB != -1 &&
+            mdlFlagTest(D_00435E14[i].entries[buffer[1]].flagB) != 0) {
+            *outParameter = D_00435E14[i].entries[buffer[1]].parameterB;
             return 1;
         }
-        if (D_00435E14[i].entries[buffer[1]].unk04 != -1 &&
-            mdlFlagTest(D_00435E14[i].entries[buffer[1]].unk04) != 0) {
-            *outParameter = D_00435E14[i].entries[buffer[1]].unk06;
+        if (D_00435E14[i].entries[buffer[1]].flagA != -1 &&
+            mdlFlagTest(D_00435E14[i].entries[buffer[1]].flagA) != 0) {
+            *outParameter = D_00435E14[i].entries[buffer[1]].parameterA;
             return 1;
         }
-        *outParameter = D_00435E14[i].entries[buffer[1]].unk00;
+        *outParameter = D_00435E14[i].entries[buffer[1]].fallbackParameter;
         return 1;
     }
     return 0;
