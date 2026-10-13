@@ -15,7 +15,7 @@ void mnuDrawMantraPulseStripAndKind(MenuSceneWork *object, s32 scale, s32 contex
     mnuChooseDisplaySpriteKindFromEntryFlags(object, scale, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257270);
+INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraGridPulseEntry);
 
 extern s16 D_0036B7F0[][6];
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);

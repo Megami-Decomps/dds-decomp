@@ -4686,6 +4686,7 @@
 0x002570A8	mnuChooseDisplaySpriteKindFromEntryFlags	inferred	Selects a display sprite kind using linked entry flag priorities. [names_reviewed14.tsv]
 0x00257150	mnuDrawSelectedMantraEntry	inferred	confidence=high; matched-C; src/dds1/game/code_00257150.c:33:func_00257150; Draws the selected mantra entry only while the display object is idle: state 3 uses the panel sprite, other states use normal or alternate cost display.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00257200	mnuDrawMantraPulseStripAndKind	inferred	confidence=high; src/dds1/game/code_00257200.c:func_00257200; Draws the mantra strip, runs the shared mantra draw, then selects the display sprite kind from the entry flags. [names_qp9.tsv]
+0x00257270	mnuDrawMantraGridPulseEntry	inferred	Draws the selected mantra grid entry during the pulsing scene phases; both scene-frame callers pass animated entry alpha and layer. [DDS1 BN analysis, 2026-10-13]
 0x002573E8	mnuDrawMantraPulseGridPasses	inferred	Fam_Mid3
 0x00257670	mnuAdvanceMantraPulseGridEntries	inferred	confidence=high; src/dds1/game/code_00257200.c:func_00257670; Walks the 17x15 pulse grid and updates every entry whose active flag is set. [names_qp9.tsv]
 0x00257C10	mnuDrawMantraPulseFrame	inferred	Emits multiple fixed-point Mantra draw stages around the pulsing frame sprite; established DDS2 twin agrees. [names_reviewed19.tsv]
