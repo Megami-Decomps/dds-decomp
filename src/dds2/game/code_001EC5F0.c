@@ -71,7 +71,7 @@ extern void func_001EF030(void *, void *);
 
 extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
 
-extern void func_001ECBF8();
+extern void btlSetDefaultActionCameraPose();
 
 extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 
@@ -568,7 +568,7 @@ s32 func_001EC828(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EC868);
 
-void func_001ECBF8(BtlLinkedCommand *command, BtlCamState *pose) {
+void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
     func_001EC868(command, pose, 27.5f);
 }
 
@@ -1054,7 +1054,7 @@ f32 angle, f32 blend) {
         }
     }
     if (first == NULL || last == NULL) {
-        func_001ECBF8(command, pose);
+        btlSetDefaultActionCameraPose(command, pose);
         return;
     }
     if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
@@ -1164,7 +1164,7 @@ void func_001EF668(BtlLinkedCommand *action, BtlCamState *out) {
 
     user = action->link->unit;
     if (btlGetIndexListCount(action->targetList) >= 2U) {
-        func_001ECBF8(action, out);
+        btlSetDefaultActionCameraPose(action, out);
         return;
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
@@ -1431,7 +1431,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     if (!(user->status.flags & target->status.flags & 0x600)) {
         btlFlagAllUnitsDefeatCandidate();
     } else {
-        func_001ECBF8(command, &command->camera);
+        btlSetDefaultActionCameraPose(command, &command->camera);
         return;
     }
     func_001EF668(command, command->frontCamera.position);
@@ -2001,7 +2001,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
             break;
         }
     }
-    func_001ECBF8(command, out);
+    btlSetDefaultActionCameraPose(command, out);
     btlCopyMotionTransform(pose, out);
     span = func_00208000(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;

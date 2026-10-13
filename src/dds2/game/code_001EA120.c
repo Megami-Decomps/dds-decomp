@@ -43,7 +43,7 @@ extern void func_001F3C30(BtlLinkedCommand *action);
 
 extern u8 effSharedRandomState[];
 
-extern void func_001ECBF8();
+extern void btlSetDefaultActionCameraPose();
 
 typedef struct BtlUnit BtlUnit;
 
@@ -552,7 +552,7 @@ void func_001EAC08(void) {
 }
 
 void func_001EAC10(BtlLinkedCommand *action) {
-    func_001ECBF8(action, &action->camera);
+    btlSetDefaultActionCameraPose(action, &action->camera);
 }
 
 void func_001EAC28(void) {
@@ -662,7 +662,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
         return;
     }
     if (btlHasActorCategoryFlag40(action) != 0) {
-        func_001ECBF8(action, action);
+        btlSetDefaultActionCameraPose(action, action);
         action->flags |= 0x800;
     } else {
         hasFlag200 = 0;
@@ -1090,7 +1090,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     if (((BtlState *)btlGetRuntime())->unk220 & 1) {
         target = action->link->unit;
         if (target->status.flags & 0x400) {
-            func_001ECBF8(action, &action->camera, target);
+            btlSetDefaultActionCameraPose(action, &action->camera, target);
             return;
         }
     }

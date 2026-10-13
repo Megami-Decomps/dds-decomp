@@ -4253,7 +4253,7 @@ extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
 
 extern u32 btlIsMarkedActionSceneStateActive(void);
 
-extern void func_001ECBF8(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
@@ -5253,7 +5253,7 @@ u32 btlTickAction6B(BtlLinkedCommand *unit) {
     if (unit->motionProgress >= 0) {
         if (unit->motionProgress >= 0xF) {
             btlClearRuntimeFlag2000();
-            func_001ECBF8(unit, &unit->camera);
+            btlSetDefaultActionCameraPose(unit, &unit->camera);
         } else {
             btlSetRuntimeFlag2000();
         }

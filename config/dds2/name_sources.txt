@@ -8042,3 +8042,4 @@
 0x00315C40	prfIsMantraCategoryEnabled	inferred	Bounds-check index<17 then test D0045C828; mnuIsResourceCategoryAvailable indexes the same array through the mantra node category selector. [Namer1 batch39, high]
 0x00315FA0	prfCheckRequirementRules	inferred	Dispatch prfReqEvaluateRules with zero extra flags and no mismatch-count output; DDS1 twin0x002CE698 retains its void definition and distinct operand types. [Namer1 batch39, high]
 0x00316020	prfReqCheckWithFallback	inferred	Align DDS1 name0x002CE710: masked requirement ID, rule evaluator with mismatch output, matching fallback group's global flags, existing unknown-ID success. [Namer1 batch39, high]
+0x001ECBF8	btlSetDefaultActionCameraPose	inferred	Paired wrapper applies the baseline action-camera pose through the three-argument camera worker at 27.5f. Multiple battle-camera paths use it as a framing fallback or starting pose before adjusting FOV, distance, and position. DDS1 twin 0x001DF358.
