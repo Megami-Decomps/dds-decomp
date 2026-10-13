@@ -240,7 +240,7 @@ void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
 
 extern void sndStartTrackExtended(s32 trackId);
 
-void func_002A5890(void) {
+void mnuResetTitleMovieMenuStateAndStartTrack(void) {
     MenuTitleState *state = mnuMovieMenuState;
 
     state->phase = 0;
