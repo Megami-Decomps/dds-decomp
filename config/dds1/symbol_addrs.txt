@@ -3926,6 +3926,7 @@ evtStartUnitModeWithValue = 0x00222EB0; // type:func
 evtResetUnitVectorSlots = 0x00223540; // type:func
 evtSetSlotVectors = 0x002235E8; // type:func
 evtSetSlotVector = 0x002236E8; // type:func
+evtCopyUnitVectorSlotEndpoint = 0x00223718; // type:func
 evtApplyMatchingUnitSlotEndpoints = 0x00223828; // type:func
 evtFindUnitSlotAuxCoordinates = 0x00223A10; // type:func
 evtFindWorldObjectByIdAndKind = 0x00223AA0; // type:func

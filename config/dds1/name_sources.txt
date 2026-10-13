@@ -4001,6 +4001,7 @@
 0x00223540	evtResetUnitVectorSlots	inferred	Initializes each vector slot and clears its state and object id. [names_reviewed7.tsv]
 0x002235E8	evtSetSlotVectors	inferred	fills EvtSlot D_003D7BD8[index] from three vec pointers; id kept only for state 3 [names_M52_EvtEff.tsv]
 0x002236E8	evtSetSlotVector	inferred	evt sets unk30[2..3] of slot
+0x00223718	evtCopyUnitVectorSlotEndpoint	inferred	Searches 7 event unit-vector slots for a unit-bound ID, falls back to the first shared-state slot, copies endpoint XYZ to out, and reports success. Paired with 0x0023E350. [code-quality cleanup, 2026-10-13]
 0x00223828	evtApplyMatchingUnitSlotEndpoints	inferred	Finds active matching or fallback slot, clamps color and applies its endpoints to unit. [names_reviewed7.tsv]
 0x00223A10	evtFindUnitSlotAuxCoordinates	inferred	Returns auxiliary x and y from matching active slot or first fallback slot. [names_reviewed7.tsv]
 0x00223AA0	evtFindWorldObjectByIdAndKind	inferred	Looks up the requested object ID and kind in the primary world object with func_00110A48.
