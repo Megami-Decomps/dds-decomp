@@ -567,12 +567,6 @@ s32 fldCmdFocusCameraOnObject(void) {
     return 1;
 }
 
-typedef struct FldVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-} FldVec3;
-
 extern f32 fldLookAtNearPoint[];
 
 
@@ -585,8 +579,8 @@ extern void func_0012F078();
 
 s32 fldUpdateLookAtSegment(void) {
     FldAreaWork *cam = &fldAreaState;
-    FldVec3 near;
-    FldVec3 far;
+    FldPoint near;
+    FldPoint far;
 
     cam->mode = 0;
     cam->negatedAngle = -cam->angle;
@@ -615,8 +609,8 @@ s32 fldCmdSetScenePhaseThree(void) {
 
 s32 fldCmdSetLookAtHeading(void) {
     FldAreaWork *cam;
-    FldVec3 near;
-    FldVec3 far;
+    FldPoint near;
+    FldPoint far;
 
     if (scrReadIntParameter(0) < 0) {
         fldAreaState.negatedAngle = -fldAreaState.angle;
