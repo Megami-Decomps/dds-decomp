@@ -763,15 +763,16 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 value) {
     quad->unk00[3] = value;
 }
 
-void func_00308650();
+void itfDrawVertexColoredTriangle();
 
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
     u32 vertexColors[3] = {color, color, color};
-    func_00308650((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
+    itfDrawVertexColoredTriangle((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
-void func_00308650(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
+/* Queue three GS vertices with individual colors on the selected draw surface. */
+void itfDrawVertexColoredTriangle(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
 {
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
@@ -797,19 +798,20 @@ void func_00308650(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 s
     surface->append(surface, list);
 }
 
-extern void func_00308828(u32, u32, u32, u32, u32, const u32 *, u32, u32);
+extern void itfDrawVertexColoredRectangle(u32, u32, u32, u32, u32, const u32 *, u32, u32);
 
 /* Draw a rectangle as a four-vertex triangle strip with one packed color. */
 void uiDrawUniformRgbaRange(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 gsContext, u32 surfaceIndex) {
     u32 vertexColors[4] = {color, color, color, color};
-    func_00308828(x, y, z, width, height, vertexColors, gsContext, surfaceIndex);
+    itfDrawVertexColoredRectangle(x, y, z, width, height, vertexColors, gsContext, surfaceIndex);
 }
 
 void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex) {
     uiDrawUniformRgbaRange(x, y, z, width, height, color, 0, surfaceIndex);
 }
 
-void func_00308828(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
+/* Queue a four-vertex GS strip with individual colors and the requested context. */
+void itfDrawVertexColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
     u32 left = x + 0x7000;
     u32 top = y + 0x7900;
     u64 topWord = (u64)top << 32;
@@ -844,7 +846,7 @@ void func_00308828(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors
 }
 
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
-    func_00308828(x, y, z, width, height, vertexColors, 0, surfaceIndex);
+    itfDrawVertexColoredRectangle(x, y, z, width, height, vertexColors, 0, surfaceIndex);
 }
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */

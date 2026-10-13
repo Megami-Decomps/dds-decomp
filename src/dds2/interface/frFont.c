@@ -220,7 +220,8 @@ s32 frFontGetParentGlyphCount(void) {
     return frFontWork.glyphCount;
 }
 
-u32 func_0019C638() {
+/* Glyph setup queries its initial Y here for flag 0x10; retail always returns zero. */
+u32 frFontGetInitialGlyphY() {
     return 0;
 }
 
@@ -507,7 +508,7 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
     glyph->cachedItem = frFontRetainOrCreateCachedItem(glyph, glyphIndex);
     frFontFillGlyphMetrics(glyph, glyphIndex);
     if (glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags & 0x10) {
-        glyph->y = func_0019C638((s8)fontIndex, glyphIndex);
+        glyph->y = frFontGetInitialGlyphY((s8)fontIndex, glyphIndex);
     } else {
         glyph->y = 0;
     }

@@ -11385,3 +11385,28 @@ Effect-manager startup calls the emitter and particle initialization hooks
 before billboard startup. Their empty retail bodies are intentional. The
 DDS1 particle hook adopts the already-established DDS2 name, and the emitter
 hook uses the same name in both games without adding initialization work.
+
+## Solid rectangles, glyph Y hooks and flag-list coordinate mode
+
+The cross-game solid-rectangle helper queues blend state and one GS quad,
+using the same packed color at all four vertices and two source corners.
+The separate DDS2 interface triangle and rectangle builders accept individual
+vertex colors. Their native primitive values are 0x14B and 0x14C; the rectangle
+also includes the caller's GS context. Keep coordinate offsets, alpha/Q bits
+and existing abbreviated declarations and extra-argument calls unchanged.
+
+Font glyph setup conditionally queries its initial Y when flag 0x10 is set.
+That hook returns zero in both games. Its empty parameter list and the
+caller's two supplied arguments are intentional retained source forms,
+not a reason to infer or repair an ABI.
+
+The light editor rotates its selected vector by signed two-degree steps
+about the pad-selected view-matrix axes, with W set to one. The named twins
+retain the four SDK MMI column-gather sequences and every VU operation.
+
+The flag-list surface accessors use upstream's existing AlphaSurfaceIndex
+spellings. Their field selects the draw-surface table in the vertex drawer.
+Camera-relative mode subtracts the view target when generating stored
+vertices, then adds the current target back at draw time. Clearing the mode
+keeps world coordinates. The mode's raw SDATA-owned global and include path
+remain intact; only the four accessor/mode function names and callers change.

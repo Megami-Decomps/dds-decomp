@@ -5050,7 +5050,7 @@ void btlDrawTintIfVisible(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_0035F5D0;
 
     if ((transition->currentColor & 0xFF000000) != 0) {
-        func_00187C08(transition);
+        effDrawSolidRectangle(transition);
     }
 }
 

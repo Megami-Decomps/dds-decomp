@@ -2425,7 +2425,7 @@ void effPcpReleaseFadeTimerWork(EffPCPFadeTimer *work) {
 }
 
 
-extern void func_0018F840(u32 *color);
+extern void effDrawSolidRectangle(u32 *color);
 
 /* Timeline update: blend factor ramps up over fadeIn frames, holds at 1.0, then
  * ramps down over the last fadeOut frames. */
@@ -2453,7 +2453,7 @@ void effPcpFadeTimerUpdate(EffPCPFadeTimer *work) {
         t = 1.0f;
     }
     work->params.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    func_0018F840(&work->params.color);
+    effDrawSolidRectangle(&work->params.color);
     work->frame++;
 }
 
