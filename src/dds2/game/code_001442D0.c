@@ -1260,7 +1260,7 @@ s32 fldFindRecordItem(s32 scene, u32 index) {
     return result;
 }
 
-void func_00146150(SdfModel *model, s32 index, s32 clearFlag) {
+void sdfSetModelChildChainVisibility(SdfModel *model, s32 index, s32 clearFlag) {
     SdfDrawNode *parent = ((SdfDrawNode **)model->list->buffer)[index + 1];
     SdfDrawNode *first;
     SdfDrawNode *node;
@@ -1503,7 +1503,7 @@ void func_00146250(void) {
                     itemVisible = 1;
                 }
             }
-            func_00146150(D_003A5470[i], item->nodeIndex, itemVisible);
+            sdfSetModelChildChainVisibility(D_003A5470[i], item->nodeIndex, itemVisible);
         }
     }
     for (i = 0; i < fldSceneRecordCount; i++) {
@@ -1531,7 +1531,7 @@ void func_00146250(void) {
                     itemVisible = 1;
                 }
             }
-            func_00146150(D_003A5470[i], item->nodeIndex, itemVisible);
+            sdfSetModelChildChainVisibility(D_003A5470[i], item->nodeIndex, itemVisible);
         }
         D_003A5470[i]->color = 0x80808080;
         fldSetEmitterPosition(D_003A5470[i], -50.0f, D_00436290, 50.0f);
@@ -1541,7 +1541,7 @@ void func_00146250(void) {
 
         item = record->items;
         for (j = 0; j < record->count; j++, item++) {
-            func_00146150(D_003A5470[i], item->nodeIndex,
+            sdfSetModelChildChainVisibility(D_003A5470[i], item->nodeIndex,
                           selectedFloor == item->floor);
         }
         D_003A5470[i]->color = 0x10101010;

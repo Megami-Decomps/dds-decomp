@@ -18,6 +18,7 @@ D_00435C56 = 0x00435C56; // type:u16 size:0x2
 D_00435D42 = 0x00435D42; // type:u16
 // Saved DebugTimeGrph task handle.
 kwlnDebugGraphTask = 0x00438DA8;
+sdfSetModelChildChainVisibility = 0x00146150; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
 kwlnInitializeRuntime = 0x001001D8; // type:func
 kwlnRequestMainLoopExit = 0x001003E8; // type:func
@@ -9204,7 +9205,6 @@ func_00145698 = 0x00145698; // type:func
 fldResetSceneResourceTables = 0x00145818; // type:func
 func_00145A08 = 0x00145A08; // type:func
 func_00145D48 = 0x00145D48; // type:func
-func_00146150 = 0x00146150; // type:func
 func_00146250 = 0x00146250; // type:func
 func_00148188 = 0x00148188; // type:func
 fldDrawScrollingLayerOverlay = 0x00148488; // type:func
