@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_sound_resource_path_api.h"
 #include "mnu_voice_resource_path_api.h"
 #include "ui_color.h"
 #include "mnu_result.h"
