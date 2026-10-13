@@ -4617,6 +4617,7 @@
 0x002A7A98	mnuStartMovieDrawTaskForResource	inferred	Starts the movie draw task when none exists, using supplied resource. [names_reviewed8.tsv]
 0x002A7AF0	mnuRequestIndexedMovieResource	inferred	confidence=high; matched-C; src/dds2/game/code_002A5260.c:843:func_002A7AF0; Selects the indexed movie resource table row and starts the movie draw task with its resource and embedded payload.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002A7D28	mnuMovieDrawNextProc	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x002A7DB0	mnuRestartMovieStreamAfterStop	inferred	Registered after canceling and releasing the current movie stream; waits for sound-command idle, restores the saved texture dimensions/audio mode and restarts stream work with the stored descriptor/path, or completes pending texture cleanup if playback stopped.
 0x002A7E60	mnuRequestMoviePlayback	inferred	Fam_Mid2
 0x002A7FD0	mnuStopMovieDrawTask	inferred	Stops the movie draw task and clears its task handle. [names_reviewed8.tsv]
 0x002A8008	mnuCheckMovieDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_002A5260.c:1054:func_002A8008; Checks the PAC decoder status associated with the retained movie draw context.; source=fresh-R_Names31-QP13 [names_qp13.tsv]

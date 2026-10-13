@@ -1585,7 +1585,7 @@ s32 mnuMovieDrawNextProc(s32 procedure) {
     return 0;
 }
 
-s32 func_002A7DB0(KwlnTask *task) {
+s32 mnuRestartMovieStreamAfterStop(KwlnTask *task) {
     MovObj *movie;
 
     if (mnuMovieDrawTask == 0) {
@@ -1629,7 +1629,7 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
         sdfCancelAndReleaseMovieStreamWork(context);
         D_00457DB0.source = D_00437AD8->word;
         D_00437AD0 = 0;
-        return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, func_002A7DB0, 0, 0);
+        return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, mnuRestartMovieStreamAfterStop, 0, 0);
     } else {
         D_00437AD4 = 0;
         sdfMovieInitializeStreamWork(&mnuMovieDrawContext, &D_00457DB0, file);
