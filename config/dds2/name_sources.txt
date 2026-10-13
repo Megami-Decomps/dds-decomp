@@ -980,6 +980,7 @@
 0x001568E0	fldCmdActivateTaskRoomObject	inferred	DDS1 0014EE20 twin; finds room from task record key then activates its flagged object [names_R_FuncNames2.tsv]
 0x00156910	fldCmdTestTaskRoomObjectActive	inferred	DDS1 0014EE50 twin; returns activation flag for room matched to script task [names_R_FuncNames2.tsv]
 0x00156960	fldCmdSetCurrentTaskScene	inferred	Sends task record scene or zero in state eight to scene setter; twin 0x0014EEA0. [names_R_FuncNames6.tsv]
+0x001569B8	fldCmdExecuteSceneAction	inferred	Reads one script integer and passes it to the same scene-action handler used by fldRunPendingSceneAction. [wrapper body and pending-action caller, 2026-10-13]
 0x001569E8	fldCmdGetActorStat0	inferred	DDS1 0014EF28 twin; returns fldGetActorStat0 of first script parameter [names_R_FuncNames2.tsv]
 0x00156A18	fldCmdGetActorStat1	inferred	DDS1 0014EF58 twin; returns fldGetActorStat1 of first script parameter [names_R_FuncNames2.tsv]
 0x00156A48	fldCmdGetActorMotionEntry	inferred	DDS1 0014EF88 twin; returns fldGetActorMotionEntry of first script parameter [names_R_FuncNames2.tsv]
