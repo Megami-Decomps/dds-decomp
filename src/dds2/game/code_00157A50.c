@@ -8,6 +8,7 @@
 #include "eff_node.h"
 #include "file_request_api.h"
 #include "eff_node_descriptor.h"
+#include "eff_bill_resource_init.h"
 
 #include "sdf.h"
 EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
@@ -72,13 +73,6 @@ typedef struct EffBillResourceArchive {
     u8 pad00[0x60];
     EffBillResourceNode *nodes;
 } EffBillResourceArchive;
-
-typedef struct EffBillResourceInit {
-    const char *resourcePath;
-    s16 billboardKind;
-    s16 pad06;
-    f32 scale;
-} EffBillResourceInit;
 
 extern s32 D_00438EFC;
 extern BillObj *effBillResourceOwners[];

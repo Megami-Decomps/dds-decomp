@@ -2433,7 +2433,7 @@ extern BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *, f32 
 
 extern BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *, f32 *, f32);
 
-extern u8 *func_001D9038(u8 *, u32);
+extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 
 extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
 
@@ -2510,7 +2510,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     spawned->startCondition.value.handle = load->handle;
     btlStartTask(spawned);
-    delayed = (BtlRuntimeTask *)func_001D9038((u8 *)unit, 0x12);
+    delayed = (BtlRuntimeTask *)btlCreateUnitDefeatFadeInTask((u8 *)unit, 0x12);
     delayed->ownerId = task->unit->identity;
     delayed->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     delayed->startDelay = 2;

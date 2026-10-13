@@ -2,6 +2,7 @@
 #include "common.h"
 #include "eff_random.h"
 #include "clock_time.h"
+#include "sdf_cd_clock.h"
 
 extern u32 effMiscRand(void *state);
 
@@ -54,17 +55,6 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
     t = t * 0x3C + now.min;
     effMiscSeedRandom(state, t * 0x3C + now.sec);
 }
-
-typedef struct SdfCdClock {
-    u8 status;
-    u8 second;
-    u8 minute;
-    u8 hour;
-    u8 pad4;
-    u8 day;
-    u8 month;
-    u8 year;
-} SdfCdClock;
 
 extern s32 func_0034D308(SdfCdClock *);
 extern s32 sdfBcdStrToInt(s32);
