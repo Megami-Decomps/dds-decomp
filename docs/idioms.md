@@ -11199,3 +11199,32 @@ All consumed-command/rotation resets that block sibling calls stay intact.
 DDS1 0x0020DE50 and DDS2 `btlUnitWrapB` (0x002247B0) remain outside this
 naming closure because the DDS1 adapter is still claimed.
 
+## Dispatch-node slots and event-setup no-op stages
+
+The retail `effNodeTypeOperations` type-three rows start at DDS1
+0x0034DEA8 and DDS2 0x003AA7D8. `EffTypeOps` is a 0x30-byte row:
+restart at +0x0C, condition query at +0x10, vector/matrix/word setters at
++0x14/+0x18/+0x1C, instance clone at +0x28 and scale at +0x2C.
+The typed consumers in `effManager.c` establish these roles. Empty restart
+and scale entries and the constant-one condition entry have role-based
+names; the three formerly letter-labelled dispatchers are named by their
+node slots, not a guessed meaning for their subtype implementations.
+Their original one-formal C surfaces remain unchanged.
+
+`effAllocSubWork` is also the registered type-three clone entry, but its
+existing name remains truthful: it allocates through `effAllocDispatch`.
+Constructor input is the payload base for types zero/one and payload
++0x40 for two through four, not an owner-record +0x04/+0x44 slot.
+Its original void surface and native result propagation are retained.
+
+Seven event-setup paths in each game use the same exact sequence:
+`effReturnEventSetupWord(recordAddressWord)`,
+`effEventSetupBeforeRecordNoOp()`, `effEventSetupRecordNoOp(record)`,
+then `effEventSetupAfterRecordNoOp()`. The first returns the input word
+unchanged; the other three are matched empty entries. Names describe
+observed order and record argument only, without inventing a hidden
+operation. Preserve zero-formal definitions, DDS1's pointer extern and
+DDS2's unprototyped externs; the shared word-returning declaration is
+otherwise identical. Unregistered stubs, all-zero admin-mode request
+forwarders and the unknown control-byte reader remain unnamed.
+

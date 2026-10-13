@@ -108,15 +108,17 @@ u32 effGetDispatchType(u32 *word) {
     return *word;
 }
 
-void func_00194800(void) {
+/* Native node type-three restart slot: no instance state is changed. */
+void effDispatchNodeRestartNoOp(void) {
 }
 
-u32 func_00194808(void) {
+/* Native node type-three condition slot: accept with the constant result one. */
+u32 effDispatchNodeConditionAlwaysTrue(void) {
     return 1;
 }
 
-/* Invoke the optional A callback when present; work and type index remain unchecked. */
-void effTypeDispatchGuardedA(EffWork *work) {
+/* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
+void effDispatchNodeSetVector(EffWork *work) {
     void (*handler)(void *) = D_003B206C[work->type].handler;
 
     if (handler != NULL) {
@@ -124,8 +126,8 @@ void effTypeDispatchGuardedA(EffWork *work) {
     }
 }
 
-/* Invoke the optional B callback when present; work and type index remain unchecked. */
-void effTypeDispatchGuardedB(EffWork *work) {
+/* Node set-matrix slot: invoke optional subtype callback B; preserve the one-formal surface. */
+void effDispatchNodeSetMatrix(EffWork *work) {
     void (*handler)(void *) = D_003B2074[work->type].handler;
 
     if (handler != NULL) {
@@ -133,8 +135,8 @@ void effTypeDispatchGuardedB(EffWork *work) {
     }
 }
 
-/* Invoke the optional C callback when present; work and type index remain unchecked. */
-void effTypeDispatchGuardedC(EffWork *work) {
+/* Node parameter-word slot: invoke optional subtype callback C; preserve the one-formal surface. */
+void effDispatchNodeSetParameterWord(EffWork *work) {
     void (*handler)(void *) = D_003B2070[work->type].handler;
 
     if (handler != NULL) {
@@ -218,15 +220,16 @@ void effAllocSubWork(EffWork *work) {
     effAllocDispatch(type, handlerArg);
 }
 
-void func_001949D8(void) {
+/* Native node type-three scale slot: no instance state is changed. */
+void effDispatchNodeScaleNoOp(void) {
 }
 
 void func_001949E0(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
-/* Return the callback word unchanged; its payload semantics are not established here. */
-u32 func_00194A08(u32 value) {
+/* Return the setup-record address word unchanged; no record access or validation is made. */
+u32 effReturnEventSetupWord(u32 value) {
     return value;
 }
 
@@ -239,13 +242,16 @@ void func_00194A18(void) {
 void func_00194A20(void) {
 }
 
-void func_00194A28(void) {
+/* Setup paths supply a record address; this matching empty entry ignores it. */
+void effEventSetupRecordNoOp(void) {
 }
 
-void func_00194A30(void) {
+/* Empty stage immediately before the per-record entry in the paired setup paths. */
+void effEventSetupBeforeRecordNoOp(void) {
 }
 
-void func_00194A38(void) {
+/* Empty stage immediately after the per-record entry in the paired setup paths. */
+void effEventSetupAfterRecordNoOp(void) {
 }
 
 void func_00194A40(void) {
