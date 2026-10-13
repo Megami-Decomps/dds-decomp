@@ -26,6 +26,7 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
@@ -4271,7 +4272,6 @@ void mnuProjectViewPoint(void) {
 }
 
 extern u8 sdfViewTargetVector[];
-extern void sdfInvertRigidVuTransform(void);
 
 /* vu0 routine: tests whether vf10 projects within the camera's forward cone. */
 s32 sdfProjectPointInForwardConeVU(void) {

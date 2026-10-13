@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "sdf_motion_bindings.h"
 
 extern SdfMotionBindingDispatch D_0040B480;

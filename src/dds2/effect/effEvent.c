@@ -16,6 +16,7 @@
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_projection.h"
 
@@ -1192,7 +1193,6 @@ extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00336818(f32 angle);
 

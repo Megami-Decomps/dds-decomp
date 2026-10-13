@@ -4,6 +4,7 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "eff.h"
 #include "eff_math.h"
 
@@ -13,7 +14,6 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
-extern void sdfInvertRigidVuTransform(void);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);

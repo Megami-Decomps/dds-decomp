@@ -14,6 +14,7 @@
 #include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "kwln.h"
 #include "scr.h"
 #include "scr_arg_read.h"
@@ -205,7 +206,6 @@ extern f32 sdfViewTargetVector[];
 extern f32 sdfViewMatrix[];
 extern f32 sdfProjectionMatrix[];
 extern f32 D_00324660[];
-extern void sdfInvertRigidVuTransform(void);
 extern void sdfPostmultiplyVuMatrixFromMemory(f32 *);
 
 /* vu0 routine: forward-cone projection from vf10 to integer screen XY */

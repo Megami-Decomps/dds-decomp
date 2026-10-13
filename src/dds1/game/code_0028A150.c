@@ -22,6 +22,7 @@
 #include "file_save_record.h"
 #include "dat_state.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "kwln.h"
 #include "fpu.h"
 #include "mnu_list.h"

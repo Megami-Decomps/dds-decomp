@@ -35,6 +35,7 @@
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "bill_object_api.h"
 #include "sdf_projection.h"
@@ -4392,7 +4393,6 @@ void effRotateNested(EffPCPBeamWork *work, void *src) {
 }
 
 
-extern void sdfInvertRigidVuTransform(void);
 
 /* Fill the node's point buffer with four concentric rings (radius, +stepA, +stepB, +stepC) of unit directions, rotated by the VU matrix. */
 void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {

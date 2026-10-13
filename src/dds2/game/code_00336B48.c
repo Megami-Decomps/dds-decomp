@@ -15,6 +15,7 @@
 #include "sdf_draw.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
