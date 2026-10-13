@@ -3348,8 +3348,6 @@ extern void dds3EnsureSlotData();
 extern void *dds3GetWorldSecondaryObject(void);
 
 
-extern void dds3SetObjectSlot1MoverCallback(EffWorldNode *object, Dds3MoverUpdate arg);
-
 extern void *memset(void *dst, s32 value, u32 size);
 
 void mdlSpawnViewerWorldObject(void) {

@@ -33,6 +33,9 @@ typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
 ObjBase *dds3CreateSlotResourceState(void *owner);
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object);
 u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object);
+/* Forward a callback to the object's slot-1 handler when one is present. */
+void dds3SetObjectSlot1MoverCallback(EffWorldNode *object,
+                                     s32 (*update)(struct ObjectTransform *, struct EffWorldNode *));
 void *dds3SetSlotByKind(EffWorldNode *object, EffWorldNode *slotData);
 void *dds3ExchangeSlot(EffWorldNode *object, void *slotData, s32 slotIndex);
 void *dds3GetSlot(EffWorldNode *object, s32 slotIndex);
