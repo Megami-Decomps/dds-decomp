@@ -284,7 +284,7 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
     SdfModel *model = sdfModelCreateFromAssetData(data, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
-    SdfItem *item = (SdfItem *)&list->firstItem;
+    SdfItem *item = list->firstItem;
 
     if (count != i) {
         do {
@@ -307,7 +307,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
     model->flags |= SDF_MODEL_ALTERNATE_ITEM_SETUP;
     list = listRef->items;
     count = list->count;
-    item = (SdfItem *)&list->firstItem;
+    item = list->firstItem;
     if (count != i) {
         do {
             sdfDrawNodeSetFromItem(((SdfDrawNode **)model->list->buffer)[i], item);

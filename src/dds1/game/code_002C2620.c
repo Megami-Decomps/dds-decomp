@@ -2,6 +2,7 @@
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
@@ -42,9 +43,8 @@ extern void evtSetSolarOverlayFullyTransparent(void);
 extern void dspCloseChannel(void);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_003BD254;
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 fldLocalMapTrackSlotFromMode();
-extern s32 fldLmapTaskUpdate(void);
+extern s32 fldLmapTaskUpdate(KwlnTask *task);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
@@ -328,7 +328,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     drawSurface->append(drawSurface, packetList);
 }
 
-s32 fldLmapTaskUpdate(void) {
+s32 fldLmapTaskUpdate(KwlnTask *task) {
     s32 state = D_003BD96C;
     s32 result;
 
@@ -688,8 +688,6 @@ s32 fldLmapToggleOverlay(void) {
     return result;
 }
 
-extern void mdlFlagClear(s32 flag);
-extern void mdlFlagSet(s32 flag);
 
 void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);

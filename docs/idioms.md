@@ -607,8 +607,8 @@ functions use trampolines and are a different case.
   `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
   `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
   0x110, 0, 0, 0); }` matches (DDS1 `func_002E9810`/`func_002E9918`/
-  `func_002E94E0`/`func_002E9510`, DDS2 `func_003426B8`/`func_00342388`/
-  `func_003423B8`).
+  `func_002E94E0`/`func_002E9510`, DDS2 `sndSendChannelGroupCommand110`/`sndSendChannelGroupCommand140`/
+  `sndSendChannelGroupCommand150`).
 - Preserve a 32-bit packet field's unsigned width when storing it through a
   wider lvalue. `u32 descriptor = 0x20000000 | (quadwords & 0xFFFF);` followed
   by `header[0] = descriptor;` and the equivalent direct store
@@ -10324,6 +10324,32 @@ accepted old-name MISSING rows from naming batch 35, pending resplit; no
 DIFF, CONTEXT, RODATA or UNDEF diagnostics occurred. Both sampler traces
 passed hooked/unhooked assembly and RTL parity. Exact logs, the complete
 consumer inventory and all 113 gate results are in PurC's deep31 ledger.
+
+## Trace-justified pack and read staging: ambient light
+
+`lightBlendAmbientColors` (DDS1 0x00116388 / DDS2 0x001165F0, 520B each)
+uses four distinct SDK RGBA workspaces at SP+0x10/0x20/0x30/0x40.
+Keep the float-input unpack's broad memory effect and the existing pack
+constraints. Direct macro use follows the exact strip-instance donor;
+no shared helper or assembly contract changes.
+
+**Deciding property:** read the second payload color after the first register
+pack, before writing its workspace or publishing the first payload color.
+The initial direct-carrier form leaves 9/130 words different. Actual cc1
+`add_dependence` observation shows workspace store uid129 -> second-color
+load uid132 as a DATA edge in `sched_analyze_2` (`haifa-sched.c:3981`), in
+both schedulers. Both accesses have alias set1.
+
+Use the real packed result and second input as ordinary consumed scalars:
+pack `packedColor`, capture `secondaryWord`, store/publish the first result,
+then initialize the second unpack workspace. In the exact trace, the load
+uid128 precedes workspace store uid131; the latter has an ANTI dependency
+on the load. Sched2 issues the load at priority15 before the store at13.
+Keeping the second workspace initialization after publication also restores
+the native output/input register homes. Both complete owners pass 2/0;
+normal and observed assembly and all22 RTL dumps are identical for both
+failing and exact DDS2 controls. Preserve the prior Cedar Spark SDK carrier
+reconstruction and Lacquer/Silver/Amber/Azure/Peregrine light investigations.
 
 ## Trace-justified base color capture: effUpdateFadeBlendC
 

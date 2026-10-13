@@ -37,7 +37,7 @@
 #include "sdf.h"
 #include "mdl_flag_api.h"
 struct EffectSlotSet;
-extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
 enum { FILE_CONFIG_SET, FILE_CONFIG_FRAME, FILE_CONFIG_X, FILE_CONFIG_Y };
 extern s16 D_003E9028[27][4];
@@ -117,10 +117,9 @@ typedef struct FileStatBonus {
 } FileStatBonus;
 extern MdlFlagPair D_003E8CE8[];
 extern FileStatBonus D_003E8D10[24];
-extern void mdlFlagSet(s32);
-extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "fpu.h"
 struct MenuListNode;
@@ -2647,7 +2646,7 @@ extern void *memset(void *dst, s32 value, s32 size);
 struct SdfMemBlock;
 extern void fileSetMemoryCardOperationActive(void);
 extern s32 D_00437D80;
-extern void func_002CE738(void);
+extern void func_002CE738(KwlnTask *task);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 void func_002CE208(s32 mode) {
@@ -2759,7 +2758,7 @@ void func_002CE208(s32 mode) {
         memcpy(D_00437D58, (void *)(titleNamesAddress + 0x3C0), 0x780);
         sdfReleaseResourceAllocation(titleNamesAllocation);
     }
-    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, func_002CE738, NULL);
+    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, func_002CE738, 0);
     D_00437CE4 = 1;
     fileInitCursorPulse();
     kwlnFadeOutStart(0, 0, 0, 8);
@@ -2771,7 +2770,7 @@ void func_002CE208(s32 mode) {
     }
 }
 
-void func_002CE738(void) {
+void func_002CE738(KwlnTask *task) {
     fileReleaseMenuResources();
 }
 
@@ -3679,7 +3678,7 @@ s32 fileCreateConfigTask(s32 mode) {
 
 
 
-void fileConfigTaskDestroy(void) {
+void fileConfigTaskDestroy(KwlnTask *task) {
     s32 request = 1;
     FileConfigListNode *node;
     s32 i;
@@ -3711,19 +3710,19 @@ void fileConfigTaskDestroy(void) {
 
 extern s32 fileCreateConfigTask(s32 mode);
 
-extern s32 fileStartQueuedLoad(void);
-extern void fileConfigTaskDestroy(void);
-extern s32 func_002D1450(void);
-extern s32 fileUpdateConfigOwnerTask(void);
+extern s32 fileStartQueuedLoad(KwlnTask *task);
+extern void fileConfigTaskDestroy(KwlnTask *task);
+extern s32 func_002D1450(KwlnTask *task);
+extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
 
 extern s8 fileConfigTaskState;
 
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
-        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (void *)fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (void *)fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (void *)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
         fileConfigTaskState = 1;
     }
 }
@@ -3759,7 +3758,7 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigLoadTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigOwnerTaskName);
 
-s32 func_002D1450(void) {
+s32 func_002D1450(KwlnTask *task) {
     s32 oldIndex;
     s32 index;
     s32 i;
@@ -3880,7 +3879,7 @@ s32 func_002D1450(void) {
 
 extern void func_002D27A0(void *);
 
-s32 fileStartQueuedLoad(void) {
+s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
         return 0;
     }
@@ -3892,7 +3891,7 @@ s32 fileStartQueuedLoad(void) {
     return 0;
 }
 
-s32 fileUpdateConfigOwnerTask(void) {
+s32 fileUpdateConfigOwnerTask(KwlnTask *task) {
     s32 result;
 
     result = -1;
@@ -4054,35 +4053,35 @@ void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
         --countdown->ticks;
     }
     if (list->cursor->index == node->index) {
-        func_00306CD0(0x80, (index * 35 + 99) << 3, 0,
+        effDrawTextureSlotWithBlendedCornerColors(0x80, (index * 35 + 99) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
                      0, ((FileConfigTask *)fileConfigTaskWork)->slots[1], 18, 0x53);
-        func_00306CD0(0x1830, (index * 35 + 99) << 3, 0,
+        effDrawTextureSlotWithBlendedCornerColors(0x1830, (index * 35 + 99) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
                      0, ((FileConfigTask *)fileConfigTaskWork)->slots[1], 19, 0x53);
-        func_00306CD0(0x8B0, 0x8C0, 0, (u32)(labelFade * 256.0f),
+        effDrawTextureSlotWithBlendedCornerColors(0x8B0, 0x8C0, 0, (u32)(labelFade * 256.0f),
                      0, ((FileConfigTask *)fileConfigTaskWork)->slots[3], labelFrames[index], 0x53);
         entryIndex = index * 2;
-        func_00306CD0(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
+        effDrawTextureSlotWithBlendedCornerColors(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
                      (u32)(choiceFade * 256.0f), 0,
                      ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[entryIndex][FILE_CONFIG_SET]],
                      D_003E9028[entryIndex][FILE_CONFIG_FRAME], 0x53);
         if (((FileConfigTask *)fileConfigTaskWork)->transitionTicks != 0) {
             ++entryIndex;
-            func_00306CD0(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)((f32)((FileConfigTask *)fileConfigTaskWork)->transitionTicks * 0.125f * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[entryIndex][FILE_CONFIG_SET]],
                          D_003E9028[entryIndex][FILE_CONFIG_FRAME], 0x53);
         }
     } else {
         entryIndex = index + 18;
-        func_00306CD0(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
+        effDrawTextureSlotWithBlendedCornerColors(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
                      (u32)(labelFade * 256.0f), 0,
                      ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[entryIndex][FILE_CONFIG_SET]],
                      D_003E9028[entryIndex][FILE_CONFIG_FRAME], 0x53);
         entryIndex = index * 2;
         if (((FileConfigTask *)fileConfigTaskWork)->previousIndex == node->index) {
-            func_00306CD0(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[entryIndex][FILE_CONFIG_X] << 4, (D_003E9028[entryIndex][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)((f32)((FileConfigTask *)fileConfigTaskWork)->transitionTicks * 0.125f * 128.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[entryIndex][FILE_CONFIG_SET]],
                          D_003E9028[entryIndex][FILE_CONFIG_FRAME], 0x53);
@@ -4090,43 +4089,43 @@ void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
     }
     if (index < 3) {
         if (fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) != 0) {
-            func_00306CD0(D_003E9028[10][FILE_CONFIG_X] << 4, (D_003E9028[10][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[10][FILE_CONFIG_X] << 4, (D_003E9028[10][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[10][FILE_CONFIG_SET]],
                          D_003E9028[10][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[11][FILE_CONFIG_X] << 4, (D_003E9028[11][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[11][FILE_CONFIG_X] << 4, (D_003E9028[11][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[11][FILE_CONFIG_SET]],
                              D_003E9028[11][FILE_CONFIG_FRAME], 0x53);
             }
-            func_00306CD0(D_003E9028[25][FILE_CONFIG_X] << 4, (D_003E9028[25][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[25][FILE_CONFIG_X] << 4, (D_003E9028[25][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[25][FILE_CONFIG_SET]],
                          D_003E9028[25][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[14][FILE_CONFIG_X] << 4, (D_003E9028[14][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[14][FILE_CONFIG_X] << 4, (D_003E9028[14][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[14][FILE_CONFIG_SET]],
                              D_003E9028[14][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
-            func_00306CD0(D_003E9028[23][FILE_CONFIG_X] << 4, (D_003E9028[23][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[23][FILE_CONFIG_X] << 4, (D_003E9028[23][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[23][FILE_CONFIG_SET]],
                          D_003E9028[23][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[10][FILE_CONFIG_X] << 4, (D_003E9028[10][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[10][FILE_CONFIG_X] << 4, (D_003E9028[10][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[10][FILE_CONFIG_SET]],
                              D_003E9028[10][FILE_CONFIG_FRAME], 0x53);
             }
-            func_00306CD0(D_003E9028[14][FILE_CONFIG_X] << 4, (D_003E9028[14][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[14][FILE_CONFIG_X] << 4, (D_003E9028[14][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[14][FILE_CONFIG_SET]],
                          D_003E9028[14][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[15][FILE_CONFIG_X] << 4, (D_003E9028[15][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[15][FILE_CONFIG_X] << 4, (D_003E9028[15][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[15][FILE_CONFIG_SET]],
                              D_003E9028[15][FILE_CONFIG_FRAME], 0x53);
@@ -4134,43 +4133,43 @@ void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
         }
     } else if (index == 3) {
         if (fileTestSlotFlagsBit(3, (s32 *)&datGameState->world.slotFlags) != 0) {
-            func_00306CD0(D_003E9028[12][FILE_CONFIG_X] << 4, (D_003E9028[12][FILE_CONFIG_Y] - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[12][FILE_CONFIG_X] << 4, (D_003E9028[12][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[12][FILE_CONFIG_SET]],
                          D_003E9028[12][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[13][FILE_CONFIG_X] << 4, (D_003E9028[13][FILE_CONFIG_Y] - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[13][FILE_CONFIG_X] << 4, (D_003E9028[13][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[13][FILE_CONFIG_SET]],
                              D_003E9028[13][FILE_CONFIG_FRAME], 0x53);
             }
-            func_00306CD0(D_003E9028[26][FILE_CONFIG_X] << 4, (D_003E9028[26][FILE_CONFIG_Y] - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[26][FILE_CONFIG_X] << 4, (D_003E9028[26][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[26][FILE_CONFIG_SET]],
                          D_003E9028[26][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[16][FILE_CONFIG_X] << 4, (D_003E9028[16][FILE_CONFIG_Y] - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[16][FILE_CONFIG_X] << 4, (D_003E9028[16][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[16][FILE_CONFIG_SET]],
                              D_003E9028[16][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
-            func_00306CD0(D_003E9028[24][FILE_CONFIG_X] << 4, (D_003E9028[24][FILE_CONFIG_Y] - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[24][FILE_CONFIG_X] << 4, (D_003E9028[24][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[24][FILE_CONFIG_SET]],
                          D_003E9028[24][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[12][FILE_CONFIG_X] << 4, (D_003E9028[12][FILE_CONFIG_Y] - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[12][FILE_CONFIG_X] << 4, (D_003E9028[12][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[12][FILE_CONFIG_SET]],
                              D_003E9028[12][FILE_CONFIG_FRAME], 0x53);
             }
-            func_00306CD0(D_003E9028[16][FILE_CONFIG_X] << 4, (D_003E9028[16][FILE_CONFIG_Y] - 30) << 3, 0,
+            effDrawTextureSlotWithBlendedCornerColors(D_003E9028[16][FILE_CONFIG_X] << 4, (D_003E9028[16][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[16][FILE_CONFIG_SET]],
                          D_003E9028[16][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
-                func_00306CD0(D_003E9028[17][FILE_CONFIG_X] << 4, (D_003E9028[17][FILE_CONFIG_Y] - 30) << 3, 0,
+                effDrawTextureSlotWithBlendedCornerColors(D_003E9028[17][FILE_CONFIG_X] << 4, (D_003E9028[17][FILE_CONFIG_Y] - 30) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
                              ((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[17][FILE_CONFIG_SET]],
                              D_003E9028[17][FILE_CONFIG_FRAME], 0x53);
@@ -4193,41 +4192,41 @@ void func_002D27A0(void *arg) {
     s32 index;
 
     index = 0;
-    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
                  ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
                  sprites[index][FILE_CONFIG_FRAME], 0x53);
     index++;
-    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
                  ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
                  sprites[index][FILE_CONFIG_FRAME], 0x53);
     if (((FileConfigTask *)fileConfigTaskWork)->state == 1) {
-        func_00306CD0(0, 0, 0, 256, 0,
+        effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, 256, 0,
                      ((FileConfigTask *)fileConfigTaskWork)->slots[4], 0, 0x53);
     }
     index++;
-    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
                  ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
                  sprites[index][FILE_CONFIG_FRAME], 0x53);
     index++;
-    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(choiceFade * 256.0f), 0,
                  ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
                  sprites[index][FILE_CONFIG_FRAME], 0x53);
     index++;
-    func_00306CD0(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
+    effDrawTextureSlotWithBlendedCornerColors(sprites[index][FILE_CONFIG_X] * 16, (s32)((u32)(sprites[index][FILE_CONFIG_Y] - 30) << 3), 0,
                  (u32)(labelFade * 256.0f), 0,
                  ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[index][FILE_CONFIG_SET]],
                  sprites[index][FILE_CONFIG_FRAME], 0x53);
     for (index = 0; index < 5; index++) {
-        func_00306CD0(0, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+        effDrawTextureSlotWithBlendedCornerColors(0, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
                      ((FileConfigTask *)fileConfigTaskWork)->slots[2], 9, 0x53);
-        func_00306CD0(461 * 16, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+        effDrawTextureSlotWithBlendedCornerColors(461 * 16, (131 + index * 35 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
                      ((FileConfigTask *)fileConfigTaskWork)->slots[2], 10, 0x53);
     }
-    func_00306CD0(73 * 16, (326 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
+    effDrawTextureSlotWithBlendedCornerColors(73 * 16, (326 - 30) * 8, 0, (u32)(labelFade * 256.0f), 0,
                  ((FileConfigTask *)fileConfigTaskWork)->slots[2], 11, 0x53);
 }
 

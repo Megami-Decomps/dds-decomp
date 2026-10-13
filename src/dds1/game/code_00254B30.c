@@ -138,7 +138,7 @@ void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, Dsp
 }
 
 extern void *memset(void *, s32, u32);
-extern void func_002CD0D8(u32, s32, void *);
+extern void prfCopyMantraNamePart(u32, s32, void *);
 extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const void *, s32, u32);
 
 /* Fetch the low-16-bit display record ID and draw its text with the supplied attributes and fixed RGB. */
@@ -148,7 +148,7 @@ void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 textAttributes, u32 pa
     u8 recordText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
 
     memset(recordText, 0, MNU_DISPLAY_TEXT_BUFFER_BYTES);
-    func_002CD0D8(recordId, 1, recordText);
+    prfCopyMantraNamePart(recordId, 1, recordText);
     frFontDrawStyledGlyphChainAndMeasure(x + 0x35, y + 0x136, layer, textColor, 4, recordText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
 

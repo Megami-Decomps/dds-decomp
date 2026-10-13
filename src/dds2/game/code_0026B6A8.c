@@ -48,7 +48,6 @@ extern DspMantraName *D_00435E50;
 extern s32 D_00435E4C;
 extern DspUnitName *D_00435E48;
 
-extern void mdlFlagSet(s32);
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();
@@ -304,7 +303,7 @@ void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal, 
 
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void uiDrawSurfaceAtNearDepth(s32);
-extern void func_00306CD0(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern void func_00308F78(s32, s32);
 typedef struct DspStripVerticalOffsets {
     s8 values[2][2][6];
@@ -332,10 +331,10 @@ void func_0026BEC0(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *sta
         frameIndex = state->layer;
         if (strip->scrollSpeed < 0) {
             offsets = verticalOffsets.values[state->layout][0];
-            func_00306CD0(0, y, z, opacity / 4, 0x60, resource, frameIndex + 1, surfaceIndex);
+            effDrawTextureSlotWithBlendedCornerColors(0, y, z, opacity / 4, 0x60, resource, frameIndex + 1, surfaceIndex);
         } else {
             offsets = verticalOffsets.values[state->layout][1];
-            func_00306CD0(state->unk14, state->unk18, z, opacity / 10, 0x60,
+            effDrawTextureSlotWithBlendedCornerColors(state->unk14, state->unk18, z, opacity / 10, 0x60,
                 resource, frameIndex + 2, surfaceIndex);
         }
         stripX = x + (strip->horizontalOffset & ~0xF);

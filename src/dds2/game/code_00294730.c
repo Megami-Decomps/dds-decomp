@@ -16,9 +16,9 @@ enum {
 };
 
 extern MenuIconPlacement D_003D03F0[];
-extern void func_00306CD0(s32, s32, s32, u32, s32,
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
                           struct EffectSlotSet *, s32, s32);
-extern void mnuDrawTerminalContextEffectSprites(MenuTerminalContext *, s32, s32);
+extern void mnuDrawType2PanelEffects(MenuTerminalContext *, s32, s32);
 extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 
 extern void mnuDrawFadingValueListRow();
@@ -64,13 +64,13 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
     }
     scale = (s32)(alpha * 256.0f);
 
-    func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[32][MENU_ICON_X] * 16,
                   D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
                   D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], 0x53);
     func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
     func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
-    mnuDrawTerminalContextEffectSprites(object, scale, 0x53);
+    mnuDrawType2PanelEffects(object, scale, 0x53);
 
     frameCount = frames - 5;
     if (frameCount < 0) {
@@ -83,7 +83,7 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
     index = evtSelectGraphicSlotBySpriteType(object);
     resources = D_00438FC8;
     scale = (s32)(alpha * 256.0f);
-    func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16,
                   D_003D03F0[index][MENU_ICON_Y] * 8, 0, scale, 0,
                   resources->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
                   D_003D03F0[index][MENU_ICON_FRAME], 0x53);
@@ -110,13 +110,13 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
     alpha = 1.0f - alpha;
     scale = (s32)(alpha * 256.0f);
 
-    func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[32][MENU_ICON_X] * 16,
                   D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
                   D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], 0x53);
     func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
     func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
-    mnuDrawTerminalContextEffectSprites(object, scale, 0x53);
+    mnuDrawType2PanelEffects(object, scale, 0x53);
 
     frameCount = (s32)elapsed;
     alpha = (f32)frameCount / 20.0f;
@@ -129,7 +129,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
     index = evtSelectGraphicSlotBySpriteType(object);
     resources = D_00438FC8;
     scale = (s32)(alpha * 256.0f);
-    func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16,
                   D_003D03F0[index][MENU_ICON_Y] * 8, 0, scale, 0,
                   resources->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
                   D_003D03F0[index][MENU_ICON_FRAME], 0x53);
@@ -143,14 +143,14 @@ void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContex
                    s32 scale, s32 option) {
     u32 index;
 
-    func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
                   0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
                   D_003D03F0[32][MENU_ICON_FRAME], option);
     func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], option);
     func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], option);
-    mnuDrawTerminalContextEffectSprites(object, scale, option);
+    mnuDrawType2PanelEffects(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
-    func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
                   0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
                   D_003D03F0[index][MENU_ICON_FRAME], option);
 }
@@ -161,7 +161,7 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
     s32 alpha;
 
     alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
-    func_00306CD0(D_003D03F0[1][MENU_ICON_X] << 4, D_003D03F0[1][MENU_ICON_Y] << 3,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[1][MENU_ICON_X] << 4, D_003D03F0[1][MENU_ICON_Y] << 3,
                   0, alpha, 0, texture, D_003D03F0[1][MENU_ICON_FRAME], drawArg);
     object->pulseFrame++;
     if (object->pulseFrame >= 120.0f) {
@@ -175,16 +175,16 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 i;
 
-    func_00306CD0(x + (D_003D03F0[57][MENU_ICON_X] << 4),
+    effDrawTextureSlotWithBlendedCornerColors(x + (D_003D03F0[57][MENU_ICON_X] << 4),
                   y + (D_003D03F0[57][MENU_ICON_Y] << 3),
                   0, scale, 0, texture, D_003D03F0[57][MENU_ICON_FRAME], option);
     for (i = 0; i < object->window->list->visibleCount; i++) {
-        func_00306CD0(x + (D_003D03F0[18][MENU_ICON_X] << 4),
+        effDrawTextureSlotWithBlendedCornerColors(x + (D_003D03F0[18][MENU_ICON_X] << 4),
                       y + (D_003D03F0[18][MENU_ICON_Y] << 3),
                       0, scale, 0, texture, D_003D03F0[18][MENU_ICON_FRAME], option);
         y += 0xB0;
     }
-    func_00306CD0(D_003D03F0[17][MENU_ICON_X] << 4, D_003D03F0[17][MENU_ICON_Y] << 3,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[17][MENU_ICON_X] << 4, D_003D03F0[17][MENU_ICON_Y] << 3,
                   0, scale, 0, texture, D_003D03F0[17][MENU_ICON_FRAME], option);
     mnuDrawListScrollbar(0x2D0, 0x450, 0, scale, object->window->list, object->windowResource, option);
 }
@@ -331,13 +331,13 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *obje
         break;
     }
     if (flags & 1) {
-        func_00306CD0(D_003D03F0[20][MENU_ICON_X] << 4,
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[20][MENU_ICON_X] << 4,
                       D_003D03F0[20][MENU_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
                       texture, D_003D03F0[20][MENU_ICON_FRAME], option);
     }
     if (flags & 2) {
-        func_00306CD0(D_003D03F0[21][MENU_ICON_X] << 4,
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[21][MENU_ICON_X] << 4,
                       D_003D03F0[21][MENU_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
                       texture, D_003D03F0[21][MENU_ICON_FRAME], option);
@@ -365,9 +365,9 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext 
     if (list->count != 0) {
         firstIndex = list->head->index;
         row = list->cursor->index - firstIndex;
-        func_00306CD0(0x600, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x20, option);
-        func_00306CD0(0xD10, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x21, option);
-        func_00306CD0((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
+        effDrawTextureSlotWithBlendedCornerColors(0x600, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x20, option);
+        effDrawTextureSlotWithBlendedCornerColors(0xD10, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x21, option);
+        effDrawTextureSlotWithBlendedCornerColors((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
                       (D_003D03F0[29][MENU_ICON_Y] + row * 22) << 3,
                       0, 0x100, 0, texture,
                       D_003D03F0[29][MENU_ICON_FRAME], option);
@@ -402,17 +402,17 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
         firstIndex = list->head->index;
         opacity = (f32)alpha * 0.00390625f;
         row = list->cursor->index - firstIndex;
-        func_00306CD0((D_003D03F0[19][MENU_ICON_X] + 8) << 4,
+        effDrawTextureSlotWithBlendedCornerColors((D_003D03F0[19][MENU_ICON_X] + 8) << 4,
                       (D_003D03F0[19][MENU_ICON_Y] + row * 22) << 3,
                       0, (u32)((1.0f - opacity) * 256.0f), 0, texture,
                       D_003D03F0[19][MENU_ICON_FRAME], option);
-        func_00306CD0(0x600, (152 + row * 22) << 3, 0,
+        effDrawTextureSlotWithBlendedCornerColors(0x600, (152 + row * 22) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x20, option);
-        func_00306CD0(0xD10, (152 + row * 22) << 3, 0,
+        effDrawTextureSlotWithBlendedCornerColors(0xD10, (152 + row * 22) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x21, option);
-        func_00306CD0((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
+        effDrawTextureSlotWithBlendedCornerColors((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
                       (D_003D03F0[29][MENU_ICON_Y] + row * 22) << 3,
                       0, (u32)(opacity * 256.0f), 0, texture,
                       D_003D03F0[29][MENU_ICON_FRAME], option);
@@ -437,12 +437,12 @@ void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->unkC7 != 1) {
-        func_00306CD0(D_003D03F0[30][MENU_ICON_X] << 4,
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[30][MENU_ICON_X] << 4,
             (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
             0, 0x100, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);
     }
     if (panel->multiplier != 1) {
-        func_00306CD0(D_003D03F0[31][MENU_ICON_X] << 4,
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[31][MENU_ICON_X] << 4,
             (D_003D03F0[31][MENU_ICON_Y] + row * 22) << 3,
             0, 0x100, 0, texture, D_003D03F0[31][MENU_ICON_FRAME], option);
     }
@@ -454,12 +454,12 @@ void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, MenuTerminalContext *pane
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->unkC7 != 1) {
-        func_00306CD0(D_003D03F0[30][MENU_ICON_X] << 4,
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[30][MENU_ICON_X] << 4,
             (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
             0, scale, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);
     }
     if (panel->multiplier != 1) {
-        func_00306CD0(D_003D03F0[31][MENU_ICON_X] << 4,
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[31][MENU_ICON_X] << 4,
             (D_003D03F0[31][MENU_ICON_Y] + row * 22) << 3,
             0, scale, 0, texture, D_003D03F0[31][MENU_ICON_FRAME], option);
     }
@@ -474,9 +474,9 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     struct MenuList *inner;
     struct FrFontGlyph *glyph;
 
-    func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
-    func_00306CD0(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
     inner = object->list;
     if (inner->count != 0) {
@@ -489,7 +489,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
 }
 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
-    func_00306CD0(
+    effDrawTextureSlotWithBlendedCornerColors(
         x + D_003D03F0[26][MENU_ICON_X] * 16,
         y + D_003D03F0[26][MENU_ICON_Y] * 8,
         z, scale, 0, D_00438FC8->effectSlots[0],
@@ -501,7 +501,7 @@ void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale,
     s32 value;
     struct FrFontGlyph *glyph;
 
-    func_00306CD0(
+    effDrawTextureSlotWithBlendedCornerColors(
         x + D_003D03F0[25][MENU_ICON_X] * 16,
         y + D_003D03F0[25][MENU_ICON_Y] * 8,
         z, scale, 0, D_00438FC8->effectSlots[0],
@@ -522,9 +522,9 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     struct MenuList *inner;
     struct FrFontGlyph *glyph;
 
-    func_00306CD0(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
-    func_00306CD0(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
                   0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
     inner = object->list;
     if (inner->count != 0) {

@@ -173,9 +173,6 @@ extern u16 scrReadIntParameter(u32);
 
 
 extern u32 btlButtonIconTexture;
-
-
-extern s32 btlGetRuntime(void);
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
 extern void scrSetIntegerReturnValue();
 extern void btlCmdSimpleC(s32, u16);
@@ -1185,7 +1182,7 @@ u32 btlScriptSetBattleWorkParameter(void) {
     s32 battleAddress;
     s16 requestArgument;
 
-    battleAddress = btlGetRuntime();
+    battleAddress = (s32)(u32)btlGetRuntime();
     scrGetCurrentCommandWork();
     requestArgument = scrReadIntParameter(0);
     ((BtlState *)battleAddress)->requestMode = 4;
@@ -1984,7 +1981,7 @@ u32 btlScriptReturnSceneSlotCount(void) {
 u32 btlScriptReturnTurnCount(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     scrSetIntegerReturnValue(((BtlState *)battle)->turnCount);
     return 1;
 }
@@ -2025,7 +2022,7 @@ u32 btlScriptReturnEffectActive(void) {
 u32 btlCmdReturnBattlePhase(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     scrSetIntegerReturnValue(((BtlState *)battle)->phase);
     return 1;
 }
@@ -2302,7 +2299,7 @@ void func_001FADF0(void) {
 extern void evtConfigureUnitTransition(s32, s32);
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
-    s32 state = btlGetRuntime();
+    s32 state = (s32)(u32)btlGetRuntime();
     if ((((BtlState *)state)->battleFlags & 0x40000000) == 0) {
         BtlUnit *actor = ((BtlState *)state)->units;
         while (actor != 0) {

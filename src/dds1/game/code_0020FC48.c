@@ -137,9 +137,6 @@ typedef struct BattleRuntimeState {
 extern BattleRuntimeState btlRuntimeState;
 
 extern s32 func_003014F0(char *, const char *, ...);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
@@ -2890,7 +2887,6 @@ extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
-extern void mdlFlagSet(u32);
 
 void btlApplyPartySetupOverride(void) {
     u32 i;

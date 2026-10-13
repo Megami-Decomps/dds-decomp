@@ -34,7 +34,6 @@
 
 extern void fldSetCameraNodeModeWithTen(void);
 extern void mnuMarkTitleStreamResetPending(void);
-extern void mdlFlagSet(s32);
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -512,7 +511,7 @@ typedef char FldSparkControllerSizeCheck[(sizeof(FldSparkController) == 0x4C) ? 
 
 extern FldSparkController fldSparkControlState;
 
-extern void func_0014F5F0();
+extern void fldCreateSparkSlotObjects();
 
 extern s32 fldAttachSparkSlotToWorldObject(s32, s32);
 
@@ -4065,7 +4064,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DC8);
 const char D_00413DD8[] = "HUNT_MDL_UNIT";
 
 /* Create the sixteen (plus one) hunt-unit objects used by the field spark controller. */
-void func_0014F5F0(void) {
+void fldCreateSparkSlotObjects(void) {
     FldVec4 position = D_00413DB8;
     FldVec4 rotation;
     FldEnt14 *entry;
@@ -4210,7 +4209,7 @@ void fldFreeSparkSlot(s32 index) {
 void fldUpdateSparkSlots(void) {
     s32 i;
 
-    func_0014F5F0();
+    fldCreateSparkSlotObjects();
     for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
             fldAttachSparkSlotToWorldObject(i, fldSparkSlots[i].unk28);
@@ -4563,7 +4562,7 @@ void fldUpdateDevilizeEventSequence(void) {
         }
         break;
     case 9:
-        func_0014F5F0();
+        fldCreateSparkSlotObjects();
         fldLoadWeatherEffects();
         fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);
@@ -4794,16 +4793,16 @@ void fldTickWeatherEffectNodes(void) {
 }
 
 /* The serialized resource row retains a signed parameter at +6. */
-s32 func_00151498(void) {
+s32 fldGetSparkEncounterSelection(void) {
     return fldSparkControlState.entry->unk06;
 }
 
-s32 func_001514A8(void) {
+s32 fldGetSparkRewardProfileIndex(void) {
     return fldSparkControlState.unk8;
 }
 
 
-s16 func_001514B8(void) {
+s16 fldGetSparkPickupCount(void) {
     return fldAreaState.collectedCount;
 }
 

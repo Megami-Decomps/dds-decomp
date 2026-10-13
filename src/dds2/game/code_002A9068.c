@@ -8,6 +8,7 @@
 #include "ui_color.h"
 #include "fr_font.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -42,11 +43,13 @@ extern void *memset(void *, s32, u32);
 
 extern s32 mnuHandleCampFieldSkillInput(KwlnTask *);
 
-extern void mnuDrawCampFieldSkillPage();
+extern s32 mnuDrawCampFieldSkillPage(KwlnTask *task);
 
-extern s32 mnuFinishStaffConfigPopup(s32);
+extern s32 mnuFinishStaffConfigPopup(KwlnTask *task);
 
-extern void kwlnTaskAddChild(s32, s32);
+extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
+
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
@@ -90,7 +93,7 @@ extern void ptyRebuildAllProfiles(void);
 
 extern void mnuDrawCampIconBackdrop(u8 *, s32);
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 
@@ -834,7 +837,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     sndStopReducedBgm();
 }
 
-u32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
+s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     s32 work;
 
     work = kwlnTaskGetUserValue(task);
@@ -884,15 +887,15 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampDrawTaskName);
 INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampOwnerTaskName);
 
 void mnuCreateCampTasks(void) {
-    s32 menuAddress;
-    s32 drawTask;
+    u8 *menu;
+    KwlnTask *drawTask;
 
-    menuAddress = (s32)mnuCreateStaffMenuWork();
-    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
-    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawCampFieldSkillPage, 0, menuAddress);
-    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, menuAddress);
-    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, menuAddress));
-    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));
+    menu = mnuCreateStaffMenuWork();
+    kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, (u32)menu);
+    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawCampFieldSkillPage, 0, (u32)menu);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, (u32)menu);
+    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, (u32)menu));
+    kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, (u32)menu));
     kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
     mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
 }
@@ -940,7 +943,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, st
     if (mdlFlagTest(0x290) == 0) {
         return;
     }
-    func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawResource, 0x3F, layer);
+    effDrawTextureSlotWithBlendedCornerColors((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawResource, 0x3F, layer);
     func_0035C860(buffer, D_00437B80, datGameState->header.currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = itfCreateTightFont3TextGlyph((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
@@ -1102,11 +1105,11 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
     mnuDrawCampIconBackdrop(work + 0x11C, 0x20);
     switch (kind) {
     case 2:
-        func_00306CD0(0, 0, 0, visual->highlightOpacity, 0, visual->resources.baseResources[0], 0x19, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, visual->highlightOpacity, 0, visual->resources.baseResources[0], 0x19, 0x53);
         resources = visual->resources.baseResources[0];
         slots = resources->workEntries;
         slots[0x17].geometry.bounds[2] = (slots[0x17].sourceWidth + 0x40) << 4;
-        func_00306CD0(0xD40, 0x2E0, 0, visual->highlightOpacity, 0, resources, 0x17, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0xD40, 0x2E0, 0, visual->highlightOpacity, 0, resources, 0x17, 0x53);
         if (visual->highlightOpacity < 0x100) {
             visual->highlightOpacity += 0x10;
         }
@@ -1118,7 +1121,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
         resources = visual->resources.baseResources[0];
         slots = resources->workEntries;
         slots[0x17].geometry.bounds[2] = slots[0x17].sourceWidth << 4;
-        func_00306CD0(0x1140, 0x2E0, 0, visual->partyWindow.transitionValue, 0, resources, 0x17, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0x1140, 0x2E0, 0, visual->partyWindow.transitionValue, 0, resources, 0x17, 0x53);
     default:
         visual->highlightOpacity = 0;
         break;

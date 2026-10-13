@@ -11,12 +11,12 @@ extern void (*sdfTickCallback)(void);
 #define FADE_MODE_IN 1
 
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 /* Draw the indexed glyph at its per-glyph origin with the current tint. */
 void mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 extent, s32 index, s32 effect) {
     s32 texture = mnuGetIndexedFadeTexture(index);
-    func_00306CD0(x + D_0040B088[index].x,
+    effDrawTextureSlotWithBlendedCornerColors(x + D_0040B088[index].x,
                          y + D_0040B088[index].y,
                          0, extent * 2, 0, itfFadeTint, texture, effect);
 }
@@ -180,7 +180,7 @@ void func_0031E8E8(FadeGauge *entry, u32 displayValue) {
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E8F0);
 
-void func_0031ED68(FadeNumber *entry, u32 displayValue) {
+void mnuSetPauseFadeChoice(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 

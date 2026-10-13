@@ -160,9 +160,6 @@ extern SoundTask *btlDeferredTaskHead;
 extern DatEnemyRecord *datEnemyRecords;
 
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 datActionAnimationRecords;
 
 extern s8 effSharedRandomState[];
@@ -330,15 +327,12 @@ extern s32 btlCountTasksForOwner(s64);
 extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
 
 extern u8 *btlCreateUnitExitFadeTask(u8 *, u32);
-
-extern s32 btlGetRuntime(void);
-
 extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
 
 BtlTask *btlFindUnitByActor(BtlUnit *target);
 
 void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
-    s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x604);
+    s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x604);
 
     if (handler != 0) {
         s32 result = handler((s32)command, (s32)argument);
@@ -1419,7 +1413,7 @@ void *btlCreateDeferredActorStatsTask(BtlUnit *owner, BtlOperandEntry *spec) {
 
 u32 btlApplyDeferredUnitStatus(void *argument) {
     u32 *args = (u32 *)argument;
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *owner = (BtlUnit *)args[0];
     if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
         return 1;
@@ -1453,7 +1447,7 @@ void *btlCreateDeferredUnitStatusTask(u8 *owner, u32 value) {
 }
 
 u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *unit = args->unit;
     if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
         return 1;
@@ -1716,7 +1710,7 @@ u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
 }
 
 u32 btlAddEpFromPacket(s32 arg0) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
 
     if (((s32 *)arg0)[1] == 0) {
         return 1;
@@ -1748,7 +1742,7 @@ u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
 }
 
 u32 btlAddMoneyFromPacket(void *arg0) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
 
     if (((s32 *)arg0)[1] == 0) {
         return 1;
@@ -2005,7 +1999,7 @@ s32 btlCountRegisteredTasks(void) {
     s32 address;
     s32 count;
 
-    address = btlGetRuntime();
+    address = (s32)(u32)btlGetRuntime();
     count = 0;
     for (address = (s32)((BtlActorWork *)address)->taskHead; address != 0; address = (s32)((SoundTask *)address)->next) {
         count = count + 1;
@@ -2318,7 +2312,7 @@ void *btlCreateImmediateCompletionTask(void) {
 }
 
 void btlDumpTaskQueue(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     s32 node = *(s32 *)(context + 0x230);
     while (node != 0) {
         btlBossDebugPrintf("btl:packet[%d]\n", *(u16 *)(node + 0x20));
@@ -2382,7 +2376,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
 }
 
 s32 btlHasMatchingModel(s32 effect, s32 model) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *node = ((BtlState *)context)->units;
     while (node != 0) {
         if ((node->status.flags & 2) != 0 &&
@@ -2872,7 +2866,7 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
         return 0;
     }
     {
-        s32 (*callback)(BtlUnit *) = *(s32 (**)(BtlUnit *))(btlGetRuntime() + 0x5A4);
+        s32 (*callback)(BtlUnit *) = *(s32 (**)(BtlUnit *))((u8 *)btlGetRuntime() + 0x5A4);
         if (callback != 0 && callback(0) == *(s32 *)((u8 *)object + 0xEC)) {
             return 1;
         }
@@ -2913,7 +2907,7 @@ s32 btlGetSlotRateKind(u8 *object, s32 index) {
 }
 
 void btlUpdateUnitEffects(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *object = *(BtlUnit **)(context + 0x228);
 
     while (object != 0) {
@@ -2940,7 +2934,7 @@ void btlApplyUnitModelScaledValue(BtlUnit *object) {
     if ((object->status.flags & 2) == 0) {
         return;
     }
-    context = btlGetRuntime();
+    context = (s32)(u32)btlGetRuntime();
     object->updateFlags &= ~1;
     volume = object->motionRate;
     object->ext->owner->first->frameStep =
@@ -3025,7 +3019,7 @@ void btlSetUnitPosition(BtlUnit *object, void *position) {
     if ((object->status.stateFlags & 0x80) != 0) {
         return;
     }
-    context = btlGetRuntime();
+    context = (s32)(u32)btlGetRuntime();
     VU0_LOAD_VF(vf10, position);
     VU0_STORE_VF(vf10, (u8 *)object + 0x60);
     VU0_LOAD_VF(vf11, context);
@@ -3042,7 +3036,7 @@ void func_001D6300(u8 *object, void *position) {
 }
 
 void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     VU0_LOAD_VF(vf10, object + 0x60);
     VU0_LOAD_VF(vf11, context);
     VU0_ADD(vf10, vf10, vf11);
@@ -5082,7 +5076,7 @@ void btlUpdateActorModelColorAndLinks(void) {
             }
             func_001F2818(unit->resourceLink);
             btlUpdateUnitCommandEffect(unit->link);
-            func_001FC998(unit);
+            btlDrawUnitStatusShadowDisc(unit);
         }
     }
 }
@@ -5180,7 +5174,7 @@ void btlDestroyUnit(u8 *actor) {
     if (previous != 0) {
         *(u8 **)(previous + 0x344) = *(u8 **)(actor + 0x344);
     } else {
-        *(u8 **)(btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
+        *(u8 **)((u8 *)btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
     }
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)(actor + 0x33C)));
 }
@@ -5195,7 +5189,7 @@ void btlDestroyAllUnits(void) {
 }
 
 void btlRemoveActorsWithFlags(u32 mask) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *actor = *(BtlUnit **)(context + 0x228);
     while (actor != 0) {
         BtlUnit *next = *(BtlUnit **)((u8 *)actor + 0x344);
@@ -5219,7 +5213,7 @@ BtlUnit *btlFindActorForOwner(s64 target) {
 }
 
 s32 btlIsActiveActor(s32 candidate) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     s32 actor = *(s32 *)(context + 0x228);
     while (actor != 0) {
         if (actor == candidate) {
@@ -5231,7 +5225,7 @@ s32 btlIsActiveActor(s32 candidate) {
 }
 
 s32 btlFindUnitByModeClear(s32 arg0) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x228);
 
     while (node != 0) {
         if (((*(u16 *)(node + 0x120) & 0x20) == 0) && (*(u16 *)(node + 0x124) == arg0)) {
@@ -5243,7 +5237,7 @@ s32 btlFindUnitByModeClear(s32 arg0) {
 }
 
 s32 btlFindUnitByModeFlagged(s32 arg0) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x228);
 
     while (node != 0) {
         if (((*(u16 *)(node + 0x120) & 0x20) != 0) && (*(u16 *)(node + 0x124) == arg0)) {
@@ -5715,7 +5709,7 @@ u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f3
 extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 s32 btlApplyEffectCameraKeyframes(f32 *args) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     btlSetCameraCommandMode(1, *(BtlTask **)args, 0, 0, 0);
     btlSetEffectCameraKeys((u8 *)(context + 0x70), args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8],
                   args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16]);
@@ -5891,7 +5885,7 @@ void btlSetEffectCameraKeys(u8 *fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f3
 u32 btlGetActiveUnitId(void) {
     s32 temp_v0;
 
-    temp_v0 = btlGetRuntime();
+    temp_v0 = (s32)(u32)btlGetRuntime();
     return *(u32 *)(temp_v0 + 0x174);
 }
 
@@ -5928,21 +5922,21 @@ void btlResetActiveUnitList(void) {
 void btlClearRuntimeFlag2000(void) {
     s32 temp_v0;
 
-    temp_v0 = btlGetRuntime();
+    temp_v0 = (s32)(u32)btlGetRuntime();
     *(u32 *)(temp_v0 + 0x160) = *(u32 *)(temp_v0 + 0x160) & 0xffffdfff;
 }
 
 void btlSetRuntimeFlag2000(void) {
     s32 temp_v0;
 
-    temp_v0 = btlGetRuntime();
+    temp_v0 = (s32)(u32)btlGetRuntime();
     *(u32 *)(temp_v0 + 0x160) = *(u32 *)(temp_v0 + 0x160) | 0x2000;
 }
 
 u32 btlIsRuntimeFlag2000Clear(void) {
     s32 temp_v0;
 
-    temp_v0 = btlGetRuntime();
+    temp_v0 = (s32)(u32)btlGetRuntime();
     return ((*(s32 *)(temp_v0 + 0x160) >> 0xd) ^ 1U) & 1;
 }
 
@@ -5990,7 +5984,7 @@ s32 btlGetWorldObjectDefault(void) {
 }
 
 s32 btlIsWorldMotionIdle(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     if ((*(u32 *)(context + 0x1F4) & 2) == 0) {
         return 0;
     }
@@ -6006,7 +6000,7 @@ s32 btlIsWorldMotionIdle(void) {
 s32 btlGetCameraVectorWork(void) {
     s32 temp_v0;
 
-    temp_v0 = btlGetRuntime();
+    temp_v0 = (s32)(u32)btlGetRuntime();
     return temp_v0 + 0x70;
 }
 

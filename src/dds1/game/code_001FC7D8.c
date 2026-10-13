@@ -24,8 +24,6 @@ extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);
-
-extern s32 btlGetRuntime();
 extern s8 btlHistoryCounter;
 extern s32 btlActionScratchWork;
 extern s32 btlIsLowHpActionReady(s32, s32);
@@ -91,7 +89,7 @@ void func_001FC990(void) {
 
 /* Actor-status providers select one complete 0x270-byte model record. */
 /* Use a map anchor for X/Z while retaining the actor's own height. */
-void func_001FC998(BtlUnit *unit) {
+void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
     f32 position[4] __attribute__((aligned(16)));
     f32 ownPosition[4] __attribute__((aligned(16)));
     f32 radius;
@@ -861,7 +859,7 @@ BtlRuntimeTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId) {
 }
 
 s32 btlUpdateLinkedDialogueEffect(BtlObjLink *link) {
-    s32 battleState = btlGetRuntime();
+    s32 battleState = (s32)(u32)btlGetRuntime();
     BtlUnit *owner = link->owner;
 
     if (owner != 0 && !(owner->partyRecord.status & 1)) {
@@ -959,7 +957,7 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedPresentation(BtlUnit *owner, s32 messag
 }
 
 s32 btlPollEffectWaitTask(BtlObjLink *link) {
-    s32 battleState = btlGetRuntime();
+    s32 battleState = (s32)(u32)btlGetRuntime();
 
     if (link->elapsedTicks == 0) {
         if (link->owner != 0) {
@@ -1093,7 +1091,7 @@ void btlAdvanceHistoryCounter(BtlHistObj *obj) {
 }
 
 void btlClearNodeFlags(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x224);
+    s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x224);
 
     if (node != NULL) {
         do {

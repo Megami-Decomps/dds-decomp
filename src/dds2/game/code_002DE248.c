@@ -463,10 +463,6 @@ extern u32 effScalyTextureHandle;
 extern s32 effSharedStripReferenceCount;
 
 extern u32 effSharedScalyStripResource;
-
-
-extern s32 btlGetRuntime(void);
-
 extern FileJobPayload *effTemporaryFileJob;
 
 extern FileQueue *effAuxiliaryFileQueue;
@@ -8321,7 +8317,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
 }
 
 void effSyncLinkedActorChildParameter(void) {
-    s32 owner = btlGetRuntime();
+    s32 owner = (s32)(u32)btlGetRuntime();
     BtlUnit *entry;
 
     if ((((BtlState *)owner)->battleFlags & 0x6000000) != 0x6000000) {
@@ -8709,7 +8705,7 @@ void effReportResourceStatus(u8 *work) {
 void effApplyBattleStateTint(void) {
     s32 actor;
 
-    actor = btlGetRuntime();
+    actor = (s32)(u32)btlGetRuntime();
     if ((((BtlState *)actor)->battleFlags & 0x6000000) == 0x6000000) {
         btlBeginSceneLightColorTransition((f32 *)(actor + 0x50), (f32 *)(actor + 0x60), 0);
         return;
@@ -8794,7 +8790,7 @@ void effSetActiveSlot(u32 slot, u8 value, u32 data) {
 void effResetActiveEffectSlots(void) {
     s32 actor;
 
-    actor = btlGetRuntime();
+    actor = (s32)(u32)btlGetRuntime();
     if ((((BtlState *)actor)->battleFlags & 0x6000000) == 0x6000000) {
         effResetSlots();
         return;
@@ -8868,7 +8864,7 @@ extern f32 D_00437E90;
 
 
 void effApplyKeyframeAngle(u8 *work) {
-    s32 owner = btlGetRuntime();
+    s32 owner = (s32)(u32)btlGetRuntime();
     f32 *keys = ((EffActiveResource *)work)->payload;
     u32 total = *(u32 *)keys;
     s32 frame;
@@ -9518,7 +9514,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
 }
 
 void effSyncFadeColorToTargets(void) {
-    s32 owner = btlGetRuntime();
+    s32 owner = (s32)(u32)btlGetRuntime();
 
     if ((((BtlState *)owner)->battleFlags & 0x6000000) == 0x6000000) {
         BtlUnit *node = ((BtlState *)owner)->units;

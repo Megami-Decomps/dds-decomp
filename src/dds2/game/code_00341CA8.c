@@ -16,7 +16,7 @@ void func_00341CD0(void) {
     sndQueueCommandPacket(0x210, 0, 0, 0);
 }
 
-void func_00341CF8(void) {
+void sndQueueNoPayloadCommand40(void) {
     sndQueueCommandPacket(0x40, 0, 0, 0);
 }
 

@@ -34,8 +34,6 @@ extern u8 D_003B01A0[];
 
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
-extern s32 btlGetRuntime(void);
-
 typedef struct EffBattleUnitRgbCommand {
     u32 color;
     u32 startFrame;

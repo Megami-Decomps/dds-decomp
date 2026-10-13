@@ -90,9 +90,6 @@ extern BtlAiScratchWork *btlActionScratchWork;
 extern s8 D_003A5A80[];
 
 extern s8 D_003A5AA8[];
-
-extern s32 btlGetRuntime(void);
-
 extern void btlBossDebugPrintf(const char *, ...);
 
 extern AiSpecies *datEnemyAiRecords;

@@ -63,7 +63,7 @@ typedef struct {
     f32 depth;             /* 0xAC */
 } VuWork;
 
-/* Finish the selected node's transformed rows and emit its textured geometry. */ void func_002E02D8(u32 workAddress);
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(u32 workAddress);
 
 /* Split ring addressing at position 128; retain the native 96-byte stride. */ void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition);
 
@@ -78,7 +78,7 @@ void sdfVuApplySelectedWorkFlags(u32 workAddress) {
     sdfVuEmitSelectedNodePacket((VuWork *)signedWorkAddress);
     selectedFlags = ((VuWork *)signedWorkAddress)->selectedFlags;
     if ((selectedFlags & 0x1000) != 0) {
-        func_002E02D8(workAddress);
+        sdfVuUpdateSelectedNodeGeometry(workAddress);
         selectedFlags = ((VuWork *)signedWorkAddress)->selectedFlags;
     }
     if ((selectedFlags & 1) != 0) {

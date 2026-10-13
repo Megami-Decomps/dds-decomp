@@ -5,7 +5,7 @@
 #include "mdl_flag_api.h"
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void mtrRecomputePartyMantraUnlockState(DatPartyRecord *);
+extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *);
 extern void mtrMantraBitResetUnit(DatPartyRecord *);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
@@ -23,7 +23,7 @@ void mtrMantraSetBit(DatPartyRecord *record) {
 
     evtPrintDeveloperConsoleMessage(D_00425F30, record->unitId);
     if (mdlFlagTest(0xBA0) != 0 && mdlFlagTest(0x80E) == 0) {
-        mtrRecomputePartyMantraUnlockState(record);
+        mtrRecomputeMantraFlagsForPartyUnit(record);
     } else {
         mtrMantraBitResetUnit(record);
         work = evtAllocateMantraSelectionWork(record, 1);

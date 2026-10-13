@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "evt_solar.h"
@@ -32,7 +33,6 @@ void evtDestroySecondaryWorldNode(void);
 
 extern u32 D_00435CBC;
 
-void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, void *destroy, void *data);
 
 extern s32 D_0043722C;
 
@@ -150,12 +150,12 @@ void evtBeginSolarOverlayFadeOut(s32 fadeDuration) {
 void func_00245810(void) {
 }
 
-u32 func_00245818(void) {
+s32 func_00245818(KwlnTask *task) {
     return 0;
 }
 
 /* Test-task teardown destroys the named script processes. */
-void evtDestroyTestTaskScripts(void) {
+void evtDestroyTestTaskScripts(KwlnTask *task) {
     scrDestroyAllNamedProcesses();
 }
 

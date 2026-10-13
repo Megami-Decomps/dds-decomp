@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_timer.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 
 extern void kwlnUpdatePadInputState(void);
 
@@ -56,15 +57,14 @@ extern char D_003BA7E8[]; /* "20\n" */
 extern char D_003BA7F0[]; /* "21\n" */
 extern char D_003BA7F8[]; /* "22\n" */
 extern s32 func_003003F0(const char *, ...);
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
-extern s32 kwlnPrepareFrameDrawPackets(void);
-extern s32 kwlnBuildFrameScenePackets(void);
-extern s32 kwlnRenderFrame(void);
-extern u32 dds3RunWorldPrimaryCallbacks(void);
-extern u32 dds3RunWorldSecondaryCallbacks(void);
-extern s32 frFontReleaseOppositeDrawBufferGlyphs(void);
-extern void frFontReleaseAll(void);
-extern s32 func_001997E0(void);
+extern s32 kwlnPrepareFrameDrawPackets(KwlnTask *task);
+extern s32 kwlnBuildFrameScenePackets(KwlnTask *task);
+extern s32 kwlnRenderFrame(KwlnTask *task);
+extern s32 dds3RunWorldPrimaryCallbacks(KwlnTask *task);
+extern s32 dds3RunWorldSecondaryCallbacks(KwlnTask *task);
+extern s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task);
+extern void frFontReleaseAll(KwlnTask *task);
+extern s32 func_001997E0(KwlnTask *task);
 
 /* Kernel startup: create the frame/draw/font tasks and initialize every subsystem, logging each step. */
 s32 kwlnInitializeRuntime(void) {

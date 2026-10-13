@@ -10,6 +10,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"
@@ -69,9 +70,6 @@ extern s32 D_00435DF0;
 extern s32 D_00435DE4;
 
 extern s32 D_00435DF8;
-
-extern s32 btlGetRuntime(void);
-
 extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern s8 D_0037F530[];
@@ -154,9 +152,7 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 extern s32 evtCheckValueThreshold(s32, s32);
 
-extern void mdlFlagSet(s32);
 
-extern void mdlFlagClear(s32);
 extern s32 sndUpdateTestMsgTask(KwlnTask *task);
 
 extern SdfPoolNode D_003805A8;
@@ -190,7 +186,6 @@ extern void *memset(void *destination, s32 value, u32 bytes);
 
 extern s32 D_00435CBC;
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void itfPrintTestMessageCallback();
 
@@ -789,7 +784,7 @@ extern void btlUpdateMotionSoundLoading(void);
 
 extern s32 btlUpdateScene(void);
 
-extern s32 func_001D3ED8(void);
+extern s32 fldAdvanceSceneGroupScheduler(void);
 
 extern s32 btlUpdateActionSeqs(void);
 
@@ -813,7 +808,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         btlUpdateTintAndWorldLight();
         btlUpdateMotionSoundLoading();
         btlUpdateScene();
-        func_001D3ED8();
+        fldAdvanceSceneGroupScheduler();
         btlUpdateActionSeqs();
         btlUpdateActiveActorModelState();
         func_0020D108();
@@ -1317,8 +1312,8 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     return 0;
 }
 
-s32 btlGetRuntime(void) {
-    return btlRuntime;
+void *btlGetRuntime(void) {
+    return (void *)(u32)btlRuntime;
 }
 
 /* Read current HP from a unit-entry address. */
@@ -1814,7 +1809,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 
 s32 btlResolveUnitValueWithOverride(s32 statusAddress, s32 element) {
-    s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x6B8);
+    s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x6B8);
     if (hook != 0) {
         s32 value = hook(statusAddress, element);
         if (value != -1) {
@@ -2547,7 +2542,7 @@ f32 btlGetEncounterAdjustmentScale(void) {
 u32 btlGetEscapeAttemptCount(void) {
     s32 controller;
 
-    controller = btlGetRuntime();
+    controller = (s32)(u32)btlGetRuntime();
     return *(u32 *)(controller + 0x278);
 }
 
@@ -3410,7 +3405,7 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
 }
 
 s32 btlTestActorStatusPredicate(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = *(s32 (**)(BtlUnit *))(btlGetRuntime() + 0x698);
+    s32 (*hook)(BtlUnit *) = *(s32 (**)(BtlUnit *))((u8 *)btlGetRuntime() + 0x698);
     if (hook != 0) {
         if (hook(unit) != 0) {
             return 1;

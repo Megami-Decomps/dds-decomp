@@ -143,7 +143,7 @@ void *dds3GetWorldObject(void);
 s32 strcmp(const char *a, const char *b);
 char *strcpy(char *dst, const char *src);
 
-EvtRuntimeChild *func_0022BE28(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer)
+EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer)
 {
     return evtCreateTrackKeyAtFrame(group, frame, viewer);
 }
@@ -2941,7 +2941,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                 }
             }
         } else if (command == 1) {
-            func_0022BE28(viewer->frameGroup, viewer->curFrame, viewer);
+            evtEventViewerCreateTrackKeyAtFrame(viewer->frameGroup, viewer->curFrame, viewer);
         }
     }
     return 0;

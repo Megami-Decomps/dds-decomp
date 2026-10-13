@@ -5,6 +5,7 @@
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 
 
 typedef struct ItfMesWindowRec ItfMesWindowRec;
@@ -89,7 +90,6 @@ s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 extern void frFontLoadTemporaryEntry(u32 arg0);
 
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern s32 itfUpdateActiveMessageWindows(void);
 

@@ -208,7 +208,7 @@ void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
     } while (bufferIndex != bufferCount);
 }
 
-void func_00341AD8(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
+void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
     D_004391E0 = 1;
     sndLoadIopSoundModules();
     sceSifInitIopHeap();

@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "mnu_title_effect.h"
 #include "mnu.h"
@@ -71,7 +72,6 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern MovieMenuState *mnuMovieMenuState;
 
-extern KwlnTask *kwlnTaskCreate();
 
 extern TitleAudioStreamState mnuTitleStreamStatus;
 

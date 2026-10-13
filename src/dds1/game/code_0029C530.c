@@ -137,9 +137,6 @@ extern FileJobPayload *effTemporaryFileJob;
 extern FileQueue *effAuxiliaryFileQueue;
 
 extern FileQueue *effFileQueue;
-
-extern s32 btlGetRuntime(void);
-
 extern void kwlnPadStartMotor(s32, u8, s32);
 
 extern u8 *effAllocateTexturedStripWork();

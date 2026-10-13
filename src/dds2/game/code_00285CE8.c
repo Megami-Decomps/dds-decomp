@@ -8,16 +8,14 @@
 
 extern void evtPrintDeveloperConsoleMessage();
 
-extern void mdlFlagClear(s32 flag);
 
-extern void mdlFlagSet(s32 flag);
 
 
 extern void mnuClearCampResourceFlagEntries(void);
 
 extern void mnuSynchronizeMantraModelFlags(s32 arg);
 
-extern void mtrRecomputePartyMantraUnlockState(void *record);
+extern void mtrRecomputeMantraFlagsForPartyUnit(void *record);
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
@@ -295,24 +293,24 @@ void mtrMantraEventBitReset(void) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitReset()]*****************\n");
 }
 
-void func_00286618(void) {
+void mtrRefreshMantraStateForUnit2(void) {
     DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
     record.unitId = 2;
-    mtrRecomputePartyMantraUnlockState(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
     mnuSynchronizeMantraModelFlags(0);
     if (mdlFlagTest(0x9A0)) {
         mdlFlagSet(0x9A1);
     }
 }
 
-void func_00286670(void) {
+void mtrRefreshMantraStateForUnit1(void) {
     DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
     record.unitId = 1;
-    mtrRecomputePartyMantraUnlockState(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
     mnuSynchronizeMantraModelFlags(1);
     if (mdlFlagTest(0x9A1)) {
         mdlFlagSet(0x9A0);
@@ -324,7 +322,7 @@ void mtrRefreshMantraStateForPartyUnit(void) {
 
     memset(&record, 0, sizeof(record));
     record.unitId = 3;
-    mtrRecomputePartyMantraUnlockState(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
 }
 
 void func_00286700(void) {
@@ -332,7 +330,7 @@ void func_00286700(void) {
 
     memset(&record, 0, sizeof(record));
     record.unitId = 7;
-    mtrRecomputePartyMantraUnlockState(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
 }
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", mtrSynchronizeMantraFlagsAcrossParty);

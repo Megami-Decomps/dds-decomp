@@ -745,7 +745,6 @@ void mnuCollectFlagArray(u8 *flags) {
 }
 
 extern u16 D_0036C6D0[];
-extern void mdlFlagSet(s32);
 
 void mnuApplyFlagArray(u8 *flags) {
     u32 i;

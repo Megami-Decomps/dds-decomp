@@ -50,7 +50,7 @@ static inline f32 fldNormalizeProbeVector(void) {
 
 extern void *dds3GetWorldObject(void);
 
-extern s32 mdlFlagTest(s32);
+#include "mdl_flag_api.h"
 extern int strcmp(const char *, const char *);
 
 extern void evtSetDrawSurfaceIndex();
@@ -3521,14 +3521,14 @@ s32 func_00144028(void *task) {
 }
 
 
-void *fldInitializeTitleBannerTask(KwlnTask *task) {
+s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     s16 *node = sdfAllocSizeClassBlock(8);
     node[1] = 1;
     node[0] = 0;
     node[2] = 0;
     node[3] = 0;
     kwlnTaskSetUserValue(task, (u32)node);
-    return func_00144028;
+    return (s32)func_00144028;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436174);

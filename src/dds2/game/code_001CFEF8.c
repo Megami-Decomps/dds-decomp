@@ -44,8 +44,6 @@
 #define FLD_SCENE_COUNTER_ACTION_ID 0x61
 #define FLD_SCENE_INSERT_ACTION_ID 0x62
 #define FLD_SCENE_SWAP_ACTION_ID 0x63
-
-extern s32 btlGetRuntime(void);
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 extern void btlDispatchStateHandler(void *, s32);
@@ -1826,7 +1824,7 @@ extern s32 func_001B2630();
 
 /* Per-frame scene advance: picks the next group task (or finishes the
  * slot sequence) and dispatches it once flags 4 and 8 are set. */
-void func_001D3ED8(void) {
+void fldAdvanceSceneGroupScheduler(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     ActionStateLink *task;
     void (*hook)(void);

@@ -4,6 +4,7 @@
 #include "btl_scene_light_params.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "btl_task_condition.h"
 #include "dat_command.h"
 #include "btl_scene_fade.h"
@@ -21,15 +22,11 @@
 #include "mdl_flag_api.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
-
-
-extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 
-extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
 extern void kwlnTaskAddChild(s32, s32);
 extern s32 btlGetTrackedTaskHandle(s32);
 extern s32 btlIsNamedBattleTaskRegistered(void);
@@ -406,9 +403,6 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
 extern s32 func_0022F180(void);
-
-extern s32 btlGetRuntime(void);
-
 extern void mdlSetAmountOnAllContextResources(f32, s32);
 
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
@@ -1520,7 +1514,6 @@ extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
 extern u32 btlGetIndexListCount(BtlIndexList *list);
 extern void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
-extern s32 btlGetRuntime(void);
 extern s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 extern s32 btlGetSlotRateKind(u8 *unit, s32 index);
 extern s32 btlMapActionCode(s32 unused, u32 id);

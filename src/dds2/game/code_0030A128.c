@@ -6,6 +6,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
@@ -31,7 +32,7 @@ extern u32 D_004388B0;
 
 extern u32 D_0043908C;
 
-extern s32 D_00439090; /* fade timer: func_0030B1E8 tests >= 31 with slti */
+extern s32 D_00439090; /* fade timer: fldUpdateLocalMapCounterSelection tests >= 31 with slti */
 
 
 
@@ -51,7 +52,6 @@ extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern s32 fldLmapTaskUpdate(KwlnTask *);
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 D_00438890;
 extern void sndReleaseTrackHandle(u32);
 extern void sdfReleaseAllSpriteSlots(void);
@@ -320,7 +320,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
 
 extern u8 fldUpdateLmapResourceLoad(LmapTaskState *);
 extern void fldInitializeLocalMapScene(void);
-extern s32 func_0030B1E8(void);
+extern s32 fldUpdateLocalMapCounterSelection(void);
 extern void fldDrawLocalMapOverlay(void);
 
 s32 fldLmapTaskUpdate(KwlnTask *task) {
@@ -340,7 +340,7 @@ s32 fldLmapTaskUpdate(KwlnTask *task) {
         D_0043888C->phase = 2;
         break;
     case 2:
-        result = func_0030B1E8();
+        result = fldUpdateLocalMapCounterSelection();
         if (result == -1) {
             return result;
         }
@@ -364,7 +364,7 @@ void fldStartLmapTask(s32 mode) {
         D_00438890 = 1;
     }
     fldInitializeLmapTaskVariant(taskData);
-    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, taskData);
+    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, (u32)taskData);
 }
 
 void fldStopLmapTask(void) {
@@ -675,7 +675,7 @@ extern void sdfInitInnerVectors(void);
 extern void fldUpdateSelectedValueTransition(void);
 extern void fldUpdateSwayOffset(void);
 
-s32 func_0030B1E8(void) {
+s32 fldUpdateLocalMapCounterSelection(void) {
     s32 result = 0;
 
     switch (D_004388AC) {
@@ -855,7 +855,6 @@ s32 fldLmapToggleOverlay(void) {
 }
 
 extern s32 sdfCounterGetDisplayValue(void);
-extern void mdlFlagClear(s32 flag);
 
 void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);

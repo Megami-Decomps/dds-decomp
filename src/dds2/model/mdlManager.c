@@ -34,6 +34,7 @@
 #include "file_request_api.h"
 #include "btl_group_id_entry.h"
 #include "mdl_grouped_parts_api.h"
+#include "mdl_done_job.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -1344,15 +1345,6 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
 }
 
 
-/* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */
-typedef struct MdlDoneJob {
-    u16 group;         /* 0x0 */
-    u16 id;            /* 0x2 */
-    u32 arg;           /* 0x4 */
-    FilePacRequest *owner; /* 0x8: retained file request */
-    void (*done)(u32); /* 0xC */
-    u32 doneArg;       /* 0x10 */
-} MdlDoneJob;
 /* Clean up the retained dispatch request, then release its completion job. */
 void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
     func_002C7CE8(ownerBlock->owner);
@@ -1383,8 +1375,6 @@ void mdlCompleteGroupedJobAndNotify(FilePacRequest *requestOwner, MdlDoneJob *co
 
 
 extern void mdlCompleteGroupedJobAndNotify(FilePacRequest *, MdlDoneJob *);
-
-#define MDL_DONE_JOB_BYTES 0x14
 
 /* Allocate a completion job and dispatch the request. Group/id narrow to u16.
  * Without onComplete, run the existing no-callback completion path and clean up

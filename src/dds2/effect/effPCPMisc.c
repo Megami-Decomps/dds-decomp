@@ -17,6 +17,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
+#include "eff_pcp_shared_trail.h"
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_node.h"
@@ -108,22 +109,6 @@ extern u8 D_003B1D30[];
 extern u8 D_003B1DF0[];
 
 extern u8 D_003B1EB0[];
-
-/* Shared trail allocation is 0x3C; each referencing task owns one u32 frame.
-   The private trail is a different 0x38-byte record, without unk24. */
-typedef struct EffPCPSharedTrail {
-    f32 pos[4];
-    u32 flags;
-    u32 color;
-    u32 frame;
-    f32 unk1C;
-    u32 limit;
-    u32 unk24;
-    u32 colors[2];
-    f32 scale;
-    s32 minSize;
-    EffBlurTemplate *obj;
-} EffPCPSharedTrail;
 
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 

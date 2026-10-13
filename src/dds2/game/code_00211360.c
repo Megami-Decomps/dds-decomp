@@ -59,9 +59,6 @@ extern s32 btlRollAiBucket(void);
 extern u32 btlNextScaledRandom(u32);
 
 extern u32 btlPreviousAiCandidateBucket;
-
-extern s32 btlGetRuntime(void);
-
 extern s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *);
 
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);

@@ -86,7 +86,6 @@ extern void itfPanelSetPairFirst(s32, s32);
 extern void itfMesStartEntry(s32, s32, s32);
 extern char D_0036ACF8[];
 extern void itfMesDestroyWindowIfPresent(s32);
-extern void mdlFlagSet(s32);
 extern s32 D_003BAA70;
 extern s32 D_003BAA74;
 extern s32 D_003BAA78;

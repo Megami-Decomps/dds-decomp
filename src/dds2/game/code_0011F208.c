@@ -2,6 +2,7 @@
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -15,6 +16,7 @@
 #include "evt_world.h"
 #include "dds3obj.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 
@@ -99,7 +101,6 @@ extern u32 D_00389988[];
 
 extern char D_00412B90[];
 
-extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
 extern s32 D_00435EE0;
 
@@ -129,7 +130,6 @@ extern void fldSubmitBackgroundDescriptorPacket(void);
 
 extern s32 D_00389780[];
 
-extern void mdlFlagSet(s32);
 
 void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[4] = first;

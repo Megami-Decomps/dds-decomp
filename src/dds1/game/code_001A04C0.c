@@ -3,6 +3,7 @@
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
@@ -41,18 +42,13 @@ extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern void btlUpdateScene(void);
-
-
-extern s32 btlGetRuntime(void);
-
-
 extern s32 btlRuntime;
 
 extern s32 kwlnTaskFindByPriority(u32);
 
 extern u64 D_003BB2E8;
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
-extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
 #include "sdf_packet_alloc.h"
 
@@ -285,7 +281,7 @@ void btlClearModelFlagRange(void) {
     } while (nextFlagIndex < 0xBFF);
 }
 
-s32 btlUpdateActiveBattleFrame(void) {
+s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlRuntime;
     if (battle == NULL) {
         return 0;
@@ -310,7 +306,7 @@ s32 btlUpdateActiveBattleFrame(void) {
     return 0;
 }
 
-s32 btlUpdateBattleFieldPresentation(void) {
+s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlRuntime;
     if (battle == NULL) {
         return 0;
@@ -329,22 +325,21 @@ s32 btlUpdateBattleFieldPresentation(void) {
 }
 
 /* Empty destructor callback for the active battle-frame task. */
-void btlReleaseActiveBattleFrameTask(void) {
+void btlReleaseActiveBattleFrameTask(KwlnTask *task) {
 }
 
-extern u8 D_003BB2F0[];
+extern char D_003BB2F0[];
 
 extern char D_003A1598[]; /* "battle_draw" */
 
-extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
 void btlCreateDrawTasks(void) {
     s32 state = btlRuntime;
-    u32 mainTask;
-    u32 drawTask;
-    mainTask = kwlnTaskCreate((u32)D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
-    *(u32 *)(state + 0x29C) = mainTask;
-    drawTask = kwlnTaskCreate((u32)D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
+    KwlnTask *mainTask;
+    KwlnTask *drawTask;
+    mainTask = kwlnTaskCreate(D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
+    *(u32 *)(state + 0x29C) = (u32)mainTask;
+    drawTask = kwlnTaskCreate(D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
     kwlnTaskAddChild(mainTask, drawTask);
 }
 
@@ -533,7 +528,6 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 extern void btlSetScene(s32 sceneId);
 extern void itfMesSetFlags(s32 flags);
-extern void mdlFlagSet(s32 flag);
 
 /* Start a battle: pick the scene parameters for the encounter and enter the battle scene. */
 void btlStart(s32 mode, s32 pack, s32 encounter) {
@@ -723,8 +717,8 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     return 0;
 }
 
-s32 btlGetRuntime(void) {
-    return btlRuntime;
+void *btlGetRuntime(void) {
+    return (void *)(u32)btlRuntime;
 }
 
 

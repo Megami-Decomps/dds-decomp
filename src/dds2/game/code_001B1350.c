@@ -27,9 +27,6 @@
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
-
-extern s32 btlGetRuntime(void);
-
 typedef struct BattleController {
     u8 pad_000[0x214];
     s32 frame;

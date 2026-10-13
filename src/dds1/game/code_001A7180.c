@@ -81,9 +81,6 @@ extern s32 btlCollectAvailableOptionSkills(s32, s32 *);
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 effMiscRandMod(s32, s32);
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
@@ -553,7 +550,7 @@ s32 btlRollEscapeChance(BtlUnit *actor) {
 extern AiSpecies *datEnemyAiRecords;
 
 s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     s32 index = *(s32 *)(context + 0x27C);
     if (datBattleSceneRecords[index].unk00 != 0) {
         return 0;

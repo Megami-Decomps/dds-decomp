@@ -7,8 +7,6 @@ extern s32 scrReadIntParameter(s32);
 
 extern s8 D_0040B7D9[];
 
-extern void mdlFlagSet(s32);
-extern void mdlFlagClear(s32);
 extern void scrSetIntegerReturnValue(s32);
 
 u32 scrGetProcedureAddress(s32 index) {
