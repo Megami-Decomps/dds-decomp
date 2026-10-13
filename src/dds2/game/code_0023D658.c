@@ -7,6 +7,7 @@
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
 #include "evt_unit.h"
+#include "evt_unit_vertical_move.h"
 #include "evt_task.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -163,8 +164,6 @@ extern s32 scrGetWindow(void);
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
 
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
-
-extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 extern f32 evtComputeClampedModelScale(s32);
 

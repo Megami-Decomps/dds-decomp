@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_vertical_move.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "mdl.h"

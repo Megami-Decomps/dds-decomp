@@ -73,7 +73,7 @@ extern void mnuDrawWindowSprites();
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
-extern s32 func_002CD240(u16, u8 **);
+extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
@@ -2180,7 +2180,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : profileId;
     if (code != 0) {
-        if (func_002CD240(code & 0xFFFF, &outValue) != 0) {
+        if (prfResolveMantraNameOrFallback(code & 0xFFFF, &outValue) != 0) {
             mnuDrawCenteredLabel(0x1120, 0x5F0, depth, color, code, param);
             return;
         }
