@@ -302,7 +302,7 @@ s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
     return 0;
 }
 
-/* Like func_0026D7E8, but a mode of 1 rejects the node and the profile caps alone decide. */
+/* Like mnuCheckMantraNeighborRequirements, but a mode of 1 rejects the node and the profile caps alone decide. */
 s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
     EvtMantraNodePositionRecord *record;
     s8 satisfiedNeighbors;
@@ -356,7 +356,7 @@ typedef struct MantraNodeStates {
     u16 *cells; /* 0x08: per-node state halfwords, indexed by record id */
 } MantraNodeStates;
 
-void func_0026D710(MantraNodeStates *states, s32 unused, s16 entry) {
+void mnuUpdateMantraNeighborNodeStates(MantraNodeStates *states, s32 unused, s16 entry) {
     EvtMantraNodePositionRecord *record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(entry);
     u16 *origin = &states->cells[record->id];
     s32 slot;
@@ -378,12 +378,12 @@ void func_0026D710(MantraNodeStates *states, s32 unused, s16 entry) {
     }
 }
 
-extern s32 func_0026DB48(DatPartyRecord *context, u8 entry);
+extern s32 scrIsPartyProfileEntryBit15Set(DatPartyRecord *context, u8 entry);
 
-extern s32 func_0026DB90(DatPartyRecord *context);
+extern s32 scrIsFirstPartyProfileEntryBitZeroSet(DatPartyRecord *context);
 
 /* Return true when all six neighbor conditions are satisfied across active party members. */
-s32 func_0026D7E8(u16 entry) {
+s32 mnuCheckMantraNeighborRequirements(u16 entry) {
     EvtMantraNodePositionRecord *record;
     s8 satisfiedNeighbors;
     s32 partyIndex;
@@ -408,8 +408,8 @@ s32 func_0026D7E8(u16 entry) {
 
                 if (neighbor != NULL) {
                     if ((neighbor->packedHeader & 0xF) == 1) {
-                        if (func_0026DB90(party) != 0) {
-                            if (func_0026DB48(party, (u8)(*neighborSlot)->id) != 0) {
+                        if (scrIsFirstPartyProfileEntryBitZeroSet(party) != 0) {
+                            if (scrIsPartyProfileEntryBit15Set(party, (u8)(*neighborSlot)->id) != 0) {
                                 satisfiedNeighbors |= 1 << slot;
                             }
                         } else {
@@ -499,7 +499,7 @@ void func_0026DB20(void) {
 
 extern void scrClearEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
 
-void func_0026DB28(DatPartyRecord *context, u8 entry) {
+void scrClearPartyProfileEntryBit15(DatPartyRecord *context, u8 entry) {
     scrClearEntryFlag(context, entry, 0xf);
 }
 

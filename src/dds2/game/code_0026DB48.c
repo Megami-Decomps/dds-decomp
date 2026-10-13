@@ -27,12 +27,12 @@ extern s8 dspWindowStateGate;
 
 extern u32 D_00437890[];
 
-extern s32 func_0026DB48(DatPartyRecord *context, u8 entry);
+extern s32 scrIsPartyProfileEntryBit15Set(DatPartyRecord *context, u8 entry);
 
-extern s32 func_0026DB90(DatPartyRecord *context);
+extern s32 scrIsFirstPartyProfileEntryBitZeroSet(DatPartyRecord *context);
 
 /* Return whether bit 15 is set for the supplied entry. */
-s32 func_0026DB48(DatPartyRecord *context, u8 entry) {
+s32 scrIsPartyProfileEntryBit15Set(DatPartyRecord *context, u8 entry) {
     return scrTestEntryFlag(context, entry, 0xf);
 }
 
@@ -48,7 +48,7 @@ void func_0026DB70(DatPartyRecord *context) {
 }
 
 /* Return the flag test's result through the native selector-zero wrapper. */
-s32 func_0026DB90(DatPartyRecord *context) {
+s32 scrIsFirstPartyProfileEntryBitZeroSet(DatPartyRecord *context) {
     return scrTestEntryFlag(context, 0, 0);
 }
 
