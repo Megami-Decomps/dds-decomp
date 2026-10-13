@@ -3,6 +3,7 @@
 #include "mnu_voice_resource_path_api.h"
 #include "ui_color.h"
 #include "mnu_result.h"
+#include "brs_result_counter.h"
 
 typedef struct { u32 word[6]; } BurstSprite;
 
@@ -526,6 +527,13 @@ typedef struct BrsResultCounter {
     s8 unk60;
     u8 pad61[7];
 } BrsResultCounter;
+
+typedef char BrsResultCounter_shared_view_size[
+    (sizeof(BrsResultCounter) == sizeof(BrsResultCounterView)) ? 1 : -1];
+typedef char BrsResultCounter_shared_phase_offset[
+    ((u32)&((BrsResultCounter *)0)->phase == 0x14) ? 1 : -1];
+typedef char BrsResultCounter_shared_remaining_offset[
+    ((u32)&((BrsResultCounter *)0)->remaining == 0x34) ? 1 : -1];
 
 typedef struct BrsResultWork {
     u8 pad00[0xAEAC];
