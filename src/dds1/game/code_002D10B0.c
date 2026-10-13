@@ -8,7 +8,7 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
-#include "sdf_texture_block_list.h"
+#include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
