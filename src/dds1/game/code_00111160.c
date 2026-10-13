@@ -4,7 +4,7 @@
 #include "dds3_path.h"
 #include "evt_action_object.h"
 
-s32 func_00111160(u32 kind) {
+s32 dds3SelectOwnerWorldIndexSlot(u32 kind) {
     s32 result = 0;
 
     if (kind >= 4) {
@@ -24,7 +24,7 @@ EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
 }
 
 void dds3EnsureWorldNodeInSlot(EffWorldNode *object, EffWorldNode *node) {
-    WorldIndexNode *slot = dds3GetWorldSlotValue(object, func_00111160(((u8 *)node)[0xF]));
+    WorldIndexNode *slot = dds3GetWorldSlotValue(object, dds3SelectOwnerWorldIndexSlot(((u8 *)node)[0xF]));
 
     dds3ResetObjectValueCursor((WorldValueIndices *)slot);
     if (dds3SeekWorldNode((WorldValueIndices *)slot, (u32)node) != 1) {
