@@ -6,7 +6,7 @@
 
 extern u32 mtrHasEnoughOwnedMantras(void);
 
-extern s32 func_0011C0B0(s32 param0, s32 param1);
+extern s32 ptyAddUnitWithFlags(s32 param0, s32 param1);
 
 extern s32 func_0011C340(s32 param0, s32 param1);
 
@@ -37,7 +37,7 @@ s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
     s32 firstOperand = scrReadIntParameter(0);
     s32 secondOperand = scrReadIntParameter(1);
 
-    scrSetIntegerReturnValue(func_0011C0B0(firstOperand, secondOperand));
+    scrSetIntegerReturnValue(ptyAddUnitWithFlags(firstOperand, secondOperand));
     return 1;
 }
 

@@ -526,6 +526,7 @@
 0x0011B328	ptyCloneTemplateAtPartyMaxLevel	inferred	U1
 0x0011B6F0	ptyInitRosterAndClearItem	inferred	R_Names31 B92
 0x0011BC80	ptyMergeSavedUnitTemplates	inferred	Fam
+0x0011C0B0	ptyAddUnitWithFlags	inferred	Adds a roster member to the first free party slot, using the supplied initialization flags for template or kind-specific setup; restores HP/MP, applies model flags and returns the slot or duplicate/full error. DDS1 ptyAddUnit is the corresponding default-flags path.
 0x0011C6A0	ptyReturnOne	inferred	returns constant one; called for kind-two records by fldActivateFlaggedObject
 0x0011C6A8	ptyUnitMatchesAffinityRequirement	inferred	Tests whether a party unit satisfies one encoded affinity participant requirement by skill, effect stat, unit id, or skill-set membership; paired DDS1 implementation at 0x0011B158.
 0x0011C868	ptyMatchAffinityPermutation	inferred	confidence=high; matched-C; src/dds2/game/code_0011A118.c:443:func_0011C868; Counts required affinity slots, checks the six gameplay actor orders, and succeeds when the occupied actors match all requirements; no compiler-order search is performed.; source=names_P5.tsv:5 [names_qp11.tsv]
