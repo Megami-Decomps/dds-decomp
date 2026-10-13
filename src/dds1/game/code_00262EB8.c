@@ -81,7 +81,7 @@ s32 mnuRefreshAndDispatchCurrentPanel(KwlnTask *input) {
     return menuRunPanel(context, 1, (void *)input);
 }
 
-s32 func_00263100(KwlnTask *input) {
+s32 mnuRunResultPanelMode2(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
     return menuRunPanel((void *)context, 2, (void *)input);
 }

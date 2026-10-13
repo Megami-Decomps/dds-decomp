@@ -34,10 +34,10 @@ void mnuReleaseMovieMenuState(void) {
     D_003BA730 = 1;
 }
 
-extern void func_0026CB10(void *, void *);
+extern void mnuUpdateMovieMenuCameraOrbit(void *, void *);
 
 s32 mnuUpdateMovieMenuEffects(void) {
-    func_0026CB10(D_003DC1C0, D_003DC1D0);
+    mnuUpdateMovieMenuCameraOrbit(D_003DC1C0, D_003DC1D0);
     return mnuApplyInnerEffectVectorsAndTickObject();
 }
 
@@ -69,7 +69,7 @@ extern void mnuDrawMovieMenuBackdrop(void);
 extern void mnuSelectMenuListCursorByAdvance(s32 amount);
 extern void mnuTitleResetSequenceTimers(void);
 extern void sndReleaseTrackHandle(u32 trackId);
-extern void func_0026CAB0(void);
+extern void mnuRunMovieMenuIdleFrame(void);
 extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuDrawMovieChoiceTransition(void);
 extern void mnuClearGlobalMenuStateFields(void);
@@ -384,7 +384,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 29:
         mnuUpdateMovieMenuEffects();
-        func_0026CAB0();
+        mnuRunMovieMenuIdleFrame();
         if (kwlnFadeIsActive() == 0) {
             mnuMovieMenuState->state = 0x1E;
             mnuMovieMenuState->cursor = 0;
@@ -393,7 +393,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 30:
         mnuUpdateMovieMenuEffects();
-        func_0026CAB0();
+        mnuRunMovieMenuIdleFrame();
         menuAction = mnuUpdateMovieMenuInputState();
         switch (menuAction) {
         case 1:
@@ -419,7 +419,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         mnuUpdateMovieMenuEffects();
         if (mnuMovieMenuState->cursor < 0xF) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
-            func_0026CAB0();
+            mnuRunMovieMenuIdleFrame();
         } else {
             mnuDrawMovieMenuBackgroundQuad(0x80);
             selectedItem = mnuGetMovieMenuSelectionIndex();
@@ -450,7 +450,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 32:
         mnuUpdateMovieMenuEffects();
-        func_0026CAB0();
+        mnuRunMovieMenuIdleFrame();
         mnuClearGlobalMenuStateFields();
         mnuMovieMenuState->state = 0x19;
         mnuMovieMenuState->cursor = 0;

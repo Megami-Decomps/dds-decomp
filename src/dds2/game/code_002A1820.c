@@ -205,7 +205,7 @@ void mnuUpdateTitleAudioStreams(void) {
     }
 
     if (D_00437A34 == 0) {
-        func_002A1678(0x400);
+        mnuConfigureTitleAudioStream(0x400);
     }
     D_00437A34 = 1;
 

@@ -36,7 +36,7 @@ INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428560);
 
 INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428570);
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029DFB0);
+INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowEntries);
 
 INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E220);
 
@@ -57,7 +57,7 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E548);
+INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowOverlays);
 
 extern void mnuSetTitleSequenceVolumePan(u32);
 extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
@@ -809,7 +809,7 @@ u32 sndOpSetTrackDefaultVolumePan(void) {
     return 1;
 }
 
-u32 func_002A13C0(void) {
+u32 sndOpSendTitleAudioCommand(void) {
     func_00341CF8();
     return 1;
 }
@@ -849,7 +849,7 @@ s32 movCheckStartupSoundState(void) {
     return mnuPollTitleStreamStateLocked() != 1;
 }
 
-u32 func_002A14D0(void) {
+u32 sndOpResetTitleStreamAfterFileIdle(void) {
     mnuResetTitleStreamAfterFileIdle();
     return 1;
 }
@@ -913,7 +913,7 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_002A1678);
+INCLUDE_ASM(const s32, "game/code_0029DF18", mnuConfigureTitleAudioStream);
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();

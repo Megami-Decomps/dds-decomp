@@ -166,7 +166,7 @@ s32 itfRunPanelMode2(KwlnTask *request) {
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C120);
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C3F0);
+INCLUDE_ASM(const s32, "game/code_0029BC58", brsPackProgressPanelColor);
 
 
 /* The opacity is latched at 0x80; later fade steps leave it untouched. */

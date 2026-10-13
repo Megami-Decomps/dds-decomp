@@ -414,7 +414,7 @@ s32 itfRunPanelMode2(KwlnTask *request) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264B08);
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264D90);
+INCLUDE_ASM(const s32, "game/code_00263EB0", mnuDrawItemPanelStatusIcons);
 
 
 /* The opacity update latches at its threshold. Keep fadeProgress signed:
