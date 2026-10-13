@@ -4369,6 +4369,7 @@
 0x00243558	campResolvePendingValue	inferred	DDS1 twin of DDS2 func_0025E8D0. [names_M44_Mid3.tsv]
 0x00243608	mnuDrawCampScaledTexture	inferred	U1
 0x002437E0	fldResetCampSceneEntries	inferred	Byte-identical dds2 twin 0x0025EBC8; Clears status of every linked camp scene entry and the scene's state at +0x240C. [names_conflicts.tsv]
+0x00243818	evtApplyCameraColorTrackAtFrame	inferred	Samples the type-0x19 camera-color track at the viewer frame, interpolates neighboring payloads, and applies the resulting camera-color parameters.
 0x00243928	fldApplyCameraColorKeyWords	inferred	confidence=high; matched-C; src/dds1/game/code_00242608.c:561:func_00243928; Copies the current camera settings, replaces the observed scalar/interleaved fields with supplied key words, applies the camera color effect, and sets the owner control flag from four nonzero key words. DDS2 native counterpart remains claimed/ASM and is not queued here.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00243A58	mnuCampInitFontResource	inferred	Creates and configures the camp scene font resource at offset 0x2410.
 0x00243AA8	mnuCampLinkFontGlyph	inferred	Passes the camp scene font resource to frFontGlyph list-linking and clears its slot.

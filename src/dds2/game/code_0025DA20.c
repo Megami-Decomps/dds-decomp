@@ -842,7 +842,7 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 /* Blend the first camera-color track at the clamped frame. Lookup includes
  * the track base, but interpolation retains the native unre-based key frames.
  * Without a future key, pass zero blend and the uninitialized fallback block. */
-void func_0025EC00(EvtRuntime *scene) {
+void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *selectedKey;
     EvtRuntimeChild *futureKey;
@@ -895,7 +895,7 @@ void func_0025EC00(EvtRuntime *scene) {
 INCLUDE_ASM(const s32, "game/code_0025DA20", fldApplyCameraColorKeyWords);
 
 void func_0025EE00(EvtRuntime *scene) {
-    func_0025EC00(scene);
+    evtApplyCameraColorTrackAtFrame(scene);
     if (scene->cameraColorActive == 1) {
         func_00137888();
         return;
