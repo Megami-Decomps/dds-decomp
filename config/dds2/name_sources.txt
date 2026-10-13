@@ -58,6 +58,7 @@
 0x00103860	kwlnDebugPulsePadMotors	inferred	Starts the small and large pad motors when the task timer reaches the pulse interval; varies the large-motor level.
 0x00103F58	kwlnPadStartMotor	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:378:func_00103F58; Peer-matched C proposal; M141; source=names_pending_main.tsv:137 [names_qp12_apply.tsv]
 0x00104020	kwlnPadResetMotorLevelsAndOutput	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]
+0x00104058	kwlnUpdatePadMotorDurations	inferred	DDS1 role twin 0x00104168: decrements both motor countdowns, stops expired motors and refreshes the large motor toward its target; DDS2 uses a direct unsigned-word countdown. Called from the pad input update.
 0x00104180	kwlnDebugGraphUpdate	inferred	DebugTimeGrph update callback; native body returns signed zero scheduler control and ignores the incoming task argument.
 0x001044E8	kwlnDebugGraphTaskDestroy	inferred	No-op destroy callback registered for the DebugTimeGrph task.
 0x00104568	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104678, input-family pairing. [names_qp10.tsv]
