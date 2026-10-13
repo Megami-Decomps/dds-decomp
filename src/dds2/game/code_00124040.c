@@ -72,7 +72,7 @@ extern s32 D_003898AC[];
 
 extern void func_00122E50(void);
 
-extern void func_00125380(void);
+extern void fldRebuildFieldScene(void);
 
 extern void fldApplySkyLightSet(u32, s32);
 
@@ -993,7 +993,7 @@ extern void fldLoadResourceByIndex(s32 index);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412D50);
 
-void func_00125380(void) {
+void fldRebuildFieldScene(void) {
     f32 fallback[12];
     f32 *transform = NULL;
     FieldPlayerSceneWork *sceneWork;
@@ -2255,7 +2255,7 @@ s32 fldUpdateFieldSceneTask(void) {
         D_00435CBC = 0x80000000;
         evtEnableSolarPhaseAdvance();
         D_004360E8 = 0;
-        func_00125380();
+        fldRebuildFieldScene();
         dds3SetWorldObject(dds3GetWorldSecondaryObject());
         fldCreateInputPanelTask();
         if (fldAreaState.transitionMode == 0) evtSetSolarOverlayFullyVisible();

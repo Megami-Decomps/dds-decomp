@@ -8429,8 +8429,8 @@ above; the newly validated working-result identity closes that frontier.
 
 ### DDS1 field scene initializer and generated axis ownership
 
-The 1,256-byte DDS1 `func_001233D0` transfers from PiM's exact DDS2
-`func_00125380` (commit f75bf24579a84cfd7b71301e7dbfb5338865e31f), with
+The 1,256-byte DDS1 `fldRebuildFieldScene` (0x001233D0) is paired with PiM's exact DDS2
+`fldRebuildFieldScene` (0x00125380; commit f75bf24579a84cfd7b71301e7dbfb5338865e31f), with
 actual DDS1 behavior restored: the title threshold is 39, player/camera
 preparation is one provider call, and two independent reads of flag 0x413
 gate camera color and the location-bit-8 menu initialization. DDS1 has no
