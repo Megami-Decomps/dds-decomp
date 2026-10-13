@@ -1306,7 +1306,7 @@ u32 evtOpEndUnitValueTransition(void) {
 
 const char D_003AC4E8[] = "EFFECT_BE not fount RID = %d\n";
 
-u32 func_00225620(void) {
+u32 evtOpSpawnBoundEffectFromTaskResource(void) {
     u8 firstVector[16];
     u8 secondVector[16];
     s32 taskId;
