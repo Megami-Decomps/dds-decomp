@@ -14,6 +14,7 @@
 #include "eff_ref_obj.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
+#include "bill_object_api.h"
 #include "btl_state.h"
 #include "btl_action.h"
 #include "ee_mmi.h"
@@ -3092,7 +3093,6 @@ extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0040B7DB[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
-extern SdfTex *effGetBillResourceTexture(s32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 
