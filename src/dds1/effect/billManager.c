@@ -194,8 +194,6 @@ typedef struct BillStatePacket {
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
-extern SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture);
-extern s32 sdfTexGetSecondaryBufferSize(SdfTex *texture);
 extern f32 D_0034E040[4];
 extern f32 D_0034E050[4];
 extern BillRenderPair *D_003BD7F8;
