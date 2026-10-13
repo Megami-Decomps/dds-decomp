@@ -15,6 +15,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
+#include "eff_event_bill_particle.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_texture_primary_buffer_api.h"
@@ -1304,29 +1305,6 @@ typedef struct {
     s32 colorStartAge; /* Batched path: primary texture RGB fades from black. */
     s32 colorTransitionFrames;
 } EffEventBillParams;
-
-typedef struct {
-    f32 position[3];
-    u8 pad0C[4];
-    f32 motion[3]; /* X/Z: unit sway direction; Y: accumulated vertical offset. */
-    u8 pad1C[4];
-    s32 age;
-    s32 motionDelay;
-    f32 baseScale;
-    f32 scalePhaseX;
-    f32 scalePhaseStepX;
-    f32 scaleAmplitudeX;
-    f32 scalePhaseY;
-    f32 scalePhaseStepY;
-    f32 scaleAmplitudeY;
-    f32 rotation;
-    f32 angularSpeed;
-    f32 swayAmplitude;
-    f32 swayPhase;
-    f32 verticalSpeed;
-    f32 lateralSpeed;
-    u8 pad5C[4];
-} EffEventBillParticle; /* 0x60 */
 
 typedef struct {
     EffEventBillParams head;
