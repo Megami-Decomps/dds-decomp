@@ -3284,7 +3284,7 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     spawned->startCondition.value.handle = load->handle;
     btlStartTask(spawned);
-    delayed = func_001E5FF8(unit, 0x12);
+    delayed = btlCreateUnitDefeatFadeInTask(unit, 0x12);
     delayed->ownerId = task->unit->owner;
     delayed->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     delayed->startDelay = 2;
