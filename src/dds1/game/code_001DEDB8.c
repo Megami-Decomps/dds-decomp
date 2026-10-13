@@ -136,13 +136,7 @@ extern void btlInitLinkedUnitActionCursor(BtlTask *);
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
-typedef struct SoundBankEntry {
-    u32 unk_00;
-    u32 resource;
-    u32 unk_08;
-} SoundBankEntry;
-
-extern SoundBankEntry D_0035F748[];
+extern BattleSoundArchiveEntry D_0035F748[BTL_SOUND_ENTRY_COUNT];
 
 extern void btlUnitGetMuzzlePosVU(void *);
 
@@ -6584,21 +6578,21 @@ void sndLoadSysEffLb(void) {
     node = *(s32 *)(archive + 0x60);
     i = 0;
     while (node != 0) {
-        if (D_0035F748[i].unk_00 != 0) {
+        if (D_0035F748[i].enabled != 0) {
             u32 unk08 = *(u32 *)(node + 8);
             u32 unk0C = *(u32 *)(node + 0xC);
-            D_0035F748[i].unk_08 = unk08;
-            D_0035F748[i].resource = unk0C;
+            D_0035F748[i].opaque08 = unk08;
+            D_0035F748[i].archiveData = unk0C;
             node = *(s32 *)node;
         } else {
-            D_0035F748[i].resource = 0;
-            D_0035F748[i].unk_08 = 0;
+            D_0035F748[i].archiveData = 0;
+            D_0035F748[i].opaque08 = 0;
         }
         i++;
     }
     for (; i < BTL_SOUND_ENTRY_COUNT; i++) {
-        D_0035F748[i].resource = 0;
-        D_0035F748[i].unk_08 = 0;
+        D_0035F748[i].archiveData = 0;
+        D_0035F748[i].opaque08 = 0;
     }
     func_00288788((void *)archive);
 }
@@ -6609,9 +6603,9 @@ void btlRefreshSoundEntries(void) {
 
     btlGetRuntime();
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
-        if (D_0035F748[i].resource != 0) {
+        if (D_0035F748[i].archiveData != 0) {
             /* Bank entries retain their original data-address word representation. */
-            btlCreateIndexedSoundResourceNode(i, (void *)D_0035F748[i].resource);
+            btlCreateIndexedSoundResourceNode(i, (void *)D_0035F748[i].archiveData);
         }
     }
 }
@@ -6623,7 +6617,7 @@ void sndFreeBattleSoundEntries(void) {
     u32 i;
 
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++, node++) {
-        if (D_0035F748[i].resource != 0) {
+        if (D_0035F748[i].archiveData != 0) {
             sndFreeResourceNode(*node);
             *node = 0;
         }
@@ -6653,9 +6647,9 @@ struct FileQueue;
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
-    SoundBankEntry *entry = &D_0035F748[index];
+    BattleSoundArchiveEntry *entry = &D_0035F748[index];
     node->actor = actor;
-    node->queue = fileCloneQueueEntries((struct FileQueue *)entry->resource);
+    node->queue = fileCloneQueueEntries((struct FileQueue *)entry->archiveData);
     return node;
 }
 
