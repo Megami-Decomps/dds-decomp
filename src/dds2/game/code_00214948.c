@@ -11,6 +11,7 @@
 #include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
 #include "btl_model_record.h"
@@ -178,15 +179,6 @@ extern u32 btlCreateScriptResourceTask(BtlUnit *, u32);
 
 extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
-/* Native 0x10-byte AI selection scratch. Its producer retains the command
- * actor and species/mode; the conditional-action dispatcher uses +8 as a
- * table row and +0xC as its query selector. This is not the singleton battle work. */
-typedef struct BtlAiScratchWork {
-    ActionStateLink *actor;
-    s32 speciesId;
-    s32 rowIndex;
-    s32 conditionKind;
-} BtlAiScratchWork;
 
 extern BtlAiScratchWork *btlActionScratchWork;
 
