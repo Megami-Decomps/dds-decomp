@@ -643,15 +643,6 @@ void evtClearUnitValueChangeFlag(EvtUnit *unit) {
     evtRefreshUnitEndpointWork(unit);
 }
 
-typedef struct EvtUnitColorEndpoints {
-    u8 pad00[4];
-    u32 firstCurrent; /* 0x04 */
-    u32 firstTarget;  /* 0x08 */
-    u8 pad0C[0x48];
-    u32 secondCurrent; /* 0x54 */
-    u32 secondTarget;  /* 0x58 */
-} EvtUnitColorEndpoints;
-
 void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor) {
     s32 color1[4];
     s32 color2[4];
@@ -663,17 +654,17 @@ void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColo
     } scale;
 
     unit->unused150 = duration;
-    ((EvtUnitColorEndpoints *)unit)->firstTarget = firstColor;
-    ((EvtUnitColorEndpoints *)unit)->secondTarget = secondColor;
+    unit->color08 = firstColor;
+    unit->color58 = secondColor;
     scale.value = 128.0f;
     evtLoadUnitFirstColorVectorVU(unit);
     EE_MMI_RGBA_PACK_UNIT(packed1, scale.bits);
     color1[0] = packed1;
-    ((EvtUnitColorEndpoints *)unit)->firstCurrent = packed1;
+    unit->firstCurrent = packed1;
     evtLoadUnitSecondColorVectorVU(unit);
     EE_MMI_RGBA_PACK_UNIT(packed2, scale.bits);
     color2[0] = packed2;
-    ((EvtUnitColorEndpoints *)unit)->secondCurrent = packed2;
+    unit->color54 = packed2;
     unit->flags = (unit->flags | 0x800) & ~0x1000;
 }
 
