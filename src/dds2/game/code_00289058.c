@@ -9,6 +9,7 @@
 #include "dat_state.h"
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
 extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
@@ -19,7 +20,6 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 typedef struct MantraPanelPool MantraPanelPool;
 extern void mnuQueueNextUnitPanelSelection(struct MantraDrawPool *pool);

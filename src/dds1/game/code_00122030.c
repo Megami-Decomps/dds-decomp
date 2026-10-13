@@ -1655,7 +1655,6 @@ extern s32 ptyAnyUnitFlagMatch(u32,s32);
 extern void ptyApplyFieldHpAttrition(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32,s32);
 extern void dds3WorkClear(void);
-extern void kwlnFadeOutStart(s32,s32,s32,s32);
 extern char D_0039FCA0[], D_0039FCB0[];
 
 /* Advance movement-driven solar/attrition state and queue field encounters.
@@ -1819,9 +1818,7 @@ u8 fldGetCampSceneControlMode(void) {
 extern void *dds3GetWorldObject(void);
 
 
-extern void kwlnFadeStartIn(s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void fldUpdateSmoothedCameraPose(void);
 
@@ -1829,7 +1826,6 @@ extern u8 fldHasPendingSceneFlags(void);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
-extern void kwlnFadeStartOut(s32);
 
 extern void mnuCreateCampTasks(void);
 

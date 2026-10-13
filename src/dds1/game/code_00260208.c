@@ -790,7 +790,6 @@ extern char D_003AFA98[];
 extern void sndEnsureMidiBankResident(s32);
 extern void effRequestResourceByMode(char *, char *, s32, u32 *);
 extern void mnuRequestBaseAssets(MenuAssets *);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     if (work->setupState != 0) {
@@ -810,7 +809,6 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
 
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
 extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
 

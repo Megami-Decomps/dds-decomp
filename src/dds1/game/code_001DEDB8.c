@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
@@ -265,11 +266,9 @@ extern void btlCreateRainEffect(u32, u32);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-extern void kwlnFadeStartIn(s32);
 
 extern s32 btlAreWorkBuffersReady(void);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 

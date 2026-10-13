@@ -34,6 +34,7 @@
 #include "sdf_textured_rect.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "kwln_fade.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
 
@@ -66,8 +67,6 @@ extern f32 sdfViewTargetVector[4];
 extern u8 D_00435C48[2][2];
 extern f32 sdfViewUpVector[4];
 extern u32 fldGetSceneReadyFlag(void);
-extern void kwlnFadeStartOut(s32);
-extern void kwlnFadeStartIn(s32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 typedef struct EffNode EffNode;
 
@@ -532,7 +531,6 @@ extern u8 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern u32 fldInputPanelTaskHandle;
 extern void fldUpdateCameraHeadingFromXY(void);
-extern void kwlnFadeStartIn(s32 duration);
 extern u32 D_00389988[];
 extern u8 D_0037F510[2][2][16];
 extern s32 D_004361D0;
@@ -4440,8 +4438,6 @@ extern void *effObjCreateEventNode(void *, void *, void *);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void func_00150138(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);

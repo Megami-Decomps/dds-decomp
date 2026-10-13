@@ -45,7 +45,6 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 
 
 extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern void evtCreateEventScriptProcess(s32);
 extern void evtClearActiveFlag(s32);
@@ -1820,7 +1819,6 @@ u32 func_00269C48(void) {
 }
 
 extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_003CE7D0[];

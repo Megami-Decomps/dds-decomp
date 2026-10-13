@@ -195,7 +195,6 @@ extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
 
 extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 /* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
  * tasks to drawing, then start the opening fade and mark camp active. */

@@ -51,7 +51,6 @@ extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
 
 extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern s32 dds3AdminReadPreviousSignedSample(void);
 

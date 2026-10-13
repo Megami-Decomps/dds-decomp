@@ -23,6 +23,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
+#include "kwln_fade.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
@@ -55,7 +56,6 @@ extern s32 D_003B6940[];
 
 extern s32 btlUpdateDebugEncounterSelector(void);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 btlRollMajinEncounter();
 extern s32 btlRollSurpriseAttack();
 extern void btlRequestSceneEventResources();
@@ -136,7 +136,6 @@ extern void kwlnDrawSetupC70B();
 extern void kwlnDrawEnableCd0();
 extern void kwlnDrawEnableD30();
 extern void btlMarkRuntimeUpdatePending();
-extern void kwlnFadeStartIn();
 extern s32 fldGetEncounterRuntimeResult();
 extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();

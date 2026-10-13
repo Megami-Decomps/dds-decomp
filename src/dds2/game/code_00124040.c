@@ -33,7 +33,6 @@
  * step-before-index, and all callers are verified. */
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void *dds3GetWorldObject(void);
 extern void func_00133F08(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
@@ -2019,9 +2018,7 @@ u8 fldGetCampSceneControlMode(void) {
 extern void *dds3GetWorldObject(void);
 
 
-extern void kwlnFadeStartIn(s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void func_00149A00(void);
 
@@ -2033,7 +2030,6 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 extern void fldMarkStageExplorationCellsAroundPosition(s32, s32, f32, f32, f32);
 
-extern void kwlnFadeStartOut(s32 duration);
 
 extern void mnuCreateCampTasks(void);
 
