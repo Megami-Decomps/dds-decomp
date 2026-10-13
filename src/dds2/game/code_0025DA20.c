@@ -443,7 +443,7 @@ extern void evtBlendVectorRows(s32 enable, f32 t, f32 *first, f32 *second, f32 *
 extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 first, f32 second);
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **selected, EvtRuntimeChild **future);
 
-void func_0025E048(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
+void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
                    f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB) {
     EvtRuntimeChild *selected;
     EvtRuntimeChild *future;
@@ -842,7 +842,7 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 /* Blend the first camera-color track at the clamped frame. Lookup includes
  * the track base, but interpolation retains the native unre-based key frames.
  * Without a future key, pass zero blend and the uninitialized fallback block. */
-void evtBlendCameraColorTrack(EvtRuntime *scene) {
+void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *selectedKey;
     EvtRuntimeChild *futureKey;
@@ -894,8 +894,8 @@ void evtBlendCameraColorTrack(EvtRuntime *scene) {
 /* The genuine three-row typed candidate remains non-matching. */
 INCLUDE_ASM(const s32, "game/code_0025DA20", fldApplyCameraColorKeyWords);
 
-void evtUpdateCameraColorEffect(EvtRuntime *scene) {
-    evtBlendCameraColorTrack(scene);
+void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
+    evtApplyCameraColorTrackAtFrame(scene);
     if (scene->cameraColorActive == 1) {
         func_00137888();
         return;
@@ -1745,7 +1745,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuShopGetRankItemPrice);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampGetRankedItemPrice);
 
 s32 mnuCampFindListedItemIndex(s32 id) {
     u16 *entry = (u16 *)mnuCampListedItems;
@@ -1789,7 +1789,7 @@ s32 itmClaimFreeSlot(s32 row) {
 }
 
 /* Convert a camp reward row and its three-way option to a flat index. */
-s32 func_00260C28(s32 row, s32 option) {
+s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option) {
     s32 index = 3;
 
     index = row * index;
@@ -1797,7 +1797,7 @@ s32 func_00260C28(s32 row, s32 option) {
     return index;
 }
 
-s32 func_00260C38(s32 slot, s32 row) {
+s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 row) {
     return row * 2 + slot;
 }
 
@@ -1880,7 +1880,7 @@ typedef char CampWideRewardEntry_size_check[
 
 extern s32 mtrMantraFindIndex(s32);
 
-s32 func_00260DF0(s32 row) {
+s32 mnuCampChooseWideRewardEntry(s32 row) {
     s32 column = 0;
     s32 eligibleCount = 0;
     s32 count = mnuCampFindFreeWideEntryIndex(row);
@@ -1932,13 +1932,13 @@ s32 func_00260DF0(s32 row) {
 
 extern u8 D_003CDA89[];
 
-u8 func_00260FE8(s32 row, s32 column) {
+u8 mnuCampGetWideRewardKind(s32 row, s32 column) {
     return D_003CDA89[column * 0xC + row * 0xC0];
 }
 
 extern u8 D_003CD8F4[];
 
-u8 func_00261018(s32 row, s32 column) {
+u8 mnuCampGetCompactRewardKind(s32 row, s32 column) {
     return D_003CD8F4[column * 8 + row * 0x44];
 }
 
@@ -2117,7 +2117,7 @@ extern void mnuClearWindowListSelectionFlags();
 extern s32 func_002958B0();
 extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
-s32 func_00261538(MenuTerminalContext *scene) {
+s32 mnuCampAppendRankedItemRows(MenuTerminalContext *scene) {
     s32 rowIndex;
     ShopRankPriceRow *row;
     MenuWindowContainer *window;
@@ -2144,7 +2144,7 @@ s32 func_00261538(MenuTerminalContext *scene) {
         window = scene->window;
         mnuAdvanceListCursorDefault(window->list);
         params = &node->camp;
-        price = mnuShopGetRankItemPrice(i, 0);
+        price = mnuCampGetRankedItemPrice(i, 0);
         params->id = id;
         params->value = price;
         params->price = price;
@@ -2157,9 +2157,9 @@ s32 func_00261538(MenuTerminalContext *scene) {
     return 0;
 }
 
-s32 func_00261850(MenuTerminalContext *scene, s32 filterMode);
+s32 mnuCampAppendRankedFilteredRows(MenuTerminalContext *scene, s32 filterMode);
 
-s32 func_00261670(MenuTerminalContext *scene) {
+s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *scene) {
     MenuTerminalWindowState *buffer;
     u8 *entry;
     u32 i;
@@ -2200,7 +2200,7 @@ s32 func_00261670(MenuTerminalContext *scene) {
             node->flags48 = 1;
         }
     }
-    func_00261538(scene);
+    mnuCampAppendRankedItemRows(scene);
     mnuSelectFirstListNode(scene->window->list);
     scene->window->list->drawCallback = func_002958B0;
     buffer = sdfAllocSizeClassBlock(0x14);
@@ -2209,7 +2209,7 @@ s32 func_00261670(MenuTerminalContext *scene) {
     return scene->window->list->count;
 }
 
-s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
+s32 mnuCampAppendRankedFilteredRows(MenuTerminalContext *scene, s32 filterMode) {
     s32 rowIndex;
     ShopRankPriceRow *row;
     u32 i;
@@ -2240,7 +2240,7 @@ s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
         mnuClearWindowListSelectionFlags(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
-        price = mnuShopGetRankItemPrice(i, 0);
+        price = mnuCampGetRankedItemPrice(i, 0);
         params->value = price;
         params->id = id;
         params->price = price;
@@ -2253,7 +2253,7 @@ s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
     return 0;
 }
 
-s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
+s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *scene, s32 filterMode) {
     MenuTerminalWindowState *buffer;
     struct MenuListNode *node;
     u8 *entry;
@@ -2300,7 +2300,7 @@ s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
             node->flags48 = 1;
         }
     }
-    func_00261850(scene, filterMode);
+    mnuCampAppendRankedFilteredRows(scene, filterMode);
     mnuSelectFirstListNode(scene->window->list);
     scene->window->list->drawCallback = func_002958B0;
     buffer = sdfAllocSizeClassBlock(0x14);
@@ -2629,7 +2629,7 @@ void evtInstallStateTableB(s32 stateAddress) {
 s32 evtBuildShopCatalogIfActive(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        func_00261670(stateAddress);
+        mnuCampRebuildItemStockWindow(stateAddress);
     }
     return 1;
 }
@@ -2756,7 +2756,7 @@ void evtInstallStateTableC(s32 stateAddress) {
 s32 evtBuildFilteredShopCatalogIfActive(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        func_002619A8(stateAddress, 1);
+        mnuCampRebuildFilteredStockWindow(stateAddress, 1);
     }
     return 1;
 }
@@ -2873,7 +2873,7 @@ void func_00262A48(s32 stateAddress) {
 s32 func_00262A88(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        func_002619A8(stateAddress, 3);
+        mnuCampRebuildFilteredStockWindow(stateAddress, 3);
     }
     return 1;
 }
@@ -3644,7 +3644,7 @@ s32 func_002646C8(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern s32 func_00260C28(s32 row, s32 option);
+extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
 extern u32 mnuCampChooseSolarWeightedOption(s32 row);
 extern u8 mnuCampChooseWeightedTableValue(void);
 extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
@@ -3668,11 +3668,11 @@ s32 func_00264710(KwlnTask *task) {
         slot = scene->rewardMode;
         scene->padCF = (u8)listedIndex;
         if (slot < 0) {
-            scene->rewardRow = (s8)func_00260C28(
+            scene->rewardRow = (s8)mnuCampGetWideRewardRowIndex(
                 listedIndex, mnuCampChooseSolarWeightedOption(listedIndex));
             scene->remainingRewards = mnuCampChooseWeightedTableValue();
         } else {
-            scene->rewardRow = (s8)func_00260C38(slot, listedIndex);
+            scene->rewardRow = (s8)mnuCampGetCompactRewardRowIndex(slot, listedIndex);
             scene->remainingRewards = (s8)mnuCampFindFreeCompactEntryIndex(
                 slot, listedIndex);
         }
@@ -3697,9 +3697,9 @@ u32 func_00264848(void) {
 }
 
 extern void ptyAdjustItemQuantity(s32, s32);
-extern s32 func_00260DF0(s32);
-extern u8 func_00260FE8(s32, s32);
-extern u8 func_00261018(s32, s32);
+extern s32 mnuCampChooseWideRewardEntry(s32);
+extern u8 mnuCampGetWideRewardKind(s32, s32);
+extern u8 mnuCampGetCompactRewardKind(s32, s32);
 extern s32 mnuCampResolveOwnedItemVariant(s32, s32);
 extern s32 mnuCampGetCompactEntryId(s32, s32);
 extern s32 func_002C54B0(s32);
@@ -3737,11 +3737,11 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
                 mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5E8);
             } else if (state->rewardDelay <= 0) {
                 if (state->rewardMode < 0) {
-                    column = func_00260DF0(state->rewardRow);
-                    state->rewardKind = func_00260FE8(state->rewardRow, column);
+                    column = mnuCampChooseWideRewardEntry(state->rewardRow);
+                    state->rewardKind = mnuCampGetWideRewardKind(state->rewardRow, column);
                     state->rewardValue = mnuCampResolveOwnedItemVariant(state->rewardRow, column);
                 } else {
-                    state->rewardKind = func_00261018(state->rewardRow, state->rewardIndex);
+                    state->rewardKind = mnuCampGetCompactRewardKind(state->rewardRow, state->rewardIndex);
                     state->rewardValue = mnuCampGetCompactEntryId(state->rewardRow, state->rewardIndex);
                 }
                 if (state->rewardKind == 0 && func_002C54B0(state->rewardValue) != 0) {
@@ -4122,8 +4122,8 @@ s32 evtMenuPersistSelectedSlot(KwlnTask *task) {
 }
 
 extern void mnuSetFlagForMenuEntry(s32);
-extern s32 func_00261670(MenuTerminalContext *);
-extern s32 func_002619A8(MenuTerminalContext *, s32);
+extern s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *);
+extern s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *, s32);
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
 s32 func_002655C0(KwlnTask *callback) {
@@ -4153,15 +4153,15 @@ s32 func_002655C0(KwlnTask *callback) {
         if (context->advancedSlots != 0) {
             switch (choice) {
             case 1:
-                func_00261670(context);
+                mnuCampRebuildItemStockWindow(context);
                 mnuSetPopupEntryFlagged(popup, D_003CE4B4);
                 break;
             case 2:
-                func_002619A8(context, 1);
+                mnuCampRebuildFilteredStockWindow(context, 1);
                 mnuSetPopupEntryFlagged(popup, D_003CE4D0);
                 break;
             case 3:
-                func_002619A8(context, 3);
+                mnuCampRebuildFilteredStockWindow(context, 3);
                 mnuSetPopupEntryFlagged(popup, D_003CE4EC);
                 break;
             case 4:
