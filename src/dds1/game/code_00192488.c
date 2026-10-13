@@ -5,6 +5,7 @@
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_channel.h"
+#include "eff_channel_layout.h"
 #include "pcp_vu0.h"
 #include "fr_font.h"
 
@@ -22,41 +23,6 @@
 #define EFF_CHANNEL_RGB_COLOR 0x00808080
 #define EFF_PRIMITIVE_CUBIC_MODE 0
 
-/* The channel copies three coordinates from each four-float source row,
- * then copies the four trailing values to a second block. */
-typedef struct EffFloatRows {
-    f32 primary[16];
-    u8 pad40[0x18];
-    f32 secondary[4];
-} EffFloatRows;
-
-/* Small channel object (0x18 bytes, created by effCreateChannel): float block
- * plus the channel-A cursor (count at +0x4, index at +0xC). */
-typedef struct EffChan {
-    struct SdfMemBlock *allocation; /* 0x0: owns the channel allocation. */
-    u32 recordCount; /* 0x4: number of keyframe records */
-    EffFloatRows *rows; /* 0x8: interpolation rows owned by the channel */
-    u32 cursorIndex; /* 0xC: channel-A record index */
-    f32 cursorPosition; /* 0x10: channel-A interpolation position */
-    f32 cursorStep; /* 0x14: channel-A position increment */
-} EffChan;
-
-
-/* Interpolation output vector; the cubic path writes W while the linear path writes only XYZ. */
-typedef struct EffVert {
-    f32 x; /* 0x0 */
-    f32 y; /* 0x4 */
-    f32 z; /* 0x8 */
-    f32 w; /* 0xC */
-} EffVert;
-
-/* Emitter handle for effFillRandRecords: target primitive at +0x8. */
-typedef struct EffEmit {
-    u8 unk0[8];    /* 0x0 */
-    EffChanWork *primitive; /* 0x8: control-point work */
-} EffEmit;
-
-typedef struct SdfMemBlock SdfMemBlock;
 extern void effSamplePrimitiveCurveVertex(EffVert *arg0, EffPrimitiveCurve *arg1, s32 arg2, f32 arg3);
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 extern u8 effDefaultRandomState[];
@@ -64,17 +30,6 @@ extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
 extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *arg0, f32 *arg1);
 extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents);
-
-typedef struct EffChanSourceOwner {
-    u8 pad00[4];
-    void *param;    /* 0x04 */
-} EffChanSourceOwner;
-
-typedef struct EffChanSource {
-    EffChanHead head;
-    EffChanSourceOwner *owner; /* 0x168 */
-} EffChanSource;
-
 
 /* Clone channel work, allocate slots and duplicate a parameter template per record.
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
@@ -483,7 +438,6 @@ void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponent
     }
     sdfReleaseResourceAllocation(allocation);
 }
-
 
 INCLUDE_ASM(const s32, "game/code_00192488", effBuildPrimitiveCurveTangents);
 
