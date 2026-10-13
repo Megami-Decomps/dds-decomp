@@ -10254,3 +10254,68 @@ one missing word (852B versus 856B). The one counter cleanup passed both
 private and live whole-unit gates: `48 match, 0 differ`, with no safety
 diagnostics; all 47 earlier matched functions remain exact.
 
+## SDK RGBA word carriers
+
+`effSampleColorAlphaTracks` (DDS1 0x00296F58 / DDS2 0x002D7458,
+788B each) selects the two packed color keys in C, blends their normalized
+vectors in VU0, then applies the independently sampled alpha. Its two unpack
+sites, DDS1 0x002970E0 and 0x00297108, use separate 16-byte workspaces;
+packing owns a third. The same three-carrier sequence occurs in the already
+matched `billUpdateFrameDrawColorAndTransform` (0x0029EEC8 / 0x002E0F30)
+and `billUpdateAlternatingDrawColorAndTransform` (0x002A0BE0 / 0x002E2C48).
+These are distinct retail sites, not just cross-game duplicates.
+
+`eeUnpackRGBAWord` and `eePackRGBAWord` in `ee_mmi.h` own those SDK word
+carriers. The unpack receives the packed word by value and the normalizer's
+integer bits; the pack receives a genuine floating scale and returns the
+packed word. They reuse the existing approved MMI/COP2 macros, with no new
+assembly or register constraints. A caller-owned `unitBits` supplies both
+sampler unpacks, and the real packed result is retained while alpha is
+calculated. This gives the native carrier order at stack offsets 0/0x10/0x20.
+The sampler's positive fade-out predicate then reproduces the native alpha
+branch order; the plateau-first form left 22/197 differing words after RGB
+had closed.
+
+Every matched C site with this **bit-unit, F128, three-carrier** contract
+migrates to the family: 16 consumers in each of `game/code_0029C530` and
+`game/code_002DE248`, including the fade, billboard transform, cell draw,
+radial-instance and tinted-mesh consumers. Float-unit, hard-$3 and GPR-pack
+variants have different operand contracts and keep their existing macros.
+The animated-frame body remains ASM; it is not counted as a matched helper
+consumer.
+
+Whole-unit gates after the actual header and source edits:
+`247 match, 0 differ` and `290 match, 0 differ` for the sampler units;
+`542 match, 0 differ` and `686 match, 0 differ` for the billboard units.
+All 113 `ee_mmi.h` includers were gated (60 DDS1, 53 DDS2): 111 units were
+clean. Both `effPCPMisc` units had 367 exact C functions and only the 11
+accepted old-name MISSING rows from naming batch 35, pending resplit; no
+DIFF, CONTEXT, RODATA or UNDEF diagnostics occurred. Both sampler traces
+passed hooked/unhooked assembly and RTL parity. Exact logs, the complete
+consumer inventory and all 113 gate results are in PurC's deep31 ledger.
+
+## Trace-justified base color capture: effUpdateFadeBlendC
+
+The SDK-family migration initially retained only a three-word rotation in
+`effUpdateFadeBlendC` (DDS1 0x0029DA70 / DDS2 0x002DF978, 264B each).
+Retail DDS1 0x0029DAD0–0x0029DAD8 loads the work's base color, transports
+the sampled color, then initializes the unpack unit.
+
+**P / deciding passes:** the real base-color load must be emitted before
+unit initialization. In the parity-checked failing form, sched1 picks unit
+uid90 before the field load uid93. Capturing `baseColor = work->color`
+before assigning `unit` makes the field load uid90 and unit uid93 instead:
+sched1 issues the load at priority 11 before the unit at 9. Sched2 issues
+the load at priority 13, then orders the sampled-color move uid86 ahead of
+unit uid93 on the equal-priority LUID comparison (25 versus 27). The final
+load/move/unit sequence is the retail one.
+
+`baseColor` is the actual input consumed by the unpack, not an unused local
+or an index copy. This one ordinary capture closes the remaining 3/66 words
+and the full-unit gates above remain exact. The fixed repository probe
+verified hooked/unhooked parity for both the failing and exact forms, using
+compiler SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+The deciding logs are recorded in PurC's deep31 ledger, not in repository
+source as sandbox paths.
+

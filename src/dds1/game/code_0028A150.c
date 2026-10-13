@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "eff_random.h"
 #include "sdf_textured_rect.h"
 #include "itf_mes_window.h"
@@ -5342,7 +5343,102 @@ void fileResetSlotStates(FileSlotTable *record) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", effSampleColorAlphaTracks);
+/* vu0 routine: preserve the packed RGB snapshot while applying the alpha track. */
+u32 effSampleColorAlphaTracks(const SdfColorTrack *colorTrack,
+                              const SdfAlphaTrack *alphaTrack,
+                              s32 frame, s32 duration) {
+    u32 color0;
+    u32 color1;
+    u32 alpha;
+    u32 packedColor;
+    u32 unitBits;
+    f32 durationFloat;
+    f32 factor;
+    f32 inverseFactor;
+    f32 alphaFactor;
+    f32 alphaValue;
+    s32 firstFrame;
+    s32 secondFrame;
+    s32 fadeInFrame;
+    s32 fadeOutFrame;
+
+    if (duration == 0) {
+        return (colorTrack->initialColor & 0x00FFFFFF) |
+               (alphaTrack->alpha << 24);
+    }
+
+    durationFloat = (f32)duration;
+    switch (colorTrack->segmentMode) {
+    case SDF_COLOR_TRACK_MODE_ENDPOINTS:
+        factor = (f32)frame / durationFloat;
+        color1 = colorTrack->initialColor;
+        color0 = colorTrack->finalColor;
+        break;
+    case SDF_COLOR_TRACK_MODE_ONE_INTERMEDIATE_KEY:
+        firstFrame = (s32)(colorTrack->firstFraction * durationFloat);
+        if (frame < firstFrame) {
+            factor = (f32)frame / firstFrame;
+            color1 = colorTrack->initialColor;
+            color0 = colorTrack->firstKeyColor;
+        } else {
+            f32 span = duration - firstFrame;
+            factor = (f32)(frame - firstFrame) / span;
+            color1 = colorTrack->firstKeyColor;
+            color0 = colorTrack->finalColor;
+        }
+        break;
+    case SDF_COLOR_TRACK_MODE_TWO_INTERMEDIATE_KEYS:
+        firstFrame = (s32)(colorTrack->firstFraction * durationFloat);
+        if (frame < firstFrame) {
+            factor = (f32)frame / firstFrame;
+            color1 = colorTrack->initialColor;
+            color0 = colorTrack->firstKeyColor;
+        } else {
+            secondFrame = (s32)(colorTrack->secondFraction * durationFloat);
+            if (frame < secondFrame) {
+                f32 span = secondFrame - firstFrame;
+                factor = (f32)(frame - firstFrame) / span;
+                color1 = colorTrack->firstKeyColor;
+                color0 = colorTrack->secondKeyColor;
+            } else {
+                f32 span = duration - secondFrame;
+                factor = (f32)(frame - secondFrame) / span;
+                color1 = colorTrack->secondKeyColor;
+                color0 = colorTrack->finalColor;
+            }
+        }
+        break;
+    default:
+        color1 = colorTrack->initialColor;
+        color0 = colorTrack->finalColor;
+        factor = 0.0f;
+        break;
+    }
+
+    unitBits = 0x3C000000;
+    eeUnpackRGBAWord(color0, unitBits);
+    VU0_MOVE_VF(vf11, vf10);
+    eeUnpackRGBAWord(color1, unitBits);
+    inverseFactor = 1.0f - factor;
+    VU0_SCALE_VF(vf10, inverseFactor);
+    VU0_SCALE_VF(vf11, factor);
+    VU0_ADD(vf10, vf10, vf11);
+    packedColor = eePackRGBAWord(128.0f);
+
+    fadeInFrame = (s32)(alphaTrack->fadeInFraction * durationFloat);
+    fadeOutFrame = (s32)(alphaTrack->fadeOutFraction * durationFloat);
+    if (frame < fadeInFrame) {
+        alphaFactor = (f32)frame / (f32)fadeInFrame;
+    } else if (frame > fadeOutFrame) {
+        alphaFactor = (f32)(duration - frame) / (f32)(duration - fadeOutFrame);
+    } else {
+        alphaFactor = 1.0f;
+    }
+
+    alphaValue = (f32)alphaTrack->alpha * alphaFactor;
+    alpha = (u32)alphaValue;
+    return (packedColor & 0x00FFFFFF) | (alpha << 24);
+}
 
 f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
     f32 from, to, factor, durationFloat;
