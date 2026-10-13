@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
 #include "evt_solar.h"
 #include "eff_random_mod.h"
@@ -3664,11 +3665,6 @@ s32 btlMapActionCode(s32 unused, u32 id) {
 }
 
 
-typedef struct BtlAnimationModeRow {
-    u8 mode;
-    u8 pad01[3];
-    s32 delay;
-} BtlAnimationModeRow;
 
 /* Sort same-side targets for the selected animation, or perform thirteen swaps. */
 void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {

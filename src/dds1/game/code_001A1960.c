@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -2009,11 +2010,6 @@ s32 btlResolveSkillCategory(s32 unused, u32 id) {
     }
 }
 
-typedef struct BtlAnimationModeRow {
-    u8 mode;
-    u8 pad01[3];
-    s32 delay;
-} BtlAnimationModeRow;
 
 extern const char D_003A1A68[];
 
