@@ -404,7 +404,7 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
-extern s32 func_0022F180(void);
+extern s32 btlUpdateActorDebugEditor(void);
 extern void mdlSetAmountOnAllContextResources(f32, s32);
 
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
@@ -3615,13 +3615,13 @@ void btlUpdateDebugActionState(void) {
 
 /* Initialize the battle debug-menu tables on entry to the retail TEST state. */
 void btlEnterTestActionState(void) {
-    func_0022F068();
+    btlInitDrawTables();
 }
 
 void btlAdvanceUnitWhenActionGateClears(u32 unit) {
     s64 status;
 
-    status = func_0022F180();
+    status = btlUpdateActorDebugEditor();
     if (status == 0) {
         btlDispatchStateHandler(unit, 6);
         return;

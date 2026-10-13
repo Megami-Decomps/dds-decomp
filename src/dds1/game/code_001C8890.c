@@ -116,7 +116,7 @@ extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern s32 func_00214868(void);
+extern s32 btlUpdateActorDebugEditor(void);
 
 u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
@@ -2860,7 +2860,7 @@ void btlEnterTestActionState(void) {
 void btlAdvanceUnitWhenActionGateClears(u32 arg0) {
     s64 temp_v0;
 
-    temp_v0 = func_00214868();
+    temp_v0 = btlUpdateActorDebugEditor();
     if (temp_v0 == 0) {
         btlDispatchStateHandler(arg0, 6);
         return;

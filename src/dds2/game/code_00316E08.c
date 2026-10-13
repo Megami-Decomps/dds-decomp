@@ -129,12 +129,12 @@ void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
 }
 
 /* Store generated vertices relative to the view target and add it back at draw time. */
-void sdfEnableFlagListCameraRelativeMode(void) {
+void sdfEnableFlagListViewTargetRelativeMode(void) {
     D_00438918 = 1;
 }
 
 /* Keep generated vertices in world coordinates instead of target-relative storage. */
-void sdfDisableFlagListCameraRelativeMode(void) {
+void sdfDisableFlagListViewTargetRelativeMode(void) {
     D_00438918 = 0;
 }
 

@@ -3014,7 +3014,8 @@ s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
         (status->motions[motionIndex].alphaFrameScale * state->unk4C8));
 }
 
-f32 btlGetUnitModelValue1C(BtlUnit *unit) {
+/* Return the unit model's current frame, or zero while its model flag is clear. */
+f32 btlGetUnitModelCurrentFrame(BtlUnit *unit) {
     f32 value = 0.0f;
     if (unit->status.flags & 2) {
         value = unit->ext->owner->first->currentFrame;
@@ -3678,7 +3679,7 @@ BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *unit) {
 }
 
 u32 btlPollThresholdTask(s32 *arguments) {
-    if ((s32)btlGetUnitModelValue1C((BtlUnit *)arguments[0]) >= arguments[1]) {
+    if ((s32)btlGetUnitModelCurrentFrame((BtlUnit *)arguments[0]) >= arguments[1]) {
         if ((((BtlUnit *)arguments[0])->updateFlags & 1) == 0) {
             btlResetUnitModelProgress((BtlUnit *)arguments[0]);
         }
@@ -5151,7 +5152,7 @@ void btlUpdateActiveActorModelState(void) {
             if (unit->unkEC != parameter && parameter != -1) {
                 btlApplyScaledUnitEffectParameter(unit, parameter, 0, 1.0f);
             } else {
-                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 if (frame >= status->model) {
                     sdfMotionSampleAtFrame(unit->ext->owner->first, (f32)status->model);
                     btlResetUnitModelProgress(unit);
@@ -5161,7 +5162,7 @@ void btlUpdateActiveActorModelState(void) {
         }
         if (unit->updateFlags & 2) {
             if (unit->updateFlags & 4) {
-                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 index = unit->unkEC;
                 if (index == mdlGetNodeMotionIndex(unit->ext->owner, 0)) {
                     if (frame >= status->motions[index].alphaStartFrame) {
@@ -6214,7 +6215,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
                         if (unit->ext != 0) {
                             s32 node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
                             if (node == 0xD || node == 0x12) {
-                                current = btlGetUnitModelValue1C(unit);
+                                current = btlGetUnitModelCurrentFrame(unit);
                                 limit = (f32)btlGetUnitModelFrameCount(unit);
                                 if (unit->partyRecord.unitId < 0xA) {
                                     limit = limit * D_003B6D90[unit->partyRecord.unitId];

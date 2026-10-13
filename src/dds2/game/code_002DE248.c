@@ -4977,7 +4977,7 @@ extern f32 sdfViewEyeVector[4];
 extern f32 func_003532D0(f32);
 
 /* Advance radial five-point wave strips from the class orientation. */
-void func_002EB058(EffClassWork *work) {
+void effUpdateRadialWavePointRows(EffClassWork *work) {
     f32 offsets[5];
     f32 widths[5];
     f32 direction[4];
@@ -9191,7 +9191,8 @@ void effResolveAndApplySurfaceEndpoints(u8 *work) {
     effAcquireSurfaceRecord(*handle);
 }
 
-void func_002F7E88(s32 owner) {
+/* Draw through the active owner's retained surface-resource handle. */
+void effDrawActiveSurfaceNode(s32 owner) {
     func_002E8770(*(u32 *)((EffActiveResource *)owner)->resource);
 }
 
@@ -9479,7 +9480,8 @@ void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void func_002F8640(void) {
+/* Empty retail update entry in the drawable-asset operation table. */
+void effDrawableAssetUpdateHook(void) {
 }
 
 typedef struct EffRadialCylinderConfig {
@@ -10440,7 +10442,8 @@ void effAcquireSlotRecordWhenRuntimeFlagClear(s32 node) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FAD98);
 
-void func_002FB400(u32 node) {
+/* Acquire the owned slot record unless paused, then invoke its native drawer. */
+void effUpdateSlotRecordAndDraw(u32 node) {
     effAcquireSlotRecordWhenRuntimeFlagClear(node);
     func_002FAD98(node);
 }

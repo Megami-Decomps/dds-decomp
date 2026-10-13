@@ -409,7 +409,7 @@ u32 btlGetActiveUnitId(void);
 
 s32 btlGetUnitModelFrameCount(BtlUnit *unit);
 
-f32 btlGetUnitModelValue1C(BtlUnit *unit);
+f32 btlGetUnitModelCurrentFrame(BtlUnit *unit);
 
 /* Find a type-two linked group whose associated unit is not disabled. */ s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor);
 

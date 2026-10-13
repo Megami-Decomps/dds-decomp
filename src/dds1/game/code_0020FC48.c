@@ -161,7 +161,7 @@ struct SoundTask;
 
 extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32 value);
 
-extern f32 btlGetUnitModelValue1C(BtlUnit *unit);
+extern f32 btlGetUnitModelCurrentFrame(BtlUnit *unit);
 
 
 
@@ -232,7 +232,7 @@ void btlUpdateEventPlayback(void) {
             (battle->commandRestrictFlags & 0x800) == 0) {
             BtlUnit *unit = battle->eventUnit;
             if ((unit->status.flags & 2) != 0) {
-                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 frame = abs(frame - 0x1A);
                 if (frame >= 6) {
                     EvtUnit *ext = unit->ext;
@@ -2228,14 +2228,15 @@ extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
 extern s32 btlCountTasksForOwner(s64);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
-/* The retail debug primitive receives a float radius in $f12. */
-extern void func_001FB188(f32 *, u32, s32, f32);
+/* Keep the diagnostic scale as a float in the existing four-argument ABI. */
+extern void btlDebugDrawScaledPositionGuide(f32 *, u32, s32, f32);
 extern void func_001FB1E0(void *);
 extern void func_001FB1A8(void);
 extern void func_001FB1F0(void *);
 extern void func_001FB1B0(void);
 
-s32 func_00214868(void) {
+/* Advance the selected actor's debug menus; return one while active, zero when selection ends. */
+s32 btlUpdateActorDebugEditor(void) {
     f32 position[4];
     char text[0x70];
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -2426,7 +2427,7 @@ s32 func_00214868(void) {
             }
         }
         if (state->unk_E0E <= 0) {
-            func_003014F0(text, "%3d/%3d\n", (s32)btlGetUnitModelValue1C(unit),
+            func_003014F0(text, "%3d/%3d\n", (s32)btlGetUnitModelCurrentFrame(unit),
                 btlGetUnitModelFrameCount(unit));
             btlDebugDrawText(32, 400, 0, text);
         }
@@ -2519,7 +2520,7 @@ s32 func_00214868(void) {
         if (D_00361760[D_00361A00.selected].target == &D_003D77C0.unk24) {
             btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            func_001FB188(position, 0x10808080, 0, record->unk24 * unit->scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->unk24 * unit->scale);
         }
         if ((D_00361760[D_00361A00.selected].target >= (void *)D_003D77C0.position &&
              D_00361760[D_00361A00.selected].target < (void *)&D_003D77C0.scale) ||
@@ -2532,7 +2533,7 @@ s32 func_00214868(void) {
         if (D_00361760[D_00361A00.selected].target == &D_003D7A30.unk0C) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            func_001FB188(position, 0x10106020, 0, D_003D7A30.unk0C * D_003D77C0.scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, D_003D7A30.unk0C * D_003D77C0.scale);
         }
         if (D_00361A00.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
