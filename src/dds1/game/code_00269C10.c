@@ -16,6 +16,7 @@
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 #include "mnu_title_stream.h"
+#include "mnu_title_stream_entry.h"
 
 #define SND_MIX_SAMPLE_COUNT 0x800
 #define SND_MIX_SAMPLE_LIMIT 0x7FFF
@@ -387,13 +388,6 @@ void mnuStartFixedSoundStream(void) {
     mnuStoreTaskResult("/soundat3/b_bgm2-2.at3");
     SignalSema(mnuTitleStreamSemaphore);
 }
-
-typedef struct MnuTitleStreamEntry {
-    u8 format;
-    u8 pad;
-    s16 parameter;
-    char filename[12];
-} MnuTitleStreamEntry;
 
 extern MnuTitleStreamEntry D_00377650[];
 
