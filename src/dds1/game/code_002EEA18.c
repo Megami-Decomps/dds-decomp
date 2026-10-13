@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_thread_workspace_api.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf.h"
@@ -585,7 +586,6 @@ void func_002EF698(void) {
     sceSifRpcLoop(queue);
 }
 
-extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
 extern void _StartThread();
 extern void SleepThread(void);
 
