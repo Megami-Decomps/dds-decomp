@@ -1592,5 +1592,5 @@ INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437958);
 
-INCLUDE_SDATA(const s32, "game/code_0028FD30", mnuPanelSoundEntryPool);
+MenuPanelEntryPool *mnuPanelSoundEntryPool = 0;
 
