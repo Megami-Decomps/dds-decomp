@@ -5786,6 +5786,7 @@
 0x003064C0	itfDrawRotatedTexturedRect	inferred	readability/matching review (QP16)
 0x00306500	effSelectPresetAndDispatch	inferred	Selects preset by supplied kind then invokes effect dispatch and restores preset 0x44. [names_R_FuncNames4.tsv]
 0x003065A0	sdfCopyCornerWordsWithEdgeByte	inferred	readability/matching review (QP16)
+0x00306970	effDrawTextureSlot	inferred	Resolves the selected slot texture and description, applies draw offsets/flip/preset modes, dispatches textured-slot rendering, and updates timed state when requested; paired with DDS1 0x002BF198. [DDS2 BN analysis, 2026-10-13]
 0x00306F80	itfDrawGridWithResolvedSlot	inferred	Resolves a slot before submitting a grid drawing request. [names_reviewed8.tsv]
 0x00307018	itfUpdateGridSlotDescription	inferred	Decrements the current entry's update-call delay or advances its continued description sequence; paired DDS1/DDS2 native wrappers agree.
 0x003071D0	itfSetGridEntryQuantizedAndRefresh	inferred	Quantizes grid bounds then refreshes the corresponding entry. [names_reviewed8.tsv]
