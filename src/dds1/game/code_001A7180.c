@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "btl_item_drop.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -81,7 +82,6 @@ extern s32 btlCollectAvailableOptionSkills(s32, s32 *);
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
-extern s32 effMiscRandMod(s32, s32);
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 

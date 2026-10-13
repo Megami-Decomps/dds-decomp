@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "dds3obj.h"
 #include "mdl_motion_api.h"
@@ -3790,7 +3791,6 @@ void btlArmEventResourceTrigger(void) {
 }
 
 extern void fldAppendSceneGroupHandle(void *);
-extern s32 effMiscRandMod(s32, s32);
 
 typedef struct BtlMarkState {
     u8 marked;  /* 0 */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
@@ -200,21 +201,20 @@ void mnuLoadMovieRollSprite(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026E160", mnuInitializeMovieRollEntry);
 
-extern s32 effMiscRandMod(s32, s32);
 
 void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
     entry->y += entry->velocity;
     entry->timer--;
     if (entry->active && entry->y < -256.0f) {
         entry->active = 0;
-        entry->duration = effMiscRandMod(0, 200) + 1;
+        entry->duration = (s32)effMiscRandMod(0, 200) + 1;
         entry->timer = entry->duration;
     } else if (entry->timer < 0) {
         if (entry->active) {
             entry->active = 0;
         } else if (mnuMovieWork->scrollTicks < 17000) {
             entry->active = 1;
-            switch (effMiscRandMod(0, 8)) {
+            switch ((s32)effMiscRandMod(0, 8)) {
             case 0:
             case 1:
                 entry->sprite = 2;
@@ -226,7 +226,7 @@ void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
                 entry->sprite = 0;
                 break;
             }
-            entry->duration = effMiscRandMod(0, 800) + 4000;
+            entry->duration = (s32)effMiscRandMod(0, 800) + 4000;
             entry->timer = entry->duration;
             entry->velocity = -(effMiscRandUnitFloat(0) + 0.5f) * 0.5f;
             entry->x = effMiscRandUnitFloat(0) * 768.0f / 6.0f + (-256.0f);

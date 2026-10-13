@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
@@ -56,7 +57,6 @@ extern u16 D_00435CEC;
 extern u16 D_00435CEE;
 
 
-extern u32 effMiscRandMod(void *stream, u32 modulus);
 
 extern void kwlnPadStartMotor(u32, u8, s32);
 

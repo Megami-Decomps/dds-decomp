@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf.h"
 #include "mnu_sprite_resource.h"
@@ -6,7 +7,6 @@
 
 
 extern SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *, SpriteSpawnNode *, s8);
-extern u32 effMiscRandMod(void *, u32);
 
 void mnuSpawnMovieParticleNodes(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {
     SpriteSpawnNode *parent = parentData;

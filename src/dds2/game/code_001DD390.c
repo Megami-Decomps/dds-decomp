@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
 #include "eff_random.h"
@@ -3043,7 +3044,6 @@ void btlSeekUnitModelFrameZero(BtlUnit *unit) {
     }
 }
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 void btlSeekRandomModelFrame(BtlUnit *object) {
     s32 duration;

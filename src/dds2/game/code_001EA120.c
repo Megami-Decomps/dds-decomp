@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -83,7 +84,6 @@ extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 

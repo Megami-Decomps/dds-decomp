@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
 #include "btl_camera_timed_instruction.h"
@@ -53,7 +54,6 @@ extern void effObjSetOpacityPassEnabled(u32 enabled);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 extern u64 btlStartTask(void *);
 
