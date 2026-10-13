@@ -2832,6 +2832,7 @@
 0x001A93A0	btlAverageFilteredCurrentForMask	inferred	confidence=high; src/dds1/game/code_001A1960.c:func_001A93A0; Selects the current-value average with flag-0x20 actors excluded. [names_qp9.tsv]
 0x001A93B8	btlAverageAllCurrentForMask	inferred	confidence=high; src/dds1/game/code_001A7180.c; selects current-HP average without excluding flag-0x20 actors. Native24B wrapper restores ra/sp then tail-jumps to s32 btlAverageCurrentValueForMask; datCalc caller consumes v0. Truthful s32 return closure Namer1 batch26; prior name source names_qp9.tsv. DDS2 twin0x001B3918.
 0x001A93D0	btlAverageMaskedActorStat	inferred	Averages an actor stat over eligible actors matching an entry mask. [names_reviewed11.tsv]
+0x001A9488	btlAverageLevelsForMaskExcludingStatus20	inferred	Returns the masked mean of party-record levels through btlAverageMaskedActorStat with mode 1, excluding units whose status.flags contains 0x20; four clients use it as an average level. DDS2 0x001B39E8.
 0x001A9598	btlAverageFilteredActorAttribute	inferred	confidence=high; src/dds1/game/code_001A1960.c:func_001A9598; Uses the masked actor-attribute aggregation path that excludes flag-0x20 actors; it averages whenever at least two actors qualify. [names_qp9.tsv]
 0x001A9CD0	btlClearUnitStatusMask	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001A9E50	btlRollActorEligibilityWithAbilityOverride	inferred	Rejects blocked actor states, accepts a special ability or rolls the battle RNG. [names_reviewed8.tsv]

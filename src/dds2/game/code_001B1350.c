@@ -82,7 +82,7 @@ extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 btlRollAiBucket(void);
 
-extern s32 func_001B39E8(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 
 extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
@@ -303,7 +303,7 @@ f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, s32 rewardKin
         return 1.0f;
     }
     if (acquirer == NULL) {
-        level = func_001B39E8(4);
+        level = btlAverageLevelsForMaskExcludingStatus20(4);
     } else {
         level = acquirer->partyRecord.level;
     }

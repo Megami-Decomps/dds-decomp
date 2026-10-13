@@ -204,7 +204,7 @@ extern char D_00419B88[];
 
 extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
-extern u32 func_001B39E8(s32);
+extern u32 btlAverageLevelsForMaskExcludingStatus20(s32);
 
 extern AiSpecies D_003BEDD0[];
 
@@ -1035,7 +1035,7 @@ s32 btlCheckCounterLimit(s32 unused, u32 minimumCount) {
 
 /* Return whether counter query 4 has reached the requested inclusive lower bound. */
 s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
-    if (func_001B39E8(4) < minimumCount) {
+    if (btlAverageLevelsForMaskExcludingStatus20(4) < minimumCount) {
         return 0;
     }
     return 1;
@@ -1158,7 +1158,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit) {
     s16 bucketRoll;
     ActionStateLink *context = btlActionScratchWork->actor;
     u16 actionTime = unit->partyRecord.level;
-    s32 delayPending = func_001B39E8(4) < (u32)(actionTime + BTL_LOW_HP_ACTION_DELAY);
+    s32 delayPending = btlAverageLevelsForMaskExcludingStatus20(4) < (u32)(actionTime + BTL_LOW_HP_ACTION_DELAY);
 
     if (context->lowHpActionHold <= 0) {
         if (delayPending == 0 && unit->partyRecord.hp * BTL_HEALTH_RATE_SCALE / unit->partyRecord.maxHp < BTL_LOW_HP_PERCENT_LIMIT && btlIsGroup400CountAtMost(unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {

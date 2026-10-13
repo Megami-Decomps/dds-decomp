@@ -106,7 +106,7 @@ extern s32 func_001A8CE0(s32);
 extern s32 btlCounterReachedLimit(s32, u32);
 extern s32 btlAnyUnitHasQueuedQuery(s32, s32, u32);
 
-extern u32 func_001A9488(s32);
+extern u32 btlAverageLevelsForMaskExcludingStatus20(s32);
 
 
 
@@ -844,7 +844,7 @@ s32 btlCheckCounterLimit(s32 unused, u32 minimumCount) {
 
 /* Return whether counter query 4 has reached the requested inclusive lower bound. */
 s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
-    if (func_001A9488(4) < minimumCount) {
+    if (btlAverageLevelsForMaskExcludingStatus20(4) < minimumCount) {
         return 0;
     }
     return 1;
@@ -935,7 +935,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit) {
     BtlActionTask *context = btlActionScratchWork->actor;
     s32 conditionMet = 0;
     u32 actionTime = unit->partyRecord.level;
-    u32 currentTime = func_001A9488(4);
+    u32 currentTime = btlAverageLevelsForMaskExcludingStatus20(4);
     s16 bucketRoll;
 
     if (context->lowHpActionHold <= 0) {

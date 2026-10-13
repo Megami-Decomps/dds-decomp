@@ -828,7 +828,7 @@ extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32
 extern void btlAdvanceTitleState(void);
 extern BtlRuntimeTask *sndCreateCustomTask(s32, s32);
 extern void btlSyncPlayerWork(BtlUnit *);
-extern s32 func_001B39E8(u32);
+extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 extern s32 btlCountAvailableParticipants(void);
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void brsTaskStart(void);
@@ -982,7 +982,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
 
     /* Retail converts reward counters as unsigned words before scaling. */
     rewardRatio = 1.0f;
-    averageLevel = func_001B39E8(4);
+    averageLevel = btlAverageLevelsForMaskExcludingStatus20(4);
     defeatedLevel = averageLevel;
     if (scene->unk290 != 0) {
         defeatedLevel = (u16)(scene->unk292 / scene->unk290);
