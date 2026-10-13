@@ -1,4 +1,5 @@
 #include "eff.h"
+#include "eff_magatuhi_ring_particle.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_math.h"
@@ -258,17 +259,6 @@ extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 void effMagatuhiResetValueHistorySlot(EffMagatuhiValueWork *valueWork, s32 index) {
     effResetMagatuhiValueSlot(valueWork, index);
 }
-
-/* Ring state is one 0x18-byte slot; replay visits every third slot. */
-typedef struct {
-    s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
-    f32 height;
-    f32 angle;
-    f32 angleStep;
-    f32 radius;
-    f32 radiusStep;
-} EffMagatuhiRingParticle;
-
 
 extern u8 effDefaultRandomState[];
 
