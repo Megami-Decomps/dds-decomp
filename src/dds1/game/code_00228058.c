@@ -397,7 +397,7 @@ extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
 
-void func_00228930(f32 delta) {
+void evtAdvanceSolarClockAndExpireControls(f32 delta) {
     if ((u8)(datGameState->world.flags & SOLAR_PHASE_ADVANCE_FLAG)) {
         f32 timer = datGameState->world.phaseTimer + delta;
 
