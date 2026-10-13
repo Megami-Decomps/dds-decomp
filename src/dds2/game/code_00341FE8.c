@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_alarm.h"
 #include "mnu_sound_resource_path_api.h"
 #include "snd_command_packet.h"
 #include "snd_midi_state_views.h"
@@ -90,7 +91,6 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
 }
 
 extern s32 func_0035C860();
-extern void sdfSleepWithAlarm();
 extern void (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */

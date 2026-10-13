@@ -1,6 +1,7 @@
 #include "sdf_request.h"
 #include "common.h"
 #include "sdf_thread_workspace_api.h"
+#include "sdf_alarm.h"
 #include "sdf.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
@@ -129,7 +130,6 @@ extern u8 sdfDevRpcBuffer[];
 
 extern u32 sdfDiscType;
 
-extern void sdfSleepWithAlarm(s32);
 
 void sdfDevWaitForDisc(void);
 
