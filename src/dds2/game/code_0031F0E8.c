@@ -64,7 +64,7 @@ typedef struct DdsPackedObject {
     u32 pendingReferences; /* 0x0C */
 } DdsPackedObject;
 
-extern DdsPackedObject *func_0031F280(void);
+extern DdsPackedObject *dds3CreatePackedObject(void);
 
 typedef struct DdsArrayRecord {
     u32 unk_00;
@@ -151,7 +151,7 @@ extern void *memset(void *, s32, u32);
 
 /* Allocate the named reference and its writable name. Native clears the first
  * four name bytes, then returns the record through the existing address word. */
-u32 func_0031F168(void) {
+u32 dds3AllocateNamedReference(void) {
     DdsNamedRecord *record = func_0035A828(sizeof(DdsNamedRecord));
     record->name = func_0035A828(DDS_NAMED_RECORD_NAME_BYTES);
     record->value = 0;
@@ -182,7 +182,7 @@ DdsAllocBlock *dds3AllocateAndAttachPackedValueBuffer(s32 object) {
     DdsAllocBlock *record;
 
     record = dds3AllocateEmptyPackedValueBuffer();
-    func_00320CE0((MnuCallbackList *)*(u32 *)(object + 4), 0, (u32)record);
+    dds3AppendIndexedListNode((MnuCallbackList *)*(u32 *)(object + 4), 0, (u32)record);
     return record;
 }
 
@@ -190,7 +190,8 @@ u32 dds3GetCurrentPackedValueBuffer(s32 object) {
     return *(u32 *)(*(s32 *)(*(s32 *)(object + 4) + 8) + 0x10);
 }
 
-DdsPackedObject *func_0031F280(void) {
+/* Allocate the packed owner, its three callback-owned lists and initial buffer. */
+DdsPackedObject *dds3CreatePackedObject(void) {
     DdsPackedObject *object = (DdsPackedObject *)func_0035A828(sizeof(DdsPackedObject));
 
     object->maxPackedOffset = 0;
@@ -243,7 +244,7 @@ void dds3WritePackedValue(destination, datum, size)
     dds3AppendPackedBytes((DdsPackedObject *)destination, value, size);
 }
 
-extern u32 func_0031F168(void);
+extern u32 dds3AllocateNamedReference(void);
 extern char D_00438960[];
 /* SDK sprintf returns the formatted byte count. */
 extern s32 func_0035C860(char *dst, const char *format, ...);
@@ -261,16 +262,16 @@ void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
         }
         node = node->next;
     }
-    record = (DdsNamedRecord *)func_0031F168();
+    record = (DdsNamedRecord *)dds3AllocateNamedReference();
     func_0035C860(record->name, D_00438960, name);
-    func_00320CE0((MnuCallbackList *)object->namedReferences, 0, (u32)record);
+    dds3AppendIndexedListNode((MnuCallbackList *)object->namedReferences, 0, (u32)record);
     record->value = object->maxPackedOffset;
 }
 
 void dds3RecordNamedReference(u32 context, const char *name) {
-    u32 record = func_0031F168();
+    u32 record = dds3AllocateNamedReference();
     strncpy((char *)((DdsNamedRecord *)record)->name, name, DDS_NAMED_RECORD_NAME_BYTES);
-    func_00320CE0((MnuCallbackList *)((DdsPackedObject *)context)->pendingReferences, 0, (u32)record);
+    dds3AppendIndexedListNode((MnuCallbackList *)((DdsPackedObject *)context)->pendingReferences, 0, (u32)record);
     ((DdsNamedRecord *)record)->value = ((DdsPackedObject *)context)->maxPackedOffset;
     dds3WritePackedValue(context, -1, 4);
 }
@@ -329,7 +330,7 @@ u32 dds3WritePendingNamedReferenceValues(u32 object) {
     if (node == NULL) {
         return 0;
     }
-    destination = (u32)func_0031F280();
+    destination = (u32)dds3CreatePackedObject();
     do {
         dds3WritePackedValue(destination, ((DdsNamedRecord *)node->record)->value, 4);
         node = node->next;
@@ -384,7 +385,7 @@ void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size
 /* Pack *source in header, word-array, then sixteen-byte payload order.
  * Return the packed owner; resolving its named references is a separate step. */
 u32 *dds3PackWordArrayRecords(u32 **source) {
-    DdsPackedObject *object = func_0031F280();
+    DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     DdsArrayRecord *record;
     char name[16];
@@ -424,7 +425,7 @@ u32 *dds3PackWordArrayRecords(u32 **source) {
 /* Pack *source and its optional nested headers, groups and counted payloads.
  * Return the packed owner with named references still awaiting resolution. */
 u32 *dds3PackNestedResourceRecords(u32 **source) {
-    DdsPackedObject *object = func_0031F280();
+    DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     DdsNestedRecord *record;
     DdsNestedHeader *header;
@@ -532,7 +533,7 @@ u32 *dds3PackNestedResourceRecords(u32 **source) {
 /* Pack basic sprite headers and named references before sixteen-byte payloads.
  * Return the packed owner; leave its relocation resolution to the caller. */
 u32 *dds3PackSpriteRecords(u32 **source) {
-    DdsPackedObject *object = func_0031F280();
+    DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     DdsSpriteRecord *record;
     char name[16];
@@ -564,7 +565,7 @@ u32 *dds3PackSpriteRecords(u32 **source) {
 /* Pack extended sprite headers, including eight inline bytes, then payloads.
  * Return the packed owner with the data references still unresolved. */
 u32 *dds3PackExtendedSpriteRecords(u32 **source) {
-    DdsPackedObject *object = func_0031F280();
+    DdsPackedObject *object = dds3CreatePackedObject();
     DdsNamedNode *node;
     DdsSpriteExtendedRecord *record;
     char name[16];
@@ -865,7 +866,8 @@ void dds3SetCallbackNodeLastListener(MnuCallbackList *callbackNode,
     }
 }
 
-SdfListNode *func_00320CE0(MnuCallbackList *list, s32 key, u32 valueWord) {
+/* Append a zeroed node carrying the old count as index and the supplied key/value. */
+SdfListNode *dds3AppendIndexedListNode(MnuCallbackList *list, s32 key, u32 valueWord) {
     SdfListNode *node = (SdfListNode *)func_0035A828(sizeof(SdfListNode));
 
     memset(node, 0, sizeof(SdfListNode));
@@ -884,7 +886,7 @@ SdfListNode *func_00320CE0(MnuCallbackList *list, s32 key, u32 valueWord) {
 }
 
 /* A null predecessor inserts at the head; only nonzero successor indices move. */
-SdfListNode *func_00320D80(MnuCallbackList *list, SdfListNode *afterNode,
+SdfListNode *dds3InsertIndexedListNodeAfter(MnuCallbackList *list, SdfListNode *afterNode,
                           s32 key, u32 valueWord) {
     SdfListNode *node = func_0035A828(sizeof(SdfListNode));
     SdfListNode *successor;

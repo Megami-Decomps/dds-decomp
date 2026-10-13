@@ -1910,7 +1910,7 @@ extern f32 D_003BD36C;
 extern f32 D_003BD370;
 
 /* Final workspace publication: see docs/idioms.md, "Publishing viewer workspace". */
-void func_0021C208(void) {
+void mdlUpdateViewerWorkspaceSetup(void) {
     s32 initialPhase = 1;
 
     switch (mdlViewerState.unk48) {
@@ -1942,12 +1942,14 @@ void func_0021C208(void) {
     }
 }
 
-void func_0021C2E0(void) {
+/* Retail no-op invoked after every workspace setup phase update. */
+void mdlAfterViewerWorkspaceUpdate(void) {
 }
 
-u32 func_0021C2E8(void) {
-    func_0021C208();
-    func_0021C2E0();
+/* Run workspace setup and its separate hook; keep the task result zero. */
+u32 mdlUpdateViewerWorkspaceSetupTask(void) {
+    mdlUpdateViewerWorkspaceSetup();
+    mdlAfterViewerWorkspaceUpdate();
     return 0;
 }
 

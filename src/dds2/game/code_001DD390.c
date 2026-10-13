@@ -244,7 +244,7 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern void btlClearPartyRecordStatusBits(void *, s32);
 
-extern void func_001ADFE0(BtlUnit *, u32, s16);
+extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *, u32, s16);
 
 extern s32 btlCountTasksByKind(u16 kind);
 
@@ -1520,7 +1520,7 @@ BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, u32 target, u32 o
 
 /* Apply the operand's masked entry changes; complete immediately. */
 s32 btlApplyMaskedActorEntryUpdate(BtlOperandTaskArgs *args) {
-    func_001ADFE0(args->unit, args->operand.entryChangeMask, args->operand.entryChange);
+    btlApplyMaskedActorEntryAdjustments(args->unit, args->operand.entryChangeMask, args->operand.entryChange);
     return 1;
 }
 
@@ -1910,8 +1910,9 @@ extern BtlUnit *btlFindActorForOwner(u64);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 
+/* Restore and validate the saved command and its eligible target indices. */
 /* Retail 0x001E107C calls btlGetIndexListCount even though its result is discarded. */
-void func_001E0CE0(ActionStateLink *task, BattleIndexWork *work) {
+void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit = task->unit;
     BtlIndexList *list;

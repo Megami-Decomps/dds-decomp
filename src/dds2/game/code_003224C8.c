@@ -902,7 +902,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
         record->offsetX = -20;
         record->offsetY = -20;
     }
-    func_00320CE0(entry->callback, 0, (u32)record);
+    dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
     currentMode = entry->flagsBits.mode;
     if (currentMode < 5) {
@@ -917,7 +917,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetX = 0;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 2;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 1:
@@ -930,7 +930,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
             tag.flags = 0x40;
             tag.group = -90;
@@ -941,7 +941,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.direction = 4;
             record->flags.bits.hasRange = 1;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 2:
@@ -954,7 +954,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetX = 0;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 2;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -965,7 +965,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -976,7 +976,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 4;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 3:
@@ -989,7 +989,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
             tag.flags = 0x40;
             tag.group = -90;
@@ -1000,7 +1000,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.direction = 4;
             record->flags.bits.hasRange = 1;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -1011,7 +1011,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -1022,7 +1022,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 4;
-            func_00320CE0(entry->callback, 0, (u32)record);
+            dds3AppendIndexedListNode(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 4:
@@ -1136,7 +1136,7 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
     initialTag.index = 0;
     memset(context, 0, 0x48);
     context->callback = mnuCreateReleaseCallbackNode();
-    func_00320CE0(context->callback, 0,
+    dds3AppendIndexedListNode(context->callback, 0,
                    (u32)mnuCreateNamedRecord(&initialTag));
 }
 

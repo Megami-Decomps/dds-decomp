@@ -33,8 +33,8 @@ void dds3SetCallbackNodeLastListener(MnuCallbackList *list, MnuCallbackListListe
 
 SdfListNode *dds3DetachIndexedListNodeAndRenumber(MnuCallbackList *list, SdfListNode *node);
 SdfListNode *dds3RemoveListNodeAndNotify(MnuCallbackList *list, SdfListNode *node);
-SdfListNode *func_00320CE0(MnuCallbackList *list, s32 key, u32 valueWord);
-SdfListNode *func_00320D80(MnuCallbackList *list, SdfListNode *afterNode, s32 key, u32 valueWord);
+SdfListNode *dds3AppendIndexedListNode(MnuCallbackList *list, s32 key, u32 valueWord);
+SdfListNode *dds3InsertIndexedListNodeAfter(MnuCallbackList *list, SdfListNode *afterNode, s32 key, u32 valueWord);
 SdfListNode *mnuFindResourceNodeByValue(MnuCallbackList *list, u32 value);
 SdfListNode *mnuFindResourceNodeById(MnuCallbackList *list, u32 id);
 SdfListNode *mnuFindResourceNodeByHandle(MnuCallbackList *list, u32 handle);

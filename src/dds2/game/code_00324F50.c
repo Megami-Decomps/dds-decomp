@@ -51,14 +51,14 @@ extern u32 *func_00324D50(void);
 
 extern void *memcpy(void *, const void *, u32);
 
-/* Reset the first resource list in a two-list owner. */ void func_00324DF8(u32 *lists, u32 option);
+/* Append a value to the first resource list in a two-list owner. */ void dds3AppendFirstResourceListValue(u32 *lists, u32 option);
 
 /* Allocate bytes, track the handle in owner[1], and return the owned buffer. */
 void *sdfAllocateOwnedResourceBuffer(u32 *owner, u32 bytes) {
     void *handle;
 
     handle = func_0035A828(bytes);
-    func_00320CE0((MnuCallbackList *)owner[1], 0, (u32)handle);
+    dds3AppendIndexedListNode((MnuCallbackList *)owner[1], 0, (u32)handle);
     return handle;
 }
 
@@ -253,7 +253,7 @@ u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
             memcpy(copy->items, source->items, copy->count * sizeof(*copy->items));
             copy->info = (SdfResourceInfo *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy->info));
             *copy->info = *source->info;
-            func_00324DF8(owner, (u32)copy);
+            dds3AppendFirstResourceListValue(owner, (u32)copy);
             source++;
             count--;
         } while (count != 0);
@@ -278,7 +278,7 @@ u32 *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *source, s32 count) {
         vector = (SdfVec4 *)(copy + 1);
         *(SdfVec4 **)&copy->data[0x18] = vector;
         *vector = **(SdfVec4 * const *)&source->data[0x18];
-        func_00324DF8(owner, (u32)copy);
+        dds3AppendFirstResourceListValue(owner, (u32)copy);
         source++;
         count--;
     }
@@ -300,7 +300,7 @@ u32 *sdfCloneExtendedSpriteRecords(const SdfResourceVectorRecord30 *source, s32 
         vector = (SdfVec4 *)(copy + 1);
         copy->vector = vector;
         *vector = *source->vector;
-        func_00324DF8(owner, (u32)copy);
+        dds3AppendFirstResourceListValue(owner, (u32)copy);
         source++;
         count--;
     }

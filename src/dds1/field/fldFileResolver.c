@@ -1355,7 +1355,6 @@ struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destina
     return NULL;
 }
 
-
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE08);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE18);

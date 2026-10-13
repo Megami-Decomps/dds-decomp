@@ -78,7 +78,7 @@ void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord
             for (recordIndex = 0; recordIndex < group->count; recordIndex++, tag++) {
                 if (tag->kind == 0x20) {
                     state = mnuCreateNamedRecord(tag);
-                    func_00320CE0(callbackList, 0, (u32)state);
+                    dds3AppendIndexedListNode(callbackList, 0, (u32)state);
                 } else if (tag->kind == 0x10) {
                     if (state != NULL) {
                         memcpy(&state->pad12, tag, sizeof(*tag));

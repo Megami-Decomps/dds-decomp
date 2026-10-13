@@ -5,15 +5,15 @@
 
 extern void (*sdfTickCallback)(void);
 
-/* Reset the first resource list in a two-list owner. */
-void func_00324DF8(u32 *lists, u32 option) {
-    func_00320CE0((MnuCallbackList *)*lists, 0, option);
+/* Append a value to the first resource list in a two-list owner. */
+void dds3AppendFirstResourceListValue(u32 *lists, u32 option) {
+    dds3AppendIndexedListNode((MnuCallbackList *)*lists, 0, option);
 }
 
 u32 mnuInsertResourceHandleAfterMatchingId(u32 *pair, u32 key, u32 value) {
     SdfListNode *node = mnuFindResourceNodeById((MnuCallbackList *)pair[0], key);
     if (node) {
-        return (u32)func_00320D80((MnuCallbackList *)pair[0], node, 0, value);
+        return (u32)dds3InsertIndexedListNodeAfter((MnuCallbackList *)pair[0], node, 0, value);
     }
     return 0;
 }
