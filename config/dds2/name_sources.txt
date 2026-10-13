@@ -3429,6 +3429,7 @@
 0x0022B510	btlOpStartSelectedUnitModelChange	inferred	Selects a battle unit from script parameters and starts a model-change task. [names_reviewed9.tsv]
 0x0022B600	btlCommandPlayUnitMotion	inferred	script op reading 3 ints: unit, selector, motion index (func_001E2C00 or mdlAddEntryPlainEx) [names_M59_D2Mid.tsv]
 0x0022B6E8	btlCommandSetSequenceVolumePan	inferred	Uses a script-provided sequence index to set volume and pan on a live sequence.
+0x0022B7A0	btlCommandChooseRandomUnflaggedGroupSlot	inferred	Reads a group selector and returns a uniformly selected member index whose model flag is clear; returns -1 when no member qualifies and 0 for an invalid selector. Retail command-function table entry 0x00412360 points to this provider. [DDS2 source/BN analysis, 2026-10-13]
 0x0022B8E0	btlCmdGetIndexedBattleStateValue	inferred	Returns a bounded indexed battle state value through the script integer result. [names_reviewed16.tsv]
 0x0022B928	btlCommandCountModelFlags	inferred	Counts one hundred descending model flags and publishes the count to the script VM.
 0x0022BAA8	btlCreateScriptResourceTask	inferred	Creates a battle task with callback btlRunSceneActorEventTask and initializes its object/group resource-work fields.
