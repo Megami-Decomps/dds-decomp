@@ -6194,6 +6194,7 @@
 0x00321328	mnuGetResourceRecordByIndex	inferred	Returns address at the externally stored resource table base plus 28 bytes per index; record fields remain unknown.
 0x00321340	mnuTriggerProgressResourceRecords	inferred	Scans configured menu resource records, marks each newly reached threshold, and initializes an available work entry with progress offset and angle; special registry kind 0x22 adds its larger threshold margin and control flags. Called during the shooting-work progress update.
 0x003214C8	mnuSetRuntimeRecordInitializationCallback	inferred	stores the callback invoked immediately after a runtime record is allocated and initialized
+0x003214D0	mnuReleaseResourceBlockCallback	inferred	Installed as MnuCallbackList.onRemove by mnuCreateReleaseCallbackNode; treats the second callback word as an optional resource pointer and releases it when nonzero.
 0x00321500	mnuCreateReleaseCallbackNode	inferred	Creates a callback node whose callback frees a nonzero supplied pointer.
 0x003218A0	mnuCreateNamedRecord	inferred	Allocates and clears a 0x22-byte record and copies an eight-byte identifier to offset 0xA.
 0x00321908	mnuFreeOptionalBlock	inferred	confidence=medium; matched-C; src/dds2/game/code_00321500.c:159:func_00321908; Releases the menu/resource heap block only when the pointer is nonzero; avoids asserting a specific record layout.; source=reviewed-prior-QP15 [names_qp15.tsv]
