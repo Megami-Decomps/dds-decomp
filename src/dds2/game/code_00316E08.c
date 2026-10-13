@@ -81,7 +81,7 @@ extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 pac
 
 extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
-extern void func_00317AD0(MnuShootingWork *handle);
+extern void mnuInitializeShootingScene(MnuShootingWork *handle);
 
 
 extern void func_0031D928(struct WideSlotPool *);
@@ -141,7 +141,7 @@ void mdlCreateViewerPackageTask(void) {
     mnuMovieTaskState = 1;
     handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
-    func_00317AD0(handle);
+    mnuInitializeShootingScene(handle);
     kwlnTaskCreate(D_0042D4D0, 0x2AF8, 0, 0, mdlAdvanceViewerPackageTask, 0, 0);
 }
 
@@ -542,7 +542,7 @@ u32 func_00317AC8(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
+INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingScene);
 
 /* Release the shooting task's owned lists, queues, slots and world object. */
 void mnuDestroyShootingWork(MnuShootingWork *work) {
@@ -629,7 +629,7 @@ u32 mnuRunShootingUpdateCallback(MnuShootingWork *work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_003180B8);
+INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingWorkResources);
 
 void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
     s32 i;
