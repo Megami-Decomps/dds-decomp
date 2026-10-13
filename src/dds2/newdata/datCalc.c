@@ -2202,7 +2202,7 @@ s32 evtSelectFineStatGrade(void) {
     return 1;
 }
 
-s32 func_0011E3A0(void) {
+s32 evtPushLevelRelativeStatGradeScale(void) {
     DatPartyRecord *unit = (DatPartyRecord *)D_0043E5C0.first;
     u16 level = unit->level;
     s32 grade = datGetStatWithStatusOverride(unit, 4);
