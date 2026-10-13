@@ -8,9 +8,7 @@
 
 extern void evtPrintDeveloperConsoleMessage();
 
-extern void mdlFlagClear(s32 flag);
 
-extern void mdlFlagSet(s32 flag);
 
 
 extern void mnuClearCampResourceFlagEntries(void);

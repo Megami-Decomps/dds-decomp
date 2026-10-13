@@ -528,7 +528,6 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 extern void btlSetScene(s32 sceneId);
 extern void itfMesSetFlags(s32 flags);
-extern void mdlFlagSet(s32 flag);
 
 /* Start a battle: pick the scene parameters for the encounter and enter the battle scene. */
 void btlStart(s32 mode, s32 pack, s32 encounter) {

@@ -34,7 +34,6 @@
 
 extern void fldSetCameraNodeModeWithTen(void);
 extern void mnuMarkTitleStreamResetPending(void);
-extern void mdlFlagSet(s32);
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 

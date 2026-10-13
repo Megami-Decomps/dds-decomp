@@ -54,7 +54,6 @@ extern void ptyClearProfileRecords(void);
 extern void ptyRebuildAllProfiles(void);
 extern void evtUpdateFlaggedEntries(void);
 extern void dds3ForEachEntry(void);
-extern void mdlFlagClear(s32 flag);
 extern void func_00120C08(s32 mode);
 extern void sdfSaveResetSnapshot(void);
 extern void sdfRestoreResetSnapshot(void);
@@ -308,7 +307,6 @@ void sdfSaveResetSnapshot(void) {
     D_003BD7A0 = datGameState->world.slotFlags;
 }
 
-extern void mdlFlagSet(s32 flag);
 extern void mnuApplyFlagArray(u8 *flags);
 extern void dds3ForEachFlagged(void);
 

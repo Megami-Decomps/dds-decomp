@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "btl_state.h"
 #include "btl_command.h"
 #include "btl_action.h"
@@ -259,7 +260,6 @@ extern s32 btlClassifyMetatronAction(BtlUnit *unit, s32 action);
 extern u8 func_0020D9A8(s32 action);
 extern s32 btlClassifyHuangLongAction(BtlUnit *unit, s32 action);
 extern s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 secondSide);
-extern void mdlFlagSet(s32 flag);
 
 /* Native providers whose bodies remain assembly in their own units. */
 s32 btlInitResourcesWrap(BtlLinkedCommand *, BtlCamState *, s32);

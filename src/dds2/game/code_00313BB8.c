@@ -19,7 +19,6 @@ extern void memset();
 #include "mnu_mantra.h"
 #include "prf_profile_cap.h"
 
-extern void mdlFlagSet(s32);
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7

@@ -401,7 +401,6 @@ extern void fldConsumePrimarySceneFlag(void);
 extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
-extern void mdlFlagClear(s32);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
 void evtAdvanceSolarClockAndExpireControls(f32 delta) {

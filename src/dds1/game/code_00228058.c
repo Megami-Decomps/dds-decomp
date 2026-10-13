@@ -396,7 +396,6 @@ extern void fldConsumePrimarySceneFlag(void);
 extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
-extern void mdlFlagClear(s32);
 
 void func_00228930(f32 delta) {
     if ((u8)(datGameState->world.flags & SOLAR_PHASE_ADVANCE_FLAG)) {

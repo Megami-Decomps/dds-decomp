@@ -4073,7 +4073,6 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 
-extern void mdlFlagSet(s32);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C468);
 

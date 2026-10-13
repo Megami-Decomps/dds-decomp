@@ -24,7 +24,6 @@ extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 
 extern void ptyApplyProfile(DatPartyRecord *, u16);
 
-extern void mdlFlagSet(s32);
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 

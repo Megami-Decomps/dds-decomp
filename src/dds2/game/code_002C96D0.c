@@ -117,8 +117,6 @@ typedef struct FileStatBonus {
 } FileStatBonus;
 extern MdlFlagPair D_003E8CE8[];
 extern FileStatBonus D_003E8D10[24];
-extern void mdlFlagSet(s32);
-extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "kwln.h"
 #include "kwln_task_create.h"
