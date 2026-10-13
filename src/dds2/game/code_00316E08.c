@@ -110,11 +110,11 @@ void itfSetPackedRgbAlpha(SdfFlagListWork *entry, u32 color) {
     entry->params.alpha.alpha = color >> 24;
 }
 
-u32 func_00316E28(SdfFlagListWork *entry) {
+u32 sdfGetFlagListAlphaSurfaceIndex(SdfFlagListWork *entry) {
     return entry->params.alpha.surfaceIndex;
 }
 
-void func_00316E30(SdfFlagListWork *entry, u32 value) {
+void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *entry, u32 value) {
     entry->params.alpha.surfaceIndex = value;
 }
 
