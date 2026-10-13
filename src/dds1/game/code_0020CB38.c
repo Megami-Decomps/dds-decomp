@@ -20,8 +20,6 @@ extern char D_003BB8A8[];
 extern s32 datActionAnimationRecords;
 
 extern void func_003014F0();
-
-extern s32 btlGetRuntime(void);
 extern u32 effMiscRandMod(void *, u32);
 
 extern void func_001D6300(void *, void *);

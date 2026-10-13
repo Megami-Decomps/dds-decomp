@@ -132,9 +132,6 @@ extern void btlResetDebugEncounterSelection(s32);
 u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
 extern DatEnemyRecord *datEnemyRecords;
-
-extern s32 btlGetRuntime(void);
-
 extern void btlResetToInitialScene(void);
 
 extern void fldClearSceneSlotsAndGroups(void);
@@ -1201,7 +1198,7 @@ extern SceneInitializer D_00359A88[];
 
 /* Select a scene and reset its frame/state before invoking its initializer. */
 void btlSetScene(s32 sceneId) {
-    s32 scene = btlGetRuntime();
+    s32 scene = (s32)(u32)btlGetRuntime();
 
     ((BattleSceneWork *)scene)->currentScene = sceneId;
     ((BattleSceneWork *)scene)->frame = 0;
@@ -1213,7 +1210,7 @@ void btlSetScene(s32 sceneId) {
 void btlQueueScene(u32 sceneId) {
     s32 scene;
 
-    scene = btlGetRuntime();
+    scene = (s32)(u32)btlGetRuntime();
     ((BattleSceneWork *)scene)->queuedScene = sceneId;
 }
 
@@ -1222,7 +1219,7 @@ extern void btlSetScene(s32);
 
 /* Consume a queued transition, run the current updater, and advance its frame. */
 void btlUpdateScene(void) {
-    s32 scene = btlGetRuntime();
+    s32 scene = (s32)(u32)btlGetRuntime();
     s32 queuedSceneId = ((BattleSceneWork *)scene)->queuedScene;
     s32 updateResult;
     if (queuedSceneId != 0) {
@@ -1240,7 +1237,7 @@ void btlUpdateScene(void) {
 void btlResetToInitialScene(void) {
     s32 scene;
 
-    scene = btlGetRuntime();
+    scene = (s32)(u32)btlGetRuntime();
     btlSetScene(FLD_SCENE_INITIAL_ID);
     ((BattleSceneWork *)scene)->queuedScene = 0;
 }
@@ -1258,7 +1255,7 @@ s32 fldGetSceneDescriptorProperty(void) {
 
 /* Select the task's group array; the handle-group bit takes precedence. */
 s32 *fldGetActorSceneGroupResource(s32 *task) {
-    s32 scene = btlGetRuntime();
+    s32 scene = (s32)(u32)btlGetRuntime();
     s32 *groupEntries = (s32 *)((BattleSceneWork *)scene)->groupSecondary;
     u32 actorGroupBits;
     if (((BtlTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
@@ -1283,7 +1280,7 @@ s32 *fldGetActorSceneGroupResource(s32 *task) {
 
 /* Resolve one of the three group IDs; all other IDs return a null address. */
 s32 fldGetSceneGroupResource(u8 groupId) {
-    s32 scene = btlGetRuntime();
+    s32 scene = (s32)(u32)btlGetRuntime();
     s32 groupEntries;
 
     switch (groupId) {
@@ -1589,7 +1586,7 @@ s32 fldCountSceneSlots(void) {
 
 /* Finished when no group remains, or the explicit finish flag is set. */
 s32 fldAreSceneSlotsFinished(void) {
-    s32 scene = btlGetRuntime();
+    s32 scene = (s32)(u32)btlGetRuntime();
     BtlSceneSlot *slotCursor;
     u32 slotIndex;
     if (((BattleSceneWork *)scene)->flags & FLD_SCENE_SLOTS_FINISHED_BIT) {
@@ -1608,7 +1605,7 @@ s32 fldAreSceneSlotsFinished(void) {
 void fldInitializeSceneGroups(void) {
     s32 scene;
 
-    scene = btlGetRuntime();
+    scene = (s32)(u32)btlGetRuntime();
     fldSortGroupByPriority(((BattleSceneWork *)scene)->groupPrimary, FLD_SCENE_PRIMARY_TASK_COUNT);
     btlSortSceneGroupByPriorityDesc(((BattleSceneWork *)scene)->groupSecondary, FLD_SCENE_SECONDARY_TASK_COUNT);
     btlSortSceneGroupByPriorityDesc(((BattleSceneWork *)scene)->groupTertiary, FLD_SCENE_TERTIARY_TASK_COUNT);
@@ -1722,7 +1719,7 @@ void btlRemoveTaskFromSceneGroup(BtlTask *task) {
 void fldEnableSceneGroupAdvancement(void) {
     s32 scene;
 
-    scene = btlGetRuntime();
+    scene = (s32)(u32)btlGetRuntime();
     ((BattleSceneWork *)scene)->flags |= FLD_SCENE_ADVANCE_ENABLE_BITS;
 }
 
@@ -1730,7 +1727,7 @@ void fldEnableSceneGroupAdvancement(void) {
 void fldClearSceneAdvanceFlag(void) {
     s32 scene;
 
-    scene = btlGetRuntime();
+    scene = (s32)(u32)btlGetRuntime();
     ((BattleSceneWork *)scene)->flags &= FLD_SCENE_ADVANCE_CLEAR_MASK;
 }
 
@@ -1740,7 +1737,7 @@ s32 fldGetActiveSceneGroupValue(void) {
     s32 headValue;
     u32 groupAddress;
 
-    scene = btlGetRuntime();
+    scene = (s32)(u32)btlGetRuntime();
     headValue = (s32)((BattleSceneWork *)scene)->groupHandles[0];
     if (headValue != 0) {
         return headValue;
@@ -1751,7 +1748,7 @@ s32 fldGetActiveSceneGroupValue(void) {
 
 /* Read one task word from the front group; an empty front slot returns zero. */
 s32 fldGetSceneGroupEntry(s32 entryIndex) {
-    s32 scene = btlGetRuntime();
+    s32 scene = (s32)(u32)btlGetRuntime();
 
     if (((BattleSceneWork *)scene)->slots[0].group == 0) {
         return 0;
@@ -1873,14 +1870,14 @@ u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode)
 void fldStopSceneActorActionUpdate(void) {
     s32 scene;
 
-    scene = btlGetRuntime();
+    scene = (s32)(u32)btlGetRuntime();
     *(u32 *)(scene + FLD_SCENE_FLAGS_OFFSET) = *(u32 *)(scene + FLD_SCENE_FLAGS_OFFSET) & FLD_SCENE_ADVANCE_CLEAR_MASK;
 }
 
 /* Enable advancement before checking the source task, then insert its requested slots.
  * A handle-group task skips insertion but still leaves advancement enabled. */
 u32 fldActivateRequestedSceneActor(s32 *request) {
-    s32 scene = btlGetRuntime();
+    s32 scene = (s32)(u32)btlGetRuntime();
     s32 actorTask = request[0];
 
     *(u32 *)(scene + FLD_SCENE_FLAGS_OFFSET) |= FLD_SCENE_ADVANCE_BIT;

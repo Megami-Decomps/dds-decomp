@@ -44,8 +44,6 @@
 #define FLD_SCENE_COUNTER_ACTION_ID 0x61
 #define FLD_SCENE_INSERT_ACTION_ID 0x62
 #define FLD_SCENE_SWAP_ACTION_ID 0x63
-
-extern s32 btlGetRuntime(void);
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 extern void btlDispatchStateHandler(void *, s32);

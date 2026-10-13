@@ -137,9 +137,6 @@ typedef struct BattleRuntimeState {
 extern BattleRuntimeState btlRuntimeState;
 
 extern s32 func_003014F0(char *, const char *, ...);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);

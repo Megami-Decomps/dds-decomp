@@ -91,9 +91,6 @@ extern BtlUnit *btlGetSelectedOrCurrentActor(void);
 extern s32 btlRollAiBucket(void);
 
 extern u32 btlNextScaledRandom(u32);
-
-extern s32 btlGetRuntime(void);
-
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern void func_002152D8(s32, s32);
@@ -1463,7 +1460,7 @@ u32 btlGetSelectionEmptyValue(void) {
     s32 battle;
     u32 value;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     value = 0;
     if (*(s8 *)((BattleWork *)battle)->sub == '\0') {
         value = 100;
@@ -1549,7 +1546,7 @@ INCLUDE_ASM(const s32, "game/code_00214948", func_002181E8);
 void func_00218250(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     *(u32 *)((BattleWork *)battle)->sub = 0;
 }
 
@@ -1863,7 +1860,7 @@ void btlCommitSelectedUnit(void) {
 }
 
 void btlResetUnitSelectionStateAndSetMode(void) {
-    s32 state = btlGetRuntime();
+    s32 state = (s32)(u32)btlGetRuntime();
     s32 resource = (s32)((BattleWork *)state)->sub;
     ((BtlSelectCtrl *)resource)->unit = 0;
     ((BtlSelectCtrl *)resource)->prevUnit = 0;
@@ -6616,9 +6613,6 @@ void func_00224F88(u32 unit) {
     btlInitMotionTransformFromComponents((BtlCamState *)unit, 81.4f, -37.8f, -1866.2f, -0.112f,
                     0.01f, -0.017f, 0.982f, 40.0f);
 }
-
-extern s32 btlGetRuntime(void);
-
 extern void btlClearRuntimeFlag2000(void);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
@@ -7246,7 +7240,7 @@ s32 btlClearUnitRestrictionFlag(void) {
 
 s64 func_00226820(ActionStateLink *unit) {
     if (unit->pendingFlags & 8) {
-        return btlGetRuntime();
+        return (s32)(u32)btlGetRuntime();
     }
 }
 

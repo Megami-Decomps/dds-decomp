@@ -103,10 +103,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
-
-
-extern s32 btlGetRuntime(void);
-
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
 
 extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
@@ -3728,7 +3724,7 @@ void btlSpawnBattleWorldAction(void) {
     s32 work;
     u32 action;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     worldCounter = dds3AdvanceWorldCounter();
     action = (u32)evtSpawnActionObj9(worldCounter);
     ((BtlState *)work)->unk228 = action;
@@ -3770,7 +3766,7 @@ void btlWaitForPendingWorkAndReleaseBuffers(void) {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
     btlReleaseWorkBuffers();
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     ((BtlState *)work)->battleFlags = ((BtlState *)work)->battleFlags & 0xfffffffd;
 }
 
@@ -3994,7 +3990,7 @@ void btlUpdateTintAndWorldLight(void) {
 void btlTickFieldSwayAndTint(void) {
     s32 work;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     if ((((((BtlState *)work)->battleFlags & 0x20000) != 0) && ((((BtlState *)work)->commandRestrictFlags & 0x20) == 0)) &&
           ((((BtlState *)work)->unk220 & 0x4000000) == 0)) {
         fldUpdateSelectedValueTransition();
@@ -4306,7 +4302,7 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     if (source != 0) {
         memcpy(arguments, source, 0x30);
     } else {
-        memcpy(arguments, (u8 *)btlGetRuntime() + 0x10, 0x30);
+        memcpy(arguments, ((u8 *)btlGetRuntime() + 0x10), 0x30);
     }
     return task;
 }
@@ -4432,7 +4428,7 @@ BtlRuntimeTask *sndCreateAcquireTask(s32 color, s32 frames) {
 }
 
 s32 sndTickFadeCounter(const BtlTintReleaseArgs *args) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
 
     if (btlTintTransitionHoldCount == 0) {
         return 1;
@@ -5054,7 +5050,7 @@ BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option) {
 u32 btlTaskSetBattleFlag40000(void) {
     s32 work;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     ((BtlState *)work)->battleFlags = ((BtlState *)work)->battleFlags | 0x40000;
     mdlClearListedObjectFlag();
     return 1;
@@ -5073,7 +5069,7 @@ BtlRuntimeTask *sndCreateSetBattleFlagTask(void) {
 u32 btlTaskClearBattleFlag40000(void) {
     s32 work;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     ((BtlState *)work)->battleFlags = ((BtlState *)work)->battleFlags & 0xfffbffff;
     mdlSetListedObjectFlag();
     return 1;
@@ -5545,7 +5541,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle) {
     s32 work;
     SoundResourceNode *node;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     node = sndAllocResourceNode();
     flags = node->flags;
     node->sourceHandle = handle;
@@ -5598,7 +5594,7 @@ void sndSetStationedSeHighVolume(u32 sequence) {
 }
 
 void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
-    s32 work = btlGetRuntime();
+    s32 work = (s32)(u32)btlGetRuntime();
     u32 v = 0;
     if (soundIndex != 0) {
         v = *(u16 *)(D_00435E0C + soundIndex * 0x190 + 4);
@@ -5631,7 +5627,7 @@ u8 sndIsStreamStatusTwoOrThree(void) {
 void btlResetTitleStreamOnBattleFlag(void) {
     s32 work;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     if ((((BtlState *)work)->battleFlags & 0x10000) != 0) {
         mnuResetTitleStreamAfterFileIdle();
         return;
@@ -6195,7 +6191,7 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
 
 /* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
 void btlResetMotionSoundFrameCounters(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     ((BtlState *)context)->unk288 = -1;
     ((BtlState *)context)->unk28C = -1;
 }

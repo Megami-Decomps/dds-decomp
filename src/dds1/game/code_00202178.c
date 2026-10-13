@@ -67,9 +67,6 @@ extern u32 btlGetEffectActive(void);
 extern u32 btlGetSelectedBossEffectId(void);
 
 extern u32 btlGetSpecialModeEffectValue(void);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 
@@ -2537,7 +2534,7 @@ u32 btlGetEffectActive(void) {
     s32 battle;
     s32 effect;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->battleMode != 0x108) {
         return 0;
     }
@@ -2553,7 +2550,7 @@ s32 btlHasEffectActor(void) {
     s32 battle;
     s32 effect;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->battleMode != 0x108) {
         return absent;
     }
@@ -2568,7 +2565,7 @@ u32 btlGetEffectValue(void) {
     s32 battle;
     s32 effect;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->battleMode != 0x108) {
         return 0;
     }
@@ -2582,7 +2579,7 @@ u32 btlGetEffectValue(void) {
 BtlUnit *btlGetEffectActor(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     return ((BtlState *)battle)->effect->actor;
 }
 
@@ -2901,7 +2898,7 @@ void btlDestroySpecialUnitSlot(void) {
     s32 *data;
     s32 unit;
 
-    unit = btlGetRuntime();
+    unit = (s32)(u32)btlGetRuntime();
     data = (s32 *)((BtlState *)unit)->effect;
     unit = *data;
     if (unit != 0) {
@@ -3243,7 +3240,7 @@ u32 btlGetSpecialModeEffectValue(void) {
     s32 battle;
     s32 effect;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->battleMode != 0x116) {
         return 0;
     }
@@ -3372,7 +3369,7 @@ void btlDestroyActiveMemberSlot(void) {
     s32 *data;
     s32 unit;
 
-    unit = btlGetRuntime();
+    unit = (s32)(u32)btlGetRuntime();
     data = (s32 *)((BtlState *)unit)->effect;
     unit = *data;
     if (unit != 0) {
@@ -3540,7 +3537,7 @@ s32 btlSwapRandomBossSelection(void) {
 s32 btlFindSubsequentTurnScript(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->turnCount == 0) {
         return -1;
     }
@@ -3751,7 +3748,7 @@ u32 btlGetSelectedBossEffectId(void) {
     s32 battle;
     s32 effect;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->battleMode != 0x10b) {
         return 0;
     }
@@ -3767,7 +3764,7 @@ s32 btlHasBossEffectOption(void) {
     s32 battle;
     s32 effect;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->battleMode != 0x10b) {
         return absent;
     }
@@ -3788,7 +3785,7 @@ void btlArmEventResourceTrigger(void) {
     u8 *data;
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     data = (u8 *)((BtlState *)battle)->effect;
     ((BtlEventTriggers *)data)->resourceReady = 1;
     ((BtlEventTriggers *)data)->pending = 0;
@@ -3862,7 +3859,7 @@ s32 btlConsumeReadyEventScriptResource(void) {
 void btlClearEventEffectValue(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     *(u16 *)((BtlState *)battle)->effect = 0;
 }
 
@@ -3977,7 +3974,7 @@ INCLUDE_ASM(const s32, "game/code_00202178", func_00209EB8);
 u32 btlGetEventEffectValue(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     return ((BtlState *)battle)->effect->formCount;
 }
 

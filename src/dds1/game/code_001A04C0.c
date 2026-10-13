@@ -42,11 +42,6 @@ extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern void btlUpdateScene(void);
-
-
-extern s32 btlGetRuntime(void);
-
-
 extern s32 btlRuntime;
 
 extern s32 kwlnTaskFindByPriority(u32);
@@ -723,8 +718,8 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     return 0;
 }
 
-s32 btlGetRuntime(void) {
-    return btlRuntime;
+void *btlGetRuntime(void) {
+    return (void *)(u32)btlRuntime;
 }
 
 

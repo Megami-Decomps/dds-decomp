@@ -122,9 +122,6 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
-
-extern s32 btlGetRuntime(void);
-
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern char D_003BB450[];
@@ -566,7 +563,7 @@ s32 btlTestSideCountEligibility(BtlTask *action) {
 
 s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 speciesIndex) {
     s32 (*callback)(u8 *, u8 *, s32) =
-        *(s32 (**)(u8 *, u8 *, s32))(btlGetRuntime() + 0x680);
+        *(s32 (**)(u8 *, u8 *, s32))((u8 *)btlGetRuntime() + 0x680);
     u8 *resource;
     if (callback != 0 && callback(actor, target, speciesIndex) == 0) {
         return 0;
@@ -614,7 +611,7 @@ s32 btlHasHighPriorityState(void) {
 }
 
 s32 btlCountFlaggedSceneActors(void) {
-    BtlUnit *actor = *(BtlUnit **)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x228);
     s32 count = 0;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x321) == 0x301 &&
@@ -1795,7 +1792,7 @@ extern s32 btlDrawTimedDialogTask(KwlnTask *);
 extern void btlReleaseDialogTaskData(KwlnTask *);
 
 s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     s32 task = btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
 
@@ -2644,7 +2641,7 @@ extern s32 btlUpdateRegisteredPanelTask(KwlnTask *);
 extern void btlReleaseRegisteredChildTaskWork(KwlnTask *);
 
 void btlStartRegisteredChildTask(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     u32 data = (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork));
     u32 task = (u32)kwlnTaskCreate(D_003BB3C0, 0x2B0E, 1, 1, btlUpdateRegisteredPanelTask, btlReleaseRegisteredChildTaskWork, data);
     kwlnTaskAddChild((KwlnTask *)*(u32 *)(context + 0x29C), (KwlnTask *)task);
@@ -3469,7 +3466,7 @@ return_zero:
 }
 
 void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *task) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(12, 0);
     *(u32 *)(context + 0x1F4) |= 0x100000;
@@ -5254,7 +5251,7 @@ s32 btlUpdateCommandUiTransition(void) {
 }
 
 void fldInitializeBattleSceneFlow(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     btlNextScaledRandom(7);
     if ((*(u32 *)(context + 0x1F4) & 0x400) != 0) {
         if (*(u16 *)(context + 0x24C) == 1) {
@@ -5311,7 +5308,7 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
 }
 
 s32 btlIsSceneActorLimitSatisfied(s32 unused, u32 limit) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     s32 index = *(s32 *)(context + 0x27C);
     if (datBattleSceneRecords[index].flags & 0x800) {
         return 1;
@@ -5521,7 +5518,7 @@ u16 *btlGatherEnemyCommands(BtlUnit *actor, s16 *outCount) {
 extern u8 D_00358FE0[];
 
 void btlBuildEligibleActorList(s32 unused, s16 *count) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     s32 index = *(s32 *)(context + 0x27C);
     s32 total = 0;
     if ((datBattleSceneRecords[index].flags & 0x800) == 0) {
@@ -6449,7 +6446,7 @@ void fldReleaseSceneSprite(KwlnTask *arg0) {
 
     temp_v0 = (SceneAiWork *)kwlnTaskGetUserValue(arg0);
     fldReleaseSceneSpriteWork(temp_v0);
-    temp_v1 = btlGetRuntime();
+    temp_v1 = (s32)(u32)btlGetRuntime();
     *(u32 *)(temp_v1 + 0x2ac) = 0;
 }
 
@@ -7363,7 +7360,7 @@ void func_001C44F8(void) {
 u32 fldGetSceneIndexedValue(s32 arg0) {
     s32 temp_v0;
 
-    temp_v0 = btlGetRuntime();
+    temp_v0 = (s32)(u32)btlGetRuntime();
     return *(u32 *)(arg0 * 4 + temp_v0 + 0x4b0);
 }
 
