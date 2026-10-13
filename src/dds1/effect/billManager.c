@@ -8,6 +8,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf.h"
+#include "sdf_texture_primary_buffer_api.h"
 
 extern BillDispatch D_0034E060[];
 extern BillDispatch D_0034E068[];
@@ -19,8 +20,6 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 #include "sdf_packet_alloc.h"
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
-extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);
-extern s32 sdfTexGetPrimaryBufferSize(SdfTex *texture);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
 extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
 extern f32 sdfViewEyeVector[4];
