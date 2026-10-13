@@ -200,7 +200,7 @@ extern f32 func_00208750(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 
 extern void func_0021F3E8(s32);
 
-extern void func_00211108(s32);
+extern void btlCmdAppendCurrentUnitIdToCommandIndices(s32);
 
 extern void func_002110E8(s32, u16);
 
@@ -1405,7 +1405,7 @@ u32 btlScriptCmdSimpleH(void) {
     return 1;
 }
 
-s32 func_0020A3F0(void) {
+s32 btlScriptCmdSelectTargetsByMode(void) {
     s32 context = scrGetCurrentCommandWork();
     func_002110E8(context, scrReadIntParameter(0));
     return 1;
@@ -1418,7 +1418,7 @@ u32 btlScriptCmdWithArgF(void) {
 
 /* Append the selected-or-current actor to the script command target list. */
 s32 btlScriptAppendSelectedOrCurrentTarget(void) {
-    func_00211108(scrGetCurrentCommandWork());
+    btlCmdAppendCurrentUnitIdToCommandIndices(scrGetCurrentCommandWork());
     return 1;
 }
 
