@@ -31,7 +31,7 @@ extern void func_00295030(s32, s32, s32, MenuTerminalContext *, s32, s32, s32);
 extern void func_00296430(s32, s32, s32, MenuTerminalContext *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(MenuTerminalContext *, s32, s32, u32, u32);
-extern void func_00296C58(s32, s32, s32, MenuTerminalContext *, s32);
+extern void mnuDrawShopSelectedRowTotal(s32, s32, s32, MenuTerminalContext *, s32);
 extern void func_002968B8(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void func_00296298(s32, s32, s32, MenuTerminalContext *, s32);
 extern void func_002967A0(s32, s32, s32, MenuTerminalContext *, s32);
@@ -502,7 +502,7 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         func_00296430(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 1:
@@ -525,7 +525,7 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         func_00296430(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 1:
@@ -544,7 +544,7 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00296298(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
         progress = 1.0f - progress;
         func_00295030(0, 0, 0, scene, (s32)(progress * 256.0f), 1, 0x53);
@@ -568,7 +568,7 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         func_00296298(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         func_002967A0(0, 0, 0, scene, 0x53);
         switch (category) {
         case 1:

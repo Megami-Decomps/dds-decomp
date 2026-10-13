@@ -508,7 +508,7 @@ extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawShopSelectedRowDetailsWithAlpha(s32, s32, s32, ShopScene *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(ShopScene *, s32, s32, u32, u32);
-extern void func_0025FFC8(s32, s32, s32, ShopScene *, s32);
+extern void mnuDrawShopSelectedRowTotal(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopLimitArrowsScaled(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawShopLimitArrows(s32, s32, s32, ShopScene *, s32);
@@ -534,7 +534,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_0025FFC8(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 0:
@@ -556,7 +556,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_0025FFC8(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 0:
@@ -574,7 +574,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
         mnuDrawShopSelectedRowDetails(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
-        func_0025FFC8(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         progress = (f32)scene->frames / 10.0f;
         progress = 1.0f - progress;
         mnuDrawShopItemQuantity(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
@@ -597,7 +597,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
         mnuDrawShopSelectedRowDetails(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_0025FFC8(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         mnuDrawShopLimitArrows(0, 0, 0, scene, 0x53);
         switch (category) {
         case 0:
