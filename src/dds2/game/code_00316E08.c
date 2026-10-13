@@ -674,7 +674,7 @@ extern s32 func_00324840(void);
 extern s32 func_0031A0B8(MnuShootingWork *);
 extern MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *, MnuShootingWork *);
 extern s32 func_00323BB8(MnuShootingWork *);
-extern s32 func_00324070(MenuWorkEntry *);
+extern s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *);
 extern MenuRuntimeList *func_00321ED8(void);
 extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
 extern void func_0031B188(void);
@@ -769,7 +769,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     }
     if (work->phase < 3) {
         func_00323BB8(work);
-        if (work->phase < 3) func_00324070(&D_0040ABF8);
+        if (work->phase < 3) mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
     }
     mnuDispatchRuntimeWorkOverlaps(func_00321ED8(), work);
     func_0031B188();
