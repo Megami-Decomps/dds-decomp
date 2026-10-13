@@ -564,7 +564,7 @@ void mnuFreeSpriteStateWork(MenuSpriteState *spriteState) {
 
 /* Select the range entry's sprite variant before submitting its draw request. */
 void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
-                                    u16 rangeId, s32 alternate, u32 drawArg, u32 texture) {
+                                    u16 rangeId, s32 alternate, EffectSlotSet *drawArg, u32 texture) {
     s32 rangeIndex;
     s32 variant;
 
@@ -573,7 +573,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
         variant = 0x12;
     }
     rangeIndex = mnuLookupRangeEntry(rangeId);
-    effDrawSpriteWithCornerFade(x, y, depth, color, 1, (EffectSlotSet *)(u32)drawArg, rangeIndex * 2 + variant, texture);
+    effDrawSpriteWithCornerFade(x, y, depth, color, 1, drawArg, rangeIndex * 2 + variant, texture);
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyInfoSprites);
@@ -598,7 +598,67 @@ void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *sprite) {
     sdfReleaseChipBlock(sprite);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyProfilePanelContents);
+extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
+extern const MenuPoint D_003BC780[];
+extern const MenuPoint D_003B2450[];
+extern const MenuPoint D_003B2468[];
+extern const u8 *D_003BAA8C;
+extern void mnuDrawRangeCostAndIcon(s32, s32, s32, s32, u32, DatPartyRecord *, u16, s32, s32, EffectSlotSet *, EffectSlotSet *, u32);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
+
+/* Reuse the frame-coordinate workspace for the next phase's row count.
+ * See docs/idioms.md, "Profile contents: coordinate-to-counter workspace". */
+void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, DatPartyRecord *actor, s32 profile, MenuSimpleSpriteState *panel, s32 surface) {
+    PrfSkillList list;
+    MenuPoint origin;
+    MenuPoint headings[3];
+    MenuPoint rows[3];
+    s32 frameRows;
+    s32 rowOffset;
+    s32 frameX;
+    s32 t;
+    s32 drawX;
+    s32 drawY;
+    u32 fade;
+    u16 *skill;
+    u16 skillId;
+    struct FrFontGlyph *glyph;
+
+    memcpy(&origin, D_003BC780, sizeof(origin));
+    memcpy(headings, D_003B2450, sizeof(headings));
+    memcpy(rows, D_003B2468, sizeof(rows));
+    fade = panel->blendFactor;
+    prfBuildRawSkillList(profile, &list);
+    frameX = x + origin.x;
+    t = y + origin.y;
+    effDrawSpriteWithCornerFade(frameX, t, depth, fade, 1, panel->resourceSets[0], 0x23, surface);
+    t += 0xB8;
+    for (frameRows = 3; frameRows >= 0; frameRows--) {
+        effDrawSpriteWithCornerFade(frameX, t, depth, fade, 1, panel->resourceSets[0], 0x24, surface);
+        t += 0xA8;
+    }
+    effDrawSpriteWithCornerFade(x + headings[0].x, y + headings[0].y, depth, fade, 1, panel->resourceSets[4], 0x3A, surface);
+    effDrawSpriteWithCornerFade(x + headings[1].x, y + headings[1].y, depth, fade, 1, panel->resourceSets[3], 0xF, surface);
+    effDrawSpriteWithCornerFade(x + headings[2].x, y + headings[2].y, depth, fade, 1, panel->resourceSets[3], 0x10, surface);
+    skill = list.skills;
+    rowOffset = 0;
+    for (t = 3; t >= 0; t--) {
+        skillId = *skill++;
+        if (skillId != 0) {
+            drawX = x + rows[0].x;
+            drawY = y + rows[0].y + rowOffset;
+            mnuDrawRangeSpriteVariant(drawX - 0x160, drawY, depth, fade, skillId, 0, panel->resourceSets[4], surface);
+            glyph = itfCreateConvertedTextGlyph(drawX, drawY, depth, 0xA09DC380, D_003BAA8C + skillId * 17, 0);
+            frFontDrawGlyphChain(glyph, 1, surface);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            mnuDrawRangeCostAndIcon(drawX + 0x7B0, drawY + 0x20, depth, 0x100, fade, actor, skillId, 0, 0, panel->resourceSets[1], panel->resourceSets[2], surface);
+        } else {
+            effDrawSpriteWithCornerFade(x + rows[1].x, y + rows[1].y + rowOffset, depth, fade, 1, panel->resourceSets[1], 9, surface);
+            effDrawSpriteWithCornerFade(x + rows[2].x, y + rows[2].y + rowOffset, depth, fade, 1, panel->resourceSets[1], 0xB, surface);
+        }
+        rowOffset += 0xA8;
+    }
+}
 
 
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
