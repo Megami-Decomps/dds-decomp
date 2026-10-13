@@ -20,6 +20,7 @@
 #include "pcp_vu0.h"
 #include "sdf_primitive.h"
 #include "sdf_packet_append.h"
+#include "grid_packed_vertex.h"
 
 #include "sdf_packet_alloc.h"
 extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
@@ -771,30 +772,24 @@ void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color,
     func_00308650((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
-typedef struct GridPackedTriangleVertex {
-    u64 channels[2];
-    u64 xy;
-    u64 depth;
-} GridPackedTriangleVertex;
-
 void func_00308650(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
 {
     SdfDrawPacket *packet;
-    GridPackedTriangleVertex *vertices;
+    GridPackedVertex *vertices;
     SdfListHead *list;
     SdfPoolNode *surface;
 
     packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(6, 1));
     sdfConsInitPacketHeader(packet, 0x14B, 6, 0x515151, 1);
-    vertices = (GridPackedTriangleVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
-    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
-    vertices[0].xy = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
+    vertices = (GridPackedVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
+    itfGridUnpackColorChannels(vertices[0].colorChannels, colors[0]);
+    vertices[0].packedXY = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
     vertices[0].depth = z;
-    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
-    vertices[1].xy = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
+    itfGridUnpackColorChannels(vertices[1].colorChannels, colors[1]);
+    vertices[1].packedXY = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
     vertices[1].depth = z;
-    itfGridUnpackColorChannels(vertices[2].channels, colors[2]);
-    vertices[2].xy = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
+    itfGridUnpackColorChannels(vertices[2].colorChannels, colors[2]);
+    vertices[2].packedXY = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
     vertices[2].depth = z;
     list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
     sdfInitPacketList(list);
@@ -815,38 +810,32 @@ void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 colo
     uiDrawUniformRgbaRange(x, y, z, width, height, color, 0, surfaceIndex);
 }
 
-typedef struct GridPackedStripVertex {
-    u64 channels[2];
-    u64 xy;
-    u64 depth;
-} GridPackedStripVertex;
-
 void func_00308828(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
     u32 left = x + 0x7000;
     u32 top = y + 0x7900;
     u64 topWord = (u64)top << 32;
     SdfDrawPacket *packet;
-    GridPackedStripVertex *vertices;
+    GridPackedVertex *vertices;
     SdfListHead *list;
     SdfPoolNode *surface;
     u64 right, bottom;
 
     packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(8, 1));
     sdfConsInitPacketHeader(packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
-    vertices = (GridPackedStripVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
-    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
-    vertices[0].xy = (u64)left | topWord;
+    vertices = (GridPackedVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
+    itfGridUnpackColorChannels(vertices[0].colorChannels, colors[0]);
+    vertices[0].packedXY = (u64)left | topWord;
     vertices[0].depth = z;
-    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
+    itfGridUnpackColorChannels(vertices[1].colorChannels, colors[1]);
     right = (u32)(left + width);
-    vertices[1].xy = right | topWord;
+    vertices[1].packedXY = right | topWord;
     vertices[1].depth = z;
-    itfGridUnpackColorChannels(vertices[2].channels, colors[2]);
+    itfGridUnpackColorChannels(vertices[2].colorChannels, colors[2]);
     bottom = (u64)(top + height) << 32;
-    vertices[2].xy = (u64)left | bottom;
+    vertices[2].packedXY = (u64)left | bottom;
     vertices[2].depth = z;
-    itfGridUnpackColorChannels(vertices[3].channels, colors[3]);
-    vertices[3].xy = right | bottom;
+    itfGridUnpackColorChannels(vertices[3].colorChannels, colors[3]);
+    vertices[3].packedXY = right | bottom;
     vertices[3].depth = z;
     list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
     sdfInitPacketList(list);
@@ -867,13 +856,6 @@ void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32
     uiDrawUniformColorLine(x, y + height, z, x + width + 0x10, y + height, z, color, context);
 }
 
-/* Lines and triangles use the same 0x20-byte packed color/XY/depth record. */
-typedef struct GridPackedVertex {
-    u64 channels[2];
-    u64 xy;
-    u64 depth;
-} GridPackedVertex;
-
 void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                    const u32 *colors, u32 surfaceIndex);
 
@@ -893,11 +875,11 @@ void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, 1));
     sdfConsInitPacketHeader(packet, 0x149, 4, 0x5151, 1);
     vertices = (GridPackedVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
-    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
-    vertices[0].xy = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
+    itfGridUnpackColorChannels(vertices[0].colorChannels, colors[0]);
+    vertices[0].packedXY = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
     vertices[0].depth = z0;
-    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
-    vertices[1].xy = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
+    itfGridUnpackColorChannels(vertices[1].colorChannels, colors[1]);
+    vertices[1].packedXY = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
     vertices[1].depth = z1;
     list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
     sdfInitPacketList(list);
