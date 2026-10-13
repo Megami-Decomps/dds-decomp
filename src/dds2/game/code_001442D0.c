@@ -2825,7 +2825,7 @@ void fldReleaseTextureSlots(void) {
 extern u32 fldPlayerObject;
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
-extern void func_00336538(f32 angle);
+extern void sdfVuLoadRotationMatrixY(f32 angle);
 
 void fldUpdatePositionedTextureNodes(void) {
     f32 position[4] __attribute__((aligned(16)));
@@ -2846,7 +2846,7 @@ void fldUpdatePositionedTextureNodes(void) {
                 position[1] -= 100.0f;
             }
             effCopyVectorToNodeInstance((EffNode *)fldEffectTextureNodes[i], position);
-            func_00336538(-angle);
+            sdfVuLoadRotationMatrixY(-angle);
             VU0_STORE_MATRIX_UNCLOBBERED(matrix);
             effApplyNodeTransformMatrix((EffNode *)fldEffectTextureNodes[i], matrix);
             effUpdateNode((EffNode *)(u32)fldEffectTextureNodes[i]);
