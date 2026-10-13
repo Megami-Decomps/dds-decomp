@@ -719,12 +719,6 @@ void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKe
     }
 }
 
-typedef struct SdfKeyTreeItem {
-    struct SdfKeyTreeItem *replaced; /* 0x0: previous item when a duplicate key replaces it */
-    u8 pad04[8];
-    f32 key;                      /* 0xC */
-} SdfKeyTreeItem;
-
 #include "sdf_packet_alloc.h"
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */

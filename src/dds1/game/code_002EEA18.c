@@ -708,13 +708,6 @@ void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKe
     }
 }
 
-typedef struct SdfKeyTreeItem {
-    struct SdfKeyTreeItem *replaced; /* 0x0: previous item when a duplicate key replaces it */
-    u8 pad04[8];
-    f32 key;                      /* 0xC */
-} SdfKeyTreeItem;
-
-
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
 void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
     SdfKeyTreeNode *path[SDF_KEY_TREE_PATH_LIMIT];
