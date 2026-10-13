@@ -40,7 +40,7 @@ extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 extern s32 kwlnTextureSetReferenceFlagIfPresent();
 extern void kwlnTextureClearReferenceFlag(void);
 extern void kwlnTextureReleaseHeldReference(void);
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 extern f32 D_003AAEB0[4];
 extern f32 D_0037F850[];
 extern f32 D_0037F860[];
@@ -454,7 +454,7 @@ void dds3StartCrossfade(s32 frames) {
         D_00436410 = frames;
         D_00436408 = 1;
         D_0043640C = 0;
-        func_0035B6E0("dds3CrossfadeStart\n");
+        sdfDebugPrintf("dds3CrossfadeStart\n");
     }
 }
 
@@ -556,7 +556,7 @@ void dds3EndCrossfade(void) {
     kwlnTextureClearReferenceFlag();
     kwlnTextureReleaseHeldReference();
     D_00436408 = 0;
-    func_0035B6E0(D_00414430);
+    sdfDebugPrintf(D_00414430);
 }
 
 extern void *memcpy(void *dst, const void *src, u32 size);

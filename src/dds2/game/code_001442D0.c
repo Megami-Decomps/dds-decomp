@@ -347,7 +347,7 @@ extern s32 dspStartEntry(s32 arg0);
 extern void fldResetPlayerSceneObjectState(void);
 
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
@@ -5463,7 +5463,7 @@ extern s32 D_00451D3C[];
 s32 fldReportCampVolumeError(void) {
     if (D_00451D3C[0] != 1) {
         if (fldGetCampSceneControlMode() != 0) {
-            func_0035B6E0(D_00413F78);
+            sdfDebugPrintf(D_00413F78);
         }
     }
 }
@@ -5476,7 +5476,7 @@ void fldUpdateTargetGuideController(void) {
                 return;
             }
             if (fldGetSceneReadyOrPendingState() != 0) {
-                func_0035B6E0(D_00413F78);
+                sdfDebugPrintf(D_00413F78);
                 return;
             }
         } else {

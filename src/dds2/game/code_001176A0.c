@@ -54,7 +54,7 @@ typedef char SdfChannel_size_must_be_0xA4[(sizeof(SdfChannel) == 0xA4) ? 1 : -1]
 
 extern SdfChannel D_00385A90[8];
 extern void sdfReloadChannelSegments(SdfChannel *channel);
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 const char D_00412AB0[16] = "sys:[%s]\n";
 
 
@@ -464,7 +464,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
         address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
     sdfReleaseResourceAllocation(block);
-    func_0035B6E0(D_00412AB0, table->path);
+    sdfDebugPrintf(D_00412AB0, table->path);
 }
 
 void sdfResetChannels(void) {
@@ -743,7 +743,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 extern u32 effMiscRandMod(void *state, u32 modulus);
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
@@ -821,7 +821,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
     hit = 1;
     if (datCommandRecords[index].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
-        func_0035B6E0(D_00412B08, scaled, ratio, mask);
+        sdfDebugPrintf(D_00412B08, scaled, ratio, mask);
         roll = effMiscRandMod(0, 100);
         hit = roll < scaled;
     }

@@ -45,7 +45,7 @@ void scrSetIntegerReturnValue(s32 value);
 void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
 /* libc printf returns the signed vfprintf character count. */
-s32 func_0035B6E0(const char *fmt, ...);
+s32 sdfDebugPrintf(const char *fmt, ...);
 
 void scrDestroyAllNamedProcesses(void);
 
@@ -329,7 +329,7 @@ s32 evtCommandReadSecondaryWorldIdValue(void) {
     node = dds3FindObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(),
                                          (const u8 *)scrReadStringParameter(0));
     if (node == NULL) {
-        func_0035B6E0("ID : id not found!! <%s>\n", scrReadStringParameter(0));
+        sdfDebugPrintf("ID : id not found!! <%s>\n", scrReadStringParameter(0));
         evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
@@ -374,7 +374,7 @@ s32 evtCommandDeferFieldTransition(void) {
     s32 loggedParameter = scrReadIntParameter(2);
     s32 command;
 
-    func_0035B6E0("CALL_NEXT(%d,%d,%d)\n", loggedArgument, loggedCommand, loggedParameter);
+    sdfDebugPrintf("CALL_NEXT(%d,%d,%d)\n", loggedArgument, loggedCommand, loggedParameter);
     command = scrReadIntParameter(1);
     fldSetDeferredFieldCommand(command, scrReadIntParameter(2));
     return 1;
@@ -386,7 +386,7 @@ s32 evtCommandCallEvent(void)
     s32 eventId;
 
     eventId = scrReadIntParameter(0);
-    func_0035B6E0("call_event:%d\n", eventId);
+    sdfDebugPrintf("call_event:%d\n", eventId);
     dds3AdminSubmitModeRequest(6, (s32)&eventId, EVT_SCALAR_REQUEST_SIZE, 0);
     scrDestroyAllNamedProcesses();
     return 1;
@@ -573,7 +573,7 @@ s32 evtCommandShutdownStage(void)
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     kwlnDrawControlFlags |= 0x2000000;
-    func_0035B6E0("event stage shutdown !!\n");
+    sdfDebugPrintf("event stage shutdown !!\n");
     evtPrintDeveloperConsoleMessage("field shutdown.\n");
     return 1;
 }
@@ -587,7 +587,7 @@ s32 evtCommandShutdownStageAlternate(void)
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     kwlnDrawControlFlags |= 0x2000000;
-    func_0035B6E0("event stage shutdown2 !!\n");
+    sdfDebugPrintf("event stage shutdown2 !!\n");
     evtPrintDeveloperConsoleMessage("field shutdown2.\n");
     return 1;
 }
@@ -595,7 +595,7 @@ s32 evtCommandShutdownStageAlternate(void)
 s32 evtCommandClearAllUnits(void)
 {
     evtDrainSecondaryWorldNodes();
-    func_0035B6E0("unit all clear !!\n");
+    sdfDebugPrintf("unit all clear !!\n");
     evtPrintDeveloperConsoleMessage("unit all clear.\n");
     return 1;
 }
@@ -605,7 +605,7 @@ s32 evtCommandClearAllUnitsAndWait(void)
     evtDrainSecondaryWorldNodes();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
-    func_0035B6E0("unit all clear2 !!\n");
+    sdfDebugPrintf("unit all clear2 !!\n");
     evtPrintDeveloperConsoleMessage("unit all clear2.\n");
     return 1;
 }
@@ -654,16 +654,16 @@ s32 evtCommandRelinkCameraOwnerToPath(void) {
         owner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
     if (owner == NULL) {
-        func_0035B6E0("CAM_PATH_MOVE error!\n");
+        sdfDebugPrintf("CAM_PATH_MOVE error!\n");
         return 1;
     }
     path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
     if (path == NULL) {
-        func_0035B6E0("CAM_PATH_MOVE error!\n");
+        sdfDebugPrintf("CAM_PATH_MOVE error!\n");
         return 1;
     }
     if (evtStageRelinkOwnedNodeResource(path, owner) == 0) {
-        func_0035B6E0("CAM_PATH_MOVE error!\n");
+        sdfDebugPrintf("CAM_PATH_MOVE error!\n");
         return 1;
     }
     return 1;
@@ -815,9 +815,9 @@ s32 evtCommandAttachObjectPath(void) {
     if (unit == NULL) {
         unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
-            func_0035B6E0(D_00421E58, scrReadIntParameter(0));
-            func_0035B6E0(D_00421E68, scrReadIntParameter(1));
-            func_0035B6E0(D_00421E78);
+            sdfDebugPrintf(D_00421E58, scrReadIntParameter(0));
+            sdfDebugPrintf(D_00421E68, scrReadIntParameter(1));
+            sdfDebugPrintf(D_00421E78);
             return 1;
         }
     }
@@ -875,10 +875,10 @@ s32 evtCommandReattachObjectPath(void) {
     if (unit == NULL) {
         unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
-            func_0035B6E0(D_00421E58, scrReadIntParameter(0));
+            sdfDebugPrintf(D_00421E58, scrReadIntParameter(0));
             targetId = scrReadIntParameter(1);
-            func_0035B6E0(D_00421E68, targetId);
-            func_0035B6E0(D_00421E78);
+            sdfDebugPrintf(D_00421E68, targetId);
+            sdfDebugPrintf(D_00421E78);
             return 1;
         }
     }
@@ -900,7 +900,7 @@ s32 evtCommandReattachObjectPath(void) {
         dds3RefreshStoredVec3(unit);
         dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
-        func_0035B6E0(D_00421E98);
+        sdfDebugPrintf(D_00421E98);
     }
     path = dds3GetObjectResourceHandle(slot);
     if (path == 0) {
@@ -935,9 +935,9 @@ s32 evtCommandWaitObjectResourceScale(void) {
         id = scrReadIntParameter(0);
         object = fldResolveWorldObjectByResourceId((u32)id);
         if (object == NULL) {
-            func_0035B6E0(D_00421E58, scrReadIntParameter(0));
-            func_0035B6E0(D_00421E68, scrReadIntParameter(1));
-            func_0035B6E0("e OBJ_PATH_WAIT : obj==NULL\n");
+            sdfDebugPrintf(D_00421E58, scrReadIntParameter(0));
+            sdfDebugPrintf(D_00421E68, scrReadIntParameter(1));
+            sdfDebugPrintf("e OBJ_PATH_WAIT : obj==NULL\n");
             return 1;
         }
     }
@@ -1073,7 +1073,7 @@ s32 evtCommandStartPolygonMovie(void) {
         return 1;
     }
     if (commandWork->task == 0) {
-        func_0035B6E0(D_00421F08);
+        sdfDebugPrintf(D_00421F08);
         return 1;
     }
     eventId = scrReadIntParameter(0);
@@ -1109,7 +1109,7 @@ s32 evtCommandCreatePolygonMovie(void) {
         return 1;
     }
     if (commandWork->task == 0) {
-        func_0035B6E0(D_00421F68);
+        sdfDebugPrintf(D_00421F68);
         return 1;
     }
     eventId = scrReadIntParameter(0);
@@ -1274,7 +1274,7 @@ s32 evtCommandMoveLightAlongPathOrWarn(void) {
     if (evtStageRelinkOwnedNodeResource(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), path) != 0) {
         return 1;
     }
-    func_0035B6E0(D_00421FB0);
+    sdfDebugPrintf(D_00421FB0);
     evtPrintDeveloperConsoleMessage(D_00421FC8);
     return 1;
 }

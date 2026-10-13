@@ -124,7 +124,7 @@ extern s32 dds3AdminGetActiveMode(void);
 
 extern void dds3AdminSetControlFlag(void);
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern char D_00414C50[]; /* "Camp process halted.\n", followed by padding no C emits */
 
@@ -1713,7 +1713,7 @@ void mnuReportCampProcessHalted(void) {
     if (dds3AdminGetActiveMode() != 5) {
         dds3AdminSetControlFlag();
     }
-    func_0035B6E0(D_00414C50);
+    sdfDebugPrintf(D_00414C50);
 }
 
 

@@ -19,7 +19,7 @@ void func_0031A638(MenuRuntimeRecord *record, MenuRuntimeRecord *unused, MnuShoo
     }
 }
 
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 extern s32 mdlFlagTest(s32);
 
 /* Seed the saved-score floor and score snapshots, then clear the current score. */
@@ -31,7 +31,7 @@ void mnuInitializeHighScoreState(MnuShootingWork *work) {
     work->peakScore = datGameState->highScore;
     work->pendingScore = datGameState->highScore;
     work->currentScore = 0;
-    func_0035B6E0("************************Score Init!![%d]\n",
+    sdfDebugPrintf("************************Score Init!![%d]\n",
                   datGameState->highScore);
 }
 
@@ -45,7 +45,7 @@ void func_0031A730(MnuShootingWork *work) {
         work->pendingScore = peakScore;
         pendingScore = peakScore;
     }
-    func_0035B6E0("************************Score SetGlobal!![%d / %d]\n", (s32)pendingScore, (s32)peakScore);
+    sdfDebugPrintf("************************Score SetGlobal!![%d / %d]\n", (s32)pendingScore, (s32)peakScore);
 }
 
 
@@ -59,7 +59,7 @@ void mnuUpdateHighScoreFlag(MnuShootingWork *work) {
     } else {
         mdlFlagClear(0x815);
     }
-    func_0035B6E0("************************Score Update!![%d / %d]\n",
+    sdfDebugPrintf("************************Score Update!![%d / %d]\n",
                   datGameState->highScore, work->pendingScore);
 }
 
@@ -70,7 +70,7 @@ void func_0031A7F8(MnuShootingWork *work) {
 
     work->peakScore = pendingScore;
     work->currentScore = pendingScore;
-    func_0035B6E0("************************Score Reset!![%d]\n", pendingScore);
+    sdfDebugPrintf("************************Score Reset!![%d]\n", pendingScore);
 }
 
 /* Clamp/quantize progress; reaching the last band starts the timed completion state. */

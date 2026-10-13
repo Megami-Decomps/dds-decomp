@@ -5,6 +5,7 @@
 #include "sdf.h"
 #include "sdf_texture_lists.h"
 #include "sdf_draw.h"
+#include "sdf_resource_list_item.h"
 #include "ee_mmi.h"
 #include "sdf_stream_read.h"
 #include "sdf_dev_event.h"
@@ -801,7 +802,6 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
 }
 
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32);
-extern void sdfAppendResourceListItem(DevRequest *, u32);
 
 DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHeader *resource) {
     s32 i = 0;
@@ -812,7 +812,7 @@ DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHead
         entry = (const s32 *)((const u8 *)resource + sizeof(*resource));
         do {
             i++;
-            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(
+            sdfAppendResourceListItem(handle, sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(
                 (void *)((const u8 *)resource + *entry))));
             entry++;
         } while (i != count);

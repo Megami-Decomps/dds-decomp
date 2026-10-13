@@ -14,7 +14,7 @@ enum {
 
 
 extern char D_00414478[];
-extern void func_0035B6E0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 extern f32 D_003AF1A0[4];
 extern f32 D_003AF190[4];
 
@@ -33,7 +33,7 @@ void effReleaseBattleVoiceOwner(BattleEffect *owner) {
     }
     sndUnlinkVoice(owner);
     owner->state->active--;
-    func_0035B6E0(D_00414478, owner->kind, owner->state,
+    sdfDebugPrintf(D_00414478, owner->kind, owner->state,
                   owner->state->active);
     sdfReleaseChipBlock(owner);
 }

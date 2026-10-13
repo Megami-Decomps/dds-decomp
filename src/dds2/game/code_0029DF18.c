@@ -778,7 +778,7 @@ void mnuPlayTitleVoiceFile(char *voiceArgument) {
     char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
     TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
-        func_0035B6E0(D_00428610);
+        sdfDebugPrintf(D_00428610);
         sdfSoundStopNamedPlayback();
     }
     func_0035C860(voicePath, D_00428628, D_003E09F0 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);

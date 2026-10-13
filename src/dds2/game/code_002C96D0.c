@@ -3214,7 +3214,7 @@ s32 func_002D0498(void) {
         if (startBranchFlag) {
             mtrMantraEventBitReset();
             ptyResetPartyRecordsAndProfiles();
-            func_0035B6E0("scd:hard init\n");
+            sdfDebugPrintf("scd:hard init\n");
         }
     } else {
         mdlFlagClear(0x80E);
@@ -3387,7 +3387,7 @@ void fileReleaseMenuFlowResource(void) {
 extern char D_0042B920[];
 
 void func_002D0AB8(void) {
-    func_0035B6E0(D_0042B920);
+    sdfDebugPrintf(D_0042B920);
 }
 
 extern char D_0042B938[];
@@ -3396,7 +3396,7 @@ void fileSaveAndDisplayCurrentMoney(void) {
     DatGameState *state = datGameState;
     u32 money = state->header.unk20;
     state->savedCurrency = money;
-    func_0035B6E0(D_0042B938, money);
+    sdfDebugPrintf(D_0042B938, money);
 }
 
 typedef struct FileMultiFlagBonus {
@@ -3408,7 +3408,7 @@ typedef struct FileMultiFlagBonus {
 extern FileMultiFlagBonus D_003E8DD0[6];
 extern s8 (*D_00435E3C)[6];
 extern s32 dds3FindEntryIndex(s32);
-extern s32 func_0035B6E0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */
@@ -3429,7 +3429,7 @@ s32 func_002D0B08(s32 unitId) {
     if (party->flags & 0x8000) {
         return 0;
     }
-    func_0035B6E0(D_0042B950, unitId);
+    sdfDebugPrintf(D_0042B950, unitId);
     changed = 0;
     party->flags |= 0x8000;
     if (unitId != 7) {
@@ -5136,7 +5136,7 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
 extern u8 D_00437E28[];
 
 FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
-    func_0035B6E0(D_00437E28);
+    sdfDebugPrintf(D_00437E28);
     return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 
