@@ -3900,6 +3900,10 @@
 0x00261310	mnuCampDisableUnavailableItemEntries	inferred	readability/matching review (QP16)
 0x002613C8	mnuCampScalePriceByTier	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2072; Applies the first price percentage tier covering the selected quantity; selector zero uses the current progress-slot percentage.
 0x00261480	mnuCampAdvanceCounter	inferred	Adds a delta to the scene counter, clamps to [1, max] and flags saturation; mode 3 also rescales the record value. [names_M44_Mid3.tsv]
+0x00261538	mnuCampAppendRankedItemRows	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2120; Appends eligible non-bullet, nonzero entries from the active ranked-stock row.
+0x00261670	mnuCampRebuildItemStockWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2162; Rebuilds the stock item window, appends ranked-stock entries, and initializes its draw context.
+0x00261850	mnuCampAppendRankedFilteredRows	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2212; Appends active ranked-stock entries that match the selected bullet-or-skill filter.
+0x002619A8	mnuCampRebuildFilteredStockWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2256; Rebuilds a stock window for the selected bullet-or-skill filter and appends matching ranked entries.
 0x00261D78	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]
 0x00261E10	evtIsFadeDispatchIdle	inferred	Returns true only when no fade is active and the associated dispatch-status function returns zero.
 0x00261E80	evtInitializeSelectedSlot	inferred	Initializes the context's scene object, retrieves the selected slot, and stores that slot in both the scene record and context.

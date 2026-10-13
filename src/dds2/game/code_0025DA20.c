@@ -2117,7 +2117,7 @@ extern void func_002B9808();
 extern s32 func_002958B0();
 extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
-s32 func_00261538(MenuTerminalContext *scene) {
+s32 mnuCampAppendRankedItemRows(MenuTerminalContext *scene) {
     s32 rowIndex;
     ShopRankPriceRow *row;
     MenuWindowContainer *window;
@@ -2157,9 +2157,9 @@ s32 func_00261538(MenuTerminalContext *scene) {
     return 0;
 }
 
-s32 func_00261850(MenuTerminalContext *scene, s32 filterMode);
+s32 mnuCampAppendRankedFilteredRows(MenuTerminalContext *scene, s32 filterMode);
 
-s32 func_00261670(MenuTerminalContext *scene) {
+s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *scene) {
     MenuTerminalWindowState *buffer;
     u8 *entry;
     u32 i;
@@ -2200,7 +2200,7 @@ s32 func_00261670(MenuTerminalContext *scene) {
             node->flags48 = 1;
         }
     }
-    func_00261538(scene);
+    mnuCampAppendRankedItemRows(scene);
     mnuSelectFirstListNode(scene->window->list);
     scene->window->list->drawCallback = func_002958B0;
     buffer = sdfAllocSizeClassBlock(0x14);
@@ -2209,7 +2209,7 @@ s32 func_00261670(MenuTerminalContext *scene) {
     return scene->window->list->count;
 }
 
-s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
+s32 mnuCampAppendRankedFilteredRows(MenuTerminalContext *scene, s32 filterMode) {
     s32 rowIndex;
     ShopRankPriceRow *row;
     u32 i;
@@ -2253,7 +2253,7 @@ s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
     return 0;
 }
 
-s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
+s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *scene, s32 filterMode) {
     MenuTerminalWindowState *buffer;
     struct MenuListNode *node;
     u8 *entry;
@@ -2300,7 +2300,7 @@ s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
             node->flags48 = 1;
         }
     }
-    func_00261850(scene, filterMode);
+    mnuCampAppendRankedFilteredRows(scene, filterMode);
     mnuSelectFirstListNode(scene->window->list);
     scene->window->list->drawCallback = func_002958B0;
     buffer = sdfAllocSizeClassBlock(0x14);
@@ -2629,7 +2629,7 @@ void evtInstallStateTableB(s32 stateAddress) {
 s32 func_00262270(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        func_00261670(stateAddress);
+        mnuCampRebuildItemStockWindow(stateAddress);
     }
     return 1;
 }
@@ -2756,7 +2756,7 @@ void evtInstallStateTableC(s32 stateAddress) {
 s32 func_00262678(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        func_002619A8(stateAddress, 1);
+        mnuCampRebuildFilteredStockWindow(stateAddress, 1);
     }
     return 1;
 }
@@ -2873,7 +2873,7 @@ void func_00262A48(s32 stateAddress) {
 s32 func_00262A88(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     if (((MenuTerminalContext *)stateAddress)->phase == 1) {
-        func_002619A8(stateAddress, 3);
+        mnuCampRebuildFilteredStockWindow(stateAddress, 3);
     }
     return 1;
 }
@@ -4122,8 +4122,8 @@ s32 evtMenuPersistSelectedSlot(KwlnTask *task) {
 }
 
 extern void mnuSetFlagForMenuEntry(s32);
-extern s32 func_00261670(MenuTerminalContext *);
-extern s32 func_002619A8(MenuTerminalContext *, s32);
+extern s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *);
+extern s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *, s32);
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
 s32 func_002655C0(KwlnTask *callback) {
@@ -4153,15 +4153,15 @@ s32 func_002655C0(KwlnTask *callback) {
         if (context->advancedSlots != 0) {
             switch (choice) {
             case 1:
-                func_00261670(context);
+                mnuCampRebuildItemStockWindow(context);
                 mnuSetPopupEntryFlagged(popup, D_003CE4B4);
                 break;
             case 2:
-                func_002619A8(context, 1);
+                mnuCampRebuildFilteredStockWindow(context, 1);
                 mnuSetPopupEntryFlagged(popup, D_003CE4D0);
                 break;
             case 3:
-                func_002619A8(context, 3);
+                mnuCampRebuildFilteredStockWindow(context, 3);
                 mnuSetPopupEntryFlagged(popup, D_003CE4EC);
                 break;
             case 4:
