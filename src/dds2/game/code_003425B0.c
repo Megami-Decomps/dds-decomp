@@ -1492,8 +1492,6 @@ void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s3
     sdfSoundAppendNode(node);
 }
 
-extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
-
 void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, s32 source, s32 size, SdfTex *resource) {
     SdfStreamParams local = *params;
     switch (resource->pixelFormat) {

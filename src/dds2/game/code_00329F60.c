@@ -1056,7 +1056,6 @@ void sdfTexListInsert(SdfTex *texture) {
     sdfResourceListHead = texture;
 }
 
-extern void sdfTexAllocatePaletteData(SdfTex *texture);
 extern void sdfTexCopyImageData(SdfTex *texture, void *source);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
@@ -1080,7 +1079,6 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
 }
 
 extern SdfTexResource *sdfTexAllocHead(s32, s32, s32);
-extern void sdfTexAllocatePaletteData(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
 SdfTex *sdfTexClone(SdfTex *source) {

@@ -38,16 +38,10 @@ typedef struct EffBattleTexHeaders {
     u8 *slot2; // 0x580
 } EffBattleTexHeaders;
 
-extern u8 sdfTexGetPaletteCount(SdfTex *texture);
-
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
 
 extern u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height,
     u32 format, u8 *pixels, s32 borrowPixels);
-
-extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
-
-extern u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 
 extern u32 D_003BC950;
 

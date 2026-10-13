@@ -16,8 +16,6 @@ void *memcpy(void *arg0, void *arg1, u32 arg2);
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
-u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
-u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,
     u32 primaryResourceWord, s32 pixelFormat, u32 secondaryResourceWord,
     s32 clutFormat, s32 textureColorComponents, s32 maxMipLevel,
@@ -159,10 +157,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 }
 
 extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
-extern u8 sdfTexGetPaletteCount(SdfTex *);
-extern void sdfTexAllocatePaletteData(SdfTex *);
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
-extern s32 sdfTexFormatSizeHint(s32);
 extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
 
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
