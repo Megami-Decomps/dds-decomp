@@ -2257,7 +2257,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     defined earlier: all `bnel`; only the callee defined above the caller
     gives `bne`). DDS1 `fldCheckSceneReady` (1 of 15 words) and the
     effEvent `func_00190708` residual are this: they stay one word short until
-    the callee (`func_001462D8`, 429 asm lines) is itself decompiled. Do not
+    the callee (`fldUpdateAutomapInput`, 429 asm lines) is itself decompiled. Do not
     fight it with source shapes; park it as "blocked by callee" and revisit
     when the callee lands. Not every plain-`bne` residual is this: DDS2
     `func_0021B4C0` calls `btlGetRuntime`, which lives in another unit.

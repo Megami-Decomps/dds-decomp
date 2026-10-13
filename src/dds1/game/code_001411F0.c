@@ -1131,7 +1131,7 @@ extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
 extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
 
 
-void func_00142D78(void) {
+void fldDrawAutomapScene(void) {
     s32 proposed;
     s32 selectedFloor;
     s32 itemVisible;
@@ -1544,7 +1544,7 @@ void func_00142D78(void) {
         }
         /* The fade gate deliberately stays open for the player-marker tail. */
 
-/* Source-only reconstruction of func_00142D78, starting at 0x00143EC0.
+/* Source-only reconstruction of fldDrawAutomapScene, starting at 0x00143EC0.
  * Continues inside the D_003BAF00 >= 128 block after the icon loops.
  * Function-scope locals and declarations are supplied by the prefix. */
 
@@ -2011,7 +2011,7 @@ u32 fldGetSceneReadyFlag(void) {
 /* Handle automap input, clamp the grid position, and refresh its camera. */
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A05D8);
 
-void func_001462D8(void) {
+void fldUpdateAutomapInput(void) {
     f32 focus[4];
     f32 eye[4];
     f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
@@ -2412,14 +2412,14 @@ void fldCheckSceneReady(void) {
         return;
     }
     if (fldSceneReady == 1) {
-        func_001462D8();
+        fldUpdateAutomapInput();
     }
 }
 
-void func_001470E0(void) {
+void fldDrawAutomapWhenReady(void) {
     if (fldSceneReady == 1) {
         fldDrawFieldBackdropFrame();
-        func_00142D78();
+        fldDrawAutomapScene();
     }
 }
 
@@ -3177,7 +3177,7 @@ s32 fldGetCurrentSceneSelectionResource(void) {
     return D_003D46C0[index].unk0[1];
 }
 
-void func_0014A298(u32 value) {
+void fldSetTitleDrawMode(u32 value) {
     D_003BAFB0 = value;
 }
 
@@ -3185,7 +3185,7 @@ s32 fldTitleIsActive(void) {
     return kwlnTaskGetTaskByName(fldTitleTaskName) != 0;
 }
 
-void func_0014A2C8(void) {
+void fldBeginTitleAnimation(void) {
     D_003BAFA8 = 0;
     D_003BAFA0 = 1;
 }
