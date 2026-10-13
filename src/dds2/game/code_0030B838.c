@@ -129,7 +129,7 @@ extern s32 mdlCollectFlagBitsIntoMask(void);
 extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern s16 sdfGetCounterChannelValueAtIndex(s32);
-extern void func_0030C250(s32, s32);
+extern void sdfSetLocalMapCounterMarkerState(s32, s32);
 extern void sdfDrawCounterMapSelectionRow(s32, s32, s32, SdfCounterRuntime *, SdfCounterChannel *, s32);
 extern u8 D_00400AF0[];
 
@@ -318,7 +318,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Fixed-width names identify the corresponding local-map model chain. */
-void func_0030C250(s32 index, s32 value) {
+void sdfSetLocalMapCounterMarkerState(s32 index, s32 value) {
     char names[7][16] = {
         "md_01all_02",
         "md_01all_03",
@@ -388,7 +388,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
         ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x7E;
     }
     sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime, index);
-    func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 0xB);
+    sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 0xB);
     return 1;
 }
 
@@ -451,8 +451,8 @@ s32 sdfPollCounterSelectionInput(void) {
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
                 index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
-            func_0030C250(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
@@ -463,8 +463,8 @@ s32 sdfPollCounterSelectionInput(void) {
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
                 index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3));
-            func_0030C250(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
@@ -474,8 +474,8 @@ s32 sdfPollCounterSelectionInput(void) {
         if (D_00438894 != index) {
             sdfCounterSelectChannelByIndex((SdfCounterRuntime *)sdfActiveCounterRuntime,
                 D_00438894);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 10);
-            func_0030C250(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 10);
+            sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
         }
         sdfSetSelectedIndex(D_00438894);
         sndSetSequenceVolumePan(10, 127, 63);
