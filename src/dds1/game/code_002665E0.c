@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "dds3_world_value.h"
 #include "mnu_sound_resource_path_api.h"

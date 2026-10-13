@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
 #include "itf_mes_window.h"
 #include "sdf_packet_list.h"
@@ -48,9 +49,6 @@ extern void itfQueueSpriteQuadPacket(UiSprite *sprite);
 extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *seq);
 
 extern void itfMesSetRowItemFlag(FrFontGlyph *sequence, s32 index, s32 count, s32 selected);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern s8 D_00324530[];
 
 

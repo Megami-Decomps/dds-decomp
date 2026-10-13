@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
 #include "dds3_path.h"
@@ -28,7 +29,6 @@
  * step-before-index, and all callers are verified. */
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void *dds3GetWorldObject(void);
 extern void func_00133F08(void);
@@ -2045,9 +2045,6 @@ extern void mnuCreateCampTasks(void);
 extern void evtSetSolarOverlayFullyVisible(void);
 
 extern void fldApplySkyLightSetToPlayerVU(void);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern void fldClearSceneLifecycleFlags(u32 mask);
 
 extern u8 fldTestSceneLifecycleFlags(u32 mask);

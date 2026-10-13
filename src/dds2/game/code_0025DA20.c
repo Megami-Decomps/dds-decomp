@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_chip.h"
 #include "dat_command.h"
 #include "fr_font.h"
@@ -3276,7 +3277,6 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
 }
 
 extern s32 mnuTickCommandWaitPhase(MenuTerminalContext *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_003CE594[];
 
 /* Poll command phases, adjust the idle quantity selection, and play UI sounds. */
@@ -3676,8 +3676,6 @@ extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
 extern u32 mnuCampChooseSolarWeightedOption(s32 row);
 extern u8 mnuCampChooseWeightedTableValue(void);
 extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 s32 func_00264710(KwlnTask *task) {
     MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     struct MenuList *activeList = scene->window->list;

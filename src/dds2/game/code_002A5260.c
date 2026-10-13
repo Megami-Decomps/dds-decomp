@@ -1,5 +1,6 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
@@ -121,7 +122,6 @@ extern void *memset(void *, s32, u32);
 extern void func_00345BA0(void *, SdfPoolNode *);
 extern void func_002A7B28(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawTitleMenuFadeOverlay(s32 mode, s32 frame) {
@@ -341,7 +341,6 @@ mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct
 
 extern s8 D_0037F510[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u32 mnuGetMovieMenuSelectionIndex(void);
 
 s32 mnuHandleMovieMenuInput(void) {

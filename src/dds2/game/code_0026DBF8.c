@@ -1,6 +1,7 @@
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"

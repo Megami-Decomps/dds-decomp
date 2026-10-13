@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
@@ -32,7 +33,6 @@ extern u8 brsGetLevelStepForValue(s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void dspSetActive(s32);
 extern s32 dspStartEntry(s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern char D_004379B0[];
 extern char D_004379B8[];
 

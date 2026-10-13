@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
@@ -184,9 +185,6 @@ extern s32 D_003D62A8[];
 extern s32 fldCurrentBgmId[];
 
 extern void func_002E8DD0();
-
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
 extern void sndStartTrackDefault(s32 arg0);
 
 

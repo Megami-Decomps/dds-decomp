@@ -3,6 +3,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
@@ -67,8 +68,6 @@ extern u32 fldGetSceneReadyFlag(void);
 extern void kwlnFadeStartOut(s32);
 extern void kwlnFadeStartIn(s32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 typedef struct EffNode EffNode;
 
 extern u8 fldTestSceneControlFlags(u32);

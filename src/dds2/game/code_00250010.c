@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "dat_state.h"
 #include "sdf_texture_offset_list.h"
 #include "itf_mes_window.h"
@@ -140,9 +141,6 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 extern void sndStartTrackExtended(s32 track);
 
 extern void sndReleaseTrackHandle(u32 sound);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern void func_00341C78(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, EvtRuntime *);

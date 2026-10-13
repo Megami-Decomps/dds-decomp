@@ -1,4 +1,5 @@
 #include "mnu_mantra.h"
+#include "snd_sequence_volume_pan.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -446,7 +447,6 @@ extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);
 extern void mnuShowMantraUnitPanel(struct MantraDrawPool *pool);
@@ -909,8 +909,6 @@ extern s8 D_0037F510[];
 extern MenuListNode *mnuRetreatListCursorDefault(MenuList *);
 extern MenuListNode *mnuAdvanceListCursorDefault(MenuList *);
 extern void mnuClearListFlagsOneAndTwo(MenuList *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 /* Move the mantra selection, rebuild its panel, or report confirm/cancel. */
 s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     s32 sound = 0;

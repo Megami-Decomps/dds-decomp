@@ -16,7 +16,6 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 extern void evtStageTestQueueMotion(s32, u32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern char D_003BC550[];
 extern char D_003BC558[];
 extern char *D_0036D3A8[];
@@ -320,11 +319,11 @@ s32 mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
 }
 
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "mnu_result.h"
 
 
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
 void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {

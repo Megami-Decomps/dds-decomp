@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_scale_params.h"
 #include "ee_mmi.h"
@@ -253,7 +254,6 @@ extern s32 fileOnAllWritten(void);
 
 extern void fileSetMemoryCardOperationActive(void);
 extern s8 D_0037F510[];
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(s32 result);
 

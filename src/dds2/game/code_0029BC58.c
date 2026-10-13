@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_result.h"
 

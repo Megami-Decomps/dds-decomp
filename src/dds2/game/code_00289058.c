@@ -1,6 +1,7 @@
 #include "mnu_mantra.h"
 #include "prf_requirement.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "mnu_list.h"
 #include "dat_state.h"
 #include "dsp_name.h"
@@ -507,8 +508,6 @@ s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *object) {
 extern s8 D_0037F510[64];
 extern s32 mnuNavigateMantraSelector(MnuStatusResource *, s8);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
-
 s32 mnuPollMantraNodeNavigation(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     s32 sound = 0;

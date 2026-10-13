@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -161,9 +162,6 @@ extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern u8 D_0037F510[];
 
 extern char D_004178A8[];

@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
 #include "snd_pad.h"
 #include "eff_random.h"
@@ -138,9 +139,6 @@ typedef struct SoundTask {
 } SoundTask;
 
 extern SndPad D_00324510;
-
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern u32 kwlnDrawControlFlags;

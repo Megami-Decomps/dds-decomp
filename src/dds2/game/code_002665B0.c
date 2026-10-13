@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
