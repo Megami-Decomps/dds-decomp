@@ -473,7 +473,7 @@ f32 fldSnapAngleToCardinalDirection(f32 angle) {
 extern f32 sdfAtan2(f32 y, f32 x);
 
 /* Direction in degrees from two X/Z positions, preserving the field's 3.14 PI. */
-f32 func_001228D8(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
+f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
     f32 dx;
     f32 dz;
     f32 result;
@@ -498,10 +498,10 @@ f32 func_001228D8(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
     return result;
 }
 
-extern f32 func_001228D8(f32, f32, f32, f32);
+extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
 
 f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
-    s32 angle = (s32)(360.0f - func_001228D8(ax, ay, bx, by) + 90.0f);
+    s32 angle = (s32)(360.0f - fldGetDirectionAngleBetweenXZPositions(ax, ay, bx, by) + 90.0f);
     return (f32)(angle % 360);
 }
 
