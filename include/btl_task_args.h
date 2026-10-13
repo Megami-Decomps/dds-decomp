@@ -39,4 +39,47 @@ typedef struct BtlActorModelBlendArgs {
 } BtlActorModelBlendArgs;
 typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
 
+/* Shared 0x28-byte record used by battle runtime callbacks and task setup. */
+typedef struct BtlRuntimeTaskArgs {
+    union {
+        void *actor;
+        s32 value;
+    };
+    union {
+        s32 option;
+        struct BtlUnit *unitA; /* Kind 0x2A: first linked camera unit. */
+        u16 optionId;
+        f32 scale;
+    };
+    union {
+        u32 unk_08; /* Kind 9: indexed-unit-effect value; kind 0x2A: second linked camera unit. */
+        struct BtlUnit *unitB;
+    };
+    union {
+        u32 unk_0C;
+        struct BtlUnit *unitC; /* Status callback receives a unit pointer in this slot. */
+        f32 scale2;
+        s8 mode;
+    };
+    u32 unk_10;
+    union {
+        u32 unk_14;
+        f32 scale14;
+    };
+    union {
+        u32 unk_18;
+        struct {
+            u8 flag18;
+            u8 flag19;
+        };
+    };
+    u32 unk_1C;
+    u32 unk_20;
+    u32 unk_24;
+} BtlRuntimeTaskArgs;
+typedef char BtlRuntimeTaskArgsSizeCheck[sizeof(BtlRuntimeTaskArgs) == 0x28 ? 1 : -1];
+typedef char BtlRuntimeTaskArgsUnitAOffsetCheck[(u32)&((BtlRuntimeTaskArgs *)0)->unitA == 0x4 ? 1 : -1];
+typedef char BtlRuntimeTaskArgsUnitBOffsetCheck[(u32)&((BtlRuntimeTaskArgs *)0)->unitB == 0x8 ? 1 : -1];
+typedef char BtlRuntimeTaskArgsUnitCOffsetCheck[(u32)&((BtlRuntimeTaskArgs *)0)->unitC == 0xC ? 1 : -1];
+
 #endif /* BTL_TASK_ARGS_H */
