@@ -14,7 +14,6 @@ extern void mnuCreateConfigTasks(s32 mode);
 
 typedef struct FrFontGlyph FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern char D_003BC6C8[];

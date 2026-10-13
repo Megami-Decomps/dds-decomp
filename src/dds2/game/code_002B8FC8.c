@@ -829,7 +829,6 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) 
 extern struct FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern const char D_00437C28[];
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
 void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,

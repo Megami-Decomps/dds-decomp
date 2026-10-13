@@ -2,6 +2,7 @@
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "fr_font_context.h"
+#include "fr_font.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
@@ -53,7 +54,6 @@ struct FrFontGlyph;
 
 extern void frFontDrawGlyphChain(u64, s32, s32);
 extern void frFontSetChildColors(struct FrFontGlyph *, u32);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
 extern u64 itfCreateTightFont3TextGlyph(s32, s32, u64, u64, u64, u64);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);

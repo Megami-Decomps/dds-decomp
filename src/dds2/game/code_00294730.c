@@ -347,7 +347,6 @@ struct FrFontGlyph;
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
 

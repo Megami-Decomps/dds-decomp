@@ -190,7 +190,6 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) 
     }
 }
 
-extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern const char D_003BC718[];

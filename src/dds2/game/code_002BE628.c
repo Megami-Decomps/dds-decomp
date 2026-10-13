@@ -1355,7 +1355,6 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
 extern void func_002C2AE8(s32, s32, s32, u32, s32, MenuPanelItem *, u32);
-extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 
 void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
                   MenuPanelItem *item, u32 flags) {
