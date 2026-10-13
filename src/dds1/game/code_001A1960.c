@@ -468,7 +468,7 @@ s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUni
     return btlApplyCommandAbilityMultiplier(&snapshot, command);
 }
 
-s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
+s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
     BtlUnit snapshot = *base;
     s32 totalMaxHp = 0;
