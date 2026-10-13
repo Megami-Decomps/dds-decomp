@@ -144,11 +144,11 @@ void mdlCreateViewerPackageTask(void) {
     kwlnTaskCreate(D_0042D4D0, 0x2AF8, 0, 0, mdlAdvanceViewerPackageTask, 0, 0);
 }
 
-u8 func_00316ED0(void) {
+u8 mdlViewerPackageTaskExists(void) {
     return kwlnTaskGetTaskByName(D_0042D4D0) != 0;
 }
 
-u32 func_00316EF8(void) {
+u32 mdlStopViewerPackageTask(void) {
     mnuMovieTaskState = 2;
     D_00435BB0 = 1;
     func_00316FA8(D_0043891C);

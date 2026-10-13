@@ -6064,6 +6064,8 @@
 0x00316E08	itfSetPackedRgbAlpha	inferred	Splits an AARRGGBB color into the object's RGB and alpha fields.
 0x00316E38	itfCopyColorFields	inferred	Copies RGB, alpha, a float, and one additional word from a source color record.
 0x00316E78	mdlCreateViewerPackageTask	inferred	Initializes viewer globals, allocates viewer work and creates the named task with polling callback. [names_reviewed19.tsv]
+0x00316ED0	mdlViewerPackageTaskExists	inferred	Returns whether the named viewer-package task created by mdlCreateViewerPackageTask is present; probes kwlnTaskGetTaskByName with the same task-name object.
+0x00316EF8	mdlStopViewerPackageTask	inferred	Marks the viewer task stopping, releases its shooting work, destroys the named task hierarchy, then resumes effect-queue frame advance.
 0x00316F40	mdlAllocateViewerPackageWork	inferred	Allocates and zeroes viewer task work, stores memory block handle and initializes internal state. [names_reviewed19.tsv]
 0x00316FC8	mdlAdvanceViewerPackageTask	inferred	Checks viewer package work status, updates on success, invokes failure handler on negative status. [names_reviewed19.tsv]
 0x00317010	evtCallShooting	inferred	confidence=high; src/dds2/game/code_00316E08.c:func_00317010; Prints the call_shooting console line, submits admin mode 0x1D and destroys the named script processes. [names_qp9.tsv]
