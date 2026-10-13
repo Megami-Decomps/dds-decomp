@@ -337,11 +337,7 @@ extern FldEncEntry *fldEncounterRollTable;
 
 /* Mode 14 copies this eight-byte request. The packed selection contains
  * group:8, entry:8, and scene:16; its consumer reads both words as signed. */
-typedef struct FieldEncounterRequest {
-    s32 tableIndex;
-    s32 encounterSelection;
-} FieldEncounterRequest;
-typedef char FieldEncounterRequest_size_check[(sizeof(FieldEncounterRequest) == 8) ? 1 : -1];
+#include "fld_encounter_request.h"
 extern FieldEncounterRequest D_00435F98;
 
 extern void fldResetEventSceneState(void);
