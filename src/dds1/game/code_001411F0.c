@@ -999,7 +999,7 @@ typedef struct {
 extern FldProjectedSprite D_0033EBA0[];
 extern SdfTex *D_003D40A0[4];
 
-void func_00142800(f32 x, f32 y, s32 index, u32 color) {
+void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
     FldProjectedSprite *sprite = &D_0033EBA0[index];
     s32 anchorY = sprite->anchorY;
     s16 u = sprite->u;
@@ -1537,7 +1537,7 @@ void func_00142D78(void) {
                                 if (offsetX < 80000.0f && offsetZ < 80000.0f) {
                                     fldProjectPointSetupAlt(&projectedX, &projectedY,
                                                             x, D_003BAEF8, z);
-                                    func_00142800(projectedX, projectedY,
+                                    fldDrawProjectedMapIcon(projectedX, projectedY,
                                                   spriteIndex, 0x80808080);
                                 }
                             }
