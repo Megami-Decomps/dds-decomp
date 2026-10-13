@@ -108,7 +108,7 @@ void itfReleaseWideSlot(WideSlot *slot) {
     slot->flags = slot->flags & ~SLOT_IN_USE;
 }
 
-extern void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
+extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
 extern s32 func_0035C860(char *destination, const char *format, ...);
 
 void func_0031DA38(WideSlotPool *pool, u32 flags) {
@@ -157,10 +157,10 @@ void func_0031DA38(WideSlotPool *pool, u32 flags) {
             offset = (s32)((f32)-width * 0.5f);
             for (digit = 0; digit < length; digit++, offset += 10) {
                 if (((slot->flags >> 1) & 0xFF) == 20) {
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, text[digit] - 7, 0x53);
                 } else {
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, text[digit] + 3, 0x53);
                 }
             }
@@ -168,23 +168,23 @@ void func_0031DA38(WideSlotPool *pool, u32 flags) {
                 offset += 13;
                 switch ((slot->flags >> 1) & 0xFF) {
                 case 1:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 61, 0x53);
                     break;
                 case 2:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 62, 0x53);
                     break;
                 case 4:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 63, 0x53);
                     break;
                 case 8:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 64, 0x53);
                     break;
                 case 20:
-                    func_0031CE60(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
+                    itfDrawCenteredIndexedImage(x + offset, (s32)((f32)(y + 32) - rise * 16.0f), 0,
                         (s32)(opacity * 128.0f), 0, 75, 0x53);
                     break;
                 }

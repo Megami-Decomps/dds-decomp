@@ -67,7 +67,7 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 
 #define INDEXED_SPRITE(index) (((EffectSlotSet *)D_0045C840[D_0040AE28[index][0]])->workEntries + D_0040AE28[index][1])
 
-void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context) {
+void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context) {
     effDrawTextureSlotWithBlendedCornerColors(((x + D_0040AE28[index][2]) << 4) -
                      (INDEXED_SPRITE(index)->geometry.bounds[2] >> 1),
                   ((y + D_0040AE28[index][3]) << 3) -
@@ -85,7 +85,7 @@ void itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flag
 
 INCLUDE_ASM(const s32, "game/code_0031CA10", func_0031CF88);
 
-void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {
+void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {
     INDEXED_SPRITE(index)->geometry.angleDegrees = angle * 57.29577637f;
     effDrawTextureSlotWithBlendedCornerColors((x + D_0040AE28[index][2]) << 4,
                   (y + D_0040AE28[index][3]) << 3,

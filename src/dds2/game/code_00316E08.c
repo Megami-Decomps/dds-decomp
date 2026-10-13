@@ -829,10 +829,10 @@ extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
 extern MenuRuntimeList *func_00321ED8(void);
 extern MenuRuntimeList *func_00321EC8(void);
 extern void func_0031D558(ModelInstanceWork *work, u32 flags);
-extern void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
+extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
 extern void func_0031CF88(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale,
                           s32 flags, s32 index, s32 context);
-extern void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle);
+extern void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle);
 extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
 extern void func_0031CBC8(MnuSectionModelWork *work, s32 paused);
 extern void func_0031DA38(struct WideSlotPool *work, u32 flags);
@@ -883,25 +883,25 @@ s32 func_00318C00(MnuShootingWork *work) {
                 case 2: {
                     s32 drawX = x + originX;
                     s32 drawY = y + originY;
-                    func_0031CE60(drawX, drawY, 0, 0x80, 0, 0x42, 0x53);
-                    func_0031CE60(drawX, drawY, 0, 0x80, 0, 0x43, 0x53);
+                    itfDrawCenteredIndexedImage(drawX, drawY, 0, 0x80, 0, 0x42, 0x53);
+                    itfDrawCenteredIndexedImage(drawX, drawY, 0, 0x80, 0, 0x43, 0x53);
                     break;
                 }
                 case 3:
-                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x44, 0x53);
+                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x44, 0x53);
                     break;
                 case 4:
-                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x45, 0x53);
+                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x45, 0x53);
                     break;
                 }
                 break;
             case 5:
                 switch ((s32)(stateWord >> 1) & 0xF) {
                 case 3:
-                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x48, 0x53);
+                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x48, 0x53);
                     break;
                 case 4:
-                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x49, 0x53);
+                    itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x49, 0x53);
                     break;
                 }
                 break;
@@ -909,7 +909,7 @@ s32 func_00318C00(MnuShootingWork *work) {
                 mnuUpdateTimedEffectPosition();
                 break;
             default:
-                func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 6, 0x53);
+                itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 6, 0x53);
                 break;
             }
         }
@@ -929,14 +929,14 @@ s32 func_00318C00(MnuShootingWork *work) {
 
             switch (kind) {
             case 1:
-                func_0031D120(x + originX - 8, y + originY - 8, 0, 0x80, 0, 5, 0x53,
+                itfDrawRotatedIndexedImage(x + originX - 8, y + originY - 8, 0, 0x80, 0, 5, 0x53,
                     -(((f32)record->state.directionDegrees * 3.141592503f) / 180.0f + record->angle));
                 break;
             case 2:
                 func_0031CF88(x + originX, y + originY, 0, 0x80, 2.0f, 2.0f, 0, 1, 0x53);
                 break;
             case 3:
-                func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x4A, 0x53);
+                itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x4A, 0x53);
                 break;
             default:
                 func_0031CF88(x + originX, y + originY, 0, 0x80, 4.0f, 4.0f, 0, 0, 0x53);
