@@ -1050,7 +1050,7 @@ extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
 extern s32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 extern void evtCopyRosterTableValue(DatPartyRecord *);
-extern void func_00286618(void);
+extern void mtrRefreshMantraStateForUnit2(void);
 extern void mtrRefreshMantraStateForPartyUnit(void);
 extern void ptyRebuildProfileSkills(s32, DatPartyRecord *);
 void ptyAssignRosterItemAndMarkOwned(DatPartyRecord *entry);
@@ -1155,7 +1155,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
     gameState = datGameState;
     memcpy(&gameState->mantraBits[2], &gameState->mantraBits[1], sizeof(gameState->mantraBits[2]));
     memcpy(gameState->profileBanks[2].records, gameState->profileBanks[1].records, sizeof(gameState->profileBanks[2].records));
-    func_00286618();
+    mtrRefreshMantraStateForUnit2();
     entry->itemId = 0;
 }
 
@@ -1502,7 +1502,7 @@ void dds3ForEachEntry(void) {
     } while (updateIndex < 2);
 }
 
-extern void func_00286670(void);
+extern void mtrRefreshMantraStateForUnit1(void);
 extern void func_00286700(void);
 extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
 extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
@@ -1522,7 +1522,7 @@ void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry) {
             stockId = 8;
             datGameState->mantraBits[1] = datGameState->mantraBits[8];
             datGameState->profileBanks[1] = datGameState->profileBanks[8];
-            func_00286670();
+            mtrRefreshMantraStateForUnit1();
             break;
         case 7:
             stockId = 7;

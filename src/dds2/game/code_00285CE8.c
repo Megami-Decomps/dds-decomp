@@ -295,7 +295,7 @@ void mtrMantraEventBitReset(void) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitReset()]*****************\n");
 }
 
-void func_00286618(void) {
+void mtrRefreshMantraStateForUnit2(void) {
     DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
@@ -307,7 +307,7 @@ void func_00286618(void) {
     }
 }
 
-void func_00286670(void) {
+void mtrRefreshMantraStateForUnit1(void) {
     DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
