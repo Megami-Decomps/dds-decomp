@@ -1135,9 +1135,9 @@ s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     return 0;
 }
 
-extern s32 func_00201900(s32, s16, s8);
+extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
-s32 func_00201900(s32 mask, s16 actionId, s8 force) {
+s32 btlActionMatchesStatMask(s32 mask, s16 actionId, s8 force) {
     s32 i;
     s32 value;
 
@@ -1193,7 +1193,7 @@ s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action) {
         }
         slots = ((BtlActionTask *)task)->actions;
         for (i = 0; i < 8; i++) {
-            if (func_00201900(action, slots[i].actionId, 1) != 0) {
+            if (btlActionMatchesStatMask(action, slots[i].actionId, 1) != 0) {
                 return 1;
             }
         }
@@ -1213,7 +1213,7 @@ s32 func_00201B50(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
-            if (func_00201900(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
+            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
                 return 1;
             }
         }
@@ -1226,7 +1226,7 @@ s32 func_00201BD8(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((btlUnitStatusPair(unit) & 0x221) == 0x201) {
-            if (func_00201900(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
+            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
                 return 1;
             }
         }
