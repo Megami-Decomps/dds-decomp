@@ -177,7 +177,7 @@ extern s32 btlAnyUnitHasActionInSlots();
 
 extern s32 btlCanSpawnAnotherEnemy(s32);
 
-extern s32 func_00213F58(s32, s16, s8);
+extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
 extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
@@ -631,7 +631,8 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
 }
 
 /* Packed-effect callbacks decode the actor from the generic context word. */
-s32 func_00212620(s32 actorAddress, u32 unused) {
+/* Normalize the scene/status/AI-record gate; the callback's second word is unused. */
+s32 btlPassesSceneAndActorRecordGate(s32 actorAddress, u32 unused) {
     s64 result;
 
     result = btlIsSelectedActorStatusAndRecordClear((BtlUnit *)actorAddress);
@@ -1006,11 +1007,13 @@ u8 btlUnitPassesActionTenCheck(u32 unitAddress) {
     return queryResult != 0;
 }
 
-s32 func_00213418(s32 actorAddress, u32 conditionIndex) {
+/* Normalize the requested actor entry-code condition to a boolean. */
+s32 btlQueryActorEntryCondition(s32 actorAddress, u32 conditionIndex) {
     return btlMatchesActorEntryCodeCondition((BtlUnit *)actorAddress, conditionIndex) != 0;
 }
 
-s32 func_00213438(BtlUnit *unit) {
+/* Test record bit 0x2000 only outside actor group 0x200; its meaning is unknown. */
+s32 btlTestRecordFlagOutsidePartyGroup(BtlUnit *unit) {
     u32 flags;
 
     if (unit->status.flags & 0x200) {
@@ -1120,7 +1123,8 @@ s32 btlUnitStatAtLeast(BtlUnit *unit, u32 limit) {
     return 1;
 }
 
-u8 func_00213728(u32 unitAddress) {
+/* Normalize the actor's option-skill availability to a byte boolean. */
+u8 btlQueryActorOptionAvailability(u32 unitAddress) {
     s64 result;
 
     result = btlHasAvailableOption(unitAddress);
@@ -1183,7 +1187,8 @@ u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
     return result == 0;
 }
 
-s32 func_00213930(BtlUnit *actor, u32 unused) {
+/* Normalize the gate requiring status and entry flag 0x40 to be clear. */
+s32 btlPassesStatusEntryGate(BtlUnit *actor, u32 unused) {
     s64 result;
 
     result = btlAreUnitStatusAndEntryFlagsClear(actor);
@@ -1337,7 +1342,8 @@ s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     return 0;
 }
 
-s32 func_00213F58(s32 mask, s16 actionId, s8 force) {
+/* Match a selector stat or encoded mask; force bypasses only the options 1..2 gate. */
+s32 btlActionMatchesStatMask(s32 mask, s16 actionId, s8 force) {
     s32 i;
     s32 value;
 
@@ -1393,7 +1399,7 @@ s32 btlAnyUnitHasActionInSlots(mask, action)
             continue;
         }
         for (i = 0; i < 8; i++) {
-            if (func_00213F58(action, actor->actions[i].actionId, 1) != 0) {
+            if (btlActionMatchesStatMask(action, actor->actions[i].actionId, 1) != 0) {
                 return 1;
             }
         }
@@ -1409,24 +1415,26 @@ s32 btlAnyGroup400HasAction(s32 unused, s32 action) {
     return btlAnyUnitHasActionInSlots(0x400, action);
 }
 
-s32 func_002141A8(s32 unused, s32 action) {
+/* Search eligible group-0x400 actors' stored action IDs with the options gate enabled. */
+s32 btlAnyEnemyActionMatchesSelector(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((btlUnitStatusPair(battler) & 0x421) == 0x401 &&
-            func_00213F58(action, battler->partyRecord.actionSlot, 0)) {
+            btlActionMatchesStatMask(action, battler->partyRecord.actionSlot, 0)) {
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_00214230(s32 unused, s32 battler) {
+/* DDS2 searches party linked actions' primary IDs; retain the different DDS1 traversal. */
+s32 btlAnyPartyActionMatchesSelector(s32 unused, s32 battler) {
     s32 node = (s32)((BattleWork *)btlGetRuntime())->actionActors;
     for (; node != 0; node = (s32)((ActionStateLink *)node)->next) {
         BtlUnit *target = ((ActionStateLink *)node)->unit;
         if (target != 0 &&
             (btlUnitStatusPair(target) & 0x221) == 0x201 &&
-            func_00213F58(battler, ((ActionStateLink *)node)->actions[0].actionId, 0)) {
+            btlActionMatchesStatMask(battler, ((ActionStateLink *)node)->actions[0].actionId, 0)) {
             return 1;
         }
     }
@@ -1637,7 +1645,8 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     return 0;
 }
 
-s32 func_00214928(void) {
+/* Query active/cumulative enemy capacity with a null limit-override requester. */
+s32 btlCheckEnemySpawnCapacity(void) {
     return btlCanSpawnAnotherEnemy(0);
 }
 

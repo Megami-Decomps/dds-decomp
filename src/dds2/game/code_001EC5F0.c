@@ -483,11 +483,11 @@ void btlInitializeCursorForLinkedAction(s32 action) {
 void func_001EC760(void) {
 }
 
-extern void func_001F35C8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Initialize the action's front/back pair from presets rotated with its actor. */
 void btlInitializeRotatedPresetCameraPair(BtlLinkedCommand *action) {
-    func_001F35C8(action, &action->frontCamera, &action->backCamera);
+    btlBuildActorRotatedCameraPresets(action, &action->frontCamera, &action->backCamera);
 }
 
 typedef struct {
@@ -2290,7 +2290,7 @@ void func_001F35C0(void) {
 }
 
 /* vu0 routine: camera preset quaternions are composed with the unit rotation. */
-void func_001F35C8(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quat[4];
     BattlePairCameraPresetSet presets = D_004183D8;
     BtlUnit *unit = action->link->unit;

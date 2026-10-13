@@ -459,7 +459,8 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 maximumCount) {
     return 1;
 }
 
-u8 func_00200308(void) {
+/* Normalize the scene/status/AI-record gate; retain the zero-formal C surface. */
+u8 btlPassesSceneAndActorRecordGate(void) {
     s32 result;
 
     result = btlIsSelectedActorStatusAndRecordClear();
@@ -819,11 +820,13 @@ u8 btlUnitPassesActionTenCheck(u32 unitAddress) {
     return queryResult != 0;
 }
 
-s32 func_00200F00(void) {
+/* Normalize the entry-code query without repairing its native short-arity call. */
+s32 btlQueryActorEntryCondition(void) {
     return btlMatchesActorEntryCodeCondition() != 0;
 }
 
-s32 func_00200F20(BtlUnit *unit) {
+/* Test record bit 0x2000 only outside actor group 0x200; its meaning is unknown. */
+s32 btlTestRecordFlagOutsidePartyGroup(BtlUnit *unit) {
     u32 flags;
 
     if (unit->status.flags & 0x200) {
@@ -897,7 +900,8 @@ s32 btlIsUnitStatAtOrBelowRate(BtlUnit *unit, s32 percentage) {
     return 1;
 }
 
-u8 func_002010D8(void) {
+/* Normalize option-skill availability; retain the zero-formal C surface. */
+u8 btlQueryActorOptionAvailability(void) {
     s32 result;
 
     result = btlHasAvailableOption();
@@ -968,7 +972,8 @@ u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
     return result == 0;
 }
 
-u8 func_002012E0(BtlUnit *actor) {
+/* Normalize the gate requiring status and entry flag 0x40 to be clear. */
+u8 btlPassesStatusEntryGate(BtlUnit *actor) {
     return btlAreUnitStatusAndEntryFlagsClear(actor) != 0;
 }
 
@@ -1135,9 +1140,10 @@ s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     return 0;
 }
 
-extern s32 func_00201900(s32, s16, s8);
+extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
-s32 func_00201900(s32 mask, s16 actionId, s8 force) {
+/* Match a selector stat or encoded mask; force bypasses only the options 1..2 gate. */
+s32 btlActionMatchesStatMask(s32 mask, s16 actionId, s8 force) {
     s32 i;
     s32 value;
 
@@ -1193,7 +1199,7 @@ s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action) {
         }
         slots = ((BtlActionTask *)task)->actions;
         for (i = 0; i < 8; i++) {
-            if (func_00201900(action, slots[i].actionId, 1) != 0) {
+            if (btlActionMatchesStatMask(action, slots[i].actionId, 1) != 0) {
                 return 1;
             }
         }
@@ -1209,11 +1215,12 @@ s32 btlAnyGroup400HasAction(s32 unused, s32 action) {
     return btlAnyUnitHasActionInSlots(0x400, action);
 }
 
-s32 func_00201B50(s32 unused, s32 action) {
+/* Search eligible group-0x400 actors' stored action IDs with the options gate enabled. */
+s32 btlAnyEnemyActionMatchesSelector(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
-            if (func_00201900(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
+            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
                 return 1;
             }
         }
@@ -1222,11 +1229,12 @@ s32 func_00201B50(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00201BD8(s32 unused, s32 action) {
+/* DDS1 searches eligible party actor records, unlike DDS2's linked-action chain. */
+s32 btlAnyPartyActionMatchesSelector(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((btlUnitStatusPair(unit) & 0x221) == 0x201) {
-            if (func_00201900(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
+            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
                 return 1;
             }
         }
@@ -1383,7 +1391,8 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     return 0;
 }
 
-s32 func_00202158(void) {
+/* Query active/cumulative enemy capacity with a null limit-override requester. */
+s32 btlCheckEnemySpawnCapacity(void) {
     return btlCanSpawnAnotherEnemy(0);
 }
 

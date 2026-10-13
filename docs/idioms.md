@@ -11021,3 +11021,29 @@ Both keep their native VM-success result of one and their original load forms.
 The paired `btlRefreshUnitEffects` names do not remove DDS2's additional enemy
 color restoration or draw-control flag update.
 
+## Packed predicate normalization and selector-mask names
+
+The paired scene/actor-record, entry-code, option-availability and status-entry
+gate adapters normalize their backend results without changing the original
+local widths, result widths or call expressions. In particular, DDS1's
+zero-formal and short-arity C surfaces remain intact; these names do not repair
+the native register-carried arguments. `btlTestRecordFlagOutsidePartyGroup`
+excludes actor group `0x200` and tests record bit `0x2000`; no gameplay meaning
+for that bit is established by this naming work.
+
+`btlActionMatchesStatMask` adopts the existing upstream name in both games.
+It compares the signed selector-stat byte directly, or decodes the mask when
+`0x100000` is set. A nonzero force argument bypasses only the command-options
+gate, which otherwise accepts options 1 and 2; it does not bypass the stat
+match. The enemy and party searches preserve their eligibility masks and
+force-zero calls. The party twin implementations differ: DDS1 reads each
+eligible unit record's stored action ID, while DDS2 reads eligible linked
+actions' primary IDs. Do not convert one traversal into the other.
+
+`btlCheckEnemySpawnCapacity` passes a null requester to the existing active-cap,
+cumulative-spawn-cap and optional limit-override query.
+`btlBuildActorRotatedCameraPresets` retains the existing real preset copy and
+VU quaternion composition, including all actor-dependent positions/distances,
+motion state and flags. No layout, declaration order, casts or expressions are
+changed by this naming closure.
+
