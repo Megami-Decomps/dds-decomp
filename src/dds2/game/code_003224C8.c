@@ -55,8 +55,8 @@ extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *recor
                                         s32 x, s32 y, f32 angle);
 
 /* Exported timed-state/runtime-list providers from the preceding unit. */
-extern MenuRuntimeList *func_00321EC8(void);
-extern MenuRuntimeList *func_00321ED8(void);
+extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern void func_00321688(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
 extern void func_00321798(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
 extern void mnuDeactivateListRecord(MenuRuntimeList *, MenuRuntimeRecord *);
@@ -413,7 +413,7 @@ void func_003232A0(MenuWorkEntry *entry, MenuShortRecordList *list) {
 extern f32 sdfVectorLength(const f32 *vector);
 
 s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
-    MenuRuntimeList *runtimeList = func_00321EC8();
+    MenuRuntimeList *runtimeList = mnuGetRuntimeHitTargetList();
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
     s32 entryIndex;
 
@@ -572,7 +572,7 @@ u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
 
 /* Find the first active runtime record overlapping the work entry's hit rectangle. */
 MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *work, struct MnuShootingWork *context) {
-    MenuRuntimeList *list = func_00321EC8();
+    MenuRuntimeList *list = mnuGetRuntimeHitTargetList();
     MenuRegistryParameters *parameters = NULL;
     MenuRuntimeRecord *record;
     s32 left;
@@ -638,8 +638,8 @@ MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *work, struct M
 }
 
 s32 func_00323BB8(struct MnuShootingWork *context) {
-    MenuRuntimeList *list = func_00321ED8();
-    MenuRuntimeList *targets = func_00321EC8();
+    MenuRuntimeList *list = mnuGetRuntimeAnimationList();
+    MenuRuntimeList *targets = mnuGetRuntimeHitTargetList();
     MenuRuntimeRecord *record = list->records;
     MenuRuntimeRecord *target;
     s32 i;
@@ -1098,7 +1098,7 @@ s32 func_00324840(void) {
     }
 
     func_00321798(work->callback,
-                  func_00321ED8(), kindMask,
+                  mnuGetRuntimeAnimationList(), kindMask,
                   (s32)work->currentX, (s32)work->currentY, kindMask,
                   work->currentAngleRadians);
 

@@ -679,7 +679,7 @@ extern s32 func_0031A0B8(MnuShootingWork *);
 extern MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *, MnuShootingWork *);
 extern s32 func_00323BB8(MnuShootingWork *);
 extern s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *);
-extern MenuRuntimeList *func_00321ED8(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
 extern void mnuUpdateShootingCameraVectors(void);
 extern void mnuTickScoreProgressState(MnuShootingWork *);
@@ -775,7 +775,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         func_00323BB8(work);
         if (work->phase < 3) mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
     }
-    mnuDispatchRuntimeWorkOverlaps(func_00321ED8(), work);
+    mnuDispatchRuntimeWorkOverlaps(mnuGetRuntimeAnimationList(), work);
     mnuUpdateShootingCameraVectors();
     mnuTickScoreProgressState(work);
     switch (mnuAdvanceShootingRoundPhase(work)) {
@@ -803,7 +803,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->completed = 0;
         work->unk94 = mode;
         itfSetFadeGaugeDisplayValue(&work->gauge, 0);
-        mnuClearRuntimeRecordStorage(func_00321ED8());
+        mnuClearRuntimeRecordStorage(mnuGetRuntimeAnimationList());
         func_0031A090();
         if (work->round >= 3) {
             work->state = -1;
@@ -830,8 +830,8 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
 
 extern u32 mnuGetWorkEntryPool(void);
 extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
-extern MenuRuntimeList *func_00321ED8(void);
-extern MenuRuntimeList *func_00321EC8(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
+extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
 extern void itfDrawAndAdvanceModelInstances(ModelInstanceWork *work, u32 flags);
 extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
 extern void func_0031CF88(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale,
@@ -871,7 +871,7 @@ s32 func_00318C00(MnuShootingWork *work) {
         itfDrawAndAdvanceModelInstances(work->work24, 1);
     }
 
-    list = func_00321ED8();
+    list = mnuGetRuntimeAnimationList();
     record = list->records;
     index = 0;
     while (index < list->capacity) {
@@ -921,7 +921,7 @@ s32 func_00318C00(MnuShootingWork *work) {
         record++;
     }
 
-    list = func_00321EC8();
+    list = mnuGetRuntimeHitTargetList();
     record = list->records;
     index = 0;
     while (index < list->capacity) {

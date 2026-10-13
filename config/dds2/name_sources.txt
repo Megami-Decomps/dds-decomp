@@ -6218,6 +6218,8 @@
 0x00321928	mnuAdvanceTimedStateRecord	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:184:func_00321928; Advances wait and busy counters, exits wait at its limit, and marks completion or re-enters waiting at the duration boundary according to the value-limit flag.; source=names_M143.tsv:22 [names_qp13.tsv]
 0x003219F0	mnuCanAdvanceIdleStateRecord	inferred	Accepts a record only while it is not busy and its optional value limit has not been reached. [names_reviewed15.tsv]
 0x00321C60	mnuCreateRuntimeRecord	inferred	Acquires a runtime-record slot, initializes its fields, invokes the registered initialization callback and returns the record.
+0x00321EC8	mnuGetRuntimeHitTargetList	inferred	Returns the D_0045C870 runtime list used by active menu-work hit/overlap searches; callers also use its records as hit targets. [provider return and caller dataflow, 2026-10-13]
+0x00321ED8	mnuGetRuntimeAnimationList	inferred	Returns the D_0045C880 runtime list used for timed animation records, per-frame overlap dispatch and drawing; round reset clears its record storage. [provider return and caller dataflow, 2026-10-13]
 0x00321EE8	mnuClearRuntimeRecordStorage	inferred	Clears only the capacity-sized runtime-record array; the list header, including activeCount, is unchanged.
 0x00321F18	mnuAcquireRuntimeRecordSlot	inferred	Selects the first inactive 0x24-byte record in a supplied runtime list, marks it active and increments activeCount; returns null when capacity is exhausted.
 0x00321F78	mnuDeactivateListRecord	inferred	Clears the record's low active bit and decrements the enclosing list's active-record count.

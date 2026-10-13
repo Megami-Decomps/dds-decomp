@@ -306,11 +306,11 @@ void func_00321E70(MenuRuntimeRecord *records, s32 capacity) {
     D_0045C880.capacity = capacity;
 }
 
-MenuRuntimeList *func_00321EC8(void) {
+MenuRuntimeList *mnuGetRuntimeHitTargetList(void) {
     return &D_0045C870;
 }
 
-MenuRuntimeList *func_00321ED8(void) {
+MenuRuntimeList *mnuGetRuntimeAnimationList(void) {
     return &D_0045C880;
 }
 
