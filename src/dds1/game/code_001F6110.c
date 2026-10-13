@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_command_partner_output.h"
 #include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
@@ -1114,20 +1115,14 @@ u32 btlScriptSelectModeAValueOne(void) {
     return 1;
 }
 
-typedef struct BtlActionProbe {
-    u16 id;         /* 0x00 */
-    u8 pad_02[2];
-    void *actionProbeFirst;    /* 0x04 */
-    void *actionProbeSecond;   /* 0x08 */
-} BtlActionProbe;
 
 extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
-extern s32 func_001A3CE0(void *, s32, BtlActionProbe *);
+extern s32 func_001A3CE0(void *, s32, BtlCommandPartnerOutput *);
 
 /* Resolve a command-table entry through its probe, or store the direct command id. */
 u32 btlScriptSelectActionEntry(void) {
     BtlCmdCtx *context;
-    BtlActionProbe probe;
+    BtlCommandPartnerOutput probe;
     s32 commandId;
 
     context = (BtlCmdCtx *)scrGetCurrentCommandWork();
@@ -1135,10 +1130,10 @@ u32 btlScriptSelectActionEntry(void) {
     if (datCommandSelectors[commandId].kind == 1) {
         if (btlHasRequiredCommandAffinityPartners(context->unit, commandId) != 0 &&
             func_001A3CE0(context->unit, commandId, &probe) != 0) {
-            context->actionProbeFirst = probe.actionProbeFirst;
+            context->actionProbeFirst = probe.firstPartner;
             context->commandMode = 3;
-            context->commandValue = probe.id;
-            context->actionProbeSecond = probe.actionProbeSecond;
+            context->commandValue = probe.commandId;
+            context->actionProbeSecond = probe.secondPartner;
         } else {
             context->commandValue = 0;
             context->commandMode = 1;
