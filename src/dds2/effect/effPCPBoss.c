@@ -327,66 +327,82 @@ u32 func_0018D5A8(void) {
     return 0;
 }
 
-u32 func_0018D5B0(void) {
+/* Kind 90 factory: DDS2 explicitly returns zero, unlike DDS1's empty entry. */
+u32 effPcpKind90CreateDisabled(void) {
     return 0;
 }
 
-u32 func_0018D5B8(void) {
+/* Kind 90's registered duplicate operation returns zero. */
+u32 effPcpKind90DuplicateDisabled(void) {
     return 0;
 }
 
-void func_0018D5C0(void) {
+/* Kind 90's registered release operation does nothing. */
+void effPcpKind90ReleaseNoOp(void) {
 }
 
-void func_0018D5C8(void) {
+/* Kind 90's registered per-work dispatch does nothing. */
+void effPcpKind90DispatchNoOp(void) {
 }
 
-void func_0018D5D0(void) {
+/* Kind 90's optional value operation is present but does nothing. */
+void effPcpKind90ValueNoOp(void) {
 }
 
 u32 func_0018D5D8(void) {
     return 0;
 }
 
-u32 func_0018D5E0(void) {
+/* Kind 91 factory: DDS2 explicitly returns zero, unlike DDS1's empty entry. */
+u32 effPcpKind91CreateDisabled(void) {
     return 0;
 }
 
-u32 func_0018D5E8(void) {
+/* Kind 91 duplicate: DDS2 explicitly returns zero, unlike DDS1's empty entry. */
+u32 effPcpKind91DuplicateDisabled(void) {
     return 0;
 }
 
-void func_0018D5F0(void) {
+/* Kind 91's registered release operation does nothing. */
+void effPcpKind91ReleaseNoOp(void) {
 }
 
-void func_0018D5F8(void) {
+/* Kind 91's registered per-work dispatch does nothing. */
+void effPcpKind91DispatchNoOp(void) {
 }
 
-void func_0018D600(void) {
+/* Kind 91's optional value operation is present but does nothing. */
+void effPcpKind91ValueNoOp(void) {
 }
 
 u32 func_0018D608(void) {
     return 0;
 }
 
-u32 func_0018D610(void) {
+/* Both kinds 92 and 94 register this zero-returning factory. */
+u32 effPcpKinds92And94CreateDisabled(void) {
     return 0;
 }
 
-u32 func_0018D618(void) {
+/* Both kinds 92 and 94 register this zero-returning duplicate operation. */
+u32 effPcpKinds92And94DuplicateDisabled(void) {
     return 0;
 }
 
-void func_0018D620(void) {
+/* Both kinds 92 and 94 register this empty release operation. */
+void effPcpKinds92And94ReleaseNoOp(void) {
 }
 
-void func_0018D628(void) {
+/* Kind 92 has its own empty dispatch entry, distinct from kind 94's. */
+void effPcpKind92DispatchNoOp(void) {
 }
 
-void func_0018D630(void) {
+/* Both kinds 92 and 94 register this empty source-pointer operation. */
+void effPcpKinds92And94SourceNoOp(void) {
 }
 
-void func_0018D638(void) {
+/* Both kinds 92 and 94 register this empty value operation. */
+void effPcpKinds92And94ValueNoOp(void) {
 }
 
 u32 func_0018D640(void) {
@@ -415,7 +431,8 @@ void effPcpKind93DispatchNoOp(void) {
 void effPcpKind93ValueNoOp(void) {
 }
 
-void func_0018D670(void) {
+/* Kind 94 has its own empty dispatch entry, distinct from kind 92's. */
+void effPcpKind94DispatchNoOp(void) {
 }
 
 u32 func_0018D678(void) {

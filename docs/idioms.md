@@ -11115,3 +11115,25 @@ The semantic effect classes remain unknown, and the native zero-returning
 callback prototypes. Separate entries and their zero-formal definitions
 are retained for matching.
 
+## PCP registry aliases and different return surfaces
+
+Kinds 90 and 91 use DDS1 rows `0x00354690` / `0x003546B8` and DDS2 rows
+`0x003B0FC0` / `0x003B0FE8`. Their create slots, and kind 91's duplicate
+slot, are not behavior-identical across games. DDS1's native entries
+`0x00185958`, `0x00185988` and `0x00185990` are `jr ra` with `nop`, leaving
+`v0` untouched. The DDS2 counterparts `0x0018D5B0`, `0x0018D5E0` and
+`0x0018D5E8` explicitly clear `v0` in the return delay slot.
+Their truthful names therefore use `CreateNoOp` / `DuplicateNoOp` in DDS1
+and `CreateDisabled` / `DuplicateDisabled` in DDS2. This is documentation
+of the existing difference, not a return-type repair: the original `void`
+and `u32` definitions and all native instructions remain unchanged.
+
+Kinds 92 and 94 register the same physical create, duplicate, release,
+source-pointer and value functions, at offsets `+0x00`, `+0x0C`, `+0x08`,
+`+0x10` and `+0x1C`. DDS1 rows are `0x003546E0` / `0x00354730`; DDS2 rows
+are `0x003B1010` / `0x003B1060`. `effPcpKinds92And94*` states this shared
+registration, not an inferred equivalence between effect classes.
+Their dispatch slots at `+0x04` still point to distinct empty functions;
+`effPcpKind92DispatchNoOp` and `effPcpKind94DispatchNoOp` retain those
+individual entries. Unregistered neighbors stay unnamed.
+
