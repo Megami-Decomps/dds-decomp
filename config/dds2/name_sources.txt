@@ -4461,6 +4461,7 @@
 0x002A24A0	mnuCommitTitleStreamReadyState	inferred	Under semaphore, changes ready stream state to next state and clears buffer marker. [names_reviewed7.tsv]
 0x002A2550	mnuResetTitleStreamLocked	inferred	Resets title stream while holding its semaphore. [names_reviewed8.tsv]
 0x002A2580	mnuInitializeTitleSoundBuffer	inferred	confidence=high; Paired title sound-buffer/decoder initializer; title-stream synchronization and AT3 resource load.; sources=names_M143.tsv; twin=0x0026A980, input-family pairing. [names_qp10.tsv]
+0x002A27A8	mnuInstallTitleSoundBufferFromData	inferred	Allocates the format-sized title sound buffer, copies compressed audio data, initializes frame state, and configures the ATRAC decoder. Paired title implementation.
 0x002A2928	mnuGetSoundBufferStateLocked	inferred	Returns one of three sound-buffer states under semaphore based on two status words. [names_reviewed7.tsv]
 0x002A2998	mnuClearInactiveSoundBufferState	inferred	Clears a sound-buffer state unless it indicates the currently active buffer. [names_reviewed15.tsv]
 0x002A29D8	mnuResetSoundBuffer	inferred	Resets stream state fields D_00455D70[1,4] then releases the active buffer through func_002A2A00.

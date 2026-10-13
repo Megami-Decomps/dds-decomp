@@ -307,7 +307,7 @@ extern SdfFlagListParams D_003BDCC8;
 
 extern void mnuReleaseSoundBufferLocked(void);
 
-extern void func_002A27A8(s32, s32, u8);
+extern void mnuInstallTitleSoundBufferFromData(s32, s32, u8);
 
 extern s32 btlGetLoggedIndexedCommandItem(s32);
 
@@ -6198,7 +6198,7 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
             }
             data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->unk_08]);
             size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->unk_08]);
-            func_002A27A8(data, size, 2);
+            mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuClearInactiveSoundBufferState();
             work->unk288 = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
