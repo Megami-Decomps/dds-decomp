@@ -15,7 +15,7 @@ extern void mnuTickMapTimers(void);
 
 extern void sdfCounterTickPositionTransition(void);
 
-extern s32 func_002C3DB0(void);
+extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 
 extern s32 sdfCounterGetDisplayValue(void);
 
@@ -169,10 +169,10 @@ s8 sdfGetMapCameraTransitionFrame(void) {
 }
 
 void func_002C3D90(void) {
-    func_002C3DB0();
+    sdfUpdateSelectedCounterMapCameraTransition();
 }
 
-s32 func_002C3DB0(void) {
+s32 sdfUpdateSelectedCounterMapCameraTransition(void) {
     f32 t;
 
     if (D_003BD271 == 0) {
