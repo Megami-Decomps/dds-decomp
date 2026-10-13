@@ -15,6 +15,7 @@
 #include "dat_command.h"
 #include "itf.h"
 #include "menu_fade_entry.h"
+#include "ui_color.h"
 struct MenuListNode;
 
 enum MenuPanelKind {
@@ -2291,7 +2292,7 @@ void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
     for (i = 0; i < 4; i++) {
         s32 result = uiBlendColors(((MenuBlendColors *)ctx)->input[i],
                                    ((MenuBlendColors *)((MenuBlendOwner *)src)->colorState)->input[i],
-                                   (s32)amount / 2 + 0x80, ctx);
+                                   (s32)amount / 2 + 0x80);
         s32 current = ((MenuBlendOwner *)dst)->colorState;
         ctx = current;
         ((MenuBlendColors *)current)->output[i] = result;
