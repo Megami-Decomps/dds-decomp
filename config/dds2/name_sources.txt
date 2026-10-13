@@ -2202,6 +2202,7 @@
 0x001A50D8	itfMesDestroyWindow	inferred	frees window mes state, effect handles, releases pool node
 0x001A5228	itfMesGetWindowEntryItems	inferred	Returns the selected window entry's item list. [names_reviewed6.tsv]
 0x001A52B8	itfMesBuildEntryGlyph	inferred	builds the glyph for the current entry (E800), registers hooks and sets entry state
+0x001A5480	itfMesReplaceTextSlotData	inferred	Releases any previous retained text-slot allocation, allocates aligned storage, retains its address, and copies a string span or requested byte count into it.
 0x001A55B0	itfMesInitCharTable	inferred	calls func_0019E8F0 for each of 32 table words
 0x001A5600	itfMesGetNextEntrySelectedItem	inferred	Gets the message subrecord's next entry and reads the item at the window block's selected index.
 0x001A5670	itfMesBuildNodeRows	inferred	twin [names_M67_Named.tsv]

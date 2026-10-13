@@ -2675,6 +2675,7 @@
 0x0019D208	itfMesGetWindowEntryItems	inferred	Returns the selected window entry's item list. [names_reviewed6.tsv]
 0x0019D240	itfMesGetEntryCount	inferred	Returns the selected window's subrecord entryCount.
 0x0019D268	itfMesGetTableItem	inferred	Returns the indexed table word, or zero when the index is out of bounds.
+0x0019D460	itfMesReplaceTextSlotData	inferred	Releases any previous retained text-slot allocation, allocates aligned storage, retains its address, and copies a string span or requested byte count into it.
 0x0019D610	itfMesCountZeroBits	inferred	counts unset bits among the low N bits of a value
 0x0019D640	itfMesBuildNodeRows	inferred	builds one node per clear mask bit stacking rows [names_M67_Named.tsv]
 0x0019D730	itfMesTrimGlyphChainToRow	inferred	readability/matching review (QP16)
