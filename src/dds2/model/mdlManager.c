@@ -18,6 +18,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "sdf_linked_packet.h"
+#include "sdf_pac_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
 #include "sdf_model.h"
@@ -1170,15 +1171,6 @@ void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *d
     destination[copyLength] = '\0';
 }
 
-typedef struct PacHead {
-    u8 command;
-    u8 flags;
-    u8 pad2[2];
-    s32 payloadSize;
-    u32 tag;
-    s32 decodedSize;
-    u8 payload[1];
-} PacHead;
 
 #define MDL_PART_PACKET_COMMAND 1
 #define MDL_PART_INFO_TAG 0x30424950
@@ -1187,8 +1179,8 @@ typedef struct PacHead {
 s32 mdlIsInnerSentinel(PacWork *packetWork) {
     s32 isSentinel = 0;
 
-    if (((PacHead *)packetWork->packet)->command == MDL_PART_PACKET_COMMAND) {
-        isSentinel = ((PacHead *)packetWork->packet)->tag == MDL_PART_INFO_TAG;
+    if (((SdfPacModelPacketHeader *)packetWork->packet)->command == MDL_PART_PACKET_COMMAND) {
+        isSentinel = ((SdfPacModelPacketHeader *)packetWork->packet)->tag == MDL_PART_INFO_TAG;
     }
     return isSentinel;
 }
@@ -1212,9 +1204,9 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
     memset(&setup, 0, sizeof(setup));
     parts = NULL;
     while (work != NULL) {
-        switch (((PacHead *)work->packet)->command) {
+        switch (((SdfPacModelPacketHeader *)work->packet)->command) {
         case 1:
-            switch (((PacHead *)work->packet)->tag) {
+            switch (((SdfPacModelPacketHeader *)work->packet)->tag) {
             case 0x30424950:
                 setup.partInfo = work->dataCursor;
                 setup.resourceHandle = (s32)work->resourceHandle;
@@ -1271,7 +1263,7 @@ extern void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, struct SdfM
 PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     MdlLoadPayload groupSetup;
     MdlPartTagRecord unknownPart;
-    PacHead *packetHeader;
+    SdfPacModelPacketHeader *packetHeader;
     MdlRecord *record;
     MdlRecord *slotRecord;
     s32 partCount;
@@ -1302,7 +1294,7 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
     }
     if (remainingParts > 0) {
         do {
-            switch (((PacHead *)packetWork->packet)->tag) {
+            switch (((SdfPacModelPacketHeader *)packetWork->packet)->tag) {
             case 0x413250:
                 mdlAddBillboardPart(partList, packetWork->dataCursor);
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)packetWork->resourceHandle);
@@ -1312,10 +1304,10 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)packetWork->resourceHandle);
                 break;
             case 0x555049:
-                objectSize = ((PacHead *)packetWork->packet)->decodedSize;
+                objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->decodedSize;
                 if (objectSize == 0) {
-                    objectSize = ((PacHead *)packetWork->packet)->payloadSize
-                               + (((PacHead *)packetWork->packet)->flags & 0xF0) - 0x10;
+                    objectSize = ((SdfPacModelPacketHeader *)packetWork->packet)->payloadSize
+                               + (((SdfPacModelPacketHeader *)packetWork->packet)->flags & 0xF0) - 0x10;
                 }
                 mdlAppendObjectPart(partList, (s32)packetWork->dataCursor,
                                     (struct SdfMemBlock *)packetWork->resourceHandle, objectSize);
@@ -1323,7 +1315,7 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
             default:
                 /* Retail retains these metadata stores: DDS1 2188E0/2188E4,
                  * DDS2 2333F8/2333FC. */
-                packetHeader = (PacHead *)packetWork->packet;
+                packetHeader = (SdfPacModelPacketHeader *)packetWork->packet;
                 unknownPart.tag = packetHeader->tag;
                 unknownPart.state = 0;
                 break;
@@ -1333,7 +1325,7 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
         } while (remainingParts != 0);
     }
 
-    if (((PacHead *)packetWork->packet)->command == 9) {
+    if (((SdfPacModelPacketHeader *)packetWork->packet)->command == 9) {
         groupSetup.resourceList = (DevRequest *)packetWork->resourceHandle;
         packetWork = sdfPacRemovePacket(packetWork);
     }
