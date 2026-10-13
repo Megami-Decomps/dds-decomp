@@ -81,7 +81,7 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
 
 
 extern void dspRequestMessageWindowModeOne(void);
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();
 extern void itfPanelSetStatus(s32, s32);

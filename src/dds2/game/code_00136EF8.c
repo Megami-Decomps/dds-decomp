@@ -192,8 +192,7 @@ extern s32 D_0043617C;
 extern u32 D_00444A30[];
 
 extern s32 D_004361AC;
-
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 
 extern s32 D_004361A8;

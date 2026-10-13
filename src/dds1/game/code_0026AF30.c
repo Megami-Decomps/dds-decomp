@@ -18,9 +18,7 @@ extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtDestroySecondaryWorldNode(void);
 
 extern void dds3SetWorldObject(void *);
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 extern void mnuCreateTitleCameraWorldEntry(void);
 
 extern u32 D_003BA8EC;

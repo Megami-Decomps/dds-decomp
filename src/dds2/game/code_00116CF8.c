@@ -4,9 +4,7 @@
 #include "dds3obj.h"
 #include "eff_transform.h"
 #include "eff.h"
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 typedef struct {
     u8 pad00[0x10];
     u32 value;

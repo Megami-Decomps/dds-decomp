@@ -115,10 +115,7 @@ extern s32 fldSceneSoundBase;
 extern s32 D_0032E570[];
 
 extern u8 D_003BAE78[];
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
+#include "dds3_world_secondary.h"
 extern void func_003003F0(const char *fmt, ...);
 
 extern s32 fldCurrentBgmMode;

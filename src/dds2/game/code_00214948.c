@@ -2356,9 +2356,7 @@ s32 btlGetSubtaskActorMotionClass(void) {
 }
 
 extern char D_0041A378[]; /* "md_01all_02" */
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 #include "dds3_object_payload.h"
 
 /* Before marking a gate enemy, notify md_01all_02 with payload word 1; always allow. */

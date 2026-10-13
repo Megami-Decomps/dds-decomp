@@ -17,9 +17,7 @@
 #include "bill_object_api.h"
 
 extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 
 extern u32 effObjOpacityPassEnabled;

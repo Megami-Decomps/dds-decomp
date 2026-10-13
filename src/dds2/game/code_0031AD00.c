@@ -7,7 +7,7 @@ struct EffWorldNode;
 extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
-extern s32 dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern void sdfSetViewFieldOfView(f32 arg0);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
@@ -160,7 +160,7 @@ void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *object) {
 }
 
 void func_0031B0F8(void) {
-    s32 world;
+    void *world;
     struct EffWorldNode *camera;
     u128 *worldEye = (u128 *)D_0040ABD0;
 

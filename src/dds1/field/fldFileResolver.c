@@ -30,7 +30,7 @@
 
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 struct EffWorldNode;
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
@@ -433,7 +433,6 @@ typedef struct FldActionSpawn {
     s32 firstValue;
 } FldActionSpawn;
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
-extern void *dds3GetWorldSecondaryObject(void);
 extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
