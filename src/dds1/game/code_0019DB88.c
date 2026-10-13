@@ -735,7 +735,7 @@ s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     return 0;
 }
 
-void sndFlushMessageQueue(void) {
+void itfMesDestroyActiveWindowsAndReleaseTexture(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     s32 window;
     while (node != 0) {

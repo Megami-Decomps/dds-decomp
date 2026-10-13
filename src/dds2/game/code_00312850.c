@@ -300,10 +300,10 @@ SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {
 }
 
 /* Return the cursor's zero-based column and row; the grid width must be nonzero. */
-void sdfGridGetCursorCoordinates(void *grid, u32 *column, u32 *row) {
-    u32 *cursorCell = *(u32 **)((s32)grid + 8);
-    *column = *cursorCell % *(u32 *)((s32)grid + 0x14);
-    *row = *cursorCell / *(u32 *)((s32)grid + 0x14);
+void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *column, u32 *row) {
+    SdfGridCell *cell = grid->cursor;
+    *column = cell->index % grid->width;
+    *row = cell->index / grid->width;
 }
 
 u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
@@ -316,12 +316,12 @@ u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
     return grid->cells[cellIndex].value;
 }
 
-void sdfGridSetCellValue(s32 grid, s32 column, s32 row, u32 value) {
+void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 value) {
     u32 cellIndex;
 
-    cellIndex = row * *(s32 *)(grid + 0x14) + column;
-    if (cellIndex < *(u32 *)(grid + 0x10)) {
-        *(u32 *)(cellIndex * 8 + *(s32 *)(grid + 4) + 4) = value;
+    cellIndex = row * grid->width + column;
+    if (cellIndex < grid->cellCount) {
+        grid->cells[cellIndex].value = value;
     }
 }
 
@@ -366,16 +366,16 @@ SdfGridCell *sdfGridCursorLeft(SdfGrid *grid) {
     return cell;
 }
 
-u8 *sdfGridCursorRight(u8 *grid) {
-    u8 *cell = *(u8 **)(grid + 8);
-    u32 width = *(u32 *)(grid + 0x14);
-    u32 index = *(u32 *)cell;
-    cell += 8;
+SdfGridCell *sdfGridCursorRight(SdfGrid *grid) {
+    SdfGridCell *cell = grid->cursor;
+    u32 width = grid->width;
+    u32 index = cell->index;
+    cell += 1;
     if (index % width == width - 1) {
         return NULL;
     }
-    *(u8 **)(grid + 8) = cell;
-    sdfGridFollowCursorWithinMargins((SdfGrid *)grid);
+    grid->cursor = cell;
+    sdfGridFollowCursorWithinMargins(grid);
     return cell;
 }
 
