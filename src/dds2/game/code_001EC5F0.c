@@ -180,38 +180,6 @@ typedef struct BtlTintTransition {
 
 extern u32 btlTintTransitionHoldCount;
 
-typedef struct {
-    union {
-        void *actor;
-        s32 value;
-    };
-    union {
-        s32 option;
-        u16 optionId;
-        f32 scale;
-    };
-    u32 unk_08;
-    union {
-        u32 unk_0C;
-        f32 scale2;
-        s8 mode;
-    };
-    u32 unk_10;
-    union {
-        u32 unk_14;
-        f32 scale14;
-    };
-    union {
-        u32 unk_18;
-        struct {
-            u8 flag18;
-            u8 flag19;
-        };
-    };
-    u32 unk_1C;
-    u32 unk_20;
-    u32 unk_24;
-} SoundTaskArgs;
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
@@ -4245,7 +4213,7 @@ extern u32 btlPollFieldArchiveLoad();
 
 BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0x28);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 1;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
@@ -4309,7 +4277,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
 
 BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 2;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
@@ -4954,7 +4922,7 @@ u32 btlWaitUnitListIdle(void) {
 
 BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x33;
     task->callback = btlWaitUnitListIdle;
@@ -4984,7 +4952,7 @@ u32 sndApplyToActiveActors(taskArgs)
 
 BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x34;
     task->callback = sndApplyToActiveActors;
@@ -5100,7 +5068,7 @@ u32 btlTaskStartFadeIn(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateFadeInTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x38;
     task->callback = btlTaskStartFadeIn;
@@ -5120,7 +5088,7 @@ extern u32 btlTaskStartCustomFadeIn(u8 *);
 
 BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x39;
     task->callback = btlTaskStartCustomFadeIn;
@@ -5756,7 +5724,7 @@ s32 sndPlayStationedSe(u32 *sound) {
 
 BtlRuntimeTask *sndCreateStationedSeTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5A;
     task->callback = sndPlayStationedSe;
@@ -5813,7 +5781,7 @@ s32 sndPlaySkillSeTask(u32 *arg0) {
 
 BtlRuntimeTask *sndCreateSkillSeTask(s32 *taskArgs, u16 optionId) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x57;
     task->callback = sndPlaySkillSeTask;
@@ -6160,7 +6128,7 @@ s32 sndHasActiveFileLoad(void) {
 }
 
 /* Queue a ready owner's packed track; stream slot 11 only supplies its file ID. */
-void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
+void btlQueueUnitSoundSlotFileLoad(BtlRuntimeTaskArgs *args) {
     SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
     SoundSlotTableEntry *table;
     SoundSlotTableEntry *entry;
@@ -6192,7 +6160,7 @@ extern void mnuResetSoundBufferLocked(void);
 
 extern void mnuClearInactiveSoundBufferState(void);
 
-u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
+u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
     SoundSlotWork *soundWork;
@@ -6254,7 +6222,7 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     s32 option;
 {
     BtlRuntimeTask *task = btlAllocTask(16);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     BtlState *work;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;

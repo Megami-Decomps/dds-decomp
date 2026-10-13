@@ -67,38 +67,6 @@ extern char D_00436AE8[];
 
 extern u32 btlTintTransitionHoldCount;
 
-typedef struct {
-    union {
-        void *actor;
-        s32 value;
-    };
-    union {
-        s32 option;
-        u16 optionId;
-        f32 scale;
-    };
-    u32 unk_08;
-    union {
-        u32 unk_0C;
-        f32 scale2;
-        s8 mode;
-    };
-    u32 unk_10;
-    union {
-        u32 unk_14;
-        f32 scale14;
-    };
-    union {
-        u32 unk_18;
-        struct {
-            u8 flag18;
-            u8 flag19;
-        };
-    };
-    u32 unk_1C;
-    u32 unk_20;
-    u32 unk_24;
-} SoundTaskArgs;
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
@@ -1221,7 +1189,7 @@ s32 btlMoveOtherUnitsForCategory(u32 *command) {
 
 BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 option, s32 target) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlMoveOtherUnitsForCategory;
