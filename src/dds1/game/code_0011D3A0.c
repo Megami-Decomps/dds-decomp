@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -509,9 +510,7 @@ u32 func_0011E278(void) {
     return 0;
 }
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void fldSetGsAlphaBlendEquation(s32);
 

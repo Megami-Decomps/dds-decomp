@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_math_vector4.h"
 #include "sdf_mat4.h"
 #include "fr_font.h"
@@ -30,9 +31,7 @@ void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern f32 sdfSinPoly(f32);
 
 /* Rotate Y/Z in place; preserve the repeated trig-call order and leave X/W untouched. */
 void fldRotateVectorAroundX(f32 *vector, f32 angle) {

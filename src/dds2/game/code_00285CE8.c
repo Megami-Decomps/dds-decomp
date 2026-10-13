@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -69,7 +70,6 @@ void mtrUpdateGridPropagation(MtrGrid *grid) {
     }
     mtrAdvanceGridCellPropagation(grid);
 }
-extern f32 sdfSinPoly(f32);
 
 void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
     MtrCell *cell = grid->cells;

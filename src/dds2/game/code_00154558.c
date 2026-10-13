@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "kwln_task_create.h"
 #include "eff_manager_task.h"
 #include "eff_random.h"
@@ -574,9 +575,7 @@ typedef struct FldVec3 {
 
 extern f32 fldLookAtNearPoint[];
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern s32 func_00133B10();
 

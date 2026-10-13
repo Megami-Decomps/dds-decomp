@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "snd_pad.h"
 #include "btl_item_drop.h"
 #include "itf_mes_window.h"
@@ -724,7 +725,6 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
     return entry;
 }
 
-extern f32 sdfSinPoly(f32);
 
 extern u64 *sdfCreateGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
 

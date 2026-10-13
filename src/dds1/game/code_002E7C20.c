@@ -1,12 +1,11 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "pcp_vu0.h"
 
 #define EFF_QUAT_SLERP_DOT_LIMIT 0.99899996f
 
 extern EffRandState D_00398938;
-extern f32 sdfSinPoly(f32 angle);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfAtan2(f32 y, f32 x);
 extern f32 D_00398380[4];
 

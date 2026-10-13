@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -487,8 +488,6 @@ extern s32 D_003BAD28;
 
 extern f32 D_00330650[];
 extern f32 D_00330660[];
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void btlActivateRuntime(s32 mode);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
@@ -4450,7 +4449,6 @@ void fldUploadSkyBuffer(void *src) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0100);
 
 void fldUpdateSwayOffset(void) {

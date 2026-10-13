@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
@@ -124,7 +125,6 @@ struct SdfListHead;
 extern void effAppendBlurRenderState(void *list, s32 blendControl, struct SdfTex *resource);
 extern void effAppendBlurRectanglePackets(void *list, EffBlurQuad *quad, u8 fixedPoint);
 extern void effDrawBlurListWithFramePacket(void *list);
-extern f32 sdfSinPoly(f32 angle);
 extern f64 fabs(f64 value);
 
 void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)

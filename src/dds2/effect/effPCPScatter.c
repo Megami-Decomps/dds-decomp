@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
@@ -54,8 +55,6 @@ extern void *effParamTableGetBlock(void *, s32);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern u8 effDefaultRandomState[];
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);

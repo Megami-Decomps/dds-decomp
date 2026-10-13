@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -86,8 +87,6 @@ extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern f32 D_003B12B0[];
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);

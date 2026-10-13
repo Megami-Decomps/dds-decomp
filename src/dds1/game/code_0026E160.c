@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -85,7 +86,6 @@ void mnuUpdateMovieSpriteResourceGroup(MnuSpriteResourceGroup *resources) {
     }
 }
 
-extern f32 sdfSinPoly(f32);
 
 void mnuDrawMovieSpriteGroup(s32 a0, s32 a1, s32 a2, s32 a3, MnuSpriteResourceGroup *group, s32 a5) {
     s32 i;

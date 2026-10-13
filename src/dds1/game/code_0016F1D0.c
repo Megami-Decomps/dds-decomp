@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -44,8 +45,6 @@ extern u32 effMultiplyPackedColors(u32 color, u32 param);
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
 extern f32 D_00354980[];
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 
 typedef struct EffPacketParams {

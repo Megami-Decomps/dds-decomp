@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
@@ -371,8 +372,6 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern void func_003364B8(f32);
 extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -445,8 +444,6 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001969B8);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern f32 sdfSinPoly(f32);
 extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
@@ -1385,8 +1382,6 @@ typedef struct EffEventBillBatch {
 } EffEventBillBatch;
 typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -1];
 
-extern f32 sdfSinPoly(f32 angle);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 struct DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);

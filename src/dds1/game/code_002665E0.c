@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "dds3_world_value.h"
 #include "mnu_sound_resource_path_api.h"
 #include "mnu_voice_resource_path_api.h"
@@ -145,7 +146,6 @@ flash:
 
 INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawLevelProgressDetails);
 
-extern f32 sdfSinPoly(f32);
 
 void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
     s32 y;
