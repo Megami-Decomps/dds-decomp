@@ -11,6 +11,7 @@
 #include "dds3obj.h"
 #include "eff_random.h"
 #include "mdl_flag_api.h"
+#include "mnu_event_flag_entries.h"
 
 struct MenuSlotState;
 extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
@@ -26,24 +27,8 @@ extern void func_0026C900(void);
 
 extern char D_003CE848[];
 
-typedef struct SceneFlagEntry {
-    s32 needFlag;    /* 0x00 */
-    s32 doneFlag;    /* 0x04 */
-    u16 areaIndex;   /* 0x08 */
-    u8 nameIndex;    /* 0x0A */
-    u8 pad0B;
-    u16 dialogIndex; /* 0x0C */
-    u16 pad0E;
-} SceneFlagEntry;
-
-typedef struct PartyFlagPair {
-    s32 needFlag;
-    s32 doneFlag;
-} PartyFlagPair;
-
-
-extern SceneFlagEntry mnuSceneFlagEventEntries[4];
-extern PartyFlagPair mnuPartyFlagEventEntries[];
+extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
+extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 extern s32 D_00435E5C;
 extern DspMantraName *D_00435E50;
 extern s32 D_00435E4C;
@@ -67,26 +52,26 @@ s32 dspStartFlagEvent(s32 context) {
                 return 1;
             }
             for (i = 0; i < sizeof(mnuSceneFlagEventEntries) / sizeof(mnuSceneFlagEventEntries[0]); i++) {
-                if (mdlFlagTest(mnuSceneFlagEventEntries[i].needFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].doneFlag) == 0) {
+                if (mdlFlagTest(mnuSceneFlagEventEntries[i].requiredFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, (void *)(D_00435E5C + mnuSceneFlagEventEntries[i].areaIndex * 0x19));
                     evtCopyEntryStringToActiveWindow(1, D_00435E50[mnuSceneFlagEventEntries[i].nameIndex].encodedText);
                     evtCopyEntryStringToActiveWindow(2, (void *)(D_00435E4C + mnuSceneFlagEventEntries[i].dialogIndex * 0x11));
                     dspStartEntry(3);
-                    mdlFlagSet(mnuSceneFlagEventEntries[i].doneFlag);
+                    mdlFlagSet(mnuSceneFlagEventEntries[i].handledFlag);
                     return 1;
                 }
             }
             for (i = 0; i < 5; i++) {
                 slot = &datGameState->party[i];
-                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].needFlag) != 0
-                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].doneFlag) == 0) {
+                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].requiredFlag) != 0
+                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     evtCopyEntryStringToActiveWindow(0, D_00435E48[slot->unitId].encodedText);
                     dspStartEntry(4);
-                    mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].doneFlag);
+                    mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].handledFlag);
                     return 1;
                 }
             }
