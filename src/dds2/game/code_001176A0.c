@@ -266,7 +266,7 @@ extern SdfMemBlock *D_00438EA4;
 extern SdfMemBlock *D_00438EA8;
 extern u32 D_00438EAC;
 extern s32 mdlFlagTest(s32 flag);
-extern void func_0011D130(void);
+extern void ptySaveActivePartyTemplates(void);
 extern SdfMemBlock *mtrMantraEventBitPush(void);
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
@@ -304,7 +304,7 @@ void sdfSaveResetSnapshot(void) {
     D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileBanks));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E98);
     memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
-    func_0011D130();
+    ptySaveActivePartyTemplates();
     D_00438E9C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E9C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
@@ -322,7 +322,7 @@ extern void mnuMarkEntryBlocked(s32);
 extern void mtrMantraEventBitPop(SdfMemBlock *);
 extern void dds3ForEachFlagged(void);
 extern void ptyClearSelectedSkillFlagsFromActiveEntries(void);
-extern void func_0011D0D8(void);
+extern void ptyClearItemF8FromPartyAndInventory(void);
 
 void sdfRestoreResetSnapshot(void) {
     DatMantraBitmap *mantra;
@@ -371,7 +371,7 @@ void sdfRestoreResetSnapshot(void) {
     mtrMantraEventBitPop(D_00438EA8);
     dds3ForEachFlagged();
     ptyClearSelectedSkillFlagsFromActiveEntries();
-    func_0011D0D8();
+    ptyClearItemF8FromPartyAndInventory();
     datGameState->world.slotFlags = D_00438EAC;
 }
 
