@@ -276,7 +276,7 @@ typedef struct CampDisplayDefaults {
 
 
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
-extern void func_0025E048(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
+extern void mnuSampleCampPanelVisualTrack(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
 extern void mnuSampleCampDisplayTrack(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
 extern void mnuSampleCampListLayoutTrack(EvtRuntime *, EvtRuntimeGroup *, EvtBlendKey *);
 extern EffBlurTemplate *effGetCh71Work(void);
@@ -296,7 +296,7 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
     switch (group->type) {
     case 10:
         vectors = sdfAllocSizeClassBlock(0x30);
-        func_0025E048(viewer, group, frame, vectors, &first, &second);
+        mnuSampleCampPanelVisualTrack(viewer, group, frame, vectors, &first, &second);
         break;
     case 24:
         mnuSampleCampDisplayTrack(viewer, viewer->frameGroup, viewer->curFrame, &display);

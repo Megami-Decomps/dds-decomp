@@ -443,7 +443,7 @@ extern void evtBlendVectorRows(s32 enable, f32 t, f32 *first, f32 *second, f32 *
 extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 first, f32 second);
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **selected, EvtRuntimeChild **future);
 
-void func_0025E048(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
+void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
                    f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB) {
     EvtRuntimeChild *selected;
     EvtRuntimeChild *future;
