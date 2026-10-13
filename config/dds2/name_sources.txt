@@ -4376,6 +4376,7 @@
 0x002864D0	mtrMantraBitResetUnit	evidence	Prints its own debug string "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n" via func_0010AE38 after clearing 0xB0 script entry low flags [names_L1_LiteSweep.tsv]
 0x00286530	mtrMantraBitReset	evidence	Prints its own debug string "*****************[mtrMantraBitReset()]*****************\n" via func_0010AE38 after resetting the 0x20 active mantra records [names_L1_LiteSweep.tsv]
 0x002865A8	mtrMantraEventBitReset	evidence	Prints its own debug string "*****************[mtrMantraEventBitReset()]*****************\n" via func_0010AE38 after clearing model flags 0x920..0x98F and 0x9A0..0x9A5 [names_L1_LiteSweep.tsv]
+0x00286BA8	mtrRecomputeMantraFlagsForPartyUnit	inferred	Recomputes eligible mantra-node unlock flags and profile caps for one party record; applies changed entry low flags. DDS2 unit-selection and profile/template callers. [LiteH-2]
 0x00286F90	mnuCreateResourceTask	inferred	Creates the resource task with the same task arguments as already-named DDS1 mnuCreateResourceTask.
 0x00286FD8	mnuCheckResourceTask	inferred	Byte-identical DDS1 counterpart: Returns whether the named resource task exists and clears its stored ID when absent.
 0x00287008	mnuStopResourceTask	inferred	Byte-identical DDS1 counterpart: Destroys the stored resource task and clears its ID.

@@ -247,7 +247,7 @@ void ptySelectProfileStage(DatPartyRecord *work) {
 
 extern void func_00314868(DatPartyRecord *, u16);
 extern void func_00286A58(DatPartyRecord *);
-extern void func_00286BA8(DatPartyRecord *);
+extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *);
 
 /* Choose the least-conflicting group, install its nonzero profile IDs,
  * then complete the native current/preset profile update. */
@@ -304,7 +304,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
     if (useCurrentProfile == 0) {
         func_00286A58(unit);
     } else {
-        func_00286BA8(unit);
+        mtrRecomputeMantraFlagsForPartyUnit(unit);
     }
 }
 

@@ -17,7 +17,7 @@ extern void mnuClearCampResourceFlagEntries(void);
 
 extern void mnuSynchronizeMantraModelFlags(s32 arg);
 
-extern void func_00286BA8(void *record);
+extern void mtrRecomputeMantraFlagsForPartyUnit(void *record);
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 
@@ -300,7 +300,7 @@ void func_00286618(void) {
 
     memset(&record, 0, sizeof(record));
     record.unitId = 2;
-    func_00286BA8(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
     mnuSynchronizeMantraModelFlags(0);
     if (mdlFlagTest(0x9A0)) {
         mdlFlagSet(0x9A1);
@@ -312,7 +312,7 @@ void func_00286670(void) {
 
     memset(&record, 0, sizeof(record));
     record.unitId = 1;
-    func_00286BA8(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
     mnuSynchronizeMantraModelFlags(1);
     if (mdlFlagTest(0x9A1)) {
         mdlFlagSet(0x9A0);
@@ -324,7 +324,7 @@ void mtrRefreshMantraStateForPartyUnit(void) {
 
     memset(&record, 0, sizeof(record));
     record.unitId = 3;
-    func_00286BA8(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
 }
 
 void func_00286700(void) {
@@ -332,7 +332,7 @@ void func_00286700(void) {
 
     memset(&record, 0, sizeof(record));
     record.unitId = 7;
-    func_00286BA8(&record);
+    mtrRecomputeMantraFlagsForPartyUnit(&record);
 }
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", mtrSynchronizeMantraFlagsAcrossParty);
