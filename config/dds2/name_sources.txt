@@ -1294,6 +1294,7 @@
 0x0016EFA8	effThunderGroupRelease	inferred	Releases each thunder handle and the group work; DDS1 twin. [names_qp9.tsv]
 0x0016F020	effSetResourceBlendColor	inferred	confidence=high; matched-C; src/dds2/game/code_0016EDD0.c:93:func_0016F020; Writes the resource handle blend-color word consumed by the blur resource caller; no per-channel conversion or multiplication occurs.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x0016F6D0	effThunderUpdateChainSegments	inferred	confidence=high; matched-C; src/dds2/game/code_0016EDD0.c:99:func_0016F6D0; Propagates adjacent parent point pairs into each thunder child segment, seeds later child fragment histories from the preceding segment, multiplies parent/child colors, advances the child counter and queues its particle system.; source=names_P5.tsv:14 [names_qp11.tsv]
+0x0016F850	effThunderCreateCurveGroup	inferred	Allocates a curve group, clones its mixer, initializes fragment-history slots and creates one event per group slot; called by effApplyParamBlockPair.
 0x0016FAD0	effApplyParamBlockPair	inferred	Obtains blocks zero and one from the effect parameter table and passes the pair to the handler.
 0x0016FD90	effReleaseGroupSlotsAndResources	inferred	Walks group slots releasing resource arrays and effect nodes before group cleanup. [names_reviewed21.tsv]
 0x00171580	effCopyResourceGroupVector	inferred	high confidence; src/dds2/game/code_0016EDD0.c func_00171580: Copies one 16-byte vector in the effect resource-group unit. [names_reviewed25.tsv]
