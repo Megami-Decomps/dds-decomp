@@ -7111,6 +7111,7 @@ mnuDrawMantraPanelBTransition = 0x0027E360; // type:func
 btlGetConditionalEncounterInterval = 0x0011E848; // type:func
 btlAdvanceConditionalEncounterRoll = 0x0011E930; // type:func
 kwlnDrawTextureResourceDetails = 0x00104700; // type:func
+kwlnUnregisterNamedSlot = 0x00103108; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -8969,7 +8970,6 @@ func_00101960 = 0x00101960; // type:func
 kwlnTaskAddChild = 0x00101968; // type:func
 func_00101AC0 = 0x00101AC0; // type:func
 func_00102E88 = 0x00102E88; // type:func
-func_00103108 = 0x00103108; // type:func
 func_001032F0 = 0x001032F0; // type:func
 func_00103388 = 0x00103388; // type:func
 func_00103430 = 0x00103430; // type:func
