@@ -4674,6 +4674,7 @@
 0x0025FB30	mnuDrawShopLimitArrows	inferred	Draws the selected shop row's up/down arrows at full alpha when the panel is not at its corresponding limit.
 0x0025FC38	mnuDrawShopLimitArrowsScaled	inferred	Draws the selected shop row's up/down arrows at caller-supplied scale when the panel is not at its corresponding limit.
 0x0025FE68	mnuDrawIconFixedEntry	inferred	mnu draws icon table entry 26
+0x00260100	mnuDrawShopCurrencyBalance	inferred	Interpolates the shop's displayed currency balance from the saved value over 20 frames, then draws it.
 0x00260208	brsDrawResultIconPairWithAlpha	inferred	Draws the selected result icon and fixed companion with matching alpha from the result icon table. [LiteH b12]
 0x0025FEB8	mnuDrawIconFixedEntryWithBadge	inferred	confidence=high; src/dds1/game/code_0025DF68.c:func_0025FEB8; Draws the fixed icon sprite plus a formatted value glyph placed at fixed offsets, with chain flag 4 and the given draw option. [names_qp9.tsv]
 0x00260530	mnuStorePendingMenuCommandValue	inferred	When a menu command exists, stores its payload and puts its mode into queued state. [names_reviewed17.tsv]

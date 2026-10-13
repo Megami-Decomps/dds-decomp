@@ -17,7 +17,7 @@ extern MenuIconPlacement D_003D03F0[];
 extern void func_00306CD0(s32, s32, s32, u32, s32,
                           struct EffectSlotSet *, s32, s32);
 extern void func_00294680(MenuTerminalContext *, s32, s32);
-extern void func_00296D90(MenuTerminalContext *, s32);
+extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 
 extern void mnuDrawFadingValueListRow();
 
@@ -122,7 +122,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
         alpha = 1.0f;
     }
     alpha = 1.0f - alpha;
-    func_00296D90(object, 0xA09DC300 | (s32)(alpha * 128.0f));
+    mnuDrawShopCurrencyBalance(object, 0xA09DC300 | (s32)(alpha * 128.0f));
 
     index = evtSelectGraphicSlotBySpriteType(object);
     resources = D_00438FC8;
@@ -540,7 +540,7 @@ void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
 }
 
 
-void func_00296D90(MenuTerminalContext *state, s32 style) {
+void mnuDrawShopCurrencyBalance(MenuTerminalContext *state, s32 style) {
     char text[16];
 
     if (datGameState->header.currency != state->previousValue) {
