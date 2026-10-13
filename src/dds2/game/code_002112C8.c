@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_ai_slot.h"
 #include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -20,7 +21,6 @@
 
 extern s32 func_00211EA8();
 
-extern u32 btlPickWeightedAiSlot();
 
 
 extern BtlAiScratchWork *btlActionScratchWork;

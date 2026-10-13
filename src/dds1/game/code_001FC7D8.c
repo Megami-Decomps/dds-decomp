@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_ai_slot.h"
 #include "dds3obj.h"
 #include "btl_resource_name.h"
 #include "sdf_chip.h"
@@ -1132,7 +1133,6 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
 
 extern AiSpecies *datEnemyAiRecords;
 extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 arg);
-extern u32 btlPickWeightedAiSlot();
 extern s32 btlRunAiAction();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
