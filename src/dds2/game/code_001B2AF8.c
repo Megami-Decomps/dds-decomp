@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "snd_pad.h"
 #include "btl_roster_pair.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
@@ -120,35 +121,6 @@ extern char D_004159A0[];
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct SndPad {
-    u8 pad00[0x20];
-    union {
-        s8 buttons[0x20];
-        struct {
-            u8 pad20;
-            s8 confirm;
-            s8 unk22;
-            s8 unk23;
-            s8 unk24;
-            s8 unk25;
-            s8 prev;
-            s8 next;
-            u8 pad28[9];
-            s8 unk31;
-            s8 unk32;
-            s8 cancel;
-            s8 coarseDown;
-            s8 coarseUp;
-            s8 unk36;
-            s8 unk37;
-            s8 fineDown;
-            u8 pad39;
-            s8 fineUp;
-            u8 pad3B[5];
-        };
-    };
-} SndPad;
-
 extern SndPad D_0037F510;
 
 extern u8 D_00436630[5];

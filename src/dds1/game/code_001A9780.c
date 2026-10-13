@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -52,18 +53,6 @@ extern s32 btlGetEffectActive(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
-
-typedef struct SndPad {
-    u8 pad00[0x21];
-    s8 confirm;
-    s8 edge22;
-    s8 edge23;
-    s8 unk24;
-    s8 unk25;
-    s8 prev;
-    s8 next;
-    u8 pad28[0x18]; /* The kernel snapshot contains four 16-byte input sets. */
-} SndPad;
 
 extern SndPad D_00324510;
 
@@ -3855,7 +3844,7 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                 sndSetStationedSeVolume(8);
                 command->state = 8;
                 command->commandData->phase = 9;
-            } else if (D_00324510.edge23 < 0) {
+            } else if (D_00324510.unk23 < 0) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
@@ -6140,7 +6129,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         return;
     }
 
-    if (D_00324510.edge23 < 0) {
+    if (D_00324510.unk23 < 0) {
         work->state = 4;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {

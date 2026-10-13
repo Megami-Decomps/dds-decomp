@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -56,35 +57,6 @@ extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 extern s32 sdfAllocPacketAligned(s32 size);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct SndPad {
-    u8 pad00[0x20];
-    union {
-        s8 buttons[0x20];
-        struct {
-            u8 pad20;
-            s8 confirm;
-            s8 edge22;
-            s8 edge23;
-            u8 pad24[2];
-            s8 prev;
-            s8 next;
-            u8 pad28[9];
-            s8 unk31;
-            u8 unk32;
-            s8 cancel;
-            s8 coarseDown;
-            s8 coarseUp;
-            s8 unk36;
-            s8 unk37;
-            s8 fineDown;
-            u8 pad39;
-            s8 fineUp;
-            u8 pad3B[5]; /* Complete two-port current/edge byte storage. */
-        };
-    };
-} SndPad;
-
-
 typedef struct ItfColorPanelWork {
     s16 editing;
     s16 selection;
