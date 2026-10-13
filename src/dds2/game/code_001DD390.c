@@ -544,9 +544,9 @@ extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 
 extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
-extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
 
@@ -708,9 +708,9 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     elementMask = btlEncodeActorIndexAsSelectionMask(element);
     if (action->indexWork.phase != 4) {
         if (datCommandSelectors[command].kind != 1) {
-            costError = func_001ABB10(source, command);
+            costError = btlGetCommandUseError(source, command);
         } else {
-            costError = func_001ABDE8(source, action->unit, action->indexWork.companionA,
+            costError = btlGetPartnerCommandUseError(source, action->unit, action->indexWork.companionA,
                                     action->indexWork.companionB, command);
         }
         if (costError == 0) {
@@ -1896,7 +1896,7 @@ extern s32 fileTestSavedSlotFlags(u32);
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
@@ -1955,7 +1955,7 @@ void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work)
             work->skillId = 0;
             work->phase = 1;
         }
-        if (func_001ABB10(unit, work->skillId)) {
+        if (btlGetCommandUseError(unit, work->skillId)) {
             work->skillId = 0;
             work->phase = 1;
         }
