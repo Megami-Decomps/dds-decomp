@@ -80,6 +80,7 @@
 0x001050B8	kwlnTextureAttachTask	inferred	allocates and initializes task then invokes scene attach callback
 0x00105118	kwlnEnsureDefaultResource	inferred	initializes D_00325748 when readiness byte is clear
 0x00105320	evtResetDisplayProjectionAndVectorState	inferred	Sets display mode, rebuilds both projections and ensures draw-vector state. [names_reviewed9.tsv]
+0x00105370	kwlnInitHeldTextureScenePackets	inferred	Rebuilds the held-texture render target dimensions, projection and both scene packet banks; DDS2 twin 0x00105290.
 0x001054D0	kwlnCreateHeldTextureBuffer	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:612:func_001054D0; Replaces the held texture reference, allocates the requested image buffer and texture, initializes texture state and returns one only after both allocations succeed.; source=names_pending_main.tsv:125 [names_qp11.tsv]
 0x001055C0	kwlnTextureReleaseHeldReference	inferred	Releases the saved SdfTex reference if present and clears the handle and two associated flags; DDS2 equivalent at 001054E0.
 0x001055F8	kwlnTextureSetReferenceFlagIfPresent	inferred	Sets the first associated flag only if the saved texture reference exists; DDS2 equivalent at 00105518.
