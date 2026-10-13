@@ -824,8 +824,8 @@ extern s32 evtPlayBgm(s32, s32);
 extern s32 evtFadeInBgm(s32, s32);
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern void evtTransitionBgm(s32, s32);
-extern void func_002E9708(void);
-extern void func_002E9730(void);
+extern void sndStartReducedBgm(void);
+extern void sndStopReducedBgm(void);
 extern void func_002E8E00(void);
 extern void kwlnFadeSetupFrames(s32, s32);
 extern s32 itfMesSelectTableItemText(s32, s32, s32);
@@ -915,10 +915,10 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             evtTransitionBgm(D_003BBE78, key->p08.sh[1]);
             break;
         case 4:
-            func_002E9708();
+            sndStartReducedBgm();
             break;
         case 5:
-            func_002E9730();
+            sndStopReducedBgm();
             break;
         case 6:
             func_002E8E00();

@@ -66,7 +66,7 @@ extern void mnuBuildCampTitleEffectResourceList(u8 *);
 
 extern void mnuResetGradientFadeColor(u8 *, s32);
 
-extern void func_003425B0(void);
+extern void sndStartReducedBgm(void);
 
 
 
@@ -809,7 +809,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     mnuBuildListSlotTableA((ListSlotWork *)menuBytes);
     mnuBuildListSlotTableB((ListSlotWork *)menuBytes);
     mnuBuildSkillSlotTable((ListSlotWork *)menuBytes);
-    func_003425B0();
+    sndStartReducedBgm();
     return menuBytes;
 }
 
@@ -831,7 +831,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     effDestroyEffectList(((MenuStaffContext *)menuBytes)->menuResource);
     sdfReleaseResourceAllocation(((MenuStaffContext *)menuBytes)->allocation);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
-    func_003425D8();
+    sndStopReducedBgm();
 }
 
 u32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {

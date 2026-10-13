@@ -1261,11 +1261,11 @@ u8 mnuGetTerminalFrameFade(MenuTerminalWork *scene) {
 
 extern void sndStartTrackExtended(s32);
 
-extern void func_002E9708(void);
+extern void sndStartReducedBgm(void);
 
 extern void sndReleaseTrackHandle(s32);
 
-extern void func_002E9730(void);
+extern void sndStopReducedBgm(void);
 
 
 struct EffectSlotSet;
@@ -1624,12 +1624,12 @@ void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
         if (host->mode == 0) {
             sndStartTrackExtended(host->bgmHandle);
         } else {
-            func_002E9708();
+            sndStartReducedBgm();
         }
     } else if (host->mode == 0) {
         sndReleaseTrackHandle(host->bgmHandle);
     } else {
-        func_002E9730();
+        sndStopReducedBgm();
     }
 }
 
