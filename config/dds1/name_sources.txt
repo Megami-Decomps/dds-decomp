@@ -7645,6 +7645,7 @@
 0x0019AFD8	itfStepHeldPanelMessages	inferred	Inferred from the current C implementation in game/code_00199AD8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0019E4F8	itfUpdateSoundSelectionTransition	inferred	Inferred from the current C implementation in game/code_0019DB88.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0019EE58	itfDrawSelectedSoundRow	inferred	Inferred from the current C implementation in game/code_0019DB88.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019F0F8	itfDrawSoundSelectorOptionPanel	inferred	Mode-3 path in itfUpdateSoundSelectorPanel; emits option-row geometry and panel quads for the selector.
 0x0019FF60	kwlnUpdateBlurDebugMenu	inferred	Inferred from the current C implementation in game/code_0019DB88.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A0910	itfCreateVerticalGradientQuadPacket	inferred	Inferred from the current C implementation in game/code_001A04C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A1530	btlSnapshotResultRewards	inferred	Inferred from the current C implementation in game/code_001A04C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
