@@ -4798,12 +4798,12 @@ s32 func_00151498(void) {
     return fldSparkControlState.entry->unk06;
 }
 
-s32 func_001514A8(void) {
+s32 fldGetSparkRewardProfileIndex(void) {
     return fldSparkControlState.unk8;
 }
 
 
-s16 func_001514B8(void) {
+s16 fldGetSparkPickupCount(void) {
     return fldAreaState.collectedCount;
 }
 

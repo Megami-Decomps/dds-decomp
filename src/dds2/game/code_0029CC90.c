@@ -126,8 +126,8 @@ typedef struct BrsProfileApRecord {
 } BrsProfileApRecord;
 
 extern BrsProfileApRecord *D_00435E18;
-extern s32 func_001514A8(void);
-extern s16 func_001514B8(void);
+extern s32 fldGetSparkRewardProfileIndex(void);
+extern s16 fldGetSparkPickupCount(void);
 
 s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
     s32 gain;
@@ -143,9 +143,9 @@ s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
         gain += baseApTotal;
     }
 
-    profileIndex = func_001514A8();
+    profileIndex = fldGetSparkRewardProfileIndex();
     if (profileIndex >= 0) {
-        gain += func_001514B8() * D_00435E18[profileIndex].apMultiplier;
+        gain += fldGetSparkPickupCount() * D_00435E18[profileIndex].apMultiplier;
     }
     return gain;
 }
