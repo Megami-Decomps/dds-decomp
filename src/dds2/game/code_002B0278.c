@@ -596,8 +596,8 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
     return 1;
 }
 
-extern void func_002B0D90(s32, s32, s32, MenuList *, MenuListNode *, s32);
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
+extern void mnuDrawPartySelectionListEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
+INCLUDE_ASM(const s32, "game/code_002B0278", mnuDrawPartySelectionListEntry);
 
 extern void mnuCreatePartySelectionWindow(MenuContext *);
 extern char D_00437BE8[];
@@ -612,7 +612,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
     mnuInitializeBasicWindowLayout(window, context->panelModels[0], 0xC);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0, 0, 0, 0);
     window->list->context = context;
-    window->list->drawCallback = func_002B0D90;
+    window->list->drawCallback = mnuDrawPartySelectionListEntry;
 
     for (i = 0; i < 5; i++) {
         if ((datGameState->party[i].flags & 1) != 0) {
@@ -877,7 +877,7 @@ s32 mnuHandlePartySelectionInput(KwlnTask *callback) {
     }
     if (*popup == 0) {
         if ((inputFlags & 0x300000) == 0) {
-            func_002B9808(window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & 0x10) {
             mnuRetreatWindowListSelection(window);
@@ -2267,7 +2267,7 @@ void mnuCampMenuHandleInput(KwlnTask *callback) {
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            func_002B9808((s32)window);
+            mnuClearWindowListSelectionFlags((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -2326,7 +2326,7 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            func_002B9808((s32)window);
+            mnuClearWindowListSelectionFlags((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -2380,7 +2380,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
     mnuHighlightSelectedListNode(callback);
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            func_002B9808((s32)window);
+            mnuClearWindowListSelectionFlags((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -2684,7 +2684,7 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *callback) {
     windowSlot = windows + ((MenuList *)menu[3])->cursor->index;
     window = (MenuWindowContainer *)*windowSlot;
     if (!(input & 0x300000)) {
-        func_002B9808((s32)window);
+        mnuClearWindowListSelectionFlags((s32)window);
     }
     if (input & 0x10) {
         mnuRetreatWindowListSelection(window);
@@ -2901,7 +2901,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
     }
     if ((buttons & 0x300000) == 0) {
         list = menu + 1;
-        func_002B9808(list[8 + menu[11]]);
+        mnuClearWindowListSelectionFlags(list[8 + menu[11]]);
     }
     list = menu + 1;
     if (buttons & 0x10) {
@@ -3876,7 +3876,7 @@ MenuListNode *mnuAdvanceListSelection(MenuWindowContainer *menu, s32 step);
 /* Retreat selection with the same conditional byte/panel cleanup as advancement. */
 MenuListNode *mnuReverseListSelection(MenuWindowContainer *menu, s32 step);
 
-void func_002B9808(MenuWindowContainer *menu);
+void mnuClearWindowListSelectionFlags(MenuWindowContainer *menu);
 
 void mnuCheckWindowListStatus(MenuWindowContainer *menu);
 

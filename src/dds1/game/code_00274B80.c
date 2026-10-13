@@ -36,7 +36,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 func_002CD240(u16, u8 **);
-extern void func_002845F8(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
+extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void func_00196088(s32, s32, FrFontGlyph *);
@@ -213,7 +213,7 @@ typedef struct MenuSpriteArguments {
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan();
 extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
-extern void func_0027C788(s32);
+extern void mnuClearWindowListSelectionFlags(s32);
 
 extern void mnuPlayInputSound(s32, u32, s32);
 extern u8 D_0037CC74[];
@@ -257,10 +257,10 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
+INCLUDE_ASM(const s32, "game/code_00274B80", mnuDrawPartySelectionListEntry);
 
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void func_00274BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *);
+extern void mnuDrawPartySelectionListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *);
 extern char D_003BC6E8[];
 void mnuCreatePartySelectionWindow(CampMenuContext *context) {
     PartyMenuData *party = (PartyMenuData *)context->menu;
@@ -274,7 +274,7 @@ void mnuCreatePartySelectionWindow(CampMenuContext *context) {
                      (struct EffectSlotSet *)context->panelResource, 0x20);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0x30, 0x530, -0x90, 0xA10);
     window->list->context = context;
-    window->list->drawCallback = func_00274BC0;
+    window->list->drawCallback = mnuDrawPartySelectionListEntry;
     for (i = 0; i < 5; i++) {
         if ((datGameState->party[i].flags & 1) != 0) {
             s32 id = datGameState->party[i].unitId;
@@ -516,7 +516,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
     }
     if (*popup == 0) {
         if ((inputFlags & 0x300000) == 0) {
-            func_0027C788((s32)window);
+            mnuClearWindowListSelectionFlags((s32)window);
         }
         if (inputFlags & 0x10) {
             mnuRetreatWindowListSelection(window);
@@ -592,9 +592,9 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
     effDrawSpriteWithCornerFade(0x4C0, 0xAE8, 0, opacity, 1, sets[0], 10, 0x53);
     effDrawSpriteWithCornerFade(0x560, 0xC98, 0, opacity, 1, sets[0], 0x1F, 0x53);
     hpBar->opacity = opacity;
-    func_002845F8(0x6E0, 0x9B8, 0, color, entry->hp, -1, hpBar, 0x53);
+    mnuDrawAndAdvanceRatioPanel(0x6E0, 0x9B8, 0, color, entry->hp, -1, hpBar, 0x53);
     mpBar->opacity = opacity;
-    func_002845F8(0x6E0, 0xA48, 0, color, entry->mp, -1, mpBar, 0x53);
+    mnuDrawAndAdvanceRatioPanel(0x6E0, 0xA48, 0, color, entry->mp, -1, mpBar, 0x53);
     effDrawSpriteWithCornerFade(0x740, 0xCB0, 0, opacity, 1, sets[0], 0x1D, 0x53);
     effDrawSpriteWithCornerFade(0x11D0, 0xCB0, 0, opacity, 1, sets[0], 0x1E, 0x53);
     if (profile) {
@@ -1297,7 +1297,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00277848);
+INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEquippedSkillEntry);
 
 /* The camp initializer allocates and clears this complete 0x38-byte child.
  * Skill pages own four category windows and a separate selected-slot window. */
@@ -1333,7 +1333,7 @@ typedef struct DspUnitName {
 extern const MenuListDefaultRecord D_003B22E0;
 extern DspUnitName *D_003BAA8C;
 extern const u8 D_003BC708[];
-extern void func_00277848();
+extern void ptySkillMenuDrawEquippedSkillEntry();
 extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern u8 brsGetLevelStepForValue(s32);
 
@@ -1373,7 +1373,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *task) {
 
     list = window->list;
     list->context = context;
-    list->drawCallback = func_00277848;
+    list->drawCallback = ptySkillMenuDrawEquippedSkillEntry;
     for (i = 0; i < skillCount; i++) {
         u16 skill = datGameState->party[partyIndex].effectData[i];
         struct MenuListNode *node;
@@ -1866,7 +1866,7 @@ void mnuCampMenuHandleInput(KwlnTask *task) {
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            func_0027C788(window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -1927,7 +1927,7 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            func_0027C788((s32)window);
+            mnuClearWindowListSelectionFlags((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -1987,7 +1987,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
     mnuHighlightSelectedListNode(callback);
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            func_0027C788((s32)window);
+            mnuClearWindowListSelectionFlags((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);

@@ -165,7 +165,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     u32 mappedButtons = mnuMapPadMaskToFlags(MNU_CAMP_CANCEL_MASK);
     s32 result;
 
-    if (func_002719F0(menu) == 0) {
+    if (mnuInitializeCampMenuWhenResourcesReady(menu) == 0) {
         return 0;
     }
     result = 0;
@@ -331,10 +331,10 @@ void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
     StaffMenuWork *menu = (StaffMenuWork *)kwlnTaskGetUserValue(task);
 
     mnuDrawBackdrop((MenuAssets *)menu->background, 0x20);
-    if (func_002719F0(task) == 0) {
+    if (mnuInitializeCampMenuWhenResourcesReady(task) == 0) {
         return;
     }
-    func_0027E8D8(-0x10, -8, 0, (s32)menu->scrollPanel, 0x53);
+    mnuDrawStaffScrollPanel(-0x10, -8, 0, (s32)menu->scrollPanel, 0x53);
     mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)((u8 *)menu + 0x15C), 0x53);
     if (kind == 0) {
         itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, menu->staffSlots.baseResources[1], 6, 0x53);

@@ -17,7 +17,7 @@ extern u8 D_003E7200[];
 
 extern u8 D_003E73F8[];
 
-extern void func_002B9808(MenuWindowContainer *);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_003E6F38[];
@@ -84,7 +84,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
         }
     }
     if ((input & 0x300000) == 0) {
-        func_002B9808(context->skillWindow);
+        mnuClearWindowListSelectionFlags(context->skillWindow);
     }
     if (input & 0x10) {
         mnuRetreatWindowListSelection(context->skillWindow);
@@ -98,11 +98,11 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
 }
 
 extern void mnuDrawCampScreenDefault(KwlnTask *);
-extern void func_002AA9D8(s32, u32, u32, u32, u32, u32, u32, u32, u32);
+extern void mnuDrawCampGridFrameAndLabel(s32, u32, u32, u32, u32, u32, u32, u32, u32);
 extern char D_003E69B0[];
 extern char D_003E6F18[];
 
-s32 func_002AB0E0(KwlnTask *task) {
+s32 mnuDrawCampFieldSkillPage(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     s32 state;
     s32 layer = 0x53;
@@ -113,7 +113,7 @@ s32 func_002AB0E0(KwlnTask *task) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    func_002AA9D8(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+    mnuDrawCampGridFrameAndLabel(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
                   1, 0, (u32)D_003E6F18, 8, layer);
     mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, layer);
     mnuDrawStaffGridLabelsForKind(0, context->resources.baseResources[0]);
@@ -167,7 +167,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
 
     context = kwlnTaskGetUserValue(callback);
     mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
-    func_002BB510(-0x10, -8, 0, ((MenuStaffContext *)context)->scrollPanel, 0x54);
+    mnuDrawStaffScrollPanel(-0x10, -8, 0, ((MenuStaffContext *)context)->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x18);
     mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)callback);
@@ -214,7 +214,7 @@ s32 func_002AB448(KwlnTask *task) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    func_002AA9D8(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+    mnuDrawCampGridFrameAndLabel(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
                   1, 0, (u32)D_003E6F18, 8, layer);
     mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, layer);
     mnuDrawStaffGridLabelsForKind(0, context->resources.baseResources[0]);

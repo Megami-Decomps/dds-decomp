@@ -60,7 +60,7 @@ void mnuDrawHeightScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, 
 }
 
 /* Draw the expanding panel gradient and its dim full-size overlay. */
-void func_00281AE8(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+void mnuDrawPanelFadeSprite(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     u32 colors[4];
     u32 color;
     u32 transparentColor;
@@ -86,7 +86,7 @@ typedef enum MenuPanelFadeKind {
 
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 
-void func_00281BE0(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+void mnuDrawAndAdvancePanelFades(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     s32 i;
 
     sdfSubmitGsAlphaOneRegisterPacket(0x48, surface);
@@ -101,7 +101,7 @@ void func_00281BE0(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
                     mnuDrawHeightScaledPanelGradient(x, y, z, &work[i], surface);
                     break;
                 case MENU_PANEL_FADE_SPRITE:
-                    func_00281AE8(0, 0, z, &work[i], 0x54);
+                    mnuDrawPanelFadeSprite(0, 0, z, &work[i], 0x54);
                     break;
                 }
                 if (work[i].blend > 0x100) {

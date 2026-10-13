@@ -57,13 +57,13 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s
 
 extern void mnuDrawSlidingPartyPanel(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
 
-extern MenuSprites *func_0027F230(s32, EffectSlotSet *, EffectSlotSet *);
+extern MenuSprites *mnuCreatePageSpriteSet(s32, EffectSlotSet *, EffectSlotSet *);
 
 extern void mnuDrawFourPanelIconsAtOffsets(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
 extern void mnuDrawPanelIconPairsAtFixedPositions(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
-extern void func_0027C140(s32, s32, s32, s32, s32, s32, u32, MenuList *, s32);
+extern void mnuDrawWindowListEntries(s32, s32, s32, s32, s32, s32, u32, MenuList *, s32);
 
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
 
@@ -195,7 +195,7 @@ extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern const char D_003BC718[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
-void func_0027C140(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
+void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
                    s32 fadeScale, u32 unusedFlags, MenuList *list, s32 drawArg) {
     char text[0x10];
     MenuListNode *node = list->head;
@@ -249,7 +249,7 @@ void func_0027C140(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
 
 /* Invoke the native window renderer at full fade with its size/flag arguments zeroed. */
 void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
-    func_0027C140(x, y, depth, 0, 0, MNU_FULL_FADE, 0, (MenuList *)(u32)menu, drawArg);
+    mnuDrawWindowListEntries(x, y, depth, 0, 0, MNU_FULL_FADE, 0, (MenuList *)(u32)menu, drawArg);
 }
 
 
@@ -402,7 +402,7 @@ MenuListNode *mnuRetreatWindowListSelection(MenuWindowContainer *window) {
     return mnuReverseListSelection(window, 0);
 }
 
-void func_0027C788(MenuWindowContainer *window) {
+void mnuClearWindowListSelectionFlags(MenuWindowContainer *window) {
     mnuClearListFlagsOneAndTwo(&window->list->stateFlags);
 }
 
@@ -575,7 +575,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     if (menu->list->count != 0) {
         mnuDrawWindowSelectionPanel(x, y, depth, menu, drawArg);
     }
-    func_0027C140(x, y, depth, menu->width, menu->height, fadeScale, menu->flags,
+    mnuDrawWindowListEntries(x, y, depth, menu->width, menu->height, fadeScale, menu->flags,
                   menu->list, drawArg);
     textures = menu->textures;
     if (textures != NULL) {
@@ -1274,7 +1274,7 @@ void mnuDrawPanelGridAndSubmitSurface(u8 *panel, s32 y, s32 unknown,
     sdfDispatchSurfaceWithPreparedTexturePacket(flag);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027E8D8);
+INCLUDE_ASM(const s32, "game/code_0027BF00", mnuDrawStaffScrollPanel);
 
 /* Ten resource handles occupy offsets 0x0c through 0x30 in each page bundle. */
 typedef struct MenuPageResources {
@@ -1424,7 +1424,7 @@ void mnuSetPageParams(MenuSprites *page, s32 mode) {
     }
 }
 
-MenuSprites *func_0027F230(s32 value, EffectSlotSet *mainResource,
+MenuSprites *mnuCreatePageSpriteSet(s32 value, EffectSlotSet *mainResource,
                             EffectSlotSet *secondaryResource) {
     MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(0x50);
 
@@ -1496,7 +1496,7 @@ void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuS
 void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource, s32 option) {
     mnuSelectPage(window, index);
     window->slots[index].windowSprites =
-        func_0027F230(0, (EffectSlotSet *)resource, (EffectSlotSet *)option);
+        mnuCreatePageSpriteSet(0, (EffectSlotSet *)resource, (EffectSlotSet *)option);
     window->flags |= 0x100;
 }
 
@@ -2102,7 +2102,7 @@ extern char D_003BC720[];
 extern u8 D_003BC730[];
 extern char D_003BC738[];
 
-void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 param) {
+void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 param) {
     char text[0x20];
     EffectSlotSet **sprite = page->overlaySprites;
     u32 i = 0;

@@ -96,7 +96,7 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
 extern char D_0037CC58[];
 extern char D_0037CC3C[];
 extern s32 ptySkillMenuHandlePageSwitch(KwlnTask *);
-extern void func_0027C788(MenuWindowContainer *);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 /* The camp initializer allocates and clears this complete 0x38-byte child. */
@@ -139,7 +139,7 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *task) {
         index = menu->categoryList->cursor->index;
         window = *(MenuWindowContainer **)((s32)windows + (index << 2));
         if ((buttons & 0x300000) == 0) {
-            func_0027C788(window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (buttons & 0x10) {
             mnuRetreatWindowListSelection(window);
@@ -352,7 +352,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
     if (state == 0) {
         if ((buttons & 0x300000) == 0) {
             list = menu + 1;
-            func_0027C788(list[8 + menu[11]]);
+            mnuClearWindowListSelectionFlags(list[8 + menu[11]]);
         }
         list = menu + 1;
         if (buttons & 0x10) {

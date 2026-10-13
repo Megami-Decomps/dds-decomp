@@ -1024,7 +1024,7 @@ MenuListNode *mnuRetreatWindowListSelection(MenuWindowContainer *menu) {
     return mnuReverseListSelection(menu, 0);
 }
 
-void func_002B9808(MenuWindowContainer *menu) {
+void mnuClearWindowListSelectionFlags(MenuWindowContainer *menu) {
     mnuClearListFlagsOneAndTwo((u32)menu->list);
 }
 
@@ -1829,7 +1829,7 @@ u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
     return resources->active.set != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BB510);
+INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuDrawStaffScrollPanel);
 
 void mnuLoadPanelSectionResources(MenuPageSlot *slot,
                                   EffectSlotSet *model, u32 firstValue,

@@ -2113,7 +2113,7 @@ s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
 extern u8 *D_00435E5C;
 extern u8 D_003C9BC4[];
 extern void mnuSelectFirstListNode();
-extern void func_002B9808();
+extern void mnuClearWindowListSelectionFlags();
 extern s32 func_002958B0();
 extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
@@ -2140,7 +2140,7 @@ s32 func_00261538(MenuTerminalContext *scene) {
         }
         node = mnuAppendWindowListNode(scene->window,
             D_00435E5C + id * 0x19);
-        func_002B9808(scene->window);
+        mnuClearWindowListSelectionFlags(scene->window);
         window = scene->window;
         mnuAdvanceListCursorDefault(window->list);
         params = &node->camp;
@@ -2188,7 +2188,7 @@ s32 func_00261670(MenuTerminalContext *scene) {
         }
         node = mnuAppendWindowListNode(scene->window,
             D_00435E5C + id * 0x19);
-        func_002B9808(scene->window);
+        mnuClearWindowListSelectionFlags(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
         price = mnuCampGetSourceItemPrice(i, scene->shopRow, 0);
@@ -2237,7 +2237,7 @@ s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
         }
         node = mnuAppendWindowListNode(scene->window,
             D_00435E5C + id * 0x19);
-        func_002B9808(scene->window);
+        mnuClearWindowListSelectionFlags(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
         price = func_00260A58(i, 0);
@@ -2288,7 +2288,7 @@ s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
         }
         node = mnuAppendWindowListNode(scene->window,
             D_00435E5C + id * 0x19);
-        func_002B9808(scene->window);
+        mnuClearWindowListSelectionFlags(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
         price = mnuCampGetSourceItemPrice(i, scene->shopRow, 0);
@@ -2462,7 +2462,7 @@ extern u8 D_003CE690[];
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
 extern void mnuSetSelectionListTransition(struct MenuList *, u32);
-extern void func_002B9808(MenuWindowContainer *);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_003CE578[];
@@ -2593,7 +2593,7 @@ s32 func_00261F48(KwlnTask *task) {
             mnuSetCommandPhase(state, 2);
             mnuSetSelectionListTransition(list, 4);
         } else if ((inputFlags & 0x300000) == 0) {
-            func_002B9808(state->ownedWindows[0]);
+            mnuClearWindowListSelectionFlags(state->ownedWindows[0]);
         } else if ((inputFlags & 0x10) != 0) {
             mnuRetreatWindowListSelection(state->ownedWindows[0]);
         } else if ((inputFlags & 0x20) != 0) {
@@ -2716,7 +2716,7 @@ s32 func_00262330(KwlnTask *task) {
             mnuSetCommandPhase(state, 5);
             mnuSetSelectionListTransition(list, 4);
         } else if ((inputFlags & 0x300000) == 0) {
-            func_002B9808(state->window);
+            mnuClearWindowListSelectionFlags(state->window);
         } else if ((inputFlags & 0x10) != 0) {
             mnuRetreatWindowListSelection(state->window);
         } else if ((inputFlags & 0x20) != 0) {
@@ -2831,7 +2831,7 @@ s32 func_00262740(KwlnTask *task) {
                     mnuSetCommandPhase(state, 5);
                     mnuSetSelectionListTransition(linkedList, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
-                    func_002B9808(state->window);
+                    mnuClearWindowListSelectionFlags(state->window);
                 } else if (inputFlags & 0x10) {
                     mnuRetreatWindowListSelection(state->window);
                 } else if (inputFlags & 0x20) {
@@ -2956,7 +2956,7 @@ s32 func_00262B50(KwlnTask *callbackContext) {
             mnuSetCommandPhase(state, 5);
             mnuSetSelectionListTransition(list, 4);
         } else if (!(input & 0x300000)) {
-            func_002B9808(state->window);
+            mnuClearWindowListSelectionFlags(state->window);
         } else if (input & 0x10) {
             mnuRetreatWindowListSelection(state->window);
         } else if (input & 0x20) {
@@ -3058,7 +3058,7 @@ s32 func_00262F78(KwlnTask *task) {
                     mnuSetCommandPhase(state, 5);
                     mnuSetSelectionListTransition(linkedList, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
-                    func_002B9808(state->window);
+                    mnuClearWindowListSelectionFlags(state->window);
                 } else if (inputFlags & 0x10) {
                     mnuRetreatWindowListSelection(state->window);
                 } else if (inputFlags & 0x20) {

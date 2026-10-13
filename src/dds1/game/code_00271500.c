@@ -146,7 +146,7 @@ s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {
     return (s32)effDestroyResourceSlotSet(menu->singleResource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00271500", func_002719F0);
+INCLUDE_ASM(const s32, "game/code_00271500", mnuInitializeCampMenuWhenResourcesReady);
 
 void func_00271B40(void) {
 }

@@ -2137,7 +2137,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     before trying declaration-order permutations. This is a targeted check,
     not a reason to rewrite unrelated declarations.
     Three more independent DDS1 examples are `func_0018AB40` (effMagatuhi),
-    `func_00280E08` (code_0027BF00), and `func_00288E70` (code_00288E70).
+    `mnuDrawPartyPageEntry` (code_0027BF00), and `func_00288E70` (code_00288E70).
     Their genuine `s32` callees are `effMathStepBezierSlot`,
     `frFontQueueGlyphInSelectedSlot`, and SDK `WaitSema`, respectively.
     Each `void` declaration leaves exactly two incorrect words: the post-call
@@ -3430,8 +3430,8 @@ The item-use callback and its complete unit are text/data exact
 field-effect provider's pre-existing sound arms and development hooks,
 remains unchanged by the pointer-contract cutover.
 
-The sorted bullet-list updater also ports between DDS2 `func_002ABED8`
-(`0x002ABED8`, 376 bytes) and DDS1 `func_00273220` (`0x00273220`,
+The sorted bullet-list updater also ports between DDS2 `mnuRefreshStaffBulletItemList`
+(`0x002ABED8`, 376 bytes) and DDS1 `mnuRefreshStaffBulletItemList` (`0x00273220`,
 368 bytes). Preserve each game's actual label representation: DDS2
 indexes a label-pointer table, while DDS1 indexes inline 25-byte labels.
 Both recover the old cursor index before removal, distinguish the last

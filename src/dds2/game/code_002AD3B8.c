@@ -62,7 +62,7 @@ extern char D_003E7488[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
-extern void func_002B9808(MenuWindowContainer *);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 
 extern void mnuClearListFlagsOneAndTwo(u32 *);
@@ -302,7 +302,7 @@ s32 mnuHandleSecondaryStaffObjectInput(KwlnTask *task) {
     object = menu->windows[1];
     if (object != 0) {
         if (!(buttons & 0x300000)) {
-            func_002B9808(object);
+            mnuClearWindowListSelectionFlags(object);
         }
         if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
             mnuRetreatWindowListSelection(object);
@@ -537,7 +537,7 @@ s32 mnuStaffListInput(KwlnTask *task) {
 
 /* Handle staff-item selection, confirmation and popup input. */
 s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
-    extern s32 func_002ABED8(s32, s32, MenuStaffContext *);
+    extern s32 mnuRefreshStaffBulletItemList(s32, s32, MenuStaffContext *);
     extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
     extern char D_003E7434[];
     extern char D_003E746C[];
@@ -567,7 +567,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
         if (mnuStaffListInput((s32)task) == 0) {
             window = menu->windows[2];
             if ((buttons & 0x300000) == 0) {
-                func_002B9808(window);
+                mnuClearWindowListSelectionFlags(window);
             }
             if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
                 mnuRetreatWindowListSelection(window);
@@ -604,7 +604,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
             mnuPlayInputSound(0, input, &window->list->stateFlags);
         }
     } else {
-        if (func_002ABED8(menu->previous, menu->requested, context) == 0) {
+        if (mnuRefreshStaffBulletItemList(menu->previous, menu->requested, context) == 0) {
             mnuClearActionFlags(0, &context->partyWindow);
             mnuSetPopupEntryFlagged(popup, D_003E7434);
         } else {
@@ -836,7 +836,7 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
         if (mnuHandleStaffSelectionListNavigation((s32)task) == 0) {
             window = menu->windows[3];
             if ((buttons & 0x300000) == 0) {
-                func_002B9808(window);
+                mnuClearWindowListSelectionFlags(window);
             }
             if (buttons & MNU_STAFF_INPUT_PREVIOUS_ROW) {
                 mnuRetreatWindowListSelection(window);
@@ -1154,7 +1154,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
             input &= ~0x80;
         }
         if (!(input & 0x300000)) {
-            func_002B9808(window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (input & 0x10) {
             mnuRetreatWindowListSelection(window);

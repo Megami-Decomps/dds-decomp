@@ -28,12 +28,12 @@ extern u8 D_0037C844[];
 
 extern void mnuDrawBackdrop(s32, s32);
 
-extern void func_0027E8D8(s32, s32, s32, u32, s32);
+extern void mnuDrawStaffScrollPanel(s32, s32, s32, u32, s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern s32 func_002719F0(s32);
-extern void func_0027C788(MenuWindowContainer *);
+extern s32 mnuInitializeCampMenuWhenResourcesReady(s32);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_0037C748[];
@@ -55,7 +55,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     if (state != 0) {
         return state;
     }
-    state = func_002719F0(callback);
+    state = mnuInitializeCampMenuWhenResourcesReady(callback);
     if (state == 0) {
         return state;
     }
@@ -77,7 +77,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
         }
     }
     if ((input & 0x300000) == 0) {
-        func_0027C788(context->images[0]);
+        mnuClearWindowListSelectionFlags(context->images[0]);
     }
     if (input & 0x10) {
         mnuRetreatWindowListSelection(context->images[0]);
@@ -100,7 +100,7 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
     s32 state;
 
     mnuDrawCampScreenDefault(task);
-    state = func_002719F0((s32)task);
+    state = mnuInitializeCampMenuWhenResourcesReady((s32)task);
     if (state == 0) {
         return state;
     }
@@ -151,13 +151,13 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
 s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(callback);
     mnuDrawBackdrop((s32)(context->background), 0x20);
-    func_0027E8D8(-0x10, -8, 0, context->scrollPanel, 0x54);
+    mnuDrawStaffScrollPanel(-0x10, -8, 0, context->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x14);
     mnuDrawStaffGridLabelsForKind(2, context->staffSlots.baseResources[6]);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 func_00272B80(KwlnTask *request) {
+s32 mnuFinishStaffImagePopup(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }

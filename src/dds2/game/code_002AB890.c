@@ -184,7 +184,7 @@ void mnuDestroyStaffBulletItemWindow(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[2]);
 }
 
-s32 func_002ABED8(s32 itemId, s32 previousItemId, MenuStaffContext *owner) {
+s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, MenuStaffContext *owner) {
     s32 previousCursorId = -1;
     s32 needsInsertion = 0;
     s32 insertBefore = 0;
@@ -463,7 +463,7 @@ s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
     return 1;
 }
 
-extern void func_002B9808(s32);
+extern void mnuClearWindowListSelectionFlags(s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_003E7450[];
@@ -527,7 +527,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
         window = context->activeWindow;
         if (window != NULL) {
             if ((input & 0x300000) == 0) {
-                func_002B9808((s32)window);
+                mnuClearWindowListSelectionFlags((s32)window);
             }
             if (input & 0x10) {
                 mnuRetreatWindowListSelection(window);
@@ -673,7 +673,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
     window = resources->windows[0];
     if (window != NULL) {
         if ((input & 0x300000) == 0) {
-            func_002B9808((s32)window);
+            mnuClearWindowListSelectionFlags((s32)window);
         }
         if (input & 0x10) {
             mnuRetreatWindowListSelection(window);
