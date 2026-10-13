@@ -21,9 +21,9 @@ struct SdfTex;
 
 extern s32 fldGetSceneStatusCode(void);
 
-extern void fldSetInputPanelStateWord1(s32);
+extern void fldSetTitleBannerChoice(s32);
 
-extern void fldSetInputPanelStateWord2(s32);
+extern void fldSetTitleBannerPending(s32);
 
 
 
@@ -411,8 +411,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    fldSetInputPanelStateWord1(scrReadIntParameter(0));
-    fldSetInputPanelStateWord2(1);
+    fldSetTitleBannerChoice(scrReadIntParameter(0));
+    fldSetTitleBannerPending(1);
     result = func_001442D0();
     switch (result) {
     case 1:
@@ -445,8 +445,8 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    fldSetInputPanelStateWord1(scrReadIntParameter(0));
-    fldSetInputPanelStateWord2(1);
+    fldSetTitleBannerChoice(scrReadIntParameter(0));
+    fldSetTitleBannerPending(1);
     result = func_001442D0();
     switch (result) {
     case 1:
@@ -460,15 +460,15 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     return 1;
 }
 
-extern void fldSetInputPanelStateWord1(s32);
+extern void fldSetTitleBannerChoice(s32);
 
-extern void fldSetInputPanelStateWord2(s32);
+extern void fldSetTitleBannerPending(s32);
 
 s32 fldCmdReadSceneStatus(void) {
     s32 result;
 
-    fldSetInputPanelStateWord1(scrReadIntParameter(0));
-    fldSetInputPanelStateWord2(1);
+    fldSetTitleBannerChoice(scrReadIntParameter(0));
+    fldSetTitleBannerPending(1);
     result = func_001442D0();
     if (result == -1) {
         scrSetIntegerReturnValue(-1);
