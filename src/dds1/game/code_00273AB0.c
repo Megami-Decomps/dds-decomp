@@ -92,7 +92,7 @@ extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow();
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
-extern void func_00276720();
+extern void mnuConfigurePartyPanelPage();
 extern void mnuReleaseStaffExtraWindow();
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
@@ -347,7 +347,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
                              (struct EffectSlotSet *)((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->pageWindow.flags |= 0x400;
     ((StaffImageContext *)context)->pageWindow.flags &= ~0x100;
-    func_00276720(context + 0x15C, 1, 0, 0);
+    mnuConfigurePartyPanelPage(context + 0x15C, 1, 0, 0);
     menu->listState = 0;
     return 1;
 }
@@ -356,7 +356,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
     mnuReleaseStaffExtraWindow(context);
-    func_00276720(context + 0x15C, 0, 0, 0);
+    mnuConfigurePartyPanelPage(context + 0x15C, 0, 0, 0);
     mnuReleasePageHandlesAndClearSelection((MenuPageWindow *)(context + 0x15C));
     mnuClearEntries(&((StaffImageContext *)context)->pageWindow);
     mnuReleasePartyIconBundles(&((StaffImageContext *)context)->pageWindow);

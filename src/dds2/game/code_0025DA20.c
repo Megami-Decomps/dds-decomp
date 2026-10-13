@@ -3183,7 +3183,7 @@ u32 func_002635E0(void) {
     return 1;
 }
 
-s32 func_002635E8(KwlnTask *callbackContext) {
+s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
     s32 dispatchResult = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);

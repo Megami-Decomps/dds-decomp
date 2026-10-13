@@ -1312,7 +1312,7 @@ void mnuDestroyResources(MenuPageResources *resources) {
     sdfReleaseChipBlock(resources);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027ECD8);
+INCLUDE_ASM(const s32, "game/code_0027BF00", mnuDrawPartyPageContents);
 
 void mnuCreatePartyPageResources(MenuPageWindow *menu, s32 x, s32 y, s32 style, s32 color) {
     u32 i;
