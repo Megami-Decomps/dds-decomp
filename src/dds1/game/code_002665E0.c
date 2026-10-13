@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "dds3_world_value.h"
@@ -421,7 +422,6 @@ struct EffWorldNode;
 
 extern void effObjSetInnerFloat(s32 object, f32 value);
 
-extern s32 dds3GetWorldSecondaryObject(void);
 
 
 extern u8 D_003DC1C0[];

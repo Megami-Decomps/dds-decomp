@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_scale_params.h"
@@ -188,7 +189,6 @@ extern s32 D_00437D60;
 extern s32 D_00437D5C;
 extern u8 (*D_00437D54)[32];
 extern u8 (*D_00437D58)[32];
-extern s32 dds3GetWorldObject(void);
 
 
 extern s32 D_00437D38;

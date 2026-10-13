@@ -28,6 +28,7 @@
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
@@ -43,7 +44,6 @@ extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
-extern EffWorldNode *dds3GetWorldSecondaryObject(void);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 
@@ -517,7 +517,6 @@ extern s32 fldAttachSparkSlotToWorldObject(s32, s32);
 
 
 
-extern s32 dds3GetWorldObject(void);
 
 extern int strcmp(const char *, const char *);
 

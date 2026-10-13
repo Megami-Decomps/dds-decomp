@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "dds3_world_value.h"
 #include "sdf.h"
 #include "dds3_world_counter.h"
@@ -12,7 +13,6 @@ extern SdfQuad fldLocalMapFirstCameraVector;
 extern SdfQuad fldLocalMapSecondCameraVector;
 
 
-extern s32 dds3GetWorldSecondaryObject(void);
 
 
 extern void effObjSetInnerFloat(s32, f32);
