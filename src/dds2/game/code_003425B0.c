@@ -204,7 +204,8 @@ u32 sdfSoundGetCommandStatus(void) {
     return sdfSoundCommandStatus;
 }
 
-void func_00342798(void) {
+/* Stop the movie's named sound playback after its stream is released. */
+void sdfSoundStopMoviePlayback(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
@@ -1542,7 +1543,9 @@ s32 sdfSoundShutdownIpuStreamHandlers(void) {
     return func_00366850(4);
 }
 
-void func_003457F8(void) {
+/* Print the native incoming a0 string and a newline through libc puts.
+ * Required to match: retain the zero-formal, void source signature. */
+void sdfPrintTextLine(void) {
     func_0035B7D8();
 }
 

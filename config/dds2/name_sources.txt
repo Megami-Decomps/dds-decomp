@@ -8219,3 +8219,14 @@
 0x002BD5C8	mnuGetPanelWindowTransitionState	inferred	Returns a panel transition state used for pending-flag clearing and for selecting a blended surface. [LiteH menu naming batch 22]
 0x002BF660	mnuUpdateAndDrawPartyCommandQueue	inferred	Updates/draws queued party commands; called by the party-member command-panel renderer. [LiteH menu naming batch 22]
 0x002BF830	mnuDrawPartyMemberCommandPanel	inferred	Mode-1 callback from mnuDispatchListPanel; DDS1 twin 0x00281D40 renders the same party-member command panel. [LiteH menu naming batch 22]
+0x00227288	btlRunLinkedPairUpdateHook	inferred	confidence=high; Mode312 afterUnitUpdate delegate to linked-pair transform pass; twin=0x00205EE0. Native callback slots differ by game. Namer1 batch46.
+0x002272A0	btlChooseLinkedPairMotion	inferred	confidence=high; chooseMotion callback remaps linked-pair codes by effect phase/counterpart quarter-value tests; twin=0x00205EF8; native unit IDs retained. Namer1 batch46.
+0x00227DA8	btlQueueLinkedPairModelSwapTasks	inferred	confidence=high; Mode170/189 preActionHook queues paired model transitions and sound/camera/fade dependencies; twin=0x002069C0. Retains PurC16612aa69 trace-derived task epochs/barriers/staging. Namer1 batch46.
+0x00228B08	btlSetLinkedPairActionCamera	inferred	confidence=high; Mode312 cameraPoseBlendHook handles171/189 paired action cameras; twin=0x00207718. DDS2 also resets188 progress while returning0; native result joins retained. Namer1 batch46.
+0x00228F48	btlAdvanceMarkedLinkedActionCamera	inferred	confidence=high; Mark readiness advances188 camera progress; at25 choose random fixed keys and clear command state. Namer1 batch46.
+0x002292D8	btlPromoteSeraForSmallParty	inferred	confidence=high; Mode345 promotes occupied non-frontline actor2 if occupied count<4/frontline count<3. actor-name2=Sera; roster unitId indexes displayed names in prfCapPresentMessages. Namer1 batch46.
+0x00229478	btlPromoteRolandToFrontline	inferred	confidence=high; Mode32D calls ptyRebalanceFrontline(7); actor-name7=Roland and roster IDs index actor names. Namer1 batch46.
+0x00229490	btlPromoteSerphArgillaGaleToFrontline	inferred	confidence=high; Mode321 calls frontline promotion for1/4/5 in order; actor-name1=Serph,4=Argilla,5=Gale; ignored results retained. Namer1 batch46.
+0x002294B8	btlPromoteSeraphToFrontline	inferred	confidence=high; Mode344 calls ptyRebalanceFrontline(8); actor-name8=Seraph and roster IDs index actor names. Namer1 batch46.
+0x00342798	sdfSoundStopMoviePlayback	inferred	confidence=high; Command100 stop for movie stream cancellation when pacEnabled, same opcode as named-playback stop; twin=0x002E98F0. Namer1 batch46.
+0x003457F8	sdfPrintTextLine	inferred	confidence=high; Native incoming-a0 forwarding to libc puts0035B7D8; strlen/string-plus-newline I/O vectors and newline byte0A at00431BE0 prove output. Zero-formal void signature retained; twin=0x002EC950. Namer1 batch46.

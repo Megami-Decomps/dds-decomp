@@ -112,7 +112,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
-extern void func_00342798(void);
+extern void sdfSoundStopMoviePlayback(void);
 
 /* Wait for active work's release phase, free its owned buffers, then deactivate it. */
 void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
@@ -138,7 +138,7 @@ void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
         }
         sdfDestroyStreamFrameNode(&job->soundNode);
         if (job->pacEnabled != 0) {
-            func_00342798();
+            sdfSoundStopMoviePlayback();
         }
         job->active = 0;
     }
