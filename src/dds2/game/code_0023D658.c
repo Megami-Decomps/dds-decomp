@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "dds3_path.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
@@ -93,7 +94,6 @@ typedef struct EvtModelHeader {
     void *target2C;     /* 0x2C: scaled by the model-cut opcode */
 } EvtModelHeader;
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);

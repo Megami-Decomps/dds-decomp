@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "dds3_path.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
@@ -71,7 +72,6 @@ extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 
 extern void dds3SetObjectFlags(void *object, s32 flags);

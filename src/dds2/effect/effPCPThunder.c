@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -2355,7 +2356,6 @@ extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.

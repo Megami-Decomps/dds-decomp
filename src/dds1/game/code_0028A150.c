@@ -95,7 +95,6 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern f32 func_002FA1C0(f32);
 extern f32 func_002FA1F0(f32, f32);
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 

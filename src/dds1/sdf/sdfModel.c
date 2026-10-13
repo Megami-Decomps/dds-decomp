@@ -38,7 +38,6 @@ typedef struct {
 } SdfPacket; /* 0x10 */
 
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 

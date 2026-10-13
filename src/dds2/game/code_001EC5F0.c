@@ -3105,7 +3105,6 @@ extern void func_001FC5E0(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,
                          const BtlCameraParameterRecord *, f32 *);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern f32 D_003BDC60[4];
 
