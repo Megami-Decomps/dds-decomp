@@ -1181,7 +1181,7 @@
 0x0014B988	fldResetSparkTable	inferred	64 0x30-byte particle records; active/vel cleared, lifetime = rand%60+15
 0x0014BA10	fldSetSparkVectors	inferred	stores pos/vel vectors into D_003D56A0[index] and marks the slot used
 0x0014BC28	fldFreeSparkSlot	inferred	moves spark slot object back to idle: resets vector, sets object flag and clears link
-0x0014BD58	fldUpdateSparkSlots	inferred	after func_0014B688 calls func_0014BA50 for each active spark slot below the live count
+0x0014BD58	fldUpdateSparkSlots	inferred	after fldCreateSparkSlotObjects calls func_0014BA50 for each active spark slot below the live count
 0x0014C158	fldIsNearSpark	inferred	returns 1 if sqrt(dist^2) to any live spark record < 50.0
 0x0014C5C8	fldFinishEventFieldState	inferred	on active event resets field effects, BGM, visibility and event flag [names_R_FuncNames2.tsv]
 0x0014CFC0	fldResetEventSceneState	inferred	clears event flags and visual state while restoring solar visibility [names_R_FuncNames2.tsv]
@@ -8717,3 +8717,4 @@
 0x00225CD8	evtOpCreateMagatuhiEffect2FromTaskResource	inferred	Resolves a task resource descriptor, forwards it to create Magatuhi effect kind 2, marks the result active, and returns its key; returns zero if lookup or creation fails. [code-quality cleanup, 2026-10-13]
 0x0022BE28	evtEventViewerCreateTrackKeyAtFrame	inferred	Viewer wrapper that forwards the current frame group, frame, and viewer to evtCreateTrackKeyAtFrame; called from the event-viewer frame processing loop. [code-quality cleanup, 2026-10-13]
 0x001FC998	btlDrawUnitStatusShadowDisc	inferred	Checks the unit visibility/status flags, selects a disc radius from its actor-status shadow kind, uses map-record X/Z with the unit height when available (otherwise its own position), and draws the disc with the unit overlay alpha. Called from active unit update. [code-quality cleanup, 2026-10-13]
+0x0014B688	fldCreateSparkSlotObjects	inferred	Paired DDS2 provider at 0x0014F5F0; resets the 17 spark object slots, spawns and configures the HUNT_MDL_UNIT world objects, then initializes each nested value. Called by spark-slot update and setup paths. [code-quality cleanup, 2026-10-13]
