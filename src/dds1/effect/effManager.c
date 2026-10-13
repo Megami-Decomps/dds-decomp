@@ -8,14 +8,15 @@
 #include "eff_node_descriptor.h"
 #include "sdf_packet_list.h"
 #include "sdf_gs_packet.h"
-#include "kwln.h"
+#include "eff_manager_task.h"
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 extern void effObjectListCountersReset(void);
 
 
-void effManagerInitializeSubsystems(void) {
+void effManagerInitializeSubsystems(KwlnTask *task) {
+    (void)task;
     func_001536A0();
     func_0015B250();
     effBillDispatchAll();
@@ -62,7 +63,8 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     return 0;
 }
 
-u32 effManagerUpdateAndDispatch(void) {
+s32 effManagerUpdateAndDispatch(KwlnTask *task) {
+    (void)task;
     func_0015B420();
     parDrawPendingCellSystems();
     billFlushPendingChildPackets();
