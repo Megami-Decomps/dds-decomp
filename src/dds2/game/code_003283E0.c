@@ -1,14 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
-
-
-typedef struct SdfHandlerNode {
-    struct SdfHandlerNode *next;
-    s32 kind;
-    s32 channel;
-    s32 handlerId;
-} SdfHandlerNode;
+#include "sdf_handler_node.h"
 
 extern SdfHandlerNode *D_004389BC;
 
