@@ -6659,6 +6659,7 @@
 0x002D7E38	sdfModelWriteFixedPacket	inferred	Appends a packet with zero high half and a fixed 0x60000000 command.
 0x002D7E80	sdfCommandListMeasure	inferred	sums packet sizes over a command list (types 1..8), adds the type-3 count to *arg1, stores the 16-byte-item size in *arg2; parked near-miss, not applied [names_M70_VuNamed.tsv]
 0x002D7FB0	sdfModelBuildIndexedCommandPackets	inferred	Starts the indexed asset packet, appends root-workspace DMA/VIF references for each listed draw-node ID, writes the sequence terminators, and returns the next packet cursor. Paired with DDS2 0x00330E60; DDS2 command dispatcher case 1 selects the same indexed-command role. [code-quality cleanup, 2026-10-13]
+0x002D8130	sdfModelBuildClippedCommandPackets	inferred	Filters the two clip-result values to select active clipped draw data, builds its DMA/VIF reference packet sequence, and returns the append cursor. Called by the model packet traversal after its clipping test; paired with DDS2 0x00330FE0. [code-quality cleanup, 2026-10-13]
 0x002D8388	sdfDrawNodePrependCommandNode	inferred	Allocates a command node and prepends it to the selected draw-node command list.
 0x002D83F8	sdfDrawNodeBuildCommandList	inferred	Dispatches serialized command-list entries into packet and object-reference commands for a draw node.
 0x002D8600	sdfDrawNodeBuildMatrix	inferred	quaternion to matrix into vectors[2..4] [names_M67_Named.tsv]
