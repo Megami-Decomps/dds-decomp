@@ -6490,7 +6490,166 @@ void fileCopyAndInvalidateSlotGroup(FileSlotTable *table, FileSlot *source) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D7B58);
+/* vu0 routine: shifts one slot's history and interpolates its trailing samples. */
+void func_002D7B58(FileSlotTable *record, FileSlot *slot) {
+    f32 points[4][4];
+    f32 color[4];
+    f32 colorStep[4];
+    u32 curveStartColor[4];
+    u32 curveEndColor[4];
+    u32 curveResultColor[4];
+    u32 linearStartColor[4];
+    u32 linearEndColor[4];
+    u32 linearResultColor[4];
+    FileKeyBlock *dims = (FileKeyBlock *)record->data0;
+    u32 rows = (u32)dims->rows;
+    u32 columns = (u32)dims->columns;
+    u32 count = columns * rows;
+    u32 remaining;
+    u32 i;
+    u32 historyIndex;
+    s32 frame;
+    FileSlot *group;
+    FileSlot *shiftTarget;
+    FileSlot *cursor;
+    f32 fraction;
+    f32 step;
+    f32 alpha;
+    f32 scale;
+    f32 angle;
+    f32 scaleDelta;
+    f32 angleDelta;
+
+    if (count != 0) {
+        u8 *base = (u8 *)record->slots;
+        frame = slot->state;
+        group = (FileSlot *)(base +
+            ((record->instances + ((u32)((u8 *)slot - base) >> 5) * count) << 5));
+        if (frame == 0) {
+            *group = *slot;
+            cursor = group;
+            for (historyIndex = 0; historyIndex < count; historyIndex++) {
+                cursor->state = -1;
+                cursor++;
+            }
+        } else {
+            group->state = (s32)((u32)frame - 1u);
+            step = 1.0f / (f32)count;
+            fraction = 0.0f;
+            alpha = (f32)(slot->color >> 24);
+            remaining = count - rows;
+            shiftTarget = group + count - 1;
+            cursor = shiftTarget - rows;
+            for (historyIndex = 0; historyIndex < remaining; historyIndex++) {
+                u32 fadedAlpha;
+                *shiftTarget = *cursor;
+                fadedAlpha = (u32)(alpha * fraction);
+                shiftTarget->color = (cursor->color & 0xFFFFFF) |
+                    (fadedAlpha << 24);
+                fraction += step;
+                cursor--;
+                shiftTarget--;
+            }
+            *group = *slot;
+            group->state = -1;
+            if (rows != 1 && columns >= 2) {
+                if (frame >= 2 && columns >= 3) {
+                    if (group[rows * 2].state >= 0) {
+                        FileSlot *previous;
+                        PCP_COPY_VECTOR(points[0], group[rows * 2].pos);
+                        previous = group + rows;
+                        PCP_COPY_VECTOR(points[1], previous->pos);
+                        PCP_COPY_VECTOR(points[2], group->pos);
+                        PCP_COPY_VECTOR(points[3], group->pos);
+                        fraction = 0.0f;
+                        cursor = previous - 1;
+                        step = 1.0f / (f32)(rows + 1);
+                        scale = previous->scale;
+                        scaleDelta = group->scale - scale;
+                        angle = previous->angle;
+                        angleDelta = group->angle - angle;
+                        curveStartColor[0] = group->color;
+                        EE_MMI_RGBA_UNPACK(curveStartColor, 0.0078125f);
+                        VU0_MOVE_VF(vf11, vf10);
+                        curveEndColor[0] = previous->color;
+                        EE_MMI_RGBA_UNPACK(curveEndColor, 0.0078125f);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, color);
+                        VU0_SUB(vf11, vf11, vf10);
+                        VU0_SET_ONES_XYZ(vf10);
+                        VU0_SCALE_VF(vf10, step);
+                        VU0_MUL(vf10, vf10, vf11);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, colorStep);
+                        for (i = 0; i < rows - 1; i++) {
+                            fraction += step;
+                            vuCatmullRomPoint(points, fraction);
+                            VU0_STORE_VF_UNCLOBBERED(vf10, cursor->pos);
+                            cursor->scale = scale + scaleDelta * fraction;
+                            cursor->angle = angle + angleDelta * fraction;
+                            VU0_LOAD_VF(vf10, color);
+                            VU0_LOAD_VF(vf11, colorStep);
+                            VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                            VU0_STORE_VF_UNCLOBBERED(vf10, color);
+                            EE_MMI_RGBA_PACK_UNIT(curveResultColor[0], 128.0f);
+                            cursor->color = curveResultColor[0];
+                            cursor->state = frame;
+                            cursor--;
+                        }
+                    }
+                } else if (frame > 0) {
+                    if (group[rows].state >= 0) {
+                        FileSlot *previous = group + rows;
+                        shiftTarget = previous;
+                        fraction = 0.0f;
+                        cursor = previous - 1;
+                        step = 1.0f / (f32)(rows + 1);
+                        scale = previous->scale;
+                        scaleDelta = group->scale - scale;
+                        angle = previous->angle;
+                        angleDelta = group->angle - angle;
+                        linearStartColor[0] = group->color;
+                        EE_MMI_RGBA_UNPACK(linearStartColor, 0.0078125f);
+                        VU0_MOVE_VF(vf11, vf10);
+                        linearEndColor[0] = previous->color;
+                        EE_MMI_RGBA_UNPACK(linearEndColor, 0.0078125f);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, color);
+                        VU0_SUB(vf11, vf11, vf10);
+                        VU0_SET_ONES_XYZ(vf10);
+                        VU0_SCALE_VF(vf10, step);
+                        VU0_MUL(vf10, vf10, vf11);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, colorStep);
+                        {
+                            u32 *__restrict packedOutput = linearResultColor;
+
+                            for (i = 0; i < rows - 1; i++) {
+                                fraction += step;
+                                VU0_LOAD_VF(vf10, shiftTarget->pos);
+                                VU0_LOAD_VF(vf11, group->pos);
+                                VU0_LERP_VF10(fraction);
+                                VU0_STORE_VF_UNCLOBBERED(vf10, cursor->pos);
+                                cursor->scale = scale + scaleDelta * fraction;
+                                cursor->angle = angle + angleDelta * fraction;
+                                VU0_LOAD_VF(vf10, color);
+                                VU0_LOAD_VF(vf11, colorStep);
+                                VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                                VU0_STORE_VF_UNCLOBBERED(vf10, color);
+                                {
+                                    u8 *__restrict slotBytes;
+
+                                    EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
+                                    slotBytes = (u8 *)cursor;
+                                    *(u32 *)(slotBytes + (u32)&((FileSlot *)0)->color) = packedOutput[0];
+                                    *(s32 *)(slotBytes + (u32)&((FileSlot *)0)->state) = frame;
+                                }
+                                cursor--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 struct EffRandState;
 extern struct EffRandState effSharedRandomState;
