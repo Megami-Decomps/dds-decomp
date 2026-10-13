@@ -73,6 +73,7 @@
 0x00105910	evtBuildFrameStatePacketList	inferred	Creates a reset packet list and appends the selected buffered frame state. [names_reviewed9.tsv]
 0x001059D8	kwlnFadeGetColor	inferred	Returns a pointer to the global fade RGBA color through its output parameter.
 0x00105B78	kwlnFadeUpdate	inferred	quiet3 twin unification
+0x00105CF8	kwlnQueueBackgroundFadeOverlayPacket	inferred	Reads the active frame-buffer index and background-fade alpha; when visible, initializes and appends the current surface overlay packet. Paired DDS1 provider at 0x00105DD8.
 0x00105FE8	kwlnFadeBackgroundStartOut	inferred	quiet3 twin unification
 0x00106080	kwlnFadeBackgroundStartIn	inferred	quiet3 twin unification
 0x00106108	kwlnFadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]

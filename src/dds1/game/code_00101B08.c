@@ -396,7 +396,7 @@ extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
 extern void kwlnDrawBackgroundFadeBands(void);
 extern void kwlnFadeUpdate(void);
-extern void func_00105DD8(void);
+extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
 extern s32 func_0011E278(void);
 extern void func_002EA5C0(s32);
@@ -433,7 +433,7 @@ s32 kwlnRenderFrame(void) {
     kwlnStepBackgroundFade();
     kwlnDrawBackgroundFadeBands();
     kwlnFadeUpdate();
-    func_00105DD8();
+    kwlnQueueBackgroundFadeOverlayPacket();
     kwlnAdvanceDrawFadesAndTransitions();
     groupHeads = D_00325788;
     packetGroups = D_003258B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;

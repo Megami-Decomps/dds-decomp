@@ -1571,7 +1571,7 @@ void kwlnDrawBlurErrorCounters(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00105CF8);
+INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnQueueBackgroundFadeOverlayPacket);
 
 /* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
  * This reset does not rewrite the background counter or duration. */
