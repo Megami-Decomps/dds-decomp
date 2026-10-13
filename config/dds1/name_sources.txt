@@ -157,6 +157,7 @@
 0x00108218	kwlnSetBackgroundColorTarget	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:185:func_00108218; M141; source=names_pending_main.tsv:107; review=Either installs the background color vector immediately or starts a timed interpolation from its previous color. [names_qp11.tsv]
 0x001082D8	kwlnSetDrawColorTarget	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:219:func_001082D8; M141; source=names_pending_main.tsv:108; review=Either installs the packed draw color immediately or starts a timed interpolation from its previous packed value. [names_qp11.tsv]
 0x00108360	evtSetDrawVectorTarget	inferred	Byte-identical dds2 twin 0x00108280; Directly stores the event draw vector in mode zero or retains its previous value and sets a new target in other modes. [names_conflicts.tsv]
+0x001083F8	kwlnUpdateDrawParameterTransitions	inferred	Per frame, interpolates the enabled camera/draw-vector, default-color, and saved scalar-vector transitions, clearing each control flag when its duration completes. DDS2 twin at 0x00108318.
 0x001089F8	evtToggleSavedDrawVectors	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
 0x00108A48	evtEnsureDrawVectorState	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
 0x00108A80	evtSetDrawSurfaceIndex	inferred	DDS2 001089A0 twin; stores draw surface slot used by GS packet submitters [names_R_FuncNames2.tsv]
