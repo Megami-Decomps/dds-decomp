@@ -5805,6 +5805,7 @@
 0x0030C9B8	sdfCounterGetDisplayValue	inferred	Returns the signed display value of the currently selected counter channel.
 0x0030C9D0	sdfGetCounterChannelValueAtIndex	inferred	Follows a number of counter channel links and returns that channel display value. [names_reviewed15.tsv]
 0x0030CA38	sdfCounterDrawLabelPlateRow	inferred	Draws the counter label-plate row by invoking the channel draw callback for three spaced channels, then submits the timer-faded full-width depth gradient; paired with DDS1 0x002C4A58.
+0x0030CC68	sdfDrawCounterMapSelectionRow	inferred	Draws one local-map counter row with its map number, completion, active-selection and timer-pulse indicators; paired with DDS1 0x002C4C88.
 0x0030CEF0	sdfCounterDrawChannelPlate	inferred	Draws the counter channel plate; DDS1 twin. [names_qp9.tsv]
 0x0030D300	mnuSetMapTimerFlags	inferred	Starts or clears two 16-bit map timers according to flag bits zero and one.
 0x0030D350	mnuTickMapTimers	inferred	Decrements two positive map timers and reloads each from 60 on reaching zero.

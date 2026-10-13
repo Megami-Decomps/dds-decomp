@@ -130,7 +130,7 @@ extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern s16 sdfGetCounterChannelValueAtIndex(s32);
 extern void func_0030C250(s32, s32);
-extern void func_0030CC68(s32, s32, s32, SdfCounterRuntime *, SdfCounterChannel *, s32);
+extern void sdfDrawCounterMapSelectionRow(s32, s32, s32, SdfCounterRuntime *, SdfCounterChannel *, s32);
 extern u8 D_00400AF0[];
 
 extern void sdfCounterIncrease(void);
@@ -353,7 +353,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     sdfActiveCounterRuntime = (s32)mnuCreateListState(0, 8, 0x16);
     ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = sdfAllocSizeClassBlock(0x24);
     memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
-    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = func_0030CC68;
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = sdfDrawCounterMapSelectionRow;
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
@@ -578,7 +578,7 @@ void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, 
 
 extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
 
-void func_0030CC68(s32 unusedX, s32 unusedY, s32 unused, SdfCounterRuntime *runtime, SdfCounterChannel *channel, s32 unusedMode) {
+void sdfDrawCounterMapSelectionRow(s32 unusedX, s32 unusedY, s32 unused, SdfCounterRuntime *runtime, SdfCounterChannel *channel, s32 unusedMode) {
     SdfCounterTimer *timer = runtime->timer;
     f32 frame = (f32)timer->value;
     f32 fade = 1.0f - frame / 10.0f;
