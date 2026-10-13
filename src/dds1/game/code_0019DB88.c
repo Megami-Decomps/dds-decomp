@@ -975,7 +975,7 @@ extern ItfFovPanelWork D_003D73C0;
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
-s32 func_0019FCC8(void) {
+s32 btlEditCameraFieldOfView(void) {
     SifCommand packet;
     SdfListHead *list;
     f32 radiansToDegrees = 57.2957795f;
