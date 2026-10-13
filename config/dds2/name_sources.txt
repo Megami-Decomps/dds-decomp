@@ -4629,6 +4629,7 @@
 0x002A7E60	mnuRequestMoviePlayback	inferred	Fam_Mid2
 0x002A7FD0	mnuStopMovieDrawTask	inferred	Stops the movie draw task and clears its task handle. [names_reviewed8.tsv]
 0x002A8008	mnuCheckMovieDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_002A5260.c:1054:func_002A8008; Checks the PAC decoder status associated with the retained movie draw context.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x002A8028	mnuGetMoviePlaybackMode	inferred	Returns the raw movie playback mode byte. Title-menu transitions wait for nonzero; movie draw/menu and event-viewer timing gate specifically on value 2. Other mode values are left unspecified. [provider and caller dataflow, 2026-10-13]
 0x002A80C0	mnuScriptRequestMovieByIndex	inferred	Starts a movie by script-selected index and resets the flow counter. [names_reviewed8.tsv]
 0x002A80F0	mnuScriptStopMovieAndResetDraw	inferred	Stops the movie, resets flow and disables the draw layer. [names_reviewed8.tsv]
 0x002A8120	mnuUpdateMovieDrawShutdownCountdown	inferred	Starts and advances the countdown that stops movie drawing. [names_reviewed11.tsv]
