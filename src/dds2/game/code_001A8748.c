@@ -53,7 +53,6 @@ extern u32 sndTestMessageResourceIndex;
 
 extern SdfTex *sndTestMessageTexture;
 
-extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern u64 D_004366E8;
 
