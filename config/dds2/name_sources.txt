@@ -6306,6 +6306,7 @@
 0x00332C30	sdfVuTransformMapRecordPosition	inferred	Transforms a map record position by its associated chunk matrix. [names_reviewed8.tsv]
 0x00332D08	sdfLoadMapRecordLookAtBasis	inferred	Resolves a map record by id and loads its look-at basis. [names_reviewed8.tsv]
 0x00332D48	sdfLoadMapRecordPositionVector	inferred	Resolves a map record by id and loads its transformed position. [names_reviewed8.tsv]
+0x00332AD8	sdfNamedChunkGetNameById	inferred	Returns the name paired with an ID in SDF_CHUNK_NAMED_IDS, or the model fallback string; DDS1 twin 0x002D9C28.
 0x00332DE8	sdfSetModelScalarOverrides	inferred	Stores both model scalar overrides and enables the model override flag; paired DDS1 implementation at 0x002D9F38.
 0x00332E00	sdfClearModelScalarOverrides	inferred	Clears the model scalar override selection flag without changing either stored value; paired DDS1 implementation at 0x002D9F50.
 0x00332E10	sdfGetFirstModelScalar	inferred	Returns the first model scalar override when selected, otherwise its shared default; paired DDS1 implementation at 0x002D9F60.
