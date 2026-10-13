@@ -34,6 +34,7 @@
 #include "file_request_api.h"
 #include "btl_group_id_entry.h"
 #include "mdl_grouped_parts_api.h"
+#include "mdl_done_job.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -257,15 +258,6 @@ extern void sdfMultiplyVuMatrixInPlace(void);
 
 
 
-/* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */
-typedef struct MdlDoneJob {
-    u16 group;         /* 0x0 */
-    u16 id;            /* 0x2 */
-    u32 arg;           /* 0x4 */
-    FilePacRequest *owner; /* 0x8: retained file request */
-    void (*done)(u32); /* 0xC */
-    u32 doneArg;       /* 0x10 */
-} MdlDoneJob;
 /* 8-byte prefix copied from D_003BBB60 by mdlBuildPrefixedString. */
 typedef struct Hdr8 {
     u8 b[8];
@@ -1339,8 +1331,6 @@ void mdlCompleteGroupedJobAndNotify(FilePacRequest *requestOwner, MdlDoneJob *co
 }
 
 extern void mdlCompleteGroupedJobAndNotify(FilePacRequest *, MdlDoneJob *);
-
-#define MDL_DONE_JOB_BYTES 0x14
 
 /* Allocate a completion job and dispatch the request. Group/id narrow to u16.
  * Without onComplete, run the existing no-callback completion path and clean up
