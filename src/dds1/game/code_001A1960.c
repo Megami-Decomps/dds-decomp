@@ -18,6 +18,7 @@
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl.h"
+#include "btl_command_partner_output.h"
 #include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
@@ -914,12 +915,6 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
     return count;
 }
 
-typedef struct BtlCommandPartnerOutput {
-    u16 command;
-    u16 pad02;
-    BtlUnit *first;
-    BtlUnit *second;
-} BtlCommandPartnerOutput;
 
 extern BtlTask *fldGetSceneGroupEntry(s32 entryIndex);
 extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, void **second);
@@ -949,12 +944,12 @@ s32 func_001A3CE0(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
     }
     if ((datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) == 0 &&
         (datBattleSceneRecords[controller->mode].flags & 1) == 0) {
-        output->command = command;
-        result = btlFindCommandPartnersByAffinity(unit, command, (void **)&output->first, (void **)&output->second);
+        output->commandId = command;
+        result = btlFindCommandPartnersByAffinity(unit, command, (void **)&output->firstPartner, (void **)&output->secondPartner);
     } else {
-        output->command = command;
-        output->first = NULL;
-        output->second = NULL;
+        output->commandId = command;
+        output->firstPartner = NULL;
+        output->secondPartner = NULL;
         if (requiredCount == 3) {
             for (i = 1; i < requiredCount; i++) {
                 BtlTask *entry = fldGetSceneGroupEntry(i);
@@ -975,10 +970,10 @@ s32 func_001A3CE0(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
                 }
                 switch (i) {
                 case 1:
-                    output->first = partner;
+                    output->firstPartner = partner;
                     break;
                 case 2:
-                    output->second = partner;
+                    output->secondPartner = partner;
                     break;
                 }
             }
@@ -989,7 +984,7 @@ s32 func_001A3CE0(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
 
             if (entry != NULL && (entry->unit->partyRecord.status & 0x2A0E) == 0 &&
                 (btlUnitStatusPair(entry->unit) & 0x4E0) == 0x400) {
-                output->first = entry->unit;
+                output->firstPartner = entry->unit;
             } else {
                 BtlUnit *partner;
 
@@ -1005,7 +1000,7 @@ s32 func_001A3CE0(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
                     return 0;
                 }
                 if ((partner->partyRecord.status & 0x2A0E) == 0) {
-                    output->first = partner;
+                    output->firstPartner = partner;
                 } else {
                     return 0;
                 }
