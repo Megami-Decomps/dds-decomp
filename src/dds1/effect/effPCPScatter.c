@@ -401,7 +401,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
     work->childWork = effPcpScatterPoolCreate(params->particleCount);
-    work->childWork->unk10 = params->poolMode;
+    work->childWork->poolMode = params->poolMode;
     if (resource != 0) {
         effPcpScatterCreatePoolResource(work->childWork, resource);
     }
@@ -732,7 +732,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
     work->childWork = effPcpScatterPoolCreate(params->particleCount);
-    work->childWork->unk10 = params->poolMode;
+    work->childWork->poolMode = params->poolMode;
     if (resource != 0) {
         effPcpScatterCreatePoolResource(work->childWork, resource);
     }
@@ -1053,7 +1053,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     memset(recordBlock, 0, allocationBytes);
     pool = (PcpScatterPool *)(recordBlock + (recordWords + auxWords));
     pool->recordBase = (u8 *)recordBlock;
-    pool->unk10 = 1;
+    pool->poolMode = 1;
     pool->auxRecordBase = (u8 *)(recordBlock + recordWords);
     pool->secondWordCount = auxWords;
     pool->allocation = allocation;
@@ -1116,7 +1116,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
         D_003D6580->vertexCount = remainingVertices;
         sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_003D6580));
     }
-    surface = D_00354B80[pool->unk10];
+    surface = D_00354B80[pool->poolMode];
     surface->append(surface, packet);
 }
 

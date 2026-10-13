@@ -738,7 +738,7 @@ typedef struct PcpScatterRes {
 /* Appended after the two record arrays; resource helpers own this same control block. */
 typedef struct PcpScatterPool {
     f32 origin[4];
-    u32 unk10;
+    u32 poolMode; /* 0x10: selects the surface node used when drawing the pool */
     u32 color;
     s32 secondWordCount;
     f32 unk1C;
@@ -749,6 +749,8 @@ typedef struct PcpScatterPool {
     PcpScatterRes *sharedResource;
 } PcpScatterPool; /* 0x34 */
 typedef char PcpScatterPool_size_must_be_0x34[(sizeof(PcpScatterPool) == 0x34) ? 1 : -1];
+typedef char PcpScatterPool_poolMode_offset_must_be_0x10[
+    ((u32)&((PcpScatterPool *)0)->poolMode == 0x10) ? 1 : -1];
 typedef char PcpScatterPool_recordBase_offset_must_be_0x20[
     ((u32)&((PcpScatterPool *)0)->recordBase == 0x20) ? 1 : -1];
 typedef char PcpScatterPool_auxRecordBase_offset_must_be_0x24[

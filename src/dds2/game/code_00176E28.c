@@ -804,7 +804,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
     work->childWork = effPcpScatterPoolCreate(params->particleCount);
-    work->childWork->unk10 = params->poolMode;
+    work->childWork->poolMode = params->poolMode;
     if (resource != 0) {
         effPcpScatterCreatePoolResource(work->childWork, resource);
     }
