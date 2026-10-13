@@ -1041,10 +1041,10 @@ u32 uiBlendColors(u32 c0, u32 c1, u32 t) {
     return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
 }
 
-void func_003091E8(void) {
+void itfInitializeAdminInterfaceNoop(void) {
 }
 
-void func_003091F0(void) {
+void itfShutdownAdminInterfaceNoop(void) {
 }
 
 u32 func_003091F8(void) {
