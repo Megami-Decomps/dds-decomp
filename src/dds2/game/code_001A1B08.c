@@ -5,6 +5,7 @@
 #include "sdf.h"
 #include "itf_panel_draw.h"
 #include "itf_panel_api.h"
+#include "itf_panel_layouts.h"
 
 #define ITF_PANEL_COLUMN_COUNT 4
 #define ITF_PANEL_ROW_COUNT 2
@@ -12,7 +13,6 @@
 #define ITF_PANEL_CORNER_COLUMN_COUNT 3
 #define ITF_PANEL_CORNER_STRIP_WIDTH 0x5A0
 #define ITF_PANEL_FULL_COLOR_SCALE 0x80
-#define ITF_PANEL_HOLD_CAPACITY 0x40
 #define ITF_PANEL_STATE_PACKET_BYTES 0x40
 #define ITF_PANEL_QUAD_INDEX_COUNT 4
 #define ITF_PANEL_WIDE_INDEX_COUNT 8
@@ -28,72 +28,7 @@
 #define ITF_PANEL_TINT_BORDER_WIDTH 0x240
 
 
-/* 0x10-byte packet record in the work object buffer. */
-typedef struct PktRec {
-    s32 unk0; /* 0x0 */
-    s32 unk4; /* 0x4 */
-    s32 unk8; /* 0x8 */
-    s32 unkC; /* 0xC */
-} PktRec;
-
-/* Rectangle corners as consumed by the border-drawing routine itfDrawThreePanelBorderBands. */
-typedef struct PanelRect {
-    s32 x0; /* 0x0 */
-    s32 y0; /* 0x4 */
-    s32 x1; /* 0x8 */
-    s32 y1; /* 0xC */
-} PanelRect;
-
 extern void (*itfPanelHandlers[])(UiSprite *, SdfListHead *);
-
-/* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
-typedef struct PanelRecSub {
-    u8 unk0[0x10]; /* 0x0 */
-    s8 status;     /* 0x10: status read and written by itfPanelGet/SetStatus */
-} PanelRecSub;
-
-
-/* The same option-list block used by itfMesBuildOptionList at window +0x40. */
-typedef struct PanelOptionBlock {
-    u32 x;
-    u32 y;
-    FrFontGlyph *glyphChain;
-    u32 panelValue;
-    s16 status;
-    s16 clearBitCount;
-    u16 unk14;
-    s16 rowCount;
-} PanelOptionBlock;
-
-/* Payload record referenced by the D_003D6ECC table. */
-typedef struct PanelRec {
-    u8 unk0[0x24];     /* 0x0 */
-    PanelRecSub sub24; /* 0x24 */
-    u8 unk35[0xB];     /* 0x35 */
-    PanelOptionBlock options; /* 0x40 */
-    u8 unk58[0x50];    /* 0x58 */
-    s32 unkA8;         /* 0xA8 */
-} PanelRec;
-
-/* D_003D6ECC entry (0x14 bytes); payload pointer is the first word. */
-typedef struct PanelEntry {
-    PanelRec *ptr;  /* 0x0 */
-    u8 unk4[0x10];  /* 0x4 */
-} PanelEntry;
-
-typedef struct PanelHoldItem {
-    s32 first;  /* 0x0 */
-    s16 second; /* 0x4 */
-    s16 third;  /* 0x6 */
-} PanelHoldItem;
-
-typedef struct PanelHold {
-    s32 window;
-    s16 unk4;
-    s16 queuedCount; /* 0x6: entries used in items[] */
-    s32 unk8;
-    PanelHoldItem items[ITF_PANEL_HOLD_CAPACITY]; /* 0xC: native 64-entry queue */
-} PanelHold;
 
 extern PanelHold itfHeldPanelCursor;
 
@@ -132,11 +67,6 @@ extern u8 D_004365B8[8];
 extern u8 D_004365C0[8];
 
 
-typedef struct PanelVert {
-    s32 x;
-    s32 y;
-} PanelVert;
-
 /* Invoke the indexed panel handler; panel and kind are trusted. */
 void itfPanelDispatchHandler(UiSprite *panel, SdfListHead *list) {
     itfPanelHandlers[panel->kind](panel, list);
@@ -144,7 +74,7 @@ void itfPanelDispatchHandler(UiSprite *panel, SdfListHead *list) {
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
    Coordinates and inset remain in the renderer's native integer units. */
-void itfPanelSetFourColumnVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetFourColumnVertices(PanelVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 columnIndex;
 
@@ -169,7 +99,7 @@ void itfPanelSetFourColumnVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, 
 extern s32 D_003B44D8[4];
 
 /* Emit the outer frame grid, then the table-spaced top/bottom edge rows. */
-void itfBuildPanelBorderVertexGrid(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfBuildPanelBorderVertexGrid(PanelVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -213,7 +143,7 @@ void itfBuildPanelBorderVertexGrid(PanelVert *vertices, s32 x0, s32 y0, s32 x1, 
 }
 
 /* Emit the outer frame grid, then the close top/bottom edge rows. */
-void itfPanelSetInsetFrameVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetInsetFrameVertices(PanelVertex *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -257,8 +187,8 @@ void itfPanelSetInsetFrameVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, 
 }
 
 /* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
-void itfPanelSetRectVerts(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
-    PanelVert *p;
+void itfPanelSetRectVerts(PanelVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+    PanelVertex *p;
     v->x = x0;
     v->y = y0;
     p = &v[1];
@@ -273,7 +203,7 @@ void itfPanelSetRectVerts(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Write two rows of three columns; the middle column is the right edge minus a fixed strip width. */
-void itfSetPanelCornerGrid(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfSetPanelCornerGrid(PanelVertex *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_CORNER_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     s32 rowIndex;
@@ -318,8 +248,8 @@ void itfSetPanelInsetVertexColumns(UiSpriteBandPayload *base, s32 x0, s32 y0, s3
 
 /* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent.
    The existing vertex-typed view addresses the same color records as the quad consumer. */
-void itfPanelSetVertexPairs(PanelVert *data, s32 red, s32 green, s32 blue, s32 alpha) {
-    PanelVert *colorRow = &data[8];
+void itfPanelSetVertexPairs(PanelVertex *data, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVertex *colorRow = &data[8];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
@@ -362,8 +292,8 @@ void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha)
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path.
    Preserve the existing vertex-typed access and signed arguments. */
-void itfPanelSetRectSpan(PanelVert *data, s32 red, s32 green, s32 blue, s32 alpha) {
-    PanelVert *colorRow = &data[4];
+void itfPanelSetRectSpan(PanelVertex *data, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVertex *colorRow = &data[4];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
@@ -372,8 +302,8 @@ void itfPanelSetRectSpan(PanelVert *data, s32 red, s32 green, s32 blue, s32 alph
 
 /* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent.
    The six-index quad path consumes its color rows from this same base offset. */
-void itfPanelInitRects30(PanelVert *data, s32 red, s32 green, s32 blue, s32 alpha) {
-    PanelVert *colorRow = &data[6];
+void itfPanelInitRects30(PanelVertex *data, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVertex *colorRow = &data[6];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
@@ -410,7 +340,7 @@ void itfDrawIndexedPanelFlatQuads(UiSprite *panel, SdfListHead *command) {
     PktRec *colors = drawBuffer + 4;
     s32 quadIndex;
 
-    colors[1].unkC = panel->unk38;
+    colors[1].alpha = panel->unk38;
     for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
         itfDrawQuadFlat4(drawBuffer, colors, &D_003B45C8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_003B45D8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->unk0C, command);
     }
@@ -425,7 +355,7 @@ void itfDrawSevenColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_COLOR_COUNT; rowIndex++, colors++) {
-        colors->unkC = alpha;
+        colors->alpha = alpha;
     }
     colors = drawBuffer + 20;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
@@ -445,7 +375,7 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_COLOR_COUNT; rowIndex++, colors++) {
-        colors->unkC = alpha;
+        colors->alpha = alpha;
     }
     colors = drawBuffer + 16;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
@@ -457,16 +387,16 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
 }
 
 void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
-    PanelVert vertices[12];
+    PanelVertex vertices[12];
     PktRec *buf = (PktRec *)panel->payload;
     PktRec *colors = buf + 2;
-    PanelVert *input = (PanelVert *)buf;
+    PanelVertex *input = (PanelVertex *)buf;
     s32 i;
 
     for (i = 0; i < 3; i++) {
         s32 xOffset = i * 16;
         s32 yOffset = i * 8;
-        PanelVert *out = &vertices[i * 4];
+        PanelVertex *out = &vertices[i * 4];
 
         out[0].x = input[0].x + xOffset;
         out[0].y = input[0].y + yOffset;
@@ -488,7 +418,7 @@ void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
 void itfDrawPanelQuadWithCommand(UiSprite *panel, SdfListHead *command) {
     PktRec *colors = (PktRec *)panel->payload + 2;
 
-    colors->unkC = panel->unk38;
+    colors->alpha = panel->unk38;
     itfDrawQuadFlat4(panel->payload, colors, D_004365C8, D_004365D0, panel->unk0C, command);
 }
 
@@ -497,7 +427,7 @@ void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 3;
 
-    colors[1].unkC = panel->unk38;
+    colors[1].alpha = panel->unk38;
     itfSendTablePacket(command, 2, 0);
     itfEmitQuadListWide(drawBuffer, colors, D_004365D8, D_004365E0, 6, panel->unk0C, command);
     itfSendTablePacket(command, 0, 0);
