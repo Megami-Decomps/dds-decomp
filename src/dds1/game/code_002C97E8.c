@@ -1402,11 +1402,11 @@ s32 sdfDefaultTaskEntryUpdate(s32 key, s32 initResult) {
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD298);
+const SdfGridDirections D_003BD298[1] __attribute__((section(".sdata"), aligned(8))) = {{0, -1, 1}};
 
-INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A0);
+const SdfGridDirections D_003BD2A0[1] __attribute__((section(".sdata"), aligned(8))) = {{0, -1, 1}};
 
-INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2A8);
+const SdfGridDirections D_003BD2A8[1] __attribute__((section(".sdata"), aligned(8))) = {{0, -1, 1}};
 
-INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD2B0);
+const SdfGridDirections D_003BD2B0[1] __attribute__((section(".sdata"), aligned(8))) = {{0, -1, 1}};
 
