@@ -42,7 +42,7 @@ typedef struct FieldPlayerSceneWork {
     u8 pad68[8];
     char cameraName[0x10]; /* 0x70: kind-4 camera-node name */
     char resourceName[0x10]; /* 0x80: sequence note; nonzero source is "elvstart_label". */
-    s32 sequenceOption; /* 0x90: read by DDS2 func_00125380, separately copied from packet options. */
+    s32 sequenceOption; /* 0x90: read by DDS2 fldRebuildFieldScene, separately copied from packet options. */
     u8 pad94[0xC];
 } FieldPlayerSceneWork;
 

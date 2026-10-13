@@ -844,7 +844,7 @@ extern void fldLoadFieldEffectTextureSlots(void);
  * the earlier Obsidian/Slate/Peregrine/Sable reconstruction lineage. */
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FBC0);
 
-void func_001233D0(void) {
+void fldRebuildFieldScene(void) {
     f32 fallback[12];
     f32 *transform = NULL;
     FieldPlayerSceneWork *sceneWork;
@@ -2055,7 +2055,7 @@ extern void fldUpdateSwayOffset(void);
 
 extern void func_00120EC8(void);
 
-extern void func_001233D0(void);
+extern void fldRebuildFieldScene(void);
 
 extern s32 fldUpdateTravelAndEncounters(void);
 
@@ -2147,7 +2147,7 @@ s32 fldProcSequence(void) {
         D_003BA8EC = 0x80000000;
         evtEnableSolarPhaseAdvance();
         D_003BAD58 = 0;
-        func_001233D0();
+        fldRebuildFieldScene();
         dds3SetWorldObject(dds3GetWorldSecondaryObject());
         fldCreateInputPanelTask();
         if (fldAreaState.transitionMode == 0) evtSetSolarOverlayFullyVisible();
