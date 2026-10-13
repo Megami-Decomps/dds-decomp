@@ -10219,3 +10219,38 @@ These identifications change identifiers and comments only. The existing
 return types, parameter types, field offsets, literal values and callback
 bodies remain unchanged in both games.
 
+## Post-call local cleanup: movie backdrop frame
+
+DDS2 `func_002A5260` (0x002A5260, 856B, `game/code_002A5260`) ports
+the matched DDS1 movie-backdrop and choice-transition arithmetic. Retail
+phase-zero and phase-one final draws are sibling jumps at 0x002A53DC and
+0x002A5474. Only the default phase ends with JAL at 0x002A559C and an
+ordinary epilogue; the sprite provider genuinely returns void.
+
+**P / deciding pass:** the default arm needs non-return work after its
+last draw during `optimize_sibling_and_tail_recursive_calls`. A single
+`frame = 0` resets the function's already-used local fade counter there;
+the two earlier returns remain unchanged. No extra local, false return
+type, attribute, compiler flag or visibility change is involved.
+
+The parity-checked vendor trace rejects default CALL_PLACEHOLDER uid533
+because its block has non-return work. Reset uid536 assigns zero to
+frame pseudo85. It survives `01.sibling`, `03.cse` and every available
+dump through `11.cfg`; its first absence is `13.life`, before allocation
+and scheduling. Earlier draw placeholders uid227 and uid324 still select
+SIBLING. Hooked and unhooked assembly and every RTL dump are identical,
+using compiler SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+The exact trace and deletion-table paths remain in PurA's deep66 ledger
+and function park. The private sibling-pass diagnostic was used because
+the repository probe currently lacks that diagnostic mode.
+
+This is the explicit own-counter post-call exception in
+`docs/CONTRIBUTING.md`, not permission for unrelated dead stores. The trace
+proves the compiler mechanism, not independently that Atlus wrote this
+particular cleanup. The ordinary void port, switch-default spelling and
+implicit-int spelling each retained 11/213 differing compared words plus
+one missing word (852B versus 856B). The one counter cleanup passed both
+private and live whole-unit gates: `48 match, 0 differ`, with no safety
+diagnostics; all 47 earlier matched functions remain exact.
+
