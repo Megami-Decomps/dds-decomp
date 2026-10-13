@@ -100,7 +100,7 @@ extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
 extern void *memcpy(void *destination, const void *source, u32 size);
-void func_0019D460();
+void itfMesReplaceTextSlotData();
 
 extern void itfInitializeCursorResetState();
 
@@ -783,13 +783,13 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
 /* Replace a text slot with a copied NUL-terminated encoded string. */
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText) {
-    func_0019D460((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
+    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
 }
 
 /* Legacy short-arity entry point: retain its one-argument copier call.
  * This function does not specify the copier's other parameters. */
 void func_0019C868(s32 window) {
-    func_0019D460((u32)itfWindowSlots[window].mes);
+    itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes);
 }
 
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
@@ -1219,7 +1219,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
 /* Replace a retained text-slot allocation. Nonpositive byteCount copies the
  * padded string span; positive counts copy that many bytes into a zeroed block.
  * DDS1 string mode intentionally has no memset. Keep the K&R declaration form. */
-void func_0019D460(mes, slotIndex, source, byteCount)
+void itfMesReplaceTextSlotData(mes, slotIndex, source, byteCount)
     ItfMesState *mes;
     s32 slotIndex;
     const char *source;
