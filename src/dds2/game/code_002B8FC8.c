@@ -95,7 +95,7 @@ extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 
 extern char D_003E75C4[];
