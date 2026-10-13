@@ -203,7 +203,7 @@ s32 mnuPollCampFieldSkillAndPopup(KwlnTask *callback) {
     return 0;
 }
 
-s32 func_002AB448(KwlnTask *task) {
+s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     s32 state;
     s32 layer = 0x53;

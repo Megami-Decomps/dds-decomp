@@ -321,7 +321,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
 }
 
 
-s32 func_0029A588(KwlnTask *request) {
+s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuTitleRenderFadeAndPanels(context);

@@ -177,7 +177,7 @@ extern s32 prfReqEvaluateRules(u32, u32, DatPartyRecord *, u16, u32 *);
 
 extern s32 prfCheckRequirementRules(u32, DatPartyRecord *, u16);
 
-extern s32 func_0028F128(u16, s8);
+extern s32 mnuIsMantraNodeModelFlagSetForMember(u16, s8);
 
 extern s32 evtTestMantraNodePartyRequirements(u16, s32);
 
@@ -224,7 +224,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                         goto unavailable;
                     }
                     if (mode != 0) {
-                        if (func_0028F128(node->id, (s8)unit->unitId) == 0) {
+                        if (mnuIsMantraNodeModelFlagSetForMember(node->id, (s8)unit->unitId) == 0) {
                             goto unavailable;
                         }
                         *entry = (*entry & 0xFFF0) | 1;
@@ -308,7 +308,7 @@ s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
     s8 satisfiedNeighbors;
     s32 partyIndex;
 
-    if (func_0028F128(entry, 0) != 0) {
+    if (mnuIsMantraNodeModelFlagSetForMember(entry, 0) != 0) {
         return 1;
     }
     if (mode == 1) {
@@ -388,7 +388,7 @@ s32 func_0026D7E8(u16 entry) {
     s8 satisfiedNeighbors;
     s32 partyIndex;
 
-    if (func_0028F128(entry, 0) != 0) {
+    if (mnuIsMantraNodeModelFlagSetForMember(entry, 0) != 0) {
         return 1;
     }
     record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord((s16)entry);

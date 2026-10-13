@@ -1812,7 +1812,7 @@ void mnuDispatchTransitionHostCallbacks(MenuSlotState *host) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269B80);
+INCLUDE_ASM(const s32, "game/code_002665B0", mnuBeginTerminalSlotSelection);
 
 u32 func_00269C48(void) {
     return 1;
@@ -2370,7 +2370,7 @@ s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
     return result;
 }
 
-s32 func_0026AEB0(KwlnTask *request) {
+s32 mnuDrawTerminalSelectionPanel(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);

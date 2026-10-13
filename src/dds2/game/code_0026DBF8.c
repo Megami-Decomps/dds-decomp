@@ -3415,7 +3415,7 @@ extern s32 mnuDrawMantraPanelCTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelNodeTransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawMantraPulseIconWithFadeState(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelATransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
-extern s32 func_0027D3D8(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
+extern s32 mnuDrawMantraPanelNodeReveal(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawMantraPanelSpriteTransition(s32, s32, s32, s32, MantraPanelPool *, u8 *, s32);
 typedef struct MantraSparkle {
     s16 age;
@@ -3437,7 +3437,7 @@ struct MantraSparkleEmitter {
 extern s32 mnuDrawMantraPanelBTransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern void mnuDrawMantraPanelBurstParticles(s32, s32, u32, s32, MantraBurstPool *, s32, u32);
 extern s32 mnuDrawMantraPanelBackdropTransition(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 func_002805E0(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
+extern s32 mnuDrawMantraPanelAnimation(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawFadedMantraSingleCyclePanel(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelAccentTransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawMantraFourIconPanelTransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
@@ -3481,11 +3481,11 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
         (MantraPanelDraw)mnuDrawMantraPanelNodeTransition,
         (MantraPanelDraw)mnuDrawMantraPulseIconWithFadeState,
         mnuDrawMantraPanelATransition,
-        func_0027D3D8,
+        mnuDrawMantraPanelNodeReveal,
         (MantraPanelDraw)mnuDrawMantraPanelSpriteTransition,
         mnuDrawMantraPanelBTransition,
         (MantraPanelDraw)mnuDrawMantraPanelBackdropTransition,
-        func_002805E0,
+        mnuDrawMantraPanelAnimation,
         (MantraPanelDraw)mnuDrawFadedMantraSingleCyclePanel,
         mnuDrawMantraPanelAccentTransition,
         mnuDrawMantraFourIconPanelTransition,
@@ -4451,7 +4451,7 @@ extern s32 func_0027CDD0(s32, s32, s32, s32, MantraPanelPool *, MantraPanelAnima
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425B68);
 
-s32 func_0027D3D8(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
                  MantraPanelAnimation *panel, u32 packet) {
     s8 shardOffsets[6][2] = {
         {0, -13}, {0, 10}, {-10, -8}, {-10, 7}, {10, -8}, {10, 7}
@@ -5442,7 +5442,7 @@ s32 mnuDrawMantraPanelOrbitingSymbols(s32 x, s32 y, u32 z, s32 amount, MantraPan
     return 0;
 }
 
-s32 func_002805E0(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+s32 mnuDrawMantraPanelAnimation(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
                   MantraPanelAnimation *panel, u32 packet) {
     u8 spriteOrder[14] = {
         0x44, 0x0E, 0x23, 0x07, 0x15, 0x1C, 0x53,
@@ -6445,7 +6445,7 @@ typedef struct MantraSparkEffectState {
 
 void mnuUpdateSparkle(MantraSpark *);
 void mnuTickMantraSparkParticles(MantraSparkState *);
-void func_00285AC0(MantraSparkState *, u32, s32);
+void mnuDrawMantraSparkleEffects(MantraSparkState *, u32, s32);
 
 void mnuUpdateAndDrawMantraSparkEffect(MantraSparkEffectState *state, s32 sprite, s32 surfaceIndex) {
     f32 fraction = (f32)state->sparkle.timer / (f32)state->sparkle.unk4;
@@ -6453,7 +6453,7 @@ void mnuUpdateAndDrawMantraSparkEffect(MantraSparkEffectState *state, s32 sprite
     fraction = 1.0f - fraction;
     sdfSinPoly(fraction * 3.14159265f);
     mnuTickMantraSparkParticles(&state->sparkle);
-    func_00285AC0(&state->sparkle, state->effectHandle, surfaceIndex);
+    mnuDrawMantraSparkleEffects(&state->sparkle, state->effectHandle, surfaceIndex);
 }
 
 /* Reset the shared timer as needed, then advance all eight spark particles. */
@@ -6503,7 +6503,7 @@ void mnuEvaluateActiveSparkleSine(MantraSpark *object, u32 sprite, s32 surfaceIn
     }
 }
 
-void func_00285AC0(MantraSparkState *state, u32 sprite, s32 surfaceIndex) {
+void mnuDrawMantraSparkleEffects(MantraSparkState *state, u32 sprite, s32 surfaceIndex) {
     MantraSpark *particle;
     s32 i = 7;
 
