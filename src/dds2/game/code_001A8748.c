@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "evt_solar.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -3662,7 +3663,6 @@ s32 btlMapActionCode(s32 unused, u32 id) {
     }
 }
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 typedef struct BtlAnimationModeRow {
     u8 mode;

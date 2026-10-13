@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "kwln_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
@@ -2225,7 +2226,6 @@ extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern s32 btlCountTasksForOwner(s64);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 /* The retail debug primitive receives a float radius in $f12. */

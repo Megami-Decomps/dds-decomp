@@ -195,7 +195,6 @@ extern f32 *D_0037F770[];
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 

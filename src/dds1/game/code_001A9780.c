@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "eff_random.h"
@@ -143,7 +144,6 @@ extern s8 effSharedRandomState[];
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 

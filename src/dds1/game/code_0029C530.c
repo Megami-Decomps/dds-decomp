@@ -7904,8 +7904,8 @@ typedef struct EffActorLightConfig {
 typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 1 : -1];
 
 
+#include "btl_effect_position.h"
 extern void btlUnitGetEffectPosVU(BtlUnit *);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);

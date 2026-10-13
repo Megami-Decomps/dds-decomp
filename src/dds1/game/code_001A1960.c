@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_item_drop.h"
@@ -2007,8 +2008,6 @@ s32 btlResolveSkillCategory(s32 unused, u32 id) {
         return datCommandSelectors[id].kind == 2 ? 0x2D : 0;
     }
 }
-
-extern void btlUnitGetMuzzlePosVU(void *);
 
 typedef struct BtlAnimationModeRow {
     u8 mode;

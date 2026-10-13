@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
@@ -595,7 +596,6 @@ extern s32 sndGetEffectNodeParameter(SoundResourceNode *, u16);
 
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
