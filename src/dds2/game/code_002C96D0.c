@@ -210,7 +210,7 @@ extern s32 fileConfigTaskWork;
 
 extern u32 effModelUpdateControlFlags;
 
-extern struct EffExpandedList *func_002DDF48(u32);
+extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
@@ -5900,7 +5900,7 @@ void fileReplaceReferenceHolder(EffectSurfaceNode *obj, u32 resource) {
     if (obj->referenceHolder != NULL) {
         effReleaseReferenceHolder(obj->referenceHolder);
     }
-    obj->referenceHolder = func_002DDF48(resource);
+    obj->referenceHolder = effCreateTextureAnimationSet(resource);
 }
 
 void fileClearLoadObjectReferences(EffectSurfaceNode *obj) {

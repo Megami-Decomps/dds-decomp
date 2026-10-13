@@ -250,7 +250,7 @@ extern s8 effSharedRandomState[];
 
 extern void sndResetTransition(void);
 
-extern void func_001F4430(void);
+extern void btlResetSoundLoadFrames(void);
 
 extern void btlResetFieldColorAndSweepFlags(void);
 
@@ -7404,7 +7404,8 @@ void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     return task;
 }
 
-void func_001F4430(void) {
+/* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
+void btlResetSoundLoadFrames(void) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
     work->unk264 = -1;

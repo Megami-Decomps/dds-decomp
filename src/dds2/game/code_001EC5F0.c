@@ -55,7 +55,7 @@ extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 
-extern void func_001F3C30(BtlLinkedCommand *action);
+extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
 extern s64 mnuGetSoundBufferStateLocked(void);
 
@@ -113,7 +113,7 @@ extern s32 btlGetRuntime(void);
 
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
 
-extern f32 func_001FDD20(f32 *, f32, f32, f32 *);
+extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -220,7 +220,7 @@ extern void btlUpdateActionTargetCameraPose(BtlLinkedCommand *);
 
 extern void btlBuildGroupFramingCameraPose(BtlCamState *, BtlCamState *);
 
-extern void func_001F3E48(BtlLinkedCommand *);
+extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
@@ -290,7 +290,7 @@ extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
-extern s32 func_001FF5D8(BtlLinkedCommand *, BtlCamState *);
+extern s32 btlInitializeCameraCursorForActorId(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
@@ -2411,7 +2411,7 @@ typedef char BtlActionCameraSettings_size_check[
 extern BtlActionCameraSettings D_003B6E50[9];
 
 /* Mark defeat candidates and initialize the selected actor camera mode. */
-void func_001F3C30(BtlLinkedCommand *action) {
+void btlInitializeActorCameraPreset(BtlLinkedCommand *action) {
     BtlUnit *user = action->link->unit;
     u16 unitId = user->partyRecord.unitId;
     u32 count;
@@ -2463,7 +2463,7 @@ void func_001F3C30(BtlLinkedCommand *action) {
 }
 
 /* Advance the configured actor camera transition and blend its distance. */
-void func_001F3E48(BtlLinkedCommand *action) {
+void btlAdvanceActorCameraPreset(BtlLinkedCommand *action) {
     BtlUnit *user = action->link->unit;
     u16 unitId = user->partyRecord.unitId;
     u32 selectedMode;
@@ -3422,7 +3422,9 @@ BtlUnit *btlFindActiveActorById(s32 id) {
     return 0;
 }
 
-f32 func_001FDD20(f32 *first, f32 radius, f32 secondRadius, f32 *second) {
+/* Return the combined radius and leave its center in vf10.
+ * The native containment branch is retained; this is not a minimum-sphere API. */
+f32 btlCombineCameraSpheresVU(f32 *first, f32 radius, f32 secondRadius, f32 *second) {
     f32 center[4];
     f32 larger[4];
     f32 smaller[4];
@@ -3483,13 +3485,14 @@ f32 btlGetUnitTargetDistance(BtlUnit *unit, u8 mode, f32 *target, f32 radius) {
     result = func_001F5780(unit, mode, 1.0f, 1.0f);
     btlUnitGetPosVU(unit, mode);
     VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-    result = func_001FDD20(pos, result, radius, target);
+    result = btlCombineCameraSpheresVU(pos, result, radius, target);
     VU0_STORE_VF(vf10, saved);
     VU0_LOAD_VF(vf10, saved);
     return result;
 }
 
-f32 func_001FDF18(BtlUnit *first, BtlUnit *second, u8 firstMode, u8 secondMode, f32 *target, f32 radius) {
+/* Combine the selected unit bounds and optional target sphere; center is in vf10. */
+f32 btlBuildUnitTargetSphereVU(BtlUnit *first, BtlUnit *second, u8 firstMode, u8 secondMode, f32 *target, f32 radius) {
     f32 pos[4];
     f32 saved[4];
     f32 result;
@@ -3512,7 +3515,7 @@ f32 func_001FDF18(BtlUnit *first, BtlUnit *second, u8 firstMode, u8 secondMode, 
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
     }
     if (target != 0) {
-        result = func_001FDD20(pos, result, radius, target);
+        result = btlCombineCameraSpheresVU(pos, result, radius, target);
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
     }
     VU0_LOAD_VF(vf10, pos);
@@ -3542,7 +3545,9 @@ s32 btlCountUnitsByFlags(u32 mask) {
     return count;
 }
 
-func_001FF5D8(BtlLinkedCommand *action, BtlCamState *state) {
+/* Reset the shared cursor and select camera setup by the linked actor's unit ID.
+ * Preserve the legacy implicit return type and the callers' existing signatures. */
+btlInitializeCameraCursorForActorId(BtlLinkedCommand *action, BtlCamState *state) {
     memset(D_003BD7D0, 0, sizeof(SoundCursor));
     switch (action->link->unit->partyRecord.unitId) {
     case 1:
@@ -6243,7 +6248,8 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     return task;
 }
 
-void func_002050D0(void) {
+/* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
+void btlResetSoundLoadFrames(void) {
     s32 context = btlGetRuntime();
     ((BtlState *)context)->unk288 = -1;
     ((BtlState *)context)->unk28C = -1;

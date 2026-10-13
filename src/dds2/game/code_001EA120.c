@@ -39,7 +39,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 
-extern void func_001F3C30(BtlLinkedCommand *action);
+extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
 extern u8 effSharedRandomState[];
 
@@ -61,7 +61,7 @@ extern void btlBuildApproachCamera(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlUpdateActionTargetCameraPose(BtlLinkedCommand *);
 
-extern void func_001F3E48(BtlLinkedCommand *);
+extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
@@ -73,7 +73,7 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
-extern s32 func_001FF5D8(BtlLinkedCommand *, BtlCamState *);
+extern s32 btlInitializeCameraCursorForActorId(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
@@ -584,11 +584,11 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
     if (flags & 0x200) {
         if (!(flags & 0x1000) && !(link->unit->partyRecord.flags & 0x10)) {
             action->stepKind = 0xB;
-            func_001FF5D8(action, &action->camera);
+            btlInitializeCameraCursorForActorId(action, &action->camera);
         } else if (btlHasSingleLinkedResource(action) != 0) {
             if ((link->unit->partyRecord.flags & 0x10) && link->indexWork.slot == 0x17) {
                 action->stepKind = 0xC;
-                func_001F3C30(action);
+                btlInitializeActorCameraPreset(action);
             } else {
                 action->stepKind = 9;
                 btlFlagUserAndTargetDefeat(action, action);
@@ -629,7 +629,7 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
         btlAdvanceCursorForUnmarkedUnit(action, &action->camera);
         break;
     case 0xC:
-        func_001F3E48(action);
+        btlAdvanceActorCameraPreset(action);
         break;
     }
 }
