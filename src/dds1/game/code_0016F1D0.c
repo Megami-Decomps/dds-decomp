@@ -38,7 +38,7 @@
 
 extern void *effParamTableGetBlock(void *table, s32 index);
 
-extern void func_001705A0(EffRecordPool *pool);
+extern void effReleaseRingRecordPool(EffRecordPool *pool);
 
 extern u32 effMultiplyPackedColors(u32 color, u32 param);
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
@@ -141,7 +141,7 @@ void func_0016F440(EffRingWork *ring) {
 
 /* Release the matrix pool's resources before the ring's backing allocation. */
 void effReleaseRingResources(EffRingWork *ring) {
-    func_001705A0(ring->recordPool);
+    effReleaseRingRecordPool(ring->recordPool);
     sdfReleaseResourceAllocation(ring->allocationHandle);
 }
 
@@ -696,7 +696,7 @@ EffRecordPool *effAllocateIdentityMatrixWork(u32 fanCount) {
     return pool;
 }
 
-void func_001705A0(EffRecordPool *pool) {
+void effReleaseRingRecordPool(EffRecordPool *pool) {
     effReleaseRecordGroupAssetAndHandle(pool);
 }
 
