@@ -433,7 +433,7 @@ void itfUpdateFadeColor(BrsSkillPackageWork *work) {
     }
 }
 
-extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_00263EB0", D_003AFB20);
 
@@ -459,7 +459,7 @@ void mnuDrawTitleFadeSprites(BrsSkillPackageWork *work) {
             colors[1] = color;
             colors[2] = color;
             colors[3] = color;
-            func_002BF438(positions[i][0] << 4, positions[i][1] << 3, 0,
+            effDrawSpriteWithCornerColors(positions[i][0] << 4, positions[i][1] << 3, 0,
                          colors, 0, work->teardownResource, positions[i][2], 0x53);
         }
     }
@@ -519,7 +519,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
             const u8 *name = D_003BAA84 + id * 25;
 
             iconGlyph = itfCreateConvertedTextGlyph(x + 0x300, y, depth, color, name, NULL);
-            func_002BF438(x + 0xB20, y + 0x28, 0, colors, 0,
+            effDrawSpriteWithCornerColors(x + 0xB20, y + 0x28, 0, colors, 0,
                           work->teardownResource, 0x1C, 0x53);
             func_003014F0(formatted, D_003BC560, parameter);
             valueGlyph = func_001979C8(x + 0xC60, y + 0x18, depth, color,

@@ -8588,3 +8588,4 @@
 0x001DEFE0	btlBuildBattleUnitFramingCameraPose	inferred	Walk the active battle-unit list, filter status flags, accumulate scaled reach and vertical bounds, and build the output camera pose using the requested angle; paired callers use it for action framing. DDS2 twin 0x001EC868.
 0x002E87A8	sndQueueCommandPacket	inferred	Reserve a sound-command ring slot, stamp its sequence, copy payload, pack command/channel/quadword count, advance the producer cursor, wake the consumer and return the sequence; DDS2 twin 0x00341650. This is the queue producer beneath sndSendCommandPacket.
 0x002BF5D8	effDrawRepeatedSpriteTiles	inferred	blends the slot’s four corner colors with alpha cleared, initializes a complete tile width from sourceWidth * 16, and draws length / tileWidth repeated tiles.
+0x002BF438	effDrawSpriteWithCornerColors	inferred	draws the selected slot using the caller-supplied four corner colors, preserving the slot work from effGetSlotWorkOrOverride.
