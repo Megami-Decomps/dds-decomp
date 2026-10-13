@@ -21,6 +21,7 @@
 #include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sdf_lookup_texture.h"
 
 #define SDF_PAD_ENTRY_COUNT 2
 
@@ -535,14 +536,6 @@ void sdfConsAppendProgramReferencePacket(SdfListHead *packetList, DmaPacketHeade
 }
 
 extern void sdfInitializeTmxImageHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
-
-typedef struct SdfGeneratedLookupTexture {
-    SdfTextureFileHeader header;
-    u32 palette[256];
-    u8 indices[64][128];
-} SdfGeneratedLookupTexture;
-
-typedef char SdfGeneratedLookupTextureSize[(sizeof(SdfGeneratedLookupTexture) == 0x2440) ? 1 : -1];
 
 /* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
 void sdfConsCreatePowerLookupTexture(void) {
