@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from check_unit import (
+    address,
     asm_literal_users,
     bss_ownership_problems,
     bss_symbols,
@@ -25,6 +26,16 @@ from check_unit import (
     symbols,
     trim_sdata_item,
 )
+
+
+class LinkerSymbolTests(unittest.TestCase):
+    def test_linker_gp_resolves_to_each_titles_retail_address(self):
+        for version, expected in (("dds1", 0x003C0CF0), ("dds2", 0x0043AE70)):
+            with self.subTest(version=version):
+                self.assertEqual(address("_gp", symbols(version)), expected)
+
+    def test_unprovided_linker_symbol_remains_unresolved(self):
+        self.assertIsNone(address("_missing_linker_symbol", symbols("dds2")))
 
 
 class AsmLiteralSharingTests(unittest.TestCase):
@@ -189,6 +200,18 @@ segments:
             (0x10, 0x30, "fileManagerSlots", True),
         ]
         self.assertEqual(self.ownership_problems(emitted), [])
+
+    def test_absolute_linker_gp_does_not_split_owned_objects(self):
+        emitted = [
+            (0x00, 0x10, "fileManagerHead", True),
+            (0x10, 0x30, "fileManagerSlots", True),
+        ]
+        syms = {
+            "fileManagerHead": 0x003DC658,
+            "fileManagerSlots": 0x003DC668,
+            "_gp": 0x003DC678,
+        }
+        self.assertEqual(self.ownership_problems(emitted, syms), [])
 
     def test_rejects_same_size_wrong_name(self):
         emitted = [(0x00, 0x40, "wrongManagerWork", True)]
