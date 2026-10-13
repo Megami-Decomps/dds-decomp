@@ -206,7 +206,7 @@ typedef struct EvtSelState {
     s32 count;
 } EvtSelState;
 
-extern void func_00109E60(void);
+extern void evtUpdateSelectionStateInterpolation(void);
 
 extern u8 D_0037F590[];
 
@@ -865,7 +865,7 @@ u32 evtCheckSelectionState(void) {
     }
     selectionState = evtSelectionState;
     if (selectionState->limit > selectionState->count || selectionState->limit == -1) {
-        func_00109E60();
+        evtUpdateSelectionStateInterpolation();
     } else {
         evtSelStateDestroy();
         return 1;
@@ -873,7 +873,7 @@ u32 evtCheckSelectionState(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109E60);
+INCLUDE_ASM(const s32, "game/code_00107EF8", evtUpdateSelectionStateInterpolation);
 
 void evtDestroySelectionState(void) {
     evtSelStateDestroy();

@@ -107,6 +107,7 @@
 0x00109780	evtSubmitQuadFromVertices	inferred	readability/matching review (QP16)
 0x00109C30	evtDrawPositionedSurfacePacket	inferred	Allocates packet list, builds XY-offset draw packet and submits to event surface. [names_reviewed7.tsv]
 0x00109D00	evtPrepareSizedDrawResource	inferred	Creates graphics resource from shifted dimensions and passes it to two preparation routines. [names_reviewed7.tsv]
+0x00109E60	evtUpdateSelectionStateInterpolation	inferred	Updates the three timed values for an active selection state, handles its mode transitions and leaves completion to evtCheckSelectionState. DDS1 twin at 0x00109D20.
 0x0010A298	evtDestroySelectionState	inferred	calls evtSelStateDestroy [names_R_FuncNames2.tsv]
 0x0010A358	evtOpenFileMenuModeThree	inferred	passes 3 to file menu mode selector [names_R_FuncNames2.tsv]
 0x0010A370	evtPollFileMenuModeThree	inferred	releases file resources then tests file menu completion [names_R_FuncNames2.tsv]

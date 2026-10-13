@@ -156,7 +156,7 @@ extern u16 D_003BD6FA;
 
 extern u16 D_003BD6F8;
 
-extern void func_00109D20(void);
+extern void evtUpdateSelectionStateInterpolation(void);
 
 extern void evtSelStateDestroy(void);
 
@@ -876,7 +876,7 @@ u32 evtCheckSelectionState(void) {
     }
     selectionState = evtSelectionState;
     if (selectionState->limit > selectionState->count || selectionState->limit == -1) {
-        func_00109D20();
+        evtUpdateSelectionStateInterpolation();
     } else {
         evtSelStateDestroy();
         return 1;
@@ -884,7 +884,7 @@ u32 evtCheckSelectionState(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_00109D20);
+INCLUDE_ASM(const s32, "game/code_00107FD8", evtUpdateSelectionStateInterpolation);
 
 void evtDestroySelectionState(void) {
     evtSelStateDestroy();
