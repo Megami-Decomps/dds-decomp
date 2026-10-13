@@ -43,6 +43,9 @@ typedef struct SdfItem {
 } SdfItem;
 
 typedef char SdfItem_size_must_be_0x50[(sizeof(SdfItem) == 0x50) ? 1 : -1];
+
+/* Scale the model root transform and propagate its draw-node tree for frame. */
+void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame);
 typedef char SdfItem_boundsCorners_at_40[
     ((u32)&((SdfItem *)0)->boundsCorners == 0x40) ? 1 : -1];
 typedef char SdfItem_commandData_at_44[
