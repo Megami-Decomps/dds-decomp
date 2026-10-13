@@ -204,7 +204,7 @@ typedef struct BtlPanelBlock {
 } BtlPanelBlock;
 
 extern BtlPanelBlock *btlResourceBlock;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 
 extern s32 btlGetEffectActive();
 extern void btlUpdateTargetSelectionInput();
