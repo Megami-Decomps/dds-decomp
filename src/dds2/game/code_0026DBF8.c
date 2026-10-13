@@ -3105,21 +3105,21 @@ void mnuSpawnMantraIconAtPosition(u32 a, u32 b, MantraDrawPool *pool) {
     }
 }
 
-void func_00278EA8(MantraDrawPool *pool) {
+void mnuSpawnMantraIconFadeIn(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x18);
     }
 }
 
-void func_00278EE0(MantraDrawPool *pool) {
+void mnuSpawnMantraIconFadeOut(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x14);
     }
 }
 
-void mnuSpawnMantraIconAndSelectPanelEntry(MantraDrawPool *pool) {
+void mnuSpawnMantraIconAndStorePanelSoundEntry(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x11);
@@ -3157,14 +3157,14 @@ void mnuSpawnMantraShortLoopIconAtPosition(u32 a, u32 b, MantraDrawPool *pool) {
     }
 }
 
-void func_00279080(MantraDrawPool *pool) {
+void mnuSpawnMantraShortLoopIconFadeIn(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x28);
     }
 }
 
-void func_002790B8(MantraDrawPool *pool) {
+void mnuSpawnMantraShortLoopIconFadeOut(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 2);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x24);
@@ -3325,14 +3325,14 @@ void mnuSpawnMantraVariantIconAtPosition(u32 a, u32 b, MantraDrawPool *pool) {
     }
 }
 
-void func_002798A0(MantraDrawPool *pool) {
+void mnuSpawnMantraVariantIconFadeIn(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x58);
     }
 }
 
-void func_002798D8(MantraDrawPool *pool) {
+void mnuSpawnMantraVariantIconFadeOut(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x54);
@@ -3346,14 +3346,14 @@ void mnuSpawnMantraShortLoopVariantIconAtPosition(u32 a, u32 b, MantraDrawPool *
     }
 }
 
-void func_00279968(MantraDrawPool *pool) {
+void mnuSpawnMantraShortLoopVariantIconFadeIn(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x68);
     }
 }
 
-void func_002799A0(MantraDrawPool *pool) {
+void mnuSpawnMantraShortLoopVariantIconFadeOut(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
         mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x64);
@@ -3381,35 +3381,35 @@ struct MantraPanelPool {
 typedef char MantraPanelPool_size_must_be_0x2DB8[
     (sizeof(MantraPanelPool) == 0x2DB8) ? 1 : -1];
 
-extern void func_0027A7F0(void);
+extern void mnuInitMantraPanelCTransition(void);
 extern void mnuResetMantraPulsePhase(s32, u8 *);
 extern void mnuRandomizeMantraPulseIconPhase(s32, u8 *);
 extern void btlInitPanelASprite(u32, s32);
 extern void mnuInitMantraPanelSpriteView(u32, s32);
-extern void func_0027DE30(void);
+extern void mnuInitMantraPanelSpriteTransition(void);
 extern void btlInitPanelBSprites(u32, s32);
 extern void mnuDrawMantraBackdropWithGsTest(void);
 extern void mnuResetMantraPanelAnimationStates(u32, s32);
-extern void func_002817B8(u32, s32);
+extern void mnuInitFadedMantraSingleCyclePanel(u32, s32);
 extern void mnuInitMantraPanelAccentSprite(u32, s32);
-extern void func_00282B50(u32, s32);
-extern void func_00283F90(u32, s32);
-extern void func_0027FDB8(void);
+extern void mnuInitMantraFourIconPanelTransition(u32, s32);
+extern void mnuInitFadedMantraDualCyclePanel(u32, s32);
+extern void mnuInitMantraNodeMasteryFlash(void);
 
-extern void func_0027A7F8(void);
+extern void mnuReleaseMantraPanelCTransition(void);
 extern void func_0027AFD8(void);
 extern void mnuDrawOscillatingMantraOverlay(void);
 extern void btlReleasePanelASprite(u32);
 extern void mnuReleaseMantraPanelSpriteView(u32);
-extern void func_0027DE38(void);
+extern void mnuReleaseMantraPanelSpriteTransition(void);
 extern void btlReleasePanelBSprites(s32);
-extern void func_0027FB68(void);
+extern void mnuReleaseMantraPanelBackdropTransition(void);
 extern void func_002803A0(void);
-extern void func_002817C0(void);
+extern void mnuReleaseFadedMantraSingleCyclePanel(void);
 extern void mnuReleaseMantraPanelAccentSprite(u32);
-extern void func_00282B60(void);
-extern void func_00283FA0(void);
-extern void func_0027FDC0(void);
+extern void mnuReleaseMantraFourIconPanelTransition(void);
+extern void mnuReleaseFadedMantraDualCyclePanel(void);
+extern void mnuReleaseMantraNodeMasteryFlash(void);
 
 extern s32 mnuDrawMantraPanelCTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_0027B678(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
@@ -3445,36 +3445,36 @@ extern s32 mnuDrawFadedMantraDualCyclePanel(s32, s32, u32, s32, MantraPanelPool 
 extern s32 mnuDrawMantraNodeMasteryFlash(s32, s32, s32, s32, s32, u8 *, s32);
 MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
     MantraPanelInit initCallbacks[14] = {
-        (MantraPanelInit)func_0027A7F0,
+        (MantraPanelInit)mnuInitMantraPanelCTransition,
         (MantraPanelInit)mnuResetMantraPulsePhase,
         (MantraPanelInit)mnuRandomizeMantraPulseIconPhase,
         (MantraPanelInit)btlInitPanelASprite,
         (MantraPanelInit)mnuInitMantraPanelSpriteView,
-        (MantraPanelInit)func_0027DE30,
+        (MantraPanelInit)mnuInitMantraPanelSpriteTransition,
         (MantraPanelInit)btlInitPanelBSprites,
         (MantraPanelInit)mnuDrawMantraBackdropWithGsTest,
         (MantraPanelInit)mnuResetMantraPanelAnimationStates,
-        (MantraPanelInit)func_002817B8,
+        (MantraPanelInit)mnuInitFadedMantraSingleCyclePanel,
         (MantraPanelInit)mnuInitMantraPanelAccentSprite,
-        (MantraPanelInit)func_00282B50,
-        (MantraPanelInit)func_00283F90,
-        (MantraPanelInit)func_0027FDB8,
+        (MantraPanelInit)mnuInitMantraFourIconPanelTransition,
+        (MantraPanelInit)mnuInitFadedMantraDualCyclePanel,
+        (MantraPanelInit)mnuInitMantraNodeMasteryFlash,
     };
     MantraPanelRelease releaseCallbacks[14] = {
-        (MantraPanelRelease)func_0027A7F8,
+        (MantraPanelRelease)mnuReleaseMantraPanelCTransition,
         (MantraPanelRelease)func_0027AFD8,
         (MantraPanelRelease)mnuDrawOscillatingMantraOverlay,
         (MantraPanelRelease)btlReleasePanelASprite,
         (MantraPanelRelease)mnuReleaseMantraPanelSpriteView,
-        (MantraPanelRelease)func_0027DE38,
+        (MantraPanelRelease)mnuReleaseMantraPanelSpriteTransition,
         (MantraPanelRelease)btlReleasePanelBSprites,
-        (MantraPanelRelease)func_0027FB68,
+        (MantraPanelRelease)mnuReleaseMantraPanelBackdropTransition,
         (MantraPanelRelease)func_002803A0,
-        (MantraPanelRelease)func_002817C0,
+        (MantraPanelRelease)mnuReleaseFadedMantraSingleCyclePanel,
         (MantraPanelRelease)mnuReleaseMantraPanelAccentSprite,
-        (MantraPanelRelease)func_00282B60,
-        (MantraPanelRelease)func_00283FA0,
-        (MantraPanelRelease)func_0027FDC0,
+        (MantraPanelRelease)mnuReleaseMantraFourIconPanelTransition,
+        (MantraPanelRelease)mnuReleaseFadedMantraDualCyclePanel,
+        (MantraPanelRelease)mnuReleaseMantraNodeMasteryFlash,
     };
     MantraPanelDraw drawCallbacks[14] = {
         (MantraPanelDraw)mnuDrawMantraPanelCTransition,
@@ -3766,10 +3766,10 @@ u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *panel, u32 bits, s16 
     return 0;
 }
 
-void func_0027A7F0(void) {
+void mnuInitMantraPanelCTransition(void) {
 }
 
-void func_0027A7F8(void) {
+void mnuReleaseMantraPanelCTransition(void) {
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
@@ -4638,10 +4638,10 @@ s32 func_0027D3D8(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
 }
 
 
-void func_0027DE30(void) {
+void mnuInitMantraPanelSpriteTransition(void) {
 }
 
-void func_0027DE38(void) {
+void mnuReleaseMantraPanelSpriteTransition(void) {
 }
 
 extern u16 mnuGetPanelValueAt(MnuStatusResource *, s32);
@@ -5248,7 +5248,7 @@ accent_pulse_ready:
 void mnuDrawMantraBackdropWithGsTest(void) {
 }
 
-void func_0027FB68(void) {
+void mnuReleaseMantraPanelBackdropTransition(void) {
 }
 
 s32 btlDrawPanelC(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
@@ -5299,10 +5299,10 @@ s32 mnuDrawMantraPanelBackdropTransition(s32 x, s32 y, s32 z, s32 amount, s32 un
     return 0;
 }
 
-void func_0027FDB8(void) {
+void mnuInitMantraNodeMasteryFlash(void) {
 }
 
-void func_0027FDC0(void) {
+void mnuReleaseMantraNodeMasteryFlash(void) {
 }
 
 /* Mantra node mastery flash: fade states 6-9 as the other nodes; state 1 pulses the node in and out over 90
@@ -5688,11 +5688,11 @@ s32 func_002805E0(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
     return 0;
 }
 
-void func_002817B8(u32 unused, s32 view) {
+void mnuInitFadedMantraSingleCyclePanel(u32 unused, s32 view) {
     ((MantraPanelAnimation *)view)->stateA = 0;
 }
 
-void func_002817C0(void) {
+void mnuReleaseFadedMantraSingleCyclePanel(void) {
 }
 
 extern const u8 D_00425CF8[];
@@ -5806,12 +5806,12 @@ u32 mnuDrawMantraPanelAccentSprites(u32 ctx, u32 x, u32 y, u32 direction, u32 un
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00281DC0);
 
-void func_00282B50(u32 unused, s32 view) {
+void mnuInitMantraFourIconPanelTransition(u32 unused, s32 view) {
     ((MantraPanelAnimation *)view)->stateA = 0;
     ((MantraPanelAnimation *)view)->stateB = 0;
 }
 
-void func_00282B60(void) {
+void mnuReleaseMantraFourIconPanelTransition(void) {
 }
 
 extern void *memcpy(void *, const void *, u32);
@@ -6068,12 +6068,12 @@ s32 mnuDrawMantraFourIconPanelTransition(s32 x, s32 y, u32 z, s32 alpha, MantraP
     return 0;
 }
 
-void func_00283F90(u32 unused, s32 view) {
+void mnuInitFadedMantraDualCyclePanel(u32 unused, s32 view) {
     ((MantraPanelAnimation *)view)->stateA = 0;
     ((MantraPanelAnimation *)view)->stateB = 0;
 }
 
-void func_00283FA0(void) {
+void mnuReleaseFadedMantraDualCyclePanel(void) {
 }
 
 s32 mnuDrawMantraDualCyclePanel(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *unused,
