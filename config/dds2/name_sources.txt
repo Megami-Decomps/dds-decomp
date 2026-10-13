@@ -8532,3 +8532,8 @@
 0x00336538	sdfVuLoadRotationMatrixY	inferred	Loads the Y-axis rotation matrix rows into VU0 registers vf28-vf31. Paired main-register helper in DDS1; XYZ composition passes the y component. [retail assembly and callers]
 0x00316E28	sdfGetFlagListAlphaSurfaceIndex	inferred	Returns SdfFlagListWork.params.alpha.surfaceIndex; paired getter uses same field in DDS1.
 0x00316E30	sdfSetFlagListAlphaSurfaceIndex	inferred	Stores the supplied value in SdfFlagListWork.params.alpha.surfaceIndex; paired setter uses same field in DDS1.
+0x0026DB48	scrTestEntryFlagBit15	inferred	Returns scrTestEntryFlag(context, suppliedEntryId, 0xF). Used by the Mantra-node eligibility scan after the entry-zero bit-0 gate; the caller uses it only as a predicate.
+0x0026DB70	scrClearEntryFlagAtZeroBit0	inferred	Calls scrClearEntryFlag(context, entryId=0, bit=0); source retains the native post-call context reset.
+0x0026DB90	scrTestEntryFlagAtZeroBit0	inferred	Returns scrTestEntryFlag(context, entryId=0, bit=0). The Mantra-node eligibility scan uses it as a gate; stored-state meaning remains unspecified.
+0x0026DBB8	scrClearEntryFlagAtZeroBit1	inferred	Calls scrClearEntryFlag(context, entryId=0, bit=1); source retains the native post-call context reset.
+0x0026DBD8	scrTestEntryFlagAtZeroBit1	inferred	Calls scrTestEntryFlag(context, entryId=0, bit=1) and discards the return value.

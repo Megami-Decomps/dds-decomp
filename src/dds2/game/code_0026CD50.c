@@ -378,9 +378,9 @@ void func_0026D710(MantraNodeStates *states, s32 unused, s16 entry) {
     }
 }
 
-extern s32 func_0026DB48(DatPartyRecord *context, u8 entry);
+extern s32 scrTestEntryFlagBit15(DatPartyRecord *context, u8 entry);
 
-extern s32 func_0026DB90(DatPartyRecord *context);
+extern s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context);
 
 /* Return true when all six neighbor conditions are satisfied across active party members. */
 s32 func_0026D7E8(u16 entry) {
@@ -408,8 +408,8 @@ s32 func_0026D7E8(u16 entry) {
 
                 if (neighbor != NULL) {
                     if ((neighbor->packedHeader & 0xF) == 1) {
-                        if (func_0026DB90(party) != 0) {
-                            if (func_0026DB48(party, (u8)(*neighborSlot)->id) != 0) {
+                        if (scrTestEntryFlagAtZeroBit0(party) != 0) {
+                            if (scrTestEntryFlagBit15(party, (u8)(*neighborSlot)->id) != 0) {
                                 satisfiedNeighbors |= 1 << slot;
                             }
                         } else {
