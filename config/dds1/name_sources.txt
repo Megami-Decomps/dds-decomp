@@ -4669,6 +4669,7 @@
 0x0025E6B0	mnuDrawShopItemQuantity	inferred	Draws the two shop quantity icons and the selected inventory count, using party bullet counts for bullet items.
 0x0025F378	mnuDrawIfActive	inferred	mnu draws overlay when inner node active
 0x0025F408	mnuDrawListChildrenWithCountdown	inferred	confidence=high; src/dds1/game/code_0025DF68.c:func_0025F408; Decrements a nonzero shared delay counter and invokes the draw callback for each linked child up to the list count. [names_qp9.tsv]
+0x0025F4E0	mnuDrawListFlagIndicatorsWithFade	inferred	Draws list flag icons 20/21 with alpha derived from the active transition mode and countdown.
 0x0025F680	mnuDrawShopSelectedRowDetails	inferred	Draws the selected shop row's marker pair, item icon and formatted counter at fixed alpha.
 0x0025F7F0	mnuDrawShopSelectedRowDetailsWithAlpha	inferred	Crossfades the selected shop row's marker pair, item icon and formatted counter using caller alpha.
 0x0025FB30	mnuDrawShopLimitArrows	inferred	Draws the selected shop row's up/down arrows at full alpha when the panel is not at its corresponding limit.

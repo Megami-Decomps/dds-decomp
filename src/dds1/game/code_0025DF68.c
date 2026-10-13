@@ -277,7 +277,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
 
 
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
-extern void func_0025F4E0(s32, s32, s32, s32, MenuWindowContainer *, s32);
+extern void mnuDrawListFlagIndicatorsWithFade(s32, s32, s32, s32, MenuWindowContainer *, s32);
 
 
 /* Draw the child and its container only while the child is active. */
@@ -286,7 +286,7 @@ void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuWindowContainer *object, s32 drawA
 
     if (inner->count != 0) {
         mnuDrawListChildrenWithCountdown(x, y, z, inner, drawArg);
-        func_0025F4E0(x, y, z, 0, object, drawArg);
+        mnuDrawListFlagIndicatorsWithFade(x, y, z, 0, object, drawArg);
         object->flags |= 4;
     }
 }
@@ -314,7 +314,7 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, struct MenuList *list
     }
 }
 
-void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object, s32 option) {
+void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object, s32 option) {
     struct MenuList *inner = object->list;
     struct EffectSlotSet *texture = D_003BC520;
     s32 *delay = inner->context;

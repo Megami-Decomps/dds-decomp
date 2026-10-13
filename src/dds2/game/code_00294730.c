@@ -25,7 +25,7 @@ extern void func_002958B0();
 
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
-extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
+extern void mnuDrawListFlagIndicatorsWithFade(s32, s32, s32, s32, u8 *, s32);
 
 
 
@@ -282,7 +282,7 @@ void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuWindowContainer *object, s32 drawA
 
     if (inner->count != 0) {
         mnuDrawListChildrenWithCountdown(x, y, z, (u8 *)inner, drawArg);
-        func_002960F0(x, y, z, 0, (u8 *)object, drawArg);
+        mnuDrawListFlagIndicatorsWithFade(x, y, z, 0, (u8 *)object, drawArg);
         object->flags |= 4;
     }
 }
@@ -311,7 +311,7 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
     }
 }
 
-void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
+void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
     MenuWindowContainer *object = (MenuWindowContainer *)objectData;
     struct MenuList *inner = object->list;
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
