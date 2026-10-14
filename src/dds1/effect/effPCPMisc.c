@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "eff_pcp_drift_event_row.h"
 #include "eff_packet_params.h"
 #include "eff_pcp_fade_timer.h"
 #include "btl_effect_position.h"
@@ -4797,15 +4798,9 @@ typedef struct EffPCPDriftEventParams {
     u8 pad84[0x80];
 } EffPCPDriftEventParams;
 
-typedef struct EffPCPDriftEvent {
-    EffEventWork *event;
-    s32 frame;
-    f32 position, positionStep, angle, angleStep;
-} EffPCPDriftEvent;
-
 typedef struct EffPCPDriftEventWork {
     EffPCPDriftEventParams params;
-    EffPCPDriftEvent *entries;
+    EffPCPDriftEventRow *entries;
     SoundMixer *owner;
     u8 unk10C;
     u8 pad10D[3];
@@ -4820,12 +4815,12 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPDriftEvent *entry;
+    EffPCPDriftEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPDriftEvent *)(work + 1);
+    entry = (EffPCPDriftEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk10C = 1;
@@ -4871,12 +4866,12 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPDriftEvent *entry;
+    EffPCPDriftEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPDriftEvent *)(work + 1);
+    entry = (EffPCPDriftEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk10C = 0;
@@ -4912,7 +4907,7 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
 void effPcpEventGroupRelease(EffPCPDriftEventWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
-    EffPCPDriftEvent *entry = work->entries;
+    EffPCPDriftEventRow *entry = work->entries;
 
     if (count != 0) {
         do {
@@ -4929,7 +4924,7 @@ void effPcpEventGroupRelease(EffPCPDriftEventWork *work) {
 
 
 void effPcpDriftRandomizeSlot(EffPCPDriftEventWork *work, s32 index) {
-    EffPCPDriftEvent *slot;
+    EffPCPDriftEventRow *slot;
     f32 spread;
     f32 scale;
 
@@ -4954,7 +4949,7 @@ void effPcpUpdateDriftEventRing(EffPCPDriftEventWork *work) {
     s32 fadeIn = work->params.fadeIn;
     s32 fadeOut = work->params.fadeOut;
     f32 angleDecay = work->params.angleDecay;
-    EffPCPDriftEvent *entry = work->entries;
+    EffPCPDriftEventRow *entry = work->entries;
     u32 color = work->color;
     u32 i;
     s32 frame;
