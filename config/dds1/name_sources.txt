@@ -6887,6 +6887,7 @@
 0x002E2088	sdfConsAppendVuPacket	inferred	sdf cons allocates 0x90 packet then runs func_002E1FF8 VU setup
 0x002E2110	sdfConsAppendAssetPacket	inferred	sdf cons applies asset entry changes then appends packet
 0x002E2600	sdfInitGeometryDmaPacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
+0x002E2680	sdfBuildTexturedQuadVifPacket	inferred	confidence=high; Writes the 0x80-byte VIF/GIF DMA packet from world position, uniform color, four UV coordinates and four quad-corner coordinates; used by field model and generated-effect quad submitters.
 0x002E27C8	sdfMeasureVertexAttributePacketBytes	inferred	confidence=high; matched-C; src/dds1/game/code_002DDC98.c:1126:func_002E27C8; Measures the allocation for the native VIF vertex-attribute packet builder: a fixed header plus packed per-vertex attribute payloads.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002E27D8	sdfBuildCompactVertexVifPacket	inferred	readability/matching review (QP16)
 0x002E2B90	sdfMeasureAlignedRecordBufferBytes	inferred	Calculates the 16-byte-aligned allocation length from a record count. [names_reviewed17.tsv]

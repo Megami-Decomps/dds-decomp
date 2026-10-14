@@ -478,7 +478,7 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_001528C0);
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
-extern void func_002E2680(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
+extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
 void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescriptor *source) {
     f32 matrix[16] __attribute__((aligned(16)));
@@ -552,7 +552,7 @@ void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescripto
     }
 
     packet = (u64 *)sdfAllocPacketAligned(0x80);
-    func_002E2680((u8 *)packet, source->position, source->color, &uv, &corners[0][0]);
+    sdfBuildTexturedQuadVifPacket((u8 *)packet, source->position, source->color, &uv, &corners[0][0]);
     sdfAppendPacket(list, (u32)packet);
 }
 

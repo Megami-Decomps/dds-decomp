@@ -2478,7 +2478,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
-extern void func_002E2680(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
+extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
 /* The marker producers supply the complete model draw input. */
 typedef struct FldMarkerPacket {
@@ -2507,7 +2507,7 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     sdfInitGeometryDmaPacket(packet, mat);
     sdfAppendPacket(command, (u32)packet);
     packet = (u8 *)sdfAllocPacketAligned(0x80);
-    func_002E2680(packet, modelData->pos, modelData->color, &modelData->uv, modelData->quad);
+    sdfBuildTexturedQuadVifPacket(packet, modelData->pos, modelData->color, &modelData->uv, modelData->quad);
     sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
