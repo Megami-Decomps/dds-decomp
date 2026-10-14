@@ -12037,3 +12037,44 @@ the DDS2 caller unit's Cedar narrow scope was disclosed and its body untouched.
 Fresh whole-unit gates are 73/0 for each provider and 109/0 / 110/0 for the
 DDS1/DDS2 callers, with no context, rodata or undefined-symbol rows. Linked
 retail verification remains the production integration gate.
+
+### Trace-justified staging: escape-result task metadata
+
+DDS1 `func_001CFB10` and DDS2 `func_001DC2D8` are paired 608-byte escape-result
+handlers. They start command sounds, stagger eligible party effects, and, on a
+successful escape, create owner-bound defeat-fade tasks fourteen frames after
+the first effect. The failure path intentionally passes its exhausted null
+unit-list cursor to the final effect constructor. Status and battle flags are
+observed afresh before the final state dispatch.
+
+Keep the three unit-admission tests independent. In the compound-`&&` control,
+the GCSE expression table already contains `(flags & 0x2E1) == 0x201`; the
+constant `0x201` occupies an extra saved `$20`. Ordinary early-continue guards
+restore the native separate tests of bits `1`, `0x200`, and `0xE0`, reducing the
+residual to four words in the fade-task metadata phase.
+
+Qualified, output-preserving allocation/scheduler traces identify the deciding
+property **P**: snapshot the real owner identity before deriving the real fade
+delay, then consume both to configure the task before publishing it. Without
+the owner snapshot, local allocation compares four-reference quantities with
+lifetimes six (signed-word delay) and eight (doubleword identity). Its priority
+tier, `13333` versus `10000`, assigns `$2` to the delay and `$3` to the identity.
+Post-reload scheduling consequently issues the identity load first while the
+delay computation waits for the constructor's return register to become free.
+Staging only the delay leaves all four differing words.
+
+Capturing `u64 ownerId` first, followed by `s32 fadeDelay`, gives the six-position
+lifetime and `$2` to the genuine doubleword identity, and the eight-position
+lifetime and `$3` to the signed-word delay. Scheduling then restores the native
+delay calculation, return-pointer transfer, identity load and metadata stores.
+Both locals carry actual consumed task configuration; there is no dummy
+dependency, extra read, register binding or compiler-flag change.
+
+The identity is genuinely 64-bit: `btlAdvanceRuntimeSequenceCounter` returns
+`u64`, and `btlCreateUnit` stores that result in the canonical actor field at
+`+0x108`. The shared owners already declare this field and the scheduler task's
+`ownerId` at `+0x40` as `u64`. Retail uses `ld` at `001CFC28` / `001DC3F0` and
+`sd` at `001CFC34` / `001DC3FC`; this is not a wide carrier for word arithmetic.
+Both final-form traces match their unhooked outputs. Complete-unit gates are
+77/0 and 79/0, with no context, rodata or undefined-symbol rows. Existing names,
+shared prototypes and the separate claimed scheduler body remain unchanged.
