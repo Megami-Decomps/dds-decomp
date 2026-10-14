@@ -25,6 +25,7 @@
 #include "fld_resource_resolver.h"
 #include "fld_clear_menu_entries_api.h"
 #include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
@@ -612,7 +613,6 @@ extern void fldDestroyTitleTask();
 extern void fldReleaseObjectSlots();
 extern void fldReleaseTitleSlots();
 extern void fldReleaseResourceHandles();
-extern void fldReleaseTextureSlots();
 #include "fld_object_slot_api.h"
 extern s32 fldTitleMiniIsActive();
 extern void fldResetZoneRecordsAndActorSlots();

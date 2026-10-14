@@ -9,6 +9,7 @@
 #include "fld_play_pending_sounds_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_object_slot_api.h"
+#include "fld_release_texture_slots_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
 #include "sdf_math_vector4.h"
