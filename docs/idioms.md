@@ -12331,3 +12331,23 @@ These ordinary source phases close both selectors from the earlier Basalt Finch
 and Copper Swift reconstruction. They introduce no extra state, alias views,
 qualifiers, wrappers or compiler flags. Real compiler probes agree with ordinary
 assembly and every RTL dump; both complete owners must remain exact.
+
+## Mantra-grid opacity belongs to its real overlay branch
+
+DDS1 `mnuDrawMantraGridEntry` (`0x00259498`, 1016 bytes) chooses a
+profile-match overlay, then its capped or transitioning form. The native
+integer-to-float opacity conversions occur inside those outcomes at `0x002596F4`
+and `0x00259758`; the non-profile transition has its own conversion at
+`0x002597E4`. Each floating opacity is genuinely reused for two sprite draws.
+
+Declare `f32 fade = (f32)alpha` in the existing branch that consumes it, rather
+than in the surrounding profile-match block. The parent-scope capture first
+differs at `+0x248` and emits 992 bytes. Branch-local captures reproduce all
+254 native words; the complete unit gates `13 match, 0 differ`. No new control
+flow, unused state, helper, attribute or compiler-flag change is involved.
+
+Keep the existing eight-argument grid callback ABI even though this renderer
+does not use the grid formal. Its six-byte special-entry map is copied from
+the original `D_003BC4A0` sdata owner, not duplicated as a new literal table.
+The inventory's DDS2 `0x00285148` candidate is a background burst-pool updater,
+not a semantic twin of this grid-entry renderer.

@@ -34,7 +34,91 @@ extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawScaledScenePlacementSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern void mnuDrawMantraEntryStatusIcon(s32, s32, s32, s32, u32, f32, f32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00259498", mnuDrawMantraGridEntry);
+extern const u8 D_003BC4A0[];
+extern void mnuDrawPlacedSpriteWithFlags(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
+extern void mnuDrawMantraGridEntryPulse(s32, s32, s32, s32, MnuMantraGridEntry *, s32);
+
+void mnuDrawMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
+                          MnuProfileProgress *profileOwner, SdfGrid *grid,
+                          SdfGridCell *entry, s32 context) {
+    u8 mappedIds[6];
+    MnuMantraGridEntry *scene;
+    MenuSceneWork *display;
+    s32 drawX;
+    s32 drawY;
+    s32 i;
+    s32 atCap;
+    u32 flags;
+    f32 pulse;
+    f32 progress;
+
+    memcpy(mappedIds, D_003BC4A0, sizeof(mappedIds));
+    display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    scene = (MnuMantraGridEntry *)entry->value;
+    pulse = (sdfSinPoly(((f32)scene->frame / 60.0f) * 6.2831853f -
+                       1.5707963f) + 1.0f) * 0.5f;
+    progress = (f32)(scene->frame - 20) / 20.0f;
+    if (progress > 1.0f) {
+        progress = 1.0f;
+    }
+    if (progress < 0.0f) {
+        progress = 0.0f;
+    }
+    progress = sdfSinPoly(progress * 3.1415926f) * 0.3f;
+    drawX = x + D_0036B7F0[scene->sceneId][2];
+    drawY = y + D_0036B7F0[scene->sceneId][3];
+    flags = mnuGetMantraDisplayFlags(scene, profileOwner);
+    if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
+        mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
+                                  1.0f, 1.0f, context);
+    } else {
+        for (i = 0; i < 6; i++) {
+            if (scene->sceneId == mappedIds[i]) {
+                mnuDrawScaledVariantSprite(x, y, depth, alpha, i + 0x59, 0x20,
+                                          1.0f, 1.0f, context);
+                break;
+            }
+        }
+        if (i == 6) {
+            mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
+                                      1.0f, 1.0f, context);
+        }
+    }
+    pulse = pulse * 0.5f + 0.4f;
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
+        atCap = flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
+        if (atCap) {
+            f32 fade = (f32)alpha;
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * 0.5f),
+                                        0x20, 0x3C, context);
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * 0.3f),
+                                        0x20, 0x3C, context);
+        } else {
+            f32 fade = (f32)alpha;
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * pulse),
+                                        0x20, 0x3C, context);
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * progress),
+                                        0x20, 0x3C, context);
+        }
+    } else {
+        atCap = flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
+        if (atCap) {
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, alpha,
+                                        0x20, 0x33, context);
+        } else if (flags & (MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1 |
+                            MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2)) {
+            f32 fade = (f32)alpha;
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * pulse),
+                                        0x20, 0x34, context);
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * progress),
+                                        0x20, 0x34, context);
+        }
+    }
+    if (atCap) {
+        mnuDrawMantraGridEntryPulse(drawX, drawY, depth, alpha, scene, context);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A0);
 
@@ -106,7 +190,6 @@ extern char D_003BC490[];
 extern char D_003BC498[];
 extern u32 mnuGetSelectedNodeValue(void);
 extern u32 mnuGetMantraPrerequisiteFlags(s32, MnuMantraGridEntry *, MnuMantraNodeState *, MnuProfileProgress *);
-extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 /* Retail clears four prerequisite flag words at +0x84, then stores results
