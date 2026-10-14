@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
+#include "evt_stage_test_api.h"
 #include "mnu_input.h"
 #include "ui_color.h"
 #include "kwln.h"
@@ -17,7 +18,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern u8 brsGetLevelStepCrossedBy(s32, s32);
 extern u8 brsGetLevelStepForValue(s32);
 extern s32 sprintf(char *, const char *, ...);
-extern void evtStageTestQueueMotion(s32, u32);
 extern char D_003BC550[];
 extern char D_003BC558[];
 extern char *D_0036D3A8[];
