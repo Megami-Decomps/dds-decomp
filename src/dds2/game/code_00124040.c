@@ -26,6 +26,7 @@
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
+#include "dds3_world_selection.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
@@ -56,7 +57,6 @@ extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 
 extern s32 fldDeferredCommand;
 
-extern void *dds3GetWorldSecondaryObject(void);
 
 
 
@@ -121,7 +121,6 @@ extern void fldFinishDeferredExit(void);
 extern void func_001447A0(void);
 
 /* Providers used by the field lifecycle controller. */
-extern void dds3SetWorldObject(void *);
 
 extern void evtEnableSolarPhaseAdvance(void);
 
