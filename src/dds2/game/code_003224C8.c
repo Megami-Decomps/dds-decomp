@@ -55,17 +55,17 @@ extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *recor
                                         s32 x, s32 y, f32 angle);
 
 /* Exported timed-state/runtime-list providers from the preceding unit. */
-extern MenuRuntimeList *func_00321EC8(void);
-extern MenuRuntimeList *func_00321ED8(void);
-extern void func_00321688(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
-extern void func_00321798(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
+extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
+extern void mnuUpdateTimedSpawns(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
+extern void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
 extern void mnuDeactivateListRecord(MenuRuntimeList *, MenuRuntimeRecord *);
-extern void func_00322418(void);
+extern void mnuAdvanceRuntimeAnimationRecords(void);
 
 /* Each packed table word contains signed X and Y hit radii. */
 extern s8 D_0040B248[][2];
 
-u16 *func_003224C8(s32 index) {
+u16 *mnuGetPackedRuntimeHitRadii(s32 index) {
     return (u16 *)&D_0040B248[index];
 }
 
@@ -110,7 +110,7 @@ MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list) {
     return NULL;
 }
 
-MenuShortRecord *func_003225C0(MenuShortRecordList *list) {
+MenuShortRecord *mnuFindFrameKeyedMotionRecord(MenuShortRecordList *list) {
     s32 i;
     MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
@@ -413,7 +413,7 @@ void func_003232A0(MenuWorkEntry *entry, MenuShortRecordList *list) {
 extern f32 sdfVectorLength(const f32 *vector);
 
 s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
-    MenuRuntimeList *runtimeList = func_00321EC8();
+    MenuRuntimeList *runtimeList = mnuGetRuntimeHitTargetList();
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
     s32 entryIndex;
 
@@ -459,7 +459,7 @@ s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
             }
 
             if (context == 0) {
-                func_00321688(entry->callback, runtimeList,
+                mnuUpdateTimedSpawns(entry->callback, runtimeList,
                               (s32)entry->currentX, currentYInteger,
                               entry->currentAngleRadians);
             }
@@ -572,7 +572,7 @@ u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
 
 /* Find the first active runtime record overlapping the work entry's hit rectangle. */
 MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *work, struct MnuShootingWork *context) {
-    MenuRuntimeList *list = func_00321EC8();
+    MenuRuntimeList *list = mnuGetRuntimeHitTargetList();
     MenuRegistryParameters *parameters = NULL;
     MenuRuntimeRecord *record;
     s32 left;
@@ -637,9 +637,9 @@ MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *work, struct M
     return NULL;
 }
 
-s32 func_00323BB8(struct MnuShootingWork *context) {
-    MenuRuntimeList *list = func_00321ED8();
-    MenuRuntimeList *targets = func_00321EC8();
+s32 mnuDispatchRuntimeListPairOverlaps(struct MnuShootingWork *context) {
+    MenuRuntimeList *list = mnuGetRuntimeAnimationList();
+    MenuRuntimeList *targets = mnuGetRuntimeHitTargetList();
     MenuRuntimeRecord *record = list->records;
     MenuRuntimeRecord *target;
     s32 i;
@@ -1038,7 +1038,7 @@ extern void sdfVectorScale(f32 factor, f32 *vector);
 
 
 
-s32 func_00324840(void) {
+s32 mnuUpdateShootingPlayerInput(void) {
     MenuWorkEntry *work = mnuActiveEffectEntry;
     u32 kindMask = 0;
     MenuInputActionSnapshot *input = &D_0045C890.snapshot;
@@ -1097,12 +1097,12 @@ s32 func_00324840(void) {
         }
     }
 
-    func_00321798(work->callback,
-                  func_00321ED8(), kindMask,
+    mnuUpdateKindMaskedTimedSpawns(work->callback,
+                  mnuGetRuntimeAnimationList(), kindMask,
                   (s32)work->currentX, (s32)work->currentY, kindMask,
                   work->currentAngleRadians);
 
-    func_00322418();
+    mnuAdvanceRuntimeAnimationRecords();
 
     {
         MenuWorkFlags flags;

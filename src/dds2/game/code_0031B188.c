@@ -179,7 +179,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work) {
                  i < registry->secondCount; i++, list++) {
                 record = NULL;
                 if (list->records != NULL) {
-                    record = func_003225C0(list);
+                    record = mnuFindFrameKeyedMotionRecord(list);
                 }
                 if (record != NULL) {
                     frame = work->elapsed;

@@ -6408,7 +6408,7 @@
 0x002CDD38	prfGetMantraDisplayParameter	inferred	Corrected legacy offset-derived getter name: read profile metadata byte value04, promoted to s32 in DDS1; actual styled-label consumers narrow to u8 and select D0036C490[label-1]. DDS2 twin0x003151D0 uses the byte as a repeated marker count, not the same UI role. [Namer1 batch39, medium]
 0x002CDD60	prfGetRequiredProfileLevel	inferred	Mirrors DDS2; returns the per-profile level threshold compared with the unit's current level.
 0x002CDD88	prfGetProfileParameterByte5	inferred	Returns the profile parameter row byte at offset 5; the mantra-grid entry builder copies this value into its value05 field. The paired DDS2 getter reads the same offset.
-0x002CDDB8	scrCallIfOperandReady	inferred	calls func_002CD7B8 twice then forwards selected index to func_002CDDB0 stub
+0x002CDDB8	scrCallIfOperandReady	inferred	calls ptyGetCurrentProfileId twice then forwards selected index to prfGetIndexedProfileByte; the DDS1 retail callee is an always-zero stub
 0x002CDE20	prfGetSkillAtIndex	inferred	legacy ProfileId_GetSkillAtIndex: profile skill id at index 0..7
 0x002CDE68	ptyCheckLevelAtLeastProfileParam7b6	inferred	legacy PartyUnit_CheckLevelAtLeastProfileParam7b6: unit level >= profile param word 0x7B6
 0x002CDEB8	ptyIsCurrentProfileId	inferred	legacy PartyUnit_IsCurrentProfileId: unit.current_profile_id_55 == profile_id
@@ -8953,3 +8953,4 @@
 0x001DE958	btlUpdateTargetCameraNoOp	inferred	confidence=high; Empty update callback of native TARGET camera-mode row10 at00359DE4, paired with btlUpdateActionCameraFromTargetPolicy. DDS2 twin001EC190. [PurD readability b8; native label and initialize/update mode contract]
 0x001DEA68	btlUpdateSummonCameraNoOp	inferred	confidence=high; Empty update callback of native SUMMON camera-mode row11 at00359DF4, paired with btlPrepareSingleTargetCameraBlend. DDS2 twin001EC2A0. [PurD readability b8; native label and initialize/update mode contract]
 0x001B6308	btlInitializeStaffActorPanels	inferred	confidence=high; Allocates BattleActorPanelWork, initializes the three panel positions and HP/MP pulse state, creates the retained panel task and stores handle3. Full C body is identical to canonical DDS2 btlInitializeStaffActorPanels001C1520 apart from title-specific symbols. [PurD readability b8; matched DDS2 source and fldCreateSceneCleanupTask caller]
+0x002CDDB0	prfGetIndexedProfileByte	inferred	confidence=high; Canonical DDS2 interface at00315248, used by matching profile-adjusted-stat and script-operand paths. DDS1 retail stub always returns0; retain its u16/s32/u32 interface and zero body, without implying a data read. [PurA readability b7; corresponding callers and canonical DDS2 body]
