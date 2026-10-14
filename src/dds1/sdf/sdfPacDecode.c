@@ -38,7 +38,6 @@ void sdfPacStartRegularPacket(PacState *state, SdfPacStreamPacketHeader *packet)
 void sdfPacStartRelocatingPacket(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
-void sdfStoreWordAndSetState(void *decoder, void *destination);
 extern void *memcpy(void *dst, const void *src, u32 n);
 
 
@@ -229,7 +228,7 @@ void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet)
             state->onInput = sdfPacCopyPendingBytes;
             break;
         case PAC_ENCODING_COMPRESSED: {
-            PacBuf *decoder = sdfAllocSizeClassBlock(0x20);
+            SdfPacDecoder *decoder = sdfAllocSizeClassBlock(0x20);
             state->decoder = (u8 *)decoder;
             sdfStoreWordAndSetState(decoder, state->outputCursor);
             state->onInput = sdfPacDecodePendingBytes;
@@ -373,7 +372,7 @@ void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet,
         state->onInput = sdfPacCopyResourceChunk;
         break;
     case PAC_ENCODING_COMPRESSED: {
-        PacBuf *decoder = sdfAllocSizeClassBlock(0x20);
+        SdfPacDecoder *decoder = sdfAllocSizeClassBlock(0x20);
         state->decoder = (u8 *)decoder;
         sdfStoreWordAndSetState(decoder, buffer->cursor);
         state->onInput = sdfPacDecodeResourceChunk;

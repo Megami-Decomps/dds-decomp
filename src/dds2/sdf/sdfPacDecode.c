@@ -58,7 +58,6 @@ void sdfPacResetOutputToAllocationEntry(PacState *state);
 
 
 
-void sdfStoreWordAndSetState(void *decoder, void *destination);
 
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 
@@ -251,7 +250,7 @@ void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet)
             state->onInput = sdfPacCopyPendingBytes;
             break;
         case PAC_ENCODING_COMPRESSED: {
-            PacBuf *decoder = sdfAllocSizeClassBlock(0x20);
+            SdfPacDecoder *decoder = sdfAllocSizeClassBlock(0x20);
             state->decoder = (u8 *)decoder;
             sdfStoreWordAndSetState(decoder, state->outputCursor);
             state->onInput = sdfPacDecodePendingBytes;
@@ -395,7 +394,7 @@ void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet,
         state->onInput = sdfPacCopyResourceChunk;
         break;
     case PAC_ENCODING_COMPRESSED: {
-        PacBuf *decoder = sdfAllocSizeClassBlock(0x20);
+        SdfPacDecoder *decoder = sdfAllocSizeClassBlock(0x20);
         state->decoder = (u8 *)decoder;
         sdfStoreWordAndSetState(decoder, buffer->cursor);
         state->onInput = sdfPacDecodeResourceChunk;

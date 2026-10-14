@@ -251,15 +251,9 @@ s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
     return 0;
 }
 
-typedef struct {
-    u8 state;    /* 0x00 */
-    u8 pad01[3];
-    u32 value;   /* 0x04 */
-} SdfWordState;
-
-void sdfStoreWordAndSetState(SdfWordState *work, u32 value) {
-    work->value = value;
-    work->state = 1;
+void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output) {
+    decoder->output = output;
+    decoder->state = 1;
 }
 
 extern f32 D_00398440[][4];
