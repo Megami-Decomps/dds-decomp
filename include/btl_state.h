@@ -527,7 +527,7 @@ typedef struct BtlState {
     s32 (*unk5DC)(BtlUnit *, s32);
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5E0 */
     s32 (*sceneCallback)(); /* 0x5E4 */
-    u8 pad5E8[4];
+    s32 (*battleOutcomeOverride)(void); /* 0x5E8: 001B2664 loads the optional signed outcome override. */
     void (*postPlacementCallback)(void); /* 0x5EC: runs after actor positions and rotations. */
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5F0: same override, DDS2 001E3264. */
     void (*initializeUnitEntry)(BtlUnit *); /* 0x5F4: scene-entry unit flag/status setup. */
