@@ -2049,7 +2049,7 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateShopFlagTrack);
 
-void func_0024A5F8(EvtRuntime *viewer) {
+void evtViewerPreGlyphTickHookNoOp(EvtRuntime *viewer) {
 }
 
 void evtViewerAdvanceGlyphTick(EvtRuntime *viewer) {
@@ -2066,7 +2066,7 @@ void evtViewerAdvanceGlyphTick(EvtRuntime *viewer) {
     }
 }
 
-void func_0024A668(EvtRuntime *viewer) {
+void evtViewerFlag8ClearFrameHookNoOp(EvtRuntime *viewer) {
 }
 
 /* Returns the latest eligible kind-5 motion key at/before frame for channel,
@@ -3437,7 +3437,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
 
     D_004372B4 = 0;
     if (viewer->unk2238 == 1) {
-        func_0024A5F8(viewer);
+        evtViewerPreGlyphTickHookNoOp(viewer);
     }
     evtViewerAdvanceGlyphTick(viewer);
     evtEventViewerApplyEffectToggles(viewer);
@@ -3452,7 +3452,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             evtViewerPushCommandHistory(1, 0x24, 0x18, viewer);
             return (s32)evtViewerPickNextHandler;
         }
-        func_0024A668(viewer);
+        evtViewerFlag8ClearFrameHookNoOp(viewer);
     } else {
         if (viewer->curFrame == viewer->headerFirst) {
             viewer->flags = flags & ~1;
