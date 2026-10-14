@@ -1461,13 +1461,7 @@ BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-typedef struct BtlStatArgs {
-    BtlUnit *unit;
-    s32 amount;
-    s32 category;
-} BtlStatArgs;
-
-s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
+s32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = args->unit;
     if (!(work->battleFlags & 0x80)) {
@@ -1495,7 +1489,7 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
 
 BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, u32 target, u32 option) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    BtlRuntimeTaskArgs *args;
+    BtlCategoryStatDamageArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApplyCategoryStatDamage;
@@ -1503,9 +1497,9 @@ BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, u32 target, u32 o
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->unk_08 = target;
-    args->option = option;
+    args->unit = unit;
+    args->category = target;
+    args->amount = option;
     return task;
 }
 
