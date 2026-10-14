@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_thread_workspace_api.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
@@ -378,7 +379,6 @@ void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 ve
 }
 
 extern u8 D_00398470[];
-extern void sdfPostmultiplyVuMatrixFromMemory();
 
 /* vu0 routine: render line pairs using the cached composed matrix. */
 void *sdfDrawCachedMatrixLinePairsVU(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {

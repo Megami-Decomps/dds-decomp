@@ -508,7 +508,6 @@ extern u8 sdfProjectionMatrix[];
 extern u8 D_0037F660[];
 
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);

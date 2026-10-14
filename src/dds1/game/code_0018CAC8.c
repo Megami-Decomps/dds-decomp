@@ -1,6 +1,7 @@
 #include "eff_resource_browser.h"
 #include "sdf_sif_command.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
 #include "kwln_sprite.h"
 #include "sdf_packet_list.h"
@@ -62,7 +63,6 @@ extern u8 D_00324660[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 /* Allocate the dispatch owner before calling the selected payload constructor. */

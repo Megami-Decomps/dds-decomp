@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "sdf_counter_runtime.h"
@@ -696,7 +697,6 @@ extern u8 D_00324650[];
 
 extern u8 D_00324660[];
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
 
 /* vu0 routine: project a world point to the screen and return its GS grid cell. */
 void fldProjectPointToGridCell(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
