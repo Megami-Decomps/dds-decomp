@@ -8,6 +8,7 @@
 #include "mnu_result.h"
 #include "kwln.h"
 #include "mdl_flag_api.h"
+#include "prf_profile_cap.h"
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
@@ -282,7 +283,6 @@ s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
 
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern u32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
-extern u32 prfGetCapValue(u16);
 
 s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     s32 i;
@@ -446,7 +446,6 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
 
 extern u32 ptyAddProfilePoints(DatPartyRecord *, s32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
-extern u32 prfGetCapValue(u16);
 extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 
 

@@ -7,6 +7,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mnu_mantra_position_api.h"
 #include "file_request_api.h"
+#include "prf_profile_cap.h"
 
 #define EVT_PARTY_SLOT_COUNT 5
 
@@ -169,7 +170,6 @@ extern s32 prfReqCheckWithFallback(DatPartyRecord *, u16);
 
 extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
 
-extern u32 ptyGetProfileRecordCap(u16);
 
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
@@ -278,7 +278,6 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
     }
 }
 
-extern u32 ptyGetProfileRecordCap(u16 scriptId);
 
 /* The shared value provider owns a DatPartyRecord, not an integer address. */
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
