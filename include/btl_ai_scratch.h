@@ -4,13 +4,13 @@
 #include "common.h"
 
 /* One 0x10-byte AI query context. The actor pointer targets the title's
- * command-action record, not its BtlUnit. DDS2's weighted-action producer
+ * command-actor record, not its BtlUnit. DDS2's weighted-action producer
  * writes the actor and species ID; route selection writes the row and query
  * selector, which the conditional-action readers consume. DDS1 has matching
  * field reads and writes. */
 #if defined(VERSION_DDS1)
-struct BtlActionTask;
-typedef struct BtlActionTask *BtlAiScratchActor;
+struct BtlTask;
+typedef struct BtlTask *BtlAiScratchActor;
 #elif defined(VERSION_DDS2)
 struct ActionStateLink;
 typedef struct ActionStateLink *BtlAiScratchActor;

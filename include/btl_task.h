@@ -183,17 +183,30 @@ typedef struct BtlTask {
     u16 actionNumber;
     u8 pad06[2];
     u32 flags;
-    u32 options;
+    union {
+        u32 options;
+        s32 actionFlags; /* +0x0C: AI context tests bit 1 as signed state */
+    };
     s32 stateTime;
     s32 unk14;
     BtlUnit *unit;
     u8 unk_1C[4];
     BattleIndexWork indexWork; /* +0x20..+0x87 */
-    u8 pad88[0xC0];
-    u32 actions[8]; /* +0x148 */
+    u16 aiCounter; /* +0x88: reset, incremented, then clamped by AI queries */
+    u8 pad8A[0xBC];
+    s8 lowHpActionHold; /* +0x146: positive suppresses the low-HP action */
+    u8 pad147;
+    u32 actions[8]; /* +0x148: queued action words; consumers also read low halfword IDs */
     struct BtlTask *prev; /* +0x168 */
     struct BtlTask *next; /* +0x16C */
 } BtlTask;
+typedef char BtlTask_size_must_be_0x170[(sizeof(BtlTask) == 0x170) ? 1 : -1];
+typedef char BtlTask_aiCounter_offset_must_be_0x88[
+    ((u32)&((BtlTask *)0)->aiCounter == 0x88) ? 1 : -1];
+typedef char BtlTask_lowHpActionHold_offset_must_be_0x146[
+    ((u32)&((BtlTask *)0)->lowHpActionHold == 0x146) ? 1 : -1];
+typedef char BtlTask_actions_offset_must_be_0x148[
+    ((u32)&((BtlTask *)0)->actions == 0x148) ? 1 : -1];
 #endif
 
 #ifdef VERSION_DDS2
