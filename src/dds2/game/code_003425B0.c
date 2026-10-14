@@ -1363,8 +1363,8 @@ s32 sdfCompleteIpuInputFeedDma(void) {
 /* Return the indexed earlier entry only when enabled; the byte index is unchecked. */
 u32 sdfMidiPreviousEntry(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
-    if (channel->enabled != 0) {
-        selectedEntry = channel->earlierEntries[channel->index];
+    if (channel->isEnabled != 0) {
+        selectedEntry = channel->previousEntries[channel->entryIndex];
     }
     return selectedEntry;
 }
@@ -1372,8 +1372,8 @@ u32 sdfMidiPreviousEntry(SndMidiChannel *channel) {
 /* Return the indexed current entry only when enabled; the byte index is unchecked. */
 u32 sndGetSelectedChannelEntry(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
-    if (channel->enabled != 0) {
-        selectedEntry = channel->entries[channel->index];
+    if (channel->isEnabled != 0) {
+        selectedEntry = channel->currentEntries[channel->entryIndex];
     }
     return selectedEntry;
 }
