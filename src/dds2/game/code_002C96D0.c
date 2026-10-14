@@ -508,7 +508,6 @@ extern u8 sdfProjectionMatrix[];
 extern u8 D_0037F660[];
 
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);
@@ -2610,7 +2609,7 @@ s32 fileDrawMenuFrame(s32 task) {
                       (alpha * 0x80 / 100 << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D74));
     }
     fileDrawModeSpecificMemoryCardPrompt();
-    func_002CEEC0();
+    fileShowPromptDialog();
     fileDrawMemoryCardFlowPrompt();
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 2);
@@ -2880,7 +2879,7 @@ s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     return (s32)func_002CE958;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CEEC0);
+INCLUDE_ASM(const s32, "game/code_002C96D0", fileShowPromptDialog);
 
 u32 fileGetLoadSelectionState(void) {
     return D_00437D04;

@@ -185,7 +185,7 @@ extern u8 D_003BD478;
 
 extern s32 func_00312618(const char *, s32, void *, s32 *);
 
-extern void func_003003F0(const char *);
+extern void sdfDebugPrintf(const char *);
 
 extern void sdfDevPrintText(const char *text);
 
@@ -1784,7 +1784,7 @@ extern SdfPowerOffCallback func_002F33C8(SdfPowerOffCallback, void *);
 
 extern s32 func_0030E620(void);
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern s32 func_00310C00(const char *, const char *, s32, const void *, s32);
 
@@ -1818,7 +1818,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     _StartThread(thread, semaphore);
     func_002F33C8(sdfPowerOffInterruptCallback, (void *)semaphore);
     func_0030E620();
-    func_003014F0(buffer, "hdd0:%s,", path);
+    sprintf(buffer, "hdd0:%s,", path);
     func_00310C00(D_003BD470, buffer, 0, 0, 0);
     sdfPfsDebugMode = 1;
 }
@@ -1828,17 +1828,20 @@ void sdfLoadDevModule(void) {
     if (sdfDevModuleLoaded == 0) {
         D_003BD478 = 0;
         if (func_00312618("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
-            func_003003F0("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
+            sdfDebugPrintf("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
             return;
         }
         if (resident != 0) {
-            func_003003F0(D_003B4690);
+            sdfDebugPrintf(D_003B4690);
             return;
         }
         D_003BD478 = 1;
         sdfDevModuleLoaded = 1;
     }
 }
+
+/* Writable device directory; its suffix is replaced by the path setter. */
+char D_00398820[64] = "host0:";
 
 INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4690);
 

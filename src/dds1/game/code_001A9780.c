@@ -1885,7 +1885,7 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern char D_003BB3F8[];
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
@@ -1934,7 +1934,7 @@ s32 btlUpdateValueMessageWindows(KwlnTask *task) {
                     value = work->config.state[i].value;
                     count++;
                     itfMesSetTextSlotFromValue(work->window[i], 0, work->config.state[i].flag, 12);
-                    func_003014F0(text, D_003BB3F8, value);
+                    sprintf(text, D_003BB3F8, value);
                     itfMesCopyStringToWindowTableSlot(work->window[i], 1, text);
                     width = itfMesMeasureEntryItem(work->window[i], 0, 0);
                     itfMesBlk24MoveTo(work->window[i], (256 - (width >> 5)) << 4,
@@ -2106,7 +2106,7 @@ extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 extern const u8 *D_003BAA74, *D_003BAA80, *D_003BAA88;
 extern const char D_003BB400[], D_003BB408[], D_003BB410[];
 extern u8 D_00359978[];
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern DatBattleSceneRecord *datBattleSceneRecords;
 extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
@@ -2164,7 +2164,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         btlDrawPanelIconGroup(0, work->alpha);
                         break;
                     }
-                    func_003014F0(text, D_003BB400, actor->partyRecord.level);
+                    sprintf(text, D_003BB400, actor->partyRecord.level);
                     glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
                                           (work->y - 2) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
@@ -2205,7 +2205,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         btlDrawPanelIconGroup(1, work->alpha);
                         break;
                     }
-                    func_003014F0(text, D_003BB408, actor->partyRecord.hp,
+                    sprintf(text, D_003BB408, actor->partyRecord.hp,
                                   actor->partyRecord.maxHp);
                     func_001AFF78(work, 0, work->x, work->y, work->alpha);
                     glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
@@ -2226,7 +2226,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         btlDrawPanelIconGroup(2, work->alpha);
                         break;
                     }
-                    func_003014F0(text, D_003BB408, actor->partyRecord.mp,
+                    sprintf(text, D_003BB408, actor->partyRecord.mp,
                                   actor->partyRecord.maxMp);
                     func_001AFF78(work, 1, work->x, work->y, work->alpha);
                     glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
@@ -2281,7 +2281,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     }
                     position = 0;
                     memset(D_00359978, 0, 256);
-                    func_003014F0((char *)D_00359978, D_003BB410,
+                    sprintf((char *)D_00359978, D_003BB410,
                         D_003BAA80 + ((BtlUnit *)work->entry)->partyRecord.unitId * 189);
                     while ((character = D_00359978[position]) != 0) {
                         s32 length = 0;
@@ -3963,7 +3963,7 @@ void btlDrawReservePanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s
 extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void btlDrawReservePanelPulse(BtlUnit *, BattleActorPanelWork *, s32);
 extern void func_001AC080(s32, s32, u32, const char *, s32);
 extern const BattlePanelColors D_003A2CC0;
@@ -4030,14 +4030,14 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
             }
 
             baseFade = work->reserveEntries[i].presentation.fade;
-            func_003014F0(text, D_003BB400, unit->partyRecord.hp);
+            sprintf(text, D_003BB400, unit->partyRecord.hp);
             color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
             color = ((u32)(baseFade + work->reserveEntries[i].presentation.hpHighlightLevel) << 24) |
                     (color & 0x00FFFFFF);
             func_001AC080(work->reserveEntries[i].position[0] + 0x50,
                           work->reserveEntries[i].position[1] + 0x26, color, text, 0x100);
 
-            func_003014F0(text, D_003BB400, unit->partyRecord.mp);
+            sprintf(text, D_003BB400, unit->partyRecord.mp);
             color = btlGetVitalTextColor(unit, unit->partyRecord.mp, unit->partyRecord.maxMp, 1);
             color = ((u32)(baseFade + work->reserveEntries[i].presentation.mpHighlightLevel) << 24) |
                     (color & 0x00FFFFFF);
@@ -5577,7 +5577,7 @@ extern const BattlePanelColors D_003A2E90;
 
 extern char D_003BB478[];
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 void btlDrawItemCommandRows(BattleSceneObject *object) {
     char text[16];
@@ -5606,7 +5606,7 @@ void btlDrawItemCommandRows(BattleSceneObject *object) {
         colors.values[3] = color;
         effDrawSpriteWithCornerColors(0x900, countY << 3, 0, colors.values, 0,
                      btlResourceBlock->resA, 5, 0x53);
-        func_003014F0(text, D_003BB478, D_00358FE0[index * 2 + 1]);
+        sprintf(text, D_003BB478, D_00358FE0[index * 2 + 1]);
         fldSubmitSceneObjectAtCoordinates(0xA0, countY, color, text);
     }
 }

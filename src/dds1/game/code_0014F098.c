@@ -1,9 +1,9 @@
 #include "common.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 
 struct EvtUnit;
 
-extern char *scrReadStringParameter(s32 idx);
 
 extern void scrSetIntegerReturnValue(s32 value);
 

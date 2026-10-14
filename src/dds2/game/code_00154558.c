@@ -15,6 +15,7 @@ extern void func_00140BC8(const char *name);
 #include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 
 struct EvtUnit;
 
@@ -200,7 +201,6 @@ extern void func_0014BF98(struct EvtUnit *unit);
 
 extern struct EvtUnit *evtGetWorldUnitNestedValue(s32 param);
 
-extern char *scrReadStringParameter(s32 idx);
 
 extern s32 fldFindEffectByName(char *str);
 

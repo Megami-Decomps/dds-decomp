@@ -301,15 +301,6 @@ typedef struct BtlFx {
     f32 fC0;
 } BtlFx;
 
-typedef struct BtlFxSrcA {
-    f32 f0;
-    f32 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-} BtlFxSrcA;
-
 typedef struct BtlFxSrcB {
     s128 vec0;
     f32 f10;

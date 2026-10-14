@@ -64,11 +64,9 @@ extern void itfSetIndexedTextSlot();
 
 s32 frFontCountGlyphChainNodes();
 
-void func_00196088();
+void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
-void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node);
 
-void itfMesCopyGlyphShade();
 
 s8 itfTestTextInterfaceMask(s32 arg0);
 
@@ -82,7 +80,6 @@ void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue);
 
 FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node);
 
-s32 itfMesCountSpanSteps();
 
 void itfMesInitCharTable(s32 *table);
 
@@ -453,7 +450,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     s32 rowIndex;
     s32 rowWidth;
 
-    func_00196088(0x1000, 0x4B0, optionBlock->glyphChain);
+    frFontCenterGlyphChainAt(0x1000, 0x4B0, optionBlock->glyphChain);
     rowsHeight = optionBlock->rowCount * ITF_MES_OPTION_ROW_SPACING * 8;
     for (rowIndex = 0; rowIndex < optionBlock->rowCount; rowIndex++) {
         rowWidth = frFontMeasureGlyphStripWidth(rowIndex, optionBlock->glyphChain);
@@ -693,7 +690,7 @@ extern char D_00347C68[][0x20];
 extern char D_003482A8[][0x20];
 extern s32 D_0032ACA8[128];
 extern char D_003BB1F0[];
-extern void func_003014F0(char *dst, const char *format, ...);
+extern void sprintf(char *dst, const char *format, ...);
 extern void itfConvertText(char *dst, const char *src);
 extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText);
@@ -710,7 +707,7 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
     switch (selector) {
     case 0:
-        func_003014F0(formatted, D_003BB1F0, value);
+        sprintf(formatted, D_003BB1F0, value);
         itfMesCopyStringToWindowTableSlot(window, slotIndex, formatted);
         break;
     case 1:
@@ -1185,9 +1182,9 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
                           (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
     if (mes->unk12 == 3) {
         if (frFontCountGlyphChainNodes(glyph) == 1) {
-            func_00196088(0x1000, 0xC60, glyph);
+            frFontCenterGlyphChainAt(0x1000, 0xC60, glyph);
         } else {
-            func_00196088(0x1000, 0xBF8, glyph);
+            frFontCenterGlyphChainAt(0x1000, 0xBF8, glyph);
         }
     }
     if (!(mes->flags & ITF_MES_SKIP_CONTEXT_ENABLE_BIT) && (itfMesWork.flags & 1)) {

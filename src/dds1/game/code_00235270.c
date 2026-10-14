@@ -35,7 +35,7 @@ extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
-extern s32 func_003014F0(char *, char *, ...);
+extern s32 sprintf(char *, char *, ...);
 extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
@@ -51,7 +51,7 @@ extern void fldSubmitTexturedOverlaySprite(void);
 extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
 extern void sndTransitionBgm(s32 sequence);
-extern void func_003003F0(char *fmt, ...);
+extern void sdfDebugPrintf(char *fmt, ...);
 extern void sndReleaseTrackHandle(u32 sequence);
 extern void sndQueueSoundId(u32 sequence);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
@@ -633,7 +633,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
 
 s32 evtDrawInputValueRow(SdfListHead *list, s32 x, s32 y, u8 *ctx) {
     char text[16];
-    func_003014F0(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
+    sprintf(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
@@ -720,7 +720,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0D8);
 
 s32 evtDrawEventFileNameRow(SdfListHead *list, s32 x, s32 y) {
     char text[32];
-    func_003014F0(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
+    sprintf(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
@@ -4214,39 +4214,39 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
 
     if (mode == 0) {
         if (sdfPfsDebugMode) {
-            func_003014F0(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
-            func_003014F0(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
         } else {
-            func_003014F0(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
-            func_003014F0(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
         }
     } else if (sdfPfsDebugMode) {
-        func_003014F0(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+        sprintf(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
             ((u32)D_003BBE78 / 10U) * 10, D_003BBE78, D_003BBE78,
             D_003BBE7A, D_003BBE78, D_003BBE7A);
-        func_003014F0(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+        sprintf(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
             ((u32)D_003BBE78 / 10U) * 10, D_003BBE78, D_003BBE78,
             D_003BBE7A, D_003BBE78, D_003BBE7A);
     } else {
-        func_003014F0(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+        sprintf(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
             sdfDevGetPathBuffer(), ((u32)D_003BBE78 / 10U) * 10,
             D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
-        func_003014F0(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+        sprintf(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
             sdfDevGetPathBuffer(), ((u32)D_003BBE78 / 10U) * 10,
             D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
     }
 
     if (sdfPfsDebugMode) {
-        func_003003F0("hdd -> %s\n", pm2Path);
+        sdfDebugPrintf("hdd -> %s\n", pm2Path);
         pm2 = func_0030E8F0(pm2Path, 0x602, 0666);
         pm3 = func_0030E8F0(pm3Path, 0x602, 0666);
     } else {
-        func_003003F0("pc -> %s\n", pm2Path);
+        sdfDebugPrintf("pc -> %s\n", pm2Path);
         pm2 = func_0030E8F0(pm2Path, 0x602);
         pm3 = func_0030E8F0(pm3Path, 0x602);
     }
     if (pm2 < 0 || pm3 < 0) {
-        func_003003F0(D_003BC350);
+        sdfDebugPrintf(D_003BC350);
         return 0;
     }
 
@@ -4268,11 +4268,11 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         case 24: evtEmitGroupTypeTwentySevenPayloads(pm2, runtime); break;
         case 21:
             evtWriteGroupMetadata(pm2, runtime);
-            func_003003F0("save object table\n");
+            sdfDebugPrintf("save object table\n");
             break;
         case 25:
             evtEmitGroupTypeTwentyFivePayloads(pm2, runtime);
-            func_003003F0("save rain data\n");
+            sdfDebugPrintf("save rain data\n");
             break;
         }
     }
@@ -4285,7 +4285,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         }
     }
     func_0030EB78(pm3);
-    func_003003F0("save pm3 file\n");
+    sdfDebugPrintf("save pm3 file\n");
     func_00310A68(D_003BC358, 0);
     return 1;
 }
@@ -4342,7 +4342,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
                 }
             }
         }
-        func_003003F0("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
+        sdfDebugPrintf("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
         link->extra1 = 0;
         link->extra2 = 0;
     }
@@ -4434,7 +4434,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     s32 oldIndex;
     s32 headerLast, headerFirst;
 
-    func_003003F0("start SetGameData\n");
+    sdfDebugPrintf("start SetGameData\n");
     soundRowsPresent = 0;
     if (work->mainEntry2Data != NULL) {
         packageId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId;
@@ -4545,7 +4545,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         if (node->value != 0) {
             for (owner = worldTable->slots[4].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -4553,7 +4553,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
             for (owner = worldTable->slots[9].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -4561,7 +4561,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
             for (owner = worldTable->slots[7].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -4569,7 +4569,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
         }
     }
-    func_003003F0("end pm1 load\n");
+    sdfDebugPrintf("end pm1 load\n");
 
     /* Access each serialized row through its version-specific accessor. */
     if (work->subEntry0Data != NULL) {
@@ -4611,7 +4611,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                         oldIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                         nameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                         oldName = (char *)work->subEntry1Data + nameIndex * 32;
-                        func_003003F0("oldtable index=%d string=%s\n", oldIndex, oldName);
+                        sdfDebugPrintf("oldtable index=%d string=%s\n", oldIndex, oldName);
                         if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4) != -1) {
                             s32 objectNameIndex;
                             world = dds3GetWorldObject();
@@ -4623,7 +4623,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                                     (char *)work->subEntry1Data + linkedNameIndex * 32, runtime);
                             } else {
                                 key->p0C.h[0] = -1;
-                                func_003003F0("name not found \n");
+                                sdfDebugPrintf("name not found \n");
                             }
                         }
                     }
@@ -5117,7 +5117,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 for (component = 2; component >= 0; component--) {
                     rain->parameters.z[component] = 0;
                 }
-                func_003003F0("modify rain param\n");
+                sdfDebugPrintf("modify rain param\n");
             }
         }
     }
@@ -5214,14 +5214,14 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         evtPreloadBgm(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
         while (evtIsBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) == 0) {
         }
-        func_003003F0("smg file load :eventViewer\n");
+        sdfDebugPrintf("smg file load :eventViewer\n");
     }
     if (timeiId != -1) {
         if (!fldTitleIsActive()) {
             fldStartTitle(timeiId, -1, 30);
-            func_003003F0("timei file load=%d\n", timeiId);
+            sdfDebugPrintf("timei file load=%d\n", timeiId);
         } else {
-            func_003003F0("warning!! timei process doing!!\n");
+            sdfDebugPrintf("warning!! timei process doing!!\n");
         }
     }
     if (mnuCampGetPrimaryOption(runtime) == 0) {
@@ -5232,7 +5232,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     evtViewerDispatchFlagMode(runtime);
     evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
     evtViewerDispatchFlagMode(runtime);
-    func_003003F0("SetGameData PM2 Version = %d Stageno = %d\n",
+    sdfDebugPrintf("SetGameData PM2 Version = %d Stageno = %d\n",
         work->sub->kind, ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
     return 1;
 }
@@ -5333,7 +5333,7 @@ s32 evtPlayBgm(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_003003F0("Event BGM play :%08X\n", sound);
+    sdfDebugPrintf("Event BGM play :%08X\n", sound);
     sndStartTrackDefault(sound);
     return sound;
 }
@@ -5347,7 +5347,7 @@ void evtTransitionBgm(s32 id, s32 fade) {
     if (fade >= 0) {
         sound = evtEncodeBgmSoundCode(id, fade);
     }
-    func_003003F0("Event BGM trans :%08X\n", sound);
+    sdfDebugPrintf("Event BGM trans :%08X\n", sound);
     sndTransitionBgm(sound);
 }
 
@@ -5357,7 +5357,7 @@ s32 evtFadeInBgm(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_003003F0("Event BGM fade in play :%08X\n", sound);
+    sdfDebugPrintf("Event BGM fade in play :%08X\n", sound);
     sndStartTrackExtended(sound);
     return sound;
 }
@@ -5393,7 +5393,7 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
 }
 
 void evtFormatTaskName(s32 taskId, void *buffer) {
-    func_003014F0(buffer, D_003BC360, taskId);
+    sprintf(buffer, D_003BC360, taskId);
 }
 
 KwlnTask *evtFindTaskById(u32 taskId) {

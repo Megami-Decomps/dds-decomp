@@ -475,7 +475,7 @@ extern s32 strlen(const char *);
 
 extern char *strcpy(char *, const char *);
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern double fptodp(f32);
 
@@ -488,25 +488,25 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
     if (entry->format != NULL) {
         entry->format(widget, entry, text, 0x100);
     } else if (entry->parameter == NULL) {
-        func_003014F0(text, "%s", entry->text);
+        sprintf(text, "%s", entry->text);
     } else {
         if (strlen(entry->text) == 0) {
             strcpy(prefix, "");
         } else {
-            func_003014F0(prefix, "%s ", entry->text);
+            sprintf(prefix, "%s ", entry->text);
         }
         switch (((GridNumericDescriptor *)entry->parameter)->mode) {
         case GRID_NUMERIC_FORMAT_DECIMAL:
-            func_003014F0(format, "%%s%%0%dd", entry->formatWidth);
-            func_003014F0(text, format, prefix, (s32)entry->number);
+            sprintf(format, "%%s%%0%dd", entry->formatWidth);
+            sprintf(text, format, prefix, (s32)entry->number);
             break;
         case GRID_NUMERIC_FORMAT_HEXADECIMAL:
-            func_003014F0(format, "%%s0x%%0%dX", entry->formatWidth - 2);
-            func_003014F0(text, format, prefix, (s32)entry->number);
+            sprintf(format, "%%s0x%%0%dX", entry->formatWidth - 2);
+            sprintf(text, format, prefix, (s32)entry->number);
             break;
         case GRID_NUMERIC_FORMAT_FLOAT:
-            func_003014F0(format, "%%s%%0%d.1f", entry->formatWidth);
-            func_003014F0(text, format, prefix, (double)entry->number);
+            sprintf(format, "%%s%%0%d.1f", entry->formatWidth);
+            sprintf(text, format, prefix, (double)entry->number);
             break;
         }
     }
@@ -514,9 +514,9 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
         s32 row = entry->index + widget->rowOffset;
 
         if (!(widget->flags & GRID_TEXT_HEX_ROW_INDEX)) {
-            func_003014F0(out, "%03d:%s", row, text);
+            sprintf(out, "%03d:%s", row, text);
         } else {
-            func_003014F0(out, "0x%03X:%s", row, text);
+            sprintf(out, "0x%03X:%s", row, text);
         }
     } else {
         strcpy(out, text);

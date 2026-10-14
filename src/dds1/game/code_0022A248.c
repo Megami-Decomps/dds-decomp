@@ -164,7 +164,7 @@ void *evtGetTestTaskUpdateCallback(void) {
 }
 
 #include "sdf_packet_alloc.h"
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 sdfPathExists(char *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern SdfPoolNode D_00325708;
@@ -192,7 +192,7 @@ s32 evtUpdateScriptTestSelection(KwlnTask *task) {
     D_00325708.append(&D_00325708, list);
 
     if ((s8)D_00324510[1][0][1] < 0) {
-        func_003014F0(path, "/event/e%03d/e%03d/scr/e%03d.bf",
+        sprintf(path, "/event/e%03d/e%03d/scr/e%03d.bf",
                       D_003BBDEC - D_003BBDEC % 10, D_003BBDEC, D_003BBDEC);
         if (sdfPathExists(path) != 0) {
             D_003BA8EC = 0x80000000;

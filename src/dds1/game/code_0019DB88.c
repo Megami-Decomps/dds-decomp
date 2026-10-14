@@ -949,7 +949,7 @@ INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A1528);
 INCLUDE_RODATA(const s32, "game/code_0019DB88", D_003A1540);
 
 void itfPrintTestMessageCallback(void) {
-    func_003003F0("********* AAAA ********\n");
+    sdfDebugPrintf("********* AAAA ********\n");
 }
 
 typedef struct ItfFovPanelWork {

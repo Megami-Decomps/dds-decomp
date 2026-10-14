@@ -5,6 +5,7 @@
 #include "file.h"
 #include "file_slot_flags.h"
 #include "file_request_entry.h"
+#include "file_manager_api.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
@@ -54,7 +55,6 @@ s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 s32 sceMcSync(s32 arg0, void *arg1, s32 *arg2);
 void func_002F6E90(u32 arg0, s32 arg1);
 s32 fileMan(KwlnTask *task);
-s32 fileManUpdate(void);
 void fileReqInit(s32 arg0);
 extern s32 sdfDevQueueControlRequest(DevState *);
 extern s32 sdfDevQueueActiveOperation(DevState *);

@@ -36,6 +36,8 @@
 #include "eff_pcp_cross.h"
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
+#include "eff_pcp_twin.h"
+#include "eff_pcp_spin.h"
 #include "eff_pcp_span.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
@@ -276,20 +278,6 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
 }
 
 extern u8 effDefaultRandomState[];
-
-typedef struct EffPCPTwinWork {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u8 pad0C[4];
-    u32 color;          /* 0x10 */
-    u32 frame;          /* 0x14: shared callback starts after frame 24 */
-    f32 scale;          /* 0x18 */
-    EffParamWork *pair[8][2];     /* 0x1C parameter handle pairs (source uses [0] and [1]) */
-    EffParamWork *shared[8];      /* 0x5C */
-    u32 state[8];       /* 0x7C */
-    u32 counter[8];     /* 0x9C */
-} EffPCPTwinWork; /* 0xBC */
 
 /* Re-rolls slot `index`: random-angle rotation matrix pushed to both handles
  * of the pair, then a new random countdown. */
@@ -3340,17 +3328,6 @@ void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
 
 extern u8 effDefaultRandomState[];
 
-/* Small PCP effect with a 4x4 matrix at 0x10 (0x68 bytes). */
-typedef struct EffPCPSpinWork {
-    u8 pad00[0x10];  /* 0x00 task header */
-    u128 matrix[4];  /* 0x10 transform */
-    s32 frame;       /* 0x50 */
-    f32 angle;       /* 0x54 random start angle */
-    f32 scale;       /* 0x58 */
-    u32 color;       /* 0x5C */
-    EffParamWork *handle0;   /* 0x60 */
-    EffParamWork *handle1;   /* 0x64 */
-} EffPCPSpinWork; /* 0x68 */
 
 
 EffPCPSpinWork *effSpinSingleCreateFromTable(void *src) {

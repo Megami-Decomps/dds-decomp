@@ -323,6 +323,9 @@ segments:
       # .ctors, .dtors, .reginfo
       - [0x280330, databin, ctors_dtors_reginfo]
       - [0x280380, data, data]
+      - [0x30C810, .data, game/code_003396D0]
+      - [0x30C9D0, .data, game/code_0033D5D0]
+      - [0x30CA10, data, data_after_console_glyph_uv]
       - [0x311C68, databin, eh_frame]
       - [0x311C6C, databin, vudata]
       - [0x311F80, rodata, rodata_00410F80]
@@ -660,7 +663,7 @@ segments:
       - { start: 0x339D2C, type: .sbss, vram: 0x439108, name: sdf/sdfChip }
       - { start: 0x339D2C, type: sbss, vram: 0x439128, name: sbss_after_sdfChip }
       - { start: 0x339D2C, type: bss, vram: 0x439280, name: bss_before_frFontTextSlots }
-      - { start: 0x339D2C, type: .bss, vram: 0x4528C0, name: game/code_0019B840 }
+      - { start: 0x339D2C, type: .bss, vram: 0x452720, name: game/code_0019B840 }
       - { start: 0x339D2C, type: .bss, vram: 0x452940, name: interface/itfMesManager }
       - { start: 0x339D2C, type: bss, vram: 0x452E60, name: bss_before_fileManager }
       - { start: 0x339D2C, type: .bss, vram: 0x457F28, name: file/fileManager }

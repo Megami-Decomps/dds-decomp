@@ -1038,7 +1038,12 @@ s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *record) {
 }
 
 /* Roll the defeat chance for a petrified actor and the command's attack kind. */
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004157A0);
+const f32 D_004157A0[9] __attribute__((section(".rodata"), aligned(8))) = {
+    1.0f, 1.0f, 1.0f,
+    0.89999997615814208984375f, 0.89999997615814208984375f,
+    0.7999999523162841796875f, 0.599999964237213134765625f,
+    0.39999997615814208984375f, 0.0999999940395355224609375f
+};
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004157C8);
 
@@ -3025,7 +3030,6 @@ extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 extern s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *);
 extern s32 sprintf(char *, const char *, ...);
-extern const s32 D_00415F38[8];
 extern const u8 *D_00435E60;
 extern const u8 *D_00435E4C;
 extern const u8 *D_00435E58;
@@ -3036,11 +3040,9 @@ extern char D_00436828[];
 extern DatEnemyRecord *datEnemyRecords;
 
 /* Advance and draw the seven analysis rows while the panel fades. */
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F38);
-
 s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
     u8 text[0x80];
-    s32 rowOffsets[8];
+    s32 rowOffsets[8] = { 52, 95, 157, 132, 132, 53, 53, 48 };
     s16 skillCount;
     BtlAnalysisPanelWork *work;
     BtlState *battle;
@@ -3056,7 +3058,6 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
     s32 clampedFrame;
     s32 state;
 
-    memcpy(rowOffsets, D_00415F38, sizeof(rowOffsets));
     battle = (BtlState *)btlGetRuntime();
     work = (BtlAnalysisPanelWork *)kwlnTaskGetUserValue(task);
     work->frame++;
@@ -3680,13 +3681,21 @@ extern const BattlePhaseFadeLimits D_004163C0;
 extern const BattlePhaseXBounds D_004163F0;
 
 /* Advance phase-panel movement, cropping and corner fades in the supplied work. */
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163A0);
+const u32 D_004163A0[4] __attribute__((section(".rodata"), aligned(8))) = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163B0);
+const BattlePhaseSlotIds D_004163B0 __attribute__((section(".rodata"), aligned(8))) = { { 30, 31, 32 } };
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163C0);
+const BattlePhaseFadeLimits D_004163C0 __attribute__((section(".rodata"), aligned(8))) = { {
+    { 128, 128, 128, 128 },
+    { 128, 96, 96, 0 },
+    { 0, 0, 0, 0 }
+} };
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163F0);
+const BattlePhaseXBounds D_004163F0 __attribute__((section(".rodata"), aligned(8))) = { {
+    { 308, 372 },
+    { 378, 442 },
+    { 464, 528 }
+} };
 
 void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
     BattlePhaseSlotIds slots = D_004163B0;
@@ -8126,24 +8135,33 @@ void btlUpdateActorSlotOrderAnimation(void) {
 
 typedef s32 SceneSlotCoordinate[3];
 
-extern const u32 D_00416DE0[4];
-extern const SceneSlotCoordinate D_00416DF0[8];
-extern const SceneSlotCoordinate D_00416E50[8];
 extern void func_001CDD38(EffectSlotSet *resource, s32 slot, s32 x, s32 y,
                           s32 bank, s32 index, s32 mode);
 extern void fldScaleSceneCoordinateRecord(EffectSlotSet *resource, s32 slot);
 
 /* Draw enabled bank-selected slot-order sprites with their current colors and scales. */
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416DE0);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416DF0);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416E50);
-
 void btlDrawActorSlotOrder(void) {
-    u32 colors[4];
-    SceneSlotCoordinate bankOneCoordinates[8];
-    SceneSlotCoordinate bankZeroCoordinates[8];
+    u32 colors[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
+    SceneSlotCoordinate bankOneCoordinates[8] = {
+        { 437, 11, 0 },
+        { 406, 30, 1 },
+        { 375, 11, 2 },
+        { 344, 30, 0 },
+        { 313, 11, 1 },
+        { 282, 30, 2 },
+        { 251, 11, 0 },
+        { 220, 30, 1 }
+    };
+    SceneSlotCoordinate bankZeroCoordinates[8] = {
+        { 437, 11, 3 },
+        { 406, 30, 4 },
+        { 375, 11, 5 },
+        { 344, 30, 3 },
+        { 313, 11, 4 },
+        { 282, 30, 5 },
+        { 251, 11, 3 },
+        { 220, 30, 4 }
+    };
     s32 slotCount;
     const SceneSlotCoordinate *coordinates;
     s32 bank;
@@ -8151,10 +8169,6 @@ void btlDrawActorSlotOrder(void) {
     s32 channel;
     s32 xOffset;
     s32 yOffset;
-
-    memcpy(colors, D_00416DE0, sizeof(colors));
-    memcpy(bankOneCoordinates, D_00416DF0, sizeof(bankOneCoordinates));
-    memcpy(bankZeroCoordinates, D_00416E50, sizeof(bankZeroCoordinates));
 
     xOffset = 0;
     yOffset = 0;
@@ -8854,7 +8868,20 @@ void fldDestroySceneTasksAndBuffers(void) {
     sdfReleaseChipBlock(btlTrackedTaskHandles);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416FA0);
+const s32 D_00416FA0[10][3] __attribute__((section(".rodata"), aligned(8))) = {
+    { 382, 28, 9 },
+    { 351, 46, 9 },
+    { 321, 28, 9 },
+    { 289, 46, 9 },
+    { 259, 28, 9 },
+    { 227, 46, 9 },
+    { 198, 28, 9 },
+    { 165, 46, 9 },
+    { 134, 46, 9 },
+    { 103, 46, 9 }
+};
+
+const char D_00417018[] __attribute__((section(".rodata"), aligned(8))) = "btl_panel__";
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368B0);
 

@@ -8,6 +8,7 @@
 #include "common.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
 #include "sdf_packet_header.h"
@@ -486,7 +487,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     }
 }
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
@@ -496,7 +497,7 @@ void evtSubmitPrimaryFramePacket(void) {
     SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES), framePacket, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), framePacket, 0);
     sdfAppendDmaTagToList(list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -511,7 +512,7 @@ void evtSubmitAlternateFramePacket(void) {
     SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES), framePacket, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), framePacket, 0);
     sdfAppendDmaTagToList(list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -1626,7 +1627,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
 
 extern void sdfDrawHeapMapOverlay(void *, s32, s32);
-extern void func_003014F0(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];
 
@@ -1644,10 +1645,10 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     sdfDrawHeapMapOverlay(packetList, 0x86C0, 0x79C0);
-    func_003014F0(statusText, D_003BA980, generalHeapStats.freeBytes);
+    sprintf(statusText, D_003BA980, generalHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText)));
-    func_003014F0(statusText, D_003BA988, chipHeapStats.freeBytes);
+    sprintf(statusText, D_003BA988, chipHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText)));
     surface->append(surface, packetList);

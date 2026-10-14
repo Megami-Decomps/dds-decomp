@@ -43,7 +43,7 @@
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 extern s32 dds3AdminGetActiveMode(void);
 extern void dds3AdminSetControlFlag(void);
-extern void func_003003F0(const char *);
+extern void sdfDebugPrintf(const char *);
 
 extern u32 itfFontTestScriptTask;
 extern u32 D_003BB18C;
@@ -1581,7 +1581,7 @@ void mnuReportCampProcessHalted(void) {
     if (dds3AdminGetActiveMode() != 5) {
         dds3AdminSetControlFlag();
     }
-    func_003003F0(D_003A13F0);
+    sdfDebugPrintf(D_003A13F0);
 }
 
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_header.h"
 #include "eff_object_node.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
@@ -135,13 +136,13 @@ extern f32 D_003BC9A8;
 
 extern char D_003BD080[];
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern u8 D_003BD078[];
 
 extern u8 D_003BCF30[];
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern u32 D_003BD064;
 
@@ -172,7 +173,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 ke
     u32 allocation;
     EffectSlotSet *instance;
 
-    func_003014F0(path, D_003BD198, base, name);
+    sprintf(path, D_003BD198, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
@@ -204,13 +205,13 @@ void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
     filePollEntryCleanup(job);
 }
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 /* Clear the output first; only mode one selects the retained-allocation completion path. */
 void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 *outInstance) {
     char path[EFF_RESOURCE_PATH_BYTES];
 
-    func_003014F0(path, D_003BD198, base, name);
+    sprintf(path, D_003BD198, base, name);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
         fileCreateCallbackRequest(path, 0, (u32)effCompleteRetainedResourceJob, (u32)outInstance);
@@ -226,7 +227,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     EffMappedResource *mappedResource;
     u32 allocation;
 
-    func_003014F0(path, D_003BD198, base, name);
+    sprintf(path, D_003BD198, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
@@ -251,7 +252,7 @@ void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResourc
 void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource) {
     char path[EFF_RESOURCE_PATH_BYTES];
 
-    func_003014F0(path, D_003BD198, base, name);
+    sprintf(path, D_003BD198, base, name);
     *outMappedResource = 0;
     fileCreateCallbackRequest(path, 0, (u32)effCompleteMappedResourceJob, (u32)outMappedResource);
 }
@@ -972,7 +973,6 @@ typedef union EffSpriteColor {
 #include "sdf_packet_alloc.h"
 extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);

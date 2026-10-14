@@ -33,7 +33,7 @@ extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
@@ -41,7 +41,7 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
-extern void func_00196088(s32, s32, FrFontGlyph *);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 extern char D_003BC6F0[], D_003BC6F8[];
 extern char D_003BC700[];
 
@@ -604,7 +604,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
         } else {
             glyph = itfCreateConvertedTextGlyph(
                 0x640, 0xBE8, 0, color, name, 0);
-            func_00196088(0xD20, 0xBE8, glyph);
+            frFontCenterGlyphChainAt(0xD20, 0xBE8, glyph);
             frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
@@ -1279,7 +1279,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     if (dim != 0) {
         color = uiBlendColors(color, color & 0xFFFFFF00, 0x80);
     }
-    func_003014F0(text, D_003BC700, value);
+    sprintf(text, D_003BC700, value);
     glyph = func_001978E8(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
     frFontSetChildChainFirstOption(glyph, chainFlag);

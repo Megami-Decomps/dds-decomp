@@ -63,9 +63,9 @@ extern s32 D_003BC5C8;
 extern u8 D_003D9178[];
 
 
-extern s32 func_003014F0(char *dst, const char *fmt, ...);
+extern s32 sprintf(char *dst, const char *fmt, ...);
 
-extern s32 func_003003F0(const char *fmt, ...);
+extern s32 sdfDebugPrintf(const char *fmt, ...);
 
 extern u32 D_003BC5B0[2];
 
@@ -423,7 +423,7 @@ void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex) {
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
         break;
     }
-    func_003014F0(soundPath, D_003AFCF0, D_00377350[soundEntryIndex].filename);
+    sprintf(soundPath, D_003AFCF0, D_00377350[soundEntryIndex].filename);
     mnuStoreTaskResult(soundPath);
     SignalSema(mnuTitleStreamSemaphore);
 }
@@ -463,7 +463,7 @@ void mnuTitleStreamUpdateAndLogBgm(void) {
         mnuTitleStreamStatus.loadState = MNU_STREAM_COMMIT_READY;
         *(u32 *)D_003D9178 = 0;
     }
-    func_003003F0("----------- AT3 BGM Play ------------\n");
+    sdfDebugPrintf("----------- AT3 BGM Play ------------\n");
     SignalSema(mnuTitleStreamSemaphore);
 }
 
@@ -576,7 +576,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     bufferAddress = sdfMemoryGetBlockAddress(allocation);
     mnuTitleSoundBufferState.allocation = allocation;
     mnuTitleSoundBufferState.compressedData = (u8 *)bufferAddress;
-    func_003014F0(soundPath, D_003AFCF0, D_00377650[soundEntryIndex].filename);
+    sprintf(soundPath, D_003AFCF0, D_00377650[soundEntryIndex].filename);
     mnuLoadTitleStreamFrameData(soundPath, &mnuTitleSoundBufferState);
     func_002F7628(D_003DA1A8);
     SignalSema(mnuTitleStreamSemaphore);
@@ -649,7 +649,7 @@ void mnuPrintTitleDebugBanner(void) {
     if (mnuTitleSoundBufferState.control != 1) {
         mnuTitleSoundBufferState.control = 0;
     }
-    func_003003F0(D_003AFD48);
+    sdfDebugPrintf(D_003AFD48);
     SignalSema(mnuTitleStreamSemaphore);
 }
 

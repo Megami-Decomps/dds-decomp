@@ -33,6 +33,7 @@
 #include "mdl_asset_request.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "file_manager_api.h"
 #include "btl_group_id_entry.h"
 #include "mdl_grouped_parts_api.h"
 #include "mdl_done_job.h"
@@ -256,7 +257,6 @@ extern u8 sdfViewMatrix[];
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 
@@ -368,7 +368,6 @@ void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
 }
 
 extern s32 btlGroupContainsId(s32 group, s32 id);
-extern s32 fileManUpdate(void);
 
 BattleGroupNode *mdlWaitGroupThenFind(s32 group, s32 id) {
     while (btlGroupContainsId(group, id)) {

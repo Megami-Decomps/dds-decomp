@@ -76,7 +76,7 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
-extern void func_00196088(s32, s32, FrFontGlyph *);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 typedef struct MenuListNode MenuListNode;
@@ -190,7 +190,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) 
     }
 }
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern const char D_003BC718[];
 
@@ -222,7 +222,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
                                                 (const u8 *)node->value, NULL);
             frFontSetChildChainFirstOption(glyph, chainFlag);
             if ((list->id & 1) != 0) {
-                func_003014F0(text, D_003BC718,
+                sprintf(text, D_003BC718,
                               (s32)node->sortKeyPrimary);
                 glyph = func_001978E8(x + 0x1180, textY + 0x20, depth,
                                       color, text, glyph);
@@ -2089,7 +2089,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 evtGetIndexedEventRecordId(s32);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern u8 *D_003BAA84;
 extern char D_003BC720[];
 extern u8 D_003BC730[];
@@ -2115,7 +2115,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     } while (i < 2);
     if (value != 0) {
         glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
-        func_003014F0(text, D_003BC720, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
+        sprintf(text, D_003BC720, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
         glyph = func_001978E8(x + 0xF70, y + 0x348, z, color, text, glyph);
     } else {
         glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
@@ -2183,7 +2183,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             return;
         }
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
-        func_00196088(0x1710, 0x5F0, glyph);
+        frFontCenterGlyphChainAt(0x1710, 0x5F0, glyph);
         frFontDrawGlyphChain(glyph, 1, param);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
@@ -2207,7 +2207,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
             slot->iconBundle->fade);
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
-            func_003014F0(text, D_003BC740, remainingExp);
+            sprintf(text, D_003BC740, remainingExp);
             glyph = func_001978E8(x + 0xDF0,
                 0x160, depth, color, text, 0);
             frFontDrawGlyphChain(glyph, 1, surface);

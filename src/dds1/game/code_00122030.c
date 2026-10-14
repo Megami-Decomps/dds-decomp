@@ -610,7 +610,7 @@ extern u64 D_003BAB98[], D_003BABA0[], D_003BABA8[], D_003BABB0[];
 
 extern u8 D_0032F240[];
 
-extern void func_003003F0(void *);
+extern void sdfDebugPrintf(void *);
 
 extern void fldInitDisplayObjects(void);
 
@@ -627,23 +627,23 @@ extern void fldLoadBattleSkyAndFilter(void);
 extern void fldResetSceneResourceTables(void);
 
 void fldInitializeDisplayAndTables(void) {
-    func_003003F0(D_003BAB70);
+    sdfDebugPrintf(D_003BAB70);
     fldInitDisplayObjects();
-    func_003003F0(D_003BAB78);
+    sdfDebugPrintf(D_003BAB78);
     fldResetPlayerSceneTransformState();
-    func_003003F0(D_003BAB80);
+    sdfDebugPrintf(D_003BAB80);
     fldResetPendingSounds();
-    func_003003F0(D_003BAB88);
+    sdfDebugPrintf(D_003BAB88);
     effMiscSeedRandom(D_0032F240, 0x1e240);
-    func_003003F0(D_003BAB90);
+    sdfDebugPrintf(D_003BAB90);
     fldParseMixLb();
-    func_003003F0(D_003BAB98);
+    sdfDebugPrintf(D_003BAB98);
     fldLoadBattleSkyAndFilter();
-    func_003003F0(D_003BABA0);
+    sdfDebugPrintf(D_003BABA0);
     fldResetSceneResourceTables();
-    func_003003F0(D_003BABA8);
+    sdfDebugPrintf(D_003BABA8);
     fldLoadFieldTables();
-    func_003003F0(D_003BABB0);
+    sdfDebugPrintf(D_003BABB0);
 }
 
 void fldResetPlayerSceneTransformState(void) {

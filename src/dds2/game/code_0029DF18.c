@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_string_parameter_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "mnu_sound_resource_path_api.h"

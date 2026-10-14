@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import check_unit
+from symbol_aliases import SymbolAlias
 
 from check_unit import (
     address,
@@ -18,6 +19,7 @@ from check_unit import (
     bss_ownership_problems,
     bss_symbols,
     common_symbols,
+    initialized_data_problems,
     nobits_ownership_problems,
     nobits_symbols,
     owned_bss_range,
@@ -287,6 +289,52 @@ segments:
             (0x10, 0x30, "fileManagerSlots", True),
         ]
         self.assertEqual(self.ownership_problems(emitted), [])
+
+    def test_explicit_native_extent_excludes_alignment_gap(self):
+        emitted = [(0, 0xC, "fileManagerHead", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        self.assertEqual(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            explicit_sizes={"fileManagerHead": 0xC}), [])
+        self.assertTrue(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms))
+
+    def test_explicit_native_extent_must_fit_its_address_interval(self):
+        emitted = [(0, 0x10, "fileManagerHead", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        for size in (0, -1, 0x11):
+            with self.subTest(size=size):
+                self.assertTrue(nobits_ownership_problems(
+                    self.YAML, "file/fileManager", ".bss", 0x40,
+                    emitted, syms, explicit_sizes={"fileManagerHead": size}))
+
+    def test_same_address_names_share_one_explicit_extent(self):
+        emitted = [(0, 0xC, "fileManagerHead", True),
+                   (0, 0xC, "headAlias", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658, "headAlias": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        self.assertEqual(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            explicit_sizes={"fileManagerHead": 0xC}), [])
+        self.assertTrue(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            explicit_sizes={"fileManagerHead": 0xC, "headAlias": 0x10}))
+
+    def test_interior_alias_cannot_enter_alignment_gap(self):
+        emitted = [(0, 0xC, "fileManagerHead", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        alias = SymbolAlias("gapAlias", "fileManagerHead", "file/fileManager",
+                            ".bss", 0xC, 0x003DC664)
+        self.assertTrue(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            (alias,), {"fileManagerHead": 0xC}))
 
     def test_absolute_linker_gp_does_not_split_owned_objects(self):
         emitted = [
@@ -615,6 +663,104 @@ class SectionOwnershipTests(unittest.TestCase):
             definitions, syms, 0, 0x003BC7D8), 8)
         self.assertIsNone(source_owned_item_size(
             definitions, syms, 0, 0x003BC7E0))
+
+
+class InitializedDataTests(unittest.TestCase):
+    ORIGIN = 0x00400000
+    RANGE = (0x1000, 0x1008)
+
+    def problems(self, *, section_range=RANGE, section_origin=ORIGIN,
+                 retail=b"\x01\x02\x03\x04\x05\x06\x07\x08",
+                 data=b"\x01\x02\x03\x04\x05\x06\x07\x08",
+                 definitions=((0, 8, "consoleUv"),), relocs=None,
+                 full_data=None, full_definitions=None, full_relocs=None,
+                 syms=None, section_bases=None):
+        if full_data is None:
+            full_data = data
+        if full_definitions is None:
+            full_definitions = definitions
+        if relocs is None:
+            relocs = {}
+        if full_relocs is None:
+            full_relocs = relocs
+        if syms is None:
+            syms = {"consoleUv": self.ORIGIN}
+        return initialized_data_problems(
+            section_range, section_origin, retail,
+            data, list(definitions), relocs, [],
+            full_data, list(full_definitions), full_relocs, [], syms,
+            section_bases or {})
+
+    def test_accepts_exact_object_and_native_payload(self):
+        self.assertEqual(self.problems(), [])
+
+    def test_resolves_native_supported_data_relocation(self):
+        native_pointer = struct.pack("<I", self.ORIGIN)
+        self.assertEqual(self.problems(
+            retail=native_pointer + b"\0" * 4, data=b"\0" * 4,
+            definitions=((0, 4, "consoleUv"),),
+            relocs={0: ("R_MIPS_32", ".data")},
+            full_data=b"\0" * 4, full_relocs={0: ("R_MIPS_32", ".data")},
+            syms={"consoleUv": self.ORIGIN},
+            section_bases={".data": self.ORIGIN}), [])
+
+    def test_rejects_unowned_or_ambiguous_yaml_extent(self):
+        self.assertTrue(any("no unambiguous YAML-owned" in p
+                            for p in self.problems(section_range=None)))
+
+    def test_rejects_unknown_or_misplaced_object(self):
+        unknown = self.problems(syms={})
+        self.assertTrue(any("no unambiguous native symbol" in p for p in unknown))
+        misplaced = self.problems(
+            definitions=((4, 4, "consoleUv"),),
+            full_definitions=((4, 4, "consoleUv"),),
+            data=b"\0" * 4 + b"\x05\x06\x07\x08",
+            full_data=b"\0" * 4 + b"\x05\x06\x07\x08")
+        self.assertTrue(any("does not match native address" in p for p in misplaced))
+
+    def test_rejects_ambiguous_or_overlapping_object_inventory(self):
+        duplicate = self.problems(
+            definitions=((0, 4, "consoleUv"), (4, 4, "consoleUv")),
+            full_definitions=((0, 4, "consoleUv"), (4, 4, "consoleUv")))
+        self.assertTrue(any("duplicate STT_OBJECT names" in p for p in duplicate))
+        overlap = self.problems(
+            definitions=((0, 8, "consoleUv"), (0, 4, "otherUv")),
+            full_definitions=((0, 8, "consoleUv"), (0, 4, "otherUv")),
+            syms={"consoleUv": self.ORIGIN, "otherUv": self.ORIGIN})
+        self.assertTrue(any("overlapping STT_OBJECT" in p for p in overlap))
+
+    def test_rejects_overlong_or_different_payload(self):
+        overlong = self.problems(
+            data=b"\x01" * 12, full_data=b"\x01" * 12,
+            definitions=((0, 12, "consoleUv"),),
+            full_definitions=((0, 12, "consoleUv"),))
+        self.assertTrue(any("exceeds its 0x8-byte" in p for p in overlong))
+        changed = self.problems(data=b"\x09\x02\x03\x04\x05\x06\x07\x08")
+        self.assertTrue(any("bytes/relocations differ" in p for p in changed))
+
+    def test_rejects_unowned_bytes_and_unresolvable_relocations(self):
+        unowned = self.problems(
+            definitions=((0, 4, "consoleUv"),),
+            full_definitions=((0, 4, "consoleUv"),),
+            data=b"\x01\x02\x03\x04\x00\x00\x00\x09",
+            full_data=b"\x01\x02\x03\x04\x00\x00\x00\x09")
+        self.assertTrue(any("unowned nonzero byte" in p for p in unowned))
+        unresolved = self.problems(
+            data=b"\0" * 8,
+            relocs={0: ("R_MIPS_32", "missingTable")},
+            full_data=b"\0" * 8,
+            full_relocs={0: ("R_MIPS_32", "missingTable")})
+        self.assertTrue(any("unresolved R_MIPS_32" in p for p in unresolved))
+        unsupported = self.problems(
+            relocs={0: ("R_MIPS_26", "consoleUv")},
+            full_relocs={0: ("R_MIPS_26", "consoleUv")})
+        self.assertTrue(any("unsupported R_MIPS_26" in p for p in unsupported))
+
+    def test_requires_same_full_unit_object_extent(self):
+        problems = self.problems(
+            full_definitions=((0, 4, "consoleUv"),),
+            full_data=b"\x01\x02\x03\x04\0\0\0\0")
+        self.assertTrue(any("STT_OBJECT inventories differ" in p for p in problems))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 #include "sdf_gs_header.h"
+#include "sdf_packet_header.h"
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_frame_draw_buffer.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -465,7 +467,6 @@ extern u8 sdfProjectionMatrix[];
 
 extern u8 D_0037F660[];
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
 
 extern u32 D_00389904[];
 
@@ -542,13 +543,12 @@ extern void *sdfConsAllocateColumnPacket(s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
 extern u32 kwlnGetDrawBufferIndex(void);
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
@@ -2618,7 +2618,7 @@ void fldSubmitPrimaryFramePacket(void) {
     SdfPoolNode *descriptor;
     sdfInitPacketList(command);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
     sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -2630,7 +2630,7 @@ void fldSubmitAlternateFramePacket(void) {
     SdfPoolNode *descriptor;
     sdfInitPacketList(command);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
     sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -2704,7 +2704,7 @@ void fldSubmitTexturedOverlaySprite(void) {
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
     sdfAppendDmaPrimary(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
+                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     /* Set texture alpha and flush the texture cache. */
@@ -2769,7 +2769,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
     sdfAppendDmaPrimary(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
+                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     firstPacket = (u64 *)sdfAllocPacketAligned(0x40);
@@ -2839,7 +2839,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
     sdfAppendDmaPrimary(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
+                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
@@ -3251,7 +3251,7 @@ void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
     SdfPoolNode *descriptor;
 
     sdfAppendDmaPrimary(list,
-        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+        (u32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), reference);
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
     texturePacket[0] = 3;
     texturePacket[1] = 0x5000000310000000ULL;
@@ -3605,6 +3605,7 @@ extern void fldSetCameraObjectHighlightFlag(void);
 extern void fldClearSceneModelColors(void);
 extern void fldMarkPrimaryObjectByPeerPresence(void);
 extern void fldClearCameraObjectTransitionFlags(void);
+extern void fldClearCameraObjectHighlightFlag(void);
 
 extern u8 fldTestSceneControlFlags(u32 mask);
 
@@ -4036,8 +4037,49 @@ void fldUpdateCameraTarget(void) {
 /* ASM mode-1 path: save previous XYZ, consume positionPending, and wrap degree angles. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00131B50);
 
-/* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_001321F8);
+/* Signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
+/* Publish the vertical step to field state, then rebuild the object vector.
+ * Each branch-local SDK snapshot dominates all of its scalar reads; there is
+ * no earlier scratch read or loop-carried value. The finite qualification
+ * and memory-contract limitation are documented in docs/idioms.md. */
+s32 func_001321F8(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    if (fldAreaState.verticalStepDirection > 0) {
+        effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        fldAreaState.previousX = fldAreaState.x;
+        fldAreaState.previousY = fldAreaState.y;
+        fldAreaState.previousZ = fldAreaState.z;
+        fldAreaState.x = position[0];
+        fldAreaState.y = position[1] - 2.0f;
+        fldAreaState.z = position[2];
+        position[0] = fldAreaState.x;
+        position[1] = fldAreaState.y;
+        position[2] = fldAreaState.z;
+        effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        fldClearCameraObjectTransitionFlags();
+        fldClearCameraObjectHighlightFlag();
+    } else if (fldAreaState.verticalStepDirection < 0) {
+        effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        fldAreaState.previousX = fldAreaState.x;
+        fldAreaState.previousY = fldAreaState.y;
+        fldAreaState.previousZ = fldAreaState.z;
+        fldAreaState.x = position[0];
+        fldAreaState.y = position[1] + 2.0f;
+        fldAreaState.z = position[2];
+        position[0] = fldAreaState.x;
+        position[1] = fldAreaState.y;
+        position[2] = fldAreaState.z;
+        effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        fldClearCameraObjectTransitionFlags();
+        fldClearCameraObjectHighlightFlag();
+    } else {
+        return 0;
+    }
+    return 0;
+}
+
 
 extern void mnuResetTitleStreamAfterFileIdle(void);
 
@@ -4130,7 +4172,6 @@ s32 fldUpdateAreaDamageReaction(void) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00132540);
 
 extern u32 fldGetSceneReadyFlag(void);
-extern void fldClearCameraObjectHighlightFlag(void);
 extern s32 func_001321F8(void);
 extern void func_00131B50(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);

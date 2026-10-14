@@ -3,6 +3,7 @@
 #include "sdf_pac_state.h"
 #include "file_request_api.h"
 #include "sdf_dev_state.h"
+#include "file_manager_api.h"
 #include "file_manager_views.h"
 
 /* Intrusive list node threaded through +0x4. */

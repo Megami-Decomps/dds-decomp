@@ -1,6 +1,8 @@
 #include "eff_packet_params.h"
+#include "sdf_packet_header.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
@@ -16,7 +18,7 @@
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern SdfTex *kwlnTextureGetHeldReference(void);
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00324B88;
 extern SdfPoolNode D_00325588;
 
@@ -24,7 +26,6 @@ extern BillDispatch billObjectCallbacks[];
 
 extern BillDispatch D_0034E654[];
 extern BillDispatch effBillConstructorEntries[];
-extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void (*D_0034E680[])();
@@ -36,7 +37,7 @@ extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 extern s32 kwlnTextureSetReferenceFlagIfPresent();
 extern void kwlnTextureClearReferenceFlag(void);
 extern void kwlnTextureReleaseHeldReference(void);
-extern void func_003003F0(const char *, ...);
+extern void sdfDebugPrintf(const char *, ...);
 extern f32 D_00324850[];
 extern f32 D_00324860[];
 extern u8 D_00325870[];
@@ -440,7 +441,7 @@ void dds3StartCrossfade(s32 frames) {
         D_003BB020 = frames;
         D_003BB018 = 1;
         D_003BB01C = 0;
-        func_003003F0("dds3CrossfadeStart\n");
+        sdfDebugPrintf("dds3CrossfadeStart\n");
     }
 }
 
@@ -466,7 +467,7 @@ void dds3UpdateCrossfade(void) {
         sdfInitPacketList(list);
         reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
         sdfAppendDmaPrimary(list,
-            (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40),
+            (u32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes),
             reference);
         texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
         texturePacket[0] = 3;
@@ -542,7 +543,7 @@ void dds3EndCrossfade(void) {
     kwlnTextureClearReferenceFlag();
     kwlnTextureReleaseHeldReference();
     D_003BB018 = 0;
-    func_003003F0(D_003A0D70);
+    sdfDebugPrintf(D_003A0D70);
 }
 
 extern void *memcpy(void *dst, const void *src, u32 size);

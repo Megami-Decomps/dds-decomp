@@ -884,7 +884,38 @@ void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
 
 
 /* The genuine three-row typed candidate remains non-matching. */
-INCLUDE_ASM(const s32, "game/code_0025DA20", fldApplyCameraColorKeyWords);
+void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source) {
+    FldCameraSetting setting;
+    s32 i;
+
+    fldCopyCameraSetting(&setting);
+    setting.color.vectorZ = source->x;
+    setting.color.red = source->w[0];
+    setting.color.green = source->w[1];
+    setting.color.blue = source->w[2];
+    setting.color.vectorY = source->w[3];
+    setting.color.mode = source->flagWord;
+    /* Copy the z/y banks into columns 1 and 2 of the three value rows. */
+    {
+        u8 *destinationA = (u8 *)&setting + 8;
+        const u8 *sourceA = (const u8 *)source + 0x0C;
+        u8 *destinationB = (u8 *)&setting + 0x0C;
+        s32 sourceOffset = 0x20;
+        s32 destinationOffset = 0x20;
+        for (i = 2; i >= 0; i--) {
+            *(s32 *)(destinationA + destinationOffset) = *(const s32 *)(sourceA + sourceOffset);
+            *(s32 *)(destinationB + destinationOffset) = *(const s32 *)((const u8 *)source + sourceOffset);
+            sourceOffset += 4;
+            destinationOffset += 0x10;
+        }
+    }
+    fldUpdateCameraColorEffect(&setting);
+    if (source->w[3] == 0 && source->z[0] == 0 && source->z[1] == 0 && source->z[2] == 0) {
+        viewer->cameraColorActive = 0;
+    } else {
+        viewer->cameraColorActive = 1;
+    }
+}
 
 void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
     evtApplyCameraColorTrackAtFrame(scene);
@@ -1631,7 +1662,7 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BC0);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BD0);
 
-void func_00260708(const s32 *stockGroup) {
+void mnuCreateCampShopPopupTasks(const s32 *stockGroup) {
     MenuTerminalContext *scene = mnuTerminalCreateContext();
     KwlnTask *drawTask;
     KwlnTask *fadeTask;
@@ -3153,14 +3184,14 @@ s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
     return dispatchResult;
 }
 
-s32 func_002633F0(KwlnTask *callbackContext) {
+s32 evtStartProgressResultPrimaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtAdvanceProgressResultMessage(KwlnTask *callbackContext) {
+s32 evtStartProgressResultSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3185,14 +3216,14 @@ s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
     return dispatchResult;
 }
 
-s32 func_00263658(KwlnTask *callbackContext) {
+s32 mnuStartTerminalPanelPrimaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtAdvanceTerminalPanelMessage(KwlnTask *callbackContext) {
+s32 mnuStartTerminalPanelSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3447,7 +3478,7 @@ s32 evtIsAllowedId(s32 itemId) {
 }
 
 /* Add progress, treating zero as one. The unsigned check also clamps negative totals. */
-s32 evtAddProgressTotal(s32 progressDelta) {
+s32 evtApplyShopProgressDelta(s32 progressDelta) {
     if (progressDelta == 0) {
         progressDelta = 1;
     }
@@ -3481,7 +3512,7 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
             datGameState->inventory.counts[itemId] += state->multiplier;
         }
         if (!evtIsAllowedId(itemId)) {
-            evtAddProgressTotal(total / 100);
+            evtApplyShopProgressDelta(total / 100);
         }
         break;
     case 4:
@@ -3490,7 +3521,7 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
         if (itemId == 0x54) {
             mdlFlagClear(0xA20);
         }
-        evtAddProgressTotal(total / 100);
+        evtApplyShopProgressDelta(total / 100);
         break;
     }
     values->value = values->price;

@@ -1721,7 +1721,7 @@ typedef struct BtlActorStateSnapshot {
 
 extern BtlActorStateSnapshot D_003D73F0[3];
 
-extern s32 func_003003F0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 /* Snapshot active party actors for the later party-slot restoration pass. */
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A18F8);
@@ -1745,7 +1745,7 @@ void btlPushSavedPartyUnitStates(void) {
                        sizeof(D_003D73F0[count].entrySlots));
                 D_003D73F0[count].status = unit->partyRecord.status & 0xEFF9;
                 count++;
-                func_003003F0("btl:state push[%d:%X]\n", count,
+                sdfDebugPrintf("btl:state push[%d:%X]\n", count,
                               unit->partyRecord.unitId);
             }
         }
@@ -1781,7 +1781,7 @@ void btlRestorePartySlotSnapshots(void) {
                             unit->status.flags |= 0x20;
                             unit->partyRecord.hp = 0;
                         }
-                        func_003003F0("btl:state pos[%d:%X]\n", slot, unit->partyRecord.unitId);
+                        sdfDebugPrintf("btl:state pos[%d:%X]\n", slot, unit->partyRecord.unitId);
                         break;
                     }
                 }

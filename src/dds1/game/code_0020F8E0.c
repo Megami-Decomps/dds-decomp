@@ -6,14 +6,14 @@
 #include "kwln.h"
 #include "scr.h"
 
-extern void func_003014F0(char *, const char *, const char *, s32);
+extern void sprintf(char *, const char *, const char *, s32);
 s32 btlFindScriptResource(char *name) {
     char path[128];
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (battle->scriptHandle == 0) {
         return -1;
     }
-    func_003014F0(path, "e%03d_%s", battle->eventTaskId, name);
+    sprintf(path, "e%03d_%s", battle->eventTaskId, name);
     return bfFindScriptIndexByName(battle->scriptHandle, path);
 }
 
