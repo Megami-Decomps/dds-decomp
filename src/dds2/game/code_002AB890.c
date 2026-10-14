@@ -3,6 +3,7 @@
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_item_requirement_api.h"
 #include "mnu_shop.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -25,7 +26,6 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridEntry(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 
-extern u8 mnuGetItemRequirementCount(s32 index);
 
 
 void mnuDrawStaffBulletItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
