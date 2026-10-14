@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_debug_panel_work.h"
 #include "snd_pad_step.h"
 #include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
@@ -1096,14 +1097,7 @@ s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f3
     return 0;
 }
 
-typedef struct ItfBlurPanelWork {
-    s16 editing;
-    s16 selection;
-    u32 blink;
-    u8 pad08[8];
-} ItfBlurPanelWork;
-
-extern ItfBlurPanelWork D_003D73D0;
+extern ItfDebugPanelWork D_003D73D0;
 extern const char *D_00358348[6];
 extern s32 D_003BA910[2];
 extern u8 kwlnDrawOverlayEnabled;
