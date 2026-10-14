@@ -10,9 +10,6 @@
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 
-extern s32 mnuUseStaffItem(s32, s32);
-
-
 extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void mnuCreateStaffItemWindow(StaffDisplayContext *);
@@ -162,8 +159,8 @@ extern void mnuRemoveWindowListCursorNode(MenuWindowContainer *);
 
 /* Refresh the bullet-item window if inventory is empty; return whether the
  * window still has entries. */
-s32 mnuIsStaffWindowReadyForItem(s32 itemId, s32 context) {
-    StaffWindowResources *resources = ((StaffDisplayContext *)context)->resources;
+s32 mnuIsStaffWindowReadyForItem(s32 itemId, StaffDisplayContext *context) {
+    StaffWindowResources *resources = context->resources;
 
     if (((SaveItemCounts *)datGameState)->counts[itemId & 0xFFFF] == 0) {
         mnuRemoveWindowListCursorNode(resources->windows[0]);
@@ -395,9 +392,9 @@ extern void mnuUpdatePartyPanelPercentDisplays(s32);
 /* Use a field item: resolve its direct effect (or field-use skill) against the
  * active unit row; on success consume one from the inventory and refresh the
  * party panels. Returns 1 when the item was consumed. */
-s32 mnuUseStaffItem(s32 itemId, s32 context) {
-    s32 partyPanel = context + 0x15C;
-    s32 targetUnit = (s32)&datGameState->party[((StaffDisplayContext *)context)->selectionList->cursor->index];
+s32 mnuUseStaffItem(s32 itemId, StaffDisplayContext *context) {
+    s32 partyPanel = (s32)context + 0x15C;
+    s32 targetUnit = (s32)&datGameState->party[context->selectionList->cursor->index];
     s32 result = btlItemApplyDirectEffect((MenuPageWindow *)partyPanel, itemId & 0xFFFF,
                                          targetUnit, (DatPartyRecord *)targetUnit);
 
@@ -410,7 +407,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
         }
     }
     ptyAdjustItemQuantity(itemId, -1);
-    mnuInitPartyPanelSlots(&((StaffDisplayContext *)context)->partyPanel);
+    mnuInitPartyPanelSlots(&context->partyPanel);
     mnuUpdateHandleStates((MenuPageWindow *)partyPanel);
     mnuUpdatePartyPanelPercentDisplays(partyPanel);
     return 1;
@@ -419,11 +416,11 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
 extern void mnuSetStateValue(u32 *, u32);
 
 /* On successful item use, publish the remaining count and record the selected item. */
-void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
+void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
     StaffWindowResources *resources;
     s32 consumed;
 
-    resources = ((StaffDisplayContext *)context)->resources;
+    resources = context->resources;
     consumed = mnuUseStaffItem(selection, context);
     if (consumed != 0) {
         resources->windows[0]->list->cursor->sortKeyPrimary =
@@ -466,7 +463,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
                 if (node->flags48 == 0) {
                     item = node->sortKeySecondary;
                     if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
-                        mnuRefreshStaffItemSelection(item, (s32)context);
+                        mnuRefreshStaffItemSelection(item, context);
                     } else {
                         mnuSetPopupEntry(popup, (void *)D_0037CA1C);
                     }

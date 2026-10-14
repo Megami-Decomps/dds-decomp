@@ -49,6 +49,10 @@ struct KwlnTask;
 u32 mnuHasSelectedListNodeId(struct KwlnTask *callback);
 #ifdef VERSION_DDS1
 void mnuClearListFlags(s32 which, MenuPageWindow *page);
+struct StaffDisplayContext;
+s32 mnuUseStaffItem(s32 itemId, struct StaffDisplayContext *context);
+s32 mnuIsStaffWindowReadyForItem(s32 itemId,
+                                 struct StaffDisplayContext *context);
 #endif
 
 #ifdef VERSION_DDS2
