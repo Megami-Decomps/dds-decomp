@@ -1,5 +1,6 @@
 #include "ee_mmi.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -62,7 +63,6 @@ extern BattleGroupIdEntry *btlGroupIdHeads[];
 
 extern void mdlDestroyPartList(DevRequest *);
 
-extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Create the model-job semaphore and clear both lists for all eight groups. */
 void btlInitializeCommandSemaphoreSlots(void) {
@@ -664,7 +664,6 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
 
 extern void mdlDestroyResourceItem(MdlResourceItem *);
 
-extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Destroy motions, resources, device slots and the context itself. Motion
  * destruction must unlink inner->motionList; save each resource's next link before

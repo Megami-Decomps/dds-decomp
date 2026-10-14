@@ -4,6 +4,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
@@ -1743,7 +1744,6 @@ extern void fldReleaseIndexedResourceEffect();
 
 extern void mnuReleaseResourceEntries();
 
-extern void sdfResourceListRelease();
 
 extern u32 D_00444930[];
 

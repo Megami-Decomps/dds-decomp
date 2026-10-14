@@ -1,6 +1,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "mdl_resource_table.h"
@@ -161,7 +162,6 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevR
 
 extern void mdlDestroyPartList(DevRequest *);
 
-extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Capture ownership before clearing it for callbacks; keep the context-release
  * loop and resource-release order intact. NULL is allowed. */
@@ -634,7 +634,6 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
 }
 
 extern void mdlDestroyResourceItem(MdlResourceItem *);
-extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Destroy motions, resources, device slots and the context itself. Motion
  * destruction must unlink inner->motionList; save each resource's next link before
