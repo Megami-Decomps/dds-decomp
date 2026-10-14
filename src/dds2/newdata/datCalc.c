@@ -1203,7 +1203,7 @@ void ptyCloneTemplateSevenToRosterUnitThree(DatPartyRecord *entry, s32 initFlags
 extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
 extern void ptySetSecondaryProfileFlag(DatPartyRecord *, u16);
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
-extern void func_00314868(DatPartyRecord *, u16);
+extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 extern void ptySetProfileRecordValue(DatPartyRecord *, u16, u32);
 extern void mtrSynchronizeMantraFlagsAcrossParty(void);
@@ -1254,7 +1254,7 @@ void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
             present = 1;
         }
         if (present) {
-            func_00314868(entry, index);
+            ptyApplyProfile(entry, index);
         }
         /* This merge compares the raw profile words as signed counters. */
         firstValue = ptyGetProfileRecordValue(&first, index);
