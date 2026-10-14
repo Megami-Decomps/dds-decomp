@@ -5,6 +5,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
 #include "kwln_draw_buffer.h"
 #include "eff_random.h"
@@ -2207,8 +2208,8 @@ extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
  * This counter still rejects 0xBF, although DDS2's bullet-ID predicate accepts it. */
-u32 ptyCountBulletItem(s32 bulletId) {
-    u32 totalCount;
+s32 ptyCountBulletItem(s32 bulletId) {
+    s32 totalCount;
     s32 partyIndex;
     if (bulletId < 0xA0) return 0;
     if (bulletId >= 0xBF) return 0;
