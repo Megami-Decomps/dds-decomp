@@ -541,7 +541,7 @@ extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlGetActionRecordLookupValue(s32);
 
-extern s32 func_001B17E8(BtlUnit *, BtlUnit *, s32);
+extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
@@ -785,7 +785,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 }
             }
         } else {
-            kind = func_001B17E8(source, target, command);
+            kind = btlResolveCommandHitResult(source, target, command);
             if (runtime->actionHitOverride != NULL) {
                 helperResult = runtime->actionHitOverride(source, target, command, kind);
                 if (helperResult != 0) {
@@ -823,7 +823,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 kind = btlGetActionRecordLookupValue(recipient->selectedEntryIndex);
                 group->sourceSpecialHit = 1;
             } else {
-                kind = func_001B17E8(action->unit, recipient, command);
+                kind = btlResolveCommandHitResult(action->unit, recipient, command);
                 group->sourceSpecialHit = 0;
             }
             if (datCommandRecords[command].flags & 2) {
