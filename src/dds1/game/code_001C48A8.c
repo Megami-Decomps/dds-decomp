@@ -1751,7 +1751,7 @@ s32 fldGetSceneGroupEntry(s32 entryIndex) {
     return *(s32 *)(fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group) + entryIndex * FLD_SCENE_GROUP_WORD_BYTES);
 }
 
-extern s32 func_001A8188(void);
+extern s32 btlResolveBattleTerminalOutcome(void);
 
 /* Advance one scene group task after both scene gates have opened. */
 void fldAdvanceSceneGroupScheduler(void) {
@@ -1766,7 +1766,7 @@ void fldAdvanceSceneGroupScheduler(void) {
             if ((scene->flags & 0x400) != 0) {
                 return;
             }
-            if (func_001A8188() != 0) {
+            if (btlResolveBattleTerminalOutcome() != 0) {
                 scene->flags |= 0x800;
                 return;
             }
