@@ -14,6 +14,7 @@ extern void func_0013DF60(const char *name);
 #include "eff_object.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
+#include "fld_activation_entry.h"
 
 
 
@@ -1098,34 +1099,26 @@ s32 fldSetFlagFromWorld2(void) {
     return 1;
 }
 
-typedef struct FldSceneParam {
-    s32 unk_0;
-    s16 unk_4;
-    s16 unk_6;
-    s32 unk_8;
-    s32 unk_c;
-} FldSceneParam;
-
-extern FldSceneParam D_0034C8F0[];
+extern FldActivationEntry D_0034C8F0[];
 
 s32 fldCmdPushSceneParam(void) {
     s32 room = fldFindRoomByTask((u32)scrGetCurrentContext()->task);
 
     switch (scrReadIntParameter(0)) {
     case 0:
-        scrSetIntegerReturnValue(D_0034C8F0[room].unk_0);
+        scrSetIntegerReturnValue(D_0034C8F0[room].selectedValue0);
         break;
     case 1:
-        scrSetIntegerReturnValue(D_0034C8F0[room].unk_4);
+        scrSetIntegerReturnValue(D_0034C8F0[room].selectedValue1);
         break;
     case 2:
-        scrSetIntegerReturnValue(D_0034C8F0[room].unk_6);
+        scrSetIntegerReturnValue(D_0034C8F0[room].selectedValue2);
         break;
     case 3:
-        scrSetIntegerReturnValue(D_0034C8F0[room].unk_8);
+        scrSetIntegerReturnValue(D_0034C8F0[room].selectedValue3);
         break;
     case 4:
-        scrSetIntegerReturnValue(D_0034C8F0[room].unk_c);
+        scrSetIntegerReturnValue(D_0034C8F0[room].selectedValue4);
         break;
     }
     return 1;
