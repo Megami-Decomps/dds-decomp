@@ -80,7 +80,7 @@ extern s32 EIntr(void);
 extern u16 D_003BD334;
 extern s32 D_003BD340;
 extern s8 D_003BDA05;
-extern u8 sdfCurrentBufferIndex;
+extern vu8 sdfCurrentBufferIndex;
 
 extern SdfPendingNode *sdfPendingQueueHead;
 extern s8 sdfPendingQueueRotationActive;

@@ -100,11 +100,11 @@ s32 sdfGraphWakeDisplayThread(s32 channel) {
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2E8);
+u8 D_003BD2E8 __attribute__((section(".sdata"))) = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2E9);
+u8 D_003BD2E9 __attribute__((section(".sdata"))) = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfCurrentBufferIndex);
+vu8 sdfCurrentBufferIndex __attribute__((section(".sdata"))) = 0;
 
 volatile s32 sdfGsImageUploadSemaphore __attribute__((section(".sdata"))) = 0;
 
