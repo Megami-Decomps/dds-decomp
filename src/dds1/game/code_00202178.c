@@ -760,9 +760,9 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern f32 btlGetActorEffectScale(BtlTask *);
 
-extern f32 func_002F9F60(f32);
+extern f32 cosf(f32);
 
-extern f32 func_002FA060(f32);
+extern f32 sinf(f32);
 
 extern f32 tanf(f32);
 
@@ -812,8 +812,8 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     VU0_STORE_VF(vf10, out->position);
     angle = ratio * 0.0f;
     angle += 0.6108652f;
-    width = extent + length * func_002FA060(angle);
-    length *= func_002F9F60(angle);
+    width = extent + length * sinf(angle);
+    length *= cosf(angle);
     length += width / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (command->flags & 0x200) {

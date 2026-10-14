@@ -1571,7 +1571,7 @@ extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern f32 tanf(f32);
-extern f32 func_00353140(f32);
+extern f32 sinf(f32);
 extern SdfAsset *D_00436D10;
 extern EffPacketParams D_00453030;
 extern u32 D_003BFB30[];
@@ -1710,7 +1710,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
                     if (influence > 1.0f) {
                         influence = 1.0f;
                     }
-                    angle = func_00353140(radius / waveRadius * 1.5707963f + phase);
+                    angle = sinf(radius / waveRadius * 1.5707963f + phase);
                     axis[0] = -directionY;
                     axis[1] = directionX;
                     axis[2] = 0.0f;

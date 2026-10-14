@@ -45,7 +45,7 @@ extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
-extern f32 func_002FA060(f32);
+extern f32 sinf(f32);
 
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
@@ -189,9 +189,9 @@ void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
     }
     if (angle < 0.95f) {
         angle = func_002FA1C0(angle);
-        firstWeight = func_002FA060(angle * (1.0f - fraction));
-        secondWeight = func_002FA060(angle * fraction);
-        denominator = func_002FA060(angle);
+        firstWeight = sinf(angle * (1.0f - fraction));
+        secondWeight = sinf(angle * fraction);
+        denominator = sinf(angle);
         out[0] = (from[0] * firstWeight + target[0] * secondWeight) / denominator;
         out[1] = (from[1] * firstWeight + target[1] * secondWeight) / denominator;
         out[2] = (from[2] * firstWeight + target[2] * secondWeight) / denominator;
@@ -204,9 +204,9 @@ void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
 void sdfQuatBlendAngular(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 angle = sdfQuatDot(from, to);
     if (-0.95f < angle && angle < 0.95f) {
-        f32 firstWeight = func_002FA060(angle * (1.0f - fraction));
-        f32 secondWeight = func_002FA060(angle * fraction);
-        f32 denominator = func_002FA060(angle);
+        f32 firstWeight = sinf(angle * (1.0f - fraction));
+        f32 secondWeight = sinf(angle * fraction);
+        f32 denominator = sinf(angle);
         out[0] = (from[0] * firstWeight + to[0] * secondWeight) / denominator;
         out[1] = (from[1] * firstWeight + to[1] * secondWeight) / denominator;
         out[2] = (from[2] * firstWeight + to[2] * secondWeight) / denominator;

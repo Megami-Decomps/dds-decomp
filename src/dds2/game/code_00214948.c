@@ -1154,9 +1154,9 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
     }
 }
 
-extern f32 func_00353040(f32);
+extern f32 cosf(f32);
 
-extern f32 func_00353140(f32);
+extern f32 sinf(f32);
 
 extern f32 tanf(f32);
 
@@ -1200,8 +1200,8 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, out->position);
     angle *= 0.017453293f;
-    extent += length * func_00353140(angle);
-    length *= func_00353040(angle);
+    extent += length * sinf(angle);
+    length *= cosf(angle);
     length += extent / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (command->flags & 0x200) {
