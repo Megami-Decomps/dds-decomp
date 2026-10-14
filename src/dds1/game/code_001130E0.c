@@ -374,7 +374,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
     if (sdfLoadMapRecordPositionVector(target->owner->inner, 0)) {
         VU0_STORE_VF(vf10, vec);
-        vec[1] = pickMode == 1 ? target->unkD4 : obj->inner->position[1];
+        vec[1] = pickMode == 1 ? target->shadowY : obj->inner->position[1];
         fldDrawShadowDisc(vec[0], vec[1], vec[2], obj->inner->radius, level);
     } else {
         if (effObjTestNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
@@ -387,7 +387,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
             vec[2] = obj->inner->position[2];
         }
         if (pickMode == 1) {
-            vec[1] = target->unkD4;
+            vec[1] = target->shadowY;
         }
         fldDrawShadowDisc(vec[0], vec[1], vec[2], obj->inner->radius, level);
     }

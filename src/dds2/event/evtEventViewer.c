@@ -1293,7 +1293,7 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
         }
         if (next == NULL) {
             unit->unkD3 = current->p0C.b[1];
-            unit->unkD4 = current->p14.f;
+            unit->shadowY = current->p14.f;
         } else {
             startFrame = current->frame;
             endFrame = next->frame;
@@ -1309,7 +1309,7 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
             if (next->p0C.b[0] < 2) {
                 t = 0.0f;
             }
-            unit->unkD4 = evtMovieInterpolateFloatIfEnabled(0, t, current->p14.f, next->p14.f);
+            unit->shadowY = evtMovieInterpolateFloatIfEnabled(0, t, current->p14.f, next->p14.f);
         }
         if (current->p0C.sb[0] == 1 || current->p0C.sb[0] == 3) {
             setFlags |= 0x4000;
