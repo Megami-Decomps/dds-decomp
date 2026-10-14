@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_draw_glyph.h"
 #include "fr_font_position.h"
 #include "fr_font_text_slots.h"
 #include "sdf_image_upload.h"
@@ -42,9 +43,6 @@ extern u32 frFontGetGlyphCellHeight(u8 fontIndex);
 extern s8 D_00356470[];
 
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
-
-extern s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags);
-
 
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 extern u8 D_003BB17C;

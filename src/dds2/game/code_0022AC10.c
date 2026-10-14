@@ -10,6 +10,7 @@
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
+#include "fr_font_draw_glyph.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -296,8 +297,6 @@ extern char D_0041B780[];
 extern char D_0041B7A8[];
 
 extern char D_0041B7D0[];
-
-extern void frFontDrawGlyphChain(void *, s32, s32);
 
 extern void btlDebugDrawTwoColorRectangle(s32, s32, s32, s32, u32, u32);
 
