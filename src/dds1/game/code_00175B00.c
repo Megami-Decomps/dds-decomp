@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_scatter_draw_request.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "sdf_asset_state.h"
@@ -56,27 +57,11 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
     sdfReleaseChipBlock(object);
 }
 
-/* Per-draw state consumed by the scatter packet builder (0x30 bytes). */
-typedef struct ScatterRenderState {
-    u16 primitiveCount;
-    u16 vertexCount;
-    u16 flags;
-    u8 pad06[2];
-    u32 color;
-    void *parameters;
-    f32 *points;
-    u8 pad14[4];
-    f32 *uv;
-    u8 pad1C[4];
-    u32 *colors;
-    u8 pad24[8];
-} ScatterRenderState;
-
-extern ScatterRenderState D_003D65B0;
+extern EffScatterDrawRequest D_003D65B0;
 extern u8 D_00354B90[];
 extern SdfPoolNode *D_00354BF0[];
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(ScatterRenderState *);
+extern void *effCreateVertexDrawPacket(EffScatterDrawRequest *);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 struct SdfAsset;
@@ -85,7 +70,7 @@ struct SdfAsset;
 void effScatterDrawObject(PcpScatterDraw *object) {
     f32 matrix[16] __attribute__((aligned(16)));
     SdfListHead *packet;
-    ScatterRenderState *draw;
+    EffScatterDrawRequest *draw;
     s32 count;
     s32 remaining;
     s32 index;
