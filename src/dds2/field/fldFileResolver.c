@@ -12,6 +12,7 @@
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -559,7 +560,6 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
-extern u32 kwlnGetDrawBufferIndex(void);
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 

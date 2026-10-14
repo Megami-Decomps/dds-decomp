@@ -12,6 +12,7 @@
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
@@ -2492,7 +2493,6 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     descriptor->append(descriptor, command);
 }
 
-extern s32 kwlnGetDrawBufferIndex(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
