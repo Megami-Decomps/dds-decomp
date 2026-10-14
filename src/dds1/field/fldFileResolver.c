@@ -1788,7 +1788,58 @@ void fldFormatAreaDirectory(char *path, s32 field, s32 unused) {
     else sprintf(path, "/fld/e/f%03d/", field);
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00128BB8);
+void fldDrawFloorQuad(s32 x, s32 y, const char *format);
+extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern char D_003BACB0[];
+extern char D_003BACB8[];
+extern char D_003BACC0[];
+extern char D_0039FF88[]; /* "0123456789ABCDEF", shared with func_00128DA0 */
+
+/* Debug view of the area's map-slot values (GMC) and room scene flags (HIT):
+ * one row per floor 1..31 and one column per slot 0..15, "." for clear. Each
+ * draw recomputes the row offset: GCSE PRE merges the `floor * 12 - 0x4C`
+ * terms into one reaching register but leaves every `<< 3` per call, as retail does. */
+void func_00128BB8(void) {
+    char text[32];
+    s32 floor;
+    s32 slot;
+
+    sprintf(text, "GMC-HOJI");
+    fldDrawFloorQuad(0, -0x320, text);
+    sprintf(text, "HIT-HOJI");
+    fldDrawFloorQuad(0xDC0, -0x320, text);
+    sprintf(text, D_0039FF88);
+    fldDrawFloorQuad(0, -0x2C0, text);
+    fldDrawFloorQuad(0xDC0, -0x2C0, text);
+    for (floor = 0; floor < 0x1F; floor++) {
+        s32 gmcX;
+        s32 hitX;
+
+        sprintf(text, D_003BACB0, floor + 1);
+        fldDrawFloorQuad(-0x200, (floor * 12 - 0x4C) << 3, text);
+        hitX = 0xDC0;
+        gmcX = 0;
+        for (slot = 0; slot < 0x10; slot++) {
+            s32 value = fldTestMapSlotValueFlag(fldAreaState.area, floor + 1, slot);
+
+            if (value == 0) {
+                sprintf(text, D_003BACB8);
+            } else {
+                sprintf(text, D_003BACC0, value);
+            }
+            fldDrawFloorQuad(gmcX, (floor * 12 - 0x4C) << 3, text);
+            gmcX += 0xC0;
+            value = fldTestRoomSceneFlag(fldAreaState.area, floor + 1, slot);
+            if (value == 0) {
+                sprintf(text, D_003BACB8);
+            } else {
+                sprintf(text, D_003BACC0, value);
+            }
+            fldDrawFloorQuad(hitX, (floor * 12 - 0x4C) << 3, text);
+            hitX += 0xC0;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FF88);
 
