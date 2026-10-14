@@ -8873,3 +8873,5 @@
 0x00369B70	sceOpen	inferred	Opens the path with flags and an optional mode; callers use the returned descriptor for reads or writes. Paired with DDS1 0x0030E8F0, which has the same open call contract.
 0x00369DF8	sceClose	inferred	Closes the descriptor returned by sceOpen after file loading, serialization, or queued I/O. Paired with DDS1 0x0030EB78.
 0x0036A420	sceWrite	inferred	Writes the supplied byte range to an open descriptor; file queue serialization and the SDF write operation pass descriptor, data, and size. Paired with DDS1 0x0030F190.
+0x00139EC0	fldRefreshAreaStateFromPosition	inferred	Uses supplied XYZ with field area/value records and label selection to refresh position-dependent area state; paired DDS1 0x001372D0. Called from mode-one camera update, camera-object pose update, and player-scene camera setup.
+0x00131B50	fldUpdateModeOneCameraPose	inferred	When positionMode is 1, updates field player camera position and heading, smooths position, and refreshes area state through fldRefreshAreaStateFromPosition; called by fldUpdateCameraFrame. Paired DDS1 0x0012F578.

@@ -374,7 +374,7 @@ extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
 extern void fldUpdateCameraTarget(void);
 
-extern void func_00139EC0(f32 *position);
+extern void fldRefreshAreaStateFromPosition(f32 *position);
 
 extern char D_00435EB8[];
 
@@ -1376,7 +1376,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
     effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
     VU0_STORE_VF(vf10, position);
     position[1] += 10.0f;
-    func_00139EC0(position);
+    fldRefreshAreaStateFromPosition(position);
 }
 
 void fldResetPlayerSceneObjectState(void) {

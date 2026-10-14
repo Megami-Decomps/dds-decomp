@@ -1315,7 +1315,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00139B98);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00139EC0);
+INCLUDE_ASM(const s32, "game/code_00136EF8", fldRefreshAreaStateFromPosition);
 
 void func_0013AA78(void) {
 }
