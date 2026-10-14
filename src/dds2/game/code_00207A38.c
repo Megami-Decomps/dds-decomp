@@ -2620,7 +2620,8 @@ void func_0020CE60(void) {
 void func_0020CE68(void) {
 }
 
-void func_0020CE70(void) {
+/* Empty callback registered by the POINT LIGHT debug menu. */
+void btlPointLightMenuNoOp(void) {
 }
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
@@ -2650,13 +2651,16 @@ void btlResetBattleDebugMenuFlags(void) {
 void func_0020D100(void) {
 }
 
-void func_0020D108(void) {
+/* Empty hook between active actor updates and the finished-task sweep. */
+void btlUpdateActiveFrameNoOp(void) {
 }
 
-void func_0020D110(void) {
+/* Empty hook between event playback and battle-field presentation. */
+void btlUpdateFieldPresentationNoOp(void) {
 }
 
-void func_0020D118(void) {
+/* Empty hook at the end of battle-runtime initialization. */
+void btlInitializeRuntimeNoOp(void) {
 }
 
 void func_0020D120(void) {
@@ -2692,7 +2696,8 @@ void btlDebugDrawLine2D(s32 x0, s32 y0, s32 x1, s32 y1, u32 color) {
 void func_0020D1D8(void) {
 }
 
-void func_0020D1E0(void) {
+/* Retail ignores the scalar-curve knot's pixel coordinates and packed color. */
+void btlDebugDrawPoint2DNoOp(s32 x, s32 y, u32 color) {
 }
 
 /* Retail stub for the endpoint marker submitted by camera diagnostics. */

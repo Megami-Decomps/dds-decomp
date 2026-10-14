@@ -296,7 +296,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         func_001C8330();
         btlUpdateActionSeqs();
         btlUpdateActiveActorModelState();
-        func_001FB088();
+        btlUpdateActiveFrameNoOp();
         btlSweepFinishedTasks();
         func_001DBE68();
         /* The callbacks above may replace the runtime; advance its current frame. */
@@ -318,7 +318,7 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
         btlSweepFloorModelLists();
         btlUpdateActorModelColorAndLinks();
         btlUpdateEventPlayback();
-        func_001FB090();
+        btlUpdateFieldPresentationNoOp();
         fldInitializeBattleSceneFlow();
         btlClearDeferredTasks();
     }
@@ -418,7 +418,7 @@ extern void btlRetainButtonTexture(void);
 
 extern void func_001C45F0(void);
 
-extern void func_001FB098(void);
+extern void btlInitializeRuntimeNoOp(void);
 
 /* Allocate/reset battle work, initialize windows and queue shared resources. */
 void btlInitializeBattleRuntime(void) {
@@ -463,7 +463,7 @@ void btlInitializeBattleRuntime(void) {
     btlRefreshSoundEntries();
     btlRetainButtonTexture();
     func_001C45F0();
-    func_001FB098();
+    btlInitializeRuntimeNoOp();
     btlClearModelFlagRange();
 }
 

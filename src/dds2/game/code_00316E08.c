@@ -91,7 +91,7 @@ extern SdfMemBlock *D_00438948;
 extern void mnuDestroyNodeJobQueues(s32 *);
 extern void mnuUpdateHighScoreFlag(MnuShootingWork *);
 /* Retail passes the task work to this otherwise empty legacy callback. */
-extern void func_0031AF60();
+extern void mnuCleanupShootingPauseNoOp();
 extern void itfClearTintAndWorkBuffers(u8 *);
 extern u32 D_00435CBC;
 #include "dds3_world_secondary.h"
@@ -581,7 +581,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     slot = work->resourceSlots;
     mnuUpdateHighScoreFlag(work);
     mnuReleaseShootingSectionResources(work);
-    func_0031AF60(work);
+    mnuCleanupShootingPauseNoOp(work);
     itfClearTintAndWorkBuffers((u8 *)work);
     for (i = 6; i >= 0; i--, slot++) {
         if (*slot != 0) {
@@ -685,7 +685,7 @@ extern void mnuTickScoreProgressState(MnuShootingWork *);
 extern s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *);
 extern void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *);
 extern void mnuClearRuntimeRecordStorage(MenuRuntimeList *);
-void func_0031A090(void);
+void mnuRequestTimedEntryEffectStop(void);
 extern void mnuClampPendingScoreToPeak(MnuShootingWork *);
 extern void dds3UpdateSoundSlots(void);
 
@@ -803,7 +803,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->unk94 = mode;
         itfSetFadeGaugeDisplayValue(&work->gauge, 0);
         mnuClearRuntimeRecordStorage(mnuGetRuntimeAnimationList());
-        func_0031A090();
+        mnuRequestTimedEntryEffectStop();
         if (work->round >= 3) {
             work->state = -1;
             mnuClampPendingScoreToPeak(work);
@@ -1112,8 +1112,8 @@ void mnuUpdateTimedEffectPosition(void) {
     }
 }
 
-/* Mark the occupied record with flag 0x800; the flag's meaning is unresolved. */
-void func_0031A090(void) {
+/* The queue updater consumes 0x800 as a deferred stop request. */
+void mnuRequestTimedEntryEffectStop(void) {
     if ((D_00438930 != 0) && ((D_00438930->flags & 1) != 0)) {
         D_00438930->flags = D_00438930->flags | 0x800;
     }
