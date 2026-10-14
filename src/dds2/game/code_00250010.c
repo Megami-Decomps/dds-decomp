@@ -3683,7 +3683,7 @@ s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
     return D_003C9928[index](x, y, runtime);
 }
 
-void func_002588A0(s32 output, s32 data, s32 size) {
+void evtWriteOutputBytes(s32 output, s32 data, s32 size) {
     sceWrite();
 }
 
@@ -3960,7 +3960,7 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     header.kind = 9;
     header.reserved18 = 0;
     header.reserved1C = 0;
-    func_002588A0(output, (s32)&header, sizeof(header));
+    evtWriteOutputBytes(output, (s32)&header, sizeof(header));
 
     for (i = 0; i < 26; i++) {
         entry.type = i;
@@ -4074,7 +4074,7 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
         if (entry.unk_04 != 0 || entry.value != 0) {
             entry.offset = payloadOffset;
             payloadOffset += (s32)entry.unk_04 * (s32)entry.value;
-            func_002588A0(output, (s32)&entry, sizeof(entry));
+            evtWriteOutputBytes(output, (s32)&entry, sizeof(entry));
         }
     }
 }
@@ -4088,7 +4088,7 @@ void evtWriteRuntimeHeaderValues(s32 output, EvtRuntime *state) {
     buffer[1] = state->frameRange.word;
     buffer[2] = state->headerThird;
     buffer[3] = state->headerMetadata;
-    func_002588A0(output, buffer, 0x10);
+    evtWriteOutputBytes(output, buffer, 0x10);
 }
 
 typedef struct EvtSerializedChild {
@@ -4142,7 +4142,7 @@ void evtViewerWriteChildRecords(s32 output, s32 mode, EvtRuntime *runtime) {
                     }
                 }
             }
-            func_002588A0(output, (s32)&record, sizeof(record));
+            evtWriteOutputBytes(output, (s32)&record, sizeof(record));
         }
     }
 }
@@ -4155,7 +4155,7 @@ void evtWriteFixedSizeEntries(s32 output, EvtRuntime *table) {
     if (table->entryTotal > 0) {
         entry = (u8 *)table->entryName;
         do {
-            func_002588A0(output, entry, 0x20);
+            evtWriteOutputBytes(output, entry, 0x20);
             entry += 0x20;
             i++;
         } while (i < table->entryTotal);
@@ -4171,7 +4171,7 @@ void evtWriteGroupHeader(s32 output, EvtRuntime *runtime) {
             header[1] = 0;
             header[2] = 0;
             header[3] = 0;
-            func_002588A0(output, header, 0x10);
+            evtWriteOutputBytes(output, header, 0x10);
         }
     }
 }
@@ -4182,7 +4182,7 @@ void evtCopyRuntimeChildPayloadsToBuffer(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0xA) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x30);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x30);
             }
         }
     }
@@ -4194,7 +4194,7 @@ void evtEmitGroupTypeElevenPayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0xB) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x20);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x20);
             }
         }
     }
@@ -4206,7 +4206,7 @@ void evtEmitGroupTypeThirteenPayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0xD) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x28);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x28);
             }
         }
     }
@@ -4218,7 +4218,7 @@ void evtEmitGroupTypeFourteenPayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0xE) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x2C);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x2C);
             }
         }
     }
@@ -4230,7 +4230,7 @@ void evtEmitGroupTypeFifteenPayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0xF) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x2C);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x2C);
             }
         }
     }
@@ -4242,7 +4242,7 @@ void evtEmitGroupTypeTwentyThreePayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0x17) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x2C);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x2C);
             }
         }
     }
@@ -4254,7 +4254,7 @@ void evtEmitGroupTypeTwentySevenPayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0x1B) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x28);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x28);
             }
         }
     }
@@ -4266,7 +4266,7 @@ void evtEmitGroupTypeSixteenPayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0x10) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x18);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x18);
             }
         }
     }
@@ -4278,7 +4278,7 @@ void evtEmitGroupTypeSeventeenPayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0x11) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x24);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x24);
             }
         }
     }
@@ -4294,7 +4294,7 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
         record.value = group->metadata.value;
         record.extra1 = group->metadata.extra1;
         record.extra2 = group->metadata.extra2;
-        func_002588A0(output, &record, 8);
+        evtWriteOutputBytes(output, &record, 8);
     }
 }
 
@@ -4304,7 +4304,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != 0; group = group->next) {
         if (group->type == 0x19) {
             for (child = group->children; child != 0; child = child->next) {
-                func_002588A0(output, (s32)child->payload, 0x40);
+                evtWriteOutputBytes(output, (s32)child->payload, 0x40);
             }
         }
     }
