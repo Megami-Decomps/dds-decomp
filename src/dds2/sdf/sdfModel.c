@@ -13,11 +13,6 @@
 #include "sdf_message.h"
 #include "sdf_model_command_views.h"
 
-
-extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
-
-extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
-
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
