@@ -1,6 +1,7 @@
 #include "dsp_name.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_kernel_thread_param.h"
 #include "sdf_thread_workspace_api.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
@@ -1531,7 +1532,22 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
     return CreateSema(&sema);
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", sdfCreateThread);
+extern void *_gp;
+extern s32 CreateThread(SdfKernelThreadParam *);
+
+/* Create a kernel thread from a zeroed descriptor that uses the caller's
+ * workspace as its stack and the program's GP. */
+s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
+    SdfKernelThreadParam param;
+
+    memset(&param, 0, sizeof(param));
+    param.entry = entryAddress;
+    param.stack = workspace;
+    param.stackSize = stackBytes;
+    param.priority = priority;
+    param.gp = &_gp;
+    return CreateThread(&param);
+}
 
 s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority) {
     void *workspace;
