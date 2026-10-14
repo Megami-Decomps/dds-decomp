@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_path.h"
@@ -72,7 +73,6 @@ extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, 
 #include "dds3_world_primary.h"
 
 
-extern void scrSetIntegerReturnValue(s32 arg0);
 
 extern s32 scrReadIntParameter(s32 idx);
 

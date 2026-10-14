@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "scr_integer_return_value_api.h"
 #include "fld_scene_record.h"
 #include "common.h"
 #include "fld_scene_status_api.h"
@@ -154,7 +155,6 @@ extern s32 fldFindRoomByTask(u32);
 
 extern s32 fldEvaluateCameraMoveTracking(void);
 
-extern void scrSetIntegerReturnValue(s32 value);
 
 extern s32 fldQuerySelectedActorMotionState(s32 value);
 

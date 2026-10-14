@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "kwln_background_fade_api.h"
 #include "eff_random_mod.h"
 #include "fpu.h"

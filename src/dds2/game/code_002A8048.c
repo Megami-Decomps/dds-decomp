@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -77,7 +78,6 @@ extern void kwlnDrawSetDc8Second(u32);
 extern void kwlnDrawSetDc8First(u32);
 extern void kwlnDrawSetupDc8(s32);
 extern s32 itfPanelReleaseHold(void);
-extern void scrSetIntegerReturnValue(s32);
 
 s32 mnuUpdateMovieDrawShutdownCountdown(void) {
     if (mnuMovieShutdownCounter == 0 && scrCommandIsProcessControlFlagClear() == 1 && D_0037F530[0] < 0) {

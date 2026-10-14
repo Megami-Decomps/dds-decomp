@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "itf.h"
@@ -23,7 +24,6 @@ extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *work);
 extern void scrSetSecondaryScriptFlag(DatPartyRecord *work, u16 index);
 
 
-extern void scrSetIntegerReturnValue(s32 arg0);
 
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
 
