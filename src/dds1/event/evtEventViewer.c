@@ -1974,7 +1974,7 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateShopFlagTrack);
 
-void func_0022F9F0(EvtRuntime *viewer) {
+void evtViewerPreGlyphTickHookNoOp(EvtRuntime *viewer) {
 }
 
 /* Tick the current glyph while text is advancing; wrap after thirty ticks. */
@@ -1992,7 +1992,7 @@ void evtViewerAdvanceGlyphTick(EvtRuntime *viewer) {
     }
 }
 
-void func_0022FA60(EvtRuntime *viewer) {
+void evtViewerFlag8ClearFrameHookNoOp(EvtRuntime *viewer) {
 }
 
 s32 evtViewerTestIndexedCondition(u32 condition);
@@ -3291,7 +3291,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
 
     D_003BBE7C = 0;
     if (viewer->unk2238 == 1) {
-        func_0022F9F0(viewer);
+        evtViewerPreGlyphTickHookNoOp(viewer);
     }
     evtViewerAdvanceGlyphTick(viewer);
     evtEventViewerApplyEffectToggles(viewer);
@@ -3306,7 +3306,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             evtViewerPushCommandHistory(1, 0x24, 0x18, viewer);
             return (s32)evtViewerPickNextHandler;
         }
-        func_0022FA60(viewer);
+        evtViewerFlag8ClearFrameHookNoOp(viewer);
     } else {
         if (viewer->curFrame == viewer->headerFirst) {
             viewer->flags = flags & ~1;
