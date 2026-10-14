@@ -2412,17 +2412,9 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
 
 extern void btlSynchronizePartyActorRecords(BtlUnit *, u8);
 
-extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
-
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 
-extern BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *, f32 *, f32);
-
-extern BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *, f32 *, f32);
-
 extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
-
-extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
 
 extern void btlResetUnitLinks(BtlUnit *);
 
