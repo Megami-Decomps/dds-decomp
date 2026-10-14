@@ -2746,13 +2746,13 @@ u32 fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_0028F630);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileUpdatePromptDialog);
 
 extern void *D_003BD908;
 extern void *D_003BD90C;
 extern s32 D_003BC830;
 extern s32 D_003BC838;
-extern s32 func_0028F630(void);
+extern s32 fileUpdatePromptDialog(void);
 s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     D_003BD908 = start;
     D_003BD90C = finish;
@@ -2761,7 +2761,7 @@ s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     if (D_003BC834 != 4 && D_003BC834 != 8) {
         fileReqBegin(fileMemoryCardRequestIndex);
     }
-    return (s32)func_0028F630;
+    return (s32)fileUpdatePromptDialog;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileShowPromptDialog);
