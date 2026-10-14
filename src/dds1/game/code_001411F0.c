@@ -5,6 +5,7 @@
 #include "evt_world.h"
 #include "common.h"
 #include "fld_spark_object_entry.h"
+#include "sdf_math_vector4.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -55,10 +56,6 @@ extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 
 
 
-
-typedef struct FldVec4 {
-    f32 v[4];
-} FldVec4;
 
 extern char fldTitleTaskName[]; /* "fldTitle" */
 
@@ -1874,7 +1871,7 @@ void fldReleaseMenuSlots(void) {
 extern void fldClearSceneLifecycleFlags(s32);
 
 
-extern FldVec4 D_003A05D8[]; /* default camera up vectors (3 copies), the first still read by asm func_00145B18 */
+extern SdfMathVector4 D_003A05D8[]; /* default camera up vectors (3 copies), the first still read by asm func_00145B18 */
 
 extern void fldApplySkyLightSetToPlayerVU(void);
 
@@ -1885,7 +1882,7 @@ void fldEnterSceneCamera(void) {
     FldAreaWork *cam = &fldAreaState;
     f32 focus[4];
     f32 eye[4];
-    FldVec4 up;
+    SdfMathVector4 up;
     f32 entry[2];
     s32 ix;
     s32 iz;
@@ -1943,7 +1940,7 @@ void fldLoadSceneModelsAndCamera(void) {
     FldSceneRecord *rec;
     f32 focus[4];
     f32 eye[4];
-    FldVec4 up;
+    SdfMathVector4 up;
     f32 entry[2];
     s32 ix;
     s32 iz;
@@ -3735,18 +3732,18 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A08F8);
 
 const char D_003A0908[] = "HUNT_MDL_UNIT";
 
-extern FldVec4 D_003A08E8;
-extern FldVec4 D_003A08F8;
+extern SdfMathVector4 D_003A08E8;
+extern SdfMathVector4 D_003A08F8;
 
 void fldCreateSparkSlotObjects(void) {
-    FldVec4 position = D_003A08E8;
-    FldVec4 rotation;
+    SdfMathVector4 position = D_003A08E8;
+    SdfMathVector4 rotation;
     MdlCtx *resource;
     s32 i;
 
     memset(&rotation, 0, sizeof(rotation));
     {
-        FldVec4 scale = D_003A08F8;
+        SdfMathVector4 scale = D_003A08F8;
 
         for (i = 0; i < 17; i++) {
             fldSparkObjectEntries[i].objectHandle = NULL;
@@ -3883,18 +3880,18 @@ s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
 
 extern void dds3ClearObjectFlags();
 
-extern FldVec4 D_003A0918;
+extern SdfMathVector4 D_003A0918;
 
 void fldFreeSparkSlot(s32 index) {
-    FldVec4 vec;
+    SdfMathVector4 vec;
     EffWorldNode *obj;
     s32 *flags;
     s16 slot;
 
     vec = D_003A0918;
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
-        vec.v[0] = fldSparkSlots[index].pos[0];
-        vec.v[2] = fldSparkSlots[index].pos[2];
+        vec.x = fldSparkSlots[index].pos[0];
+        vec.z = fldSparkSlots[index].pos[2];
         effObjSetInnerPosition(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
         flags = (s32 *)dds3GetObjectBaseResourceHandle(obj);
@@ -3927,7 +3924,7 @@ void fldUpdateSparkSequence(void) {
     FldSparkSequence *sequence;
     s32 i;
     s32 slot;
-    FldVec4 position __attribute__((aligned(16)));
+    SdfMathVector4 position __attribute__((aligned(16)));
     f32 dx;
     f32 dy;
     f32 dz;
@@ -3969,11 +3966,11 @@ void fldUpdateSparkSequence(void) {
             if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
                 fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
                 PCP_COPY_VECTOR(&position, fldSparkSlots[i].pos);
-                dx = fldAreaState.x - position.v[0];
-                dy = fldAreaState.y - position.v[1];
-                dz = fldAreaState.z - position.v[2];
+                dx = fldAreaState.x - position.x;
+                dy = fldAreaState.y - position.y;
+                dz = fldAreaState.z - position.z;
                 if (fsqrtf(dx * dx + dy * dy + dz * dz) < 200.0f) {
-                    fldSetWeatherEffectPos(position.v[0], position.v[1], position.v[2]);
+                    fldSetWeatherEffectPos(position.x, position.y, position.z);
                     fldAreaState.collectedCount++;
                     fldAreaState.score += 0x32;
                     fldSparkControlState.sequenceRemaining--;

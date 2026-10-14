@@ -7,6 +7,7 @@
 #include "evt_unit.h"
 #include "common.h"
 #include "fld_spark_object_entry.h"
+#include "sdf_math_vector4.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -469,13 +470,9 @@ extern FieldPair48 fldSparkSlots[];
 
 
 
-typedef struct FldVec4 {
-    f32 v[4];
-} FldVec4;
-
 extern void dds3ClearObjectFlags();
 
-extern FldVec4 D_00413DE8;
+extern SdfMathVector4 D_00413DE8;
 
 struct FieldResourceRecord;
 
@@ -2209,7 +2206,7 @@ extern s32 D_00436264;
 extern void fldClearSceneLifecycleFlags(s32);
 
 
-extern FldVec4 D_00413788[]; /* default camera up vectors (3 copies), the first still read by asm func_00149A00 */
+extern SdfMathVector4 D_00413788[]; /* default camera up vectors (3 copies), the first still read by asm func_00149A00 */
 
 extern void fldApplySkyLightSetToPlayerVU(void);
 
@@ -2224,7 +2221,7 @@ void fldEnterSceneCamera(void) {
     FldAreaWork *cam = &fldAreaState;
     f32 focus[4];
     f32 eye[4];
-    FldVec4 up;
+    SdfMathVector4 up;
     f32 entry[2];
     s32 ix;
     s32 iz;
@@ -2278,7 +2275,7 @@ void fldLoadSceneModelsAndCamera(void) {
     FldSceneRecord *rec;
     f32 focus[4];
     f32 eye[4];
-    FldVec4 up;
+    SdfMathVector4 up;
     f32 entry[2];
     s32 ix;
     s32 iz;
@@ -4037,8 +4034,8 @@ s32 fldFindResourceRecordIndex(s32 category, s32 id) {
     return 0;
 }
 
-extern FldVec4 D_00413DB8;
-extern FldVec4 D_00413DC8;
+extern SdfMathVector4 D_00413DB8;
+extern SdfMathVector4 D_00413DC8;
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DB8);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DC8);
@@ -4047,15 +4044,15 @@ const char D_00413DD8[] = "HUNT_MDL_UNIT";
 
 /* Create the sixteen (plus one) hunt-unit objects used by the field spark controller. */
 void fldCreateSparkSlotObjects(void) {
-    FldVec4 position = D_00413DB8;
-    FldVec4 rotation;
+    SdfMathVector4 position = D_00413DB8;
+    SdfMathVector4 rotation;
     FldSparkObjectEntry *entry;
     MdlCtx *model;
     s32 i;
 
     memset(&rotation, 0, sizeof(rotation));
     {
-        FldVec4 scale = D_00413DC8;
+        SdfMathVector4 scale = D_00413DC8;
 
         for (i = 0; i < 17; i++) {
             fldSparkObjectEntries[i].objectHandle = 0;
@@ -4168,15 +4165,15 @@ s32 fldAttachSparkSlotToWorldObject(s32 index, s32 reserved) {
 }
 
 void fldFreeSparkSlot(s32 index) {
-    FldVec4 vec;
+    SdfMathVector4 vec;
     s32 obj;
     s32 *flags;
     s16 slot;
 
     vec = D_00413DE8;
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
-        vec.v[0] = fldSparkSlots[index].pos[0];
-        vec.v[2] = fldSparkSlots[index].pos[2];
+        vec.x = fldSparkSlots[index].pos[0];
+        vec.z = fldSparkSlots[index].pos[2];
         effObjSetInnerPosition((EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
         flags = (s32 *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)obj);
@@ -4206,7 +4203,7 @@ void fldUpdateSparkSequence(void) {
     FldSparkSequence *sequence;
     s32 i;
     s32 slot;
-    FldVec4 position __attribute__((aligned(16)));
+    SdfMathVector4 position __attribute__((aligned(16)));
     f32 dx;
     f32 dy;
     f32 dz;
@@ -4246,11 +4243,11 @@ void fldUpdateSparkSequence(void) {
             if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
                 fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
                 PCP_COPY_VECTOR(&position, fldSparkSlots[i].pos);
-                dx = fldAreaState.x - position.v[0];
-                dy = fldAreaState.y - position.v[1];
-                dz = fldAreaState.z - position.v[2];
+                dx = fldAreaState.x - position.x;
+                dy = fldAreaState.y - position.y;
+                dz = fldAreaState.z - position.z;
                 if (fsqrtf(dx * dx + dy * dy + dz * dz) < 200.0f) {
-                    fldSetWeatherEffectPos(position.v[0], position.v[1], position.v[2]);
+                    fldSetWeatherEffectPos(position.x, position.y, position.z);
                     fldAreaState.collectedCount++;
                     fldAreaState.score += 0x32;
                     fldSparkControlState.pickupDelay = 4;
@@ -5159,8 +5156,8 @@ void func_001523D0(void) {
 
 void fldUpdateTargetGuideMovementState(void) {
     FieldTargetGuideState *state = &fldTargetGuideState;
-    FldVec4 guidePosition;
-    FldVec4 areaPosition;
+    SdfMathVector4 guidePosition;
+    SdfMathVector4 areaPosition;
     f32 dx;
     f32 dz;
     f32 magnitude;
@@ -5190,14 +5187,14 @@ void fldUpdateTargetGuideMovementState(void) {
     areaZ = fldAreaState.z;
     state->viewAngleError = magnitude;
 
-    guidePosition.v[0] = guideX;
-    guidePosition.v[1] = 0.0f;
-    guidePosition.v[2] = guideZ;
-    guidePosition.v[3] = 1.0f;
-    areaPosition.v[0] = areaX;
-    areaPosition.v[1] = 0.0f;
-    areaPosition.v[2] = areaZ;
-    areaPosition.v[3] = 1.0f;
+    guidePosition.x = guideX;
+    guidePosition.y = 0.0f;
+    guidePosition.z = guideZ;
+    guidePosition.w = 1.0f;
+    areaPosition.x = areaX;
+    areaPosition.y = 0.0f;
+    areaPosition.z = areaZ;
+    areaPosition.w = 1.0f;
 
     if (state->mode == 0) {
         return;
