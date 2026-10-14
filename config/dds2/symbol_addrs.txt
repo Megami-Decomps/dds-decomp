@@ -7150,6 +7150,8 @@ btlAdvanceConditionalEncounterRoll = 0x0011E930; // type:func
 kwlnDrawTextureResourceDetails = 0x00104700; // type:func
 kwlnUnregisterNamedSlot = 0x00103108; // type:func
 kwlnDrawBackgroundFadeBands = 0x00106288; // type:func
+evtDrawSolarOverlayMarker = 0x00243C68; // type:func
+evtDrawSolarOverlayShapeWithScaledAlpha = 0x00243DB8; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -10211,8 +10213,6 @@ evtOpcodeStopReducedBgm = 0x002431A0; // type:func
 evtAdvanceSolarClockAndExpireControls = 0x00243568; // type:func
 evtDrawSolarNoiseLayerAtConfiguredScale = 0x00243958; // type:func
 evtDrawSolarNoiseLayerAtCenteredScale = 0x00243AD8; // type:func
-evtDrawSolarBackdropFan = 0x00243C68; // type:func
-evtDrawSolarPhaseFan = 0x00243DB8; // type:func
 func_002441F8 = 0x002441F8; // type:func
 evtAdvanceLongSolarNoiseLayers = 0x00244408; // type:func
 func_00244B90 = 0x00244B90; // type:func
