@@ -110,7 +110,11 @@ void sdfVuMultiplyNodeColors(VuWork *work, u32 color) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DEA18", func_002DEAC0);
+void func_002DEAC0(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
+    out->sourceA = first;
+    out->sourceB = second;
+    VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DEA18", func_002DEB40);
 

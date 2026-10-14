@@ -780,6 +780,27 @@ typedef struct {
     "sqc2 vf15, 0x30(%0)\n\tsqc2 vf16, 0x20(%0)\n\t.set reorder" \
     : : "r" (node), "r" (first), "r" (second) : "memory")
 
+/* Clip-plane crossing of edge first->second into out. VF1.w holds the plane
+ * on entry; a first vertex with node byte +0x50 bit 0 set clips at w = 0.
+ * Q = (plane - first.w) / (second.w - first.w) lerps the +0x00 vector and the
+ * +0x30 XY pair, copies first's +0x20 color, and writes Q to +0x4C and the
+ * clip value to +0x10.w. The region test and its branch are part of the block
+ * (the delay-slot lqc2 is the assembler's reorder swap), so the whole COP2
+ * sequence is one statement. Shared by DDS1 func_002DEAC0 and DDS2
+ * sdfVuInterpolateClipVertex. */
+#define VU0_INTERPOLATE_CLIP_VERTEX(out, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vaddx.w vf2, vf0, vf0x\n\tlbu $2, 0x50(%1)\n\tlqc2 vf4, 0x10(%1)\n\tlqc2 vf5, 0x10(%2)\n\t" \
+    "andi $2, $2, 0x1\n\tbne $0, $2, 1f\n\tlqc2 vf6, 0x0(%1)\n\tvsubw.w vf2, vf1, vf0w\n" \
+    "1:\n\tlqc2 vf7, 0x0(%2)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "vsubw.w vf12, vf2, vf4w\n\tvsubw.w vf13, vf5, vf4w\n\tvsub.xyzw vf14, vf7, vf6\n\t" \
+    "vdiv Q, vf12w, vf13w\n\tlqc2 vf10, 0x20(%1)\n\tvsub.xyzw vf15, vf9, vf8\n\t" \
+    "vmulaw.xyzw ACC, vf6, vf0w\n\tsqc2 vf10, 0x20(%0)\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\t" \
+    "vmaddq.xyzw vf14, vf14, Q\n\tvmulaw.xyzw ACC, vf8, vf0w\n\tvmaddq.xy vf15, vf15, Q\n\t" \
+    "sqc2 vf14, 0x0(%0)\n\tsw $2, 0x4C(%0)\n\tsqc2 vf15, 0x30(%0)\n\tsqc2 vf2, 0x10(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (out), "r" (first), "r" (second) : "$2", "memory")
+
 /* Extended-asm forms of the register-only VU operations. The empty operand
  * sections preserve the SDK's volatile ASM_OPERANDS boundary in EE GCC 2.96;
  * basic asm has the same opcodes but is a different compiler representation.
