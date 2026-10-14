@@ -26,7 +26,6 @@ extern u32 *sdfCloneOwnedSpriteRecordList(const void *, s32);
 
 extern void (*sdfTickCallback)(void);
 
-extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 typedef struct SdkFileStream SdkFileStream;
 /* SDK malloc wrapper: a successful result owns a fresh allocation. */
 extern void *sdfAllocHeapMemory(u32 bytes) __attribute__((malloc));
