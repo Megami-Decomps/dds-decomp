@@ -174,7 +174,7 @@ extern s32 sceCdSearchFile(void *, s32);
 
 extern u16 sdfDefaultDevRequestOptions;
 
-extern s32 func_002E69F0(const char *, void **);
+extern s32 sdfDevResolvePathForWorker(const char *path, char **outResolvedPath);
 
 extern void sdfDevEnqueueStateAndWakeWorker(DevState *);
 
@@ -1480,7 +1480,7 @@ char *sdfDevAllocateWorkerPath(char *path, s32 worker) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E69F0);
+INCLUDE_ASM(const s32, "game/code_002E4720", sdfDevResolvePathForWorker);
 
 /* Allocate a request state and retain the callback's opaque context word. */
 DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
@@ -1499,14 +1499,14 @@ DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
 /* Resolve a path to its worker and enqueue an asynchronous read-only open. */
 DevState *sdfDevCreateCallbackState(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext) {
-    void *resource;
-    s32 workerIndex = func_002E69F0(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_OPEN_READ, callback, callbackContext);
+    state = sdfDevAllocState(resolvedPath, workerIndex, SDF_DEV_OPERATION_OPEN_READ, callback, callbackContext);
     sdfDevEnqueueStateAndWakeWorker(state);
     return state;
 }
@@ -1514,14 +1514,14 @@ DevState *sdfDevCreateCallbackState(const char *path, void (*callback)(DevState 
 /* Enqueue a write open; zero options select the device's default creation options. */
 DevState *sdfDevCreateModeState(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
-    void *resource;
-    s32 workerIndex = func_002E69F0(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_OPEN_WRITE, callback, callbackContext);
+    state = sdfDevAllocState(resolvedPath, workerIndex, SDF_DEV_OPERATION_OPEN_WRITE, callback, callbackContext);
     state->options = options != 0 ? options : sdfDefaultDevRequestOptions;
     sdfDevEnqueueStateAndWakeWorker(state);
     return state;
@@ -1609,14 +1609,14 @@ s32 sdfDevQueueReleaseState(DevState *state) {
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
 DevState *sdfDevCreateRequest(const char *path, s32 buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
-    void *resource;
-    s32 workerIndex = func_002E69F0(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_READ_BUFFER, callback, callbackContext);
+    state = sdfDevAllocState(resolvedPath, workerIndex, SDF_DEV_OPERATION_READ_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
     state->requestData = (void *)buffer;
     state->operationArg = 0;
@@ -1628,14 +1628,14 @@ DevState *sdfDevCreateRequest(const char *path, s32 buffer, s32 byteCount,
 DevState *sdfDevOpenRequest(const char *path, s32 buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
-    void *resource;
-    s32 workerIndex = func_002E69F0(path, &resource);
+    char *resolvedPath;
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resolvedPath);
     DevState *state;
 
     if (workerIndex < 0) {
         return NULL;
     }
-    state = sdfDevAllocState(resource, workerIndex, SDF_DEV_OPERATION_WRITE_BUFFER, callback, callbackContext);
+    state = sdfDevAllocState(resolvedPath, workerIndex, SDF_DEV_OPERATION_WRITE_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
     state->requestData = (void *)buffer;
     state->options = options != 0 ? options : sdfDefaultDevRequestOptions;

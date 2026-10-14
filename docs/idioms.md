@@ -1826,7 +1826,7 @@ splitting copy, not a pointer or user-variable flag), then by descending
 `floor_log2(refs) * refs / live_length * 10000 * width`, and only then by
 ascending pseudo number. Pseudos local to one basic block with a single death
 are allocated earlier by local-alloc, with copy suggestions tried first.
-Controls on DDS1 `func_00104168`, `func_002E69F0` and others: plain versus
+Controls on DDS1 `func_00104168`, `sdfDevResolvePathForWorker` and others: plain versus
 `register` storage class, prototyped versus unprototyped integer calls, and
 visible/static/opaque out-of-line callees all left the priorities and homes
 unchanged. The ordering follows from what is referenced and for how long:
