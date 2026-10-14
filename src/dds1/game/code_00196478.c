@@ -82,21 +82,11 @@ void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
 extern u32 strlen(const char *str);
 
-/* Allocation handle precedes the first queue node by four bytes. */
-typedef struct MemRingHeader {
-    SdfMemBlock *allocation;
-    MemNode first;
-} MemRingHeader;
-
 /* Two consecutive entries in the four-byte-stride offset table bound a span. */
 typedef struct ItfBitRange {
     u32 start;
     u32 end;
 } ItfBitRange;
-
-
-
-
 
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
