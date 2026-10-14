@@ -24,7 +24,7 @@ extern MenuProgressState mnuStepCounterState;
 
 extern u16 mnuStepCounterThreshold[];
 
-extern void func_0035A880(SdfListNode *);
+extern void sdfFreeHeapMemory(SdfListNode *);
 
 /* Remove the matching ID entry and invoke its list listener. */
 SdfListNode *mnuRemoveResourceNodeById(MnuCallbackList *list, u32 id) {
@@ -46,7 +46,7 @@ void mnuClearResourceList(MnuCallbackList *list) {
                 SdfListNode *current = node;
                 node = node->next;
                 list->onRemove(current->index, (u32)current->value);
-                func_0035A880(current);
+                sdfFreeHeapMemory(current);
             } while (node != NULL);
         }
         list->tail = NULL;
