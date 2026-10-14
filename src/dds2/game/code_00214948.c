@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -200,8 +201,6 @@ extern u32 btlAppendEffectActorToCommandIndices(s32);
 
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-
-extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
@@ -589,7 +588,7 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
         for (i = 0; i < count; i++) {
             DatPartyRecord *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
-            s32 percent = current * 100 / btlComputeSkillAdjustedMaxHp(stats);
+            s32 percent = current * 100 / (s32)btlComputeSkillAdjustedMaxHp(stats);
 
             if (lowestPercent >= percent && current != 0) {
                 lowestPercent = percent;
