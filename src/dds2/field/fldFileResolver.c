@@ -1938,12 +1938,12 @@ void func_0012B0D0(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413198);
-
 extern s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 /* Same debug grid as func_0012B0D0 for the room mode (VIS) and room object
  * mode (ANM) flags. */
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413198);
+
 void func_0012B2B8(void) {
     char text[32];
     s32 floor;
