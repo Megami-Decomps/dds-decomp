@@ -769,6 +769,8 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6848);
 
+#include "btl_actor_entry_code_api.h"
+
 s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
     s32 entryCount = btlGetIndexListCount(indexList);

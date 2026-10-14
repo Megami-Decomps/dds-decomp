@@ -77,7 +77,7 @@ extern void func_001B7718(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
-extern s16 btlGetActorEntryCode(BtlUnit *, s32);
+#include "btl_actor_entry_code_api.h"
 
 extern s32 D_003BF660[];
 
