@@ -808,7 +808,7 @@ extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 const char D_004156D8[] = "btl:drop money=%d[ratio=%f]\n";
 
-s32 func_001B3B28(BtlUnit *actor) {
+s32 btlCalculateMoneyDropAmount(BtlUnit *actor) {
     DatPartyRecord *record = &actor->partyRecord;
     s32 money;
     f32 ratio;
