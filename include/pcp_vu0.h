@@ -30,6 +30,15 @@ typedef struct {
     : "r" (dst), "r" (src), "m" (*(const PcpVectorCopyF32 *)(src)) \
     : "$2")
 
+/* PCP_COPY_VECTOR with register operands only and no memory clobber: values
+ * the caller loaded before the copy stay live across it (DDS2 0020CEF8 keeps
+ * its toggle byte), and each address gets a single asm reference, so local
+ * allocation colors the destination before the source. The caller must not
+ * read the destination through a cached value afterwards. */
+#define PCP_COPY_VECTOR_UNCLOBBERED(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
+    : : "r" (dst), "r" (src) : "$2")
+
 /*
  * Fill the x, y and z components of a float vector with one value (plain C;
  * the w component is left alone). Used by the PCP particle and strip
