@@ -13,6 +13,7 @@
 #include "bill_object_api.h"
 #include "par_color_ramp.h"
 #include "par_object.h"
+#include "par_history.h"
 
 struct ParSystem;
 struct EffTrackPolyList;
@@ -20,17 +21,6 @@ struct EffTrackPolyList;
 enum {
     PAR_BURST_RANDOM_AXIS = 1
 };
-
-typedef struct {
-    s32 nextIndex;
-    s32 count;
-    f32 (*points)[3];
-} ParHistory;
-
-typedef struct {
-    ParHistory *records;
-    s32 capacity;
-} ParHistoryTable;
 
 typedef struct {
     ParObj head;
