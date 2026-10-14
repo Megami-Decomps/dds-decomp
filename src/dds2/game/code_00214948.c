@@ -11,6 +11,7 @@
 #include "sdf_draw.h"
 #include "btl_command.h"
 #include "btl_camera_pose_api.h"
+#include "btl_marked_command_requested_state_api.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
@@ -4275,8 +4276,6 @@ u64 btlMaskValueWhenSubtaskInactive(u64 value) {
 }
 
 extern void btlSetRuntimeFlag2000(void);
-
-extern u32 btlGetMarkedCommandRequestedState(void);
 
 extern u8 D_003BF6C0[][5];
 
