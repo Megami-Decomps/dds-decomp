@@ -35,7 +35,7 @@ void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
     VU0_LOAD_MATRIX_B(&matrix);
 }
 
-extern void func_003364B8(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void func_00336818(f32 angle);
 extern void func_00336898(f32 angle);
 
@@ -69,7 +69,7 @@ void sdfRotateVuMatrixAboutZ(f32 angle)
 /* Compose the three axis rotations of a per-axis angle vector into the VU0 matrix. */
 void vu0RotMatrixXYZFromVec3(const RwV3d *rot)
 {
-    func_003364B8(rot->x);
+    sdfVuLoadRotationMatrixX(rot->x);
     func_00336818(rot->y);
     sdfMultiplyVuMatrixInPlace();
     func_00336898(rot->z);
