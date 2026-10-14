@@ -113,7 +113,6 @@ extern MdlCtx *fldPlayerModelContext;
 
 extern void fldSetPendingAreaAndFloor(u32, u32);
 
-extern s32 fldIsAreaResourceReady(void);
 
 
 

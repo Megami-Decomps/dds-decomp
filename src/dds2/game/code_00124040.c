@@ -240,7 +240,6 @@ void fldLoadPlayerModel(void);
 
 extern u32 D_00389790[];
 
-extern s32 fldIsAreaResourceReady(void);
 
 
 
