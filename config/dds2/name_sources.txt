@@ -3772,6 +3772,7 @@
 0x00244988	evtActivateNextSolarPoint	inferred	M141; sources=names_pending_main.tsv; twin=0x00229CD0, input-family pairing. [names_qp10.tsv]
 0x002449E0	evtDeactivateLastSolarPoint	inferred	M141; sources=names_pending_main.tsv; twin=0x00229D28, input-family pairing. [names_qp10.tsv]
 0x00244A38	evtSetSolarPointActiveCount	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:261:func_00244A38; Counts the active solar points, then activates or deactivates points until the requested count is reached.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00244B90	evtDrawSolarPointTransitionShapes	inferred	Called by evtDrawFadingSolarOverlayFrame during solar-phase transitions. Reads each nonzero-duration SolarPoint's age and duration, applies a sine-based rotation and alpha to indexed triangle-fan geometry, and submits both shape passes. Evidence: retail MLIL at 0x00244B90 and caller refs at 0x00245268, 0x002452A8, 0x0024530C.
 0x00244F00	evtDrawFadingSolarOverlayFrame	inferred	Solar-overlay painter blends solar layer packets across the transition and submits the selected visual frame. [names_reviewed19.tsv]
 0x00245508	evtInitializeVisualData	inferred	Populates the event object's visual parameter pairs at +0x3C and +0x9C after reading its current state.
 0x00245590	evtUpdateSolarPhaseTransition	inferred	R_Names31 B89

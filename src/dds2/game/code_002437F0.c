@@ -463,7 +463,7 @@ void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00244B90);
+INCLUDE_ASM(const s32, "game/code_002437F0", evtDrawSolarPointTransitionShapes);
 
 INCLUDE_RODATA(const s32, "game/code_002437F0", D_004221D8);
 
