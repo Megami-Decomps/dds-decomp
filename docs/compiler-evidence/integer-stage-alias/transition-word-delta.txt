@@ -1,0 +1,4 @@
++0x170: 02c0102d move	v0,s6 -> 0080102d move	v0,a0
++0x1a4: 0084100b movn	v0,a0,a0 -> 02c4100a movz	v0,s6,a0
++0x1a8: afa200a4 sw	v0,164(sp) -> 86110034 lh	s1,52(s0)
++0x1b0: 86110034 lh	s1,52(s0) -> afa200a4 sw	v0,164(sp)

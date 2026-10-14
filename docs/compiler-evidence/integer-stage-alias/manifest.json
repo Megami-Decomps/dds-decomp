@@ -1,0 +1,21 @@
+{
+  "base_commit": "143ec511aac362e16c72eb5f47381ad20e93ab85",
+  "qualification": "Static RTL/assembly captures; no new live REG-to-MEM observation. Nonmatching candidate source is not included.",
+  "input_hashes": {
+    "tools/cc.sh": "3dd20f63d95d1133aa7602722f4b1cab812e8e204f3334137a8b08ad4a3d7b8b",
+    "tools/check_unit.py": "ad01be3d6b54f227d8282a88f790f6ae9699ff690527d42bfdca7cb7349635f5",
+    "tools/compilers/ee-gcc2.96/lib/gcc-lib/ee/2.96-ee-001003-1/cc1": "d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1",
+    "config/dds2/cflags.txt": "e688448e725a74e05d71823a8aefce942e6121419fbcc88c6ea9a799e856b89b",
+    "src/dds2/game/code_00136EF8.c": "e78e7ac1c923b4810d478d21725d792de70ef91fea18a1c6f3b9a785e620526c"
+  },
+  "evidence_sha256": {
+    "evidence-stage-full.00.rtl.txt": "1ee93fb58ddcb9fe90d656817f04c76624d9fa956926cb6cea5f423123799796",
+    "evidence-stage-full.02.jump.txt": "c467396d8e8552e038dc9334891de74f684b7672da6d7c3a829c47f63df880c5",
+    "evidence-stage-full.03.cse.txt": "110a2e1fa991b07c4af5a514170ec95a6b8ab6260574383a55962fec13d5554d",
+    "evidence-stage-skip.00.rtl.txt": "1c1a0e49dee8b87c19330bc6ebfd19105e38afc9cef32f63617a948dff6f6dd6",
+    "evidence-stage-skip.02.jump.txt": "7befc086212024cac9629c11b2c03be027e76b023c280e18814f4d48b96d6fee",
+    "evidence-stage-skip.03.cse.txt": "8ef8a62c988b895a080ca4773a1503d16ba640ff636fa3ca8a90a8ee87069780",
+    "transition-word-delta.txt": "2ae61e80c17e1ef31feec6f0585c617d5b73b34fd6dbf0be3d86575431b7ddb1",
+    "transition-rtl-hashes.json": "bb07e40cab175f609f694a0c88419659a563d6c3bad33a8cb5a39ecdb8e6cf90"
+  }
+}

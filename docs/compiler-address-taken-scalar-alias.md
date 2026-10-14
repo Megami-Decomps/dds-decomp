@@ -194,3 +194,122 @@ paths and hashes rather than copied blindly.
   and the linked retail-image gates can establish a match.
 
 Recovery and observation: KiB, with independent semantic and compiler review.
+
+## Address-taken integer stage: separate current-context observation
+
+A later DDS2 observation extends the *observed RTL symptom* to an address-taken
+integer. It does not repeat the live REG-to-MEM conversion observation above.
+The compiler remains the same pinned cc1. The target is
+`game/code_00136EF8::fldStartDeferredActorTransition` at `0x00141CF0`.
+
+At repository commit `143ec511aac362e16c72eb5f47381ad20e93ab85`, the owner has SHA-256
+`e78e7ac1c923b4810d478d21725d792de70ef91fea18a1c6f3b9a785e620526c`.
+The experimental complete owner, replacing only the preceding room geometry
+binder's INCLUDE_ASM with recovered C, has SHA-256
+`7eeb765403b34b8e44a5d08e7d240a82207905bb56dcab96f68c9b64254fce2d`.
+No source change was made to the transition function. The experimental binder
+is not a match and is not included in this compiler-note evidence.
+
+Four ordinary compilations distinguish a baseline issue from the experiment:
+
+- Current baseline full and SKIP_ASM: identical transition instructions, 616B.
+- Binder-added SKIP_ASM: same instructions, 616B.
+- Binder-added full: four differing instruction words after relocation normalization, still 616B.
+
+Fresh full and SKIP_ASM `-da` captures produce transition assembly identical to
+the corresponding ordinary captures after local-label-number normalization.
+The resulting first executable difference is in `03.cse`, not merely a late
+conditional-move preference.
+
+The source quantity is a genuine `s32 stage`. An earlier branch passes `&stage`
+to `dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0)`. The affected later branch is:
+
+```c
+stage = command;
+if (entry->variant != 0) {
+    stage = entry->variant;
+}
+room = entry->warpEntry;
+if (fldAreaState.area != stage) {
+    fldReleaseCurrentBgm();
+}
+```
+
+Before CSE, `stage` is `mem/f:SI(addressof(reg177), alias)`:
+
+- Full alias: `3447816126786961408`.
+- SKIP_ASM alias: zero.
+
+Both values already appear in expansion (`00.rtl`) and persist through
+`02.jump`. Both contexts then contain the same stage-selection operations:
+
+1. UID374 stores command pseudo84 to stage.
+2. UID377 reloads `entry->variant`, a signed halfword at offset `0x32`, alias17.
+3. UID379 and UID381 sign-extend that reload into pseudo183.
+4. UID382 tests pseudo183 against zero.
+5. On the assignment arm, UIDs387/389/391 perform a second variant load and
+   sign-extension into pseudo185; UID393 stores pseudo185 to stage.
+
+There is no intervening provider call in this sequence. Initial CSE in the
+full context removes UIDs377/379/381, changes UID382 to use the prior variant
+pseudo172, and stores pseudo172 in UID393. Both contexts also fold the second
+load/sign-extension at UIDs387/389/391: full reuses pseudo172, while SKIP_ASM
+reuses pseudo183 for UID393. The prior variant pseudo172 was loaded and
+sign-extended by UIDs328/330/332 before UID374. SKIP_ASM retains the reload and pseudo183 across the alias-zero stage store,
+consistent with conservative alias invalidation. The address,
+mode, and alias17 of the variant load are the same in both contexts.
+
+This establishes the first alias-sensitive optimization divergence. It is
+consistent with the previously observed recycled alias-storage mechanism;
+the integer conversion itself has **not** yet been dynamically observed here.
+There is no evidence of new unit-visible provider knowledge or a legitimate
+source-type change. This is not evidence that the source's stack scalar and
+actor field actually alias, and no compiler memory was patched to test a
+counterfactual.
+
+The downstream four-word, relocation-normalized difference relative to the function start is:
+
+```
++0x170  move v0,s6       -> move v0,a0
++0x1A4  movn v0,a0,a0    -> movz v0,s6,a0
++0x1A8  sw v0,164(sp)    -> lh s1,52(s0)
++0x1B0  lh s1,52(s0)     -> sw v0,164(sp)
+```
+
+The raw full/SKIP object bytes also differ at +0x34 and +0x1BC: these words carry
+`R_MIPS_26 .text` addends for unchanged local call targets. Those two relocation
+addend differences are excluded from the four instruction differences above.
+
+The command-default MOVN and variant-default MOVZ forms implement the same
+conditional selection, but differ from each other and therefore cannot pass
+the same retail instruction comparison. The subsequent spill/load scheduling
+also differs. No source workaround, neighbor edit, checker masking, or
+production flag was applied.
+
+### Actual capture commands
+
+Working directory: `/workspace/scratch/a4cc6a43d59f/dds-direct-recovery`.
+`W=/workspace/scratch/a4cc6a43d59f/dds-recovered-inputs/room-binder-recovery-oct14`.
+For each `mode=full` and `mode=skip`, `flags` is empty or `-DSKIP_ASM`, respectively:
+
+```sh
+TMPDIR="$W/transition-rtl-$mode-tmp" \
+DDS_VERSION=dds2 DDS_AS_UNIT=src/dds2/game/code_00136EF8.c \
+DDS_KEEP_S="$W/transition-rtl-$mode.s" \
+DDS_I386_LIBDIR=/workspace/scratch/a4cc6a43d59f/dds-host-runtime \
+tools/cc.sh $flags -da -dumpbase "$W/transition-rtl-$mode" \
+  "$W/candidate-preferred-dds2.c" -o "$W/transition-rtl-$mode.o" \
+  > "$W/transition-rtl-$mode.log" 2>&1
+```
+
+Ordinary captures used the same wrapper and source, without `-da -dumpbase`,
+with separate `transition-candidate-$mode` actual assembly/object/log paths.
+Baseline captures substituted `src/dds2/game/code_00136EF8.c` and used separate
+`transition-baseline-$mode` output paths. Each TMPDIR existed before invocation.
+The wrapper retained the original unit's filename lengths and standard flags.
+
+The compact evidence consists of stage RTL excerpts, the four-word delta, and
+hash manifest. Complete raw dumps and nonmatching source remain local for
+review, not part of this proposed documentation addition.
+
+Compact captured evidence: [integer-stage-alias](compiler-evidence/integer-stage-alias/manifest.json). The manifest identifies the unchanged published base and input hashes; it does not make the omitted experimental source independently reproducible.
