@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
@@ -33,8 +34,8 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
 
-extern s32 func_003101B8(s32 directory);
-extern s32 func_00310320(s32 directory, SceDirent *entry);
+extern s32 sceDclose(s32 directory);
+extern s32 sceDread(s32 directory, SceDirent *entry);
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
     BTL_RESOURCE_NAME_RECORD_BYTES = 0x38,
@@ -146,8 +147,6 @@ typedef struct BtlVec3 {
 
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
-
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
 extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
@@ -711,7 +710,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     return activeCount;
 }
 
-extern f32 func_002FA1F0(f32, f32);
+extern f32 atan2f(f32, f32);
 extern u128 D_0035F9E0;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
@@ -720,7 +719,7 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
     delta[0] = targetPosition[0] - origin[0];
     delta[2] = targetPosition[2] - origin[2];
     if (delta[0] != 0.0f || delta[2] != 0.0f) {
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, func_002FA1F0(delta[0], delta[2]), 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, atan2f(delta[0], delta[2]), 0.0f);
         return 1;
     }
     VU0_LOAD_VF($vf10, &D_0035F9E0);
@@ -747,7 +746,7 @@ s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 ang
         } else {
             x = -ffabsf(x);
         }
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, func_002FA1F0(x, delta[2]), 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, atan2f(x, delta[2]), 0.0f);
         return 1;
     }
     return 0;
@@ -2597,7 +2596,7 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
     if (sdfPfsDebugMode == 0) {
         return;
     }
-    func_003101B8(directoryHandle);
+    sceDclose(directoryHandle);
 }
 
 
@@ -2607,7 +2606,7 @@ extern char *D_00360380[];
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
 s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
     if (sdfPfsDebugMode != 0) {
-        return func_00310320(directoryHandle, reader);
+        return sceDread(directoryHandle, reader);
     }
     if ((u32)D_003BD868 >= BTL_BUILTIN_NAME_COUNT) {
         return 0;

@@ -2,6 +2,7 @@
  * "Title-audio controller transport boundary". */
 
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "mnu_result.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -711,7 +712,6 @@ void mnuLoadTitleMenuAssets(void) {
     mnuEnsureMovieMenuSpriteHandle(1);
 }
 
-extern void kwlnFadeBackgroundStartOut(s32);
 extern void mnuStopTitleMovieDraw(void);
 extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);

@@ -6,6 +6,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "dds3_admin_control_api.h"
 #include "kwln_task_add_child.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -269,7 +270,6 @@ extern char D_004370C0[]; /* "%5.2f" */
 extern u8 sdfViewTargetVector[];
 
 
-extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *billboard);
 
 
@@ -1560,7 +1560,6 @@ u32 mdlRunViewerAssetSelectionTask(void) {
 }
 
 extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern f32 sdfViewMatrix[];
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
@@ -2507,8 +2506,6 @@ u32 mdlRunViewerEffectEditorTask(void) {
     return 0;
 }
 
-extern void dds3AdminSetControlFlag();
-
 s32 mdlRequestViewerExitOnce(void) {
     if (mdlViewerState.unk08 == 0) {
         mdlViewerState.unk08 = 1;
@@ -3417,8 +3414,6 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     dds3SetObjectFlags((u32)obj, 0x400);
     return world;
 }
-
-extern void effMiscQuatMultiplyVU();
 
 void mdlAttachWorldObjectToSourceVector(s32 firstId, s32 secondId) {
     f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};

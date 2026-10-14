@@ -24,7 +24,7 @@ extern f64 cos(f64);
 
 extern f64 sin(f64);
 
-extern f64 func_003532A0(f64);
+extern f64 sqrt(f64);
 
 typedef struct SdfResourceInfo {
     u32 word[4];
@@ -491,7 +491,7 @@ f32 sdfVec3Normalize(f32 *vector) {
 }
 
 f32 sdfVectorLength(const f32 *vector) {
-    return func_003532A0(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+    return sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
 }
 
 /* Dot product of two normalized 3D directions (w is ignored). */

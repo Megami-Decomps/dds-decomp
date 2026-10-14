@@ -27,7 +27,7 @@ extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTex
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
-extern f32 func_002FA1C0(f32);
+extern f32 acosf(f32);
 
 
 
@@ -45,7 +45,7 @@ extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
-extern f32 func_002FA060(f32);
+extern f32 sinf(f32);
 
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
@@ -145,7 +145,7 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
 
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *q) {
     f32 w = q[3];
-    f32 twiceAngle = 2.0f * func_002FA1C0(w);
+    f32 twiceAngle = 2.0f * acosf(w);
     f32 scale = fsqrtf(1.0f - w * w);
     double magnitude = scale;
 
@@ -188,10 +188,10 @@ void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
         memcpy(target, to, 16);
     }
     if (angle < 0.95f) {
-        angle = func_002FA1C0(angle);
-        firstWeight = func_002FA060(angle * (1.0f - fraction));
-        secondWeight = func_002FA060(angle * fraction);
-        denominator = func_002FA060(angle);
+        angle = acosf(angle);
+        firstWeight = sinf(angle * (1.0f - fraction));
+        secondWeight = sinf(angle * fraction);
+        denominator = sinf(angle);
         out[0] = (from[0] * firstWeight + target[0] * secondWeight) / denominator;
         out[1] = (from[1] * firstWeight + target[1] * secondWeight) / denominator;
         out[2] = (from[2] * firstWeight + target[2] * secondWeight) / denominator;
@@ -204,9 +204,9 @@ void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
 void sdfQuatBlendAngular(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 angle = sdfQuatDot(from, to);
     if (-0.95f < angle && angle < 0.95f) {
-        f32 firstWeight = func_002FA060(angle * (1.0f - fraction));
-        f32 secondWeight = func_002FA060(angle * fraction);
-        f32 denominator = func_002FA060(angle);
+        f32 firstWeight = sinf(angle * (1.0f - fraction));
+        f32 secondWeight = sinf(angle * fraction);
+        f32 denominator = sinf(angle);
         out[0] = (from[0] * firstWeight + to[0] * secondWeight) / denominator;
         out[1] = (from[1] * firstWeight + to[1] * secondWeight) / denominator;
         out[2] = (from[2] * firstWeight + to[2] * secondWeight) / denominator;
@@ -225,7 +225,7 @@ void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f3
 }
 
 void sdfQuatLog(f32 *out, f32 *in) {
-    f32 angle = func_002FA1C0(in[3]);
+    f32 angle = acosf(in[3]);
     f32 sine = sdfSinPoly(angle);
     out[3] = 0.0f;
     if (out[3] < sine) {
@@ -977,7 +977,41 @@ void sdfNoOpGridDrawCallback(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB9C0);
+/* Allocate a grid header followed by its cells, install the no-op callbacks
+ * (or the caller's destroy hook), and start with every cell released. */
+SdfGrid *func_002CB9C0(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16 visibleColumns,
+                       u16 visibleRows, u32 userData, void (*onDestroy)(s32, u32)) {
+    u32 cellCount = width * height;
+    s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    SdfGrid *grid = (SdfGrid *)sdfMemoryGetBlockAddress(allocation);
+
+    memset(grid, 0, size);
+    grid->allocation = allocation;
+    grid->width = width;
+    grid->cellCount = cellCount;
+    grid->viewportOrigin = (SdfGridCell *)(grid + 1);
+    grid->cursor = (SdfGridCell *)(grid + 1);
+    grid->cells = (SdfGridCell *)(grid + 1);
+    grid->releaseCell = (void *)sdfNoOpKeyValueCallback;
+    grid->onDestroy = (void *)sdfNoOpKeyValueCallback;
+    grid->drawCell = (void *)sdfNoOpGridDrawCallback;
+    grid->userData = 0;
+    grid->cellWidth = cellWidth;
+    grid->cellHeight = cellHeight;
+    grid->visibleColumns = visibleColumns;
+    grid->visibleRows = visibleRows;
+    grid->columnMargin = 0;
+    grid->rowMargin = 0;
+    if (userData != 0) {
+        grid->userData = userData;
+    }
+    if (onDestroy != NULL) {
+        grid->onDestroy = onDestroy;
+    }
+    sdfGridReleaseAllCells(grid);
+    return grid;
+}
 
 /* Set horizontal/vertical cursor margins without changing the viewport itself. */
 void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {

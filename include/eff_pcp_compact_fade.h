@@ -4,6 +4,26 @@
 #include "eff.h"
 #include "eff_blur.h"
 
+/* Serialized prefix shared by the compact rectangle/scatter/scale/blur inputs. */
+typedef struct EffPCPCompactTimelineParams {
+    u8 flags;
+    u8 pad01[3];
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 startExtent;
+    s32 endExtent;
+} EffPCPCompactTimelineParams;
+
+typedef char EffPCPCompactTimelineParamsSizeCheck[
+    (sizeof(EffPCPCompactTimelineParams) == 0x18) ? 1 : -1];
+typedef char EffPCPCompactTimelineParamsDurationOffsetCheck[
+    ((u32)&((EffPCPCompactTimelineParams *)0)->duration == 0x04) ? 1 : -1];
+typedef char EffPCPCompactTimelineParamsStartExtentOffsetCheck[
+    ((u32)&((EffPCPCompactTimelineParams *)0)->startExtent == 0x10) ? 1 : -1];
+typedef char EffPCPCompactTimelineParamsEndExtentOffsetCheck[
+    ((u32)&((EffPCPCompactTimelineParams *)0)->endExtent == 0x14) ? 1 : -1];
+
 /* Both compact-fade lifecycles use the same 0x3C chip allocation. The
  * resource union is selected by the short rectangle or long textured-blur
  * constructor and each path has its own matching release routine. */

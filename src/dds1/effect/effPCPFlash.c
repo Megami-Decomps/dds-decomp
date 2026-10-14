@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_param.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
@@ -11,8 +12,6 @@
 /* Work records keep SDF allocation ownership separate from drawable records.
    tintColor multiplies the age-faded packed color; scaleRampTime governs
    scale growth independently of the color fade. */
-
-extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool);
 extern void effReleaseRecordGroupResources(EffRecordPool *pool);

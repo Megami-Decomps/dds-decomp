@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pty_roster_api.h"
 
 
 

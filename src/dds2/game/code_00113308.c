@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_model.h"
 #include "sdf_chip.h"
@@ -247,7 +248,6 @@ extern s32 func_0023DA70(ObjectTransform *, EffWorldNode *);
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
-extern void effMiscQuatMultiplyVU(void);
 extern void effObjInnerVecBackup(ObjectTransform *);
 extern void effUpdateValueTransitionProximity(EffWorldNode *);
 extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
@@ -491,8 +491,6 @@ ObjBase *effObjGetDataHandle(EffWorldNode *object) {
     return data->resourceState;
 }
 
-
-extern void dds3EnsureSlotData();
 
 /* Spawn a world object of kind 6 and seed its stored vector. */
 EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {

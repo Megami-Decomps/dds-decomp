@@ -15,9 +15,6 @@ struct EvtUnit;
 extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
 
 
-extern void dds3EnsureSlotData();
-
-
 u32 dds3LightObjectDrawNoop(void) {
     return 1;
 }

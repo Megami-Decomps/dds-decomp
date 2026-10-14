@@ -1,4 +1,6 @@
 #include "common.h"
+#include "file_load_menu_state.h"
+#include "eff.h"
 #include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "mnu_title_stream.h"
@@ -23,6 +25,7 @@
 #include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
+#include "file_scroll_arrow_state.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
 #include "file_save_record.h"
@@ -57,13 +60,6 @@ enum {
 };
 extern s16 D_0037E008[27][4];
 
-typedef struct FileScrollArrowState {
-    s32 angle;
-    s32 upAlpha;
-    s32 unk08;
-    s32 downAlpha;
-} FileScrollArrowState;
-
 extern FileScrollArrowState D_0037D4C0;
 extern f32 D_003BC83C;
 extern u8 D_0037DB20[];
@@ -95,9 +91,8 @@ extern s32 D_003BC87C;
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
-extern f32 func_002FA1C0(f32);
-extern f32 func_002FA1F0(f32, f32);
-extern void effMiscQuatMultiplyVU(void);
+extern f32 acosf(f32);
+extern f32 atan2f(f32, f32);
 
 
 
@@ -284,19 +279,7 @@ extern s8 fileMenuTaskAlive;
 extern s32 D_003BC7F0;
 
 /* Loader context at fileLoadMenuState. */
-typedef struct LoadCtx374A0 {
-    u8 unk0[4]; /* 0x00 */
-    s32 unk4;   /* 0x04 */
-    s32 inputRepeatTimer; /* 0x08 */
-    s32 unkC;   /* 0x0C */
-    s8 unk10;   /* 0x10 */
-    u8 pad11[3]; /* 0x11 */
-    s32 unk14;  /* 0x14 */
-    s32 unk18;  /* 0x18 */
-    s32 unk1C;  /* 0x1C */
-} LoadCtx374A0;
-
-extern LoadCtx374A0 fileLoadMenuState;
+extern FileLoadMenuState fileLoadMenuState;
 
 /* Far scalar: incomplete array forces non-small-data addressing. */
 extern s32 D_0037D4D0[];
@@ -2467,11 +2450,11 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         fileDrawCursorPulse(0x25, 0x1F, 0x53);
     }
     fileLoadCtxSlideUpdate();
-    if (fileLoadMenuState.unk10 == 0) {
+    if (fileLoadMenuState.slideMode == 0) {
         rowCount = 3;
         rowBase = D_003BC840;
         slotBase = D_003BC840;
-    } else if (fileLoadMenuState.unk10 == 1) {
+    } else if (fileLoadMenuState.slideMode == 1) {
         rowCount = 4;
         rowBase = D_003BC840;
         slotBase = D_003BC840 - 1;
@@ -2485,7 +2468,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     }
     for (row = 0; row < rowCount; row++) {
         slot = slotBase + row;
-        y = (s32)D_003BC83C + (rowBase + row) * 110 + fileLoadMenuState.unk14;
+        y = (s32)D_003BC83C + (rowBase + row) * 110 + fileLoadMenuState.rowVerticalOffset;
         if (fileSelectedSlotIndex == slot) {
             titleColor = 0xA09DC380;
             detailColor = 0x89FEFF80;
@@ -2493,24 +2476,24 @@ s32 fileDrawSlotListAndPreview(s32 work) {
             titleColor = 0x805D8340;
             detailColor = 0x69BEBF40;
         }
-        if (fileLoadMenuState.unk10 != 0) {
+        if (fileLoadMenuState.slideMode != 0) {
             if (row == 0) {
-                alpha = fileLoadMenuState.unk18;
+                alpha = fileLoadMenuState.leadingRowAlpha;
                 titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
-                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unk18, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.leadingRowAlpha, 0);
             } else if (row == 3) {
-                alpha = fileLoadMenuState.unk1C;
+                alpha = fileLoadMenuState.trailingRowAlpha;
                 titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
-                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unk1C, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.trailingRowAlpha, 0);
             } else {
-                alpha = fileLoadMenuState.unkC;
+                alpha = fileLoadMenuState.standardRowAlpha;
                 titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
-                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unkC, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.standardRowAlpha, 0);
             }
         } else {
-            alpha = fileLoadMenuState.unkC;
+            alpha = fileLoadMenuState.standardRowAlpha;
             titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
-            detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unkC, 0);
+            detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.standardRowAlpha, 0);
         }
         baseColor = (alpha << 24) | 0x808080;
         kwlnDrawTexturedColorQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC868));
@@ -2798,8 +2781,8 @@ void fileSetPreviewLocation(s16 x, s16 y) {
 
 void fileSetMenuValueAndInitializeFlags(u32 value) {
     D_0037D4D0[0] = value;
-    fileLoadMenuState.unkC = 0x80;
-    fileLoadMenuState.unk4 = 0;
+    fileLoadMenuState.standardRowAlpha = 0x80;
+    fileLoadMenuState.transitionTickCount = 0;
 }
 
 /* Lower the selected low/alpha byte, retaining the native signed, unmasked bound. */
@@ -2827,11 +2810,11 @@ u32 fileClampPackedColorByte(u32 color, s32 limit, s8 alpha) {
 }
 
 void fileCursorStepUp(void) {
-    fileLoadMenuState.unk4++;
-    fileLoadMenuState.unk4 = fileLoadMenuState.unk4 <= 0 ? 0 : fileLoadMenuState.unk4 > 12 ? 12 : fileLoadMenuState.unk4;
-    if (fileLoadMenuState.unk4 >= 7) {
-        fileLoadMenuState.unkC += 0x30;
-        fileLoadMenuState.unkC = fileLoadMenuState.unkC <= 0 ? 0 : fileLoadMenuState.unkC > 0x80 ? 0x80 : fileLoadMenuState.unkC;
+    fileLoadMenuState.transitionTickCount++;
+    fileLoadMenuState.transitionTickCount = fileLoadMenuState.transitionTickCount <= 0 ? 0 : fileLoadMenuState.transitionTickCount > 12 ? 12 : fileLoadMenuState.transitionTickCount;
+    if (fileLoadMenuState.transitionTickCount >= 7) {
+        fileLoadMenuState.standardRowAlpha += 0x30;
+        fileLoadMenuState.standardRowAlpha = fileLoadMenuState.standardRowAlpha <= 0 ? 0 : fileLoadMenuState.standardRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.standardRowAlpha;
     }
 }
 
@@ -2947,48 +2930,48 @@ void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
 }
 
 void fileLoadSetMode(s8 mode) {
-    fileLoadMenuState.unk14 = 0;
-    fileLoadMenuState.unk10 = mode;
+    fileLoadMenuState.rowVerticalOffset = 0;
+    fileLoadMenuState.slideMode = mode;
     if (mode == 1) {
-        fileLoadMenuState.unk1C = 0;
-        fileLoadMenuState.unk18 = 0x74;
+        fileLoadMenuState.trailingRowAlpha = 0;
+        fileLoadMenuState.leadingRowAlpha = 0x74;
     } else {
-        fileLoadMenuState.unk18 = 0;
-        fileLoadMenuState.unk1C = 0x74;
+        fileLoadMenuState.leadingRowAlpha = 0;
+        fileLoadMenuState.trailingRowAlpha = 0x74;
     }
 }
 
 void fileResetLoadContextSlide(void) {
-    fileLoadMenuState.unk14 = 0;
-    fileLoadMenuState.unk10 = 0;
-    fileLoadMenuState.unk4 = 0;
+    fileLoadMenuState.rowVerticalOffset = 0;
+    fileLoadMenuState.slideMode = 0;
+    fileLoadMenuState.transitionTickCount = 0;
 }
 
 void fileLoadCtxSlideUpdate(void) {
-    switch (fileLoadMenuState.unk10) {
+    switch (fileLoadMenuState.slideMode) {
     case 1:
-        fileLoadMenuState.unk14 -= 0x14;
-        fileLoadMenuState.unk14 = fileLoadMenuState.unk14 <= -0x6E ? -0x6E : fileLoadMenuState.unk14 > 0 ? 0 : fileLoadMenuState.unk14;
-        if (fileLoadMenuState.unk14 <= -0x6E) {
-            fileLoadMenuState.unk14 = 0;
-            fileLoadMenuState.unk10 = 0;
+        fileLoadMenuState.rowVerticalOffset -= 0x14;
+        fileLoadMenuState.rowVerticalOffset = fileLoadMenuState.rowVerticalOffset <= -0x6E ? -0x6E : fileLoadMenuState.rowVerticalOffset > 0 ? 0 : fileLoadMenuState.rowVerticalOffset;
+        if (fileLoadMenuState.rowVerticalOffset <= -0x6E) {
+            fileLoadMenuState.rowVerticalOffset = 0;
+            fileLoadMenuState.slideMode = 0;
         }
-        fileLoadMenuState.unk18 -= 0x20;
-        fileLoadMenuState.unk18 = fileLoadMenuState.unk18 <= 0 ? 0 : fileLoadMenuState.unk18 > 0x80 ? 0x80 : fileLoadMenuState.unk18;
-        fileLoadMenuState.unk1C += 0x10;
-        fileLoadMenuState.unk1C = fileLoadMenuState.unk1C <= 0 ? 0 : fileLoadMenuState.unk1C > 0x80 ? 0x80 : fileLoadMenuState.unk1C;
+        fileLoadMenuState.leadingRowAlpha -= 0x20;
+        fileLoadMenuState.leadingRowAlpha = fileLoadMenuState.leadingRowAlpha <= 0 ? 0 : fileLoadMenuState.leadingRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.leadingRowAlpha;
+        fileLoadMenuState.trailingRowAlpha += 0x10;
+        fileLoadMenuState.trailingRowAlpha = fileLoadMenuState.trailingRowAlpha <= 0 ? 0 : fileLoadMenuState.trailingRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.trailingRowAlpha;
         break;
     case 2:
-        fileLoadMenuState.unk14 += 0x14;
-        fileLoadMenuState.unk14 = fileLoadMenuState.unk14 <= 0 ? 0 : fileLoadMenuState.unk14 > 0x6E ? 0x6E : fileLoadMenuState.unk14;
-        if (fileLoadMenuState.unk14 >= 0x6E) {
-            fileLoadMenuState.unk14 = 0;
-            fileLoadMenuState.unk10 = 0;
+        fileLoadMenuState.rowVerticalOffset += 0x14;
+        fileLoadMenuState.rowVerticalOffset = fileLoadMenuState.rowVerticalOffset <= 0 ? 0 : fileLoadMenuState.rowVerticalOffset > 0x6E ? 0x6E : fileLoadMenuState.rowVerticalOffset;
+        if (fileLoadMenuState.rowVerticalOffset >= 0x6E) {
+            fileLoadMenuState.rowVerticalOffset = 0;
+            fileLoadMenuState.slideMode = 0;
         }
-        fileLoadMenuState.unk18 += 0x10;
-        fileLoadMenuState.unk18 = fileLoadMenuState.unk18 <= 0 ? 0 : fileLoadMenuState.unk18 > 0x80 ? 0x80 : fileLoadMenuState.unk18;
-        fileLoadMenuState.unk1C -= 0x20;
-        fileLoadMenuState.unk1C = fileLoadMenuState.unk1C <= 0 ? 0 : fileLoadMenuState.unk1C > 0x80 ? 0x80 : fileLoadMenuState.unk1C;
+        fileLoadMenuState.leadingRowAlpha += 0x10;
+        fileLoadMenuState.leadingRowAlpha = fileLoadMenuState.leadingRowAlpha <= 0 ? 0 : fileLoadMenuState.leadingRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.leadingRowAlpha;
+        fileLoadMenuState.trailingRowAlpha -= 0x20;
+        fileLoadMenuState.trailingRowAlpha = fileLoadMenuState.trailingRowAlpha <= 0 ? 0 : fileLoadMenuState.trailingRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.trailingRowAlpha;
         break;
     }
 }
@@ -5051,9 +5034,9 @@ void camAimRotation(CamAim *obj, void *dst)
     VU0_STORE_VF(vf10, v);
     pitch = 0.0f;
     if ((flags & 0x40) == 0) {
-        pitch = -func_002FA1C0(-v[1]);
+        pitch = -acosf(-v[1]);
     }
-    sdfConvertEulerAnglesToQuaternionVU(pitch, func_002FA1F0(v[0], v[2]), 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(v[0], v[2]), 0.0f);
     if (obj->flags & 0x40) {
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, obj->quat);
@@ -5302,7 +5285,6 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
 #include "eff_anim.h"
 
 extern void billInvokeCallback(struct BillObj *);
-extern void effCopyVector(void *, void *);
 extern void fileReadRecordSecondVector(void *, u128 *);
 extern void fileReadVectorPtr20(void *, u128 *);
 extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
@@ -5739,7 +5721,7 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, delta);
     if (delta[0] != 0.0f || delta[1] != 0.0f) {
-        out->angle = func_002FA1F0(delta[1], delta[0]);
+        out->angle = atan2f(delta[1], delta[0]);
     }
     VU0_MOVE_VF(vf28, vf20);
     VU0_MOVE_VF(vf29, vf21);

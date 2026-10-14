@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_boss_data_api.h"
 #include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -17,6 +18,7 @@
 #include "dat_state.h"
 #include "sdf_resource.h"
 #include "mdl_flag_api.h"
+#include "btl_scene_initializer.h"
 
 extern void btlInterpolateVectorStep();
 
@@ -200,7 +202,71 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00227528);
+/* With no unit, report phase 18/19 from the last eligible pair.
+ * A qualifying first unit instead reports 15 when its inactive effect is ready. */
+s32 func_00227528(BtlUnit *unit) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleLinkedEffectState *effect = &battle->effect->linked;
+    BtlUnit *node;
+    BtlUnit *first;
+    BtlUnit *second;
+
+    if (unit == NULL) {
+        if (effect->active != 1) {
+            goto unavailable_pair;
+        }
+        first = NULL;
+        second = NULL;
+        for (node = battle->units; node != NULL; node = node->nextActor) {
+            if (node->status.flags & 1) {
+                if (node->status.flags & 0x400) {
+                    switch (node->partyRecord.unitId) {
+                    case 0x12F:
+                        first = node;
+                        break;
+                    case 0x12E:
+                        second = node;
+                        break;
+                    }
+                }
+            }
+        }
+        if (first == NULL) {
+            goto unavailable_pair;
+        }
+        if (second == NULL) {
+            goto unavailable_pair;
+        }
+        if (first->unkEC < 0x14) {
+            if (first->unkEC >= 0x12) {
+                return first->unkEC;
+            }
+        }
+        if (second->unkEC < 0x14) {
+            if (second->unkEC >= 0x12) {
+                return second->unkEC;
+            }
+        }
+/* Share pair rejections so early conversion does not hoist the return
+ * value into the phase test. Keep single-unit rejection paths separate. */
+unavailable_pair:
+        return -1;
+    }
+    if (!(unit->status.flags & 1)) {
+        return -1;
+    }
+    if (!(unit->status.flags & 0x400)) {
+        return -1;
+    }
+    if (unit->partyRecord.unitId != 0x12F) {
+        return -1;
+    }
+    if (effect->active != 0) {
+        return -1;
+    }
+    return effect->actor == NULL ? -1 : 0xF;
+}
+
 
 s32 btlRemapEffectActiveCombatantAction(BtlUnit *unit, s32 code) {
     u32 id;

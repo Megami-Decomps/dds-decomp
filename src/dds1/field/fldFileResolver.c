@@ -4,7 +4,9 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
@@ -22,6 +24,7 @@
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
+#include "fld_encounter_runtime_api.h"
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "sdf_resource.h"
@@ -608,11 +611,10 @@ extern void fldReleaseObjectSlots();
 extern void fldReleaseTitleSlots();
 extern void fldReleaseResourceHandles();
 extern void fldReleaseTextureSlots();
-extern void fldResetObjectSlots();
+#include "fld_object_slot_api.h"
 extern s32 fldTitleMiniIsActive();
 extern void fldResetZoneRecordsAndActorSlots();
 extern void fldResetPendingSounds();
-extern void fldReleaseSceneRecordChunk();
 extern void fldReleaseMenuSlotsAfterWait();
 extern void mnuReleaseResourceEntries();
 extern void sdfResourceListRelease();
@@ -1389,7 +1391,7 @@ extern void fldUploadSkyBuffer(void *source);
 extern void fldCopyActorWaypointTable(const void *source);
 extern void fldCopyInfoTable(const void *);
 extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle);
-extern void fldCacheMapLabelLengths();
+#include "fld_label_cache_api.h"
 
 void fldLoadAreaPackedResources(void) {
     char name[32];
@@ -1487,9 +1489,7 @@ extern char D_003BACA0[];
 extern char D_003BACA8[];
 extern FieldPlayerSceneWork D_0032F1A0;
 extern void fldAllocateBackgroundBuffer(void);
-extern void fldResetObjectSlots();
 extern void fldReleaseTitleSlots();
-extern void fldReleaseSceneRecordChunk();
 extern void fldCreateResourceScriptObjects(void);
 extern u8 fldHasAreaResourceNameChanged(void);
 extern void fldLoadAreaPackedResources(void);
@@ -1814,20 +1814,7 @@ SdfPoolNode *fldGetDisplayTableRow(void) {
     return &kwlnDrawSurfaces[fldDisplayRow];
 }
 
-typedef struct FldSpriteCorner {
-    s32 u, v;
-    u8 pad08[8];
-    s32 x, y;
-    s32 mask;
-    s16 flag;
-    u8 pad1E[2];
-} FldSpriteCorner;
-
-/* Sprite vertex record (0x50 bytes): colour, then two corners of the quad. */
-typedef struct FldSpriteVertex {
-    s32 r, g, b, a;
-    FldSpriteCorner corner[2];
-} FldSpriteVertex;
+#include "fld_sprite_vertex.h"
 
 void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
     void *handle = sdfConsAllocateColumnPacket(1);
@@ -2478,7 +2465,6 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
 }
 
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
-extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
@@ -7598,38 +7584,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
 extern s32 D_003BAE18;
 extern s32 D_003BAE20;
 extern s32 D_003BAE2C;
-typedef struct FldTriggerSphere {
-    u32 kind;
-    f32 radius;
-} FldTriggerSphere;
-
-typedef struct FldTriggerPlane {
-    u32 kind;
-    f32 width;
-    f32 height;
-} FldTriggerPlane;
-
-typedef struct FldTriggerBox {
-    u32 kind;
-    f32 size[3];
-} FldTriggerBox;
-
-/* Serialized kind0/1/2 records occupy8/12/16 bytes. The action constructor
- * embeds only the real8-byte sphere prefix, followed by its task descriptor;
- * shape pointers inspect the member selected by kind, not a padded view. */
-typedef union FldTriggerShape {
-    u32 kind;
-    FldTriggerSphere sphere;
-    FldTriggerPlane plane;
-    FldTriggerBox box;
-} FldTriggerShape;
-
-typedef struct FldTaskInfo {
-    s32 unk0;
-    s32 slot;
-    u32 unk08;
-    FldTriggerShape *shape;
-} FldTaskInfo;
+#include "fld_trigger_shape.h"
 extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 /* Clear slot handles and destroy named tasks reached through linked display values. */
 void fldResetTaskSlots(void) {

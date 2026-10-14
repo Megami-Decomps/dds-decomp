@@ -620,8 +620,6 @@ s32 mnuValidateProfileEntry(MantraFlagResource *slot, DatPartyRecord *partyRecor
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", mnuPrepareMantraPanelEntriesForTutorial);
-
 /* Updated as a halfword here, and read as signed high-byte flags elsewhere. */
 typedef struct MenuPanelPositionRecord {
     s16 id;
@@ -640,6 +638,31 @@ static inline s32 mnuPanelFlagsWithStatus(s32 flags, s32 status) {
 }
 
 extern MenuPanelPositionRecord D_003CFEB8[][37];
+
+/* Reset all tutorial entries; mark the two tutorial-specific mantra ids.
+ * cc1 keeps the consumed mask and shared status/group value across both
+ * loops. Initializing group before them gives retail's sched1 LUID tie. */
+void mnuPrepareMantraPanelEntriesForTutorial(void) {
+    s32 group = 0;
+    s32 statusMask = ~0xF;
+    s32 defaultStatus = 2;
+    u32 entry;
+
+    for (; group < 3; group++) {
+        for (entry = 0; entry < 37; entry++) {
+            D_003CFEB8[group][entry].stateFlags = defaultStatus;
+            if (group == 1 && D_003CFEB8[1][entry].id == 0x4B) {
+                D_003CFEB8[1][entry].stateFlags =
+                    (D_003CFEB8[1][entry].stateFlags & statusMask) | 1;
+            }
+            if (group == defaultStatus && D_003CFEB8[2][entry].id == 0x45) {
+                D_003CFEB8[2][entry].stateFlags =
+                    (D_003CFEB8[2][entry].stateFlags & statusMask) | 1;
+            }
+        }
+    }
+}
+
 
 /* Find one panel record by its script ID within a selected 37-entry row. */
 MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32 selector, u16 id) {

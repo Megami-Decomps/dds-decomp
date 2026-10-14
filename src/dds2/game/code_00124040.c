@@ -3,8 +3,10 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_encounter_runtime_api.h"
 #include "sdf_message.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -41,7 +43,7 @@
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
 #include "dds3_world_primary.h"
-extern void func_00133F08(void);
+extern void fldUpdateCameraHeadingTransition(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 
 extern f32 D_0038A6F0[4];
@@ -238,11 +240,8 @@ void fldLoadPlayerModel(void);
 
 extern u32 D_00389790[];
 
-extern s32 fldIsAreaResourceReady(void);
 
-extern u32 fldPollAreaResourceLoad(void);
 
-extern u32 fldGetResourceReadyFlag(void);
 
 extern void fldFreeDisplayObjects(void);
 
@@ -254,8 +253,6 @@ struct EffWorldNode;
 extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
 
 extern u8 D_0037F530[];
-
-extern s32 fldGetEncounterRuntimeResult(void);
 
 extern u8 fldGetCampSceneControlMode(void);
 
@@ -948,7 +945,6 @@ extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceR
 extern void *dds3GetTransformSourceData(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern void fldApplySceneLightSet(s32, s32);
 extern void fldSpawnPlayerUnits(f32 *transform);
 extern void fldCreateChaseCameraObject(void);
@@ -1202,7 +1198,6 @@ typedef struct FieldVec4 {
 
 extern FieldVec4 D_00412EB0;
 extern void effMiscAxisAngleToQuaternionVU(f32);
-extern void effMiscQuatMultiplyVU(void);
 extern s32 D_00389888[];
 extern MdlCtx *fldPlayerModelContext;
 
@@ -1407,8 +1402,6 @@ void fldCreatePlayerObject(void) {
 extern void effObjSetInnerFloat(u32, f32);
 
 extern void effMiscAxisAngleToQuaternionVU(f32);
-
-extern void effMiscQuatMultiplyVU(void);
 
 extern void dds3SetObjectFlags(void *, u32);
 
@@ -1834,7 +1827,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (fldAreaState.consumedFlags & 15) {
         fldResetPlayerSceneObjectState();
         evtStartSceneResourceTask(dds3GetWorldObject(), D_00412F30);
-        func_00133F08();
+        fldUpdateCameraHeadingTransition();
         return 0;
     }
     if (!(fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) &&
@@ -1995,7 +1988,7 @@ u8 fldGetCampSceneControlMode(void) {
 
 extern void func_00149A00(void);
 
-extern void func_00133F08(void);
+extern void fldUpdateCameraHeadingTransition(void);
 
 extern u8 fldHasPendingSceneFlags(void);
 
@@ -2061,7 +2054,7 @@ s32 fldUpdateCampMenuTransition(void) {
         sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
         fldSetSceneLifecycleFlags(1);
         fldResetPlayerSceneObjectState();
-        func_00133F08();
+        fldUpdateCameraHeadingTransition();
         evtSetSolarOverlayFullyTransparent();
         scene->sceneMode = 4;
         scene->sceneState = 5;
@@ -2128,7 +2121,7 @@ s32 fldUpdateNextFloorTransition(void) {
                 scene->sceneMode = 4;
                 scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
-                func_00133F08();
+                fldUpdateCameraHeadingTransition();
                 kwlnFadeInStart(0, 0, 0, 4);
                 D_00435F80 = 5;
                 fldSetCameraNodeModeWithTen();
@@ -2208,7 +2201,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             return 0;
         }
     }
-    if (fldTestSceneControlFlags(0x40) == 0) func_00133F08();
+    if (fldTestSceneControlFlags(0x40) == 0) fldUpdateCameraHeadingTransition();
     switch (controller->stage) {
     case 0:
         D_00435F78 = 0;

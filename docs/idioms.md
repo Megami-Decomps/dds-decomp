@@ -64,6 +64,22 @@ Retail example: `func_0018CC98`.
   return v;`. A `return X;` per arm gives `j` instead of `b`
   (`func_002C2F40`, `func_0030AAB0`).
 
+### Repeated call arms can defer merging until after allocation
+
+Separate cases with the same call and a `break` to a shared failure return
+can preserve two predecessors through `15.ce`. That prevents
+`find_if_case_2` from hoisting the zero return into either test block. The
+comparison can then use the return register, and reorg retains an annulled
+failure branch. In `27.jump2`, cross-jumping merges the now-identical call
+tails into one.
+
+Confirmed by DDS1 `func_001FCAC0` and DDS2 `func_0020EB40`: cases `0x40` and
+`0x400` each call `btlRollAiBucket`, break when its unsigned result is at
+least 25, and otherwise return 1. Combining those case labels allows the
+zero-return hoist, producing `$v1` plus a plain `beq` in place of retail's
+`$v0` plus `beql`. Qualified ordinary/hooked compiler output and complete
+retail builds prove the separate-case form.
+
 ### State-field continuation after dispatch
 
 When each state transition is published to a signed-byte work field and the
@@ -1826,7 +1842,7 @@ splitting copy, not a pointer or user-variable flag), then by descending
 `floor_log2(refs) * refs / live_length * 10000 * width`, and only then by
 ascending pseudo number. Pseudos local to one basic block with a single death
 are allocated earlier by local-alloc, with copy suggestions tried first.
-Controls on DDS1 `func_00104168`, `func_002E69F0` and others: plain versus
+Controls on DDS1 `func_00104168`, `sdfDevResolvePathForWorker` and others: plain versus
 `register` storage class, prototyped versus unprototyped integer calls, and
 visible/static/opaque out-of-line callees all left the priorities and homes
 unchanged. The ordering follows from what is referenced and for how long:
@@ -12256,3 +12272,26 @@ the native loop and 492-byte extent. The whole-unit gate is 160 match, 0
 differ; no owner or prototype changes were needed. The trace's hooked and
 unhooked compiler outputs agree.
 
+
+### Share rejection paths within their actual query branch
+
+DDS1 `func_00206180` and DDS2 `func_00227528` are 312-byte phase callbacks.
+With a null unit they require the active effect and both eligible actors, then
+return phase 18 or 19; with a unit they apply separate eligibility/readiness
+guards. A common rejection label **inside the null-unit branch** reproduces
+both bodies. Keep the single-unit early returns separate.
+
+The qualified actual compiler trace explains the scope: with separate early
+returns, `15.ce`'s `find_if_case_1` and `dead_or_predicable` hoist the failure
+assignment (`uid39`, hard `$2 = -1`) into the active-phase test. Local allocation
+then puts its constant 1 in `$3` and active byte in `$4`; the battle pointer
+conflicts with `$4` and gets `$6`. With the real pair rejections sharing
+`unavailable_pair`, label 195 still has four predecessors in `15.ce` and its
+return assignment `uid198` stays outside that test. Constant 1 can use `$2`,
+the active byte `$3`, and battle pseudo 85 can use `$4`. Later delay filling
+places the failure result in the native branch slot.
+
+Sharing every failure across both query branches is a measured negative:
+it changes the unit-present guards and emits 316 bytes. The accepted form
+shares only the actual pair-query failures; it uses no flags, extra references,
+alternate types or artificial lifetimes. Complete owners check 153/0 and 44/0.

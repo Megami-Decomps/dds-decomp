@@ -1,6 +1,9 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_boss_data_api.h"
+#include "btl_event_asset_api.h"
+#include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_command_partner_output.h"
@@ -1303,11 +1306,11 @@ void btlComputeProfileMaxMp(DatPartyRecord *unit) {
     ptyComputeMaxMp(unit);
 }
 
-s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *stats) {
+u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *stats) {
     return datComputeSkillBoostedMaxHp(stats);
 }
 
-s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
+u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
     return datComputeSkillBoostedMaxMp(stats);
 }
 
@@ -2768,6 +2771,8 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
     unit->entrySlots[index].unk02 = -1;
     unit->entrySlots[index].countdown = -1;
 }
+
+#include "btl_actor_entry_code_api.h"
 
 s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;

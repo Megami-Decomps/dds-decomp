@@ -5,6 +5,8 @@
 #include "evt_world.h"
 #include "common.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_object_slot_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
 #include "sdf_math_vector4.h"
@@ -778,6 +780,8 @@ extern char D_0033EC90[][0x18];
 extern s16 D_003D43B0[], D_003D4408[], D_003D4460[];
 
 extern s16 D_003BD7D0;
+
+#include "fld_label_cache_api.h"
 
 void fldCacheMapLabelLengths(s32 map) {
     s32 i;
@@ -1776,15 +1780,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
 
 extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 
-typedef struct FldFogParams {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    s32 unk10;
-} FldFogParams;
-
-extern FldFogParams D_00324B30;
+extern KwlnDrawVectorParams D_00324B30;
 
 
 
@@ -1919,11 +1915,11 @@ void fldEnterSceneCamera(void) {
     PCP_COPY_VECTOR(&D_00324A30, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
     PCP_COPY_VECTOR(&D_00324A40, &up);
-    D_00324B30.unk0 = 255.0f;
-    D_00324B30.unk8 = 1000.0f;
-    D_00324B30.unk4 = 255.0f;
-    D_00324B30.unkC = 20000.0f;
-    D_00324B30.unk10 = 0x108010;
+    D_00324B30.fogNear = 255.0f;
+    D_00324B30.depthNear = 1000.0f;
+    D_00324B30.fogFar = 255.0f;
+    D_00324B30.depthFar = 20000.0f;
+    D_00324B30.fogColor = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -1977,11 +1973,11 @@ void fldLoadSceneModelsAndCamera(void) {
     PCP_COPY_VECTOR(&D_00324A30, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
     PCP_COPY_VECTOR(&D_00324A40, &up);
-    D_00324B30.unk0 = 255.0f;
-    D_00324B30.unk8 = 1000.0f;
-    D_00324B30.unk4 = 255.0f;
-    D_00324B30.unkC = 20000.0f;
-    D_00324B30.unk10 = 0x108010;
+    D_00324B30.fogNear = 255.0f;
+    D_00324B30.depthNear = 1000.0f;
+    D_00324B30.fogFar = 255.0f;
+    D_00324B30.depthFar = 20000.0f;
+    D_00324B30.fogColor = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -2149,11 +2145,11 @@ void fldUpdateAutomapInput(void) {
     PCP_COPY_VECTOR(&D_00324A30, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
     PCP_COPY_VECTOR(&D_00324A40, up);
-    D_00324B30.unk0 = 255.0f;
-    D_00324B30.unk8 = 1000.0f;
-    D_00324B30.unk4 = 255.0f;
-    D_00324B30.unkC = 20000.0f;
-    D_00324B30.unk10 = 0x808080;
+    D_00324B30.fogNear = 255.0f;
+    D_00324B30.depthNear = 1000.0f;
+    D_00324B30.fogFar = 255.0f;
+    D_00324B30.depthFar = 20000.0f;
+    D_00324B30.fogColor = 0x808080;
     PCP_COPY_VECTOR(sdfViewTargetVector, eye);
     PCP_COPY_VECTOR(sdfViewEyeVector, focus);
     PCP_COPY_VECTOR(sdfViewUpVector, up);
@@ -2188,11 +2184,11 @@ void fldCenterCameraOnEntry(void) {
     PCP_COPY_VECTOR(&D_00324A30, eye);
     PCP_COPY_VECTOR(&D_00324A20, focus);
     PCP_COPY_VECTOR(&D_00324A40, up);
-    D_00324B30.unk0 = 255.0f;
-    D_00324B30.unk8 = 1000.0f;
-    D_00324B30.unk4 = 255.0f;
-    D_00324B30.unkC = 20000.0f;
-    D_00324B30.unk10 = 0x808080;
+    D_00324B30.fogNear = 255.0f;
+    D_00324B30.depthNear = 1000.0f;
+    D_00324B30.fogFar = 255.0f;
+    D_00324B30.depthFar = 20000.0f;
+    D_00324B30.fogColor = 0x808080;
 }
 
 /* Stores the area, floor/room and third location selection, and selects the

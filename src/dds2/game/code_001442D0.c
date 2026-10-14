@@ -6,7 +6,10 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_object_slot_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
 #include "sdf_math_vector4.h"
@@ -48,7 +51,6 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
@@ -374,8 +376,7 @@ typedef struct {
 } FieldResourceSlot;
 
 extern FieldResourceSlot D_0044FFB0[];
-
-extern void fldCacheMapLabelLengths(s32);
+#include "fld_label_cache_api.h"
 
 extern void fldLoadSceneRecordTable(void);
 
@@ -2155,15 +2156,7 @@ void fldReleaseSceneDevSlotsAndTextures(void) {
 
 extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 
-typedef struct FldFogParams {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    s32 unk10;
-} FldFogParams;
-
-extern FldFogParams D_0037FB30;
+extern KwlnDrawVectorParams D_0037FB30;
 
 
 
@@ -2239,11 +2232,11 @@ void fldEnterSceneCamera(void) {
     PCP_COPY_VECTOR(&D_0037FA30, eye);
     PCP_COPY_VECTOR(&D_0037FA20, focus);
     PCP_COPY_VECTOR(&D_0037FA40, &up);
-    D_0037FB30.unk0 = 255.0f;
-    D_0037FB30.unk8 = 1000.0f;
-    D_0037FB30.unk4 = 255.0f;
-    D_0037FB30.unkC = 20000.0f;
-    D_0037FB30.unk10 = 0x108010;
+    D_0037FB30.fogNear = 255.0f;
+    D_0037FB30.depthNear = 1000.0f;
+    D_0037FB30.fogFar = 255.0f;
+    D_0037FB30.depthFar = 20000.0f;
+    D_0037FB30.fogColor = 0x108010;
     D_0037F980.camera.offsetX = 2244.0f;
     D_0037F980.camera.offsetY = 2118.0f;
 }
@@ -2295,11 +2288,11 @@ void fldLoadSceneModelsAndCamera(void) {
     PCP_COPY_VECTOR(&D_0037FA30, eye);
     PCP_COPY_VECTOR(&D_0037FA20, focus);
     PCP_COPY_VECTOR(&D_0037FA40, &up);
-    D_0037FB30.unk0 = 255.0f;
-    D_0037FB30.unk8 = 1000.0f;
-    D_0037FB30.unk4 = 255.0f;
-    D_0037FB30.unkC = 20000.0f;
-    D_0037FB30.unk10 = 0x108010;
+    D_0037FB30.fogNear = 255.0f;
+    D_0037FB30.depthNear = 1000.0f;
+    D_0037FB30.fogFar = 255.0f;
+    D_0037FB30.depthFar = 20000.0f;
+    D_0037FB30.fogColor = 0x108010;
     D_0037F980.camera.offsetX = 2241.0f;
     D_0037F980.camera.offsetY = 2113.0f;
 }
@@ -2467,11 +2460,11 @@ void fldUpdateAutomapInput(void) {
     PCP_COPY_VECTOR(&D_0037FA30, eye);
     PCP_COPY_VECTOR(&D_0037FA20, focus);
     PCP_COPY_VECTOR(&D_0037FA40, up);
-    D_0037FB30.unk0 = 255.0f;
-    D_0037FB30.unk8 = 1000.0f;
-    D_0037FB30.unk4 = 255.0f;
-    D_0037FB30.unkC = 20000.0f;
-    D_0037FB30.unk10 = 0x808080;
+    D_0037FB30.fogNear = 255.0f;
+    D_0037FB30.depthNear = 1000.0f;
+    D_0037FB30.fogFar = 255.0f;
+    D_0037FB30.depthFar = 20000.0f;
+    D_0037FB30.fogColor = 0x808080;
     PCP_COPY_VECTOR(sdfViewTargetVector, eye);
     PCP_COPY_VECTOR(sdfViewEyeVector, focus);
     PCP_COPY_VECTOR(sdfViewUpVector, up);
@@ -2506,11 +2499,11 @@ void fldCenterCameraOnEntry(void) {
     PCP_COPY_VECTOR(&D_0037FA30, eye);
     PCP_COPY_VECTOR(&D_0037FA20, focus);
     PCP_COPY_VECTOR(&D_0037FA40, up);
-    D_0037FB30.unk0 = 255.0f;
-    D_0037FB30.unk8 = 1000.0f;
-    D_0037FB30.unk4 = 255.0f;
-    D_0037FB30.unkC = 20000.0f;
-    D_0037FB30.unk10 = 0x808080;
+    D_0037FB30.fogNear = 255.0f;
+    D_0037FB30.depthNear = 1000.0f;
+    D_0037FB30.fogFar = 255.0f;
+    D_0037FB30.depthFar = 20000.0f;
+    D_0037FB30.fogColor = 0x808080;
 }
 
 /* Stores the area, room and third location selection, and selects the area's
@@ -2798,8 +2791,6 @@ void fldReleaseTextureSlots(void) {
 extern u32 fldPlayerObject;
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
-extern void sdfVuLoadRotationMatrixY(f32 angle);
-
 void fldUpdatePositionedTextureNodes(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 matrix[4][4] __attribute__((aligned(16)));

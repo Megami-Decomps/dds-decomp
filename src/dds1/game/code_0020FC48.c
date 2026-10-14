@@ -1,6 +1,8 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_event_asset_api.h"
+#include "kwln_background_fade_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
@@ -21,6 +23,7 @@
 #include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
+#include "btl_scene_initializer.h"
 #include "btl_action.h"
 #include "btl_sound.h"
 #include "evt_unit.h"
@@ -747,6 +750,8 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 al
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
+#include "btl_actor_entry_code_api.h"
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);
@@ -1426,16 +1431,16 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
     sdfAppendDmaTagToList(list, (u32)tag);
 }
 
-extern f32 func_002F9F60(f32);
+extern f32 cosf(f32);
 
-extern f32 func_002FA060(f32);
+extern f32 sinf(f32);
 
 void btlInitVisibilityGrid(void) {
     f32 angle = 3.1415927f / 6.0f; /* 30 degrees */
     s32 x;
     s32 y;
-    btlRuntimeState.cellWidth = func_002F9F60(angle) * 16.0f + 1.25f;
-    btlRuntimeState.cellHeight = (func_002FA060(angle) * 16.0f + 16.0f + 2.5f) * 0.5f;
+    btlRuntimeState.cellWidth = cosf(angle) * 16.0f + 1.25f;
+    btlRuntimeState.cellHeight = (sinf(angle) * 16.0f + 16.0f + 2.5f) * 0.5f;
     btlRuntimeState.gridWidth = 0x200 / (btlRuntimeState.cellWidth * 2) + 1;
     btlRuntimeState.gridHeight = 0x1C0 / (btlRuntimeState.cellHeight * 2) + 1;
     btlRuntimeState.ownedData = sdfAllocSizeClassBlock(btlRuntimeState.gridWidth * btlRuntimeState.gridHeight);
@@ -1605,6 +1610,8 @@ extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
 extern u8 D_00325870[];
 
+#include "kwln_texture_reference_flag_api.h"
+
 void btlClearOverlayBuffers(void) {
     u8 *entry;
     s32 i;
@@ -1675,7 +1682,6 @@ void btlInitializeOverlayGraphics(void) {
 
 extern void fldDrawSkyGradient(void);
 
-extern void kwlnFadeBackgroundStartOut(s32);
 
 extern u32 kwlnDrawControlFlags;
 

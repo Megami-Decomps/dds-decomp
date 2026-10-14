@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_admin_control_api.h"
 #include "sdf_chip.h"
 #include "dds3Admin.h"
 #include "kwln.h"

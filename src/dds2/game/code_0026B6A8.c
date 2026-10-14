@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "kwln.h"
 #include "kwln_fade.h"
@@ -34,7 +35,6 @@ extern DspUnitName *D_00435E48;
 
 extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void dspSetActive();
 
 s32 dspStartFlagEvent(s32 context) {
     s32 kind = *(s32 *)(context + 0x84);

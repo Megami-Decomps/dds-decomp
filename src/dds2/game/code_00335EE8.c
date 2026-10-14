@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_quaternion.h"
 #include "rw_matrix.h"
 #include "sdf_chip.h"
@@ -251,16 +252,16 @@ void sdfInvertScaledVuTransform(void) {
     VU0_MATRIX4_INVERT_SCALED();
 }
 
-extern f32 func_00353040(f32 angle);
-extern f32 func_00353140(f32 angle);
+extern f32 cosf(f32 angle);
+extern f32 sinf(f32 angle);
 
 /* Rotation loaders build the matrix in a volatile scratch array: it is read
  * only by the lqc2 asm through its address, and retail stores its four
  * elements in program order. */
 void sdfVuLoadRotationMatrixX(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     EE_MMI_UNIT_MATRIX((f32 *)m);
     m[1][1] = c;
@@ -272,8 +273,8 @@ void sdfVuLoadRotationMatrixX(f32 angle) {
 
 void sdfVuLoadRotationMatrixY(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     EE_MMI_UNIT_MATRIX((f32 *)m);
     m[0][0] = c;
@@ -286,8 +287,8 @@ void sdfVuLoadRotationMatrixY(f32 angle) {
 /* Build and load the Z-axis rotation matrix in primary VU0 registers. */
 void sdfVuLoadRotationMatrixZ(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     EE_MMI_UNIT_MATRIX((f32 *)m);
     m[0][0] = c;
@@ -304,8 +305,8 @@ void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d *axis, RwMatrix 
     f32 x;
     f32 y;
     f32 z;
-    f32 cosine = func_00353040(angle);
-    f32 sine = func_00353140(angle);
+    f32 cosine = cosf(angle);
+    f32 sine = sinf(angle);
 
     VU0_LOAD_VF(vf10, axis);
     VU0_NORMALIZE_VF10();

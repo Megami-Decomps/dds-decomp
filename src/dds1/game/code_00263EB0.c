@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "ui_color.h"
@@ -16,7 +17,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern u8 brsGetLevelStepCrossedBy(s32, s32);
 extern u8 brsGetLevelStepForValue(s32);
 extern s32 sprintf(char *, const char *, ...);
-extern void dspSetActive(s32);
 extern void evtStageTestQueueMotion(s32, u32);
 extern char D_003BC550[];
 extern char D_003BC558[];
@@ -412,7 +412,48 @@ s32 itfRunPanelMode2(KwlnTask *request) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00263EB0", brsAnimateSkillIconRows);
-INCLUDE_ASM(const s32, "game/code_00263EB0", mnuDrawItemPanelStatusIcons);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+extern const u32 D_003AFB20[4]; /* Shared with mnuDrawTitleFadeSprites. */
+
+/* Draw the primary skill icon and the secondary icon for one to three gains.
+ * cc1 sched1 favors the load that kills rows: capturing X/Y before opacity
+ * makes opacity issue first, then X/Y follow their LUID tie. The consumed
+ * count/color temporary preserves retail's allocation across the gates. */
+void mnuDrawItemPanelStatusIcons(BrsSkillPackageWork *work) {
+    u32 colors[4];
+    s32 value;
+    BrsSkillIconRow *rows;
+
+    memcpy(colors, D_003AFB20, sizeof(colors));
+    value = work->skillIconRows[0].opacity | 0x80808000;
+    colors[0] = value;
+    colors[1] = value;
+    colors[2] = value;
+    colors[3] = value;
+    effDrawSpriteWithCornerColors(work->skillIconRows[0].x << 4,
+        work->skillIconRows[0].y << 3, 0, colors, 0, work->teardownResource, 0x1D, 0x53);
+    rows = work->skillIconRows;
+    value = rows[1].count;
+    if (value >= 4) {
+        return;
+    }
+    if (value <= 0) {
+        return;
+    }
+    {
+        s32 x = rows[1].x;
+        s32 y = rows[1].y;
+
+        value = rows[1].opacity | 0x80808000;
+        colors[0] = value;
+        colors[1] = value;
+        colors[2] = value;
+        colors[3] = value;
+        effDrawSpriteWithCornerColors(x << 4, y << 3,
+            0, colors, 0, work->teardownResource, 0x1E, 0x53);
+    }
+}
 
 
 /* The opacity update latches at its threshold. Keep fadeProgress signed:
@@ -430,8 +471,6 @@ void itfUpdateFadeColor(BrsSkillPackageWork *work) {
         }
     }
 }
-
-extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_00263EB0", D_003AFB20);
 

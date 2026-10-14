@@ -14,8 +14,6 @@
 #include "sdf_chunk.h"
 #include "sdf_projection.h"
 
-/* Packed effect parameter-set accessor (see game/code_001624D0). */
-extern void *effParamTableGetBlock(void *data, s32 index);
 extern void effBossUpdateGeometry(void *work);
 extern void effBossSetPosition(void *dst, void *src);
 extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);

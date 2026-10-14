@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
@@ -16,7 +17,6 @@ extern void ptyApplyEventPenalty(s32);
 
 
 extern void effMiscNormalizeVU(void);
-extern void effMiscQuatMultiplyVU(void);
 void effObjInnerVecInit(ObjectTransform *node);
 
 u32 ptyScriptApplyEventPenalty(void) {

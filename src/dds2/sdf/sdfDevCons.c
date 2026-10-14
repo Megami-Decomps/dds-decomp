@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 #include "sdf_dev_cons.h"
+#include "sdf_dev_cons_stack_packets.h"
 #include "ee_mmi.h"
 
 #define SDF_DEVCONS_CELL_BYTES 2
@@ -309,12 +310,6 @@ void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 buffe
     packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
     packetBuffers->dmaChannel = sceDmaGetChan(2);
 }
-
-typedef struct DevConsStackPackets {
-    u8 header[0x30];
-    u8 data[0x1000]; /* packet storage handed to the console buffer setup */
-    u8 trailer[0x10];
-} DevConsStackPackets;
 
 extern DevConsState *D_00438AB0;
 void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);

@@ -55,7 +55,6 @@
 
 
 
-extern void *effParamTableGetBlock(void *data, s32 index);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 

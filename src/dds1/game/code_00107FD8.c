@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "dds3_admin_control_api.h"
 #include "sdf_dev_cons.h"
 #include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
@@ -7,6 +8,7 @@
 #include "sdf_packet_builders.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -90,9 +92,6 @@ extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 extern s32 kwlnTaskNoopCallback(KwlnTask *task);
 
 extern void fldStartSequenceRecord(void);
-
-extern void dds3AdminSetControlFlag(void);
-
 extern void btlStart(s32 mode, s32 pack, s32 encounter);
 
 extern void evtEventViewerDestroyTask(void);
@@ -240,7 +239,41 @@ void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color) {
 }
 
 /* Normalize the requested light direction; replace it immediately or prepare its blend. */
-INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnSetLightDirectionTarget);
+extern s16 D_003BD6D8[4];
+extern s16 D_003BD6E0[4];
+extern f32 D_003C2BC0[][4];
+extern f32 D_003C2BF0[][4];
+extern void kwlnBuildShortestArcQuaternion(void);
+
+void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction) {
+    u32 blendFlag;
+
+    if (D_00324770[lightIndex] != NULL) {
+        blendFlag = 8 << (lightIndex * 2);
+        if (blendFrames == 0) {
+            kwlnDrawControlFlags &= ~blendFlag;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_CLEAR_W(vf10);
+            VU0_STORE_VF(vf10, D_00324770[lightIndex] + 4);
+        } else {
+            D_003BD6E0[lightIndex] = blendFrames;
+            D_003BD6D8[lightIndex] = 0;
+            kwlnDrawControlFlags |= blendFlag;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_CLEAR_W(vf10);
+            VU0_NORMALIZE_VF10();
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, D_00324770[lightIndex] + 4);
+            VU0_CLEAR_W(vf10);
+            VU0_NORMALIZE_VF10();
+            /* No memory clobber here: retail recomputes the slot offset after the call. */
+            VU0_STORE_VF_UNCLOBBERED(vf10, D_003C2BC0[lightIndex]);
+            kwlnBuildShortestArcQuaternion();
+            VU0_STORE_VF(vf10, D_003C2BF0[lightIndex]);
+        }
+    }
+}
 
 extern u16 D_003BD6E6;
 extern u16 D_003BD6E8;
@@ -1197,7 +1230,6 @@ void evtCreateTestAndSkyTasks(void) {
     evtCreateSkyTask();
 }
 
-extern void kwlnFadeBackgroundStartOut();
 
 u32 evtInitializeSelectionScene(void) {
     D_003BA730 = 1;

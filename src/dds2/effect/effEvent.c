@@ -1696,7 +1696,6 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
     return work;
 }
 
-extern void *effParamTableGetBlock(void *data, s32 index);
 extern u32 effParamTableGetWord2(void *data, s32 index);
 
 /* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */

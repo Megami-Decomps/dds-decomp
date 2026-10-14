@@ -12,4 +12,7 @@ void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 void kwlnFadeStartIn(s32 duration);
 void kwlnFadeStartOut(s32 duration);
 
+/* Select the background fade visibility mode used by scene transitions. */
+void kwlnFadeSetMode(s32 visibilityMode);
+
 #endif /* KWLN_FADE_H */

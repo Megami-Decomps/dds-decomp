@@ -128,6 +128,8 @@ EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src);
 void effTrackPolyRelease(EffTrackPolyWork *work);
 void effTrackPolyUpdate(EffTrackPolyWork *work);
 
+/* Copy one vector from source storage into destination storage. */
+void effCopyVector(void *dst, void *src);
 void effCopyVectorToNodeInstance(struct EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(struct EffNode *node, const void *matrix);
 
@@ -197,6 +199,9 @@ typedef struct {
     EffResourceRectParams params;
     SdfTex *texture;
 } EffResourceRectWork; /* 0x28 */
+
+EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
+void effReleaseResourceTemplate(EffResourceRectWork *work);
 
 typedef char EffResourceRectDrawParams_size_must_be_0x18[(sizeof(EffResourceRectDrawParams) == 0x18) ? 1 : -1];
 typedef char EffResourceRectParams_size_must_be_0x24[(sizeof(EffResourceRectParams) == 0x24) ? 1 : -1];

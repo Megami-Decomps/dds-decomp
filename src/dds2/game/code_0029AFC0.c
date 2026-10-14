@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
@@ -33,7 +34,6 @@ extern void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *, BrsSkillPackageWor
 extern u8 brsGetLevelStepCrossedBy(s32, s32);
 extern u8 brsGetLevelStepForValue(s32);
 extern s32 sprintf(char *, const char *, ...);
-extern void dspSetActive(s32);
 extern char D_004379B0[];
 extern char D_004379B8[];
 

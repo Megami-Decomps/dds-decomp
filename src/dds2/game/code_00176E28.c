@@ -40,11 +40,6 @@
 #define EFF_RGB_MASK 0xFFFFFF
 #define EFF_DIRECT_SURFACE_COUNT 4
 
-extern void *effParamTableGetBlock(void *table, s32 index);
-
-
-
-
 extern EffPacketParams D_00451FF0[];
 extern u32 D_003B12C0[];
 extern SdfPoolNode *D_003B1308[];

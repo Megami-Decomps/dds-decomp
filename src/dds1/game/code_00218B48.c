@@ -1,4 +1,5 @@
 #include "dds3_path.h"
+#include "dds3_admin_control_api.h"
 #include "sdf_request.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -209,13 +210,6 @@ void mdlDrawViewerSelectionLabel(void);
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
 void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
-
-
-
-
-void dds3AdminSetControlFlag(void);
-
-
 void mdlCleanupViewerTasksAndResources(void);
 
 
@@ -895,7 +889,6 @@ void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f3
     VU0_STORE_VF_UNCLOBBERED(vf10, positionOut);
 }
 
-extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *billboard);
 
 
@@ -1533,7 +1526,6 @@ u32 mdlRunViewerAssetSelectionTask(void) {
 }
 
 extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern f32 sdfViewMatrix[];
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
@@ -3374,8 +3366,6 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     dds3SetObjectFlags(object, 0x400);
     return counter;
 }
-
-extern void effMiscQuatMultiplyVU(void);
 
 void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
     f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };

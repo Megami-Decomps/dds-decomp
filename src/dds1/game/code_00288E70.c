@@ -6,32 +6,11 @@
 #include "file_slot_flags.h"
 #include "file_request_entry.h"
 #include "file_manager_api.h"
+#include "file_transfer_job.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
 extern s32 D_003BD8E8;
-
-/* A 0x6C-byte async device transfer, distinct from an effect/file-queue FileJob. */
-typedef struct FileTransferJob {
-    u8 kind;      /* 0x00 */
-    u8 state;     /* 0x01 */
-    u8 retryCount; /* 0x02 */
-    u8 allocationMode; /* 0x03 */
-    struct FileTransferJob *next; /* 0x04 */
-    char *name;   /* 0x08 */
-    void *deviceRequest; /* 0x0C: transfer backend dereferences mode at +0x16 */
-    s32 transferBytes; /* 0x10: capped at 0x8000 for each device operation */
-    s32 totalBytes; /* 0x14 */
-    void (*completionCallback)(void *job, u32 arg); /* 0x18 */
-    u32 completionArg; /* 0x1C */
-    s32 allocationHandle; /* 0x20 */
-    u32 retainedAddress; /* 0x24 */
-    u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
-    struct FileTransferJob *completionNext; /* 0x2C */
-    u8 pad30[0x38];
-    u16 stateRequired; /* 0x68 */
-    u16 slot; /* 0x6A */
-} FileTransferJob;
 
 /* The open device state retains the resolved path at +0x10. */
 /* Completion node drained by fileManDispatchDone. */

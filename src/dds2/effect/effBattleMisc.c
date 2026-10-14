@@ -24,7 +24,6 @@ extern void dds3LoadCameraVectorVU(struct EffWorldNode *object);
 
 extern f32 D_003AF1C0[];
 extern f32 D_003AF1D8[];
-extern void sdfVuLoadRotationMatrixY(f32 angle);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];

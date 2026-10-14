@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_active_api.h"
 #include "mnu_camp_display.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
@@ -1234,7 +1235,49 @@ s32 mnuCampFindActiveSlot(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", mnuShopHasExtraOption);
+typedef struct ShopSourcePriceEntry {
+    u16 itemId;
+    u8 type;
+    u8 flags;
+    u16 pricePercent;
+} ShopSourcePriceEntry;
+
+typedef struct ShopSourcePriceRow {
+    u16 pricePercent;
+    ShopSourcePriceEntry entries[0x40];
+} ShopSourcePriceRow;
+
+extern ShopSourcePriceRow D_00368CF0[];
+
+/* True when the shop's source row or the active rank row stocks an available
+ * item in the 0xA0..0xBF range (entries of type 1 are skipped). */
+s32 mnuShopHasExtraOption(ShopScene *scene) {
+    s32 row;
+    u32 i;
+    u32 type;
+    u32 itemId;
+
+    row = campFlagRowValue(scene->initialSelection);
+    for (i = 0; i < 0x40; i++) {
+        itemId = D_00368CF0[row].entries[i].itemId;
+        type = D_00368CF0[row].entries[i].type;
+        if (type != 1 && itemId - 0xA0 < 0x20) {
+            return 1;
+        }
+    }
+    row = mnuCampFindActiveSlot();
+    if (row == -1) {
+        return 0;
+    }
+    for (i = 0; i < 0x20; i++) {
+        itemId = ((ShopRankPriceRow *)D_00369A88)[row].entries[i].itemId;
+        type = ((ShopRankPriceRow *)D_00369A88)[row].entries[i].mode;
+        if (type != 1 && itemId - 0xA0 < 0x20) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 
 extern void mnuDestroyWindowContainer(MenuWindowContainer *);
@@ -1418,20 +1461,6 @@ s32 mnuCampRunPanel2(KwlnTask *request) {
     return menuRunPanel((void *)state, 2, request);
 }
 
-typedef struct ShopSourcePriceEntry {
-    u16 itemId;
-    u8 type;
-    u8 flags;
-    u16 pricePercent;
-} ShopSourcePriceEntry;
-
-typedef struct ShopSourcePriceRow {
-    u16 pricePercent;
-    ShopSourcePriceEntry entries[0x40];
-} ShopSourcePriceRow;
-
-
-extern ShopSourcePriceRow D_00368CF0[];
 
 s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     u32 rowIndex;
@@ -3027,7 +3056,6 @@ u32 func_00247D50(void) {
 
 extern const char D_003AF528[];
 extern s32 evtIsActiveFlagSet(s32);
-extern void dspSetActive(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
 

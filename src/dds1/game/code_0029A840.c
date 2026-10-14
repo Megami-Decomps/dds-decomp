@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_object_node.h"
+#include "eff_model_owner.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -15,7 +16,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_tex_create.h"
 #include "sdf_chunk.h"
-#include "eff_expanded_list.h"
+#include "eff_expanded_source.h"
 #include "eff_update_flags.h"
 #include "btl_runtime.h"
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
@@ -39,14 +40,6 @@ typedef struct EffBattleTexHeaders {
 extern u32 D_003BC950;
 
 extern u32 D_003BC954;
-
-
-typedef struct EffModelOwner {
-    f32 scale;
-    MdlCtx *model;
-    SdfLightingPacketStorage *ownedBuffer;
-    u32 flags;
-} EffModelOwner;
 
 
 extern EffectObjectNode *effFloorModelListHead;
@@ -714,13 +707,6 @@ s32 effCountExpandedEntries(EffExpandedList *list) {
 }
 
 /* Serialized expanded list: 0x10-byte header, the entry table, then each entry's payload. */
-typedef struct EffExpandedSource {
-    u8 unk00[4];
-    u32 count;
-    u8 unk08[8];
-    EffExpandedEntry entries[1];
-} EffExpandedSource;
-
 /* Copy a serialized list into one allocation and retain a shared texture reference per entry. */
 struct EffExpandedList *effCreateTextureAnimationSet(u32 sourceAddress) {
     EffExpandedSource *source = (EffExpandedSource *)sourceAddress;

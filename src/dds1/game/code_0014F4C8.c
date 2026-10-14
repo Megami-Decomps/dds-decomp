@@ -102,7 +102,7 @@ extern s32 D_0032E3C0[];
 
 extern s32 scrReadIntParameter(s32);
 
-extern void func_00121DE0(s32, s32, s32, s32, s32, s32);
+extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 
 /* Pass five field-script arguments to the underlying handler. */
 s32 fldCmdMarkBitmapRegion(void) {
@@ -110,7 +110,7 @@ s32 fldCmdMarkBitmapRegion(void) {
     s32 second = scrReadIntParameter(1);
     s32 third = scrReadIntParameter(2);
     s32 fourth = scrReadIntParameter(3);
-    func_00121DE0(D_0032E3C0[0], first, second, third, fourth, scrReadIntParameter(4));
+    fldMarkStageExplorationBitmapRegion(D_0032E3C0[0], first, second, third, fourth, scrReadIntParameter(4));
     return 1;
 }
 
