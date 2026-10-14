@@ -36,6 +36,7 @@
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
 #include "eff_pcp_twin.h"
+#include "eff_pcp_spin.h"
 #include "eff_pcp_span.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
@@ -413,17 +414,6 @@ extern struct SdfPoolNode *D_00380828[4];
 
 
 
-/* Small PCP effect with a 4x4 matrix at 0x10 (0x68 bytes). */
-typedef struct EffPCPSpinWork {
-    u8 pad00[0x10];  /* 0x00 task header */
-    u128 matrix[4];  /* 0x10 transform */
-    s32 frame;       /* 0x50 */
-    f32 angle;       /* 0x54 random start angle */
-    f32 scale;       /* 0x58 */
-    u32 color;       /* 0x5C */
-    EffParamWork *handle0;   /* 0x60 */
-    EffParamWork *handle1;   /* 0x64 */
-} EffPCPSpinWork; /* 0x68 */
 
 
 
