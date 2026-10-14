@@ -2385,7 +2385,7 @@ s32 evtEventViewerOpenInputMenu(s32 arg0, s32 arg1, EvtRuntime *viewer) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00230660);
 
-u32 func_00230A38(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+u32 evtViewerPushMode5CommandHistory(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     evtViewerPushCommandHistory(5, 0x90, 0x48, viewer);
     return 0;
 }

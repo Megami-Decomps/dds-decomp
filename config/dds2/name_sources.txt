@@ -8977,3 +8977,4 @@
 0x00156C78	fldCmdGetResolvedEventSelectorTarget	inferred	Field script command stores fldResolveEventSelectorTarget(1) in the script integer-return slot; neighboring commands in the same unit use the fldCmd prefix.
 0x002CE958	fileUpdatePromptDialog	inferred	Asynchronous prompt-dialog state handler: fileBeginPromptDialog stores start/finish callbacks and mode, begins the memory-card request when needed, and returns this handler; it polls request/readiness state, updates prompt audio, invokes the selected continuation, and resumes slot selection on errors. Paired with DDS1 0x0028F630; both handlers have the same prompt-dialog callback role.
 0x00312E28	sdfGridCreate	inferred	Allocates and initializes an SdfGrid and its inline cells; identical DDS1 twin 0x002CB9C0.
+0x0024B678	evtViewerPushMode5CommandHistory	inferred	Records mode-5 event-viewer command history with fixed 0x90 by 0x48 parameters; paired callback at 0x00230A38 has the identical body.
