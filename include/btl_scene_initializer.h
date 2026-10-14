@@ -4,6 +4,7 @@
 #include "common.h"
 
 void btlInitializeBossCallbacks(s32 mode);
+void btlRequestSceneEventResources(void);
 
 /* One indexed scene row stores its initializer, updater, and behavior flags. */
 typedef struct SceneInitializer {

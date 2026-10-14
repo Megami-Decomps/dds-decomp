@@ -19,6 +19,7 @@
 #include "sdf_resource.h"
 #include "file_pac.h"
 #include "btl_state.h"
+#include "btl_scene_initializer.h"
 #include "btl_action.h"
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
