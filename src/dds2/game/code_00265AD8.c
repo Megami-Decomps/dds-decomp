@@ -22,18 +22,6 @@ typedef struct EventCallbackContext {
     s32 dispatch; /* +0x58: state passed to the callback dispatcher */
 } EventCallbackContext;
 
-typedef struct FlagEntry {
-    s32 firstFlag;
-    s32 firstOn;
-    s32 secondFlag;
-    s32 secondOn;
-} FlagEntry;
-
-
-
-
-
-
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
@@ -364,8 +352,8 @@ u32 func_00266230(void) {
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 struct SdfMemBlock *mnuCreateFlagEntries(void) {
-    struct SdfMemBlock *handle = sdfAllocGeneralBlock(0x140);
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
+    MnuFlagSnapshotEntry *entries = (MnuFlagSnapshotEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
     for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
@@ -384,7 +372,7 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
 }
 
 void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
+    MnuFlagSnapshotEntry *entries = (MnuFlagSnapshotEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
     for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {

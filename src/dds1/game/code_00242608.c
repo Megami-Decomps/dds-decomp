@@ -2015,8 +2015,6 @@ typedef struct MenuResourceWork MenuResourceWork;
 #define EVT_DISPATCH_OPERATION_PRIMARY 1
 #define EVT_DISPATCH_OPERATION_SECONDARY 2
 
-#define MNU_FLAG_SNAPSHOT_BYTES 0x140
-
 extern void mnuDrawDispatchProgressIcons(s32, s32);
 
 extern s32 mnuDrawCommandClosePhase(ShopScene *);
@@ -3283,22 +3281,13 @@ u32 func_002482D0(void) {
     return 0;
 }
 
-typedef struct FlagEntry {
-    s32 firstFlag;
-    s32 firstOn;
-    s32 secondFlag;
-    s32 secondOn;
-} FlagEntry;
-
-
-
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 struct SdfMemBlock *mnuCreateFlagEntries(void) {
     struct SdfMemBlock *snapshotHandle = sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
-    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress(snapshotHandle);
+    MnuFlagSnapshotEntry *snapshot = (MnuFlagSnapshotEntry *)sdfResourceRetainAddress(snapshotHandle);
     u32 pairIndex;
 
     for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_ENTRY_COUNT; pairIndex++) {
@@ -3318,7 +3307,7 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
 
 /* Restore only those flags that were enabled in the saved snapshot. */
 void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
-    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress(snapshotHandle);
+    MnuFlagSnapshotEntry *snapshot = (MnuFlagSnapshotEntry *)sdfResourceRetainAddress(snapshotHandle);
     u32 pairIndex;
 
     /* Scene pairs restore only their second flag; party pairs restore both. */
