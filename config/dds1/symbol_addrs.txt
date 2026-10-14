@@ -7496,6 +7496,7 @@ evtDrawSolarOverlayShapeWithScaledAlpha = 0x00229100; // type:func
 fldRefreshAreaStateFromPosition = 0x001372D0; // type:func
 fldUpdateModeOneCameraPose = 0x0012F578; // type:func
 sdfVuLoadRotationMatrixZ = 0x002DD688; // type:func
+fldResolveEventSelectorTarget = 0x0013CBA8; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -8404,7 +8405,6 @@ func_0013C2B8 = 0x0013C2B8; // type:func
 fldResolveEventSetByNameKindAreaOne = 0x0013C600; // type:func
 fldResolveEventSetByNameKindAreaZero = 0x0013C7F8; // type:func
 fldResolveEventSetByNameEitherKindArea = 0x0013C9E0; // type:func
-func_0013CBA8 = 0x0013CBA8; // type:func
 func_0013CEB0 = 0x0013CEB0; // type:func
 fldStartSelectedActorTask = 0x0013D650; // type:func
 fldSelectCameraByActorName = 0x0013DDF0; // type:func

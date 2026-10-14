@@ -317,7 +317,7 @@ extern char *D_004361D8;
 
 extern void fldSetMapSlotValueFlag(s32, s32, s32, s32);
 
-extern s32 func_0013F790(s32 index);
+extern s32 fldResolveEventSelectorTarget(s32 index);
 
 extern s32 D_0043624C;
 
@@ -1521,7 +1521,7 @@ s32 fldCmdGetActorSlotAttribute(void) {
 }
 
 void func_00156C78(void) {
-    scrSetIntegerReturnValue(func_0013F790(1));
+    scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
 }
 
 s32 fldCmdStartSelectedActorTask(void) {
