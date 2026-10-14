@@ -19,8 +19,6 @@ ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object) {
 
 
 
-extern void dds3EnsureSlotData(void *object);
-
 extern void effObjInnerVecBackup(ObjectTransform *node);
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern s32 dds3RegisterObjectInHandlerIndex(void *object);

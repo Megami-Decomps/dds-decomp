@@ -6,7 +6,6 @@
 
 
 extern s32 effObjInnerCreate(EffWorldNode *object);
-extern void dds3EnsureSlotData();
 
 
 extern void effObjInnerVecBackup(ObjectTransform *node);
