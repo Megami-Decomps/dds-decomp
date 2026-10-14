@@ -2972,7 +2972,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
     return 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_00231950);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerStoreMenuValueInPendingKey);
 
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
 s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
