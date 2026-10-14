@@ -30,6 +30,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+fldClassifyMovementAgainstZoneFaces = 0x00136FE8; // type:func
 btlCheckStatusActionEligibility = 0x001FCAC0; // type:func
 sdfDevFindDiscFileRecordByCdromPath = 0x002E4FB0; // type:func
 sdfDisableDmacChannel = 0x0030B5D0; // type:func
@@ -8405,7 +8406,6 @@ fldDrawCameraColorScrollingGradient = 0x00134348; // type:func
 fldDrawCameraColorLayerPass = 0x00134CD8; // type:func
 fldBuildCollisionRecordsFromGeometry = 0x00135360; // type:func
 fldUpdatePositionZoneHits = 0x00136A78; // type:func
-func_00136FE8 = 0x00136FE8; // type:func
 func_00137E90 = 0x00137E90; // type:func
 func_00137E98 = 0x00137E98; // type:func
 func_00137EA0 = 0x00137EA0; // type:func
