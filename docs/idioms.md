@@ -12114,3 +12114,36 @@ installer unit. All 21 direct DDS2 owner-header includers remain exact,
 including the hash-sensitive `btlChooseStartVoice` unit at 244/0.
 The current names and prototypes of the classifiers remain unchanged.
 
+### Trace-justified result-profile coordinates
+
+DDS1 `brsDrawProfileProgressIndicator` (`00268590`, 560 bytes) draws the
+profile icon, two auxiliary pieces sharing an absolute Y snapshot, and a
+completion icon after a fresh signed completion-state test. It uses the
+existing `BrsProgressAnimation` owner. The matched DDS2 function at `002A0148`
+corroborates the four-word gray palette and eight-argument draw contract,
+but has a different two-piece rendering path.
+
+Real `spriteX` and `spriteY` locals carry the successive icon and auxiliary
+coordinates. The auxiliary X is reloaded after its first draw, as at
+`0026870C`; its Y remains the shared snapshot. These ordinary coordinate
+epochs recover the native raw-X/raw-Y and resource homes. Direct field
+expressions instead coalesce raw X into argument register 4 and auxiliary
+raw Y into register 16, leaving 30 words different after the native palette
+initializer is restored.
+
+The remaining nine-word scheduling residual is trace-justified. Property
+**P**: prepare the actually consumed X offset before calculating absolute Y.
+In the qualified `sched2` trace, the X shift and Y addition both have priority
+14. Inlining the shift into the draw argument gives Y LUID 73 and X LUID 74,
+so the LUID tier picks Y first. Staging `xOffset = spriteX << 4` before
+`drawY` reverses those LUIDs; the trace then picks the X shift and flag-zero
+move together at clock 5, followed by Y at clock 6, reproducing retail.
+Both traces preserve their unhooked output. This was one trace-first
+staging form, not an ordering search.
+
+The native gray initializer at `003AFC70` becomes the automatic palette.
+Its preceding `INCLUDE_RODATA` blocks remain in native address order:
+`003AFBF0`, `003AFC30`, `003AFC40`, `003AFC50`, `003AFC60`. Their bytes are
+unchanged. The full owning-unit gate is 44 match, 0 differ, including its
+read-only pool; no shared-header or DDS2 changes are needed.
+

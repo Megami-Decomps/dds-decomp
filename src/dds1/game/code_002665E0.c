@@ -300,7 +300,70 @@ void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsS
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProfileProgressIndicator);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+
+INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBF0);
+
+INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC30);
+
+INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC40);
+
+INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC50);
+
+INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC60);
+
+void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+    BrsProgressRow *row, s32 context, s32 index) {
+    u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    u32 color;
+    s32 drawY;
+    s32 spriteX;
+    s32 spriteY;
+    s32 xOffset;
+
+    if (work->teardownResource != NULL) {
+        if (work->profileAnimation[index].iconState != 0) {
+            spriteX = work->profileAnimation[index].iconPosition[0];
+            spriteY = work->profileAnimation[index].iconPosition[1];
+            color = work->profileAnimation[index].iconColor | 0x80808000;
+            colors[0] = color;
+            colors[1] = color;
+            colors[2] = color;
+            colors[3] = color;
+            effDrawSpriteWithCornerColors(x + (spriteX << 4),
+                y + (spriteY << 3), z, colors, 0,
+                work->teardownResource, 0x1A, context);
+        }
+        if (work->profileAnimation[index].completionState != 0) {
+            spriteX = work->profileAnimation[index].auxiliaryPosition[0];
+            spriteY = work->profileAnimation[index].auxiliaryPosition[1];
+            /* Stage X before Y; see docs/idioms.md,
+             * "Trace-justified result-profile coordinates". */
+            xOffset = spriteX << 4;
+            drawY = y + (spriteY << 3);
+            color = work->profileAnimation[index].auxiliaryColor | 0x80808000;
+            colors[0] = color;
+            colors[1] = color;
+            colors[2] = color;
+            colors[3] = color;
+            effDrawSpriteWithCornerColors(x + xOffset,
+                drawY, z, colors, 0, work->teardownResource, 0x17, context);
+            spriteX = work->profileAnimation[index].auxiliaryPosition[0] + 0x4D;
+            effDrawSpriteWithCornerColors(x + (spriteX << 4),
+                drawY, z, colors, 0, work->teardownResource, 0x18, context);
+            if (work->profileAnimation[index].completionState >= 2) {
+                color = work->profileAnimation[index].completionColor | 0x80808000;
+                colors[0] = color;
+                colors[1] = color;
+                colors[2] = color;
+                colors[3] = color;
+                effDrawSpriteWithCornerColors(x + 0x13A0, y + 0xF8, z, colors, 0,
+                    work->teardownResource, 0xB, context);
+            }
+        }
+    }
+}
+
 
 extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
@@ -720,17 +783,6 @@ void mnuSetTitleVoicePrefixIndex(s32 prefixIndex) {
 
 /* The native char*-typed voice argument is passed to numeric %04d formatting;
  * retain that signature rather than treating it as a filename string. */
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBF0);
-
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC30);
-
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC40);
-
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC50);
-
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC60);
-
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC70);
 
 INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC80);
 
