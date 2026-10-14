@@ -66,9 +66,7 @@ s32 frFontCountGlyphChainNodes();
 
 void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
-void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node);
 
-void itfMesCopyGlyphShade();
 
 s8 itfTestTextInterfaceMask(s32 arg0);
 
@@ -82,7 +80,6 @@ void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue);
 
 FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node);
 
-s32 itfMesCountSpanSteps();
 
 void itfMesInitCharTable(s32 *table);
 
