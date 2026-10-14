@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_bit_range.h"
 #include "dds3_admin_control_api.h"
 #include "itf_text_vector.h"
 #include "itf_text_slots_api.h"
@@ -83,12 +84,6 @@ extern u32 D_003BD818;
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
 extern u32 strlen(const char *str);
-
-/* Two consecutive entries in the four-byte-stride offset table bound a span. */
-typedef struct ItfBitRange {
-    u32 start;
-    u32 end;
-} ItfBitRange;
 
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
