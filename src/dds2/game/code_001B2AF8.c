@@ -885,7 +885,100 @@ s32 btlSelectPreemptiveOutcome(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004156F8);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B3DD8);
+/* Select a follow-up encounter from the override, forced scene or adjustment rows. */
+s32 btlSelectSerialEncounter(void) {
+    extern void btlSerialBattleChanceHook(s32);
+
+    BtlState *state = (BtlState *)btlGetRuntime();
+    u16 selectionIndex = (u16)state->adjustmentEntryIndex;
+    s32 (*serialOverride)(void) = state->serialOverride;
+    u16 encounterPack;
+    u16 groupIndex;
+    u16 forcedScene;
+    BattleAdjustmentEntry *entries;
+    s32 chance;
+    u16 candidates[20];
+    u16 candidateCount;
+    u16 rowIndex;
+
+    state->requestMode = 0;
+    state->requestArgument = 0;
+    state->nextAdjustmentEntryIndex = selectionIndex;
+    encounterPack = (u16)state->effectLayer;
+    groupIndex = (u16)state->adjustmentGroupIndex;
+
+    if (serialOverride != NULL) {
+        s32 result = serialOverride();
+
+        if (result != -1) {
+            state->requestArgument = result;
+            state->requestMode = 3;
+            btlBossDebugPrintf("btl:serial boss [%X]\n", result);
+            return 1;
+        }
+        return 0;
+    }
+
+    if (state->encounterKind == 3) {
+        return 0;
+    }
+
+    if (datBattleSceneRecords[state->battleMode].serialScene != 0) {
+        forcedScene = datBattleSceneRecords[state->battleMode].serialScene;
+        state->requestMode = 2;
+        state->requestArgument = forcedScene;
+        btlBossDebugPrintf("btl:serial 100%% [%X]\n", forcedScene);
+        return 1;
+    }
+    if (encounterPack == 0) {
+        return 0;
+    }
+
+    entries = D_00435E0C[encounterPack].groups[groupIndex].entries;
+    chance = entries[selectionIndex].opaque05;
+    if ((datGameState->world.fieldFlags & 2) != 0) {
+        chance *= 5;
+    }
+    if (chance > 90) {
+        chance = 90;
+    }
+    btlBossDebugPrintf("btl:serial ratio=%d\n", chance);
+    btlSerialBattleChanceHook(chance);
+    if ((s32)btlRollAiBucket() >= chance) {
+        return 0;
+    }
+    btlBossDebugPrintf("btl:serial\n");
+
+    {
+        s32 battleMode;
+
+        candidateCount = 0;
+        battleMode = state->battleMode;
+        for (rowIndex = 0; rowIndex < 20; rowIndex++) {
+            if (state->battleMode != entries[rowIndex].sceneIndex &&
+                entries[rowIndex].sceneIndex != 0 && entries[rowIndex].weight != 0 &&
+                !(datBattleSceneRecords[entries[rowIndex].sceneIndex].flags & 0x40)) {
+                candidates[candidateCount] = rowIndex;
+                candidateCount++;
+            }
+        }
+
+        state->requestMode = 1;
+        if (candidateCount == 0) {
+            state->requestArgument = battleMode;
+            return 1;
+        }
+
+        {
+            u16 randomIndex = (u16)effMiscRandMod(0, candidateCount);
+            u16 selectedIndex = candidates[randomIndex];
+
+            state->nextAdjustmentEntryIndex = selectedIndex;
+            state->requestArgument = entries[selectedIndex].sceneIndex;
+        }
+    }
+    return 1;
+}
 
 /* Roll the solar-phase Majin encounter chance after scene gates and the party override. */
 s32 btlRollMajinEncounter(void) {

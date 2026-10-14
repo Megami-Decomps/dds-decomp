@@ -133,7 +133,7 @@ extern void btlMarkRuntimeUpdatePending();
 extern s32 btlAreWorkBuffersReady(void);
 extern s32 btlIsFadeOutCompleteOrIdle(void);
 extern s32 btlResetSceneSlotFades(void);
-extern s32 func_001B3DD8(void);
+extern s32 btlSelectSerialEncounter(void);
 extern void btlAddItemDrop(u16);
 
 
@@ -523,7 +523,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
         scene->eventReady = 0;
-        func_001B3DD8();
+        btlSelectSerialEncounter();
         if (datBattleSceneRecords[scene->battleMode].unk01 != 0) {
             for (i = 0; i < datBattleSceneRecords[scene->battleMode].unk02; i++) {
                 btlAddItemDrop(datBattleSceneRecords[scene->battleMode].unk01);
