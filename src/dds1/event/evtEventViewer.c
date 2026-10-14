@@ -12,6 +12,7 @@
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -828,7 +829,6 @@ extern void itfMesBuildOptionList(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 extern void mnuStopMovieDrawTask(void);
 extern void mnuRequestIndexedMovieResource(s32);
-extern void kwlnFadeSetMode(s32);
 extern void kwlnFadeBackgroundStartOut(s32);
 extern void kwlnFadeBackgroundStartIn(s32);
 extern u16 D_003BBE78;
@@ -3441,7 +3441,6 @@ extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void kwlnTextureReleaseHeldReference();
 extern void fldReleaseCameraColorEffect();
-extern void kwlnFadeSetMode();
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
 void evtViewerReleaseResources(EvtRuntime *viewer) {
