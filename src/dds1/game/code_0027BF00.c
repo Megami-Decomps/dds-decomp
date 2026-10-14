@@ -1385,13 +1385,13 @@ void mnuReleasePartyPanelTextures(MenuPageWindow *window) {
 void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, s32 unused, s32 retainScale) {
     MenuPageSlot *page = &window->slots[index];
 
-    page->hp.fadeOut = 0;
-    page->mp.fadeOut = 0;
+    page->bars[0].fadeOut = 0;
+    page->bars[1].fadeOut = 0;
     if (retainScale != 0) {
         return;
     }
-    page->hp.opacity = 0x100;
-    page->mp.opacity = 0x100;
+    page->bars[0].opacity = 0x100;
+    page->bars[1].opacity = 0x100;
 }
 
 void mnuSetPageParams(MenuSprites *page, s32 mode) {
@@ -1600,9 +1600,9 @@ void mnuDrawPartyPageGauges(MenuPageWindow *window, s32 texture) {
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        mnuDrawPanelSequenceByRow((s32)&window->slots[i].hp, 0, (s32)D_0037CD30[i], 0x1E,
+        mnuDrawPanelSequenceByRow((s32)&window->slots[i].bars[0], 0, (s32)D_0037CD30[i], 0x1E,
             mnuPercentOrHundred(window->records->slots[i].hp, window->records->slots[i].maxHp), texture);
-        mnuDrawPanelSequenceByRow((s32)&window->slots[i].mp, 1, (s32)D_0037CD30[i], 0x1E,
+        mnuDrawPanelSequenceByRow((s32)&window->slots[i].bars[1], 1, (s32)D_0037CD30[i], 0x1E,
             mnuPercentOrHundred(window->records->slots[i].mp, window->records->slots[i].maxMp), texture);
     }
 }
@@ -1610,8 +1610,8 @@ void mnuDrawPartyPageGauges(MenuPageWindow *window, s32 texture) {
 void mnuReleasePartyPanelSpriteTextures(MenuPageWindow *window) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        mnuReleaseSpriteTextures((s32 *)&window->slots[i].hp);
-        mnuReleaseSpriteTextures((s32 *)&window->slots[i].mp);
+        mnuReleaseSpriteTextures((s32 *)&window->slots[i].bars[0]);
+        mnuReleaseSpriteTextures((s32 *)&window->slots[i].bars[1]);
     }
 }
 
@@ -1771,7 +1771,37 @@ void mnuUpdateHandleStates(MenuPageWindow *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", mnuUpdatePartyPanelPercentDisplays);
+extern void mnuUpdatePairedEffectBounds(MenuEffectPair *bar);
+
+/* Recompute each listed party row's HP and MP bar percentages. */
+void mnuUpdatePartyPanelPercentDisplays(MenuPageWindow *page) {
+    PartyPanel *party;
+    s32 hp;
+    s32 maxHp;
+    s32 mp;
+    s32 maxMp;
+    s32 row;
+
+    party = page->records;
+    row = 0;
+    if (party->unk0 + party->unk4 <= 0) {
+        return;
+    }
+
+    do {
+        hp = party->slots[row].hp;
+        maxHp = party->slots[row].maxHp;
+        page->slots[row].bars[0].quantizedSpan = (hp * 100) / maxHp;
+        mnuUpdatePairedEffectBounds(&page->slots[row].bars[0]);
+
+        mp = page->records->slots[row].mp;
+        maxMp = page->records->slots[row].maxMp;
+        page->slots[row].bars[1].quantizedSpan = (mp * 100) / maxMp;
+        mnuUpdatePairedEffectBounds(&page->slots[row].bars[1]);
+        party = page->records;
+        row++;
+    } while (row < party->unk0 + party->unk4);
+}
 
 extern char D_003BC728[];
 
@@ -1818,9 +1848,9 @@ void mnuClearPageSelection(MenuPageWindow *window) {
         u32 bankAddress = (u32)&window->alternateSlot;
 
         *(s32 *)(bankAddress + selected * (s32)sizeof(MenuPageSlot)
-                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].hp.opacity) = 0x100;
+                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].bars[0].opacity) = 0x100;
         *(s32 *)(bankAddress + window->selected * (s32)sizeof(MenuPageSlot)
-                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].mp.opacity) = 0x100;
+                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].bars[1].opacity) = 0x100;
         window->selected = -1;
     }
     window->flags &= ~0x400;
