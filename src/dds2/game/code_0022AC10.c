@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_transform_parameters.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "eff_random_mod.h"
@@ -2373,15 +2374,7 @@ typedef struct BtlDebugValueMenu {
     u32 count;
 } BtlDebugValueMenu;
 
-typedef struct BtlDebugTransformParameters {
-    f32 position[3];
-    f32 scaleOverride;
-    f32 reach;
-    f32 height;
-} BtlDebugTransformParameters;
-
 typedef char BtlDebugValueEntryStride[(sizeof(BtlDebugValueEntry) == 0x18) ? 1 : -1];
-typedef char BtlDebugTransformExtent[(sizeof(BtlDebugTransformParameters) == 0x18) ? 1 : -1];
 
 extern BtlIndexList *fldGetSceneScriptValue(void);
 extern s32 fldGetSceneScriptState(void);
@@ -2424,7 +2417,7 @@ extern s32 D_00438F8C;
 extern u16 D_004530B0[7];
 extern DatPartyRecord D_004530C0;
 extern f32 D_00453290[4];
-extern BtlDebugTransformParameters D_004532A0;
+extern BtlActorTransformParameters D_004532A0;
 extern BtlActorStatusRecord D_004532C0;
 extern BtlActorMotionSlot D_00453530;
 
@@ -2444,7 +2437,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     MenuList *motionMenu;
     MenuList *gunMenu;
     BtlActorStatusRecord *record;
-    BtlDebugTransformParameters *parameters;
+    BtlActorTransformParameters *parameters;
     u32 modelIndex;
     u32 model;
     u32 health;
@@ -2713,17 +2706,17 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             parameters->position[1] = record->position[1];
             parameters->position[2] = record->position[2];
         }
-        memcpy(&D_004532A0, parameters, sizeof(BtlDebugTransformParameters));
+        memcpy(&D_004532A0, parameters, sizeof(BtlActorTransformParameters));
         btlReturnDebugMenuSetupWord((u32)&D_003BFF88);
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp((u32)&D_003BFF88);
         btlDebugMenuAfterRecordNoOp();
-        memcpy(parameters, &D_004532A0, sizeof(BtlDebugTransformParameters));
-        savedScale = parameters->scaleOverride;
-        parameters->scaleOverride = 1.0f;
+        memcpy(parameters, &D_004532A0, sizeof(BtlActorTransformParameters));
+        savedScale = parameters->overrideEnabled;
+        parameters->overrideEnabled = 1.0f;
         battle->battleFlags |= 0x400000;
         btlApplyUnitEffectScale(unit);
-        parameters->scaleOverride = savedScale;
+        parameters->overrideEnabled = savedScale;
         break;
     case 9:
         unit = battle->debug.selectedUnit;

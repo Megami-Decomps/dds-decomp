@@ -1,5 +1,6 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
+#include "btl_actor_transform_parameters.h"
 #include "common.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -238,15 +239,6 @@ typedef struct BtlStatArgs {
     s32 amount;
     s32 category;
 } BtlStatArgs;
-
-typedef struct BtlFxSrcA {
-    f32 f0;
-    f32 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-} BtlFxSrcA;
 
 typedef struct BtlRotationTaskArgs {
     s128 from;
@@ -2337,21 +2329,21 @@ void btlInitFxLights(u8 *fx) {
 }
 
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 index) {
-    BtlFxSrcA *alt = (BtlFxSrcA *)btlSelectSharedOrIndexedTransformParameters(kind, index);
+    BtlActorTransformParameters *alt = (BtlActorTransformParameters *)btlSelectSharedOrIndexedTransformParameters(kind, index);
     BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
 
-    if (alt->fC == 0.0f) {
+    if (alt->overrideEnabled == 0.0f) {
         PCP_COPY_VECTOR(fx->bodyOffset, base);
         fx->reach = base->reach;
         fx->height = base->height;
         fx->cameraRadius = base->cameraRadius;
     } else {
-        fx->bodyOffset[0] = alt->f0;
-        fx->bodyOffset[1] = alt->f4;
-        fx->bodyOffset[2] = alt->f8;
+        fx->bodyOffset[0] = alt->position[0];
+        fx->bodyOffset[1] = alt->position[1];
+        fx->bodyOffset[2] = alt->position[2];
         fx->bodyOffset[3] = 0.0f;
-        fx->reach = alt->f10;
-        fx->height = alt->f14;
+        fx->reach = alt->reach;
+        fx->height = alt->height;
     }
     PCP_COPY_VECTOR(fx->muzzleOffset, base);
     fx->unkBC = base->reach;
