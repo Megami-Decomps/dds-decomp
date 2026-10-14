@@ -1219,8 +1219,9 @@ u32 btlScriptPickLowestHpBlockTarget(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgE(void) {
-    btlCmdWithArgE(scrGetCurrentCommandWork());
+/* Pick the current command's highest-MP target and return VM completion. */
+u32 btlScriptPickHighestMpTarget(void) {
+    btlPickCommandHighestMpTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
@@ -2215,7 +2216,8 @@ u32 btlAiGetAllKoudo(void) {
     return 1;
 }
 
-u32 func_001FAB98(void) {
+/* Complete zero-operand builtin 342; retain its unused command-work lookup. */
+u32 btlScriptBuiltin342NoOp(void) {
     scrGetCurrentCommandWork();
     return 1;
 }
@@ -2294,7 +2296,8 @@ u32 btlRequestEffectEditor(void) {
     return 0;
 }
 
-u32 func_001FADD8(u32 value) {
+/* Return the supplied value unchanged. */
+u32 btlReturnInputValue(u32 value) {
     return value;
 }
 

@@ -1333,8 +1333,9 @@ u32 btlScriptPickLowestHpBlockTarget(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgE(void) {
-    btlCmdWithArgE(scrGetCurrentCommandWork());
+/* Pick the current command's highest-MP target and return VM completion. */
+u32 btlScriptPickHighestMpTarget(void) {
+    btlPickCommandHighestMpTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
@@ -2134,7 +2135,8 @@ s32 btlCmdRememberContextSecondaryFlag(void) {
     return 1;
 }
 
-u32 func_0020C078(void) {
+/* Complete zero-operand builtin 435 without publishing a script result. */
+u32 btlScriptBuiltin435NoOp(void) {
     return 1;
 }
 
@@ -2201,7 +2203,8 @@ u32 btlScriptReturnUnitHpRatioPercent(void) {
     return 1;
 }
 
-u32 func_0020C290(void) {
+/* Complete zero-operand builtin 450 without publishing a script result. */
+u32 btlScriptBuiltin450NoOp(void) {
     return 1;
 }
 
@@ -2296,11 +2299,13 @@ u32 btlScriptReturnActorLevel(void) {
     return 1;
 }
 
-u32 func_0020C560(void) {
+/* Complete zero-operand builtin 422 without publishing a script result. */
+u32 btlScriptBuiltin422NoOp(void) {
     return 1;
 }
 
-u32 func_0020C568(void) {
+/* Complete zero-operand builtin 437 without publishing a script result. */
+u32 btlScriptBuiltin437NoOp(void) {
     return 1;
 }
 
@@ -2358,7 +2363,8 @@ u32 btlScriptReturnGlobalDebugValue(void) {
     return 1;
 }
 
-u32 func_0020C688(void) {
+/* Complete zero-operand builtin 451 without publishing a script result. */
+u32 btlScriptBuiltin451NoOp(void) {
     return 1;
 }
 
@@ -2603,7 +2609,8 @@ u32 btlRequestEffectEditor(void) {
     return 0;
 }
 
-u32 func_0020CE58(u32 value) {
+/* Return the supplied value unchanged. */
+u32 btlReturnInputValue(u32 value) {
     return value;
 }
 

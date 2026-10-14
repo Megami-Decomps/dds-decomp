@@ -87,13 +87,14 @@ u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 payloadByt
 }
 
 
-void func_002E88F8(u32 unused) {
+/* Ignore the post-queue sequence; this native entry does not wait or update state. */
+void sndPostQueueCommandNoOp(u32 unused) {
 }
 
 u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
     u32 result = sndQueueCommandPacket(command, channel, packet, size);
 
-    func_002E88F8(result);
+    sndPostQueueCommandNoOp(result);
     return result;
 }
 

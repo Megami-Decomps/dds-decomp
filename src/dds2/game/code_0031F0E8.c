@@ -640,7 +640,8 @@ s32 dds3WriteArraySpriteFile(const char *directory, const char *name, u32 **sour
     return 1;
 }
 
-u32 *func_00320510(const char *source, const char *request) {
+/* Load relocated sprite records into an owned list, then release the file buffer. */
+u32 *dds3LoadOwnedSpriteRecordList(const char *source, const char *request) {
     void *buffer;
     u32 *result;
     u32 metadata[4];
@@ -687,7 +688,8 @@ s32 dds3WriteNestedSpriteFile(const char *directory, const char *name, u32 **sou
     return 1;
 }
 
-u32 *func_003206E8(const char *source, const char *request) {
+/* Separate native copy of the same owned-list loader, using the shared decoder. */
+u32 *dds3LoadOwnedSpriteRecordListDuplicate(const char *source, const char *request) {
     void *buffer;
     u32 *result;
     u32 metadata[4];

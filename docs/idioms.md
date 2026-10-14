@@ -606,7 +606,7 @@ functions use trampolines and are a different case.
   `u64` parameter gives the same `dsrl` but then needs `dsll32/dsra32` before a
   `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
   `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
-  0x110, 0, 0, 0); }` matches (DDS1 `sndSendChannelGroupCommand110`/`func_002E9918`/
+  0x110, 0, 0, 0); }` matches (DDS1 `sndSendChannelGroupCommand110`/`sndSendChannelGroupCommand110Duplicate`/
   `sndSendChannelGroupCommand140`/`sndSendChannelGroupCommand150`, with the same
   three named commands in DDS2).
 - Preserve a 32-bit packet field's unsigned width when storing it through a
@@ -11561,3 +11561,45 @@ followed by the copied `count * 8` byte payloads; copied data pointers are
 rebased into that allocation. The existing allocator tracks ownership.
 List counts, size arithmetic, empty-list behavior, copy order and types are
 unchanged; no callback invocation or menu-specific payload meaning is assumed.
+
+## Native registry no-ops and retained forwarding surfaces
+
+`btlPickCommandHighestMpTarget` forwards the command and native zero second
+argument to the highest-current-MP selector. Its native comparison replaces
+the candidate on `currentMp >= bestMp`, so the last equal-MP candidate wins.
+`btlScriptPickHighestMpTarget` supplies the current command and returns VM
+completion. The underlying protected primitives are unchanged.
+
+The following native `ScrCommand` records all have zero operands:
+
+| Game | Builtin index | Registry record |
+| --- | --- | --- |
+| DDS1 | 342 | `0x0039ED38` |
+| DDS2 | 422 | `0x00412138` |
+| DDS2 | 435 | `0x004121A0` |
+| DDS2 | 437 | `0x004121B0` |
+| DDS2 | 450 | `0x00412218` |
+| DDS2 | 451 | `0x00412220` |
+
+Their `btlScriptBuiltin...NoOp` names identify those registry roles, not
+guessed missing game actions. Each returns completion value one; DDS1's
+342 also retains its ignored command-work getter. `bfOpWaitDispatch` uses
+nonzero completion to advance the VM, but these bodies do not publish a
+script integer result. Do not infer cross-game twins from a trivial return.
+
+`itfMesCopyWindowTextSlot` resolves the window's `mes` pointer and supplies
+only that argument to the slot-data copier. Preserve the existing legacy
+short-arity call: it does not specify slot/source or the other parameters.
+`btlReturnInputValue` is simply the native unsigned-word identity function;
+its name does not invent an otherwise unobserved caller role.
+
+`sndPostQueueCommandNoOp` receives the sequence immediately after queuing
+in `sndSendCommandPacket`, then does nothing. It does not wait, synchronize
+or update state. `sndSendChannelGroupCommand110Duplicate` is a separate
+native copy of the command-`0x110` sender, not a new command kind.
+
+`dds3LoadOwnedSpriteRecordList` and its `Duplicate` entry use the same
+relocated-SPR0 reader and owned-list decoder, then release the intermediate
+file buffer. The decoder tracks allocations and copies record data into
+owned storage. Different neighboring writers do not establish a distinct
+word-array-versus-nested loader behavior; retain the shared implementation.
