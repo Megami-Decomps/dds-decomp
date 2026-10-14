@@ -742,7 +742,7 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
     memset(packet + 0x2C, 0, 12);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E0820", func_002E2680);
+INCLUDE_ASM(const s32, "game/code_002E0820", sdfBuildTexturedQuadVifPacket);
 
 s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
     return count * 0x40 + 0x40;
