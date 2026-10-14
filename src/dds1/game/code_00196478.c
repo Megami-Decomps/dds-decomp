@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_text_vector.h"
 #include "fr_font_text_slots.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
@@ -95,12 +96,7 @@ typedef struct ItfBitRange {
 
 
 
-typedef struct TextVector {
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 w;
-} TextVector;
+
 
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
