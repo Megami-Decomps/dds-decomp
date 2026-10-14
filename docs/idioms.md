@@ -566,7 +566,18 @@ functions use trampolines and are a different case.
   0x14,0x18,0x24,0x28 needs the 0x28 store to be unavailable until the `neg.s`
   store has issued; no source order, pointer/2-D indexing, local, or
   unit-matrix macro variant (memory clobber removed, `"=m"` operand, non-volatile)
-  reproduced that, so the 12 rotation builders stay in `build/parked/`.
+  reproduces that. **Resolved:** the scratch matrix is `volatile`. Volatile stores
+  carry dependences on each other, so both schedulers keep them in program
+  order (`m[1][1]`, `m[1][2]`, `m[2][1]`, `m[2][2]`), whatever the register
+  weight or `neg.s` latency. This is a real source property, not steering: the
+  matrix is read only by the `lqc2` asm through a bare address operand, so its
+  element stores are dead as far as C can tell. One template matches all 12
+  rotation loaders in both games (primary `VU0_LOAD_MATRIX` and secondary
+  `VU0_LOAD_MATRIX_B` banks):
+  `volatile f32 m[4][4] __attribute__((aligned(16))); f32 c = cos(a); f32 s = sin(a);
+  EE_MMI_UNIT_MATRIX((f32 *)m); <four cells>; VU0_LOAD_MATRIX((f32 *)m);`.
+  The family is DDS1 `game/code_002DD038`/`code_002DD8B8` and DDS2
+  `game/code_00335EE8`/`code_00336768`.
 - A walking pointer that is the call-result variable itself, plus a second
   variable for the unmoved base: `cursor = f(h); base = cursor; cursor +=
   *(u32 *)(cursor + 0xC); for (...; cursor += 8) { r = base + *(u32 *)(cursor + 4);`.
