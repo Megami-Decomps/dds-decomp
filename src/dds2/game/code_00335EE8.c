@@ -270,7 +270,18 @@ void sdfVuLoadRotationMatrixX(f32 angle) {
     VU0_LOAD_MATRIX((f32 *)m);
 }
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", sdfVuLoadRotationMatrixY);
+void sdfVuLoadRotationMatrixY(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = func_00353040(angle);
+    f32 s = func_00353140(angle);
+
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[0][0] = c;
+    m[0][2] = -s;
+    m[2][0] = s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX((f32 *)m);
+}
 
 /* Build and load the Z-axis rotation matrix in primary VU0 registers. */
 INCLUDE_ASM(const s32, "game/code_00335EE8", sdfVuLoadRotationMatrixZ);
