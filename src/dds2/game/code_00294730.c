@@ -190,7 +190,7 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00295030);
+INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawTerminalPanelValues);
 
 INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawMenuItemListRow);
 

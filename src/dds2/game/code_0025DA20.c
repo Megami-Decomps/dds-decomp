@@ -3635,7 +3635,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
 extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, void *, s32, s32);
 extern void func_00294D50(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, void *, s32, s32);
-extern void func_00295030(s32, s32, s32, void *, s32, s32, s32);
+extern void mnuDrawTerminalPanelValues(s32, s32, s32, void *, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
 extern void mnuDrawShopPricePlaceholder(s32, s32, s32, void *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
@@ -3653,7 +3653,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
     case 1:
         mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
-        func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
+        mnuDrawTerminalPanelValues(0, 0, 0, state, 0x100, 0, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         mnuDrawShopPricePlaceholder(0, 0, 0, state, 0x53);
         mnuDrawShopCurrencyBalance(state, 0xA09DC380);
@@ -3670,7 +3670,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         } else {
             mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
-            func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
+            mnuDrawTerminalPanelValues(0, 0, 0, state, 0x100, 0, 0x53);
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);
             mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)state, 0x100, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
