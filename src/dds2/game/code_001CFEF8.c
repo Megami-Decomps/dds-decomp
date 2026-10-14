@@ -1095,7 +1095,6 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
 }
 
 
-extern s32 fldLoadAreaResource();
 
 extern void btlReleaseEventAssets();
 
