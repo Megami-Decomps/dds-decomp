@@ -783,7 +783,7 @@ extern s32 btlUpdateActionSeqs(void);
 
 extern s32 btlUpdateActiveActorModelState(void);
 
-extern s32 func_0020D108(void);
+extern void btlUpdateActiveFrameNoOp(void);
 
 extern s32 btlSweepFinishedTasks(void);
 
@@ -804,7 +804,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         fldAdvanceSceneGroupScheduler();
         btlUpdateActionSeqs();
         btlUpdateActiveActorModelState();
-        func_0020D108();
+        btlUpdateActiveFrameNoOp();
         btlSweepFinishedTasks();
         func_001E9130();
         ((BattleController *)btlRuntime)->frame = ((BattleController *)btlRuntime)->frame + 1;
@@ -824,7 +824,7 @@ extern s32 btlUpdateActorModelColorAndLinks(void);
 
 extern void btlUpdateEventPlayback(void);
 
-extern s32 func_0020D110(void);
+extern void btlUpdateFieldPresentationNoOp(void);
 
 extern s32 fldInitializeBattleSceneFlow(void);
 
@@ -841,7 +841,7 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
         btlSweepFloorModelLists();
         btlUpdateActorModelColorAndLinks();
         btlUpdateEventPlayback();
-        func_0020D110();
+        btlUpdateFieldPresentationNoOp();
         fldInitializeBattleSceneFlow();
         btlClearDeferredTasks();
     }
@@ -985,7 +985,7 @@ void btlInitializeBattleRuntime(void) {
     btlRefreshSoundEntries();
     btlRetainButtonTexture();
     func_001CFC40();
-    func_0020D118();
+    btlInitializeRuntimeNoOp();
     btlClearModelFlagRange();
     mdlFlagClear(0x82B);
 

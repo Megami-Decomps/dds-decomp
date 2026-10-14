@@ -70,7 +70,7 @@ void mnuRestoreShootingNodeModelDepths(MnuShootingWork *object) {
 }
 
 extern void mnuResetShootingPauseChoiceIndex(MnuShootingWork *object);
-extern void func_0031AF60(void);
+extern void mnuCleanupShootingPauseNoOp(void);
 extern void mnuPauseEffectQueueFrameAdvance(void);
 extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
@@ -84,7 +84,7 @@ void mnuToggleShootingPause(MnuShootingWork *object) {
         return;
     }
     if (!object->unk70Bit0) {
-        func_0031AF60();
+        mnuCleanupShootingPauseNoOp();
         mnuResumeEffectQueueFrameAdvance();
         mnuRestoreShootingNodeModelDepths(object);
         itfSetFadeMode(&object->pauseFade.fade, 0, 8);
@@ -96,7 +96,8 @@ void mnuResetShootingPauseChoiceIndex(MnuShootingWork *object) {
     object->choiceIndex = 0;
 }
 
-void func_0031AF60(void) {
+/* Retail leaves this pause-resume/teardown hook empty. */
+void mnuCleanupShootingPauseNoOp(void) {
 }
 
 typedef struct SoundSlot SoundSlot;
@@ -159,7 +160,8 @@ void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *object) {
     fade = NULL;
 }
 
-void func_0031B0F8(void) {
+/* Create and attach the shooting scene camera with its fixed field of view. */
+void mnuCreateShootingSceneCamera(void) {
     void *world;
     struct EffWorldNode *camera;
     u128 *worldEye = (u128 *)D_0040ABD0;
