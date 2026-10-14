@@ -104,7 +104,7 @@ typedef char MenuSlotState_gradient_check[((u32)&((MenuSlotState *)0)->gradientF
 typedef char MenuSlotState_reduced_check[((u32)&((MenuSlotState *)0)->reducedMode == 0x3F4) ? 1 : -1];
 
 extern void mnuLoadTerminalSceneResourceBanks(MenuSlotState *);
-extern void func_00266460(EffectSlotSet *, MenuEffectResources *);
+extern void mnuLoadCampEffectMapResources(EffectSlotSet *, MenuEffectResources *);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
@@ -241,7 +241,7 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
             scene->resourceBank[0], 0x46, 0x43);
         mnuSetScrollingStripSpeedsRandomly(&scene->panels[1], 0, 0x10, 0x20);
         mnuSetScrollingStripOverlayPosition(&scene->panels[1], 0x1470, 0xCB8, 0);
-        func_00266460(scene->resourceBank[2], &scene->campEffect.resources);
+        mnuLoadCampEffectMapResources(scene->resourceBank[2], &scene->campEffect.resources);
     } else {
         for (i = 0; i < 2; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(

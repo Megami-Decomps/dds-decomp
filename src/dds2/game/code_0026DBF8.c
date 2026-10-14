@@ -933,7 +933,7 @@ void mnuResetMantraListFadeDelay(MantraListState *state) {
     state->unk2C = 0x1e;
 }
 
-u32 func_0026FAB8(void) {
+u32 mnuNoOpMantraDrawItemCallback(void) {
     return 0;
 }
 
@@ -1007,12 +1007,12 @@ MantraDrawItem *mnuRegisterMantraDrawItem(MantraDrawPool *pool, u32 kind, s32 (*
     if (update != 0) {
         item->update = update;
     } else {
-        item->update = func_0026FAB8;
+        item->update = mnuNoOpMantraDrawItemCallback;
     }
     if (draw != 0) {
         item->draw = draw;
     } else {
-        item->draw = func_0026FAB8;
+        item->draw = mnuNoOpMantraDrawItemCallback;
     }
     item->release = release;
     if (startDelay > 0) {
