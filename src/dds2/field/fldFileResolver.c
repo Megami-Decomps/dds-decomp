@@ -4280,7 +4280,7 @@ extern f32 fldSnapAngleToCompassPoint(f32);
 extern f32 fldSnapAngleToCompassOctant(f32);
 extern f32 fldSnapAngleToCardinalDirection(f32);
 extern s32 fldIsNearSpark(f32, f32, f32);
-extern void func_00139B98(f32 *);
+extern void fldClassifyMovementAgainstZoneFaces(f32 *);
 extern void fldRestoreSceneModelColors(void);
 extern void fldClearSceneModelColors(void);
 extern void fldShowSceneModels(void);
@@ -4598,7 +4598,7 @@ s32 func_00132540(void) {
             secondary->smoothedPosition[3] = source->smoothedPosition[3];
         }
     }
-    func_00139B98(position);
+    fldClassifyMovementAgainstZoneFaces(position);
     difference = fldAngleDifference(fldAreaState.angle, heading);
     step = difference / 5.0f;
     if (step < 0.0f) {

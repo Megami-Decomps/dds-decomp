@@ -1275,7 +1275,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
 extern s32 D_0038988C[];
 
 /* Classify flagged zone faces after checking the current movement. */
-void func_00139B98(f32 *position) {
+void fldClassifyMovementAgainstZoneFaces(f32 *position) {
     f32 point[3];
     f32 reference[3];
     f32 distanceVector[3];
