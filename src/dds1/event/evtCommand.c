@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
 #include "fld_resource_resolver.h"
@@ -119,11 +120,6 @@ void evtSetWorldSlotValue(void *unit, u32 value);
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
 u32 fldGetPlayerSceneState(void);
-
-
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
 
 extern char D_003AC978[];

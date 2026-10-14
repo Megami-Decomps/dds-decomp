@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
@@ -454,9 +455,6 @@ extern char D_0041B6D8[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 
 extern char D_0041B710[]; /* "btl:BSE free\n" */
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "btl_state.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
@@ -39,7 +40,7 @@ void btlStartSkillEventTask(u32 skill) {
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, skill);
     scrSetCurrentActor((KwlnTask *)taskId, NULL);
-    kwlnTaskAddChild((s32)battle->scriptOwner, taskId);
+    kwlnTaskAddChild(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
 }
 
@@ -84,7 +85,7 @@ void btlStartPrimaryScriptTask(void) {
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
     scrSetCurrentActor((KwlnTask *)taskId, NULL);
-    kwlnTaskAddChild((s32)battle->scriptOwner, taskId);
+    kwlnTaskAddChild(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 1;
 }
@@ -123,7 +124,7 @@ void btlStartSecondaryScriptTask(void) {
     taskId = scrCreateTaskForProcessId((s32)battle->scriptOwner->priority - 1,
                             battle->scriptHandle, scriptId);
     scrSetCurrentActor((KwlnTask *)taskId, NULL);
-    kwlnTaskAddChild((s32)battle->scriptOwner, taskId);
+    kwlnTaskAddChild(battle->scriptOwner, (KwlnTask *)taskId);
     battle->scriptTask = taskId;
     battle->scriptFlags |= 2;
 }

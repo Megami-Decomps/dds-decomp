@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "evt_message_window_api.h"
@@ -112,9 +113,6 @@ extern const char *D_003BB3C4;
 extern const char *btlAnalyzPanelTaskNameRef;
 
 extern const char *btlMahenPanelTaskNameRef;
-
-extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
-
 extern s32 btlGetTrackedTaskHandle(s32);
 
 extern BattleCmdPanel *btlCommandPanelWork;
@@ -1632,8 +1630,6 @@ extern const BtlPsechgPositions D_003A2298;
 extern s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *);
 extern void btlReleasePsechgPanelWork(KwlnTask *);
 extern void btlSetTrackedTaskHandle(s32, s32);
-extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
-
 /* Create the phase-gated PSECHG panel with one of two initial point sets. */
 s32 btlCreatePhaseChangePanelTask(s32 variant) {
     BtlPsechgPositions firstPoints = D_003A2270;

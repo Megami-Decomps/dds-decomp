@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_path.h"
 #include "fpu.h"
@@ -148,9 +149,6 @@ extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 extern char D_00421AF8[];
 
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
 extern s32 scrGetWindow(void);
 
 

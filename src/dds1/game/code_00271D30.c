@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
@@ -190,10 +191,6 @@ extern s32 mnuDrawStaffCampImageScreen(KwlnTask *task);
 extern s32 mnuFinishStaffConfigPopup(KwlnTask *task);
 
 extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
-
 /* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
  * tasks to drawing, then start the opening fade and mark camp active. */
 void mnuCreateCampTasks(void) {

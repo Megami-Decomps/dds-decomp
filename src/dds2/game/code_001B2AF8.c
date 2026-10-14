@@ -3,6 +3,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
@@ -72,9 +73,6 @@ extern s32 btlRuntime;
 extern BattleCmdPanel *btlCommandPanelWork;
 
 extern const char *btlMahenPanelTaskNameRef;
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
 extern const char *btlAnalyzPanelTaskNameRef;
 
 extern const char *D_004367E0;
@@ -2572,8 +2570,6 @@ extern const BtlPsechgPositions D_00415DC8;
 extern s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *);
 extern void btlReleasePsechgPanelWork(KwlnTask *);
 extern void btlSetTrackedTaskHandle(s32, s32);
-extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
-
 /* Create the phase-gated PSECHG panel with one of two initial point sets. */
 s32 btlCreatePhaseChangePanelTask(s32 variant) {
     BtlPsechgPositions firstPoints = D_00415DA0;
@@ -2633,9 +2629,6 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
     }
     return 0;
 }
-
-extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
-
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 
 extern void btlFreeRegisteredTaskData(KwlnTask *);

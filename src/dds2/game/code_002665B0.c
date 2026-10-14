@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "kwln_task_add_child.h"
 #include "evt_message_window_api.h"
 #include "fr_font.h"
 #include "mnu_text_entry.h"
@@ -37,8 +38,6 @@
 #define MNU_RECOVERY_STATUS_KEEP_MASK 0xFA2F
 #define MNU_TERMINAL_EXIT_PROCESS 0x322
 #define MNU_COLOR_LOW_BYTE_MASK 0xFF
-
-extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
 extern s32 evtRunTerminalPanel(KwlnTask *task);
 extern s32 evtRunTerminalPanelSync(KwlnTask *task);

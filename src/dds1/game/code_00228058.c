@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "scr.h"
@@ -11,16 +12,6 @@
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
-
-
-
-
-
-
-void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
-
-
 void scrSetIntegerReturnValue(s32 value);
 
 extern char D_003ACAE0[];

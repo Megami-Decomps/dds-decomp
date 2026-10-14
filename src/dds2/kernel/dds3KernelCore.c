@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 
 #include "kwln.h"

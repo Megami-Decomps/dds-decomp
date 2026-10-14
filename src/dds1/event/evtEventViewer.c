@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
@@ -37,7 +38,6 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
-void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
@@ -1015,7 +1015,6 @@ extern char evtViewerTaskName[]; /* "EventViewer" */
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
-void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
@@ -3366,7 +3365,7 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
 
     viewer = (void *)kwlnTaskGetUserValue((KwlnTask *)task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
-    kwlnTaskAddChild(task, evtCreateFrameVariableTask());
+    kwlnTaskAddChild(task, (KwlnTask *)evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (void *)evtViewerUpdateFrame;
 }
@@ -3524,7 +3523,7 @@ void evtViewerCreateTaskWithSky(void) {
     memset(viewer, 0, 0x2490);
     viewer->resourceHandle = viewerHandle;
     viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    kwlnTaskAddChild((s32)viewerTask, evtCreateSkyTask());
+    kwlnTaskAddChild(viewerTask, (KwlnTask *)evtCreateSkyTask());
     evtEventViewerInitCampFontResource(viewer);
 }
 

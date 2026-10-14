@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_path.h"
 #include "fpu.h"
@@ -82,7 +83,6 @@ extern void evtResetObjectPendingValue(EffWorldNode *object);
 extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 sdfDebugPrintf();
 extern u8 D_003AC480[];
