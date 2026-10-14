@@ -26,6 +26,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
+#include "btl_select_transform_parameters_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -540,11 +541,11 @@ s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
     return D_003BAA20 + arg1 * 0x270;
 }
 
-s32 btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
     if (arg0 == 0) {
-        return (s32)D_003583A0;
+        return (BtlActorTransformParameters *)D_003583A0;
     }
-    return D_003BAA30 + arg1 * 24;
+    return (BtlActorTransformParameters *)(D_003BAA30 + arg1 * 24);
 }
 
 s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
