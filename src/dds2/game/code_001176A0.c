@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_save_words.h"
 #include "evt_scaled_value.h"
 #include "eff_random_mod.h"
 #include "kwln_task_create.h"
@@ -244,7 +245,7 @@ void sdfRuntimeTaskTeardownHook(void) {
 }
 
 extern u8 D_0043E5B0[16];
-extern u32 D_00385218[3];
+extern DatSaveWords D_00385218;
 extern s8 D_00435DB5;
 extern s8 D_00435DB6;
 extern u16 D_00435DB8;
@@ -288,9 +289,9 @@ void sdfSaveResetSnapshot(void) {
     D_00435DB8 = datGameState->header.unk0C;
     D_00435DBC = datGameState->header.secondTick;
     D_00435DC0 = datGameState->header.unk20;
-    D_00385218[0] = datGameState->header.unk24;
-    D_00385218[1] = datGameState->header.unk28;
-    D_00385218[2] = datGameState->header.unk2C;
+    D_00385218.words[0] = datGameState->header.unk24;
+    D_00385218.words[1] = datGameState->header.unk28;
+    D_00385218.words[2] = datGameState->header.unk2C;
     D_00438E90 = mnuCreateFlagEntries();
     D_00438E94 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
     copy = (void *)sdfMemoryGetBlockAddress(D_00438E94);
@@ -334,9 +335,9 @@ void sdfRestoreResetSnapshot(void) {
     datGameState->header.secondTick = D_00435DBC;
     datGameState->header.unk20 = D_00435DC0;
     datGameState->header.playTicks = datGameState->header.secondTick;
-    datGameState->header.unk24 = D_00385218[0];
-    datGameState->header.unk28 = D_00385218[1];
-    datGameState->header.unk2C = D_00385218[2];
+    datGameState->header.unk24 = D_00385218.words[0];
+    datGameState->header.unk28 = D_00385218.words[1];
+    datGameState->header.unk2C = D_00385218.words[2];
     mnuApplyCampResourceFlagEntries(D_00438E90);
     sdfReleaseResourceAllocation(D_00438E90);
 

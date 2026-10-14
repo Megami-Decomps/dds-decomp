@@ -1870,9 +1870,9 @@ s32 fileBuildMainBlobAndWrite(void) {
     memcpy(fileSavePreviewRecords[slot].party, header->party, 8);
     memcpy(fileSavePreviewRecords[slot].levels, header->levels, 8);
     fileSavePreviewRecords[slot].money = header->money;
-    fileSavePreviewRecords[slot].stateWords[0] = header->stateWords[0];
-    fileSavePreviewRecords[slot].stateWords[1] = header->stateWords[1];
-    fileSavePreviewRecords[slot].stateWords[2] = header->stateWords[2];
+    fileSavePreviewRecords[slot].saveWords.words[0] = header->saveWords.words[0];
+    fileSavePreviewRecords[slot].saveWords.words[1] = header->saveWords.words[1];
+    fileSavePreviewRecords[slot].saveWords.words[2] = header->saveWords.words[2];
     D_00439010 = datGameState;
     D_00439014 = sizeof(DatGameState);
     if (D_00437D08 == 0 || D_00437D08 == 2) {
@@ -2503,7 +2503,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                         }
                     }
                 }
-                if (fileSavePreviewRecords[slot].stateWords[2] & 0x80000000) {
+                if (fileSavePreviewRecords[slot].saveWords.words[2] & 0x80000000) {
                     u32 badgeColor = (alpha << 24) | 0x808080;
                     evtSubmitTexturedGradientQuad(0x1B, y + 0x4C, 0x57, 0x23, 2, 0x5D, 0x57, 0x23, badgeColor, badgeColor, badgeColor, badgeColor, (struct SdfTex *)(u32)(D_00437D70));
                 }
@@ -3448,9 +3448,9 @@ void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
     DatGameState *state = datGameState;
 
     state->header.unk20 = source->money;
-    state->header.unk24 = source->stateWords[0];
-    state->header.unk28 = source->stateWords[1];
-    state->header.unk2C = source->stateWords[2];
+    state->header.unk24 = source->saveWords.words[0];
+    state->header.unk28 = source->saveWords.words[1];
+    state->header.unk2C = source->saveWords.words[2];
 }
 
 void fileCopyRecordHeader(FileSavePreviewRecord *destination, const void *source) {
