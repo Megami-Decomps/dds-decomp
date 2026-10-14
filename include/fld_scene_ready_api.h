@@ -5,5 +5,6 @@
 
 u32 fldGetSceneReadyFlag(void);
 u32 fldGetResourceReadyFlag(void);
+u32 fldPollAreaResourceLoad(void);
 
 #endif

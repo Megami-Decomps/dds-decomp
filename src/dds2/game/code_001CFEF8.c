@@ -1101,7 +1101,6 @@ extern void btlReleaseEventAssets();
 
 extern void btlReleaseBossData();
 
-extern void fldPollAreaResourceLoad();
 
 
 #include "brs_task_poll_done_api.h"

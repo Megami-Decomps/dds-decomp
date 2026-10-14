@@ -115,7 +115,6 @@ extern void fldSetPendingAreaAndFloor(u32, u32);
 
 extern s32 fldIsAreaResourceReady(void);
 
-extern u32 fldPollAreaResourceLoad(void);
 
 
 extern void fldFreeDisplayObjects(void);
