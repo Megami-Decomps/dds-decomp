@@ -114,7 +114,7 @@ typedef struct MenuMantraRecord {
             u8 flagsHigh;
         };
     };
-    u8 pad02[2];
+    u16 eventFlag; /* 0x02: event flag claimed from 0x923 by mnuBuildMantraSourceList */
     s8 element;
     u8 pad05[3];
 } MenuMantraRecord;

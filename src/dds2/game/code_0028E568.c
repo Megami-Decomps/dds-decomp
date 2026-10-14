@@ -76,11 +76,72 @@ INCLUDE_ASM(const s32, "game/code_0028E568", func_0028E858);
 
 INCLUDE_ASM(const s32, "game/code_0028E568", mnuAdvanceMantraSelectionCursor);
 
+extern MenuMantraRecord *D_0043792C;
+
+/* Build the mantra source list after the status work: a header record whose
+ * level comes from event flags 0x920-0x922, then one record per kind-2/4 node
+ * and six per kind-3 node, each claiming the next event flag from 0x923. The
+ * final store recomputes the list address so `record` stays the live cursor. */
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427278);
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272C8);
 
-INCLUDE_ASM(const s32, "game/code_0028E568", mnuBuildMantraSourceList);
+void mnuBuildMantraSourceList(MnuStatusResource *status) {
+    MenuMantraRecord *list = (MenuMantraRecord *)((u8 *)status + 0x824);
+    MenuMantraRecord *record = list;
+    MantraNodePos *node;
+    s32 used;
+    s32 i;
+
+    memset(list, 0, 0x70 * sizeof(MenuMantraRecord));
+    node = mnuGetMantraNodePositionRecord(0);
+    list->flags |= 0x8000;
+    if (mdlFlagTest(0x922)) {
+        list->flags = (list->flags & 0xF0FF) | 0x4300;
+    } else if (mdlFlagTest(0x921)) {
+        list->flags = (list->flags & 0xF0FF) | 0x200;
+    } else if (mdlFlagTest(0x920)) {
+        list->flags = (list->flags & 0xF0FF) | 0x100;
+    }
+    record++;
+    used = 0;
+    for (i = 0; i < 0xB0; i++, node++) {
+        if (node->id != 0) {
+            u32 kind = node->selector.packed & 0xF;
+
+            if (kind == 2 || kind == 4) {
+                record->mantraId = node->id;
+                {
+                    u32 packed = node->selector.packed;
+                    u32 kindBits = (packed & 0xF) << 8;
+
+                    record->flags = (record->flags & 0xE0FF) | kindBits | ((packed << 4) & 0x1000);
+                }
+                record->eventFlag = 0x923 + used++;
+                record++;
+            } else if (kind == 3) {
+                s32 element;
+
+                for (element = 0; element < 6; element++) {
+                    record->mantraId = node->id;
+                    {
+                        u32 packed = node->selector.packed;
+
+                        record->flags = (record->flags & 0xE0FF) | ((packed & 0xF) << 8) | ((packed << 4) & 0x1000);
+                    }
+                    record->element = element;
+                    record->eventFlag = 0x923 + used++;
+                    record++;
+                }
+            }
+        }
+        if (used >= 0x70) {
+            break;
+        }
+    }
+    evtPrintDeveloperConsoleMessage("Used EventFlag [0x%x] - [0x%x]\n", 0x920, 0x923 + used);
+    D_0043792C = (MenuMantraRecord *)((u8 *)status + 0x824);
+}
 
 extern void *memcpy(void *, const void *, u32);
 extern const u16 D_004272F8[14][2];
