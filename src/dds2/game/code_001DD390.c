@@ -4473,7 +4473,7 @@ s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
             void *handle = battle->resources[BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT]->sourceHandle;
             unit->status.flags |= 0x80;
             args->mixer = sndMixerClone(handle);
-            args->effect = func_00168548(args->mixer, 2, unit, 0);
+            args->effect = effCreateBattleVoiceOwner(args->mixer, 2, unit, 0);
             args->duration = 0xE;
             args->effect->flags &= 0xFFF9;
             effBattleUpdateSelectedValue(args->effect, 0xE);

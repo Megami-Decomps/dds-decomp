@@ -609,7 +609,7 @@ void sndUnlinkVoice(BattleEffect *voice) {
 
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414430);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00168548);
+INCLUDE_ASM(const s32, "game/code_001670C0", effCreateBattleVoiceOwner);
 
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414478);
 
