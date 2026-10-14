@@ -11825,3 +11825,52 @@ quaternion-address pseudo; the real motion local remains live but shifts
 from S4 to S3. This control limits the qualification; it does not make
 volatile input-only asm a generally sound memory interface. Reaudit any
 compiler, source-lifetime, control-flow, alignment or macro-contract change.
+
+### Homogeneous array constructors can change memory-dependence scheduling
+
+The generated wall meshes `func_00138910` / `func_0013B4F8` are 788 bytes
+in each title. The retained PiM/Tidal and Brass Osprey reconstruction supplied
+the real eight-vertex/four-face shape. Reuse `FldCollisionFace` and the
+provider-owned `FldCollisionDescriptor`; the complete record is 0x128 bytes,
+with vertices at 0, faces at 0x80 and descriptor at 0x110. Allocation is
+0x4A00 bytes, exactly 64 records. Do not add 16-byte record alignment:
+odd-index records start eight bytes off that boundary. The builder retains
+face pointers, so these records must remain in the persistent allocation.
+
+Three ordinary construction facts close the compiler gap: describe the
+geometry header before its components, compute front/maxZ before back/minZ
+(as used by the corner order), and initialize the real homogeneous origin
+as `f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f}`. This is a valid reconstruction,
+not a claim that instruction order uniquely recovers the original C order.
+The resulting complete owners match without register constraints, pointer
+reinterpretation, dummy uses, or altered field widths.
+
+The final twelve differing words were one face-count store crossing eleven
+float stores. Actual read-only QEMU observations reproduced all 28 baseline
+assembly/object/RTL/log artifacts. The scheduler's relation to the last
+issued instruction was decisive before successor count: after the scalar
+origin-W store, float vertex stores had output dependencies (class 2), while
+integer header stores were independent (class 3). Face count then won the
+independent group with five successors. The float group had six successors,
+but that later comparator tier was never reached.
+
+The full array constructor supplies the missing, legitimate memory metadata.
+Pinned cc1's `store_constructor_field` passes alias set zero to `store_field`;
+its mostly-zero constructor path clears the full sixteen-byte array and
+writes W=1. The emitted pass-00 W store is `mem/s:SF` at stack+12 with alias
+set 0. In contrast, `memset(origin,0,sizeof(origin)); origin[3]=1.0f;` uses
+the scalar float alias set. The native memset and W store remain, but the
+constructor's conservative aliasing places both integer and float stores
+in the dependent class, allowing the successor counts to select native order.
+This closes both games exactly with an ordinary, fully initialized float
+array. No integer/float union or `restrict` assertion is warranted.
+
+Earlier pass evidence explains the other source facts. The pending-memory
+list flushes when its length exceeds 32; header-first construction places
+that boundary at vertex 6's X store. Front-before-back bounds put the final
+Z/extent use on minZ in sched1, so local allocation coalesces Z with maxZ as
+native does. A typed retained-buffer pointer alone leaves the twelve-word
+gap; moving topology counts after vertex/face construction changes the flush
+and regresses. Publishing a temporary aggregate descriptor produces real
+stack/block-copy scaffolding and an 844-byte body. Those controls are not
+alternate matching implementations.

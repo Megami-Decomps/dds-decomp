@@ -6932,7 +6932,132 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
     return found;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00138910);
+typedef struct FldWallMeshRecord {
+    f32 vertices[8][4];
+    FldCollisionFace faces[4];
+    FldCollisionDescriptor geometry;
+} FldWallMeshRecord;
+
+typedef char FldWallMeshRecordSizeCheck[(sizeof(FldWallMeshRecord) == 0x128) ? 1 : -1];
+
+
+/* Add the four vertical faces of an axis-aligned field collision box. */
+void func_00138910(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
+    f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    s32 index;
+    f32 minX, minY, minZ, maxX, maxZ;
+
+    index = D_003BADEC;
+    minX = x - extent;
+    maxX = x + extent;
+    minY = y - height;
+    /* Build the front boundary before the back boundary, matching the
+     * native corner ordering. The traced sched1 death notes then place
+     * the final Z/extent use on minZ; local allocation keeps Z with maxZ. */
+    maxZ = z + extent;
+    minZ = z - extent;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.vertexCount = 8;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.faceCount = 4;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.triangleCount = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.vertices = ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.faces = ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry.stopData = NULL;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][0] = minX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][1] = minY;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][2] = maxZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[0][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][0] = maxX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][1] = minY;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][2] = maxZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[1][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][0] = minX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][1] = minY;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][2] = minZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[2][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][0] = maxX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][1] = minY;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][2] = minZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[3][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][0] = minX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][1] = y;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][2] = maxZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[4][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][0] = maxX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][1] = y;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][2] = maxZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[5][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][0] = minX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][1] = y;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][2] = minZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[6][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][0] = maxX;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][1] = y;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][2] = minZ;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].vertices[7][3] = 1.0f;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].attributes = 128;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].moveFloor = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].sound = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].stop = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].place = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].automap[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].automap[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[1] = 1;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[2] = 5;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].vertexIndices[3] = 4;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].encounterType = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].encounter = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].special[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[0].special[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].attributes = 128;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].moveFloor = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].sound = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].stop = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].place = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].automap[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].automap[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[0] = 1;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[1] = 3;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[2] = 7;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].vertexIndices[3] = 5;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].encounterType = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].encounter = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].special[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[1].special[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].attributes = 128;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].moveFloor = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].sound = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].stop = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].place = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].automap[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].automap[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[0] = 3;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[1] = 2;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[2] = 6;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].vertexIndices[3] = 7;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].encounterType = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].encounter = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].special[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[2].special[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].attributes = 128;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].moveFloor = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].sound = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].stop = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].place = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].automap[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].automap[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[0] = 2;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[1] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[2] = 4;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].vertexIndices[3] = 6;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].encounterType = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].encounter = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[0] = 0;
+    ((FldWallMeshRecord *)fldAuxRecordBuffer)[index].faces[3].special[1] = 0;
+    fldBuildCollisionRecordsFromGeometry(&((FldWallMeshRecord *)fldAuxRecordBuffer)[index].geometry,
+                  origin, dds3AdvanceWorldCounter(), 0, id);
+    D_003BADEC++;
+}
 
 void func_00138C28(void) {
 }
