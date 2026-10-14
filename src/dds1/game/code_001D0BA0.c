@@ -261,7 +261,7 @@ void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
 
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
 
-void func_001D12A0(BtlTask *task, BattleIndexWork *work);
+void btlResolveActionTargetResults(BtlTask *task, BattleIndexWork *work);
 
 extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
 
@@ -616,7 +616,7 @@ extern u32 btlAdjustPointsForCombatFlags(u32, u32, u32, s32);
 
 extern s32 btlGetCommandResultKindFromFlags(u32, u32);
 
-void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
+void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     BtlUnit combinedUnit;
     BtlState *runtime;
     BtlUnit *source;
