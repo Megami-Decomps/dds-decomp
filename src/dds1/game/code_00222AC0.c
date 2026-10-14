@@ -20,6 +20,7 @@
 #include "eff_object_dispatch_api.h"
 #include "eff_event.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 
 
@@ -109,12 +110,11 @@ extern u8 D_003AC600[];
 extern u32 sdfGetLodChunkValue(SdfModel *model);
 extern s32 scrGetWindow(void);
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
-extern s32 scrReadStringParameter(s32 idx);
-extern void *effObjCreateKindFromResource(s32 arg0, s32 arg1);
+extern void *effObjCreateKindFromResource(s32 kind, void *resource);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
 extern u8 D_003AC520[];
-extern void *effObjCreateFromResolvedResource(s32 arg0, void *arg1, void *arg2);
+extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
 extern void scrSetIntegerReturnValue(s32 arg0);
 extern void mdlAttachWorldObjectToSourceVector(s32 arg0, s32 arg1);
 
@@ -1337,13 +1337,13 @@ u32 evtOpSpawnBoundEffectFromTaskResource(void) {
 u32 evtOpResolveAndFlagObjectFromName(void) {
     u8 buf1[16];
     u8 buf2[16];
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
     param0 = scrReadStringParameter(0);
-    unit = effObjSpawnLoadedResourceEffect((const char *)(u32)param0, buf1, buf2);
+    unit = effObjSpawnLoadedResourceEffect((const char *)param0, buf1, buf2);
     if (unit == NULL) {
         func_003003F0(D_003AC520, 1);
         func_003003F0(D_003AC550, scrReadStringParameter(0));
@@ -1358,7 +1358,7 @@ u32 evtOpResolveAndFlagObjectFromName(void) {
 u32 evtOpCreateAndFlagObjectFromResourceName(void) {
     f32 buf1[4];
     f32 buf2[4];
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     memset(buf1, 0, 0x10);
@@ -1473,7 +1473,7 @@ u32 evtOpSetModelCutAndScale(void) {
 }
 
 u32 evtCmdCreateEffectObjectFromResource(void) {
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     param0 = scrReadStringParameter(0);
@@ -1519,7 +1519,7 @@ u32 evtOpCreateMagatuhiEffect1FromTaskResource(void) {
 }
 
 u32 evtScriptCreateEffectObjectFromResource(void) {
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     param0 = scrReadStringParameter(0);

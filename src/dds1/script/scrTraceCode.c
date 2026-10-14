@@ -1,5 +1,6 @@
 #include "common.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 
 extern ScrVM *datGameState;

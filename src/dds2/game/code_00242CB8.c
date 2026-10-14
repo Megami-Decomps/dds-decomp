@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "evt_world.h"
@@ -32,7 +33,6 @@ extern char D_00437208[];
 void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 
-char *scrReadStringParameter(s32 idx);
 
 void scrSetIntegerReturnValue(s32 value);
 
