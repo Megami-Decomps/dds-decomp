@@ -41,7 +41,7 @@
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
 #include "dds3_world_primary.h"
-extern void func_00133F08(void);
+extern void fldUpdateCameraHeadingTransition(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 
 extern f32 D_0038A6F0[4];
@@ -1834,7 +1834,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (fldAreaState.consumedFlags & 15) {
         fldResetPlayerSceneObjectState();
         evtStartSceneResourceTask(dds3GetWorldObject(), D_00412F30);
-        func_00133F08();
+        fldUpdateCameraHeadingTransition();
         return 0;
     }
     if (!(fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) &&
@@ -1995,7 +1995,7 @@ u8 fldGetCampSceneControlMode(void) {
 
 extern void func_00149A00(void);
 
-extern void func_00133F08(void);
+extern void fldUpdateCameraHeadingTransition(void);
 
 extern u8 fldHasPendingSceneFlags(void);
 
@@ -2061,7 +2061,7 @@ s32 fldUpdateCampMenuTransition(void) {
         sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
         fldSetSceneLifecycleFlags(1);
         fldResetPlayerSceneObjectState();
-        func_00133F08();
+        fldUpdateCameraHeadingTransition();
         evtSetSolarOverlayFullyTransparent();
         scene->sceneMode = 4;
         scene->sceneState = 5;
@@ -2128,7 +2128,7 @@ s32 fldUpdateNextFloorTransition(void) {
                 scene->sceneMode = 4;
                 scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
-                func_00133F08();
+                fldUpdateCameraHeadingTransition();
                 kwlnFadeInStart(0, 0, 0, 4);
                 D_00435F80 = 5;
                 fldSetCameraNodeModeWithTen();
@@ -2208,7 +2208,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             return 0;
         }
     }
-    if (fldTestSceneControlFlags(0x40) == 0) func_00133F08();
+    if (fldTestSceneControlFlags(0x40) == 0) fldUpdateCameraHeadingTransition();
     switch (controller->stage) {
     case 0:
         D_00435F78 = 0;

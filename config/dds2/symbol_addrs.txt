@@ -7157,6 +7157,7 @@ fldUpdateModeOneCameraPose = 0x00131B50; // type:func
 dspRequestMessageWindowModeOne = 0x0026C900; // type:func
 fldResolveEventSelectorTarget = 0x0013F790; // type:func
 fldMarkStageExplorationBitmapRegion = 0x00123DE8; // type:func
+fldUpdateCameraHeadingTransition = 0x00133F08; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -9173,7 +9174,6 @@ func_001302A0 = 0x001302A0; // type:func
 func_001321F8 = 0x001321F8; // type:func
 func_00132540 = 0x00132540; // type:func
 fldSynchronizePlayerPositionAndAreaState = 0x00133B10; // type:func
-func_00133F08 = 0x00133F08; // type:func
 fldSetSkyAlpha = 0x00135588; // type:func
 fldGetSkyAlpha = 0x00135598; // type:func
 fldUpdateSelectedValueTransition = 0x001355D8; // type:func
