@@ -4115,8 +4115,44 @@ void fldClearCameraObjectTransitionFlags(void) {
 }
 
 extern void func_001372D0(f32 *);
-extern void effObjClearNodeFlags(void *, s32);
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraObjectPose);
+extern void effObjClearNodeFlags(ObjectTransform *, u32);
+/* State-first XYZ publication; SDK snapshot audit: docs/idioms.md. */
+s32 fldUpdateCameraObjectPose(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 current[3];
+    ObjectTransform *inner;
+
+    fldAreaState.positionMode = 0;
+    if (D_003BAB50 == 0) return 0;
+    effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    fldAreaState.previousX = fldAreaState.x;
+    fldAreaState.previousY = fldAreaState.y;
+    fldAreaState.previousZ = fldAreaState.z;
+    fldAreaState.x = position[0];
+    fldAreaState.y = position[1] + 10.0f;
+    fldAreaState.z = position[2];
+    current[0] = fldAreaState.x;
+    current[1] = fldAreaState.y;
+    current[2] = fldAreaState.z;
+    func_001372D0(current);
+    if (fldAreaState.positionPending != 0) {
+        fldAreaState.x = fldAreaState.targetX;
+        fldAreaState.y = fldAreaState.targetY + 44.0f;
+        fldAreaState.z = fldAreaState.targetZ;
+        position[0] = fldAreaState.x;
+        position[1] = fldAreaState.y;
+        position[2] = fldAreaState.z;
+        effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        fldAreaState.positionPending = 0;
+    }
+    effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    inner = ((EffWorldNode *)fldPlayerObject)->inner;
+    PCP_COPY_VECTOR(inner->smoothedPosition, position);
+    effObjClearNodeFlags(inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
+    return 0;
+}
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
