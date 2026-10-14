@@ -39,7 +39,7 @@ extern s32 EIntr(void);
 extern u16 D_00438A24;
 extern s32 D_00438A30;
 extern s8 D_00439165;
-extern u8 sdfCurrentBufferIndex;
+extern vu8 sdfCurrentBufferIndex;
 
 #define SDF_DMA_TAG_NEXT_BYTE 0x20
 #define SDF_DMA_TAG_REF_BYTE 0x30
