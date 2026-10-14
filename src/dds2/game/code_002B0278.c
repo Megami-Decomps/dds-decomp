@@ -16,6 +16,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "prf_skill_list_buffer.h"
 #include "eff_random.h"
 #include "fr_font.h"
 struct MenuListNode;
@@ -1876,24 +1877,16 @@ void mnuRefreshSkillWindowOwnershipFlags(MenuContext *context) {
     }
 }
 
-typedef struct SkillInfo {
-    u8 pad00[0x20];
-    u32 count;
-    u16 codes[14];
-} SkillInfo;
-
-extern void prfBuildRawSkillList(u16, SkillInfo *);
-
 u32 *mnuBuildOwnedSkillBits(void) {
-    SkillInfo info;
+    PrfSkillListBuffer info;
     u32 *bits = (u32 *)sdfAllocSizeClassBlock(0x58);
     s32 i;
     u32 j;
     memset(bits, 0, 0x58);
     for (i = 0; i < 0xb0; i++) {
-        prfBuildRawSkillList(i, &info);
-        for (j = 0; j < info.count; j++) {
-            u16 id = info.codes[j];
+        prfBuildRawSkillList(i, &info.list);
+        for (j = 0; j < info.list.count; j++) {
+            u16 id = info.list.skills[j];
             if (id != 0) {
                 bits[id >> 5] |= 1 << id;
             }

@@ -11,6 +11,7 @@
 #include "mnu_scroll_panel.h"
 #include "mnu_list.h"
 #include "dat_state.h"
+#include "prf_skill_list_buffer.h"
 #include "kwln.h"
 #include "eff.h"
 #include "itf.h"
@@ -1477,26 +1478,18 @@ void ptySkillMenuRefreshEntries(CampMenuContext *context) {
     }
 }
 
-typedef struct SkillInfo {
-    u8 pad00[0x20];
-    u32 count;
-    u16 codes[14];
-} SkillInfo;
-
-extern void prfBuildRawSkillList(u32, SkillInfo *);
-
 s32 mnuBuildSkillCodeBitset(void) {
     s32 id = 0;
     u32 *bits = (u32 *)sdfAllocSizeClassBlock(0x50);
-    SkillInfo info;
+    PrfSkillListBuffer info;
 
     memset(bits, 0, 0x50);
     for (id = 0; id < 0x60; id++) {
         u32 i;
 
-        prfBuildRawSkillList(id & 0xFFFF, &info);
-        for (i = 0; i < info.count; i++) {
-            u16 code = info.codes[i];
+        prfBuildRawSkillList(id & 0xFFFF, &info.list);
+        for (i = 0; i < info.list.count; i++) {
+            u16 code = info.list.skills[i];
 
             if (code != 0) {
                 bits[code >> 5] |= 1 << code;

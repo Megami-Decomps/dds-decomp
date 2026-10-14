@@ -495,14 +495,6 @@ void mnuNoOpItemSelectionTeardown(s32 context);
 
 
 
-typedef struct SkillInfo {
-    u8 pad00[0x20];
-    u32 count;
-    u16 codes[14];
-} SkillInfo;
-
-extern void prfBuildRawSkillList(u16, SkillInfo *);
-
 u32 *mnuBuildOwnedSkillBits(void);
 
 void mnuReleaseSkillCodeBitset(void);
