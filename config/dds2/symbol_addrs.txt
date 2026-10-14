@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sdfBuildFourColorTexturedQuadVifPacket = 0x0033BC98; // type:func
 effObjApplyTransformParameters = 0x00112518; // type:func
 fldAddAxisAlignedCollisionBoxVerticalFaces = 0x0013B4F8; // type:func
 fldInitializeHuntSparkUnit = 0x0014BF98; // type:func

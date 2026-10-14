@@ -6672,6 +6672,7 @@
 0x0033B678	sdfMeasureVertexAttributePacketBytes	inferred	confidence=high; matched-C; src/dds2/game/code_00336B48.c:1145:func_0033B678; Measures the allocation for the native VIF vertex-attribute packet builder: a fixed header plus packed per-vertex attribute payloads.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0033B688	sdfBuildCompactVertexVifPacket	inferred	readability/matching review (QP16)
 0x0033BA40	sdfMeasureAlignedRecordBufferBytes	inferred	Calculates the 16-byte-aligned allocation length from a record count. [names_reviewed17.tsv]
+0x0033BC98	sdfBuildFourColorTexturedQuadVifPacket	inferred	One-vertex textured-quad VIF packet builder; emits four color words, four UV corner words and eight quad coordinates. Paired implementation at DDS1 0x002E2DE8.
 0x0033BDF0	sdfMeasureAlignedRecordStorage	inferred	medium confidence; src/dds2/game/code_00336B48.c func_0033BDF0: Computes (count * 0x4C + 0x4B) rounded down to a 16-byte boundary for this record-buffer size query. [names_reviewed25.tsv]
 0x0033C240	sdfBuildWideVertexVifPacket	inferred	readability/matching review (QP16)
 0x0033C478	sdfPadUpdatePort	inferred	DDS2 twin of DDS1 port polling routine; invoked once per each of two pad entries.
