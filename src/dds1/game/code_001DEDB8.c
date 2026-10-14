@@ -4836,9 +4836,9 @@ void btlAdvanceWorldCounterAndSpawnActionObject(void) {
 }
 
 s32 btlAreWorkBuffersReady(void) {
-    s32 context = (s32)(u32)btlGetRuntime();
-    if (*(u32 *)(context + 0x57C) != 0) {
-        if (*(u32 *)(context + 0x580) != 0) {
+    BtlState *work = (BtlState *)btlGetRuntime();
+    if (work->primaryBuffer != 0) {
+        if (work->secondaryBuffer != 0) {
             return 1;
         }
     }
@@ -4846,15 +4846,14 @@ s32 btlAreWorkBuffersReady(void) {
 }
 
 void btlReleaseWorkBuffers(void) {
-    s32 context = (s32)(u32)btlGetRuntime();
-    u32 pointer = *(u32 *)(context + 0x580);
-    if (pointer != 0) {
-        sdfReleaseChipOrRetainedResource((void *)pointer);
-        *(u32 *)(context + 0x580) = 0;
+    BtlState *work = (BtlState *)btlGetRuntime();
+    if (work->secondaryBuffer != 0) {
+        sdfReleaseChipOrRetainedResource(work->secondaryBuffer);
+        work->secondaryBuffer = 0;
     }
-    if (*(u32 *)(context + 0x57C) != 0) {
-        sdfReleaseChipOrRetainedResource((void *)(*(u32 *)(context + 0x57C)));
-        *(u32 *)(context + 0x57C) = 0;
+    if (work->primaryBuffer != 0) {
+        sdfReleaseChipOrRetainedResource(work->primaryBuffer);
+        work->primaryBuffer = 0;
     }
 }
 
@@ -5317,15 +5316,9 @@ s32 fldCreateSceneTileTask(u32 stage, u32 variant) {
     return (s32)task;
 }
 
-typedef struct BtlFloorLoadRuntime {
-    u8 pad_000[0x57C];
-    void *primaryBuffer;
-    void *secondaryBuffer;
-} BtlFloorLoadRuntime;
-
 s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     s32 result = 1;
-    BtlFloorLoadRuntime *work = (BtlFloorLoadRuntime *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     s32 stage = args->stage;
     s32 variant = args->variant;
     char path[0x70];

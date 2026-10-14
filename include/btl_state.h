@@ -282,7 +282,9 @@ typedef struct BtlState {
     u8 pad4B0[4];
     u32 buttonTextureHandle; /* 0x4B4 */
     struct SoundResourceNode *resources[0x31]; /* 0x4B8: SYSEFF resource slots, indexed like DDS2's */
-    u8 pad57C[0x10];
+    void *primaryBuffer; /* 0x57C: retained front floor texture resource. */
+    void *secondaryBuffer; /* 0x580: retained side floor texture resource. */
+    u8 pad584[8];
     struct SdfFlagListWork *soundTransitionTask; /* 0x58C */
     u8 pad590[4];
     void (*bossCleanup)(void); /* 0x594 */
@@ -353,6 +355,10 @@ typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->listener 
 typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
 typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];
 typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x298) ? 1 : -1];
+typedef char BtlPrimaryBufferOffset[
+    ((unsigned int)&((BtlState *)0)->primaryBuffer == 0x57C) ? 1 : -1];
+typedef char BtlSecondaryBufferOffset[
+    ((unsigned int)&((BtlState *)0)->secondaryBuffer == 0x580) ? 1 : -1];
 typedef char BtlMotionSeOwnersOffset[((unsigned int)&((BtlState *)0)->soundSlotOwners == 0x23C) ? 1 : -1];
 typedef char BtlMotionSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
 typedef char BtlSkillSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x268) ? 1 : -1];
