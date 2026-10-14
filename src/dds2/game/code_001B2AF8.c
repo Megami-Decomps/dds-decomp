@@ -5038,7 +5038,87 @@ void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C2A98);
+void func_001C2A98(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+    s32 i;
+
+    switch (work->reserveEntries[slot].presentation.presentationState) {
+    case 3:
+        work->reserveEntries[slot].presentation.transitionGeometry[0]++;
+        work->reserveEntries[slot].presentation.transitionGeometry[1]--;
+        work->reserveEntries[slot].presentation.transitionGeometry[2]--;
+        work->reserveEntries[slot].presentation.transitionGeometry[3]++;
+    case 4:
+        for (i = 0; i < 2; i++) {
+            if (work->reserveEntries[slot].presentation.transitionFade[i] >= 16) {
+                work->reserveEntries[slot].presentation.transitionFade[i] -= 16;
+            } else {
+                work->reserveEntries[slot].presentation.transitionFade[i] = 0;
+            }
+        }
+        if (work->reserveEntries[slot].presentation.transitionFade[0] < 9) {
+            work->reserveEntries[slot].presentation.presentationState = 0;
+        }
+        break;
+    case 1:
+        for (i = 0; i < 2; i++) {
+            switch (work->reserveEntries[slot].presentation.pulseDirection[i]) {
+            case 0:
+                work->reserveEntries[slot].presentation.pulseLevel[i] += 10;
+                work->reserveEntries[slot].presentation.pulseLevel[i] =
+                    work->reserveEntries[slot].presentation.pulseLevel[i] <= 32 ? 32 :
+                    work->reserveEntries[slot].presentation.pulseLevel[i] > 192 ? 192 :
+                    work->reserveEntries[slot].presentation.pulseLevel[i];
+                if (work->reserveEntries[slot].presentation.pulseLevel[i] >= 192) {
+                    work->reserveEntries[slot].presentation.pulseDirection[i] = 1;
+                    work->reserveEntries[slot].presentation.pulseLevel[i] = 192;
+                }
+                break;
+            case 1:
+            default:
+                work->reserveEntries[slot].presentation.pulseLevel[i] -= 12;
+                work->reserveEntries[slot].presentation.pulseLevel[i] =
+                    work->reserveEntries[slot].presentation.pulseLevel[i] <= 32 ? 32 :
+                    work->reserveEntries[slot].presentation.pulseLevel[i] > 192 ? 192 :
+                    work->reserveEntries[slot].presentation.pulseLevel[i];
+                if (work->reserveEntries[slot].presentation.pulseLevel[i] <= 32) {
+                    work->reserveEntries[slot].presentation.pulseLevel[i] = 32;
+                    work->reserveEntries[slot].presentation.pulseDirection[i] = 0;
+                }
+                break;
+            }
+        }
+        break;
+    case 2:
+        work->reserveEntries[slot].presentation.transitionGeometry[0] = 68;
+        work->reserveEntries[slot].presentation.transitionGeometry[1] = 38;
+        work->reserveEntries[slot].presentation.transitionGeometry[2] = 5;
+        work->reserveEntries[slot].presentation.transitionGeometry[3] = 64;
+        for (i = 0; i < 2; i++) {
+            work->reserveEntries[slot].presentation.transitionFade[i] += 16;
+            work->reserveEntries[slot].presentation.transitionFade[i] =
+                work->reserveEntries[slot].presentation.transitionFade[i] <= 0 ? 0 :
+                work->reserveEntries[slot].presentation.transitionFade[i] >= 128 ? 128 :
+                work->reserveEntries[slot].presentation.transitionFade[i];
+            work->reserveEntries[slot].presentation.pulseLevel[i] += 12 - i * 2;
+            work->reserveEntries[slot].presentation.pulseLevel[i] =
+                work->reserveEntries[slot].presentation.pulseLevel[i] <= 0 ? 0 :
+                work->reserveEntries[slot].presentation.pulseLevel[i] > 96 ? 96 :
+                work->reserveEntries[slot].presentation.pulseLevel[i];
+        }
+        if (work->reserveEntries[slot].presentation.transitionFade[0] >= 128) {
+            work->reserveEntries[slot].presentation.presentationState = 1;
+            work->reserveEntries[slot].presentation.pulseDirection[0] = 0;
+            work->reserveEntries[slot].presentation.pulseDirection[1] = 0;
+            work->reserveEntries[slot].presentation.pulseTimer[0] = 0;
+            work->reserveEntries[slot].presentation.pulseTimer[1] = 0;
+            work->reserveEntries[slot].presentation.pulseOffsets[0][0] = 4;
+            work->reserveEntries[slot].presentation.pulseOffsets[0][1] = 4;
+            work->reserveEntries[slot].presentation.pulseOffsets[1][0] = 2;
+            work->reserveEntries[slot].presentation.pulseOffsets[1][1] = 2;
+        }
+        break;
+    }
+}
 
 extern const BattlePanelColors D_00416820;
 
