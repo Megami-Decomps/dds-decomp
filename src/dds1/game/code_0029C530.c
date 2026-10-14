@@ -106,8 +106,6 @@ extern f32 effCalcViewAxisWidthFactor(u8 *, void *);
 
 
 
-extern void effCopyVector(void *, void *);
-
 extern void billInvokeCallback(BillObj *);
 
 extern u8 D_003B2B10[];

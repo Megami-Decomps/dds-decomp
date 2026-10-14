@@ -270,7 +270,6 @@ extern char D_004370C0[]; /* "%5.2f" */
 extern u8 sdfViewTargetVector[];
 
 
-extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *billboard);
 
 

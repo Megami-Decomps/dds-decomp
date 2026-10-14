@@ -889,7 +889,6 @@ void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f3
     VU0_STORE_VF_UNCLOBBERED(vf10, positionOut);
 }
 
-extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *billboard);
 
 
