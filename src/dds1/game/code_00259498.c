@@ -9,6 +9,7 @@
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_sprite_resource.h"
+#include "mnu_sprite_placement.h"
 #include "sdf_grid.h"
 #include "mnu_scene_work.h"
 #include "sdf_chip.h"
@@ -298,14 +299,6 @@ void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 p
         pulse->frame = 0;
     }
 }
-
-typedef struct MnuSpritePlacement {
-    s16 resourceIndex;
-    s16 spriteIndex;
-    s16 x;
-    s16 y;
-} MnuSpritePlacement;
-
 
 extern MnuSpritePlacement D_0036B510[];
 extern struct EffectSlotSet *D_0036C698[];
