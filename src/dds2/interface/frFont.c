@@ -1207,7 +1207,7 @@ void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *glyphChain) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019DD48);
+INCLUDE_ASM(const s32, "interface/frFont", frFontCenterGlyphChainAt);
 
 /* Read the packed table count, then skip the table and its trailing metadata
  * word to reach the encoded text. The native parser copies that metadata even

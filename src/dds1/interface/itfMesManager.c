@@ -64,7 +64,7 @@ extern void itfSetIndexedTextSlot();
 
 s32 frFontCountGlyphChainNodes();
 
-void func_00196088();
+void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
 void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node);
 
@@ -453,7 +453,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     s32 rowIndex;
     s32 rowWidth;
 
-    func_00196088(0x1000, 0x4B0, optionBlock->glyphChain);
+    frFontCenterGlyphChainAt(0x1000, 0x4B0, optionBlock->glyphChain);
     rowsHeight = optionBlock->rowCount * ITF_MES_OPTION_ROW_SPACING * 8;
     for (rowIndex = 0; rowIndex < optionBlock->rowCount; rowIndex++) {
         rowWidth = frFontMeasureGlyphStripWidth(rowIndex, optionBlock->glyphChain);
@@ -1185,9 +1185,9 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
                           (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
     if (mes->unk12 == 3) {
         if (frFontCountGlyphChainNodes(glyph) == 1) {
-            func_00196088(0x1000, 0xC60, glyph);
+            frFontCenterGlyphChainAt(0x1000, 0xC60, glyph);
         } else {
-            func_00196088(0x1000, 0xBF8, glyph);
+            frFontCenterGlyphChainAt(0x1000, 0xBF8, glyph);
         }
     }
     if (!(mes->flags & ITF_MES_SKIP_CONTEXT_ENABLE_BIT) && (itfMesWork.flags & 1)) {

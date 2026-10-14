@@ -76,7 +76,7 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
-extern void func_00196088(s32, s32, FrFontGlyph *);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 typedef struct MenuListNode MenuListNode;
@@ -2183,7 +2183,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             return;
         }
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
-        func_00196088(0x1710, 0x5F0, glyph);
+        frFontCenterGlyphChainAt(0x1710, 0x5F0, glyph);
         frFontDrawGlyphChain(glyph, 1, param);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
