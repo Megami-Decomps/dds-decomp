@@ -7,6 +7,7 @@
 #include "sdf_vu_matrix_multiply_api.h"
 #include "btl.h"
 #include "eff.h"
+#include "eff_field_color.h"
 #include "sdf_projection.h"
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
@@ -29,8 +30,6 @@ extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
 extern void sdfVuLoadRotationMatrixX(f32 value);
 extern void sdfVuLoadSecondaryRotationMatrixY(f32 value);
-extern u32 effFieldColorFlags;
-
 /* The selected position provider leaves its vector in vf10. */
 void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *param, u128 *out) {
     D_003AF208[param->kind](owner, param);
