@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_boss_data_api.h"
 #include "mdl_flag_api.h"
 #include "btl_state.h"
 #include "btl_command.h"
