@@ -244,14 +244,29 @@ void sdfInvertScaledVuTransform(void) {
     VU0_MATRIX4_INVERT_SCALED();
 }
 
-INCLUDE_ASM(const s32, "game/code_002DD038", sdfVuLoadRotationMatrixX);
+extern f32 func_002F9F60(f32 angle);
+extern f32 func_002FA060(f32 angle);
+
+/* Rotation loaders build the matrix in a volatile scratch array: it is read
+ * only by the lqc2 asm through its address, and retail stores its four
+ * elements in program order. */
+void sdfVuLoadRotationMatrixX(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = func_002F9F60(angle);
+    f32 s = func_002FA060(angle);
+
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[1][1] = c;
+    m[1][2] = s;
+    m[2][1] = -s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX((f32 *)m);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD688);
 
 INCLUDE_ASM(const s32, "game/code_002DD038", sdfVuLoadRotationMatrixY);
 
-extern f32 func_002F9F60(f32 angle);
-extern f32 func_002FA060(f32 angle);
 
 
 void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
