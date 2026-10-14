@@ -13,6 +13,7 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
+#include "bill_linked_value.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
@@ -157,13 +158,6 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
     }
     }
 }
-
-
-/* Kind-one payload's +4 link leads to another +4 value word. */
-typedef struct BillLinkedValue {
-    s32 unk00;
-    s32 value;
-} BillLinkedValue;
 
 
 /* Store the variant bits in one child payload or every child of a list. */
