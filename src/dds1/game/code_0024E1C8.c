@@ -962,7 +962,7 @@ s32 mnuAreRequiredProfilesCapped(u16 profileId) {
     return 0;
 }
 
-extern SdfGrid *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
+extern SdfGrid *sdfGridCreate(s32, s32, s32, s32, s32, s32, void *, s32);
 extern void sdfSetShortPairValues(SdfGrid *, s32, s32);
 extern void mnuFreeTaskData(u32, u32);
 extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s32);
@@ -977,7 +977,7 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     s32 resourceTaskAddress;
     s32 fieldAddress;
 
-    sceneWork->gridHandle = func_002CB9C0(0xF, 0x11, 0x40, 0x43, 4, 4,
+    sceneWork->gridHandle = sdfGridCreate(0xF, 0x11, 0x40, 0x43, 4, 4,
                                           sceneWork->nodes, 0);
     sdfSetShortPairValues(sceneWork->gridHandle, 1, 1);
     sceneWork->gridHandle->releaseCell = mnuFreeTaskData;

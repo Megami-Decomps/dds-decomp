@@ -883,9 +883,9 @@ s32 btlSelectPreemptiveOutcome(void) {
     return btlRollAiBucket() < chance ? 1 : 2;
 }
 
+/* Select a follow-up encounter from the override, forced scene or adjustment rows. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004156F8);
 
-/* Select a follow-up encounter from the override, forced scene or adjustment rows. */
 s32 btlSelectSerialEncounter(void) {
     extern void btlSerialBattleChanceHook(s32);
 
