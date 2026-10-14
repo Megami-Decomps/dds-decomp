@@ -5,6 +5,7 @@
 #include "sdf_model.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_object_flags.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
@@ -235,7 +236,6 @@ typedef struct EffVec4 {
 
 extern EffVec4 D_0039F720;
 extern EffVec4 D_0039F730;
-extern u8 dds3TestObjectFlags(void *, s32);
 extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
 extern void effObjInnerVecInit(ObjectTransform *);
 extern s32 func_00222ED8(ObjectTransform *, EffWorldNode *);
