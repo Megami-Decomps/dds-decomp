@@ -1890,13 +1890,13 @@ extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern char D_00436040[];
 extern char D_00436048[];
 extern char D_00436050[];
-extern char D_00413198[]; /* "0123456789ABCDEF", shared with func_0012B2B8 */
+extern char D_00413198[]; /* "0123456789ABCDEF", shared with fldDrawRoomModeAndObjectModeFlagGrid */
 
 /* Debug view of the area's map-slot values (GMC) and room scene flags (HIT):
  * one row per floor 1..31 and one column per slot 0..15, "." for clear. Each
  * draw recomputes the row offset: GCSE PRE merges the `floor * 12 - 0x4C`
  * terms into one reaching register but leaves every `<< 3` per call, as retail does. */
-void func_0012B0D0(void) {
+void fldDrawMapSlotAndSceneFlagGrid(void) {
     char text[32];
     s32 floor;
     s32 slot;
@@ -1940,11 +1940,11 @@ void func_0012B0D0(void) {
 
 extern s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-/* Same debug grid as func_0012B0D0 for the room mode (VIS) and room object
+/* Same debug grid as fldDrawMapSlotAndSceneFlagGrid for the room mode (VIS) and room object
  * mode (ANM) flags. */
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413198);
 
-void func_0012B2B8(void) {
+void fldDrawRoomModeAndObjectModeFlagGrid(void) {
     char text[32];
     s32 floor;
     s32 slot;
