@@ -33,6 +33,7 @@
 #include "dds3_world_counter.h"
 #include "fld_resource_wait_api.h"
 #include "fld_sequence_controller.h"
+#include "file_selection_api.h"
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -569,8 +570,6 @@ void fldPrepareDeferredSceneTransition(void) {
         dds3AdminSubmitModeRequest(6, &code, 4, 0);
     }
 }
-
-extern s32 fileGetSelectionPendingFlag(void);
 
 extern void fldResetFieldRuntimeState(s32);
 

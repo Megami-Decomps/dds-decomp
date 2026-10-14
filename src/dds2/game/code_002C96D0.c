@@ -22,6 +22,7 @@
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
 #include "sdf_dev_state.h"

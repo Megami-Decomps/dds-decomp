@@ -31,6 +31,7 @@
 #include "dds3_world_counter.h"
 #include "fld_resource_wait_api.h"
 #include "fld_sequence_controller.h"
+#include "file_selection_api.h"
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
@@ -731,8 +732,6 @@ void fldPrepareDeferredSceneTransition(void) {
         dds3AdminSubmitModeRequest(6, &code, 4, 0);
     }
 }
-
-extern u32 fileGetSelectionPendingFlag(void);
 
 extern void func_00122B58();
 
