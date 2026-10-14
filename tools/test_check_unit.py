@@ -190,6 +190,106 @@ class RodataCodePointerTests(unittest.TestCase):
             {"callback": 0x101000}, {0x101000}), [(0, None), (4, None)])
 
 
+class FocusedRodataTests(unittest.TestCase):
+    def check_tables(self, *, func=None, wrong_entry=False, extra_entry=False,
+                     neighbor_as_built=False):
+        # Skipping an ASM function packs these C tables together in the object,
+        # but retail keeps an unrelated table between them. The selected table
+        # must end at the next compiled reference, not the end of .rodata or
+        # a guessed retail length.
+        entries = [0, 4, 8, 0 if wrong_entry else 12]
+        if extra_entry:
+            entries.append(8)
+        neighbor_offset = len(entries) * 4
+        entries.extend([16, 20, 24, 28])
+        rodata = struct.pack(f"<{len(entries)}I", *entries)
+        compiled = struct.pack("<8I", 0x3C020000, 0x24420000, 0x03E00008, 0,
+                               0x3C020000, 0x24420000 + neighbor_offset,
+                               0x03E00008, 0)
+        full_text = bytearray(compiled)
+        if neighbor_as_built:
+            struct.pack_into("<I", full_text, 28, 0x24020001)
+        retail = bytearray(0x1040)
+        struct.pack_into("<4I", retail, 0, 0x3C020000, 0x24422000, 0x03E00008, 0)
+        struct.pack_into("<4I", retail, 0x40, 0x3C020000, 0x24422020,
+                         0x03E00008, 0x24020001 if neighbor_as_built else 0)
+        struct.pack_into("<12I", retail, 0x1000,
+                         0x1000, 0x1004, 0x1008, 0x100C,
+                         *([0x12345678] * 4),
+                         0x1040, 0x1044, 0x1048, 0x104C)
+        relocs = {
+            ".text": {0: ("R_MIPS_HI16", ".rodata"),
+                      4: ("R_MIPS_LO16", ".rodata"),
+                      16: ("R_MIPS_HI16", ".rodata"),
+                      20: ("R_MIPS_LO16", ".rodata")},
+            ".rodata": {off: ("R_MIPS_32", ".text")
+                        for off in range(0, len(rodata), 4)},
+            ".sdata": {}, ".data": {},
+        }
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root / "src/dds1/game/unit.c"
+            unit.parent.mkdir(parents=True)
+            unit.write_text("void target(void) {}\nvoid neighbor(void) {}\n")
+            config = root / "config/dds1"
+            config.mkdir(parents=True)
+            (config / "symbol_addrs.txt").write_text(
+                "target = 0x1000; // type:func\nneighbor = 0x1040; // type:func\n")
+            (config / "SLUS_209.74.yaml").write_text("")
+            original = root / check_unit.RETAIL["dds1"]
+            original.parent.mkdir(parents=True)
+            original.write_bytes(retail)
+            assembly = root / "asm/dds1/data/game/unit.rodata.s"
+            assembly.parent.mkdir(parents=True)
+            assembly.write_text("dlabel jtbl_00002000\ndlabel jtbl_00002010\n"
+                                "dlabel jtbl_00002020\n")
+            argv = ["check_unit.py", str(unit)]
+            if func:
+                argv.extend(["--func", func])
+            stack.enter_context(patch.object(check_unit, "ROOT", root))
+            stack.enter_context(patch.object(check_unit.sys, "argv", argv))
+            stack.enter_context(patch("eeas_compat.lit4_range", return_value=(0, 0)))
+            stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
+            stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
+            stack.enter_context(patch.object(check_unit, "text_section", side_effect=lambda obj: full_text if obj.name == "full.o" else compiled))
+            stack.enter_context(patch.object(check_unit, "sections", return_value=(rodata, {".rodata": (0, len(rodata))})))
+            stack.enter_context(patch.object(check_unit, "relocations", return_value=relocs))
+            stack.enter_context(patch.object(check_unit, "owns_rodata", return_value=True))
+            stack.enter_context(patch.object(check_unit, "run", side_effect=lambda *args: "0 10 T target\n10 10 T neighbor\n" if "-S" in args else ""))
+            stack.enter_context(patch.object(check_unit.subprocess, "run", return_value=SimpleNamespace(returncode=0, stderr="")))
+            output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            return stopped.exception.code, output.getvalue()
+
+    def test_focus_preserves_adjacent_c_table_boundaries(self):
+        for func in (None, "target", "neighbor"):
+            with self.subTest(func=func):
+                code, report = self.check_tables(func=func)
+                self.assertEqual(code, 0, report)
+                self.assertIn(f"{1 if func else 2} match, 0 differ", report)
+                if func == "target":
+                    self.assertNotIn("neighbor", report)
+
+    def test_filtered_as_built_neighbor_still_ends_the_table(self):
+        for func in (None, "target"):
+            with self.subTest(func=func):
+                code, report = self.check_tables(func=func, neighbor_as_built=True)
+                self.assertEqual(code, 0, report)
+
+    def test_focus_still_rejects_incorrect_selected_table_entry(self):
+        code, report = self.check_tables(func="target", wrong_entry=True)
+        self.assertEqual(code, 1, report)
+        self.assertIn("DIFF jump table of target", report)
+        self.assertIn("1 of 4 entries differ", report)
+
+    def test_focus_does_not_truncate_excess_entries_to_retail_length(self):
+        code, report = self.check_tables(func="target", extra_entry=True)
+        self.assertEqual(code, 1, report)
+        self.assertIn("DIFF jump table of target", report)
+        self.assertIn("1 of 5 entries differ", report)
+
+
 class SdataRelocationTests(unittest.TestCase):
     def test_resolves_local_text_and_external_pointers(self):
         item = struct.pack("<II", 0x24, 4)
