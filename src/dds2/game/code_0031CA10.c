@@ -79,13 +79,13 @@ void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 
                   itfIndexedImageDescriptors[index][1], context);
 }
 
-extern void func_0031CF88(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale, s32 flags, s32 index, s32 context);
+extern void itfDrawScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale, s32 flags, s32 index, s32 context);
 
 void itfDrawUniformlyScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 scale) {
-    func_0031CF88(x, y, z, alpha, scale, scale, flags, index, context);
+    itfDrawScaledIndexedImage(x, y, z, alpha, scale, scale, flags, index, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_0031CA10", func_0031CF88);
+INCLUDE_ASM(const s32, "game/code_0031CA10", itfDrawScaledIndexedImage);
 
 /* Convert radians to degrees for this draw, then reset the shared angle to zero. */
 void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle) {

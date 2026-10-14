@@ -833,7 +833,7 @@ extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
 extern void itfDrawAndAdvanceModelInstances(ModelInstanceWork *work, u32 flags);
 extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
-extern void func_0031CF88(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale,
+extern void itfDrawScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale,
                           s32 flags, s32 index, s32 context);
 extern void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle);
 extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
@@ -936,13 +936,13 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
                     -(((f32)record->state.directionDegrees * 3.141592503f) / 180.0f + record->angle));
                 break;
             case 2:
-                func_0031CF88(x + originX, y + originY, 0, 0x80, 2.0f, 2.0f, 0, 1, 0x53);
+                itfDrawScaledIndexedImage(x + originX, y + originY, 0, 0x80, 2.0f, 2.0f, 0, 1, 0x53);
                 break;
             case 3:
                 itfDrawCenteredIndexedImage(x + originX, y + originY, 0, 0x80, 0, 0x4A, 0x53);
                 break;
             default:
-                func_0031CF88(x + originX, y + originY, 0, 0x80, 4.0f, 4.0f, 0, 0, 0x53);
+                itfDrawScaledIndexedImage(x + originX, y + originY, 0, 0x80, 4.0f, 4.0f, 0, 0, 0x53);
                 break;
             }
         }
