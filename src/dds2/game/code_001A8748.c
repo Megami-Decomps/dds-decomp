@@ -34,6 +34,7 @@
 #include "btl_action.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "btl_resolve_unit_value_api.h"
 #include "mnu_result.h"
 #include "dat_command.h"
 #include "sdf_sif_command.h"
@@ -1763,23 +1764,21 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
     return datCommandSelectors[index].stat;
 }
 
-extern s32 btlResolveUnitValueWithOverride(s32, s32);
-
 s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
-    return btlResolveUnitValueWithOverride((s32)&battler->partyRecord.flags, element);
+    return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
 }
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 
-s32 btlResolveUnitValueWithOverride(s32 statusAddress, s32 element) {
+s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 element) {
     s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x6B8);
     if (hook != 0) {
-        s32 value = hook(statusAddress, element);
+        s32 value = hook((s32)record, element);
         if (value != -1) {
             return value;
         }
     }
-    return datGetEffectiveAffinity((DatPartyRecord *)statusAddress, element);
+    return datGetEffectiveAffinity(record, element);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {

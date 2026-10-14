@@ -2,6 +2,7 @@
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
+#include "btl_resolve_unit_value_api.h"
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 
@@ -1749,7 +1750,6 @@ s32 evtPushSecondRosterMaximumHp(void) {
     return 1;
 }
 
-extern s32 btlResolveUnitValueWithOverride(s32, s32);
 extern u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
@@ -1764,7 +1764,8 @@ s32 evtPushFirstRosterSelectedStat(void) {
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.first, statIndex);
+            statValue = (u16)btlResolveUnitValueWithOverride(
+                (DatPartyRecord *)D_0043E5C0.first, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
                 (DatPartyRecord *)D_0043E5C0.first, statIndex);
@@ -1788,7 +1789,8 @@ s32 evtPushSecondRosterSelectedStat(void) {
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.second, statIndex);
+            statValue = (u16)btlResolveUnitValueWithOverride(
+                (DatPartyRecord *)D_0043E5C0.second, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
                 (DatPartyRecord *)D_0043E5C0.second, statIndex);
@@ -1811,7 +1813,8 @@ s32 evtPushFirstRosterOptionStat(void) {
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.first, statIndex);
+            statValue = (u16)btlResolveUnitValueWithOverride(
+                (DatPartyRecord *)D_0043E5C0.first, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
                 (DatPartyRecord *)D_0043E5C0.first, statIndex);
@@ -1834,7 +1837,8 @@ s32 evtPushSecondRosterOptionStat(void) {
         break;
     default:
         if (btlIsRuntimeAllocated()) {
-            statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.second, statIndex);
+            statValue = (u16)btlResolveUnitValueWithOverride(
+                (DatPartyRecord *)D_0043E5C0.second, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
                 (DatPartyRecord *)D_0043E5C0.second, statIndex);

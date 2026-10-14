@@ -46,7 +46,7 @@ extern void ptyClearProfileRecords(void);
 extern void ptyRebuildAllProfiles(void);
 extern void evtUpdateFlaggedEntries(void);
 extern void dds3ForEachEntry(void);
-extern void func_00120C08(s32 mode);
+extern void fldResetFieldRuntimeState(s32 mode);
 extern void sdfSaveResetSnapshot(void);
 extern void sdfRestoreResetSnapshot(void);
 
@@ -207,7 +207,7 @@ void evtResetWorldAndProfileRuntime(void) {
     mdlResetViewerFlagsAndSolarOverlay();
     datGameState->world.updateMode = 8;
     ptyInitRuntime();
-    func_00120C08(0);
+    fldResetFieldRuntimeState(0);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
@@ -373,7 +373,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     datGameState->world.updateMode = 8;
     ptyInitRuntime();
     mdlFlagClear(0xC0E);
-    func_00120C08(0);
+    fldResetFieldRuntimeState(0);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
