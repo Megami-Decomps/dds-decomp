@@ -1412,7 +1412,7 @@ u32 evtOpCreateEffectNodeFromTaskResource(void) {
     return 1;
 }
 
-u32 func_00225958(void) {
+u32 evtOpBuiltin359NoOp(void) {
     return 1;
 }
 
@@ -1562,7 +1562,7 @@ u32 evtOpCreateMagatuhiEffect2FromTaskResource(void) {
     return 1;
 }
 
-u32 func_00225D80(void) {
+u32 evtOpRunWorldEffectReadyAction(void) {
     s32 id;
     void *obj;
 
@@ -1574,7 +1574,7 @@ u32 func_00225D80(void) {
     return 1;
 }
 
-u32 func_00225DC0(void) {
+u32 evtOpRunWorldEffectReadyActionDuplicate(void) {
     s32 id;
     void *obj;
 
