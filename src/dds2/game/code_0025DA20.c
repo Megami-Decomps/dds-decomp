@@ -3234,10 +3234,10 @@ s32 evtStartProgressResultSecondaryTransition(KwlnTask *callbackContext) {
 extern s32 D_003CE420[8];
 extern s32 D_003CE440[];
 
-/* Start a display entry for the shop row. Message-set two picks one of five
- * entries from the first group whose flag is clear; sets one and three pick
- * one of the row's pair by its flag. */
-s32 func_00263490(KwlnTask *callbackContext) {
+/* Registered in the camp popup table; start the message for the selected shop row.
+ * Message-set two picks one of five entries from the first group whose flag is
+ * clear; sets one and three pick one of the row's pair by its flag. */
+s32 mnuStartShopRowMessage(KwlnTask *callbackContext) {
     MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(callbackContext);
     s32 row = scene->shopRow;
     s32 i;
