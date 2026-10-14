@@ -63,7 +63,7 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
 }
 
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
 #include "sdf_packet_alloc.h"
 extern s32 dds3DrawWorldNodeTransformDiagnostic();

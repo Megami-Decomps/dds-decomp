@@ -2437,7 +2437,7 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E1B80);
 /* Native actor-model setup providers used by btlBindUnitModel. */
 extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 

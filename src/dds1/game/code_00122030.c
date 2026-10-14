@@ -1623,7 +1623,7 @@ s16 fldRollEncounter(void) {
 }
 
 extern f32 D_0032F250[4];
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 extern void evtAdvanceSolarClockAndExpireControls(f32);
@@ -1793,7 +1793,6 @@ u8 fldGetCampSceneControlMode(void) {
     return fldTestSceneControlFlags(0x20) != 0 ? 0 : 3;
 }
 
-extern void *dds3GetWorldObject(void);
 
 
 

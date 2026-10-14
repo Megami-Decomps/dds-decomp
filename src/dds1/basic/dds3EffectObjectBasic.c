@@ -93,7 +93,7 @@ void effObjReleaseObjectData(EffectObj *obj) {
     obj->data = NULL;
 }
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effMiscNormalizeVU(void);

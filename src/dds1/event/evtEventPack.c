@@ -18,7 +18,7 @@
 s32 evtTickPackLoad(KwlnTask *task);
 void evtReleaseEventPackResources(KwlnTask *task);
 
-extern EffWorldNode *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern Motion *mdlFindNodeById(MdlCtx *, s32);
 extern s32 evtSetBgmVolumePan(s32, s32);
 

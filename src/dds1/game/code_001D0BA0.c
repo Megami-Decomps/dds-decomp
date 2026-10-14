@@ -2362,7 +2362,7 @@ typedef struct EventUnitData {
 
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 extern void dds3ClearObjectFlags(void *, s32);
 

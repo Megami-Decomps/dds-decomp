@@ -290,7 +290,7 @@ extern s32 D_00436300;
 
 extern s32 D_0043630C;
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 extern u32 fldGetPlayerSceneState(void);
 

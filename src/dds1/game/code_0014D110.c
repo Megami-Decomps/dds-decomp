@@ -81,7 +81,7 @@ extern s32 fldPrimaryEffectPositionPending;
 
 extern s32 fldSecondaryEffectPositionPending;
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 
 extern char D_003BB000[]; /* "BARIA" */

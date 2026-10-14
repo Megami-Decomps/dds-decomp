@@ -513,7 +513,7 @@ extern u32 D_003BAD40;
 
 extern u32 D_003BAD1C;
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern s64 fldGetPlayerSceneState(void);
 
 

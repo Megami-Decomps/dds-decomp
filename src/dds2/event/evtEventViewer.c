@@ -30,7 +30,7 @@
 #include "kwln_task_create.h"
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern void *memset(void *dst, s32 value, u32 size);
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
@@ -955,7 +955,6 @@ extern u8 D_00423050[];
 extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer();
-extern void *dds3GetWorldObject(void);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32);
 

@@ -18,7 +18,7 @@ extern u32 D_003AB050[];
 
 extern void (*D_003AF208[])();
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 struct EffWorldNode;
 extern void dds3LoadCameraVectorVU(struct EffWorldNode *object);
 
