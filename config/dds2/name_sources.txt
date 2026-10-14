@@ -954,6 +954,7 @@
 0x00154758	fldCmdTestActorEntryCondition	inferred	Looks up current script task room entry and pushes result of actor-entry condition test. [names_reviewed5.tsv]
 0x001547F0	fldCmdRestoreCameraNodeMode	inferred	Resets field camera state and selects camera model node mode when active. [names_reviewed5.tsv]
 0x00154828	fldCmdReleaseCurrentObject	inferred	Invokes slot-one handler on current field object, refreshes field state and clears a companion flag; twin DDS1 0x0014D400. [names_R_FuncNames9.tsv]
+0x00154870	fldCmdForceTargetGuideUpdate	inferred	No-argument script handler sets the flag read by fldUpdateTargetGuideController to bypass the ordinary scene-control-0x40 gate and run target-guide updates; resets occur on field reset, current-object release, and special guide disable. Registered in scrScriptProcess at 0x004124C8.
 0x00154880	fldCmdSetSceneControlFlag	inferred	Field-script command enables a scene-control flag and acknowledges completion. [names_reviewed13.tsv]
 0x001548A0	fldCmdClearSceneControlFlag	inferred	Field-script command disables the same scene-control flag and acknowledges completion. [names_reviewed13.tsv]
 0x001548C0	fldCmdFocusCameraOnObject	inferred	Copies script-selected object's position into camera focusPos and enables focus; twin 0x0014D498. [names_R_FuncNames6.tsv]
