@@ -1448,6 +1448,7 @@
 0x0015B228	parSysReset	inferred	clears the object list head, inits the control block, then notifies with D_003D64B0
 0x0015B3D8	parReleaseAssetRecord	inferred	Marks release record then queues asset and frees allocation. [names_reviewed8.tsv]
 0x0015B410	parPrependRecordListNode	inferred	Links record node at front of particle system list. [names_reviewed8.tsv]
+0x0015B420	parDrawPendingParticleRecords	inferred	iterates pending particle draw records, builds vertex packets from each record's geometry and selected axes, then clears and dispatches records; paired DDS2 0x00163010
 0x0015B660	parControlInit	inferred	zeroes the 0x2C control block and sets its u16 at +4 to 0x4000
 0x0015B6A0	parAllocateCellSystem	inferred	Allocates cell history vertices colors and model object for system. [names_reviewed8.tsv]
 0x0015B8B8	parReleaseCellSystem	inferred	Releases cell system model object and allocation handle. [names_reviewed8.tsv]

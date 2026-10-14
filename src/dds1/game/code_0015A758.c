@@ -468,7 +468,7 @@ void parPrependRecordListNode(ParListNode *node) {
     parRecordListHead = node;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B420);
+INCLUDE_ASM(const s32, "game/code_0015A758", parDrawPendingParticleRecords);
 
 /* Replace the record asset's primary texture and dirty its draw state. */
 void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
