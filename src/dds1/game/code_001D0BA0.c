@@ -2346,7 +2346,16 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001D4E60);
+/* Inherit the source unit's sound owner, transparency model, world node and
+ * event work, and mark the destination as an inheriting unit. */
+void func_001D4E60(BtlUnit *dst, BtlUnit *src) {
+    dst->soundSlotOwner = src->soundSlotOwner;
+    dst->transparencyModel = src->transparencyModel;
+    dst->effectObject = src->effectObject;
+    dst->ext = src->ext;
+    dst->unkCC = 1;
+    dst->status.flags |= 2;
+}
 
 /* Kind-5 world-node payload attaches the event unit at +8. */
 typedef struct EventUnitData {
@@ -3305,7 +3314,7 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
         return;
     }
     shape = unit->ext->owner->sub;
-    unit->transparencyModel = (s32)sdfModelCreateWithItems(shape->resourceList, shape->itemList);
+    unit->transparencyModel = sdfModelCreateWithItems(shape->resourceList, shape->itemList);
     dds3SetObjectFlags(unit->effectObject, 1);
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
@@ -3327,7 +3336,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             alpha = color >> 24;
             if (!(flags & 0x20000)) {
                 if (unit->transparencyModel != 0) {
-                    sdfReleaseDevSlot((SdfModel *)unit->transparencyModel, 1, 1);
+                    sdfReleaseDevSlot(unit->transparencyModel, 1, 1);
                     unit->transparencyModel = 0;
                     if (unit->status.flags & 2) {
                         info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
@@ -3344,7 +3353,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             } else if (unit->transparencyModel == 0) {
                 btlCreateUnitTransparency(unit);
             } else {
-                btlDrawUnitTransparencyPasses(unit, info, (SdfModel *)unit->transparencyModel, D_00359D10, color);
+                btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, D_00359D10, color);
             }
         }
     }
@@ -3377,14 +3386,14 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     D_00359D20[0]->append(D_00359D20[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
-        unit->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        unit->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
         dds3SetObjectFlags(unit->effectObject, 1);
         return;
     }
-    btlDrawUnitTransparencyPasses(unit, info, (SdfModel *)unit->transparencyModel, D_00359D20, unit->overlayColor);
+    btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, D_00359D20, unit->overlayColor);
     info = unit->mirror->ext->owner;
     if (unit->mirror->transparencyModel == 0) {
-        unit->mirror->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        unit->mirror->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
         dds3SetObjectFlags(unit->mirror->effectObject, 1);
         return;
     }
@@ -3392,7 +3401,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     sdfCreateDescriptorPacket(list, D_003980E0.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
     D_00359D30[0]->append(D_00359D30[0], list);
-    btlDrawUnitTransparencyPasses(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
+    btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
 
 extern char D_003A3BA8[];
