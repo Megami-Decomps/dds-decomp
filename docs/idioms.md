@@ -12001,3 +12001,39 @@ bytes without changing layout and corresponds to DDS1's existing callback at
 `0x68C`. The final paired bodies each match all 53 native instruction words;
 their whole-unit gates are 81/0 and 133/0 respectively.
 
+### Final argument use: mdlCreateDevSlotList
+
+DDS1 `mdlCreateDevSlotList` (`00217310`, 292 bytes) and its DDS2 twin
+(`00231E28`, 292 bytes) release the prior device-slot list, initialize a new
+`MdlDevList`, and derive a color interpolation step from the requested span.
+The native multiplication at `00217354` / `00231E6C` consumes the actual saved
+capacity and stride arguments. Computing that span after the counter and stride
+initialization is ordinary source sequencing: those arguments remain live until
+their genuine final use, rather than ending at the halfword stores.
+
+An output-preserving `cc1probe` scheduler/allocation/CSE trace isolates the
+remaining four words. In the owner-derived-span control, capacity dies in the
+`capacity` store at field `+6`. Pre-reload scheduling favors that store over
+`usedCount` at `+4` by register weight, and post-reload LUID order preserves the
+reversed stores. In the final source, both counter stores have priority 7,
+register weight 0 and cost 2. The sched1 comparison of UIDs 58/61 therefore
+reaches LUID 14/15 and chooses `+4` first. The later MULT, UID 67, is the real
+final use of both arguments; its two dead operands give it register weight -1.
+Sched2 again chooses `+4` first by LUID 23/27. This closes the paired bodies
+without an extra read, dummy lifetime, type change or compiler-flag change.
+
+There is a separate SDK boundary requirement. Basic VU `ASM_INPUT` forms let
+cse1 UID 96 merge the second `1/128` normalization constant with the first,
+shortening the function. Existing `VU0_MOVE_VF_EXTENDED` and
+`VU0_SUB_EXTENDED` retain the native separate materialization while emitting
+the same VU instructions. No new inline-assembly macro was introduced. The
+native MMI/VU sequences are at `002173A0..00217410` and
+`00231EB8..00231F28`; the two packed-color work homes are at SP+0 and SP+0x10
+in both games, supporting the four-word SDK carriers.
+
+The existing primary `MdlCtx` and `MdlDevList` owners remain unchanged.
+Both actual C callers receive only the truthful void, five-argument prototype;
+the DDS2 caller unit's Cedar narrow scope was disclosed and its body untouched.
+Fresh whole-unit gates are 73/0 for each provider and 109/0 / 110/0 for the
+DDS1/DDS2 callers, with no context, rodata or undefined-symbol rows. Linked
+retail verification remains the production integration gate.
