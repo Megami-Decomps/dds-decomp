@@ -4115,7 +4115,7 @@ void fldClearCameraObjectTransitionFlags(void) {
 }
 
 extern void func_001372D0(f32 *);
-extern void effObjClearNodeFlags(ObjectTransform *, u32);
+extern void effObjClearNodeFlags(ObjectTransform *, s32);
 /* State-first XYZ publication; SDK snapshot audit: docs/idioms.md. */
 s32 fldUpdateCameraObjectPose(void) {
     f32 position[4] __attribute__((aligned(16)));

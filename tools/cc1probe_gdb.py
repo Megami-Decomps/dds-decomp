@@ -1387,6 +1387,77 @@ def hk_elig_exit():
         insn_uid(d), slot, insn_uid(c), insn_text(c), flags & 0xFFFFFFFF, sreg("eax")))
 
 
+
+# ---- resource.c mark_target_live_regs (halcyon-drift): live set reorg computes at a thread ----
+MTLR = []
+
+
+def hk_mtlr_entry():
+    if not wanted():
+        MTLR.append(None)
+        return
+    MTLR.append((arg(1), arg(2), caller_line()))
+
+
+def hk_mtlr_exit():
+    ent = MTLR.pop() if MTLR else None
+    if not ent or not wanted():
+        return
+    target, res, where = ent
+    words = [u32(res + 4 + 4 * i) for i in range(3)]
+    live = []
+    for i in range(96):
+        if (words[i // 32] >> (i % 32)) & 1:
+            live.append(("$%d" % i) if i < 32 else ("$f%d" % (i - 32)) if i < 64 else ("hr%d" % i))
+    out("    mark_target_live_regs@%s(target=uid%d) => mem=%d live={%s}" % (
+        where, insn_uid(target) if target else -1, u32(res) & 0xFF, " ".join(live)))
+
+
+FDSR = []
+
+
+def hk_fdsr_entry():
+    if not wanted():
+        return
+    out("      find_dead_or_set_registers(start=uid%d jump_count=%d)" % (insn_uid(arg(0)) if arg(0) else -1, sarg(3)))
+
+
+CT = []
+
+
+def hk_ct_entry():
+    CT.append(arg(0) if wanted() else None)
+
+
+def hk_ct_exit():
+    i = CT.pop() if CT else None
+    if i is None or not wanted():
+        return
+    if reg("eax"):
+        out("      can_throw(uid%d: %s) => %d" % (insn_uid(i), insn_text(i)[:80], reg("eax")))
+
+
+CR = []
+
+
+def hk_cr_entry():
+    if not wanted():
+        CR.append(None)
+        return
+    def rn(x):
+        try:
+            return rtx(x)
+        except Exception:
+            return "?"
+    CR.append((rn(arg(0)), rn(arg(1)), insn_uid(arg(4)) if arg(4) else -1, sarg(5)))
+
+
+def hk_cr_exit():
+    ent = CR.pop() if CR else None
+    if not ent or not wanted():
+        return
+    out("    combine_regs(used=%s set=%s insn=uid%d already_dead=%d) => %d" % (ent + (reg("eax"),)))
+
 FST = []
 
 
@@ -1495,6 +1566,9 @@ def install():
         for r in rets("mips_sched_reorder"):
             Hook(r, hk_reorder_exit)
     if "alloc" in MODES:
+        Hook(sym("combine_regs"), hk_cr_entry)
+        for r in rets("combine_regs"):
+            Hook(r, hk_cr_exit)
         Hook(sym("local_alloc"), hk_local_alloc)
         Hook(sym("block_alloc"), hk_block_alloc)
         Hook(0x813E96C, hk_qty_compare_1_entry)
@@ -1610,6 +1684,13 @@ def install():
         for r in rets("eligible_for_delay"):
             Hook(r, hk_elig_exit)
         Hook(sym("fill_slots_from_thread"), hk_fst_entry)
+        Hook(sym("mark_target_live_regs"), hk_mtlr_entry)
+        Hook(sym("find_dead_or_set_registers"), hk_fdsr_entry)
+        Hook(sym("can_throw"), hk_ct_entry)
+        for r in rets("can_throw"):
+            Hook(r, hk_ct_exit)
+        for r in rets("mark_target_live_regs"):
+            Hook(r, hk_mtlr_exit)
         for r in rets("fill_slots_from_thread"):
             Hook(r, hk_fst_exit)
         Hook(sym("redundant_insn"), hk_red_entry)
