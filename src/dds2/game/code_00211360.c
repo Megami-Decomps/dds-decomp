@@ -167,7 +167,7 @@ extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 btlAnyUnitHasActionInSlots();
+extern s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action);
 
 extern s32 btlCanSpawnAnotherEnemy(s32);
 
@@ -1369,10 +1369,7 @@ s32 btlActionMatchesStatMask(s32 mask, s16 actionId, s8 force) {
 }
 
 /* Return whether an eligible unit has a queued action in the requested category. */
-s32 btlAnyUnitHasActionInSlots(mask, action)
-    s32 mask;
-    s32 action;
-{
+s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action) {
     ActionStateLink *actor;
     BtlUnit *unit;
     u32 flags;
