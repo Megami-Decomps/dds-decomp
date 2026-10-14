@@ -779,6 +779,8 @@ extern s16 D_003D43B0[], D_003D4408[], D_003D4460[];
 
 extern s16 D_003BD7D0;
 
+#include "fld_label_cache_api.h"
+
 void fldCacheMapLabelLengths(s32 map) {
     s32 i;
 

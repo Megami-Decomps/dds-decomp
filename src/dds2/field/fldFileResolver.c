@@ -1436,8 +1436,7 @@ extern void fldCopyActorWaypointTable(FldWaypointBlock *source);
 
 
 extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId);
-
-extern void fldCacheMapLabelLengths();
+#include "fld_label_cache_api.h"
 
 void fldLoadAreaPackedResources(void) {
     char name[32];
