@@ -29,7 +29,7 @@ typedef struct FldAreaWork {
     s32 floor;                   /* Zero-based; room lookups use floor + 1. */
     s32 unk18;
     s32 cachedArea;
-    s32 unk20;
+    s32 reuseAreaResources;    /* 0x20: preserves same-area resources across transitions */
     s32 titleFade;
     s32 sequenceCode;            /* 0x28: retained scene/sequence index */
     u8 pad2C[4];

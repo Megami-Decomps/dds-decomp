@@ -797,7 +797,7 @@ void fldResetPlayerSceneTransformState(void) {
 void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState.area == stage) {
-            fldAreaState.unk20 = 1;
+            fldAreaState.reuseAreaResources = 1;
         } else {
             dds3WorkClear();
         }
@@ -825,7 +825,7 @@ void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, 
 void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState.area == stage) {
-            fldAreaState.unk20 = 1;
+            fldAreaState.reuseAreaResources = 1;
         } else {
             dds3WorkClear();
         }
@@ -852,7 +852,7 @@ void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s3
                    s32 code, s32 link, const char *subname) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState.area == stage) {
-            fldAreaState.unk20 = 1;
+            fldAreaState.reuseAreaResources = 1;
         } else {
             dds3WorkClear();
         }
@@ -879,7 +879,7 @@ void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 k
                     s32 code, const char *subname) {
     if (kwlnTaskGetTaskByName(D_00412D50) != NULL) {
         if (fldAreaState.area == stage) {
-            fldAreaState.unk20 = 1;
+            fldAreaState.reuseAreaResources = 1;
         } else {
             dds3WorkClear();
         }
@@ -967,7 +967,7 @@ void fldRebuildFieldScene(void) {
     EffWorldNode *node;
     FieldAreaEncounterTable *encounters;
     FieldAreaEncounterRow *room;
-    s32 reuse;
+    s32 reuseAreaResources;
     s32 areaIndex;
     s32 i;
     s32 selection;
@@ -988,7 +988,7 @@ void fldRebuildFieldScene(void) {
             fldInitializeActorLinkedSequence(datGameState->vr.previewX,
                 datGameState->vr.previewY, (FieldSequenceRecord *)sceneWork);
         }
-        reuse = fldAreaState.unk20;
+        reuseAreaResources = fldAreaState.reuseAreaResources;
         evtCreateWorldObjectForKey(sceneWork->area, sceneWork->room);
         dds3SetWorldObject(NULL);
         if (sceneWork->primaryState == 0) {
@@ -1041,7 +1041,7 @@ void fldRebuildFieldScene(void) {
                     fldAreaState.defaultEncounterId = encounter;
                 }
             }
-            if (fldAreaState.area < 31 && fldGetSceneStatusCode() != 4 && reuse == 0) {
+            if (fldAreaState.area < 31 && fldGetSceneStatusCode() != 4 && reuseAreaResources == 0) {
                 if (fldGetSceneStatusCode() == 5) {
                     if (fldAreaState.cachedArea != fldAreaState.area) {
                         fldStartMiniTitleForUnlock(fldAreaState.area);
