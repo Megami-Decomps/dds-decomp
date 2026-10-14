@@ -20,7 +20,6 @@
 
 extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 #include "dds3_world_secondary.h"
-extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 
 extern u32 effObjOpacityPassEnabled;
 
