@@ -3,6 +3,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_light_set.h"
 #include "kwln_frame_draw_buffer.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
@@ -5514,46 +5515,6 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     D_0038BB60.color[2] = blueB;
 }
 
-typedef struct {
-    u8 type;
-    u8 pad1[3];
-    s32 unk4; /* 0x04: exported to the display state as slot 14; never read back */
-    s32 fadeValue;
-    s32 swayMode;
-    u8 pad10[0xC];
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 fixedVectorX;
-    s32 fixedVectorY;
-    s32 fixedVectorZ;
-    f32 lightVectorAX;
-    f32 lightVectorAY;
-    f32 lightVectorAZ;
-    f32 lightDirectionAX;
-    f32 lightDirectionAY;
-    f32 lightDirectionAZ;
-    f32 lightVectorBX;
-    f32 lightVectorBY;
-    f32 lightVectorBZ;
-    f32 lightDirectionBX;
-    f32 lightDirectionBY;
-    f32 lightDirectionBZ;
-    f32 lightVectorCX;
-    f32 lightVectorCY;
-    f32 lightVectorCZ;
-    f32 lightDirectionCX;
-    f32 lightDirectionCY;
-    f32 lightDirectionCZ;
-    f32 finalVectorX;
-    f32 finalVectorY;
-    f32 finalVectorZ;
-    f32 unitColorA[3];
-    f32 unitLightDirection[3];
-    u8 padA4[0x30];
-    f32 unitColorB[3];
-} FldLightSet; /* 0xE0 bytes */
 
 extern s32 kwlnSetDrawColorTarget(s32, void *);
 extern s32 kwlnSetLightColorTarget(s32, s32, void *);
@@ -5595,28 +5556,28 @@ void fldApplySkyLightSet(u32 index, s32 mode) {
         D_00436138 = 0;
         if (fldAreaState.sceneCommand == 0) {
             light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
-            area = light->type;
+            area = light->fadeArea;
             D_00389988[13] = area;
-            D_00389988[14] = light->unk4;
-            value = light->fadeValue;
+            D_00389988[14] = light->displayStateSlot14;
+            value = light->fadeMode;
             D_00389988[15] = value;
             D_00389988[16] = light->swayMode;
             fldSetFadeTarget(area, value, duration);
             fldSetSwayMode(D_00389988[16]);
-            vec[0] = light->fixedVectorX * 0.00390625f;
-            vec[1] = light->fixedVectorY * 0.00390625f;
-            vec[2] = light->fixedVectorZ * 0.00390625f;
+            vec[0] = light->drawColorFixedR * 0.00390625f;
+            vec[1] = light->drawColorFixedG * 0.00390625f;
+            vec[2] = light->drawColorFixedB * 0.00390625f;
             vec[3] = 0;
             kwlnSetDrawColorTarget(duration, vec);
-            evtSetDrawVectorTarget(duration, light->unk1C, light->unk24, light->unk20, light->unk28);
+            evtSetDrawVectorTarget(duration, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
             dir[0] = light->lightDirectionAX;
             dir[1] = light->lightDirectionAY;
             dir[2] = light->lightDirectionAZ;
             dir[3] = 0;
             kwlnSetLightDirectionTarget(duration, 0, dir);
-            vec[0] = light->lightVectorAX;
-            vec[1] = light->lightVectorAY;
-            vec[2] = light->lightVectorAZ;
+            vec[0] = light->lightColorAX;
+            vec[1] = light->lightColorAY;
+            vec[2] = light->lightColorAZ;
             vec[3] = 0;
             kwlnSetLightColorTarget(duration, 0, vec);
             dir[0] = light->lightDirectionBX;
@@ -5624,9 +5585,9 @@ void fldApplySkyLightSet(u32 index, s32 mode) {
             dir[2] = light->lightDirectionBZ;
             dir[3] = 0;
             kwlnSetLightDirectionTarget(duration, 1, dir);
-            vec[0] = light->lightVectorBX;
-            vec[1] = light->lightVectorBY;
-            vec[2] = light->lightVectorBZ;
+            vec[0] = light->lightColorBX;
+            vec[1] = light->lightColorBY;
+            vec[2] = light->lightColorBZ;
             vec[3] = 0;
             kwlnSetLightColorTarget(duration, 1, vec);
             dir[0] = light->lightDirectionCX;
@@ -5634,14 +5595,14 @@ void fldApplySkyLightSet(u32 index, s32 mode) {
             dir[2] = light->lightDirectionCZ;
             dir[3] = 0;
             kwlnSetLightDirectionTarget(duration, 2, dir);
-            vec[0] = light->lightVectorCX;
-            vec[1] = light->lightVectorCY;
-            vec[2] = light->lightVectorCZ;
+            vec[0] = light->lightColorCX;
+            vec[1] = light->lightColorCY;
+            vec[2] = light->lightColorCZ;
             vec[3] = 0;
             kwlnSetLightColorTarget(duration, 2, vec);
-            vec[0] = light->finalVectorX;
-            vec[1] = light->finalVectorY;
-            vec[2] = light->finalVectorZ;
+            vec[0] = light->backgroundColorX;
+            vec[1] = light->backgroundColorY;
+            vec[2] = light->backgroundColorZ;
             vec[3] = 1.0f;
             kwlnSetBackgroundColorTarget(duration, vec);
             fldSetPlayerAndPeerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
@@ -5708,28 +5669,28 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
             if (fldAreaState.sceneCommand == 0) {
                 light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
                 D_00389988[11] = index;
-                area = light->type;
+                area = light->fadeArea;
                 D_00389988[13] = area;
-                D_00389988[14] = light->unk4;
-                value = light->fadeValue;
+                D_00389988[14] = light->displayStateSlot14;
+                value = light->fadeMode;
                 D_00389988[15] = value;
                 D_00389988[16] = light->swayMode;
                 fldSetFadeTarget(area, value, duration);
                 fldSetSwayMode(D_00389988[16]);
-                vec[0] = light->fixedVectorX * 0.00390625f;
-                vec[1] = light->fixedVectorY * 0.00390625f;
-                vec[2] = light->fixedVectorZ * 0.00390625f;
+                vec[0] = light->drawColorFixedR * 0.00390625f;
+                vec[1] = light->drawColorFixedG * 0.00390625f;
+                vec[2] = light->drawColorFixedB * 0.00390625f;
                 vec[3] = 0;
                 kwlnSetDrawColorTarget(duration, vec);
-                evtSetDrawVectorTarget(duration, light->unk1C, light->unk24, light->unk20, light->unk28);
+                evtSetDrawVectorTarget(duration, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
                 dir[0] = light->lightDirectionAX;
                 dir[1] = light->lightDirectionAY;
                 dir[2] = light->lightDirectionAZ;
                 dir[3] = 0;
                 kwlnSetLightDirectionTarget(duration, 0, dir);
-                vec[0] = light->lightVectorAX;
-                vec[1] = light->lightVectorAY;
-                vec[2] = light->lightVectorAZ;
+                vec[0] = light->lightColorAX;
+                vec[1] = light->lightColorAY;
+                vec[2] = light->lightColorAZ;
                 vec[3] = 0;
                 kwlnSetLightColorTarget(duration, 0, vec);
                 dir[0] = light->lightDirectionBX;
@@ -5737,9 +5698,9 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
                 dir[2] = light->lightDirectionBZ;
                 dir[3] = 0;
                 kwlnSetLightDirectionTarget(duration, 1, dir);
-                vec[0] = light->lightVectorBX;
-                vec[1] = light->lightVectorBY;
-                vec[2] = light->lightVectorBZ;
+                vec[0] = light->lightColorBX;
+                vec[1] = light->lightColorBY;
+                vec[2] = light->lightColorBZ;
                 vec[3] = 0;
                 kwlnSetLightColorTarget(duration, 1, vec);
                 dir[0] = light->lightDirectionCX;
@@ -5747,14 +5708,14 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
                 dir[2] = light->lightDirectionCZ;
                 dir[3] = 0;
                 kwlnSetLightDirectionTarget(duration, 2, dir);
-                vec[0] = light->lightVectorCX;
-                vec[1] = light->lightVectorCY;
-                vec[2] = light->lightVectorCZ;
+                vec[0] = light->lightColorCX;
+                vec[1] = light->lightColorCY;
+                vec[2] = light->lightColorCZ;
                 vec[3] = 0;
                 kwlnSetLightColorTarget(duration, 2, vec);
-                vec[0] = light->finalVectorX;
-                vec[1] = light->finalVectorY;
-                vec[2] = light->finalVectorZ;
+                vec[0] = light->backgroundColorX;
+                vec[1] = light->backgroundColorY;
+                vec[2] = light->backgroundColorZ;
                 vec[3] = 1.0f;
                 kwlnSetBackgroundColorTarget(duration, vec);
                 fldSetPlayerAndPeerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
