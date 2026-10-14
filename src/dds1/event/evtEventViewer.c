@@ -2407,7 +2407,7 @@ extern char D_003BBF60[];
 extern char D_003BBF68[];
 extern char D_003BBF70[];
 extern u8 D_003BD344;
-extern s32 func_0021ECF0(KwlnTask *task);
+extern s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task);
 extern s32 evtPollRuntimeControlReady(KwlnTask *task);
 extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
 extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
@@ -2760,7 +2760,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         EvtViewerDrawPayload *parameters = key->payload;
                         evtSetDrawVectorTarget(0, parameters->y, parameters->x, parameters->z, parameters->w);
                         kwlnDrawVector.fogColor = parameters->mode;
-                        viewer->controlState = kwlnTaskCreate(D_003BBF60, 0x2AF9, 1, 1, func_0021ECF0, NULL, 1);
+                        viewer->controlState = kwlnTaskCreate(D_003BBF60, 0x2AF9, 1, 1, evtEventViewerEditDrawVectorTargetTask, NULL, 1);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     }
