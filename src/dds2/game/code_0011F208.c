@@ -772,7 +772,7 @@ void fldLoadFieldTablesAndIndexStages(void) {
 
 extern void fldClearAllAreaFloorFlags(void);
 
-void func_00122A38(void) {
+void fldResetFieldMapState(void) {
     s32 bankIndex;
     s32 slotIndex;
     s32 valueIndex;
