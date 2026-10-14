@@ -508,7 +508,75 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
     sdfDiscReadPosition += size;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DE60);
+/* Disc file-table record: name offset, start offset and byte size. */
+typedef struct SdfDiscFileRecord {
+    u32 nameOffset; /* 0x00 */
+    u32 offset;     /* 0x04 */
+    s32 size;       /* 0x08 */
+} SdfDiscFileRecord;
+
+extern SdfDiscFileRecord D_00476940;
+extern s32 sceOpen();
+extern s32 sdfDevSeekFile(s32, s32, s32);
+
+/* Look up a "cdrom" path through the CD file system: convert it to an ISO
+ * name ("\\" separators, upper case, ";1" version), retry the search until
+ * the disc answers, and record the file's size in the shared record. */
+s32 func_0033DE60(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
+    u32 file[9];
+    char path[256];
+    char *name;
+    char *cursor;
+    char *flag = (char *)flagAddress;
+    s32 character;
+    s32 status;
+    s32 fd;
+
+    strcpy(path, (char *)pathAddress);
+    name = strchr(path, ':') + 1;
+    cursor = name;
+    character = *cursor;
+    while (character != 0) {
+        if (character == '/') {
+            *cursor = '\\';
+        } else if (character >= 'a' && character <= 'z') {
+            *cursor = character - 0x20;
+        }
+        cursor++;
+        character = *cursor;
+    }
+    if (cursor[-2] != ';') {
+        cursor[0] = ';';
+        cursor[1] = '1';
+        cursor[2] = 0;
+    }
+    for (;;) {
+        WaitSema(sdfDiscSemaphore);
+        if (sceCdSearchFile(file, (s32)name) != 0) {
+            fd = sceOpen(path, 1);
+            if (fd < 0) {
+                SignalSema(sdfDiscSemaphore);
+                continue;
+            }
+            D_00476940.size = sdfDevSeekFile(fd, 0, 2);
+            sceClose(fd);
+            SignalSema(sdfDiscSemaphore);
+            break;
+        }
+        status = sceCdStatus();
+        SignalSema(sdfDiscSemaphore);
+        if (status == 1) {
+            sdfDevWaitForDisc();
+        } else {
+            sdfSleepWithAlarm(100);
+        }
+    }
+    *(u32 *)sectorOut = file[0];
+    if (flag != NULL) {
+        *flag = 1;
+    }
+    return (s32)&D_00476940;
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevFindDiscFileRecordByPath);
 
