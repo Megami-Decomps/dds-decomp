@@ -23,9 +23,9 @@ void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
 
 INCLUDE_ASM(const s32, "game/code_00336768", func_00336798);
 
-INCLUDE_ASM(const s32, "game/code_00336768", func_00336818);
+INCLUDE_ASM(const s32, "game/code_00336768", sdfVuLoadSecondaryRotationMatrixY);
 
-INCLUDE_ASM(const s32, "game/code_00336768", func_00336898);
+INCLUDE_ASM(const s32, "game/code_00336768", sdfVuLoadSecondaryRotationMatrixZ);
 
 /* Build an axis-angle matrix in the VU0 secondary matrix registers. */
 void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
@@ -36,8 +36,8 @@ void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
 }
 
 extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void func_00336818(f32 angle);
-extern void func_00336898(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
 void sdfRotateVuMatrixAboutX(f32 angle)
@@ -70,9 +70,9 @@ void sdfRotateVuMatrixAboutZ(f32 angle)
 void vu0RotMatrixXYZFromVec3(const RwV3d *rot)
 {
     sdfVuLoadRotationMatrixX(rot->x);
-    func_00336818(rot->y);
+    sdfVuLoadSecondaryRotationMatrixY(rot->y);
     sdfMultiplyVuMatrixInPlace();
-    func_00336898(rot->z);
+    sdfVuLoadSecondaryRotationMatrixZ(rot->z);
     sdfMultiplyVuMatrixInPlace();
 }
 

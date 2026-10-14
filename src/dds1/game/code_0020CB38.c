@@ -522,8 +522,8 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 }
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
-extern void func_002DD608(f32);
-extern void func_002DD968(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 extern f32 D_003BB8B0[];
 
 s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
@@ -565,17 +565,17 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     if (rotate == 1 && runtime[0x122] == 3) {
         switch (kind) {
         case 0:
-            func_002DD608(-0.13089969f);
-            func_002DD968(0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
+            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            func_002DD608(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            func_002DD608(angle);
-            func_002DD968(angle);
+            sdfVuLoadRotationMatrixX(angle);
+            sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
         }

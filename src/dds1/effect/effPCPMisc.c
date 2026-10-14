@@ -181,7 +181,7 @@ typedef struct EffPCPRotateWork {
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 extern void func_002DD688(f32 scale);
-extern void func_002DD968(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void func_002DD8E8(f32 angle);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
@@ -1480,8 +1480,8 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 val) {
     work->unk18 = val;
 }
 
-extern void func_002DD608(f32 angle);
-extern void func_002DD9E8(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 extern EffSpawnParams D_00354F60[];
 
 /* 8 pieces flung sideways from below; the rotation matrix is composed by the
@@ -1502,8 +1502,8 @@ void effPcpSpawnSidewaysEight(EffPCPThunderGroup *group) {
         params->pos[0] = 0;
         params->pos[1] = -600.0f;
         params->pos[2] = 0;
-        func_002DD608((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
-        func_002DD9E8((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        sdfVuLoadRotationMatrixX((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        sdfVuLoadSecondaryRotationMatrixZ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         sdfMultiplyVuMatrixInPlace();
         VU0_LOAD_VF($vf10, params->pos);
                 VU0_ROTATE_VEC(vf10, vf10);
@@ -2794,7 +2794,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     }
     if (node != 0) {
         VU0_LOAD_MATRIX(work);
-        func_002DD968(work->angle);
+        sdfVuLoadSecondaryRotationMatrixY(work->angle);
         sdfComposeVuMatrixFromRegisters();
         aim[0] = aim[1] = 0.0f;
         aim[2] = 1.0f;
@@ -4259,7 +4259,7 @@ void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
         sdfInvertRigidVuTransform();
     } else {
         sdfVuLoadRotationMatrixY(work->rotationA);
-        func_002DD968(work->rotationB);
+        sdfVuLoadSecondaryRotationMatrixY(work->rotationB);
         sdfMultiplyVuMatrixInPlace();
         work->rotationB += work->rotationStep;
         work->rotationStep *= work->head.rotationDecay;

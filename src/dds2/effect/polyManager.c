@@ -130,7 +130,7 @@ void polyUpdateBasicRingCells(PolyNode *obj);
 void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void func_00336818(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
@@ -864,7 +864,7 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
     out = (f32 *)entry->history;
     pairs = strip->vertexWordCount >> 1;
     sdfVuLoadRotationMatrixX(rec->rotationXRadians);
-    func_00336818(rec->rotationYRadians);
+    sdfVuLoadSecondaryRotationMatrixY(rec->rotationYRadians);
     sdfMultiplyVuMatrixInPlace();
     rec->rotationYRadians += obj->rotationStepDegrees * (3.14159265f / 180.0f);
     value = rec->radius;

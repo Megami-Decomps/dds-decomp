@@ -77,7 +77,7 @@ extern u8 D_003B1A38[];
 extern u8 D_003B1A88[];
 
 extern void sdfVuLoadRotationMatrixY(f32 scale);
-extern void func_00336818(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -1693,7 +1693,7 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 value) {
 }
 
 extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void func_00336898(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 extern EffSpawnParams D_003B1890[];
 
 /* 8 pieces flung sideways from below; three rotation-matrix loads compose the
@@ -1715,7 +1715,7 @@ void effPcpSpawnSidewaysEight(EffPCPThunderGroup *group) {
         params->pos[1] = -600.0f;
         params->pos[2] = 0;
         sdfVuLoadRotationMatrixX((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
-        func_00336898((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        sdfVuLoadSecondaryRotationMatrixZ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         sdfMultiplyVuMatrixInPlace();
         VU0_LOAD_VF($vf10, params->pos);
         VU0_ROTATE_VEC(vf10, vf10);
@@ -2967,7 +2967,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     }
     if (node != 0) {
         VU0_LOAD_MATRIX(work);
-        func_00336818(work->angle);
+        sdfVuLoadSecondaryRotationMatrixY(work->angle);
         sdfComposeVuMatrixFromRegisters();
         aim[0] = aim[1] = 0.0f;
         aim[2] = 1.0f;
@@ -4382,7 +4382,7 @@ void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
         sdfInvertRigidVuTransform();
     } else {
         sdfVuLoadRotationMatrixZ(work->rotationA);
-        func_00336818(work->rotationB);
+        sdfVuLoadSecondaryRotationMatrixY(work->rotationB);
         sdfMultiplyVuMatrixInPlace();
         work->rotationB += work->rotationStep;
         work->rotationStep *= work->head.rotationDecay;

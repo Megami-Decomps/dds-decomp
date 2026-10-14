@@ -4254,7 +4254,7 @@ extern void func_001EBE88(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,
                          const BtlCameraParameterRecord *, f32 *);
 
-extern void func_002DD608(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 
 
 extern f32 D_0035F590[4];
@@ -4296,7 +4296,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf11, pose->position);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
-                    func_002DD608(value[0]);
+                    sdfVuLoadRotationMatrixX(value[0]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);

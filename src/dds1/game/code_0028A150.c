@@ -6663,8 +6663,8 @@ typedef struct FileOrientedRingMotion {
     f32 angleMultiplier;
 } FileOrientedRingMotion;   /* 0x38, ordinary word alignment */
 
-extern void func_002DD608(f32 angle);
-extern void func_002DD968(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
 void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
@@ -6762,8 +6762,8 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             motion->height = 0.0f;
                             motion->orientationAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                             motion->tiltAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                            func_002DD608(motion->orientationAngle);
-                            func_002DD968(motion->tiltAngle);
+                            sdfVuLoadRotationMatrixX(motion->orientationAngle);
+                            sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
                             sdfMultiplyVuMatrixInPlace();
                             direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * initialRadius;
                             direction[1] = 0.0f;
@@ -6833,8 +6833,8 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         motion->height += gravity * age;
                         motion->radius += motion->radiusStep;
                         phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
-                        func_002DD608(motion->orientationAngle);
-                        func_002DD968(motion->tiltAngle);
+                        sdfVuLoadRotationMatrixX(motion->orientationAngle);
+                        sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
                         sdfMultiplyVuMatrixInPlace();
                         radius = motion->radius;
                         direction[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
