@@ -70,18 +70,7 @@ extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 
 
 
-extern PcpScatterInstanceA *effPcpScatterCreateParticleInstance();
-
 extern void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source);
-
-
-
-
-
-
-extern PcpScatterInstanceB *effScatterCreateDampedRing();
-extern PcpScatterInstanceC *effScatterCreateTwoColorRing();
-extern PcpScatterPlainInstance *effPcpScatterCreatePlainInstance();
 
 
 
@@ -92,10 +81,6 @@ extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);
 extern void effPcpScatterReleasePoolResources(PcpScatterPool *work);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
-extern PcpScatterSpinWork *effScatterCreateSpinWork();
-extern PcpScatterRibbonWork *effScatterCreateRibbonWork();
-
-
 extern void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *src);
 
 
