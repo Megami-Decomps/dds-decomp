@@ -1568,14 +1568,6 @@ BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit) {
     return task;
 }
 
-/* Complete eight-byte argument allocation owned by the hunt-EP task. */
-typedef struct BtlHuntExpArgs {
-    BtlUnit *actor;
-    u32 amount;
-} BtlHuntExpArgs;
-
-typedef char BtlHuntExpArgsSizeCheck[sizeof(BtlHuntExpArgs) == 8 ? 1 : -1];
-
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
 /* Award hunt experience; the sharing ability also rewards eligible party records. */

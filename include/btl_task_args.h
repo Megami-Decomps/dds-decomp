@@ -3,6 +3,14 @@
 
 #include "common.h"
 
+/* Complete eight-byte actor/amount block owned by the hunt-EP task. */
+typedef struct BtlHuntExpArgs {
+    struct BtlUnit *actor; /* 0x00 */
+    u32 amount;            /* 0x04 */
+} BtlHuntExpArgs;
+typedef char BtlHuntExpArgsSizeCheck[sizeof(BtlHuntExpArgs) == 8 ? 1 : -1];
+typedef char BtlHuntExpArgsAmountOffsetCheck[(u32)&((BtlHuntExpArgs *)0)->amount == 4 ? 1 : -1];
+
 /* Return the runtime scheduler task's allocated argument block, or NULL. */
 void *btlGetTaskArguments(void *task);
 
