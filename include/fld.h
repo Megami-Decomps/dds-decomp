@@ -135,7 +135,7 @@ typedef struct FldValueRecord {
 typedef char FldCollisionFaceSizeCheck[(sizeof(FldCollisionFace) == 0x24) ? 1 : -1];
 typedef char FldValueRecordSizeCheck[(sizeof(FldValueRecord) == 0xE4) ? 1 : -1];
 
-/* fldFileResolver::func_001263F0 publishes file rows; func_00126A30 walks them
+/* fldFileResolver::fldSpawnSceneResourceBatches publishes file rows; fldSpawnPlacementObjectsFromBatches walks them
  * at stride 0x24. Both game resolvers walk counted names at stride 0x0C.
  * Name tables have variable extent; entries[1] is the native struct-hack head. */
 typedef struct FldFileNameEntry {

@@ -88,14 +88,14 @@ void effMagatuhiSetValue(EffMagatuhiValueWork *work, s32 index, u32 color);
 void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 colorB);
 #ifdef VERSION_DDS2
 EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
-void func_00190DE0(EffMagatuhiOwner *owner);
+void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void func_00191450(EffMagatuhiValueWork *work, s32 index, void *vector);
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vector);
 #else
 EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
-void func_001891A8(EffMagatuhiOwner *owner);
+void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void func_00189818(EffMagatuhiValueWork *work, s32 index, void *vector);
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vector);
 #endif
 
 struct MdlCtx;

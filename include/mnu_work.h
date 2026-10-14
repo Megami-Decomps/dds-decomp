@@ -303,8 +303,8 @@ typedef struct MenuRegistryParameters {
     s32 kind;
     u8 pad04[2];
     s16 unk06; /* 0x06: per-record count copied for kind 1 and kind 3 records */
-    s16 unk08; /* 0x08: printed as Major by func_003180B8 */
-    s16 unk0A; /* 0x0A: printed as Minor by func_003180B8 */
+    s16 unk08; /* 0x08: printed as Major by mnuInitializeShootingWorkResources */
+    s16 unk0A; /* 0x0A: printed as Minor by mnuInitializeShootingWorkResources */
     s16 xOffset, yOffset;
     u8 pad10[4];
     s32 rotationX, rotationY, rotationZ, scale;

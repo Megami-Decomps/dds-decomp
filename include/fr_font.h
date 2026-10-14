@@ -139,7 +139,7 @@ extern FntList frFontResourceList;
 
 /* Decode encoded text into glyph nodes, optionally extending an existing chain. */
 #ifdef VERSION_DDS1
-struct FrFontGlyph *func_001951C8(const char *text, s8 fontIndex,
+struct FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
 #endif
 #ifdef VERSION_DDS2
