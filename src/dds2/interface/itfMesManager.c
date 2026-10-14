@@ -100,12 +100,6 @@ extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 void itfMesReplaceTextSlotData();
 
-extern void itfInitializeCursorResetState();
-
-extern void itfResetWindowResourceBlock();
-
-extern void itfClearDrawStateWords();
-
 extern void itfResetBattleFadeState();
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);

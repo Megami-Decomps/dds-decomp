@@ -95,12 +95,6 @@ extern void *memset(void *destination, s32 value, u32 size);
 extern void *memcpy(void *destination, const void *source, u32 size);
 void itfMesReplaceTextSlotData();
 
-extern void itfInitializeCursorResetState();
-
-extern void itfResetWindowResourceBlock();
-
-extern void itfClearDrawStateWords();
-
 extern void itfResetBattleFadeState();
 
 extern s32 frFontMeasureGlyphStripWidth();
