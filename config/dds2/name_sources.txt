@@ -3030,7 +3030,8 @@
 0x00209DD8	btlScriptSelectModeDValueOne	inferred	Twin of dds1 0x001F8388; Writes commandMode 0xD and commandValue 1. [names_R_FuncNames3.tsv]
 0x00209E08	btlCmdSetContextFlagOne	inferred	DDS1 func_001F8508 twin; ORs flag one in command context [names_R_FuncNames.tsv]
 0x00209E38	btlScriptSelectModeAValueOne	inferred	Twin of dds1 0x001F83B8; Writes commandMode 10 and commandValue 1. [names_R_FuncNames3.tsv]
-0x00209E68	btlScriptSelectActionEntry	inferred	reads a script parameter, probes action table via btlHasRequiredCommandAffinityPartners/func_001ACD10 and sets command mode 1/2/3 [names_M36_SmallSweep5.tsv]
+0x00209E68	btlScriptSelectActionEntry	inferred	Reads a script parameter, probes action eligibility with btlHasRequiredCommandAffinityPartners, resolves partner units through btlResolveCommandAffinityPartners, then sets command mode 1/2/3.
+0x001ACD10	btlResolveCommandAffinityPartners	inferred	Validates an affinity command and its required partner count, then fills the probe output from affinity lookup or eligible scene-group partners. Called by btlScriptSelectActionEntry before it stores the selected command probe; matches the DDS1 resolver at 0x001A3CE0.
 0x00209F28	btlScriptSelectByKind	inferred	command mode 2, kind 0x196 substitutes btlChoosePartyMemberShadowId() [names_M36_SmallSweep5.tsv]
 0x00209FA0	btlScriptSelectWeightedEntry	inferred	calls btlPickWeightedEntry on the script parameter [names_M36_SmallSweep5.tsv]
 0x00209FF8	btlScriptSelectDirect	inferred	command mode 5 with the raw script parameter [names_M36_SmallSweep5.tsv]
