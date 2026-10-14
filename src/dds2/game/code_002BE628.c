@@ -410,7 +410,60 @@ typedef struct MenuQueuedRenderContext {
 typedef char MenuQueuedRenderContext_size_check[
     sizeof(MenuQueuedRenderContext) == 0x18 ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuUpdateAndDrawPartyCommandQueue);
+extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
+extern void func_002BF000(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
+extern void func_002BF238(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
+extern void mnuDrawPartyStatusValuePanel(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
+
+/* Advance and draw a page's two queued commands. An active command first waits
+ * out its delay, then draws by kind and fades its phase toward zero; it is
+ * cleared once the phase is spent while the first command is idle. The loop
+ * indexes `commands[i]` (each block forms its own address, so GCSE does not
+ * forward the first phase load; loop.c later reduces the addresses and
+ * reverses the counter). */
+void mnuUpdateAndDrawPartyCommandQueue(s32 x, s32 y, s32 z, MenuQueuedCommand *commands,
+                  MenuQueuedRenderContext *context, s32 surface) {
+    s32 i;
+
+    sdfSubmitGsAlphaOneRegisterPacket(0x48, surface);
+    for (i = 0; i < 2; i++) {
+        s32 phase;
+
+        if (commands[i].initialValue != 0 || commands[i].unk0 != 0) {
+            if (commands[i].argument == 0) {
+                switch ((u32)commands[i].kind) {
+                case 0:
+                    func_002BF000(x, y, z, &commands[i], context, surface);
+                    mnuDrawPartyStatusValuePanel(x, y, z, context->menu, context->panelIndex, 1,
+                                  commands[i].initialValue, surface);
+                    break;
+                case 1:
+                    func_002BF238(x, y, z, &commands[i], context, surface);
+                    mnuDrawPartyStatusValuePanel(x, y, z, context->menu, context->panelIndex, 2,
+                                  commands[i].initialValue, surface);
+                    break;
+                case 2:
+                    mnuDrawQueuedCommandScatterEffect(0, 0, z, &commands[i], 0x54);
+                    break;
+                }
+                phase = commands[i].initialValue;
+                if (phase > 0x100) {
+                    commands[i].initialValue = phase - commands[i].unkC;
+                } else {
+                    commands[i].initialValue = phase - commands[i].unk10;
+                }
+                if (commands[i].initialValue < 0) {
+                    commands[i].initialValue = 0;
+                }
+                if (commands[i].initialValue <= 0 && commands->unk0 == 0) {
+                    mnuClearSpriteRecord(&commands[i]);
+                }
+            } else {
+                commands[i].argument--;
+            }
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
 
@@ -423,7 +476,6 @@ extern char D_00437C68[]; /* "%2d", shared with mnuDrawPartyMemberCommandPanel. 
 struct MenuPageSpriteSlot;
 extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
 extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
-extern void mnuDrawPartyStatusValuePanel(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
 /* Both native page renderers also forward the surface word; the
  * selection helper consumes only its first five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
