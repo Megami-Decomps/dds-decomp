@@ -74,8 +74,6 @@ s32 itfGetTextLipsUnitId();
 
 s32 itfGetTextLipsMotionId();
 
-void evtLipsExecFunction();
-
 void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue);
 
 FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node);
