@@ -3642,6 +3642,7 @@
 0x00204B88	btlSelectDisabledCommand	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00204BA8	btlTrackSpecialEnemyCommandRestrictionByTurn	inferred	Updates special enemy restriction state using command flags and turn count. [names_reviewed14.tsv]
 0x00204C88	btlClearUnitRestrictionFlag	inferred	Clears bit 0x2000 on active kind-0x104 battle units while battle mode is 2; the same bit disables commands.
+0x00204D08	btlClearSpecialEnemyRestrictionAfterAction	inferred	Registered pad callback clears unit 0x102's restriction flag after its action unless the phase/skill is exempt or the flag was set this turn; provider body and callback registration inspected.
 0x00204D98	btlDisableNonBossUnits	inferred	if boss species 0x102-0x104 is flagged, disable others via func_001D8DE8
 0x00204F08	btlResetUnitPlacement	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00204FE0	btlClearSpecialEnemyEntryFlags	inferred	Clears a special enemy entry flag and updates matching active units. [names_reviewed14.tsv]

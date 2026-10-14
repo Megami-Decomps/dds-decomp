@@ -263,7 +263,7 @@ extern s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSi
 
 /* Native providers whose bodies remain assembly in their own units. */
 s32 btlInitResourcesWrap(BtlLinkedCommand *, BtlCamState *, s32);
-void func_00204D08(BtlTask *);
+void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *);
 s32 func_00206180(BtlUnit *);
 void func_00206608(void);
 void btlQueueLinkedPairModelSwapTasks(BtlTask *, s32, u64, u64, u64);
@@ -319,7 +319,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5A4, 0x0, btlSelectDisabledCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlTrackSpecialEnemyCommandRestrictionByTurn);
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlClearUnitRestrictionFlag);
-        BTL_INSTALL_CALLBACK(battle->pad5F4, 0xc, func_00204D08);
+        BTL_INSTALL_CALLBACK(battle->pad5F4, 0xc, btlClearSpecialEnemyRestrictionAfterAction);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlResetUnitPlacement);
         if (mode == 0x106) {
             BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlDisableNonBossUnits);

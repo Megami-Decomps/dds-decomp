@@ -990,7 +990,7 @@ s32 btlClearUnitRestrictionFlag(void) {
 
 /* After the special enemy acts, clear its restriction flag unless the action
  * was phase 10, skill 0x1A6 in phase 2, or it was set this same turn. */
-void func_00204D08(BtlTask *task) {
+void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *task) {
     BtlState *battle;
     BtlUnit *unit;
     s32 *effect;
