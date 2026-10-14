@@ -373,6 +373,17 @@ static inline u32 eePackRGBAWord(f32 unit) {
     : : "r"(dst), "r"(value) : "$2", "memory")
 
 /*
+ * Load a word from an unaligned address, `lwr` first. cc1's own unaligned
+ * accesses (block moves, packed fields) emit `lwl` first, and block moves
+ * also store with swl/swr. Retail: DDS1 sdfBuildTexturedQuadVifPacket and
+ * DDS2 func_0033B530 (texture-quad UV words).
+ */
+#define EE_LOAD_UNALIGNED_WORD(out, src) __asm__ volatile ( \
+    "lwr %0, 0(%1)\n\t" \
+    "lwl %0, 3(%1)" \
+    : "=&r"(out) : "r"(src))
+
+/*
  * vf10 (floats) -> RGBA8888 word, scale 255.0f through `mfc1 $2` (the draw
  * colour setters; EE_MMI_RGBA_PACK_F128 is the 128.0f twin):
  *     mfc1 $2,255.0f; qmtc2.ni $2,vf2; vmulx.xyzw vf10,vf10,vf2x;
