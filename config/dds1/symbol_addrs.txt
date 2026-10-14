@@ -7491,6 +7491,8 @@ kwlnDrawTextureResourceDetails = 0x00104810; // type:func
 kwlnUnregisterNamedSlot = 0x00103218; // type:func
 kwlnInitHeldTextureScenePackets = 0x00105370; // type:func
 kwlnDrawBackgroundFadeBands = 0x00106368; // type:func
+evtDrawSolarOverlayMarker = 0x00228FB0; // type:func
+evtDrawSolarOverlayShapeWithScaledAlpha = 0x00229100; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -9298,8 +9300,6 @@ func_00228548 = 0x00228548; // type:func
 evtAdvanceSolarClockAndExpireControls = 0x00228930; // type:func
 evtDrawSolarNoiseLayerAtConfiguredScale = 0x00228CA0; // type:func
 evtDrawSolarNoiseLayerAtCenteredScale = 0x00228E20; // type:func
-evtDrawSolarBackdropFan = 0x00228FB0; // type:func
-evtDrawSolarPhaseFan = 0x00229100; // type:func
 evtAdvanceSolarPhaseParticles = 0x00229540; // type:func
 evtAdvanceLongSolarNoiseLayers = 0x00229750; // type:func
 func_00229ED8 = 0x00229ED8; // type:func
