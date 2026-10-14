@@ -22,6 +22,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
+#include "fpu.h"
 #include "sdf_texture_file.h"
 #include "sdf_lookup_texture.h"
 #include "sdf_dev_console_node.h"
@@ -414,7 +415,91 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003396D0", sdfBuildLightingPacket);
+extern u8 D_0040B540[]; /* fallback up vector */
+
+/* Pack up to three directional lights and the ambient color for VU1: light
+ * directions as columns (negated, unit length), colors and their sum, and a
+ * basis built from the first light's direction. The axis scratch is volatile:
+ * retail keeps its stores in source order. */
+void sdfBuildLightingPacket(SdfLightingPacketStorage *packet, SdfLightSources sources, f32 *ambient) {
+    f32 direction[4] __attribute__((aligned(16)));
+    volatile f32 axis[4] __attribute__((aligned(16)));
+    f32 (*first)[4];
+    s32 i;
+
+    packet->quadwordCount = 13;
+    packet->flushCode = 0x10000000;
+    packet->unpackCode = 0x6C0D4398;
+    VU0_LOAD_VF(vf11, ambient);
+    VU0_STORE_VF(vf11, packet->ambient);
+    first = NULL;
+    for (i = 0; i < 3; i++) {
+        f32 (*light)[4] = sources[i];
+
+        if (light == NULL) {
+            packet->normal[0][i] = 0.0f;
+            packet->normal[1][i] = 0.0f;
+            packet->normal[2][i] = 0.0f;
+            packet->color[i][0] = 0.0f;
+            packet->color[i][1] = 0.0f;
+            packet->color[i][2] = 0.0f;
+            packet->color[i][3] = 0.0f;
+        } else {
+            if (first == NULL) {
+                first = light;
+            }
+            VU0_LOAD_VF(vf10, light[1]);
+            VU0_NORMALIZE_VF10();
+            VU0_SCALE_VF(vf10, -1.0f);
+            VU0_STORE_VF(vf10, direction);
+            packet->normal[0][i] = direction[0];
+            packet->normal[1][i] = direction[1];
+            packet->normal[2][i] = direction[2];
+            VU0_LOAD_VF(vf10, light[0]);
+            VU0_ADD(vf11, vf11, vf10);
+            VU0_STORE_VF(vf10, packet->color[i]);
+        }
+    }
+    PCP_COPY_VECTOR(packet->normal[3], packet->color[0]);
+    VU0_STORE_VF(vf11, packet->combinedColor);
+    if (first == NULL) {
+        EE_MMI_UNIT_MATRIX(packet->basis);
+        return;
+    }
+    VU0_LOAD_VF(vf10, first[1]);
+    VU0_NORMALIZE_VF10();
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_STORE_VF(vf10, axis);
+    if (ffabsf(axis[0]) < 0.000001f && ffabsf(axis[2]) < 0.000001f) {
+        axis[0] = -axis[1];
+        axis[1] = 0.0f;
+        axis[2] = 0.0f;
+        axis[3] = 0.0f;
+        VU0_LOAD_VF(vf11, axis);
+    } else {
+        VU0_LOAD_VF(vf11, D_0040B540);
+    }
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf28, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf29, vf10);
+    VU0_MOVE_VF(vf31, vf0);
+    sdfTransposeVuMatrix();
+    VU0_LOAD_VF(vf10, first[1]);
+    VU0_NORMALIZE_VF10();
+    EE_MMI_LOAD_MATRIX_COLUMN(vf11, D_0040B660 + 8);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(packet->basis);
+}
 
 /* DMA/VIF prefix, projection range terms, then a one-register GIF write
  * and the VU execution command. */
