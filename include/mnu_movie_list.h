@@ -2,8 +2,8 @@
 #define MNU_MOVIE_LIST_H
 
 #include "common.h"
+#include "mnu_movie_list_node.h"
 
-struct MovieListNode;
 struct SdfListHead;
 struct KwlnTask;
 
@@ -11,7 +11,7 @@ struct KwlnTask;
  * are external. */
 typedef struct MnuMovieList {
     struct KwlnTask *task;
-    struct MovieListNode *head;
+    MnuMovieListNode *head;
     s16 top;
     s16 cursor;
     s16 total;

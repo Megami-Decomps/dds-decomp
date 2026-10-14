@@ -23,11 +23,6 @@ extern MnuMovieTransfer mnuMovieDrawSources;
 
 extern char mnuMovieViewerTaskName[];
 
-typedef struct MovieListNode {
-    struct MovieListNode *next;
-    char path[4];
-} MovieListNode;
-
 extern MnuMovieList mnuMovieList;
 
 extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
@@ -117,10 +112,10 @@ s32 mnuCanDrawMovie(void) {
 }
 
 void mnuClearMovieList(void) {
-    MovieListNode *node = mnuMovieList.head;
+    MnuMovieListNode *node = mnuMovieList.head;
     if (node != NULL) {
         do {
-            MovieListNode *next = node->next;
+            MnuMovieListNode *next = node->next;
             sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
@@ -133,8 +128,8 @@ void mnuClearMovieList(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A8048", mnuBuildMovieViewerList);
 
-MovieListNode *mnuGetMovieListNodeAtOffset(void) {
-    MovieListNode *entry = mnuMovieList.head;
+MnuMovieListNode *mnuGetMovieListNodeAtOffset(void) {
+    MnuMovieListNode *entry = mnuMovieList.head;
     s32 remaining = mnuMovieList.cursor;
     if (entry != 0 && remaining > 0) {
         do {
@@ -152,7 +147,7 @@ INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF0);
 INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF8);
 
 void mnuDrawMovieList(void) {
-    MovieListNode *node;
+    MnuMovieListNode *node;
     SdfListHead *packets;
     s32 selected;
     s32 i;
@@ -193,7 +188,7 @@ void mnuDrawMovieProgressCounter(void) {
 }
 
 s32 mnuMovieViewer(void) {
-    MovieListNode *node;
+    MnuMovieListNode *node;
     s32 nextTop;
 
     if (D_0037F510[0x2D] != 0) {
