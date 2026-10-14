@@ -7495,6 +7495,7 @@ evtDrawSolarOverlayMarker = 0x00228FB0; // type:func
 evtDrawSolarOverlayShapeWithScaledAlpha = 0x00229100; // type:func
 fldRefreshAreaStateFromPosition = 0x001372D0; // type:func
 fldUpdateModeOneCameraPose = 0x0012F578; // type:func
+sdfVuLoadRotationMatrixZ = 0x002DD688; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -10010,7 +10011,6 @@ sdfMotionCreateSecondaryTextSampleBinding = 0x002DCF68; // type:func
 sdfMotionCaptureSecondaryTextNoOp = 0x002DD038; // type:func
 sdfBlendMotionSlotPairWeights = 0x002DD1B8; // type:func
 sdfVuLoadRotationMatrixX = 0x002DD608; // type:func
-func_002DD688 = 0x002DD688; // type:func
 func_002DD8E8 = 0x002DD8E8; // type:func
 sdfVuLoadSecondaryRotationMatrixY = 0x002DD968; // type:func
 sdfVuLoadSecondaryRotationMatrixZ = 0x002DD9E8; // type:func

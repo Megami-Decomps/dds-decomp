@@ -263,7 +263,7 @@ void sdfVuLoadRotationMatrixX(f32 angle) {
     VU0_LOAD_MATRIX((f32 *)m);
 }
 
-void func_002DD688(f32 angle) {
+void sdfVuLoadRotationMatrixZ(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);

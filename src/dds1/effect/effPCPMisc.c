@@ -182,7 +182,7 @@ typedef struct EffPCPRotateWork {
 
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
-extern void func_002DD688(f32 scale);
+extern void sdfVuLoadRotationMatrixZ(f32 scale);
 extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void func_002DD8E8(f32 angle);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
@@ -284,7 +284,7 @@ extern u8 effDefaultRandomState[];
 void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
     u128 mtx[4];
 
-    func_002DD688((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
+    sdfVuLoadRotationMatrixZ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
     VU0_STORE_MATRIX_NOCLOBBER(mtx);
     effParamWorkCallback2(work->pair[index][0], mtx);
     effParamWorkCallback2(work->pair[index][1], mtx);
@@ -416,7 +416,7 @@ void effPcpSetTwinEffectColor(EffPCPTwinWork *work, u32 val) {
 void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
-    func_002DD688((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
+    sdfVuLoadRotationMatrixZ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
     VU0_STORE_MATRIX_NOCLOBBER(mtx);
     effParamWorkCallback2(work->handle[index * 2], mtx);
     effParamWorkCallback2(work->handle[index * 2 + 1], mtx);
@@ -533,9 +533,9 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     mdlAddEntryPlain(effParamWorkGetData(work->handle[i][j]), 0, 0);
     angle = (f32)j * -1.0471974f;
     if (i == 0) {
-        func_002DD688(angle);
+        sdfVuLoadRotationMatrixZ(angle);
     } else if (i == 1) {
-        func_002DD688(-angle);
+        sdfVuLoadRotationMatrixZ(-angle);
     } else if (i == 2) {
         sdfVuLoadRotationMatrixY(-angle);
     } else {
@@ -2798,7 +2798,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         if (work->frame > params->holdFrames) {
             work->angle += work->spin;
         }
-        func_002DD688(work->angle);
+        sdfVuLoadRotationMatrixZ(work->angle);
         VU0_STORE_MATRIX(mtx);
         effApplyNodeTransformMatrix(node, mtx);
         if (fadeFrames >= remaining && fadeFrames != 0) {
@@ -2821,7 +2821,7 @@ void effPcpSpanSetColor(EffPCPSpanWork *work, u32 val) {
 }
 
 void effPcpCopyHalfTurnMatrix(void *dst, void *src) {
-    func_002DD688(3.1415927f);
+    sdfVuLoadRotationMatrixZ(3.1415927f);
     VU0_LOAD_MATRIX_B(src);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(dst);
@@ -3374,7 +3374,7 @@ void effSpinEffectUpdate(EffPCPSpinWork *work) {
     effParamWorkCallback0(handle, work);
     effParamWorkCallback1(handle, work->scale);
     effParamWorkCallback3(handle, work->color);
-    func_002DD688(work->angle);
+    sdfVuLoadRotationMatrixZ(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(mtx);
@@ -3448,7 +3448,7 @@ void effSpinPairUpdateDelayed(EffPCPSpinWork *work) {
     effParamWorkCallback1(handle[1], work->scale);
     effParamWorkCallback3(handle[0], work->color);
     effParamWorkCallback3(handle[1], work->color);
-    func_002DD688(work->angle);
+    sdfVuLoadRotationMatrixZ(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
@@ -3524,7 +3524,7 @@ void effPcpUpdateSpinningPair(EffPCPSpinWork *work) {
     effParamWorkCallback1(handle[1], work->scale);
     effParamWorkCallback3(handle[0], work->color);
     effParamWorkCallback3(handle[1], work->color);
-    func_002DD688(work->angle);
+    sdfVuLoadRotationMatrixZ(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);

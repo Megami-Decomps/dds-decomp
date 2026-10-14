@@ -9018,3 +9018,4 @@
 0x0012F578	fldUpdateModeOneCameraPose	inferred	When positionMode is 1, updates field player camera position and heading, smooths position, and refreshes area state through fldRefreshAreaStateFromPosition; called by fldUpdateCameraFrame. Paired DDS2 0x00131B50.
 0x002B9320	effEditColorTrack	inferred	Paired with DDS2 effEditColorTrack; ASM helper called by effect color/alpha track callbacks and uses the active mapping options.
 0x002BA538	effEditScalarTrack	inferred	Paired with DDS2 effEditScalarTrack; scale, rotation, and area callbacks route scalar property curves through this editor and its active option tables.
+0x002DD688	sdfVuLoadRotationMatrixZ	inferred	Paired DDS2 0x003365B8, already named sdfVuLoadRotationMatrixZ; DDS1 provider builds the Z-axis rotation matrix with cosine/sine in m[0][0], m[0][2], m[2][0], m[2][2], then loads primary VU0 rows. Completes the existing named X/Y loader set; 32 source references across six callers.
