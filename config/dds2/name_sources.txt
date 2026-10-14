@@ -8988,3 +8988,4 @@
 0x001B1090	btlShouldDistributeRandomTargetHits	inferred	Returns whether the action path should distribute repeated hits across randomized targets; a true result directly gates btlDistributeRandomTargetHits. DDS1 twin 0x001A6EC0. [high-volume naming lane, 2026-10-14]
 0x003667E8	EnableIntc	inferred	wraps _EnableIntc with interrupt-state preservation; exact paired body and sdfWakeQueuedThreadWaiters caller pass event ID 2
 0x0033F898	sdfDevResolvePathForWorker	inferred	Parses device prefixes, selects and allocates the worker path, and returns the worker class; four asynchronous request constructors reject negative results. Paired DDS1 0x002E5D98; corroborated by sdfDevSetFallbackDeviceWorker provenance and allocator call.
+0x0024AD48	evtViewerUpdateWindowShadeFade	inferred	The identical DDS2 body advances windowShadeFade and submits the viewer shade overlay packet from evtUpdateViewerMessageWindow; paired with DDS1 0x00230140.
