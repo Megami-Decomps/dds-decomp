@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "dds3obj.h"
 #include "eff_transform.h"
@@ -17,7 +18,6 @@ extern void sdfDisableFlagListViewTargetRelativeMode(void);
 
 extern void evtDestroySecondaryWorldNode(void);
 
-extern void dds3SetWorldObject(void *);
 #include "dds3_world_secondary.h"
 extern void mnuCreateTitleCameraWorldEntry(void);
 
