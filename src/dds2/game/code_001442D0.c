@@ -6,6 +6,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "fld_spark_object_entry.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -331,13 +332,7 @@ extern char D_00413C80[]; /* "fldTitleMini" */
 
 extern void ddsReleaseUnitObject(EffWorldNode *node);
 
-typedef struct {
-    EffWorldNode *objectHandle;
-    s32 unk4;
-    u8 pad8[0xC];
-} FldEnt14; /* 0x14 bytes */
-
-extern FldEnt14 fldSparkObjectEntries[];
+extern FldSparkObjectEntry fldSparkObjectEntries[];
 
 extern s32 D_00389884[];
 
@@ -4054,7 +4049,7 @@ const char D_00413DD8[] = "HUNT_MDL_UNIT";
 void fldCreateSparkSlotObjects(void) {
     FldVec4 position = D_00413DB8;
     FldVec4 rotation;
-    FldEnt14 *entry;
+    FldSparkObjectEntry *entry;
     MdlCtx *model;
     s32 i;
 
@@ -4064,7 +4059,7 @@ void fldCreateSparkSlotObjects(void) {
 
         for (i = 0; i < 17; i++) {
             fldSparkObjectEntries[i].objectHandle = 0;
-            fldSparkObjectEntries[i].unk4 = -1;
+            fldSparkObjectEntries[i].sparkSlotIndex = -1;
             *(s32 *)fldSparkObjectEntries[i].pad8 = 0;
         }
         for (i = 0; i < 17; i++) {
@@ -4084,7 +4079,7 @@ void fldCreateSparkSlotObjects(void) {
 }
 
 void fldClearObjectEntryHandles(void) {
-    FldEnt14 *entry = fldSparkObjectEntries;
+    FldSparkObjectEntry *entry = fldSparkObjectEntries;
     s32 i = 0x10;
 
     do {
@@ -4147,7 +4142,7 @@ s32 fldAttachSparkSlotToWorldObject(s32 index, s32 reserved) {
         slot = -1;
         for (i = 0; i < 16; i++) {
             candidate = (fldSparkControlState.cursor + i) % 16;
-            if (fldSparkObjectEntries[candidate].unk4 == -1) {
+            if (fldSparkObjectEntries[candidate].sparkSlotIndex == -1) {
                 slot = candidate;
                 break;
             }
@@ -4166,7 +4161,7 @@ s32 fldAttachSparkSlotToWorldObject(s32 index, s32 reserved) {
         model = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSparkObjectEntries[slot].objectHandle);
         model->flags &= ~MDL_SKIP_TRANSFORMS;
         fldSparkSlots[index].objectSlot = slot;
-        fldSparkObjectEntries[slot].unk4 = index;
+        fldSparkObjectEntries[slot].sparkSlotIndex = index;
         return 1;
     }
     return 0;
@@ -4189,7 +4184,7 @@ void fldFreeSparkSlot(s32 index) {
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
         fldSparkSlots[index].objectSlot = -1;
-        fldSparkObjectEntries[slot].unk4 = -1;
+        fldSparkObjectEntries[slot].sparkSlotIndex = -1;
     }
 }
 

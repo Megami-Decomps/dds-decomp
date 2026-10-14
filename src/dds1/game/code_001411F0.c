@@ -4,6 +4,7 @@
 #include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "common.h"
+#include "fld_spark_object_entry.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -198,13 +199,7 @@ extern s32 fldSceneSoundBase;
 
 extern void ddsReleaseUnitObject(EffWorldNode *node);
 
-typedef struct {
-    EffWorldNode *objectHandle;
-    s32 unk4;
-    u8 pad8[0xC];
-} FldEnt14; /* 0x14 bytes */
-
-extern FldEnt14 fldSparkObjectEntries[];
+extern FldSparkObjectEntry fldSparkObjectEntries[];
 
 /* Each DDS1 resource row owns sixteen 16-byte spark sequences. */
 typedef struct FldSparkSequence {
@@ -3755,7 +3750,7 @@ void fldCreateSparkSlotObjects(void) {
 
         for (i = 0; i < 17; i++) {
             fldSparkObjectEntries[i].objectHandle = NULL;
-            fldSparkObjectEntries[i].unk4 = -1;
+            fldSparkObjectEntries[i].sparkSlotIndex = -1;
             *(s32 *)fldSparkObjectEntries[i].pad8 = 0;
         }
         for (i = 0; i < 17; i++) {
@@ -3778,7 +3773,7 @@ void fldCreateSparkSlotObjects(void) {
 }
 
 void fldClearObjectEntryHandles(void) {
-    FldEnt14 *entry = fldSparkObjectEntries;
+    FldSparkObjectEntry *entry = fldSparkObjectEntries;
     s32 i = 0x10;
 
     do {
@@ -3861,7 +3856,7 @@ s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
         slot = -1;
         for (i = 0; i < 16; i++) {
             candidate = (fldSparkControlState.cursor + i) % 16;
-            if (fldSparkObjectEntries[candidate].unk4 == -1) {
+            if (fldSparkObjectEntries[candidate].sparkSlotIndex == -1) {
                 slot = candidate;
                 break;
             }
@@ -3880,7 +3875,7 @@ s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
         flags = (s32 *)dds3GetObjectBaseResourceHandle(fldSparkObjectEntries[slot].objectHandle);
         *flags &= ~1;
         fldSparkSlots[index].objectSlot = slot;
-        fldSparkObjectEntries[slot].unk4 = index;
+        fldSparkObjectEntries[slot].sparkSlotIndex = index;
         return 1;
     }
     return 0;
@@ -3907,7 +3902,7 @@ void fldFreeSparkSlot(s32 index) {
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
         fldSparkSlots[index].objectSlot = -1;
-        fldSparkObjectEntries[slot].unk4 = -1;
+        fldSparkObjectEntries[slot].sparkSlotIndex = -1;
     }
 }
 
