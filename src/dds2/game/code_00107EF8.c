@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "sdf_dev_cons.h"
+#include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_heap_overlay_block.h"
@@ -77,7 +78,7 @@ extern s32 fldPollSceneState(void);
 
 extern s32 fldLmapTaskExists(void);
 
-extern s32 evtConsoleFontResourceChain;
+extern ConsNode *evtConsoleFontResourceChain;
 
 extern u32 kwlnDrawControlFlags;
 
@@ -225,9 +226,6 @@ extern void evtStopTestTasks(void);
 extern void evtDestroySkyTask(void);
 
 extern void kwlnFadeBackgroundStartOut();
-
-extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-
 
 extern void dds3AdminSetControlFlag(void);
 
@@ -1451,8 +1449,6 @@ void evtDestroyFontResourceChain(void) {
 }
 
 extern s32 sdfVFormatString();
-extern void sdfDevConsPrintf();
-
 /* printf into the dev console node when one exists. */
 INCLUDE_SDATA(const s32, "game/code_00107EF8", evtSelectionStateActive);
 
@@ -1460,7 +1456,7 @@ INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D20);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D28);
 
-INCLUDE_SDATA(const s32, "game/code_00107EF8", evtConsoleFontResourceChain);
+INCLUDE_SDATA(ConsNode *, "game/code_00107EF8", evtConsoleFontResourceChain);
 
 void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     char messageBuffer[EVT_DEV_CONSOLE_BUFFER_BYTES];
@@ -1469,7 +1465,7 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
         sdfVFormatString(messageBuffer, format, formatArgs);
-        sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
+        sdfDevConsPrintf((DevConsState *)evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }
 

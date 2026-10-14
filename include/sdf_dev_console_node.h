@@ -25,4 +25,7 @@ typedef char ConsNodeDimensionsOffsetCheck[
 typedef char ConsNodeCellsOffsetCheck[
     (((unsigned int)&((ConsNode *)0)->cells) == 0x1C) ? 1 : -1];
 
+ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows);
+void sdfDevConsNodeDestroy(ConsNode *node);
+
 #endif /* SDF_DEV_CONSOLE_NODE_H */
