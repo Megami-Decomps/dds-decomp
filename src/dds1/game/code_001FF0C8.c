@@ -64,27 +64,6 @@ extern s32 btlIsSelectedActorStatusAndRecordClear();
 
 extern s8 btlHistoryCounter;
 
-/* Command-actor state retained by AI queries; this is not a battle unit.
- * The first queued action is also the word tested by btlActionMatchesUnit. */
-typedef union BtlActionSlot {
-    s32 word;
-    s16 actionId;
-} BtlActionSlot;
-
-typedef struct BtlActionTask {
-    u8 pad00[0xC];
-    s32 flags; /* 0x0C: AI context flags */
-    u8 pad10[0x78];
-    u16 aiCounter; /* 0x88: wraps as a halfword, then clamps to 0xFF */
-    u8 pad8A[0xBC];
-    s8 lowHpActionHold; /* 0x146: positive suppresses the low-HP action */
-    u8 pad147;
-    BtlActionSlot actions[8]; /* 0x148 */
-    u8 pad168[4];
-    struct BtlActionTask *next; /* 0x16C, same link as BtlTask */
-} BtlActionTask;
-
-
 extern BtlAiScratchWork *btlActionScratchWork;
 
 extern s8 D_003A5A80[];
@@ -835,7 +814,7 @@ s32 btlTestRecordFlagOutsidePartyGroup(BtlUnit *unit) {
 
 /* Test scratch-context bit 1; no gameplay meaning for this flag is established here. */
 s32 btlHasContextFlagTwo(void) {
-    return ((btlActionScratchWork->actor->flags & 2) > 0);
+    return ((btlActionScratchWork->actor->actionFlags & 2) > 0);
 }
 
 s32 btlCheckCounterLimit(s32 unused, u32 minimumCount) {
@@ -852,7 +831,7 @@ s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
 
 /* Increment the stored counter, retain native wrap/clamp behavior, then reread it for the limit test. */
 s32 btlAiCounterReachedLimit(s32 unused, u32 minimumCount) {
-    BtlActionTask *counterState = btlActionScratchWork->actor;
+    BtlTask *counterState = btlActionScratchWork->actor;
     counterState->aiCounter++;
     counterState->aiCounter = counterState->aiCounter <= 0 ? 0 : counterState->aiCounter >= BTL_AI_COUNTER_SATURATION ? BTL_AI_COUNTER_MAX : counterState->aiCounter;
     if (btlActionScratchWork->actor->aiCounter < minimumCount) {
@@ -933,7 +912,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
 /* Gate the low-HP action on hold, delay, HP ratio, enemy count, bucket roll, and selected-actor status.
  * Preserve native unsigned timing and division behavior, including the absence of a max-HP guard. */
 s32 btlIsLowHpActionReady(BtlUnit *unit) {
-    BtlActionTask *context = btlActionScratchWork->actor;
+    BtlTask *context = btlActionScratchWork->actor;
     s32 conditionMet = 0;
     u32 actionTime = unit->partyRecord.level;
     u32 currentTime = btlAverageLevelsForMaskExcludingStatus20(4);
@@ -1174,7 +1153,7 @@ s32 btlActionMatchesStatMask(s32 mask, s16 actionId, s8 force) {
 /* Return whether an eligible unit has a queued action in the requested category. */
 s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action) {
     BtlTask *task;
-    BtlActionSlot *slots;
+    u32 *slots;
     BtlUnit *unit;
     u32 flags;
     s32 i;
@@ -1194,9 +1173,9 @@ s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action) {
         if (flags & 0x20) {
             continue;
         }
-        slots = ((BtlActionTask *)task)->actions;
+        slots = ((BtlTask *)task)->actions;
         for (i = 0; i < 8; i++) {
-            if (btlActionMatchesStatMask(action, slots[i].actionId, 1) != 0) {
+            if (btlActionMatchesStatMask(action, (s16)slots[i], 1) != 0) {
                 return 1;
             }
         }
@@ -1339,7 +1318,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
             if ((flags & 1) && (flags & mask) && !(flags & 0x20)) {
                 s32 i;
                 for (i = 0; i < 8; i++) {
-                    if (((BtlActionTask *)node)->actions[i].word == query) {
+                    if (((BtlTask *)node)->actions[i] == query) {
                         return 1;
                     }
                 }
