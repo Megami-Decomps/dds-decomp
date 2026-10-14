@@ -3275,7 +3275,7 @@ extern u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value);
 
 /* Queue escape-result sounds and stagger eligible party effects; successful
  * escapes also fade each eligible actor, with its identity as the task owner. */
-void func_001DC2D8(ActionStateLink *task) {
+void btlScheduleEscapeResultTasks(ActionStateLink *task) {
     BtlState *state = btlGetRuntime();
     BtlUnit *unit;
     BtlRuntimeTask *effect;

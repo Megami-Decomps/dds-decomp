@@ -12056,7 +12056,7 @@ retail verification remains the production integration gate.
 
 ### Trace-justified staging: escape-result task metadata
 
-DDS1 `func_001CFB10` and DDS2 `func_001DC2D8` are paired 608-byte escape-result
+DDS1 and DDS2 `btlScheduleEscapeResultTasks` are paired 608-byte escape-result
 handlers. They start command sounds, stagger eligible party effects, and, on a
 successful escape, create owner-bound defeat-fade tasks fourteen frames after
 the first effect. The failure path intentionally passes its exhausted null
