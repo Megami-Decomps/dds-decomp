@@ -8800,3 +8800,4 @@
 0x00337FD8	sdfVuBuildRingTriangleRefs	inferred	Builds triangle vertex references from the work ring and delegates clipped work to sdfVuBuildClippedTriangleRefs.
 0x003385C0	sdfVuBuildIndexedTriangleRefs	inferred	Builds triangle vertex references from indexed work nodes and delegates generated edge vertices to sdfVuInterpolateClipVertex.
 0x0019DD48	frFontCenterGlyphChainAt	inferred	Centers each glyph line around x and shifts the chain to y; message and UI callers supply target coordinates and a glyph chain. [native implementation and paired caller context, 2026-10-13]
+0x002CEEC0	fileShowPromptDialog	inferred	confidence=high; DDS1 twin fileShowPromptDialog at 0x0028FB98 builds the same local prompt-message table and draws the save, format, overwrite, insufficient-space, new-cycle, and title-transition dialogs from file-flow state.
