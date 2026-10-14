@@ -19,23 +19,23 @@ struct MenuListNode *mnuAdvanceWindowListSelection(struct MenuWindowContainer *w
 void mnuClearWindowPanelTransitionFlag(struct MenuWindowContainer *window);
 
 /* DDS2 scheduler word: zero or the encoded next-handler address. */
-extern s32 func_002C4038(void *work, s32 *entrySlot, s32 mode, void *callback);
+extern s32 mnuDispatchPopupTransition(void *work, s32 *entrySlot, s32 mode, void *callback);
 void mnuSetPopupEntry(s32 *entrySlot, void *entry);
 void mnuSetPopupEntryFlagged(s32 *entrySlot, void *entry);
 
 
 static inline s32 menuSetHandler(void *context, s32 mode, void *callback) {
-    return func_002C4038((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
+    return mnuDispatchPopupTransition((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
 }
 /* DDS1 uses the same scheduler-word contract as the DDS2 dispatcher. */
-extern s32 func_00285670(void *work, s32 *entrySlot, s32 mode, void *callback);
+extern s32 mnuDispatchPopupTransition(void *work, s32 *entrySlot, s32 mode, void *callback);
 
 static inline s32 menuRunPanel(void *context, s32 mode, void *callback) {
-    return func_00285670((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
+    return mnuDispatchPopupTransition((u8 *)context + 8, (s32 *)((u8 *)context + 0x54), mode, callback);
 }
 
 static inline s32 evtMenuSetHandler(void *context, s32 mode, void *callback) {
-    return func_002C4038((u8 *)context + 0xC, (s32 *)((u8 *)context + 0x58), mode, callback);
+    return mnuDispatchPopupTransition((u8 *)context + 0xC, (s32 *)((u8 *)context + 0x58), mode, callback);
 }
 
 static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {

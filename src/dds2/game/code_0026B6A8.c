@@ -94,7 +94,7 @@ u32 func_0026B930(void) {
 s32 dspUpdateFlagEvent(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     s32 *panel = (s32 *)(state + 0x54);
-    s32 result = func_002C4038((u8 *)state + 8, panel, 0, (void *)request);
+    s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panel, 0, (void *)request);
     if (result != 0) {
         return result;
     }
@@ -151,7 +151,7 @@ extern char D_003CE998[];
 s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     s32 *panelState = (s32 *)(state + 0x54);
-    s32 result = func_002C4038((u8 *)state + 8, panelState, 0, request);
+    s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && kwlnFadeIsActive() == 0) {
             mnuSetPopupEntryFlagged(panelState, D_003CE998);

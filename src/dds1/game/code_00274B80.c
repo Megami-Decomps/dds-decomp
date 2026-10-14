@@ -510,7 +510,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
     s32 *popup = &context->popupState;
     MenuWindowContainer *window = menuWork->primaryWindow;
     s32 entryIndex = window->list->cursor->index;
-    s32 state = func_00285670(&context->transitionWork, popup, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, (void *)callback);
 
     if (state != 0) {
         return state;
@@ -1678,7 +1678,7 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
     SkillMenuRuntime *runtime = (SkillMenuRuntime *)context->menu;
     s32 inputFlags = mnuMapPadMaskToFlags(3);
     s32 *popup = &context->popupState;
-    s32 transition = func_00285670(&context->transitionWork, popup, 0, callback);
+    s32 transition = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, callback);
     MenuWindowContainer *categoryWindow;
     s32 partyIndex;
     DatPartyRecord *partyRecord;

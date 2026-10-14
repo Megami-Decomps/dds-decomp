@@ -60,7 +60,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *request) {
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_00285670(&work->transition, &work->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
@@ -171,7 +171,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_00285670(&work->transition, &work->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
@@ -245,7 +245,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
     s32 result;
 
     evtStageTestUpdateCamera();
-    result = func_00285670(&context->transition, panelState, 0, request);
+    result = mnuDispatchPopupTransition(&context->transition, panelState, 0, request);
     if (result != 0) {
         return result;
     }

@@ -71,7 +71,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *request) {
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_002C4038(&work->transition, &work->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
@@ -177,7 +177,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
-    result = func_002C4038(&work->transition, &work->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&work->transition, &work->transition.state, 0, request);
     if (result != 0) {
         return result;
     }
@@ -250,7 +250,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
     s32 result;
 
     evtStageTestUpdateCamera();
-    result = func_002C4038(&context->transition, panelState, 0, request);
+    result = mnuDispatchPopupTransition(&context->transition, panelState, 0, request);
     if (result == 0) {
         if ((*panelState == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
             mnuSetPopupEntryFlagged(panelState, D_003D64C8);

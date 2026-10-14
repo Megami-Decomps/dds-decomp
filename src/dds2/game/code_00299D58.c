@@ -65,7 +65,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
     if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
         return 0;
     }
-    result = func_002C4038(&context->transition, window, 0, input);
+    result = mnuDispatchPopupTransition(&context->transition, window, 0, input);
     if (result != 0) {
         return result;
     }
@@ -268,7 +268,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     s32 *dispatchStatus = &scene->transition.state;
 
-    result = func_002C4038(&scene->transition, dispatchStatus, 0, task);
+    result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, task);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
             (result = evtGetMessageWindowControlState(), result == 0)) {
@@ -440,7 +440,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
-    result = func_002C4038(&scene->transition, dispatchStatus, 0, request);
+    result = mnuDispatchPopupTransition(&scene->transition, dispatchStatus, 0, request);
     if (result != 0) {
         return result;
     }

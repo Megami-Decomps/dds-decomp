@@ -2704,7 +2704,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
     s32 selectedOperation;
 
     memcpy(&options, D_003BC3D0, sizeof(options));
-    result = func_00285670(&state->transitionWork, dispatchSlot, 0, task);
+    result = mnuDispatchPopupTransition(&state->transitionWork, dispatchSlot, 0, task);
 
     if (result != 0) {
         return result;
@@ -2771,7 +2771,7 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
         brsDrawResultIconPairWithAlpha((s32)state, 0x100, 0, 0x53);
         break;
     }
-    return func_00285670(&state->transitionWork, &state->dispatchState, 1, task);
+    return mnuDispatchPopupTransition(&state->transitionWork, &state->dispatchState, 1, task);
 }
 
 s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
@@ -2908,7 +2908,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
     s32 allowed;
     s32 result;
 
-    result = func_00285670(&state->transitionWork, dispatchSlot,
+    result = mnuDispatchPopupTransition(&state->transitionWork, dispatchSlot,
                           EVT_DISPATCH_OPERATION_POLL, task);
     if (result == 0) {
         if (*dispatchSlot == 0) {

@@ -474,7 +474,7 @@ s32 mnuUpdatePartySlotAssignmentPopup(KwlnTask *callback) {
     s32 *popup = ((MenuContext *)context)->popupState;
     DatPartyRecord *slot = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
     u8 *menu = (u8 *)((MenuContext *)context)->party;
-    s32 state = func_002C4038(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
     s32 label;
     if (state != 0) {
         return state;
@@ -542,7 +542,7 @@ s32 mnuPartySlotConfirmClearUpdate(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     s32 *popup = ((MenuContext *)context)->popupState;
     DatPartyRecord *slot = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
-    s32 state = func_002C4038(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
     s32 selectedEntry;
     if (state != 0) {
         return state;
@@ -867,7 +867,7 @@ s32 mnuHandlePartySelectionInput(KwlnTask *callback) {
     s32 *popup = context->popupState;
     MenuWindowContainer *window = menuWork->primaryWindow;
     s32 entryIndex = window->list->cursor->index;
-    s32 state = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, (void *)callback);
 
     if (state != 0) {
         return state;
@@ -1246,7 +1246,7 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_POPUP_INPUT_MASK);
     s32 stateWord;
     MenuPageWindow *panelWork;
-    stateWord = func_002C4038(&((MenuContext *)context)->transitionWork, popupState, 0, (void *)callback);
+    stateWord = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popupState, 0, (void *)callback);
     if (stateWord != 0) {
         return stateWord;
     }
@@ -1417,7 +1417,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
         inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_INPUT_CANCEL);
     }
     popupState = ((MenuContext *)context)->popupState;
-    stateWord = func_002C4038(&((MenuContext *)context)->transitionWork, popupState, 0, (void *)callback);
+    stateWord = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popupState, 0, (void *)callback);
     if (stateWord != 0) {
         return stateWord;
     }
@@ -2079,7 +2079,7 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
     SkillMenuRuntime *runtime = (SkillMenuRuntime *)context->party;
     s32 inputFlags = mnuMapPadMaskToFlags(3);
     s32 *popup = context->popupState;
-    s32 transition = func_002C4038(&context->transitionWork, popup, 0, callback);
+    s32 transition = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, callback);
     MenuWindowContainer *categoryWindow;
     s32 partyIndex;
     DatPartyRecord *partyRecord;
@@ -2392,7 +2392,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
 s32 ptySkillMenuUpdate(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     s32 *menu = (s32 *)((MenuContext *)context)->party;
-    s32 state = func_002C4038(&((MenuContext *)context)->transitionWork, ((MenuContext *)context)->popupState, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, ((MenuContext *)context)->popupState, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -2538,7 +2538,7 @@ s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
     s32 label;
     u16 code;
     MenuPageWindow *window;
-    state = func_002C4038(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
+    state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -2664,7 +2664,7 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *callback) {
     u32 input = mnuMapPadMaskToFlags(0xC37);
     s32 *popup = ((MenuContext *)context)->popupState;
     u32 buttons = mnuMapPadMaskToFlags(0xC0);
-    s32 state = func_002C4038(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
     s32 *windows;
     s32 *windowSlot;
     MenuWindowContainer *window;
@@ -2891,7 +2891,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
     u32 buttons = mnuMapPadMaskToFlags(0xc32);
     s32 state;
     s32 *list;
-    state = func_002C4038(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
+    state = mnuDispatchPopupTransition(&((MenuContext *)context)->transitionWork, popup, 0, (void *)callback);
     if (state != 0) {
         return state;
     }

@@ -50,7 +50,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     context = (StaffMenuWork *)kwlnTaskGetUserValue(callback);
     input = mnuMapPadMaskToFlags(0x33);
     popup = &context->value54;
-    state = func_00285670(&context->panel, popup, 0, (void *)callback);
+    state = mnuDispatchPopupTransition(&context->panel, popup, 0, (void *)callback);
     if (state != 0) {
         return state;
     }

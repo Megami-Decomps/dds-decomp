@@ -1939,7 +1939,7 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *request) {
     MenuTerminalWork *host = (MenuTerminalWork *)kwlnTaskGetUserValue(request);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &host->popupState;
-    s32 result = func_00285670(&host->transitionWork, dispatch, 0, request);
+    s32 result = mnuDispatchPopupTransition(&host->transitionWork, dispatch, 0, request);
     struct MenuListNode *node;
     MenuThresholdEntry *entry;
 
