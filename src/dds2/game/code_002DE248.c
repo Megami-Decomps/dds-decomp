@@ -109,7 +109,7 @@ extern u32 D_004386BC;
 
 extern u8 D_003FFDD8[];
 
-extern s32 func_00300578(s32, s32, s32);
+extern s32 effEditColorTrack(s32, s32, s32);
 
 extern u8 D_003FFF58[];
 
@@ -12813,7 +12813,7 @@ void effResetMappingFlags(void) {
     effMappingState.field10 |= 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_00300578);
+INCLUDE_ASM(const s32, "game/code_002DE248", effEditColorTrack);
 
 /* The effect mapping dispatcher stores its data pointer at +0x0C. */
 typedef struct EffMappingRequest {
@@ -12856,7 +12856,7 @@ s32 effMapObjectWithTemporaryMappingTable(s32 request) {
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
     /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
-    result = func_00300578(object + 0x2c, object + 0x50, *(s32 *)(object + 0xb8));
+    result = effEditColorTrack(object + 0x2c, object + 0x50, *(s32 *)(object + 0xb8));
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -12869,7 +12869,7 @@ s32 effEditGkColorTrack(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
-    result = func_00300578(object + 0x48, object + 0x6c, ((EffMappingObject *)object)->valueD4);
+    result = effEditColorTrack(object + 0x48, object + 0x6c, ((EffMappingObject *)object)->valueD4);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -12880,14 +12880,14 @@ void effEditBfColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
 }
 
 extern u8 D_00459E30[] __attribute__((aligned(4)));
 
 /* HELPER's COLOR callback edits the shared default color/alpha data. */
 void effEditHlpColorTrack(void) {
-    func_00300578(D_00459E30, D_00459E30 + 0x24, ((EffMappingObject *)D_00459E30)->value34.bits);
+    effEditColorTrack(D_00459E30, D_00459E30 + 0x24, ((EffMappingObject *)D_00459E30)->value34.bits);
 }
 
 /* Edit T-BOARD color/alpha tracks using the alternate property-option table. */
@@ -12897,7 +12897,7 @@ s32 effEditTBoardColorTrack(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
-    result = func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value8C);
+    result = effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value8C);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -12908,7 +12908,7 @@ void effEditRainColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Pass the E-FLARE request's color/alpha tracks and frame bound to the editor. */
@@ -12916,7 +12916,7 @@ void effEditFlareColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value38);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value38);
 }
 
 /* COLOR property callback shared by the native S-family descriptors. */
@@ -12924,7 +12924,7 @@ void effEditSColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit R-NOMAL/R-CRCLE COLOR tracks, then restore the default option table. */
@@ -12935,7 +12935,7 @@ s32 effEditRColorTrack(s32 request) {
     effMappingState.table = D_003FFE98;
     effMappingState.count = 8;
     /* Keep this parameter load raw: a typed member changes the table-write scheduling. */
-    result = func_00300578(object, object + 0x24, *(s32 *)(object + 0x34));
+    result = effEditColorTrack(object, object + 0x24, *(s32 *)(object + 0x34));
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -12946,7 +12946,7 @@ void effEditRTrackColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* COLOR property callback shared by native D-/O-family descriptors. */
@@ -12954,7 +12954,7 @@ void effEditDoColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 s32 effResolveMappingWithTemporaryTable(s32 request) {
@@ -12963,7 +12963,7 @@ s32 effResolveMappingWithTemporaryTable(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
-    result = func_00300578(object + 0x4c, object + 0x70, ((EffMappingObject *)object)->valueD8);
+    result = effEditColorTrack(object + 0x4c, object + 0x70, ((EffMappingObject *)object)->valueD8);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -12974,7 +12974,7 @@ void effEditNColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit COLOR in the N-family descriptors' nested POLYGON data. */
@@ -12982,7 +12982,7 @@ void effEditNPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
+    effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
 /* Edit the root U-CYLND color and alpha tracks selected by the request. */
@@ -12990,7 +12990,7 @@ void effEditUCylinderColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* Edit COLOR in U-CYLND's nested POLYGON data. */
@@ -12998,7 +12998,7 @@ void effEditUCylinderPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
+    effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
 /* U-SMOKE/U-SPIRL COLOR uses its own property options; forward editor status. */
@@ -13008,7 +13008,7 @@ s32 effEditUSmokeSpiralColorTrack(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
-    result = func_00300578(object + 0x68, object + 0x8c, ((EffMappingObject *)object)->valueF4);
+    result = effEditColorTrack(object + 0x68, object + 0x8c, ((EffMappingObject *)object)->valueF4);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -13019,7 +13019,7 @@ void effEditUSphereColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value70);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value70);
 }
 
 /* COLOR callback for the native CRACK POLYGON descriptor. */
@@ -13027,7 +13027,7 @@ void effEditCrackPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
+    effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
 /* COLOR callback for the native FLASH POLYGON descriptor. */
@@ -13035,7 +13035,7 @@ void effEditFlashPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
-    func_00300578(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
+    effEditColorTrack(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
 }
 
 /* 2D's COLOR callback restores its property options and forwards editor status. */
@@ -13045,7 +13045,7 @@ s32 effEditTwoDimensionalColorTrack(s32 request) {
 
     effMappingState.table = D_003FFE98;
     effMappingState.count = 8;
-    result = func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value8C);
+    result = effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value8C);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -13058,7 +13058,7 @@ s32 effEditOP2TrackColorTrack(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
-    result = func_00300578(object + 0x48, object + 0x6c, ((EffMappingObject *)object)->valueD4);
+    result = effEditColorTrack(object + 0x48, object + 0x6c, ((EffMappingObject *)object)->valueD4);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -13071,7 +13071,7 @@ s32 effEditMColorTrack(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
-    result = func_00300578(object + 0x7c, object + 0xa0, ((EffMappingObject *)object)->value108);
+    result = effEditColorTrack(object + 0x7c, object + 0xa0, ((EffMappingObject *)object)->value108);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -13084,7 +13084,7 @@ s32 effEditOPlsclColorTrack(s32 request) {
 
     effMappingState.table = D_003FFF58;
     effMappingState.count = 8;
-    result = func_00300578(object + 0x24, object + 0x48, *(s32 *)object);
+    result = effEditColorTrack(object + 0x24, object + 0x48, *(s32 *)object);
     effMappingState.table = D_003FFDD8;
     effMappingState.count = 8;
     return result;
@@ -13109,16 +13109,16 @@ void btlResetEffectWork(void) {
     D_004387B0 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_003018C8);
+INCLUDE_ASM(const s32, "game/code_002DE248", effEditScalarTrack);
 
 extern u8 D_00400068[];
 
-extern s32 func_003018C8(void *, s32, void *, void *);
+extern s32 effEditScalarTrack(void *, s32, void *, void *);
 
 /* Pass the requested P-family SCALE track and its frame bound to the editor. */
 void effEditPScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x60, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 extern u8 D_004001A0[];
@@ -13126,13 +13126,13 @@ extern u8 D_004001A0[];
 /* Edit the requested P-family ROTATE track with its independent editor state. */
 void effEditPRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x8C, ((EffMappingObject *)source)->valueB8.signedValue, D_00400250, D_004001A0);
+    effEditScalarTrack(source + 0x8C, ((EffMappingObject *)source)->valueB8.signedValue, D_00400250, D_004001A0);
 }
 
 /* SCALE property callback shared by native G-/K-family descriptors. */
 void effEditGkScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x7C, ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x7C, ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
 }
 
 extern u8 D_00400250[];
@@ -13140,49 +13140,49 @@ extern u8 D_00400250[];
 /* ROTATE property callback for native K-family descriptors. */
 void effEditKRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0xA8, ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    effEditScalarTrack(source + 0xA8, ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
 }
 
 /* SCALE property callback for native B-family descriptors. */
 void effEditBScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x34, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
 void effEditBRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x60, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* AREA property callback shared by B-/F-family descriptors. */
 void effEditBfAreaTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x8C, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x8C, ((EffMappingObject *)source)->valueB8.signedValue, D_00400150, D_00400068);
 }
 
 /* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
 void effEditTBoardScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x34, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* Pass the requested T-BOARD ROTATE track and its frame bound to the editor. */
 void effEditTBoardRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* SCALE property callback for native W-family descriptors. */
 void effEditWScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x80, ((EffMappingObject *)source)->valueD8, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x80, ((EffMappingObject *)source)->valueD8, D_00400150, D_00400068);
 }
 
 /* ROTATE property callback for native W-family descriptors. */
 void effEditWRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0xAC, ((EffMappingObject *)source)->valueD8, D_00400250, D_004001A0);
+    effEditScalarTrack(source + 0xAC, ((EffMappingObject *)source)->valueD8, D_00400250, D_004001A0);
 }
 
 extern u8 D_004000B8[];
@@ -13190,61 +13190,61 @@ extern u8 D_004000B8[];
 /* Edit the SCALE_UV curve in U-CYLND's POLYGON child; native callback is void. */
 void effEditUCylinderPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x90, ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
+    effEditScalarTrack(source + 0x90, ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root SCALE curve; native callback is void. */
 void effEditUSmokeSpiralScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x9C, ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x9C, ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root ROTATE curve; native callback is void. */
 void effEditUSmokeSpiralRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0xC8, ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
+    effEditScalarTrack(source + 0xC8, ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
 }
 
 /* Edit SCALE_UV in their POLYGON children; preserve the native void callback. */
 void effEditUSmokeSpiralPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
+    effEditScalarTrack(source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
 }
 
 /* Edit the native U-SPHRE root SCALE curve; native callback is void. */
 void effEditUSphereScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x34, ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
+    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
 }
 
 /* Edit the native 2D root SCALE curve; native callback is void. */
 void effEditTwoDimensionalScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x34, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x34, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* Edit the native 2D root ROTATE curve; native callback is void. */
 void effEditTwoDimensionalRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
 /* SCALE editor for the native O-P2_TRK root descriptor. */
 void effEditOP2TrackScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0x7C, ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0x7C, ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
 }
 
 /* ROTATE editor for the native O-P2_TRK root descriptor. */
 void effEditOP2TrackRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0xA8, ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    effEditScalarTrack(source + 0xA8, ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
 }
 
 /* SCALE editor shared by the six native M-family descriptors. */
 void effEditMScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    func_003018C8(source + 0xB0, ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
+    effEditScalarTrack(source + 0xB0, ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
 }
 
 /* Reset the color/alpha editor's selected curve key to one, not a pending flag. */

@@ -9016,3 +9016,5 @@
 0x0030F190	sceWrite	inferred	Writes the supplied byte range to an open descriptor; file queue serialization and the SDF write operation pass descriptor, data, and size. Paired with DDS2 0x0036A420.
 0x001372D0	fldRefreshAreaStateFromPosition	inferred	Uses supplied XYZ with field area/value records and label selection to refresh position-dependent area state; paired DDS2 0x00139EC0. Called from mode-one camera update, camera-object pose update, and player-scene camera setup.
 0x0012F578	fldUpdateModeOneCameraPose	inferred	When positionMode is 1, updates field player camera position and heading, smooths position, and refreshes area state through fldRefreshAreaStateFromPosition; called by fldUpdateCameraFrame. Paired DDS2 0x00131B50.
+0x002B9320	effEditColorTrack	inferred	Paired with DDS2 effEditColorTrack; ASM helper called by effect color/alpha track callbacks and uses the active mapping options.
+0x002BA538	effEditScalarTrack	inferred	Paired with DDS2 effEditScalarTrack; scale, rotation, and area callbacks route scalar property curves through this editor and its active option tables.
