@@ -2097,7 +2097,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
 }
 
 /* Share the policy rejection; see docs/idioms.md, "Shared rejection blocks: battle command availability". */
-s32 func_001A6EC0(BtlUnit *unit, s32 command) {
+s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
     BtlState *runtime = btlGetRuntime();
 
     if (runtime->commandAvailabilityOverride != NULL) {
