@@ -7,6 +7,7 @@
 #include "pcp_vu0.h"
 #include "common.h"
 #include "fld_scene_ready_api.h"
+#include "fld_encounter_runtime_api.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
 #include "mdl_flag_api.h"

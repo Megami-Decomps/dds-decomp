@@ -14,6 +14,7 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
+#include "fld_encounter_runtime_api.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -234,10 +235,6 @@ extern void kwlnDrawEnableD30(s32);
 
 extern void btlMarkRuntimeUpdatePending(void);
 
-
-extern s32 fldGetEncounterRuntimeResult(void);
-
-extern void fldSetEncounterPendingValue(s32);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
