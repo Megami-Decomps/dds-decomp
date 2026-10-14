@@ -2,6 +2,7 @@
 #define MNU_SHOP_H
 
 #include "common.h"
+#include "evt_world.h"
 #include "mnu_transition.h"
 
 struct MenuList;
@@ -175,8 +176,7 @@ typedef struct ShopScene {
     MenuPopupState transitionWork;
     s32 dispatchState;
     s32 stateTable;
-    u8 resourcePair[4];
-    s32 pairedHandle;
+    EvtResourcePair messageResource;
     struct EffectSlotSet *spriteResource;
     s32 batchState;
     MenuWindowContainer *sprite;

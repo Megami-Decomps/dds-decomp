@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "dat_stat.h"
+#include "evt_world.h"
 #include "mnu_transition.h"
 #ifdef VERSION_DDS2
 #include "mnu_shop.h"
@@ -738,7 +739,7 @@ typedef struct MenuTerminalContext {
     MenuPopupState transitionWork;
     s32 popupState;
     s32 stateTable;
-    s32 messageResources[2];
+    EvtResourcePair messageResources;
     struct EffectSlotSet *effectSlots[4];
     s32 state;
     MenuWindowContainer *ownedWindows[1];

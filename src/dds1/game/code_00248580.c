@@ -72,7 +72,7 @@ typedef struct MenuTerminalWork {
     MenuPopupState transitionWork; /* 0x08 */
     s32 popupState;         /* 0x54 */
     u32 dispatchTable;       /* 0x58 */
-    s32 messageResources[2]; /* 0x5C: second handle opens the message window */
+    EvtResourcePair messageResources; /* 0x5C: loader handle and message data address */
     EffectSlotSet *batch;  /* 0x64 */
     EffectSlotSet *secondResource;     /* 0x68 */
     EffectSlotSet *alternateBatch; /* 0x6C */
@@ -868,7 +868,7 @@ extern void mnuLoadResourceHandles(u32 *);
 
 extern void mnuTerminalBuildMenus(MenuTerminalWork *host);
 
-extern void evtLoadResourcePair(const char *, void *);
+extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 
 extern s32 evtCreateMessageWindowIfMissing(s32);
 
@@ -898,8 +898,8 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     obj->initState = slot;
     obj->selectedSlot = slot;
     mnuTerminalBuildMenus(obj);
-    evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", obj->messageResources);
-    evtCreateMessageWindowIfMissing(obj->messageResources[1]);
+    evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
+    evtCreateMessageWindowIfMissing(obj->messageResources.dataAddress);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->cursor[i] = -1;
     }
@@ -909,7 +909,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
 
 extern void mnuReleaseResourceHandles(u32 *work);
 extern void dspCloseChannel(void);
-extern void evtReleaseResourcePairHandle(u32 *record);
+extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void fldApplyTerminalActorSelection(s32 a, s32 b);
@@ -927,7 +927,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
-        evtReleaseResourcePairHandle((u32 *)work->messageResources);
+        evtReleaseResourcePairHandle(&work->messageResources);
         sdfReleaseResourceAllocation(work->allocation);
         mnuTerminalTaskState = 2;
     }
@@ -2112,7 +2112,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuAnimateTerminalSelection(1, (MenuTerminalWork *)context);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuTerminalWork *)context);
     ((MenuTerminalWork *)context)->exitPending = 0;
-    evtCreateMessageWindowIfMissing(((MenuTerminalWork *)context)->messageResources[1]);
+    evtCreateMessageWindowIfMissing(((MenuTerminalWork *)context)->messageResources.dataAddress);
     if (((MenuTerminalWork *)context)->mode != 0) {
         sndStartTrackExtended(((MenuTerminalWork *)context)->bgmHandle);
     }

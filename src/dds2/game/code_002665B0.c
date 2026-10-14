@@ -985,7 +985,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     obj->slotCopy = slot;
     mnuTerminalBuildMenus(obj);
     evtLoadResourcePair((u32)"/facility/msg/terminal/mes_data.bmd", &obj->messageResources);
-    evtCreateMessageWindowIfMissing(obj->messageResources.unk04);
+    evtCreateMessageWindowIfMissing(obj->messageResources.dataAddress);
     for (i = 0; i < MNU_SELECTED_SLOT_COUNT; i++) {
         obj->selectedSlots[i] = -1;
     }
@@ -2249,7 +2249,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuTerminalSelectSlot(3, 0, state);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
-    evtCreateMessageWindowIfMissing(((MenuSlotState *)state)->messageResources.unk04);
+    evtCreateMessageWindowIfMissing(((MenuSlotState *)state)->messageResources.dataAddress);
     return 1;
 }
 

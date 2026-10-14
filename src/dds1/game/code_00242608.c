@@ -66,7 +66,7 @@
 #define CAMP_PARTY_ACTIVE_FLAG 1
 
 
-extern void evtLoadResourcePair(const char *, u8 *);
+extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 mnuCampGetShopPriceStage();
 extern struct EffectSlotSet *D_003BC520;
@@ -1375,8 +1375,8 @@ ShopScene *mnuShopCreateScene(void) {
     mnuClearPanelTransitionState(&obj->transitionWork);
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
-    evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj->resourcePair);
-    evtCreateMessageWindowIfMissing(obj->pairedHandle);
+    evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", &obj->messageResource);
+    evtCreateMessageWindowIfMissing(obj->messageResource.dataAddress);
     D_003BC520 = obj->spriteResource;
     obj->count98 = mnuCampGetShopPriceStage();
     obj->count8C = mnuCountActivePartyEntries();
@@ -1384,7 +1384,7 @@ ShopScene *mnuShopCreateScene(void) {
 }
 
 extern void dspCloseChannel();
-extern void evtReleaseResourcePairHandle();
+extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
 void mnuShopDestroyScene(KwlnTask *arg) {
     ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(arg);
@@ -1395,7 +1395,7 @@ void mnuShopDestroyScene(KwlnTask *arg) {
         mnuShopReleaseSceneObjects(scene);
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
-        evtReleaseResourcePairHandle(scene->resourcePair);
+        evtReleaseResourcePairHandle(&scene->messageResource);
         sdfReleaseResourceAllocation(scene->resourceHandle);
         D_003BC39C = 2;
     }
