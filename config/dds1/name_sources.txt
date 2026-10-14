@@ -6218,6 +6218,7 @@
 0x002C36E8	fldLmapToggleOverlay	inferred	func_0024DC08 ? dspRequestMessageWindowModeOne : func_0024DBB0, returns which branch ran; DDS2 0030B6D8 [names_M33_SmallSweep2.tsv]
 0x002C3738	sdfClearCounterDisplayFlags	inferred	confidence=high; src/dds1/game/code_002C2620.c:func_002C3738; Clears the per-counter mdlFlag pairs selected by the current counter display value's bit. [names_qp9.tsv]
 0x002C3800	fldCreateLocalMapCamera	inferred	Creates a world object tagged Lmap_Cam and attaches it to local-map world. [names_reviewed8.tsv]
+0x002C38B0	sdfLoadMapCounterCameraVectorsForMask	inferred	Iterates set bits in the local-map selection mask, resolves each numbered camera object, copies its inner position and normalized rotation into indexed camera-vector arrays, and returns the loaded count.
 0x002C3AC8	sdfInitializeMapCounterSelection	inferred	readability/matching review (QP16)
 0x002C3C48	sdfLatchBaseVectorsForSelection	inferred	src/dds1/game/code_002C3868.c func_002C3C48: Copies both base vectors into pending pair, sets selection-change flag and commits pending vector. [names_reviewed24.tsv]
 0x002C3CD0	sdfSetSelectedIndex	inferred	Resets selection state then stores the requested index

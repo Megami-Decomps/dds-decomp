@@ -5926,6 +5926,7 @@
 0x0030B728	sdfClearCounterDisplayFlags	inferred	Clears map-selection flags corresponding to the committed counter index; paired behavior with DDS1 002C3738, retaining title-specific flag IDs.
 0x0030B7D0	fldCreateLocalMapCamera	inferred	Creates a world object tagged Lmap_Cam and attaches it to local-map world. [names_reviewed8.tsv]
 0x0030B838	sdfInitInnerVectors	inferred	sets inner first/second vec on D_004388B4 then vtbl refresh
+0x0030B880	sdfLoadMapCounterCameraVectorsForMask	inferred	DDS2 twin of DDS1 0x002C38B0: filters numbered local-map camera objects by mask, loads their inner position and normalized rotation into camera-vector arrays, and returns the selected count.
 0x0030BA98	sdfInitializeMapCounterSelection	inferred	readability/matching review (QP16)
 0x0030BBA8	sdfLatchBaseVectorsForSelection	inferred	src/dds2/game/code_0030B838.c func_0030BBA8: Copies both base vectors into pending pair, sets selection-change flag and commits pending vector. Twin of DDS1 func_002C3C48. [names_reviewed24.tsv]
 0x0030BC30	sdfSetSelectedIndex	inferred	Resets selection state then stores the requested index

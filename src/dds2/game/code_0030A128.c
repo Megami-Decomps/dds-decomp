@@ -80,7 +80,7 @@ extern void fldCreateLocalMapCamera(void);
 extern s32 fldPackLocalMapFlagStates(void);
 extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
 extern s32 sdfCreateMaskedCounterChannels(s32, s32);
-extern s32 func_0030B880(s32);
+extern s32 sdfLoadMapCounterCameraVectorsForMask(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern void fldCreateMapRequestQueues(void);
 extern void evtCreateMessageWindowIfMissing(s32);
@@ -632,7 +632,7 @@ void fldInitializeLocalMapScene(void) {
     index = fldCountMaskBitsBeforeOrdinal(mask, D_00438890);
     D_00438894 = index;
     sdfCreateMaskedCounterChannels(mask, index);
-    sdfInitializeMapCounterSelection(D_00438894, func_0030B880(mask));
+    sdfInitializeMapCounterSelection(D_00438894, sdfLoadMapCounterCameraVectorsForMask(mask));
     fldCreateMapRequestQueues();
     dspCloseChannel();
     D_004388A4 = sdfReadNamedResource("/lmap/lmpmsg.bmd", &D_004388A8, NULL);

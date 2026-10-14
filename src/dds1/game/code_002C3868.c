@@ -81,7 +81,7 @@ void sdfInitInnerVectors(void) {
     ((EffWorldNode *)fldLocalMapCameraObject)->ops->update(fldLocalMapCameraObject);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C38B0);
+INCLUDE_ASM(const s32, "game/code_002C3868", sdfLoadMapCounterCameraVectorsForMask);
 
 void sdfInitializeMapCounterSelection(s32 index, s32 count) {
     fldLocalMapFirstCameraVector = D_003900E0[index];
