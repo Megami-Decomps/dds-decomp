@@ -3229,7 +3229,39 @@ s32 evtStartProgressResultSecondaryTransition(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00263490);
+extern s32 D_003CE420[8];
+extern s32 D_003CE440[];
+
+/* Start a display entry for the shop row. Message-set two picks one of five
+ * entries from the first group whose flag is clear; sets one and three pick
+ * one of the row's pair by its flag. */
+s32 func_00263490(KwlnTask *callbackContext) {
+    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(callbackContext);
+    s32 row = scene->shopRow;
+    s32 i;
+    s32 entry;
+
+    switch (D_003C9A40[row].messageSet) {
+    case 2:
+        for (i = 0; i < 8; i++) {
+            if (mdlFlagTest(D_003CE420[i]) == 0 || i == 7) {
+                dspStartEntry(i * 5 + effMiscRand(0) % 5 + 0x30);
+                break;
+            }
+        }
+        break;
+    case 1:
+    case 3:
+        entry = row * 2 + 0x58;
+        if (mdlFlagTest(D_003CE440[row])) {
+            dspStartEntry(entry + 1);
+        } else {
+            dspStartEntry(entry);
+        }
+        break;
+    }
+    return 1;
+}
 
 u32 func_002635E0(void) {
     return 1;
