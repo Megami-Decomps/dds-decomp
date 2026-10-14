@@ -21,7 +21,7 @@ extern s32 evtStageTestAdvanceResourceWork(void);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
-extern void func_00294D50(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void mnuDrawTerminalPanelListRows(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
@@ -283,7 +283,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         if (position > 1.0f) {
             position = 1.0f;
         }
-        func_00294D50(0, (s32)(position * 64.0f) << 3, 0, scene,
+        mnuDrawTerminalPanelListRows(0, (s32)(position * 64.0f) << 3, 0, scene,
                       (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawListChildrenWithCountdown(0, 0, 0,
                                          (u8 *)scene->ownedWindows[0]->list, 0x53);
@@ -386,7 +386,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         if (position > 1.0f) {
             position = 1.0f;
         }
-        func_00294D50(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
+        mnuDrawTerminalPanelListRows(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
                       (s32)(opacity * 256.0f), 0x53);
         mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;

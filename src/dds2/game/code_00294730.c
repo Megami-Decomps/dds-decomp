@@ -169,7 +169,7 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00294D50);
+INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawTerminalPanelListRows);
 
 void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
