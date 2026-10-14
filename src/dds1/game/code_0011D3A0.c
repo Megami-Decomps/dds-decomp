@@ -781,7 +781,7 @@ extern void fldClearCameraFacingPointRequest(void);
 
 extern void fldClearCameraHeadingRequest(void);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120EC8);
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldInitializeAreaWork);
 
 /* Map IDs select 1920-byte banks of 30-byte slots; flag banks are halfwords.
  * The guards check only the upper map-ID bound: negative IDs and slot/bit

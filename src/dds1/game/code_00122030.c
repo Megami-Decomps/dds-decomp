@@ -2010,7 +2010,7 @@ extern void fldUpdateObjectSlotActivation(void);
 
 extern void fldUpdateSwayOffset(void);
 
-extern void func_00120EC8(void);
+extern void fldInitializeAreaWork(void);
 
 extern void fldRebuildFieldScene(void);
 
@@ -2097,7 +2097,7 @@ s32 fldProcSequence(KwlnTask *task) {
     case 0:
         D_003BABE8 = 0;
         fldAreaState.unk130 = 1;
-        func_00120EC8();
+        fldInitializeAreaWork();
         D_003BA8EC = 0x80000000;
         evtEnableSolarPhaseAdvance();
         D_003BAD58 = 0;
