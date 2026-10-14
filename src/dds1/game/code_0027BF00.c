@@ -2044,7 +2044,62 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
     mnuClearPageSelection(window);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", mnuGetPartyRowDrawState);
+/* Classify a party row while no selection is pending: 1 when it is the active
+ * list's cursor row (or a highlighted frontline row), 2 when only the primary
+ * list's cursor rests on it during secondary selection, otherwise 0. */
+s32 mnuGetPartyRowDrawState(MenuPageWindow *window, s32 row) {
+    u32 flags;
+    s32 mode;
+    s32 target;
+    s32 highlighted;
+    DatPartyRecord *party;
+
+    target = 0;
+    mode = 0;
+    if (window->selected >= 0) {
+        return 0;
+    }
+    flags = window->flags;
+    if (flags & 4) {
+        mode = 1;
+        if (!(flags & 2)) {
+            mode = 2;
+        }
+        target = window->lists[0]->cursor->index == row;
+    }
+    if (flags & 8) {
+        if (window->lists[1]->cursor->index == row) {
+            target = 2;
+        }
+        mode = 2;
+    }
+    highlighted = 0;
+    if (flags & 0x20) {
+        highlighted = 1;
+    }
+    if (flags & 0x10) {
+        party = datGameState->party;
+        if (party[window->records->slots[row].index].flags & DAT_PARTY_FLAG_FRONTLINE) {
+            highlighted = 1;
+        }
+    }
+    switch (mode) {
+    case 1:
+        if (target == 1 || highlighted) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (target == mode || highlighted) {
+            return 1;
+        }
+        if (target == 1) {
+            return 2;
+        }
+        break;
+    }
+    return 0;
+}
 
 extern s32 mnuGetPartyRowDrawState(MenuPageWindow *, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
