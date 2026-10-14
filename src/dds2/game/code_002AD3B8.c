@@ -897,11 +897,66 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AD3B8", mnuDrawStaffValueGrid);
+extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
+extern char D_00437BC0[];
+
+typedef struct MenuStaffGridCell {
+    s32 index;
+    s32 x;
+    s32 y;
+} MenuStaffGridCell;
+
+/* Draw the five staff stat cells for an item: an empty or filled frame per
+ * stat (with a highlight when the item carries a bonus there), the stat
+ * label, and the bonus value. */
+void mnuDrawStaffValueGrid(s32 x, s32 y, s32 itemId, MenuStaffContext *context) {
+    char text[16];
+    MenuStaffGridCell frames[3] = { { 3, 0x240, 0x110 }, { 4, 0x240, 0x110 }, { 0x1A, 0x3E0, 0x110 } };
+    MenuStaffGridCell labels[5] = {
+        { 5, 0x2A0, 0xF0 }, { 7, 0x690, 0xF0 }, { 6, 0xA80, 0xF0 }, { 8, 0xE70, 0xF0 }, { 9, 0x1260, 0xF0 },
+    };
+    s32 value = 0;
+    u32 i;
+
+    for (i = 0; i < 5; i++) {
+        s32 bonus = 0;
+        s32 filled;
+        s32 left;
+        s32 kind;
+
+        if (itemId != 0) {
+            value = ptyGetCombinedRecordAndSlotValue(itemId, i);
+            bonus = datGameState->itemStatBonuses[itemId - 0xC0][i] != 0;
+        }
+        filled = value != 0;
+        kind = frames[filled].index;
+        left = frames[filled].x + x + i * 0x3F0;
+        itfDrawGridWithResolvedSlot(left, frames[filled].y + y + 0x918, 0, 0,
+                                    context->titleFrames[0], kind, 0x53);
+        if (bonus) {
+            itfDrawGridWithResolvedSlot(frames[2].x + x + i * 0x3F0, frames[2].y + y + 0x918, 0, 0,
+                                        context->titleFrames[0], frames[2].index, 0x53);
+        }
+        kind = labels[i].index + filled * 5;
+        itfDrawGridWithResolvedSlot(labels[i].x + x, labels[i].y + y + 0x918, 0, 0,
+                                    context->titleFrames[0], kind, 0x53);
+        if (value != 0) {
+            FrFontGlyph *glyph;
+
+            sprintf(text, D_00437BC0, value);
+            glyph = (FrFontGlyph *)itfCreateFont2TextGlyph(x + i * 0x3F0 + 0x490, y + 0xA20, 0, 0xA09DC380,
+                                                           (s32)text, 0);
+            if (bonus) {
+                frFontSetChildChainFirstOption(glyph, 3);
+            }
+            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        }
+    }
+}
 
 s32 mnuDrawStaffValuePage(KwlnTask *task) {
     extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, s32, s32);
-    extern s32 mnuDrawStaffValueGrid(s32, s32, s32, MenuStaffContext *);
     extern char D_0042AD08[];
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     const u8 *slotsCaption = (const u8 *)D_0042AD08;
@@ -1231,10 +1286,6 @@ void mnuClearStaffSceneConfigEntries(MenuPanelGroup *config) {
         mnuSetPanelItemAuxiliaryValue(config->entries[i], 0);
     }
 }
-
-INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACA0);
-
-INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
 
 INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042AD08);
 

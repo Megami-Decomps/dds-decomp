@@ -29,6 +29,7 @@
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
+#include "dds3_world_selection.h"
 #include "mdl.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
@@ -52,7 +53,6 @@ extern s32 D_003BABF0;
 
 extern u32 D_003BABD0;
 
-extern void *dds3GetWorldSecondaryObject(void);
 
 
 
@@ -1963,7 +1963,6 @@ s32 fldDispatchPendingSceneResource(void) {
     return 0;
 }
 
-extern void dds3SetWorldObject(void *);
 
 extern void evtEnableSolarPhaseAdvance(void);
 

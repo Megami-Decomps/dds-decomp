@@ -345,8 +345,8 @@ void mnuTitlePickRandomSlot(PickList *list) {
         }
         if (found == 0) {
             list->entry[list->count].id = id;
-            list->entry[list->count].unk1 = 0;
-            list->entry[list->count].unk2 = 10;
+            list->entry[list->count].paletteIndex = 0;
+            list->entry[list->count].fadeDelay = 10;
             list->count++;
         }
         tries++;
@@ -370,13 +370,13 @@ void mnuDrawMovieMenuSpritePickList(PickList *work, s32 drawContext) {
         mnuDrawSprite(D_003E38F0[work->entry[i].id][0],
                       D_003E38F0[work->entry[i].id][1],
                       0, work->control.pos / 4, 0,
-                      palette[(s8)work->entry[i].unk1], drawContext);
-        if (work->entry[i].unk2 != 0) {
-            work->entry[i].unk2--;
+                      palette[(s8)work->entry[i].paletteIndex], drawContext);
+        if (work->entry[i].fadeDelay != 0) {
+            work->entry[i].fadeDelay--;
         } else {
-            work->entry[i].unk1++;
-            work->entry[i].unk2 = 10;
-            if (work->entry[i].unk1 >= 5) {
+            work->entry[i].paletteIndex++;
+            work->entry[i].fadeDelay = 10;
+            if (work->entry[i].paletteIndex >= 5) {
                 for (j = i + 1; j < work->count; j++) {
                     memcpy(&work->entry[j - 1], &work->entry[j], sizeof(PickEntry));
                 }

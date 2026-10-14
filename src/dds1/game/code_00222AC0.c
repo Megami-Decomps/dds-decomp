@@ -17,6 +17,7 @@
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
 #include "evt_task.h"
+#include "evt_event_pack.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
@@ -113,7 +114,6 @@ extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
-extern void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key);
 extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern const char D_003AC508[];
 

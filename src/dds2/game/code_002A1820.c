@@ -372,10 +372,6 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
 
 
 /* Install the fixed title track and queue its compressed frames under the lock. */
-INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428590);
-
-INCLUDE_RODATA(const s32, "game/code_002A1820", D_004285A0);
-
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_004285B0);
 
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_004285C0);

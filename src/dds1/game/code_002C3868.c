@@ -25,9 +25,22 @@ extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s32 sdfCounterGetDisplayValue(void);
 
 typedef struct SdfCounterRuntime {
-    u8 pad00[0xC];                  /* title-specific/unknown prefix */
+    u32 stateFlags;                 /* 0x00: generic menu-list state bits */
+    u32 flags;                      /* 0x04: generic menu-list flags */
+    s32 id;                         /* 0x08: menu-list owner identifier */
     SdfCounterRuntimeState state;   /* 0x0C */
+    u8 pad34[0xC];                  /* category/list tail not used by this counter */
 } SdfCounterRuntime;
+typedef char SdfCounterRuntimeSizeCheck[(sizeof(SdfCounterRuntime) == 0x40) ? 1 : -1];
+typedef char SdfCounterRuntimeStateFlags_at_0x00[
+    ((u32)&((SdfCounterRuntime *)0)->stateFlags == 0x00) ? 1 : -1
+];
+typedef char SdfCounterRuntimeFlags_at_0x04[
+    ((u32)&((SdfCounterRuntime *)0)->flags == 0x04) ? 1 : -1
+];
+typedef char SdfCounterRuntimeId_at_0x08[
+    ((u32)&((SdfCounterRuntime *)0)->id == 0x08) ? 1 : -1
+];
 typedef char SdfCounterRuntimeState_at_0x0C[
     ((u32)&((SdfCounterRuntime *)0)->state == 0x0C) ? 1 : -1
 ];

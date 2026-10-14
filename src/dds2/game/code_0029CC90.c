@@ -6,10 +6,10 @@
 #include "dat_state.h"
 #include "dat_party_growth.h"
 #include "mnu_result.h"
+#include "prf_profile_cap.h"
 
 extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
-extern u32 ptyGetProfileRecordCap(u16);
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern s32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
 extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
@@ -449,7 +449,6 @@ extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *, u32);
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
-extern u32 ptyGetProfileRecordCap(u16);
 
 
 /* Set up the level and profile progress bars for one party member. */

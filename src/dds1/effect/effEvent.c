@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_sif_command.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
@@ -113,7 +114,6 @@ extern u8 D_00355948[];
 extern u8 D_00355970[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
-extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);

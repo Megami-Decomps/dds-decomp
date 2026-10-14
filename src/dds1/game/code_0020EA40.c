@@ -266,7 +266,7 @@ extern s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSi
 /* Native providers whose bodies remain assembly in their own units. */
 s32 btlInitResourcesWrap(BtlLinkedCommand *, BtlCamState *, s32);
 void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *);
-s32 func_00206180(BtlUnit *);
+s32 btlGetLinkedEffectPhase(BtlUnit *);
 void func_00206608(void);
 void btlQueueLinkedPairModelSwapTasks(BtlTask *, s32, u64, u64, u64);
 void func_00209EB8(BtlTask *);
@@ -360,7 +360,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad590, 0x0, btlResetEffectState);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlChooseLinkedPairMotion);
         BTL_INSTALL_CALLBACK(battle->pad5A4, 0x4, btlIsEffectPhaseInRange);
-        BTL_INSTALL_CALLBACK(battle->pad5A4, 0x0, func_00206180);
+        BTL_INSTALL_CALLBACK(battle->pad5A4, 0x0, btlGetLinkedEffectPhase);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlApplyRahuOperandEffects);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlCheckActiveEffectForSpecialTarget);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlUpdateLinkedEffectUnitTransforms);
@@ -441,7 +441,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlCheckSelectedBossUnitFlag);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlRefreshRavanaUnitModelsAndPose);
         battle->cameraModeInitializePredicate = btlDispatchEligibleBossEvent;
-        BTL_INSTALL_CALLBACK(battle->pad668, 0x0, btlCheckAttachedMember);
+        BTL_INSTALL_CALLBACK(battle->cameraUpdatePredicate, 0x0, btlCheckAttachedMember);
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlCheckBossOptionAllowed);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapSelectedBossCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlSyncEffectActorToUnit);

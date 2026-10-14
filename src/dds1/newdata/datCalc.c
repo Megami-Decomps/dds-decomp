@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_solar.h"
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
@@ -1784,7 +1785,6 @@ void evtSelectFineStatGrade(void) {
     scrSetFloatReturnValue(datBattleParameters->hpFineGradeValues[gradeIndex]);
 }
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
     u32 type = flags >> 16;

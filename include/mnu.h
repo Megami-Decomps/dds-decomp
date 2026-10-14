@@ -521,8 +521,7 @@ typedef struct MenuPageSlot {
     u32 flags;
     u8 pad08[8];
     struct EffectSlotSet *icon[3];
-    MenuEffectPair hp; /* 0x1C */
-    MenuEffectPair mp; /* 0x70 */
+    MenuEffectPair bars[2]; /* 0x1C: HP, then MP at 0x70 */
     struct EffectSlotSet *frame[6];
     struct MenuPageResources *resources;
     struct MenuSprites *windowSprites;
@@ -538,8 +537,8 @@ typedef char MenuPageSlot_icon_check_dds1[
     ((u32)&((MenuPageSlot *)0)->icon == 0x10) ? 1 : -1];
 typedef char MenuPageSlot_frame_check_dds1[
     ((u32)&((MenuPageSlot *)0)->frame == 0xC4) ? 1 : -1];
-typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->hp == 0x1C) ? 1 : -1];
-typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->mp == 0x70) ? 1 : -1];
+typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->bars[0] == 0x1C) ? 1 : -1];
+typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->bars[1] == 0x70) ? 1 : -1];
 typedef char MenuPageSlot_work_check[((u32)&((MenuPageSlot *)0)->work == 0xF4) ? 1 : -1];
 #endif
 
@@ -996,9 +995,10 @@ typedef struct MovieMenuEffectSlot {
 
 typedef struct PickEntry {
     s8 id;
-    u8 unk1;
-    s8 unk2;
+    u8 paletteIndex; /* Current index in the five-entry fade palette. */
+    s8 fadeDelay;    /* Ticks until the next palette step. */
 } PickEntry;
+typedef char PickEntry_size_must_be_3[(sizeof(PickEntry) == 3) ? 1 : -1];
 
 /* Paired bar with the randomly picked title-movie slots (0x94 bytes). */
 typedef struct PickList {
@@ -1010,6 +1010,7 @@ typedef struct PickList {
     s32 unk70;
     MovieMenuEffectSlot effectSlots[4]; /* 0x74 */
 } PickList;
+typedef char PickList_size_must_be_0x94[(sizeof(PickList) == 0x94) ? 1 : -1];
 
 #endif /* VERSION_DDS2 */
 

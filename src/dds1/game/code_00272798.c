@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "fr_font_draw_glyph.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
@@ -14,7 +15,6 @@ extern void mnuCreateConfigTasks(s32 mode);
 
 typedef struct FrFontGlyph FrFontGlyph;
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 sprintf(char *, const char *, ...);
 extern char D_003BC6C8[];
 extern const char D_003BC6D0[];
@@ -31,7 +31,6 @@ extern void mnuDrawStaffScrollPanel(s32, s32, s32, u32, s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
