@@ -36,5 +36,8 @@ Dds3L2dRectangle *l2dCreateOwnedColoredRectangle(s32 left, s32 top, s32 depth, s
     return rect;
 }
 
-INCLUDE_SDATA(const s32, "misc/l2d", D_00435EB0);
+Dds3IntrusiveNodeCallbacks D_00435EB0 __attribute__((section(".sdata"))) = {
+    frFontReleaseOwnerStorage,
+    l2dDrawColoredRect,
+};
 

@@ -6,6 +6,7 @@
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
+#include "mnu_event_flag_entries.h"
 #include "mdl_flag_api.h"
 
 
@@ -32,20 +33,8 @@ typedef struct FlagEntry {
 
 
 
-typedef struct FlagPair {
-    s32 first;
-    s32 second;
-} FlagPair;
-
-typedef struct FlagSource {
-    s32 first;
-    s32 second;
-    s32 pad[2];
-} FlagSource;
-
-extern FlagSource mnuSceneFlagEventEntries[];
-
-extern FlagPair mnuPartyFlagEventEntries[];
+extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
+extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 
 extern u8 D_003CE6AC[];
@@ -379,17 +368,17 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
-    for (i = 0; i < 4; i++) {
-        entries[i].firstFlag = mnuSceneFlagEventEntries[i].first;
+    for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
+        entries[i].firstFlag = mnuSceneFlagEventEntries[i].requiredFlag;
         entries[i].firstOn = mdlFlagTest(entries[i].firstFlag);
-        entries[i].secondFlag = mnuSceneFlagEventEntries[i].second;
+        entries[i].secondFlag = mnuSceneFlagEventEntries[i].handledFlag;
         entries[i].secondOn = mdlFlagTest(entries[i].secondFlag);
     }
-    for (i = 0; i < 16; i++) {
-        entries[4 + i].firstFlag = mnuPartyFlagEventEntries[i].first;
-        entries[4 + i].firstOn = mdlFlagTest(entries[4 + i].firstFlag);
-        entries[4 + i].secondFlag = mnuPartyFlagEventEntries[i].second;
-        entries[4 + i].secondOn = mdlFlagTest(entries[4 + i].secondFlag);
+    for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag = mnuPartyFlagEventEntries[i].requiredFlag;
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstOn = mdlFlagTest(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag = mnuPartyFlagEventEntries[i].handledFlag;
+        entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondOn = mdlFlagTest(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
     }
     return handle;
 }
@@ -398,7 +387,7 @@ void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
         if (entries[i].firstOn != 0) {
             mdlFlagSet(entries[i].firstFlag);
         }
@@ -406,12 +395,12 @@ void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
             mdlFlagSet(entries[i].secondFlag);
         }
     }
-    for (i = 0; i < 16; i++) {
-        if (entries[4 + i].firstOn != 0) {
-            mdlFlagSet(entries[4 + i].firstFlag);
+    for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
+        if (entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstOn != 0) {
+            mdlFlagSet(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].firstFlag);
         }
-        if (entries[4 + i].secondOn != 0) {
-            mdlFlagSet(entries[4 + i].secondFlag);
+        if (entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondOn != 0) {
+            mdlFlagSet(entries[MNU_SCENE_FLAG_ENTRY_COUNT + i].secondFlag);
         }
     }
 }
@@ -419,13 +408,13 @@ void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
 void mnuClearCampResourceFlagEntries(void) {
     u32 i;
 
-    for (i = 0; i < 4; i++) {
-        mdlFlagClear(mnuSceneFlagEventEntries[i].first);
-        mdlFlagClear(mnuSceneFlagEventEntries[i].second);
+    for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {
+        mdlFlagClear(mnuSceneFlagEventEntries[i].requiredFlag);
+        mdlFlagClear(mnuSceneFlagEventEntries[i].handledFlag);
     }
-    for (i = 0; i < 16; i++) {
-        mdlFlagClear(mnuPartyFlagEventEntries[i].first);
-        mdlFlagClear(mnuPartyFlagEventEntries[i].second);
+    for (i = 0; i < MNU_PARTY_FLAG_ENTRY_COUNT; i++) {
+        mdlFlagClear(mnuPartyFlagEventEntries[i].requiredFlag);
+        mdlFlagClear(mnuPartyFlagEventEntries[i].handledFlag);
     }
 }
 
@@ -451,29 +440,22 @@ void func_00266460(struct EffectSlotSet *object, MenuEffectResources *resources)
     mnuCopyCampEffectRowData(&rows, resources);
 }
 
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D50);
+const char D_00424D50[] __attribute__((aligned(8))) = "s_k_r_bg.spr";
+const char D_00424D60[] __attribute__((aligned(8))) = "karma_bg.spr";
+const char D_00424D70[] __attribute__((aligned(8))) = "karma_01.spr";
+const char D_00424D80[] __attribute__((aligned(8))) = "sun_k_bg.spr";
+const char D_00424D90[] __attribute__((aligned(8))) = "sun_krm1.spr";
+const char D_00424DA0[] __attribute__((aligned(8))) = "bg_seraf.spr";
+const char D_00424DB0[] __attribute__((aligned(8))) = "bg_geil.spr";
+const char D_00424DC0[] __attribute__((aligned(8))) = "bg_sera.spr";
+const char D_00424DD0[] __attribute__((aligned(8))) = "bg_sarf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D60);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D70);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D80);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424D90);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DA0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DB0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DC0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DD0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424DE0);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424E10);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424E30);
-
-INCLUDE_RODATA(const s32, "game/code_00265AD8", D_00424E48);
+const CampMapArguments D_00424DE0 __attribute__((aligned(8))) = {
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+};
+const CampEffectRows D_00424E10 __attribute__((aligned(8))) = {
+    { { 0, 0, 0x200, 0 }, { 0x1000, 0, 0x200, 0 } }
+};
+const char D_00424E30[] __attribute__((aligned(8))) = "/camp/mot/bg.mot";
+const char D_00424E48[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
 

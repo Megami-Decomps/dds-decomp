@@ -327,15 +327,14 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern u32 itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, s32);
-extern void frFontDrawGlyphChain(u32, s32, s32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 fade = scene->iconFade;
     s32 delta;
     s32 x;
-    u32 glyph;
+    struct FrFontGlyph *glyph;
     u32 color;
 
     effDrawSpriteWithCornerFade(0x9A0, 0x348, 0, fade, 1, (u32)scene->unitResource, 8, 0x53);
@@ -352,7 +351,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     func_003014F0(text, D_003BC550, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x408, 0, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, 0x53);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 
     if (item->unitId == 1) {
         if (scene->iconFade < 0x100) {

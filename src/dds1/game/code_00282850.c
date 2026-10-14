@@ -5,6 +5,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "kwln_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
@@ -128,7 +129,6 @@ extern void fldSetPrimarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
 extern void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern char D_003BC7C8[];
@@ -608,8 +608,6 @@ extern const MenuPoint D_003B2450[];
 extern const MenuPoint D_003B2468[];
 extern const u8 *D_003BAA8C;
 extern void mnuDrawRangeCostAndIcon(s32, s32, s32, s32, u32, DatPartyRecord *, u16, s32, s32, EffectSlotSet *, EffectSlotSet *, u32);
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
-
 /* Reuse the frame-coordinate workspace for the next phase's row count.
  * See docs/idioms.md, "Profile contents: coordinate-to-counter workspace". */
 void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, DatPartyRecord *actor, s32 profile, MenuSimpleSpriteState *panel, s32 surface) {

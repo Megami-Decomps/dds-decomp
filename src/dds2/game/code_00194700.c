@@ -61,11 +61,11 @@ extern char D_00436450[];
 
 extern EffHandler D_003B2068[];
 
-extern s32 func_0036B420(s32 directory);
+extern s32 sceDclose(s32 directory);
 
 extern char *D_003B20D8[];
 
-extern s32 func_0036B588(s32 directory, EffDirEnt *entry);
+extern s32 sceDread(s32 directory, EffDirEnt *entry);
 
 extern u8 sdfViewMatrix[];
 
@@ -316,7 +316,7 @@ s32 effOpenDataDir(void *name) {
 /* Run the native directory callback only in debug filesystem mode; its result is ignored. */
 void effRunIfEnabled(s32 directory) {
     if (sdfPfsDebugMode != 0) {
-        func_0036B420(directory);
+        sceDclose(directory);
     }
 }
 
@@ -324,7 +324,7 @@ void effRunIfEnabled(s32 directory) {
    clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
 s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {
     if (sdfPfsDebugMode != 0) {
-        return func_0036B588(directory, entry);
+        return sceDread(directory, entry);
     }
     if ((u32)effDataDirectoryIndex >= EFF_BUILTIN_NAME_COUNT) {
         return 0;

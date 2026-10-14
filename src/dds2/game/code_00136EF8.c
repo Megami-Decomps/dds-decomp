@@ -6,6 +6,7 @@
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
+#include "fld_npc_motion.h"
 #include "fld_inf.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_vu_matrix.h"
@@ -192,8 +193,7 @@ extern s32 D_0043617C;
 extern u32 D_00444A30[];
 
 extern s32 D_004361AC;
-
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 
 extern s32 D_004361A8;
@@ -256,15 +256,6 @@ extern FldRoomState fldRoomRecords[];
 
 extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 
-
-typedef struct FldNpcMotion {
-    s32 defaultMotionId;
-    u8 primaryName[0x10];
-    u8 secondaryName[0x10];
-    u8 unk24[0x10];
-    u8 unk34[0x10];
-    s32 unk44;
-} FldNpcMotion; /* 0x48 bytes */
 
 extern FldNpcMotion D_00391FA0[];
 
@@ -3478,7 +3469,7 @@ typedef struct FldMenuState {
     u16 pending;
 } FldMenuState;
 
-s32 fldDrawPendingTitleBannerWhenIdle(void *task) {
+s32 fldUpdateTitleBannerTask(void *task) {
     FldMenuState *menu;
 
     if (D_00389780[0] >= 200) {
@@ -3528,7 +3519,7 @@ s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     node[2] = 0;
     node[3] = 0;
     kwlnTaskSetUserValue(task, (u32)node);
-    return (s32)fldDrawPendingTitleBannerWhenIdle;
+    return (s32)fldUpdateTitleBannerTask;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436174);

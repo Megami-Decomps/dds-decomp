@@ -11,6 +11,7 @@
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -2356,9 +2357,7 @@ s32 btlGetSubtaskActorMotionClass(void) {
 }
 
 extern char D_0041A378[]; /* "md_01all_02" */
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 #include "dds3_object_payload.h"
 
 /* Before marking a gate enemy, notify md_01all_02 with payload word 1; always allow. */
@@ -3427,7 +3426,6 @@ s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, 
 
 extern void func_00336798(f32);
 
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 

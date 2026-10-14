@@ -11,6 +11,7 @@
 #include "eff.h"
 #include "eff_resource_records.h"
 #include "itf.h"
+#include "fr_font.h"
 
 extern EffPayload *effCreatePayload(u32);
 extern u32 effDestroyPayload(EffPayload *);
@@ -221,7 +222,6 @@ void mnuDrawSelectionLabel(s32 selection) {
 extern s32 ptyGetAffinityKind(s32, s32);
 extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
 extern s32 mnuLookupRangeEntry(u16);
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern const u8 *D_0037CCC8[16];
 extern const u8 *D_003BAA8C;
 

@@ -39,9 +39,7 @@ enum {
     EFFECT_OPACITY_COLOR_NEUTRAL = 0x80808080,
     EFFECT_OPACITY_COLOR_TRANSPARENT = 0x00808080
 };
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);

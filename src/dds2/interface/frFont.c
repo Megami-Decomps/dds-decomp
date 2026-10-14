@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_text_slots.h"
 #include "sdf_image_upload.h"
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
@@ -1229,7 +1230,7 @@ u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode) {
     return (u8 *)bank + offset;
 }
 
-extern u32 D_004528C0[];
+
 extern s8 D_00436550;
 
 void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
@@ -1242,7 +1243,7 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
     FrFontGlyph *context;
     FrFontGlyph *existingGlyph;
 
-    textData = (const char *)D_004528C0[fontIndex & 0xFF];
+    textData = (const char *)frFontIndexedTextSlots[fontIndex & 0xFF];
     memset(glyphText, 0, sizeof(glyphText));
     if (textData == NULL) {
         return;

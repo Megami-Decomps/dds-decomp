@@ -1787,19 +1787,18 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
     return scene->window->list->count;
 }
 
-extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
+extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
 
-extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
-extern void frFontDrawGlyphChain(s32, s32, s32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 void mnuQueueCampTextGlyphWithChildColor(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
-    s32 handle;
+    struct FrFontGlyph *handle;
 
     if (a1 != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)a0, a1, a4);
-        frFontSetChildColors((struct FrFontGlyph *)(u32)handle, 0x80808040);
+        frFontSetChildColors(handle, 0x80808040);
         frFontDrawGlyphChain(handle, 0, a5);
-        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+        frFontQueueGlyphForCurrentDrawBuffer(handle);
     }
 }
 
@@ -1809,6 +1808,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4,
 #include "snd_sequence_volume_pan.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
+#include "mnu_event_flag_entries.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -1823,8 +1823,6 @@ typedef struct MenuResourceWork MenuResourceWork;
 #define EVT_DISPATCH_OPERATION_PRIMARY 1
 #define EVT_DISPATCH_OPERATION_SECONDARY 2
 
-#define MNU_SCENE_FLAG_PAIR_COUNT 4
-#define MNU_PARTY_FLAG_PAIR_COUNT 16
 #define MNU_FLAG_SNAPSHOT_BYTES 0x140
 
 extern void mnuDrawDispatchProgressIcons(s32, s32);
@@ -3103,19 +3101,8 @@ typedef struct FlagEntry {
 
 
 
-typedef struct FlagPair {
-    s32 first;
-    s32 second;
-} FlagPair;
-
-typedef struct FlagSource {
-    s32 first;
-    s32 second;
-    s32 pad[2];
-} FlagSource;
-
-extern FlagSource mnuSceneFlagEventEntries[];
-extern FlagPair mnuPartyFlagEventEntries[];
+extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
+extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 struct SdfMemBlock *mnuCreateFlagEntries(void) {
@@ -3123,17 +3110,17 @@ struct SdfMemBlock *mnuCreateFlagEntries(void) {
     FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress(snapshotHandle);
     u32 pairIndex;
 
-    for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_PAIR_COUNT; pairIndex++) {
-        snapshot[pairIndex].firstFlag = mnuSceneFlagEventEntries[pairIndex].first;
+    for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_ENTRY_COUNT; pairIndex++) {
+        snapshot[pairIndex].firstFlag = mnuSceneFlagEventEntries[pairIndex].requiredFlag;
         snapshot[pairIndex].firstOn = mdlFlagTest(snapshot[pairIndex].firstFlag);
-        snapshot[pairIndex].secondFlag = mnuSceneFlagEventEntries[pairIndex].second;
+        snapshot[pairIndex].secondFlag = mnuSceneFlagEventEntries[pairIndex].handledFlag;
         snapshot[pairIndex].secondOn = mdlFlagTest(snapshot[pairIndex].secondFlag);
     }
-    for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_PAIR_COUNT; pairIndex++) {
-        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstFlag = mnuPartyFlagEventEntries[pairIndex].first;
-        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstFlag);
-        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondFlag = mnuPartyFlagEventEntries[pairIndex].second;
-        snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondFlag);
+    for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_ENTRY_COUNT; pairIndex++) {
+        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag = mnuPartyFlagEventEntries[pairIndex].requiredFlag;
+        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag);
+        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag = mnuPartyFlagEventEntries[pairIndex].handledFlag;
+        snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondOn = mdlFlagTest(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag);
     }
     return snapshotHandle;
 }
@@ -3144,22 +3131,22 @@ void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
     u32 pairIndex;
 
     /* Scene pairs restore only their second flag; party pairs restore both. */
-    for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_PAIR_COUNT; pairIndex++) {
+    for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_ENTRY_COUNT; pairIndex++) {
         if (snapshot[pairIndex].secondOn != 0) {
             mdlFlagSet(snapshot[pairIndex].secondFlag);
         }
     }
-    for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_PAIR_COUNT; pairIndex++) {
-        if (snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstOn != 0) {
-            mdlFlagSet(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].firstFlag);
+    for (pairIndex = 0; pairIndex < MNU_PARTY_FLAG_ENTRY_COUNT; pairIndex++) {
+        if (snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstOn != 0) {
+            mdlFlagSet(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].firstFlag);
         }
-        if (snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondOn != 0) {
-            mdlFlagSet(snapshot[MNU_SCENE_FLAG_PAIR_COUNT + pairIndex].secondFlag);
+        if (snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondOn != 0) {
+            mdlFlagSet(snapshot[MNU_SCENE_FLAG_ENTRY_COUNT + pairIndex].secondFlag);
         }
     }
 }
 
-extern char D_003AF590[];
+extern const char D_003AF590[];
 extern s32 D_0036AC78[];
 
 /* Keep the two loaded handles and their derived slot set in the menu work array. */
@@ -3192,11 +3179,9 @@ void mnuReleaseResourceHandles(u32 *menuWork) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF570);
-
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF580);
-
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF590);
+const char D_003AF570[] __attribute__((aligned(8))) = "karma_bg.spr";
+const char D_003AF580[] __attribute__((aligned(8))) = "karma_01.spr";
+const char D_003AF590[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3D0);
 

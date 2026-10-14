@@ -75,8 +75,6 @@ extern void sndStartReducedBgm(void);
 
 
 extern void scrClearPackedScriptFlags(DatPartyRecord *);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-
 extern void mnuClearEntryBlocked(s32);
 
 extern void mdlFlagClear(s32);
@@ -143,7 +141,7 @@ extern struct EffectSlotSet *mnuCampResourceHandles[2];
 
 extern u32 D_003E6848[];
 
-extern char D_0042A950[];
+extern const char D_0042A950[];
 
 
 #define MNU_STAFF_BASE_RESOURCE_COUNT 2
@@ -195,143 +193,143 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
 }
 
 /* Return this category's handle array and count; unknown categories have none. */
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A440);
+const char D_0042A440[] = "SP Items";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A450);
+const char D_0042A450[] = "Customize Ring";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A460);
+const char D_0042A460[] = "Equip Ring";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A470);
+const char D_0042A470[] = "Combo List";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A480);
+const char D_0042A480[] = "Skill Set";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A490);
+const char D_0042A490[] = "Who will fight? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A4A8);
+const char D_0042A4A8[] = "View whose status? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A4C0);
+const char D_0042A4C0[] = "View whose Mantra? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A4D8);
+const char D_0042A4D8[] = "View which Combo? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A4F0);
+const char D_0042A4F0[] = "Swap with? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A500);
+const char D_0042A500[] = "Move which skill? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A518);
+const char D_0042A518[] = "Remove which skill? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A530);
+const char D_0042A530[] = "Select a slot. ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A540);
+const char D_0042A540[] = "Set which skill? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A558);
+const char D_0042A558[] = "Set whose skills? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A570);
+const char D_0042A570[] = "View which item? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A588);
+const char D_0042A588[] = "Use which gem? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A598);
+const char D_0042A598[] = "Who will customize? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A5B0);
+const char D_0042A5B0[] = "Equip which ring? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A5C8);
+const char D_0042A5C8[] = "Who will equip? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A5E0);
+const char D_0042A5E0[] = "Load which bullet? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A5F8);
+const char D_0042A5F8[] = "Who will load? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A608);
+const char D_0042A608[] = "Use which item? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A620);
+const char D_0042A620[] = "Select a target. ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A638);
+const char D_0042A638[] = "Use which skill? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A650);
+const char D_0042A650[] = "Who will use it? ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A668);
+const char D_0042A668[] = "Select an option. ";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A680);
+const char D_0042A680[] = "nall_cmm.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A690);
+const char D_0042A690[] = "/camp/spr/n_pac/sprite_a.lb";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A6B0);
+const char D_0042A6B0[] = "n_min01.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A6C0);
+const char D_0042A6C0[] = "nn_seraf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A6D0);
+const char D_0042A6D0[] = "nn_roard.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A6E0);
+const char D_0042A6E0[] = "nn_siero.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A6F0);
+const char D_0042A6F0[] = "nn_geil.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A700);
+const char D_0042A700[] = "nn_arjir.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A710);
+const char D_0042A710[] = "nn_hirt.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A720);
+const char D_0042A720[] = "nn_sera.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A730);
+const char D_0042A730[] = "nn_sarf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A740);
+const char D_0042A740[] = "n_seraf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A750);
+const char D_0042A750[] = "n_roard.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A760);
+const char D_0042A760[] = "n_siero.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A770);
+const char D_0042A770[] = "n_geil.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A780);
+const char D_0042A780[] = "n_arujir.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A790);
+const char D_0042A790[] = "n_hirt.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A7A0);
+const char D_0042A7A0[] = "n_sera.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A7B0);
+const char D_0042A7B0[] = "/camp/spr/n_pac/sprite_b.lb";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A7D0);
+const char D_0042A7D0[] = "n_sarf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A7E0);
+const char D_0042A7E0[] = "bad_sta5.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A7F0);
+const char D_0042A7F0[] = "bad_sta4.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A800);
+const char D_0042A800[] = "bad_sta3.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A810);
+const char D_0042A810[] = "bad_sta2.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A820);
+const char D_0042A820[] = "bad_sta1.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A830);
+const char D_0042A830[] = "n_sta02.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A840);
+const char D_0042A840[] = "n_sta01.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A850);
+const char D_0042A850[] = "/camp/spr/n_pac/sprite_c.lb";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A870);
+const char D_0042A870[] = "n_itm/n_itm01.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A888);
+const char D_0042A888[] = "n_ski/n_ski01.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A8A0);
+const char D_0042A8A0[] = "np_seraf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A8B0);
+const char D_0042A8B0[] = "np_roard.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A8C0);
+const char D_0042A8C0[] = "np_siero.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A8D0);
+const char D_0042A8D0[] = "np_geil.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A8E0);
+const char D_0042A8E0[] = "np_arujir.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A8F0);
+const char D_0042A8F0[] = "np_hirt.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A900);
+const char D_0042A900[] = "np_sera.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A910);
+const char D_0042A910[] = "np_sarf.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A920);
+const char D_0042A920[] = "n_pty01.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A930);
+const char D_0042A930[] = "n_con01.spr";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A940);
+const char D_0042A940[] = "cursor.mot";
 
-INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A950);
+const char D_0042A950[] = "/camp/spr/n_min/";
 
 struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount,
                                                  u8 *menuBytes) {
@@ -981,7 +979,7 @@ extern u8 *D_003E5710[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
+    FrFontGlyph *sprite = itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
                                       D_003E5710[imageIndex], 0);
     frFontDrawGlyphChain(sprite, 1, 0x54);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
@@ -1020,8 +1018,7 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
 }
 
 
-extern void frFontSetChildColors(struct FrFontGlyph *, u32);
-extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 typedef struct StaffFramePiece {
     s32 gridId;
@@ -1040,7 +1037,7 @@ void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 c
     StaffFramePiece *pieces;
     MenuStaffContext *menu = (MenuStaffContext *)context;
     s32 i;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
     memcpy(primary, D_0042AC40, sizeof(primary));
     memcpy(alternate, D_0042AC70, sizeof(alternate));
     switch (kind) {
@@ -1075,9 +1072,9 @@ void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 c
         }
         glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
                                              0, labelIndex, textTable, textOption);
-        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC35A);
-        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, layer);
-        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
+        frFontSetChildColors(glyph, 0xA09DC35A);
+        frFontDrawGlyphChain(glyph, 1, layer);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 

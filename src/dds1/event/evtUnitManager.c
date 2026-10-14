@@ -20,7 +20,6 @@ extern u8 kwlnDefaultColorVector[];
 
 
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);

@@ -2127,7 +2127,7 @@ extern const u8 *D_003BAA74;
 
 extern s32 D_003BAA84;
 
-void btlInitDrawTables(void) {
+void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
     state->debug.selectedUnit = NULL;
@@ -2236,7 +2236,7 @@ extern void btlDebugMenuRecordNoOp(void *);
 extern void btlDebugMenuAfterRecordNoOp(void);
 
 /* Advance the selected actor's debug menus; return one while active, zero when selection ends. */
-s32 btlUpdateActorDebugEditor(void) {
+s32 btlUpdateBattleModelDebugEditor(void) {
     f32 position[4];
     char text[0x70];
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -2720,8 +2720,6 @@ extern void btlDebugMenuAfterRecordNoOp(void);
 extern s32 btlGetConditionalEncounterInterval(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 extern void btlApplyDebugEncounterPartySelection(void);
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
-
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7128);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_text_slots.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
 #include "fr_font.h"
@@ -79,7 +80,7 @@ extern u32 itfFontTestScriptTask;
 
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
-extern u32 D_004528C0[];
+
 
 /* Two consecutive entries in the four-byte-stride offset table bound a span. */
 typedef struct ItfBitRange {
@@ -179,7 +180,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         *position = payloadPosition + 2;
         break;
     case 0xF203:
-        if (D_004528C0[bytes[*position] - 1] != 0) {
+        if (frFontIndexedTextSlots[bytes[*position] - 1] != 0) {
             frFontCheckPendingGlyphState(stream);
             frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
         }
@@ -376,7 +377,7 @@ u32 itfTestTextInterfaceMask(u32 mask) {
 
 /* Store an unchecked replacement-text address word in the font's indexed table. */
 void itfSetIndexedTextSlot(s32 slotIndex, s32 encodedTextAddress) {
-    D_004528C0[slotIndex] = encodedTextAddress;
+    frFontIndexedTextSlots[slotIndex] = encodedTextAddress;
 }
 
 /* Return the unit identifier saved by text lip-sync control 0xF416. */

@@ -10,6 +10,7 @@
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_math.h"
@@ -76,7 +77,6 @@ extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resId);
 extern u8 effDefaultRandomState[];
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
@@ -401,7 +401,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
     work->childWork = effPcpScatterPoolCreate(params->particleCount);
-    work->childWork->unk10 = params->poolMode;
+    work->childWork->poolMode = params->poolMode;
     if (resource != 0) {
         effPcpScatterCreatePoolResource(work->childWork, resource);
     }
@@ -732,7 +732,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
     work->childWork = effPcpScatterPoolCreate(params->particleCount);
-    work->childWork->unk10 = params->poolMode;
+    work->childWork->poolMode = params->poolMode;
     if (resource != 0) {
         effPcpScatterCreatePoolResource(work->childWork, resource);
     }
@@ -1053,7 +1053,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     memset(recordBlock, 0, allocationBytes);
     pool = (PcpScatterPool *)(recordBlock + (recordWords + auxWords));
     pool->recordBase = (u8 *)recordBlock;
-    pool->unk10 = 1;
+    pool->poolMode = 1;
     pool->auxRecordBase = (u8 *)(recordBlock + recordWords);
     pool->secondWordCount = auxWords;
     pool->allocation = allocation;
@@ -1116,7 +1116,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
         D_003D6580->vertexCount = remainingVertices;
         sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_003D6580));
     }
-    surface = D_00354B80[pool->unk10];
+    surface = D_00354B80[pool->poolMode];
     surface->append(surface, packet);
 }
 

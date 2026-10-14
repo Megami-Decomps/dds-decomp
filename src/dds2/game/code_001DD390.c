@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
@@ -19,12 +20,15 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_position_lerp_task_args.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_selected_unit_effect_task_args.h"
+#include "btl_approach_task_args.h"
 #include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "file.h"
@@ -237,7 +241,6 @@ extern void btlReleaseUnitResources(BtlUnit *);
 
 extern void btlInitUnitFxDefaults(BtlUnit *);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern void btlClearPartyRecordStatusBits(void *, s32);
 
@@ -1895,7 +1898,6 @@ void btlUpdateAutoMusic(void) {
 
 extern s32 fileTestSavedSlotFlags(u32);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
@@ -3703,15 +3705,6 @@ BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-typedef struct BtlApproachTaskArgs {
-    BtlUnit *unit;
-    BtlUnit *target;
-    f32 offset;
-    f32 scale;
-    s32 unk10;
-    s32 count;
-} BtlApproachTaskArgs;
-
 /* vu0 routine: move the unit along the line to the target's muzzle, offset by reach */
 s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     BtlUnit *unit = args->unit;
@@ -3767,7 +3760,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
 
 BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(24);
-    BtlRuntimeTaskArgs *args;
+    BtlApproachTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApproachTargetTask;
@@ -3775,22 +3768,13 @@ BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scal
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->option = index;
-    args->scale2 = scale;
-    args->unk_08 = 0;
-    args->unk_14 = 0;
+    args->unit = unit;
+    args->target = (BtlUnit *)(u32)index;
+    args->scale = scale;
+    args->offset = 0.0f;
+    args->count = 0;
     return task;
 }
-
-typedef struct BtlPosLerpTaskArgs {
-    s128 from;
-    s128 to;
-    f32 rate;
-    f32 t;
-    s32 count;
-    BtlUnit *unit;
-} BtlPosLerpTaskArgs;
 
 s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
     s128 pos;
@@ -3821,7 +3805,7 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
 
 BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, f32 *target, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(0x30);
-    u8 *args;
+    BtlPosLerpTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0xC;
@@ -3829,12 +3813,12 @@ BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, f32 *ta
     task->callback = btlUpdateUnitPositionInterpolationTask;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    ((BtlVectorTaskArgs *)args)->scale = scale;
-    ((BtlVectorTaskArgs *)args)->unit2C = (u32)unit;
-    ((BtlVectorTaskArgs *)args)->state24 = 0;
-    ((BtlVectorTaskArgs *)args)->state28 = 0;
-    PCP_COPY_VECTOR(args, unit->currentPosition);
-    PCP_COPY_VECTOR(args + 0x10, target);
+    args->rate = scale;
+    args->unit = unit;
+    args->t = 0.0f;
+    args->count = 0;
+    PCP_COPY_VECTOR(&args->from, unit->currentPosition);
+    PCP_COPY_VECTOR(&args->to, target);
     return task;
 }
 
@@ -4512,19 +4496,11 @@ BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-typedef struct UnitEffectTaskArgs {
-    BtlUnit *unit;
-    SoundMixer *mixer;
-    BattleEffect *effect;
-    s32 duration;
-    s32 counter;
-} UnitEffectTaskArgs;
-
 extern void effBattleUpdate(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
-s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
+s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
     BtlUnit *unit = args->unit;
     if (!(unit->status.flags & 2)) {
         return 1;
@@ -4554,7 +4530,7 @@ s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
     }
 }
 
-void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
+void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     BattleEffect *voice = arguments->effect;
     if (voice != 0) {
         effReleaseBattleVoiceOwner(voice);
@@ -4568,7 +4544,7 @@ void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
 
 BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    UnitEffectTaskArgs *args;
+    BtlSelectedUnitEffectTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x16;

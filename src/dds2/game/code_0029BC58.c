@@ -115,7 +115,6 @@ void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
 #include "mnu_result.h"
 struct EffectSlotSet;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain();
 
 
@@ -251,8 +250,6 @@ void brsNoOpMessageInputCallback(void *work) {
 }
 
 extern u32 D_004379C0[];
-extern s32 itfCreateConvertedTextGlyph();
-extern s32 itfCreateFont3TextGlyph();
 extern s32 func_0035C860();
 
 /* Draw the three reward icon rows: name, label shadow, value text and its shadow. */
@@ -263,7 +260,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
     MenuIconRef *icon = res->icons;
     u16 id;
     u8 param;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
     u32 packed;
     u32 i;
 
@@ -288,9 +285,9 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
             func_0035C860(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
             glyph = itfCreateFont3TextGlyph(x + 0x900, y, z, packed, name, 0);
-            frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)glyph, 3);
+            frFontSetChildChainFirstOption(glyph, 3);
             frFontDrawGlyphChain(glyph, 1, surface);
-            frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
             effDrawSpriteWithCornerColors(x + 0x6E0, y + 0x88, 0, valueColor, 0, work->teardownResource, 0x1B, 0x53);
             y += 0xB8;
         }
@@ -299,22 +296,21 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
 
 extern u32 D_004379C8[];
 
-extern s32 itfCreateFont3TextGlyph();
 
 extern s32 func_0035C860();
 
 void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
-    s32 sprite;
+    struct FrFontGlyph *sprite;
     u32 packed;
 
     packed = (alpha & 0xFF) | 0xA09DC300;
     func_0035C860(name, D_004379C8, res->totalExp);
     sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
-    frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)sprite, 3);
+    frFontSetChildChainFirstOption(sprite, 3);
     frFontDrawGlyphChain(sprite, 1, arg5);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
+    frFontQueueGlyphForCurrentDrawBuffer(sprite);
     color[0] = alpha;
     color[1] = alpha;
     color[2] = alpha;
@@ -326,16 +322,16 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
 void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
-    s32 sprite;
+    struct FrFontGlyph *sprite;
     u32 packed;
 
     if (mdlFlagTest(0x290) != 0) {
         packed = (alpha & 0xFF) | 0xA09DC300;
         func_0035C860(name, D_004379C8, res->macca);
         sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
-        frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)sprite, 3);
+        frFontSetChildChainFirstOption(sprite, 3);
         frFontDrawGlyphChain(sprite, 1, arg5);
-        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
+        frFontQueueGlyphForCurrentDrawBuffer(sprite);
         color[0] = alpha;
         color[1] = alpha;
         color[2] = alpha;

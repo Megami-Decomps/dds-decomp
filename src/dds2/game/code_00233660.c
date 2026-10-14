@@ -179,9 +179,7 @@ extern void dds3SetObjectFlags(s32 obj, u32 flags);
 extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 extern void dds3RebuildObjectModelContext(EffWorldNode *obj, s32 a, s32 b);
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 extern s8 D_00453560[];
 
 void mdlUpdateViewerSelectedModelFromPad(void);

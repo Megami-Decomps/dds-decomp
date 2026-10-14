@@ -229,10 +229,7 @@ extern s32 fldSecondaryEffectPositionPending;
 extern void fldResetPlayerSceneObjectState(void);
 
 extern s32 D_003897C0[];
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
+#include "dds3_world_secondary.h"
 extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern s32 D_003897C8[];
@@ -279,7 +276,7 @@ extern s32 fldMirroredSolarThresholds[];
 
 extern char fldRoomNameSentinel[];
 
-extern s32 func_0035D600(char *, const char *);
+extern char *strstr(const char *, const char *);
 
 extern void fldSetFadeTarget(s32, s32, s32);
 
@@ -744,7 +741,7 @@ s32 fldFindSearchId(const char *name) {
 
 s32 fldParseRoomNumberFromName(char *name) {
     s32 index;
-    if (func_0035D600(name, fldRoomNameSentinel) == 0) return 0;
+    if (strstr(name, fldRoomNameSentinel) == 0) return 0;
     for (index = 0; index < 32; index++) {
         if (name[index] == '\0') {
             if (index < 4) return 0;
@@ -1410,7 +1407,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
     return 1;
 }
 
-u32 func_001569B8(void) {
+u32 fldCmdExecuteSceneAction(void) {
     u64 value;
 
     value = scrReadIntParameter(0);

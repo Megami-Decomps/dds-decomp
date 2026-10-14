@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
@@ -28,6 +29,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "fpu.h"
@@ -94,7 +96,6 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern f32 func_002FA1C0(f32);
 extern f32 func_002FA1F0(f32, f32);
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 
@@ -150,11 +151,7 @@ extern s32 func_003014F0(char *dst, const char *fmt, ...);
 
 extern u32 fileSaveReadBuffer;
 
-extern u32 D_003BD8EC;
-
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-
-
+extern struct FrFontGlyph *D_003BD8EC;
 extern void *fileWaitContinuation;
 
 extern s32 fileWaitTicksRemaining;
@@ -277,7 +274,7 @@ extern u32 fileSaveIconRequest;
 
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
-extern u32 D_003BD8F0;
+extern struct FrFontGlyph *D_003BD8F0;
 
 extern s32 D_003BC7FC;
 
@@ -355,7 +352,7 @@ extern u32 D_003BC804;
 
 extern void fileSetMemoryCardOperationActive(void);
 
-extern void fileRequestMemoryCardFormat(u32 handle);
+extern void fileReqStartCardDetection(u32 handle);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -566,18 +563,18 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     D_003BD8EC = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_003BD8EC);
+    frFontQueueGlyphForCurrentDrawBuffer(D_003BD8EC);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontAddSharedGlyphFlags(1);
-    D_003BD8F0 = (u32)frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
+    D_003BD8F0 = frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_003BD8F0, 1);
-    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)D_003BD8F0, x << 4, y << 3);
-    frFontSetChildColors((struct FrFontGlyph *)(u32)D_003BD8F0, color);
+    frFontSetSpacingAndMeasureGlyphs(D_003BD8F0, 1);
+    frFontSetGlyphPosition(D_003BD8F0, x << 4, y << 3);
+    frFontSetChildColors(D_003BD8F0, color);
     frFontDrawGlyphChain(D_003BD8F0, 0, 0x56);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_003BD8F0);
+    frFontQueueGlyphForCurrentDrawBuffer(D_003BD8F0);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -2163,7 +2160,7 @@ s32 mcHandleDetectionResult(void) {
 s32 fileStartMemoryCardFormat(void) {
     fileSetMenuFlowState(5);
     fileSetMemoryCardOperationActive();
-    fileRequestMemoryCardFormat(fileMemoryCardRequestIndex);
+    fileReqStartCardDetection(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
 
@@ -5309,17 +5306,6 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
 
 #include "eff_anim.h"
 
-/* Same complete producer view as the generated-texture packet provider. */
-typedef struct EffGeneratedTextureDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    SdfTex *texture;
-} EffGeneratedTextureDescriptor;
-
 extern void billInvokeCallback(struct BillObj *);
 extern void effCopyVector(void *, void *);
 extern void fileReadRecordSecondVector(void *, u128 *);
@@ -6679,7 +6665,6 @@ typedef struct FileOrientedRingMotion {
 
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
 void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {

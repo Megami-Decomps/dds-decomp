@@ -306,7 +306,8 @@ void evtClearSolarOverlayControl(void) {
     datGameState->world.overlayFlag = 0;
 }
 
-void func_00243320(void) {
+/* Reset the field-transition expiry counter at world offset 0xA4C. */
+void evtResetFieldTransitionCounter(void) {
     datGameState->world.unkA4C = 0;
 }
 

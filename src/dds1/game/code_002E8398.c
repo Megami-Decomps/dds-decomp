@@ -150,7 +150,7 @@ extern s32 _StartThread(s32, s32);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void sdfSoundStartRpcServer(void);
 
-s32 func_002E8700(void) {
+s32 sndStartIopCommandAndRpcWorkers(void) {
     s32 threadId;
 
     while (func_0030C970(31) == 0) {

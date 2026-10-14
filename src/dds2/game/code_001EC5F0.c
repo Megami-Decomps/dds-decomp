@@ -1,5 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
+#include "btl_pair_camera_preset.h"
+#include "btl_camera_parameter_record.h"
 #include "common.h"
 #include "mnu_title_stream.h"
 #include "eff_random_mod.h"
@@ -9,6 +11,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
+#include "btl_scene_lighting_task_args.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -27,6 +30,9 @@
 #include "btl_command.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
+#include "btl_field_load_task_args.h"
+#include "file_pac.h"
+#include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
 #include "actor_effect_task.h"
 #include "eff_field_color.h"
@@ -119,8 +125,6 @@ extern u32 kwlnDrawControlFlags;
 
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
-
-typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
@@ -524,15 +528,6 @@ void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *command, BtlCamState *
 }
 
 extern f32 func_00353228(f32);
-
-typedef struct BattlePairCameraPreset {
-    f32 fromQuaternion[4];
-    f32 toQuaternion[4];
-    f32 fromDistanceScale;
-    f32 toDistanceScale;
-    f32 fromHeightScale;
-    f32 motionParameter;
-} BattlePairCameraPreset;
 
 /* The two default rows form one copied camera-preset bank. */
 typedef struct BattlePairCameraPresetSet {
@@ -3090,29 +3085,10 @@ INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001FBAC0);
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001FC5E0);
 
-/* Camera parameter banks have a native 0x80-byte stride. */
-typedef struct BtlCameraParameterRecord {
-    u8 flags00;
-    u8 pad01[0xF];
-    f32 value[4];
-    u8 flags20;
-    u8 pad21[0xF];
-    f32 fadeInDuration;
-    u8 pad34[0xC];
-    f32 fadeOutDuration;
-    u8 pad44[0x18];
-    f32 curveScale5C;
-    f32 curveScale60;
-    u8 pad64[0xC];
-    s8 stop;
-    u8 pad71[0xF];
-} BtlCameraParameterRecord;
-
 extern void func_001FC5E0(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,
                          const BtlCameraParameterRecord *, f32 *);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern f32 D_003BDC60[4];
 
@@ -4070,36 +4046,13 @@ void btlStopRainSoundTransition(void) {
     }
 }
 
-typedef struct BtlFieldArchiveNode {
-    struct BtlFieldArchiveNode *next;
-    u32 unk04;
-    s32 handle;
-    void *data;
-} BtlFieldArchiveNode;
-
-typedef struct BtlFieldArchiveRequest {
-    u8 pad00[0x60];
-    BtlFieldArchiveNode *resources;
-} BtlFieldArchiveRequest;
-
-typedef struct BtlFieldLoadArgs {
-    s32 stage;
-    s32 variant;
-    BtlFieldArchiveRequest *request;
-    u8 pad0C[0xC];
-    void *fieldF1;
-    void *fieldF2;
-    void *fieldTB;
-    s32 frame;
-} BtlFieldLoadArgs;
-
 u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
 {
     BtlState *blocks = (BtlState *)btlGetRuntime();
     char directory[0x80];
     char path[0x80];
-    BtlFieldArchiveNode *node;
+    PacWork *node;
     u32 i;
 
     if (args->frame == 0) {
@@ -4107,28 +4060,28 @@ u32 btlPollFieldArchiveLoad(args)
         fldFormatAreaDirectory(directory, args->stage, 1);
         func_0035C860(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
         btlBossDebugPrintf("btl:field load[%s]\n", path);
-        args->request = (BtlFieldArchiveRequest *)fileQueuePlainDispatchRequest(path);
+        args->request = (struct FilePacRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
         if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
-            BtlFieldArchiveRequest *request = args->request;
-            node = request->resources;
+            FilePacRequest *request = args->request;
+            node = request->packet.queueHead;
             i = 0;
             while (node != NULL) {
                 switch (i) {
                 case 0:
-                    blocks->fieldTBResourceId = node->handle;
-                    args->fieldTB = node->data;
+                    blocks->fieldTBResourceId = (s32)(u32)node->resourceHandle;
+                    args->fieldTB = node->dataCursor;
                     break;
                 case 1:
-                    blocks->fieldF2ResourceId = node->handle;
-                    args->fieldF2 = node->data;
+                    blocks->fieldF2ResourceId = (s32)(u32)node->resourceHandle;
+                    args->fieldF2 = node->dataCursor;
                     break;
                 case 2:
-                    blocks->fieldF1ResourceId = node->handle;
-                    args->fieldF1 = node->data;
+                    blocks->fieldF1ResourceId = (s32)(u32)node->resourceHandle;
+                    args->fieldF1 = node->dataCursor;
                     break;
                 }
                 node = node->next;
@@ -4160,27 +4113,19 @@ extern u32 btlPollFieldArchiveLoad();
 
 BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0x28);
-    BtlRuntimeTaskArgs *args;
+    BtlFieldLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 1;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFieldArchiveLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    args = btlGetTaskArguments(task);
+    args = (BtlFieldLoadArgs *)btlGetTaskArguments(task);
     memset(args, 0, 0x28);
-    args->value = value;
-    args->option = option;
-    args->unk_24 = 0;
+    args->stage = value;
+    args->variant = option;
+    args->frame = 0;
     return task;
 }
-
-typedef struct BtlFloorLoadArgs {
-    s32 frontHandle;
-    s32 sideHandle;
-    s32 stage;
-    s32 variant;
-    s32 state;
-} BtlFloorLoadArgs;
 
 s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     s32 result = 1;
@@ -4222,29 +4167,22 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     return result;
 }
 
-BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
+BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    BtlRuntimeTaskArgs *args;
+    BtlFloorLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 2;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFloorLoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->unk_08 = first;
-    args->unk_0C = second;
-    args->value = 0;
-    args->option = 0;
-    args->unk_10 = 0;
+    args->frontHandle = 0;
+    args->sideHandle = 0;
+    args->stage = stage;
+    args->variant = variant;
+    args->state = 0;
     return task;
 }
-
-typedef struct SceneLightTransitionArgs {
-    f32 direction[4];
-    f32 lightColor[4];
-    f32 ambientColor[4];
-    u32 value;
-} SceneLightTransitionArgs;
 
 extern u32 btlBlendColorVec(f32 *colorA, f32 *colorB, f32 blendFactor);
 

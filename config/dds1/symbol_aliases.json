@@ -1,0 +1,37 @@
+[
+  {
+    "name": "itfWindowSlots",
+    "owner": "itfMesWork",
+    "unit": "interface/itfMesManager",
+    "section": ".bss",
+    "offset": 44
+  },
+  {
+    "name": "D_003D6EA4",
+    "owner": "itfMesWork",
+    "unit": "interface/itfMesManager",
+    "section": ".bss",
+    "offset": 4
+  },
+  {
+    "name": "D_003D6EAC",
+    "owner": "itfMesWork",
+    "unit": "interface/itfMesManager",
+    "section": ".bss",
+    "offset": 12
+  },
+  {
+    "name": "D_003D6EB0",
+    "owner": "itfMesWork",
+    "unit": "interface/itfMesManager",
+    "section": ".bss",
+    "offset": 16
+  },
+  {
+    "name": "D_003D6EC0",
+    "owner": "itfMesWork",
+    "unit": "interface/itfMesManager",
+    "section": ".bss",
+    "offset": 32
+  }
+]

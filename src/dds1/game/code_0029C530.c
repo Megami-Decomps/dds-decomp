@@ -7,6 +7,7 @@
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
+#include "eff_bill_column_particle.h"
 #include "eff_ribbon_work.h"
 #include "eff_class_work_api.h"
 #include "fld_transfer_chunk.h"
@@ -47,6 +48,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 
 
 
@@ -5221,7 +5223,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern void sdfMultiplyVuMatrixInPlace(void);
 extern void func_002DD608(f32);
 extern void func_002DD968(f32);
 extern f32 func_002FA1D8(f32);
@@ -6091,24 +6092,6 @@ void effReleaseBillFadeTable(s32 work) {
     effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
-
-typedef struct EffBillColumnParticle {
-    s32 age;
-    u32 unk04;
-    f32 radius;
-    f32 radiusStep;
-    f32 drag;
-    f32 verticalOffset;
-    f32 spin;
-    f32 spinPhase;
-    f32 width;
-    f32 extent;
-    f32 flare;
-    f32 height;
-} EffBillColumnParticle;
-
-typedef char EffBillColumnParticleSizeCheck[(sizeof(EffBillColumnParticle) == 0x30) ? 1 : -1];
-
 
 /* Update the column's particle records and the ribbon vertices for this frame. */
 void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {

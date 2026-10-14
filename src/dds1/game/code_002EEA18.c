@@ -427,7 +427,6 @@ extern void FlushCache(s32);
 extern s32 SignalSema(s32);
 extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
-extern s32 sdfReadTimerCount(void);
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
@@ -538,7 +537,7 @@ extern s32 GetThreadId(void);
 extern void sceSifSetRpcQueue(void *, s32);
 extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 extern void sceSifRpcLoop(void *);
-extern s32 func_00310478(const char *, SceIoStat *);
+extern s32 sceGetstat(const char *, SceIoStat *);
 extern s32 WakeupThread(s32);
 extern s32 D_003BDAC4;
 extern u8 D_003FF380[];
@@ -557,7 +556,7 @@ void sdfRunStreamIopRpcServer(void) {
                       D_003FF380, 0, 0, queue);
     module = "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1";
     if (sdfPfsDebugMode != 0 &&
-        func_00310478("pfs0:/userirx/sdfiopfl.irx", &info) == 0 &&
+        sceGetstat("pfs0:/userirx/sdfiopfl.irx", &info) == 0 &&
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs0:/userirx/sdfiopfl.irx";
     }

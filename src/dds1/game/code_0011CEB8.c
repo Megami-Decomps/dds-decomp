@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "itf.h"
+#include "fr_font.h"
 #include "dds3_owned_node.h"
 
 extern s32 scrReadIntParameter(s32);

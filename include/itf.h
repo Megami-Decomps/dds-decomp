@@ -351,6 +351,19 @@ typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(ItfMesPoolNode) == 0x14) ?
 typedef char ItfMesPool_size_must_be_0x10[(sizeof(ItfMesPool) == 0x10) ? 1 : -1];
 typedef char ItfMesGlobals_size_must_be_0x520[(sizeof(ItfMesGlobals) == 0x520) ? 1 : -1];
 
+/* Native interior symbols alias these fields without allocating another object. */
+typedef char ItfMesGlobals_windowTexture_offset_must_be_0x4[
+    ((u32)&((ItfMesGlobals *)0)->windowTexture == 0x4) ? 1 : -1];
+typedef char ItfMesGlobals_flags_offset_must_be_0xC[
+    ((u32)&((ItfMesGlobals *)0)->flags == 0xC) ? 1 : -1];
+typedef char ItfMesGlobals_pool_offset_must_be_0x10[
+    ((u32)&((ItfMesGlobals *)0)->pool == 0x10) ? 1 : -1];
+typedef char ItfMesGlobals_nodes_offset_must_be_0x20[
+    ((u32)&((ItfMesGlobals *)0)->nodes == 0x20) ? 1 : -1];
+typedef char ItfMesGlobals_firstStateAddress_offset_must_be_0x2C[
+    ((u32)&((ItfMesGlobals *)0)->nodes[0].stateAddress == 0x2C) ? 1 : -1];
+
+
 /* Message-window pool operations move nodes between the free and active lists.
  * Acquire returns NULL when the free list is empty; release expects an active
  * node belonging to the supplied pool and appends it to the free-list tail. */

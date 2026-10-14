@@ -17,6 +17,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
 

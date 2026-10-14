@@ -17,6 +17,7 @@
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "eff_random.h"
+#include "fr_font.h"
 struct MenuListNode;
 struct StaffMenuRuntime;
 #include "fpu.h"
@@ -375,7 +376,6 @@ extern void mnuDrawStaffPartySelectionPanel(KwlnTask *task);
 
 extern const char *D_003E78D0[];
 extern s32 D_00435E70;
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void mnuDrawStaffValueGrid(s32, s32, s32, MenuContext *);
 extern void mnuSetPanelItemsFromRow(MenuPanelGroup *, s32);
 extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);

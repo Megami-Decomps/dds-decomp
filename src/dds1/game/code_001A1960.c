@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_special_ability.h"
 #include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
@@ -103,7 +104,6 @@ extern void *D_00358450[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 

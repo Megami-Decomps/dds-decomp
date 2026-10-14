@@ -269,23 +269,36 @@ s32 mnuSelectMatchingNode(MnuStatusResource *object, MantraMenuSrc *state) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272F8);
+const u16 D_004272F8[14][2] __attribute__((aligned(8))) = {
+    { 7, 0x923 }, { 14, 0x929 }, { 21, 0x92F }, { 28, 0x935 },
+    { 35, 0x93B }, { 59, 0x941 }, { 64, 0x947 }, { 68, 0x94B },
+    { 83, 0x953 }, { 84, 0x959 }, { 90, 0x95F }, { 91, 0x965 },
+    { 92, 0x96B }, { 94, 0x971 }
+};
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427330);
+const u16 D_00427330[4][2] __attribute__((aligned(8))) = {
+    { 97, 0x977 }, { 98, 0x978 }, { 99, 0x979 }, { 100, 0x97A }
+};
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427340);
+const u16 D_00427340[8][2] __attribute__((aligned(8))) = {
+    { 113, 0x97B }, { 114, 0x97C }, { 115, 0x97D }, { 116, 0x97E },
+    { 117, 0x97F }, { 118, 0x980 }, { 119, 0x981 }, { 120, 0x982 }
+};
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427360);
+const u16 D_00427360[8][2] __attribute__((aligned(8))) = {
+    { 145, 0x983 }, { 146, 0x984 }, { 147, 0x985 }, { 148, 0x986 },
+    { 149, 0x987 }, { 150, 0x988 }, { 151, 0x989 }, { 152, 0x98A }
+};
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427380);
+const s8 D_00427380[9] __attribute__((aligned(8))) = { 0, 0, 1, 5, 2, 3, 4, 5, 1 };
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427390);
+const char D_00427390[] __attribute__((aligned(8))) = "mtrChkMantraEventTarget_DrawRankUp!![%d]\n";
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273C0);
+const char D_004273C0[] __attribute__((aligned(8))) = "EventFlag PlayerIndex[%d]\n";
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273E0);
+const char D_004273E0[] __attribute__((aligned(8))) = "None...\n\n";
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273F0);
+const char D_004273F0[] __attribute__((aligned(8))) = "EventFlag PlayerIndex[%d:0x%02x] MantraID[0x%02x]\n";
 
 void mnuSelectMantraLimitLine(MnuStatusResource *object, u16 id) {
     u32 flags = 0;
@@ -317,7 +330,7 @@ extern void mnuQueueMantraLimitLineFlags(struct MantraDrawPool *pool, u32 flags)
 
 extern void mnuSetMantraBackgroundSelection(struct MantraDrawPool *pool, u32 value);
 
-void func_0028F8A8(MnuStatusResource *object) {
+void mnuUpdateSelectedMantraLimitLineState(MnuStatusResource *object) {
     u16 limitIds[18] = {
         0x61, 0x3B, 0x5B, 0x23, 0x40, 0x62,
         0x53, 0x5E, 0x1C, 0x5A, 0x63, 0x54,

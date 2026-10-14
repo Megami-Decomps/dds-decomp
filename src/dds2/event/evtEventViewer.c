@@ -3427,7 +3427,7 @@ extern s8 D_0037F510[];
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void evtUpdateViewerMessageWindow(EvtRuntime *);
 extern void mnuAdvanceShopMenuState();
-extern u8 mnuGetMovieDrawState(void);
+extern u8 mnuGetMoviePlaybackMode(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
@@ -3496,7 +3496,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
                 evtViewerDispatchFlagMode(viewer);
             }
         } else if (viewer->timedActive == 1) {
-            if (mnuGetMovieDrawState() == 2) {
+            if (mnuGetMoviePlaybackMode() == 2) {
                 viewer->curFrame++;
             }
         } else {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_special_ability.h"
 #include "kwln_fade.h"
 #include "btl_sound.h"
 #include "btl_task_condition.h"
@@ -300,7 +301,6 @@ extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern struct SoundTask *sndCreateEarringTask(void);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 /* Queue actor model, light, fade and entry tasks using their completion handles. */
 void btlQueueSceneActorModelEntry(s32 sceneAddress) {

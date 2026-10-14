@@ -205,8 +205,7 @@ void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled) {
         ((EvtWorldTable *)object->data)->drawEnabled = (s32)enabled;
     }
 }
-
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 
 /* Create a member in the current secondary world's list for this kind. */

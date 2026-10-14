@@ -7,7 +7,7 @@ struct EffWorldNode;
 extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
-extern s32 dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern void sdfSetViewFieldOfView(f32 arg0);
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
@@ -69,7 +69,7 @@ void mnuRestoreShootingNodeModelDepths(MnuShootingWork *object) {
     }
 }
 
-extern void mnuResetShootingPauseChoice(MnuShootingWork *object);
+extern void mnuResetShootingPauseChoiceIndex(MnuShootingWork *object);
 extern void func_0031AF60(void);
 extern void mnuPauseEffectQueueFrameAdvance(void);
 extern u32 mnuResumeEffectQueueFrameAdvance(void);
@@ -77,7 +77,7 @@ extern u32 mnuResumeEffectQueueFrameAdvance(void);
 void mnuToggleShootingPause(MnuShootingWork *object) {
     object->unk70Bit0 ^= 1;
     if (object->unk70Bit0) {
-        mnuResetShootingPauseChoice(object);
+        mnuResetShootingPauseChoiceIndex(object);
         mnuPauseEffectQueueFrameAdvance();
         mnuSetShootingNodeModelDepthsToZero(object);
         itfSetFadeMode(&object->pauseFade.fade, 1, 8);
@@ -92,7 +92,7 @@ void mnuToggleShootingPause(MnuShootingWork *object) {
 }
 
 
-void mnuResetShootingPauseChoice(MnuShootingWork *object) {
+void mnuResetShootingPauseChoiceIndex(MnuShootingWork *object) {
     object->choiceIndex = 0;
 }
 
@@ -160,7 +160,7 @@ void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *object) {
 }
 
 void func_0031B0F8(void) {
-    s32 world;
+    void *world;
     struct EffWorldNode *camera;
     u128 *worldEye = (u128 *)D_0040ABD0;
 

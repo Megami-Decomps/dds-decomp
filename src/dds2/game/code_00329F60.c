@@ -195,7 +195,6 @@ extern s32 CancelWakeupThread(s32);
 extern s32 SleepThread(void);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern u32 sdfReadTimerCount(void);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
 extern void sdfGraphResetDeviceForCurrentMode(void);
 extern void func_0032DEC8(void);

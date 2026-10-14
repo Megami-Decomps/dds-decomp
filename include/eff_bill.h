@@ -290,10 +290,59 @@ typedef char EffBillStripEntry_tilt_OffsetCheck[((u32)&((EffBillStripEntry *)0)-
 typedef char EffBillStripEntry_width_OffsetCheck[((u32)&((EffBillStripEntry *)0)->width == 0x24) ? 1 : -1];
 
 
+/* Kind-7 trails share each randomized width factor across their two ends. */
 typedef struct EffBillTrailFrameConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x50];
+    u32 colorA;
+    u32 colorB;
+    f32 widthA;
+    f32 widthB;
+    f32 widthJitter;
+    f32 lengthStart;
+    f32 lengthStartJitter;
+    f32 lengthEnd;
+    f32 lengthEndJitter;
+    f32 radiusStart;
+    f32 radiusStartJitter;
+    f32 radiusEnd;
+    f32 radiusEndJitter;
+    f32 tiltStart;
+    f32 tiltStartJitter;
+    f32 tiltEnd;
+    f32 tiltEndJitter;
+    f32 spin;
+    f32 spinJitter;
+    f32 spinAccel;
 } EffBillTrailFrameConfig; /* kind 7, 0xA8 */
+
+typedef struct EffBillTrailEntry {
+    s32 age;
+    f32 angle;
+    f32 spin;
+    f32 length;
+    f32 lengthStep;
+    f32 radius;
+    f32 radiusStep;
+    f32 tilt;
+    f32 tiltStep;
+    f32 widthA;
+    f32 widthB;
+} EffBillTrailEntry;
+
+typedef char EffBillTrailEntrySizeCheck[(sizeof(EffBillTrailEntry) == 0x2C) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_colorA_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->colorA == 0x58) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_widthA_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->widthA == 0x60) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_widthB_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->widthB == 0x64) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_lengthStart_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->lengthStart == 0x6c) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_radiusStart_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->radiusStart == 0x7c) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_tiltStart_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->tiltStart == 0x8c) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_spin_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->spin == 0x9c) ? 1 : -1];
+typedef char EffBillTrailFrameConfig_spinAccel_OffsetCheck[((u32)&((EffBillTrailFrameConfig *)0)->spinAccel == 0xa4) ? 1 : -1];
+typedef char EffBillTrailEntry_length_OffsetCheck[((u32)&((EffBillTrailEntry *)0)->length == 0xc) ? 1 : -1];
+typedef char EffBillTrailEntry_radius_OffsetCheck[((u32)&((EffBillTrailEntry *)0)->radius == 0x14) ? 1 : -1];
+typedef char EffBillTrailEntry_tilt_OffsetCheck[((u32)&((EffBillTrailEntry *)0)->tilt == 0x1c) ? 1 : -1];
+typedef char EffBillTrailEntry_widthA_OffsetCheck[((u32)&((EffBillTrailEntry *)0)->widthA == 0x24) ? 1 : -1];
+typedef char EffBillTrailEntry_widthB_OffsetCheck[((u32)&((EffBillTrailEntry *)0)->widthB == 0x28) ? 1 : -1];
 
 /* Kind-8 quad updates (DDS1 002A2E18 / DDS2 002E4E80) read these
  * parameters from the copied 0x98-byte record and advance 0x20-byte entries. */
@@ -335,7 +384,9 @@ typedef struct EffBillPointConfig {
      * layer word as an unsigned division count for floating-point math. */
     s32 layers;
     s32 respawnDelay;
-    u8 pad44[8];
+    /* Initial lateral-wave amplitude of alternating five-point ribbons. */
+    f32 alternatingAmplitude; /* 0x44 */
+    u8 pad48[4];
     u32 periods;
     f32 amplitude;
     f32 speed;
@@ -641,6 +692,10 @@ typedef char EffBillClass2ConfigSizeCheck[(sizeof(EffBillClass2Config) == 0xD0) 
 typedef char EffBillClass3ConfigSizeCheck[(sizeof(EffBillClass3Config) == 0x68) ? 1 : -1];
 typedef char EffBillQuantizedConfigSizeCheck[(sizeof(EffBillQuantizedConfig) == 0x98) ? 1 : -1];
 typedef char EffBillPointConfigSizeCheck[(sizeof(EffBillPointConfig) == 0x88) ? 1 : -1];
+typedef char EffBillPointAlternatingAmplitudeOffsetCheck[
+    ((u32)&((EffBillPointConfig *)0)->alternatingAmplitude == 0x44) ? 1 : -1];
+typedef char EffBillPointAmplitudeOffsetCheck[
+    ((u32)&((EffBillPointConfig *)0)->amplitude == 0x50) ? 1 : -1];
 typedef char EffBillPointFlagOffsetCheck[((u32)&((EffBillPointConfig *)0)->drawFlag == 0x5C) ? 1 : -1];
 typedef char EffBillRangeConfigSizeCheck[(sizeof(EffBillRangeConfig) == 0xAC) ? 1 : -1];
 typedef char EffBillEmitterHeaderSizeCheck[(sizeof(EffBillEmitterHeader) == 0x90) ? 1 : -1];

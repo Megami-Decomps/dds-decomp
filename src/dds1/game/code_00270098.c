@@ -62,7 +62,7 @@ void mnuRequestIndexedMovieResource(s32 index);
 
 s32 mnuCheckMovieDecoderStatus(void);
 
-s32 mnuGetMovieDrawState(void);
+s32 mnuGetMoviePlaybackMode(void);
 
 void mnuStopMovieDrawTask(void);
 
@@ -129,7 +129,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
 u8 mnuCanDrawMovie(void) {
     s64 movieState;
 
-    movieState = mnuGetMovieDrawState();
+    movieState = mnuGetMoviePlaybackMode();
     return movieState == 2;
 }
 

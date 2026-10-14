@@ -37,6 +37,7 @@
 #include "mdl_grouped_parts_api.h"
 #include "mdl_done_job.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -392,7 +393,6 @@ extern u8 D_0037F660[];
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 extern Motion *mdlFindNodeById(MdlCtx *, s32);
 
@@ -455,8 +455,8 @@ extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 extern s32 btlGroupContainsId(s32, s32);
 extern void btlAddGroupId(s32, s32);
 extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);
-extern char *func_0035D5B0(const char *, s32);
-extern s32 func_0035CB10(const char *, const char *);
+extern char *strrchr(const char *, s32);
+extern s32 strcasecmp(const char *, const char *);
 extern const char D_00436FA8[];
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *, MdlLoadRequest *);
@@ -489,9 +489,9 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     selection = &((MdlResourceSelection *)D_003C86B0[group].entries)[id];
     path = &((MdlResourcePath *)D_003C6588[selection->pathTable].entries)[selection->pathIndex];
     packed = 0;
-    extension = func_0035D5B0(path->path, '.');
+    extension = strrchr(path->path, '.');
     if (extension != NULL) {
-        packed = func_0035CB10(extension, D_00436FA8) == 0;
+        packed = strcasecmp(extension, D_00436FA8) == 0;
     }
     btlAddGroupId(group, id);
     SignalSema(mdlGroupJobSemaphore);

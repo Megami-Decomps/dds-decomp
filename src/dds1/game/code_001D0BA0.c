@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
@@ -21,12 +22,15 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_position_lerp_task_args.h"
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_selected_unit_effect_task_args.h"
+#include "btl_approach_task_args.h"
 #include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
@@ -79,8 +83,6 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
 extern s32 btlCountTasksForOwner(s64);
-
-typedef struct BtlPosLerpTaskArgs BtlPosLerpTaskArgs;
 
 extern s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *);
 
@@ -220,7 +222,6 @@ s32 btlGetLoggedIndexedCommandItem(s32 index);
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
@@ -246,15 +247,6 @@ typedef struct BtlFxSrcA {
     f32 f10;
     f32 f14;
 } BtlFxSrcA;
-
-typedef struct BtlApproachTaskArgs {
-    BtlUnit *unit;
-    BtlUnit *target;
-    f32 offset;
-    f32 scale;
-    s32 unk10;
-    s32 count;
-} BtlApproachTaskArgs;
 
 typedef struct BtlRotationTaskArgs {
     s128 from;
@@ -3692,7 +3684,7 @@ extern s32 btlApproachTargetTask(BtlApproachTaskArgs *);
 
 u8 *btlAllocateApproachTargetTask(u8 *owner, s32 index, f32 scale) {
     u8 *task = btlAllocTask(24);
-    u32 *arguments;
+    BtlApproachTaskArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -3701,22 +3693,13 @@ u8 *btlAllocateApproachTargetTask(u8 *owner, s32 index, f32 scale) {
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = index;
-    *(f32 *)(arguments + 3) = scale;
-    arguments[2] = 0;
-    arguments[5] = 0;
+    arguments->unit = (BtlUnit *)owner;
+    arguments->target = (BtlUnit *)(u32)index;
+    arguments->scale = scale;
+    arguments->offset = 0.0f;
+    arguments->count = 0;
     return task;
 }
-
-struct BtlPosLerpTaskArgs {
-    s128 from;
-    s128 to;
-    f32 rate;
-    f32 t;
-    s32 count;
-    BtlUnit *unit;
-};
 
 s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
     s128 pos;
@@ -4412,19 +4395,11 @@ u8 *btlCreateUnitExitFadeTask(u8 *owner, u32 value) {
     return task;
 }
 
-typedef struct UnitEffectTaskArgs {
-    BtlUnit *unit;
-    SoundMixer *mixer;
-    BattleEffect *effect;
-    s32 duration;
-    s32 counter;
-} UnitEffectTaskArgs;
-
 extern void effBattleUpdate(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
-u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
+u32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     BtlUnit *unit = arguments->unit;
     SoundResourceNode *work;
     void *handle;
@@ -4458,9 +4433,9 @@ u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
     }
 }
 
-extern u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *);
+extern u32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *);
 
-void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
+void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     BattleEffect *voice = arguments->effect;
     if (voice != 0) {
         effReleaseBattleVoiceOwner(voice);
@@ -4474,7 +4449,7 @@ void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
 
 u8 *btlCreateSelectedEffectUpdateTask(u8 *owner) {
     u8 *task = btlAllocTask(20);
-    UnitEffectTaskArgs *arguments;
+    BtlSelectedUnitEffectTaskArgs *arguments;
     BtlUnit *unit = (BtlUnit *)owner;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;

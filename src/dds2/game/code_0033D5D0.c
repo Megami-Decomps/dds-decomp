@@ -79,7 +79,7 @@ extern s32 sdfOpenDiscFileRecord;
 
 extern u32 sdfDiscSemaphore;
 
-extern s32 func_0033E008(u32, u8 *, u32);
+extern s32 sdfDevFindDiscFileRecordByPath(u32, u8 *, u32);
 
 extern u32 sdfDevControlReplyValue;
 
@@ -367,8 +367,6 @@ extern s32 func_0034DE68(SifClient *, s32, s32, void *, s32, void *, s32, void (
 extern s32 func_00367B60(const char *, ...);
 
 
-extern s32 sdfReadTimerCount(void);
-
 
 extern s32 sceSifMBindRpc(void *, s32, s32);
 
@@ -546,7 +544,7 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DE60);
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E008);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevFindDiscFileRecordByPath);
 
 extern s32 D_004391AC;
 
@@ -563,7 +561,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 request[4];
     s32 file;
 
-    file = func_0033E008((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
+    file = sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
         D_004391AC = *(s32 *)(file + 8);
@@ -661,7 +659,7 @@ u32 sdfPacketExists(index)
     s64 packet;
     u8 buffer[16];
 
-    packet = func_0033E008(index, buffer, 0);
+    packet = sdfDevFindDiscFileRecordByPath(index, buffer, 0);
     return packet != 0;
 }
 
@@ -669,7 +667,7 @@ s32 sdfPktQuery(u32 index) {
     u8 buffer[16];
     SifCommand *packet;
 
-    packet = (SifCommand *)func_0033E008(index, buffer, 0);
+    packet = (SifCommand *)sdfDevFindDiscFileRecordByPath(index, buffer, 0);
     if (packet != 0) {
         return packet->argument;
     }
@@ -685,11 +683,11 @@ s32 sdfDevGetFileSize(void) {
 
 extern s32 func_00369B70();
 
-extern s32 func_00369F78(s32, s32, s32);
+extern s32 sdfDevSeekFile(s32, s32, s32);
 
 extern s32 func_0035A828(s32);
 
-extern s32 func_0036A1B0(s32, s32, s32);
+extern s32 sdfDevReadFileBytes(s32, s32, s32);
 
 extern s32 func_00369DF8(s32);
 
@@ -702,11 +700,11 @@ void sdfDevLoadWholeFile(const char *fileName) {
     if (fileHandle < 0) {
         sdfPanicHaltPrintf(D_0042E288, fileName);
     }
-    fileBytes = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
-    func_00369F78(fileHandle, 0, SDF_DEV_SEEK_START);
+    fileBytes = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
+    sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
     bufferAddress = func_0035A828(fileBytes);
     D_004391A4 = bufferAddress;
-    func_0036A1B0(fileHandle, bufferAddress, fileBytes);
+    sdfDevReadFileBytes(fileHandle, bufferAddress, fileBytes);
     func_00369DF8(fileHandle);
 }
 
@@ -1161,7 +1159,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_SEEK - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            endOffset = func_00369F78(state->resourceId, state->operationArg, state->options);
+            endOffset = sdfDevSeekFile(state->resourceId, state->operationArg, state->options);
             if (endOffset < 0) {
                 sdfDevDeactivate(state, endOffset);
                 continue;
@@ -1176,17 +1174,17 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_GET_SIZE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            position = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_CURRENT);
+            position = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_CURRENT);
             if (position < 0) {
                 sdfDevDeactivate(state, position);
                 continue;
             }
-            endOffset = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_END);
+            endOffset = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_END);
             if (endOffset < 0) {
                 sdfDevDeactivate(state, endOffset);
                 continue;
             }
-            result = func_00369F78(state->resourceId, position, SDF_DEV_SEEK_START);
+            result = sdfDevSeekFile(state->resourceId, position, SDF_DEV_SEEK_START);
             if (result < 0) {
                 sdfDevDeactivate(state, result);
                 continue;
@@ -1201,7 +1199,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_READING;
-            result = func_0036A1B0(state->resourceId, (s32)state->requestData,
+            result = sdfDevReadFileBytes(state->resourceId, (s32)state->requestData,
                            state->requestExtra);
             if (result < 0) {
                 sdfDevDeactivate(state, result);
@@ -1261,12 +1259,12 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             /* A negative count means the whole file; NULL storage is allocated below. */
             if (transferResult < 0) {
                 state->state = SDF_DEV_STATE_SEEKING;
-                transferResult = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
+                transferResult = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
                 }
-                result = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_START);
+                result = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_START);
                 if (result < 0) {
                     sdfDevDeactivate(state, result);
                     continue;
@@ -1279,7 +1277,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
                 }
                 state->requestData = buffer;
                 state->state = SDF_DEV_STATE_READING;
-                transferResult = func_0036A1B0(state->resourceId, (s32)buffer, transferResult);
+                transferResult = sdfDevReadFileBytes(state->resourceId, (s32)buffer, transferResult);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;

@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "fld_npc_motion.h"
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
@@ -42,12 +43,7 @@ enum {
     FIELD_STAGE_INDEX_SCAN_LIMIT = 0x280,
     FIELD_STAGE_RECORD_SCAN_LIMIT = 0x60
 };
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
-
-
+#include "dds3_world_secondary.h"
 #include "sdf_packet_alloc.h"
 
 extern s32 D_003BAB08;
@@ -716,7 +712,8 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011ECC8);
 
-extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032F510[], fldCameraFollowRows[], D_0032E5C8[], D_00336A60[];
+extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032F510[], fldCameraFollowRows[], D_0032E5C8[];
+extern FldNpcMotion D_00336A60[];
 
 extern FldCameraSetting *fldCameraSettings;
 
@@ -739,7 +736,7 @@ void fldLoadFieldTables(void) {
     sdfDevQueueReadAndWait(command, D_0032C9B0, 0x1400);
     sdfDevQueueReadAndWait(command, D_0032DDB0, 0x600);
     sdfDevQueueReadAndWait(command, D_0032E5C8, 0x880);
-    sdfDevQueueReadAndWait(command, D_00336A60, 0x1200);
+    sdfDevQueueReadAndWait(command, D_00336A60, 0x1200); /* 64 FldNpcMotion rows */
     sdfDevWaitThenReleaseCommandState(command);
 }
 

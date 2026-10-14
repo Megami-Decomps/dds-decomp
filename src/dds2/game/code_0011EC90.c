@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "itf.h"
+#include "fr_font.h"
 #include "dds3_owned_node.h"
 
 extern u32 mtrHasEnoughOwnedMantras(void);
