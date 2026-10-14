@@ -996,7 +996,7 @@
 0x0012E9D0	fldResetCameraModelHandles	inferred	Clears camera model handle state and marks current object handle invalid. [names_R_FuncNames6.tsv]
 0x0012E9E8	fldReleaseCameraModel	inferred	Conditionally releases current camera model resource and clears its handle. [names_R_FuncNames6.tsv]
 0x0012F4B8	fldUpdateCameraTarget	inferred	copies D_0032E3B0 camera vectors and pushes them to the field effect object
-0x00131098	fldUpdateCameraFrame	inferred	Per-frame field camera update dispatch; twin of D2 0x00133840 [names_M53_Field.tsv]
+0x00131098	fldUpdateCameraFrame	inferred	Per-frame field camera update dispatch; applies pending vertical field steps through fldApplyPlayerVerticalStep on the non-movement path and updates camera/player movement on the scene-control path; DDS2 twin at 0x00133840.
 0x001311A0	fldHasPendingSceneFlags	inferred	Returns true if any of three adjacent field scene-state words is nonzero. [names_reviewed5.tsv]
 0x001311D8	fldEnableCameraObjectFlag	inferred	Sets bit 1 on camera object then resets camera node setting. [names_R_FuncNames6.tsv]
 0x001311F8	fldDisableCameraObjectFlag	inferred	Clears bit 1 on camera object. [names_R_FuncNames6.tsv]
@@ -9098,3 +9098,4 @@
 0x0012FF48	fldUpdateFieldPlayerMovement	inferred	Per-frame player movement processor: gates updates on field transitions/damage/control, maps directional input into target heading and position, advances motion, and refreshes field coordinates. The active camera-frame routine dispatches it only under scene-control flag 0x40. Paired DDS2 provider is 0x00132540.
 0x00161A88	effGetActorScaleForParameterWork	inferred	Paired DDS1/DDS2 wrapper returns the owner unit effect scale for the mixer parameter-work scale callback by calling effBTLFieldColorGetActorScale.
 0x00206180	btlGetLinkedEffectPhase	inferred	With no unit, returns phase 18 or 19 from the active eligible linked pair; with its first actor, returns phase 15 only when the effect is inactive and owned. DDS2 twin at 0x00227528.
+0x0012FC20	fldApplyPlayerVerticalStep	inferred	Applies a pending signed verticalStepDirection by saving prior XYZ, shifting player Y by two units in the opposite direction, then clearing camera transition and highlight flags. Called by fldUpdateCameraFrame; DDS2 twin at 0x001321F8.
