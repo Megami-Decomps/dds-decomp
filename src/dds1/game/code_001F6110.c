@@ -3,6 +3,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_vec3.h"
 #include "btl_skill_max_api.h"
 #include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
@@ -141,11 +142,6 @@ typedef struct BtlCmdCtx {
 } BtlCmdCtx;
 
 extern f32 btlUnitGetTopY(BtlUnit *);
-
-typedef struct BtlVec3 {
-    f32 x, y, z;
-} BtlVec3;
-
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
