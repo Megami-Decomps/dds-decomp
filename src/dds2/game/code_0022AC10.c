@@ -1410,7 +1410,44 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
 
 /* Finalize the existing kind/id entry's motion-SE pack ownership and ready state.
  * The native DDS2 twin also logs each adopted resource slot. */
-INCLUDE_ASM(const s32, "game/code_0022AC10", btlFinalizeModelPackEntry);
+void btlFinalizeModelPackEntry(s32 kind, s32 id) {
+    BattleModelEntry *entry = btlFindModelEntry(kind, id);
+    PacWork *node;
+    SoundSlotTableEntry *parts;
+    s32 i;
+
+    if (entry->state == 0) {
+        if (entry->packRequest != NULL) {
+            entry->soundOwner = sndAcquireSlotOwner(kind, id);
+            if (entry->soundOwner->work.refCount == 1) {
+                s32 count = kind == 0 ? 0x1D : 0x17;
+                parts = (SoundSlotTableEntry *)btlSelectSideIndexedActorParameterTable(kind, id);
+                node = entry->packRequest->packet.queueHead;
+                for (i = 0; i < count; i++) {
+                    /* Capture the row before field access; see docs/idioms.md,
+                     * "Trace-justified pointer staging: sound-table row". */
+                    SoundSlotTableEntry *part = parts + i;
+                    if (part->resourceOffset >= 0) {
+                        entry->soundOwner->work.resourceHandles[i] = (struct SdfMemBlock *)node->resourceHandle;
+                        entry->soundOwner->work.fileRequests[i] = 0;
+                        btlBossDebugPrintf("btl:pack motSE load[%02d][%02d]\n", i, part->resourceOffset);
+                        node = node->next;
+                    } else {
+                        entry->soundOwner->work.resourceHandles[i] = 0;
+                        entry->soundOwner->work.fileRequests[i] = 0;
+                    }
+                }
+            } else {
+                for (node = entry->packRequest->packet.queueHead; node != NULL; node = node->next) {
+                    sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
+                }
+            }
+            btlStageTaskCleanupCallback(entry->packRequest);
+            entry->packRequest = NULL;
+        }
+        entry->state = 1;
+    }
+}
 
 /* Return the sign-extended cache state, or zero when no entry exists. */
 s32 btlGetEntryState(s32 modelKind, s32 modelId) {
