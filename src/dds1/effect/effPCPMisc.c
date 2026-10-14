@@ -37,6 +37,7 @@
 #include "eff_pcp_group_set.h"
 #include "eff_pcp_map_events.h"
 #include "eff_pcp_block_set.h"
+#include "eff_pcp_rotate_work.h"
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
 #include "eff_pcp_cross.h"
@@ -159,18 +160,6 @@ extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *para
 extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
-/* Three frame thresholds and their block-set inputs form the copied prefix. */
-typedef struct EffPCPRotateParams {
-    s32 startFrame[3];
-    EffPCPBlockSetParams group[3];
-} EffPCPRotateParams;
-
-typedef struct EffPCPRotateWork {
-    EffPCPRotateParams params;
-    EffPCPBlockSetWork *blockSets[3];
-    s32 frame;
-} EffPCPRotateWork;
-
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 extern void sdfVuLoadRotationMatrixZ(f32 scale);
