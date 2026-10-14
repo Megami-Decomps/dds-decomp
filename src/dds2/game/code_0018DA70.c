@@ -92,7 +92,6 @@ void effSetPairedResourceColor(PairedEffectResources *pair, u32 colorWithAlpha) 
 
 typedef EffBlurQuad BlurSource;
 
-extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 extern void *billGetWorkTransformMatrix(void *packet);
 
 

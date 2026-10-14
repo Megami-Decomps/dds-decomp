@@ -7,7 +7,6 @@
 #include "sdf_chip.h"
 
 #include "sdf_packet_alloc.h"
-extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 extern void *billGetWorkTransformMatrix(void *packet);
 extern SdfPoolNode D_003803C8;
 
