@@ -1353,7 +1353,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
         fldSetSceneControlFlags(0x40);
         dds3SetSlot1HandlerCallback((void *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
-    fldAreaState.unkE8 = 4;
+    fldAreaState.cameraTargetGraceTicks = 4;
     if (fldAreaState.sceneMode < 4) {
         fldAreaState.sceneMode = 4;
     }
@@ -1795,7 +1795,7 @@ s32 fldUpdateTravelAndEncounters(void) {
 
     if (fldAreaState.sceneMode > 0) fldAreaState.sceneMode--;
     if (fldAreaState.sceneState > 0) fldAreaState.sceneState--;
-    if (fldAreaState.unkE8 > 0) fldAreaState.unkE8--;
+    if (fldAreaState.cameraTargetGraceTicks > 0) fldAreaState.cameraTargetGraceTicks--;
     if (!fldIsTargetWithinInteractionRange() && !fldAreaState.targetGuideActive &&
         !fldTestSceneControlFlags(0x40)) return 0;
     if (fldTestSceneLifecycleFlags(1) == 1) return 0;
@@ -1811,7 +1811,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (distance < 0.2f) distance = 0.0f;
     fldAreaState.frameTravelDistance = distance;
     previousPhase = evtGetSolarPhase();
-    if (fldAreaState.unkE8 > 0) {
+    if (fldAreaState.cameraTargetGraceTicks > 0) {
         if (fldAreaState.unk11C && D_00389988[0x60 / 4]) {
             fldAreaState.attritionDistance += distance;
         }
