@@ -26,8 +26,6 @@ ObjBase *dds3GetLightObjectResource(EffWorldNode *object) {
 
 
 
-extern void dds3EnsureSlotData();
-
 EffWorldNode *evtSpawnActionObj9(s32 value) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_LIGHT);
 

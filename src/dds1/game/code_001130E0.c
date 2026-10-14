@@ -486,8 +486,6 @@ ObjBase *effObjGetDataHandle(EffWorldNode *object) {
     return data->resourceState;
 }
 
-extern void dds3EnsureSlotData();
-
 EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     f32 zero[4];
     EffWorldNode *obj;
