@@ -12454,3 +12454,34 @@ pseudo 96 still becomes `$4`. This reproduces retail's `lw $2` followed by
 `addiu $4,$2,77` without pinning either register. The complete unit gates
 `46 match, 0 differ`, including all 45 previously matched C functions and
 rodata. The trace paths and all three forms are recorded in the agent ledger.
+
+## Native post-call loop reset: DDS1 staff frame
+
+`mnuDrawStaffRollFrame` (`0026F230`, `game/code_0026EC90.c`) draws the
+five-tile backdrop, updates and draws 32 roll entries, optionally draws the
+selected image and another 32-entry pass, then restores GS state. Its complete
+primary owners are `MnuStaffMovieWork` (0x20), `MnuMovieRollEntry` (0x1C) and
+`MnuStaffImageRecord` (0x1C). The GS TEST provider really takes `u64` data;
+the local declaration agrees with its matched implementation.
+
+Retail ends with `jal sdfSubmitGsTestOneRegisterPacket` and a 32-byte-frame
+epilogue. Without a final counter reset, all bytes before `+0x290` match, but
+the compiler chooses a sibling call: 12 words differ and four bytes are
+missing. The admitted post-call statement is only `i = 0`, resetting the
+function's own counter after both real 32-entry loops have finished.
+
+Qualified cc1probe runs are byte-identical to their unhooked controls. In the
+no-reset control, `rtl.01.sibling` selects `call_insn/j 800`, with a use of the
+return address. With the reset, that pass keeps regular `call_insn 806`,
+clobbering the return address, followed by UID 810 setting the real counter
+pseudo 85 to zero. UID 810 survives through `rtl.11.cfg` and is removed in
+`rtl.13.life`, after the sibling-call decision. No reset instruction reaches
+the final assembly.
+
+This satisfies the narrowly admitted post-call rule: retail has a real call
+and epilogue, the assignment plausibly resets this function's own used loop
+counter, and the trace proves later deletion. It is not permission to add
+discarded expressions, fake variables or unrelated dead stores. The complete
+live unit gates `20 match, 0 differ`, including all 19 previously matched C
+functions and readonly data. Trace paths and exact pass locations are recorded
+in the agent ledger.
