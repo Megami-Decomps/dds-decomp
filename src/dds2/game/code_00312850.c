@@ -29,7 +29,7 @@ extern s8 D_0037F510[];
 
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
-extern f32 func_003532B8(f32);
+extern f32 acosf(f32);
 
 
 

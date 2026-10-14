@@ -9,7 +9,7 @@
 #include "pcp_vu0.h"
 extern f32 sdfQuatDot(f32 *, f32 *);
 
-extern f32 func_003532B8(f32);
+extern f32 acosf(f32);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
@@ -162,7 +162,7 @@ float fldVec3AngleBetween(a, b)
 float *a;
 float *b;
 {
-    return func_003532B8(fldNormalizedVectorDot(a, b));
+    return acosf(fldNormalizedVectorDot(a, b));
 }
 
 /* Cross the normalized input copies; the result itself is not normalized. */
@@ -465,5 +465,5 @@ float sdfSumCrossProductComponents(float *left, float *right) {
 
 /* Pass the four-component dot directly to the angle evaluator, without input normalization. */
 float fldVec4ArcCosDot(float *left, float *right) {
-    return func_003532B8(sdfQuatDot(left, right));
+    return acosf(sdfQuatDot(left, right));
 }

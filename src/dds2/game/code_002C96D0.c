@@ -4409,8 +4409,8 @@ void vuCatmullRomPoint(f32 (*p)[4], f32 t)
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
-extern f32 func_003532B8(f32);
-extern f32 func_003532E8(f32, f32);
+extern f32 acosf(f32);
+extern f32 atan2f(f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target sdfViewEyeVector and up sdfViewUpVector */
@@ -5608,9 +5608,9 @@ void camAimRotation(CamAim *obj, void *dst)
     VU0_STORE_VF(vf10, v);
     pitch = 0.0f;
     if ((flags & 0x40) == 0) {
-        pitch = -func_003532B8(-v[1]);
+        pitch = -acosf(-v[1]);
     }
-    sdfConvertEulerAnglesToQuaternionVU(pitch, func_003532E8(v[0], v[2]), 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(v[0], v[2]), 0.0f);
     if (obj->flags & 0x40) {
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, obj->quat);
@@ -6423,7 +6423,7 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, delta);
     if (delta[0] != 0.0f || delta[1] != 0.0f) {
-        out->angle = func_003532E8(delta[1], delta[0]);
+        out->angle = atan2f(delta[1], delta[0]);
     } else {
         out->angle = 0.0f;
     }

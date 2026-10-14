@@ -427,7 +427,7 @@ void kwlnResetPadInputAndMotorState(void) {
 }
 
 extern u8 sdfPadAnalogSticks[8];
-extern f32 func_003532B8(f32);
+extern f32 acosf(f32);
 extern void kwlnUpdatePadMotorDurations(void);
 
 /* vu0 routine: native stick length, normalization and forward dot product. */
@@ -492,7 +492,7 @@ void kwlnUpdatePadInputState(void) {
             if (dot > 1.0f) {
                 dot = 1.0f;
             }
-            angle = func_003532B8(dot);
+            angle = acosf(dot);
             if (v[0] < 0.0f) {
                 angle = 6.283185307179586f - angle;
             }

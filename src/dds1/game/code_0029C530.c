@@ -5144,7 +5144,7 @@ void effFreeIndexedEntries(EffClassWork *work) {
 extern f32 D_0037E120[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern f32 func_002FA1D8(f32);
+extern f32 atanf(f32);
 
 /* Advance radial five-point wave strips from the class orientation. */
 void effUpdateRadialWavePointRows(EffClassWork *work) {
@@ -5251,7 +5251,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     delta = newHeight - waveHeight;
                     waveHeight = newHeight;
                     segmentLength = fsqrtf(delta * delta + stepSquared);
-                    oldSlope = func_002FA1D8(delta / segmentLength) + phase;
+                    oldSlope = atanf(delta / segmentLength) + phase;
                     inner = config->halfWidth;
                     width = inner + config->edgeWidth;
                     VU0_LOAD_VF(vf10, direction);
@@ -5300,7 +5300,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                         newHeight = sdfSinPoly(waveAngle) * waveRadius;
                         delta = newHeight - waveHeight;
                         segmentLength = fsqrtf(delta * delta + stepSquared);
-                        slope = func_002FA1D8(delta / segmentLength) + (tilt + bend);
+                        slope = atanf(delta / segmentLength) + (tilt + bend);
                         sdfBuildVuRotationFromAxisAngle(oldSlope, (const struct RwV3d *)axis);
                         slope += phase;
                         VU0_LOAD_VF(vf10, direction);
@@ -5654,7 +5654,7 @@ extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 extern void sdfVuLoadRotationMatrixX(f32);
 extern void sdfVuLoadSecondaryRotationMatrixY(f32);
-extern f32 func_002FA1D8(f32);
+extern f32 atanf(f32);
 extern f32 func_002F9CD0(f32);
 
 /* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
@@ -5785,7 +5785,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 delta = newHeight - waveHeight;
                 waveHeight = newHeight;
                 segmentLength = fsqrtf(delta * delta + stepSquared);
-                oldSlope = func_002FA1D8(delta / segmentLength);
+                oldSlope = atanf(delta / segmentLength);
                 inner = config->point.halfWidth;
                 edgeWidth = config->point.edgeWidth;
                 curveSample = effMiscRandUnitFloat(effSharedRandomState);
@@ -5860,7 +5860,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                     newHeight = sdfSinPoly(waveAngle) * waveRadius;
                     delta = newHeight - waveHeight;
                     segmentLength = fsqrtf(delta * delta + stepSquared);
-                    slope = func_002FA1D8(delta / segmentLength) + tilt;
+                    slope = atanf(delta / segmentLength) + tilt;
                     sdfBuildVuRotationFromAxisAngle(oldSlope, (const struct RwV3d *)radial);
                     VU0_LOAD_VF(vf10, direction);
                     VU0_ROTATE_VEC(vf10, vf10);

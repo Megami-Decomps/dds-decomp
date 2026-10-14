@@ -37,7 +37,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 
-extern f32 func_003532B8(f32);
+extern f32 acosf(f32);
 
 
 
@@ -156,7 +156,7 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
 
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion) {
     f32 w = quaternion[3];
-    f32 twiceAngle = 2.0f * func_003532B8(w);
+    f32 twiceAngle = 2.0f * acosf(w);
     f32 scale = fsqrtf(1.0f - w * w);
     double magnitude = scale;
 
@@ -199,7 +199,7 @@ void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
         memcpy(target, to, 16);
     }
     if (angle < 0.95f) {
-        angle = func_003532B8(angle);
+        angle = acosf(angle);
         firstWeight = sinf(angle * (1.0f - fraction));
         secondWeight = sinf(angle * fraction);
         denominator = sinf(angle);
@@ -236,7 +236,7 @@ void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f3
 }
 
 void sdfQuatLog(f32 *out, f32 *in) {
-    f32 angle = func_003532B8(in[3]);
+    f32 angle = acosf(in[3]);
     f32 sine = sdfSinPoly(angle);
     out[3] = 0.0f;
     if (out[3] < sine) {
