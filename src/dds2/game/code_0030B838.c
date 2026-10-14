@@ -4,6 +4,7 @@
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "sdf_counter_runtime.h"
+#include "sdf_counter_runtime_api.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
@@ -38,11 +39,9 @@ extern void sdfQuaternionNormalize(f32 *);
 
 extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void sdfCounterDestroyRuntime();
 
 extern u32 sdfSelectedCounterIndex;
 
-extern s32 sdfActiveCounterRuntime;
 
 typedef struct SdfCounterRuntime {
     u32 stateFlags;                 /* 0x00 */
@@ -320,10 +319,10 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     s32 i;
 
     count = 0;
-    sdfActiveCounterRuntime = (s32)mnuCreateListState(0, 8, 0x16);
-    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer = sdfAllocSizeClassBlock(0x24);
-    memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer, 0, 0x24);
-    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.draw = sdfDrawCounterMapSelectionRow;
+    sdfActiveCounterRuntime = (SdfCounterRuntime *)mnuCreateListState(0, 8, 0x16);
+    sdfActiveCounterRuntime->state.timer = sdfAllocSizeClassBlock(0x24);
+    memset(sdfActiveCounterRuntime->state.timer, 0, 0x24);
+    sdfActiveCounterRuntime->state.draw = sdfDrawCounterMapSelectionRow;
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
@@ -342,20 +341,20 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
         }
     }
     if (count < 6) {
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.base = count;
+        sdfActiveCounterRuntime->state.base = count;
     }
     if (count == 3) {
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.posX = 0x148;
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->y = 0x8F;
+        sdfActiveCounterRuntime->state.posX = 0x148;
+        sdfActiveCounterRuntime->state.timer->y = 0x8F;
     } else if (count == 4) {
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.posX = 0x100;
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->y = 0x84;
+        sdfActiveCounterRuntime->state.posX = 0x100;
+        sdfActiveCounterRuntime->state.timer->y = 0x84;
     } else if (count == 5) {
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.posX = 0xD8;
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->y = 0x7F;
+        sdfActiveCounterRuntime->state.posX = 0xD8;
+        sdfActiveCounterRuntime->state.timer->y = 0x7F;
     } else {
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.posX = 0xB0;
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->y = 0x7E;
+        sdfActiveCounterRuntime->state.posX = 0xB0;
+        sdfActiveCounterRuntime->state.timer->y = 0x7E;
     }
     sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime, index);
     sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 0xB);
@@ -414,34 +413,34 @@ s32 sdfPollCounterSelectionInput(void) {
     s32 previousIndex;
 
     if ((s8)D_0037F510[1][0][6] < 0 || (D_0037F510[1][0][6] & 2)) {
-        previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->index;
+        previousIndex = sdfActiveCounterRuntime->state.channel->index;
         if (mnuRetreatListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
-            index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->index;
+            index = sdfActiveCounterRuntime->state.channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
-                index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.posX >> 3));
+                index * (sdfActiveCounterRuntime->state.posX >> 3));
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
     if ((s8)D_0037F510[1][0][7] < 0 || (D_0037F510[1][0][7] & 2)) {
-        previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->index;
+        previousIndex = sdfActiveCounterRuntime->state.channel->index;
         if (mnuAdvanceListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
-            index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->index;
+            index = sdfActiveCounterRuntime->state.channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
-                index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.posX >> 3));
+                index * (sdfActiveCounterRuntime->state.posX >> 3));
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(previousIndex) - 1, 10);
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 11);
             sndSetSequenceVolumePan(0, 127, 63);
         }
     }
     if ((s8)D_0037F510[1][0][3] < 0) {
-        sdfCounterSetMode(((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->index);
-        index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->index;
+        sdfCounterSetMode(sdfActiveCounterRuntime->state.channel->index);
+        index = sdfActiveCounterRuntime->state.channel->index;
         if (D_00438894 != index) {
-            sdfCounterSelectChannelByIndex((SdfCounterRuntime *)sdfActiveCounterRuntime,
+            sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime,
                 D_00438894);
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(index) - 1, 10);
             sdfSetLocalMapCounterMarkerState(sdfGetCounterChannelValueAtIndex(D_00438894) - 1, 11);
@@ -451,12 +450,12 @@ s32 sdfPollCounterSelectionInput(void) {
     }
     if ((s8)D_0037F510[1][0][1] < 0) {
         sndSetSequenceVolumePan(8, 127, 63);
-        sdfSetSelectedIndex(((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->index);
+        sdfSetSelectedIndex(sdfActiveCounterRuntime->state.channel->index);
         return -2;
     }
     mnuSetMapTimerFlags(sdfCounterGetSelectionBoundaryFlags());
     if ((s8)D_0037F510[1][0][6] == 0 && (s8)D_0037F510[1][0][7] == 0) {
-        mnuClearListFlagsOneAndTwo(&((SdfCounterRuntime *)sdfActiveCounterRuntime)->stateFlags);
+        mnuClearListFlagsOneAndTwo(&sdfActiveCounterRuntime->stateFlags);
     }
     if (D_004388D0 < 11) {
         return 0;
@@ -470,7 +469,7 @@ s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     /* Untouched retail 32-byte slot: frame 0x30 rather than 0x10.
      * DDS1 sdfAdjustCounterValueAndRedraw has the same 32-byte frame gap. */
     s32 drawScratch[8];
-    s32 x = (s32)(((f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->value / 10.0f) *
+    s32 x = (s32)(((f32)sdfActiveCounterRuntime->state.timer->value / 10.0f) *
                     -32.0f);
 
     if (decrease != 0) {
@@ -480,22 +479,22 @@ s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     }
     sdfDrawCounterChannelInfoLabel(0x146, 0x190);
     mnuCallInitWide((x + 0x10) << 4,
-                    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->y << 3,
-                    0, sdfActiveCounterRuntime, 0x54);
+                    sdfActiveCounterRuntime->state.timer->y << 3,
+                    0, (s32)sdfActiveCounterRuntime, 0x54);
     sdfUpdateCounterSelectionFade();
     return 1;
 }
 
 u32 *sdfCounterGetDisplayWordPointer(void) {
-    return ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->display->word;
+    return sdfActiveCounterRuntime->state.channel->display->word;
 }
 
 s32 sdfCounterGetDisplayValue(void) {
-    return ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->display->value;
+    return sdfActiveCounterRuntime->state.channel->display->value;
 }
 
 s16 sdfGetCounterChannelValueAtIndex(s32 channelIndex) {
-    SdfCounterChannel *channelCursor = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.first;
+    SdfCounterChannel *channelCursor = sdfActiveCounterRuntime->state.first;
     if (channelIndex > 0) {
         do {
             channelIndex--;
@@ -508,7 +507,7 @@ s16 sdfGetCounterChannelValueAtIndex(s32 channelIndex) {
 float sdfCounterGetScaledValue(void) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    timer = sdfActiveCounterRuntime->state.timer;
     return (float)timer->value / 10.0f;
 }
 
@@ -611,25 +610,25 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt,
 void sdfCounterIncrease(void) {
     s32 currentValue;
 
-    currentValue = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->value;
+    currentValue = sdfActiveCounterRuntime->state.timer->value;
     if (currentValue < 10) {
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->value = currentValue + 1;
+        sdfActiveCounterRuntime->state.timer->value = currentValue + 1;
     }
 }
 
 void sdfCounterDecrease(void) {
     s32 currentValue;
 
-    currentValue = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->value;
+    currentValue = sdfActiveCounterRuntime->state.timer->value;
     if (currentValue != 0) {
-        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->value = currentValue - 1;
+        sdfActiveCounterRuntime->state.timer->value = currentValue - 1;
     }
 }
 
 void sdfCounterSetMode(s32 mode) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    timer = sdfActiveCounterRuntime->state.timer;
     timer->mode = mode;
     timer->countdown = 8;
 }
@@ -637,7 +636,7 @@ void sdfCounterSetMode(s32 mode) {
 void sdfCounterTickCountdown(void) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    timer = sdfActiveCounterRuntime->state.timer;
     if (0 < timer->countdown) {
         timer->countdown = timer->countdown - 1;
     }
@@ -645,7 +644,7 @@ void sdfCounterTickCountdown(void) {
 
 /* Enabling a stopped timer starts it at one; disabling clears it. */
 void mnuSetMapTimerFlags(s32 flags) {
-    SdfCounterTimer *timers = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    SdfCounterTimer *timers = sdfActiveCounterRuntime->state.timer;
     if ((flags & 1) != 0) {
         if (timers->mapTimerPrimary == 0) {
             timers->mapTimerPrimary = 1;
@@ -664,7 +663,7 @@ void mnuSetMapTimerFlags(s32 flags) {
 
 /* Active timers repeat every 60 ticks rather than stopping at zero. */
 void mnuTickMapTimers(void) {
-    SdfCounterTimer *timers = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    SdfCounterTimer *timers = sdfActiveCounterRuntime->state.timer;
     if (timers->mapTimerPrimary > 0) {
         timers->mapTimerPrimary--;
         if (timers->mapTimerPrimary == 0) {
@@ -682,7 +681,7 @@ void mnuTickMapTimers(void) {
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030D3A8);
 
 s32 sdfCounterGetSelectionBoundaryFlags(void) {
-    SdfCounterRuntime *rt = (SdfCounterRuntime *)sdfActiveCounterRuntime;
+    SdfCounterRuntime *rt = sdfActiveCounterRuntime;
     s32 count;
     s32 done;
     if (rt->state.active == 0) {
@@ -694,7 +693,7 @@ s32 sdfCounterGetSelectionBoundaryFlags(void) {
 }
 
 void sdfCounterStartTimerPositionTransition(s32 x, s32 y) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    SdfCounterTimer *timer = sdfActiveCounterRuntime->state.timer;
     timer->startX = timer->curX;
     timer->startY = timer->curY;
     timer->targetX = x;
@@ -704,7 +703,7 @@ void sdfCounterStartTimerPositionTransition(s32 x, s32 y) {
 
 /* Advance the timer's position transition one frame (3-frame lerp start -> target). */
 void sdfCounterTickPositionTransition(void) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    SdfCounterTimer *timer = sdfActiveCounterRuntime->state.timer;
     s32 frames = timer->frames;
     f32 t;
 
@@ -733,8 +732,8 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
     f32 shrink;
 
     grow = fade * 0.5f + (1.0f - fade) * 2.5f;
-    offset = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.selected->index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.posX >> 3);
-    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer;
+    offset = sdfActiveCounterRuntime->state.selected->index * (sdfActiveCounterRuntime->state.posX >> 3);
+    timer = sdfActiveCounterRuntime->state.timer;
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
     shrink = (1.0f - grow) * 8.5f;
@@ -836,8 +835,8 @@ void sdfDrawCounterChannelInfoLabel(s32 x, s32 y) {
     f32 fade;
     s32 width;
 
-    display = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->display;
-    fade = 1.0f - (f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.timer->value / 10.0f;
+    display = sdfActiveCounterRuntime->state.channel->display;
+    fade = 1.0f - (f32)sdfActiveCounterRuntime->state.timer->value / 10.0f;
     width = frMeasureAndQueueCounterText((const char *)display->info);
     x = (f32)x - (f32)width * 0.5f;
     if (display->value == 2) {
