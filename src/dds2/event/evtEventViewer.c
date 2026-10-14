@@ -6,6 +6,7 @@
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
+#include "evt_reset_unit_vector_slots_api.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "mdl_motion_api.h"
@@ -1345,7 +1346,6 @@ extern s32 evtViewerTestIndexedCondition(u32);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
-extern void evtResetUnitVectorSlots();
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
 extern EvtRuntimeGroup *D_004372B8;
@@ -3593,7 +3593,6 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 }
 
 extern f32 D_0037F590[];
-extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
 extern void fldSetTitleDrawMode();
 extern void kwlnCancelConfiguredFadeFrames();
