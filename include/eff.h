@@ -200,6 +200,9 @@ typedef struct {
     SdfTex *texture;
 } EffResourceRectWork; /* 0x28 */
 
+EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
+void effReleaseResourceTemplate(EffResourceRectWork *work);
+
 typedef char EffResourceRectDrawParams_size_must_be_0x18[(sizeof(EffResourceRectDrawParams) == 0x18) ? 1 : -1];
 typedef char EffResourceRectParams_size_must_be_0x24[(sizeof(EffResourceRectParams) == 0x24) ? 1 : -1];
 typedef char EffResourceRectWork_size_must_be_0x28[(sizeof(EffResourceRectWork) == 0x28) ? 1 : -1];

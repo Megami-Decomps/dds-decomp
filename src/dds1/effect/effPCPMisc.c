@@ -132,8 +132,6 @@ extern EffPCPSharedTrail *effPcpSharedTrailWork;
  * computed as a signed difference of the parameter words. */
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
-extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 struct EffPCPBeamWork;

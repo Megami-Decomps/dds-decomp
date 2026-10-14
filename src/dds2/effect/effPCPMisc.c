@@ -132,9 +132,6 @@ typedef struct {
 } EffPCPCompactScaleParams;
 
 
-extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void effReleaseResourceTemplate(EffResourceRectWork *work);
-
 /* Scatter and scale callbacks share this work; their factory selects the resource view. */
 typedef struct {
     f32 position[4];
