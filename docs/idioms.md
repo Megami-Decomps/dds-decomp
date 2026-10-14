@@ -12078,3 +12078,35 @@ The identity is genuinely 64-bit: `btlAdvanceRuntimeSequenceCounter` returns
 Both final-form traces match their unhooked outputs. Complete-unit gates are
 77/0 and 79/0, with no context, rodata or undefined-symbol rows. Existing names,
 shared prototypes and the separate claimed scheduler body remain unchanged.
+
+
+### Signed flag bytes inside packed state words
+
+DDS2 `mnuUpdateMantraTutorialPanelSprites` (956 bytes) uses the existing
+`MenuPanelPositionRecord` union: an unsigned state byte and signed flags byte
+share `u16 stateFlags`. Preserve the two interpretations when decoding flags:
+
+```c
+s32 headerFlags = (s8)(*flagWord >> 8);              /* Ordinary nodes. */
+s32 high = ((s16)*flagWord & 0xFF00) >> 8;          /* Kind-2 nodes. */
+```
+
+The ordinary path tests only bit 0 of the signed high byte. The kind-2 path
+masks the packed word before arithmetic byte extraction, then tests bits 3
+and 0. The mask clears both the state byte and the widened sign bits, so its
+decoded value is 0..255. These tests agree with the native halfword operations
+for every 16-bit state word; no layout or prototype changes are needed.
+
+Qualified `cc1probe --cse` output agrees with ordinary compilation. In initial
+RTL, an unsigned-halfword expression narrows the ordinary predicate through
+HImode and introduces an extra `andi 0xffff`; the signed-byte decode avoids
+that conversion. For kind 2, the signed packed-word promotion preserves
+`ashiftrt:SI` after the `0xff00` mask. Later simplification removes the input
+sign extension under that mask, leaving native `andi 0xff00; sra 8` instead
+of a signed-byte `sll 16; sra 24`. The complete unit checks 43/0.
+
+The renderer also needs its real mode-0 early return, signed nibble kind and
+visibility fields, and a fresh menu-flags snapshot for each live node. Explicit
+hidden/visible modes do not update the transition timer; only opening/closing
+modes increment it. The map renderer supplies the branch-specific sprite calls;
+normal cross-jumping merges their shared tails into the two native callsites.
