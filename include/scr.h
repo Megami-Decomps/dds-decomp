@@ -122,8 +122,11 @@ typedef struct {
 /* Common-command global state (0x38C); DDS1/2 script/scrCommonCommand.c. */
 typedef struct {
     u8 pad[0x388];
-    s32 unk388;
+    s32 processControlFlag; /* 0x388: set/clear by process-control script commands. */
 } ScrComGlobals;
+typedef char ScrComGlobals_size_must_be_0x38C[(sizeof(ScrComGlobals) == 0x38C) ? 1 : -1];
+typedef char ScrComGlobals_processControlFlag_at_0x388[
+    ((u32)&((ScrComGlobals *)0)->processControlFlag == 0x388) ? 1 : -1];
 
 /* XYZ float plus integer W operand (0x10); DDS1/2 script/scrCommonCommand.c. */
 typedef struct {
