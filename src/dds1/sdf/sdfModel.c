@@ -390,7 +390,18 @@ void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, u32 *
     sdfInstallPoolNodeReleaseCallbacks(work);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTestTransformedClipVectors);
+/* Nonzero when the bounds box lies entirely outside one clip plane: each
+ * plane's bit must be set in all four 6-bit clip-flag groups. */
+s32 sdfModelTestTransformedClipVectors(const f32 *bounds) {
+    s32 flags;
+    s32 result;
+
+    VU0_CLIP_TEST_BOX_CORNERS(flags, bounds);
+    result = flags & 0x3F;
+    result &= (flags >> 12) & (flags >> 6);
+    result &= flags >> 18;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildVisibleNodePackets);
 

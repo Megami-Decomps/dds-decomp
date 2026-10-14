@@ -801,6 +801,39 @@ typedef struct {
     ".set reorder" \
     : : "r" (out), "r" (first), "r" (second) : "$2", "memory")
 
+/* Clip-test the eight corners of a min/max box (two unaligned vec3 at bounds)
+ * against the primary matrix (vf28-vf31) and AND the two clip-flag reads, so
+ * flags holds the plane bits that every corner fails. The ANDs of $2/$3 are part
+ * of the block; that is why the result can take the bounds register. ACC,
+ * vf2-vf5, $2/$3 and $6/$7 are scratch. Shared by both games'
+ * sdfModelTestTransformedClipVectors. */
+#define VU0_CLIP_TEST_BOX_CORNERS(flags, bounds) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%1)\n\tldl $2, 7(%1)\n\tlw $3, 8(%1)\n\t" \
+    "ldr $6, 0xC(%1)\n\tldl $6, 0x13(%1)\n\tlw $7, 0x14(%1)\n\t" \
+    "pcpyld $2, $3, $2\n\tpcpyld $6, $7, $6\n\tqmtc2.ni $2, vf2\n\tqmtc2.ni $6, vf3\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vnop\n\tcfc2.ni $2, $vi18\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vnop\n\tvnop\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vnop\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2.ni $3, $vi18\n\t" \
+    "and %0, $2, $3\n\t.set reorder" \
+    : "=r" (flags) : "r" (bounds) : "$2", "$3", "$6", "$7", "memory")
+
 /* Extended-asm forms of the register-only VU operations. The empty operand
  * sections preserve the SDK's volatile ASM_OPERANDS boundary in EE GCC 2.96;
  * basic asm has the same opcodes but is a different compiler representation.
