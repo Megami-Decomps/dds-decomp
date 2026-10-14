@@ -20,7 +20,7 @@ extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern s32 D_003BAA98;
-extern void func_00280048(s32);
+extern void mnuUpdatePartyPanelPercentDisplays(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern char D_0037CC58[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -180,7 +180,7 @@ s32 ptySkillMenuUseSelectedInField(id, context)
         mnuConsumeEntryCost(id, selectedEntry);
         mnuInitPartyPanelSlots(&((SkillMenuContext *)context)->partyPanel);
         mnuUpdateHandleStates((MenuPageWindow *)window);
-        func_00280048(window);
+        mnuUpdatePartyPanelPercentDisplays(window);
         return 1;
     }
     return 0;

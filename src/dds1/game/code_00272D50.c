@@ -390,7 +390,7 @@ s32 mnuStaffRunPanel2b(KwlnTask *request) {
 extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
-extern void func_00280048(s32);
+extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the
  * active unit row; on success consume one from the inventory and refresh the
@@ -412,7 +412,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
     ptyAdjustItemQuantity(itemId, -1);
     mnuInitPartyPanelSlots(&((StaffDisplayContext *)context)->partyPanel);
     mnuUpdateHandleStates((MenuPageWindow *)partyPanel);
-    func_00280048(partyPanel);
+    mnuUpdatePartyPanelPercentDisplays(partyPanel);
     return 1;
 }
 

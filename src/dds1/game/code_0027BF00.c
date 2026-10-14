@@ -1771,7 +1771,7 @@ void mnuUpdateHandleStates(MenuPageWindow *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280048);
+INCLUDE_ASM(const s32, "game/code_0027BF00", mnuUpdatePartyPanelPercentDisplays);
 
 extern char D_003BC728[];
 
