@@ -4242,7 +4242,8 @@ f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     return scale;
 }
 
-BtlUnit *btlFindUnitByMode(void) {
+/* Native caller 0x21F8B8 passes zero; this provider does not use arguments. */
+BtlUnit *btlFindUnitByMode() {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     BattleSub *sub = work->sub;
     BtlUnit *unit;
@@ -4675,9 +4676,221 @@ u32 btlIsMarkedActionSceneStateActive(void) {
     return battle->effect->summon.active != 0;
 }
 
+extern BtlRuntimeTask *btlCreateDefeatCandidateTask(BtlUnit *);
+extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32,
+    f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAF8);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021F848);
+void func_0021F848(ActionStateLink *actor, BtlUnit *target, u64 handle, u64 unused) {
+    BtlUnit *boss;
+    BtlState *battle;
+    BtlUnit *unit;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *firstCamera;
+    BtlRuntimeTask *secondCamera;
+    u32 preset;
+    s32 twoUnitCameraMode;
+
+    if (!(actor->pendingFlags & 8) || !(actor->unit->status.flags & 0x400) ||
+        target == NULL || actor->indexWork.skillId != 0x196) {
+        return;
+    }
+    boss = btlFindUnitByMode(0);
+    if (boss == NULL) {
+        return;
+    }
+    battle = btlGetRuntime();
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        if (unit->status.flags & 0x200) {
+            task = btlCreateDefeatCandidateTask(unit);
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+            task->startCondition.value.handle = handle;
+            btlStartTask(task);
+        }
+    }
+    task = btlCreateUnitFaceBodyTask(boss, target);
+    task->startCondition.value.handle = handle;
+    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    /* Stage the real mode across setup; see docs/idioms.md, "Cherun camera preset staging". */
+    twoUnitCameraMode = 2;
+    btlStartTask(task);
+
+    task = btlCreateDefeatCandidateTask(target);
+    task->startDelay = 0xEE;
+    task->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
+    task->startCondition.value.taskKind = 0x32;
+    btlStartTask(task);
+    task = btlAllocateIndexedUnitEffectTask(target, 0xE, 2, 1.0f);
+    task->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
+    task->startCondition.value.taskKind = 0x32;
+    task->startDelay = 0xDA;
+    btlStartTask(task);
+    task = sndCreateStationedSeTask(battle->sequenceHandle + 7);
+    task->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
+    task->startCondition.value.taskKind = 0x32;
+    task->startDelay = 0xDA;
+    btlStartTask(task);
+
+    if (battle->unk268 != twoUnitCameraMode) {
+        if (battle->unk268 == 3) {
+            preset = boss->lookupId * 2;
+        } else {
+            preset = 2;
+        }
+    } else {
+        /* Stage the first-unit preset before the default; see the same idiom. */
+        u32 firstUnitCameraPreset = 8;
+        preset = 6;
+        if (boss->lookupId == 0) {
+            preset = firstUnitCameraPreset;
+        }
+    }
+    if (target->lookupId != 0) {
+        preset++;
+    }
+    switch (preset) {
+    case 0:
+        btlBossDebugPrintf("CHERUN:3-1-l\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            -70.6f, -257.6f, -611.2f, 0.219f,
+            0.135f, 0.014f, 0.957f, -105.6f,
+            -146.9f, -383.7f, 0.093f, 0.14f,
+            -0.003f, 0.976f, 40.0f, 50.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            -335.6f, -231.7f, -131.8f, 0.229f,
+            -0.154f, -0.053f, 0.95f, -349.3f,
+            -31.6f, -194.0f, -0.117f, -0.151f,
+            0.0010f, 0.972f, 40.0f, 25.0f);
+        break;
+    case 1:
+        btlBossDebugPrintf("CHERUN:3-1-r\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            -538.4f, -222.8f, -419.4f, -0.228f,
+            0.513f, 0.166f, -0.793f, -634.9f,
+            -246.5f, -349.2f, -0.131f, 0.598f,
+            0.128f, -0.762f, 40.0f, 40.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            443.1f, -126.9f, 576.3f, 0.026f,
+            0.961f, 0.072f, 0.231f, 443.1f,
+            -266.9f, 576.3f, 0.045f, 0.952f,
+            0.144f, 0.23f, 40.0f, 35.0f);
+        break;
+    case 2:
+        btlBossDebugPrintf("CHERUN:3-2-l\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            247.3f, -203.0f, -565.0f, 0.223f,
+            0.354f, 0.068f, 0.895f, 244.6f,
+            -256.1f, -557.9f, 0.166f, 0.359f,
+            0.046f, 0.906f, 40.0f, 50.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            4.1f, -184.1f, -41.8f, -0.234f,
+            -0.432f, -0.084f, -0.853f, -142.9f,
+            -297.4f, -154.0f, -0.215f, -0.138f,
+            -0.0010f, -0.954f, 40.0f, 35.0f);
+        break;
+    case 3:
+        btlBossDebugPrintf("CHERUN:3-2-r\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            349.4f, -264.3f, 10.5f, -0.061f,
+            -0.913f, -0.131f, -0.345f, 569.0f,
+            -269.9f, 477.3f, -0.063f, -0.924f,
+            -0.156f, -0.302f, 40.0f, 45.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            478.8f, -138.5f, -88.1f, 0.144f,
+            0.329f, 0.039f, 0.923f, 553.8f,
+            -64.0f, -134.9f, -0.082f, 0.357f,
+            -0.041f, 0.92f, 40.0f, 30.0f);
+        break;
+    case 4:
+        btlBossDebugPrintf("CHERUN:3-3-l\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            596.0f, -245.1f, -377.9f, -0.232f,
+            -0.546f, -0.125f, -0.779f, 591.4f,
+            -272.0f, -435.0f, -0.161f, -0.501f,
+            -0.064f, -0.833f, 40.0f, 50.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            -557.4f, -212.9f, 432.9f, 0.062f,
+            -0.883f, -0.159f, 0.415f, -598.7f,
+            -40.1f, 455.3f, -0.066f, -0.888f,
+            0.104f, 0.421f, 40.0f, 35.0f);
+        break;
+    case 5:
+        btlBossDebugPrintf("CHERUN:3-3-r\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            349.4f, -264.3f, 10.5f, -0.061f,
+            -0.913f, -0.131f, -0.345f, 569.0f,
+            -269.9f, 477.3f, -0.063f, -0.924f,
+            -0.156f, -0.302f, 40.0f, 45.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            478.8f, -138.5f, -88.1f, 0.144f,
+            0.329f, 0.039f, 0.923f, 553.8f,
+            -64.0f, -134.9f, -0.082f, 0.357f,
+            -0.041f, 0.92f, 40.0f, 30.0f);
+        break;
+    case 6:
+        btlBossDebugPrintf("CHERUN:2-1-l\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            -108.0f, -222.3f, -0.8f, -0.037f,
+            0.936f, 0.165f, -0.276f, -417.8f,
+            -239.6f, 419.8f, -0.038f, 0.936f,
+            0.167f, -0.276f, 40.0f, 50.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            -476.9f, -240.6f, -201.9f, 0.146f,
+            -0.249f, -0.049f, 0.946f, -472.4f,
+            -97.2f, -184.1f, -0.044f, -0.25f,
+            0.0010f, 0.957f, 40.0f, 30.0f);
+        break;
+    case 7:
+        btlBossDebugPrintf("CHERUN:2-1-r\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            206.7f, -222.2f, 37.0f, 0.027f,
+            0.976f, 0.15f, 0.069f, 308.6f,
+            -209.0f, 480.7f, 0.026f, 0.979f,
+            0.132f, 0.069f, 40.0f, 50.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            485.4f, -174.7f, 433.2f, 0.051f,
+            0.927f, 0.15f, 0.303f, 510.1f,
+            -89.2f, 457.7f, -0.025f, 0.936f,
+            -0.073f, 0.306f, 40.0f, 20.0f);
+        break;
+    case 8:
+        btlBossDebugPrintf("CHERUN:2-2-l\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            -310.6f, -276.3f, 28.3f, 0.029f,
+            -0.952f, -0.174f, 0.209f, -371.5f,
+            -223.6f, 398.0f, 0.017f, -0.964f,
+            -0.144f, 0.179f, 40.0f, 40.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            -449.2f, -176.8f, -118.8f, -0.196f,
+            0.377f, 0.091f, -0.889f, -468.2f,
+            -70.6f, -124.3f, 0.066f, 0.377f,
+            -0.014f, -0.912f, 40.0f, 30.0f);
+        break;
+    case 9:
+    default:
+        btlBossDebugPrintf("CHERUN:2-2-r\n");
+        firstCamera = btlCreateFloatTask29(actor,
+            -445.6f, -278.2f, -58.9f, 0.057f,
+            -0.889f, -0.16f, 0.401f, -553.6f,
+            -278.9f, -444.6f, 0.133f, -0.542f,
+            -0.106f, 0.811f, 40.0f, 35.0f);
+        secondCamera = btlCreateFloatTask29(actor,
+            -161.1f, -150.4f, -194.3f, 0.063f,
+            -0.393f, -0.041f, 0.905f, -62.5f,
+            -82.6f, -116.4f, -0.051f, -0.392f,
+            0.006f, 0.907f, 40.0f, 25.0f);
+        break;
+    }
+    firstCamera->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
+    firstCamera->startCondition.value.taskKind = 0x32;
+    firstCamera->startDelay = 0x58;
+    btlStartTask(firstCamera);
+    secondCamera->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
+    secondCamera->startCondition.value.taskKind = 0x32;
+    secondCamera->startDelay = 0xE1;
+    btlStartTask(secondCamera);
+}
 
 /* Commit the requested state, then refresh active enemy-ID 0x11B's motion (not mode 0x11B). */
 void btlApplyMarkedCommandStateMotion(void) {
