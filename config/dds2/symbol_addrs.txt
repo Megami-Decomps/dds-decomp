@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+fldConfigureCameraMoveTracking = 0x001206D0; // type:func
 sdfLoadMapCounterCameraVectorsForMask = 0x0030B880; // type:func
 btlInitializeBattleUnits = 0x001D0140; // type:func
 evtViewerUpdateWindowShadeFade = 0x0024AD48; // type:func
@@ -9149,7 +9150,6 @@ func_0011F518 = 0x0011F518; // type:func
 fldIsUpdateInhibited = 0x001200E0; // type:func
 fldDrawShadowDisc = 0x001200E8; // type:func
 func_00120528 = 0x00120528; // type:func
-func_001206D0 = 0x001206D0; // type:func
 func_001208D0 = 0x001208D0; // type:func
 func_00120B88 = 0x00120B88; // type:func
 func_00122A38 = 0x00122A38; // type:func
