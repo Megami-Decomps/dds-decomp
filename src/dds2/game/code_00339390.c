@@ -94,11 +94,11 @@ void sdfVuApplySelectedWorkFlags(u32 workAddress) {
     }
 }
 
-extern void func_00337FD8(VuWork *);
+extern void sdfVuBuildRingTriangleRefs(VuWork *);
 
 extern void func_00337688(u32, s32);
 
-extern void func_003385C0(VuWork *);
+extern void sdfVuBuildIndexedTriangleRefs(VuWork *);
 
 /* Align the packet to 64 bytes; the optional second pass preserves vf24-vf26. */
 void sdfVuBeginPacketFromWork(VuWork *work) {
@@ -113,17 +113,17 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
-        func_00337FD8(work);
+        sdfVuBuildRingTriangleRefs(work);
         sdfVuApplySelectedWorkFlags((u32)work);
         sdfVuConfigureWorkRingDma(work, work->param1);
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
         func_00337688(work->ringSrc, work->param1);
-        func_003385C0(work);
+        sdfVuBuildIndexedTriangleRefs(work);
         sdfVuApplySelectedWorkFlags((u32)work);
     } else {
-        func_00337FD8(work);
+        sdfVuBuildRingTriangleRefs(work);
         sdfVuApplySelectedWorkFlags((u32)work);
     }
 }
