@@ -6,6 +6,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "staff_grid_label_row.h"
 #include "kwln_task_add_child.h"
 #include "ui_color.h"
 #include "fr_font.h"
@@ -982,15 +983,6 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
-typedef struct StaffGridLabelRow {
-    s32 count;
-    s32 x[10];
-    s8 gridIds[10];
-    u8 pad36[2];
-} StaffGridLabelRow;
-typedef char StaffGridLabelRow_size_check[sizeof(StaffGridLabelRow) == 0x38 ? 1 : -1];
-typedef char StaffGridLabelRow_gridIds_offset_check[
-    ((u32)&((StaffGridLabelRow *)0)->gridIds == 0x2C) ? 1 : -1];
 extern const StaffGridLabelRow D_0042AA48[];
 
 void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
