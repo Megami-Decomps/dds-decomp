@@ -17,6 +17,7 @@ extern FldInfTable D_0038E2D0;
 #include "dds3obj.h"
 #include "evt_world_source_transform.h"
 #include "fld.h"
+#include "fld_collision_geometry.h"
 #include "evt_world.h"
 #include "scr.h"
 #include "sdf.h"
@@ -476,18 +477,6 @@ void fldResetRecordState(void) {
         fldReleaseRecordStorage();
     }
 }
-
-/* Complete runtime collision descriptor. Serialized resources have two
- * additional reserved words, but generated geometry embeds these six words. */
-typedef struct FldCollisionDescriptor {
-    s32 vertexCount;
-    s32 faceCount;
-    s32 triangleCount;
-    f32 (*vertices)[4];
-    FldCollisionFace *faces;
-    void *stopData;
-} FldCollisionDescriptor;
-typedef char FldCollisionDescriptorSize[(sizeof(FldCollisionDescriptor) == 0x18) ? 1 : -1];
 
 void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
@@ -1734,15 +1723,6 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
     hitPoint[2] = origin[2];
     return found;
 }
-
-typedef struct FldWallMeshRecord {
-    f32 vertices[8][4];
-    FldCollisionFace faces[4];
-    FldCollisionDescriptor geometry;
-} FldWallMeshRecord;
-
-typedef char FldWallMeshRecordSizeCheck[(sizeof(FldWallMeshRecord) == 0x128) ? 1 : -1];
-
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
 void func_0013B4F8(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {

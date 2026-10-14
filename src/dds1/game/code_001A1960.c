@@ -26,6 +26,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
+#include "btl_select_transform_parameters_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -540,11 +541,11 @@ s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
     return D_003BAA20 + arg1 * 0x270;
 }
 
-s32 btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
     if (arg0 == 0) {
-        return (s32)D_003583A0;
+        return (BtlActorTransformParameters *)D_003583A0;
     }
-    return D_003BAA30 + arg1 * 24;
+    return (BtlActorTransformParameters *)(D_003BAA30 + arg1 * 24);
 }
 
 s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
@@ -568,9 +569,9 @@ s32 btlGetActorBedAssetIdFromIndex(s32 arg0) {
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A30F8);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlBuildEligibleTargetIndexList);
 
-extern s32 func_001A30F8(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
 
 u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
@@ -635,7 +636,7 @@ u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 un
         mask = 0;
     }
     if (destination != NULL) {
-        func_001A30F8(task, destination, mode, flags, mask);
+        btlBuildEligibleTargetIndexList(task, destination, mode, flags, mask);
     }
     return category;
 }

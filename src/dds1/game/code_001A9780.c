@@ -6351,7 +6351,7 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
     return 0;
 }
 
-extern s32 func_001A30F8(void *source, BtlIndexList *list, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(void *source, BtlIndexList *list, s32, s32, s32);
 
 extern u32 btlSelectCommandTargetPolicy(void *source, BtlIndexList *list, s32);
 
@@ -6380,9 +6380,9 @@ SceneAiWork *btlCreateAiWork(BtlTask *source) {
         count = btlCountFlaggedSceneActors();
         if (count < 2 &&
             (datGameState->party[other->partyRecordIndex].status & 0x4800)) {
-            func_001A30F8(source, work->listA, 1, 4, -0x4801);
+            btlBuildEligibleTargetIndexList(source, work->listA, 1, 4, -0x4801);
         } else {
-            func_001A30F8(source, work->listA, 1, 4, -1);
+            btlBuildEligibleTargetIndexList(source, work->listA, 1, 4, -1);
         }
         btlGetIndexListCount(work->listA);
         work->result = 0;
