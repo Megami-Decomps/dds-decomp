@@ -33,5 +33,54 @@
     "unit": "interface/itfMesManager",
     "section": ".bss",
     "offset": 32
+  },
+  {
+    "name": "frFontResourceRecords",
+    "owner": "frFontWork",
+    "unit": "game/code_00193C08",
+    "section": ".bss",
+    "offset": 4
+  },
+  {
+    "name": "D_003D6DC4",
+    "owner": "frFontWork",
+    "unit": "game/code_00193C08",
+    "section": ".bss",
+    "offset": 324
+  },
+  {
+    "name": "D_003D6DC8",
+    "owner": "frFontWork",
+    "unit": "game/code_00193C08",
+    "section": ".bss",
+    "offset": 328
+  },
+  {
+    "name": "D_003D6DCC",
+    "owner": "frFontWork",
+    "unit": "game/code_00193C08",
+    "section": ".bss",
+    "offset": 332
+  },
+  {
+    "name": "D_003D6DE0",
+    "owner": "frFontWork",
+    "unit": "game/code_00193C08",
+    "section": ".bss",
+    "offset": 352
+  },
+  {
+    "name": "D_003D6DF8",
+    "owner": "frFontWork",
+    "unit": "game/code_00193C08",
+    "section": ".bss",
+    "offset": 376
+  },
+  {
+    "name": "D_003D6E14",
+    "owner": "frFontWork",
+    "unit": "game/code_00193C08",
+    "section": ".bss",
+    "offset": 404
   }
 ]

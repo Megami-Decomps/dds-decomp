@@ -11561,3 +11561,21 @@ followed by the copied `count * 8` byte payloads; copied data pointers are
 rebased into that allocation. The existing allocator tracks ownership.
 List counts, size arithmetic, empty-list behavior, copy order and types are
 unchanged; no callback invocation or menu-specific payload meaning is assumed.
+
+### Font system storage and its indexed-text table
+
+The paired font bootstrap units own `FrFontSystem frFontWork` followed by the
+32-word indexed-text table. The system's recovered fields end at `0x19C`;
+the table begins at `+0x1A0`. Ordinary eight-byte object alignment accounts
+for the four-byte gap. Keep the system's real `0x19C` extent and explicit
+zero initialization in `.bss`; do not enlarge the type to include the gap or
+the table. Together the two objects occupy a `0x220` section span.
+
+The `frFontResourceRecords` label is system `+4`, the first entry's resource
+header pointer. Subsequent pointers have the real `FrFontEntry` stride of
+`0x24`, rather than forming a contiguous pointer array. The count, atlas,
+image-buffer and glyph-slot labels likewise denote existing system fields;
+link them as owner-relative aliases without allocating additional objects.
+The encoded-text control's one-based table lookup can use a native address
+four bytes before the table. This is not a field beyond the system's end;
+preserve the existing unchecked table indexing instead of inventing a sentinel.
