@@ -527,7 +527,7 @@ s32 fldCmdReleaseCurrentObject(void) {
     return 1;
 }
 
-s32 func_00154870(void) {
+s32 fldCmdForceTargetGuideUpdate(void) {
     D_003898B0[0] = 1;
     return 1;
 }
