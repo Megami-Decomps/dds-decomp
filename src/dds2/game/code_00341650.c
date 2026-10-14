@@ -171,8 +171,8 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     sndMidiTrackState.opaque204 = 0;
     for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
         sndMidiTrackState.slots[i].id = -1;
-        sndMidiTrackState.slots[i].unknown_04[0] = 0;
-        sndMidiTrackState.slots[i].unknown_04[1] = 0;
+        sndMidiTrackState.slots[i].balanceFirstComponent = 0;
+        sndMidiTrackState.slots[i].balanceSecondComponent = 0;
     }
 }
 

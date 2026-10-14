@@ -8,8 +8,7 @@ extern s32 sndFindPackedTrackLoadStatus(s32 id);
 
 extern s32 sndRequestedMidiBankId;
 
-/* Per-track volume/balance record; unk4 and unk5 are the two balance bytes
-   read by sndGetNonnegativeEntryBalance. */
+/* Eight-byte view retained for the separate MIDI channel table. */
 typedef struct {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
@@ -25,7 +24,7 @@ extern void func_0030B458(void *dst, void *src);
 
 extern SndTrackVolume D_003FE0D0[];
 
-extern SndTrackVolume sndTrackBalanceEntries[];
+extern SndTrackSlot sndTrackBalanceEntries[];
 
 extern SndMidiStateWords sndMidiTrackState;
 
@@ -153,17 +152,17 @@ void sndReleaseMidiTrack(s32 id) {
 
 /* Read the byte used as the minuend by the nonnegative balance query. */
 u8 sndGetTrackBalanceFirstComponent(s32 index) {
-    return sndTrackBalanceEntries[index].unk4;
+    return sndTrackBalanceEntries[index].balanceFirstComponent;
 }
 
 /* Read the byte subtracted by the nonnegative balance query. */
 u8 sndGetTrackBalanceSecondComponent(s32 index) {
-    return sndTrackBalanceEntries[index].unk5;
+    return sndTrackBalanceEntries[index].balanceSecondComponent;
 }
 
 s32 sndGetNonnegativeEntryBalance(s32 index) {
-    SndTrackVolume *entry = &sndTrackBalanceEntries[index];
-    s32 difference = entry->unk4 - entry->unk5;
+    SndTrackSlot *entry = &sndTrackBalanceEntries[index];
+    s32 difference = entry->balanceFirstComponent - entry->balanceSecondComponent;
 
     if (difference <= 0) {
         difference = 0;
@@ -176,7 +175,7 @@ SndTrackVolume *sndGetMidiChannelTable(void) {
     return D_003FE0D0;
 }
 
-SndTrackVolume *sndGetTrackSlotTable(void) {
+SndTrackSlot *sndGetTrackSlotTable(void) {
     return sndTrackBalanceEntries;
 }
 
