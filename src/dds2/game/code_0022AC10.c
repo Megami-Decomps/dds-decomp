@@ -1530,7 +1530,7 @@ extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
-extern f32 func_00353228(f32);
+extern f32 tanf(f32);
 extern f32 func_00353140(f32);
 extern SdfAsset *D_00436D10;
 extern EffPacketParams D_00453030;
@@ -1641,7 +1641,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
         D_00453030.positions = (u128 *)positions;
         D_00453030.normals = (u128 *)normals;
         D_00453030.texcoords = (u32 *)coordinates;
-        height = func_00353228(D_0037F980.camera.fov * 0.5f) * 1000.0f;
+        height = tanf(D_0037F980.camera.fov * 0.5f) * 1000.0f;
         width = height * 1.333333254f;
         packet = (u64 *)sdfAllocPacketAligned(0x40);
         packet[0] = 3;

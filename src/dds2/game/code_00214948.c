@@ -1157,7 +1157,7 @@ extern f32 func_00353040(f32);
 
 extern f32 func_00353140(f32);
 
-extern f32 func_00353228(f32);
+extern f32 tanf(f32);
 
 extern void sdfVuLoadRotationMatrixY(f32);
 
@@ -1201,7 +1201,7 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     angle *= 0.017453293f;
     extent += length * func_00353140(angle);
     length *= func_00353040(angle);
-    length += extent / func_00353228(out->fov * 1.3333333f * 0.5f);
+    length += extent / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (command->flags & 0x200) {
         angle = -angle;
@@ -1252,8 +1252,8 @@ void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
-    front->distance += userExtent * 2.5f / func_00353228(angle);
-    minDistance = targetExtent / func_00353228(angle);
+    front->distance += userExtent * 2.5f / tanf(angle);
+    minDistance = targetExtent / tanf(angle);
     if (front->distance < minDistance) {
         front->distance = minDistance;
     }
@@ -1310,8 +1310,8 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
-    front->distance = front->distance + targetExtent * 1.5f / func_00353228(angle);
-    minDistance = userExtent / func_00353228(angle);
+    front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
+    minDistance = userExtent / tanf(angle);
     if (front->distance < minDistance) {
         front->distance = minDistance;
     }
@@ -1370,8 +1370,8 @@ void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
-    front->distance = front->distance + targetExtent * 1.5f / func_00353228(angle);
-    minDistance = userExtent / func_00353228(angle);
+    front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
+    minDistance = userExtent / tanf(angle);
     if (front->distance < minDistance) {
         front->distance = minDistance;
     }
