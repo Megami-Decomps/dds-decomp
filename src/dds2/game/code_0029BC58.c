@@ -160,7 +160,7 @@ s32 itfRunPanelMode2(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
-    func_0026C8E8(0);
+    dspAdvanceMessageWindowControlWithRefresh(0);
     return menuSetHandler(panel, 2, request);
 }
 

@@ -391,13 +391,13 @@ void dspAdvanceMessageWindowControl(s32 notify, s32 refresh) {
 }
 
 /* Pass the supplied value to mode one of the existing message-window worker. */
-void func_0026C8E8(u32 value) {
+void dspAdvanceMessageWindowControlWithRefresh(u32 value) {
     dspAdvanceMessageWindowControl(value, 1);
 }
 
 /* Request value one from the existing mode-one message-window worker. */
 void dspRequestMessageWindowModeOne(void) {
-    func_0026C8E8(1);
+    dspAdvanceMessageWindowControlWithRefresh(1);
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
