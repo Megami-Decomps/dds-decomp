@@ -182,7 +182,6 @@ void kwlnDrawSetDc8First(u32 rgba) {
     kwlnColorRectangleParameters.color.rgba = rgba;
 }
 
-extern EffSolidRectParams *effGetCh74Params(void);
 extern u16 D_00438E50;
 extern u16 D_00438E52;
 
