@@ -1096,11 +1096,6 @@ void fldCacheMapLabelLengths(s32 world) {
 }
 
 void fldLoadSceneRecordTable(void) {
-    typedef struct {
-        u8 pad00[4];
-        s32 rows;
-        s32 count;
-    } SceneHeader;
     char path[0x80];
     char directory[0x40];
     s32 resourceHandle;
@@ -1113,17 +1108,11 @@ void fldLoadSceneRecordTable(void) {
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
     header = fldGetTransferChunkPayload(transferStart);
-    fldSceneRecords = (FldSceneRecord *)(u32)((SceneHeader *)header)->rows;
-    fldSceneRecordCount = ((SceneHeader *)header)->count;
+    fldSceneRecords = (FldSceneRecord *)(u32)((FldSceneRecordTableHeader *)header)->rows;
+    fldSceneRecordCount = ((FldSceneRecordTableHeader *)header)->count;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
-    /* Descriptor from fldGetTransferChunkPayload precedes the 0x14-byte scene rows. */
-    typedef struct {
-        u8 pad00[4];
-        s32 rows; /* 0x04: first scene row */
-        s32 count; /* 0x08: number of scene rows */
-    } SceneHeader;
     if (D_00389780[0] < 0xC8) {
         u8 *transferStart = chunk + 8;
 
@@ -1131,8 +1120,8 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldRelocatePackedTransferChunk((u32)chunk, (s32)(u32)transferStart);
         {
             s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
-            s32 rows = ((SceneHeader *)header)->rows;
-            s32 count = ((SceneHeader *)header)->count;
+            s32 rows = ((FldSceneRecordTableHeader *)header)->rows;
+            s32 count = ((FldSceneRecordTableHeader *)header)->count;
 
             fldSceneRecordCount = count;
             fldSceneRecords = (FldSceneRecord *)(u32)rows;

@@ -34,6 +34,13 @@ typedef struct FldSceneRecord {
     FldPoint *pos;
 } FldSceneRecord;
 
+/* Payload header produced after relocating the packed scene-record chunk. */
+typedef struct FldSceneRecordTableHeader {
+    u8 opaque00[4];
+    s32 rows;  /* 0x04: relocated first FldSceneRecord address */
+    s32 count; /* 0x08: number of scene records */
+} FldSceneRecordTableHeader;
+
 typedef char FldPoint_size_must_be_0xC[(sizeof(FldPoint) == 0xC) ? 1 : -1];
 typedef char FldPoint_y_at_4[((u32)&((FldPoint *)0)->y == 4) ? 1 : -1];
 typedef char FldPoint_z_at_8[((u32)&((FldPoint *)0)->z == 8) ? 1 : -1];
@@ -54,6 +61,13 @@ typedef char FldSceneRecord_items_at_4[((u32)&((FldSceneRecord *)0)->items == 4)
 typedef char FldSceneRecord_count_at_8[((u32)&((FldSceneRecord *)0)->count == 8) ? 1 : -1];
 typedef char FldSceneRecord_model_at_C[((u32)&((FldSceneRecord *)0)->model == 0xC) ? 1 : -1];
 typedef char FldSceneRecord_pos_at_10[((u32)&((FldSceneRecord *)0)->pos == 0x10) ? 1 : -1];
+
+typedef char FldSceneRecordTableHeader_size_must_be_0x0C[
+    (sizeof(FldSceneRecordTableHeader) == 0x0C) ? 1 : -1];
+typedef char FldSceneRecordTableHeader_rows_at_4[
+    ((u32)&((FldSceneRecordTableHeader *)0)->rows == 4) ? 1 : -1];
+typedef char FldSceneRecordTableHeader_count_at_8[
+    ((u32)&((FldSceneRecordTableHeader *)0)->count == 8) ? 1 : -1];
 
 extern FldSceneRecord *fldSceneRecords;
 extern s32 fldSceneRecordCount;
