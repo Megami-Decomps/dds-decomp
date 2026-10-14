@@ -15,6 +15,7 @@
 #include "btl.h"
 #include "eff_pcp_beam.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -3866,7 +3867,6 @@ void effPcpSetScaledThunderScale(EffPCPGrowWork *work, f32 val) {
 
 /* Shared draw-request parameters are cleared before creating a beam. */
 extern EffPacketParams D_003D6610;
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {

@@ -4,6 +4,7 @@
 #include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -94,7 +95,6 @@ extern SdfPoolNode *D_003B14B0[];
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
