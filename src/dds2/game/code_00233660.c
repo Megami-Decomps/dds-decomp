@@ -2635,7 +2635,7 @@ extern char D_00437118[]; /* "fog=" */
 extern KwlnDrawVectorParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
 
-extern s32 func_0035C8F8();
+extern s32 sscanf(const char *, const char *, ...);
 extern s32 memcmp(const void *, const void *, u32);
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
@@ -2678,27 +2678,27 @@ void mdlLoadViewerPresentationConfig(void) {
         }
         lineStart = fileData + lineOffset;
         if (memcmp(lineStart, "bg-color=", 9) == 0) {
-            if (func_0035C8F8(lineStart + 9, D_00437100, &color) == 1) {
+            if (sscanf(lineStart + 9, D_00437100, &color) == 1) {
                 D_00435CBC = color;
             }
         } else if (memcmp(lineStart, "eye-position=", 13) == 0) {
-            if (func_0035C8F8(lineStart + 13, "%f,%f,%f", &x, &y, &z) == 3) {
+            if (sscanf(lineStart + 13, "%f,%f,%f", &x, &y, &z) == 3) {
                 D_003C87C0.x = x;
                 D_003C87C0.y = y;
                 D_003C87C0.z = z;
             }
         } else if (memcmp(lineStart, "target-position=", 16) == 0) {
-            if (func_0035C8F8(lineStart + 16, "%f,%f,%f", &x, &y, &z) == 3) {
+            if (sscanf(lineStart + 16, "%f,%f,%f", &x, &y, &z) == 3) {
                 D_003C87D0.x = x;
                 D_003C87D0.y = y;
                 D_003C87D0.z = z;
             }
         } else if (memcmp(lineStart, D_00437108, 5) == 0) {
-            if (func_0035C8F8(lineStart + 5, D_00437110, &verticalFov) == 1) {
+            if (sscanf(lineStart + 5, D_00437110, &verticalFov) == 1) {
                 sdfSceneProjectionParameters.camera.fov = verticalFov;
             }
         } else if (memcmp(lineStart, D_00437118, 4) == 0) {
-            if (func_0035C8F8(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
+            if (sscanf(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
                 kwlnDrawVector.fogNear = fogNear;
                 kwlnDrawVector.depthNear = fogValue;
                 kwlnDrawVector.fogFar = fogFar;
