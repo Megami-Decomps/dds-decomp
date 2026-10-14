@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_scaled_value.h"
+#include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
 #include "sdf_chip.h"
@@ -2089,10 +2090,6 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
     return best;
 }
 
-typedef struct EvtViewerPlaybackData {
-    ObjBase *object;
-    struct EvtScaledValue *counter;
-} EvtViewerPlaybackData;
 extern void sdfFreezeFloatCounter(struct EvtScaledValue *counter);
 extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *counter);
 
