@@ -7502,6 +7502,7 @@ fldResolveEventSelectorTarget = 0x0013CBA8; // type:func
 sdfVuBuildVisibleTriangleList = 0x002DF128; // type:func
 btlSetEligibleActorPanelTransitionState = 0x001ACC20; // type:func
 fldMarkStageExplorationBitmapRegion = 0x00121DE0; // type:func
+sdfDevDiscRequestWorkerThread = 0x002E6538; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8

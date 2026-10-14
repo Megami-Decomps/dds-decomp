@@ -7160,6 +7160,7 @@ dspRequestMessageWindowModeOne = 0x0026C900; // type:func
 fldResolveEventSelectorTarget = 0x0013F790; // type:func
 fldMarkStageExplorationBitmapRegion = 0x00123DE8; // type:func
 fldUpdateCameraHeadingTransition = 0x00133F08; // type:func
+sdfDevDiscRequestWorkerThread = 0x0033F3E0; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
