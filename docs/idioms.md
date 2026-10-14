@@ -11975,3 +11975,29 @@ the qualified observed object in all those sections. This closes Brass Osprey's 
 Kestrel, Tidal Quill, Sable Forge and Cedar Ridge predecessor/compiler work.
 The independent native contract audit passes without shared header or compiler
 changes. Production integration/retail gates remain separate.
+
+### Shared rejection blocks: battle command availability
+
+DDS1 `func_001A6EC0` and DDS2 `func_001B1090` first permit an optional
+runtime callback to veto the command. Their two mutually exclusive built-in
+policies then accept only a byte equal to one: the unit's roster byte for the
+flag-`0x200`/selector-kind-5 case, otherwise the command-record byte. Both policy
+failures reach the same final `return 0`; the callback veto remains separate.
+
+An output-preserving DDS1 `--ifcvt --jump` trace distinguishes this ordinary
+shared rejection from returning zero separately inside each policy. The separate
+returns let the first `if_convert` pass's `noce_try_store_flag` succeed twice,
+then late cross-jumping merges the two byte comparisons; that form is 180 bytes
+against the native 212. With one shared fallback, the first two if-conversion
+passes do not enter `noce_process_if_block`. Later `find_if_case_1` succeeds via
+`dead_or_predicable` and hoists the command path's literal-one return, reproducing
+the native branch layout. The required property is the actual common rejection
+block, not a dummy result local or an artificial barrier.
+
+The DDS2 primary runtime owner also recovers the callback at `0x6D8`:
+`001B10AC` loads it and `001B10BC` calls it with the unit pointer and command
+index. Its signed-word result is tested for zero. This replaces four unused pad
+bytes without changing layout and corresponds to DDS1's existing callback at
+`0x68C`. The final paired bodies each match all 53 native instruction words;
+their whole-unit gates are 81/0 and 133/0 respectively.
+
