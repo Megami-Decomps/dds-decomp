@@ -17,6 +17,7 @@
 #include "eff_event_sound.h"
 #include "btl_sound.h"
 #include "bill_object_api.h"
+#include "effect_value_object.h"
 
 extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
@@ -407,19 +408,6 @@ void evtEndObjectValueTransition(EffWorldNode *object) {
         data->activeId = 0xffffffff;
     }
 }
-
-typedef struct EffectValueData {
-    u8 pad00[0x64];
-    u32 flags;
-} EffectValueData;
-
-typedef struct EffectValueObject {
-    u8 pad00[4];
-    s32 valueId;
-    u8 pad08[0x10];
-    EffectValueData *data;
-    f32 *source;
-} EffectValueObject;
 
 struct WorldIndexNode;
 extern s32 dds3IsPointWithinObjectRadius(f32 *, f32 *);
