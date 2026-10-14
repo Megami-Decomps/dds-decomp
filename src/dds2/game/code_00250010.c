@@ -4673,9 +4673,9 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 if (strcmp(runtime->entryName[group->entryHeader],
                     (char *)work->subEntry1Data + evtGetRowVariant(work, row) * 32) == 0) {
                     key = evtCreateViewerTimelineKey(group, evtGetRowParameter(work, row), runtime);
-                    key->p08.f = ((EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].f;
-                    key->p0C.h[0] = ((EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].h[0];
-                    key->p0C.h[1] = ((EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].h[1];
+                    key->p08.f = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->cameraFieldOfView;
+                    key->p0C.h[0] = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque04;
+                    key->p0C.h[1] = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque06;
                     key->serializedValue = evtEventViewerAddName((char *)work->subEntry1Data +
                         evtGetRowVariant(work, row) * 32, runtime);
                     dds3SetCameraFieldOfView(group->info, key->p08.f);

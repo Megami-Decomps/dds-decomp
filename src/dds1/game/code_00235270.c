@@ -4616,8 +4616,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
                     key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
-                    key->p08.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
-                    key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                    key->p08.f = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->cameraFieldOfView;
+                    key->p0C.h[0] = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque04;
                     {
                         s32 serializedNameIndex;
                         EffWorldNode *camera;
