@@ -4,6 +4,7 @@
 #include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -1014,7 +1015,6 @@ void func_00172C60(void)
 }
 
 extern void *memset(void *dst, s32 value, u32 size);
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 
 extern EffPacketParams D_003D6580[];
