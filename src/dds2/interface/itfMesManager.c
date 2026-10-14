@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_text_slots_api.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
 #include "fld_area_work.h"
@@ -1208,7 +1209,6 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 itemIndex) {
 }
 
 extern s32 frFontCountGlyphBands();
-extern s8 itfTestTextInterfaceMask();
 extern s32 itfGetTextLipsUnitId();
 extern s32 itfGetTextLipsMotionId();
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
@@ -1218,7 +1218,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     FrFontGlyph *glyph;
     FrFontGlyph *previousGlyph;
     s32 lipsValue;
-    s8 interfaceMask;
+    u32 interfaceMask;
     void (*callback)();
 
     previousGlyph = entryBlock->glyphChain;
@@ -1295,7 +1295,6 @@ void itfMesReplaceTextSlotData(mes, slotIndex, source, byteCount)
     memcpy((void *)*textAddress, source, byteCount);
 }
 
-extern void itfSetIndexedTextSlot();
 
 /* Install all replacement-text addresses into the font's fixed slot table. */
 void itfMesInitCharTable(s32 *table) {

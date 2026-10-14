@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itf_text_vector.h"
+#include "itf_text_slots_api.h"
 #include "fr_font_text_slots.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
