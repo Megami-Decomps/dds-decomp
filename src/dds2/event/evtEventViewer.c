@@ -14,6 +14,7 @@
 #include "itf_mes_window.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_fade.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
@@ -740,7 +741,6 @@ extern void mnuStartMoviePlaybackByResourceIndex(s32 value);
 extern s32 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(s32 enabled);
 extern void fldBeginTitleAnimation(void);
-extern void kwlnFadeSetMode(s32 mode);
 extern void kwlnFadeBackgroundStartOut(s32 duration);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
@@ -3600,7 +3600,6 @@ extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void kwlnTextureReleaseHeldReference();
 extern void fldReleaseCameraColorEffect();
-extern void kwlnFadeSetMode();
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
