@@ -1297,7 +1297,65 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuConfigurePartyPanelPage);
+extern void mnuResetPartyPanelFade(MenuPageWindow *, s32, u32, u32);
+extern void mnuSetPageParams(MenuSprites *, s32);
+
+void mnuConfigurePartyPanelPage(MenuPageWindow *window, s32 mode, u32 staffImage, s32 staffMode) {
+    s32 fadeDirection = 1;
+    s32 selectedIndex = window->lists[0]->cursor->index;
+    MenuPageSlot *slot = &window->slots[selectedIndex];
+
+    switch ((u32)mode) {
+    case 0: {
+        MenuIconBundle *bundle = slot->iconBundle;
+        /* sched1 favors the store ending the window pointer's lifetime. */
+        window->transitionValue = 0x100;
+        window->scrollOffset = 0;
+        if (bundle != NULL) {
+            bundle->fade = 0x100;
+            bundle->fadeOut = 0;
+        }
+        mnuResetPartyPanelFade(window, selectedIndex, 0, 0);
+        break;
+    }
+    case 1: {
+        MenuIconBundle *bundle = slot->iconBundle;
+        window->scrollOffset = 0x40;
+        window->transitionValue = 0;
+        if (bundle != NULL) {
+            bundle->fadeOut = staffMode;
+            bundle->fade = 0;
+        }
+        if (staffMode == fadeDirection) {
+            slot->windowSprites->fadeOut = fadeDirection;
+            if (bundle != NULL) {
+                bundle->fadeOut = fadeDirection;
+            }
+            mnuResetPartyPanelFade(window, selectedIndex, 1, 0);
+        }
+        break;
+    }
+    case 2:
+        mnuSetPageParams(slot->windowSprites, 0);
+        if (slot->iconBundle != NULL) {
+            slot->iconBundle->fadeOut = 0;
+        }
+        mnuResetPartyPanelFade(window, selectedIndex, 0, 1);
+        break;
+    case 3:
+        mnuSetPageParams(slot->windowSprites, 1);
+        if (slot->iconBundle != NULL) {
+            slot->iconBundle->fadeOut = fadeDirection;
+        }
+        mnuResetPartyPanelFade(window, selectedIndex, 0, 1);
+        /* Retail retains this ordinary call. cc1probe: this local reset
+         * survives 01.sibling and 03.cse, then 13.life removes it. */
+        fadeDirection = 0;
+        break;
+    }
+}
+
+
 
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, u32, s32);
@@ -4027,11 +4085,9 @@ void mnuUpdateFade(s32 *list);
 void mnuResetWindowFadeParameters(MenuFadeFields *menu);
 
 
-void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve);
 
 void mnuSetMenuPageFlags(MenuSprites *page, u32 flags);
 
-void mnuSetPageParams(MenuSprites *page, s32 mode);
 
 
 
