@@ -806,7 +806,7 @@ extern void fldPreparePlayerAndCameraScene(u128 *transform);
 extern void fldPreparePlayerSceneCameraTarget(void);
 extern void fldCreateSecondaryWorldCamera(void);
 extern void fldUpdateCameraViewFromPlayer(void);
-extern void func_0012CB48(void);
+extern void fldUpdateFieldCameraViewState(void);
 extern void func_0012CED0(void);
 extern void fldActivateCameraColorSetting(s32 enabled);
 extern void mnuInitializeResourceEntries(void);
@@ -939,7 +939,7 @@ void fldRebuildFieldScene(void) {
                     fldUpdateCameraViewFromPlayer();
                 } else {
                     fldAreaState.mode = 0;
-                    func_0012CB48();
+                    fldUpdateFieldCameraViewState();
                 }
             } else {
                 if (cameraLinkMode == 2) {
@@ -950,7 +950,7 @@ void fldRebuildFieldScene(void) {
                 if (sceneWork->secondaryState == 3) {
                     func_0012CED0();
                 } else {
-                    func_0012CB48();
+                    fldUpdateFieldCameraViewState();
                 }
             }
         }

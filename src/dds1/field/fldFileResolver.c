@@ -3336,7 +3336,7 @@ void fldProbeCameraSupportSurface(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012CB48);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateFieldCameraViewState);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012CED0);
 
