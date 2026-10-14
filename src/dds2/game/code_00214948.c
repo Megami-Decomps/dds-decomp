@@ -10,6 +10,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
+#include "btl_camera_pose_api.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
@@ -2500,7 +2501,6 @@ extern s32 btlHasMarkedEntry14();
 
 extern void btlClearRuntimeFlag2000(void);
 
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (command->actionCode != 0x10c) {
