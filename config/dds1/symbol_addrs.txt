@@ -7498,6 +7498,7 @@ fldRefreshAreaStateFromPosition = 0x001372D0; // type:func
 fldUpdateModeOneCameraPose = 0x0012F578; // type:func
 sdfVuLoadRotationMatrixZ = 0x002DD688; // type:func
 fldResolveEventSelectorTarget = 0x0013CBA8; // type:func
+sdfVuBuildVisibleTriangleList = 0x002DF128; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -10035,7 +10036,6 @@ func_002DE980 = 0x002DE980; // type:func
 sdfVuMultiplyNodeColors = 0x002DEA18; // type:func
 func_002DEAC0 = 0x002DEAC0; // type:func
 func_002DEB40 = 0x002DEB40; // type:func
-func_002DF128 = 0x002DF128; // type:func
 func_002DF710 = 0x002DF710; // type:func
 sdfVuUpdateSelectedNodeGeometry = 0x002E02D8; // type:func
 func_002E03C0 = 0x002E03C0; // type:func
