@@ -4,6 +4,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
@@ -4780,7 +4781,6 @@ clear_highlight:
 }
 
 
-extern u32 fldGetSceneReadyFlag(void);
 extern s32 func_001321F8(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);

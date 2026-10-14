@@ -3,6 +3,7 @@
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
 #include "mdl_flag_api.h"
@@ -53,7 +54,6 @@ extern void fldResetSparkRewardProfileIndex(void);
 
 extern FieldStageCoordinate D_00389170[];
 
-extern u32 fldGetSceneReadyFlag(void);
 
 
 

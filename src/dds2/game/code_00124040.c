@@ -3,6 +3,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "sdf_message.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -209,7 +210,6 @@ u8 fldTestSceneControlFlags(u32 arg0);
 
 extern s32 D_00435F80;
 
-extern u32 fldGetSceneReadyFlag(void);
 
 extern u32 fldDeferredCommandParameter;
 

@@ -4,6 +4,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
@@ -436,7 +437,6 @@ typedef struct FldActionSpawn {
     s32 firstValue;
 } FldActionSpawn;
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
-extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
 extern void fldSetCameraObjectHighlightFlag(void);
