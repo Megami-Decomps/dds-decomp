@@ -728,7 +728,42 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
     memset(packet + 0x2C, 0, 12);
 }
 
-INCLUDE_ASM(const s32, "game/code_003396D0", func_0033B530);
+/* Build a one-vertex textured-quad VIF packet: the position, color, the four
+ * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
+void func_0033B530(u8 *packet, const f32 *position, u32 color, const void *uv,
+                                   const f32 *quad) {
+    *(u16 *)packet = 7;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xA0000000;
+    *(u32 *)(packet + 20) = 0x43434310;
+    *(u32 *)(packet + 24) = 0x43;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E01C003;
+    *(u32 *)(packet + 56) = color;
+    *(u32 *)(packet + 60) = 0x6504C004;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 64), (const u8 *)uv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)uv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)uv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv + 12);
+    *(u32 *)(packet + 80) = 0x6404C008;
+    *(f32 *)(packet + 84) = quad[0];
+    *(f32 *)(packet + 88) = quad[1];
+    *(f32 *)(packet + 92) = quad[2];
+    *(f32 *)(packet + 96) = quad[3];
+    *(f32 *)(packet + 100) = quad[4];
+    *(f32 *)(packet + 104) = quad[5];
+    *(f32 *)(packet + 108) = quad[6];
+    *(f32 *)(packet + 112) = quad[7];
+    *(u32 *)(packet + 116) = 0x04000002;
+    *(u32 *)(packet + 120) = 0x14000008;
+    *(u32 *)(packet + 124) = 0;
+}
 
 s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
     return count * 0x40 + 0x40;
