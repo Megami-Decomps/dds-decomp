@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "evt_world_object_api.h"
 #include "evt_world.h"
 #include "sdf_texture_offset_list.h"
 
@@ -119,7 +120,6 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
 }
 
 extern void dds3ClearSceneObjectState(EffWorldNode *object);
-extern void evtReleaseSceneResource(EffWorldNode *object);
 
 /* Destroy every node of every list, then release the data block and scene state. */
 void dds3DestroyWorldObjectData(EffWorldNode *object) {
