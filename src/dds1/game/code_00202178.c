@@ -989,7 +989,29 @@ s32 btlClearUnitRestrictionFlag(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00204D08);
+/* After the special enemy acts, clear its restriction flag unless the action
+ * was phase 10, skill 0x1A6 in phase 2, or it was set this same turn. */
+void func_00204D08(BtlTask *task) {
+    BtlState *battle;
+    BtlUnit *unit;
+    s32 *effect;
+
+    if ((task->flags & 8) == 0) {
+        return;
+    }
+    battle = btlGetRuntime();
+    unit = task->unit;
+    effect = (s32 *)battle->effect;
+    if (unit->partyRecord.unitId != 0x102) {
+        return;
+    }
+    if (task->indexWork.phase != 2 ? task->indexWork.phase == 10 : task->indexWork.skillId == 0x1A6) {
+        return;
+    }
+    if (*effect != battle->turnCount) {
+        unit->partyRecord.flags &= ~0x2000;
+    }
+}
 
 s32 btlDisableNonBossUnits(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
