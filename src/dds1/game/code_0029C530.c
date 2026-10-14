@@ -13,6 +13,7 @@
 #include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_matrix4.h"
 #include "eff_active_resource.h"
 #include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
@@ -219,14 +220,6 @@ typedef struct EffectObjectFlag {
 extern EffectObjectNode *effFloorModelListHead;
 
 extern u8 btlIsRuntimeAllocated(void);
-
-/* 4x4 float matrix with 128-bit row access for VU0/DMA transfers. */
-typedef struct Matrix4 {
-    union {
-        float m[4][4];
-        s128 rows[4];
-    } u; // 0x00
-} Matrix4; // 0x40
 
 void effDrawThreePointGroups(EffPointSet *, Matrix4 *);
 
