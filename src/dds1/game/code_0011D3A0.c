@@ -745,7 +745,7 @@ void fldLoadFieldTables(void) {
 
 extern void fldClearAllAreaFloorFlags(void);
 
-void func_00120AE8(void) {
+void fldResetFieldMapState(void) {
     s32 bankIndex;
     s32 slotIndex;
     s32 valueIndex;
