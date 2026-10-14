@@ -634,7 +634,7 @@ void fldTestDrawDestroy(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00120528);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001206D0);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldConfigureCameraMoveTracking);
 
 enum {
     FIELD_CAMERA_TRACKING_UNSET = -999

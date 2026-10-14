@@ -1227,7 +1227,7 @@ u32 func_0014F010(void) {
 
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    func_0011E810(first, second);
+    fldConfigureCameraMoveTracking(first, second);
     return 1;
 }
 
