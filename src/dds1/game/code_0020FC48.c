@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
@@ -290,9 +291,6 @@ extern char D_003A6758[]; /* "btl:event[%s]\n" */
 extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
 
 extern char D_003A6788[]; /* "btl:event SMG load[%X]\n" */
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
  * DDS1 ensures the derived sequence is resident, unlike DDS2's release path. */

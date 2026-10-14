@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "btl_command_partner_output.h"
 #include "sdf_trig.h"
 #include "dds3obj.h"
@@ -2275,7 +2276,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
         BtlUnit *unit = actor->unit;
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
-    kwlnTaskAddChild(state->scriptOwner, slot);
+    kwlnTaskAddChild(state->scriptOwner, (KwlnTask *)slot);
     state->boundTask = slot;
 }
 

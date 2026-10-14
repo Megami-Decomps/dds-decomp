@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
@@ -48,9 +49,6 @@ extern s32 btlRuntime;
 extern s32 kwlnTaskFindByPriority(u32);
 
 extern u64 D_003BB2E8;
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
-
 #include "sdf_packet_alloc.h"
 
 /* Option IDs index the same signed-byte bank used by the named controls. */

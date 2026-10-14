@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
 #include "fld_resource_resolver.h"
@@ -104,11 +105,6 @@ u32 fldGetPlayerSceneState(void);
 
 
 extern void effMiscQuatMultiplyVU(void);
-
-
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
 extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
 
 extern char D_00421F08[];

@@ -6,6 +6,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "ui_color.h"
 #include "fr_font.h"
 #include "kwln.h"
@@ -49,10 +50,6 @@ extern s32 mnuDrawCampFieldSkillPage(KwlnTask *task);
 extern s32 mnuFinishStaffConfigPopup(KwlnTask *task);
 
 extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
-
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
-
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);

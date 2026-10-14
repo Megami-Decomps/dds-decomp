@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_command_partner_output.h"
 #include "btl_enc_bg_entry.h"
@@ -77,8 +78,6 @@ extern s32 D_00435DF0;
 extern s32 D_00435DE4;
 
 extern s32 D_00435DF8;
-extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
 extern s8 D_0037F530[];
 
 extern u8 D_003B4DC0[];

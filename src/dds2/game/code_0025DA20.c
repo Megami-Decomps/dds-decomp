@@ -1,6 +1,7 @@
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "mnu_camp_display.h"
 #include "evt_solar.h"
 #include "eff_random.h"
@@ -66,8 +67,6 @@
 #define CAMP_SLOT_LAST_ROW_INDEX 0x14
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
-
-extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPreparePopupAndDispatchSelection(KwlnTask *task);
 extern s32 mnuAdvanceCampPopup(KwlnTask *task);
 extern s32 mnuFinishCampPopup(KwlnTask *task);

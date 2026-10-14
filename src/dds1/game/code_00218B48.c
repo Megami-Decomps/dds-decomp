@@ -5,6 +5,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
@@ -217,7 +218,6 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 
 void dds3AdminSetControlFlag(void);
 
-void kwlnTaskAddChild(s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void);
 
@@ -2566,7 +2566,7 @@ void mdlViewerTaskDestroy(void) {
 void mdlRestartViewerPhaseTask(void) {
     mdlViewerTaskDestroy();
     mdlViewerState.viewerTask = (s32)kwlnTaskCreate(D_00367A40[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0, D_00367A40[mdlViewerState.taskPhase - 1].update, 0, D_00367A40[mdlViewerState.taskPhase - 1].data);
-    kwlnTaskAddChild(mdlViewerState.unk00, mdlViewerState.viewerTask);
+    kwlnTaskAddChild((KwlnTask *)mdlViewerState.unk00, (KwlnTask *)mdlViewerState.viewerTask);
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", mdlViewer);

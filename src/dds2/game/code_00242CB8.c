@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "scr.h"
@@ -28,12 +29,6 @@ extern s32 scrGetCommandTimer(void);
 
 
 extern char D_00437208[];
-
-
-void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
-
-
 void scrSetIntegerReturnValue(s32 value);
 
 extern char D_00422050[];
