@@ -64,7 +64,6 @@ extern s32 D_003B6940[];
 extern s32 btlUpdateDebugEncounterSelector(void);
 
 extern s32 btlRollMajinEncounter();
-extern s32 btlRollSurpriseAttack();
 extern void btlSelectSceneAudioTrack();
 
 typedef struct SceneControl {

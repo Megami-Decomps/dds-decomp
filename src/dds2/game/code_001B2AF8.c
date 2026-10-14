@@ -24,6 +24,7 @@
 #include "itf.h"
 #include "itf_panel_draw.h"
 #include "btl_state.h"
+#include "btl_scene_initializer.h"
 #include "btl_ui.h"
 #include "btl_phase_panel_work.h"
 #include "sdf.h"
