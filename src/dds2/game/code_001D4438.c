@@ -237,7 +237,7 @@ extern void btlReleaseEventAssets();
 extern void btlReleaseBossData();
 extern void fldPollAreaResourceLoad();
 extern s32 fldGetResourceReadyFlag();
-extern s32 brsTaskPollDone();
+#include "brs_task_poll_done_api.h"
 
 extern s32 func_001B2630();
 
