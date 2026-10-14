@@ -1457,13 +1457,13 @@ typedef struct CampEntryEnableSet {
 } CampEntryEnableSet;
 
 extern const CampEntryEnableSet D_00424BA0;
-extern s32 func_00260250(MenuTerminalContext *, s32);
+extern s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *, s32);
 
 void mnuBuildEnabledCampEntryWindow(MenuTerminalContext *scene) {
     CampEntryEnableSet options = D_00424BA0;
-    scene->unkA0 = func_00260250(scene, 1);
+    scene->unkA0 = mnuHasCampFlaggedItemByClass(scene, 1);
     if (mdlFlagTest(0x901)) {
-        scene->unkA2 = func_00260250(scene, 3);
+        scene->unkA2 = mnuHasCampFlaggedItemByClass(scene, 3);
     }
     switch (D_003C9A40[scene->shopRow].messageSet) {
     case 1:
@@ -1510,7 +1510,7 @@ s32 mnuCampFindActiveSlot(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260250);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuHasCampFlaggedItemByClass);
 
 
 void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
