@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "dds3_admin_control_api.h"
 #include "sdf_dev_cons.h"
 #include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
@@ -90,9 +91,6 @@ extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 extern s32 kwlnTaskNoopCallback(KwlnTask *task);
 
 extern void fldStartSequenceRecord(void);
-
-extern void dds3AdminSetControlFlag(void);
-
 extern void btlStart(s32 mode, s32 pack, s32 encounter);
 
 extern void evtEventViewerDestroyTask(void);

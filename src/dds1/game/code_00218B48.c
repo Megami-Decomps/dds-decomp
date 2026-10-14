@@ -1,4 +1,5 @@
 #include "dds3_path.h"
+#include "dds3_admin_control_api.h"
 #include "sdf_request.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -209,13 +210,6 @@ void mdlDrawViewerSelectionLabel(void);
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
 void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
-
-
-
-
-void dds3AdminSetControlFlag(void);
-
-
 void mdlCleanupViewerTasksAndResources(void);
 
 

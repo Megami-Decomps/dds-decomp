@@ -6,6 +6,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "dds3_admin_control_api.h"
 #include "kwln_task_add_child.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -2505,8 +2506,6 @@ u32 mdlRunViewerEffectEditorTask(void) {
     mdlDrawViewerEffectRecordList();
     return 0;
 }
-
-extern void dds3AdminSetControlFlag();
 
 s32 mdlRequestViewerExitOnce(void) {
     if (mdlViewerState.unk08 == 0) {

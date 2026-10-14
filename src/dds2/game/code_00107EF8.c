@@ -3,6 +3,7 @@
 #include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "dds3_admin_control_api.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -226,8 +227,6 @@ extern void evtStopTestTasks(void);
 extern void evtDestroySkyTask(void);
 
 extern void kwlnFadeBackgroundStartOut();
-
-extern void dds3AdminSetControlFlag(void);
 
 extern void btlStart(s32 mode, s32 pack, s32 encounter);
 

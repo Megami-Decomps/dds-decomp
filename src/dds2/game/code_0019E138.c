@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_admin_control_api.h"
 #include "itf_text_vector.h"
 #include "itf_text_slots_api.h"
 #include "fr_font_text_slots.h"
@@ -97,8 +98,6 @@ extern u32 strlen(const char *str);
 
 
 extern s32 dds3AdminGetActiveMode(void);
-
-extern void dds3AdminSetControlFlag(void);
 
 extern void sdfDebugPrintf(const char *fmt, ...);
 
