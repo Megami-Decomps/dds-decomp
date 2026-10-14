@@ -42,7 +42,68 @@ void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) 
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
-INCLUDE_ASM(const s32, "game/code_00175B00", effScatterCreateDrawObject);
+extern EffScatterDrawRequest D_003D65B0;
+extern void *memset(void *, s32, u32);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+
+/* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
+PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
+    s32 vectors = pairs * 2 + 2;
+    s32 totalVectors = vectors * count;
+    s32 bytes = (totalVectors * 6 + vectors + count) * 4;
+    PcpScatterDraw *object;
+    struct SdfMemBlock *allocation;
+    u8 *cursor;
+    u32 quarter;
+    u32 i;
+    u32 *left;
+    u32 *right;
+    f32 alpha;
+    f32 step;
+    u32 color;
+
+    object = sdfAllocSizeClassBlock(sizeof(PcpScatterDraw));
+    allocation = sdfAllocGeneralBlock(bytes);
+    cursor = (u8 *)sdfResourceRetainAddress(allocation);
+    memset(cursor, 0, bytes);
+    object->points = (f32 *)cursor;
+    cursor += totalVectors * 16;
+    object->uv = (f32 *)cursor;
+    cursor += totalVectors * 8;
+    object->vertexColors = (u32 *)cursor;
+    cursor += vectors * 4;
+    object->colors = (u32 *)cursor;
+    object->color = 0x80808080;
+    object->vectorsPerParticle = vectors;
+    object->packetQueueIndex = 1;
+    object->particleCount = count;
+    object->allocation = allocation;
+    object->scale = 1.0f;
+    object->sharedResource = NULL;
+    object->asset = sdfCreateAssetWithDrawEntries();
+    sdfSetPrimaryStateFloat(object->asset, 1.0f);
+    memset(object->vertexColors, 0x80, vectors * 4);
+    quarter = vectors >> 2;
+    if (quarter >= 2) {
+        left = object->vertexColors;
+        right = left + vectors - 2;
+        alpha = 0.0f;
+        step = 1.0f / quarter;
+        for (i = 0; i < quarter; i++) {
+            color = ((u32)(alpha * 128.0f) << 24) | 0x808080;
+            alpha += step;
+            left[0] = color;
+            left[1] = left[0];
+            right[0] = left[0];
+            right[1] = left[0];
+            left += 2;
+            right -= 2;
+        }
+    }
+    memset(&D_003D65B0, 0, sizeof(EffScatterDrawRequest));
+    D_003D65B0.flags = 0x4000;
+    return object;
+}
 
 /* Release the shared scatter resource before the object's private assets. */
 void effReleaseScatterObject(PcpScatterDraw *object) {
@@ -57,7 +118,6 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
     sdfReleaseChipBlock(object);
 }
 
-extern EffScatterDrawRequest D_003D65B0;
 extern u8 D_00354B90[];
 extern SdfPoolNode *D_00354BF0[];
 #include "sdf_packet_alloc.h"

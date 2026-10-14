@@ -12180,3 +12180,23 @@ Whole-unit gates are 43/0 for the movie unit, 44/0 for the DDS1 implicit
 caller, and 126/0 and 24/0 for the two signed-formal caller units, with no
 context, data or undefined-symbol differences. No owner, flag, SDK macro,
 provider body or held caller body changes are required.
+
+### Scatter drawable: contiguous streams and mirrored alpha ramp
+
+`effScatterCreateDrawObject` (DDS1 `00175B50`, DDS2 `0017D7A8`, 564 bytes
+each) uses the existing `PcpScatterDraw` owner without an allocator-contract
+override. Its 0x80-byte object owns a separate zeroed geometry block:
+16-byte points, 8-byte UVs, one packed color per vector, then one per particle.
+The vector count is `2 * pairs + 2`; the ramp covers a quarter of that count,
+writing paired colors from both ends. The final mirrored store reads the
+source color again, as retail does at `00175D1C` / `0017D974`; retaining that
+ordinary pointer-based copy preserves the real aliasing behavior.
+
+Both native bodies use unsigned float-to-color conversion and signed vector
+count shifting followed by an unsigned quarter-count comparison/conversion.
+Plain C emits those instructions; no new FPU/MMI primitive or attribute is
+needed. Current unsigned particle/segment caller contracts remain unchanged.
+The first fresh reconstruction and its signature closure both gate at
+14 match, 0 differ in each unit, with every existing neighbor unchanged.
+Prior recovery credit belongs to Quartz Kestrel, Copper/PiM and Harbor Maple;
+the latter's allocation-freshness trial was explicitly released.
