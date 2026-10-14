@@ -3035,6 +3035,7 @@
 0x001D0EA8	btlClassifyActionOperand	inferred	Classifies action operand types using actor status and battle-entry metadata, with a jump table over operand kinds.
 0x001D0F98	btlClassifyActionResult	inferred	Checks action/status flags and maps combinations to result codes; sequel counterpart has established name. [names_reviewed19.tsv]
 0x001D1118	btlActionEntryIsEmpty	inferred	Rejects blocked action kinds, slot types and flagged or populated records. [names_reviewed14.tsv]
+0x001D12A0	btlResolveActionTargetResults	inferred	Paired with DDS2 0x001DDB60. Resolves the selected action's targets into damage/status results, including reflection, defeat, miss and press-turn outcomes; the command-print/fetch-owner caller reads the resolved command phase afterward.
 0x001D2B18	btlResetIndexWork	inferred	inits BattleIndexWork and its 13 0xA1C entries, then func_001DAE40(indices) [names_reviewed2.tsv]
 0x001D2BD0	btlInitBattleIndexWork	inferred	Twin of dds2 0x001DF7B8; Allocates index list with capacity 13 and resets index work; also retains resource address. [names_R_FuncNames3.tsv]
 0x001D2F08	btlCreateActorParameterDeltaTask	inferred	Allocates battle actor task, copies BattleDeltaSpec and installs actor-parameter update callback; sibling stages DDS2 exact twin. [names_reviewed19.tsv]
