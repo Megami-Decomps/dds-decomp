@@ -1587,7 +1587,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     fldResetPendingSounds();
     fldClearMenuEntries();
     fldResetObjectSlots();
-    if (fldAreaState.unk20 == 0) {
+    if (fldAreaState.reuseAreaResources == 0) {
         fldInitializeMenuResources();
         fldLoadAreaPackedResources();
     } else if (fldHasAreaResourceNameChanged() != 0 || (u32)(fldAreaState.area - 0x1B) < 2) {
@@ -1704,7 +1704,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         evtRetainSceneResource(dds3GetWorldSecondaryObject(), (void *)D_00435FDC);
     }
     fldInitializeActorMotionSlots();
-    fldAreaState.unk20 = 0;
+    fldAreaState.reuseAreaResources = 0;
     if (fldAreaState.transitionMode != 0) {
         fldUpdateSparkSlots();
     }
@@ -1788,7 +1788,7 @@ void fldReleaseFieldResources(void) {
     fldReleaseObjectSlots();
     fldResetObjectSlots();
     if (fldAreaState.area < 0xC8) {
-        if (fldAreaState.unk20 != 0) {
+        if (fldAreaState.reuseAreaResources != 0) {
             if ((u32)(fldAreaState.area - 0x1B) < 2U) {
                 fldReleaseResourceSlots(&fldAreaState);
                 fldReleaseMenuSlotsAfterWait();
