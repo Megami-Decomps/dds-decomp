@@ -1,4 +1,5 @@
 #include "common.h"
+#include "brs_primary_panel_update_api.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_list.h"
