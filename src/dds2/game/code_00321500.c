@@ -42,7 +42,6 @@ extern MenuRuntimeList D_0045C870;
 
 extern MenuRuntimeList D_0045C880;
 
-extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
 extern void *sdfAllocHeapMemory(u32 bytes);
