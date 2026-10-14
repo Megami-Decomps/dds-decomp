@@ -772,7 +772,7 @@ extern void btlUpdateActiveFrameNoOp(void);
 
 extern s32 btlSweepFinishedTasks(void);
 
-extern s32 func_001E9130(void);
+extern void btlUpdateBattleCameraFrame(void);
 
 extern s32 btlExitWhenAudioAndTasksIdle(void);
 
@@ -791,7 +791,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         btlUpdateActiveActorModelState();
         btlUpdateActiveFrameNoOp();
         btlSweepFinishedTasks();
-        func_001E9130();
+        btlUpdateBattleCameraFrame();
         ((BattleController *)btlRuntime)->frame = ((BattleController *)btlRuntime)->frame + 1;
     } else {
         btlExitWhenAudioAndTasksIdle();

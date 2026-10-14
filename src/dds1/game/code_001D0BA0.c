@@ -5712,7 +5712,7 @@ extern f32 D_00359E60[4], D_00359E70[4];
 
 /* Per-frame battle camera update: run the active camera mode's update hook,
  * advance the command's pose blend, then push the pose into the world camera. */
-void func_001DBE68(void) {
+void btlUpdateBattleCameraFrame(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u32 kind;
     EffWorldNode *camera;
