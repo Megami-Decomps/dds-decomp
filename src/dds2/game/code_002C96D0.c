@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -136,7 +137,7 @@ extern MenuWork *fileLoadSelectionWork;
 extern void fileApplyMenuFlagsToModel(MenuWork *);
 extern void fldPrepareDeferredSceneTransition(void);
 extern void fileCopySaveHeaderNumbers(FileSavePreviewRecord *);
-extern void func_002D0AB8(void);
+extern void filePrintAccessoryLoadNotice(void);
 extern void fileSaveAndDisplayCurrentMoney(void);
 extern s32 ptyApplyUnlockedUnitStatBonusesOnce(s32);
 extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
@@ -215,13 +216,13 @@ extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
 extern s32 D_00437D88;
-extern s32 func_0035C860(char *dst, const char *fmt, ...);
+extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern s32 fileSlotSelectPoll(void);
 
 extern s32 fileBeginSlotMetadataRefresh(void);
 
-extern s32 fileStartMemoryCardDetection(void);
+extern s32 fileStartMemoryCardFormat(void);
 
 extern s32 mcResetSlotMetadata(void);
 
@@ -352,7 +353,7 @@ extern s8 fileConfigTaskState;
 
 extern s32 mcdFinishFileDetectionWithAudio(void);
 
-extern s32 func_002CAED0(void);
+extern s32 fileResetSlotSelection(void);
 
 extern s32 D_00437D50;
 
@@ -558,7 +559,7 @@ void mcdFormatSaveSlotName(void *buffer, s32 slot) {
         titleId = 0x51ee;
     }
     D_00437D88 = titleId;
-    func_0035C860(buffer, "BASLUS-%05d-new-%d", titleId, slot);
+    sprintf(buffer, "BASLUS-%05d-new-%d", titleId, slot);
 }
 
 void fileReqGetSlotCode(void) {
@@ -588,7 +589,7 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
     return condition != 0 && D_00437CE4 == 1;
 }
 
-void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
+void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     struct FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
@@ -1169,7 +1170,7 @@ s32 fileRestartSlotScan(void) {
 
 /* 0x40-byte backing region; the browser uses the first ten slot states. */
 extern u32 fileSlotDisplayStates[16];
-extern s32 func_002CCAD0(void);
+extern s32 fileSlotBrowserUpdate(void);
 
 s32 fileScanSlotStates(void) {
     s32 i;
@@ -1193,7 +1194,7 @@ s32 fileScanSlotStates(void) {
         }
     }
     fileReqBegin(fileMemoryCardRequestIndex);
-    return (s32)func_002CCAD0;
+    return (s32)fileSlotBrowserUpdate;
 }
 
 s32 fileResolveAbortSlotFlow(void) {
@@ -1214,7 +1215,7 @@ s32 fileLoadIconFileAndResetSelection(void) {
     return fileResetSelection();
 }
 
-s32 func_002CAED0(void) {
+s32 fileResetSlotSelection(void) {
     return fileResetSelection();
 }
 
@@ -1254,7 +1255,7 @@ s32 fileSlotStatusPoll(void) {
             fileSetMenuFlowState(0);
             D_00437D3C = 0;
             D_00437D1C = 2;
-            return fileBeginPromptDialog(fileStartMemoryCardDetection, mnuSelectFileBranch, 1);
+            return fileBeginPromptDialog(fileStartMemoryCardFormat, mnuSelectFileBranch, 1);
         }
         fileSetMenuFlowState(0);
         D_00437D3C = 7;
@@ -1404,7 +1405,7 @@ s32 filePollSlotDetectionAndBranch(void) {
                 fileClearAllSlotFlags();
                 D_00437D3C = 0;
                 D_00437D1C = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
             }
             if (D_00437D3C != 7) {
                 fileClearAllSlotFlags();
@@ -1541,7 +1542,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
                 fileSetMenuFlowState(0);
                 D_00437D3C = 0;
                 D_00437D1C = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
             }
             if (D_00437D3C != 7) {
                 fileClearAllSlotFlags();
@@ -2013,7 +2014,7 @@ s32 mcHandleDetectionResult(void) {
     return fileBeginDetectionRequest((u32)fileRestartSlotScan);
 }
 
-s32 fileStartMemoryCardDetection(void) {
+s32 fileStartMemoryCardFormat(void) {
     fileSetMenuFlowState(5);
     fileSetMemoryCardOperationActive();
     fileReqStartCardDetection(fileMemoryCardRequestIndex);
@@ -2128,7 +2129,7 @@ extern void fileLoadSetMode(s8);
 extern void fileSetMenuValueAndInitializeFlags(u32);
 extern void fileCopyRecordHeader(FileSavePreviewRecord *, const void *);
 
-s32 func_002CCAD0(void) {
+s32 fileSlotBrowserUpdate(void) {
     s32 oldSelection = fileSelectedSlotIndex;
     s32 offset;
     s32 selection;
@@ -2459,11 +2460,11 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 hours = ticks / 108000;
                 minutes = (ticks % 108000) / 1800;
                 seconds = (ticks % 1800) / 30;
-                func_0035C860(text, D_00437D98, hours);
+                sprintf(text, D_00437D98, hours);
                 fileDrawMenuImageAtPoint(0x187, y + 0x15, titleColor, text);
-                func_0035C860(text, D_00437DA0, minutes);
+                sprintf(text, D_00437DA0, minutes);
                 fileDrawMenuImageAtPoint(0x1A7, y + 0x15, titleColor, text);
-                func_0035C860(text, D_00437DA0, seconds);
+                sprintf(text, D_00437DA0, seconds);
                 fileDrawMenuImageAtPoint(0x1BD, y + 0x15, titleColor, text);
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
@@ -2513,7 +2514,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
             break;
                             }
                             evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(D_003E7FA8[portrait]));
-                            func_0035C860(text, D_00437DA8, fileSavePreviewRecords[slot].levels[partyIndex]);
+                            sprintf(text, D_00437DA8, fileSavePreviewRecords[slot].levels[partyIndex]);
                             fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
                         }
                     }
@@ -2644,7 +2645,7 @@ extern void *memset(void *dst, s32 value, s32 size);
 struct SdfMemBlock;
 extern void fileSetMemoryCardOperationActive(void);
 extern s32 D_00437D80;
-extern void func_002CE738(KwlnTask *task);
+extern void fileDestroyMemoryCardMenuTask(KwlnTask *task);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 void fileStartMemoryCardMenuForMode(s32 mode) {
@@ -2724,7 +2725,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     } else if (mode == 1) {
         D_00437D0C = 0;
         D_00437CF4 = 1;
-        fileMenuStateHandler = (s32 (*)())func_002CAED0;
+        fileMenuStateHandler = (s32 (*)())fileResetSlotSelection;
         mcdOriginalTitleFileMode = 0;
     } else if (mode == 2) {
         D_00437CF4 = 1;
@@ -2756,7 +2757,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         memcpy(D_00437D58, (void *)(titleNamesAddress + 0x3C0), 0x780);
         sdfReleaseResourceAllocation(titleNamesAllocation);
     }
-    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, func_002CE738, 0);
+    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, fileDestroyMemoryCardMenuTask, 0);
     D_00437CE4 = 1;
     fileInitCursorPulse();
     kwlnFadeOutStart(0, 0, 0, 8);
@@ -2768,7 +2769,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
     }
 }
 
-void func_002CE738(KwlnTask *task) {
+void fileDestroyMemoryCardMenuTask(KwlnTask *task) {
     fileReleaseMenuResources();
 }
 
@@ -3159,13 +3160,13 @@ s32 fileBeginFourWayDialog(u32 ready, u32 completed, u32 cancelled, u32 state) {
     return (s32)fileFourWayDialogPoll;
 }
 
-s32 func_002D0490(void) {
+s32 fileWaitAfterLoadResult(void) {
     return 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
 
-s32 func_002D0498(void) {
+s32 fileApplySelectedLoadResult(void) {
     s32 i;
 
     if (kwlnDrawControlFlags & 2) {
@@ -3176,7 +3177,7 @@ s32 func_002D0498(void) {
     D_00437D1C = 0;
     fldPrepareDeferredSceneTransition();
     if (fileLoadSelectionWork->applyLoadResult == 0) {
-        return (s32)func_002D0490;
+        return (s32)fileWaitAfterLoadResult;
     }
     if (fileLoadSelectionWork->startBranchFlag == 0) {
         mdlFlagSet(0xB8F);
@@ -3185,7 +3186,7 @@ s32 func_002D0498(void) {
         fileCopyRecordHeader(&fileLoadSelectionWork->header, &datGameState->header);
     }
     fileApplyMenuFlagsToModel(fileLoadSelectionWork);
-    func_002D0AB8();
+    filePrintAccessoryLoadNotice();
     fileSaveAndDisplayCurrentMoney();
     for (i = 0; i < 5; i++) {
         u16 activeFlag = datGameState->party[i].flags & DAT_PARTY_FLAG_OCCUPIED;
@@ -3223,14 +3224,14 @@ s32 func_002D0498(void) {
         mdlFlagSet(0x805);
         mdlFlagSet(0x806);
     }
-    return (s32)func_002D0490;
+    return (s32)fileWaitAfterLoadResult;
 }
 
 
 s32 fileBeginFadeAndConfirmSound(void) {
     kwlnFadeInStart(0, 0, 0, 8);
     sndReleaseTrackHandle(0x310000);
-    return (s32)func_002D0498;
+    return (s32)fileApplySelectedLoadResult;
 }
 
 
@@ -3260,7 +3261,7 @@ s32 fileStartLoadDetectionAfterBranchDialog(void) {
 
 s32 fileRestartSelectionFlow(void) {
     fileResetMenuFlowState();
-    return (s32)func_002CAED0;
+    return (s32)fileResetSlotSelection;
 }
 
 s32 fileBeginLoadConfirmationDialog(void) {
@@ -3383,7 +3384,7 @@ void fileReleaseMenuFlowResource(void) {
 
 extern char D_0042B920[];
 
-void func_002D0AB8(void) {
+void filePrintAccessoryLoadNotice(void) {
     sdfDebugPrintf(D_0042B920);
 }
 
@@ -3623,7 +3624,7 @@ typedef struct FileConfigTask {
 } FileConfigTask;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
-extern void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list, FileConfigListNode *node, s32 drawArg);
+extern void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *list, FileConfigListNode *node, s32 drawArg);
 extern void mnuResetTitleStreamLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 extern void mnuQueueTitleSoundStreamEntry(s32);
@@ -3648,7 +3649,7 @@ s32 fileCreateConfigTask(s32 mode) {
     task->result = 0;
     list = mnuCreateListState(0, 5, 0x23);
     task->frame = list;
-    list->drawCallback = func_002D1930;
+    list->drawCallback = fileDrawConfigurationMenuEntry;
     for (i = 0; i < 5; i++) {
         node = (FileConfigListNode *)mnuListAppendNode(task->frame, NULL);
         node->resource = sdfAllocSizeClassBlock(4);
@@ -3710,7 +3711,7 @@ extern s32 fileCreateConfigTask(s32 mode);
 
 extern s32 fileStartQueuedLoad(KwlnTask *task);
 extern void fileConfigTaskDestroy(KwlnTask *task);
-extern s32 func_002D1450(KwlnTask *task);
+extern s32 fileUpdateConfigurationMenu(KwlnTask *task);
 extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
 
 extern s8 fileConfigTaskState;
@@ -3718,7 +3719,7 @@ extern s8 fileConfigTaskState;
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
-        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, fileUpdateConfigurationMenu, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
         fileConfigTaskState = 1;
@@ -3756,7 +3757,7 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigLoadTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigOwnerTaskName);
 
-s32 func_002D1450(KwlnTask *task) {
+s32 fileUpdateConfigurationMenu(KwlnTask *task) {
     s32 oldIndex;
     s32 index;
     s32 i;
@@ -3875,7 +3876,7 @@ s32 func_002D1450(KwlnTask *task) {
     return 0;
 }
 
-extern void func_002D27A0(void *);
+extern void fileDrawConfigurationMenuBackground(void *);
 
 s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
@@ -3884,7 +3885,7 @@ s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->result < 0) {
         return -1;
     }
-    func_002D27A0((void *)fileConfigTaskWork);
+    fileDrawConfigurationMenuBackground((void *)fileConfigTaskWork);
     mnuCallInitWide(0x400, 0x400, 0, (u32)((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
     return 0;
 }
@@ -4027,7 +4028,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DF0);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileConfigInputTaskName);
 
-void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
+void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
                    FileConfigListNode *node, s32 drawArg) {
     s8 labelFrames[5] = {0, 1, 2, 3, 4};
     s32 index = node->index;
@@ -4177,7 +4178,7 @@ void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
 }
 
 
-void func_002D27A0(void *arg) {
+void fileDrawConfigurationMenuBackground(void *arg) {
     s16 sprites[5][4] = {
         {0, 2, 99, -57},
         {0, 3, -31, 365},
@@ -4671,10 +4672,10 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     s32 fd;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, filePath);
+        sprintf(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
     fileJobWriteSerializedPayload(fd, job);
@@ -5259,10 +5260,10 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, filePath);
+        sprintf(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
     header = *queue;
@@ -5359,10 +5360,10 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, filePath);
+        sprintf(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
     image.version = 5;
@@ -5920,24 +5921,13 @@ fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
 
 #include "eff_anim.h"
 
-/* Same complete producer view as the generated-texture packet provider. */
-typedef struct EffGeneratedTextureDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    SdfTex *texture;
-} EffGeneratedTextureDescriptor;
-
 extern void billInvokeCallback(struct BillObj *);
 extern void effCopyVector(void *, void *);
 extern void fileReadRecordSecondVector(u8 *, void *);
 extern void fileReadVectorPtr20(u8 *, void *);
 extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
 
-void func_002D69B8(s32 object) {
+void fileDrawLoadObjectSlots(s32 object) {
     EffGeneratedTextureDescriptor params;
     EffAnimSample sample;
     f32 transformed[4];
@@ -6208,9 +6198,9 @@ void func_002D69B8(s32 object) {
 }
 
 
-void func_002D7398(u32 objectAddr) {
+void fileUpdateLoadObjectSlots(u32 objectAddr) {
     fileAcquireLoadObjectRecord((EffectSurfaceNode *)objectAddr);
-    func_002D69B8(objectAddr);
+    fileDrawLoadObjectSlots(objectAddr);
 }
 
 void fileSendLoadObjectRecordVector(EffectSurfaceNode *obj) {
@@ -7357,7 +7347,7 @@ typedef struct FileOrientedRingMotion {
     f32 angleMultiplier;
 } FileOrientedRingMotion;   /* 0x38, ordinary word alignment */
 
-extern void func_003364B8(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void func_00336818(f32 angle);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
@@ -7456,7 +7446,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             motion->height = 0.0f;
                             motion->orientationAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                             motion->tiltAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                            func_003364B8(motion->orientationAngle);
+                            sdfVuLoadRotationMatrixX(motion->orientationAngle);
                             func_00336818(motion->tiltAngle);
                             sdfMultiplyVuMatrixInPlace();
                             direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * initialRadius;
@@ -7527,7 +7517,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         motion->height += gravity * age;
                         motion->radius += motion->radiusStep;
                         phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
-                        func_003364B8(motion->orientationAngle);
+                        sdfVuLoadRotationMatrixX(motion->orientationAngle);
                         func_00336818(motion->tiltAngle);
                         sdfMultiplyVuMatrixInPlace();
                         radius = motion->radius;

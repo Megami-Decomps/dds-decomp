@@ -1579,7 +1579,7 @@ u8 fldIsFlagActive(void) {
     return 1;
 }
 
-void func_001248D0(void) {
+void fldConfigureRenderCleanupMessage(void) {
     sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (u32 *)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
 }
 
@@ -2021,7 +2021,7 @@ extern s32 fldUpdateCameraFollow(void);
 
 extern s32 fldUpdateCameraFrame(void);
 
-extern void fldUpdateObjectActivation(void);
+extern void fldUpdateObjectSlotActivation(void);
 
 extern void fldUpdateSwayOffset(void);
 
@@ -2280,7 +2280,7 @@ s32 fldProcSequence(KwlnTask *task) {
             fldHasKiretaLabelProcess() == 0 && fldHasHirakenaiLabelProcess() == 0 &&
             fldHasBadkaifukuLabelProcess() == 0) {
             fldFlushQueuedEffectPositions();
-            fldUpdateObjectActivation();
+            fldUpdateObjectSlotActivation();
         }
     }
     if (fldGetCampSceneControlMode() != 1) fldUpdateCameraFollow();
@@ -2396,7 +2396,7 @@ u8 fldIsFieldResourceWaitFinished(void) {
     return sdfCheckPendingWorkWithInterrupts() == 0;
 }
 
-void func_00126038(void) {
+void fldApplyTerminalActorSelection(void) {
     fldSelectActorFromSceneIndexTables();
 }
 

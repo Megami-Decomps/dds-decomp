@@ -593,7 +593,7 @@ extern char *D_0040BE00[];
 extern s32 sceSifLoadModule(const char *, s32, const char *);
 extern char *strcpy(char *, const char *);
 extern char *strcat(char *, const char *);
-extern void func_0034EC40(void);
+extern void sdfInitializeMemoryCardRpcClient(void);
 
 /* Load the selected pair of IOP module paths from prefix; loader results are not checked. */
 void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
@@ -606,7 +606,7 @@ void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
         strcat(path, moduleNames[moduleIndex]);
         sceSifLoadModule(path, 0, 0);
     }
-    func_0034EC40();
+    sdfInitializeMemoryCardRpcClient();
 }
 
 /* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */

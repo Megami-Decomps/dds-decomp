@@ -911,7 +911,7 @@ extern void dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(u32 *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
-extern void func_00126038(s32 a, s32 b);
+extern void fldApplyTerminalActorSelection(s32 a, s32 b);
 extern void fldProcessDeferredSceneCommand(void);
 extern s8 mnuTerminalTaskState;
 
@@ -933,7 +933,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
     }
-    func_00126038(work->mode, work->initState);
+    fldApplyTerminalActorSelection(work->mode, work->initState);
     fldProcessDeferredSceneCommand();
 }
 

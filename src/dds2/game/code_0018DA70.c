@@ -104,7 +104,7 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
-extern u32 func_001200E0(void);
+extern u32 fldIsUpdateInhibited(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
@@ -254,7 +254,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     void *drawPacket;
 
-    if (func_001200E0() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
@@ -403,14 +403,14 @@ void effDrawBlurListWithFramePacket(void *list) {
     D_003803E8.append(&D_003803E8, list);
 }
 
-extern u32 func_001200E0(void);
+extern u32 fldIsUpdateInhibited(void);
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
 void effDrawBlurSource(BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
     void *list;
 
-    if (func_001200E0() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, source->blendControl, resource);

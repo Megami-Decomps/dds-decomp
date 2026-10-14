@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
@@ -103,7 +104,7 @@ extern void effMiscQuatMultiplyVU(void);
 
 
 
-extern s32 fileStartMemoryCardDetection(void);
+extern s32 fileStartMemoryCardFormat(void);
 extern s32 mnuSelectFileBranch(void);
 
 
@@ -310,7 +311,7 @@ extern char D_003B26C8[];
 
 extern void dds3DispatchIndexedCallback(void *callback);
 
-extern void func_002966D8(s32 object);
+extern void fileDrawLoadObjectSlots(s32 object);
 
 extern s32 fileResetSelection(void);
 extern s32 D_003BC818;
@@ -351,7 +352,7 @@ extern u32 D_003BC804;
 
 extern void fileSetMemoryCardOperationActive(void);
 
-extern void fileSubmitMemoryCardDetectionRequest(u32 handle);
+extern void fileReqStartCardDetection(u32 handle);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -1142,7 +1143,7 @@ s32 fileSlotStatusPoll(void) {
             fileSetMenuFlowState(0);
             D_003BC854 = 0;
             D_003BC834 = 2;
-            return fileBeginPromptDialog(fileStartMemoryCardDetection, mnuSelectFileBranch, 1);
+            return fileBeginPromptDialog(fileStartMemoryCardFormat, mnuSelectFileBranch, 1);
         }
         fileSetMenuFlowState(0);
         D_003BC854 = 7;
@@ -1286,7 +1287,7 @@ s32 filePollSlotDetectionAndBranch(void) {
                 fileClearAllSlotFlags();
                 D_003BC854 = 0;
                 D_003BC834 = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
             }
             if (D_003BC854 != 7) {
                 fileClearAllSlotFlags();
@@ -1422,7 +1423,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
                 fileSetMenuFlowState(0);
                 D_003BC854 = 0;
                 D_003BC834 = 2;
-                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardFormat, &mnuSelectFileBranch, 1);
             }
             if (D_003BC854 != 7) {
                 fileClearAllSlotFlags();
@@ -2156,10 +2157,10 @@ s32 mcHandleDetectionResult(void) {
     return fileBeginDetectionRequest((u32)fileRestartSlotScan);
 }
 
-s32 fileStartMemoryCardDetection(void) {
+s32 fileStartMemoryCardFormat(void) {
     fileSetMenuFlowState(5);
     fileSetMemoryCardOperationActive();
-    fileSubmitMemoryCardDetectionRequest(fileMemoryCardRequestIndex);
+    fileReqStartCardDetection(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
 
@@ -2675,7 +2676,7 @@ s32 fileDrawMenuFrame(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileEnterMcPackScene);
 
-void func_0028F440(void) {
+void fileDestroyMemoryCardMenuTask(void) {
     fileReleaseMenuResources();
 }
 
@@ -5305,24 +5306,13 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
 
 #include "eff_anim.h"
 
-/* Same complete producer view as the generated-texture packet provider. */
-typedef struct EffGeneratedTextureDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    SdfTex *texture;
-} EffGeneratedTextureDescriptor;
-
 extern void billInvokeCallback(struct BillObj *);
 extern void effCopyVector(void *, void *);
 extern void fileReadRecordSecondVector(void *, u128 *);
 extern void fileReadVectorPtr20(void *, u128 *);
 extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
 
-void func_002966D8(s32 object) {
+void fileDrawLoadObjectSlots(s32 object) {
     LoadObj *obj = (LoadObj *)object;
     EffGeneratedTextureDescriptor params;
     EffAnimSample sample;
@@ -5537,9 +5527,9 @@ void func_002966D8(s32 object) {
 }
 
 
-void func_00296E98(s32 object) {
+void fileUpdateLoadObjectSlots(s32 object) {
     fileAcquireLoadObjectRecord(object);
-    func_002966D8(object);
+    fileDrawLoadObjectSlots(object);
 }
 
 void fileSendLoadObjectRecordVector(LoadObj *obj, u128 *vector) {

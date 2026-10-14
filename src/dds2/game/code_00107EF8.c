@@ -1348,16 +1348,16 @@ u32 func_0010AC00(void) {
     return 0;
 }
 
-void func_0010AC08(void) {
-    func_003091E8();
+void evtEnterInterfaceMode(void) {
+    itfInitializeAdminInterfaceNoop();
 }
 
-u32 func_0010AC20(void) {
-    func_003091F0();
+u32 evtDestroyInterfaceMode(void) {
+    itfShutdownAdminInterfaceNoop();
     return 0;
 }
 
-u32 func_0010AC40(void) {
+u32 evtKeepInterfaceModePending(void) {
     return 0;
 }
 
@@ -1662,7 +1662,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
 extern char D_00435D50[];
 extern char D_00435D58[];
-extern void func_0035C860(char *buffer, const char *format, ...);
+extern void sprintf(char *buffer, const char *format, ...);
 extern void sdfDrawHeapMapOverlay(void *, s32, s32);
 
 /* Format general/chip free-memory statistics into the supplied draw surface.
@@ -1679,10 +1679,10 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     sdfDrawHeapMapOverlay(packetList, 0x8AC0, 0x79C0);
-    func_0035C860(statusText, D_00435D50, generalHeapStats.freeBytes);
+    sprintf(statusText, D_00435D50, generalHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x86C0,
         (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText));
-    func_0035C860(statusText, D_00435D58, chipHeapStats.freeBytes);
+    sprintf(statusText, D_00435D58, chipHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x86C0,
         (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText));
     surface->append(surface, packetList);

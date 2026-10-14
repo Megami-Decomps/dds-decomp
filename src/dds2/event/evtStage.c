@@ -60,7 +60,7 @@ extern void sdfSetViewFieldOfView(f32);
 extern void dds3DrawSetIndexedWord(u32, s32);
 extern void kwlnDrawCopyWords20(void *);
 extern void kwlnDrawCopyRow128(void *);
-extern void func_0035C860(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
 {
@@ -74,7 +74,7 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     dds3SetWorldObject(worldObject);
     dds3SetWorldObjectValue(worldObject, (area << 16) + room);
     fldFormatAreaDirectory(directory, area, room);
-    func_0035C860(resourcePath, D_00421578, directory, area, room);
+    sprintf(resourcePath, D_00421578, directory, area, room);
     dds3AttachResourceHandleToWorldObject(worldObject, (u32)resourcePath);
     mdlSpawnViewerWorldObject();
     if (area < 10) {
@@ -119,14 +119,14 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3,
     return 1;
 }
 
-extern void func_0035C860(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern void sdfDebugPrintf(const char *format, ...);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
 void evtCreateEventScriptProcess(s32 eventId) {
-    func_0035C860(evtScriptResourcePathBuffer, D_00421588, eventId - eventId % 10, eventId, eventId);
+    sprintf(evtScriptResourcePathBuffer, D_00421588, eventId - eventId % 10, eventId, eventId);
     scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 

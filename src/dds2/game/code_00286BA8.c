@@ -441,7 +441,7 @@ extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern s32 mnuGetMantraSourceValue(u16);
 extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
@@ -520,7 +520,7 @@ s32 mtrMantraEquipUpdate(void) {
         evtCopyEntryStringToActiveWindow(
             2, D_00435E50[selectedEntryId].encodedText);
         sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
-        func_0035C860(text, "%d", sourceAmount);
+        sprintf(text, "%d", sourceAmount);
         evtCopyEntryStringToActiveWindow(3, text);
         evtSetMessageWindowOptionWhenOpen(0);
         dspStartEntry(0);
@@ -535,7 +535,7 @@ s32 mtrMantraEquipUpdate(void) {
         evtCopyEntryStringToActiveWindow(
             2, D_00435E50[selectedEntryId].encodedText);
         sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
-        func_0035C860(text, "%d", sourceAmount);
+        sprintf(text, "%d", sourceAmount);
         evtCopyEntryStringToActiveWindow(3, text);
         evtSetMessageWindowOptionWhenOpen(0);
         dspStartEntry(1);
@@ -565,7 +565,7 @@ s32 mtrMantraEquipUpdate(void) {
         evtCopyEntryStringToActiveWindow(
             2, D_00435E50[selectedEntryId].encodedText);
         sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
-        func_0035C860(text, "%d", sourceAmount);
+        sprintf(text, "%d", sourceAmount);
         evtCopyEntryStringToActiveWindow(3, text);
         dspStartEntry(2);
         equip->state = 12;
@@ -679,7 +679,7 @@ s32 mtrMantraEquipDraw(void) {
 }
 
 extern const char D_00437928[];
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32, s32);
 
 void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *list,
@@ -700,7 +700,7 @@ void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *l
                         icons[record->unitId] + selected, 0, depth);
     mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha,
                         selected + 0x20, 0, depth);
-    func_0035C860(text, D_00437928, record->level);
+    sprintf(text, D_00437928, record->level);
     frFontDrawTextVariantBAndMeasure(0xBB, node->index * 22 + 0x81, drawPool,
                                     (highlightAlpha & 0xFF) | 0xA09DC300,
                                     selected * 4, text, 0, depth);

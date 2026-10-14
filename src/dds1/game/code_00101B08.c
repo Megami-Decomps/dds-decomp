@@ -215,7 +215,7 @@ extern u8 D_00325788[];
 extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
 extern void kwlnUpdateDrawParameterTransitions(void);
-extern void func_001248D0(void);
+extern void fldConfigureRenderCleanupMessage(void);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 #include "sdf_packet_alloc.h"
 #include "sdf_message.h"
@@ -317,7 +317,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00325788),
             (s32)(messageData + 0x400), (u32 *)(messageData + 0x420),
             (s32)(messageData + 0x600), (s32)(messageData + 0x620));
-        func_001248D0();
+        fldConfigureRenderCleanupMessage();
         sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00325788 + 0x80),
             (s32)(messageData + 0x6E0), (u32 *)(messageData + 0x700),
             (s32)(messageData + 0x720), (s32)(messageData + 0x740));
@@ -395,7 +395,7 @@ extern void kwlnDrawBackgroundFadeBands(void);
 extern void kwlnFadeUpdate(void);
 extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
-extern s32 func_0011E278(void);
+extern s32 fldIsUpdateInhibited(void);
 extern void func_002EA5C0(s32);
 extern void sdfQueueFramePackets(SdfListHead *, SdfPacketChain *);
 extern u8 D_00325788[];
@@ -439,7 +439,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
         groupHeads += KWLN_FRAME_GROUP_HEAD_BYTES / sizeof(*groupHeads);
         packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
-    if (kwlnDrawOverlayEnabled != 0 && func_0011E278() == 0) {
+    if (kwlnDrawOverlayEnabled != 0 && fldIsUpdateInhibited() == 0) {
         packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
         sdfInitPacketList(packetList);
         sdfAppendDmaPrimary(packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));

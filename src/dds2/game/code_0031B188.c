@@ -179,7 +179,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work) {
                  i < registry->secondCount; i++, list++) {
                 record = NULL;
                 if (list->records != NULL) {
-                    record = func_003225C0(list);
+                    record = mnuFindFrameKeyedMotionRecord(list);
                 }
                 if (record != NULL) {
                     frame = work->elapsed;
@@ -281,7 +281,7 @@ extern char D_0040AD50[][64];
 extern const char D_00438950[]; /* "%d:%s\n"; shared sdata in current build. */
 
 /* Give the first record the source queue and clone it for subsequent records. */
-void func_0031B748(MnuEffectList *list, s32 resourceIndex, FileQueue **sources) {
+void mnuAssignEffectRecordQueues(MnuEffectList *list, s32 resourceIndex, FileQueue **sources) {
     FileQueue *source = NULL;
     MnuEffectRecord *record = list->records;
     s32 i;
@@ -505,7 +505,7 @@ u32 mnuResumeEffectQueueFrameAdvance(void) {
 
 extern char D_0042DAE8[];
 
-MnuSectionModelWork *func_0031BFE0(s32 listCount, s32 *nodeCounts) {
+MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
     s32 listBytes = listCount * sizeof(MnuNodeList);
     s32 allocationSize = listBytes + sizeof(MnuSectionModelWork);
     s32 i;
@@ -575,7 +575,7 @@ void mnuDestroyAllModelNodeContexts(MnuNodeList *list) {
     }
 }
 
-void func_0031C280(MnuNodeList *list, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
+void mnuPopulateModelNodeList(MnuNodeList *list, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
     MnuModelNode *node = list->nodes;
     s32 i;
 
@@ -721,7 +721,7 @@ void mnuRefreshNodeSecondaryVector(u8 *node, f32 xAngle, f32 yAngle, f32 zAngle)
     mdlUpdateContextRotationBasisFromQuaternion(((MnuModelNode *)node)->model);
 }
 
-void func_0031C688(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
+void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle) {
     f32 vector[4];
     f32 left[4];
     f32 up[4];

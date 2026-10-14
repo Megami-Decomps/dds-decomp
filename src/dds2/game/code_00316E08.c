@@ -103,7 +103,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void);
 extern char D_0042D4D0[];
 
 
-void func_00316FA8(MnuShootingWork *work);
+void mdlDestroyOptionalViewerPackageWork(MnuShootingWork *work);
 
 void itfSetPackedRgbAlpha(SdfFlagListWork *entry, u32 color) {
     entry->params.color.initialColor = color & 0xFFFFFF;
@@ -128,12 +128,12 @@ void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
 }
 
 /* Store generated vertices relative to the view target and add it back at draw time. */
-void sdfEnableFlagListCameraRelativeMode(void) {
+void sdfEnableFlagListViewTargetRelativeMode(void) {
     D_00438918 = 1;
 }
 
 /* Keep generated vertices in world coordinates instead of target-relative storage. */
-void sdfDisableFlagListCameraRelativeMode(void) {
+void sdfDisableFlagListViewTargetRelativeMode(void) {
     D_00438918 = 0;
 }
 
@@ -155,7 +155,7 @@ u8 mdlViewerPackageTaskExists(void) {
 u32 mdlStopViewerPackageTask(void) {
     mnuMovieTaskState = 2;
     D_00435BB0 = 1;
-    func_00316FA8(D_0043891C);
+    mdlDestroyOptionalViewerPackageWork(D_0043891C);
     kwlnTaskDestroyWithHierarchyByName(D_0042D4D0, 1);
     return mnuResumeEffectQueueFrameAdvance();
 }
@@ -174,7 +174,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
     return work;
 }
 
-void func_00316FA8(MnuShootingWork *work) {
+void mdlDestroyOptionalViewerPackageWork(MnuShootingWork *work) {
     if (work != NULL) {
         mnuDestroyShootingWork(work);
     }
@@ -253,7 +253,7 @@ extern MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data)
 void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry);
 
 /* Advance the shooting package loader; only the completed state returns one. */
-s32 func_00317058(u8 *workBytes) {
+s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
     MnuShootingWork *work = (MnuShootingWork *)workBytes;
     void *data = NULL;
 
@@ -665,18 +665,18 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
 }
 
 extern u8 D_0037F510[2][2][16];
-extern void func_0031AEB8(MnuShootingWork *);
+extern void mnuToggleShootingPause(MnuShootingWork *);
 extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
 extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
 extern void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *, MnuShootingWork *);
 extern s32 mnuUpdateActiveMenuWorkEntries(s32);
-extern void func_003223F8(void);
-extern s32 func_00324840(void);
-extern s32 func_0031A0B8(MnuShootingWork *);
+extern void mnuAdvanceRuntimeHitTargets(void);
+extern s32 mnuUpdateShootingPlayerInput(void);
+extern s32 mnuAdvanceShootingPlayerEntryReset(MnuShootingWork *);
 extern MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *, MnuShootingWork *);
-extern s32 func_00323BB8(MnuShootingWork *);
+extern s32 mnuDispatchRuntimeListPairOverlaps(MnuShootingWork *);
 extern s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *);
 extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
@@ -702,7 +702,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     if ((s8)D_0037F510[1][0][12] < 0 && work->phase == 2 &&
         !D_0040ABF8.flagsBits.updated && D_0040ABF8.inputCountdown == 0 &&
         !D_0040ABF8.flagsBits.inputDisabled) {
-        func_0031AEB8(work);
+        mnuToggleShootingPause(work);
     }
     if (work->unk70Bit0) {
         result = mnuPollPauseChoiceInput(work);
@@ -710,11 +710,11 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         case -1:
             break;
         case 0:
-            func_0031AEB8(work);
+            mnuToggleShootingPause(work);
             break;
         case 1:
             work->flags |= 4;
-            func_0031AEB8(work);
+            mnuToggleShootingPause(work);
             work->flags |= 0x20;
             work->phase = 11;
             work->result = 0;
@@ -722,7 +722,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             return 1;
         case 2:
             work->flags |= 4;
-            func_0031AEB8(work);
+            mnuToggleShootingPause(work);
             work->flags |= 0x20;
             work->result = 1;
             work->phase = 11;
@@ -737,7 +737,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     mnuProcessMenuWorkEntryLifecycle(&D_0040ABF8, work);
     if (work->phase == 2) mnuUpdateActiveMenuWorkEntries(0);
     else mnuUpdateActiveMenuWorkEntries(1);
-    func_003223F8();
+    mnuAdvanceRuntimeHitTargets();
     memset(&input, 0, sizeof(input));
     if (!((work->flags >> 2) & 1)) {
         if ((s8)D_0037F510[1][0][6] != 0) input.verticalNegative = 1;
@@ -762,7 +762,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             input.actionSlot1 = 1;
     }
     mnuSetInputActionSnapshot(&input);
-    if (func_00324840() == 0) func_0031A0B8(work);
+    if (mnuUpdateShootingPlayerInput() == 0) mnuAdvanceShootingPlayerEntryReset(work);
     if (!((work->flags >> 5) & 1)) {
         record = mnuFindOverlappingRuntimeRecord(&D_0040ABF8, work);
         if (record != NULL) {
@@ -771,7 +771,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         }
     }
     if (work->phase < 3) {
-        func_00323BB8(work);
+        mnuDispatchRuntimeListPairOverlaps(work);
         if (work->phase < 3) mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
     }
     mnuDispatchRuntimeWorkOverlaps(mnuGetRuntimeAnimationList(), work);
@@ -850,7 +850,7 @@ extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
 extern struct SdfPoolNode *D_00380788[13][4];
 
-s32 func_00318C00(MnuShootingWork *work) {
+s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     MenuProgressParameters *origin = mnuGetResourceProgressParameters();
     MenuRuntimeList *list;
     MenuRuntimeRecord *record;
@@ -989,7 +989,7 @@ extern u8 *mnuAcquireUnusedModelNode(u32 *group);
 extern s32 itfClaimFreeModelInstance(ModelInstanceList *list);
 extern MnuModelNode *D_00438928;
 
-void func_003191B0(MenuWorkEntry *entry, MnuShootingWork *work) {
+void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
     u32 tagClass = entry->tag & MNU_WORK_TAG_CLASS_MASK;
     MnuNodeList *groups = work->modelWork->groups;
     ModelInstanceList *instances = work->work24->lists;
@@ -1054,7 +1054,7 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00319388);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 
-void func_00319E48(MenuRuntimeRecord *record) {
+void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *record) {
     MnuModelNode *node;
 
     if ((record->state.kind & 0xF0) == 0x40) {
@@ -1119,7 +1119,7 @@ void func_0031A090(void) {
     }
 }
 
-s32 func_0031A0B8(MnuShootingWork *work) {
+s32 mnuAdvanceShootingPlayerEntryReset(MnuShootingWork *work) {
     MenuWorkEntry *entry = &D_0040ABF8;
     MnuModelNode *node = entry->object.modelNode;
     s32 finished = 0;

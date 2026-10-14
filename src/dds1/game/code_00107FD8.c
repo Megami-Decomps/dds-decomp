@@ -1361,16 +1361,16 @@ u32 func_0010AAC0(void) {
     return 0;
 }
 
-void func_0010AAC8(void) {
-    func_002C16E0();
+void evtEnterInterfaceMode(void) {
+    itfInitializeAdminInterfaceNoop();
 }
 
-u32 func_0010AAE0(void) {
-    func_002C16E8();
+u32 evtDestroyInterfaceMode(void) {
+    itfShutdownAdminInterfaceNoop();
     return 0;
 }
 
-u32 func_0010AB00(void) {
+u32 evtKeepInterfaceModePending(void) {
     return 0;
 }
 

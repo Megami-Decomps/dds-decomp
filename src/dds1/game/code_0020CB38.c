@@ -118,7 +118,7 @@ typedef char BtlUnitScaleTransitionLayout[
      (u32)&((BtlUnitScaleTransition *)0)->range == 0x10) ? 1 : -1];
 
 
-extern f32 btlGetUnitModelValue1C(BtlUnit *);
+extern f32 btlGetUnitModelCurrentFrame(BtlUnit *);
 
 /* Initialize the supported boss-unit scale transition using the active lead's model value. */
 void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {
@@ -180,7 +180,7 @@ next_actor:
     payload->active = 1;
     payload->unitId = transitionUnitId;
     payload->scale = unit->scale;
-    payload->modelValue = (s32)btlGetUnitModelValue1C(actor);
+    payload->modelValue = (s32)btlGetUnitModelCurrentFrame(actor);
     btlScalarRangeInitQuadratic(&payload->range, 80.0f);
 done:
     return;

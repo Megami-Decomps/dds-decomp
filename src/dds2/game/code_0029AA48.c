@@ -22,7 +22,7 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
 struct FrFontGlyph;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
@@ -48,7 +48,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
         }
     }
     color = uiBlendColors(0xA09DC380, 0xA09DC300, iconFade);
-    func_0035C860(text, D_004379B0, delta);
+    sprintf(text, D_004379B0, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x8E8, 0, color, text, 0);
     frFontSetChildChainFirstOption(glyph, 3);
     frFontDrawGlyphChain(glyph, 1, 0x53);
@@ -173,10 +173,10 @@ void mnuClearItemSelectionSlots(BrsSkillPackageWork *context) {
     } while (-1 < remaining);
 }
 
-extern void func_00314298(DatPartyRecord *, const s32 *);
+extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
 void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *unit, BrsSkillPackageWork *menu) {
-    func_00314298(unit, menu->statGains);
+    ptyRecomputeMaxVitals(unit, menu->statGains);
     mnuRefreshSelectedUnitPanels(unit, menu);
 }

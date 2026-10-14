@@ -113,7 +113,7 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
-extern s32 func_0011E278();
+extern s32 fldIsUpdateInhibited();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
@@ -263,7 +263,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
     u64 *samplingPacket, *textureAlphaPacket, *blendPacket, *clampPacket;
     void *drawPacket;
 
-    if (func_0011E278() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
@@ -412,14 +412,14 @@ void effDrawBlurListWithFramePacket(void *list) {
     D_003253E8.append(&D_003253E8, list);
 }
 
-extern s32 func_0011E278();
+extern s32 fldIsUpdateInhibited();
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
 void effDrawBlurSource(BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
     void *list;
 
-    if (func_0011E278(source) == 0) {
+    if (fldIsUpdateInhibited(source) == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, source->blendControl, resource);
@@ -458,7 +458,7 @@ void effReleaseBlurTemplate(EffBlurTemplate *owner) {
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 centerX, centerY, halfExtent;
 
-    if (func_0011E278(rect) == 0) {
+    if (fldIsUpdateInhibited(rect) == 0) {
         centerX = rect->body.source.position[0] + 0x100;
         centerY = rect->body.source.position[1] + 0xE0;
         halfExtent = rect->body.extent;
@@ -474,7 +474,7 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 centerX, centerY, halfExtent;
 
-    if (func_0011E278(owner) == 0) {
+    if (fldIsUpdateInhibited(owner) == 0) {
         centerX = owner->body.source.position[0] + 0x1000;
         centerY = (owner->body.source.position[1] + 0xE00) >> 1;
         halfExtent = owner->body.extent;

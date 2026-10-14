@@ -720,12 +720,12 @@ s32 itfUpdateActiveMessageWindows(void) {
 }
 
 extern void itfMesDestroyWindow(s32 window);
-extern u32 func_0011E278(void);
+extern u32 fldIsUpdateInhibited(void);
 
 s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     ItfMesPoolNode *node;
 
-    if (func_0011E278() != 0) {
+    if (fldIsUpdateInhibited() != 0) {
         return 0;
     }
     for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {

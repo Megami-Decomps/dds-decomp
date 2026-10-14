@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "eff_generated_texture_descriptor.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -87,7 +88,6 @@ extern s32 effBillResourceOwners[];
 #include "sdf_packet_alloc.h"
 
 
-typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
 void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
 typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
@@ -121,7 +121,7 @@ BillObj *effCreateBillboardSharingIndexedResource(s32 index) {
     return effect;
 }
 
-u32 func_00159BB0(void) {
+u32 effGetGeneralResourceCount(void) {
     return 0xf;
 }
 
@@ -506,18 +506,6 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A4B0);
 
-/* Generated texture quad input. Producers initialize fields through +0x28;
- * +0x18..+0x1F are not accessed by this packet builder. */
-struct EffGeneratedTextureDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    SdfTex *texture;
-};
-
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
@@ -821,7 +809,7 @@ void effReleaseBufferAllocation(EffectBufferTail *buffer) {
 struct ParColorRamp;
 extern void parInitColorRamp(struct ParColorRamp *, s32);
 extern ParTable *parCreateHistorySlotTable(u32, u16, BillObj **);
-extern u32 func_00162E10(u16);
+extern u32 parGetEmitterCellGroupDivisor(u16);
 extern void parDispatchSub(void *, s32, void *, void *);
 
 /* Allocate drawing resources and reset the emitter's common runtime state. */
@@ -847,7 +835,7 @@ void effInitializeEmitterHead(EffEmitterHead *owner) {
     case 2:
         owner->sub.primaryDrawSystem = parAllocateCellSystem(
             owner->particleCount, owner->sub.templateEntryCount,
-            func_00162E10(owner->sub.templateEntryCount), 0);
+            parGetEmitterCellGroupDivisor(owner->sub.templateEntryCount), 0);
         parDispatchSub(owner->sub.primaryDrawSystem, 1,
                        owner->sub.dispatchParameter, owner->sub.dispatchParameter);
         parSetCellDrawBucket(owner->sub.primaryDrawSystem, (u16)owner->drawKind);
@@ -855,7 +843,7 @@ void effInitializeEmitterHead(EffEmitterHead *owner) {
     case 3:
         owner->sub.secondaryDraw.system = parAllocateCellSystem(
             owner->particleCount, owner->sub.templateEntryCount,
-            func_00162E10(owner->sub.templateEntryCount), 1);
+            parGetEmitterCellGroupDivisor(owner->sub.templateEntryCount), 1);
         parDispatchSub(owner->sub.secondaryDraw.system, 1,
                        owner->sub.dispatchParameter, owner->sub.primaryDrawSystem);
         parSetCellDrawBucket(owner->sub.secondaryDraw.system, (u16)owner->drawKind);
@@ -2664,7 +2652,7 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015F560(void) {
+void effResetSingleParticleTemplate(void) {
     effInitParticleRecord();
 }
 

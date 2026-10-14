@@ -131,16 +131,16 @@ extern s32 D_00438F6C;
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern void btlCmdSimpleB(s32, s32);
-extern void btlCmdSimpleI(s32, s32);
+extern void btlPickCommandElementCheckedTarget(s32, s32);
+extern void btlPickCommandTargetExcludingActor(s32, s32);
 
-extern void btlCmdSimpleA(s32, u16);
+extern void btlPickCommandLowestHpBlockTarget(s32, u16);
 
-extern void btlCmdSimpleD(s32, u16);
+extern void btlPickCommandTargetWithoutStatusMask(s32, u16);
 
 extern void btlFilterCommandTargetsByUnitId(s32, u16);
 
-extern void btlCmdSimpleJ(s32, u16);
+extern void btlPickCommandElementBlockTarget(s32, u16);
 
 extern s8 btlHistoryCounter;
 
@@ -174,7 +174,7 @@ extern s32 sceDopen(char *);
 
 extern s32 D_00438F80;
 
-extern void func_0035C860();
+extern void sprintf();
 
 
 extern u32 btlGetEffectActive(void);
@@ -183,7 +183,7 @@ extern u32 btlGetEffectValue(void);
 
 extern u32 btlGetSubtaskTargetMode(void);
 
-extern void btlCmdSimpleC(s32, u16);
+extern void btlPickCommandTargetWithStatusMask(s32, u16);
 
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
 
@@ -1299,32 +1299,37 @@ u32 btlScriptSetBattleWorkParameter(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgA(void) {
-    btlCmdWithArgA(scrGetCurrentCommandWork());
+/* Select targets for the current command's action; return VM success. */
+u32 btlScriptChooseActionTargets(void) {
+    btlChooseCommandActionTargets(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdSimpleB(void) {
+/* Parameter 0 supplies the group element-check input; return VM success. */
+u32 btlScriptPickElementCheckedTarget(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleB((s32)(u32)context, value);
+    btlPickCommandElementCheckedTarget((s32)(u32)context, value);
     return 1;
 }
 
-u32 btlScriptCmdWithArgB(void) {
-    btlCmdWithArgB(scrGetCurrentCommandWork());
+/* Select the current command's minimum nonzero-HP candidate; return VM success. */
+u32 btlScriptPickLowestHpTarget(void) {
+    btlPickCommandLowestHpTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdWithArgC(void) {
-    btlCmdWithArgC(scrGetCurrentCommandWork());
+/* Select the current command's minimum HP-percentage candidate; return VM success. */
+u32 btlScriptPickLowestHpRatioTarget(void) {
+    btlPickCommandLowestHpRatioTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdSimpleA(void) {
+/* Parameter 0 feeds lowest-HP element-block selection; return VM success. */
+u32 btlScriptPickLowestHpBlockTarget(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleA((s32)(u32)context, value);
+    btlPickCommandLowestHpBlockTarget((s32)(u32)context, value);
     return 1;
 }
 
@@ -1333,22 +1338,25 @@ u32 btlScriptCmdWithArgE(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgD(void) {
-    btlCmdWithArgD(scrGetCurrentCommandWork());
+/* Run the current command's minimum-value target selector; return VM success. */
+u32 btlScriptPickLowestLevelTarget(void) {
+    btlPickCommandLowestLevelTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdSimpleC(void) {
+/* Parameter 0 is a status-presence mask for command target selection; return VM success. */
+u32 btlScriptPickTargetWithStatusMask(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleC((s32)(u32)context, value);
+    btlPickCommandTargetWithStatusMask((s32)(u32)context, value);
     return 1;
 }
 
-u32 btlScriptCmdSimpleD(void) {
+/* Parameter 0 is a status-absence mask for command target selection; return VM success. */
+u32 btlScriptPickTargetWithoutStatusMask(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleD((s32)(u32)context, value);
+    btlPickCommandTargetWithoutStatusMask((s32)(u32)context, value);
     return 1;
 }
 
@@ -1360,8 +1368,9 @@ u32 btlScriptFilterTargetsByUnitId(void) {
     return 1;
 }
 
-u32 func_0020A338(void) {
-    btlCmdWithArgA(scrGetCurrentCommandWork());
+/* Separate builtin entry with the same action-target selection body; return VM success. */
+u32 btlScriptChooseActionTargetsDuplicate(void) {
+    btlChooseCommandActionTargets(scrGetCurrentCommandWork());
     return 1;
 }
 
@@ -1377,8 +1386,9 @@ u32 btlScriptPickLinkedPartyTarget(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleH(void) {
-    btlCmdSimpleH(scrGetCurrentCommandWork(), 0);
+/* Append this command's own actor after target scan; return VM success. */
+u32 btlScriptAppendActorToTargets(void) {
+    btlAppendActorToCommandTargets(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
@@ -1389,8 +1399,9 @@ s32 btlScriptCmdSelectTargetsByMode(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgF(void) {
-    btlCmdWithArgF(scrGetCurrentCommandWork());
+/* Append the global effect actor to this command's targets; return VM success. */
+u32 btlScriptAddEffectActorTarget(void) {
+    btlAddEffectActorTargetToCommand(scrGetCurrentCommandWork());
     return 1;
 }
 
@@ -1400,15 +1411,17 @@ s32 btlScriptAppendSelectedOrCurrentTarget(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleJ(void) {
+/* Parameter 0 feeds element-block target selection; return VM success. */
+u32 btlScriptPickElementBlockTarget(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleJ((s32)(u32)context, value);
+    btlPickCommandElementBlockTarget((s32)(u32)context, value);
     return 1;
 }
 
-u32 btlScriptCmdSimpleI(void) {
-    btlCmdSimpleI(scrGetCurrentCommandWork(), 0);
+/* Prefer a non-actor target, retaining native self fallback; return VM success. */
+u32 btlScriptPickTargetExcludingActor(void) {
+    btlPickCommandTargetExcludingActor(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
@@ -1427,7 +1440,8 @@ s32 btlNbScriptCheckActorFlag(void) {
     return 1;
 }
 
-s32 func_0020A580(void) {
+/* Remember the choice when the packed MP-percentage condition succeeds. */
+s32 btlCmdStoreActorMpCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
@@ -1441,7 +1455,8 @@ s32 func_0020A580(void) {
     return 1;
 }
 
-s32 func_0020A610(void) {
+/* Identical unregistered copy of the preceding MP-choice command. */
+s32 btlCmdStoreActorMpCheckChoiceUnregistered(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
@@ -2659,10 +2674,12 @@ void btlDebugDrawRectangle(s32 x, s32 y, s32 width, s32 height) {
 void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
-void func_0020D1C8(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
+/* Retail no-op for the colored span between adjacent mapping-plot knots. */
+void btlDebugDrawMappingColorSpan(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
-void func_0020D1D0(s32 x0, s32 y0, s32 x1, s32 y1, u32 color) {
+/* Retail no-op: plot guides supply two-dimensional endpoints and packed color. */
+void btlDebugDrawLine2D(s32 x0, s32 y0, s32 x1, s32 y1, u32 color) {
 }
 
 void func_0020D1D8(void) {
@@ -2683,10 +2700,11 @@ void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
 /* Retail stub for the two extents and orientation submitted by camera diagnostics. */
-void func_0020D200(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
+void btlDebugDrawOrientedExtentGuide(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
 }
 
-void func_0020D208(f32 *position, u32 color, s32 mode, f32 scale) {
+/* Retail stub for the position, color, mode and scale submitted by the actor editor. */
+void btlDebugDrawScaledPositionGuide(f32 *position, u32 color, s32 mode, f32 scale) {
 }
 
 void func_0020D210(void) {
@@ -2699,10 +2717,12 @@ void btlDebugDrawSegment(f32 *from, f32 *to, u32 color) {
 void func_0020D220(void) {
 }
 
-void func_0020D228(void) {
+/* Empty stage immediately before the per-context debug-menu entry. */
+void btlDebugMenuBeforeRecordNoOp(void) {
 }
 
-void func_0020D230(void) {
+/* Empty stage immediately after the per-context debug-menu entry. */
+void btlDebugMenuAfterRecordNoOp(void) {
 }
 
 void func_0020D238(void) {
@@ -2720,14 +2740,16 @@ void func_0020D250(void) {
 void func_0020D258(void) {
 }
 
-u32 func_0020D260(u32 value) {
+/* First debug-menu stage; return the supplied context word unchanged. */
+u32 btlReturnDebugMenuSetupWord(u32 value) {
     return value;
 }
 
 void func_0020D268(void) {
 }
 
-void func_0020D270(u32 value) {
+/* Empty per-context stage; its sequence position does not imply recording. */
+void btlDebugMenuRecordNoOp(u32 value) {
 }
 
 
@@ -2859,7 +2881,7 @@ s32 btlOpenPfsDebugDirectory(const char *directoryName) {
     /* Debug mode opens a formatted pfs0 path; built-in mode resets name iteration. */
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(pathBuffer, "pfs0:/%s", directoryName);
+        sprintf(pathBuffer, "pfs0:/%s", directoryName);
         return sceDopen(pathBuffer);
     }
     D_00438F80 = 0;
@@ -2917,13 +2939,13 @@ BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
     }
     if (flags & 8) {
         index = 0;
-        generalCount = func_00159BB0();
+        generalCount = effGetGeneralResourceCount();
         for (; index < generalCount; index++) {
             entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
             entry->category = 8;
             entry->value = index;
             entry->id = 0;
-            func_0035C860(entry->name, "GENERAL %d", index);
+            sprintf(entry->name, "GENERAL %d", index);
             if (tail != NULL) {
                 tail->next = entry;
             } else {
@@ -3271,9 +3293,9 @@ u32 btlGetResourceBrowserSelectionStatus(const BtlResourceDescriptor *descriptor
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *descriptor, char *output) {
     char *pathPrefix = descriptor->entryList->pathPrefix;
     if (pathPrefix != NULL) {
-        func_0035C860(output, D_00436C50, pathPrefix, descriptor->selectedEntry->name);
+        sprintf(output, D_00436C50, pathPrefix, descriptor->selectedEntry->name);
     } else {
-        func_0035C860(output, D_00436C58, descriptor->selectedEntry->name);
+        sprintf(output, D_00436C58, descriptor->selectedEntry->name);
     }
     return descriptor->selectedEntry->category;
 }
@@ -3282,7 +3304,7 @@ s32 btlFormatSelectedResourceName(BtlResourceDescriptor *descriptor, char *outpu
 s32 btlTrimResourceName(BtlResourceDescriptor *descriptor, char *output) {
     u32 nameLength;
     u32 characterIndex;
-    func_0035C860(output, D_00436C58, descriptor->selectedEntry->name);
+    sprintf(output, D_00436C58, descriptor->selectedEntry->name);
     nameLength = strlen(output);
     for (characterIndex = 0; characterIndex < nameLength && output[characterIndex] != '.'; characterIndex++) {
     }
@@ -3487,7 +3509,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
         record->resourceName[record->nameLength] = 0;
     }
     btlDebugDrawRectangle(x, y, 0xA4, 0x14);
-    func_0035C860(text, D_00436C50, record->resourceName, record->extension);
+    sprintf(text, D_00436C50, record->resourceName, record->extension);
     btlDebugDrawText(x + 4, y + 4, 0, text);
     y += 0x18;
     btlDebugDrawRectangle(x, y, 0xA4, 0x44);
@@ -3529,11 +3551,11 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
 }
 
 void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output) {
-    func_0035C860(output, D_00436C50, record->resourceName, record->extension);
+    sprintf(output, D_00436C50, record->resourceName, record->extension);
 }
 
 void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output) {
-    func_0035C860(output, D_00436C58, record->resourceName);
+    sprintf(output, D_00436C58, record->resourceName);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436AF0);

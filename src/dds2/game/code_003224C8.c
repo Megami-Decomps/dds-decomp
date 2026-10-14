@@ -57,15 +57,15 @@ extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *recor
 /* Exported timed-state/runtime-list providers from the preceding unit. */
 extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
 extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
-extern void func_00321688(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
-extern void func_00321798(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
+extern void mnuUpdateTimedSpawns(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
+extern void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
 extern void mnuDeactivateListRecord(MenuRuntimeList *, MenuRuntimeRecord *);
 extern void mnuAdvanceRuntimeAnimationRecords(void);
 
 /* Each packed table word contains signed X and Y hit radii. */
 extern s8 D_0040B248[][2];
 
-u16 *func_003224C8(s32 index) {
+u16 *mnuGetPackedRuntimeHitRadii(s32 index) {
     return (u16 *)&D_0040B248[index];
 }
 
@@ -110,7 +110,7 @@ MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list) {
     return NULL;
 }
 
-MenuShortRecord *func_003225C0(MenuShortRecordList *list) {
+MenuShortRecord *mnuFindFrameKeyedMotionRecord(MenuShortRecordList *list) {
     s32 i;
     MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
@@ -459,7 +459,7 @@ s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
             }
 
             if (context == 0) {
-                func_00321688(entry->callback, runtimeList,
+                mnuUpdateTimedSpawns(entry->callback, runtimeList,
                               (s32)entry->currentX, currentYInteger,
                               entry->currentAngleRadians);
             }
@@ -637,7 +637,7 @@ MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *work, struct M
     return NULL;
 }
 
-s32 func_00323BB8(struct MnuShootingWork *context) {
+s32 mnuDispatchRuntimeListPairOverlaps(struct MnuShootingWork *context) {
     MenuRuntimeList *list = mnuGetRuntimeAnimationList();
     MenuRuntimeList *targets = mnuGetRuntimeHitTargetList();
     MenuRuntimeRecord *record = list->records;
@@ -1038,7 +1038,7 @@ extern void sdfVectorScale(f32 factor, f32 *vector);
 
 
 
-s32 func_00324840(void) {
+s32 mnuUpdateShootingPlayerInput(void) {
     MenuWorkEntry *work = mnuActiveEffectEntry;
     u32 kindMask = 0;
     MenuInputActionSnapshot *input = &D_0045C890.snapshot;
@@ -1097,7 +1097,7 @@ s32 func_00324840(void) {
         }
     }
 
-    func_00321798(work->callback,
+    mnuUpdateKindMaskedTimedSpawns(work->callback,
                   mnuGetRuntimeAnimationList(), kindMask,
                   (s32)work->currentX, (s32)work->currentY, kindMask,
                   work->currentAngleRadians);

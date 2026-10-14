@@ -390,13 +390,13 @@ void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
+        sprintf(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
             state->shown = datGameState->header.currency;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, mnuMantraValueFormat, datGameState->header.currency);
+        sprintf(text, mnuMantraValueFormat, datGameState->header.currency);
     }
     frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
@@ -445,7 +445,7 @@ void mnuDrawMantraDigitRow(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 d
     if (entryId != 0) {
         count = prfGetMantraDisplayParameter(entryId);
         if (count != 0) {
-            func_0035C860(text, mnuMantraNumberFormat, count);
+            sprintf(text, mnuMantraNumberFormat, count);
             frFontDrawTextVariantBAndMeasure(x + 0x82, y + 0x17C, depth, flags, 4, text, 0, drawArg);
             for (i = 0; i < count; i++) {
                 mnuDrawMantraSprite(x, y, depth, fade, 0x51, 0, drawArg);
@@ -465,10 +465,10 @@ void mnuDrawMantraCostCounter(u32 x, u32 y, u32 depth, s32 fade, u32 entryId, u3
     if (entryId != 0) {
         mnuDrawMantraSprite(x, y, depth, fade, 0x53, 0, drawArg);
         if (showCost != 0) {
-            func_0035C860(text, mnuMantraNumberFormat, mnuGetMantraSourceValue(entryId));
+            sprintf(text, mnuMantraNumberFormat, mnuGetMantraSourceValue(entryId));
             frFontDrawTextVariantBAndMeasure(x + 0x9A, y + 0x190, depth, flags, 4, text, 0, drawArg);
         } else {
-            func_0035C860(text, D_004378B0);
+            sprintf(text, D_004378B0);
             frFontDrawStyledGlyphChainAndMeasure(x + 0xA2, y + 0x18C, depth, (u32)(fade * 0.5f) | 0xA09D7D00, 0, text, 0x80000000, drawArg);
         }
     } else {
@@ -739,7 +739,7 @@ void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 amount, s32
     mnuDrawMantraSprite(x, y, depth, amount, buttons[((MantraCostRecord *)record)->iconIndex], 0, drawArg);
     mnuDrawMantraSprite(x, y, depth, amount, MNU_MANTRA_COST_MARKER_CODE, 0, drawArg);
     memset(text, 0, sizeof(text));
-    func_0035C860(text, mnuMantraNumberFormat, ((MantraCostRecord *)record)->cost);
+    sprintf(text, mnuMantraNumberFormat, ((MantraCostRecord *)record)->cost);
     if (strlen(text) > 1) {
         frFontDrawTextVariantBAndMeasure(x + MNU_MANTRA_COST_MULTI_DIGIT_X_OFFSET, y + MNU_MANTRA_COST_TEXT_Y_OFFSET, depth, drawFlags, 0, text, 0, drawArg);
     } else {
@@ -2631,13 +2631,13 @@ void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
+        sprintf(text, mnuMantraValueFormat, state->shown + (datGameState->header.currency - state->shown) * state->step / steps);
         if (state->step == steps) {
             state->shown = datGameState->header.currency;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, mnuMantraValueFormat, datGameState->header.currency);
+        sprintf(text, mnuMantraValueFormat, datGameState->header.currency);
     }
     frFontDrawTextVariantAAndMeasure(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }

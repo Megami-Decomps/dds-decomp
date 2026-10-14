@@ -1628,7 +1628,7 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
     return mnuMovieDrawTask;
 }
 
-void func_002A7F98(s32 index) {
+void mnuStartMoviePlaybackByResourceIndex(s32 index) {
     MnuMovieResourceEntry *entry = &D_003E4C48[index];
     mnuRequestMoviePlayback(entry->fileName, &entry->descriptor);
 }
@@ -1652,7 +1652,7 @@ u8 mnuGetMoviePlaybackMode(void) {
     return D_003E563C[0];
 }
 
-u8 func_002A8038(void) {
+u8 mnuIsMovieDrawContextActive(void) {
     return mnuMovieDrawContext.active;
 }
 

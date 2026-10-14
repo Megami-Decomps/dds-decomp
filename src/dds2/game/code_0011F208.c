@@ -530,7 +530,7 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
     }
 }
 
-u32 func_001200E0(void) {
+u32 fldIsUpdateInhibited(void) {
     return 0;
 }
 

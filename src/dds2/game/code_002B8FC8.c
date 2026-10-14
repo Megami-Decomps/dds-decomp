@@ -489,7 +489,7 @@ MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback
 
 void mnuSelectSkillSelectionVisuals(u32 context);
 
-void func_002B4290(s32 context);
+void mnuNoOpItemSelectionTeardown(s32 context);
 
 
 
@@ -827,7 +827,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) 
 }
 
 extern struct FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern const char D_00437C28[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
@@ -863,7 +863,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
                                                 (const u8 *)node->value, NULL);
             frFontSetChildChainFirstOption(glyph, chainFlag);
             if ((list->id & 1) != 0) {
-                func_0035C860(text, D_00437C28, (s32)node->sortKeyPrimary);
+                sprintf(text, D_00437C28, (s32)node->sortKeyPrimary);
                 glyph = func_0019F5E8(x + 0x1180, rowY + 0x20, depth,
                                       color, text, glyph);
                 frFontSetChildChainFirstOption(glyph, chainFlag);

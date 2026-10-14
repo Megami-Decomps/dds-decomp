@@ -61,7 +61,7 @@ extern void *memset(void *, s32, u32);
 
 
 extern u32 strlen(const char *);
-extern s32 func_0035C860(char *buffer, const char *fmt, ...);
+extern s32 sprintf(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 

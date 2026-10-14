@@ -264,7 +264,7 @@ u32 effReturnCallbackValue(u32 value) {
     return value;
 }
 
-void func_0018CE38(void) {
+void effFieldTaskStartupHook(void) {
 }
 
 u32 func_0018CE40(void) {

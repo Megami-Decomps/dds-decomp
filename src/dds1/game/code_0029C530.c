@@ -173,7 +173,7 @@ extern void effFillSurfaceGridColorGradient(u32, u32 *);
 
 extern void effReleaseSurfaceGridBuffers(s32);
 
-extern s32 func_00151FC0(void);
+extern s32 effGetGeneralResourceCount(void);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
@@ -4718,7 +4718,7 @@ extern f32 sdfViewEyeVector[4];
 extern f32 func_002FA1D8(f32);
 
 /* Advance radial five-point wave strips from the class orientation. */
-void func_002A8A90(EffClassWork *work) {
+void effUpdateRadialWavePointRows(EffClassWork *work) {
     f32 offsets[5];
     f32 widths[5];
     f32 direction[4];
@@ -9410,10 +9410,10 @@ typedef char EffCameraMenuStateSizeCheck[(sizeof(EffCameraMenuState) == 0x38) ? 
 extern EffCameraMenuState D_0038F428;
 extern s8 sdfPadButtonStates[];
 extern const char D_003BD0E8[];
-extern void func_001FB1E0(void *context);
-extern void func_001FB1A8(void);
-extern void func_001FB1F0(void *context);
-extern void func_001FB1B0(void);
+extern void btlDebugMenuSetupNoOp(void *context);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuRecordNoOp(void *context);
+extern void btlDebugMenuAfterRecordNoOp(void);
 
 typedef struct EffCameraCreateRequest {
     EffFileJobRequest *resource;
@@ -9778,10 +9778,10 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
         oldIndex = state->selectedIndex;
     }
     state->nameKey = nameKey;
-    func_001FB1E0(state);
-    func_001FB1A8();
-    func_001FB1F0(state);
-    func_001FB1B0();
+    btlDebugMenuSetupNoOp(state);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(state);
+    btlDebugMenuAfterRecordNoOp();
     sdfReleaseResourceAllocation(allocation);
 
     if (sdfPadButtonStates[1] < 0 && count != 0) {
@@ -10069,10 +10069,10 @@ extern s8 D_0039862B[];
 extern void btlDebugDrawPoint(f32 *position);
 extern void btlDebugDrawRadiusGuide(f32 *center, f32 radius, u32 color, s32 flags);
 extern void btlDebugDrawSegment(f32 *from, f32 *to, u32 color);
-extern void func_001FB1A8(void);
-extern void func_001FB1B0(void);
-extern void func_001FB1E0(void *camera);
-extern void func_001FB1F0(void *camera);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuAfterRecordNoOp(void);
+extern void btlDebugMenuSetupNoOp(void *camera);
+extern void btlDebugMenuRecordNoOp(void *camera);
 extern void camFollowOffsetVec(u8 *camera, void *destination);
 extern void effComputeBattleCameraPositionVU(u8 *snapshot);
 
@@ -10092,10 +10092,10 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *snapshot, s8 mode) {
     }
 
     PCP_COPY_VECTOR(D_003DFA20, snapshot->position);
-    func_001FB1E0(camera);
-    func_001FB1A8();
-    func_001FB1F0(camera);
-    func_001FB1B0();
+    btlDebugMenuSetupNoOp(camera);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(camera);
+    btlDebugMenuAfterRecordNoOp();
     PCP_COPY_VECTOR(snapshot->position, D_003DFA20);
 
     if ((*(u32 *)(camera + 0x10) & 8) != 0) {
@@ -10187,7 +10187,7 @@ typedef struct EffectCameraDebugState {
 extern EffectCameraDebugState D_0038F588;
 extern s8 D_0039862B[];
 extern f32 D_0037E120[4];
-extern void func_001FB180(f32 *, f32, f32, u32, f32 (*)[4]);
+extern void btlDebugDrawOrientedExtentGuide(f32 *, f32, f32, u32, f32 (*)[4]);
 extern void btlDebugDrawPoint(f32 *);
 
 typedef struct EffectCameraDebugScratch {
@@ -10197,7 +10197,7 @@ typedef struct EffectCameraDebugScratch {
     s128 rotationMatrix[4];
 } EffectCameraDebugScratch;
 
-u32 func_002B8648(EffectCameraSnapshotView *state, s8 useBattlePosition) {
+u32 effUpdateCameraSnapshotGuides(EffectCameraSnapshotView *state, s8 useBattlePosition) {
     EffectCameraDebugScratch scratch;
     u32 result = 1;
 
@@ -10216,10 +10216,10 @@ u32 func_002B8648(EffectCameraSnapshotView *state, s8 useBattlePosition) {
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.basePosition);
     VU0_STORE_VF(vf10, D_003DFA20);
 
-    func_001FB1E0(&D_0038F588);
-    func_001FB1A8();
-    func_001FB1F0(&D_0038F588);
-    func_001FB1B0();
+    btlDebugMenuSetupNoOp(&D_0038F588);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(&D_0038F588);
+    btlDebugMenuAfterRecordNoOp();
     PCP_COPY_VECTOR(state->camera.quat, D_003DFA30);
     if (D_0038F588.flags & 8) {
         result |= 2;
@@ -10240,7 +10240,7 @@ u32 func_002B8648(EffectCameraSnapshotView *state, s8 useBattlePosition) {
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
 
-    func_001FB180((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
+    btlDebugDrawOrientedExtentGuide((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
     btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80000080);
     btlDebugDrawPoint((f32 *)&scratch.segmentStart);
 
@@ -10306,14 +10306,14 @@ s32 effRunWithStateBackup(void) {
     return result;
 }
 
-extern u32 func_002B8648(EffectCameraSnapshotView *, s8);
+extern u32 effUpdateCameraSnapshotGuides(EffectCameraSnapshotView *, s8);
 
 u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
 
     memcpy(D_003DF840, file, 0x90);
-    result = func_002B8648((EffectCameraSnapshotView *)D_003DF840, 1);
+    result = effUpdateCameraSnapshotGuides((EffectCameraSnapshotView *)D_003DF840, 1);
     memcpy(file, D_003DF840, 0x90);
     if (result & 1) {
         result |= 0x800000;
@@ -10477,7 +10477,7 @@ void effPollResourceBank(s32 flags, void *out) {
         effResourceBankEntries = btlScanDirectory(0, flags);
         if (flags & BTL_RESOURCE_SCAN_GENERAL) {
             u32 i = 0;
-            u32 count = func_00151FC0();
+            u32 count = effGetGeneralResourceCount();
             if (count != 0) {
                 do {
                     char name[0x70];

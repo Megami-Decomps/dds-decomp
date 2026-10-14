@@ -374,7 +374,7 @@ u32 mnuKindIsSelectable(u32 kind) {
 }
 
 extern char D_004379B0[];
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void brsShowStatSelectionStatus(BrsSkillPackageWork *);
 
 
@@ -401,7 +401,7 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
     kind = item->unitId;
     if (mnuKindIsSelectable(kind) != 0) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48[kind].encodedText);
-        func_0035C860(text, D_004379B0, available);
+        sprintf(text, D_004379B0, available);
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         if (scene->extentExhausted == 0) {

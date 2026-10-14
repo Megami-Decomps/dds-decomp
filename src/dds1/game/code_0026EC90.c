@@ -401,7 +401,7 @@ s32 mnuCheckMovieDecoderStatus(void) {
 }
 
 
-s32 mnuGetMovieDrawState(void) {
+s32 mnuGetMoviePlaybackMode(void) {
     return D_0037B8BC[0];
 }
 

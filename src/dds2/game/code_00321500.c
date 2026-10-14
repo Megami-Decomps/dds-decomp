@@ -97,7 +97,7 @@ void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord
 
 void mnuUpdateLinkedTimedStateList(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
 
-void func_00321688(MnuCallbackList *left, MenuRuntimeList *right,
+void mnuUpdateTimedSpawns(MnuCallbackList *left, MenuRuntimeList *right,
                    u32 value, u32 count, f32 angle) {
     mnuUpdateLinkedTimedStateList(left, right, value, count, 1, angle);
 }
@@ -126,7 +126,7 @@ void mnuUpdateLinkedTimedStateList(MnuCallbackList *list, MenuRuntimeList *runti
     }
 }
 
-void func_00321798(MnuCallbackList *list, MenuRuntimeList *runtimeList,
+void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *list, MenuRuntimeList *runtimeList,
                    s32 kindMask, s32 x, s32 y, s32 enabled, f32 angle) {
     SdfListNode *node = list->head;
     MenuStateRecord *record;
@@ -294,13 +294,13 @@ MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *list, s32 x, s32 y, u
 }
 
 
-void func_00321E18(MenuRuntimeRecord *records, s32 capacity) {
+void mnuInitializeRuntimeHitTargetList(MenuRuntimeRecord *records, s32 capacity) {
     memset(&D_0045C870, 0, sizeof(D_0045C870));
     D_0045C870.records = records;
     D_0045C870.capacity = capacity;
 }
 
-void func_00321E70(MenuRuntimeRecord *records, s32 capacity) {
+void mnuInitializeRuntimeAnimationList(MenuRuntimeRecord *records, s32 capacity) {
     memset(&D_0045C880, 0, sizeof(D_0045C880));
     D_0045C880.records = records;
     D_0045C880.capacity = capacity;
@@ -415,7 +415,7 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
     }
 }
 
-void func_003223F8(void) {
+void mnuAdvanceRuntimeHitTargets(void) {
     mnuAdvanceMovingRuntimeRecords(&D_0045C870);
 }
 

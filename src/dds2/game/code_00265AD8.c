@@ -86,7 +86,7 @@ extern const u8 (*D_00435E5C)[25];
 extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
-extern s32 func_00265A60(MenuTerminalContext *);
+extern s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *);
 extern void dspSetActive(s32);
 extern u32 func_00260460(void);
 extern s32 mnuCampFindActiveSlot(void);
@@ -96,7 +96,7 @@ extern void dspStartActivePresetEntry(void);
 
 /* DDS2's twelve-state shop sequence. The stock scan and dispatcher pattern
  * share the exact DDS1 donor, but fade, reward and preset paths are DDS2's. */
-s32 func_00265AD8(KwlnTask *task) {
+s32 mnuTickShopMessageSequence(KwlnTask *task) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 *dispatchSlot = &state->popupState;
     s32 allowed;
@@ -127,7 +127,7 @@ s32 func_00265AD8(KwlnTask *task) {
                         state->delayFrames--;
                     } else if (evtMenuSetProgressFlag(state) != 0) {
                         state->phase = 8;
-                    } else if (func_00265A60(state) != 0) {
+                    } else if (evtMenuSetTypeProgressFlagOnce(state) != 0) {
                         state->phase = 10;
                     } else if (mdlFlagTest(4) == 0) {
                         mnuSetPopupEntryFlagged(dispatchSlot, D_003CE674);
@@ -252,13 +252,13 @@ s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
-s32 func_00265EE8(KwlnTask *callback) {
+s32 evtSetupDispatchSyncI(KwlnTask *callback) {
     s32 eventContext = kwlnTaskGetUserValue(callback);
     func_0026C900();
     return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
 }
 
-u32 func_00265F30(void) {
+u32 evtStartTerminalMenuMessage(void) {
     dspSetActive(1);
     dspStartEntry(0xd);
     return 1;
@@ -294,7 +294,7 @@ s32 func_00265FE8(KwlnTask *callback) {
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 func_00266038(KwlnTask *callback) {
+s32 evtAdvanceTerminalMenuMessage(KwlnTask *callback) {
     s32 eventContext = kwlnTaskGetUserValue(callback);
     func_0026C900();
     return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);

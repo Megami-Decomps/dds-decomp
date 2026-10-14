@@ -979,7 +979,8 @@ u32 btlAppendEffectActorToCommandIndices(s32 task) {
     return 1;
 }
 
-u32 btlAppendCurrentUnitIdToCommandIndices(s32 task) {
+/* Append the selected/current actor pointer to this command's indices; return success. */
+u32 btlAppendSelectedOrCurrentActorTarget(s32 task) {
     BtlUnit *unit;
 
     unit = btlGetSelectedOrCurrentActor();
@@ -3128,7 +3129,7 @@ extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 
 
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 
 extern void func_00336818(f32);
 
@@ -3391,16 +3392,16 @@ s32 rotate;
     if (rotate == 1 && runtime[0x134] == 3) {
         switch (kind) {
         case 0:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             func_00336818(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            func_003364B8(angle);
+            sdfVuLoadRotationMatrixX(angle);
             func_00336818(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -4378,7 +4379,7 @@ extern char D_0041AAC8[]; /* format string */
 
 extern char D_00436CF0[];
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer) {
     u32 value;
@@ -4400,7 +4401,7 @@ void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer) {
         default:
             return;
         }
-        func_0035C860(buffer, D_0041AAC8, D_00436CF0, datActionAnimationRecords[action].displayCode, value);
+        sprintf(buffer, D_0041AAC8, D_00436CF0, datActionAnimationRecords[action].displayCode, value);
     }
 }
 
@@ -5883,16 +5884,16 @@ s32 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
     if (rotate == 1 && battle->unk268 == 3) {
         switch (cameraPreset) {
         case 0:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             func_00336818(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             break;
         case 2: {
             f32 angle = -0.13089969f;
-            func_003364B8(angle);
+            sdfVuLoadRotationMatrixX(angle);
             func_00336818(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -6547,16 +6548,16 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     if (rotate == 1 && runtime[0x134] == 3) {
         switch (kind) {
         case 0:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             func_00336818(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            func_003364B8(angle);
+            sdfVuLoadRotationMatrixX(angle);
             func_00336818(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
@@ -6773,7 +6774,7 @@ void btlSelectTargetCameraPose(BtlLinkedCommand *command) {
     }
 }
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 
 extern void func_00336818(f32);
 
@@ -6834,16 +6835,16 @@ s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *came
     if (rotate == 1 && runtime->formationMode == 3) {
         switch (kind) {
         case 0:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             func_00336818(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
-            func_003364B8(-0.13089969f);
+            sdfVuLoadRotationMatrixX(-0.13089969f);
             break;
         case 2:
             angle = -0.13089969f;
-            func_003364B8(angle);
+            sdfVuLoadRotationMatrixX(angle);
             func_00336818(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
