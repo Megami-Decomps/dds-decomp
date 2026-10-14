@@ -50,6 +50,17 @@ def symbols(version):
     return out
 
 
+def symbol_sizes(version):
+    """Read explicit native extents; an address interval may include alignment."""
+    out = {}
+    for line in (ROOT / "config" / version / "symbol_addrs.txt").read_text().splitlines():
+        row = ROW.match(line)
+        size = re.search(r"\bsize:([^\s/]+)", line)
+        if row and size:
+            out[row.group(1)] = int(size.group(1), 0)
+    return out
+
+
 def address(name, syms):
     if name in syms:
         return syms[name]
@@ -193,14 +204,16 @@ def bss_symbols(objdump_text):
     return nobits_symbols(objdump_text, ".bss")
 
 
-def _retail_nobits_inventory(start, size, syms):
+def _retail_nobits_inventory(start, size, syms, explicit_sizes=None):
     """Derive canonical ``(offset, size, name)`` rows from symbol_addrs.
 
     Every symbol_addrs address inside the exact owned span is authoritative.
     The absolute linker _gp address is not an object boundary or alias.  Aliases
     at one address are separate required names for the same object extent;
     their spelling order is canonicalized because ELF symbol-table order is
-    not a source-layout fact.
+    not a source-layout fact. An explicit native size applies to all names at
+    that address and must fit before the next address; alignment is not part
+    of the object. Without that fact, retain the full address interval.
     """
     end = start + size
     addressed = sorted(
@@ -221,15 +234,28 @@ def _retail_nobits_inventory(start, size, syms):
         retail: addresses[index + 1] if index + 1 < len(addresses) else end
         for index, retail in enumerate(addresses)
     }
-    inventory = [
-        (retail - start, next_address[retail] - retail, name)
-        for retail, name in addressed
-    ]
+    explicit_sizes = explicit_sizes or {}
+    extents = {}
+    for retail in addresses:
+        declared = {explicit_sizes[name] for addr, name in addressed
+                    if addr == retail and name in explicit_sizes}
+        if len(declared) > 1:
+            problems.append(f"conflicting explicit sizes at +0x{retail - start:X}")
+        extent = min(declared) if declared else next_address[retail] - retail
+        if extent <= 0 or extent > next_address[retail] - retail:
+            problems.append(
+                f"explicit size {extent:#x} at +0x{retail - start:X} "
+                "must be positive and fit within its retail address interval"
+            )
+        extents[retail] = extent
+    inventory = [(retail - start, extents[retail], name)
+                 for retail, name in addressed]
     return inventory, problems
 
 
 def nobits_ownership_problems(
-        yaml_text, unit, section_name, section_size, emitted, syms, aliases=()):
+        yaml_text, unit, section_name, section_size, emitted, syms, aliases=(),
+        explicit_sizes=None):
     """Explain why emitted NOBITS does not exactly implement its retail span.
 
     The YAML owns the bounded address range.  Every ``symbol_addrs`` fact in
@@ -237,7 +263,8 @@ def nobits_ownership_problems(
     object aliases. Validated non-owning interior aliases are checked against
     their primary object's extent and do not split or allocate storage.
     The object must emit the remaining inventory one-for-one with each name
-    at the derived address and size as STT_OBJECT.  This deliberately fails
+    at the native address and size as STT_OBJECT. Explicit native extents may
+    leave alignment gaps but cannot cross another primary. This fails
     closed when the retail inventory is absent or does not begin at the span.
     """
     owned = owned_nobits_range(yaml_text, unit, section_name)
@@ -254,7 +281,7 @@ def nobits_ownership_problems(
     alias_names = {alias.name for alias in local_aliases}
     inventory, inventory_problems = _retail_nobits_inventory(
         start, expected_size, {name: addr for name, addr in syms.items()
-                               if name not in alias_names}
+                               if name not in alias_names}, explicit_sizes
     )
     problems.extend(inventory_problems)
     canonical = {
@@ -1274,7 +1301,7 @@ def main():
             continue
         problems = nobits_ownership_problems(
             yaml_text, unit_name, section, emitted[section],
-            explicit_nobits[section], syms, aliases
+            explicit_nobits[section], syms, aliases, symbol_sizes(version)
         )
         if problems and not args.func:
             for problem in problems:

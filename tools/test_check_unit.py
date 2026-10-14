@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import check_unit
+from symbol_aliases import SymbolAlias
 
 from check_unit import (
     address,
@@ -288,6 +289,52 @@ segments:
             (0x10, 0x30, "fileManagerSlots", True),
         ]
         self.assertEqual(self.ownership_problems(emitted), [])
+
+    def test_explicit_native_extent_excludes_alignment_gap(self):
+        emitted = [(0, 0xC, "fileManagerHead", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        self.assertEqual(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            explicit_sizes={"fileManagerHead": 0xC}), [])
+        self.assertTrue(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms))
+
+    def test_explicit_native_extent_must_fit_its_address_interval(self):
+        emitted = [(0, 0x10, "fileManagerHead", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        for size in (0, -1, 0x11):
+            with self.subTest(size=size):
+                self.assertTrue(nobits_ownership_problems(
+                    self.YAML, "file/fileManager", ".bss", 0x40,
+                    emitted, syms, explicit_sizes={"fileManagerHead": size}))
+
+    def test_same_address_names_share_one_explicit_extent(self):
+        emitted = [(0, 0xC, "fileManagerHead", True),
+                   (0, 0xC, "headAlias", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658, "headAlias": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        self.assertEqual(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            explicit_sizes={"fileManagerHead": 0xC}), [])
+        self.assertTrue(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            explicit_sizes={"fileManagerHead": 0xC, "headAlias": 0x10}))
+
+    def test_interior_alias_cannot_enter_alignment_gap(self):
+        emitted = [(0, 0xC, "fileManagerHead", True),
+                   (0x10, 0x30, "fileManagerSlots", True)]
+        syms = {"fileManagerHead": 0x003DC658,
+                "fileManagerSlots": 0x003DC668}
+        alias = SymbolAlias("gapAlias", "fileManagerHead", "file/fileManager",
+                            ".bss", 0xC, 0x003DC664)
+        self.assertTrue(nobits_ownership_problems(
+            self.YAML, "file/fileManager", ".bss", 0x40, emitted, syms,
+            (alias,), {"fileManagerHead": 0xC}))
 
     def test_absolute_linker_gp_does_not_split_owned_objects(self):
         emitted = [
