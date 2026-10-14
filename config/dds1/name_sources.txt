@@ -4156,6 +4156,8 @@
 0x00228460	evtOpcodePlayBgm	inferred	Event opcode obtains two script arguments and passes them to evtPlayBgm.
 0x002284A0	evtOpcodeTransitionBgm	inferred	Event opcode obtains two script arguments and passes them to evtTransitionBgm.
 0x002284E0	evtCommandQueueBgmWithFade	inferred	confidence=high; src/dds1/game/code_00228058.c:func_002284E0; Reads sound-id and fade script parameters and queues the validated BGM change. [names_qp9.tsv]
+0x00228520	evtOpcodeStartReducedBgm	inferred	DDS2 peer evtOpcodeStartReducedBgm at 0x00243180 calls sndStartReducedBgm and returns success; DDS1 also advances its audio-cleanup task.
+0x00228548	evtOpcodeStopReducedBgm	inferred	DDS2 peer evtOpcodeStopReducedBgm at 0x002431A0 calls sndStopReducedBgm and returns success; DDS1 also advances its audio-cleanup task.
 0x00228570	evtOpcodeSetBgmVolumePan	inferred	Event opcode obtains two script arguments and passes them to evtSetBgmVolumePan.
 0x002285B0	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds1/game/code_00228058.c:func_002285B0; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
 0x002285F0	evtOpcodeRefreshTaskData	inferred	Forwards the task ID and resource key to evtRefreshTaskEffectTexture.

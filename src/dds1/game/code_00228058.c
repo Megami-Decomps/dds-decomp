@@ -231,13 +231,13 @@ u32 evtCommandQueueBgmWithFade(void) {
     return 1;
 }
 
-u32 func_00228520(void) {
+u32 evtOpcodeStartReducedBgm(void) {
     sndStartReducedBgm();
     btlAdvanceTitleStateWithAudioCleanupTask();
     return 1;
 }
 
-u32 func_00228548(void) {
+u32 evtOpcodeStopReducedBgm(void) {
     sndStopReducedBgm();
     btlAdvanceTitleStateWithAudioCleanupTask();
     return 1;
