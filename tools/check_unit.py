@@ -935,9 +935,23 @@ def main():
             bad += 1
             print(f"DATA CONTEXT {problem}")
     tables = []  # (offset in our .rodata, retail address, function)
-    bounds = []  # .rodata items of as-built functions: they only end a neighbour
+    bounds = []  # .rodata items of unexamined functions: they only end a neighbour
     small = []   # the same for .sdata
     for off, size, name in sorted(funcs):
+        # Filtering reports must not change the compiled section's item
+        # boundaries. Tables of other C functions remain in SKIP_ASM's
+        # .rodata, even when --func excludes their comparisons. As-built
+        # functions likewise delimit neighbours without being checked here.
+        if (args.func and name != args.func) or name in as_built:
+            hi = None
+            for i in range(0, size, 4):
+                r = relocs.get(off + i)
+                if r and r[1].split("+")[0] == ".rodata":
+                    w = struct.unpack_from("<I", text, off + i)[0]
+                    if r[0] == "R_MIPS_HI16":
+                        hi = w & 0xFFFF
+                    elif r[0] == "R_MIPS_LO16" and hi is not None:
+                        bounds.append((hi << 16) + sext16(w))
         if args.func and name != args.func:
             continue
         addr = address(name, syms)
@@ -948,17 +962,6 @@ def main():
         if name in as_built:
             ok += 1
             print(f"OK   {name} @ 0x{addr:08X} (as built in the full unit; the SKIP_ASM compile differs)")
-            # Its jump tables still sit in our .rodata and end the item before
-            # them; the full-unit .rodata check above compares their bytes.
-            hi = None
-            for i in range(0, size, 4):
-                r = relocs.get(off + i)
-                if r and r[1].split("+")[0] == ".rodata":
-                    w = struct.unpack_from("<I", text, off + i)[0]
-                    if r[0] == "R_MIPS_HI16":
-                        hi = w & 0xFFFF
-                    elif r[0] == "R_MIPS_LO16" and hi is not None:
-                        bounds.append((hi << 16) + ((w & 0xFFFF) ^ 0x8000) - 0x8000)
             continue
         roff = va_to_off(segs, addr)
         diffs = []
@@ -1238,8 +1241,8 @@ def main():
             bad += 1
             print(f"PAD jump table of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
                   "after it that no C or asm supplies; keep the function as asm")
-    # As-built items and the strings a compiled table points at: compared by the
-    # full-unit .rodata check.
+    # Unexamined items and the strings a compiled table points at: compared by
+    # the full-unit .rodata check (or outside the requested --func scope).
     for b in set(bounds) | pointed:
         if 0 <= b < len(rodata):
             covered.update(range(b, next(s for s in starts if s > b)))
