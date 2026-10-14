@@ -50,7 +50,6 @@ extern s32 mnuDrawCampFieldSkillPage(KwlnTask *task);
 
 extern s32 mnuFinishStaffConfigPopup(KwlnTask *task);
 
-extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);

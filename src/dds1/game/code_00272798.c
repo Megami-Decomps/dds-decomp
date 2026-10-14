@@ -31,7 +31,6 @@ extern void mnuDrawStaffScrollPanel(s32, s32, s32, u32, s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
