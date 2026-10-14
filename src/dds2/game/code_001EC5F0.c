@@ -5553,7 +5553,7 @@ void btlAdvanceTitleState(void) {
 void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
     sndQueueNoPayloadCommand210();
-    func_00341CA8();
+    sndQueueNoPayloadCommand1A0();
 }
 
 void btlAdvanceTitleStateTask(void) {

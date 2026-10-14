@@ -734,7 +734,7 @@ extern void evtTransitionBgm(s32, s32);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
-extern void func_00341CA8(void);
+extern void sndQueueNoPayloadCommand1A0(void);
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern void kwlnFadeSetupFrames(s32 mode, s32 frames);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
@@ -858,7 +858,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             sndStopReducedBgm();
             break;
         case 6:
-            func_00341CA8();
+            sndQueueNoPayloadCommand1A0();
             break;
         }
         break;
