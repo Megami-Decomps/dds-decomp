@@ -13,6 +13,7 @@
 #include "eff_class_work_api.h"
 #include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
+#include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
 #include "eff_resource_list_request.h"
@@ -5083,17 +5084,6 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 
 
 
-
-typedef struct EffPointSetRow {
-    EffPointSet *set; /* 0x00 */
-    s32 key;          /* 0x04 */
-    u32 color;        /* 0x08: packed alpha/color used by the bolt updater */
-    f32 angle;        /* 0x0C: phase of the radial class instance */
-} EffPointSetRow;
-
-typedef struct EffPointSetTable {
-    EffPointSetRow *rows;
-} EffPointSetTable;
 
 void effRandomizeParticleFields(EffClassWork *work) {
     u32 index = 0;
