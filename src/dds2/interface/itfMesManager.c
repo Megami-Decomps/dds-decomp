@@ -107,7 +107,7 @@ extern void itfClearDrawStateWords();
 
 extern void itfResetBattleFadeState();
 
-extern void func_0019DD48();
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
 extern s32 frFontMeasureLineWidth();
 
@@ -449,7 +449,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     s32 rowIndex;
     s32 rowWidth;
 
-    func_0019DD48(0x1000, 0x4B0, optionBlock->glyphChain);
+    frFontCenterGlyphChainAt(0x1000, 0x4B0, optionBlock->glyphChain);
     rowsHeight = optionBlock->rowCount * ITF_MES_OPTION_ROW_SPACING * 8;
     for (rowIndex = 0; rowIndex < optionBlock->rowCount; rowIndex++) {
         rowWidth = frFontMeasureLineWidth(rowIndex, optionBlock->glyphChain);
@@ -1143,7 +1143,6 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 itemIndex) {
 }
 
 extern s32 frFontCountGlyphBands();
-extern void func_0019DD48();
 extern s8 itfTestTextInterfaceMask();
 extern s32 itfGetTextLipsUnitId();
 extern s32 itfGetTextLipsMotionId();
@@ -1170,9 +1169,9 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
                           (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
     if (mes->unk12 == 3) {
         if (frFontCountGlyphBands(glyph) == 1) {
-            func_0019DD48(0x1000, 0xC60, glyph);
+            frFontCenterGlyphChainAt(0x1000, 0xC60, glyph);
         } else {
-            func_0019DD48(0x1000, 0xBF8, glyph);
+            frFontCenterGlyphChainAt(0x1000, 0xBF8, glyph);
         }
     }
     if (!(mes->flags & ITF_MES_SKIP_CONTEXT_ENABLE_BIT) && (itfMesWork.flags & 1)) {
