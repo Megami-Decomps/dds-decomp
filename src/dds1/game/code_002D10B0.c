@@ -171,7 +171,7 @@ extern volatile u8 D_003BD32D;
 extern volatile u8 D_003BD32C;
 extern u16 D_003BD32E;
 extern s32 sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
-extern s32 func_0030B638(s32);
+extern s32 sdfEnableDmacChannel(s32);
 extern s32 GetThreadId(void);
 extern s32 CancelWakeupThread(s32);
 extern s32 SleepThread(void);
@@ -188,7 +188,7 @@ void sdfRunGraphicsTransferWorker(void) {
 
     D_003BD2F1 = 0;
     sdfAddHandler(1, 1, sdfGraphWakeDisplayThread, -1, 0);
-    func_0030B638(1);
+    sdfEnableDmacChannel(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());
         D_003BD2F1 = 1;

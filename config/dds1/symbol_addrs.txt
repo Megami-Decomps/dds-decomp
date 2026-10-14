@@ -30,6 +30,8 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sdfDisableDmacChannel = 0x0030B5D0; // type:func
+sdfEnableDmacChannel = 0x0030B638; // type:func
 sdfBuildFourColorTexturedQuadVifPacket = 0x002E2DE8; // type:func
 effObjApplyTransformParameters = 0x001122F0; // type:func
 fldAddAxisAlignedCollisionBoxVerticalFaces = 0x00138910; // type:func
@@ -10609,8 +10611,6 @@ func_0030B4D8 = 0x0030B4D8; // type:func
 QueryIntrContext = 0x0030B4F0; // type:func
 func_0030B500 = 0x0030B500; // type:func
 func_0030B568 = 0x0030B568; // type:func
-func_0030B5D0 = 0x0030B5D0; // type:func
-func_0030B638 = 0x0030B638; // type:func
 func_0030B6A0 = 0x0030B6A0; // type:func
 func_0030B6C0 = 0x0030B6C0; // type:func
 func_0030B6E0 = 0x0030B6E0; // type:func
