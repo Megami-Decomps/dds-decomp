@@ -62,7 +62,6 @@ struct StaffDisplayContext {
 };
 typedef char StaffDisplayContext_size[(sizeof(StaffDisplayContext) == 0x924) ? 1 : -1];
 
-extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 
 typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
