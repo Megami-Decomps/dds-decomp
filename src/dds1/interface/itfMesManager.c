@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
 #include "fr_font_glyph_chain_count.h"
 #include "itf_mes_window.h"
@@ -94,8 +95,6 @@ extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
 extern void *memcpy(void *destination, const void *source, u32 size);
 void itfMesReplaceTextSlotData();
-
-extern void itfResetBattleFadeState();
 
 extern s32 frFontMeasureGlyphStripWidth();
 
@@ -1136,8 +1135,6 @@ void itfMesClearGlobalWords(void) {
 
 /* Slot record reached through the pool base, one 0x14 bytes per window. */
 extern ItfMesWindowRec D_003D6EC0[];
-
-extern void btlReleaseEffectResourceHandles();
 
 extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
 
