@@ -137,6 +137,8 @@ void effDrawBlurSource(EffBlurQuad *source, struct SdfTex *resource, u8 fixedPoi
 void effDrawBlurRectangle(EffBlurQuad *source);
 void effBlurDrawFramebufferQuad(EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
+/* Borrow the live textured-blur owner; callers do not acquire or release it. */
+EffBlurTemplate *effGetCh71Work(void);
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *body);
 void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters);
 void effCopyFilterBlurParameters(EffBlurScatterParams *parameters);
