@@ -3619,6 +3619,7 @@
 0x00202390	btlUnitHasEitherSpecialAction	inferred	Calls btlGroup400UnitHasAction for action IDs 0x1B2 and 0x1B6. [names_R_FuncNames3.tsv]
 0x00202410	btlActionMatchesUnit	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00202448	btlGroup400UnitHasAction	inferred	tests action on live group 400 unit [names_R_FuncNames.tsv]
+0x002024A8	btlSelectFlaggedIndexListEntry	inferred	confidence=high; Starts at an RNG-derived candidate index, scans cyclically for a flagged BtlIndexList entry, then retries with entries selected by the unit status fallback mask and finally entry zero; callers supply flags from status masks, unit IDs, or AI predicates.
 0x002025F8	btlBuildActorIndexListAndCount	inferred	allocates indexed actor list and returns it while writing result and count [names_R_FuncNames.tsv]
 0x00203098	btlSelectLowestHealthElementBlockTarget	inferred	confidence=high; matched-C; src/dds1/game/code_001FF030.c:1272:func_00203098; sibling of btlSelectLowestHealthRateTarget: candidates are units with btlUnitBlocksElementQueryForGroup(.., 0x200)==1, lowest nonzero func_001A17F8 value wins, else every listed unit is a candidate; source=reviewed-names_M103_Battle4.tsv [names_qp15.tsv]
 0x00203248	btlSelectLowestHealthRateTarget	inferred	min of hp*100/maxHp over the list, skipping hp == 0; falls back to a random flagged pick [names_M89_Battle3.tsv]
