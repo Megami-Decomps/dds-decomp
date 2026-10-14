@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sdfDevFindDiscFileRecordByCdromPath = 0x0033DE60; // type:func
 sdfBuildFourColorTexturedQuadVifPacket = 0x0033BC98; // type:func
 effObjApplyTransformParameters = 0x00112518; // type:func
 fldAddAxisAlignedCollisionBoxVerticalFaces = 0x0013B4F8; // type:func
@@ -11374,7 +11375,6 @@ sdfDevConsInitPacketBuffers = 0x0033D480; // type:func
 sdfDevConsRenderAll = 0x0033D568; // type:func
 sdfBuildFormattedConsolePacket = 0x0033D5D0; // type:func
 sdfDevPrintText = 0x0033DA30; // type:func
-func_0033DE60 = 0x0033DE60; // type:func
 sdfDevFindDiscFileRecordByPath = 0x0033E008; // type:func
 sdfDevReadDiscFileBytes = 0x0033E248; // type:func
 sdfDevDetectDiscPathDisabled = 0x0033E800; // type:func

@@ -30,6 +30,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sdfDevFindDiscFileRecordByCdromPath = 0x002E4FB0; // type:func
 sdfDisableDmacChannel = 0x0030B5D0; // type:func
 sdfEnableDmacChannel = 0x0030B638; // type:func
 sdfBuildFourColorTexturedQuadVifPacket = 0x002E2DE8; // type:func
@@ -10067,7 +10068,6 @@ sdfDevConsInitPacketBuffers = 0x002E45D0; // type:func
 sdfDevConsRenderAll = 0x002E46B8; // type:func
 sdfBuildFormattedConsolePacket = 0x002E4720; // type:func
 sdfDevPrintText = 0x002E4B80; // type:func
-func_002E4FB0 = 0x002E4FB0; // type:func
 func_002E5158 = 0x002E5158; // type:func
 sdfDevReadDiscFileBytes = 0x002E5398; // type:func
 sdfDevDetectDiscPathDisabled = 0x002E5958; // type:func

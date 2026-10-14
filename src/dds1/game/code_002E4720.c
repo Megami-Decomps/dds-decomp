@@ -540,7 +540,7 @@ extern s32 sdfDevSeekFile(s32, s32, s32);
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
  * the disc answers, and record the file's size in the shared record. */
-s32 func_002E4FB0(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
+s32 sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
     u32 file[9];
     char path[256];
     char *name;
