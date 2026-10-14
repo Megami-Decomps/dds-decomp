@@ -4,6 +4,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
+#include "pty_roster_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18

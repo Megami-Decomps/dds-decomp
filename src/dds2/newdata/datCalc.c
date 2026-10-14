@@ -5,6 +5,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
+#include "pty_roster_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -1358,14 +1359,14 @@ s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags) {
     return slotIndex;
 }
 
-void ptyAddUnit(u32 arg0) {
-    ptyAddUnitWithFlags(arg0, 0);
+s32 ptyAddUnit(s32 rosterIndex) {
+    return ptyAddUnitWithFlags(rosterIndex, 0);
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", ptyRemoveUnitWithFlags);
 
-void ptyRemoveUnit(u32 arg0) {
-    ptyRemoveUnitWithFlags(arg0, 0);
+s32 ptyRemoveUnit(s32 unitId) {
+    return ptyRemoveUnitWithFlags(unitId, 0);
 }
 
 u32 ptyReturnZero(void) {
