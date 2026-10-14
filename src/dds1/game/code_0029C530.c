@@ -5224,8 +5224,8 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern void func_002DD608(f32);
-extern void func_002DD968(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 extern f32 func_002FA1D8(f32);
 extern f32 func_002F9CD0(f32);
 
@@ -5302,8 +5302,8 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 entry->height = -config->heightScale * effMiscRandUnitFloat(effSharedRandomState);
             }
             entry->pitch = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-            func_002DD608(entry->yaw);
-            func_002DD968(entry->pitch);
+            sdfVuLoadRotationMatrixX(entry->yaw);
+            sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
             sdfMultiplyVuMatrixInPlace();
             phase = entry->phase;
             position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
@@ -5365,8 +5365,8 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 phase = (entry->angularRate + acceleration * (f32)(entry->negativeSeed + 1) * 0.5f) * (f32)(entry->negativeSeed + 1);
                 phase = phase + entry->phase;
                 curve = bendStep * (curveSample * 0.7f + (1.0f - 0.7f));
-                func_002DD608(entry->yaw);
-                func_002DD968(entry->pitch);
+                sdfVuLoadRotationMatrixX(entry->yaw);
+                sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
                 sdfMultiplyVuMatrixInPlace();
                 position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
                 position[1] = 0;

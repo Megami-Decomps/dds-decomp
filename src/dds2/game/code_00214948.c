@@ -3131,7 +3131,7 @@ extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 
 extern void sdfVuLoadRotationMatrixX(f32);
 
-extern void func_00336818(f32);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 
 
 extern s32 btlSetLinkedDefeatCameraPresetA();
@@ -3393,7 +3393,7 @@ s32 rotate;
         switch (kind) {
         case 0:
             sdfVuLoadRotationMatrixX(-0.13089969f);
-            func_00336818(0.13089969f);
+            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
@@ -3402,7 +3402,7 @@ s32 rotate;
         case 2:
             angle = -0.13089969f;
             sdfVuLoadRotationMatrixX(angle);
-            func_00336818(angle);
+            sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
         }
@@ -5885,7 +5885,7 @@ s32 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         switch (cameraPreset) {
         case 0:
             sdfVuLoadRotationMatrixX(-0.13089969f);
-            func_00336818(0.13089969f);
+            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
@@ -5894,7 +5894,7 @@ s32 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         case 2: {
             f32 angle = -0.13089969f;
             sdfVuLoadRotationMatrixX(angle);
-            func_00336818(angle);
+            sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
         }
@@ -6549,7 +6549,7 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
         switch (kind) {
         case 0:
             sdfVuLoadRotationMatrixX(-0.13089969f);
-            func_00336818(0.13089969f);
+            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
@@ -6558,7 +6558,7 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
         case 2:
             angle = -0.13089969f;
             sdfVuLoadRotationMatrixX(angle);
-            func_00336818(angle);
+            sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
         }
@@ -6776,7 +6776,7 @@ void btlSelectTargetCameraPose(BtlLinkedCommand *command) {
 
 extern void sdfVuLoadRotationMatrixX(f32);
 
-extern void func_00336818(f32);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 
 
 s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
@@ -6836,7 +6836,7 @@ s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *came
         switch (kind) {
         case 0:
             sdfVuLoadRotationMatrixX(-0.13089969f);
-            func_00336818(0.13089969f);
+            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
             sdfComposeVuMatrixFromRegisters();
             break;
         case 1:
@@ -6845,7 +6845,7 @@ s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *came
         case 2:
             angle = -0.13089969f;
             sdfVuLoadRotationMatrixX(angle);
-            func_00336818(angle);
+            sdfVuLoadSecondaryRotationMatrixY(angle);
             sdfComposeVuMatrixFromRegisters();
             break;
         }

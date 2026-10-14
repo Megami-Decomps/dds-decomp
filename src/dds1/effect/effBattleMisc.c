@@ -28,8 +28,8 @@ extern void func_002DD688(f32 angle);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void func_002DD608(f32 value);
-extern void func_002DD968(f32 value);
+extern void sdfVuLoadRotationMatrixX(f32 value);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32 value);
 extern f32 func_001F6970(u32 mask, s32 a, s32 b);
 extern u32 effFieldColorFlags;
 
@@ -130,7 +130,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
             dir[1] = 0;
             VU0_LOAD_VF(vf10, unit->orientation);
             effMiscQuaternionToMatrixVU();
-            func_002DD968(D_003528A8[sub]);
+            sdfVuLoadSecondaryRotationMatrixY(D_003528A8[sub]);
             sdfComposeVuMatrixFromRegisters();
             VU0_LOAD_VF(vf10, dir);
             VU0_ROTATE_VEC(vf10, vf10);
@@ -355,8 +355,8 @@ void effBattleMiscBuildBasis(EffectVectorRequest *param, u128 *out) {
         if (param->size < 9) {
             angle = D_003528A8[param->size];
         }
-        func_002DD608(tilt);
-        func_002DD968(angle);
+        sdfVuLoadRotationMatrixX(tilt);
+        sdfVuLoadSecondaryRotationMatrixY(angle);
         sdfMultiplyVuMatrixInPlace();
     }
     VU0_STORE_MATRIX(out);

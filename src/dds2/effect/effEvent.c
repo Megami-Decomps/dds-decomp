@@ -1175,7 +1175,7 @@ extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void func_00336818(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
@@ -1237,7 +1237,7 @@ void effEventLoadSelectedAimPositionVu(EffEventInit *src, EffAimParams *param) {
         dir[1] = 0.0f;
         VU0_LOAD_VF(vf10, src->orientation);
         effMiscQuaternionToMatrixVU();
-        func_00336818(D_003B2CE8[directionMode]);
+        sdfVuLoadSecondaryRotationMatrixY(D_003B2CE8[directionMode]);
         sdfComposeVuMatrixFromRegisters();
         VU0_LOAD_VF(vf10, dir);
         VU0_CLEAR_W(vf10);

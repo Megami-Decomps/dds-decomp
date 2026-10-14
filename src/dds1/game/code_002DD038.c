@@ -244,7 +244,7 @@ void sdfInvertScaledVuTransform(void) {
     VU0_MATRIX4_INVERT_SCALED();
 }
 
-INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD608);
+INCLUDE_ASM(const s32, "game/code_002DD038", sdfVuLoadRotationMatrixX);
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD688);
 
