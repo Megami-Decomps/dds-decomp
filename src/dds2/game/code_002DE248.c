@@ -23,6 +23,7 @@
 #include "eff_span_work.h"
 #include "common.h"
 #include "eff_resource_list_request.h"
+#include "eff_resource_bank_slot.h"
 #include "eff_matrix4.h"
 #include "eff_active_resource.h"
 #include "eff_frame_asset.h"
@@ -230,13 +231,7 @@ extern u8 D_0045C270[];
 extern void effComputeBattleCameraPositionVU(u8 *);
 
 
-typedef struct EffResourceBankSlot {
-    char fullName[0xC8]; /* Formatted path or selected built-in name. */
-    char name[0x34];    // 0xC8
-    s32 type;           // 0xFC
-    s32 state;          // 0x100
-    s32 count;          // 0x104
-} EffResourceBankSlot;
+
 
 extern void effPollResourceBankSlot(char *, u32, EffResourceBankSlot *);
 
@@ -12192,18 +12187,18 @@ extern char D_0042CF58[];
 
 
 s32 effPollPartResource(void) {
-    u8 request[0x110];
+    EffResourceBankSlot request;
     s32 state;
     s32 result = 0x400001;
     FileJob *entry;
 
-    effPollResourceBankSlot(D_0042CF58, BTL_RESOURCE_SCAN_EP, request);
-    state = ((EffResourceBankSlot *)request)->state;
+    effPollResourceBankSlot(D_0042CF58, BTL_RESOURCE_SCAN_EP, &request);
+    state = request.state;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
     } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
-            entry = fileAppendJobFromCommandPath(effFileQueue, (const char *)request);
+            entry = fileAppendJobFromCommandPath(effFileQueue, (const char *)&request);
             strcpy(entry->name, *(char **)effFindAssetData(entry));
         }
         result = 0x400002;
@@ -12212,20 +12207,20 @@ s32 effPollPartResource(void) {
 }
 
 u32 effPollNamedFileJob(void) {
-    u8 record[0x110];
+    EffResourceBankSlot record;
     u32 state;
     u32 result = 0x400001;
 
-    effPollResourceBankSlot(D_0042CF70, BTL_RESOURCE_SCAN_EPL, record);
-    state = ((EffResourceBankSlot *)record)->state;
+    effPollResourceBankSlot(D_0042CF70, BTL_RESOURCE_SCAN_EPL, &record);
+    state = record.state;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
     } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             fileQueueDestroy(effFileQueue);
         }
-        strcpy(D_0045C1A0, ((EffResourceBankSlot *)record)->name);
-        effFileQueue = fileQueueCreateFromCommandState((const char *)record);
+        strcpy(D_0045C1A0, record.name);
+        effFileQueue = fileQueueCreateFromCommandState((const char *)&record);
         D_0045C1F0 = *(EffectBlock128 *)effFileQueue;
         D_004386B0 = 0;
         D_003FFA84[0] = 0;
@@ -13242,20 +13237,20 @@ void effPollResourceQueueWithoutTlp(void) {
 }
 
 s32 effPollFileRecord(const char *resourceName, s32 mode) {
-    u8 status[0x110];
+    EffResourceBankSlot status;
     s32 result = 0x600001;
 
-    effPollResourceBankSlot(resourceName, mode, status);
-    if (((EffResourceBankSlot *)status)->state == BTL_RESOURCE_SELECTION_CANCELED) {
+    effPollResourceBankSlot(resourceName, mode, &status);
+    if (status.state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (((EffResourceBankSlot *)status)->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+    } else if (status.state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
-        if (((EffResourceBankSlot *)status)->type != 8) {
+        if (status.type != 8) {
             fileJobCopyCommandIntoSecondaryData(effQueuedFileHandle,
-                           (const char *)status,
-                           effClassifyResourceMask(((EffResourceBankSlot *)status)->type));
+                           (const char *)&status,
+                           effClassifyResourceMask(status.type));
         } else {
-            fileJobSetSecondaryData(effQueuedFileHandle, status + 0x104, 4, 4);
+            fileJobSetSecondaryData(effQueuedFileHandle, &status.count, 4, 4);
         }
         result = 0x400002;
     }
@@ -13347,7 +13342,7 @@ extern EffFileJobRequest D_003F01D0;
 
 
 u32 fileLoadEffectSlotA(void) {
-    u8 fileInfo[0x110];
+    EffResourceBankSlot fileInfo;
     FileJobPayload *job;
     FileJob *entry;
     EffFileJobRequest *resource;
@@ -13355,8 +13350,8 @@ u32 fileLoadEffectSlotA(void) {
     s32 status;
     u32 result;
 
-    effPollResourceBankSlot(D_0042D128, BTL_RESOURCE_SCAN_PB, fileInfo);
-    status = ((EffResourceBankSlot *)fileInfo)->state;
+    effPollResourceBankSlot(D_0042D128, BTL_RESOURCE_SCAN_PB, &fileInfo);
+    status = fileInfo.state;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13364,8 +13359,8 @@ u32 fileLoadEffectSlotA(void) {
         job = fileCreateJob(3);
         fileJobSetPrimaryData(job, D_003F01D0.output, D_003F01D0.size,
                       D_003F01D0.transferMode);
-        fileJobCopyCommandIntoSecondaryData(job, (const char *)fileInfo,
-                      effClassifyResourceMask(((EffResourceBankSlot *)fileInfo)->type));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -13397,15 +13392,8 @@ extern void effResetFileResourceManager(void);
 
 extern u8 D_003F0DA8[] __attribute__((aligned(4)));
 
-typedef struct EffFileQueryInfo {
-    u8 pad0[0xFC];
-    u32 resourceMask;
-    s32 status;
-    u8 pad104[0xC];
-} EffFileQueryInfo;
-
 u32 effQueueGeneratedFileJob(void) {
-    EffFileQueryInfo fileInfo;
+    EffResourceBankSlot fileInfo;
     u32 result;
     s32 status;
     FileJobPayload *job;
@@ -13418,7 +13406,7 @@ u32 effQueueGeneratedFileJob(void) {
     struct SdfMemBlock *allocation;
 
     effPollResourceBankSlot(D_0042D140, BTL_RESOURCE_SCAN_PB, &fileInfo);
-    status = fileInfo.status;
+    status = fileInfo.state;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13468,7 +13456,7 @@ u32 effQueueGeneratedFileJob(void) {
 extern EffFileJobRequest D_003F9060;
 
 u32 effPollAndQueueCopiedFileResource(void) {
-    EffFileQueryInfo fileInfo;
+    EffResourceBankSlot fileInfo;
     FileJobPayload *job;
     FileJob *entry;
     EffFileJobRequest *resource;
@@ -13477,7 +13465,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
     u32 result;
 
     effPollResourceBankSlot(D_0042D128, BTL_RESOURCE_SCAN_PB, &fileInfo);
-    status = fileInfo.status;
+    status = fileInfo.state;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13486,7 +13474,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
         fileJobSetPrimaryData(job, D_003F9060.output, D_003F9060.size,
                       D_003F9060.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
-                      effClassifyResourceMask(fileInfo.resourceMask));
+                      effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -13527,7 +13515,7 @@ INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D128);
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D140);
 
 u32 effLoadFileSlotF2(void) {
-    EffFileQueryInfo fileInfo;
+    EffResourceBankSlot fileInfo;
     FileJobPayload *job;
     FileJob *entry;
     EffFileJobRequest *resource;
@@ -13536,7 +13524,7 @@ u32 effLoadFileSlotF2(void) {
     u32 result;
 
     effPollResourceBankSlot("/tool/effect/f2/", BTL_RESOURCE_SCAN_F2, &fileInfo);
-    status = fileInfo.status;
+    status = fileInfo.state;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13545,7 +13533,7 @@ u32 effLoadFileSlotF2(void) {
         fileJobSetPrimaryData(job, D_003FB948.output, D_003FB948.size,
                       D_003FB948.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
-                      effClassifyResourceMask(fileInfo.resourceMask));
+                      effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -13570,7 +13558,7 @@ u32 effLoadFileSlotF2(void) {
 extern EffFileJobRequest D_003FD988;
 
 u32 effLoadMaterialFile(void) {
-    EffFileQueryInfo fileInfo;
+    EffResourceBankSlot fileInfo;
     FileJobPayload *job;
     FileJob *entry;
     EffFileJobRequest *resource;
@@ -13579,7 +13567,7 @@ u32 effLoadMaterialFile(void) {
     u32 result;
 
     effPollResourceBankSlot(D_0042D128, BTL_RESOURCE_SCAN_P2A, &fileInfo);
-    status = fileInfo.status;
+    status = fileInfo.state;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13588,7 +13576,7 @@ u32 effLoadMaterialFile(void) {
         fileJobSetPrimaryData(job, D_003FD988.output, D_003FD988.size,
                       D_003FD988.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
-                      effClassifyResourceMask(fileInfo.resourceMask));
+                      effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -13613,7 +13601,7 @@ u32 effLoadMaterialFile(void) {
 extern EffFileJobRequest D_003FE040;
 
 u32 effPollAndQueueFileResourceWithUnitFloats(void) {
-    EffFileQueryInfo fileInfo;
+    EffResourceBankSlot fileInfo;
     FileJobPayload *job;
     FileJob *entry;
     EffFileJobRequest *resource;
@@ -13624,7 +13612,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
     f32 *coordinates;
 
     effPollResourceBankSlot(D_0042D128, BTL_RESOURCE_SCAN_PB, &fileInfo);
-    status = fileInfo.status;
+    status = fileInfo.state;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13637,7 +13625,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         fileJobSetPrimaryData(job, D_003FE040.output, D_003FE040.size,
                       D_003FE040.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
-                      effClassifyResourceMask(fileInfo.resourceMask));
+                      effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = entry;
         memcpy(D_0045C270, entry, 0x80);
