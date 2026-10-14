@@ -208,17 +208,6 @@ typedef struct EffectBlock128 {
     u32 word[32];
 } EffectBlock128;
 
-typedef struct EffectSlot {
-    u8 pad_0x00[0x28]; // 0x00
-    s32 bucket;        // 0x28
-    u8 pad_0x2C[0x54]; // 0x2C
-} EffectSlot; // 0x80
-
-typedef struct EffectSlotOwner {
-    u8 pad_0x00[0x10];  // 0x00
-    EffectSlot *slots;  // 0x10
-} EffectSlotOwner;
-
 extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
@@ -14051,7 +14040,7 @@ EffectOwnerRecord *effCreateOwnerRecordList(u32 ownerAddress) {
 /* Clamp only the upper bucket bound and prepend; the former head's prev link is not rewritten. */
 void effInsertSlotRecord(void *owner, EffectOwnerRecord *list, EffectSlotOwner *work, s32 slotIndex) {
     EffectSlot *slotData = &work->slots[slotIndex];
-    s32 bucketIndex = slotData->bucket;
+    s32 bucketIndex = slotData->bucketIndex;
     EffectRecord *record;
 
     if (bucketIndex >= EFF_RECORD_BUCKETS) {
@@ -14068,7 +14057,7 @@ void effInsertSlotRecord(void *owner, EffectOwnerRecord *list, EffectSlotOwner *
 /* Remove the first matching slot from the raw bucket index; unlike insertion, this does not clamp it. */
 s32 effRemoveSlotRecord(EffectOwnerRecord *list, EffectSlotOwner *work, s32 slotIndex) {
     EffectSlot *slotData = &work->slots[slotIndex];
-    s32 bucketIndex = slotData->bucket;
+    s32 bucketIndex = slotData->bucketIndex;
     EffectRecord *record = list->entries[bucketIndex];
 
     while (record != 0) {
