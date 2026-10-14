@@ -24,6 +24,7 @@
 #include "sdf_resource.h"
 #include "sdf_sif_command.h"
 #include "scr.h"
+#include "bf_flw0_header.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
 
@@ -1746,17 +1747,6 @@ void evtUnlinkWorkNode(ScrData *node) {
     scrNamedProcessCount--;
 }
 
-
-typedef struct BfFlw0Header {
-    u8 pad00[8];
-    u32 magic;
-    u8 pad0C[4];
-    s32 sectionCount;
-    s16 intCount;
-    s16 floatCount;
-    u8 pad18[8];
-    ScrSection sections[1];
-} BfFlw0Header;
 
 extern s32 itfMesCreateWindow(void *data);
 

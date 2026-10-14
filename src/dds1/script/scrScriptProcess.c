@@ -4,6 +4,7 @@
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "scr.h"
+#include "bf_flw0_header.h"
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
 extern ScrProcGlobals *datGameState;
@@ -178,15 +179,8 @@ ScrData *scrFindNamedProcessNode(char *name) {
     return NULL;
 }
 
-typedef struct BfFlw0Lookup {
-    u8 pad00[0x10];
-    s32 sectionCount;
-    u8 pad14[0xC];
-    ScrSection sections[1];
-} BfFlw0Lookup;
-
 /* Index of the named procedure in the FLW0 procedure section, or -1. */
-s32 bfFindScriptIndexByName(BfFlw0Lookup *header, const char *name) {
+s32 bfFindScriptIndexByName(BfFlw0Header *header, const char *name) {
     ScrLabel *procedures = NULL;
     ScrSection *sections;
     s32 i;
