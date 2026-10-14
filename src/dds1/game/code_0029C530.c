@@ -1,6 +1,7 @@
 #include "eff_packet_params.h"
 #include "eff_camera_create_request.h"
 #include "eff_file_job_request.h"
+#include "eff_emitter_row.h"
 #include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
@@ -2172,16 +2173,6 @@ typedef char EffEmitterFrameParameters_size_check[
     sizeof(EffEmitterFrameParameters) == sizeof(EffBillEmitterFrameConfig) ? 1 : -1];
 typedef char EffEmitterFrameParameters_reverse_check[
     (u32)&((EffEmitterFrameParameters *)0)->reverse == 0x84 ? 1 : -1];
-
-typedef struct EffEmitterRow {
-    s32 age;
-    f32 speed;
-    f32 angle;
-    f32 radius;
-    f32 offset;
-    f32 width;
-} EffEmitterRow;
-typedef char EffEmitterRow_size_check[sizeof(EffEmitterRow) == 0x18 ? 1 : -1];
 
 extern s8 effSharedRandomState[];
 
