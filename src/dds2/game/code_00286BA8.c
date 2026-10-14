@@ -638,7 +638,7 @@ s32 mtrMantraEquipUpdate(void) {
     return 0;
 }
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern void mnuUpdateMantraDrawPool(struct MantraDrawPool *pool);
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mnuDrawLoadedProgressPanels(DatPartyRecord *, MenuProgressHost *, s32);
@@ -653,7 +653,7 @@ s32 mtrMantraEquipDraw(void) {
     f32 ratio;
     s32 value;
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     mnuUpdateMantraDrawPool(work->menu.selectionController);
     ratio = 0.0f;
     if (work->flags.fadeProgress) {
@@ -861,7 +861,7 @@ s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {
     return result;
 }
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern s32 mtrDrawSelectionFadeAndScale(s32, s32, s32, s32, MnuStatusResource *, s32, f32);
 extern s32 mtrDrawSelectedMantraEntry(s32, s32, s32, s32, MnuStatusResource *, s32);
 
@@ -875,7 +875,7 @@ s32 mtrDrawUnitSelectionOverlay(MnuStatusResource *resourceWork) {
     if (!resourceWork->flags.visible) {
         return 0;
     }
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     selectionState = &resourceWork->selection;
     switch (selectionState->state) {
         case 1:

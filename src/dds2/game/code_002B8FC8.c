@@ -302,7 +302,7 @@ extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 
 
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 extern void *memset(void *, s32, u32);

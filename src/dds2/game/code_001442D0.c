@@ -4412,7 +4412,7 @@ struct EffectObj;
 extern struct FileRequest *D_004363A0;
 extern u32 D_004363A4;
 extern u32 D_004363A8;
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void *effObjCreateEventNode(void *, void *, void *);
 extern void effObjClearFlags(struct EffectObj *, u32);
@@ -4430,7 +4430,7 @@ void fldUpdateDevilizeEventSequence(void) {
 
     switch (fldSparkControlState.dialogPhase) {
     case 12:
-        func_0026C900();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
@@ -4440,7 +4440,7 @@ void fldUpdateDevilizeEventSequence(void) {
         }
         break;
     case 1:
-        func_0026C900();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() == 0) {
             choice = evtGetCapturedWindowPanelValue();
             if (choice == 0) {
@@ -4467,7 +4467,7 @@ void fldUpdateDevilizeEventSequence(void) {
         }
         break;
     case 4:
-        func_0026C900();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
@@ -4639,7 +4639,7 @@ void fldUpdateSparkEncounterScene(void) {
         }
         return;
     } else if (phase == 3) {
-        func_0026C900();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
@@ -4745,7 +4745,7 @@ void fldStartDeferredFieldExit(void) {
  * controlled, then closes its display channel and restores the camera target. */
 void fldFinishDeferredExit(void) {
     if (fldAreaState.deferredExit == 2) {
-        func_0026C900();
+        dspRequestMessageWindowModeOne();
         if (!evtGetMessageWindowControlState()) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();

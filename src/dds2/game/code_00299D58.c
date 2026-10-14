@@ -13,7 +13,7 @@ extern void dspSetActive(s32 index);
 
 extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 extern void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *);
@@ -324,7 +324,7 @@ s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
 s32 mnuRequestMessageWindowAndAdvanceResultPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 

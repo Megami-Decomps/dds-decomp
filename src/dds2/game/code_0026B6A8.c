@@ -19,7 +19,7 @@ extern void mnuApplyFadeTrackMode(s32, struct MenuSlotState *);
 #include "dds3_world_secondary.h"
 extern void mnuDrawTerminalBackdrop(s32);
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 
@@ -118,7 +118,7 @@ s32 mnuDispatchTerminalPanel(KwlnTask *request) {
 s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)state, 2, (void *)request);
 }
 

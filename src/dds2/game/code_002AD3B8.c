@@ -23,7 +23,7 @@
 #define MNU_STAFF_INPUT_NEXT_PAGE 0x200
 
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
@@ -107,7 +107,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
 s32 mnuStaffImageExitA(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
@@ -670,7 +670,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
 s32 mnuExitStaffPartyValuePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
@@ -958,7 +958,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
 s32 mnuExitStaffValuePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 

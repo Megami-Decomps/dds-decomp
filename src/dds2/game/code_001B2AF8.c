@@ -4259,7 +4259,7 @@ typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ?
 extern const BattlePanelColors D_00416650;
 extern u8 *D_00435E64;
 extern u32 btlGetActiveUnitId(void);
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -4347,7 +4347,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
             colors.values[2] = color;
             colors.values[3] = color;
             if (evtGetMessageWindowControlState() == 1) {
-                func_0026C900();
+                dspRequestMessageWindowModeOne();
                 goto dialog_active;
             }
             if (work->phase == 3) {
@@ -4381,7 +4381,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
 extern s32 fldGetActiveSceneGroupValue(void);
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u64 btlStartTask(void *);
 extern void btlCopyUnitCurrentPosition(void *, f32 *);
@@ -4557,7 +4557,7 @@ s32 btlUpdateMajinTutorialTask(KwlnTask *task) {
         return -1;
     }
     if (windowState == 1) {
-        func_0026C900();
+        dspRequestMessageWindowModeOne();
     }
     return 0;
 }
