@@ -4315,13 +4315,510 @@ s32 fldUpdateAreaDamageReaction(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00132540);
+extern s8 D_0037F510[2][2][16];
+extern u8 D_00435C40[2][2][2];
+extern s32 D_004360BC;
+extern s32 D_004360C0;
+extern s32 D_004360D8;
+extern s32 D_004360DC;
+extern f32 D_004360E0;
+extern s32 D_004360E4;
+extern f32 D_0038A610[12];
+extern s32 fileTestSavedSlotFlags(u32);
+extern f32 fldSnapAngleToCompassPoint(f32);
+extern f32 fldSnapAngleToCompassOctant(f32);
+extern f32 fldSnapAngleToCardinalDirection(f32);
+extern s32 fldIsNearSpark(f32, f32, f32);
+extern void func_00139B98(f32 *);
+extern void fldRestoreSceneModelColors(void);
+extern void fldClearSceneModelColors(void);
+extern void fldShowSceneModels(void);
+extern void fldMarkPrimaryObjectByPeerPresence(void);
+extern void fldSetCameraObjectHighlightFlag(void);
+extern s32 fldIsCurrentGridGuideMarkerActive(void);
+extern void fldGetFieldFloatPair(f32 *, f32 *);
+
+/* Field movement, player pose and camera input controller. */
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413280);
+
+s32 func_00132540(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 smoothed[4] __attribute__((aligned(16)));
+    f32 quaternion[4] __attribute__((aligned(16)));
+    PcpVectorCopyF32 axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
+    f32 directionAngles[16] = {
+        0.0f, -22.5f, -45.0f, -67.5f, -90.0f, -112.5f, -135.0f, -157.5f,
+        180.0f, 157.5f, 135.0f, 112.5f, 90.0f, 67.5f, 45.0f, 22.5f
+    };
+    f32 current[3];
+    f32 guideX;
+    f32 guideZ;
+    f32 heading;
+    f32 difference;
+    f32 step;
+    f32 distance;
+    f32 radians;
+    s32 direction = -1;
+    s32 snapInput = 0;
+    s32 motion;
+    s16 oldMotion;
+
+    if (D_004360C0 > 0) {
+        D_004360C0--;
+    }
+    if (fldUpdateFieldTransition() == -1) {
+        return 0;
+    }
+    if (fldUpdateAreaDamageReaction() == -1) {
+        return 0;
+    }
+    if (fldTestSceneControlFlags(0x40) == 0) {
+        return 0;
+    }
+    if (D_004360D0 != 0) {
+        fldUpdateCameraModelMotion(0, 0, 6.0f);
+        return 0;
+    }
+
+    if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x100) {
+        if (D_00435C40[0][0][1] < 0x40) {
+            if (fileTestSavedSlotFlags(3) != 0) {
+                fldAreaState.cameraTilt -= 10.0f;
+            } else {
+                fldAreaState.cameraTilt += 10.0f;
+            }
+            fldAreaState.cameraTiltActive = 1;
+        }
+        if (D_00435C40[0][0][1] > 0xC0) {
+            if (fileTestSavedSlotFlags(3) != 0) {
+                fldAreaState.cameraTilt += 10.0f;
+            } else {
+                fldAreaState.cameraTilt -= 10.0f;
+            }
+            fldAreaState.cameraTiltActive = 1;
+        }
+        if (fldAreaState.cameraTilt < -150.0f) {
+            fldAreaState.cameraTilt = -150.0f;
+        }
+        if (fldAreaState.cameraTilt > 150.0f) {
+            fldAreaState.cameraTilt = 150.0f;
+        }
+        if (D_0037F510[1][0][3] < 0) {
+            fldAreaState.cameraTiltActive = 0;
+            fldAreaState.cameraTilt = 0.0f;
+        }
+    }
+
+    if (D_00435C40[0][1][0] < 0x40 || D_00435C40[0][1][0] > 0xC0 ||
+        D_00435C40[0][1][1] < 0x40 || D_00435C40[0][1][1] > 0xC0) {
+        f32 x = D_00435C40[0][1][0] - 128;
+        f32 y = D_00435C40[0][1][1] - 128;
+        f32 angle;
+        y = -y;
+        if (-64.0f < x && x < 64.0f) {
+            x = 0.0f;
+        }
+        if (-64.0f < y && y < 64.0f) {
+            y = 0.0f;
+        }
+        angle = sdfAtan2(x, y);
+        angle *= 180.0f / 3.14f;
+        angle += 11.25f;
+        if (angle < 0.0f) {
+            angle += 360.0f;
+        }
+        if (angle > 360.0f) {
+            angle -= 360.0f;
+        }
+        direction = (s32)(angle / 22.5f);
+    }
+    if (direction == -1) {
+        if (D_0037F510[1][0][4] != 0 && D_0037F510[1][0][6] != 0) {
+            direction = 14;
+        } else if (D_0037F510[1][0][4] != 0 && D_0037F510[1][0][7] != 0) {
+            direction = 10;
+        } else if (D_0037F510[1][0][5] != 0 && D_0037F510[1][0][6] != 0) {
+            direction = 2;
+        } else if (D_0037F510[1][0][5] != 0 && D_0037F510[1][0][7] != 0) {
+            direction = 6;
+        } else if (D_0037F510[1][0][4] != 0) {
+            direction = 12;
+        } else if (D_0037F510[1][0][5] != 0) {
+            direction = 4;
+        } else if (D_0037F510[1][0][6] != 0) {
+            direction = 0;
+        } else if (D_0037F510[1][0][7] != 0) {
+            direction = 8;
+        }
+    }
+    if (D_0037F510[1][0][3] < 0) {
+        D_004360D8 = 0;
+        D_004360E4 = 0;
+    }
+    if (D_004360D8 != 0) {
+        D_004360E4++;
+        if (D_004360DC != direction) {
+            D_004360D8 = 0;
+        } else if (D_004360E4 > 12) {
+            D_004360D8 = 0;
+        }
+    }
+    if (D_0037F510[1][0][3] != 0 || (D_0037F510[1][0][8] != 0 && D_0037F510[1][0][10] != 0)) {
+        if (fldAreaState.mode != 1 && fldAreaState.mode != 3) {
+            snapInput = 1;
+        }
+    }
+    if (fldAreaState.sceneState > 0) {
+        direction = -1;
+        snapInput = 0;
+    }
+
+    effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    fldAreaState.previousX = fldAreaState.x;
+    fldAreaState.previousY = fldAreaState.y;
+    fldAreaState.previousZ = fldAreaState.z;
+    fldAreaState.x = position[0];
+    fldAreaState.y = position[1];
+    fldAreaState.z = position[2];
+    while (fldAreaState.negatedAngle >= 360.0f) {
+        fldAreaState.negatedAngle -= 360.0f;
+    }
+    while (fldAreaState.negatedAngle < 0.0f) {
+        fldAreaState.negatedAngle += 360.0f;
+    }
+    while (fldAreaState.angle >= 360.0f) {
+        fldAreaState.angle -= 360.0f;
+    }
+    while (fldAreaState.angle < 0.0f) {
+        fldAreaState.angle += 360.0f;
+    }
+    effObjFetchInnerRotationNormalized((EffWorldNode *)fldPlayerObject);
+    VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    sdfInvertScaledVuTransform();
+    effObjSetNodeFlags(((EffWorldNode *)fldPlayerObject)->inner,
+                      OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
+    if (fldSecondarySceneObject != 0) {
+        effObjSetNodeFlags(((EffWorldNode *)fldSecondarySceneObject)->inner,
+                          OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
+    }
+    if (direction != -1 && D_00435F30 != 0) {
+        if (fldAreaState.unk17C > 0.0f) {
+            fldAreaState.y = position[1] + 5.0f;
+        } else {
+            fldAreaState.y = position[1] + 10.0f;
+        }
+    }
+    if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
+        motion = 18;
+    } else {
+        motion = 2;
+    }
+    oldMotion = fldPlayerModelContext->current.h.motionIndex;
+    effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+    heading = fldAreaState.targetAngle;
+    if (direction != -1) {
+        heading = directionAngles[direction] - fldAreaState.negatedAngle;
+        if (D_004360D8 != 0) {
+            heading = D_004360E0;
+        } else {
+            D_004360E0 = heading;
+        }
+        if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
+            motion = 17;
+        } else {
+            motion = 1;
+        }
+        if (fldIsCurrentGridGuideMarkerActive() != 0) {
+            fldGetFieldFloatPair(&guideX, &guideZ);
+            motion = 16;
+            fldAreaState.x -= (fldAreaState.x - guideX) * 0.25f;
+            fldAreaState.z -= (fldAreaState.z - guideZ) * 0.25f;
+            position[0] = fldAreaState.x;
+            position[1] = fldAreaState.y;
+            position[2] = fldAreaState.z;
+            effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+            if (fldAreaState.movementSoundActive == 0) {
+                sndSetSequenceVolumePan(0x690062, 0x7F, 0x3F);
+            }
+            fldAreaState.movementSoundActive = 1;
+        } else {
+            fldAreaState.movementSoundActive = 0;
+            if (fldAreaState.unk118 != 0) {
+                distance = 32.0f;
+            } else {
+                distance = 25.0f;
+            }
+            if (fldAreaState.unk17C > 0.0f) {
+                distance += ffabsf(fldAreaState.unk17C) / 40.0f + 2.0f;
+            }
+            difference = fldAngleDifference(fldAreaState.angle, heading);
+            if (difference < 0.0f) {
+                difference = -difference;
+            }
+            distance = (distance / 180.0f) * (180.0f - difference);
+            radians = -heading * 3.14f / 180.0f;
+            position[0] = fldAreaState.x - sdfSinPoly(radians) * distance;
+            position[1] = fldAreaState.y;
+            position[2] = fldAreaState.z - sdfEvaluateCosineViaSinePhaseShift(radians) * distance;
+            effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        }
+    } else {
+        if (fldIsCurrentGridGuideMarkerActive() != 0) {
+            fldGetFieldFloatPair(&guideX, &guideZ);
+            motion = 16;
+            fldAreaState.x -= (fldAreaState.x - guideX) * 0.25f;
+            fldAreaState.z -= (fldAreaState.z - guideZ) * 0.25f;
+            if (fldAreaState.movementSoundActive == 0) {
+                sndSetSequenceVolumePan(0x690062, 0x7F, 0x3F);
+            }
+            fldAreaState.movementSoundActive = 1;
+        } else {
+            fldAreaState.movementSoundActive = 0;
+        }
+        position[0] = fldAreaState.x;
+        position[1] = fldAreaState.y;
+        position[2] = fldAreaState.z;
+        effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+    }
+    while (heading >= 360.0f) {
+        heading -= 360.0f;
+    }
+    while (heading < 0.0f) {
+        heading += 360.0f;
+    }
+    fldAreaState.targetAngle = fldSnapAngleToCompassPoint(heading);
+    if (fldAreaState.transitionMode != 0 && direction != -1 &&
+        fldIsNearSpark(position[0], position[1], position[2]) != 0) {
+        position[0] = fldAreaState.x;
+        position[1] = fldAreaState.y;
+        position[2] = fldAreaState.z;
+        effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+    }
+    if (D_00435F30 != 0) {
+        if (direction != -1) {
+            fldAreaState.x = position[0];
+            fldAreaState.y = position[1];
+            fldAreaState.z = position[2];
+            current[0] = fldAreaState.x;
+            current[1] = fldAreaState.y;
+            current[2] = fldAreaState.z;
+            fldRefreshAreaStateFromPosition(current);
+            if (fldAreaState.positionPending != 0) {
+                fldAreaState.x = fldAreaState.targetX;
+                fldAreaState.y = fldAreaState.targetY + 44.0f;
+                fldAreaState.z = fldAreaState.targetZ;
+                position[0] = fldAreaState.x;
+                position[1] = fldAreaState.y;
+                position[2] = fldAreaState.z;
+                effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+                fldAreaState.positionPending = 0;
+            }
+        }
+        effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        PCP_COPY_VECTOR_F32(smoothed, ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition);
+        if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
+            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
+        } else {
+            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] =
+                smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
+        }
+        if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
+            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
+        } else {
+            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] =
+                smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
+        }
+        if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
+            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
+        } else {
+            ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] =
+                smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
+        }
+        ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
+        if (fldSecondarySceneObject != 0) {
+            ObjectTransform *source = ((EffWorldNode *)fldPlayerObject)->inner;
+            ObjectTransform *secondary = ((EffWorldNode *)fldSecondarySceneObject)->inner;
+            secondary->smoothedPosition[0] = source->smoothedPosition[0];
+            secondary->smoothedPosition[1] = source->smoothedPosition[1] + 0.0f;
+            secondary->smoothedPosition[2] = source->smoothedPosition[2];
+            secondary->smoothedPosition[3] = source->smoothedPosition[3];
+        }
+    }
+    func_00139B98(position);
+    difference = fldAngleDifference(fldAreaState.angle, heading);
+    step = difference / 5.0f;
+    if (step < 0.0f) {
+        step = -step;
+    }
+    if (step < 2.0f) {
+        step = 2.0f;
+    }
+    if (fldIsCurrentGridGuideMarkerActive() != 0) {
+        step *= 0.25f;
+    }
+    if ((0.0f <= difference && difference <= step) ||
+        (difference <= 0.0f && -step <= difference)) {
+        difference = heading;
+    } else if (difference < 0.0f) {
+        difference = fldAreaState.angle - step;
+    } else {
+        difference = fldAreaState.angle + step;
+    }
+    fldAreaState.angle = difference;
+    VU0_LOAD_VF(vf10, axis.components);
+    effMiscAxisAngleToQuaternionVU(fldAreaState.angle * 3.14f / 180.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
+    effObjSetInnerRotation((EffWorldNode *)fldPlayerObject, (u128 *)quaternion);
+    if (fldSecondarySceneObject != 0) {
+        effObjSetInnerRotation((EffWorldNode *)fldSecondarySceneObject, (u128 *)quaternion);
+    }
+    if (fldAreaState.mode != 3 && fldAreaState.mode != 1) {
+        if (D_004360BC != 0) {
+            difference = fldAngleDifference(fldAreaState.negatedAngle, fldAreaState.cameraTargetAngle);
+            step = 30.0f;
+            if ((0.0f <= difference && difference <= step) ||
+                (difference <= 0.0f && -step <= difference)) {
+                D_004360BC = 0;
+                difference = fldAreaState.cameraTargetAngle;
+            } else if (difference < 0.0f) {
+                difference = fldAreaState.negatedAngle - step;
+            } else {
+                difference = fldAreaState.negatedAngle + step;
+            }
+            fldAreaState.negatedAngle = difference;
+        }
+        if (D_004360BC == 0) {
+            if (D_0037F510[1][0][3] < 0) {
+                fldAreaState.cameraTargetAngle = -fldAreaState.targetAngle;
+                fldAreaState.cameraTargetAngle = fldSnapAngleToCardinalDirection(fldAreaState.cameraTargetAngle);
+                difference = fldAngleDifference(fldAreaState.cameraTargetAngle, fldAreaState.negatedAngle);
+                if (difference < -100.0f || difference > 100.0f) {
+                    D_004360C0 = 2;
+                    fldAreaState.negatedAngle = fldAreaState.cameraTargetAngle;
+                } else {
+                    D_004360BC = 1;
+                }
+                if (direction != -1) {
+                    D_004360DC = direction;
+                    D_004360D8 = 1;
+                    D_004360E4 = 0;
+                }
+            }
+        }
+        if (fldAreaState.unkA0 != -1 && direction != -1 &&
+            (s32)fldAreaState.negatedAngle != (s32)fldAreaState.cameraTargetAngle) {
+            difference = fldAngleDifference(fldAreaState.negatedAngle, fldAreaState.cameraTargetAngle);
+            step = 0.4f;
+            if ((0.0f <= difference && difference <= step) ||
+                (difference <= 0.0f && -step <= difference)) {
+                difference = fldAreaState.cameraTargetAngle;
+            } else if (difference < 0.0f) {
+                difference = fldAreaState.negatedAngle - step;
+            } else {
+                difference = fldAreaState.negatedAngle + step;
+            }
+            fldAreaState.negatedAngle = difference;
+        }
+        if (snapInput != 0) {
+            if (D_0037F510[1][0][8] < 0 && D_0037F510[1][0][10] == 0) {
+                fldAreaState.cameraTargetAngle -= 88.0f;
+                fldAreaState.cameraTargetAngle = fldSnapAngleToCardinalDirection(fldAreaState.cameraTargetAngle);
+                D_004360BC = 1;
+                fldAreaState.targetAngle = -fldAreaState.cameraTargetAngle;
+            } else if (D_0037F510[1][0][10] < 0 && D_0037F510[1][0][8] == 0) {
+                fldAreaState.cameraTargetAngle += 88.0f;
+                fldAreaState.cameraTargetAngle = fldSnapAngleToCardinalDirection(fldAreaState.cameraTargetAngle);
+                D_004360BC = 1;
+                fldAreaState.targetAngle = -fldAreaState.cameraTargetAngle;
+            }
+        } else {
+            s32 reversed = fileTestSavedSlotFlags(3) == 0;
+            if (D_0037F510[1][0][8] != 0) {
+                if (D_0037F510[1][0][10] == 0) {
+                    fldAreaState.negatedAngle -= 4.5f;
+                    goto update_camera_angle;
+                }
+            } else if (D_0037F510[1][0][10] != 0) {
+                fldAreaState.negatedAngle += 4.5f;
+                goto update_camera_angle;
+            }
+            if (D_00435C40[0][0][0] < 0x20) {
+                if (reversed) {
+                    fldAreaState.negatedAngle += 3.0f;
+                } else {
+                    fldAreaState.negatedAngle -= 3.0f;
+                }
+            } else if (D_00435C40[0][0][0] < 0x40) {
+                if (reversed) {
+                    fldAreaState.negatedAngle += 1.5f;
+                } else {
+                    fldAreaState.negatedAngle -= 1.5f;
+                }
+            } else if (D_00435C40[0][0][0] > 0xE0) {
+                if (reversed) {
+                    fldAreaState.negatedAngle -= 3.0f;
+                } else {
+                    fldAreaState.negatedAngle += 3.0f;
+                }
+            } else if (D_00435C40[0][0][0] > 0xC0) {
+                if (reversed) {
+                    fldAreaState.negatedAngle -= 1.5f;
+                } else {
+                    fldAreaState.negatedAngle += 1.5f;
+                }
+            } else {
+                goto camera_input_done;
+            }
+update_camera_angle:
+            fldAreaState.cameraTargetAngle = fldSnapAngleToCompassOctant(fldAreaState.negatedAngle);
+        }
+    }
+camera_input_done:
+    dds3SetOwnedWorldInnerValue((EffWorldNode *)fldPlayerObject, 0);
+    fldRestoreSceneModelColors();
+    if (fldAreaState.dist < 20.0f) {
+        fldClearSceneModelColors();
+        fldShowSceneModels();
+        fldClearCameraObjectTransitionFlags();
+clear_highlight:
+        fldClearCameraObjectHighlightFlag();
+    } else {
+        fldShowSceneModels();
+        fldMarkPrimaryObjectByPeerPresence();
+        if (fldAreaState.mode == 1 || fldAreaState.mode == 3) {
+            goto clear_highlight;
+        }
+        if (fldAreaState.dist < 100.0f) {
+            fldSetCameraObjectHighlightFlag();
+        } else {
+            fldClearCameraObjectHighlightFlag();
+        }
+    }
+    fldUpdateCameraModelMotion(oldMotion, motion, 6.0f);
+    fldDispatchCameraModelFrameEvents(oldMotion, motion);
+    fldAreaState.x = position[0];
+    fldAreaState.y = position[1];
+    fldAreaState.z = position[2];
+    D_0038A610[0] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0];
+    D_0038A610[1] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1];
+    D_0038A610[2] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2];
+    D_0038A610[3] = ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3];
+    D_0038A610[4] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[0];
+    D_0038A610[5] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[1];
+    D_0038A610[6] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[2];
+    D_0038A610[7] = ((EffWorldNode *)fldPlayerObject)->inner->rotation[3];
+    return 0;
+}
+
 
 extern u32 fldGetSceneReadyFlag(void);
 extern s32 func_001321F8(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);
-extern void func_00132540(void);
+extern s32 func_00132540(void);
 extern u32 D_00389988[];
 extern s32 D_003897C0[];
 
@@ -4567,12 +5064,6 @@ extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting D_0038BB70;
 extern void *D_004360F0;
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413280);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413290);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_004132A0);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_004132E0);
 
