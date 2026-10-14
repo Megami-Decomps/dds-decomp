@@ -77,7 +77,7 @@ typedef struct PolyMovieWork {
     PmdEntry *sub2Entries; /* 0x94 */
     u8 *secondEntry4Data; /* 0x98 */
     u32 unk_9C;        /* 0x9C */
-    u32 unk_A0;        /* 0xA0 */
+    u32 subEntry4Count; /* 0xA0 */
     u8 *subEntry5Data;    /* 0xA4 */
     u32 unk_A8;        /* 0xA8 */
     u8 *subEntry13Data;   /* 0xAC */
