@@ -71,7 +71,7 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern s8 btlHistoryCounter;
 
-extern s32 func_00211EA8();
+extern s32 btlExecuteAiTableAction();
 extern void func_001B7718(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
@@ -246,7 +246,7 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     work->speciesId = unit->partyRecord.unitId;
     btlSelectConditionalAiRoute((s32)unit, species, (u32 *)&row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
-    func_00211EA8(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
+    btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
     if (mode == 2) {
         func_001B7718(task);
@@ -527,7 +527,7 @@ s32 btlRollAiBucket(void) {
     return roll;
 }
 
-INCLUDE_ASM(const s32, "game/code_00211360", func_00211EA8);
+INCLUDE_ASM(const s32, "game/code_00211360", btlExecuteAiTableAction);
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419A88);
 

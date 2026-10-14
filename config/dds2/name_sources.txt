@@ -3181,6 +3181,7 @@
 0x00211360	btlSelectAndRunModeAiAction	inferred	Maps the supplied mode to an enemy AI record table and variant, selects a conditional route and weighted action for the task unit, executes it, and releases temporary scratch; mode 2 also advances its follow-up state. Called from command-status branches before state dispatch. [2026-10-13]
 0x00211D20	btlPickWeightedAiSlot	inferred	sums u8 slot weights (5 per row of the 0x15C-byte per-species table D_00435DF4) until the total reaches the roll from func_00211DE0; logs "AI_BUGBUGBUG.." and returns 0 when no slot qualifies [names_M42_BattleMid.tsv]
 0x00211DE0	btlRollAiBucket	inferred	unified with DDS1 twin (was btlRollAiWeight)
+0x00211EA8	btlExecuteAiTableAction	inferred	Resolves an AI table action ID/argument, stores the decoded action fields on its task, and dispatches the selected action handler. Retail 0x00211EA8; called by three weighted species-table action paths (0x00210FE8, 0x00211338, 0x00211570). (2026-10-13)
 0x002122D8	btlIsUnitAtOrBelowHealthRate	inferred	Compares current health times one hundred against maximum health times the requested rate.
 0x00212340	btlHasBossAtOrBelowHealthRate	inferred	Checks whether an active flag-0x400 unit meets the requested health threshold.
 0x002123C0	btlHasUnitAtOrBelowHealthRate	inferred	Scans active battlers for current health at or below a caller-specified percentage of maximum health.

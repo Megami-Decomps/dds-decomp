@@ -19,7 +19,7 @@
 
 #define BTL_AI_SLOT_COUNT 5
 
-extern s32 func_00211EA8();
+extern s32 btlExecuteAiTableAction();
 
 
 
@@ -37,6 +37,6 @@ void btlRunWeightedAiAction(ActionStateLink *task, s32 rowIndex) {
     btlActionScratchWork = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     speciesId = task->unit->partyRecord.unitId;
     slotIndex = btlPickWeightedAiSlot((s32)task->unit, speciesId, rowIndex);
-    func_00211EA8(task, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionArg);
+    btlExecuteAiTableAction(task, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionArg);
     sdfReleaseChipBlock(btlActionScratchWork);
 }
