@@ -29,6 +29,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "fld_resource_wait_api.h"
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
