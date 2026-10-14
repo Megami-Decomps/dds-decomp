@@ -14,7 +14,7 @@ extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0040B7DB[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+#include "sdf_bordered_rectangle_packet.h"
 extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 extern void *sdfConsAllocateColumnPacket(s32 count);
 extern s8 D_0043643D;
