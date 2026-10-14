@@ -342,7 +342,7 @@ s32 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s32 unuse
 
 extern s32 btlOffsetSpecialTargetPositionForAction();
 
-s32 func_0020D668(BtlLinkedCommand *command, s32 modeA, s32 modeB) {
+s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *command, s32 modeA, s32 modeB) {
     s32 result = btlOffsetSpecialTargetPositionForAction(command, (s8)modeA, (s8)modeB);
     /* Retail uses JAL plus an epilogue. Qualified cc1probe retains this
      * consumed local cleanup through sibling selection, then removes it in CSE. */
