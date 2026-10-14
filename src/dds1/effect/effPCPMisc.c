@@ -41,6 +41,7 @@
 #include "eff_pcp_rotate_work.h"
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
+#include "eff_pcp_vector_copy_api.h"
 #include "eff_pcp_cross.h"
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
