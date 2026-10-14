@@ -1410,7 +1410,9 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CBA0);
+/* Finalize the existing kind/id entry's motion-SE pack ownership and ready state.
+ * The native DDS2 twin also logs each adopted resource slot. */
+INCLUDE_ASM(const s32, "game/code_0022AC10", btlFinalizeModelPackEntry);
 
 /* Return the sign-extended cache state, or zero when no entry exists. */
 s32 btlGetEntryState(s32 modelKind, s32 modelId) {
@@ -1430,7 +1432,7 @@ s32 btlIsModelEntryReady(s32 kind, s32 id) {
     return 0;
 }
 
-extern void func_0022CBA0(s32, s32);
+extern void btlFinalizeModelPackEntry(s32, s32);
 
 /* Return 1 once model and motion-sound work are ready; request/poll them otherwise. */
 s32 btlEnsureModelAndSoundReady(s32 kind, s32 id) {
@@ -1444,7 +1446,7 @@ s32 btlEnsureModelAndSoundReady(s32 kind, s32 id) {
     if (entry != 0) {
         if (btlIsModelPackEntryReady(entry) != 0) {
             if (entry->state == 0) {
-                func_0022CBA0(kind, id);
+                btlFinalizeModelPackEntry(kind, id);
             }
             return 1;
         }
@@ -1806,7 +1808,8 @@ s32 btlUpdateFadeIn(void) {
     return 1;
 }
 
-void btlFadeSelectionOverlayAlpha(void) {
+/* Native empty transition hook after fade-in completes and fade-out is pending. */
+void btlFadeInCompleteNoOp(void) {
 }
 
 s32 btlFadeSharedOverlayAlpha(void) {
@@ -1945,7 +1948,7 @@ s32 btlUpdateRuntimeFadeState(void) {
         }
         if (btlUpdateFadeIn() != 0) {
             if (btlRuntimeState.pending != 0) {
-                btlFadeSelectionOverlayAlpha();
+                btlFadeInCompleteNoOp();
                 btlRuntimeState.state = 3;
             }
         }
