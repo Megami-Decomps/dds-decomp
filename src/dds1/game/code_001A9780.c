@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_task_state6_api.h"
 #include "btl_effect_active_api.h"
@@ -46,8 +47,6 @@ extern void func_001C2E90(EffectSlotSet *, s32, s32 *, s32 *, f32);
 extern SceneSlotFadeWork *D_003BD83C;
 
 extern ActorSlotOrder *D_003BD840[2];
-
-extern void mdlFlagSet(s32 flag);
 
 extern void dspCloseChannel(void);
 
