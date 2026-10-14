@@ -344,7 +344,17 @@ INCLUDE_RODATA(const s32, "game/code_0029BC58", D_00428410);
 
 INCLUDE_RODATA(const s32, "game/code_0029BC58", D_00428420);
 
-INCLUDE_RODATA(const s32, "game/code_0029BC58", D_004284E0);
+const s32 D_004284E0[9][3] __attribute__((aligned(8))) = {
+    {0, 0, 0x1E},
+    {0, 0x55, 0x14},
+    {0, 0x1AD, 0x15},
+    {0, 0x1E, 0},
+    {0x169, 0x17A, 1},
+    {0x3E, 0x12, 5},
+    {0xF8, 0x12, 6},
+    {0xA6, 0x65, 4},
+    {0x55, 0x3A, 7},
+};
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_004379C0);
 
