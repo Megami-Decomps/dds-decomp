@@ -122,7 +122,7 @@ extern void mnuDrawThresholdNodeWithSelectedAccents(s32, s32, s32, struct MenuLi
 extern u8 D_003BC3F8[];
 
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
@@ -222,7 +222,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     char text[16];
     struct FrFontGlyph *sprite;
 
-    func_003014F0(text, mnuNumberSpriteFormat, number);
+    sprintf(text, mnuNumberSpriteFormat, number);
     sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
@@ -1990,7 +1990,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     struct FrFontGlyph *sprite;
 
     index = fldGetModeFrameRecordIndex(scene);
-    func_003014F0(text, D_003BC3F0, datGameState->header.currency);
+    sprintf(text, D_003BC3F0, datGameState->header.currency);
     if (fading == 0) {
         color = (*(u8 *)&scene->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300;
     } else {

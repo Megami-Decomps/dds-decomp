@@ -21,7 +21,7 @@ extern char D_003BB8A8[];
 
 extern s32 datActionAnimationRecords;
 
-extern void func_003014F0();
+extern void sprintf();
 
 extern void btlCopyUnitCurrentPosition(void *, void *);
 
@@ -280,7 +280,7 @@ void btlFormatBattleEffectResourceName(s32 record, s32 action, s32 pathBuffer) {
     if (action != 0xd5) {
         return;
     }
-    func_003014F0(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(datActionAnimationRecords + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
+    sprintf(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(datActionAnimationRecords + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
 }
 
 u32 func_0020D548(void) {

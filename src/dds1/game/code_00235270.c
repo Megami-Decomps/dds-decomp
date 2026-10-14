@@ -35,7 +35,7 @@ extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
-extern s32 func_003014F0(char *, char *, ...);
+extern s32 sprintf(char *, char *, ...);
 extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
@@ -633,7 +633,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
 
 s32 evtDrawInputValueRow(SdfListHead *list, s32 x, s32 y, u8 *ctx) {
     char text[16];
-    func_003014F0(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
+    sprintf(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
@@ -720,7 +720,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0D8);
 
 s32 evtDrawEventFileNameRow(SdfListHead *list, s32 x, s32 y) {
     char text[32];
-    func_003014F0(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
+    sprintf(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
@@ -4214,24 +4214,24 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
 
     if (mode == 0) {
         if (sdfPfsDebugMode) {
-            func_003014F0(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
-            func_003014F0(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
         } else {
-            func_003014F0(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
-            func_003014F0(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
         }
     } else if (sdfPfsDebugMode) {
-        func_003014F0(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+        sprintf(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
             ((u32)D_003BBE78 / 10U) * 10, D_003BBE78, D_003BBE78,
             D_003BBE7A, D_003BBE78, D_003BBE7A);
-        func_003014F0(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+        sprintf(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
             ((u32)D_003BBE78 / 10U) * 10, D_003BBE78, D_003BBE78,
             D_003BBE7A, D_003BBE78, D_003BBE7A);
     } else {
-        func_003014F0(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+        sprintf(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
             sdfDevGetPathBuffer(), ((u32)D_003BBE78 / 10U) * 10,
             D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
-        func_003014F0(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+        sprintf(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
             sdfDevGetPathBuffer(), ((u32)D_003BBE78 / 10U) * 10,
             D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
     }
@@ -4545,7 +4545,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         if (node->value != 0) {
             for (owner = worldTable->slots[4].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -4553,7 +4553,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
             for (owner = worldTable->slots[9].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -4561,7 +4561,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
             for (owner = worldTable->slots[7].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -5393,7 +5393,7 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
 }
 
 void evtFormatTaskName(s32 taskId, void *buffer) {
-    func_003014F0(buffer, D_003BC360, taskId);
+    sprintf(buffer, D_003BC360, taskId);
 }
 
 KwlnTask *evtFindTaskById(u32 taskId) {

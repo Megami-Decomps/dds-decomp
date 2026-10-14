@@ -803,7 +803,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
     }
 }
 
-extern s32 func_003014F0(char *buffer, const char *fmt, ...);
+extern s32 sprintf(char *buffer, const char *fmt, ...);
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
@@ -817,8 +817,8 @@ TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, vo
     sdfSetTaskSecondaryCallback(work->list, sdfCallbackWorkOnRemove);
     work->primaryTaskName = sdfAllocSizeClassBlock(strlen(name));
     work->secondaryTaskName = sdfAllocSizeClassBlock(strlen(name) + 5);
-    func_003014F0(work->primaryTaskName, "%s", name);
-    func_003014F0(work->secondaryTaskName, "draw_%s", name);
+    sprintf(work->primaryTaskName, "%s", name);
+    sprintf(work->secondaryTaskName, "draw_%s", name);
     return work;
 }
 

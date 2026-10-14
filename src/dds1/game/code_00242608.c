@@ -2525,7 +2525,7 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void func_003014F0(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 extern char D_003BC3B8[];
 extern void evtCopyEntryStringToActiveWindow(s32 window, char *text);
 extern void evtSetMessageWindowOptionWhenOpen(s32 option);
@@ -2565,7 +2565,7 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     if (operation == 3) {
         message = (u32)(values->value * scene->counter + datGameState->header.currency) > 9999999 ? 0xC : 7;
     }
-    func_003014F0(text, D_003BC3B8, values->value * scene->counter);
+    sprintf(text, D_003BC3B8, values->value * scene->counter);
     evtCopyEntryStringToActiveWindow(3, text);
     dspSetActive(1);
     dspStartEntry(message);

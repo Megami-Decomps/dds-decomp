@@ -804,7 +804,7 @@ void fldCacheMapLabelLengths(s32 map) {
     D_003BD7D0 = strlen(D_0033EC90[i]);
 }
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 /* The base format occupies the first 16-byte-aligned AMB format record. */
 const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
@@ -824,15 +824,15 @@ void fldLoadSceneRecordTable(void) {
     area = fldAreaState.area;
     if (area == 0x1C) {
         if (mdlFlagTest(0x5E1)) {
-            func_003014F0(path, D_003A04B0, directory, fldAreaState.area);
+            sprintf(path, D_003A04B0, directory, fldAreaState.area);
         } else if (mdlFlagTest(0x5E2)) {
-            func_003014F0(path, "%sf%03da.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03da.amb", directory, fldAreaState.area);
         } else if (mdlFlagTest(0x5E3)) {
-            func_003014F0(path, "%sf%03db.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03db.amb", directory, fldAreaState.area);
         } else if (mdlFlagTest(0x5E4)) {
-            func_003014F0(path, "%sf%03dc.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
         } else {
-            func_003014F0(path, "%sf%03dd.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
         }
     } else if (area == 0x1B) {
         room = fldAreaState.floor;
@@ -851,29 +851,29 @@ void fldLoadSceneRecordTable(void) {
         case 19:
         case 20:
         case 21:
-            func_003014F0(path, "%sf%03da.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03da.amb", directory, fldAreaState.area);
             break;
         case 7:
-            func_003014F0(path, "%sf%03db.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03db.amb", directory, fldAreaState.area);
             break;
         case 22:
         case 23:
         case 27:
             if (mdlFlagTest(0x58D)) {
-                func_003014F0(path, "%sf%03dd.amb", directory, fldAreaState.area);
+                sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
             } else {
-                func_003014F0(path, "%sf%03dc.amb", directory, fldAreaState.area);
+                sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
             }
             break;
         case 24:
         case 25:
         case 26:
         default:
-            func_003014F0(path, D_003A04B0, directory, fldAreaState.area);
+            sprintf(path, D_003A04B0, directory, fldAreaState.area);
             break;
         }
     } else {
-        func_003014F0(path, D_003A04B0, directory, fldAreaState.area);
+        sprintf(path, D_003A04B0, directory, fldAreaState.area);
     }
 
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceAddress, 0);
@@ -3132,7 +3132,7 @@ void fldFireRoomEffects(void) {
 extern u8 D_003D44A0[0x200];
 
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
 
@@ -3144,7 +3144,7 @@ void fldLoadNpcPalette(s32 field) {
 
     if (field < 100) {
         fldFormatAreaDirectory(directory, field, 1);
-        func_003014F0(path, "%sF%03d.NPL", directory, field);
+        sprintf(path, "%sF%03d.NPL", directory, field);
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, D_003D44A0, 0x200);
         sdfDevWaitThenReleaseCommandState(command);
@@ -3326,7 +3326,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAF9C = 0;
     D_003BAFA0 = 0;
     D_003BAFB0 = 0;
-    func_003014F0(path, D_003A0810, field);
+    sprintf(path, D_003A0810, field);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&resourceAddress, 0);
     D_003BAFB4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
@@ -3612,7 +3612,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_003BAFC0 = id;
     D_003BAFB8 = 0;
     D_003BAFBC = 0;
-    func_003014F0(path, "/fld/f/pnl/ds%03d.tmx", id);
+    sprintf(path, "/fld/f/pnl/ds%03d.tmx", id);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&data, 0);
     D_003BAFC4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));

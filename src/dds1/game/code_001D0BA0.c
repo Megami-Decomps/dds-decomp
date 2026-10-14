@@ -56,7 +56,7 @@
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 
-extern s32 func_003014F0(char *dst, const char *format, ...);
+extern s32 sprintf(char *dst, const char *format, ...);
 
 extern s32 fileTestSavedSlotFlags(u32);
 
@@ -3442,10 +3442,10 @@ s32 btlFormatUnitBedName(BtlUnit *actor, char *filename) {
         return 0;
     }
     if (flags & 0x1000) {
-        func_003014F0(filename, D_003A3BA8, D_003BB5F8, 0,
+        sprintf(filename, D_003A3BA8, D_003BB5F8, 0,
                       *(u16 *)((u8 *)actor + 0x124));
     } else {
-        func_003014F0(filename, D_003A3BA8, D_003BB5F8,
+        sprintf(filename, D_003A3BA8, D_003BB5F8,
                       btlGetActorBedAssetIdFromIndex(actor->partyRecord.menuValue),
                       *(u16 *)((u8 *)actor + 0x124));
     }

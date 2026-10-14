@@ -63,7 +63,7 @@ extern s32 D_003BC5C8;
 extern u8 D_003D9178[];
 
 
-extern s32 func_003014F0(char *dst, const char *fmt, ...);
+extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern s32 func_003003F0(const char *fmt, ...);
 
@@ -423,7 +423,7 @@ void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex) {
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
         break;
     }
-    func_003014F0(soundPath, D_003AFCF0, D_00377350[soundEntryIndex].filename);
+    sprintf(soundPath, D_003AFCF0, D_00377350[soundEntryIndex].filename);
     mnuStoreTaskResult(soundPath);
     SignalSema(mnuTitleStreamSemaphore);
 }
@@ -576,7 +576,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     bufferAddress = sdfMemoryGetBlockAddress(allocation);
     mnuTitleSoundBufferState.allocation = allocation;
     mnuTitleSoundBufferState.compressedData = (u8 *)bufferAddress;
-    func_003014F0(soundPath, D_003AFCF0, D_00377650[soundEntryIndex].filename);
+    sprintf(soundPath, D_003AFCF0, D_00377650[soundEntryIndex].filename);
     mnuLoadTitleStreamFrameData(soundPath, &mnuTitleSoundBufferState);
     func_002F7628(D_003DA1A8);
     SignalSema(mnuTitleStreamSemaphore);

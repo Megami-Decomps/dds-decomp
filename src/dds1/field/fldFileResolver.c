@@ -127,7 +127,7 @@ extern u32 D_003C91D0[];
 extern u32 D_003C91F0[];
 extern char D_003BAC40[];
 extern void *memset(void *, int, unsigned int);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern EffWorldNode *effObjCreateResourceKindZero(const char *, void *, s32);
 extern EffWorldNode *effObjCreateResourceKindOne(const char *, void *, s32);
 extern EffWorldNode *effObjSpawnSharedBillNodeClone(EffWorldNode *, void *, s32);
@@ -210,7 +210,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                     cacheByteOffset = config->resourceIndex * sizeof(*cached);
                     if (loaded[config->resourceIndex] == 0) {
                         fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
-                        func_003014F0(path, D_003BAC40, directory,
+                        sprintf(path, D_003BAC40, directory,
                                      resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
                         object = effObjCreateResourceKindZero(path, position, (s32)rotation);
                         effObjSetFlags(object, 1);
@@ -228,7 +228,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                     cacheByteOffset = config->resourceIndex * sizeof(*cached);
                     if (loaded[config->resourceIndex] == 0) {
                         fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
-                        func_003014F0(path, D_003BAC40, directory,
+                        sprintf(path, D_003BAC40, directory,
                                      resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
                         object = effObjCreateResourceKindOne(path, position, (s32)rotation);
                         effObjSetFlags(object, 1);
@@ -1003,7 +1003,7 @@ extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern void evtScaleSlotByClampedMultiplier(void *, f32);
 extern void dds3InvokeMoverUpdate(EffWorldNode *);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern char D_0039FE08[], D_0039FE18[], D_0039FE28[];
 
 /* Restore the room's named objects and enable their retained path controllers. */
@@ -1023,9 +1023,9 @@ void fldActivateRoomFlagObjects(void) {
             EffWorldNode *slot;
             Dds3SlotResource *resource;
 
-            func_003014F0(modelName, D_0039FE08, index);
-            func_003014F0(collisionName, D_0039FE18, index);
-            func_003014F0(pathName, D_0039FE28, index);
+            sprintf(modelName, D_0039FE08, index);
+            sprintf(collisionName, D_0039FE18, index);
+            sprintf(pathName, D_0039FE28, index);
             modelKey = fldFindSearchId(modelName);
             collisionKey = fldFindSearchId(collisionName);
             if (modelKey == -1) {
@@ -1056,7 +1056,7 @@ void fldActivateRoomFlagObjects(void) {
             s32 key;
             EffWorldNode *object;
 
-            func_003014F0(modelName, D_0039FE08, index);
+            sprintf(modelName, D_0039FE08, index);
             key = fldFindSearchId(modelName);
             object = (EffWorldNode *)dds3FindWorldObjectNodeByKey(world, key, 6);
             dds3SetObjectPayloadWord8(object, 2);
@@ -1084,7 +1084,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
         for (i = 0; i < 4; i++) {
             if (D_003C91D0[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor + 1);
-                func_003014F0(path, D_003BAC40, directory, D_003C91D0[i]);
+                sprintf(path, D_003BAC40, directory, D_003C91D0[i]);
                 D_003C91E0[i] = (u32)sdfReadNamedResource(path, &D_003C91F0[i], 0);
             }
         }
@@ -1152,7 +1152,7 @@ void fldSetPendingAreaAndFloor(u32 area, u32 floor) {
 }
 
 extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 s32 fldLoadAreaResource(void) {
     char directory[64];
@@ -1165,7 +1165,7 @@ s32 fldLoadAreaResource(void) {
         fldAreaState.resourceArea = area;
         fldAreaState.resourceFloor = floor;
         fldFormatAreaDirectory(directory, area, 1);
-        func_003014F0(path, D_0039FE38, directory, area, floor);
+        sprintf(path, D_0039FE38, directory, area, floor);
         fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
         fldAreaState.resourceFlag = 1;
         return 1;
@@ -1206,7 +1206,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     sdfRaiseDeviceThreadPriority();
     D_003BA734 = 1;
     fldFormatAreaDirectory(directory, area, 1);
-    func_003014F0(path, D_0039FE38, directory, area, room);
+    sprintf(path, D_0039FE38, directory, area, room);
     fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
     fldAreaState.resourceFlag = 1;
     return 1;
@@ -1340,43 +1340,43 @@ void fldFormatAreaResourceName(char *out) {
     fldFormatAreaDirectory(directory, area, 1);
     if (area == 0x1C) {
         if (mdlFlagTest(0x5E1)) {
-            func_003014F0(out, "%sf%03d_000.LB", directory, 0x1C);
+            sprintf(out, "%sf%03d_000.LB", directory, 0x1C);
         } else if (mdlFlagTest(0x5E2)) {
-            func_003014F0(out, "%sf%03d_00a.LB", directory, 0x1C);
+            sprintf(out, "%sf%03d_00a.LB", directory, 0x1C);
         } else if (mdlFlagTest(0x5E3)) {
-            func_003014F0(out, "%sf%03d_00b.LB", directory, 0x1C);
+            sprintf(out, "%sf%03d_00b.LB", directory, 0x1C);
         } else if (mdlFlagTest(0x5E4)) {
-            func_003014F0(out, "%sf%03d_00c.LB", directory, 0x1C);
+            sprintf(out, "%sf%03d_00c.LB", directory, 0x1C);
         } else {
-            func_003014F0(out, "%sf%03d_00d.LB", directory, 0x1C);
+            sprintf(out, "%sf%03d_00d.LB", directory, 0x1C);
         }
         return;
     }
     if (area == 0x1B) {
         switch (room) {
         case 8 ... 21:
-            func_003014F0(out, "%sf%03d_00a.LB", directory, area);
+            sprintf(out, "%sf%03d_00a.LB", directory, area);
             break;
         case 7:
-            func_003014F0(out, "%sf%03d_00b.LB", directory, area);
+            sprintf(out, "%sf%03d_00b.LB", directory, area);
             break;
         case 22:
         case 23:
         case 27:
             if (mdlFlagTest(0x58D)) {
-                func_003014F0(out, "%sf%03d_00d.LB", directory, area);
+                sprintf(out, "%sf%03d_00d.LB", directory, area);
             } else {
-                func_003014F0(out, "%sf%03d_00c.LB", directory, area);
+                sprintf(out, "%sf%03d_00c.LB", directory, area);
             }
             break;
         case 24 ... 26:
         default:
-            func_003014F0(out, "%sf%03d_000.LB", directory, area);
+            sprintf(out, "%sf%03d_000.LB", directory, area);
             break;
         }
         return;
     }
-    func_003014F0(out, "%sf%03d_000.LB", directory, area);
+    sprintf(out, "%sf%03d_000.LB", directory, area);
 }
 
 u8 fldHasAreaResourceNameChanged(void) {
@@ -1559,7 +1559,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
             fldFreeDisplayObjects();
         } else {
             fldFormatAreaDirectory(directory, area, 1);
-            func_003014F0(path, D_0039FE38, directory, area, room);
+            sprintf(path, D_0039FE38, directory, area, room);
             request = fileQueuePlainDispatchRequest(path);
             D_003BAC38 = request;
             fileWaitForRequestReady(request);
@@ -1600,7 +1600,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     if (isField == 0) {
         fldCachedRoomResourceAllocation = (u32)fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == 0) {
-            func_003014F0(path, D_003BAC98, name);
+            sprintf(path, D_003BAC98, name);
             D_003BAC14 = sndLoadNamedOffsetResourceList(path);
         } else {
             D_003BAC14 = sndBuildResourceHandleListFromOffsets(roomOffsets);
@@ -1609,7 +1609,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         }
     }
     if (isField == 0) {
-        func_003014F0(path, D_003BACA0, name);
+        sprintf(path, D_003BACA0, name);
         fldCachedRoomF2ResourceAllocation = (u32)fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF2ResourceAllocation == 0) {
             fldCachedRoomF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
@@ -1622,7 +1622,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     }
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
         fldFormatAreaDirectory(directory, area, 1);
-        func_003014F0(path, D_0039FF18, directory, area, room);
+        sprintf(path, D_0039FF18, directory, area, room);
         fldCachedRoomKF2ResourceAllocation = (u32)fldLoadCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomKF2ResourceAllocation == 0) {
             fldCachedRoomKF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
@@ -1634,7 +1634,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
     }
     if (isField == 0) {
-        func_003014F0(path, D_003BACA8, name);
+        sprintf(path, D_003BACA8, name);
         fldCachedRoomF1ResourceAllocation = (u32)fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF1ResourceAllocation == 0) {
             fldCachedRoomF1ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
@@ -1780,14 +1780,14 @@ void fldReleaseFieldResources(void) {
     }
 }
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 /* All 25 code words match. Check_unit rodata range extends beyond selector strings into the separately-owned next string. */
 void fldFormatAreaDirectory(char *path, s32 field, s32 unused) {
-    if (field < 200) func_003014F0(path, "/fld/f/f%03d/", field);
-    else if (field < 500) func_003014F0(path, "/fld/b/f%03d/", field);
-    else func_003014F0(path, "/fld/e/f%03d/", field);
+    if (field < 200) sprintf(path, "/fld/f/f%03d/", field);
+    else if (field < 500) sprintf(path, "/fld/b/f%03d/", field);
+    else sprintf(path, "/fld/e/f%03d/", field);
 }
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00128BB8);
@@ -4350,7 +4350,7 @@ void fldLoadSkyResource(s32 area) {
     fldSkyDrawState = 0x80;
     if (area < 200) {
         fldFormatAreaDirectory(directory, area, 1);
-        func_003014F0(path, "%sF%03d.SKY", directory, area);
+        sprintf(path, "%sF%03d.SKY", directory, area);
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);
         sdfDevWaitThenReleaseCommandState(command);
@@ -7368,7 +7368,7 @@ s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
 
 
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 void fldLoadInfoTable(s32 field) {
@@ -7377,7 +7377,7 @@ void fldLoadInfoTable(s32 field) {
     DevState *command;
     if (field < 200) {
         fldFormatAreaDirectory(directory, field, 1);
-        func_003014F0(path, D_003A01F8, directory, field);
+        sprintf(path, D_003A01F8, directory, field);
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, &D_00332E30, sizeof(D_00332E30));
         sdfDevWaitThenReleaseCommandState(command);
@@ -7963,7 +7963,7 @@ void fldLoadActorWaypointTable(s32 field) {
         memset(&fldActorWaypointRows, 0, 0x6CA0);
     } else {
         fldFormatAreaDirectory(directory, field, 1);
-        func_003014F0(path, "%sF%03d.WAP", directory, field);
+        sprintf(path, "%sF%03d.WAP", directory, field);
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, &fldActorWaypointRows, 0x6CA0);
         sdfDevWaitThenReleaseCommandState(command);

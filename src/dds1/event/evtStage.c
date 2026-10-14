@@ -36,7 +36,7 @@ extern const char D_003AC008[0x10];
 extern char D_00367DF0[];
 extern char D_00367EB0[];
 extern char D_00367ED0[];
-extern void func_003014F0(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 
 void evtDestroySecondaryWorldNode(void)
 {
@@ -78,7 +78,7 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     dds3SetWorldObject(worldObject);
     dds3SetWorldObjectValue(worldObject, (area << 16) + room);
     fldFormatAreaDirectory(directory, area, room);
-    func_003014F0(resourcePath, D_003AC008, directory, area, room);
+    sprintf(resourcePath, D_003AC008, directory, area, room);
     dds3AttachResourceHandleToWorldObject(worldObject, (u32)resourcePath);
     mdlSpawnViewerWorldObject();
     if (area < 10) {
@@ -124,7 +124,7 @@ extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern char evtScriptResourcePathBuffer[];
 
 void evtCreateEventScriptProcess(s32 eventId) {
-    func_003014F0(evtScriptResourcePathBuffer, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
+    sprintf(evtScriptResourcePathBuffer, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
     scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 

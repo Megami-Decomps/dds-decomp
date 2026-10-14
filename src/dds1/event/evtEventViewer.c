@@ -3170,7 +3170,7 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
 extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
-extern s32 func_003014F0(char *buffer, const char *format, ...);
+extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer(s32 slot, EvtRuntime *viewer);
 
@@ -3181,7 +3181,7 @@ s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EvtRuntime *viewer) {
 
     if (mode < 3) {
         if (mode >= 0) {
-            func_003014F0(viewer->eventName, D_003ADA98, D_003BBE78, D_003BBE7A);
+            sprintf(viewer->eventName, D_003ADA98, D_003BBE78, D_003BBE7A);
             if (viewer->inputA == 0) {
                 evtViewerSaveTrackFiles(0, viewer);
                 evtViewerSaveTrackFiles(1, viewer);
@@ -3425,7 +3425,7 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
     sceneId = context->sceneId;
     D_003BBE78 = eventId;
     D_003BBE7A = sceneId;
-    func_003014F0(viewer->eventName, D_003ADA98, D_003BBE78, D_003BBE7A);
+    sprintf(viewer->eventName, D_003ADA98, D_003BBE78, D_003BBE7A);
     viewer->flags = 1;
     evtViewerDispatchFlagMode(viewer);
     viewer->unk2238 = 0;
