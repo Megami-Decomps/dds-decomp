@@ -62,7 +62,7 @@ extern void sndQueueNoPayloadCommand1A0(void);
 extern void sndQueueNoPayloadCommand210(void);
 extern f32 D_00359EE0[4];
 
-extern s32 func_003014F0(char *dst, const char *format, ...);
+extern s32 sprintf(char *dst, const char *format, ...);
 
 extern void effObjSetOpacityPassEnabled(u32 enabled);
 
@@ -5190,7 +5190,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
     if (args->frame == 0) {
         btlFreeFieldBlocks();
         fldFormatAreaDirectory(directory, args->stage, 1);
-        func_003014F0(path, D_003A4B50, directory, args->stage, args->variant);
+        sprintf(path, D_003A4B50, directory, args->stage, args->variant);
         btlBossDebugPrintf(D_003A4B60, path);
         args->request = (struct FilePacRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
@@ -5272,11 +5272,11 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     char path[0x70];
 
     if (args->state == 0) {
-        func_003014F0(path, D_003A4B98, stage, stage, variant);
+        sprintf(path, D_003A4B98, stage, stage, variant);
         result = 0;
         args->frontHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BB8, path);
-        func_003014F0(path, D_003A4BC8, stage, stage, variant);
+        sprintf(path, D_003A4BC8, stage, stage, variant);
         args->sideHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BE8, path);
     } else {
@@ -6153,9 +6153,9 @@ s32 btlFormatActionEventFilename(s32 index, char *output) {
         if (assetId == 0) {
             return 0;
         }
-        func_003014F0(output, D_003A4CA8, D_003BB6A0, assetId);
+        sprintf(output, D_003A4CA8, D_003BB6A0, assetId);
     } else {
-        func_003014F0(output, D_003A4CB8);
+        sprintf(output, D_003A4CB8);
     }
     return 1;
 }
@@ -6937,7 +6937,7 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *node) {
 }
 
 void sndFormatResourceNameFromIndex(s32 index, char *output) {
-    func_003014F0(output, D_003A5158, D_003BB6B0, (index + 0x200) & 0xffff);
+    sprintf(output, D_003A5158, D_003BB6B0, (index + 0x200) & 0xffff);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A50D8);
@@ -6951,7 +6951,7 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5138);
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5158);
 
 void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
-    func_003014F0(output, "MDD_%03X.ADB", unit->partyRecord.unitId);
+    sprintf(output, "MDD_%03X.ADB", unit->partyRecord.unitId);
 }
 
 s32 sndMapResourceType(s32 sound, s32 index) {
@@ -7060,11 +7060,11 @@ void sndLoadMotSeFiles(SoundSlotOwner *sound) {
         u32 id = sndBuildMotSeResourceKey(sound, slot);
         if (id != 0) {
             if (slot != 0xB) {
-                func_003014F0(filename, D_003A5158, D_003BB6B0, id >> 16);
+                sprintf(filename, D_003A5158, D_003BB6B0, id >> 16);
             } else if (sound->category == 0) {
-                func_003014F0(filename, D_003A5178, D_003A5188, sound->work.id);
+                sprintf(filename, D_003A5178, D_003A5188, sound->work.id);
             } else {
-                func_003014F0(filename, D_003A5198, D_003A5188, sound->work.id);
+                sprintf(filename, D_003A5198, D_003A5188, sound->work.id);
             }
             *(struct FileRequest **)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf(D_003A51A8, slot, sound, filename);
@@ -7462,7 +7462,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     u32 size;
 
     if (args->state == 0) {
-        func_003014F0(path, D_003A5328, D_00377650[args->entryIndex].fileName);
+        sprintf(path, D_003A5328, D_00377650[args->entryIndex].fileName);
         args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5340, path);
     } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
@@ -7516,9 +7516,9 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
             if (unit->status.flags & 0x1000) {
                 id += 0x10;
             }
-            func_003014F0(path, D_003A5178, D_003A5188, id);
+            sprintf(path, D_003A5178, D_003A5188, id);
         } else {
-            func_003014F0(path, D_003A5198, D_003A5188, unit->partyRecord.unitId);
+            sprintf(path, D_003A5198, D_003A5188, unit->partyRecord.unitId);
         }
         args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5370, path);

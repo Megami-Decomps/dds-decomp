@@ -15,7 +15,7 @@ extern u8 *D_003BAA70;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern u8 brsGetLevelStepCrossedBy(s32, s32);
 extern u8 brsGetLevelStepForValue(s32);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void dspSetActive(s32);
 extern void evtStageTestQueueMotion(s32, u32);
 extern char D_003BC550[];
@@ -220,9 +220,9 @@ u32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
 
     work->crossedSteps = step;
     if (step != 0) {
-        func_003014F0(text, D_003BC558, D_003BAA70 + entry->unitId * 17);
+        sprintf(text, D_003BC558, D_003BAA70 + entry->unitId * 17);
         evtCopyEntryStringToActiveWindow(0, text);
-        func_003014F0(text, D_003BC550, brsGetLevelStepForValue(entry->level));
+        sprintf(text, D_003BC550, brsGetLevelStepForValue(entry->level));
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         dspStartEntry(0x17);
@@ -488,7 +488,7 @@ void brsNoOpMessageInputCallback(void *work) {
 
 extern u8 *D_003BAA84;
 extern char D_003BC560[];
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC568[];
 
@@ -517,7 +517,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
             iconGlyph = itfCreateConvertedTextGlyph(x + 0x300, y, depth, color, name, NULL);
             effDrawSpriteWithCornerColors(x + 0xB20, y + 0x28, 0, colors, 0,
                           work->teardownResource, 0x1C, 0x53);
-            func_003014F0(formatted, D_003BC560, parameter);
+            sprintf(formatted, D_003BC560, parameter);
             valueGlyph = itfCreateFont3TextGlyph(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);
             frFontDrawGlyphChain(valueGlyph, 1, textStyle);
@@ -531,7 +531,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
     char text[32];
     FrFontGlyph *glyph;
 
-    func_003014F0(text, D_003BC568, info->totalExp);
+    sprintf(text, D_003BC568, info->totalExp);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, color);
@@ -542,7 +542,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary 
     char text[32];
     FrFontGlyph *glyph;
 
-    func_003014F0(text, D_003BC568, info->macca);
+    sprintf(text, D_003BC568, info->macca);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, color);

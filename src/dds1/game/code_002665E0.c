@@ -467,7 +467,7 @@ extern KwlnTask *mnuTitleSoundTask;
 extern char D_003771D8[];
 
 /* libc sprintf returns the signed vfprintf character count. */
-extern s32 func_003014F0(char *dst, const char *fmt, ...);
+extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern s32 func_003003F0(const char *fmt, ...);
 
@@ -742,7 +742,7 @@ void mnuPlayTitleVoiceFile(char *voiceArgument) {
         func_003003F0("now playeng start...\n");
         sdfSoundStopNamedPlayback();
     }
-    func_003014F0(voicePath, "%s%04d.ADB", D_003771D8 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
+    sprintf(voicePath, "%s%04d.ADB", D_003771D8 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
     func_003003F0("--------------- VOICE -> %s\n", voicePath);
     sdfSoundSendNamedCommand(voicePath, 0x64);
     effectState->frameCounter = 0;

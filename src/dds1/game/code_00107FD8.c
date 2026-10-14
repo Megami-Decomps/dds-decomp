@@ -1627,7 +1627,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
 
 
 extern void sdfDrawHeapMapOverlay(void *, s32, s32);
-extern void func_003014F0(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];
 
@@ -1645,10 +1645,10 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     sdfDrawHeapMapOverlay(packetList, 0x86C0, 0x79C0);
-    func_003014F0(statusText, D_003BA980, generalHeapStats.freeBytes);
+    sprintf(statusText, D_003BA980, generalHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText)));
-    func_003014F0(statusText, D_003BA988, chipHeapStats.freeBytes);
+    sprintf(statusText, D_003BA988, chipHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText)));
     surface->append(surface, packetList);

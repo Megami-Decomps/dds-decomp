@@ -1781,7 +1781,7 @@ extern SdfPowerOffCallback func_002F33C8(SdfPowerOffCallback, void *);
 
 extern s32 func_0030E620(void);
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern s32 func_00310C00(const char *, const char *, s32, const void *, s32);
 
@@ -1815,7 +1815,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     _StartThread(thread, semaphore);
     func_002F33C8(sdfPowerOffInterruptCallback, (void *)semaphore);
     func_0030E620();
-    func_003014F0(buffer, "hdd0:%s,", path);
+    sprintf(buffer, "hdd0:%s,", path);
     func_00310C00(D_003BD470, buffer, 0, 0, 0);
     sdfPfsDebugMode = 1;
 }

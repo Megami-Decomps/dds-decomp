@@ -793,14 +793,14 @@ SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(u8 **out) {
     return handle;
 }
 
-s32 func_003014F0(char *output, const char *format, ...);
+s32 sprintf(char *output, const char *format, ...);
 
 s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3) {
-    func_003014F0(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
+    sprintf(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
                   event / 10 * 10, event, event, id, event, id);
-    func_003014F0(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+    sprintf(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
                   event / 10 * 10, event, event, id, event, id);
-    return func_003014F0(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+    return sprintf(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
                          event / 10 * 10, event, event, id, event, id);
 }
 

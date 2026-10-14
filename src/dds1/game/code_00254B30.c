@@ -73,7 +73,7 @@ extern DspEntrySpriteLookup D_003BC448[];
 extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
 extern void mnuDrawPlacedSpriteByIndex(s32, s32, s32, s32, s32, s32, s32);
-extern void func_003014F0(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Draw the selection strip from the last row back to the first. */
@@ -117,7 +117,7 @@ void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, Dsp
         mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
                       spriteLookup.spriteIndices[profileProgress->partyRecord->unitId] + 1, drawContext);
         mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xB, drawContext);
-        func_003014F0(levelText, D_003BC450, profileProgress->partyRecord->level);
+        sprintf(levelText, D_003BC450, profileProgress->partyRecord->level);
         textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
         textColor |= MNU_DISPLAY_TEXT_RGB;
         itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
@@ -127,7 +127,7 @@ void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, Dsp
         mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
                       spriteLookup.spriteIndices[profileProgress->partyRecord->unitId], drawContext);
         mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xA, drawContext);
-        func_003014F0(levelText, D_003BC450, profileProgress->partyRecord->level);
+        sprintf(levelText, D_003BC450, profileProgress->partyRecord->level);
         textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
         textColor |= MNU_DISPLAY_TEXT_RGB;
         itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
@@ -162,8 +162,8 @@ void mnuDrawDisplayPlaceholder(s32 x, s32 y, s32 layer, s32 alpha, s32 drawConte
 
     mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x21, drawContext);
     mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x11, drawContext);
-    func_003014F0(placeholderText, "%s %s %s", D_003BC458, D_003BC458, D_003BC458);
-    func_003014F0(placeholderText, D_003BC460);
+    sprintf(placeholderText, "%s %s %s", D_003BC458, D_003BC458, D_003BC458);
+    sprintf(placeholderText, D_003BC460);
     frFontDrawStyledGlyphChainAndMeasure(x + 0xB3, y + 0x171, layer, textColor,
                                       0, placeholderText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
@@ -175,7 +175,7 @@ void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue
 
     mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x21, drawContext);
     mnuDrawPlacedSpriteFromTable(x, y, layer, alpha, 0x11, drawContext);
-    func_003014F0(valueText, D_003BC468, displayValue);
+    sprintf(valueText, D_003BC468, displayValue);
     itfDrawGlyphChainWithWidthQuery(x + 0xB3, y + 0x173, layer, textColor,
                                   0, valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
@@ -266,7 +266,7 @@ void itfDspPopulatePrimaryLabels(void) {
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
     evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
     evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
-    func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
+    sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
@@ -282,7 +282,7 @@ void itfDspPopulateAlternateLabels(void) {
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
     evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
     evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
-    func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
+    sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(1);
@@ -298,7 +298,7 @@ void itfDspPopulateThirdLabels(void) {
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
     evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
     evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
-    func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
+    sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
     dspStartEntry(2);
 }
@@ -522,7 +522,7 @@ void itfDspDrawEntryWithLevel(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scal
     u32 textColor = scale | 0xA09DC300;
 
     mnuDrawPlacedSpriteFromTable(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
-    func_003014F0(text, D_003BC450, entry->level);
+    sprintf(text, D_003BC450, entry->level);
     frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, textColor,
                                      4, text, 0, context);
 }
@@ -542,7 +542,7 @@ void itfDspDrawPartyRecordWithLevel(s32 x, s32 y, s32 layer, DatPartyRecord *ent
 
     mnuDrawPlacedSpriteFromTable(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
     mnuDrawPlacedSpriteFromTable(x, y, layer, scale, lookup.spriteIndices[entry->unitId] + 0x14, context);
-    func_003014F0(text, D_003BC450, entry->level);
+    sprintf(text, D_003BC450, entry->level);
     frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, tag,
                                      4, text, 0, context);
 }

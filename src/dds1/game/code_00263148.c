@@ -221,7 +221,7 @@ void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
 }
 
 extern char D_003BC550[];
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void brsShowStatSelectionStatus(BrsSkillPackageWork *);
 
 /* Cap the available extent by the remaining capacity of five components. */
@@ -245,7 +245,7 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
     }
     if (item->unitId == 1) {
         evtCopyEntryStringToActiveWindow(0, D_003BAA70[item->unitId].encodedText);
-        func_003014F0(text, D_003BC550, available);
+        sprintf(text, D_003BC550, available);
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         if (scene->extentExhausted == 0) {
@@ -348,7 +348,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     }
 
     color = uiBlendColors(0xFFF06480, 0xFFF06400, fade);
-    func_003014F0(text, D_003BC550, delta);
+    sprintf(text, D_003BC550, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x408, 0, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);

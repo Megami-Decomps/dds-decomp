@@ -111,7 +111,7 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
 }
 
 extern char D_003BC628[];
-extern void func_003014F0(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);
@@ -156,10 +156,10 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
             if ((u32)(y + 0x1E) < 0x1DF) {
                 entry = &D_00379F70[i];
                 if (entry->leftText != 0 && D_00379F70[i].rightText == 0) {
-                    func_003014F0(text, D_003BC628, entry->leftText);
+                    sprintf(text, D_003BC628, entry->leftText);
                     mnuDrawStaffRollText(20.0f, (f32)y, entry->leftFont, 0x80808080, text);
                 } else if (D_00379F70[i].rightText != 0) {
-                    func_003014F0(text, D_003BC628, D_00379F70[i].rightText);
+                    sprintf(text, D_003BC628, D_00379F70[i].rightText);
                     mnuDrawStaffRollText(30.0f, (f32)y, D_00379F70[i].rightFont, 0x80808080, text);
                 }
             }

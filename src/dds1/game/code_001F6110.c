@@ -100,7 +100,7 @@ extern s8 D_003A5558[];
 
 extern u32 D_003BB6C8;
 
-extern void func_003014F0();
+extern void sprintf();
 
 extern u8 D_003BB820[];
 
@@ -2576,7 +2576,7 @@ s32 btlOpenPfsDebugDirectory(const char *directoryName) {
     /* Debug mode opens a formatted pfs0 path; built-in mode resets name iteration. */
 
     if (sdfPfsDebugMode != 0) {
-        func_003014F0(pathBuffer, "pfs0:/%s", directoryName);
+        sprintf(pathBuffer, "pfs0:/%s", directoryName);
         return sceDopen(pathBuffer);
     }
     D_003BD868 = 0;
@@ -2644,7 +2644,7 @@ BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
             entry->category = 8;
             entry->value = index;
             entry->id = 0;
-            func_003014F0(entry->name, "GENERAL %d", index);
+            sprintf(entry->name, "GENERAL %d", index);
             if (tail != NULL) {
                 tail->next = entry;
             } else {
@@ -2996,9 +2996,9 @@ u32 btlGetResourceBrowserSelectionStatus(const BtlResourceDescriptor *descriptor
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *descriptor, char *output) {
     char *pathPrefix = descriptor->entryList->pathPrefix;
     if (pathPrefix != NULL) {
-        func_003014F0(output, D_003BB818, pathPrefix, descriptor->selectedEntry->name);
+        sprintf(output, D_003BB818, pathPrefix, descriptor->selectedEntry->name);
     } else {
-        func_003014F0(output, D_003BB820, descriptor->selectedEntry->name);
+        sprintf(output, D_003BB820, descriptor->selectedEntry->name);
     }
     return descriptor->selectedEntry->category;
 }
@@ -3007,7 +3007,7 @@ s32 btlFormatSelectedResourceName(BtlResourceDescriptor *descriptor, char *outpu
 s32 btlTrimResourceName(BtlResourceDescriptor *descriptor, char *output) {
     u32 nameLength;
     u32 characterIndex;
-    func_003014F0(output, D_003BB820, descriptor->selectedEntry->name);
+    sprintf(output, D_003BB820, descriptor->selectedEntry->name);
     nameLength = strlen(output);
     for (characterIndex = 0; characterIndex < nameLength && output[characterIndex] != '.'; characterIndex++) {
     }
@@ -3216,7 +3216,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
         record->resourceName[record->nameLength] = 0;
     }
     btlDebugDrawRectangle(x, y, 0xA4, 0x14);
-    func_003014F0(text, D_003BB818, record->resourceName, record->extension);
+    sprintf(text, D_003BB818, record->resourceName, record->extension);
     btlDebugDrawText(x + 4, y + 4, 0, text);
     y += 0x18;
     btlDebugDrawRectangle(x, y, 0xA4, 0x44);
@@ -3258,11 +3258,11 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
 }
 
 void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output) {
-    func_003014F0(output, D_003BB818, record->resourceName, record->extension);
+    sprintf(output, D_003BB818, record->resourceName, record->extension);
 }
 
 void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output) {
-    func_003014F0(output, D_003BB820, record->resourceName);
+    sprintf(output, D_003BB820, record->resourceName);
 }
 
 void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 maximumNameLength) {
