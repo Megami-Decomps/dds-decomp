@@ -19,6 +19,7 @@
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
+#include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
@@ -6177,18 +6178,6 @@ void fldResetRecordState(void) {
 }
 
 
-/* Complete runtime collision descriptor. Serialized resources have two
- * additional reserved words, but generated geometry embeds these six words. */
-typedef struct FldCollisionDescriptor {
-    s32 vertexCount;
-    s32 faceCount;
-    s32 triangleCount;
-    f32 (*vertices)[4];
-    FldCollisionFace *faces;
-    void *stopData;
-} FldCollisionDescriptor;
-typedef char FldCollisionDescriptorSize[(sizeof(FldCollisionDescriptor) == 0x18) ? 1 : -1];
-
 void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
@@ -7422,15 +7411,6 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
     hitPoint[2] = origin[2];
     return found;
 }
-
-typedef struct FldWallMeshRecord {
-    f32 vertices[8][4];
-    FldCollisionFace faces[4];
-    FldCollisionDescriptor geometry;
-} FldWallMeshRecord;
-
-typedef char FldWallMeshRecordSizeCheck[(sizeof(FldWallMeshRecord) == 0x128) ? 1 : -1];
-
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
 void func_00138910(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
