@@ -3701,7 +3701,7 @@ typedef struct FldSparkController {
     s32 frame;                 /* 0x20 */
     s32 pulse;                 /* 0x24 */
     s32 dialogPhase;           /* 0x28 */
-    s32 unk2C;                 /* 0x2C */
+    s32 dialogTimer;           /* 0x2C */
     s32 entryCount;            /* 0x30 */
     s32 sequenceIndex;         /* 0x34 */
     s32 sequenceRemaining;     /* 0x38 */
@@ -4110,7 +4110,7 @@ void fldUpdateSparkMessageSequence(void) {
                 evtFinishMessageWindowAndNotify();
                 dspCloseChannel();
                 fldSparkControlState.dialogPhase = 5;
-                fldSparkControlState.unk2C = 0;
+                fldSparkControlState.dialogTimer = 0;
             } else if (choice == 1) {
                 evtFinishMessageWindowAndNotify();
                 dspCloseChannel();
@@ -4121,7 +4121,7 @@ void fldUpdateSparkMessageSequence(void) {
                 evtFinishMessageWindowAndNotify();
                 dspCloseChannel();
                 fldSparkControlState.dialogPhase = 4;
-                fldSparkControlState.unk2C = 0;
+                fldSparkControlState.dialogTimer = 0;
                 evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
                 dspStartEntry(3);
                 evtStoreValueAndCaptureWindowPanelValue(2);
@@ -4135,7 +4135,7 @@ void fldUpdateSparkMessageSequence(void) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
             fldSparkControlState.dialogPhase = 1;
-            fldSparkControlState.unk2C = 0;
+            fldSparkControlState.dialogTimer = 0;
         }
         break;
     case 5:
@@ -4143,7 +4143,7 @@ void fldUpdateSparkMessageSequence(void) {
         fldReleaseCurrentBgm();
         D_003BAFE8 = fileQueueDefaultCallbackRequest((const char *)D_003A0978);
         fldSparkControlState.dialogPhase = 6;
-        fldSparkControlState.unk2C = 0;
+        fldSparkControlState.dialogTimer = 0;
         break;
     case 6:
         if (fileIsRequestReadyInCurrentMode(D_003BAFE8) != 0) {
@@ -4159,42 +4159,42 @@ void fldUpdateSparkMessageSequence(void) {
             fldAddCameraModelEntry(0xD);
             D_0032E5C4[0] = 1;
             fldResetArchiveLoadPhase();
-            fldSparkControlState.unk2C = 0;
+            fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 2;
         }
         break;
     case 2:
-        if (fldSparkControlState.unk2C == 20) {
+        if (fldSparkControlState.dialogTimer == 20) {
             effObjSetFlags(fldSparkControlState.object, 1);
             effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
         }
-        fldSparkControlState.unk2C++;
+        fldSparkControlState.dialogTimer++;
         if (fldStepArchiveLoad() != 0) {
             mnuQueueTitleSoundStreamEntry(0x12);
             fldSparkControlState.dialogPhase = 3;
         }
         break;
     case 3:
-        if (fldSparkControlState.unk2C == 20) {
+        if (fldSparkControlState.dialogTimer == 20) {
             effObjSetFlags(fldSparkControlState.object, 1);
             effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
         }
-        fldSparkControlState.unk2C++;
+        fldSparkControlState.dialogTimer++;
         if (mnuPollTitleStreamStateLocked() == 2) {
             sndSetSequenceVolumePan(0x670010, 0x7F, 0x3F);
             fldSparkControlState.dialogPhase = 8;
         }
         break;
     case 8:
-        if (fldSparkControlState.unk2C == 46) {
+        if (fldSparkControlState.dialogTimer == 46) {
             kwlnFadeInStart(0xFF, 0xFF, 0xFF, 4);
         }
-        if (fldSparkControlState.unk2C == 20) {
+        if (fldSparkControlState.dialogTimer == 20) {
             effObjSetFlags(fldSparkControlState.object, 1);
             effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
         }
-        if (++fldSparkControlState.unk2C > 50) {
-            fldSparkControlState.unk2C = 0;
+        if (++fldSparkControlState.dialogTimer > 50) {
+            fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 9;
         }
         break;
@@ -4203,18 +4203,18 @@ void fldUpdateSparkMessageSequence(void) {
         fldLoadWeatherEffects();
         fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);
-        fldSparkControlState.unk2C = 0;
+        fldSparkControlState.dialogTimer = 0;
         fldSparkControlState.dialogPhase = 10;
         evtSetSolarOverlayFullyTransparent();
         kwlnFadeOutStart(0xFF, 0xFF, 0xFF, 4);
         break;
     case 10:
         fldDrawWeatherLimitTimer();
-        if (++fldSparkControlState.unk2C > 10) {
+        if (++fldSparkControlState.dialogTimer > 10) {
             effObjClearFlags(fldSparkControlState.object, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
             sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAFEC);
-            fldSparkControlState.unk2C = 0;
+            fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 7;
             mnuTitleStreamUpdateAndLogBgm();
         }

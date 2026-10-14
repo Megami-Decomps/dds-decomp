@@ -486,7 +486,7 @@ typedef struct FldSparkController {
     s32 frame;
     s32 pulse;
     s32 dialogPhase;
-    s32 unk30;
+    s32 dialogTimer;
     s32 entryCount;
     s32 sequenceIndex;
     s32 sequenceRemaining;
@@ -4421,7 +4421,7 @@ void fldUpdateDevilizeEventSequence(void) {
                 evtFinishMessageWindowAndNotify();
                 dspCloseChannel();
                 fldSparkControlState.dialogPhase = 5;
-                fldSparkControlState.unk30 = 0;
+                fldSparkControlState.dialogTimer = 0;
             } else if (choice == 1) {
                 evtFinishMessageWindowAndNotify();
                 dspCloseChannel();
@@ -4432,7 +4432,7 @@ void fldUpdateDevilizeEventSequence(void) {
                 evtFinishMessageWindowAndNotify();
                 dspCloseChannel();
                 fldSparkControlState.dialogPhase = 4;
-                fldSparkControlState.unk30 = 0;
+                fldSparkControlState.dialogTimer = 0;
                 evtCreateMessageWindowIfMissing(D_003A9EB0);
                 dspStartEntry(3);
                 evtStoreValueAndCaptureWindowPanelValue(2);
@@ -4446,7 +4446,7 @@ void fldUpdateDevilizeEventSequence(void) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
             fldSparkControlState.dialogPhase = 1;
-            fldSparkControlState.unk30 = 0;
+            fldSparkControlState.dialogTimer = 0;
         }
         break;
     case 5:
@@ -4454,7 +4454,7 @@ void fldUpdateDevilizeEventSequence(void) {
         fldReleaseCurrentBgm();
         D_004363A0 = fileQueueDefaultCallbackRequest("/fld/f/bin/DVILIZE.BED");
         fldSparkControlState.dialogPhase = 6;
-        fldSparkControlState.unk30 = 0;
+        fldSparkControlState.dialogTimer = 0;
         break;
     case 6:
         if (fileIsRequestReadyInCurrentMode(D_004363A0) != 0) {
@@ -4470,42 +4470,42 @@ void fldUpdateDevilizeEventSequence(void) {
             fldAddCameraModelEntry(0xD);
             D_003899E0[0] = 1;
             fldResetArchiveLoadPhase();
-            fldSparkControlState.unk30 = 0;
+            fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 2;
         }
         break;
     case 2:
-        if (fldSparkControlState.unk30 == 20) {
+        if (fldSparkControlState.dialogTimer == 20) {
             effObjSetFlags(fldSparkControlState.object, 1);
             effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
         }
-        fldSparkControlState.unk30++;
+        fldSparkControlState.dialogTimer++;
         if (fldStepArchiveLoad() != 0) {
             mnuQueueTitleSoundStreamEntry(0x12);
             fldSparkControlState.dialogPhase = 3;
         }
         break;
     case 3:
-        if (fldSparkControlState.unk30 == 20) {
+        if (fldSparkControlState.dialogTimer == 20) {
             effObjSetFlags(fldSparkControlState.object, 1);
             effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
         }
-        fldSparkControlState.unk30++;
+        fldSparkControlState.dialogTimer++;
         if (mnuPollTitleStreamStateLocked() == 2) {
             sndSetSequenceVolumePan(0x680010, 0x7F, 0x3F);
             fldSparkControlState.dialogPhase = 8;
         }
         break;
     case 8:
-        if (fldSparkControlState.unk30 == 46) {
+        if (fldSparkControlState.dialogTimer == 46) {
             kwlnFadeInStart(0xFF, 0xFF, 0xFF, 4);
         }
-        if (fldSparkControlState.unk30 == 20) {
+        if (fldSparkControlState.dialogTimer == 20) {
             effObjSetFlags(fldSparkControlState.object, 1);
             effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
         }
-        if (++fldSparkControlState.unk30 > 50) {
-            fldSparkControlState.unk30 = 0;
+        if (++fldSparkControlState.dialogTimer > 50) {
+            fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 9;
         }
         break;
@@ -4514,18 +4514,18 @@ void fldUpdateDevilizeEventSequence(void) {
         fldLoadWeatherEffects();
         fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);
-        fldSparkControlState.unk30 = 0;
+        fldSparkControlState.dialogTimer = 0;
         fldSparkControlState.dialogPhase = 10;
         evtSetSolarOverlayFullyTransparent();
         kwlnFadeOutStart(0xFF, 0xFF, 0xFF, 4);
         break;
     case 10:
         fldDrawSparkStatusOverlay();
-        if (++fldSparkControlState.unk30 > 10) {
+        if (++fldSparkControlState.dialogTimer > 10) {
             effObjClearFlags(fldSparkControlState.object, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
             sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_004363A4);
-            fldSparkControlState.unk30 = 0;
+            fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 7;
             mnuResetTitleStreamAfterFileIdle();
         }
