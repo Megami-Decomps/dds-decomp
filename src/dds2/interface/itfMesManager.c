@@ -774,7 +774,7 @@ void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *so
 
 /* Legacy short-arity entry point: retain its one-argument copier call.
  * This function does not specify the copier's other parameters. */
-void func_001A4888(s32 window) {
+void itfMesCopyWindowTextSlot(s32 window) {
     itfMesReplaceTextSlotData((u32)itfWindowSlots[window].mes);
 }
 

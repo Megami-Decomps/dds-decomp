@@ -201,7 +201,8 @@ void sdfSoundStopMoviePlayback(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
-void func_003427C0(u8 channel) {
+/* Separate native copy of the command-0x110 channel-group sender. */
+void sndSendChannelGroupCommand110Duplicate(u8 channel) {
     sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 

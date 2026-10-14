@@ -1301,7 +1301,8 @@ void btlPickCommandLowestLevelTarget(s32 context) {
     btlSelectLowestRankTarget(context, 0);
 }
 
-void btlCmdWithArgE(s32 context) {
+/* Select the highest-current-MP candidate through the native mode-zero entry. */
+void btlPickCommandHighestMpTarget(s32 context) {
     func_00216888(context, 0);
 }
 
