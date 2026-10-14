@@ -1,4 +1,5 @@
 #include "eff_packet_params.h"
+#include "eff_camera_create_request.h"
 #include "sdf_packet_header.h"
 #include "fld.h"
 #include "btl_command.h"
@@ -11745,13 +11746,6 @@ INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042CF90);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FCA58);
 
-
-typedef struct EffCameraCreateRequest {
-    EffFileJobRequest *resource;
-    EffQueuedFileObject *object;
-    u32 existingJob;
-    f32 position[3];
-} EffCameraCreateRequest;
 
 extern void fileQueueInitTransform(void *);
 extern FileJob *fileAppendJob(FileQueue *, u32);
