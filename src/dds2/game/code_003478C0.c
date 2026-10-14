@@ -62,8 +62,6 @@ extern void SleepThread(void);
 
 extern s32 D_00439224;
 
-extern void sdfInsertFloatKeyTreeItem();
-
 extern void sdfRebuildPoolChain();
 
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32 count);
@@ -752,7 +750,8 @@ void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
             node->next = pool->freeHead;
             pool->freeHead = node;
         } else {
-            sdfInsertFloatKeyTreeItem(pool->keyTree, node);
+            /* The key tree views the pool node's +0xC word as its float key. */
+            sdfInsertFloatKeyTreeItem(pool->keyTree, (SdfKeyTreeItem *)node);
         }
     }
 }

@@ -733,7 +733,6 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
     }
 }
 
-extern void sdfInsertFloatKeyTreeItem();
 extern void sdfRebuildPoolChain();
 
 void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
@@ -742,7 +741,8 @@ void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
             node->next = pool->freeHead;
             pool->freeHead = node;
         } else {
-            sdfInsertFloatKeyTreeItem(pool->keyTree, node);
+            /* The key tree views the pool node's +0xC word as its float key. */
+            sdfInsertFloatKeyTreeItem(pool->keyTree, (SdfKeyTreeItem *)node);
         }
     }
 }

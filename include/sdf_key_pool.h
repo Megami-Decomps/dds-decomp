@@ -6,7 +6,8 @@
 struct SdfKeyTreeItem;
 
 /* Pool release logic uses the next link, word at 0x4 and kind at 0xC;
- * bytes at 0x8 remain opaque. DDS1/2 game/code_002EEA18/003478C0.c. */
+ * bytes at 0x8 remain opaque. The float-key tree insertion helper reads the
+ * same +0xC word through SdfKeyTreeItem. DDS1/2 game/code_002EEA18/003478C0.c. */
 typedef struct SdfKeyPoolNode {
     struct SdfKeyPoolNode *next; /* 0x00 */
     s32 unk4;                    /* 0x04 */
@@ -38,7 +39,11 @@ typedef struct SdfPool {
     SdfKeyTreeNode *keyTree[1];    /* 0x18: first root; allocation continues */
 } SdfPool;
 
+void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item);
+
 typedef char SdfKeyPoolNode_size_must_be_0x10[(sizeof(SdfKeyPoolNode) == 0x10) ? 1 : -1];
+typedef char SdfKeyPoolNode_kind_must_be_at_C[
+    ((u32)&((SdfKeyPoolNode *)0)->kind == 0x0C) ? 1 : -1];
 typedef char SdfKeyTreeItem_size_must_be_0x10[(sizeof(SdfKeyTreeItem) == 0x10) ? 1 : -1];
 typedef char SdfKeyTreeItem_key_must_be_at_C[
     ((u32)&((SdfKeyTreeItem *)0)->key == 0x0C) ? 1 : -1];
