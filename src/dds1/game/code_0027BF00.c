@@ -2047,7 +2047,7 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
 INCLUDE_ASM(const s32, "game/code_0027BF00", mnuGetPartyRowDrawState);
 
 extern s32 mnuGetPartyRowDrawState(MenuPageWindow *, s32);
-extern void uiDrawSurfaceAtNearDepth(s32);
+extern void uiDrawSurfaceAtNearDepth(u32);
 
 /* Draw the party row's frame variant and restore the near-depth surface. */
 void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,

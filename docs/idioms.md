@@ -12147,3 +12147,36 @@ Its preceding `INCLUDE_RODATA` blocks remain in native address order:
 unchanged. The full owning-unit gate is 44 match, 0 differ, including its
 read-only pool; no shared-header or DDS2 changes are needed.
 
+### Movie path drawing: real outputs and surface return
+
+DDS2 `mnuDrawAndAdvanceMovieMenuSlidePath` (`002A4B70`, 440 bytes) uses the
+existing `PickList` owner and earlier matched path/pulse helpers. Its two
+offsets are both initialized at `002A4BD8..002A4BE4`, but the native loop
+counter starts at zero, decrements once, and exits: only the first path is
+drawn. The second offset initialization is native-present, not invented
+storage. Plain signed C conversion emits the native `cvt.w.s`; no new FPU
+macro or inline assembly is needed.
+
+Separate real scalar `x` and `y` outputs match `mnuSlidePathPoint`'s two
+output formals and the native stack homes at `+0x10` and `+0x14`. The
+triangular pulse and scaled draw alpha have different actual lifetimes.
+Using a two-element position array instead retains two element-address
+pseudos across the loop and adds saved registers and 24 bytes of code.
+The scalar-output form leaves only two different words, at `+0x168` and
+`+0x16C`: the final active-flag load and test use V1 instead of V0.
+
+The qualified trace pins this to local allocation, not scheduling:
+`find_free_reg` for the flag pseudo (reg124, born14/dead19) selects V1
+while the preceding implicit-int surface call still reserves its unused
+hard V0 result. Property **P** is that the surface call has no result.
+The matched providers in both games already define
+`void uiDrawSurfaceAtNearDepth(u32)`. Giving the caller that truthful
+file-scope declaration removes the false return value and closes the
+two words. All C callers now agree with that return and formal type;
+only the remaining implicit or signed-formal declarations were changed.
+The trace preserves unhooked assembly and all RTL dumps.
+
+Whole-unit gates are 43/0 for the movie unit, 44/0 for the DDS1 implicit
+caller, and 126/0 and 24/0 for the two signed-formal caller units, with no
+context, data or undefined-symbol differences. No owner, flag, SDK macro,
+provider body or held caller body changes are required.

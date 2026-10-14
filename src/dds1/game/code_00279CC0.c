@@ -545,6 +545,8 @@ void mnuReleaseAssets(MenuAssets *assets) {
     effDestroyPayload(assets->layerB);
 }
 
+extern void uiDrawSurfaceAtNearDepth(u32);
+
 void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
     uiDrawTexturedSurfaceAtFarDepth(drawArg);
     itfDrawGridWithResolvedSlot(0xffffffffffffff90, 0xa0, 0, 0x61, assets->sprites[4], 0, drawArg);
