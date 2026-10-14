@@ -105,16 +105,7 @@ extern volatile s8 sdfPacketSlotIndex;
 extern s32 D_003BD338;
 extern SdfPacketSlot D_00398158[];
 
-typedef struct SdfDescriptorSource {
-    u8 pad00[0xC];
-    u32 baseAddress;
-    u8 pad10[4];
-    s16 bufferWidth;
-    u8 pad16[2];
-    s32 pixelFormat;
-} SdfDescriptorSource;
-
-extern SdfDescriptorSource *sdfPacketResourceEntries[];
+extern SdfTexResource *sdfPacketResourceEntries[];
 
 void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
@@ -305,7 +296,7 @@ void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sour
 void sdfPatchPacketResourceField(SdfPatchableResourcePacket *packet, s32 entryIndex) {
     packet->resourcePacket.transfer.bitbltbuf.value =
         (packet->resourcePacket.transfer.bitbltbuf.value & ~0x3FFF) |
-        (u64)(u32)(sdfPacketResourceEntries[entryIndex]->baseAddress >> 6);
+        (u64)(u32)(sdfPacketResourceEntries[entryIndex]->word >> 6);
 }
 
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
@@ -321,7 +312,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
     packet = (SdfPatchableResourcePacket *)allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     packet->link.patch = sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket(&packet->resourcePacket,
-        (SdfTexResource *)sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
+        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
         resourceAddress, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, &packet->link);
     sdfAppendPacketRange(list, (u32)&packet->resourcePacket,
@@ -1355,7 +1346,7 @@ void sdfCreateExtendedPacket(s32 packetList, u32 destinationBufferAddress, s32 d
 void sdfPatchPacketResourceReference(SdfGraphCopyPacket *packet, s32 entryIndex) {
     packet->draw.transfer.bitbltbuf.value =
         (packet->draw.transfer.bitbltbuf.value & ~0x3FFF) |
-        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
+        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->word >> 6);
 }
 
 extern SdfGraphObj D_003980E0;
