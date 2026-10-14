@@ -12,6 +12,7 @@
 #include "sdf_dev_protocol.h"
 #include "sdf_dev_state.h"
 #include "sdf_dev_worker.h"
+#include "sdf_thread_workspace_api.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 
@@ -358,9 +359,6 @@ extern char D_003BD3D0[];
 extern s32 func_002F4FD8(SifRpcClientContextView *, s32, s32, void *, s32, void *, s32, void (*)(void *), void *);
 
 extern s32 func_0030C8E0(const char *, ...);
-
-extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
-
 
 extern s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
 
