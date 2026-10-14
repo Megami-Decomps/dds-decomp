@@ -1814,20 +1814,7 @@ SdfPoolNode *fldGetDisplayTableRow(void) {
     return &kwlnDrawSurfaces[fldDisplayRow];
 }
 
-typedef struct FldSpriteCorner {
-    s32 u, v;
-    u8 pad08[8];
-    s32 x, y;
-    s32 mask;
-    s16 flag;
-    u8 pad1E[2];
-} FldSpriteCorner;
-
-/* Sprite vertex record (0x50 bytes): colour, then two corners of the quad. */
-typedef struct FldSpriteVertex {
-    s32 r, g, b, a;
-    FldSpriteCorner corner[2];
-} FldSpriteVertex;
+#include "fld_sprite_vertex.h"
 
 void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
     void *handle = sdfConsAllocateColumnPacket(1);
