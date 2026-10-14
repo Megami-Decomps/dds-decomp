@@ -11908,3 +11908,9 @@ gap; moving topology counts after vertex/face construction changes the flush
 and regresses. Publishing a temporary aggregate descriptor produces real
 stack/block-copy scaffolding and an 844-byte body. Those controls are not
 alternate matching implementations.
+
+### Large field movement and camera controllers
+
+See [field controller matching](field-controller-matching.md) for the paired
+4,428/4,864-byte controller reconstruction: complete action joins, two-sided
+speed choices, actual final-use scheduler evidence, and finite SDK qualification.
