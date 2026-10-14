@@ -39,8 +39,6 @@ extern void ptyRebuildAllProfiles(void);
 extern void evtUpdateFlaggedEntries(void);
 extern void dds3ForEachEntry(void);
 extern void ptyAssignPartyRosterItemsAndMarkOwned(void);
-extern void mdlFlagClear(s32 flag);
-extern void mdlFlagSet(s32 flag);
 extern void sdfSaveResetSnapshot(void);
 extern void sdfRestoreResetSnapshot(void);
 
