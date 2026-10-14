@@ -776,15 +776,18 @@ void sdfPathPrefixCat(char *dst, char *src) {
     strcat(dst, src);
 }
 
-u32 func_0033E800(char *path) {
+/* Retail disables the implicit-disc path probe used by the ordered device dispatch. */
+u32 sdfDevDetectDiscPathDisabled(char *path) {
     return 0;
 }
 
-u32 func_0033E808(char *path) {
+/* Retail disables the implicit-host probe; the host builder is still used explicitly. */
+u32 sdfDevDetectHostPathDisabled(char *path) {
     return 0;
 }
 
-u32 func_0033E810(char *path) {
+/* Retail disables the implicit-PFS probe before the configured-device fallback. */
+u32 sdfDevDetectPfsPathDisabled(char *path) {
     return 0;
 }
 
@@ -818,11 +821,11 @@ char *sdfDevAllocateNormalizedPath(char *path) {
             *cursor++ = '1';
             *cursor = 0;
         }
-    } else if (func_0033E800(path)) {
+    } else if (sdfDevDetectDiscPathDisabled(path)) {
         sdfDevMakeDiscPath(result, path);
-    } else if (func_0033E808(path)) {
+    } else if (sdfDevDetectHostPathDisabled(path)) {
         sdfDevBuildPath(result, path);
-    } else if (func_0033E810(path)) {
+    } else if (sdfDevDetectPfsPathDisabled(path)) {
         sdfPathPrefixCat(result, path);
     } else {
         switch (D_00438AE0) {

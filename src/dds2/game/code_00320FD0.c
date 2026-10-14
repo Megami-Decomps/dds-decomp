@@ -148,7 +148,8 @@ SdfListNode *mnuFindResourceNodeByHandle(MnuCallbackList *list, u32 handle) {
     return node;
 }
 
-void func_003211F0(u32 unusedFirstWord, u32 unusedSecondWord) {
+/* Default callback-list removal/destruction listener ignores both supplied words. */
+void mnuCallbackNodeNoOp(u32 unusedFirstWord, u32 unusedSecondWord) {
 }
 
 MenuProgressParameters *mnuGetResourceProgressParameters(void) {
@@ -234,7 +235,8 @@ s32 mnuTriggerProgressResourceRecords(MenuProgressState *progressState) {
     return 0;
 }
 
-void func_003214C0(MenuRuntimeRecord *record) {
+/* Default post-initialization callback leaves the runtime record unchanged. */
+void mnuRuntimeRecordInitializationNoOp(MenuRuntimeRecord *record) {
 }
 
 void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback) {

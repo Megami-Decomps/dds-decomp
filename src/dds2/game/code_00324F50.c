@@ -47,7 +47,7 @@ typedef struct SdfResourceVectorRecord30 {
     SdfVec4 *vector;
 } SdfResourceVectorRecord30;
 
-extern u32 *func_00324D50(void);
+extern u32 *mnuCreateCallbackPair(void);
 
 extern void *memcpy(void *, const void *, u32);
 
@@ -242,7 +242,7 @@ SdfFilteredRecords *sdfCloneEnabledFilterRecords(u32 *owner, SdfFilterRecord *re
 }
 
 u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
-    u32 *owner = func_00324D50();
+    u32 *owner = mnuCreateCallbackPair();
 
     if (count != 0) {
         do {
@@ -266,7 +266,7 @@ INCLUDE_ASM(const s32, "game/code_00324F50", func_00325790);
 /* Deep-copy count basic sprite headers and their sixteen-byte vectors.
  * Return the resource-list owner; each copied header points to its own vector. */
 u32 *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *source, s32 count) {
-    u32 *owner = func_00324D50();
+    u32 *owner = mnuCreateCallbackPair();
 
     while (count != 0) {
         SdfResourceVectorRecord1C *copy =
@@ -288,7 +288,7 @@ u32 *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *source, s32 count) {
 /* Deep-copy count extended sprite headers and their sixteen-byte vectors.
  * Return the resource-list owner with each copied vector stored after its header. */
 u32 *sdfCloneExtendedSpriteRecords(const SdfResourceVectorRecord30 *source, s32 count) {
-    u32 *owner = func_00324D50();
+    u32 *owner = mnuCreateCallbackPair();
 
     while (count != 0) {
         SdfResourceVectorRecord30 *copy =

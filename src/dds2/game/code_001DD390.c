@@ -2594,7 +2594,7 @@ void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
 
     available = mdlFlagTest(0xc0f);
     if (available != 0) {
-        func_0022CD60(effect, model);
+        btlEnsureModelAndSoundReady(effect, model);
         return;
     }
     mdlRequestAsset(effect, model, 0);
@@ -2612,7 +2612,7 @@ void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
 
 s32 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
     if (mdlFlagTest(0xC0F) != 0) {
-        if (func_0022CD60(effect, model, 0) != 0) {
+        if (btlEnsureModelAndSoundReady(effect, model, 0) != 0) {
             return 1;
         }
     } else {

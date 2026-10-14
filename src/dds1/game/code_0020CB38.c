@@ -97,7 +97,8 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
     return 1;
 }
 
-void func_0020CCA8(void) {
+/* Mode 0x10E's update hook reuses the Hariti formation restoration routine. */
+void btlHaritiUpdateCallback(void) {
     btlRestoreHaritiFormation();
 }
 INCLUDE_ASM(const s32, "game/code_0020CB38", btlUpdateBossUnitScaleTransition);
@@ -283,7 +284,8 @@ void btlFormatBattleEffectResourceName(s32 record, s32 action, s32 pathBuffer) {
     func_003014F0(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(datActionAnimationRecords + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
 }
 
-u32 func_0020D548(void) {
+/* Hariti's spawn-limit override caps the active enemy count at seven. */
+u32 btlGetHaritiActiveEnemyLimit(void) {
     return 7;
 }
 
@@ -457,7 +459,8 @@ u32 btlMapActionToCode(s32 action) {
     return result;
 }
 
-u8 func_0020D9A8(s32 action) {
+/* Mode 0x140's installed predicate rejects only action code 0xD3. */
+u8 btlMode140IsActionNotD3(s32 action) {
     return action != 0xd3;
 }
 

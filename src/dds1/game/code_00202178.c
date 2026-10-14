@@ -643,7 +643,8 @@ s32 btlSelectTargetsBlockingElement(s32 actor, s32 mask) {
     return 1;
 }
 
-u32 func_00204198(void) {
+/* AI operation 22 has no state/selection effect; void dispatch ignores its native 1. */
+u32 btlAiActionOperation22NoOp(void) {
     return 1;
 }
 
@@ -909,7 +910,8 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     btlUnitFaceTarget(target, user);
 }
 
-u32 func_00204AC0(void) {
+/* Mode 0x101's negative result declines selection of a boss-script argument. */
+u32 btlSelectNoBossScriptArgument(void) {
     return 0xffffffff;
 }
 
@@ -927,7 +929,8 @@ s32 btlClassifyLinkedSkillRequest(BtlUnit *source, BtlUnit *unit, s32 index) {
     return 0;
 }
 
-u32 func_00204B40(void) {
+/* Independent mode 0x102 copy of the same no-argument-selection callback. */
+u32 btlSelectNoBossScriptArgumentDuplicate(void) {
     return 0xffffffff;
 }
 
@@ -1267,7 +1270,8 @@ void btlNormalizeDefaultPlayerDisplaySpecies(s32 unit) {
     }
 }
 
-u32 func_002055F0(void) {
+/* Mode 0x107 replaces the scene's automatically toggled variant with 2. */
+u32 btlMode107SelectSceneVariant(void) {
     return 2;
 }
 
@@ -2989,7 +2993,8 @@ s32 btlCheckEnemyUnitReadiness(void) {
     return count == 0;
 }
 
-u32 func_00208660(void) {
+/* Cerber's unsigned -1 leaves resource-type selection to the action-record fallback. */
+u32 btlCerberDeclineResourceTypeOverride(void) {
     return 0xffffffff;
 }
 

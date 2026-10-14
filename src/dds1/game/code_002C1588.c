@@ -73,7 +73,8 @@ void itfInitializeAdminInterfaceNoop(void) {
 void itfShutdownAdminInterfaceNoop(void) {
 }
 
-u32 func_002C16F0(void) {
+/* Separate native copy of itfReturnZero; no more specific caller role is established. */
+u32 itfReturnZeroDuplicate(void) {
     return 0;
 }
 

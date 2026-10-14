@@ -1432,7 +1432,8 @@ s32 btlIsModelEntryReady(s32 kind, s32 id) {
 
 extern void func_0022CBA0(s32, s32);
 
-s32 func_0022CD60(s32 kind, s32 id) {
+/* Return 1 once model and motion-sound work are ready; request/poll them otherwise. */
+s32 btlEnsureModelAndSoundReady(s32 kind, s32 id) {
     BattleModelEntry *entry;
 
     if (mdlRequestAsset(kind, id, 0) != 0 && mdlRequestAsset(kind, id, 0) != -1 &&

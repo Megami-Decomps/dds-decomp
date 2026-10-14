@@ -228,10 +228,10 @@ extern s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command);
 extern void btlUpdateReadyUnits(void);
 extern s32 btlUpdateSpecialTargetCamera(BtlLinkedCommand *command);
 extern void effBTLFieldColorSetFlags(u32 flags);
-extern u32 func_00204AC0(void);
-extern u32 func_00204B40(void);
+extern u32 btlSelectNoBossScriptArgument(void);
+extern u32 btlSelectNoBossScriptArgumentDuplicate(void);
 extern void btlCenterUsasEnemyFormation(void);
-extern u32 func_002055F0(void);
+extern u32 btlMode107SelectSceneVariant(void);
 extern s32 btlSetFirstCriticalHpUnitSideFlag(void);
 extern void btlApplyRahuOperandEffects(BtlUnit *actor, BtlOperandEntry *operand);
 extern void btlUpdateLinkedEffectUnitTransforms(void);
@@ -241,7 +241,7 @@ extern void btlUpdateRahuEffectActorHeights(void);
 extern s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command);
 extern void btlAlignCerberusPartTransforms(void);
 extern s32 btlChooseCerberusPartMotion(BtlUnit *unit, s32 animation);
-extern u32 func_00208660(void);
+extern u32 btlCerberDeclineResourceTypeOverride(void);
 extern s32 btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command);
 extern s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command);
 extern void btlAdvanceNidhoggrScaleStage(s32 unit, BtlScaleStageSource *source);
@@ -252,12 +252,12 @@ extern void btlFinishRavanaModelUnit(BtlUnit *unit);
 extern void btlRefreshRavanaUnitModelsAndPose(void);
 extern s32 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b);
 extern u32 btlGetMillenniaCurseSoundDelay(s32 action);
-extern void func_0020CCA8(void);
+extern void btlHaritiUpdateCallback(void);
 extern void btlInitializeBossUnitScaleTransition(BtlUnit *unit);
-extern u32 func_0020D548(void);
+extern u32 btlGetHaritiActiveEnemyLimit(void);
 extern s32 btlClassifyBeelzebubAction(BtlUnit *unit, s32 action);
 extern s32 btlClassifyMetatronAction(BtlUnit *unit, s32 action);
-extern u8 func_0020D9A8(s32 action);
+extern u8 btlMode140IsActionNotD3(s32 action);
 extern s32 btlClassifyHuangLongAction(BtlUnit *unit, s32 action);
 extern s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 secondSide);
 
@@ -297,13 +297,13 @@ void btlInitializeBossCallbacks(s32 mode) {
     case 0x101:
         battle->commandRestrictFlags |= 0x2000;
         mdlFlagSet(0x802);
-        BTL_INSTALL_CALLBACK(battle->pad598, 0x0, func_00204AC0);
+        BTL_INSTALL_CALLBACK(battle->pad598, 0x0, btlSelectNoBossScriptArgument);
         BTL_INSTALL_CALLBACK(battle->hitResultOverride, 0x0, btlClassifyLinkedSkillRequest);
         break;
     case 0x102:
         mdlFlagSet(0x803);
         battle->commandRestrictFlags |= 5;
-        BTL_INSTALL_CALLBACK(battle->pad598, 0x0, func_00204B40);
+        BTL_INSTALL_CALLBACK(battle->pad598, 0x0, btlSelectNoBossScriptArgumentDuplicate);
         break;
     case 0x103:
     case 0x106:
@@ -345,7 +345,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlInitializeResources);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlInitResourcesWrap);
         if (mode == 0x107) {
-            BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, func_002055F0);
+            BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlMode107SelectSceneVariant);
         }
         allocation = sdfAllocateBlockBySizeThreshold(0x44);
         battle->effect = allocation;
@@ -400,7 +400,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->callback5D4, 0x0, btlStartSubtaskWithInput);
         BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateReadyUnits);
         BTL_INSTALL_CALLBACK(battle->pad5E4, 0x4, btlCheckEnemyUnitReadiness);
-        BTL_INSTALL_CALLBACK(battle->pad644, 0x0, func_00208660);
+        BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlCerberDeclineResourceTypeOverride);
         BTL_INSTALL_CALLBACK(battle->commandAvailabilityOverride, 0x0, btlCerberAllowsNonPartyActor);
         BTL_INSTALL_CALLBACK(battle->commandRangeOverride, 0x0, btlCerberGetCommandHitCount);
         allocation = sdfAllocateBlockBySizeThreshold(4);
@@ -486,7 +486,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad670, 0x8, btlMapSkillRange);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlRestoreHaritiFormation);
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlMapSpeciesToActionVariant);
-        BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, func_0020CCA8);
+        BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlHaritiUpdateCallback);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetLinkedDefeatCameraPresetA);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUpdateLinkedDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->cameraStateChangePredicate, 0x0, btlTryStartTargetFacingActionEffect);
@@ -502,7 +502,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->postTargetHook, 0x0, btlStartPairedActorCommandEffect);
         BTL_INSTALL_CALLBACK(battle->pad680, 0x0, btlAllowsSpeciesCondition);
         BTL_INSTALL_CALLBACK(battle->pad680, 0x4, btlFormatBattleEffectResourceName);
-        BTL_INSTALL_CALLBACK(battle->pad680, 0x8, func_0020D548);
+        BTL_INSTALL_CALLBACK(battle->pad680, 0x8, btlGetHaritiActiveEnemyLimit);
         allocation = sdfAllocateBlockBySizeThreshold(0x24);
         battle->effect = allocation;
         memset(allocation, 0, 0x24);
@@ -530,7 +530,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     case 0x140:
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlRecenterUnitsOnLead);
         BTL_INSTALL_CALLBACK(battle->pad670, 0x8, btlMapActionToCode);
-        BTL_INSTALL_CALLBACK(battle->pad634, 0x4, func_0020D9A8);
+        BTL_INSTALL_CALLBACK(battle->pad634, 0x4, btlMode140IsActionNotD3);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
         BTL_INSTALL_CALLBACK(battle->pad5E4, 0x0, btlIsSceneUnitModeListed);
         break;
