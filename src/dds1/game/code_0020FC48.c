@@ -1167,7 +1167,9 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
 extern SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
 extern s32 btlSelectSideIndexedActorParameterTable(s32, s32);
 
-void func_00211740(s32 kind, s32 id) {
+/* Finalize the existing kind/id entry: adopt or release its motion-SE packet
+ * resources, retire the pack request, and mark the cache entry ready. */
+void btlFinalizeModelPackEntry(s32 kind, s32 id) {
     BattleModelEntry *entry = btlFindModelEntry(kind, id);
     PacWork *node;
     SoundSlotTableEntry *parts;
@@ -1223,7 +1225,7 @@ s32 btlIsModelEntryReady(s32 kind, s32 id) {
     return 0;
 }
 
-extern void func_00211740(s32, s32);
+extern void btlFinalizeModelPackEntry(s32, s32);
 
 s32 btlEnsureModelAndSoundReady(s32 kind, s32 id) {
     BattleModelEntry *entry;
@@ -1236,7 +1238,7 @@ s32 btlEnsureModelAndSoundReady(s32 kind, s32 id) {
     if (entry != 0) {
         if (btlIsModelPackEntryReady(entry) != 0) {
             if (entry->state == 0) {
-                func_00211740(kind, id);
+                btlFinalizeModelPackEntry(kind, id);
             }
             return 1;
         }
@@ -1539,7 +1541,8 @@ s32 btlUpdateFadeIn(void) {
     return 1;
 }
 
-void func_00213368(void) {
+/* Native empty transition hook after fade-in completes and fade-out is pending. */
+void btlFadeInCompleteNoOp(void) {
 }
 
 extern u8 D_00360F68[21][21];
@@ -1734,7 +1737,7 @@ s32 btlUpdateRuntimeFadeState(void) {
         }
         if (btlUpdateFadeIn() != 0) {
             if (btlRuntimeState.pending != 0) {
-                func_00213368();
+                btlFadeInCompleteNoOp();
                 btlRuntimeState.state = 3;
             }
         }

@@ -8147,12 +8147,12 @@ view, assembly, register pin, steering cast or unused staging value.
 
 ## Trace-justified pointer staging: sound-table row
 
-DDS1 `func_00211740` (0x00211740, 316 bytes) distributes a model pack's
+DDS1 `btlFinalizeModelPackEntry` (0x00211740, 316 bytes) distributes a model pack's
 resource handles according to its motion-SE descriptor table. The existing
 four-byte `SoundSlotTableEntry` owner is shared with the file loaders;
 capturing `SoundSlotTableEntry *part = parts + i` before reading
 `part->resourceOffset` reproduces the table-base-first `addu` at 0x002117DC.
-The DDS2 semantic counterpart, `func_0022CBA0`, also adds its table base
+The DDS2 semantic counterpart, `btlFinalizeModelPackEntry`, also adds its table base
 first at 0x0022CC38, before its additional debug print.
 
 Property P is that the row address expands as a pointer value before its
@@ -11668,3 +11668,21 @@ list-clear path passes `node->index` and `node->value` before freeing the
 node itself. Keep the complete typed constructor, allocation ownership
 declaration and layout unchanged; its existing upstream destructor name
 does not establish an effect-only payload type.
+
+## Model-pack finalization and the fade-in completion no-op
+
+`btlFinalizeModelPackEntry` finalizes an existing kind/id cache entry after
+`btlEnsureModelAndSoundReady` has found its model pack ready. A first-reference
+motion-SE owner receives the packet's resource handles; an already-shared
+owner instead causes the duplicate packet handles to be released. The pack
+request is scheduled for cleanup and cleared, and the entry becomes ready.
+DDS2 adds per-slot debug logging to the same ownership transitions. Keep the
+existing descriptor-row capture and its trace evidence above, the actual
+owner types, and the caller's repeated model requests unchanged.
+
+The empty `btlFadeInCompleteNoOp` twins are called when fade-in has completed
+and the pending flag is set, immediately before the runtime switches to
+state 3 and begins its fade-out updates. Neither native function reduces
+alpha or performs cleanup. The older DDS2 name and provenance described an
+alpha reduction that its body does not implement; the corrected name states
+the observed transition role while preserving the original naming credit.
