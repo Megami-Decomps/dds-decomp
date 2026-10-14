@@ -14,7 +14,7 @@ each hook is a Python breakpoint whose `stop()` returns False.
 
 Related tools: [`ee_gcc_probe.py` / `ee_gcc_observe.py`](compiler-live-observer.md)
 (QEMU, 35 verified hooks, allocation and early operand choices) and the
-[RTL diagnostics](compiler-diagnostics.md). cc1probe is the wider net (nine
+[RTL diagnostics](compiler-diagnostics.md). cc1probe is the wider net (compiler
 decision families, run under `gdb`); use whichever answers the question. The
 RTL dumps it keeps (`rtl.NN.*`) are the ordinary `-da` dumps.
 
@@ -47,6 +47,7 @@ tools/cc1probe.sh /tmp/candidate.c --as-unit src/dds1/game/code_001411F0.c \
 | `--ifcvt` | `noce_process_if_block` shapes, `noce_try_*` successes, `find_if_case_1/2`, `dead_or_predicable` hoists with the merged block's insns |
 | `--jump` | cross-jumping: `find_cross_jump` pairs and matched runs, `do_cross_jump` |
 | `--gcse` | PRE/cprop expression table, insert/delete verdicts, deletions and copies |
+| `--expand` | `get_inner_reference` input field chain (byte/bit offsets) and output size, bit position, variable offset, mode, alignment and containing object; runs before CSE/PRE |
 | `--reorg` | `estimate_probability` (the REG_BR_PROB note each conditional jump gets, with the rule that produced it: loop-exit 9001, pointer EQ/NE 3999/6001, opcode table, default 5000), then `mostly_true_jump` (shows the note value it read, or `none(fallback heuristics)`), `eligible_for_delay`, `fill_slots_from_thread`, `redundant_insn`, the simple and eager fill passes |
 | `--loops` | the R5900 short-loop nop padding |
 | `--all` | every mode |
@@ -134,6 +135,15 @@ says a later-pass change cannot.
 
 ## Reading notes
 
+- An indexed field's address can be split before PRE sees it. `--expand --gcse`
+  distinguishes that expansion from PRE's later hoisting. For example, DDS1
+  `mnuUpdatePartyPanelPercentDisplays` expands the HP span as `page + 20 +
+  (row*308 + 144)` and the MP span as `page + 8 + (row*308 + 240)`. The log
+  exposes each field's separate byte/bit offsets and `get_inner_reference`'s
+  resulting `bitpos` (in bits). PRE then sees two different invariant bases,
+  so loop reduction cannot express one span through the other's cursor.
+  This diagnoses the source requirement; it does not justify changing a proven
+  layout or adding an artificial access.
 - sched1 order, not final order, decides reload's spill-ring walk: `reload`
   allocates in the stream sched1 produced (sched2 runs afterwards), so a
   different temp register can be a sched1 tie.
