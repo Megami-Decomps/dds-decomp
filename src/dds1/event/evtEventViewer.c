@@ -2235,7 +2235,7 @@ extern void itfPanelSetPairFirst(s32,s16);
 extern void itfMesCleanupWindow(s32,s32);
 extern void itfMesResetWindow(s32);
 void evtViewerMarkWindowInactive(EvtRuntime *);
-void func_00230140(EvtRuntime *);
+void evtViewerUpdateWindowShadeFade(EvtRuntime *);
 
 void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     if (viewer->windowContext == 0) {
@@ -2258,7 +2258,7 @@ void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
         viewer->flags ^= 1;
         evtViewerDispatchFlagMode(viewer);
     }
-    func_00230140(viewer);
+    evtViewerUpdateWindowShadeFade(viewer);
 }
 
 
@@ -2293,7 +2293,7 @@ void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
     viewer->windowActive = 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_00230140);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateWindowShadeFade);
 
 s32 evtViewerTestIndexedCondition(u32 condition) {
     u32 index;

@@ -32,6 +32,7 @@ sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
 fldClassifyMovementAgainstZoneFaces = 0x00136FE8; // type:func
 btlCheckStatusActionEligibility = 0x001FCAC0; // type:func
+evtViewerUpdateWindowShadeFade = 0x00230140; // type:func
 sdfDevFindDiscFileRecordByCdromPath = 0x002E4FB0; // type:func
 sdfDisableDmacChannel = 0x0030B5D0; // type:func
 sdfEnableDmacChannel = 0x0030B638; // type:func
@@ -9335,7 +9336,6 @@ evtViewerPreGlyphTickHookNoOp = 0x0022F9F0; // type:func
 evtViewerFlag8ClearFrameHookNoOp = 0x0022FA60; // type:func
 evtEventViewerApplyPlaybackMode = 0x0022FB30; // type:func
 evtUpdateViewerMessageWindow = 0x0022FFC8; // type:func
-func_00230140 = 0x00230140; // type:func
 func_00230470 = 0x00230470; // type:func
 evtEventViewerOpenInputMenu = 0x00230478; // type:func
 evtViewerPushMode5CommandHistory = 0x00230A38; // type:func
