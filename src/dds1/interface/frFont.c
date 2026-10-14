@@ -1294,19 +1294,19 @@ void frFontAdvanceContextCursor(FrFontCtx *ctx) {
     ctx->pendingPosition = 1;
 }
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB160);
+s8 D_003BB160 __attribute__((section(".sdata"))) = 0;
 
-INCLUDE_SDATA(const s32, "interface/frFont", frFontContextCursorSpacing);
+u32 frFontContextCursorSpacing __attribute__((section(".sdata"))) = 21;
 
-INCLUDE_SDATA(const s32, "interface/frFont", frFontDefaultGlyphCellSize);
+s32 frFontDefaultGlyphCellSize __attribute__((section(".sdata"))) = 20;
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB16C);
+u32 D_003BB16C __attribute__((section(".sdata"))) = 0;
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_003BB170);
+u32 D_003BB170 __attribute__((section(".sdata"))) = 0;
 
-INCLUDE_SDATA(const s32, "interface/frFont", frFontSharedGlyphFlags);
+u8 frFontSharedGlyphFlags __attribute__((section(".sdata"))) = 0x16;
 
-INCLUDE_SDATA(const s32, "interface/frFont", frFontSharedRenderFlags);
+u32 frFontSharedRenderFlags __attribute__((section(".sdata"))) = 0x54;
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 
