@@ -139,7 +139,10 @@ extern FntList frFontResourceList;
 
 /* Decode encoded text into glyph nodes, optionally extending an existing chain. */
 #ifdef VERSION_DDS1
-struct FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex,
+/* DDS1 keeps the legacy placeholder spelling here: declaring the real name in
+ * this header perturbs vendor-cc1 symbol-name CSE hashing in
+ * field/fldFileResolver.c (fldQuerySelectedActorMotionState grows 8 bytes). */
+struct FrFontGlyph *func_001951C8(const char *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
 #endif
 #ifdef VERSION_DDS2
