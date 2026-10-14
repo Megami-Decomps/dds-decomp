@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_state6_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
@@ -3346,8 +3347,6 @@ s32 btlHasUnmarkedLinkageSkill(BtlUnit *unit) {
     }
     return count;
 }
-
-extern s32 btlGetTaskState6(void);
 
 s32 btlGetTaskState6(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);

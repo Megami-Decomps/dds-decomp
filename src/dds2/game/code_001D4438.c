@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_effect_active_api.h"
+#include "btl_task_state6_api.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "mnu_title_stream.h"
@@ -187,8 +188,6 @@ typedef struct SceneGlobalState {
 } SceneGlobalState;
 
 extern u8 *btlTrackedTaskHandles;
-extern s32 btlGetTaskState6();
-
 extern s32 D_00416BB8[];
 
 typedef struct BtlPanelInner {
