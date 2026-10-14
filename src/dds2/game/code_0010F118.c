@@ -42,7 +42,58 @@ u32 ptyScriptGetRosterStat(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010F118", dds3DrawWorldNodeTransformDiagnostic);
+extern char D_00435D70[];
+extern char D_00435D78[];
+extern char D_00435D80[];
+
+/* Each transform section owns its row coordinate; see docs/idioms.md,
+ * "Trace-justified diagnostic row coordinates". */
+s32 dds3DrawWorldNodeTransformDiagnostic(void *object, s32 x, s32 y, SdfListHead *list) {
+    EffWorldNode *node = object;
+    ObjectTransform *transform;
+    s32 labelX;
+    s32 valueX;
+    s32 positionY;
+    s32 rotationY;
+    s32 scaleY;
+    s32 lines;
+
+    x *= 12;
+    labelX = (x << 4) + 0x7000;
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(labelX,
+        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "ID    : 0x%05X", node->key));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(labelX,
+        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", node->value));
+    transform = node->inner;
+    lines = 2;
+    if (transform != NULL) {
+        y++;
+        positionY = (y * 6 << 4) + 0x7900;
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(labelX,
+            positionY, 0xFEFFFF, 0, D_00435D70));
+        valueX = ((x + 84) << 4) + 0x7000;
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(valueX,
+            positionY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f",
+            transform->position[0], transform->position[1], transform->position[2]));
+        y += 2;
+        rotationY = (y * 6 << 4) + 0x7900;
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(labelX,
+            rotationY, 0xFEFFFF, 0, D_00435D78));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(valueX,
+            rotationY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f %3.2f",
+            transform->rotation[0], transform->rotation[1],
+            transform->rotation[2], transform->rotation[3]));
+        y += 2;
+        scaleY = (y * 6 << 4) + 0x7900;
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(labelX,
+            scaleY, 0xFEFFFF, 0, D_00435D80));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(valueX,
+            scaleY, 0xFEFFFF, 0xE, "%3.1f %3.1f %3.1f",
+            transform->scale[0], transform->scale[1], transform->scale[2]));
+        lines = 8;
+    }
+    return lines;
+}
 
 extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
 
@@ -65,7 +116,6 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
 #include "dds3_world_primary.h"
 extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
 #include "sdf_packet_alloc.h"
-extern s32 dds3DrawWorldNodeTransformDiagnostic();
 extern SdfPoolNode D_00380708;
 extern s8 D_0037F543[];
 extern void dds3DrawWorldNodeChainDiagnosticPanel();
