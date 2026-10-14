@@ -4,6 +4,7 @@
 #include "common.h"
 #include "dat_state.h"
 #include "mnu_list.h"
+#include "prf_profile_cap.h"
 
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
@@ -34,8 +35,6 @@ extern const char D_004273F0[];
 extern DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *, s32);
 
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
-
-extern u32 ptyGetProfileRecordCap(u16);
 
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
