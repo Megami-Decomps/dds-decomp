@@ -515,7 +515,7 @@ typedef struct GridColorTargetTable {
 } GridColorTargetTable;
 
 /* Blend each saved corner color toward the table's target color. */
-s32 func_00307C30(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridColorTargetTable *table = (GridColorTargetTable *)owner->source->status;
     u32 *destColor = out->geometry.cornerColors;
     u32 *sourceColor = rectangle->savedColors;
