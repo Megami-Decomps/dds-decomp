@@ -19,6 +19,17 @@ void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 void itfMesFinishWindowAndClearStatus(s32 window);
 void evtLipsExecFunction(s32 id, s32 motion);
 
+struct ItfMesBlk40;
+struct ItfMesBlkA4;
+struct ItfMesTextSlots;
+
+/* Initialize the cursor state used by a newly reset message window. */
+void itfInitializeCursorResetState(struct ItfMesBlk40 *cursor);
+/* Release the window's three sprites and restore its default bounds/fade limit. */
+void itfResetWindowResourceBlock(struct ItfMesBlkA4 *block);
+/* Clear the 32 encoded-text address slots owned by a message window. */
+void itfClearDrawStateWords(struct ItfMesTextSlots *slots);
+
 struct SdfTex;
 struct SdfTex *itfMesGetWindowTexture(void);
 
