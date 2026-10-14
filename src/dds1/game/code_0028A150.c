@@ -1762,7 +1762,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     datGameState->header.partyLevels[5] = 0;
     datGameState->header.partyLevels[6] = 0;
     datGameState->header.partyLevels[7] = 0;
-    datGameState->header.unk20 = datGameState->header.currency;
+    datGameState->header.savedMoney = datGameState->header.currency;
     if (D_003BC824 != 0) {
         if (mdlFlagTest(0x74) != 0) {
             datGameState->header.unk24 |= 1;
@@ -2037,7 +2037,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].newCycle = datGameState->header.transition;
     memcpy(fileSavePreviewRecords[slot].party, datGameState->header.partyIds, 8);
     memcpy(fileSavePreviewRecords[slot].levels, datGameState->header.partyLevels, 8);
-    fileSavePreviewRecords[slot].money = datGameState->header.unk20;
+    fileSavePreviewRecords[slot].money = datGameState->header.savedMoney;
     fileSavePreviewRecords[slot].saveWords.words[0] = datGameState->header.unk24;
     fileSavePreviewRecords[slot].saveWords.words[1] = datGameState->header.unk28;
     fileSavePreviewRecords[slot].saveWords.words[2] = datGameState->header.unk2C;

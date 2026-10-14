@@ -3376,7 +3376,7 @@ extern char D_0042B938[];
 
 void fileSaveAndDisplayCurrentMoney(void) {
     DatGameState *state = datGameState;
-    u32 money = state->header.unk20;
+    u32 money = state->header.savedMoney;
     state->savedCurrency = money;
     sdfDebugPrintf(D_0042B938, money);
 }
@@ -3447,7 +3447,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
 void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
     DatGameState *state = datGameState;
 
-    state->header.unk20 = source->money;
+    state->header.savedMoney = source->money;
     state->header.unk24 = source->saveWords.words[0];
     state->header.unk28 = source->saveWords.words[1];
     state->header.unk2C = source->saveWords.words[2];

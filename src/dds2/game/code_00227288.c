@@ -204,7 +204,7 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
 
 /* With no unit, report phase 18/19 from the last eligible pair.
  * A qualifying first unit instead reports 15 when its inactive effect is ready. */
-s32 func_00227528(BtlUnit *unit) {
+s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleLinkedEffectState *effect = &battle->effect->linked;
     BtlUnit *node;
@@ -1542,19 +1542,19 @@ extern void mdlFlagClear(s32 flag);
 extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *, BtlOperandEntry *);
 extern s32 btlUpdateBrahmanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlUnitWrapB(BtlLinkedCommand *, BtlCamState *, s32);
-extern s32 func_002181E8(void);
+extern s32 btlFindReadyScriptResource(void);
 extern void func_0021A978(BtlUnit *, s32, s32, s32, s32, f32);
 extern void func_0021B828(ActionStateLink *);
 extern s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *, s32, s32);
 extern s32 func_0021E8C0(BtlLinkedCommand *);
-extern void func_0021F848(ActionStateLink *, BtlUnit *, u64, u64);
+extern void btlScheduleCherunShadowSkillPresentation(ActionStateLink *, BtlUnit *, u64, u64);
 extern void btlSetSpecialEnemyGeometry(void);
 extern s32 func_00223350(BtlLinkedCommand *, s32, s32);
 extern s32 func_002247D0(BtlLinkedCommand *, s32, s32);
 extern s32 btlUpdateSatanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 func_00225BF8(BtlLinkedCommand *, s32, s32);
-extern s32 func_00227528(BtlUnit *);
+extern s32 btlGetLinkedEffectPhase(BtlUnit *);
 extern void func_002279F0(void);
 extern void btlQueueLinkedPairModelSwapTasks(ActionStateLink *, s32, u64, u64, u64);
 
@@ -1594,7 +1594,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         if (mode == 0x302) {
             mdlFlagClear(0x804);
             battle->commandRestrictFlags |= 0x84000;
-            BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, func_002181E8);
+            BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, btlFindReadyScriptResource);
             BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlCheckPhaseOnePartyStatusGate);
         }
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlRestoreEnemyUnitWhenModelFlagSet);
@@ -1762,7 +1762,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlStartOtherMarkedUnitTasks);
         BTL_INSTALL_CALLBACK(battle->pad674, 0x4, btlIsNonCalamityAction);
         BTL_INSTALL_CALLBACK(battle->pad6C0, 0x4, btlMapActorMotionId);
-        BTL_INSTALL_CALLBACK(battle->pad694, 0x0, func_0021F848);
+        BTL_INSTALL_CALLBACK(battle->pad694, 0x0, btlScheduleCherunShadowSkillPresentation);
         BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSpecialMotion);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
         allocation = sdfAllocateBlockBySizeThreshold(0x8);
@@ -1971,7 +1971,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetEffectState);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlChooseLinkedPairMotion);
         BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsEffectPhaseInRange);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, func_00227528);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetLinkedEffectPhase);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlApplyRahuOperandEffects);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlCheckActiveEffectForSpecialTarget);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlUpdateLinkedEffectUnitTransforms);

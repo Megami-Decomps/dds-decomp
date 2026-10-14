@@ -17,6 +17,7 @@
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
 #include "evt_task.h"
+#include "evt_event_pack.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
@@ -103,7 +104,6 @@ extern u8 D_00421AC0[];
 
 extern void effObjSetFlags(void *object, s32 flags);
 
-extern void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key);
 extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
 extern EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);

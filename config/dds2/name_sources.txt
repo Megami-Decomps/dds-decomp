@@ -1083,7 +1083,7 @@
 0x0015A3F0	effReadBillboardModeValues	inferred	confidence=high; matched-C; src/dds2/game/code_00159B48.c:547:func_0015A3F0; For kind-one billboard, writes output mode and one/two parameter-derived values selected by billboard flags.; twin=0x00152800, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0015AA30	effDrawGeneratedTextureQuad	inferred	Allocates primary texture-state and quad geometry packets from texture dimensions, scales and optional angle; DDS1 counterpart00152E40.
 0x0015ACB0	effSubmitGeneratedTexturePacket	inferred	confidence=high; matched-C; src/dds2/game/code_00159B48.c:571:func_0015ACB0; Allocates a packet list, builds its textured GS payload using source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:6 [names_qp12_apply.tsv]
-0x0015AD18	effDrawCompositeTextureQuad	inferred	Builds test/blend and texture-state packets for both GS contexts, emits the positioned two-texture quad, and restores frame/test/blend state.
+0x0015AD18	effDrawCompositeTextureQuad	inferred	Builds test/blend and texture-state packets for both GS contexts, emits the positioned two-texture quad through sdfBuildTwoTextureQuadVifPacket, and restores frame/test/blend state.
 0x0015B208	effSubmitCompositeGsPacket	inferred	confidence=high; matched-C; src/dds2/game/code_00159B48.c:581:func_0015B208; Allocates a packet list, builds a composite GS payload from source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:7 [names_qp12_apply.tsv]
 0x0015B318	effReleaseBufferAllocation	inferred	Releases allocation handle stored in buffer allocation slot [names_reviewed6.tsv]
 0x0015B5C0	effSetTemplateTagPeriod	inferred	Initializes each packet tag and decrements it at template tail period boundaries.
@@ -3030,7 +3030,8 @@
 0x00209DD8	btlScriptSelectModeDValueOne	inferred	Twin of dds1 0x001F8388; Writes commandMode 0xD and commandValue 1. [names_R_FuncNames3.tsv]
 0x00209E08	btlCmdSetContextFlagOne	inferred	DDS1 func_001F8508 twin; ORs flag one in command context [names_R_FuncNames.tsv]
 0x00209E38	btlScriptSelectModeAValueOne	inferred	Twin of dds1 0x001F83B8; Writes commandMode 10 and commandValue 1. [names_R_FuncNames3.tsv]
-0x00209E68	btlScriptSelectActionEntry	inferred	reads a script parameter, probes action table via btlHasRequiredCommandAffinityPartners/func_001ACD10 and sets command mode 1/2/3 [names_M36_SmallSweep5.tsv]
+0x00209E68	btlScriptSelectActionEntry	inferred	Reads a script parameter, probes action eligibility with btlHasRequiredCommandAffinityPartners, resolves partner units through btlResolveCommandAffinityPartners, then sets command mode 1/2/3.
+0x001ACD10	btlResolveCommandAffinityPartners	inferred	Validates an affinity command and its required partner count, then fills the probe output from affinity lookup or eligible scene-group partners. Called by btlScriptSelectActionEntry before it stores the selected command probe; matches the DDS1 resolver at 0x001A3CE0.
 0x00209F28	btlScriptSelectByKind	inferred	command mode 2, kind 0x196 substitutes btlChoosePartyMemberShadowId() [names_M36_SmallSweep5.tsv]
 0x00209FA0	btlScriptSelectWeightedEntry	inferred	calls btlPickWeightedEntry on the script parameter [names_M36_SmallSweep5.tsv]
 0x00209FF8	btlScriptSelectDirect	inferred	command mode 5 with the raw script parameter [names_M36_SmallSweep5.tsv]
@@ -3902,7 +3903,8 @@
 0x00254678	evtDrawGroupPropertyTable	inferred	U3
 0x00254F80	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state; DDS1 twin. [names_qp9.tsv]
 0x00255360	evtDrawGroupListRow	inferred	DDS1 twin 0x0023A4B0 [names_M95_Event.tsv]
-0x002560B0	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds2/game/code_00250010.c:2565; Paired implementation draws and handles X/Y slot-vector edits through evtSetSlotVector and restores saved values on cancel. DDS1 twin 0x0023B200.
+0x002560B0	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds2/game/code_00250010.c:2565; Paired implementation draws and handles X/Y slot-vector edits through evtSetSlotVector, uses evtNoOpXYSlotVectorEditorRow for the frame's blank row, and restores saved values on cancel. DDS1 twin 0x0023B200.
+0x002560A8	evtNoOpXYSlotVectorEditorRow	inferred	Empty row callback passed to evtDrawMenuFrame by evtDrawAndHandleXYSlotVectorEditor; the editor draws its values directly. DDS1 twin at 0x0023B1F8.
 0x002566F8	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
 0x002569D0	evtViewerDrawGroupWindow	inferred	Light1d2
 0x002570B8	evtPollRuntimeControlReady	inferred	Returns negative and clears runtime control state if external control poll is false. [names_reviewed7.tsv]
@@ -8146,6 +8148,7 @@
 0x0033A5C0	sdfConsSetDefaultSecondReference	inferred	Store the second model DMA-reference fallback; native sdfModel copies it to SdfListHead.secondReferenceSource, and the frame caller supplies a frustum packet. DDS1 twin 0x002E1710. [Namer1 batch 38, high]
 0x0033AC10	sdfConsCreatePowerLookupTexture	inferred	Acquire a128x64 indexed texture with grayscale CLUT and rounded255*(x/127)^row samples, then release its temporary image; resource-queue initialization calls it. DDS1 twin 0x002E1D60. [Namer1 batch 38, high]
 0x0033B050	sdfBuildPrimitiveAttributeVifPacket	inferred	Serialize requested position, optional normal, UV, second-UV and vertex-color streams with strip data and primitive microprogram dispatch into an aligned packet. Triangle/quad/cylinder callers establish primitive usage. DDS1 twin 0x002E21A0. [Namer1 batch 38, high]
+0x0033B8B0	sdfBuildTwoTextureQuadVifPacket	inferred	Builds a one-vertex VIF packet for a two-texture quad from position, two colors, paired UV corners and eight quad coordinates; effDrawCompositeTextureQuad allocates and appends it. DDS1 twin 0x002E2A00.
 0x0033BA68	sdfBuildPairedQuadVifPacket	inferred	Build10-register quad payload from center positions, two child colors and paired UV sets plus four-corner offsets supplied by billFlushPairedQuadStreams. DDS1 twin 0x002E2BB8. [Namer1 batch 38, high]
 0x0033BE18	sdfBuildVertexColorQuadVifPacket	inferred	Build13-register quad payload with four per-corner RGBA values, UV pairs and XY offset pairs; preserve native allocation formula and byte/count reuse, without asserting Gouraud shading. DDS1 twin 0x002E2F68. [Namer1 batch 38, high]
 0x0033CBE8	sdfDevConsGetGlyphUvTable	inferred	Return the96-entry packed glyph-UV table indexed by character-0x20 in sdfDevConsDrawGlyphGrid. DDS1 twin 0x002E3D38. [Namer1 batch 38, high]
@@ -9007,3 +9010,7 @@
 0x002E9E98	effDrawSurfaceTrailHistory	inferred	Skips transparent/incomplete trails; draws wrapped point/color ring-buffer slices as triangle strips, appends the fixed end cap and submits it. Called by func_002E8770. Paired DDS1 implementation is 0x002A78E0.
 0x00132540	fldUpdateFieldPlayerMovement	inferred	Per-frame player movement processor: gates updates on field transitions/damage/control, maps directional input and guide coordinates into target heading and position, advances motion, and refreshes field coordinates. The active camera-frame routine dispatches it only under scene-control flag 0x40. Paired DDS1 provider is 0x0012FF48.
 0x001B7830	btlSetEligibleActorPanelTransitionState	inferred	If the actor-panel task exists, counts eligible linked actors and marks each eligible active entry's transitionState as 4; returns 0 when the task is absent and 1 after the walk. Called from the scene scheduler and battle actor update path. DDS1 twin 0x001ACC20.
+0x001696B8	effGetActorScaleForParameterWork	inferred	DDS1 twin at 0x00161A88; returns the owner unit effect scale for the mixer parameter-work scale callback by calling effBTLFieldColorGetActorScale.
+0x00227528	btlGetLinkedEffectPhase	inferred	DDS1 twin at 0x00206180; with no unit, returns phase 18 or 19 from the active eligible linked pair; with its first actor, returns phase 15 only when the effect is inactive and owned.
+0x002181E8	btlFindReadyScriptResource	inferred	Mode 0x302 selectScriptState callback waits for an active event task, script handle, battle flag 0x800 and eventReady 6 before looking up the primary script resource; registered by btlInitializeBossCallbacks. [DDS2 source body and callback registration, 2026-10-14]
+0x0021F848	btlScheduleCherunShadowSkillPresentation	inferred	Mode 0x30E pad694 callback gated on the active actor using skill 0x196; schedules unit-facing/defeat and sound tasks, then starts the selected timed CHERUN camera pair. CHERUN shadow diagnostics and the party-derived shadow-skill path identify the action context. [DDS2 source body, mode registration, and paired shadow-skill caller evidence, 2026-10-14]

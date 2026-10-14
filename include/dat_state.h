@@ -20,7 +20,7 @@ typedef struct DatStateHeader {
     s16 transition;
     s8 partyIds[8];
     s8 partyLevels[8];
-    u32 unk20;
+    u32 savedMoney; /* 0x20: save-slot money copied to and from the live currency. */
     u32 unk24;
     u32 unk28;
     u32 unk2C;
@@ -29,6 +29,8 @@ typedef struct DatStateHeader {
     u32 secondTick;
     s32 currency;
 } DatStateHeader;
+typedef char DatStateHeaderSavedMoneyOffsetCheck[
+    ((u32)&((DatStateHeader *)0)->savedMoney == 0x20) ? 1 : -1];
 
 /* Shared script storage begins at +0x40; +0x388 is integer register 210. */
 typedef struct DatScriptGlobals {

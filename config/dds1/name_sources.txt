@@ -996,7 +996,7 @@
 0x0012E9D0	fldResetCameraModelHandles	inferred	Clears camera model handle state and marks current object handle invalid. [names_R_FuncNames6.tsv]
 0x0012E9E8	fldReleaseCameraModel	inferred	Conditionally releases current camera model resource and clears its handle. [names_R_FuncNames6.tsv]
 0x0012F4B8	fldUpdateCameraTarget	inferred	copies D_0032E3B0 camera vectors and pushes them to the field effect object
-0x00131098	fldUpdateCameraFrame	inferred	Per-frame field camera update dispatch; twin of D2 0x00133840 [names_M53_Field.tsv]
+0x00131098	fldUpdateCameraFrame	inferred	Per-frame field camera update dispatch; applies pending vertical field steps through fldApplyPlayerVerticalStep on the non-movement path and updates camera/player movement on the scene-control path; DDS2 twin at 0x00133840.
 0x001311A0	fldHasPendingSceneFlags	inferred	Returns true if any of three adjacent field scene-state words is nonzero. [names_reviewed5.tsv]
 0x001311D8	fldEnableCameraObjectFlag	inferred	Sets bit 1 on camera object then resets camera node setting. [names_R_FuncNames6.tsv]
 0x001311F8	fldDisableCameraObjectFlag	inferred	Clears bit 1 on camera object. [names_R_FuncNames6.tsv]
@@ -1339,7 +1339,7 @@
 0x00152800	effReadBillboardModeValues	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:514:func_00152800; For kind-one billboard, writes output mode and one/two parameter-derived values selected by billboard flags.; twin=0x0015A3F0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00152E40	effDrawGeneratedTextureQuad	inferred	Allocates primary texture-state and quad geometry packets from texture dimensions, scales and optional angle.
 0x001530C0	effSubmitGeneratedTexturePacket	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:533:func_001530C0; Allocates a packet list, builds its textured GS payload using source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:7 [names_qp12_apply.tsv]
-0x00153128	effDrawCompositeTextureQuad	inferred	Builds test/blend and texture-state packets for both GS contexts, emits the positioned two-texture quad, and restores frame/test/blend state.
+0x00153128	effDrawCompositeTextureQuad	inferred	Builds test/blend and texture-state packets for both GS contexts, emits the positioned two-texture quad through sdfBuildTwoTextureQuadVifPacket, and restores frame/test/blend state.
 0x00153618	effSubmitCompositeGsPacket	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:543:func_00153618; Allocates a packet list, builds a composite GS payload from source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:8 [names_qp12_apply.tsv]
 0x001536A8	effAllocateBuffer	inferred	eff effect resources and animation in game/code_00151F58.c
 0x00153728	effReleaseBufferAllocation	inferred	Releases allocation handle stored in buffer allocation slot [names_reviewed6.tsv]
@@ -4371,7 +4371,8 @@
 0x00239DE0	mnuDrawMotionChangeLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
 0x0023A0D0	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state. [names_qp9.tsv]
 0x0023A4B0	evtDrawGroupListRow	evidence	strings "DISABLE"/"ALL"/"UNIT ALL" then the type-1 group names [names_M95_Event.tsv]
-0x0023B200	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds1/game/code_00235270.c:2449; Draws and handles the X/Y slot-vector editor, applies .1/.01 edits through evtSetSlotVector, and restores saved values on cancel. DDS2 twin 0x002560B0.
+0x0023B200	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds1/game/code_00235270.c:2449; Draws and handles the X/Y slot-vector editor, uses evtNoOpXYSlotVectorEditorRow for the frame's blank row, applies .1/.01 edits through evtSetSlotVector, and restores saved values on cancel. DDS2 twin 0x002560B0.
+0x0023B1F8	evtNoOpXYSlotVectorEditorRow	inferred	Empty row callback passed to evtDrawMenuFrame by evtDrawAndHandleXYSlotVectorEditor; the editor draws its values directly. DDS2 twin at 0x002560A8.
 0x0023B848	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
 0x0023B8F8	mnuDrawTimedPrompt	inferred	Window builder with a countdown at work+0x23E4 and confirm/cancel from the pad state
 0x0023B9D8	evtSetRuntimeCommandValues	inferred	Stores the three supplied values in successive runtime command fields at offsets 0x23E4, 0x23E8 and 0x23EC.
@@ -8603,6 +8604,7 @@
 0x002E1710	sdfConsSetDefaultSecondReference	inferred	Store the second model DMA-reference fallback; native sdfModel copies it to SdfListHead.secondReferenceSource, and the frame caller supplies a frustum packet. DDS2 twin 0x0033A5C0. [Namer1 batch 38, high]
 0x002E1D60	sdfConsCreatePowerLookupTexture	inferred	Acquire a128x64 indexed texture with grayscale CLUT and rounded255*(x/127)^row samples, then release its temporary image; resource-queue initialization calls it. DDS2 twin 0x0033AC10. [Namer1 batch 38, high]
 0x002E21A0	sdfBuildPrimitiveAttributeVifPacket	inferred	Serialize requested position, optional normal, UV, second-UV and vertex-color streams with strip data and primitive microprogram dispatch into an aligned packet. Triangle/quad/cylinder callers establish primitive usage. DDS2 twin 0x0033B050. [Namer1 batch 38, high]
+0x002E2A00	sdfBuildTwoTextureQuadVifPacket	inferred	Builds a one-vertex VIF packet for a two-texture quad from position, two colors, paired UV corners and eight quad coordinates; effDrawCompositeTextureQuad allocates and appends it. DDS2 twin 0x0033B8B0.
 0x002E2BB8	sdfBuildPairedQuadVifPacket	inferred	Build10-register quad payload from center positions, two child colors and paired UV sets plus four-corner offsets supplied by billFlushPairedQuadStreams. DDS2 twin 0x0033BA68. [Namer1 batch 38, high]
 0x002E2F40	sdfMeasureAlignedRecordStorage	inferred	Native(count*0x4c+0x4bU)&0xfffffff0 matches the already-named DDS2 storage query at0x0033BDF0; preserve DDS1 u32 and DDS2 s32 return types. Previously absent native symbol row added with Main approval. [Namer1 batch 38, high]
 0x002E2F68	sdfBuildVertexColorQuadVifPacket	inferred	Build13-register quad payload with four per-corner RGBA values, UV pairs and XY offset pairs; preserve native allocation formula and byte/count reuse, without asserting Gouraud shading. DDS2 twin 0x0033BE18. [Namer1 batch 38, high]
@@ -9096,3 +9098,7 @@
 0x001A8188	btlResolveBattleTerminalOutcome	inferred	Applies the optional battle-outcome override or classifies defeat, escape, all-party-stoned and no-enemy outcomes into eventReady; returns 1 when terminal. The scene-group scheduler calls it before dispatching another task. DDS2 twin 0x001B2630.
 0x002A78E0	effDrawSurfaceTrailHistory	inferred	Skips transparent/incomplete trails; draws wrapped point/color ring-buffer slices as triangle strips, appends the fixed end cap and submits it. Called by func_002A6440. Paired DDS2 implementation is 0x002E9E98.
 0x0012FF48	fldUpdateFieldPlayerMovement	inferred	Per-frame player movement processor: gates updates on field transitions/damage/control, maps directional input into target heading and position, advances motion, and refreshes field coordinates. The active camera-frame routine dispatches it only under scene-control flag 0x40. Paired DDS2 provider is 0x00132540.
+0x00161A88	effGetActorScaleForParameterWork	inferred	Paired DDS1/DDS2 wrapper returns the owner unit effect scale for the mixer parameter-work scale callback by calling effBTLFieldColorGetActorScale.
+0x00206180	btlGetLinkedEffectPhase	inferred	With no unit, returns phase 18 or 19 from the active eligible linked pair; with its first actor, returns phase 15 only when the effect is inactive and owned. DDS2 twin at 0x00227528.
+0x0012FC20	fldApplyPlayerVerticalStep	inferred	Applies a pending signed verticalStepDirection by saving prior XYZ, shifting player Y by two units in the opposite direction, then clearing camera transition and highlight flags. Called by fldUpdateCameraFrame; DDS2 twin at 0x001321F8.
+0x001C27B0	btlDrawActorSlotOrderSecondarySprite	inferred	Draws a bank-selected secondary slot-order sprite: adjusts its four corner colors, applies and rereads its scale-dependent offsets, submits the sprite, then rescales the scene coordinate record. btlDrawActorSlotOrder calls variants 0 and 1 for slot states 4, 5 and 6. Matching DDS2 body at 0x001CDD38. [DDS1 source body/caller; paired DDS2 implementation, 2026-10-14]

@@ -92,7 +92,7 @@ f32 effBTLFieldColorGetActorScale(BtlUnit *unit) {
     return radius;
 }
 
-f32 func_00161A88(BtlUnit *unit) {
+f32 effGetActorScaleForParameterWork(BtlUnit *unit) {
     return effBTLFieldColorGetActorScale(unit);
 }
 

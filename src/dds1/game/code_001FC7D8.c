@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "btl_command_effect.h"
 #include "btl_ai_slot.h"
+#include "btl_ai_scratch.h"
 #include "dds3obj.h"
 #include "btl_resource_name.h"
 #include "sdf_chip.h"
@@ -27,7 +28,7 @@ extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s8 btlHistoryCounter;
-extern s32 btlActionScratchWork;
+extern BtlAiScratchWork *btlActionScratchWork;
 extern s32 btlIsLowHpActionReady(s32, s32);
 
 extern u32 btlRandomState;
@@ -1085,11 +1086,11 @@ s32 btlRandomInclusiveRange(s32 a0, s32 a1) {
 }
 
 s32 btlAllocAndCheck(s32 object) {
-    void *allocation = sdfAllocAndClearQuadwords(0x10);
+    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     s32 actor = (s32)((BtlTask *)object)->unit;
 
-    btlActionScratchWork = (s32)allocation;
-    *(s32 *)allocation = object;
+    btlActionScratchWork = work;
+    work->actor = (BtlTask *)object;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
         sdfReleaseChipBlock((void *)btlActionScratchWork);
         return 1;
@@ -1136,12 +1137,12 @@ void btlClearNodeFlags(void) {
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
-    s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
+    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     s32 result;
 
-    btlActionScratchWork = (s32)work;
-    work[1] = owner->partyRecord.unitId;
-    work[0] = context;
+    btlActionScratchWork = work;
+    work->speciesId = owner->partyRecord.unitId;
+    work->actor = (BtlTask *)context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
     sdfReleaseChipBlock((void *)btlActionScratchWork);
     return result;
@@ -1165,17 +1166,17 @@ extern s32 btlRunAiAction();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
 s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
-    s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
+    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     BtlUnit *unit;
     u16 species;
     s32 row;
     s32 index;
 
     unit = task->unit;
-    btlActionScratchWork = (s32)work;
+    btlActionScratchWork = work;
     species = unit->partyRecord.unitId;
-    work[0] = (s32)task;
-    work[1] = species;
+    work->actor = task;
+    work->speciesId = species;
     btlSelectTierMatrixAiRoute(unit, species, &row, 0);
     index = btlPickWeightedAiSlot(unit, species, row);
     btlRunAiAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,

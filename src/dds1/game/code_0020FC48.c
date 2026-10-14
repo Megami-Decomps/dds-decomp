@@ -2226,7 +2226,6 @@ extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
-extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
 extern s32 btlCountTasksForOwner(s64);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 /* Keep the diagnostic scale as a float in the existing four-argument ABI. */

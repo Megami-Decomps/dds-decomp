@@ -123,10 +123,20 @@ void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad
 
 /* Each effect scene object owns a billboard and an asset reference. */
 typedef struct EffUnitObject {
-    u8 matrix[0x80];
+    f32 localMatrix[4][4]; /* 0x00: VU0 matrix initialized on clone. */
+    f32 transform[4][4]; /* 0x40: VU0 matrix copied by effCopyMatrixToNext. */
     BillObj *billboard; /* 0x80: scene-owned billboard */
     void *resource; /* 0x84 */
 } EffUnitObject;
+typedef char EffUnitObject_size_check[(sizeof(EffUnitObject) == EFF_INSTANCE_BYTES) ? 1 : -1];
+typedef char EffUnitObject_localMatrix_offset_check[
+    ((u32)&((EffUnitObject *)0)->localMatrix == 0) ? 1 : -1];
+typedef char EffUnitObject_transform_offset_check[
+    ((u32)&((EffUnitObject *)0)->transform == EFF_MATRIX_BYTES) ? 1 : -1];
+typedef char EffUnitObject_billboard_offset_check[
+    ((u32)&((EffUnitObject *)0)->billboard == 0x80) ? 1 : -1];
+typedef char EffUnitObject_resource_offset_check[
+    ((u32)&((EffUnitObject *)0)->resource == 0x84) ? 1 : -1];
 
 /* Narrow mode for the child kinds, or update each resolved animation entry. */
 void billSetBillboardMode(BillObj *effect, s32 mode) {
@@ -391,29 +401,29 @@ f32 effCalcViewAxisWidthFactor(void *self, f32 *axis) {
 
 /* Create the indexed billboard and render asset; only the second matrix is initialized. */
 u8 *billCreateUnitObject(s32 entryIndex) {
-    u8 *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
+    EffUnitObject *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    ((EffUnitObject *)instance)->billboard = billCreateIndexed(1, entryIndex);
-    ((EffUnitObject *)instance)->resource = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(((EffUnitObject *)instance)->resource, 1.0f);
-    EE_MMI_UNIT_MATRIX(instance + EFF_MATRIX_BYTES);
-    return instance;
+    instance->billboard = billCreateIndexed(1, entryIndex);
+    instance->resource = sdfCreateAssetWithDrawEntries();
+    sdfSetPrimaryStateFloat(instance->resource, 1.0f);
+    EE_MMI_UNIT_MATRIX(instance->transform);
+    return (u8 *)instance;
 }
 
 /* Retain a cloned billboard's shared data, create a fresh render asset, and reset both matrices. */
 u8 *billCloneUnitObject(u8 *source) {
-    u8 *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
+    EffUnitObject *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    ((EffUnitObject *)instance)->billboard = billCloneObjectRetainingSharedData(
+    instance->billboard = billCloneObjectRetainingSharedData(
         ((EffUnitObject *)source)->billboard);
-    ((EffUnitObject *)instance)->resource = sdfCreateAssetWithDrawEntries();
-    sdfSetPrimaryStateFloat(((EffUnitObject *)instance)->resource, 1.0f);
-    sdfSetPrimaryStateWordSecond(((EffUnitObject *)instance)->resource, 0x80808080);
-    sdfSetPrimaryStateWordFirst(((EffUnitObject *)instance)->resource, 0x80808080);
-    sdfSetPrimaryStateWordThird(((EffUnitObject *)instance)->resource, 0x80808080);
-    EE_MMI_UNIT_MATRIX(instance + EFF_MATRIX_BYTES);
-    EE_MMI_UNIT_MATRIX(instance);
-    return instance;
+    instance->resource = sdfCreateAssetWithDrawEntries();
+    sdfSetPrimaryStateFloat(instance->resource, 1.0f);
+    sdfSetPrimaryStateWordSecond(instance->resource, 0x80808080);
+    sdfSetPrimaryStateWordFirst(instance->resource, 0x80808080);
+    sdfSetPrimaryStateWordThird(instance->resource, 0x80808080);
+    EE_MMI_UNIT_MATRIX(instance->transform);
+    EE_MMI_UNIT_MATRIX(instance->localMatrix);
+    return (u8 *)instance;
 }
 
 void effDestroy(u32 instance) {
@@ -433,8 +443,7 @@ void billSetChildScale2(s32 instance, float scale) {
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
 void effCopyMatrixToNext(u8 *instanceBytes, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
-    instanceBytes += EFF_MATRIX_BYTES;
-    VU0_STORE_MATRIX(instanceBytes);
+    VU0_STORE_MATRIX(((EffUnitObject *)instanceBytes)->transform);
 }
 
 void billSetChildValue(s32 instance, u32 value) {
@@ -584,7 +593,7 @@ typedef char EffCompositeGsDescriptor_size_must_be_0x68[
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
-extern void func_002E2A00(u8 *, const f32 *, u32, u32,
+extern void sdfBuildTwoTextureQuadVifPacket(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
 void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *source) {
@@ -706,7 +715,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     }
 
     geometry = (u8 *)sdfAllocPacketAligned(0x90);
-    func_002E2A00((u8 *)geometry, source->position, source->color, source->color,
+    sdfBuildTwoTextureQuadVifPacket((u8 *)geometry, source->position, source->color, source->color,
                   &source->primaryUv, &source->secondaryUv, &corners[0][0]);
     sdfAppendPacket(list, (u32)geometry);
 

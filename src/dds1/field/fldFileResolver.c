@@ -448,7 +448,7 @@ extern void fldSpawnActionObjects(FldActionSpawn *, u32);
 extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
 extern void fldSetCameraObjectHighlightFlag(void);
-extern s32 func_0012FC20(void);
+extern s32 fldApplyPlayerVerticalStep(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);
 extern s32 fldUpdateFieldPlayerMovement(void);
@@ -4111,7 +4111,7 @@ void fldUpdateModeOneCameraPose(void) {
  * Each branch-local SDK snapshot dominates all of its scalar reads; there is
  * no earlier scratch read or loop-carried value. The finite qualification
  * and memory-contract limitation are documented in docs/idioms.md. */
-s32 func_0012FC20(void) {
+s32 fldApplyPlayerVerticalStep(void) {
     f32 position[4] __attribute__((aligned(16)));
     if (fldAreaState.verticalStepDirection > 0) {
         effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
@@ -4697,7 +4697,7 @@ s32 fldUpdateCameraFrame(void) {
         if (fldAreaState.mode == 1 || fldAreaState.mode == 3) {
             fldClearCameraObjectHighlightFlag();
         }
-        func_0012FC20();
+        fldApplyPlayerVerticalStep();
         fldUpdateCameraTarget();
         fldUpdateModeOneCameraPose();
         node = fldPlayerModelContext->current.h.motionIndex;

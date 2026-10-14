@@ -2403,7 +2403,8 @@ void evtRotateViewerPositionFromPad(f32 *position)
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023A968);
 
-void func_0023B1F8(void) {
+/* The editor draws its own fields; the menu frame's row callback stays blank. */
+void evtNoOpXYSlotVectorEditorRow(void) {
 }
 
 /* This coordinate table is supplied by the ordinary data segment. */
@@ -2430,7 +2431,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
     group = runtime->frameGroup;
     list = sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x + runtime->horizontalOffset + 0x60, y,
-                     0xF, 6, 0, 1, (u8 *)runtime, NULL, func_0023B1F8);
+                     0xF, 6, 0, 1, (u8 *)runtime, NULL, evtNoOpXYSlotVectorEditorRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                      list);
 

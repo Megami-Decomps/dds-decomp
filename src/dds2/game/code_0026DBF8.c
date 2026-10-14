@@ -298,6 +298,8 @@ typedef struct MantraFadeState {
     /* 0x1E */ u16 delay;
     /* 0x20 */ u32 queuedFlags;
 } MantraFadeState;
+typedef char MantraFadeState_size_must_be_0x24[
+    (sizeof(MantraFadeState) == 0x24) ? 1 : -1];
 
 /* Background transition/fade data plus the separate burst-pool reference.
  * The transition word packs variant nibbles followed by a signed delay byte. */
@@ -1560,12 +1562,12 @@ void mnuQueueMantraLimitLineFlags(MantraDrawPool *pool, u32 flags) {
 
 u32 mnuCreateMantraLimitLineFadeData(u32 pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind((MantraDrawPool *)pool, 1);
-    u8 *work = sdfAllocSizeClassBlock(0x24);
+    MantraFadeState *work = sdfAllocSizeClassBlock(sizeof(*work));
 
-    memset(work, 0, 0x24);
-    *(u16 *)(work + 2) = 0;
-    *(u16 *)work = (item->flags >> 12) & 0xFF;
-    *(u32 *)(work + 0x18) = 0;
+    memset(work, 0, sizeof(*work));
+    work->timer = 0;
+    work->state = (item->flags >> 12) & 0xFF;
+    work->clock = 0;
     return (u32)work;
 }
 

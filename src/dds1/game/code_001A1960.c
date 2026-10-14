@@ -1955,13 +1955,7 @@ u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index) {
     return 12;
 }
 
-typedef struct BtlActionDelayRecord {
-    u8 pad00;
-    u8 delayIndex;
-    u8 pad02[0x1E];
-} BtlActionDelayRecord;
-
-extern s32 datActionAnimationRecords;
+extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern s32 D_00358490[];
 
@@ -1983,7 +1977,7 @@ s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId) {
     }
     delayTable = D_00358490;
     delayTable++;
-    delayIndex = ((BtlActionDelayRecord *)datActionAnimationRecords)[actionId].delayIndex;
+    delayIndex = datActionAnimationRecords[actionId].delayIndex;
     delay = delayTable + delayIndex * 2;
     btlBossDebugPrintf(D_003A1A58, *delay);
     return *delay;
@@ -2034,7 +2028,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
         datCommandSelectors[actionId].kind == 5) {
         mode = unit->partyRecord.unitId == 6 ? 2 : 0;
     } else {
-        u32 delayIndex = ((BtlActionAnimationRecord *)datActionAnimationRecords)[actionId].delayIndex;
+        u32 delayIndex = datActionAnimationRecords[actionId].delayIndex;
         mode = ((BtlAnimationModeRow *)D_00358490)[delayIndex].mode;
     }
     switch (mode) {

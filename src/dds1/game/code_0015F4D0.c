@@ -608,7 +608,7 @@ void sndUnlinkVoice(BattleEffect *voice) {
     }
 }
 
-extern f32 func_00161A88(struct BtlUnit *unit);
+extern f32 effGetActorScaleForParameterWork(struct BtlUnit *unit);
 
 /* Create a voice on the mixer bank selected by kind (0/1: first bank, 2+:
  * second): link it into the mixer, duplicate each parameter row's work (with
@@ -662,7 +662,7 @@ BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value)
                 *workSlot = effParamWorkDuplicate(entry->value.work);
                 if (callbackEnabled != 0 && owner != NULL &&
                     (entry->aimParams.scaleKind == 0 || entry->aimParams.scaleKind == 4)) {
-                    f32 scale = func_00161A88((struct BtlUnit *)effect->owner);
+                    f32 scale = effGetActorScaleForParameterWork((struct BtlUnit *)effect->owner);
                     effParamWorkCallback1(*workSlot, scale);
                 }
             } else {
