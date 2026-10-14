@@ -3000,6 +3000,7 @@
 0x001C7E90	btlMoveTaskToGroupTail	inferred	twin 0x001D39C8: compacts the group array and places task at the end
 0x001C8000	fldAppendTaskToGroup	inferred	appends task to its group then resorts primary group
 0x001C80C8	fldUpdateSceneGroupTask	inferred	Checks actor-scene group resource, updates scene flags and dispatches group task conditionally; established DDS2 twin agrees. [names_reviewed19.tsv]
+0x001C7690	fldBuildSceneSlotsFromActorTasks	inferred	Called by fldInitializeSceneGroups after group sorting. Selects eligible active tasks from the variant-specific actor group, writes each task group ID into its action-count scene slots, clears unused slots and initializes scene fade records.
 0x001C8198	btlRemoveTaskFromSceneGroup	inferred	twin 0x001D3D40: removes task from its group and shifts the tail
 0x001C8330	fldAdvanceSceneGroupScheduler	inferred	Equivalent to DDS2 0x001D3ED8: once per active battle frame, waits on scene/task blockers, invokes the completion hook, dispatches the next eligible front-group task or marks scene slots finished. The DDS1 main-loop caller invokes it after scene update.
 0x001C8578	fldDispatchSceneGroupRequestWhenAllowed	inferred	Scene-group action installs this callback, which skips requests blocked by owner flag. [names_reviewed11.tsv]

@@ -1374,7 +1374,7 @@ s32 fldGetSceneGroupIndexByActorFlags(BtlTask *task) {
 }
 
 /* Retail fills thirteen task pointers at sp+0..0x30, then repeats each action number into scene slots. */
-void func_001C7690(void) {
+void fldBuildSceneSlotsFromActorTasks(void) {
     BtlTask *selected[13];
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     BtlTask *task;
@@ -1604,7 +1604,7 @@ void fldInitializeSceneGroups(void) {
     fldSortGroupByPriority(((BattleSceneWork *)scene)->groupPrimary, FLD_SCENE_PRIMARY_TASK_COUNT);
     btlSortSceneGroupByPriorityDesc(((BattleSceneWork *)scene)->groupSecondary, FLD_SCENE_SECONDARY_TASK_COUNT);
     btlSortSceneGroupByPriorityDesc(((BattleSceneWork *)scene)->groupTertiary, FLD_SCENE_TERTIARY_TASK_COUNT);
-    func_001C7690();
+    fldBuildSceneSlotsFromActorTasks();
 }
 
 /* Move a member behind its occupied successors; native membership/bounds are unchecked. */
