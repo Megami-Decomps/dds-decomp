@@ -275,7 +275,7 @@ s32 func_0020AB08(DatPartyRecord *, s32);
 s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 void btlUpdateBossUnitScaleTransition(void);
 s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *, s32, s32);
-s32 func_0020DE50(BtlLinkedCommand *, BtlCamState *, s32);
+s32 btlDefeatCameraHookPresetB(BtlLinkedCommand *, BtlCamState *, s32);
 
 extern u32 kwlnDrawControlFlags;
 
@@ -557,7 +557,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5E4, 0x0, btlIsSceneUnitModeListed);
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlClassifyHuangLongAction);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetLinkedDefeatCameraPresetB);
-        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, func_0020DE50);
+        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlDefeatCameraHookPresetB);
         BTL_INSTALL_CALLBACK(battle->cameraStateChangePredicate, 0x0, btlFrameMarkedTargetDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->pad614, 0x4, btlHandleLinkedUnitDefeatAction);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectSpecialActionCameraPose);

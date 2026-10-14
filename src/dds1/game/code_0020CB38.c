@@ -590,7 +590,7 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-s32 func_0020DE50(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+s32 btlDefeatCameraHookPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     s32 result = btlSetLinkedDefeatCameraPresetB(command, camera, rotate);
     /* Retail uses JAL plus an epilogue. Qualified cc1probe retains this
      * consumed local cleanup through sibling selection, then removes it in CSE. */
