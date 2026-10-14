@@ -50,11 +50,20 @@ extern void effDestroyResources(EffEmitterHead *owner);
 extern u32 effParModulateColors(u32, u32);
 
 typedef struct EffInstance {
-    u8 localMatrix[0x40]; /* 0x00 */
-    u8 transform[0x40]; /* 0x40 */
+    f32 localMatrix[4][4]; /* 0x00: VU0 matrix initialized on clone. */
+    f32 transform[4][4]; /* 0x40: VU0 matrix copied by effCopyMatrixToNext. */
     BillObj *billboard; /* 0x80 */
     void *renderState; /* 0x84 */
 } EffInstance;
+typedef char EffInstance_size_check[(sizeof(EffInstance) == EFF_INSTANCE_BYTES) ? 1 : -1];
+typedef char EffInstance_localMatrix_offset_check[
+    ((u32)&((EffInstance *)0)->localMatrix == 0) ? 1 : -1];
+typedef char EffInstance_transform_offset_check[
+    ((u32)&((EffInstance *)0)->transform == EFF_MATRIX_BYTES) ? 1 : -1];
+typedef char EffInstance_billboard_offset_check[
+    ((u32)&((EffInstance *)0)->billboard == 0x80) ? 1 : -1];
+typedef char EffInstance_renderState_offset_check[
+    ((u32)&((EffInstance *)0)->renderState == 0x84) ? 1 : -1];
 
 typedef struct EffScaledRecord {
     u8 pad00[0x20];
@@ -437,11 +446,8 @@ void billSetChildScale2(EffInstance *instance, f32 scale) {
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
 void effCopyMatrixToNext(EffInstance *instance, void *matrix) {
-    u8 *transformBytes;
-
     VU0_LOAD_MATRIX(matrix);
-    transformBytes = instance->transform;
-    VU0_STORE_MATRIX(transformBytes);
+    VU0_STORE_MATRIX(instance->transform);
 }
 
 void billSetChildValue(EffInstance *instance, u32 value) {
