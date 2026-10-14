@@ -13,6 +13,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "evt_randomize_entry_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -897,8 +898,6 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
 void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 value) {
     item->status = (item->status & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
 }
-
-extern void evtRandomizeEntryValue();
 
 /* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value) {
