@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_actor_transform_parameters.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "kwln_draw_buffer.h"
@@ -2158,14 +2159,6 @@ void btlInitializeBattleDebugMenu(void) {
     state->unk_E0E = -1;
 }
 
-/* Battle debug editors use the same complete records as their live owners. */
-typedef struct BtlDebugTransform {
-    f32 position[3];
-    f32 overrideEnabled;
-    f32 reach;
-    f32 height;
-} BtlDebugTransform;
-
 typedef struct BtlDebugPosition {
     f32 value[4];
 } __attribute__((aligned(16))) BtlDebugPosition;
@@ -2186,7 +2179,6 @@ typedef struct BtlParameterEditor {
     s32 rowCount;
 } BtlParameterEditor;
 
-typedef char BtlDebugTransformSize[sizeof(BtlDebugTransform) == 0x18 ? 1 : -1];
 typedef char BtlParameterEditorRowSize[sizeof(BtlParameterEditorRow) == 0x18 ? 1 : -1];
 
 extern DatPartyRecord *D_003BAA04;
@@ -2201,7 +2193,7 @@ extern char D_003BBAB0[];
 extern u16 D_003D75D0[7];
 extern DatPartyRecord D_003D75E0;
 extern BtlDebugPosition D_003D7790;
-extern BtlDebugTransform D_003D77A0;
+extern BtlActorTransformParameters D_003D77A0;
 extern BtlActorStatusRecord D_003D77C0;
 extern BtlActorMotionSlot D_003D7A30;
 extern u8 D_003BD870;
@@ -2244,7 +2236,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     BtlUnit *unit;
     BtlRuntimeTask *dependent;
     BtlActorStatusRecord *record;
-    BtlDebugTransform *transform;
+    BtlActorTransformParameters *transform;
     u32 motion;
     f32 savedOverride;
 
@@ -2471,7 +2463,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 btlRefreshUnitMotionSelection(unit);
                 state->debug.unk00 = 2;
             } else {
-                transform = (BtlDebugTransform *)btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
+                transform = (BtlActorTransformParameters *)btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
                 if (sdfPadButtonStates[2] < 0) {
                     record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
                     transform->reach = record->unk18;
@@ -2480,7 +2472,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                     transform->position[1] = record->position[1];
                     transform->position[2] = record->position[2];
                 }
-                memcpy(&D_003D77A0, transform, sizeof(D_003D77A0));
+                memcpy(&D_003D77A0, transform, sizeof(BtlActorTransformParameters));
                 btlDebugMenuSetupNoOp(&D_00361728);
                 btlDebugMenuBeforeRecordNoOp();
                 btlDebugMenuRecordNoOp(&D_00361728);

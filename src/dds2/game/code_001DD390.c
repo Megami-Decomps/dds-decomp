@@ -1,5 +1,6 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
+#include "btl_actor_transform_parameters.h"
 #include "common.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -78,15 +79,6 @@ extern struct SdfPoolNode *D_00380788[13][4];
 extern SdfPoolNode *D_003B6BD0[];
 
 typedef struct BtlUnit BtlUnit;
-
-typedef struct BtlFxSrcA {
-    f32 f0;
-    f32 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-} BtlFxSrcA;
 
 typedef struct FxTask {
     u8 pad0[0x10];
@@ -2405,20 +2397,20 @@ void btlInitFxLights(BtlUnit *unit) {
 extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
 
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 index) {
-    BtlFxSrcA *alt = btlSelectSharedOrIndexedTransformParameters(kind, index);
+    BtlActorTransformParameters *alt = btlSelectSharedOrIndexedTransformParameters(kind, index);
     BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
-    if (alt->fC == 0.0f) {
+    if (alt->overrideEnabled == 0.0f) {
         PCP_COPY_VECTOR(unit->bodyOffset, base);
         unit->reach = base->reach;
         unit->height = base->height;
         unit->unkC0 = base->cameraRadius;
     } else {
-        unit->bodyOffset[0] = alt->f0;
-        unit->bodyOffset[1] = alt->f4;
-        unit->bodyOffset[2] = alt->f8;
+        unit->bodyOffset[0] = alt->position[0];
+        unit->bodyOffset[1] = alt->position[1];
+        unit->bodyOffset[2] = alt->position[2];
         unit->bodyOffset[3] = 0.0f;
-        unit->reach = alt->f10;
-        unit->height = alt->f14;
+        unit->reach = alt->reach;
+        unit->height = alt->height;
     }
     PCP_COPY_VECTOR(unit->muzzleOffset, base);
     unit->unkBC = base->reach;
