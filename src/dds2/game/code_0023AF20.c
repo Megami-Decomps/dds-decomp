@@ -11,7 +11,6 @@
 #include "sdf_vu_matrix.h"
 
 extern u32 sdfGetFloatCounterDirection(u32 *handle);
-extern f32 evtGetValueScaleFactor(struct EvtScaledValue *handle);
 
 s32 evtCheckWorldObjectResourceScale(void *obj) {
     f32 target = 1.0f;
