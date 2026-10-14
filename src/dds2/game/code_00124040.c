@@ -30,6 +30,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "fld_resource_wait_api.h"
+#include "fld_sequence_controller.h"
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
@@ -59,12 +60,6 @@ extern void *dds3GetWorldSecondaryObject(void);
 #include "dds3_object_payload.h"
 
 extern u32 D_00435F60;
-
-/* The stage member also has the assembler label D_00435F8C. */
-typedef struct FldSequenceController {
-    u32 flags;
-    s32 stage;
-} FldSequenceController;
 
 extern FldSequenceController fldSceneLifecycleFlags;
 

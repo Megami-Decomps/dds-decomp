@@ -32,6 +32,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "fld_resource_wait_api.h"
+#include "fld_sequence_controller.h"
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -40,16 +41,6 @@ extern u32 D_003BABE0;
 extern s32 fldDeferredCommand;
 
 extern u32 fldSceneControlFlags;
-
-/* The native controller keeps the flags base and accesses its stage at +4.
- * Both original four-byte SDATA labels retain their storage. */
-typedef struct FldSequenceController {
-    u32 flags;
-    s32 stage;
-} FldSequenceController;
-
-typedef char FldSequenceController_size_check[
-    sizeof(FldSequenceController) == 8 ? 1 : -1];
 
 extern FldSequenceController fldSceneLifecycleFlags;
 
