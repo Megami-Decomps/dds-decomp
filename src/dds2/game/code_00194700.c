@@ -52,7 +52,7 @@ extern u32 effDataDirectoryIndex;
 
 extern char D_00436448[];
 
-extern s32 func_0035C860(char *destination, const char *format, ...);
+extern s32 sprintf(char *destination, const char *format, ...);
 
 extern s32 sceDopen(void *path);
 
@@ -305,7 +305,7 @@ s32 effOpenDataDir(void *name) {
     u8 path[EFF_DIRECTORY_PATH_BYTES];
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00436448, name);
+        sprintf(path, D_00436448, name);
         return sceDopen(path);
     } else {
         effDataDirectoryIndex = 0;
@@ -534,7 +534,7 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
                 switch (category) {
                 case 1: {
                     char resourceName[0x70];
-                    func_0035C860(resourceName, D_00436450,
+                    sprintf(resourceName, D_00436450,
                         descriptor->resourceList->directoryPath, selectedEntry->name);
                     effSetWorkTextureResource(descriptor, resourceName);
                     descriptor->previewActive = category;
@@ -628,7 +628,7 @@ u32 effGetWorkLink(EffResourceDescriptor *work) {
 /* Format the prefix/name records through the native template and return the name record's first word.
    Buffer capacity and record pointers remain unchecked. */
 u32 effFormatMsgNames(EffResourceDescriptor *message, void *destination) {
-    func_0035C860(destination, D_00436450, message->resourceList->directoryPath, message->selectedEntry->name);
+    sprintf(destination, D_00436450, message->resourceList->directoryPath, message->selectedEntry->name);
     return message->selectedEntry->type;
 }
 

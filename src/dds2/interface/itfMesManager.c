@@ -678,7 +678,7 @@ extern char D_003A41A8[][0x20];
 extern char D_003A47E8[][0x20];
 extern char *D_00386048[];
 extern char D_004365F0[];
-extern void func_0035C860(char *dst, const char *format, ...);
+extern void sprintf(char *dst, const char *format, ...);
 extern void itfConvertText(char *dst, const char *src);
 extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
 void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText);
@@ -695,7 +695,7 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
     switch (selector) {
     case 0:
-        func_0035C860(formatted, D_004365F0, value);
+        sprintf(formatted, D_004365F0, value);
         itfMesCopyStringToWindowTableSlot(window, slotIndex, formatted);
         break;
     case 1:

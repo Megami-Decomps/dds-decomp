@@ -67,7 +67,7 @@ extern s32 dspCloseChannel(void);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
 extern s32 sdfCounterGetDisplayWordPointer(void);
-extern void func_0035C860(char *, char *, ...);
+extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
@@ -833,7 +833,7 @@ u32 sdfGetInitialMapCameraTransitionState(void) {
 void fldDisplayLocalMapCounterMessage(void) {
     char text[32];
 
-    func_0035C860(text, D_004388A0, sdfCounterGetDisplayWordPointer());
+    sprintf(text, D_004388A0, sdfCounterGetDisplayWordPointer());
     evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);

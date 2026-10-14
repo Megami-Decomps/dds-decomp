@@ -9,7 +9,7 @@ extern void btlStartSkillEventTask(u32);
 
 extern s32 btlReleaseScriptResource(void);
 
-extern void func_0035C860(char *, const char *, const char *, s32);
+extern void sprintf(char *, const char *, const char *, s32);
 
 
 extern char btlPrimaryScriptResourceName[];
@@ -24,7 +24,7 @@ s32 btlFindScriptResource(char *name) {
     if (battle->scriptHandle == 0) {
         return -1;
     }
-    func_0035C860(path, "e%03d_%s", battle->eventTaskId, name);
+    sprintf(path, "e%03d_%s", battle->eventTaskId, name);
     return bfFindScriptIndexByName(battle->scriptHandle, path);
 }
 

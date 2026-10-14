@@ -459,7 +459,7 @@ extern void btlRunTask(BtlRuntimeTask *);
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
-extern void func_0035C860();
+extern void sprintf();
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
 

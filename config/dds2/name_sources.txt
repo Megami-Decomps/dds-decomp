@@ -6870,6 +6870,7 @@
 0x00357708	litodp	inferred	Fam-3
 0x00357890	dptofp	inferred	libgcc fp-bit double->float, follows fptodp; func_003269F0 wraps a double sqrt in it
 0x0035B6E0	sdfDebugPrintf	inferred	Variadic diagnostic output helper; callers pass format strings and debug/error messages across scheduler and event systems. [caller cohort review, 2026-10-13]
+0x0035C860	sprintf	inferred	confidence=high; matched-C callers across 51 DDS2 units pass a destination buffer, format string, and variadic format arguments; return value is used as the formatted character count. Path/resource/UI text construction confirms sprintf semantics, and the separate va_list API at 0x00360E78 is named sdfVFormatString. [retail callers, signature cohorts, sibling formatter]
 0x00360E78	sdfVFormatString	inferred	formats text into a destination buffer from a va_list and returns the formatted character count; DDS1 counterpart 0x00305B08.
 0x0036DE70	DIntr	inferred	Binary Ninja: reads COP0 Status IE; returns 0 if already disabled, otherwise executes DI/SYNC until disabled and returns 1 for conditional EIntr restoration.
 0x0037F550	effSharedRandomState	inferred	confidence=high; src/dds2/game/code_00102DC8.c:D_0037F550; type=PRNG state storage (u8[]); refs=kwlnInitMagicState,btlSelectActorAction; Seeded with a fixed value and passed to random generators for effect frame, position and scale variation. [names_qp9.tsv]

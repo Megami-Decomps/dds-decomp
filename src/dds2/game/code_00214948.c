@@ -4379,7 +4379,7 @@ extern char D_0041AAC8[]; /* format string */
 
 extern char D_00436CF0[];
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer) {
     u32 value;
@@ -4401,7 +4401,7 @@ void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer) {
         default:
             return;
         }
-        func_0035C860(buffer, D_0041AAC8, D_00436CF0, datActionAnimationRecords[action].displayCode, value);
+        sprintf(buffer, D_0041AAC8, D_00436CF0, datActionAnimationRecords[action].displayCode, value);
     }
 }
 

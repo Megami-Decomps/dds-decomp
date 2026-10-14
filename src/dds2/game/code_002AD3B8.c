@@ -43,7 +43,7 @@ extern char D_00437BD8[];
 extern s32 D_003E7400[];
 extern s32 mnuGetItemRequirementCount();
 extern s32 mnuGetItemRequirementValue();
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
@@ -621,7 +621,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
 
     itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->titleFrames[0], 2, 0x53);
     if (entryId != 0) {
-        func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
+        sprintf(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)fontHandle, 4);
         frFontDrawGlyphChain((FrFontGlyph *)fontHandle, 1, 0x53);
@@ -1031,10 +1031,10 @@ void mnuPrepareStaffValueChangeDialog(MenuStaffContext *context,
     current = mnuGetPartyEntryCurrentId(entry);
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
     evtCopyEntryStringToActiveWindow(1, (const void *)(D_003E7400[menu->thirdListIndex]));
-    func_0035C860(valueText, D_00437BD8, menu->thirdListValue);
+    sprintf(valueText, D_00437BD8, menu->thirdListValue);
     evtCopyEntryStringToActiveWindow(2, valueText);
     base = mnuGetItemRequirementCount(current);
-    func_0035C860(valueText, D_00437BD8, mnuGetItemRequirementValue(current) - base);
+    sprintf(valueText, D_00437BD8, mnuGetItemRequirementValue(current) - base);
     evtCopyEntryStringToActiveWindow(3, valueText);
     if (flag == 0) {
         dspStartEntry(9);

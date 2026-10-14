@@ -667,7 +667,7 @@ extern char D_004374D0[];
 
 s32 evtDrawInputValueRow(SdfListHead *list, s32 x, s32 y, u8 *ctx) {
     char text[16];
-    func_0035C860(text, D_004374E0, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
+    sprintf(text, D_004374E0, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, text));
     return 2;
 }
@@ -757,7 +757,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423688);
 
 s32 evtDrawEventFileNameRow(SdfListHead *list, s32 x, s32 y) {
     char text[32];
-    func_0035C860(text, "[E%3d_%03d.PM1+2+3]", D_004372B0, D_004372B2);
+    sprintf(text, "[E%3d_%03d.PM1+2+3]", D_004372B0, D_004372B2);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, text));
     return 2;
 }
@@ -4312,7 +4312,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 
 extern u8 sdfPfsDebugMode;
 extern char *sdfDevGetPathBuffer(void);
-extern s32 func_0035C860(char *buffer, const char *format, ...);
+extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 func_00369B70(const char *path, s32 flags, ...);
 extern s32 func_00369DF8(s32 descriptor);
 extern s32 func_0036BCD0(const char *device, s32 flags);
@@ -4335,24 +4335,24 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
 
     if (mode == 0) {
         if (sdfPfsDebugMode) {
-            func_0035C860(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
-            func_0035C860(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
         } else {
-            func_0035C860(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
-            func_0035C860(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            sprintf(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
         }
     } else if (sdfPfsDebugMode) {
-        func_0035C860(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+        sprintf(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
             ((u32)D_004372B0 / 10U) * 10, D_004372B0, D_004372B0,
             D_004372B2, D_004372B0, D_004372B2);
-        func_0035C860(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+        sprintf(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
             ((u32)D_004372B0 / 10U) * 10, D_004372B0, D_004372B0,
             D_004372B2, D_004372B0, D_004372B2);
     } else {
-        func_0035C860(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+        sprintf(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
             sdfDevGetPathBuffer(), ((u32)D_004372B0 / 10U) * 10,
             D_004372B0, D_004372B0, D_004372B2, D_004372B0, D_004372B2);
-        func_0035C860(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+        sprintf(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
             sdfDevGetPathBuffer(), ((u32)D_004372B0 / 10U) * 10,
             D_004372B0, D_004372B0, D_004372B2, D_004372B0, D_004372B2);
     }
@@ -4626,7 +4626,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         if (node->value != 0) {
             for (owner = world->slots[4].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_0035C860(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -4634,7 +4634,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
             for (owner = world->slots[9].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_0035C860(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -4642,7 +4642,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
             for (owner = world->slots[7].head; owner != NULL; owner = owner->next) {
                 if (owner->value != 0) {
-                    func_0035C860(motionName, "%s_MOTION", (char *)owner->value);
+                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
                     if (strcmp((char *)node->value, motionName) == 0) {
                         evtStageRelinkOwnedNodeResource(node, owner);
                     }
@@ -5372,7 +5372,7 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
 extern char D_004377D0[];
 
 void evtFormatTaskName(s32 id, char *buffer) {
-    func_0035C860(buffer, D_004377D0, id);
+    sprintf(buffer, D_004377D0, id);
 }
 
 KwlnTask *evtFindTaskById(u32 taskId) {

@@ -2432,7 +2432,7 @@ extern s32 D_00435E48;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern void mnuBuildEnabledCampEntryWindow();
@@ -3123,10 +3123,10 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 s32 evtShowResultText(void) {
     char formattedText[0x40];
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
-    func_0035C860(formattedText, D_00437840, datGameState->progressTotal);
+    sprintf(formattedText, D_00437840, datGameState->progressTotal);
     evtCopyEntryStringToActiveWindow(1, formattedText);
     evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
-    func_0035C860(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
+    sprintf(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
     evtCopyEntryStringToActiveWindow(3, formattedText);
     if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
         dspStartEntry(datGameState->progressSlot + 0x1a);
@@ -3369,7 +3369,7 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
             entry = 12;
         }
     }
-    func_0035C860(text, D_00437840, item->value * state->multiplier);
+    sprintf(text, D_00437840, item->value * state->multiplier);
     evtCopyEntryStringToActiveWindow(3, text);
     dspSetActive(1);
     dspStartEntry(entry);
@@ -3773,7 +3773,7 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
                     evtCopyEntryStringToActiveWindow(1, D_00437848);
                     dspStartEntry(0x2D);
                 } else {
-                    func_0035C860(text, D_00437850, state->rewardValue);
+                    sprintf(text, D_00437850, state->rewardValue);
                     evtCopyEntryStringToActiveWindow(0, text);
                     dspStartEntry(0x2E);
                 }
@@ -3880,7 +3880,7 @@ s32 evtShowSlotText(KwlnTask *task) {
     char formattedText[0x40];
     if (((MenuTerminalContext *)kwlnTaskGetUserValue(task))->advancedSlots > 0) {
         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
-        func_0035C860(formattedText, D_00437840, D_003CE148[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
+        sprintf(formattedText, D_00437840, D_003CE148[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
         evtCopyEntryStringToActiveWindow(1, formattedText);
         evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
         if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
@@ -4009,7 +4009,7 @@ extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
@@ -4032,7 +4032,7 @@ s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
                 if ((reward++)->kind == 0) {
                     evtCopyEntryStringToActiveWindow(i, D_00435E5C + value * 0x19);
                 } else {
-                    func_0035C860(text, D_00437850, value);
+                    sprintf(text, D_00437850, value);
                     evtCopyEntryStringToActiveWindow(i, text);
                 }
                 i++;
@@ -4098,7 +4098,7 @@ s32 evtMenuGrantSelectedProgressReward(KwlnTask *task) {
             evtCopyEntryStringToActiveWindow(0, D_00435E5C + rewardValue * 0x19);
             ptyAdjustItemQuantity(rewardValue, 1);
         } else {
-            func_0035C860(text, D_00437850, rewardValue);
+            sprintf(text, D_00437850, rewardValue);
             evtCopyEntryStringToActiveWindow(0, text);
             datAddCurrencyClamped(rewardValue);
         }
@@ -4260,7 +4260,7 @@ void mnuAwardCampProgressCurrency(void) {
     s32 amount = mnuCampResolveProgressTierValue();
 
     dspSetActive(1);
-    func_0035C860(formattedText, D_00437840, amount);
+    sprintf(formattedText, D_00437840, amount);
     evtCopyEntryStringToActiveWindow(0, formattedText);
     dspStartEntry(0x19);
     datAddCurrencyClamped(amount);

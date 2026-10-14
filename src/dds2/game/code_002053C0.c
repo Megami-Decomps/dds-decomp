@@ -60,7 +60,7 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern char D_00436AE8[];
 
@@ -199,7 +199,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     s32 data;
     s32 size;
     if (args->state == 0) {
-        func_0035C860(path, D_00419468, D_003E0F60[args->entryIndex].fileName);
+        sprintf(path, D_00419468, D_003E0F60[args->entryIndex].fileName);
         args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
     } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
@@ -251,9 +251,9 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
             } else if (unit->status.flags & 0x1000) {
                 id += 0x10;
             }
-            func_0035C860(path, D_004192F8, D_00419308, id);
+            sprintf(path, D_004192F8, D_00419308, id);
         } else {
-            func_0035C860(path, D_00419318, D_00419308, unit->partyRecord.unitId);
+            sprintf(path, D_00419318, D_00419308, unit->partyRecord.unitId);
         }
         args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:ATRAC3 dead load start[%s]\n", path);
