@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_sif_command.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
@@ -43,7 +44,6 @@ u32 ptyScriptGetRosterStat(void) {
 
 INCLUDE_ASM(const s32, "game/code_0010F118", dds3DrawWorldNodeTransformDiagnostic);
 
-extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, const char *format, ...);
 extern const char D_00412778[]; /* "FLAG  : 0x%08X" */
 
 u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
