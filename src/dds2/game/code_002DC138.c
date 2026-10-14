@@ -16,7 +16,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_tex_create.h"
 #include "sdf_chunk.h"
-#include "eff_expanded_list.h"
+#include "eff_expanded_source.h"
 #include "eff_update_flags.h"
 #include "btl_runtime.h"
 
@@ -774,13 +774,6 @@ s32 effCountExpandedEntries(EffExpandedList *list) {
 }
 
 /* Serialized expanded list: 0x10-byte header, the entry table, then each entry's payload. */
-typedef struct EffExpandedSource {
-    u8 unk00[4];
-    u32 count;
-    u8 unk08[8];
-    EffExpandedEntry entries[1];
-} EffExpandedSource;
-
 /* Copy a serialized list into one allocation and retain a shared texture reference per entry. */
 struct EffExpandedList *effCreateTextureAnimationSet(u32 sourceAddress) {
     EffExpandedSource *source = (EffExpandedSource *)sourceAddress;
