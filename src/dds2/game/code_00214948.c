@@ -98,11 +98,11 @@ extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern void func_002152D8(s32, s32);
 
-extern s32 func_00215C70(s32, s32);
+extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 
 extern void *memset(void *, s32, u32);
 
-extern s32 func_00216888(s32, s32);
+extern s32 btlSelectHighestCurrentMpTarget(s32, s32);
 
 extern void *btlSelectRandomUnitFromMask(BtlIndexList *, u16 *, u16);
 
@@ -522,7 +522,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_002152D8);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00215C70);
+INCLUDE_ASM(const s32, "game/code_00214948", btlSelectLowestNonzeroHpTarget);
 
 /* Prefer the lowest nonzero HP among element-blocking units; otherwise use the list. */
 s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
@@ -855,7 +855,7 @@ s32 btlSelectLowestRankTarget(s32 task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00216888);
+INCLUDE_ASM(const s32, "game/code_00214948", btlSelectHighestCurrentMpTarget);
 
 s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);

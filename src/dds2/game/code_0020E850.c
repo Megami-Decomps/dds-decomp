@@ -48,13 +48,13 @@ extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 extern void func_002152D8(s32, s32);
 
-extern s32 func_00215C70(s32, s32);
+extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 
 extern void btlSelectLowestRankTarget(s32, s32);
 
-extern s32 func_00216888(s32, s32);
+extern s32 btlSelectHighestCurrentMpTarget(s32, s32);
 
 extern void btlPickLinkedPartyTarget();
 
@@ -1271,7 +1271,7 @@ void btlChooseCommandActionTargets(s32 context) {
 
 /* Delegate minimum nonzero-current-HP selection for this command, with mode zero. */
 void btlPickCommandLowestHpTarget(s32 context) {
-    func_00215C70(context, 0);
+    btlSelectLowestNonzeroHpTarget(context, 0);
 }
 
 /* Delegate minimum HP-percentage selection without changing native fallback modes. */
@@ -1303,7 +1303,7 @@ void btlPickCommandLowestLevelTarget(s32 context) {
 
 /* Select the highest-current-MP candidate through the native mode-zero entry. */
 void btlPickCommandHighestMpTarget(s32 context) {
-    func_00216888(context, 0);
+    btlSelectHighestCurrentMpTarget(context, 0);
 }
 
 extern s32 btlSelectTargetsPassingCheck(s32, s32);
