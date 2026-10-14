@@ -326,7 +326,6 @@ u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 
-extern char D_003A1C10[]; /* "btl:hunt mp rec[%d]\n" */
 
 /* Target is part of the hunt-recovery interface; this implementation uses only actor. */
 s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
@@ -336,7 +335,7 @@ s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     } else if (btlCheckSpecialAbility(&actor->partyRecord, 0x229)) {
         recovery = (s32)(actor->partyRecord.maxMp * datAbilityParameters[0x229 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
     }
-    btlBossDebugPrintf(D_003A1C10, recovery);
+    btlBossDebugPrintf("btl:hunt mp rec[%d]\n", recovery);
     return recovery;
 }
 
@@ -406,9 +405,72 @@ s32 btlIsUnitStatusFlagClear(BtlUnit *object) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A7180", D_003A1C10);
 
-INCLUDE_ASM(const s32, "game/code_001A7180", func_001A8188);
+/* Terminal policies publish and return; see docs/idioms.md,
+ * "Outcome classifiers: late publication sharing". */
+s32 func_001A8188(void) {
+    BtlState *state;
+    BtlUnit *unit;
+    s32 partyCount = 0;
+    s32 enemyCount = 0;
+    s32 stoneCount = 0;
+    s32 defeatedCount = 0;
+
+    state = btlGetRuntime();
+    state->eventReady = 0;
+    if (state->unk5B4 != NULL) {
+        s32 result = state->unk5B4();
+        if (result != -1) {
+            state->eventReady = result;
+            return 1;
+        }
+    }
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        if (unit->status.flags & 0x20) {
+            defeatedCount++;
+        } else if (unit->status.flags & 1) {
+            if (unit->status.flags & 0x200) {
+                partyCount++;
+                if (unit->partyRecord.status & 0x800) {
+                    stoneCount++;
+                }
+            }
+            if (unit->status.flags & 0x400) {
+                enemyCount++;
+            }
+        }
+    }
+    if (partyCount == 0) {
+        if (defeatedCount != 0) {
+            btlBossDebugPrintf("btl:lose[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
+            state->eventReady = 2;
+            return 1;
+        } else {
+            state->eventReady = 4;
+            return 1;
+        }
+    }
+    if (state->battleFlags & 0x2000) {
+        btlBossDebugPrintf("btl:esc[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
+        state->eventReady = 4;
+        return 1;
+    }
+    if (partyCount == stoneCount) {
+        btlBossDebugPrintf("btl:stone[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
+        state->eventReady = 3;
+        return 1;
+    }
+    if (enemyCount == 0) {
+        btlBossDebugPrintf("btl:win[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
+        if (state->requestArgument != 0) {
+            state->eventReady = 5;
+        } else {
+            state->eventReady = 1;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 extern s32 D_00358514[];
 

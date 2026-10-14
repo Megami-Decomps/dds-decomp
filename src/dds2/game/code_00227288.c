@@ -1183,7 +1183,7 @@ void btlInitializeSpecialUnitHpOverride(BtlUnit *unit) {
 }
 
 /* Mode 0x336's fixed value 6 is not proven to be an actor ID. */
-u32 btlMode336FixedCallbackValue(void) {
+s32 btlMode336FixedCallbackValue(void) {
     return 6;
 }
 
@@ -1529,7 +1529,7 @@ void btlInitializeBossCallbacks(s32 mode) {
             mdlFlagClear(0x804);
             battle->commandRestrictFlags |= 0x84000;
             BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, func_002181E8);
-            BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlCheckPhaseOnePartyStatusGate);
+            BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlCheckPhaseOnePartyStatusGate);
         }
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlRestoreEnemyUnitWhenModelFlagSet);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
@@ -1581,7 +1581,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlStartActionRecordTasks);
         BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetSpecialEnemySubtaskGuardResponse);
         BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsSpecialEnemyActionCode);
-        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlSelectSoleEligibleActor);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlSelectSoleEligibleActor);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlRaiseUnitForCommandSlot);
         BTL_INSTALL_CALLBACK(battle->pad674, 0x0, btlSpawnLinkedActionEffect);
         BTL_INSTALL_CALLBACK(battle->modelChangeSoundHook, 0x0, btlStartActionRecordSoundTask);
@@ -1627,7 +1627,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = battle->commandRestrictFlags;
         battle->commandRestrictFlags = commandFlags | 0x200000;
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlRecenterActorsAroundLead);
-        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlDisableUnitsIfSpeciesFlagged);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlDisableUnitsIfSpeciesFlagged);
         break;
     }
     case 0x30B: {
@@ -1693,7 +1693,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetMarkedUnitActionStatus);
         BTL_INSTALL_CALLBACK(battle->actionResourceNameHook, 0x0, btlFormatSpecialMotionDisplayCode);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlCenterMarkedFormationAroundLead);
-        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlStartOtherMarkedUnitTasks);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlStartOtherMarkedUnitTasks);
         BTL_INSTALL_CALLBACK(battle->pad674, 0x4, btlIsNonCalamityAction);
         BTL_INSTALL_CALLBACK(battle->pad6C0, 0x4, btlMapActorMotionId);
         BTL_INSTALL_CALLBACK(battle->pad694, 0x0, func_0021F848);
@@ -1919,7 +1919,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlEffectTaskStartFinale);
         BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlQueueLinkedPairModelSwapTasks);
         BTL_INSTALL_CALLBACK(battle->pad694, 0x4, btlIsEffectActor);
-        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlGetSoleTargetKind);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetKind);
         BTL_INSTALL_CALLBACK(battle->actorEligibilityOverride, 0x0, btlHasDifferentActiveTarget);
         BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlSetLinkFlagOff);
         BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlSetLinkFlagOn);
@@ -1972,7 +1972,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         }
         battle->commandRestrictFlags |= 0x82800;
         BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlInitializeSpecialUnitHpOverride);
-        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlMode336FixedCallbackValue);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlMode336FixedCallbackValue);
         break;
     }
     case 0x32D: {

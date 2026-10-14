@@ -12078,3 +12078,39 @@ The identity is genuinely 64-bit: `btlAdvanceRuntimeSequenceCounter` returns
 Both final-form traces match their unhooked outputs. Complete-unit gates are
 77/0 and 79/0, with no context, rodata or undefined-symbol rows. Existing names,
 shared prototypes and the separate claimed scheduler body remain unchanged.
+
+### Outcome classifiers: late publication sharing
+
+DDS1 `func_001A8188` (424 bytes) and DDS2 `func_001B2630` (440 bytes)
+classify the battle outcome after counting active party, enemy, stone and
+defeated units. Each terminal policy publishes its outcome byte and returns
+immediately; no classification means return zero.
+
+Qualified `ifcvt`, `jump` and `reorg` traces identify property **P**:
+the terminal byte stores remain separate through early if-conversion, then
+become equivalent store-and-return tails after allocation. The
+`jump_optimize_1(cross_jump=1)` pass merges those actual tails. An explicit
+common outcome local instead permits early `noce_try_cmove` for the winner's
+one/five choice and changes counter homes; a common return alone also misses.
+
+Handle the real pending request first (`requestArgument != 0` publishes five),
+with normal victory otherwise publishing one. This mirrors the native EQ-zero
+edge. `estimate_probability` gives that edge `REG_BR_PROB=3999`;
+`fill_slots_from_thread` ultimately selects literal one from its true thread,
+producing the native branch-likely slot. A zero-first spelling leaves three
+words different in each title. Both final traces preserve their unhooked output.
+
+DDS2's defeat condition genuinely reads both status words through the existing
+`btlUnitStatusPair` owner API: mask `0x4000000020`, compare with `0x20`.
+Its optional signed, zero-argument outcome callback is loaded at `001B2664`;
+minus one requests normal classification. Recovering the four-byte slot at
+`BtlState+0x5E8` changes no layout. All six existing installer references are
+migrated, and the fixed-six producer uses that signed callback return contract.
+The preceding hunt logger's sole-string rodata blob becomes its original
+literal so its pool precedes the four new outcome strings.
+
+Whole-unit gates are 53/0, 23/0 and 43/0 for the two classifiers and the
+installer unit. All 21 direct DDS2 owner-header includers remain exact,
+including the hash-sensitive `btlChooseStartVoice` unit at 244/0.
+The current names and prototypes of the classifiers remain unchanged.
+
