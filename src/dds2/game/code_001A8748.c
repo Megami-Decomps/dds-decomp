@@ -1817,9 +1817,9 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
 
-INCLUDE_ASM(const s32, "game/code_001A8748", func_001AC0F8);
+INCLUDE_ASM(const s32, "game/code_001A8748", btlBuildUnitIndexList);
 
-extern s32 func_001AC0F8(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
 extern s32 datRosterDetails;
 u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destination, s32 unused) {
@@ -1884,7 +1884,7 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
         mask = 0;
     }
     if (destination != NULL) {
-        func_001AC0F8(task, destination, mode, flags, mask);
+        btlBuildUnitIndexList(task, destination, mode, flags, mask);
     }
     return category;
 }
