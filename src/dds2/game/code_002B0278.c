@@ -469,7 +469,66 @@ u32 func_002B06A0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuApplyRandomStatItemEffect);
+extern char D_003E7202[];
+extern char D_003E7207[20];
+s32 mnuApplyRandomStatItemEffect(u8 *menu, DatPartyRecord *entry, s32 itemId) {
+    MenuStaffChoices *choices;
+    MenuListNode *node;
+    s32 eligibleStats[5];
+    char *eligibleTable;
+    char *weightTable;
+    u32 rowIndex;
+    s32 eligibleCount;
+    s32 statIndex;
+    s32 roll;
+    s32 cumulativeWeight;
+    s32 weightCount;
+    s8 weight;
+    s32 entryIndex;
+    s32 i;
+
+    choices = (MenuStaffChoices *)menu;
+    node = choices->windows[4]->list->cursor;
+    rowIndex = node->sortKeyTertiary;
+    eligibleTable = D_003E7202 + rowIndex * 0x1C;
+    eligibleCount = 0;
+    for (i = 0; i < 5; i++, eligibleTable++) {
+        if (*eligibleTable != 0) {
+            eligibleStats[eligibleCount++] = i;
+        }
+    }
+
+    /* Start the scan totals before random selection; see
+     * docs/idioms.md, "Random stat item selection".
+     */
+    cumulativeWeight = 0;
+    weightCount = 0;
+    statIndex = eligibleStats[effMiscRand(NULL) % eligibleCount];
+    choices->thirdListIndex = statIndex;
+    roll = effMiscRand(NULL) % 100;
+    choices->thirdListValue = 0;
+    weightTable = D_003E7207 + rowIndex * 0x1C;
+    i = 0;
+    do {
+        weight = *weightTable++;
+        if (weight != 0) {
+            cumulativeWeight += weight;
+            weightCount++;
+            if (roll < cumulativeWeight || i == 19) {
+                choices->thirdListValue = i + 1;
+                break;
+            }
+        }
+        i++;
+    } while (i < 20);
+
+    entryIndex = mnuGetPartyEntryCurrentId(entry) - 0xC0;
+    datGameState->itemStatBonuses[entryIndex][statIndex] += choices->thirdListValue;
+    datGameState->itemRequirementCounts[entryIndex]++;
+    ptyRecomputeMaxHpMp(entry);
+    ptyAdjustItemQuantity(itemId, -1);
+    return weightCount >= 2;
+}
 
 s32 mnuUpdatePartySlotAssignmentPopup(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);

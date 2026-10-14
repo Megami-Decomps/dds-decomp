@@ -12232,3 +12232,27 @@ visibility fields, and a fresh menu-flags snapshot for each live node. Explicit
 hidden/visible modes do not update the transition timer; only opening/closing
 modes increment it. The map renderer supplies the branch-specific sprite calls;
 normal cross-jumping merges their shared tails into the two native callsites.
+
+### Random stat item selection
+
+DDS2 `mnuApplyRandomStatItemEffect` (`002B06A8`, 492 bytes) reads five
+eligible flags from the selected menu row, then a 20-byte signed weight row.
+`cumulativeWeight` and `weightCount` are real scan totals. Initializing them
+before the two `effMiscRand` calls keeps their values live across those calls
+and supplies the weighted scan in the retail lifetime.
+
+The qualified `cc1probe --all` trace places the count and cumulative total in
+`$16` and `$18` through global allocation's `find_reg` decisions; these are
+saved registers in the retail prologue. The chosen stat is kept in `$21`.
+Property **P** is that both totals are initialized before the RNG calls,
+rather than first being assigned at the weighted loop. Delaying them gives a
+different allocation and frame; reusing one counter or starting both only
+when the weight loop begins retains the register/frame residuals.
+
+The table walks consume bytes as their pointers advance. A pointer-based
+`for` loop over the weights retained a setup/branch difference at `+0xD8`;
+the ordinary `do { weight = *weightTable++; ... } while (i < 20)` scan matches
+the native loop and 492-byte extent. The whole-unit gate is 160 match, 0
+differ; no owner or prototype changes were needed. The trace's hooked and
+unhooked compiler outputs agree.
+
