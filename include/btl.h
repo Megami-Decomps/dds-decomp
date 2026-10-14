@@ -233,7 +233,7 @@ typedef struct BtlUnit {
     struct SoundResourceLink *link31C;
     struct SoundLink *link320;
     struct ActiveSoundNode *node324;
-    s32 unk328; /* Owner of the actor model's file slots and allocation handles. */
+    struct SoundSlotOwner *unk328; /* Owner of the actor model's file slots and allocation handles. */
     void *gunResource;
     BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
     u8 firstCountdown; /* 0x338: linked-number task selects modulo-12 offset then increments. */
@@ -241,7 +241,7 @@ typedef struct BtlUnit {
     u8 pad33A[2];
     struct EffWorldNode *effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
-    s32 unk344; /* Alternate SDF model used by the transparency path. */
+    struct SdfModel *unk344; /* Alternate SDF model used by the transparency path. */
     struct BtlUnit *mirror; /* 0x348: created and destroyed by the model-change task. */
     s32 unk34C;
     s32 unk350;

@@ -5981,7 +5981,7 @@ s32 sndHasActiveFileLoad(void) {
 
 /* Queue a ready owner's packed track; stream slot 11 only supplies its file ID. */
 void btlQueueUnitSoundSlotFileLoad(BtlRuntimeTaskArgs *args) {
-    SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
+    SoundSlotOwner *owner = ((BtlUnit *)args->actor)->unk328;
     SoundSlotTableEntry *table;
     SoundSlotTableEntry *entry;
     if (owner == 0) {
@@ -6014,7 +6014,7 @@ extern void mnuClearInactiveSoundBufferState(void);
 
 u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
+    SoundSlotOwner *owner = ((BtlUnit *)args->actor)->unk328;
     SoundSlotWork *soundWork;
     u32 key;
     u32 data;
