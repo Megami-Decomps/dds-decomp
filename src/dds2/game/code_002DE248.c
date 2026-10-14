@@ -15,6 +15,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_resource_list_request.h"
 #include "eff_matrix4.h"
 #include "eff_active_resource.h"
 #include "eff_frame_asset.h"
@@ -13848,18 +13849,6 @@ u32 mnuGetValueRecordOwner(const EffectList *list) {
     return list->mode;
 }
 
-typedef struct EffLoadedItem {
-    struct EffLoadedItem *next;
-    u8 pad_04[4];
-    u32 buffer; // 0x08
-    u8 pad_0C[4];
-    u8 kind;    // 0x10: 1 once the job's buffer is ready
-} EffLoadedItem;
-
-typedef struct EffRequest {
-    u8 pad_00[0x60];
-    EffLoadedItem *items; // 0x60
-} EffRequest;
 
 
 
@@ -13929,7 +13918,7 @@ s32 effPollResourceList(EffectList *list) {
                 for (item = list->request->items; item != NULL; item = item->next) {
                     if (item->kind == 1) {
                         node = list->first;
-                        buffer = item->buffer;
+                        buffer = item->allocationHandle;
                         *node->reference = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)buffer, node->kind);
                         if (node->kind == 0) {
                             sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(buffer));
