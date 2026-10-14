@@ -2822,7 +2822,7 @@ void fldResetObjectSlots(void) {
     D_003BAF7C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00147DB0);
+INCLUDE_ASM(const s32, "game/code_001411F0", fldInitializeHuntSparkUnit);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0718);
 
@@ -3717,7 +3717,7 @@ typedef struct FldSparkEntryInfo {
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerScale(EffWorldNode *node, u128 *vector);
-extern void func_00147DB0(void *unit);
+extern void fldInitializeHuntSparkUnit(void *unit);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A08E8);
 
@@ -3757,7 +3757,7 @@ void fldCreateSparkSlotObjects(void) {
             mdlAddEntryFlagged(resource, 0, 0);
             resource->flags |= 1;
             dds3SetObjectFlags(fldSparkObjectEntries[i].objectHandle, 0x400);
-            func_00147DB0(evtUnitGetNestedValue(fldSparkObjectEntries[i].objectHandle));
+            fldInitializeHuntSparkUnit(evtUnitGetNestedValue(fldSparkObjectEntries[i].objectHandle));
         }
     }
 }

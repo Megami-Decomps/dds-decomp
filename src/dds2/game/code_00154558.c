@@ -197,7 +197,7 @@ typedef struct FldSceneParamRow {
 
 extern FldSceneParamRow D_003A8EB0[];
 
-extern void func_0014BF98(struct EvtUnit *unit);
+extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
 
 extern struct EvtUnit *evtGetWorldUnitNestedValue(s32 param);
 
@@ -1617,8 +1617,8 @@ s32 fldScriptReturnSelectedActorMotionId(void) {
     return 1;
 }
 
-s32 func_00156F40(void) {
-    func_0014BF98(evtGetWorldUnitNestedValue(scrReadIntParameter(0)));
+s32 fldCmdInitializeHuntSparkUnit(void) {
+    fldInitializeHuntSparkUnit(evtGetWorldUnitNestedValue(scrReadIntParameter(0)));
     return 1;
 }
 
