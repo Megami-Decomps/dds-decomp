@@ -15,6 +15,7 @@
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
 #include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
 #include "fld.h"
 #include "fld_scene_request.h"
 #include "sdf_resource.h"
@@ -453,15 +454,6 @@ extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
 extern void fldClearCameraModelColor(void);
 extern void fldSetCameraObjectTransitionFlag(void);
 extern void fldClearCameraObjectTransitionFlags(void);
-typedef struct {
-    f32 dist;
-    f32 y;
-    f32 targetY;
-    f32 fov;
-    f32 unk10;
-    f32 unk14;
-} FldCamRow; /* 0x18 bytes */
-
 extern FldCamRow fldCameraFollowRows[];
 extern f32 D_00330630[];
 extern s32 D_003BAD24;

@@ -13,6 +13,7 @@
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
 #include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
 #include "fld.h"
 #include "fld_scene_request.h"
 #include "dds3obj.h"
@@ -695,16 +696,6 @@ extern void btlClearRuntimeState(void);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
-
-typedef struct {
-    f32 dist;
-    f32 y;
-    f32 targetY;
-    f32 fov;
-    f32 unk10;
-    f32 unk14;
-} FldCamRow; /* 0x18 bytes */
-
 
 extern FldCamRow fldCameraFollowRows[];
 
