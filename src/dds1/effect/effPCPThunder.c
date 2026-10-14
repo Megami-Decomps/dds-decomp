@@ -591,49 +591,6 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
     parPrependCellNode(work->cellSystem);
 }
 
-/* Spark parameter prefix (0xA4 bytes); updates also rewrite its position vectors. */
-typedef struct {
-    f32 origin[4];     /* 0x00 complete orbit origin quadword */
-    f32 loweredPosition[4]; /* 0x10: complete endpoint quadword */
-    f32 position[4];    /* 0x20: complete endpoint quadword */
-    u16 systemParam;    /* 0x30 */
-    u8 pad32[0xA];
-    f32 waveAmplitude; /* 0x3C */
-    u8 pad40[8];
-    u16 halfLife;       /* 0x48 */
-    u8 pad4A[2];
-    f32 width;         /* 0x4C: strip half-width */
-    void *dispatchArg;  /* 0x50 */
-    u8 pad54[0x10];
-    f32 heightOffset;   /* 0x64 */
-    u32 sparkCount;     /* 0x68 */
-    u8 loop;            /* 0x6C restart finished sparks */
-    u8 pad6D[3];
-    s32 duration;       /* 0x70 */
-    s32 startDelaySpread; /* 0x74 modulus of the initial negative age */
-    s32 fadeInTime;     /* 0x78 initial-age blend duration */
-    s32 fadeOutTime;    /* 0x7C remaining-lifetime blend duration */
-    f32 orbitRadius;            /* 0x80 */
-    f32 radiusRandomness;       /* 0x84 */
-    f32 heightOffsetRange;      /* 0x88 */
-    f32 angularSpeed;           /* 0x8C */
-    f32 angularSpeedRandomness; /* 0x90 */
-    f32 angularDamping;         /* 0x94 */
-    f32 verticalSpeed;          /* 0x98 */
-    f32 verticalSpeedRandomness; /* 0x9C */
-    f32 verticalDamping;        /* 0xA0 */
-} EffThunderSparkParams;
-typedef char EffThunderSparkParamsSizeCheck[sizeof(EffThunderSparkParams) == 0xA4 ? 1 : -1];
-
-/* Each spark owns its own cell system; all subsystems are released before
-   the containing work allocation. */
-typedef struct {
-    EffThunderSparkParams head;
-    EffThunderSpark *sparks; /* 0xA4 */
-    u32 tintColor;      /* 0xA8 multiplies the faded spark color */
-    SdfMemBlock *allocationHandle; /* 0xAC */
-} EffThunderSparkWork; /* 0xB0 */
-
 extern void effThunderSparkInit(EffThunderSparkWork *work, s32 index);
 
 /* Allocate spark state after the work and a separate one-cell system per spark.
