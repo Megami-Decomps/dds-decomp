@@ -4896,7 +4896,7 @@ FileQueue *effCloneQueueForNode(u32 unused, FileQueue *source) {
     return fileCloneQueueEntries(source);
 }
 
-extern void camFollowOffsetVec();
+void camFollowOffsetVec(FileJob *job, void *dst);
 extern void camAimRotation();
 
 /* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start frame (job+0x80) has been reached; the frame counter only advances when the effect-frame pause flag is clear. */
@@ -5550,26 +5550,19 @@ s32 fileQueueCountLinkedJobs(FileQueue *queue) {
 }
 
 
-typedef struct CamFollow {
-    u8 pad00[0x40];
-    f32 pos[4];
-    u8 pad50[0x18];
-    u32 flags;
-} CamFollow;
-
 /* vu0 routine: dst = |pos| * unit(sdfViewTargetVector - sdfViewEyeVector); flag 0x10 flattens y, then puts pos.y back */
-void camFollowOffsetVec(CamFollow *obj, void *dst)
+void camFollowOffsetVec(FileJob *obj, void *dst)
 {
     f32 len[4];
     f32 length;
-    u32 flags = obj->flags;
+    u32 flags = obj->xformFlags;
 
     if ((flags & 0x18) == 0) {
-        PCP_COPY_VECTOR(dst, obj->pos);
+        PCP_COPY_VECTOR(dst, obj->offset);
         return;
     }
-    VU0_LOAD_VF(vf10, obj->pos);
-    if (obj->flags & 0x10) {
+    VU0_LOAD_VF(vf10, obj->offset);
+    if (obj->xformFlags & 0x10) {
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
     }
     VU0_LENGTH_VF10(length);
@@ -5577,14 +5570,14 @@ void camFollowOffsetVec(CamFollow *obj, void *dst)
     VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_LOAD_VF(vf11, sdfViewEyeVector);
     VU0_SUB(vf10, vf10, vf11);
-    if (obj->flags & 0x10) {
+    if (obj->xformFlags & 0x10) {
         VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
     }
     VU0_NORMALIZE_VF10();
     VU0_LOAD_VF(vf11, len);
     VU0_MUL(vf10, vf10, vf11);
-    if (obj->flags & 0x10) {
-        VU0_SCALAR_OP(obj->pos[1], "vaddx.y vf10, vf0, vf2x");
+    if (obj->xformFlags & 0x10) {
+        VU0_SCALAR_OP(obj->offset[1], "vaddx.y vf10, vf0, vf2x");
     }
     VU0_STORE_VF(vf10, dst);
 }
