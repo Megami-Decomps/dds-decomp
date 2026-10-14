@@ -18,6 +18,7 @@
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 #include "mnu_title_stream.h"
+#include "mnu_title_stream_status_snapshot.h"
 #include "mnu_title_stream_entry.h"
 
 #define SND_MIX_SAMPLE_COUNT 0x800
@@ -55,12 +56,6 @@ typedef struct MovieMenuState {
     s32 movieAlpha;       /* 0x110 */
     s32 movieFrame;       /* 0x114 */
 } MovieMenuState;
-
-typedef struct AtracInfo {
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-} AtracInfo;
 
 extern void *memcpy(void *, const void *, u32);
 
@@ -308,20 +303,20 @@ void mnuInitializeTitleAudioStreams(void) {
 }
 
 /* Read state words 0, 1 and 3; the frame-byte word 2 is not in this snapshot. */
-void mnuReadTitleStreamStatusLocked(AtracInfo *statusSnapshot) {
+void mnuReadTitleStreamStatusLocked(TitleAudioStreamStatusSnapshot *statusSnapshot) {
     WaitSema(mnuTitleStreamSemaphore);
-    statusSnapshot->unk0 = mnuTitleStreamStatus.frameCount;
-    statusSnapshot->unk4 = mnuTitleStreamStatus.frameIndex;
-    statusSnapshot->unk8 = mnuTitleStreamStatus.repeatFrame;
+    statusSnapshot->frameCount = mnuTitleStreamStatus.frameCount;
+    statusSnapshot->frameIndex = mnuTitleStreamStatus.frameIndex;
+    statusSnapshot->repeatFrame = mnuTitleStreamStatus.repeatFrame;
     SignalSema(mnuTitleStreamSemaphore);
 }
 
 /* Restore the same condensed three-word status mapping under the lock. */
-void mnuWriteTitleStreamStatusLocked(u32 *statusValues) {
+void mnuWriteTitleStreamStatusLocked(TitleAudioStreamStatusSnapshot *statusValues) {
     WaitSema(mnuTitleStreamSemaphore);
-    mnuTitleStreamStatus.frameCount = statusValues[0];
-    mnuTitleStreamStatus.frameIndex = statusValues[1];
-    mnuTitleStreamStatus.repeatFrame = statusValues[2];
+    mnuTitleStreamStatus.frameCount = statusValues->frameCount;
+    mnuTitleStreamStatus.frameIndex = statusValues->frameIndex;
+    mnuTitleStreamStatus.repeatFrame = statusValues->repeatFrame;
     SignalSema(mnuTitleStreamSemaphore);
 }
 
