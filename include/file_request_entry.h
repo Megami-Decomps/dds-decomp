@@ -9,7 +9,7 @@ typedef struct FileReqEntry {
     u32 unk4;      /* 0x04 */
     u32 sizeKiB;   /* 0x08: fileReqGetSize converts this to bytes */
     u32 unkC;      /* 0x0C */
-    u8 unk10;      /* 0x10 */
+    u8 requestRetryCount; /* 0x10: reset on begin; retries request-mode 2 up to five times. */
     u8 status;     /* 0x11: inspected by memory-card request polling */
     u8 slotMetadataDirty; /* 0x12 */
     s8 selectedSlot; /* 0x13 */
@@ -18,6 +18,8 @@ typedef struct FileReqEntry {
 
 typedef char FileReqEntrySizeCheck[
     (sizeof(FileReqEntry) == 0x64) ? 1 : -1];
+typedef char FileReqEntryRequestRetryCountOffsetCheck[
+    ((u32)&((FileReqEntry *)0)->requestRetryCount == 0x10) ? 1 : -1];
 typedef char FileReqEntrySlotFlagsOffsetCheck[
     ((u32)&((FileReqEntry *)0)->slotFlags == 0x14) ? 1 : -1];
 
