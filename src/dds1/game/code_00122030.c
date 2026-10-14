@@ -2040,7 +2040,7 @@ extern void func_001415F8(void);
 
 extern void fldUpdateSparkMessageSequence(void);
 
-extern s32 func_0014CAF8(void);
+extern s32 fldGetSparkDialogPhase(void);
 
 extern void fldUpdateSparkEncounterScene(void);
 
@@ -2188,7 +2188,7 @@ s32 fldProcSequence(KwlnTask *task) {
             fldAreaState.titleFade == 0 && kwlnFadeIsActive() == 0) {
             kwlnFadeStartIn(8);
         }
-        if (kwlnTaskFindByPriority(0x3EA) == NULL && func_0014CAF8() == 0) {
+        if (kwlnTaskFindByPriority(0x3EA) == NULL && fldGetSparkDialogPhase() == 0) {
             fldPreparePlayerSceneCameraTarget();
         }
         dds3ClearObjectFlags((void *)fldPlayerObject, 0x40);
@@ -2214,7 +2214,7 @@ s32 fldProcSequence(KwlnTask *task) {
             if (fldTestSceneControlFlags(0x20) == 0) break;
             if (D_0032E570[0] == 0) fldUpdateNextFloorTransition();
         }
-        if (func_0014CAF8() != 0) fldUpdateSparkMessageSequence();
+        if (fldGetSparkDialogPhase() != 0) fldUpdateSparkMessageSequence();
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
         if (fldTestSceneControlFlags(0x40) != 0) {
             func_0014DAF0(1);

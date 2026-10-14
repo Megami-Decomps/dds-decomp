@@ -6312,7 +6312,7 @@ each with a signed word count and eight signed-byte slot IDs. Complete
 The DDS2 controller's actual payload ends at `+48` (size `0x4C`). Its
 inserted `+8` word and pickup/scheduled-sound bookkeeping differ from
 DDS1's `0x40` controller, so do not homogenize their offsets. In DDS2,
-`func_00150F20` uses signed countdown comparisons at `+1C`; the collection
+`fldUpdateSparkEncounterScene` uses signed countdown comparisons at `+1C`; the collection
 window separately interprets `countdown - 10` as unsigned before testing
 it against six. Field-area pickup count/score at `+106/+108` are cleared
 by the initializer and incremented by the collector. Existing field

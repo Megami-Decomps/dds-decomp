@@ -97,9 +97,9 @@ extern void fldApplyCurrentAreaActorEntries(void);
 
 extern s32 fldIsTargetWithinInteractionRange(void);
 
-extern void func_00150F20(void);
+extern void fldUpdateSparkEncounterScene(void);
 
-extern s32 func_00150F10(void);
+extern s32 fldGetSparkDialogPhase(void);
 
 extern void fldUpdateDevilizeEventSequence(void);
 
@@ -2306,7 +2306,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             fldAreaState.titleFade == 0 && kwlnFadeIsActive() == 0) {
             kwlnFadeStartIn(8);
         }
-        if (kwlnTaskFindByPriority(0x3EA) == NULL && func_00150F10() == 0) {
+        if (kwlnTaskFindByPriority(0x3EA) == NULL && fldGetSparkDialogPhase() == 0) {
             fldPreparePlayerSceneCameraTarget();
         }
         dds3ClearObjectFlags(fldPlayerObject, 0x40);
@@ -2325,7 +2325,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         }
         fldFinishDeferredExit();
         if (fldAreaState.transitionMode != 0) {
-            func_00150F20();
+            fldUpdateSparkEncounterScene();
             fldMarkStageExplorationCellsAroundPosition(fldAreaState.floor, fldAreaState.unkC0,
                           fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_00389988[0] == 0) {
@@ -2333,7 +2333,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             if (fldTestSceneControlFlags(0x20) == 0) break;
             if (D_00389988[0] == 0) fldUpdateNextFloorTransition();
         }
-        if (func_00150F10() != 0) fldUpdateDevilizeEventSequence();
+        if (fldGetSparkDialogPhase() != 0) fldUpdateDevilizeEventSequence();
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
         if (fldIsTargetWithinInteractionRange() != 0 && fldAreaState.targetGuideActive == 1) {
             func_00154F18(1);

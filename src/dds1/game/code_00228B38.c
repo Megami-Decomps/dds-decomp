@@ -114,7 +114,7 @@ void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 l
 }
 
 /* Submit the fixed fourteen-point solar marker with a scaled leading alpha. */
-void func_00228FB0(s32 unused0, s32 unused1, s32 alpha, s32 intensity, s32 object) {
+void evtDrawSolarBackdropFan(s32 unused0, s32 unused1, s32 alpha, s32 intensity, s32 object) {
     s32 positions[28] = {
         47, 48, 76, 48, 72, 63, 63, 75, 51, 79, 38, 75, 29, 64,
         27, 48, 29, 32, 38, 20, 51, 16, 63, 20, 72, 31, 76, 48,
@@ -131,7 +131,7 @@ void func_00228FB0(s32 unused0, s32 unused1, s32 alpha, s32 intensity, s32 objec
 }
 
 /* Scale a selected overlay shape's alpha values and submit it between GS states. */
-void func_00229100(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale,
+void evtDrawSolarPhaseFan(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale,
     s32 entryIndex, s32 object) {
     s32 colors[4];
     s32 i;
