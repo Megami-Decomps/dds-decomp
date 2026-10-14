@@ -1774,7 +1774,7 @@ EffPCPSharedTrailRef *effPcpCreateSharedTrailRef(EffPCPTrailParams *params) {
         effPcpSharedTrailWork->pos[0] = 0;
         effPcpSharedTrailWork->pos[1] = 0;
         effPcpSharedTrailWork->pos[2] = 0;
-        effPcpSharedTrailWork->unk1C = 0;
+        effPcpSharedTrailWork->sizeInput = 0;
         effPcpSharedTrailWork->limit = params->count;
         effPcpSharedTrailWork->unk24 = params->count;
         effPcpSharedTrailWork->colors[0] = params->colors[0];
@@ -1801,13 +1801,18 @@ typedef struct EffPCPTrailWork {
     u32 flags;
     u32 color;
     u32 frame;
-    f32 unk1C;
+    f32 sizeInput;
     u32 count;
     u32 colors[2];
     f32 scale; /* multiplies the computed trail size */
     s32 minSize;
     EffBlurTemplate *obj;
 } EffPCPTrailWork;
+
+typedef char EffPCPTrailWork_size_must_be_0x38[
+    (sizeof(EffPCPTrailWork) == 0x38) ? 1 : -1];
+typedef char EffPCPTrailWork_sizeInput_offset_must_be_0x1C[
+    ((u32)&((EffPCPTrailWork *)0)->sizeInput == 0x1C) ? 1 : -1];
 
 extern s32 effMeasureCameraRightScreenOffsetVU(f32 value);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
@@ -1837,7 +1842,7 @@ void effPcpUpdateSharedTrail(ref)
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
         VU0_LOAD_VF($vf10, work);
-        obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
+        obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->sizeInput) * EFF_SHARED_TRAIL->scale);
         VU0_STORE_VF($vf10, pos);
         obj->body.source.position[0] = (s32)pos[0] - 0x800;
         obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
@@ -1859,7 +1864,7 @@ void effPcpSharedTrailSetFlags(u32 unused, u32 val) {
 }
 
 void effSetSharedScale(u32 unused, f32 value) {
-    effPcpSharedTrailWork->unk1C = value;
+    effPcpSharedTrailWork->sizeInput = value;
 }
 
 
@@ -1873,7 +1878,7 @@ EffPCPTrailWork *effPcpTrailCreate(EffPCPTrailParams *params) {
     work->pos[0] = 0.0f;
     work->pos[1] = 0.0f;
     work->pos[2] = 0.0f;
-    work->unk1C = 0.0f;
+    work->sizeInput = 0.0f;
     work->count = params->count;
     work->colors[0] = params->colors[0];
     work->colors[1] = params->colors[1];
@@ -1895,7 +1900,7 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
 
     obj = work->obj;
     VU0_LOAD_VF($vf10, work->pos);
-    obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->unk1C) * work->scale);
+    obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->sizeInput) * work->scale);
     VU0_STORE_VF($vf10, pos);
     obj->body.source.position[0] = (s32)pos[0] - 0x800;
     obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
@@ -1921,7 +1926,7 @@ void effPcpSetTrailFlags(EffPCPTrailWork *work, u32 val) {
 }
 
 void effPcpTrailSetSizeInput(EffPCPTrailWork *work, f32 val) {
-    work->unk1C = val;
+    work->sizeInput = val;
 }
 
 EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params) {
