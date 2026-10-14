@@ -442,7 +442,29 @@ SdfMotionDrawBinding *sdfMotionCreateInterpolatedQuaternionBinding(Motion *motio
     return binding;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", sdfMotionApplyInterpolatedEulerRotation);
+/* vu0 routine: interpolate the Euler-angle keys, then rebuild the node's quaternion
+ * and rotation rows. The angle vector is read back only through the stack, so it
+ * is volatile (retail reloads it in order and leaves the call's delay slot empty). */
+void sdfMotionApplyInterpolatedEulerRotation(SdfMotionDrawBinding *binding, f32 frame) {
+    SdfMotionKeyInterval keyInterval;
+    volatile f32 angles[4] __attribute__((aligned(16)));
+    SdfDrawNode *drawNode;
+    f32 (*matrix)[4];
+
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
+    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    VU0_LERP_VF10_CLEAR_W(keyInterval.weight);
+    VU0_STORE_VF(vf10, (f32 *)angles);
+    sdfConvertEulerAnglesToQuaternionVU(angles[0], angles[1], angles[2]);
+    drawNode = binding->node;
+    VU0_STORE_VF(vf10, drawNode->quaternion);
+    matrix = drawNode->localMatrix;
+    effMiscQuaternionToMatrixVU();
+    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
+    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
+    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", sdfMotionBlendInterpolatedEulerRotation);
 
