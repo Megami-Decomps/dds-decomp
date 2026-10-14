@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_special_ability.h"
+#include "dat_unit_has_skill_api.h"
 #include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
@@ -106,8 +107,6 @@ extern void *D_00358450[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
-
-extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 
 extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
 extern s32 D_003BAA14;

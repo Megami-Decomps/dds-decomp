@@ -13,6 +13,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "dat_unit_has_skill_api.h"
 #include "evt_randomize_entry_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
@@ -734,7 +735,6 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
 }
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
-extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 extern void sdfDebugPrintf(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
