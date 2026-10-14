@@ -215,7 +215,7 @@ void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *comma
     }
 }
 
-void func_00162948(void) {
+void dds3AdminSubmitEmptyModeRequest(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
