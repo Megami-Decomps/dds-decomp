@@ -708,8 +708,8 @@ void btlAverageFilteredMaximumForMask(u32 arg0) {
     btlAverageMaximumValueForMask(arg0, 1);
 }
 
-void btlAverageAllMaximumForMask(u32 arg0) {
-    btlAverageMaximumValueForMask(arg0, 0);
+s32 btlAverageAllMaximumForMask(u32 arg0) {
+    return btlAverageMaximumValueForMask(arg0, 0);
 }
 
 s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
