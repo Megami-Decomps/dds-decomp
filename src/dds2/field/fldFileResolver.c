@@ -4929,7 +4929,7 @@ void fldClearCameraObjectTransitionFlags(void) {
 
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 /* State-first XYZ publication; SDK snapshot audit: docs/idioms.md. */
-s32 func_00133B10(void) {
+s32 fldSynchronizePlayerPositionAndAreaState(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 current[3];
     ObjectTransform *inner;

@@ -1216,7 +1216,7 @@ extern MdlCtx *fldPlayerModelContext;
  * pipeline; they are not general-purpose memory barriers. */
 
 extern void ddsReleaseUnitObject(EffWorldNode *);
-extern s32 func_00133B10(void);
+extern s32 fldSynchronizePlayerPositionAndAreaState(void);
 
 void fldTogglePlayerModel(void) {
     f32 work[4];
@@ -1282,7 +1282,7 @@ void fldTogglePlayerModel(void) {
     fldApplySceneLightSet(0, 0);
     fldApplySkyLightSet(D_00389988[0x2C / 4], 0);
     fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
-    func_00133B10();
+    fldSynchronizePlayerPositionAndAreaState();
 }
 
 
@@ -1551,7 +1551,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             }
             fldClearCameraObjectActiveFlag(fldAreaState.commandEnabled);
         }
-        func_00133B10();
+        fldSynchronizePlayerPositionAndAreaState();
         evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0038A610, (s32)(u32)D_00435F50);
     }
 }
