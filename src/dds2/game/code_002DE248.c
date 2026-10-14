@@ -1,4 +1,5 @@
 #include "eff_packet_params.h"
+#include "sdf_packet_header.h"
 #include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
@@ -14339,7 +14340,6 @@ typedef union EffSpriteColor {
 
 extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);

@@ -1,4 +1,5 @@
 #include "eff_packet_params.h"
+#include "sdf_packet_header.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_packet_list.h"
@@ -24,7 +25,6 @@ extern BillDispatch billObjectCallbacks[];
 
 extern BillDispatch D_0034E654[];
 extern BillDispatch effBillConstructorEntries[];
-extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void (*D_0034E680[])();
