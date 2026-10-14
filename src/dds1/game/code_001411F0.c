@@ -49,6 +49,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "fr_font.h"
+#include "itf.h"
 
 extern void sndQueueNoPayloadCommand1A0(void);
 extern u8 D_00324510[2][2][16];
@@ -1121,7 +1122,6 @@ extern void func_001428C0(s32, f32, f32, f32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
-extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
 extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
 
