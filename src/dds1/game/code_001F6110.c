@@ -207,7 +207,6 @@ extern f32 sdfViewTargetVector[];
 extern f32 sdfViewMatrix[];
 extern f32 sdfProjectionMatrix[];
 extern f32 D_00324660[];
-extern void sdfPostmultiplyVuMatrixFromMemory(f32 *);
 
 /* vu0 routine: forward-cone projection from vf10 to integer screen XY */
 s32 btlProjectForwardPositionToScreen(s32 *out) {

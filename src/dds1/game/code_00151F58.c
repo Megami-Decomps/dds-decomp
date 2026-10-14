@@ -2,6 +2,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "eff_generated_texture_descriptor.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -334,7 +335,6 @@ extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
 extern u8 D_0034E080[];
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern f32 sdfAtan2(f32, f32);
 
 /* vu0 routine: project position and position + scaled offset; return the reverse XY heading. */

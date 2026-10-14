@@ -391,7 +391,6 @@ extern u8 D_0037F650[];
 
 extern u8 D_0037F660[];
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 extern Motion *mdlFindNodeById(MdlCtx *, s32);

@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_pad_entry.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
@@ -178,7 +179,6 @@ extern SdfTex *D_00438A80;
 
 extern vu8 sdfCurrentBufferIndex;
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void sdfPostmultiplyVuMatrixFromMemory(void *matrix);
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void sdfPremultiplyVuMatrixFromMemory(void *matrix);
 

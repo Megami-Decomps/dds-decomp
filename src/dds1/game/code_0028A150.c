@@ -3730,7 +3730,6 @@ SdfPoolNode *effGetPacketSubmissionSurface(s32 index) {
 extern u8 sdfViewMatrix[];
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 /* vu0 routine: project the point in vf10 through view/projection and screen scale/bias. */
 void mnuProjectViewPoint(void) {

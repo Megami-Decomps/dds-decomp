@@ -257,7 +257,6 @@ extern u8 sdfViewMatrix[];
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 
