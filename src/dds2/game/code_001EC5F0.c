@@ -5478,10 +5478,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle) {
     node->flags = flags | 10;
 }
 
-typedef struct SoundHandleNode {
-    struct FileQueue *queue;
-    void *actor;
-} SoundHandleNode;
+#include "btl_sound_handle_node.h"
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
