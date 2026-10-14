@@ -229,7 +229,6 @@ extern void datAdjustCurrentHp();
 extern s32 fldLoadAreaResource();
 extern void btlReleaseEventAssets();
 extern void btlReleaseBossData();
-extern void fldPollAreaResourceLoad();
 #include "brs_task_poll_done_api.h"
 
 extern s32 func_001B2630();

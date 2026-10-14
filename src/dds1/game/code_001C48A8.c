@@ -1066,7 +1066,6 @@ extern void btlReleaseEventAssets();
 
 extern void btlReleaseBossData();
 
-extern void fldPollAreaResourceLoad();
 
 
 extern void btlBossDebugPrintf(const char *format, ...);
