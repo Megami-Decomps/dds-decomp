@@ -12423,3 +12423,34 @@ last source use and has register weight -1 versus the front store's 0. It
 therefore issues first, giving retail's back-FOV then front-FOV store order.
 Writing C in the emitted order reverses those two words. Direct world and
 motion-transform API declarations preserve the real provider contracts.
+
+## Trace-justified level-progress right-edge coordinate
+
+DDS1 `brsDrawLevelProgressIndicator` (`0x00267E20`, 460 bytes) uses the
+canonical `BrsSkillPackageWork.levelAnimation` fields for its icon and the two
+completion sprites. The 16-byte palette copy at `0x00267E60..0x00267E80`
+survives before recoloring; its existing `D_003AFC60` storage is unchanged.
+
+For the final sprite, keep the complete relative coordinate in the real
+`spriteX` local:
+
+```c
+spriteX = work->levelAnimation[index].auxiliaryPosition[0] + 0x4D;
+```
+
+The qualified cc1probe traces agree with unhooked compilation. If `spriteX`
+holds only the reloaded field and the offset remains inside the call,
+the reload defines global pseudo 96. Local allocation combines the offset
+and shift temporaries, and the argument suggestion chooses `$4`; global
+allocation also puts pseudo 96 in `$4`. This leaves two words different:
+the load at `+0x170` and the add's input at `+0x180`. Reading the field directly
+inside the argument does not change that result.
+
+Property P is that the local holds the actual right-edge coordinate, not
+the unadjusted field. With the assignment above, UID 396 loads a distinct
+pseudo 213, UID 398 adds 77 into pseudo 96, and UID 427 shifts that coordinate.
+Local allocation gives pseudo 213 `$2` without a hard-register suggestion;
+pseudo 96 still becomes `$4`. This reproduces retail's `lw $2` followed by
+`addiu $4,$2,77` without pinning either register. The complete unit gates
+`46 match, 0 differ`, including all 45 previously matched C functions and
+rodata. The trace paths and all three forms are recorded in the agent ledger.

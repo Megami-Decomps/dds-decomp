@@ -224,7 +224,53 @@ void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSki
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawLevelProgressIndicator);
+typedef struct BrsLevelCornerColors {
+    u32 values[4];
+} BrsLevelCornerColors;
+
+extern const BrsLevelCornerColors D_003AFC60;
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+
+void brsDrawLevelProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                                 BrsProgressRow *row, s32 context, s32 index) {
+    BrsLevelCornerColors colors = D_003AFC60;
+    u32 color;
+    s32 spriteX;
+    s32 spriteY;
+    s32 drawY;
+
+    /* 0x00267E60..0x00267E80 retains the palette copy before recoloring. */
+    if (work->teardownResource != NULL) {
+        if (work->levelAnimation[index].iconState != 0) {
+            spriteX = work->levelAnimation[index].iconPosition[0];
+            spriteY = work->levelAnimation[index].iconPosition[1];
+            color = work->levelAnimation[index].iconColor | 0x80808000;
+            colors.values[0] = color;
+            colors.values[1] = color;
+            colors.values[2] = color;
+            colors.values[3] = color;
+            effDrawSpriteWithCornerColors(x + (spriteX << 4), y + (spriteY << 3),
+                                          z, colors.values, 0, work->teardownResource, 0xD, context);
+        }
+        if (work->levelAnimation[index].completionState != 0) {
+            spriteX = work->levelAnimation[index].auxiliaryPosition[0];
+            spriteY = work->levelAnimation[index].auxiliaryPosition[1];
+            color = work->levelAnimation[index].auxiliaryColor | 0x80808000;
+            drawY = y + (spriteY << 3);
+            colors.values[0] = color;
+            colors.values[1] = color;
+            colors.values[2] = color;
+            colors.values[3] = color;
+            effDrawSpriteWithCornerColors(x + (spriteX << 4), drawY, z, colors.values,
+                                          0, work->teardownResource, 0x15, context);
+            /* Keep the right-edge coordinate in spriteX; see docs/idioms.md,
+             * "Trace-justified level-progress right-edge coordinate". */
+            spriteX = work->levelAnimation[index].auxiliaryPosition[0] + 0x4D;
+            effDrawSpriteWithCornerColors(x + (spriteX << 4), drawY, z, colors.values,
+                                          0, work->teardownResource, 0x16, context);
+        }
+    }
+}
 
 void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
     s32 y;
