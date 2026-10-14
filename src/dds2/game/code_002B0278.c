@@ -3879,7 +3879,55 @@ MenuListNode *mnuScrollListToEnd(MenuList *list) {
     return list->cursor;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuScrollListToPreviousPage);
+/* Retreat the window by up to one page; at the first page, select the first
+ * node, otherwise re-centre a cursor left on the window's final row. */
+MenuListNode *mnuScrollListToPreviousPage(MenuList *list) {
+    s32 i;
+    MenuListNode *node;
+
+    if (list->cursor == NULL) {
+        return 0;
+    }
+    i = 0;
+    while (i < list->visibleCount) {
+        if (list->head == list->first) {
+            if (i == 0) {
+                if (list->cursor == list->first) {
+                    return 0;
+                }
+                list->windowOffset = 0;
+                list->cursor = list->first;
+                return list->first;
+            }
+            break;
+        }
+        mnuRetreatListWindowStart(list);
+        i++;
+        list->cursor = list->cursor->prev;
+        list->windowOffset -= 1;
+    }
+    if (list->head == list->first) {
+        list->windowOffset = 0;
+        list->cursor = list->first;
+        return list->first;
+    }
+    node = list->head;
+    for (i = 0; i < list->visibleCount - 1; i++) {
+        node = node->next;
+        if (node == NULL) {
+            break;
+        }
+    }
+    if (list->cursor == node) {
+        list->cursor = list->head;
+        list->windowOffset = list->visibleCount - 2;
+        for (i = 0; i < list->visibleCount - 2; i++) {
+            list->cursor = list->cursor->next;
+        }
+    }
+    mnuUpdateListScrollFlags((u8 *)list);
+    return list->cursor;
+}
 
 void mnuClearListFlagsOneAndTwo(u32 *flags) {
     *flags &= ~1;
