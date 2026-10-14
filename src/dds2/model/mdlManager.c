@@ -1283,7 +1283,6 @@ typedef struct MdlPartTagRecord {
     u8 pad05[3];
 } MdlPartTagRecord;
 extern u32 mdlGetViewerRecordPayloadWord(MdlRecord *record);
-extern u16 mdlGetRecordSlotCount(MdlRecord *record);
 extern void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, struct SdfMemBlock *allocation, s32 size);
 
 /* Apply the group's counted parts and entity slots; return the next packet. */

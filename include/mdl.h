@@ -214,6 +214,9 @@ u8 mdlHasNode(MdlCtx *ctx, s32 searchId);
 /* The referenced halfword is promoted to a word-sized SDK result. */
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId);
 
+/* Count of following entity-slot packets in a grouped record. */
+u16 mdlGetRecordSlotCount(MdlRecord *record);
+
 /* VU helpers transfer vectors through vf10 and basis rows through vf28-vf30. */
 void mdlLoadPrimaryVectorVU(MdlCtx *ctx);
 void mdlStorePrimaryVectorVU(MdlCtx *ctx);
