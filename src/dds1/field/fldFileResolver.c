@@ -8567,7 +8567,7 @@ void fldApplySceneRoomSelection(FldActorEntry *entry) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013DF60);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013E5A8);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldDispatchSceneAction);
 
 void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
     switch (mode) {

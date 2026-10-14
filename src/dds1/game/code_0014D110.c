@@ -27,6 +27,7 @@ extern s32 fldGetActorStat1(s32);
 extern s32 fldGetActorStat0(s32);
 
 extern s32 scrReadIntParameter(s32);
+extern void fldDispatchSceneAction(u32 action);
 
 
 extern s32 fldFindRoomByTask(u32);
@@ -1167,7 +1168,7 @@ u32 func_0014EEF8(void) {
     s32 value;
 
     value = scrReadIntParameter(0);
-    func_0013E5A8(value);
+    fldDispatchSceneAction(value);
     return 1;
 }
 
