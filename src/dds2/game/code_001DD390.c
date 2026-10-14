@@ -591,7 +591,7 @@ extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
 extern s32 btlRollFearChance(s32, BtlUnit *, s32, s32);
 
-extern s32 func_001B4600(BtlUnit *, s32);
+extern s32 btlRollPetrifiedDeathChance(BtlUnit *, s32);
 
 extern s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *);
 
@@ -601,7 +601,7 @@ extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
 extern u8 btlGetActorDisplayByteWithDefault(BtlUnit *, s32);
 
-extern s32 func_001B4918(BtlUnit *, BtlUnit *);
+extern s32 btlSelectCounterSkill(BtlUnit *, BtlUnit *);
 
 extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
@@ -1091,7 +1091,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 break;
             }
             {
-                if (kind == 1 && func_001B4600(recipient, command)) {
+                if (kind == 1 && btlRollPetrifiedDeathChance(recipient, command)) {
                     hitCount = hitIndex + 1;
                     fearPending = 0;
                     allEmpty = 0;
@@ -1163,7 +1163,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             kind == 1 && !group->inactive && !group->reflected && !group->targetSpecialHit &&
             !absorbed && !(action->pendingFlags & 0x40) && !(target->partyRecord.status & 0x290F) &&
             !(addedStatus & 0x290F)) {
-            s32 counter = func_001B4918(target, action->unit);
+            s32 counter = btlSelectCounterSkill(target, action->unit);
             if (counter > 0) {
                 s32 counterPhase;
                 ActionStateLink *reaction = btlFindUnitByActor(target);

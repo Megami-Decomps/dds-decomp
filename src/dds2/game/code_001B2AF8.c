@@ -1045,7 +1045,7 @@ const f32 D_004157A0[9] __attribute__((section(".rodata"), aligned(8))) = {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004157C8);
 
-s32 func_001B4600(BtlUnit *unit, s32 command) {
+s32 btlRollPetrifiedDeathChance(BtlUnit *unit, s32 command) {
     s32 kind;
     s32 chance;
     f32 ratio;
@@ -1159,7 +1159,7 @@ typedef struct BtlAiActionEntry {
 
 extern BtlAiActionEntry D_003B5100[];
 
-s32 func_001B4918(BtlUnit *unit, BtlUnit *target) {
+s32 btlSelectCounterSkill(BtlUnit *unit, BtlUnit *target) {
     s32 result;
     s32 threshold;
     u32 i;
