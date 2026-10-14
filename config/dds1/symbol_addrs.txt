@@ -7504,6 +7504,7 @@ btlSetEligibleActorPanelTransitionState = 0x001ACC20; // type:func
 fldMarkStageExplorationBitmapRegion = 0x00121DE0; // type:func
 sdfDevDiscRequestWorkerThread = 0x002E6538; // type:func
 btlSelectSerialEncounter = 0x001A9780; // type:func
+sndDispatchIopAudioCommand = 0x002F5990; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -10229,7 +10230,6 @@ func_002F55B0 = 0x002F55B0; // type:func
 sceIpuInit = 0x002F5618; // type:func
 sceSdTransToIOP = 0x002F58F8; // type:func
 func_002F5980 = 0x002F5980; // type:func
-func_002F5990 = 0x002F5990; // type:func
 func_002F5C50 = 0x002F5C50; // type:func
 func_002F5D28 = 0x002F5D28; // type:func
 func_002F5D90 = 0x002F5D90; // type:func
