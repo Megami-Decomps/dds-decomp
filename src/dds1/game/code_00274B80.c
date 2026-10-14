@@ -1346,7 +1346,66 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEquippedSkillEntry);
+extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
+extern void itfGridCopyEntryQuad(s32, s32);
+
+/* Draw an equipped skill's range and cost, or the two empty-slot markers. */
+void ptySkillMenuDrawEquippedSkillEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
+                   struct MenuListNode *node, s32 texture) {
+    CampMenuContext *context = (CampMenuContext *)list->context;
+    u32 skill = node->sortKeyPrimary;
+    s32 selected = 0;
+    s32 highlight;
+    s32 partyIndex;
+    DatPartyRecord *actor;
+    s32 entryIndex;
+    s32 markerX;
+    s32 markerY;
+
+    if (list->cursor == node) {
+        u32 locked = list->stateFlags & 8;
+
+        selected = locked == 0;
+    }
+    partyIndex = context->partyWindow.lists[0]->cursor->index;
+    if (node->flags48 & 2) {
+        selected = 1;
+    }
+    highlight = selected != 0;
+    entryIndex = highlight + 9;
+    actor = &datGameState->party[partyIndex];
+    if (skill != 0) {
+        s32 icon;
+        s32 dim;
+
+        markerX = x + 0x20;
+        markerY = y;
+        icon = mnuLookupRangeEntry((u16)skill) * 2;
+        if (selected) {
+            icon += 1;
+        }
+        itfDrawGridWithResolvedSlot(markerX, markerY, depth, 1,
+                      (EffectSlotSet *)(u32)context->variant, icon + 0xA, texture);
+        dim = node->flags48 & 1;
+        mnuDrawRangeCostAndIcon(x + 0x930, y + 0x30, depth, 0xF0, list->scale, actor,
+                      (u16)skill, selected, dim,
+                      (EffectSlotSet *)(u32)context->unk68,
+                      (EffectSlotSet *)(u32)context->displayVariant, texture);
+        return;
+    }
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)(u32)context->unk68;
+
+        markerX = x + 0x150;
+        markerY = y + 0x30;
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        itfDrawGridWithResolvedSlot(markerX, markerY, depth, 1,
+                                    resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+        itfDrawGridWithResolvedSlot(x + 0x9A0, markerY, depth, 1,
+                      (EffectSlotSet *)(u32)context->unk68, highlight + 0xB, texture);
+    }
+}
 
 /* The camp initializer allocates and clears this complete 0x38-byte child.
  * Skill pages own four category windows and a separate selected-slot window. */
