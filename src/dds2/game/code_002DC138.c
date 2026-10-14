@@ -14,6 +14,7 @@
 #include "sdf.h"
 #include "sdf_texture_submit.h"
 #include "sdf_texture_file.h"
+#include "sdf_tex_packet.h"
 #include "sdf_tex_create.h"
 #include "sdf_chunk.h"
 #include "eff_expanded_source.h"
@@ -670,7 +671,6 @@ void effObjectListCountersReset(void) {
 }
 
 extern s32 sdfFormatImageSize(u32 format, s32 width, s32 height);
-extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
 RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {
     u32 paletteWidth;
