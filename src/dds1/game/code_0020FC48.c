@@ -3,6 +3,7 @@
 #include "common.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
+#include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "kwln_draw_buffer.h"
@@ -2215,7 +2216,6 @@ extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern s32 btlGetUnitModelFrameCount(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, void *);
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
-extern s32 btlSelectSharedOrIndexedTransformParameters(s32, s32);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
@@ -2464,7 +2464,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 btlRefreshUnitMotionSelection(unit);
                 state->debug.unk00 = 2;
             } else {
-                transform = (BtlActorTransformParameters *)btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
+                transform = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
                 if (sdfPadButtonStates[2] < 0) {
                     record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
                     transform->reach = record->unk18;

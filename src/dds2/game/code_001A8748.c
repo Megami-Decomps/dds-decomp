@@ -35,6 +35,7 @@
 #include "scr.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
+#include "btl_select_transform_parameters_api.h"
 #include "mnu_result.h"
 #include "dat_command.h"
 #include "sdf_sif_command.h"
@@ -1788,11 +1789,11 @@ s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
     return D_00435DF0 + arg1 * 0x270;
 }
 
-s32 btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
     if (arg0 == 0) {
-        return (s32)D_003B4DC0;
+        return (BtlActorTransformParameters *)D_003B4DC0;
     }
-    return D_00435E00 + arg1 * 24;
+    return (BtlActorTransformParameters *)(D_00435E00 + arg1 * 24);
 }
 
 s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
