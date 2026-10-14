@@ -3,6 +3,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_frame_draw_buffer.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -548,7 +549,7 @@ extern s32 sdfConsMeasurePacketWithHeader(s32);
 
 extern u32 kwlnGetDrawBufferIndex(void);
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
@@ -2618,7 +2619,7 @@ void fldSubmitPrimaryFramePacket(void) {
     SdfPoolNode *descriptor;
     sdfInitPacketList(command);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
     sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -2630,7 +2631,7 @@ void fldSubmitAlternateFramePacket(void) {
     SdfPoolNode *descriptor;
     sdfInitPacketList(command);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
     sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -2704,7 +2705,7 @@ void fldSubmitTexturedOverlaySprite(void) {
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
     sdfAppendDmaPrimary(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
+                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     /* Set texture alpha and flush the texture cache. */
@@ -2769,7 +2770,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
     sdfAppendDmaPrimary(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
+                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     firstPacket = (u64 *)sdfAllocPacketAligned(0x40);
@@ -2839,7 +2840,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
     sdfAppendDmaPrimary(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
+                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
@@ -3251,7 +3252,7 @@ void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
     SdfPoolNode *descriptor;
 
     sdfAppendDmaPrimary(list,
-        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+        (u32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), reference);
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
     texturePacket[0] = 3;
     texturePacket[1] = 0x5000000310000000ULL;

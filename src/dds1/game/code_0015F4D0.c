@@ -2,6 +2,7 @@
 #include "sdf_packet_header.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
@@ -17,7 +18,7 @@
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern SdfTex *kwlnTextureGetHeldReference(void);
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00324B88;
 extern SdfPoolNode D_00325588;
 
@@ -466,7 +467,7 @@ void dds3UpdateCrossfade(void) {
         sdfInitPacketList(list);
         reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
         sdfAppendDmaPrimary(list,
-            (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40),
+            (u32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes),
             reference);
         texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
         texturePacket[0] = 3;

@@ -4,6 +4,7 @@
 #include "common.h"
 #include "eff_generated_texture_descriptor.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf.h"
@@ -585,7 +586,7 @@ struct EffCompositeGsDescriptor {
 typedef char EffCompositeGsDescriptor_size_must_be_0x68[
     (sizeof(EffCompositeGsDescriptor) == 0x68) ? 1 : -1];
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void func_002E2A00(u8 *, const f32 *, u32, u32,
@@ -604,7 +605,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     f32 cornerX, cornerY;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), framePacket, 0);
     sdfAppendDmaTagToList(list, (u32)framePacket);
 
     state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
@@ -715,7 +716,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     sdfAppendPacket(list, (u32)geometry);
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), framePacket, 0);
     sdfAppendDmaTagToList(list, (u32)framePacket);
 
     state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);

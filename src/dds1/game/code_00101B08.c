@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_draw_packet_groups.h"
 #include "kwln_sprite.h"
@@ -399,7 +400,7 @@ extern s32 fldIsUpdateInhibited(void);
 extern void func_002EA5C0(s32);
 extern void sdfQueueFramePackets(SdfListHead *, SdfPacketChain *);
 extern u8 D_00325788[];
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00325708;
 extern u8 kwlnDrawOverlayEnabled;
 extern s16 kwlnDrawOverlayAlpha;
@@ -442,7 +443,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
     if (kwlnDrawOverlayEnabled != 0 && fldIsUpdateInhibited() == 0) {
         packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
         sdfInitPacketList(packetList);
-        sdfAppendDmaPrimary(packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
+        sdfAppendDmaPrimary(packetList, (u32)(kwlnFrameDrawPacketRecords[bufferIndex].baseBytes), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
         texturePacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         texturePacket[0] = 3;
         /* VIF FLUSHA, then DIRECT for the three following quadwords. */
