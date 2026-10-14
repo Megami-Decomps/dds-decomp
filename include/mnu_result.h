@@ -189,7 +189,7 @@ typedef struct BrsSkillPackageWork {
         struct EffectSlotSet *teardownResource;
         u32 opacity;
         s8 resultPhase;
-        s8 unkD4D;
+        s8 skipProgressAnimation;
         u8 padD4E[0x2];
         BrsSkillIconRow leadIconRow;
         BrsSkillIconRow followIconRows[4];
@@ -208,7 +208,7 @@ typedef struct BrsSkillPackageWork {
         struct EffectSlotSet *teardownResource;
         u32 opacity;
         s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (mnuDrawUnitProgressRows) */
-        s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
+        s8 skipProgressAnimation; /* 0xAEB9: set when the confirm input lands at full opacity */
         u8 padAEBA[0x2];
         BrsSkillIconRow leadIconRow;
         BrsSkillIconRow followIconRows[4];
