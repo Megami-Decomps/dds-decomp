@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_scaled_value.h"
 #include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -11,7 +12,6 @@
 #include "kwln_task_state.h"
 #include "sdf_texture_offset_list.h"
 
-struct EvtScaledValue;
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 
 
