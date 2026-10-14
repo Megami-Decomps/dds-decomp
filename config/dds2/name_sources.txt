@@ -816,6 +816,7 @@
 0x00139950	fldApplyRelativeZoneMotion	inferred	Applies movement deltas from relative zone anchors to the supplied player position and publishes a pending target for fldUpdateCameraTarget.
 0x0013AA90	fldGetPositionZoneClearance	inferred	Finds the closest permitted zone-plane clearance or returns negative one. [names_reviewed8.tsv]
 0x0013B0D0	fldClipSegmentToPositionZones	inferred	Tests the segment against eligible relative zone planes, clips the hit point to zone clearance, and returns the intersected zone index.
+0x0013B4F8	fldAddAxisAlignedCollisionBoxVerticalFaces	inferred	confidence=high; builds eight corner positions and four vertical faces for a field collision box in FldWallMeshRecord; paired title function 0x00138910. Original paired C reconstruction landed in af6a1a958 by red thing.
 0x0013B818	fldResetZoneRecordsAndActorSlots	inferred	Clears all field zone records and resets the actor slots. [names_reviewed8.tsv]
 0x0013D308	fldTestRoomProbeFacingAndRange	inferred	R_Structs55
 0x0013D598	fldTestRoomProbeFacing	inferred	R_Structs55

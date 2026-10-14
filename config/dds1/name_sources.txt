@@ -1043,6 +1043,7 @@
 0x00136DA0	fldApplyRelativeZoneMotion	inferred	Applies movement deltas from relative zone anchors to the supplied player position and publishes a pending target for fldUpdateCameraTarget.
 0x00137EA8	fldGetPositionZoneClearance	inferred	Finds the closest permitted zone-plane clearance or returns negative one. [names_reviewed8.tsv]
 0x001384E8	fldClipSegmentToPositionZones	inferred	Tests the segment against eligible relative zone planes, clips the hit point to zone clearance, returns the zone index, and handles stop metadata on the flagged face type.
+0x00138910	fldAddAxisAlignedCollisionBoxVerticalFaces	inferred	confidence=high; builds eight corner positions and four vertical faces for a field collision box in FldWallMeshRecord; paired title function 0x0013B4F8. Original paired C reconstruction landed in af6a1a958 by red thing.
 0x00138C30	fldResetZoneRecordsAndActorSlots	inferred	Clears all field zone records and resets the actor slots. [names_reviewed8.tsv]
 0x00138D88	fldResetTaskSlots	inferred	clears D_003308B0 task slots and re-registers HUNT_MDL_UNIT flag objects
 0x00138EB0	fldPushDisplayValue	inferred	appends arg to D_003C92E0[D_003BAE28++] bump-allocator array; parked regalloc ($5 vs $2) diff

@@ -23,6 +23,7 @@ sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
 effObjApplyTransformParameters = 0x00112518; // type:func
+fldAddAxisAlignedCollisionBoxVerticalFaces = 0x0013B4F8; // type:func
 scrTestEntryFlagBit15 = 0x0026DB48; // type:func
 scrClearEntryFlagAtZeroBit0 = 0x0026DB70; // type:func
 scrTestEntryFlagAtZeroBit0 = 0x0026DB90; // type:func
@@ -9194,7 +9195,6 @@ func_0013AA78 = 0x0013AA78; // type:func
 func_0013AA80 = 0x0013AA80; // type:func
 func_0013AA88 = 0x0013AA88; // type:func
 fldFindFieldSegmentIntersection = 0x0013AC40; // type:func
-func_0013B4F8 = 0x0013B4F8; // type:func
 func_0013B810 = 0x0013B810; // type:func
 func_0013BAB8 = 0x0013BAB8; // type:func
 func_0013DBB0 = 0x0013DBB0; // type:func

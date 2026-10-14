@@ -31,6 +31,7 @@ sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
 effObjApplyTransformParameters = 0x001122F0; // type:func
+fldAddAxisAlignedCollisionBoxVerticalFaces = 0x00138910; // type:func
 sdfDebugPrintf = 0x003003F0; // type:func
 sprintf = 0x003014F0; // type:func
 sdfGetFlagListAlphaSurfaceIndex = 0x002CF3E8; // type:func
@@ -8401,7 +8402,6 @@ func_00137E90 = 0x00137E90; // type:func
 func_00137E98 = 0x00137E98; // type:func
 func_00137EA0 = 0x00137EA0; // type:func
 fldFindFieldSegmentIntersection = 0x00138058; // type:func
-func_00138910 = 0x00138910; // type:func
 func_00138C28 = 0x00138C28; // type:func
 func_00138ED0 = 0x00138ED0; // type:func
 func_0013AFC8 = 0x0013AFC8; // type:func
