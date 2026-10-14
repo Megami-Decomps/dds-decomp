@@ -1110,7 +1110,7 @@ extern void fldPollAreaResourceLoad();
 
 extern s32 fldGetResourceReadyFlag();
 
-extern s32 brsTaskPollDone();
+#include "brs_task_poll_done_api.h"
 
 /* Field-load step: while loading, sends every linked scene node to state
  * 0x1F, otherwise advances loadStep (0 start, 1 polling, 2 done). Returns
