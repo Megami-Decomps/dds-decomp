@@ -2160,7 +2160,99 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E5198);
+/* The pair preset row with an integer frame count in place of the motion parameter. */
+typedef struct BattlePairCameraFramePreset {
+    f32 fromQuaternion[4];
+    f32 toQuaternion[4];
+    f32 fromDistanceScale;
+    f32 toDistanceScale;
+    f32 fromHeightScale;
+    s32 frames;
+} BattlePairCameraFramePreset;
+
+/* Frame the first listed target from one of two randomized pair presets: both
+ * cameras start at its muzzle, lowered by the preset height scale, at a distance
+ * that fits the larger of its reach (wider view) and half its height. */
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4190);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4310);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4320);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
+
+void func_001E5198(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 quaternion[4];
+    f32 position[4];
+    BattlePairCameraFramePreset poses[2] = {
+        {{0.058f, -0.871f, 0x1.1eb85p-3f, -0.443f},
+         {-0.03f, -0x1.f0a3d6p-1f, 0.153f, 0x1.c6a7eep-4f},
+         1.3f, 0x1.f33332p0f, 0.775f, 32},
+        {{-0.042f, -0x1.e7ef9cp-1f, 0.117f, 0.232f},
+         {0.03f, -0x1.deb85p-1f, 0x1.418936p-3f, -0x1.1eb85p-2f},
+         1.3f, 0x1.f33332p0f, 0.775f, 32},
+    };
+    BtlUnit *unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    s32 pose;
+    f32 fov;
+    f32 height;
+    f32 reach;
+
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
+    reach = unit->reach * unit->scale;
+    height = unit->height;
+    height *= unit->scale;
+    pose = effMiscRandMod(0, 2);
+    btlCopyUnitRotationQuaternion(unit, quaternion);
+    fov = action->camera.fov;
+    from->fov = fov;
+    to->fov = fov;
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_LOAD_VF(vf10, position);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_STORE_VF(vf10, to->position);
+    to->position[1] = from->position[1] = -height * poses[pose].fromHeightScale;
+    height *= 0.5f;
+    fov *= 0.5f;
+    if (height < reach) {
+        height = reach / tanf(fov * 0x1.555554p+0f);
+    } else {
+        height = height / tanf(fov);
+    }
+    from->distance = height * poses[pose].fromDistanceScale;
+    to->distance = height * poses[pose].toDistanceScale;
+
+    VU0_LOAD_VF(vf10, poses[pose].fromQuaternion);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+
+    VU0_LOAD_VF(vf10, poses[pose].toQuaternion);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+}
 
 /* cameraKind 7 participant preparation; the camera argument is unused. */
 void btlPrepareCameraMode7Participants(BtlLinkedCommand *action, BtlCamState *camera) {
@@ -2285,26 +2377,6 @@ extern void func_001E6668(BtlLinkedCommand *, BtlCamState *, s32, s32);
 static inline s32 btlHasFlag(u32 flags, u32 mask) {
     return (flags & mask) != 0;
 }
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4190);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4310);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4320);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4468);
 
 void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     s16 groupChoices[2];
