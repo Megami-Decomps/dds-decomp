@@ -384,7 +384,7 @@ void mdlInitializeViewerResourceTable(void) {
     D_003C6588[MDL_VIEWER_TABLE_SLOT].count = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00233938);
+INCLUDE_ASM(const s32, "game/code_00233660", mdlRefreshDebugModelWorkFileList);
 
 s32 mdlSetViewerSlotResourceHandles(s32 table, s32 slot, const char *resourceListPath, const char *path, const char *motionPath) {
     MdlResourcePath *entries = D_003C6588[table].entries;
@@ -1303,7 +1303,7 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
 
 extern u32 mdlGetResourceTableCount(void);
 extern u32 mdlGetTableWord(s32 tableIndex);
-extern void func_00233938(void);
+extern void mdlRefreshDebugModelWorkFileList(void);
 extern void mdlFreeViewResources(void);
 extern u8 sdfPfsDebugMode;
 
@@ -1407,7 +1407,7 @@ void mdlHandleViewerAssetSelection(void) {
             return;
         }
         mdlFreeViewResources();
-        func_00233938();
+        mdlRefreshDebugModelWorkFileList();
         if (mdlViewerState.resourceGroup == mdlGetResourceTableCount() - 1) {
             mdlViewerState.resourceId = 0;
             mdlViewerState.unk1C = mdlViewerState.resourceGroup;
@@ -2742,7 +2742,7 @@ extern char D_004214F8[];
 
 extern s32 mdlViewer(KwlnTask *);
 extern s32 mdlViewerEnd(KwlnTask *);
-extern void func_00233938(void);
+extern void mdlRefreshDebugModelWorkFileList(void);
 extern s32 kwlnUnregisterNamedSlot(const char *);
 extern MdlEyeVec D_003C8A80;
 extern MdlEyeVec D_0037F6C0;
@@ -2776,7 +2776,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     }
     mdlLoadViewerResourceAndResetCursors();
     mdlViewerState.resourceCount = 1;
-    func_00233938();
+    mdlRefreshDebugModelWorkFileList();
     for (i = 0, task = D_003C8890; i != 3; i++, task++) {
         kwlnUnregisterNamedSlot(task->name);
     }
