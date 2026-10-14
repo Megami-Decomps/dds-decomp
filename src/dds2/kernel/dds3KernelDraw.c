@@ -436,11 +436,10 @@ void kwlnDrawSetC70Triple(u32 extent, u32 centerX, u32 centerY) {
 extern KwlnPixelBlurParams D_0043E3C0;
 extern u16 D_00438E20;
 extern u16 D_00438E22;
-extern u32 effGetCh71Work(void);
 
 /* Save live textured-blur params; zero copies the staged body immediately. */
 void kwlnDrawSetupC70FromCh71(s32 duration) {
-    D_0043E3C0 = *(KwlnPixelBlurParams *)effGetCh71Work();
+    D_0043E3C0 = *(KwlnPixelBlurParams *)&effGetCh71Work()->body;
     D_00438E20 = 0;
     D_00438E22 = duration;
     if (duration == 0) {

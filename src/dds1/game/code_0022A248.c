@@ -362,7 +362,6 @@ extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void mnuSampleCampPanelVisualTrack(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
 extern void mnuSampleCampDisplayTrack(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
 extern void mnuSampleCampListLayoutTrack(EvtRuntime *, EvtRuntimeGroup *, EvtBlendKey *);
-extern EffBlurTemplate *effGetCh71Work(void);
 extern EffBlurScatterWork *effGetCh72Work(void);
 extern EffBlurScaleWork *effGetCh76Work(void);
 extern EffResourceRectWork *effGetCh75Work(void);
@@ -470,7 +469,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
     case 14: {
         void *payload = sdfAllocSizeClassBlock(0x2C);
         key->payload = payload;
-        memcpy(payload, effGetCh71Work(), 0x2C);
+        memcpy(payload, &effGetCh71Work()->body, sizeof(EffBlurTemplateBody));
         key->p08.h[0] = 1;
         key->p10.h[0] = 0;
         break;
