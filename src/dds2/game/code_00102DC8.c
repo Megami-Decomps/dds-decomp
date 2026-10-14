@@ -18,6 +18,7 @@
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf.h"
+#include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
@@ -1076,7 +1077,6 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, SdfTexRes
     }
 }
 
-extern SdfTexResource *sdfGetTextureListHead(void);
 
 /* Draw the allocation-map border, then walk blocks through their prev links. */
 void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
