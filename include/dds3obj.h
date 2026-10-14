@@ -45,6 +45,8 @@ EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kin
 EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
+/* Allocate and initialize the inner transform object for a world node. */
+s32 effObjInnerCreate(EffWorldNode *node);
 void dds3RemoveWorldObjectNode(EffWorldNode *node);
 /* Attach the resource indexed by resourceId to the object's world table. */
 void dds3AttachResourceHandleToWorldObject(EffWorldNode *object, u32 resourceId);

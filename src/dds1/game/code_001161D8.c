@@ -5,7 +5,6 @@
 #include "eff_event.h"
 
 
-extern s32 effObjInnerCreate(EffWorldNode *object);
 
 
 extern void effObjInnerVecBackup(ObjectTransform *node);
