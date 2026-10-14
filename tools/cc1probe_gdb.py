@@ -81,6 +81,7 @@ A = dict(
     reg_class_names=0x8219ED8, current_function_decl=0x82536BC,
     expr_hash_table=0x8245CC0, expr_hash_table_size=0x8245CBC, pre_insert_map=0x8245DDC,
     pre_delete_map=0x8245DE0, edge_list=0x8245DE4,
+    tree_code_name=0x823D860,
 )
 HID_SZ = 40          # struct haifa_insn_data
 QTY_SZ = 40          # struct qty
@@ -131,6 +132,67 @@ def out(s):
     if MAXRANK and NLINES[0] > MAXRANK:
         return
     LOG.write(s + "\n")
+
+
+# ---- field-reference expansion (before CSE/PRE) --------------------------------------------
+
+def tree_text(a, depth=0):
+    if not a:
+        return "nil"
+    name = cstr(u32(A["tree_code_name"] + 4 * rd(a + 8, 1)[0]))
+    if name == "integer_cst":
+        return str(s64(a + 16))
+    if name == "identifier_node":
+        return cstr(u32(a + 16))
+    if name.endswith("_decl"):
+        label = tree_text(u32(a + 48), depth + 1)
+        fields = ""
+        if name == "field_decl":
+            fields = "[byte_offset=%s,bit_offset=%s]" % (
+                tree_text(u32(a + 56), depth + 1),
+                tree_text(u32(a + 92), depth + 1))
+        return name + ":" + label + fields
+    if depth >= 7:
+        return name
+    arity = 2 if name in (
+        "component_ref", "array_ref", "plus_expr", "mult_expr", "minus_expr",
+        "exact_div_expr") else 1 if name in (
+        "indirect_ref", "nop_expr", "convert_expr", "addr_expr", "non_lvalue_expr") else 0
+    return name + ("(" + ",".join(
+        tree_text(u32(a + 16 + 4 * i), depth + 1) for i in range(arity)) + ")" if arity else "")
+
+
+class InnerReferenceFinish(gdb.FinishBreakpoint):
+    def __init__(self, expression, pointers):
+        self.source_tree = expression
+        self.output_pointers = pointers
+        super().__init__(gdb.newest_frame(), internal=True)
+
+    def stop(self):
+        try:
+            bits, bitpos, offset, mode, unsigned, volatile, alignment = self.output_pointers
+            out("  get_inner_reference IN  " + self.source_tree)
+            out("    OUT bits=%d bitpos=%d offset=%s mode=%s unsigned=%d volatile=%d "
+                "alignment_bits=%d base=%s" % (
+                    s64(bits), s64(bitpos), tree_text(u32(offset)),
+                    cstr(u32(A["mode_name"] + 4 * s32(mode))), s32(unsigned),
+                    s32(volatile), u32(alignment), tree_text(int(self.return_value))))
+        except Exception as e:
+            LOG.write("!! hook get_inner_reference return failed: %r\n" % e)
+        return False
+
+
+EXPAND_FUNCTIONS = set()
+
+
+def hk_inner_reference():
+    name = cur_func()
+    if ONLY_FUNC is not None and name != ONLY_FUNC:
+        return
+    if name not in EXPAND_FUNCTIONS:
+        EXPAND_FUNCTIONS.add(name)
+        out("\n=== expand (get_inner_reference)  function %s ===" % name)
+    InnerReferenceFinish(tree_text(arg(0)), [arg(i) for i in range(1, 8)])
 
 
 # ---- RTL pretty printer (reads inferior memory with the binary's own rtx tables) --------
@@ -1547,11 +1609,25 @@ def sym(name):
 
 
 BEGIN_FNS.update(["hk_schedule_insns", "hk_local_alloc", "hk_global_alloc", "hk_cse_main", "hk_dbr", "hk_jump_begin", "hk_gcse_main", "hk_rcse_regs", "hk_lengthen_loops", "hk_ce_begin",
-                 "hk_est_entry", "hk_est_reset", "hk_est_pass1", "hk_est_emit"] + ["hk_est_tag_%x" % a for a in EST_TAGS])  # estimate_probability runs before dbr: not gated by the per-function toggle
+                 "hk_est_entry", "hk_est_reset", "hk_est_pass1", "hk_est_emit", "hk_inner_reference"] + ["hk_est_tag_%x" % a for a in EST_TAGS])  # expansion/estimate_probability run before their pass-begin hooks: not gated by the per-function toggle
 
 
 def install():
     check_layouts()
+    if "expand" in MODES:
+        for expression, expected in {
+            "sizeof(((struct tree_int_cst*)0)->int_cst_low)": 8,
+            "(long)&((struct tree_exp*)0)->operands": 16,
+            "(long)&((struct tree_int_cst*)0)->int_cst_low": 16,
+            "(long)&((struct tree_identifier*)0)->pointer": 16,
+            "(long)&((struct tree_decl*)0)->name": 48,
+            "(long)&((struct tree_decl*)0)->arguments": 56,
+            "(long)&((struct tree_decl*)0)->u2": 92,
+            "(long)&tree_code_name": A["tree_code_name"],
+        }.items():
+            actual = int(gdb.parse_and_eval(expression))
+            assert actual == expected, "expansion layout drift: %s = %d" % (expression, actual)
+        Hook(sym("get_inner_reference"), hk_inner_reference)
     if "sched" in MODES:
         Hook(0x817160C, hk_schedule_insns)                  # schedule_insns
         Hook(0x816D822, hk_regweight_table)                 # find_insn_reg_weight epilogue

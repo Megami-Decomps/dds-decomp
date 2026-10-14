@@ -1,6 +1,6 @@
 #!/bin/bash
 # cc1probe.sh <file.c> [--sched] [--alloc] [--cse] [--reorg] [--jump] [--gcse] [--rcse] [--reload]
-#             [--ifcvt] [--loops] [--all] [--func NAME] [--as-unit src/<v>/<dir>/<unit>.c]
+#             [--ifcvt] [--loops] [--expand] [--all] [--func NAME] [--as-unit src/<v>/<dir>/<unit>.c]
 #             [--version dds1|dds2] [--out DIR] [--dumpbase PATH] [--cflag FLAG]... [--maxlines N]
 #             [--no-verify] [--nohook] [--quiet]
 #
@@ -23,6 +23,7 @@
 #   --ifcvt  ifcvt.c (the `ce` passes): noce_process_if_block shapes, noce_try_* successes,
 #            find_if_case_1/2, dead_or_predicable hoists
 #   --loops  SCE mips_r5900_lengthen_loops: R5900 short-loop nop padding
+#   --expand get_inner_reference: source field offsets and the bitpos/variable-offset split
 #   --reorg  dbr_schedule: mostly_true_jump, eligible_for_delay, fill_slots_from_thread,
 #            redundant_insn, fill_simple/eager_delay_slots
 #   --all    every mode above.  --func NAME restricts the log to one function (strongly advised).
@@ -56,8 +57,9 @@ while [ $# -gt 0 ]; do
         --rcse) modes=$modes,rcse ;;
         --reload) modes=$modes,reload ;;
         --loops) modes=$modes,loops ;;
+        --expand) modes=$modes,expand ;;
         --ifcvt) modes=$modes,ifcvt ;;
-        --all) modes=sched,alloc,cse,reorg,jump,gcse,rcse,reload,loops,ifcvt ;;
+        --all) modes=sched,alloc,cse,reorg,jump,gcse,rcse,reload,loops,ifcvt,expand ;;
         --func) func=$2; shift ;;
         --as-unit) as_unit=$2; shift ;;
         --version) version=$2; shift ;;
