@@ -64,6 +64,22 @@ Retail example: `func_0018CC98`.
   return v;`. A `return X;` per arm gives `j` instead of `b`
   (`func_002C2F40`, `func_0030AAB0`).
 
+### Repeated call arms can defer merging until after allocation
+
+Separate cases with the same call and a `break` to a shared failure return
+can preserve two predecessors through `15.ce`. That prevents
+`find_if_case_2` from hoisting the zero return into either test block. The
+comparison can then use the return register, and reorg retains an annulled
+failure branch. In `27.jump2`, cross-jumping merges the now-identical call
+tails into one.
+
+Confirmed by DDS1 `func_001FCAC0` and DDS2 `func_0020EB40`: cases `0x40` and
+`0x400` each call `btlRollAiBucket`, break when its unsigned result is at
+least 25, and otherwise return 1. Combining those case labels allows the
+zero-return hoist, producing `$v1` plus a plain `beq` in place of retail's
+`$v0` plus `beql`. Qualified ordinary/hooked compiler output and complete
+retail builds prove the separate-case form.
+
 ### State-field continuation after dispatch
 
 When each state transition is published to a signed-byte work field and the
