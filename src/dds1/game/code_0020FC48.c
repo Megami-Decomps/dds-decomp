@@ -747,8 +747,6 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 al
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
-#include "btl_actor_entry_code_api.h"
-
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);
@@ -770,6 +768,8 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6810);
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6848);
+
+#include "btl_actor_entry_code_api.h"
 
 s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
