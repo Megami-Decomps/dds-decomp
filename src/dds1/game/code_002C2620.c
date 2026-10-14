@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "evt_message_window_api.h"
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
@@ -56,7 +57,6 @@ extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern s32 fldLocalMapTrackState;
 
-extern void dds3SetWorldObject(void *);
 #include "dds3_world_secondary.h"
 extern void fldCreateLocalMapCamera(void);
 extern s32 mdlCollectLowFlagBits(void);

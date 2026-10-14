@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "evt_message_window_api.h"
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "file_pac.h"
 #include "file_request_api.h"
@@ -74,7 +75,6 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
 extern void dspRequestMessageWindowModeOne(void);
 
-extern void dds3SetWorldObject(void *);
 #include "dds3_world_secondary.h"
 extern void fldCreateLocalMapCamera(void);
 extern s32 fldPackLocalMapFlagStates(void);
