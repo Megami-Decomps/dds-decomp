@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_vec3.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_marked_command_requested_state_api.h"
 #include "btl_skill_max_api.h"
@@ -210,11 +211,6 @@ extern void btlSelectCommandTargetsByMode(s32, u16);
 extern void btlSetSpecialBattleEffectActorByte(u8);
 
 extern s32 btlIsLinkedActionSceneStateActive(void);
-
-typedef struct BtlVec3 {
-    f32 x, y, z;
-} BtlVec3;
-
 
 extern BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32);
 
