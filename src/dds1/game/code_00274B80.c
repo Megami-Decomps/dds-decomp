@@ -899,7 +899,55 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
     return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", mnuConfigurePartyPanelPage);
+extern void mnuResetPartyPanelFade(MenuPageWindow *, s32, s32, s32);
+extern void mnuSetPageParams(MenuSprites *, s32);
+
+void mnuConfigurePartyPanelPage(s32 windowAddress, s32 mode, s32 staffImage, s32 staffMode) {
+    MenuPageWindow *window = (MenuPageWindow *)windowAddress;
+    s32 fadeDirection = 1;
+    s32 selectedIndex = window->lists[0]->cursor->index;
+    MenuPageSlot *slot = &window->slots[selectedIndex];
+
+    switch ((u32)mode) {
+    case 0: {
+        MenuIconBundle *bundle = slot->iconBundle;
+        /* sched1 favors the store ending the window pointer's lifetime. */
+        window->transitionValue = 0x100;
+        window->scrollOffset = 0;
+        bundle->fade = 0x100;
+        bundle->fadeOut = 0;
+        mnuResetPartyPanelFade(window, selectedIndex, 0, 0);
+        break;
+    }
+    case 1: {
+        MenuIconBundle *bundle = slot->iconBundle;
+        window->scrollOffset = 0x40;
+        window->transitionValue = 0;
+        bundle->fadeOut = staffMode;
+        bundle->fade = 0;
+        if (staffMode == fadeDirection) {
+            slot->windowSprites->fadeOut = fadeDirection;
+            bundle->fadeOut = fadeDirection;
+            mnuResetPartyPanelFade(window, selectedIndex, 1, 0);
+        }
+        break;
+    }
+    case 2:
+        mnuSetPageParams(slot->windowSprites, 0);
+        slot->iconBundle->fadeOut = 0;
+        mnuResetPartyPanelFade(window, selectedIndex, 0, 1);
+        break;
+    case 3:
+        mnuSetPageParams(slot->windowSprites, 1);
+        slot->iconBundle->fadeOut = fadeDirection;
+        mnuResetPartyPanelFade(window, selectedIndex, 0, 1);
+        /* Retail retains this ordinary call. cc1probe: this local reset
+         * survives 01.sibling and 03.cse, then 13.life removes it. */
+        fadeDirection = 0;
+        break;
+    }
+}
+
 
 
 s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
