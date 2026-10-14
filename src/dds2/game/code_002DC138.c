@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_object_node.h"
+#include "eff_model_owner.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -18,14 +19,6 @@
 #include "eff_expanded_list.h"
 #include "eff_update_flags.h"
 #include "btl_runtime.h"
-
-typedef struct EffModelOwner {
-    f32 scale;
-    MdlCtx *model;
-    SdfLightingPacketStorage *ownedBuffer;
-    u32 flags;
-} EffModelOwner;
-
 
 extern u32 effModelUpdateControlFlags;
 extern u8 btlIsRuntimeAllocated(void);

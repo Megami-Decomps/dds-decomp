@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_object_node.h"
+#include "eff_model_owner.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -39,14 +40,6 @@ typedef struct EffBattleTexHeaders {
 extern u32 D_003BC950;
 
 extern u32 D_003BC954;
-
-
-typedef struct EffModelOwner {
-    f32 scale;
-    MdlCtx *model;
-    SdfLightingPacketStorage *ownedBuffer;
-    u32 flags;
-} EffModelOwner;
 
 
 extern EffectObjectNode *effFloorModelListHead;
