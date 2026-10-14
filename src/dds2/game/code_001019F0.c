@@ -395,7 +395,7 @@ extern void kwlnFadeUpdate(void);
 extern void kwlnQueueBackgroundFadeOverlayPacket(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
 extern u32 fldIsUpdateInhibited(void);
-extern void func_00343468(s32);
+extern void sdfDumpDmaVifCommandStream(s32);
 extern void sdfQueueFramePackets(SdfListHead *, SdfPacketChain *);
 extern u8 D_00380788[];
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
@@ -495,7 +495,7 @@ s32 kwlnRenderFrame(KwlnTask *task) {
     poolHead = sdfFlushPoolNodes(kwlnDrawSurfaces);
     D_00435C14 = poolHead;
     if (D_00435BC8 != 0) {
-        func_00343468(poolHead->first);
+        sdfDumpDmaVifCommandStream(poolHead->first);
         D_00435BC8 = 0;
     }
     if (!(kwlnDrawControlFlags & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {

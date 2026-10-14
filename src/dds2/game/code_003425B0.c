@@ -668,7 +668,7 @@ void sdfPrintDmaChain(u32 *dmaTag) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00343468);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfDumpDmaVifCommandStream);
 
 void sdfDumpGsMemoryForward(void) {
     char buf[8];
