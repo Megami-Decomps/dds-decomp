@@ -724,21 +724,12 @@ extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
-/* One aim pose: quaternion, distance multiplier, height scale and two words this aim leaves unused. */
-typedef struct CameraAimPose {
-    f32 quat[4];
-    f32 distanceScale;
-    f32 heightScale;
-    f32 unk18;
-    f32 unk1C;
-} CameraAimPose;
-
 /* Build the from pose, then aim the to pose at the unit's muzzle using the pose row
  * for the side of the from view the muzzle lies on. */
 void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
     f32 muzzle[4];
     f32 quat[4];
-    CameraAimPose poses[2] = {
+    BattleSideCameraPreset poses[2] = {
         {{0x1.70a3d6p-3f, -0x1.999998p-2f, -0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
         {{0x1.70a3d6p-3f, 0x1.999998p-2f, 0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
     };

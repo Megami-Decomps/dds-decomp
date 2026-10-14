@@ -687,15 +687,6 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
     }
 }
 
-/* Mirrored camera aim presets: quaternion, distance and height scale. */
-typedef struct BattleSideCameraPreset {
-    f32 quat[4];
-    f32 distanceScale;
-    f32 heightScale;
-    f32 unk18;
-    f32 unk1C;
-} BattleSideCameraPreset;
-
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
