@@ -47,7 +47,7 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
     position[2] = -300.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031CA10", func_0031CBC8);
+INCLUDE_ASM(const s32, "game/code_0031CA10", mnuUpdateSectionModelWork);
 
 extern u32 itfIndexedImageResourceBanks[];
 

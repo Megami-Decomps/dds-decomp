@@ -837,7 +837,7 @@ extern void itfDrawScaledIndexedImage(s32 x, s32 y, s32 z, s32 alpha, f32 xScale
                           s32 flags, s32 index, s32 context);
 extern void itfDrawRotatedIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle);
 extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
-extern void func_0031CBC8(MnuSectionModelWork *work, s32 paused);
+extern void mnuUpdateSectionModelWork(MnuSectionModelWork *work, s32 paused);
 extern void itfUpdateAndDrawSpriteNumbers(struct WideSlotPool *work, u32 flags);
 extern void itfUpdateAndDrawSpriteHitEffects(struct CompactSlotPool *work, u32 flags);
 extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
@@ -952,12 +952,12 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
 
     if ((work->unk70Bit0 & 1) == 0) {
         mnuUpdateEffectQueues(work->effectWork, 0);
-        func_0031CBC8(work->modelWork, 0);
+        mnuUpdateSectionModelWork(work->modelWork, 0);
         itfUpdateAndDrawSpriteNumbers(work->spriteWork, 0);
         itfUpdateAndDrawSpriteHitEffects(work->tintWork, 0);
     } else {
         mnuUpdateEffectQueues(work->effectWork, 1);
-        func_0031CBC8(work->modelWork, 1);
+        mnuUpdateSectionModelWork(work->modelWork, 1);
         itfUpdateAndDrawSpriteNumbers(work->spriteWork, 1);
         itfUpdateAndDrawSpriteHitEffects(work->tintWork, 1);
     }
