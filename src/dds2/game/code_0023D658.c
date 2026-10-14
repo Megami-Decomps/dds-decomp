@@ -8,6 +8,7 @@
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
 #include "evt_task.h"
 #include "ee_mmi.h"
@@ -97,7 +98,6 @@ typedef struct EvtModelHeader {
 extern void effMiscQuatMultiplyVU();
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
-extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
 
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);

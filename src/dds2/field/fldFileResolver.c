@@ -355,6 +355,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "dat_state.h"
 #include "mdl.h"
 #include "kwln_task_lifecycle.h"
@@ -382,9 +383,6 @@ typedef char FldUnitLightColor_size_must_be_0x10[(sizeof(FldUnitLightColor) == 0
 
 extern FldUnitLightParams D_0038BB10;
 extern FldUnitLightColor D_0038BB60;
-
-
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern MdlCtx *fldPlayerModelContext;
 extern s32 D_00389888[];
