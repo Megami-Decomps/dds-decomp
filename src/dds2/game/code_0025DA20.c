@@ -2417,7 +2417,7 @@ extern s32 evtAdvanceSlotFlags(void);
 extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
 extern void mdlFlagClear(s32);
-extern void func_00297320(s32);
+extern void mnuDrawCommandPhaseTransition(s32);
 extern void mnuDrawCampCommandTransition(s32);
 
 
@@ -2624,7 +2624,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
 s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3156,7 +3156,7 @@ s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
 s32 func_002633F0(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3188,7 +3188,7 @@ s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
 s32 func_00263658(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
