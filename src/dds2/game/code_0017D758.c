@@ -2,6 +2,7 @@
 #include "eff_scatter_draw_request.h"
 #include "eff_random.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -44,7 +45,6 @@ void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) 
 
 extern EffScatterDrawRequest D_00452050;
 extern void *memset(void *, s32, u32);
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 /* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
 PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
