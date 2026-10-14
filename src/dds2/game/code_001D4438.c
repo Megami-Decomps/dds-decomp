@@ -226,7 +226,6 @@ extern void btlClearPartyRecordStatusBits();
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 extern void datAdjustCurrentHp();
 
-extern void btlReleaseBossData();
 #include "brs_task_poll_done_api.h"
 
 extern s32 func_001B2630();

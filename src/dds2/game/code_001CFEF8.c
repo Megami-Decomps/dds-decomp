@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "fld_scene_ready_api.h"
 #include "kwln_background_fade_api.h"
@@ -1098,7 +1099,6 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
 
 
 
-extern void btlReleaseBossData();
 
 
 

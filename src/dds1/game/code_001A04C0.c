@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
