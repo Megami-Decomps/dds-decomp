@@ -6,6 +6,7 @@
 #include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
+#include "dat_unit_has_skill_api.h"
 #include "btl_command_partner_output.h"
 #include "btl_enc_bg_entry.h"
 #include "btl_animation_mode_entry.h"
@@ -2305,9 +2306,6 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
 s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);
 }
-
-extern s32 datUnitHasSkill(DatPartyRecord *, s32);
-
 
 s32 btlCheckSpecialAbility(DatPartyRecord *record, s32 ability) {
     if (datUnitHasSkill(record, ability) == 0) {
