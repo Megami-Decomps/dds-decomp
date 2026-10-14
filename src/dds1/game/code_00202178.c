@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "dds3obj.h"
@@ -42,7 +43,6 @@ extern u32 btlGetEventEffectValue(void);
 
 extern u32 btlGetEffectValue(void);
 
-extern u32 btlGetEffectActive(void);
 
 extern u32 btlGetSelectedBossEffectId(void);
 

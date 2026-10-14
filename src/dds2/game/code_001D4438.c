@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_effect_active_api.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "mnu_title_stream.h"
@@ -210,7 +211,6 @@ typedef struct BtlPanelBlock {
 extern BtlPanelBlock *btlResourceBlock;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 
-extern s32 btlGetEffectActive();
 extern void btlUpdateTargetSelectionInput();
 extern void btlUpdateAndDrawTargetActorPanels();
 
