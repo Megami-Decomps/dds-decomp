@@ -9077,3 +9077,4 @@
 0x001A6EC0	btlShouldDistributeRandomTargetHits	inferred	Returns whether the action path should distribute repeated hits across randomized targets; a true result directly gates btlDistributeRandomTargetHits. DDS2 twin 0x001B1090. [high-volume naming lane, 2026-10-14]
 0x0030B568	EnableIntc	inferred	wraps _EnableIntc with interrupt-state preservation; exact paired body and sdfWakeQueuedThreadWaiters caller pass event ID 2
 0x00230140	evtViewerUpdateWindowShadeFade	inferred	Animates the viewer's windowShadeFade ramp and submits the shade overlay packet from evtUpdateViewerMessageWindow; the DDS2 twin has the identical body and caller role.
+0x001A7548	btlResolveCommandHitResult	inferred	Examines attacker/target status and elemental affinity, ability modifiers, command hit parameters and RNG, then returns the hit/reflection classification consumed as kind by code_001D0BA0; paired DDS2 provider 0x001B17E8 logs and resolves the same hit flow.

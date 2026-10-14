@@ -31,6 +31,7 @@ sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
 fldClassifyMovementAgainstZoneFaces = 0x00136FE8; // type:func
+btlResolveCommandHitResult = 0x001A7548; // type:func
 btlCheckStatusActionEligibility = 0x001FCAC0; // type:func
 evtViewerUpdateWindowShadeFade = 0x00230140; // type:func
 sdfDevFindDiscFileRecordByCdromPath = 0x002E4FB0; // type:func
@@ -8794,7 +8795,6 @@ btlSelectCommandHitCount = 0x001A6968; // type:func
 btlGetActionAnimationDelay = 0x001A6AA0; // type:func
 btlSortActorMuzzleDirections = 0x001A6BE0; // type:func
 btlShouldDistributeRandomTargetHits = 0x001A6EC0; // type:func
-func_001A7548 = 0x001A7548; // type:func
 func_001A7AD0 = 0x001A7AD0; // type:func
 btlGetRewardLevelMultiplier = 0x001A7C20; // type:func
 func_001A8188 = 0x001A8188; // type:func
