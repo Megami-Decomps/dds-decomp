@@ -29,6 +29,8 @@
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
+#include "btl_target_result.h"
+
 typedef struct BattleController {
     u8 pad_000[0x214];
     s32 frame;
@@ -87,23 +89,6 @@ extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
-
-typedef struct BtlHitResult {
-    s32 amount;
-    u8 pad04[0x28];
-} BtlHitResult;
-
-typedef struct BtlTargetResult {
-    u8 hitCount;
-    u8 pad01[7];
-    u32 kind;
-    u8 pad0C[4];
-    u8 skipped;
-    u8 pad11[3];
-    u8 blocked;
-    u8 pad15[7];
-    BtlHitResult hits[32];
-} BtlTargetResult;
 
 extern s32 btlRollAiBucket();
 
