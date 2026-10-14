@@ -4134,8 +4134,8 @@ extern char D_003BC928[];
 extern char D_003BC930[];
 extern char D_003BC938[];
 extern char *sdfDevGetPathBuffer(void);
-extern s32 func_0030E8F0(const char *path, s32 flags, ...);
-extern s32 func_0030EB78(s32 fd);
+extern s32 sceOpen(const char *path, s32 flags, ...);
+extern s32 sceClose(s32 fd);
 extern s32 func_00310A68(const char *path, s32 mode);
 
 void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
@@ -4144,13 +4144,13 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
 
     if (sdfPfsDebugMode != 0) {
         sprintf(path, D_003BC928, filePath);
-        fd = func_0030E8F0(path, 0x602, 0x1B6);
+        fd = sceOpen(path, 0x602, 0x1B6);
     } else {
         sprintf(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
-        fd = func_0030E8F0(path, 0x602);
+        fd = sceOpen(path, 0x602);
     }
     fileJobWriteSerializedPayload(fd, job);
-    func_0030EB78(fd);
+    sceClose(fd);
     func_00310A68(D_003BC938, 0);
 }
 
@@ -4687,7 +4687,7 @@ void fileJobCopyHeader(FileJob *dst, FileJob *src) {
 }
 
 extern char D_0037E518[];
-extern s32 func_0030F190(s32 fd, void *data, s32 size);
+extern s32 sceWrite(s32 fd, void *data, s32 size);
 extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
 /* Export a queue: the queue header, one relocated record per job, then each
@@ -4705,10 +4705,10 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
 
     if (sdfPfsDebugMode != 0) {
         sprintf(path, D_003BC928, filePath);
-        fd = func_0030E8F0(path, 0x602, 0x1B6);
+        fd = sceOpen(path, 0x602, 0x1B6);
     } else {
         sprintf(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
-        fd = func_0030E8F0(path, 0x602);
+        fd = sceOpen(path, 0x602);
     }
     header = *queue;
     header.updateFrame = 0;
@@ -4716,7 +4716,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
     header.entryOffset = size;
     header.first = NULL;
     count = fileQueueCountLinkedJobs(queue);
-    func_0030F190(fd, &header, sizeof(FileQueue));
+    sceWrite(fd, &header, sizeof(FileQueue));
     offset = count * sizeof(FileJob) + sizeof(FileQueue);
 
     for (job = queue->first; job != NULL; job = job->next) {
@@ -4741,7 +4741,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
         record.next = NULL;
         record.prev = NULL;
-        func_0030F190(fd, &record, sizeof(FileJob));
+        sceWrite(fd, &record, sizeof(FileJob));
         offset += (size & 0xF) != 0 ? ((size >> 4) + 1) << 4 : (size >> 4) << 4;
     }
 
@@ -4772,10 +4772,10 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
         padding = aligned - size;
         if (padding > 0) {
-            func_0030F190(fd, D_0037E518, padding);
+            sceWrite(fd, D_0037E518, padding);
         }
     }
-    func_0030EB78(fd);
+    sceClose(fd);
     func_00310A68(D_003BC938, 0);
 }
 
@@ -4805,15 +4805,15 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
 
     if (sdfPfsDebugMode != 0) {
         sprintf(path, D_003BC928, filePath);
-        fd = func_0030E8F0(path, 0x602, 0x1B6);
+        fd = sceOpen(path, 0x602, 0x1B6);
     } else {
         sprintf(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
-        fd = func_0030E8F0(path, 0x602);
+        fd = sceOpen(path, 0x602);
     }
     image.version = 5;
     image.unk4 = 0;
     image.unkC = 1.03f;
-    func_0030F190(fd, &image, sizeof(image));
+    sceWrite(fd, &image, sizeof(image));
 
     header = *queue;
     header.updateFrame = 0;
@@ -4821,7 +4821,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
     header.entryOffset = size;
     header.first = NULL;
     count = fileQueueCountLinkedJobs(queue);
-    func_0030F190(fd, &header, sizeof(FileQueue));
+    sceWrite(fd, &header, sizeof(FileQueue));
     offset = count * sizeof(FileJob) + sizeof(FileQueue);
 
     for (job = queue->first; job != NULL; job = job->next) {
@@ -4846,7 +4846,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
         record.next = NULL;
         record.prev = NULL;
-        func_0030F190(fd, &record, sizeof(FileJob));
+        sceWrite(fd, &record, sizeof(FileJob));
         offset += (size & 0xF) != 0 ? ((size >> 4) + 1) << 4 : (size >> 4) << 4;
     }
 
@@ -4877,10 +4877,10 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
         padding = aligned - size;
         if (padding > 0) {
-            func_0030F190(fd, D_0037E528, padding);
+            sceWrite(fd, D_0037E528, padding);
         }
     }
-    func_0030EB78(fd);
+    sceClose(fd);
     func_00310A68(D_003BC938, 0);
 }
 

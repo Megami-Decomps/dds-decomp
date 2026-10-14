@@ -2600,11 +2600,11 @@ extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern char *sdfDevGetPathBuffer(void);
 
-extern s32 func_0030E8F0(const char *, s32, ...);
+extern s32 sceOpen(const char *, s32, ...);
 
-extern s32 func_0030F190(s32, const void *, s32);
+extern s32 sceWrite(s32, const void *, s32);
 
-extern s32 func_0030EB78(s32);
+extern s32 sceClose(s32);
 
 extern s32 func_00310A68(const char *, s32);
 
@@ -2672,13 +2672,13 @@ void btlWriteActorModelTableFile(void) {
         cursor += sprintf(cursor, D_003BBB00);
     }
     if (sdfPfsDebugMode) {
-        fd = func_0030E8F0("pfs0:/model/table.txt", 0x602, 0666);
+        fd = sceOpen("pfs0:/model/table.txt", 0x602, 0666);
     } else {
         sprintf(path, "%smodel/table.txt", sdfDevGetPathBuffer());
-        fd = func_0030E8F0(path, 0x602);
+        fd = sceOpen(path, 0x602);
     }
-    func_0030F190(fd, buffer, cursor - buffer);
-    func_0030EB78(fd);
+    sceWrite(fd, buffer, cursor - buffer);
+    sceClose(fd);
     func_00310A68(D_003BBB08, 0);
     sdfFreeMemoryFromEitherHeap(buffer);
 }

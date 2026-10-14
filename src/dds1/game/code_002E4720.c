@@ -124,7 +124,7 @@ extern void sdfDevRecycleCompletedState(DevState *arg0);
 extern DevState *sdfDevCreateCallbackState(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
 
-extern s32 func_0030EB78(s32 arg0);
+extern s32 sceClose(s32 arg0);
 
 extern s32 DIntr(DevState *arg0);
 
@@ -685,7 +685,7 @@ s32 sdfDevGetFileSize(void) {
     return *(s32 *)(sdfOpenDiscFileRecord + 8);
 }
 
-extern s32 func_0030E8F0();
+extern s32 sceOpen();
 
 extern s32 func_0030ECF8(s32, s32, s32);
 
@@ -693,7 +693,7 @@ extern s32 func_002FF538(s32);
 
 extern s32 func_0030EF30(s32, s32, s32);
 
-extern s32 func_0030F190(s32, s32, s32);
+extern s32 sceWrite(s32, s32, s32);
 
 extern void FlushCache(s32);
 
@@ -701,7 +701,7 @@ extern char D_003B4578[];
 
 /* Read a whole named file into the loader's allocated EE buffer, then close it. */
 void sdfDevLoadWholeFile(const char *fileName) {
-    s32 fileHandle = func_0030E8F0(fileName, SDF_DEV_FILE_OPEN_READ);
+    s32 fileHandle = sceOpen(fileName, SDF_DEV_FILE_OPEN_READ);
     s32 fileBytes;
     s32 bufferAddress;
 
@@ -713,7 +713,7 @@ void sdfDevLoadWholeFile(const char *fileName) {
     bufferAddress = func_002FF538(fileBytes);
     D_003BDA44 = bufferAddress;
     func_0030EF30(fileHandle, bufferAddress, fileBytes);
-    func_0030EB78(fileHandle);
+    sceClose(fileHandle);
     FlushCache(0);
 }
 
@@ -891,8 +891,8 @@ s32 sdfPathExists(char *path) {
     if (*resolved == '/') {
         return sdfPacketExists((u32)resolved);
     }
-    fd = func_0030E8F0(resolved, 1);
-    func_0030EB78(fd);
+    fd = sceOpen(resolved, 1);
+    sceClose(fd);
     sdfReleaseChipBlock(resolved);
     return fd >= 0;
 }
@@ -1087,7 +1087,7 @@ void sdfDevRelease(DevState *state) {
 
     state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
     if (fileHandle >= 0) {
-        func_0030EB78(fileHandle);
+        sceClose(fileHandle);
     }
     sdfDevRecycleCompletedState(state);
 }
@@ -1128,7 +1128,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
         switch (operationIndex) {
         case SDF_DEV_OPERATION_OPEN_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_0030E8F0(state->resolvedPath, SDF_DEV_FILE_OPEN_READ, 0);
+            fileHandle = sceOpen(state->resolvedPath, SDF_DEV_FILE_OPEN_READ, 0);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1144,7 +1144,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_OPEN_WRITE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_0030E8F0(state->resolvedPath, SDF_DEV_FILE_OPEN_WRITE, state->options);
+            fileHandle = sceOpen(state->resolvedPath, SDF_DEV_FILE_OPEN_WRITE, state->options);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1217,7 +1217,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_WRITE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_WRITING;
-            result = func_0030F190(state->resourceId, (s32)state->requestData,
+            result = sceWrite(state->resourceId, (s32)state->requestData,
                             state->requestExtra);
             if (result < 0) {
                 sdfDevDeactivate(state, result);
@@ -1234,7 +1234,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_CLOSE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_CLOSING;
-            result = func_0030EB78(state->resourceId);
+            result = sceClose(state->resourceId);
             state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
             if (result < 0) {
                 sdfDevDeactivate(state, result);
@@ -1250,7 +1250,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_0030E8F0(state->resolvedPath, SDF_DEV_FILE_OPEN_READ, 0);
+            fileHandle = sceOpen(state->resolvedPath, SDF_DEV_FILE_OPEN_READ, 0);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1285,7 +1285,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
                 }
             }
             state->state = SDF_DEV_STATE_CLOSING;
-            func_0030EB78(state->resourceId);
+            sceClose(state->resourceId);
             state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
             sdfDevRecycleCompletedState(state);
             state->state = SDF_DEV_STATE_COMPLETE;
@@ -1299,7 +1299,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_WRITE_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_0030E8F0(state->resolvedPath, SDF_DEV_FILE_OPEN_WRITE, state->options);
+            fileHandle = sceOpen(state->resolvedPath, SDF_DEV_FILE_OPEN_WRITE, state->options);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1308,7 +1308,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             transferResult = state->requestExtra;
             if (transferResult != 0) {
                 state->state = SDF_DEV_STATE_WRITING;
-                transferResult = func_0030F190(fileHandle, (s32)state->requestData, transferResult);
+                transferResult = sceWrite(fileHandle, (s32)state->requestData, transferResult);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
@@ -1321,7 +1321,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
         }
 
         state->state = SDF_DEV_STATE_CLOSING;
-        func_0030EB78(state->resourceId);
+        sceClose(state->resourceId);
         state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
         sdfDevRecycleCompletedState(state);
         state->state = SDF_DEV_STATE_COMPLETE;
