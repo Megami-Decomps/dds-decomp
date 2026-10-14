@@ -1,4 +1,5 @@
 #include "eff_packet_params.h"
+#include "eff_particle_shared_resource.h"
 #include "eff_camera_create_request.h"
 #include "eff_file_job_request.h"
 #include "eff_emitter_row.h"
@@ -10364,25 +10365,11 @@ void effSetActiveResourceScale(EffActiveResource *work, f32 value) {
 }
 
 /* Alternate particle handles share a header but occupy distinct slots. */
-typedef struct EffParticleShared {
-    u32 color;
-    u32 option;
-    u32 state;
-    u8 pad0C[0x98];
-    BillObj *billHandle;  // 0xA4: retained billboard cloned from the source resource.
-    struct EffExpandedList *reference; // 0xA8
-} EffParticleShared;
-typedef char EffParticleSharedSizeCheck[(sizeof(EffParticleShared) == 0xAC) ? 1 : -1];
-typedef char EffParticleSharedBillboardOffsetCheck[
-    ((u32)&((EffParticleShared *)0)->billHandle == 0xA4) ? 1 : -1];
-typedef char EffParticleSharedReferenceOffsetCheck[
-    ((u32)&((EffParticleShared *)0)->reference == 0xA8) ? 1 : -1];
-
-EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *source) {
-    EffParticleShared *work = sdfAllocSizeClassBlock(sizeof(EffParticleShared));
+EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayload *source) {
+    EffParticleSharedResource *work = sdfAllocSizeClassBlock(sizeof(EffParticleSharedResource));
     void *buffer;
 
-    memset(work, 0, sizeof(EffParticleShared));
+    memset(work, 0, sizeof(EffParticleSharedResource));
     work->color = 0x80808080;
     work->billHandle = NULL;
     work->reference = NULL;
@@ -10391,7 +10378,7 @@ EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *sourc
     }
     work->option = source->option;
     buffer = fileResolvePrimaryBuffer(source);
-    memcpy(work->pad0C, buffer, sizeof(work->pad0C));
+    memcpy(work->opaquePayload, buffer, sizeof(work->opaquePayload));
     buffer = fileResolveSecondaryBuffer(source);
     if (buffer != NULL) {
         switch (source->primary.selector) {
@@ -10415,7 +10402,7 @@ EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *sourc
     return work;
 }
 
-void effReleaseParticleResources(EffParticleShared *p) {
+void effReleaseParticleResources(EffParticleSharedResource *p) {
     BillObj *billboard = p->billHandle;
     if (billboard != NULL) {
         billDispatchByKind(billboard);
@@ -10426,16 +10413,16 @@ void effReleaseParticleResources(EffParticleShared *p) {
     sdfReleaseChipBlock(p);
 }
 
-void effReplaceSharedResource(EffParticleShared *, EffParticleShared *);
+void effReplaceSharedResource(EffParticleSharedResource *, EffParticleSharedResource *);
 
-EffParticleShared *effCloneParticleSharedResource(EffParticleShared *source) {
-    EffParticleShared *effect = effCreateParticleSharedResourceFromFile(NULL);
-    memcpy(effect->pad0C, source->pad0C, sizeof(effect->pad0C));
+EffParticleSharedResource *effCloneParticleSharedResource(EffParticleSharedResource *source) {
+    EffParticleSharedResource *effect = effCreateParticleSharedResourceFromFile(NULL);
+    memcpy(effect->opaquePayload, source->opaquePayload, sizeof(effect->opaquePayload));
     effReplaceSharedResource(effect, source);
     return effect;
 }
 
-void effReplaceSharedResource(EffParticleShared *dst, EffParticleShared *src) {
+void effReplaceSharedResource(EffParticleSharedResource *dst, EffParticleSharedResource *src) {
     BillObj *billboard;
 
     if (src->billHandle != 0) {
@@ -10454,8 +10441,8 @@ void effReplaceSharedResource(EffParticleShared *dst, EffParticleShared *src) {
     }
 }
 
-void effResetParticleStateWord(EffParticleShared *work) {
-    work->state = 0;
+void effResetParticleStateWord(EffParticleSharedResource *work) {
+    work->opaque08 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F9DF0);
