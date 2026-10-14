@@ -12248,3 +12248,27 @@ visibility fields, and a fresh menu-flags snapshot for each live node. Explicit
 hidden/visible modes do not update the transition timer; only opening/closing
 modes increment it. The map renderer supplies the branch-specific sprite calls;
 normal cross-jumping merges their shared tails into the two native callsites.
+
+
+### Share rejection paths within their actual query branch
+
+DDS1 `func_00206180` and DDS2 `func_00227528` are 312-byte phase callbacks.
+With a null unit they require the active effect and both eligible actors, then
+return phase 18 or 19; with a unit they apply separate eligibility/readiness
+guards. A common rejection label **inside the null-unit branch** reproduces
+both bodies. Keep the single-unit early returns separate.
+
+The qualified actual compiler trace explains the scope: with separate early
+returns, `15.ce`'s `find_if_case_1` and `dead_or_predicable` hoist the failure
+assignment (`uid39`, hard `$2 = -1`) into the active-phase test. Local allocation
+then puts its constant 1 in `$3` and active byte in `$4`; the battle pointer
+conflicts with `$4` and gets `$6`. With the real pair rejections sharing
+`unavailable_pair`, label 195 still has four predecessors in `15.ce` and its
+return assignment `uid198` stays outside that test. Constant 1 can use `$2`,
+the active byte `$3`, and battle pseudo 85 can use `$4`. Later delay filling
+places the failure result in the native branch slot.
+
+Sharing every failure across both query branches is a measured negative:
+it changes the unit-present guards and emits 316 bytes. The accepted form
+shares only the actual pair-query failures; it uses no flags, extra references,
+alternate types or artificial lifetimes. Complete owners check 153/0 and 44/0.
