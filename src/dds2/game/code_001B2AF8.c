@@ -3,6 +3,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_stat_effect_offsets.h"
 #include "btl_task_state6_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
@@ -6281,11 +6282,6 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C6648);
 
-typedef struct BattleStatEffectOffsets {
-    s32 hp[2]; /* x, y */
-    s32 mp[2]; /* x, y */
-} BattleStatEffectOffsets;
-
 extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004168C8);
@@ -6307,8 +6303,8 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
             work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.hpEffectFade;
         func_001C7760(unit, unit->partyRecord.hp, work->activeEntries[slot].presentation.hpTarget,
                       unit->partyRecord.maxHp, 10,
-                      work->activeEntries[slot].position[0] + offsets.hp[0],
-                      work->activeEntries[slot].position[1] + offsets.hp[1], alpha, type, 0);
+                      work->activeEntries[slot].position[0] + offsets.hp.x,
+                      work->activeEntries[slot].position[1] + offsets.hp.y, alpha, type, 0);
         work->activeEntries[slot].presentation.hpEffectFade -= 8;
         work->activeEntries[slot].presentation.hpEffectFade =
             work->activeEntries[slot].presentation.hpEffectFade <= 0 ? 0 :
@@ -6328,8 +6324,8 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
             work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.mpEffectFade;
         func_001C7760(unit, unit->partyRecord.mp, work->activeEntries[slot].presentation.mpTarget,
                       unit->partyRecord.maxMp, 11,
-                      work->activeEntries[slot].position[0] + offsets.mp[0],
-                      work->activeEntries[slot].position[1] + offsets.mp[1], alpha, type, 1);
+                      work->activeEntries[slot].position[0] + offsets.mp.x,
+                      work->activeEntries[slot].position[1] + offsets.mp.y, alpha, type, 1);
         work->activeEntries[slot].presentation.mpEffectFade -= 8;
         work->activeEntries[slot].presentation.mpEffectFade =
             work->activeEntries[slot].presentation.mpEffectFade <= 0 ? 0 :
