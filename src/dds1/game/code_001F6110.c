@@ -1112,7 +1112,7 @@ u32 btlScriptSelectModeAValueOne(void) {
 
 
 extern s32 btlHasRequiredCommandAffinityPartners(void *, s32);
-extern s32 func_001A3CE0(void *, s32, BtlCommandPartnerOutput *);
+extern s32 btlResolveCommandAffinityPartners(void *, s32, BtlCommandPartnerOutput *);
 
 /* Resolve a command-table entry through its probe, or store the direct command id. */
 u32 btlScriptSelectActionEntry(void) {
@@ -1124,7 +1124,7 @@ u32 btlScriptSelectActionEntry(void) {
     commandId = scrReadIntParameter(0);
     if (datCommandSelectors[commandId].kind == 1) {
         if (btlHasRequiredCommandAffinityPartners(context->unit, commandId) != 0 &&
-            func_001A3CE0(context->unit, commandId, &probe) != 0) {
+            btlResolveCommandAffinityPartners(context->unit, commandId, &probe) != 0) {
             context->actionProbeFirst = probe.firstPartner;
             context->commandMode = 3;
             context->commandValue = probe.commandId;
