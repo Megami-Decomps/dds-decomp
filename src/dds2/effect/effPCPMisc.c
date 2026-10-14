@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_pcp_fade_timer.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -25,6 +26,7 @@
 #include "eff_node_descriptor.h"
 #include "eff_thunder_fragment.h"
 #include "eff_param.h"
+#include "eff_pcp_spawn_once_work.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
@@ -48,19 +50,6 @@
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
-
-
-/* Compact spawn-once work: cleared header words, grey colour, and two
-   independently retained parameter handles released on destroy. */
-typedef struct {
-    u32 unk00;    /* 0x00 cleared on init */
-    u32 unk04;    /* 0x04 cleared on init */
-    u32 unk08;    /* 0x08 cleared on init */
-    u8 pad0C[0x4]; /* 0x0C */
-    u32 color;    /* 0x10 initialised to grey 0x80808080 */
-    EffParamWork *primaryHandle;   /* 0x14 parameter block 0 */
-    EffParamWork *secondaryHandle; /* 0x18 parameter block 1 */
-} EffPCPSpawnOnceWork;
 
 
 
@@ -307,27 +296,6 @@ typedef struct {
 extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
 
-
-/* Timer constructors copy these parameter prefixes before initializing
-   the live source/target colors and frame counter. */
-typedef struct EffPCPFadeTimerParams {
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    u32 color;
-    u8 pad10[4];
-    u32 unk14;
-    u32 unk18;
-    u32 width;
-    u32 height;
-} EffPCPFadeTimerParams;
-
-typedef struct EffPCPFadeTimer {
-    EffPCPFadeTimerParams params;
-    u32 colorFrom;
-    u32 colorTo;
-    s32 frame;
-} EffPCPFadeTimer;
 
 typedef struct EffPCPFadeTimerLongParams {
     s32 duration;

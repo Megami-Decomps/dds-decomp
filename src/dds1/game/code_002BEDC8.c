@@ -35,7 +35,7 @@ void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValue
 }
 
 
-extern void func_002BE8A8(s32, s32, s32, s32, s32, const u32 *, const u32 *, u32,
+extern void sdfDrawTexturedQuad(s32, s32, s32, s32, s32, const u32 *, const u32 *, u32,
                           f32, u32, u32, u32, u32);
 
 /* Draw enabled border strips and restore the temporary texture-coordinate changes. */
@@ -61,7 +61,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
         textureCoordinates[3] = textureCoordinates[1] + 1;
         sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
                                        edgeColorBytes, 0);
-        func_002BE8A8(position[0], position[1], depth,
+        sdfDrawTexturedQuad(position[0], position[1], depth,
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
@@ -77,7 +77,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
         textureCoordinates[1] = textureCoordinates[3] - 1;
         sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
                                        edgeColorBytes, 1);
-        func_002BE8A8(position[0], position[1], depth,
+        sdfDrawTexturedQuad(position[0], position[1], depth,
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
@@ -93,7 +93,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
         textureCoordinates[2] = textureCoordinates[0] + 1;
         sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
                                        edgeColorBytes, 2);
-        func_002BE8A8(position[0], position[1], depth,
+        sdfDrawTexturedQuad(position[0], position[1], depth,
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
@@ -109,7 +109,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
         textureCoordinates[0] = textureCoordinates[2] - 1;
         sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
                                        edgeColorBytes, 3);
-        func_002BE8A8(position[0], position[1], depth,
+        sdfDrawTexturedQuad(position[0], position[1], depth,
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
@@ -176,7 +176,7 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
         effDrawTexturedRectBorderStrips(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], description->rect,
                      (u8 *)draw->bounds.texture.rect, (u32 *)colors, (u32 *)color,
                      kind, mode, flip, texture, buffer);
-        func_002BE8A8(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3],
+        sdfDrawTexturedQuad(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3],
                      (const u32 *)colors, (const u32 *)color,
                      kind, draw->geometry.angleDegrees, mode, flip, texture, buffer);
     }

@@ -68,7 +68,7 @@ extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *
 extern s32 dds3DrawWorldNodeTransformDiagnostic();
 extern SdfPoolNode D_00380708;
 extern s8 D_0037F543[];
-extern void func_002458B8();
+extern void dds3DrawWorldNodeChainDiagnosticPanel();
 
 /* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
 s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
@@ -82,7 +82,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     }
     node = kwlnTaskGetUserValue(task);
     if (dds3ContainsNodeInAnyObjectChain(dds3GetWorldObject(), (EffWorldNode *)node) == 0) {
-        return (s32)func_002458B8;
+        return (s32)dds3DrawWorldNodeChainDiagnosticPanel;
     }
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
@@ -98,7 +98,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     D_00380708.append(&D_00380708, spriteList);
     D_00380708.append(&D_00380708, list);
     if (D_0037F543[0] < 0) {
-        return (s32)func_002458B8;
+        return (s32)dds3DrawWorldNodeChainDiagnosticPanel;
     }
     return 0;
 }

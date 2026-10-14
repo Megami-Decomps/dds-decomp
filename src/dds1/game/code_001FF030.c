@@ -20,27 +20,6 @@
 
 #define BTL_AI_SLOT_COUNT 5
 
-/* Command-actor state retained by AI queries; this is not a battle unit.
- * The first queued action is also the word tested by btlActionMatchesUnit. */
-typedef union BtlActionSlot {
-    s32 word;
-    s16 actionId;
-} BtlActionSlot;
-
-typedef struct BtlActionTask {
-    u8 pad00[0xC];
-    s32 flags; /* 0x0C: AI context flags */
-    u8 pad10[0x78];
-    u16 aiCounter; /* 0x88: wraps as a halfword, then clamps to 0xFF */
-    u8 pad8A[0xBC];
-    s8 lowHpActionHold; /* 0x146: positive suppresses the low-HP action */
-    u8 pad147;
-    BtlActionSlot actions[8]; /* 0x148 */
-    u8 pad168[4];
-    struct BtlActionTask *next; /* 0x16C, same link as BtlTask */
-} BtlActionTask;
-
-
 extern BtlAiScratchWork *btlActionScratchWork;
 
 extern AiSpecies *datEnemyAiRecords;

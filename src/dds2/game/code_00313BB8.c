@@ -183,11 +183,11 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
 
 
-extern s32 func_00359A98(const char *, const char *);
+extern s32 sdfOpenFileStream(const char *, const char *);
 
 extern void func_00359AC0(s32, const char *, s32, s32);
 
-extern void func_003594A8(s32);
+extern void sdfCloseFileStream(s32);
 
 extern char sdfDebugLogAppendMode[];
 
@@ -203,10 +203,10 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
-    s32 file = func_00359A98("debug.log", sdfDebugLogAppendMode);
+    s32 file = sdfOpenFileStream("debug.log", sdfDebugLogAppendMode);
     if (file != 0) {
         func_00359AC0(file, sdfDebugLogPairFormat, left, right);
-        func_003594A8(file);
+        sdfCloseFileStream(file);
     }
 }
 

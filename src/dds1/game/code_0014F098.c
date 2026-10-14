@@ -11,7 +11,7 @@ extern const char *fldGetTaskRecordValue(u32 key);
 
 extern void fldSelectCameraByActorName(const char *entry);
 
-extern s32 func_0013CBA8(s32 index);
+extern s32 fldResolveEventSelectorTarget(s32 index);
 
 extern s32 func_0013CEB0(s32 param0, s32 param1);
 
@@ -91,7 +91,7 @@ s32 fldCmdGetActorSlotAttribute(void) {
 }
 
 void func_0014F1A0(void) {
-    scrSetIntegerReturnValue(func_0013CBA8(1));
+    scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
 }
 
 s32 fldCmdStartSelectedActorTask(void) {

@@ -759,8 +759,8 @@ RefObj *effRetainSharedReference(RefObj *obj) {
     return obj;
 }
 
-extern SdfTex *func_002DDD60(void *, RefObj *);
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDD60);
+extern SdfTex *sdfGetOrCreateTextureForReference(void *, RefObj *);
+INCLUDE_ASM(const s32, "game/code_002DC138", sdfGetOrCreateTextureForReference);
 
 s32 effCountExpandedEntries(EffExpandedList *list) {
     u32 count = list->count;
@@ -885,7 +885,7 @@ void effSampleAnimSet(EffExpandedList *set, u32 frame, EffAnimSample *out) {
 }
 
 SdfTex *effAssignSampledSegmentReference(EffExpandedList *set, void *target, const EffAnimSample *sample) {
-    return func_002DDD60(target, set->handles[sample->segment]);
+    return sdfGetOrCreateTextureForReference(target, set->handles[sample->segment]);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E2C);

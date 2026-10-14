@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "eff_owner_bill_entry.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
@@ -42,7 +43,7 @@ typedef ObjectTransform EffectParameters;
 
 typedef EffWorldNode EffectObj;
 
-void effObjFreeInner(void *arg);
+void effObjFreeInner(EffWorldNode *node);
 void dds3DestroyObjectBase(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
@@ -77,7 +78,7 @@ extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
 extern void dds3EnsureSlotData(void *obj);
 
-extern void effObjInnerVecBackup(void *params);
+extern void effObjInnerVecBackup(ObjectTransform *node);
 extern void effMagatuhiCopyFloatBlock(void *, const void *);
 extern void effMagatuhiSetControlPointParams(void *, const void *);
 
@@ -231,7 +232,6 @@ s32 effUpdateLinkedWorldObjectConsumers(EffectObj *obj) {
 struct BillObj;
 struct EffNode;
 
-extern u8 dds3TestObjectFlags(void *obj, s32 flags);
 extern void billInvokeCallback(struct BillObj *bill);
 
 s32 effObjUpdateDependencies(EffectObj *obj) {

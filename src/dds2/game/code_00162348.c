@@ -110,7 +110,7 @@ extern void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color);
 extern void effBillSetEntryValue(s32, s32, u32);
 
 
-extern void func_001638D8(s32, s32);
+extern void parFadeTriangleCellAlpha(ParSystem *system, s32 index);
 
 
 #include "sdf_packet_alloc.h"
@@ -454,7 +454,7 @@ void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     VU0_STORE_VF(vf11, &axis[2]);
 ;
     parUpdateCellVertexTriangle((ParSystem *)particle, index, axis);
-    func_001638D8(particle, index);
+    parFadeTriangleCellAlpha((ParSystem *)particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
@@ -730,7 +730,71 @@ void parFadeAlphaCell(ParSystem *system, s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_001638D8);
+extern f32 D_003AAED0[4];
+/* Fade one triangle cell's middle and edge colors toward transparent along its history. */
+void parFadeTriangleCellAlpha(ParSystem *system, s32 index) {
+    u32 count = system->cells[index].vertexCount / 3;
+    ParTriangleVertexColors *vertex;
+    u32 middleWord;
+    u32 edgeWord;
+    f32 cur0[4];
+    f32 cur1[4];
+    f32 step0[4];
+    f32 step1[4];
+    s32 alpha0[4];
+    s32 alpha1[4];
+    s32 col0[4];
+    s32 col1[4];
+    s32 out0[4];
+    s32 out1[4];
+    u32 j;
+    u32 packedMiddle;
+    u32 packedEdge;
+
+    if (count >= 2) {
+        vertex = (ParTriangleVertexColors *)system->cells[index].colors;
+        middleWord = vertex->middle;
+        edgeWord = vertex->edge0;
+        alpha0[0] = middleWord & 0xFF000000;
+        EE_MMI_RGBA_UNPACK(alpha0, 1.0f / 128.0f);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, D_003AAED0);
+        VU0_LERP_VF10(1.0f / count);
+        VU0_STORE_VF(vf10, step0);
+        alpha1[0] = edgeWord & 0xFF000000;
+        EE_MMI_RGBA_UNPACK(alpha1, 1.0f / 128.0f);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, D_003AAED0);
+        VU0_LERP_VF10(1.0f / count);
+        VU0_STORE_VF_UNCLOBBERED(vf10, step1);
+        col0[0] = middleWord;
+        EE_MMI_RGBA_UNPACK(col0, 1.0f / 128.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, cur0);
+        col1[0] = edgeWord;
+        EE_MMI_RGBA_UNPACK(col1, 1.0f / 128.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, cur1);
+        for (j = 0; j < count; j++) {
+            VU0_LOAD_VF(vf10, cur0);
+            VU0_MOVE_VF(vf11, vf10);
+            EE_MMI_RGBA_PACK_UNIT(packedMiddle, 128.0f);
+            out0[0] = packedMiddle;
+            vertex->middle = packedMiddle;
+            VU0_LOAD_VF(vf12, step0);
+            VU0_SUB(vf11, vf11, vf12);
+            VU0_STORE_VF(vf11, cur0);
+            VU0_LOAD_VF(vf10, cur1);
+            VU0_MOVE_VF(vf11, vf10);
+            EE_MMI_RGBA_PACK_UNIT(packedEdge, 128.0f);
+            out1[0] = packedEdge;
+            vertex->edge0 = packedEdge;
+            vertex->edge1 = packedEdge;
+            VU0_LOAD_VF(vf12, step1);
+            VU0_SUB(vf11, vf11, vf12);
+            VU0_STORE_VF(vf11, cur1);
+            vertex++;
+        }
+    }
+}
 
 void parFillVertexPairs(ParSystem *system, u32 firstColor, u32 secondColor) {
     s32 perCell = system->vertexWordCount >> 1;

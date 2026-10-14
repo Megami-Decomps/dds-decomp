@@ -687,15 +687,6 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
     }
 }
 
-/* Mirrored camera aim presets: quaternion, distance and height scale. */
-typedef struct BattleSideCameraPreset {
-    f32 quat[4];
-    f32 distanceScale;
-    f32 heightScale;
-    f32 unk18;
-    f32 unk1C;
-} BattleSideCameraPreset;
-
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
@@ -4490,7 +4481,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     owner = args->option == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
     if (args->source->flags & 2) {
         if (args->effect == NULL) {
-            args->effect = func_00168548(args->source->resourceHandle, args->option, owner, 0);
+            args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, args->option, owner, 0);
             args->duration = sndSetEffectNodeParameter(args->source, args->option);
             if ((owner->effectLink.packed & 0xA) == 8) {
                 args->duration = 35;
@@ -4632,7 +4623,7 @@ s32 btlUpdateActorSystemEffect(ActorEffectTaskArgs *args) {
         return 1;
     }
     if (args->effect == 0) {
-        args->effect = func_00168548(args->source->resourceHandle, 0, unit, 0);
+        args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, 0, unit, 0);
         effBattleUpdateSelectedValue(args->effect, args->duration);
     }
     if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
@@ -4871,7 +4862,7 @@ s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
     owner = args->owner.unit;
 
     if (args->effect == NULL) {
-        args->effect = func_00168548(args->source->resourceHandle, 0, owner, 0);
+        args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, 0, owner, 0);
         args->effect->flags |= 1;
     }
     if (args->frameCount < 12) {
@@ -5266,7 +5257,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         if (link->effectHandle == 0) {
             link->effect = work->resources[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
             sndCreateSystemEffect(link->effect);
-            link->effectHandle = func_00168548(link->effect->resourceHandle, 2, actor, 0);
+            link->effectHandle = effCreateBattleVoiceOwner(link->effect->resourceHandle, 2, actor, 0);
             link->effect->referenceCount++;
             link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
         }

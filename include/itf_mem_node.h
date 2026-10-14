@@ -12,6 +12,17 @@ typedef struct MemNode {
 typedef char MemNodeSizeCheck[(sizeof(MemNode) == 8) ? 1 : -1];
 typedef char MemNodeNextOffsetCheck[((u32)&((MemNode *)0)->next == 4) ? 1 : -1];
 
+/* Allocation prefix immediately before the returned node ring base. */
+struct SdfMemBlock;
+typedef struct MemRingHeader {
+    struct SdfMemBlock *allocation;
+    MemNode first;
+} MemRingHeader;
+
+typedef char MemRingHeaderSizeCheck[(sizeof(MemRingHeader) == 0x0C) ? 1 : -1];
+typedef char MemRingHeaderFirstOffsetCheck[
+    ((u32)&((MemRingHeader *)0)->first == 0x04) ? 1 : -1];
+
 MemNode *itfCreateMemNodeRing(s32 payloadBytes, s32 count);
 void *itfDequeueMemNode(MemNode *pool);
 s32 itfEnqueueMemNode(void *payload, MemNode *pool);

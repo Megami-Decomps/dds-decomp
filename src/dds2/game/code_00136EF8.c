@@ -2421,9 +2421,86 @@ const char *fldResolveEventSetByNameEitherKindArea(const char *eventName) {
     return 0;
 }
 
+extern s32 fldGetActorStat0(s32 attribute);
+/* Follow the INF flag/message graph to its terminal event or actor action.
+ * Linked selectors recurse in tail position; the native routine loops without
+ * growing the stack. Targets and eventHit are signed serialized bytes. */
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004133A0);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013F790);
+s32 fldResolveEventSelectorTarget(s32 selector) {
+    s32 target;
+    s32 index;
+
+    if (selector < 10) {
+        index = selector - 1;
+        if (D_0038E2D0.sets[D_004361C8].flags[index].flag == 0) {
+            target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
+        } else if (mdlFlagTest(D_0038E2D0.sets[D_004361C8].flags[index].flag)) {
+            target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].onTarget;
+        } else {
+            target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
+        }
+    } else {
+        index = selector - 10;
+        target = (s8)D_0038E2D0.sets[D_004361C8].messages[index].targets[0];
+    }
+    switch (target) {
+    case 0:
+        return 0;
+    case 100:
+        fldResolveEventSetByNameEitherKindArea(D_0038BC50[D_004361CC]->name);
+        switch ((s8)D_0038E2D0.sets[D_004361C8].eventHit) {
+        case 0: return 199;
+        case 4: return 104;
+        case 5: return 105;
+        case 6: return 106;
+        case 7: return 107;
+        }
+        fldFindActorEntryByName(D_0038BC50[D_004361CC]->name);
+        switch (D_004361F8) {
+        case 0:
+        case 1:
+        case 2:
+        case 4: return 100;
+        case 3: return 102;
+        case 5:
+            if (fldGetActorStat0(0) == 0) {
+                return 104;
+            } else {
+                return 105;
+            }
+        case 6: return 106;
+        case 7: return 107;
+        }
+        return target;
+    case 101: return target;
+    case 102: return target;
+    case 103: return target;
+    case 104: return target;
+    case 105: return target;
+    default:
+        if (target < 10) {
+            return fldResolveEventSelectorTarget(target);
+        }
+        index = target - 10;
+        if (D_0038E2D0.sets[D_004361C8].messages[index].kind == -1) {
+            return fldResolveEventSelectorTarget(target);
+        }
+        if ((u16)D_0038E2D0.sets[D_004361C8].messages[index].kind < 2) {
+            switch ((s8)D_0038E2D0.sets[D_004361C8].eventHit) {
+            case 0: return 199;
+            case 1: return 2;
+            case 2: return 100;
+            case 3: return 1;
+            case 4: return 104;
+            case 5: return 105;
+            case 6: return 106;
+            case 7: return 107;
+            }
+        }
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013FA98);
 

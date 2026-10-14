@@ -808,7 +808,7 @@ extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 const char D_004156D8[] = "btl:drop money=%d[ratio=%f]\n";
 
-s32 func_001B3B28(BtlUnit *actor) {
+s32 btlCalculateMoneyDropAmount(BtlUnit *actor) {
     DatPartyRecord *record = &actor->partyRecord;
     s32 money;
     f32 ratio;
@@ -1045,7 +1045,7 @@ const f32 D_004157A0[9] __attribute__((section(".rodata"), aligned(8))) = {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004157C8);
 
-s32 func_001B4600(BtlUnit *unit, s32 command) {
+s32 btlRollPetrifiedDeathChance(BtlUnit *unit, s32 command) {
     s32 kind;
     s32 chance;
     f32 ratio;
@@ -1159,7 +1159,7 @@ typedef struct BtlAiActionEntry {
 
 extern BtlAiActionEntry D_003B5100[];
 
-s32 func_001B4918(BtlUnit *unit, BtlUnit *target) {
+s32 btlSelectCounterSkill(BtlUnit *unit, BtlUnit *target) {
     s32 result;
     s32 threshold;
     u32 i;
@@ -1215,7 +1215,7 @@ extern BattleStartVoiceRow D_003B5140[16];
 extern s8 D_003B52C0[16];
 extern char D_004158F8[], D_00415920[];
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-extern s32 func_001AF4A0(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
 extern char D_00415878[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_00415898[]; /* "btl:start voice off[SERIAL]\n" */
@@ -1289,7 +1289,7 @@ s8 btlChooseStartVoice(void) {
     for (unit = state->units; unit != NULL; unit = unit->nextActor) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
-                damage = func_001AF4A0(unit, chosen, 0, 1, 1, 1, 0);
+                damage = btlCalculateHpActionAmount(unit, chosen, 0, 1, 1, 1, 0);
                 /* Keep the first decisive category; later damage calls still run.
                  * The high threshold wins even when unsigned arithmetic wraps. */
                 if (category == 2) {
@@ -7842,7 +7842,7 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
 
 
 
-extern s32 func_001AC0F8(void *source, BtlIndexList *list, s32, s32, s32);
+extern s32 btlBuildUnitIndexList(void *source, BtlIndexList *list, s32, s32, s32);
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *source, BtlIndexList *list, s32);
 
@@ -7865,9 +7865,9 @@ s32 btlCreateAiWork(s32 source) {
         other = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (datGameState->party[other->partyRecordIndex].status & 0x4800)) {
-            func_001AC0F8((void *)source, work->listA, 1, 4, -0x4801);
+            btlBuildUnitIndexList((void *)source, work->listA, 1, 4, -0x4801);
         } else {
-            func_001AC0F8((void *)source, work->listA, 1, 4, -1);
+            btlBuildUnitIndexList((void *)source, work->listA, 1, 4, -1);
         }
         btlGetIndexListCount(work->listA);
         work->result = 0;

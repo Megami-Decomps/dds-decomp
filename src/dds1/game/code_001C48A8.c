@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_unit_base_light_task.h"
 #include "btl_special_ability.h"
 #include "kwln_fade.h"
 #include "btl_sound.h"
@@ -292,7 +293,6 @@ extern u8 *btlCreateSecondaryCommandSoundTask(void);
 extern void *btlCreateCommandSoundTask(s32, s32);
 extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
 extern void *btlCreateActorTransparencyTask(BtlUnit *);
-extern void *btlCreateUnitBaseLightTask(BtlUnit *);
 extern u8 *btlCreateUnitFadeInTask(u8 *, u32, u32);
 extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);

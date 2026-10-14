@@ -45,7 +45,7 @@ extern MenuRuntimeList D_0045C880;
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
-extern void *func_0035A828(u32 bytes);
+extern void *sdfAllocHeapMemory(u32 bytes);
 void mnuReleaseResourceBlockCallback(u32, u32);
 
 
@@ -158,7 +158,7 @@ MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {
     if (tagData == 0) {
         return 0;
     }
-    record = func_0035A828(sizeof(*record));
+    record = sdfAllocHeapMemory(sizeof(*record));
     memset(record, 0, sizeof(*record));
     memcpy(&record->tag, tagData, sizeof(record->tag));
     return record;
@@ -166,7 +166,7 @@ MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {
 
 void mnuFreeOptionalBlock(u32 ptr) {
     if (ptr != 0) {
-        func_0035A880(ptr);
+        sdfFreeHeapMemory(ptr);
     }
 }
 

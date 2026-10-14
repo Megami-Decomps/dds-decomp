@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "sdf_dev_cons.h"
+#include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
 #include "ee_mmi.h"
 #include "sdf_packet_list.h"
@@ -27,6 +28,7 @@
 #include "bf_flw0_header.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
+#include "fld_resource_wait_api.h"
 
 extern void mnuCreateConfigTasks(s32 mode);
 
@@ -56,7 +58,7 @@ enum {
     BF_FLW0_SECTION_STRINGS = 4
 };
 
-extern s32 evtConsoleFontResourceChain;
+extern ConsNode *evtConsoleFontResourceChain;
 
 extern s32 fldLmapTaskExists(void);
 
@@ -71,8 +73,6 @@ extern s32 fileConsumeConfigTaskReady(void);
 extern s32 mnuAcknowledgeCampState(void);
 
 extern u32 D_003BA730;
-
-extern s32 fldIsFieldResourceWaitFinished(void);
 
 extern s32 fileMenuTaskExists(void);
 extern void fileEnterMcPackScene(s32 mode);
@@ -169,10 +169,6 @@ extern void evtSelStateDestroy(void);
 extern s32 D_0032E3C0[];
 
 extern void fldStartLmapTask(s32 arg0);
-
-extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-
-
 
 extern u32 scrNamedProcessCount;
 
@@ -1416,8 +1412,6 @@ void evtDestroyFontResourceChain(void) {
 }
 
 extern s32 sdfVFormatString();
-extern void sdfDevConsPrintf();
-
 /* printf into the dev console node when one exists. */
 INCLUDE_SDATA(const s32, "game/code_00107FD8", evtSelectionStateActive);
 
@@ -1425,7 +1419,7 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA950);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA958);
 
-INCLUDE_SDATA(const s32, "game/code_00107FD8", evtConsoleFontResourceChain);
+INCLUDE_SDATA(ConsNode *, "game/code_00107FD8", evtConsoleFontResourceChain);
 
 void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     char messageBuffer[EVT_DEV_CONSOLE_BUFFER_BYTES];
@@ -1434,7 +1428,7 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
         sdfVFormatString(messageBuffer, format, formatArgs);
-        sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
+        sdfDevConsPrintf((DevConsState *)evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }
 

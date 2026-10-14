@@ -382,7 +382,7 @@ extern s32 fileSaveFileDescriptor;
 extern struct SdfMemBlock *fileSaveReadBufferResource;
 extern s32 fileReadSlotPreviewWait(void);
 
-extern s32 func_002CBA90(void);
+extern s32 fileBeginReadRemainingSlotIcons(void);
 
 extern s32 fileBeginSlotOpen(void);
 
@@ -971,7 +971,7 @@ s32 fileBeginSlotOpen(void) {
     ctx = fileMemoryCardRequestIndex;
     slot = fileReqGetSelectedSlot(ctx);
     if ((fileReqGetSlotFlags(ctx, slot) & FILE_REQ_SLOT_CAN_READ_SAVE) == 0) {
-        return func_002CBA90();
+        return fileBeginReadRemainingSlotIcons();
     }
     path[0] = 0x2F;
     mcdFormatSaveSlotName(&path[1], slot);
@@ -1027,7 +1027,7 @@ s32 fileStoreSlotHeader(void) {
     if (status == MC_POLL_SUCCESS) {
         memcpy(&fileSavePreviewRecords[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
         sdfReleaseResourceAllocation(fileSaveReadBufferResource);
-        return func_002CBA90();
+        return fileBeginReadRemainingSlotIcons();
     }
     sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
@@ -1610,7 +1610,7 @@ s32 mcHandleSlotWriteResult(void) {
     return fileBeginSlotOpen();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CBA90);
+INCLUDE_ASM(const s32, "game/code_002C96D0", fileBeginReadRemainingSlotIcons);
 
 s32 mcResetSlotMetadata(void) {
     s32 index;

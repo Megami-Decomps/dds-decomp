@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_map_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
@@ -81,13 +82,6 @@ extern void sdfCounterTickPositionTransition(void);
 extern s32 sdfUpdateSelectedCounterMapCameraTransition();
 
 extern u8 D_00400BB0[];
-
-typedef struct {
-    u8 pad00[0x0C];
-    s32 selectedCount; /* 0x0C */
-    u8 pad10[0x10];
-    s32 maxCount;      /* 0x20 */
-} MapSelection;
 
 extern u32 sdfInstalledSpriteSlots[];
 

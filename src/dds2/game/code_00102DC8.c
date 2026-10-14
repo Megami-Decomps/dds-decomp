@@ -13,6 +13,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "sdf_tex_packet.h"
 #include "kwln.h"
+#include "kwln_named_slot.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf.h"
@@ -162,19 +163,6 @@ void kwlnDebugTaskCreate(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnRegisterNamedSlot);
 
-typedef struct KwlnNamedSlot {
-    s32 kind;
-    char name[32];
-    void *unk24;
-    void *unk28;
-    void *unk2C;
-    void *unk30;
-    s32 unk34;
-    void *unk38;
-    s32 previous;
-    s32 next;
-} KwlnNamedSlot;
-
 extern KwlnNamedSlot D_0043D410[];
 extern s32 D_00435C20;
 
@@ -236,19 +224,19 @@ s32 kwlnUnregisterNamedSlot(const char *name) {
     }
     if (D_0043D410[slotIndex].kind > 0) {
         if (D_0043D410[slotIndex].kind < 3) {
-            if (kwlnTaskIsRegistered((KwlnTask *)D_0043D410[slotIndex].unk24) == 1) {
-                kwlnTaskDestroyWithHierarchy((KwlnTask *)D_0043D410[D_00435C2C].unk24, 1);
+            if (kwlnTaskIsRegistered((KwlnTask *)D_0043D410[slotIndex].task) == 1) {
+                kwlnTaskDestroyWithHierarchy((KwlnTask *)D_0043D410[D_00435C2C].task, 1);
             }
         }
     }
     D_0043D410[slotIndex].kind = 0;
     D_0043D410[slotIndex].name[0] = 0;
-    D_0043D410[slotIndex].unk24 = 0;
-    D_0043D410[slotIndex].unk28 = 0;
-    D_0043D410[slotIndex].unk2C = 0;
-    D_0043D410[slotIndex].unk30 = 0;
-    D_0043D410[slotIndex].unk34 = 0;
-    D_0043D410[slotIndex].unk38 = 0;
+    D_0043D410[slotIndex].task = 0;
+    D_0043D410[slotIndex].opaque28 = 0;
+    D_0043D410[slotIndex].opaque2C = 0;
+    D_0043D410[slotIndex].opaque30 = 0;
+    D_0043D410[slotIndex].opaque34 = 0;
+    D_0043D410[slotIndex].opaque38 = 0;
     if (D_0043D410[slotIndex].previous < 0) {
         D_00435C20 = D_0043D410[slotIndex].next;
     } else {

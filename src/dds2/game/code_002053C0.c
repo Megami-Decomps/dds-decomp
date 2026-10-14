@@ -1080,7 +1080,75 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
 
 
 
-INCLUDE_ASM(const s32, "game/code_002053C0", func_00207268);
+/* Read-only spacing cells from the actor resource archive: first float at
+ * +0x38, then one cell per 0x14-byte slot. This view owns no archive storage. */
+typedef struct BtlFormationSpacingCell {
+    f32 spacing;
+    u8 unread04[0x10];
+} BtlFormationSpacingCell;
+
+typedef char BtlFormationSpacingCellSizeCheck[(sizeof(BtlFormationSpacingCell) == 0x14) ? 1 : -1];
+
+void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
+    BtlUnit *participants[3];
+    f32 targetPosition[4] __attribute__((aligned(16)));
+    f32 oldPosition[4] __attribute__((aligned(16)));
+    f32 newPosition[4] __attribute__((aligned(16)));
+    BtlUnit *target;
+    const BtlFormationSpacingCell *spacing;
+    s32 actorStatusAddress;
+    s32 actionCode;
+    s32 selector;
+    u32 i;
+    f32 distance;
+    f32 flatY;
+
+    actionCode = command->actionCode;
+    if (((u32)actionCode - 0x1AB) >= 0x75) {
+        return;
+    }
+    if (btlGetIndexListCount(command->targetList) != 1) {
+        return;
+    }
+    target = btlGetIndexListEntry(command->targetList, 0);
+    btlUnitGetMuzzlePosVU(target);
+    /* Audited SDK store: this vector is read only by the VU load below. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
+    participants[0] = command->linkedA;
+    participants[1] = command->linkedB;
+    participants[2] = command->link->unit;
+    flatY = 0.0f;
+    for (i = 0; i < 3; i++) {
+        BtlUnit *actor = participants[i];
+        const BtlEffectActionRecord *row;
+        if (actor == NULL) {
+            continue;
+        }
+        row = (const BtlEffectActionRecord *)((u32)D_00435E34 +
+              actionCode * sizeof(BtlEffectActionRecord) -
+              0x1AB * sizeof(BtlEffectActionRecord));
+        selector = row->participantSelectors[i];
+        if (selector == -1) {
+            continue;
+        }
+        actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
+        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + actorStatusAddress + 0x38);
+        distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
+        btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
+        btlUnitGetMuzzlePosVU(participants[i]);
+        VU0_LOAD_VF(vf11, targetPosition);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_SET_VF10_COMPONENT(y, flatY);
+        VU0_NORMALIZE_VF10();
+        VU0_SCALAR_OP_CLOBBER(distance, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, targetPosition);
+        VU0_ADD(vf10, vf10, vf11);
+        /* The vector is complete here; Y is replaced, then the callee consumes it. */
+        VU0_STORE_VF_UNCLOBBERED(vf10, newPosition);
+        newPosition[1] = oldPosition[1];
+        btlSetUnitPosition(participants[i], newPosition);
+    }
+}
 
 extern f32 D_003E9110[4];
 

@@ -665,7 +665,7 @@ extern void mnuSpawnMantraIconWithShortLoop(struct MantraDrawPool *);
 extern void mtrDrawRankPass(s32, u16);
 extern void mnuSpawnMantraMapPanels(MnuStatusResource *, u16, u16);
 /* The following three declarations remain inferred from native callers. */
-extern s32 func_0028EB38(MnuStatusResource *, s32);
+extern s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *, s32);
 extern void mnuUpdateMantraNodeState(MnuStatusResource *, u16);
 extern s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *, MnuStatusResource *);
 
@@ -789,7 +789,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage(D_00426D48);
         break;
     case 6:
-        if (func_0028EB38(object, 1) == 0) {
+        if (mnuAdvanceMantraSelectionCursor(object, 1) == 0) {
             work->sourceNextState = 15;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
@@ -862,7 +862,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage(D_00426E48);
         break;
     case 9:
-        if (func_0028EB38(object, 1) == 0) {
+        if (mnuAdvanceMantraSelectionCursor(object, 1) == 0) {
             work->sourceNextState = 12;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
@@ -913,7 +913,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         break;
     case 11:
         work->frame++;
-        if (func_0028EB38(object, 1) == 0) {
+        if (mnuAdvanceMantraSelectionCursor(object, 1) == 0) {
             mdlFlagSet(work->src->unk02);
             work->frame = 0;
             work->drawBits.hasSource = 0;

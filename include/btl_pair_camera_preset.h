@@ -28,4 +28,28 @@ typedef char BattlePairCameraPresetFromHeightOffsetCheck[
 typedef char BattlePairCameraPresetMotionParameterOffsetCheck[
     ((u32)&((BattlePairCameraPreset *)0)->motionParameter == 0x2C) ? 1 : -1];
 
+/* Side-selected actor camera pose. Only the quaternion and scale factors are
+ * consumed by the paired providers; retain the initialized tail floats as
+ * opaque values. */
+typedef struct BattleSideCameraPreset {
+    f32 quat[4];          /* 0x00 */
+    f32 distanceScale;    /* 0x10 */
+    f32 heightScale;      /* 0x14 */
+    f32 unk18;            /* 0x18 */
+    f32 unk1C;            /* 0x1C */
+} BattleSideCameraPreset;
+
+typedef char BattleSideCameraPresetSizeCheck[
+    (sizeof(BattleSideCameraPreset) == 0x20) ? 1 : -1];
+typedef char BattleSideCameraPresetQuaternionOffsetCheck[
+    ((u32)&((BattleSideCameraPreset *)0)->quat == 0x00) ? 1 : -1];
+typedef char BattleSideCameraPresetDistanceOffsetCheck[
+    ((u32)&((BattleSideCameraPreset *)0)->distanceScale == 0x10) ? 1 : -1];
+typedef char BattleSideCameraPresetHeightOffsetCheck[
+    ((u32)&((BattleSideCameraPreset *)0)->heightScale == 0x14) ? 1 : -1];
+typedef char BattleSideCameraPresetOpaque18OffsetCheck[
+    ((u32)&((BattleSideCameraPreset *)0)->unk18 == 0x18) ? 1 : -1];
+typedef char BattleSideCameraPresetOpaque1COffsetCheck[
+    ((u32)&((BattleSideCameraPreset *)0)->unk1C == 0x1C) ? 1 : -1];
+
 #endif /* BTL_PAIR_CAMERA_PRESET_H */

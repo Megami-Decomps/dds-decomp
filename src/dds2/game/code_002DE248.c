@@ -15,8 +15,10 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_resource_list_request.h"
 #include "eff_matrix4.h"
 #include "eff_active_resource.h"
+#include "eff_frame_asset.h"
 #include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
 #include "btl_effect_position.h"
@@ -205,17 +207,6 @@ typedef struct EffMotionResourceConfig {
 typedef struct EffectBlock128 {
     u32 word[32];
 } EffectBlock128;
-
-typedef struct EffectSlot {
-    u8 pad_0x00[0x28]; // 0x00
-    s32 bucket;        // 0x28
-    u8 pad_0x2C[0x54]; // 0x2C
-} EffectSlot; // 0x80
-
-typedef struct EffectSlotOwner {
-    u8 pad_0x00[0x10];  // 0x00
-    EffectSlot *slots;  // 0x10
-} EffectSlotOwner;
 
 extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
 
@@ -1666,18 +1657,6 @@ void effSetBillboardColor(s32 work, u32 value) {
 void effSetBillboardMatrixComponent(EffBillboardWork *work, float value) {
     work->scale = value;
 }
-
-/* DDS1/DDS2 frame asset: storage at +0x1C, count at +0x08. */
-typedef struct EffFrameAsset {
-    u8 pad_00[8];
-    u32 frameCount;
-    u8 pad_0C[0xC];
-    u32 *animationFrames; // 0x18, per-frame reset flags
-    void *frameStorage;
-    f32 *transformRows;
-    u32 pad_24;
-    u32 *colorRows;
-} EffFrameAsset;
 
 /* Per-instance frame entries and the descriptor that owns their storage. */
 typedef struct EffFrameState {
@@ -3652,7 +3631,7 @@ extern u32 D_003E9A50[20];
 extern u32 D_003E9AA0[12];
 extern u32 D_003E9AD0[20];
 extern u32 D_003E9B20[16];
-extern SdfTex *func_002DDD60(void *, RefObj *);
+extern SdfTex *sdfGetOrCreateTextureForReference(void *, RefObj *);
 struct SdfAsset;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
@@ -3697,9 +3676,9 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
                 texture = NULL;
                 goto setTexture;
             }
-            texture = func_002DDD60(surface, reference);
+            texture = sdfGetOrCreateTextureForReference(surface, reference);
         } else {
-            texture = func_002DDD60(surface, reference);
+            texture = sdfGetOrCreateTextureForReference(surface, reference);
         }
 setTexture:
         sdfSetAssetPrimaryTextureAddress(track->handle, texture);
@@ -5145,7 +5124,89 @@ void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
     sdfConsAppendVuPacket(effCurrentRenderPacket, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E9E98);
+extern EffPacketParams D_00458310;
+extern EffPacketParams D_00458340;
+
+/* Point history of a grid-surface trail: a ring of 16-byte points with packed colors,
+ * drawn as triangle strips into the current render packet, then a fixed end cap. */
+typedef struct EffSurfaceTrailHistory {
+    u8 pad00[0x20];
+    s32 pointCapacity;        /* 0x20 */
+    s32 activePointCount;     /* 0x24 */
+    s32 nextPointWriteIndex;  /* 0x28 */
+    u8 pad2C[0x08];
+    u128 *points;             /* 0x34 */
+    u32 *colors;              /* 0x38 */
+    s32 resourceHandle;       /* 0x3C */
+    u128 *endPoints;          /* 0x40 */
+    u32 *endColors;           /* 0x44 */
+} EffSurfaceTrailHistory;
+
+void func_002E9E98(EffSurfaceTrailHistory *history, u32 color) {
+    s32 start[4];
+    s32 length[4];
+    s32 recent;
+    s32 wrapped;
+    s32 i;
+    s32 remaining;
+    EffPacketParams *draw;
+    u32 *colors;
+    u32 edgeColor;
+    u32 centerColor;
+    SdfListHead *list;
+
+    if ((color & 0xFF000000) == 0) {
+        return;
+    }
+    if (history->activePointCount < 6) {
+        return;
+    }
+    sdfConsAppendAssetPacket(effCurrentRenderPacket, history->resourceHandle, 0);
+    recent = history->activePointCount;
+    start[0] = history->nextPointWriteIndex - recent;
+    if (start[0] < 3) {
+        wrapped = start[0] - 3;
+        start[1] = 0;
+        start[0] = wrapped + history->pointCapacity;
+        length[0] = -wrapped;
+        length[1] = recent - length[0] + 3;
+    } else {
+        length[0] = recent;
+        length[1] = 0;
+    }
+    D_00458310.colors = history->colors;
+    for (i = 0; i < 2; i++) {
+        draw = &D_00458310;
+        draw->positions = history->points + start[i];
+        draw->color = color;
+        draw->parameterCount = 16;
+        remaining = length[i];
+        draw->vertexCount = 15;
+        while (remaining >= 15) {
+            remaining -= 12;
+            list = effCurrentRenderPacket;
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_00458310));
+            D_00458310.positions += 12;
+            D_00458310.colors += 12;
+        }
+        if (remaining >= 6) {
+            draw->parameterCount = (remaining / 3) * 4 - 4;
+            draw->vertexCount = remaining;
+            list = effCurrentRenderPacket;
+            sdfAppendPacket(list, effCreateVertexDrawPacket(draw));
+            draw->colors += remaining;
+        }
+    }
+    colors = history->endColors;
+    D_00458340.positions = history->endPoints;
+    colors[0] = D_00458310.colors[-2];
+    D_00458340.colors = colors;
+    colors[7] = colors[6] = colors[5] = colors[4] =
+        colors[3] = colors[2] = colors[1] = D_00458310.colors[-3];
+    D_00458340.color = color;
+    list = effCurrentRenderPacket;
+    sdfAppendPacket(list, effCreateVertexDrawPacket(&D_00458340));
+}
 
 typedef struct EffDrawEntry {
     u32 handle;
@@ -13777,18 +13838,6 @@ u32 mnuGetValueRecordOwner(const EffectList *list) {
     return list->mode;
 }
 
-typedef struct EffLoadedItem {
-    struct EffLoadedItem *next;
-    u8 pad_04[4];
-    u32 buffer; // 0x08
-    u8 pad_0C[4];
-    u8 kind;    // 0x10: 1 once the job's buffer is ready
-} EffLoadedItem;
-
-typedef struct EffRequest {
-    u8 pad_00[0x60];
-    EffLoadedItem *items; // 0x60
-} EffRequest;
 
 
 
@@ -13858,7 +13907,7 @@ s32 effPollResourceList(EffectList *list) {
                 for (item = list->request->items; item != NULL; item = item->next) {
                     if (item->kind == 1) {
                         node = list->first;
-                        buffer = item->buffer;
+                        buffer = item->allocationHandle;
                         *node->reference = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)buffer, node->kind);
                         if (node->kind == 0) {
                             sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(buffer));
@@ -13991,7 +14040,7 @@ EffectOwnerRecord *effCreateOwnerRecordList(u32 ownerAddress) {
 /* Clamp only the upper bucket bound and prepend; the former head's prev link is not rewritten. */
 void effInsertSlotRecord(void *owner, EffectOwnerRecord *list, EffectSlotOwner *work, s32 slotIndex) {
     EffectSlot *slotData = &work->slots[slotIndex];
-    s32 bucketIndex = slotData->bucket;
+    s32 bucketIndex = slotData->bucketIndex;
     EffectRecord *record;
 
     if (bucketIndex >= EFF_RECORD_BUCKETS) {
@@ -14008,7 +14057,7 @@ void effInsertSlotRecord(void *owner, EffectOwnerRecord *list, EffectSlotOwner *
 /* Remove the first matching slot from the raw bucket index; unlike insertion, this does not clamp it. */
 s32 effRemoveSlotRecord(EffectOwnerRecord *list, EffectSlotOwner *work, s32 slotIndex) {
     EffectSlot *slotData = &work->slots[slotIndex];
-    s32 bucketIndex = slotData->bucket;
+    s32 bucketIndex = slotData->bucketIndex;
     EffectRecord *record = list->entries[bucketIndex];
 
     while (record != 0) {

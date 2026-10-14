@@ -1034,7 +1034,7 @@ s32 brsTaskIsFadeIdle(void) {
 void mnuRefreshSelectedUnitPanels(DatPartyRecord *unused, BrsSkillPackageWork *menu) {
     mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuUpdateHandleStates(&menu->partyWindow);
-    func_00280048((s32)&menu->partyWindow);
+    mnuUpdatePartyPanelPercentDisplays((s32)&menu->partyWindow);
 }
 
 
