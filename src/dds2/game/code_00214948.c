@@ -1551,7 +1551,25 @@ s32 btlCheckPhaseOnePartyStatusGate(void) {
     return 6;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_002181E8);
+extern char D_00436CC0[];
+
+/* Look up the primary script resource once the event task, script handle and
+ * script-ready state 6 are in place; -1 when it cannot be looked up yet. */
+s32 func_002181E8(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+
+    if (battle->eventTaskId == -1 || battle->scriptHandle == 0) {
+        return -1;
+    }
+    if ((battle->battleFlags & 0x800) == 0 || battle->eventReady != 6) {
+        return -1;
+    }
+    /* Retail calls and returns here instead of sibcalling: GCC does not sibcall
+     * while a loop is still open, so the return sits in a one-pass loop. */
+    do {
+        return btlFindScriptResource(D_00436CC0);
+    } while (0);
+}
 
 /* Clear the unit word shared by the command-claim and ready-unit action callbacks. */
 void btlClearClaimedCommandUnit(void) {
