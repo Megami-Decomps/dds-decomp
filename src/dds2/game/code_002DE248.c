@@ -1,5 +1,6 @@
 #include "eff_packet_params.h"
 #include "eff_camera_create_request.h"
+#include "eff_file_job_request.h"
 #include "sdf_packet_header.h"
 #include "fld.h"
 #include "btl_command.h"
@@ -11075,21 +11076,6 @@ void effApplyBattleCameraToObject(work)
     fileJobInvokeScaleCallback(work, ((FileJob *)D_0045C270)->scale * effFileQueue->scaleMultiplier);
     fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
 }
-
-/* Effect asset/creation descriptor (0x20), separate from the runtime FileJob. */
-typedef struct EffFileJobRequest {
-    char *name;
-    u16 fileKind;
-    u8 pad6[2];
-    u16 transferMode;
-    u8 padA[2];
-    void *output;
-    u32 size;
-    struct SdfMemBlock *allocation;
-    u16 resourceMode;
-    u8 pad1A[2];
-    const char *secondaryCommandPath;
-} EffFileJobRequest;
 
 /* Debug parameter table: each 0x18-byte row points at the variable it edits. */
 typedef struct EffTunableRow {

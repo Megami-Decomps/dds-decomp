@@ -2,8 +2,8 @@
 #define EFF_CAMERA_CREATE_REQUEST_H
 
 #include "common.h"
+#include "eff_file_job_request.h"
 
-struct EffFileJobRequest;
 struct EffQueuedFileObject;
 
 typedef struct EffCameraCreateRequest {
