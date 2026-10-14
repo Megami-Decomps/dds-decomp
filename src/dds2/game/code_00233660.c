@@ -17,6 +17,7 @@
 #include "mdl.h"
 #include "mdl_part_entry.h"
 #include "mdl_resource_entries.h"
+#include "mdl_resource_entry_records.h"
 #include "mdl_track_poly_record.h"
 #include "mdl_mark_params.h"
 #include "mdl_resource_table.h"
@@ -762,16 +763,6 @@ MdlPartEntry *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
     return (MdlPartEntry *)((u8 *)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES);
 }
 
-typedef struct MdlPartRec {
-    u8 pad00[4];
-    u32 size;      /* 0x04 */
-    s32 firstId;   /* 0x08 */
-    u16 count;     /* 0x0C */
-    u16 partIndex; /* 0x0E */
-    f32 anchorScale; /* 0x10: distance scale for the anchored part position */
-} MdlPartRec;
-
-
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
 void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 motionSlotIndex, s32 type, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
@@ -829,15 +820,6 @@ void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
                   record->parameter.word, record->tail.word10);
 }
 
-
-typedef struct MdlEntryRec {
-    u8 pad00[8];
-    s32 dataId; /* 0x08 */
-    s32 minimumTime; /* 0x0C: deferred initialization threshold */
-    u8 flagB;   /* 0x10 */
-    u8 flagA;   /* 0x11 */
-    u16 index;  /* 0x12 */
-} MdlEntryRec;
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
 void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 motionSlotIndex) {
@@ -2730,14 +2712,14 @@ void mdlLoadViewerPresentationConfig(void) {
 }
 
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 void mdlSaveViewerPresentationConfig(void) {
     char buffer[0x130];
     s32 size;
     struct FileRequest *request;
 
-    size = func_0035C860(buffer, D_00421488, D_00435CBC,
+    size = sprintf(buffer, D_00421488, D_00435CBC,
                         D_00453620[0], D_00453620[1], D_00453620[2],
                         D_00453630[0], D_00453630[1], D_00453630[2],
                         sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.fogNear,

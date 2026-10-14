@@ -123,7 +123,7 @@ extern void mnuSnapshotCampTextureHandles(u32 *);
 extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 typedef struct FrFontGlyph FrFontGlyph;
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];
@@ -386,7 +386,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     char text[16];
     FrFontGlyph *sprite;
 
-    func_0035C860(text, mnuNumberSpriteFormat, number);
+    sprintf(text, mnuNumberSpriteFormat, number);
     sprite = func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
@@ -1000,7 +1000,7 @@ extern s32 dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
-extern void func_001285E8(s32 a, s32 b);
+extern void fldApplyTerminalActorSelection(s32 a, s32 b);
 extern void fldProcessDeferredSceneCommand(void);
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
@@ -1021,7 +1021,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
     }
-    func_001285E8(work->reduced, work->slot);
+    fldApplyTerminalActorSelection(work->reduced, work->slot);
     fldProcessDeferredSceneCommand();
 }
 
@@ -2136,7 +2136,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     char text[16];
 
     index = fldGetModeFrameRecordIndex(context);
-    func_0035C860(text, D_00437868, datGameState->header.currency);
+    sprintf(text, D_00437868, datGameState->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
         color = *(u8 *)&((MenuSlotState *)context)->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;

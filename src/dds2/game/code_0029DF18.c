@@ -501,7 +501,7 @@ extern void Exit(s32 status);
 extern s32 D_00438FD8;
 
 /* libc sprintf returns the signed vfprintf character count. */
-extern s32 func_0035C860(char *dst, const char *fmt, ...);
+extern s32 sprintf(char *dst, const char *fmt, ...);
 extern u32 D_00437A20[2];
 
 extern u32 D_00437A28;
@@ -781,7 +781,7 @@ void mnuPlayTitleVoiceFile(char *voiceArgument) {
         sdfDebugPrintf(D_00428610);
         sdfSoundStopNamedPlayback();
     }
-    func_0035C860(voicePath, D_00428628, D_003E09F0 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
+    sprintf(voicePath, D_00428628, D_003E09F0 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
     sdfSoundSendNamedCommand(voicePath, 0x64);
     effectState->frameCounter = 0;
 }

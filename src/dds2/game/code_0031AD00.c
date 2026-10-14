@@ -74,7 +74,7 @@ extern void func_0031AF60(void);
 extern void mnuPauseEffectQueueFrameAdvance(void);
 extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
-void func_0031AEB8(MnuShootingWork *object) {
+void mnuToggleShootingPause(MnuShootingWork *object) {
     object->unk70Bit0 ^= 1;
     if (object->unk70Bit0) {
         mnuResetShootingPauseChoiceIndex(object);

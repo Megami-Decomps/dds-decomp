@@ -773,7 +773,7 @@ Confirmed examples:
   match with the recovered distinction.
 - DDS2 `BtlState.debug` starts at `0x728`; its inner table starts at `0x128`.
   The two remainders, `8 + 8`, explain a `0x10` displacement in
-  `func_0022F068`. An invented `aligned(32)` record contradicts the actual
+  `btlInitializeBattleDebugMenu`. An invented `aligned(32)` record contradicts the actual
   allocation and layout guards.
 - `BattleActorPanelEntry.position[2]` and the nested presentation
   `cursorOffset[2]` reproduce the separate x/y address copies in DDS1
@@ -2878,14 +2878,14 @@ units rejoined, the function matches as written.
 Check API contracts before treating a park as one-word-close. For DDS2
 `func_0024D430`, combining the genuine glyph-increment eligibility in the
 completion-first layout removes the old `+0x21C` branch residual. Using
-the existing producer's `u8 func_002A8028(void)` contract leaves three
+the existing producer's `u8 mnuGetMoviePlaybackMode(void)` contract leaves three
 different words at `+0x258/+0x260/+0x264`, not the older park's one word
 with its `s32 (s32)` declaration. A global-byte getter's native body alone
 does not prove its original return width or distinguish zero parameters
 from an unused parameter. Recover independent API evidence rather than
 choosing the declaration with the prettier score.
 
-DDS2 `func_0014D0E8` (660 bytes) is an exact example of branch-local
+DDS2 `fldUpdateObjectSlotActivation` (660 bytes) is an exact example of branch-local
 complete actions. Its stage-29/30 and default branches select different
 effect descriptors, but each creates the node, publishes it, and restarts
 the base instance. Keeping that complete action in each branch lets GCC
@@ -11437,3 +11437,127 @@ previously admitted source form or introduce a new matching lever.
 The channel-group 0x140/0x150 senders now share the existing DDS2 names in
 both games. Preserve their u8 parameters, bits-3-to-6 extraction and empty
 packet payloads; the opcode alone does not establish an IOP-side operation.
+
+## Actor-debug providers, group slots and radial waves
+
+`btlUpdateBattleModelDebugEditor` is the paired eleven-phase actor editor: its
+status/model/motion/gun, position and transform menus display FLD/POS and
+current/total-frame values. `btlInitializeBattleDebugMenu` initializes the selected
+unit, menu rows, label-address tables, phase and delay before TEST polling.
+Keep the per-game capacities and the editor's existing local lifetimes.
+
+`btlGetUnitModelCurrentFrame` reads the model's `currentFrame` when unit
+flag 2 is set and returns zero otherwise. Threshold tasks and the debug
+frame display corroborate that meaning. The corrected local offset
+placeholder retains its original naming credit in both provenance files.
+`btlDebugDrawScaledPositionGuide` remains an empty retail hook; its callers
+establish position, packed color, mode and a scaled row value, not a guide
+shape. Preserve the differing pointer constness in the two definitions.
+
+The DDS2 script-return hook command retains the real default value 100 and
+the unspecified hook prototype. `btlCommandAddOneItem` retains its signed,
+upper-bound-only check. The private `BtlGroupSlot.group` byte drives equal
+group membership in the random unflagged-slot selector; its unchanged
+`u8` plus `pad[3]` declaration remains four bytes. The separate byte/u16
+global overlays stay untouched. `btlCommandGetGroupSlotAuxValue` names
+only the observed auxiliary u16, not an item, reward or flag identifier.
+
+`effUpdateRadialWavePointRows` is registered by native update rows
+0x0037EC74/0x003E9D24 and advances oriented five-point strips, sinusoidal
+heights, bends and fading/respawn state before the paired strip renderer.
+The DDS2 active-surface drawer, slot-record update/draw adapter and empty
+drawable-asset update hook are named from their bodies and native resource
+operation rows; their native callees and existing signatures stay intact.
+The flag-list enable/disable pair now shares the upstream DDS1
+`ViewTargetRelativeMode` spelling: generation subtracts the retained view
+target and drawing adds it back, without changing the raw SDATA word.
+
+## Debug-menu stages, MP choices and completion-only camera modes
+
+The actor, encounter, file and camera debug menus repeat four provider stages:
+setup, before-record, per-context record, then after-record. The three shared
+`btlDebugMenuBeforeRecordNoOp`, `btlDebugMenuRecordNoOp` and
+`btlDebugMenuAfterRecordNoOp` entries are empty in retail. "Record" names
+their observed sequence position, not a recording or rendering side effect.
+DDS1's `btlDebugMenuSetupNoOp` ignores its pointer, whereas DDS2's
+`btlReturnDebugMenuSetupWord` returns the actual `u32` word unchanged.
+Keep that difference, each existing extern, and the interleaved caller stores.
+
+`btlDebugDrawOrientedExtentGuide` receives the camera's start point, two
+float extents, packed color and genuine orientation matrix. It remains empty;
+those arguments do not establish a box, sphere or missing rasterizer algorithm.
+Native mapping editors pass span geometry and two endpoint colors to
+`btlDebugDrawMappingColorSpan`, while `btlDebugDrawLine2D` receives plot-guide
+endpoints and a packed color. The alpha plot uses a sixteen-pixel-high span
+and a gray center line from `(200, 360)` to `(200, 384)`. Preserve DDS1's
+legacy `void(void)` drawing boundaries and DDS2's existing full signatures.
+
+The three `btlCompleteCameraFlag08Mode`, `btlCompleteCameraFlag20Mode` and
+`btlCompleteCameraFlag80Mode` entries return one without changing state.
+Native dispatchers 0x001DBE68/0x001E9130 select them under masks 0x08, 0x20
+and 0x80, then clear active bit 1 and reset the counter on completion.
+The names describe that dispatch/completion contract, not an inferred camera
+motion. The neighboring real pose and frame blends are unchanged.
+
+`btlWriteActorModelTableFile` writes the selected model header and 29 motion
+rows to `model/table.txt`, using either `pfs0:` or the developer base path.
+It allocates, formats, writes, closes and releases storage; it does not draw.
+The corrected DDS1 local name keeps its original R1 naming credit.
+`btlApplyDebugEncounterPartySelection` adopts upstream's DDS2 spelling in
+both games, preserving DDS1's fixed-five preset behavior and DDS2's bank,
+variable-count and conditional-copy behavior.
+
+The packed action dispatcher shifts by 22 and masks the argument to 22 bits.
+DDS1 prefix 0x06000000 selects handler 24 at 0x00360D70; DDS2 prefix
+0x07000000 selects handler 28 at 0x003BF510. Both table entries compare
+current MP against a percentage of skill-adjusted maximum MP.
+`btlCmdStoreActorMpCheckChoice` publishes that Boolean and retains
+`choicesA[1]`/validity bit 2 only on success, while still returning command
+completion one. Preserve DDS1's repeated parameter reads and statement order.
+DDS2's `btlCmdStoreActorMpCheckChoiceUnregistered` is identical to the
+registered 0x0020A580 entry and has no registry/call reference; the suffix
+describes observed linkage, not a behavioral variant.
+
+## Command target adapters and counted-payload packing
+
+The command adapter units (`code_001FC7D8`/`code_0020E850`) separate
+target-selection policy from script parameter decoding. Their corresponding
+script providers obtain the current command, optionally read parameter 0 as
+`u16`, invoke the adapter, and return VM completion one. The old letter-only
+labels did not describe those policies:
+
+| Command adapter | Observable default-selection role |
+| --- | --- |
+| `btlChooseCommandActionTargets` | Read command-record attributes, choose from native candidate policies, and append the result. |
+| `btlPickCommandLowestHpTarget` | Minimize nonzero current HP. |
+| `btlPickCommandLowestHpRatioTarget` | Minimize current/skill-adjusted-maximum HP percentage using the native initial bound and fallback. |
+| `btlPickCommandLowestHpBlockTarget` | Minimize nonzero current HP among group element-query 0x200 candidates. |
+| `btlPickCommandElementCheckedTarget` | Choose group element-query 0x200 or 0x400 according to candidate status 0x200. |
+| `btlPickCommandTargetWithStatusMask` | Mark candidates with any status in the supplied mask. |
+| `btlPickCommandTargetWithoutStatusMask` | Mark candidates without those statuses. |
+| `btlPickCommandElementBlockTarget` | Mark candidates passing element query 0x200. |
+
+These names describe the default selection branch, not a guarantee that every
+mode filters the list. Native modes 1/2 can copy a preselected list unchanged;
+fallbacks and tie behavior remain native. The actor-excluding adapter can use
+the actor itself when no other candidate remains, and its per-game mode
+predicates differ. `btlAppendActorToCommandTargets` appends the command's own
+actor after a temporary scan; `btlAddEffectActorTargetToCommand` instead
+appends the global effect actor.
+
+Preserve the zero-formal DDS1 forwarding surfaces, existing unprototyped
+calls, explicit DDS2 arguments, ignored return values, and unused arguments.
+They are native ABI boundaries, not an invitation to normalize signatures.
+The separately registered `btlScriptChooseActionTargetsDuplicate` has the
+same current-command body as `btlScriptChooseActionTargets`: its suffix
+records duplicate code and a distinct builtin entry, not an unknown mode.
+The selected/current-actor append primitive carries a `BtlUnit *`, not an ID.
+The upstream-authored command-adapter name is retained, with that pointer
+evidence recorded in provenance.
+
+`sdfPackCountedPayloadLists` packs two callback lists into one owner-tracked
+`DdsNestedGroup`. Each list region contains its counted-payload headers
+followed by the copied `count * 8` byte payloads; copied data pointers are
+rebased into that allocation. The existing allocator tracks ownership.
+List counts, size arithmetic, empty-list behavior, copy order and types are
+unchanged; no callback invocation or menu-specific payload meaning is assumed.

@@ -133,7 +133,7 @@ extern u8 sdfViewEyeVector[];
 
 extern u8 sdfViewTargetVector[];
 
-void func_0015A758(ParObj *work, u32 value) {
+void parSetObjectParameterWord(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
@@ -326,7 +326,7 @@ void parRebuildInstanceTransforms(void) {
     parComposeEffectTransformMatrices();
 }
 
-void func_0015AD90(ParObj *work, u32 value) {
+void effParSetInstanceParameterWord(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
@@ -486,7 +486,7 @@ void parUpdateTrackPolygonCrossAxes(EffTrackPolyList *list, s32 index, u32 color
     effTrackPolySetIndexedColor(list, index, (color & 0xFF000000) | 0x808080);
 }
 
-u32 func_0015B220(void) {
+u32 parGetEmitterCellGroupDivisor(void) {
     return 0;
 }
 

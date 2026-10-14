@@ -16,13 +16,13 @@ void effReleaseBlurTemplate(EffBlurTemplate *owner) {
     sdfReleaseChipBlock(owner);
 }
 
-extern u32 func_001200E0(void);
+extern u32 fldIsUpdateInhibited(void);
 
 /* Update pixel-coordinate edges and draw only when the eligibility check allows. */
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 x, y, w;
 
-    if (func_001200E0() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         x = rect->body.source.position[0] + 0x100;
         y = rect->body.source.position[1] + 0xE0;
         w = rect->body.extent;
@@ -38,7 +38,7 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 x, y, w;
 
-    if (func_001200E0() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         x = owner->body.source.position[0] + 0x1000;
         y = (owner->body.source.position[1] + 0xE00) >> 1;
         w = owner->body.extent;
@@ -133,7 +133,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
     s32 count;
     u32 alpha;
 
-    if (func_001200E0() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, work->params.blendControl, work->texture);

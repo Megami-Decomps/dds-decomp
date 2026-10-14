@@ -71,7 +71,7 @@ extern u32 kwlnTextureGetPageIndex(void);
 
 extern s32 kwlnTextureCountIncompleteResources(void);
 
-extern s32 func_0035C860();
+extern s32 sprintf();
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
@@ -798,7 +798,7 @@ void kwlnTextureDrawPageCounter(SdfListHead *packetList) {
     char pageText[0x70];
     s32 pageIndex = kwlnTextureGetPageIndex();
     s32 resourceCount = kwlnTextureCountIncompleteResources();
-    func_0035C860(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
+    sprintf(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
 }
 
@@ -813,7 +813,7 @@ void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
     s32 formatIndex = 0;
     s32 formatMode = 0;
 
-    func_0035C860(text, "W:%4d H:%4d", texture->width, texture->height);
+    sprintf(text, "W:%4d H:%4d", texture->width, texture->height);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x82A0, 0x0FFFFF80, 0, text));
     switch (texture->pixelFormat) {
     case 0: formatIndex = 0; formatMode = 6; break;
@@ -829,7 +829,7 @@ void kwlnDrawTextureResourceDetails(SdfListHead *packetList, SdfTex *texture) {
     }
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x8300, 0x0FFFFF80,
                                                                 formatMode, D_0037F560[formatIndex]));
-    func_0035C860(text, "ID[%2d,%2d]", texture->resourceKey, texture->battleTextureSlot);
+    sprintf(text, "ID[%2d,%2d]", texture->resourceKey, texture->battleTextureSlot);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x77C0, 0x8300, 0x0FFFFF80, 0, text));
 }
 

@@ -54,7 +54,7 @@ extern char D_00437C40[];
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -71,14 +71,14 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sp
     if (entryId != 0) {
         current = mnuGetItemRequirementCount(entryId);
         required = mnuGetItemRequirementValue(entryId);
-        func_0035C860(text, D_00437C38, required - current);
+        sprintf(text, D_00437C38, required - current);
         color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
         glyph = func_0019F5E8(x, y, 0, color, text, 0);
         frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
         effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
-        func_0035C860(text, D_00437C38, required);
+        sprintf(text, D_00437C38, required);
         color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
         glyph = func_0019F5E8(thresholdX, y, 0, color, text, 0);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
@@ -114,7 +114,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     value = mnuGetPartyEntryMenuValue(party);
     if (value != 0) {
         glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
-        func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
+        sprintf(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
         glyph = (struct FrFontGlyph *)(u32)func_0019F5E8(x + 0x1050, 0x360, depth, color, text, (s32)(u32)glyph);
         if (page->unk74 != 0) {
             frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
@@ -234,7 +234,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
             slot->iconBundle->fade);
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
-            func_0035C860(text, D_00437C48, remainingExp);
+            sprintf(text, D_00437C48, remainingExp);
             glyph = (FrFontGlyph *)func_0019F5E8(0x1A50,
                 0xD8, depth, color, text, 0);
             frFontSetChildChainFirstOption(glyph, 3);

@@ -809,7 +809,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 /* The base format occupies the first 16-byte-aligned AMB format record. */
 const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
 
-void fldLoadAreaModelTransfers(void) {
+void fldLoadSceneRecordTable(void) {
     char path[128];
     char directory[64];
     u32 resourceAddress;
@@ -914,7 +914,7 @@ void fldInitSceneMapLabels(void) {
 
     if (sceneId < 0xC8) {
         fldCacheMapLabelLengths(sceneId % 100);
-        fldLoadAreaModelTransfers();
+        fldLoadSceneRecordTable();
     }
 }
 
@@ -2266,7 +2266,7 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     }
 }
 
-void func_00146CA8(s32 index) {
+void fldSetPrimaryMapLabelSelection(s32 index) {
     if (index >= 0x40) {
         D_0032E474[0] = -1;
     } else {
@@ -2274,7 +2274,7 @@ void func_00146CA8(s32 index) {
     }
 }
 
-void func_00146CD0(s32 index) {
+void fldSetSecondaryMapLabelSelection(s32 index) {
     if (index >= 0x40) {
         D_0032E478[0] = -1;
     } else {
@@ -2892,7 +2892,7 @@ void fldReleaseObjectSlots(void) {
 
 extern s32 fldTestSceneControlFlags(s32);
 
-void fldUpdateObjectActivation(void) {
+void fldUpdateObjectSlotActivation(void) {
     s32 i;
     MdlCtx *resource;
 

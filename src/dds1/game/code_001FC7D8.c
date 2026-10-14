@@ -1164,23 +1164,28 @@ void btlShiftActorStateHistory(u8 *work, s8 flag) {
     }
 }
 
-void btlCmdWithArgA(s32 context) {
+/* Choose command-record-driven targets; retain the native zero mode argument. */
+void btlChooseCommandActionTargets(s32 context) {
     func_00202668(context, 0);
 }
 
-void btlCmdWithArgB(s32 context) {
+/* Delegate minimum nonzero-current-HP selection for this command, with mode zero. */
+void btlPickCommandLowestHpTarget(s32 context) {
     func_00202F90(context, 0);
 }
 
-void btlCmdWithArgC(s32 context) {
+/* Delegate minimum HP-percentage selection without changing native fallback modes. */
+void btlPickCommandLowestHpRatioTarget(s32 context) {
     btlSelectLowestHealthRateTarget(context, 0);
 }
 
-void btlCmdSimpleA(void) {
+/* Pick a lowest-HP element-block candidate; retain zero-formal argument forwarding. */
+void btlPickCommandLowestHpBlockTarget(void) {
     btlSelectLowestHealthElementBlockTarget();
 }
 
-void btlCmdWithArgD(s32 context) {
+/* Forward command selection with its native zero second argument. */
+void btlPickCommandLowestLevelTarget(s32 context) {
     btlSelectLowestRankTarget(context, 0);
 }
 
@@ -1188,15 +1193,18 @@ void btlCmdWithArgE(s32 context) {
     func_00203BA8(context, 0);
 }
 
-void btlCmdSimpleB(s32 context, s32 value) {
+/* Select by group element checks; value is the query input, not a status mask. */
+void btlPickCommandElementCheckedTarget(s32 context, s32 value) {
     btlSelectTargetsPassingCheck(context, value);
 }
 
-void btlCmdSimpleC(void) {
+/* Select by status-mask presence; retain the native zero-formal forwarding surface. */
+void btlPickCommandTargetWithStatusMask(void) {
     btlSelectTargetsByActionMask();
 }
 
-void btlCmdSimpleD(void) {
+/* Select by status-mask absence; retain the native zero-formal forwarding surface. */
+void btlPickCommandTargetWithoutStatusMask(void) {
     btlSelectTargetsWithoutActionMask();
 }
 
@@ -1215,19 +1223,23 @@ void btlPickLinkedCommandTarget(void) {
     btlPickLinkedPartyTarget();
 }
 
-void btlCmdSimpleH(void) {
+/* Append the command's own actor after the native scan; keep short-arity forwarding. */
+void btlAppendActorToCommandTargets(void) {
     btlAppendSelfAfterTargetScan();
 }
 
-void btlCmdSimpleI(s32 context, s32 unused) {
+/* Default selection excludes the actor, with native self fallback; unused stays unused. */
+void btlPickCommandTargetExcludingActor(s32 context, s32 unused) {
     btlSelectTargetsExcludingActorUnit(context);
 }
 
-void btlCmdWithArgF(s32 context) {
+/* Append the global effect actor, distinct from this command's own actor. */
+void btlAddEffectActorTargetToCommand(s32 context) {
     btlAppendEffectActorToCommandIndices(context, 0);
 }
 
-void btlCmdSimpleJ(void) {
+/* Select element-block candidates; retain the native zero-formal forwarding surface. */
+void btlPickCommandElementBlockTarget(void) {
     btlSelectTargetsBlockingElement();
 }
 

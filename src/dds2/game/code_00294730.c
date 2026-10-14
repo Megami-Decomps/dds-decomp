@@ -266,7 +266,7 @@ void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
         style = (s32)(fade * 64.0f + 64.0f) | 0xA09DC300;
     }
     value = (s32)node->sortKeyPrimary;
-    func_0035C860(text, D_00437970, value);
+    sprintf(text, D_00437970, value);
     glyph = func_0019F5E8(0xFF0, (rowOffset + 0x8A) << 3, z, style, text, NULL);
     if (selected) {
         frFontSetChildChainFirstOption(glyph, 4);
@@ -345,7 +345,7 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *obje
 
 struct FrFontGlyph;
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
@@ -374,7 +374,7 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext 
         } else {
             textOffset = 0x70;
         }
-        func_0035C860(text, D_00437978, scene->multiplier);
+        sprintf(text, D_00437978, scene->multiplier);
         glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(
             0xD30 + textOffset, (135 + row * 22) << 3, depth, 0xA09DC380, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
@@ -419,7 +419,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
         if (scene->multiplier / 10 != 0) {
             textOffset = 0;
         }
-        func_0035C860(text, D_00437978, scene->multiplier);
+        sprintf(text, D_00437978, scene->multiplier);
         glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(
             0xD30 + textOffset, (135 + row * 22) << 3, depth, color, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
@@ -478,7 +478,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
                   0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
     inner = object->list;
     if (inner->count != 0) {
-        func_0035C860(text, D_00437980, 0);
+        sprintf(text, D_00437980, 0);
         glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
@@ -506,7 +506,7 @@ void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale,
         D_003D03F0[25][MENU_ICON_FRAME], option
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
-    func_0035C860(text, D_00437980, 0);
+    sprintf(text, D_00437980, 0);
     glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(x + 0x1910, y + 0x290, z, value, text, 0);
     frFontSetChildChainFirstOption(glyph, 4);
     frFontDrawGlyphChain(glyph, 1, option);
@@ -526,7 +526,7 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *p
                   0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
     inner = object->list;
     if (inner->count != 0) {
-        func_0035C860(text, D_00437980, inner->cursor->camp.value * panel->multiplier);
+        sprintf(text, D_00437980, inner->cursor->camp.value * panel->multiplier);
         glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
@@ -547,13 +547,13 @@ void mnuDrawShopCurrencyBalance(MenuTerminalContext *state, s32 style) {
         displayedValue = state->previousValue +
                          ((datGameState->header.currency - state->previousValue) * state->elapsedFrames) /
                              transitionFrames;
-        func_0035C860(text, D_00437980, displayedValue);
+        sprintf(text, D_00437980, displayedValue);
         if (state->elapsedFrames == transitionFrames) {
             state->previousValue = datGameState->header.currency;
             state->elapsedFrames = 0;
         }
     } else {
-        func_0035C860(text, D_00437980, datGameState->header.currency);
+        sprintf(text, D_00437980, datGameState->header.currency);
     }
 
     {

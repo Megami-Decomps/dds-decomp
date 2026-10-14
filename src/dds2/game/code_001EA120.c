@@ -461,7 +461,7 @@ s32 btlIsSpecialActorCategory(s32 actor) {
     }
 }
 
-u32 func_001EAA00(BtlLinkedCommand *action) {
+u32 btlUsesSpecialLinkedCameraPath(BtlLinkedCommand *action) {
     return 0;
 }
 
@@ -470,10 +470,10 @@ u8 btlIsLinkedItemDropCommand(BtlLinkedCommand *action) {
     return action->actionCode == 0x1a0;
 }
 
-void func_001EAA18(void) {
+void btlInitializeFreeCameraNoOp(void) {
 }
 
-void func_001EAA20(void) {
+void btlUpdateFreeCameraNoOp(void) {
 }
 
 extern void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -547,7 +547,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
     action->flags |= 0x41;
 }
 
-void func_001EAC08(void) {
+void btlUpdateEncounterCameraNoOp(void) {
 }
 
 /* Prepare the embedded primary camera through the existing 27.5f provider. */
@@ -555,7 +555,7 @@ void btlPreparePrimaryActionCamera(BtlLinkedCommand *action) {
     btlSetDefaultActionCameraPose(action, &action->camera);
 }
 
-void func_001EAC28(void) {
+void btlUpdatePrimaryActionCameraNoOp(void) {
 }
 
 extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
@@ -656,7 +656,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
 
     action->stepKind = 0;
     link = action->link;
-    if (func_001EAA00(action) != 0) {
+    if (btlUsesSpecialLinkedCameraPath(action) != 0) {
         btlStartLinkedActionPoseBlendIfEligible(action);
         return;
     }
@@ -801,7 +801,7 @@ extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState 
 void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
 
-    if (func_001EAA00(action) != 0) {
+    if (btlUsesSpecialLinkedCameraPath(action) != 0) {
         btlAdvanceUnblockedPlayerCursorAnimation(action);
         return;
     }
@@ -830,7 +830,7 @@ void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
     }
 }
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
@@ -842,7 +842,7 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
@@ -875,7 +875,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
     s32 choice;
     s32 reduceDistance;
 
-    if (func_001EAA00(action)) {
+    if (btlUsesSpecialLinkedCameraPath(action)) {
         btlSelectActionCameraPose(action);
         return;
     }
@@ -1042,7 +1042,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
     BtlState *work;
     s32 category;
     u8 *out;
-    if (func_001EAA00(action) != 0) {
+    if (btlUsesSpecialLinkedCameraPath(action) != 0) {
         btlAdvanceActionSkillCamera(action);
         return;
     }
@@ -1058,7 +1058,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         }
         if (btlIsSpecialActorCategory((s32)action) != 0) {
             btlBuildBattleUnitFramingCameraPose(action, &action->camera, 0.0f);
-            func_003364B8(-(10.0f * 0.017453293f));
+            sdfVuLoadRotationMatrixX(-(10.0f * 0.017453293f));
             VU0_STORE_VF_UNCLOBBERED(vf10, action->camera.direction);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, action->camera.direction);
@@ -1103,7 +1103,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     }
 }
 
-void func_001EBE28(void) {
+void btlUpdateCommandCameraNoOp(void) {
 }
 
 /* Update the action camera from target-policy results once the link reaches state seven. */
@@ -1217,7 +1217,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
     }
 }
 
-void func_001EC190(void) {
+void btlUpdateTargetCameraNoOp(void) {
 }
 
 extern void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
@@ -1251,7 +1251,7 @@ void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
     action->flags |= 0x41;
 }
 
-void func_001EC2A0(void) {
+void btlUpdateSummonCameraNoOp(void) {
 }
 
 extern void btlInitSkillCommandCursor(BtlLinkedCommand *, BtlCamState *);

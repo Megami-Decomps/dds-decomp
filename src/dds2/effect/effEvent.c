@@ -373,7 +373,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
@@ -434,7 +434,7 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
             }
             sdfAppendPacket(list, (u32)sdfDrawCachedMatrixLinePairsVU(vertices, colors, 40, 0x80));
         }
-        func_003364B8(1.5707963f);
+        sdfVuLoadRotationMatrixX(1.5707963f);
         VU0_LOAD_MATRIX_B_F32(matrix);
         sdfComposeVuMatrixFromRegisters();
         VU0_STORE_MATRIX_UNCLOBBERED(matrix);

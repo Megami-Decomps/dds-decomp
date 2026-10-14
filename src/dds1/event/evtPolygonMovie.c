@@ -181,7 +181,7 @@ void evtBlendVectorRows(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     VU0_STORE_VF(vf10, out + 8);
 }
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00233308);
+INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtBlendParamsC);
 
 void evtBlendParamsA(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
 {

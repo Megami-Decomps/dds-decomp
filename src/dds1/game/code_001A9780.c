@@ -3547,7 +3547,7 @@ extern const BattleActorPanelInitialPositions D_003A2C10;
 extern s32 func_001B6CF8(KwlnTask *);
 extern void btlReleaseStwrPanelResource(KwlnTask *);
 
-void func_001B6308(void) {
+void btlInitializeStaffActorPanels(void) {
     BattleActorPanelInitialPositions positions = D_003A2C10;
     BtlState *battle;
     struct SdfMemBlock *allocation;
@@ -7382,7 +7382,7 @@ void fldCreateSceneCleanupTask(void) {
     context->cleanupTask = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
-    func_001B6308();
+    btlInitializeStaffActorPanels();
     func_001B6498(1);
     fldBeginSceneTransition();
 }

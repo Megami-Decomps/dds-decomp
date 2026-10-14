@@ -78,7 +78,7 @@ void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
     sdfReleaseResourceAllocation(work->allocation);
 }
 
-extern u32 func_0011E278(void);
+extern u32 fldIsUpdateInhibited(void);
 #include "sdf_packet_alloc.h"
 struct SdfListHead;
 extern void effAppendBlurRenderState(void *list, s32 blendControl, struct SdfTex *resource);
@@ -93,7 +93,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
     s32 count;
     u32 alpha;
 
-    if (func_0011E278() == 0) {
+    if (fldIsUpdateInhibited() == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, work->params.blendControl, work->texture);

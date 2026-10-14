@@ -129,7 +129,7 @@ typedef union {
 void polyUpdateBasicRingCells(PolyNode *obj);
 void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
-extern void func_003364B8(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void func_00336818(f32 angle);
 extern void memset();
 extern void memcpy();
@@ -863,7 +863,7 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
     entry->vertexCount = strip->vertexWordCount;
     out = (f32 *)entry->history;
     pairs = strip->vertexWordCount >> 1;
-    func_003364B8(rec->rotationXRadians);
+    sdfVuLoadRotationMatrixX(rec->rotationXRadians);
     func_00336818(rec->rotationYRadians);
     sdfMultiplyVuMatrixInPlace();
     rec->rotationYRadians += obj->rotationStepDegrees * (3.14159265f / 180.0f);

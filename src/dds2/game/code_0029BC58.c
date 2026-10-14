@@ -250,7 +250,7 @@ void brsNoOpMessageInputCallback(void *work) {
 }
 
 extern u32 D_004379C0[];
-extern s32 func_0035C860();
+extern s32 sprintf();
 
 /* Draw the three reward icon rows: name, label shadow, value text and its shadow. */
 void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *res, s32 surface, BrsSkillPackageWork *work) {
@@ -282,7 +282,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
             frFontDrawGlyphChain(glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
             effDrawSpriteWithCornerColors(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
-            func_0035C860(name, D_004379C0, param);
+            sprintf(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
             glyph = itfCreateFont3TextGlyph(x + 0x900, y, z, packed, name, 0);
             frFontSetChildChainFirstOption(glyph, 3);
@@ -297,7 +297,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
 extern u32 D_004379C8[];
 
 
-extern s32 func_0035C860();
+extern s32 sprintf();
 
 void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
     char name[32];
@@ -306,7 +306,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     u32 packed;
 
     packed = (alpha & 0xFF) | 0xA09DC300;
-    func_0035C860(name, D_004379C8, res->totalExp);
+    sprintf(name, D_004379C8, res->totalExp);
     sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
     frFontSetChildChainFirstOption(sprite, 3);
     frFontDrawGlyphChain(sprite, 1, arg5);
@@ -327,7 +327,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSumm
 
     if (mdlFlagTest(0x290) != 0) {
         packed = (alpha & 0xFF) | 0xA09DC300;
-        func_0035C860(name, D_004379C8, res->macca);
+        sprintf(name, D_004379C8, res->macca);
         sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
         frFontSetChildChainFirstOption(sprite, 3);
         frFontDrawGlyphChain(sprite, 1, arg5);

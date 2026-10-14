@@ -259,7 +259,7 @@ typedef struct BattleScriptTaskData {
     u32 frames;
 } BattleScriptTaskData;
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern char D_0041B7E0[];
 
@@ -309,7 +309,7 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern s32 abs(s32);
 
-extern f32 btlGetUnitModelValue1C(BtlUnit *);
+extern f32 btlGetUnitModelCurrentFrame(BtlUnit *);
 
 
 
@@ -390,7 +390,7 @@ void btlUpdateEventPlayback(void) {
             (battle->commandRestrictFlags & 0x800) == 0) {
             BtlUnit *unit = battle->eventUnit;
             if ((unit->status.flags & 2) != 0) {
-                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 frame = abs(frame - 0x1A);
                 if (frame >= 6) {
                     EvtUnit *ext = unit->ext;
@@ -491,7 +491,7 @@ void btlRequestSceneEventResources(void) {
     }
     eventId = (s16)rawEventId;
     battleState->eventTaskId = eventId;
-    func_0035C860(scriptPath, D_0041B6A8, eventId - eventId % 10, eventId, eventId);
+    sprintf(scriptPath, D_0041B6A8, eventId - eventId % 10, eventId, eventId);
     battleState->eventAssets = sdfReadNamedResource(scriptPath, &battleState->scriptHandle, 0);
     btlBossDebugPrintf(D_0041B6C8, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
@@ -738,7 +738,7 @@ s32 btlCommandSetSequenceVolumePan(void) {
 }
 
 /* Optional hook: it reads its argument (100) straight from $a0 and returns the value passed to scrSetIntegerReturnValue. */
-s32 func_0022B760(void) {
+s32 btlCommandGetScriptReturnHookValue(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 value = 100;
 
@@ -749,12 +749,12 @@ s32 func_0022B760(void) {
     return 1;
 }
 
-typedef struct BtlFlagSlot {
-    u8 key;
+typedef struct BtlGroupSlot {
+    u8 group;
     u8 pad[3];
-} BtlFlagSlot;
+} BtlGroupSlot;
 
-extern BtlFlagSlot D_003BF960[];
+extern BtlGroupSlot D_003BF960[];
 
 
 /* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to scrSetIntegerReturnValue. */
@@ -766,10 +766,10 @@ s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
     u32 i;
 
     if (value < 100) {
-        group = D_003BF960[value].key;
+        group = D_003BF960[value].group;
         count = 0;
         for (i = 0; i < 100; i++) {
-            if (group == D_003BF960[i].key) {
+            if (group == D_003BF960[i].group) {
                 if (mdlFlagTest(0x8FF - i) == 0) {
                     count++;
                 }
@@ -778,7 +778,7 @@ s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
         if (count > 0) {
             pick = effMiscRandMod(0, count);
             for (i = 0; i < 100; i++) {
-                if (group == D_003BF960[i].key) {
+                if (group == D_003BF960[i].group) {
                     if (mdlFlagTest(0x8FF - i) == 0) {
                         if (--pick == -1) {
                             break;
@@ -827,7 +827,8 @@ u32 btlCommandCountModelFlags(void) {
     return 1;
 }
 
-u32 func_0022B988(void) {
+/* Return the group slot's auxiliary u16, or one for an unsigned index outside the table. */
+u32 btlCommandGetGroupSlotAuxValue(void) {
     u32 index = scrReadIntParameter(0);
     u32 value = 1;
     if (index < 100) {
@@ -837,7 +838,8 @@ u32 func_0022B988(void) {
     return 1;
 }
 
-u32 func_0022B9D0(void) {
+/* Add one item under the retail signed upper-bound check, then complete the command. */
+u32 btlCommandAddOneItem(void) {
     s32 index = scrReadIntParameter(0);
     if (index < 0x100) {
         ptyAdjustItemQuantity(index, 1);
@@ -1329,9 +1331,9 @@ void btlReleaseAllModelEntries(void) {
 /* Format the model path into the caller's buffer; nonzero selects devil data. */
 void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
     if (isDevil == 0) {
-        func_0035C860(pathOut, "%spc%03X_ms.LB", "/model/human/", modelId);
+        sprintf(pathOut, "%spc%03X_ms.LB", "/model/human/", modelId);
     } else {
-        func_0035C860(pathOut, "%s%03X_ms.LB", "/model/devil/", modelId);
+        sprintf(pathOut, "%s%03X_ms.LB", "/model/devil/", modelId);
     }
 }
 
@@ -2318,6 +2320,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
 extern s32 D_00435E48;
 extern s32 D_00435E4C;
 extern s32 D_00435E5C;
+/* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
@@ -2400,12 +2403,12 @@ extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, u32);
-extern void func_0020D208(f32 *, u32, s32, f32);
+extern void btlDebugDrawScaledPositionGuide(f32 *, u32, s32, f32);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
-extern void func_0020D228(void);
-extern void func_0020D230(void);
-extern u32 func_0020D260(u32);
-extern void func_0020D270(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuAfterRecordNoOp(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuRecordNoOp(u32);
 extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern s32 D_003BFB50[], D_003BFB70[];
@@ -2585,10 +2588,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         D_004530B0[5] = unit->entrySlots[5].code;
         D_004530B0[6] = unit->entrySlots[6].code;
         D_00438F8C = unit->selectedEntryIndex;
-        func_0020D260((u32)&D_003BFE40);
-        func_0020D228();
-        func_0020D270((u32)&D_003BFE40);
-        func_0020D230();
+        btlReturnDebugMenuSetupWord((u32)&D_003BFE40);
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003BFE40);
+        btlDebugMenuAfterRecordNoOp();
         btlDrawUnitAffinityDebug(unit, 256, 32);
         if (sdfPadButtonStates[0] & 2) {
             health = D_004530C0.hp >> 1;
@@ -2629,7 +2632,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if (battle->unk_E0E > 0) {
             battle->unk_E0E--;
-            func_0035C860(text, D_00436F00, battle->unk_E0E / (s8)battle->unk4C4 + 1);
+            sprintf(text, D_00436F00, battle->unk_E0E / (s8)battle->unk4C4 + 1);
             btlDebugDrawText(32, 400, 6, text);
         }
         if (battle->unk_E0E == 0) {
@@ -2645,8 +2648,8 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             }
         }
         if (battle->unk_E0E <= 0) {
-            currentFrame = (s32)btlGetUnitModelValue1C(unit);
-            func_0035C860(text, "%3d/%3d\n", currentFrame, btlGetUnitModelFrameCount(unit));
+            currentFrame = (s32)btlGetUnitModelCurrentFrame(unit);
+            sprintf(text, "%3d/%3d\n", currentFrame, btlGetUnitModelFrameCount(unit));
             btlDebugDrawText(32, 400, 0, text);
         }
         mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, (u8 *)motionMenu, D_003BFB70);
@@ -2675,16 +2678,16 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             break;
         }
         PCP_COPY_VECTOR(D_00453290, unit->position);
-        func_0020D260((u32)&D_003BFEC0);
+        btlReturnDebugMenuSetupWord((u32)&D_003BFEC0);
         if (sdfPadButtonStates[2] < 0) {
             D_00453290[0] = 0.0f;
             D_00453290[1] = 0.0f;
             D_00453290[2] = 0.0f;
             D_00453290[3] = 0.0f;
         }
-        func_0020D228();
-        func_0020D270((u32)&D_003BFEC0);
-        func_0020D230();
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003BFEC0);
+        btlDebugMenuAfterRecordNoOp();
         PCP_COPY_VECTOR(unit->position, D_00453290);
         btlSetUnitPosition(unit, unit->position);
         break;
@@ -2711,10 +2714,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             parameters->position[2] = record->position[2];
         }
         memcpy(&D_004532A0, parameters, sizeof(BtlDebugTransformParameters));
-        func_0020D260((u32)&D_003BFF88);
-        func_0020D228();
-        func_0020D270((u32)&D_003BFF88);
-        func_0020D230();
+        btlReturnDebugMenuSetupWord((u32)&D_003BFF88);
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003BFF88);
+        btlDebugMenuAfterRecordNoOp();
         memcpy(parameters, &D_004532A0, sizeof(BtlDebugTransformParameters));
         savedScale = parameters->scaleOverride;
         parameters->scaleOverride = 1.0f;
@@ -2728,10 +2731,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
         memcpy(&D_004532C0, record, sizeof(BtlActorStatusRecord));
         memcpy(&D_00453530, &record->motions[D_00436E58], sizeof(BtlActorMotionSlot));
-        func_0020D260((u32)&D_003C0260);
-        func_0020D228();
-        func_0020D270((u32)&D_003C0260);
-        func_0020D230();
+        btlReturnDebugMenuSetupWord((u32)&D_003C0260);
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)&D_003C0260);
+        btlDebugMenuAfterRecordNoOp();
         memcpy(record, &D_004532C0, sizeof(BtlActorStatusRecord));
         if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_00436E58) {
             memcpy(&record->motions[D_00436E58], &D_00453530, sizeof(BtlActorMotionSlot));
@@ -2746,7 +2749,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk24) {
             btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            func_0020D208(position, 0x10808080, 0, record->unk24 * unit->scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->unk24 * unit->scale);
         }
         selectedAddress = D_003BFFC0[D_003C0260.cursor].valueAddress;
         if (((u32)selectedAddress >= (u32)&D_004532C0.position[0] &&
@@ -2759,7 +2762,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_00453530.unk0C) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            func_0020D208(position, 0x10106020, 0, D_00453530.unk0C * D_004532C0.scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, D_00453530.unk0C * D_004532C0.scale);
         }
         if (D_003C0260.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
@@ -2840,7 +2843,7 @@ extern s32 func_00369DF8(s32);
 extern s32 func_0036BCD0(const char *, s32);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
-void func_002303D0(void) {
+void btlWriteActorModelTableFile(void) {
     BtlUnit *unit = D_00436D90;
     BtlActorStatusRecord *record;
     BtlActorMotionSlot *motion;
@@ -2856,56 +2859,56 @@ void func_002303D0(void) {
     buffer = sdfAllocateBlockBySizeThreshold(10000);
     cursor = buffer;
     if (unit->status.flags & 0x200) {
-        cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[0]);
+        cursor += sprintf(cursor, D_00436F08, D_003BFBE8[0]);
     } else {
-        cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[1]);
+        cursor += sprintf(cursor, D_00436F08, D_003BFBE8[1]);
     }
-    cursor += func_0035C860(cursor, "ID:0x%X\n", unit->resourceIndex);
-    cursor += func_0035C860(cursor, "%s: %.2f,%.2f,%.2f\n", D_003BFBE8[2],
+    cursor += sprintf(cursor, "ID:0x%X\n", unit->resourceIndex);
+    cursor += sprintf(cursor, "%s: %.2f,%.2f,%.2f\n", D_003BFBE8[2],
                             (double)D_004532C0.position[0], (double)D_004532C0.position[1],
                             (double)D_004532C0.position[2]);
-    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[3], (double)D_004532C0.scale);
-    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[4], (double)D_004532C0.z);
-    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[5], (double)D_004532C0.unk18);
-    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[6], (double)D_004532C0.unk1C);
-    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[7], (double)D_004532C0.unk20);
-    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[8], (double)D_004532C0.unk24);
-    cursor += func_0035C860(cursor, D_00436F10, D_003BFBE8[9]);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[3], (double)D_004532C0.scale);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[4], (double)D_004532C0.z);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[5], (double)D_004532C0.unk18);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[6], (double)D_004532C0.unk1C);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[7], (double)D_004532C0.unk20);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[8], (double)D_004532C0.unk24);
+    cursor += sprintf(cursor, D_00436F10, D_003BFBE8[9]);
     switch (D_004532C0.shadowKind) {
-    case 0: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_NON"); break;
-    case 1: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_S"); break;
-    case 2: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_M"); break;
-    case 3: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_L"); break;
-    case 4: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_LL"); break;
+    case 0: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_NON"); break;
+    case 1: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_S"); break;
+    case 2: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_M"); break;
+    case 3: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_L"); break;
+    case 4: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_LL"); break;
     }
-    cursor += func_0035C860(cursor, D_00436F18, D_003BFBE8[10], D_004532C0.model);
-    cursor += func_0035C860(cursor, D_00436F20, D_003BFBE8[11]);
+    cursor += sprintf(cursor, D_00436F18, D_003BFBE8[10], D_004532C0.model);
+    cursor += sprintf(cursor, D_00436F20, D_003BFBE8[11]);
     rowCursor = (u8 *)record;
     for (i = 0; i < 29; i++) {
         motion = (BtlActorMotionSlot *)(rowCursor + 0x2C);
-        cursor += func_0035C860(cursor, D_00436F28, i);
+        cursor += sprintf(cursor, D_00436F28, i);
         switch (motion->moveKind) {
-        case 0: cursor += func_0035C860(cursor, D_00436F30, "UV_MV_NON "); break;
-        case 1: cursor += func_0035C860(cursor, D_00436F30, "UV_MV_ROT "); break;
-        case 2: cursor += func_0035C860(cursor, D_00436F30, "UV_MV_DASH"); break;
+        case 0: cursor += sprintf(cursor, D_00436F30, "UV_MV_NON "); break;
+        case 1: cursor += sprintf(cursor, D_00436F30, "UV_MV_ROT "); break;
+        case 2: cursor += sprintf(cursor, D_00436F30, "UV_MV_DASH"); break;
         }
-        cursor += func_0035C860(cursor, D_00436F38, motion->frameCount);
+        cursor += sprintf(cursor, D_00436F38, motion->frameCount);
         switch (motion->kind) {
-        case 0: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_NORM ", motion->alphaStartFrame); break;
-        case 1: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_PAUSE", motion->alphaStartFrame); break;
-        case 2: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_OUT  ", motion->alphaStartFrame); break;
-        case 3: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_STOP ", motion->alphaStartFrame); break;
+        case 0: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_NORM ", motion->alphaStartFrame); break;
+        case 1: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_PAUSE", motion->alphaStartFrame); break;
+        case 2: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_OUT  ", motion->alphaStartFrame); break;
+        case 3: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_STOP ", motion->alphaStartFrame); break;
         }
         rowCursor += sizeof(BtlActorMotionSlot);
-        cursor += func_0035C860(cursor, D_00436F40, (double)motion->alphaFrameScale);
-        cursor += func_0035C860(cursor, D_00436F48, (double)motion->unk0C);
-        cursor += func_0035C860(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
-        cursor += func_0035C860(cursor, D_00436F50);
+        cursor += sprintf(cursor, D_00436F40, (double)motion->alphaFrameScale);
+        cursor += sprintf(cursor, D_00436F48, (double)motion->unk0C);
+        cursor += sprintf(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
+        cursor += sprintf(cursor, D_00436F50);
     }
     if (sdfPfsDebugMode) {
         fd = func_00369B70("pfs0:/model/table.txt", 0x602, 0666);
     } else {
-        func_0035C860(path, "%smodel/table.txt", sdfDevGetPathBuffer());
+        sprintf(path, "%smodel/table.txt", sdfDevGetPathBuffer());
         fd = func_00369B70(path, 0x602);
     }
     func_0036A420(fd, (s32)buffer, cursor - buffer);
@@ -2941,10 +2944,10 @@ extern u32 D_00436F74, D_00436F78;
 extern const char *D_00436F80, *D_00436F84;
 extern char D_00436F98[];
 extern DatPartyRecord D_003C0620[][5];
-extern u32 func_0020D260(u32);
-extern void func_0020D228(void);
-extern void func_0020D270(u32);
-extern void func_0020D230(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuRecordNoOp(u32);
+extern void btlDebugMenuAfterRecordNoOp(void);
 extern s32 btlGetConditionalEncounterInterval(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 extern void btlApplyDebugEncounterPartySelection(void);
@@ -3040,12 +3043,12 @@ s32 btlUpdateDebugEncounterSelector(void) {
         BattleDebugWindow *window = &D_003C05E0;
         D_00436F78 = state->unk220;
         D_00436F74 = state->battleFlags;
-        func_0020D260((u32)window);
+        btlReturnDebugMenuSetupWord((u32)window);
         state->battleFlags = D_00436F74;
         state->unk220 = D_00436F78;
-        func_0020D228();
-        func_0020D270((u32)window);
-        func_0020D230();
+        btlDebugMenuBeforeRecordNoOp();
+        btlDebugMenuRecordNoOp((u32)window);
+        btlDebugMenuAfterRecordNoOp();
     }
     if (D_00436F5F == 0) {
         for (i = 0; i < 5 && (unitId = D_003C0620[D_00436F61][i].unitId) != 0; i++) {
@@ -3110,6 +3113,7 @@ extern s32 D_003C3248[5][24];
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
+/* Apply the debug party bank/preset, refreshed HP/MP and inventory flags. */
 void btlApplyDebugEncounterPartySelection(void) {
     u32 i;
     u32 n;

@@ -2417,7 +2417,7 @@ extern s32 evtAdvanceSlotFlags(void);
 extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
 extern void mdlFlagClear(s32);
-extern void func_00297320(s32);
+extern void mnuDrawCommandPhaseTransition(s32);
 extern void mnuDrawCampCommandTransition(s32);
 
 
@@ -2432,7 +2432,7 @@ extern s32 D_00435E48;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern void mnuBuildEnabledCampEntryWindow();
@@ -2624,7 +2624,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
 s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3123,10 +3123,10 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 s32 evtShowResultText(void) {
     char formattedText[0x40];
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
-    func_0035C860(formattedText, D_00437840, datGameState->progressTotal);
+    sprintf(formattedText, D_00437840, datGameState->progressTotal);
     evtCopyEntryStringToActiveWindow(1, formattedText);
     evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
-    func_0035C860(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
+    sprintf(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
     evtCopyEntryStringToActiveWindow(3, formattedText);
     if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
         dspStartEntry(datGameState->progressSlot + 0x1a);
@@ -3156,7 +3156,7 @@ s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
 s32 func_002633F0(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3188,7 +3188,7 @@ s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
 s32 func_00263658(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3369,7 +3369,7 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
             entry = 12;
         }
     }
-    func_0035C860(text, D_00437840, item->value * state->multiplier);
+    sprintf(text, D_00437840, item->value * state->multiplier);
     evtCopyEntryStringToActiveWindow(3, text);
     dspSetActive(1);
     dspStartEntry(entry);
@@ -3661,7 +3661,7 @@ extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
 extern u32 mnuCampChooseSolarWeightedOption(s32 row);
 extern u8 mnuCampChooseWeightedTableValue(void);
 extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
-s32 func_00264710(KwlnTask *task) {
+s32 evtMenuPrepareCampRewardSelection(KwlnTask *task) {
     MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     struct MenuList *activeList = scene->window->list;
     struct MenuListNode *selectedNode = scene->ownedWindows[0]->list->cursor;
@@ -3773,7 +3773,7 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
                     evtCopyEntryStringToActiveWindow(1, D_00437848);
                     dspStartEntry(0x2D);
                 } else {
-                    func_0035C860(text, D_00437850, state->rewardValue);
+                    sprintf(text, D_00437850, state->rewardValue);
                     evtCopyEntryStringToActiveWindow(0, text);
                     dspStartEntry(0x2E);
                 }
@@ -3790,14 +3790,14 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
     return result;
 }
 
-s32 func_00264AB8(KwlnTask *callbackContext) {
+s32 evtDrawPendingRewardTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_00264B10(KwlnTask *callbackContext) {
+s32 evtAdvancePendingRewardMessage(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3846,14 +3846,14 @@ s32 evtOpenSlotAdvancePopupWhenIdle(KwlnTask *callbackContext) {
     return dispatchResult;
 }
 
-s32 func_00264CE0(KwlnTask *callbackContext) {
+s32 evtDrawSlotAdvanceTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_00264D38(KwlnTask *callbackContext) {
+s32 evtAdvanceSlotAdvanceMessage(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3880,7 +3880,7 @@ s32 evtShowSlotText(KwlnTask *task) {
     char formattedText[0x40];
     if (((MenuTerminalContext *)kwlnTaskGetUserValue(task))->advancedSlots > 0) {
         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
-        func_0035C860(formattedText, D_00437840, D_003CE148[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
+        sprintf(formattedText, D_00437840, D_003CE148[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
         evtCopyEntryStringToActiveWindow(1, formattedText);
         evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
         if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
@@ -3913,14 +3913,14 @@ s32 evtTriggerProgressGateThenOpenPopup(KwlnTask *callbackContext) {
     return dispatchResult;
 }
 
-s32 func_00264F98(KwlnTask *callbackContext) {
+s32 evtDrawProgressGateTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCampCommandTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_00264FF0(KwlnTask *callbackContext) {
+s32 evtAdvanceProgressGateMessage(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -4009,7 +4009,7 @@ extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 evtIsLastSlot(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
@@ -4032,7 +4032,7 @@ s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
                 if ((reward++)->kind == 0) {
                     evtCopyEntryStringToActiveWindow(i, D_00435E5C + value * 0x19);
                 } else {
-                    func_0035C860(text, D_00437850, value);
+                    sprintf(text, D_00437850, value);
                     evtCopyEntryStringToActiveWindow(i, text);
                 }
                 i++;
@@ -4069,7 +4069,7 @@ s32 evtMenuPollWindow(KwlnTask *callback) {
     return state;
 }
 
-s32 func_00265360(KwlnTask *callback) {
+s32 evtDrawSelectedRewardTransition(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     mnuDrawCampCommandTransition((MenuTerminalContext *)context);
@@ -4083,7 +4083,7 @@ s32 evtFinishPopupAfterMenuConfiguration(KwlnTask *callback) {
 }
 
 /* Hand out the captured slot's reward: an item (named in the window) or a currency amount. */
-s32 func_00265408(KwlnTask *task) {
+s32 evtMenuGrantSelectedProgressReward(KwlnTask *task) {
     char text[0x40];
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
@@ -4098,7 +4098,7 @@ s32 func_00265408(KwlnTask *task) {
             evtCopyEntryStringToActiveWindow(0, D_00435E5C + rewardValue * 0x19);
             ptyAdjustItemQuantity(rewardValue, 1);
         } else {
-            func_0035C860(text, D_00437850, rewardValue);
+            sprintf(text, D_00437850, rewardValue);
             evtCopyEntryStringToActiveWindow(0, text);
             datAddCurrencyClamped(rewardValue);
         }
@@ -4133,7 +4133,7 @@ extern s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *);
 extern s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *, s32);
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
-s32 func_002655C0(KwlnTask *callback) {
+s32 evtMenuUpdateProgressRewardPopup(KwlnTask *callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
     s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 *popup = &context->popupState;
@@ -4199,14 +4199,14 @@ s32 func_002655C0(KwlnTask *callback) {
     return 0;
 }
 
-s32 func_002657F8(KwlnTask *callback) {
+s32 evtDrawGrantedRewardTransition(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     mnuDrawCampCommandTransition((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 func_00265850(KwlnTask *callback) {
+s32 evtAdvanceGrantedRewardMessage(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     func_0026C900();
     return evtMenuSetHandler((void *)context, 2, (void *)callback);
@@ -4260,7 +4260,7 @@ void mnuAwardCampProgressCurrency(void) {
     s32 amount = mnuCampResolveProgressTierValue();
 
     dspSetActive(1);
-    func_0035C860(formattedText, D_00437840, amount);
+    sprintf(formattedText, D_00437840, amount);
     evtCopyEntryStringToActiveWindow(0, formattedText);
     dspStartEntry(0x19);
     datAddCurrencyClamped(amount);
@@ -4269,7 +4269,7 @@ void mnuAwardCampProgressCurrency(void) {
 }
 
 /* One-shot menu flag: set the object's flag the first time it is not yet set, returning 1 only then. */
-s32 func_00265A60(MenuTerminalContext *object) {
+s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *object) {
     u32 flag = D_003CE460[object->type];
     if (flag == 0) {
         return 0;

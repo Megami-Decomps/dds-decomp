@@ -585,7 +585,7 @@ extern f32 D_00330670[];
 extern u32 D_003308B0[];
 
 extern void *memset(void *s, s32 c, u32 n);
-extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
+extern s32 fldUpdateTitleBannerTask(KwlnTask *task);
 extern s32 btlGetRuntimeResult(void);
 extern s32 fldValueRecordCount;
 extern s32 D_003BADF8;
@@ -5417,7 +5417,7 @@ void fldInitializeCameraColorResource(void) {
     fldCameraColorEnabled = 1;
 }
 
-void func_00134CD8(void) {
+void fldDrawCameraColorLayerPass(void) {
     func_00134348();
 }
 
@@ -8515,7 +8515,7 @@ extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
 
-s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task) {
+s32 fldUpdateTitleBannerTask(KwlnTask *task) {
     u16 *ticket;
     u8 *label;
     s32 width;
@@ -8564,7 +8564,7 @@ s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     ticket[2] = 0;
     ticket[3] = 0;
     kwlnTaskSetUserValue(task, (u32)ticket);
-    return (s32)fldDrawPendingTitleBannerWhenIdle;
+    return (s32)fldUpdateTitleBannerTask;
 }
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC10);

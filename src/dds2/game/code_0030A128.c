@@ -61,13 +61,13 @@ extern void sdfReleaseAllSpriteSlots(void);
 extern void sdfDestroyActiveCounterRuntime(void);
 extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
-extern void sdfDisableFlagListCameraRelativeMode(void);
+extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern s32 dspCloseChannel(void);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
 extern s32 sdfCounterGetDisplayWordPointer(void);
-extern void func_0035C860(char *, char *, ...);
+extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
@@ -87,7 +87,7 @@ extern void evtCreateMessageWindowIfMissing(s32);
 extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
-extern void sdfEnableFlagListCameraRelativeMode(void);
+extern void sdfEnableFlagListViewTargetRelativeMode(void);
 extern void sndStartTrackDefault(s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
 extern u32 kwlnDrawControlFlags;
@@ -375,7 +375,7 @@ s32 fldLmapTaskExists(void) {
     return kwlnTaskGetTaskByName(fldLocalMapTaskName) != NULL;
 }
 
-void func_0030AA68(const char *fmt, ...) {
+void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
 }
 
 /* Map a local-map mode to its track-selection ordinal; unmapped modes use 1. */
@@ -441,7 +441,7 @@ void fldShutdownLmapResources(void) {
     sdfDestroyActiveCounterRuntime();
     fldReleaseMapRequestQueues();
     fldReleaseCameraColorEffect();
-    sdfDisableFlagListCameraRelativeMode();
+    sdfDisableFlagListViewTargetRelativeMode();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
     sdfQueueGeneralAllocationRelease(D_004388A4);
@@ -639,7 +639,7 @@ void fldInitializeLocalMapScene(void) {
     evtCreateMessageWindowIfMissing(D_004388A8);
     evtSetSolarOverlayFullyVisible();
     fldInitializeCameraColorResource();
-    sdfEnableFlagListCameraRelativeMode();
+    sdfEnableFlagListViewTargetRelativeMode();
     sndStartTrackDefault(0x400001);
     if (mdlFlagTest(0x13)) {
         kwlnFadeOutStart(0, 0, 0, 30);
@@ -826,14 +826,14 @@ s32 mdlCollectFlagBitsIntoMask(void) {
     return bits;
 }
 
-u32 func_0030B678(void) {
+u32 sdfGetInitialMapCameraTransitionState(void) {
     return 1;
 }
 
 void fldDisplayLocalMapCounterMessage(void) {
     char text[32];
 
-    func_0035C860(text, D_004388A0, sdfCounterGetDisplayWordPointer());
+    sprintf(text, D_004388A0, sdfCounterGetDisplayWordPointer());
     evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);

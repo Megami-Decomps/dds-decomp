@@ -75,7 +75,7 @@ extern s64 mnuGetSoundBufferStateLocked(void);
 
 extern void sdfVuLoadRotationMatrixY(f32);
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 
 extern u8 effSharedRandomState[];
 
@@ -144,7 +144,7 @@ extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
 extern s32 btlSampleActorModelPositionVU(BtlUnit *, s32);
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
 
@@ -366,7 +366,7 @@ u32 btlGetActiveUnitId(void);
 
 s32 btlGetUnitModelFrameCount(BtlUnit *unit);
 
-f32 btlGetUnitModelValue1C(BtlUnit *unit);
+f32 btlGetUnitModelCurrentFrame(BtlUnit *unit);
 
 void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst);
 
@@ -3128,7 +3128,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf11, pose->position);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
-                    func_003364B8(value[0]);
+                    sdfVuLoadRotationMatrixX(value[0]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -4058,7 +4058,7 @@ u32 btlPollFieldArchiveLoad(args)
     if (args->frame == 0) {
         btlFreeFieldBlocks();
         fldFormatAreaDirectory(directory, args->stage, 1);
-        func_0035C860(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
+        sprintf(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
         btlBossDebugPrintf("btl:field load[%s]\n", path);
         args->request = (struct FilePacRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
@@ -4134,11 +4134,11 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     s32 variant = args->variant;
     char path[0x70];
     if (args->state == 0) {
-        func_0035C860(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
+        sprintf(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
         result = 0;
         args->frontHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:load 0[%s]\n", path);
-        func_0035C860(path, "/fld/b/f%03d/f%03d_%03ds.tmx", stage, stage, variant);
+        sprintf(path, "/fld/b/f%03d/f%03d_%03ds.tmx", stage, stage, variant);
         args->sideHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:load 1[%s]\n", path);
     } else {
@@ -5026,9 +5026,9 @@ s32 btlFormatActionEventFilename(s32 index, char *output) {
     if ((state->battleFlags & 0x10000000) == 0) {
         u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[index].displayCode;
         if (assetId == 0) return 0;
-        func_0035C860(output, D_00418E28, D_00436AE0, assetId);
+        sprintf(output, D_00418E28, D_00436AE0, assetId);
     } else {
-        func_0035C860(output, D_00418E38);
+        sprintf(output, D_00418E38);
     }
     return 1;
 }
@@ -5776,11 +5776,11 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource) {
 }
 
 void sndFormatResourceNameFromIndex(s32 source, char *output) {
-    func_0035C860(output, D_004192D8, D_00436AE8, (u16)(source + 0x200));
+    sprintf(output, D_004192D8, D_00436AE8, (u16)(source + 0x200));
 }
 
 void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
-    func_0035C860(output, D_004192E8, unit->partyRecord.unitId);
+    sprintf(output, D_004192E8, unit->partyRecord.unitId);
 }
 
 s32 sndResolveResourceId(s32 category, s32 id) {
@@ -5896,11 +5896,11 @@ void sndLoadMotSeFiles(SoundSlotOwner *sound) {
         u32 id = sndBuildMotSeResourceKey(sound, slot);
         if (id != 0) {
             if (slot != 0xB) {
-                func_0035C860(filename, D_004192D8, D_00436AE8, id >> 16);
+                sprintf(filename, D_004192D8, D_00436AE8, id >> 16);
             } else if (sound->category == 0) {
-                func_0035C860(filename, D_004192F8, D_00419308, sound->work.id);
+                sprintf(filename, D_004192F8, D_00419308, sound->work.id);
             } else {
-                func_0035C860(filename, D_00419318, D_00419308, sound->work.id);
+                sprintf(filename, D_00419318, D_00419308, sound->work.id);
             }
             *(struct FileRequest **)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf("btl:motSE file load start[%d][%p][%s]\n", slot, sound, filename);

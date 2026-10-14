@@ -425,10 +425,10 @@ u8 btlIsLinkedItemDropCommand(BtlLinkedCommand *action) {
     return action->actionCode == 0x1a0;
 }
 
-void func_001DD4A8(void) {
+void btlInitializeFreeCameraNoOp(void) {
 }
 
-void func_001DD4B0(void) {
+void btlUpdateFreeCameraNoOp(void) {
 }
 
 extern void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -492,7 +492,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
     action->flags |= 0x41;
 }
 
-void func_001DD678(void) {
+void btlUpdateEncounterCameraNoOp(void) {
 }
 
 /* Prepare the embedded primary camera through the existing 27.5f provider. */
@@ -500,7 +500,7 @@ void btlPreparePrimaryActionCamera(BtlLinkedCommand *command) {
     btlSetDefaultActionCameraPose(command, &command->camera);
 }
 
-void func_001DD698(void) {
+void btlUpdatePrimaryActionCameraNoOp(void) {
 }
 
 extern void btlFlagUserAndTargetDefeat(BtlLinkedCommand *, BtlLinkedCommand *);
@@ -997,7 +997,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     }
 }
 
-void func_001DE5F0(void) {
+void btlUpdateCommandCameraNoOp(void) {
 }
 
 /* Update the action camera from target-policy results once the link reaches state seven. */
@@ -1111,7 +1111,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
     }
 }
 
-void func_001DE958(void) {
+void btlUpdateTargetCameraNoOp(void) {
 }
 
 extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
@@ -1145,7 +1145,7 @@ void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
     action->flags |= 0x41;
 }
 
-void func_001DEA68(void) {
+void btlUpdateSummonCameraNoOp(void) {
 }
 
 extern void btlInitSkillCommandCursor(BtlLinkedCommand *, BtlCamState *);

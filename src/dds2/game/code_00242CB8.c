@@ -45,7 +45,7 @@ extern char D_00422050[];
 void evtBeginSolarOverlayFadeIn(s32 arg0);
 
 extern s32 fileMenuTaskExists(void);
-extern u32 func_001200E0(void);
+extern u32 fldIsUpdateInhibited(void);
 void sdfDebugPrintf(const char *fmt, ...);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
@@ -365,7 +365,7 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
     f32 f;
 
     f = 0.0f;
-    if ((fileMenuTaskExists() != 0) || (func_001200E0() != 0)) {
+    if ((fileMenuTaskExists() != 0) || (fldIsUpdateInhibited() != 0)) {
         return 0;
     }
     overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);

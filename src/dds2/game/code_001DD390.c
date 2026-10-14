@@ -157,7 +157,7 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 btlSampleActorModelPositionVU(BtlUnit *, s32);
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern u32 btlApplyDeferredUnitStatus(void *);
 
@@ -3016,7 +3016,8 @@ s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
         (status->motions[motionIndex].alphaFrameScale * state->unk4C8));
 }
 
-f32 btlGetUnitModelValue1C(BtlUnit *unit) {
+/* Return the unit model's current frame, or zero while its model flag is clear. */
+f32 btlGetUnitModelCurrentFrame(BtlUnit *unit) {
     f32 value = 0.0f;
     if (unit->status.flags & 2) {
         value = unit->ext->owner->first->currentFrame;
@@ -3508,11 +3509,11 @@ s32 btlFormatUnitBedName(BtlUnit *unit, char *name) {
     btlGetRuntime();
     if (unit->status.flags & 0x200) {
         if (unit->partyRecord.flags & 0x10) {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId + 0x20);
+            sprintf(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId + 0x20);
         } else if (unit->status.flags & 0x1000) {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId);
+            sprintf(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId);
         } else {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue), unit->partyRecord.unitId);
+            sprintf(name, "%s%03X_%02X.BED", D_00436A28, btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue), unit->partyRecord.unitId);
         }
         return 1;
     }
@@ -3680,7 +3681,7 @@ BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *unit) {
 }
 
 u32 btlPollThresholdTask(s32 *arguments) {
-    if ((s32)btlGetUnitModelValue1C((BtlUnit *)arguments[0]) >= arguments[1]) {
+    if ((s32)btlGetUnitModelCurrentFrame((BtlUnit *)arguments[0]) >= arguments[1]) {
         if ((((BtlUnit *)arguments[0])->updateFlags & 1) == 0) {
             btlResetUnitModelProgress((BtlUnit *)arguments[0]);
         }
@@ -5127,7 +5128,7 @@ void btlUpdateActiveActorModelState(void) {
             if (unit->unkEC != parameter && parameter != -1) {
                 btlApplyScaledUnitEffectParameter(unit, parameter, 0, 1.0f);
             } else {
-                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 if (frame >= status->model) {
                     sdfMotionSampleAtFrame(unit->ext->owner->first, (f32)status->model);
                     btlResetUnitModelProgress(unit);
@@ -5137,7 +5138,7 @@ void btlUpdateActiveActorModelState(void) {
         }
         if (unit->updateFlags & 2) {
             if (unit->updateFlags & 4) {
-                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 index = unit->unkEC;
                 if (index == mdlGetNodeMotionIndex(unit->ext->owner, 0)) {
                     if (frame >= status->motions[index].alphaStartFrame) {
@@ -5576,15 +5577,18 @@ void btlInterpolateVectorStep(f32 *src) {
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
-u32 func_001E8568(BtlLinkedCommand *command) {
+/* Complete native camera flag-0x08 mode without changing command state. */
+u32 btlCompleteCameraFlag08Mode(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001E8570(BtlLinkedCommand *command) {
+/* Complete native camera flag-0x20 mode without changing command state. */
+u32 btlCompleteCameraFlag20Mode(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001E8578(BtlLinkedCommand *command) {
+/* Complete native camera flag-0x80 mode without changing command state. */
+u32 btlCompleteCameraFlag80Mode(BtlLinkedCommand *command) {
     return 1;
 }
 
@@ -6190,7 +6194,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
                         if (unit->ext != 0) {
                             s32 node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
                             if (node == 0xD || node == 0x12) {
-                                current = btlGetUnitModelValue1C(unit);
+                                current = btlGetUnitModelCurrentFrame(unit);
                                 limit = (f32)btlGetUnitModelFrameCount(unit);
                                 if (unit->partyRecord.unitId < 0xA) {
                                     limit = limit * D_003B6D90[unit->partyRecord.unitId];

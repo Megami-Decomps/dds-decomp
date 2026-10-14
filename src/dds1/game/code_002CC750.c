@@ -812,7 +812,7 @@ u8 prfGetProfileParameterByte5(u16 profileId) {
     return D_003907B0[profileId].value05;
 }
 
-u32 func_002CDDB0(u16 profileId, s32 statIndex) {
+u32 prfGetIndexedProfileByte(u16 profileId, s32 statIndex) {
     return 0;
 }
 
@@ -822,7 +822,7 @@ u32 scrCallIfOperandReady(DatPartyRecord *operand, u32 byteIndex) {
     s32 selectedProfileId = ptyGetCurrentProfileId(operand);
 
     if (ptyGetCurrentProfileId(operand)) {
-        return func_002CDDB0(selectedProfileId, byteIndex);
+        return prfGetIndexedProfileByte(selectedProfileId, byteIndex);
     }
 }
 

@@ -99,7 +99,7 @@ extern void mnuDrawStaffScrollPanel(s32, s32, s32, s32, s32);
 extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, struct EffectSlotSet *, u8 *, s32);
 
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
 extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, s32);
@@ -941,7 +941,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, st
         return;
     }
     effDrawTextureSlotWithBlendedCornerColors((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawResource, 0x3F, layer);
-    func_0035C860(buffer, D_00437B80, datGameState->header.currency);
+    sprintf(buffer, D_00437B80, datGameState->header.currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = itfCreateTightFont3TextGlyph((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);

@@ -4979,7 +4979,7 @@ extern f32 sdfViewEyeVector[4];
 extern f32 func_003532D0(f32);
 
 /* Advance radial five-point wave strips from the class orientation. */
-void func_002EB058(EffClassWork *work) {
+void effUpdateRadialWavePointRows(EffClassWork *work) {
     f32 offsets[5];
     f32 widths[5];
     f32 direction[4];
@@ -5468,7 +5468,7 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 extern void func_00336818(f32);
 extern f32 func_003532D0(f32);
 extern f32 func_00352DB0(f32);
@@ -5546,7 +5546,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 entry->height = -config->heightScale * effMiscRandUnitFloat(effSharedRandomState);
             }
             entry->pitch = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-            func_003364B8(entry->yaw);
+            sdfVuLoadRotationMatrixX(entry->yaw);
             func_00336818(entry->pitch);
             sdfMultiplyVuMatrixInPlace();
             phase = entry->phase;
@@ -5609,7 +5609,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 phase = (entry->angularRate + acceleration * (f32)(entry->negativeSeed + 1) * 0.5f) * (f32)(entry->negativeSeed + 1);
                 phase = phase + entry->phase;
                 curve = bendStep * (curveSample * 0.7f + (1.0f - 0.7f));
-                func_003364B8(entry->yaw);
+                sdfVuLoadRotationMatrixX(entry->yaw);
                 func_00336818(entry->pitch);
                 sdfMultiplyVuMatrixInPlace();
                 position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
@@ -9174,7 +9174,8 @@ void effResolveAndApplySurfaceEndpoints(u8 *work) {
     effAcquireSurfaceRecord(*handle);
 }
 
-void func_002F7E88(s32 owner) {
+/* Draw through the active owner's retained surface-resource handle. */
+void effDrawActiveSurfaceNode(s32 owner) {
     func_002E8770(*(u32 *)((EffActiveResource *)owner)->resource);
 }
 
@@ -9462,7 +9463,8 @@ void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void func_002F8640(void) {
+/* Empty retail update entry in the drawable-asset operation table. */
+void effDrawableAssetUpdateHook(void) {
 }
 
 typedef struct EffRadialCylinderConfig {
@@ -10423,7 +10425,8 @@ void effAcquireSlotRecordWhenRuntimeFlagClear(s32 node) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FAD98);
 
-void func_002FB400(u32 node) {
+/* Acquire the owned slot record unless paused, then invoke its native drawer. */
+void effUpdateSlotRecordAndDraw(u32 node) {
     effAcquireSlotRecordWhenRuntimeFlagClear(node);
     func_002FAD98(node);
 }
@@ -10832,7 +10835,7 @@ extern const char D_004386D0[];
 
 extern char D_004386D8[];
 
-extern s32 func_0035C860(char *, char *, ...);
+extern s32 sprintf(char *, char *, ...);
 
 
 
@@ -10848,7 +10851,7 @@ s32 effPollPrimaryFile(void) {
         result = 0x400000;
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effQueuedFileHandle != 0) {
-            func_0035C860(path, D_004386D8, D_0042CF58, request.nameWithExtension);
+            sprintf(path, D_004386D8, D_0042CF58, request.nameWithExtension);
             result = 0x400002;
             fileWriteToPfs(effQueuedFileHandle, path);
         }
@@ -10872,7 +10875,7 @@ s32 effPollNamedFile(void) {
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithExtension);
+            sprintf(path, D_004386D8, D_0042CF70, request.nameWithExtension);
             result = 0x400002;
             fileQueueSaveImage(effFileQueue, path);
         }
@@ -10896,7 +10899,7 @@ s32 effPollAttachedFile(void) {
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithExtension);
+            sprintf(path, D_004386D8, D_0042CF70, request.nameWithExtension);
             result = 0x400002;
             fileQueueSaveVersionedImage(effFileQueue, path);
         }
@@ -11648,10 +11651,10 @@ typedef char EffCameraMenuStateSizeCheck[(sizeof(EffCameraMenuState) == 0x38) ? 
 extern EffCameraMenuState D_003FFBB0;
 extern s8 sdfPadButtonStates[];
 extern char D_00438740[];
-extern u32 func_0020D260(u32);
-extern void func_0020D228(void);
-extern void func_0020D270(u32);
-extern void func_0020D230(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuRecordNoOp(u32);
+extern void btlDebugMenuAfterRecordNoOp(void);
 
 typedef struct EffCameraCreateRow {
     EffCameraCreateRequest request;
@@ -11681,7 +11684,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
     for (i = 0; i < capacity; i++) {
         const EffCameraCreateRequest *request = &requests[i].request;
         if (request->resource != NULL) {
-            func_0035C860(nameBuffer, D_00438740, request->resource->name);
+            sprintf(nameBuffer, D_00438740, request->resource->name);
             entries[count].name = nameBuffer;
             entries[count].selected = 0;
             entries[count].unk08 = 0;
@@ -11705,10 +11708,10 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
         oldIndex = state->selectedIndex;
     }
     state->nameKey = nameKey;
-    func_0020D260((u32)state);
-    func_0020D228();
-    func_0020D270((u32)state);
-    func_0020D230();
+    btlReturnDebugMenuSetupWord((u32)state);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((u32)state);
+    btlDebugMenuAfterRecordNoOp();
     sdfReleaseResourceAllocation(allocation);
 
     if (sdfPadButtonStates[1] < 0 && count != 0) {
@@ -12031,10 +12034,10 @@ s32 effResetStaticState(void) {
     return 0;
 }
 
-extern u32 func_0020D260(u32);
-extern void func_0020D228(void);
-extern void func_0020D270(u32);
-extern void func_0020D230(void);
+extern u32 btlReturnDebugMenuSetupWord(u32);
+extern void btlDebugMenuBeforeRecordNoOp(void);
+extern void btlDebugMenuRecordNoOp(u32);
+extern void btlDebugMenuAfterRecordNoOp(void);
 extern void btlDebugDrawRadiusGuide(f32 *, f32, u32, s32);
 extern void btlDebugDrawSegment(f32 *, f32 *, u32);
 extern void btlDebugDrawPoint(f32 *);
@@ -12057,10 +12060,10 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
     }
 
     PCP_COPY_VECTOR(D_0045C2F0, state->position);
-    func_0020D260((u32)D_003FFC78);
-    func_0020D228();
-    func_0020D270((u32)D_003FFC78);
-    func_0020D230();
+    btlReturnDebugMenuSetupWord((u32)D_003FFC78);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((u32)D_003FFC78);
+    btlDebugMenuAfterRecordNoOp();
     PCP_COPY_VECTOR(state->position, D_0045C2F0);
     if (D_003FFC78[4] & 8) {
         flags |= 2;
@@ -12130,7 +12133,7 @@ s32 effResetCameraSnapshotSelection(void) {
 }
 
 extern EffCameraMenuState D_003FFD08;
-extern void func_0020D200(f32 *, f32, f32, u32, f32 (*)[4]);
+extern void btlDebugDrawOrientedExtentGuide(f32 *, f32, f32, u32, f32 (*)[4]);
 
 /* Private scratch feeds only VU loads or empty retail debug providers. */
 typedef struct EffectCameraDebugScratch {
@@ -12140,7 +12143,7 @@ typedef struct EffectCameraDebugScratch {
     s128 rotationMatrix[4];
 } EffectCameraDebugScratch;
 
-u32 func_002FF8A0(EffectStateSnapshot *state, s8 useBattlePosition) {
+u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePosition) {
     EffectCameraDebugScratch scratch;
     u32 result = 1;
 
@@ -12159,10 +12162,10 @@ u32 func_002FF8A0(EffectStateSnapshot *state, s8 useBattlePosition) {
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.basePosition);
     VU0_STORE_VF(vf10, D_0045C2F0);
 
-    func_0020D260((u32)&D_003FFD08);
-    func_0020D228();
-    func_0020D270((u32)&D_003FFD08);
-    func_0020D230();
+    btlReturnDebugMenuSetupWord((u32)&D_003FFD08);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((u32)&D_003FFD08);
+    btlDebugMenuAfterRecordNoOp();
     PCP_COPY_VECTOR(state->quat, D_0045C300);
     if (D_003FFD08.unk10 & 8) {
         result |= 2;
@@ -12183,7 +12186,7 @@ u32 func_002FF8A0(EffectStateSnapshot *state, s8 useBattlePosition) {
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
 
-    func_0020D200((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
+    btlDebugDrawOrientedExtentGuide((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
     btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80000080);
     btlDebugDrawPoint((f32 *)&scratch.segmentStart);
 
@@ -12247,13 +12250,13 @@ s32 effRunWithStateBackup(void) {
     return result;
 }
 
-extern u32 func_002FF8A0(EffectStateSnapshot *, s8);
+extern u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *, s8);
 
 u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
     memcpy(D_0045C110, file, 0x90);
-    result = func_002FF8A0((EffectStateSnapshot *)D_0045C110, 1);
+    result = effUpdateCameraSnapshotGuides((EffectStateSnapshot *)D_0045C110, 1);
     memcpy(file, D_0045C110, 0x90);
     if (result & 1) {
         result |= 0x800000;
@@ -12410,9 +12413,9 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
 
         effResourceBankEntries = btlScanDirectory(0, mode);
         if (mode & BTL_RESOURCE_SCAN_GENERAL) {
-            count = func_00159BB0();
+            count = effGetGeneralResourceCount();
             for (i = 0; i < count; i++) {
-                func_0035C860(name, "GENERAL %d", i);
+                sprintf(name, "GENERAL %d", i);
                 btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
             }
         }
@@ -13536,7 +13539,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
     u32 sourceAddress;
     u32 allocation;
     EffectSlotSet *instance;
-    func_0035C860(path, D_004387E8, base, name);
+    sprintf(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
@@ -13571,7 +13574,7 @@ void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
 /* Clear the output first; only mode one selects the retained-allocation completion path. */
 void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u32 *outInstance) {
     char path[EFF_RESOURCE_PATH_BYTES];
-    func_0035C860(path, D_004387E8, prefix, name);
+    sprintf(path, D_004387E8, prefix, name);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
         fileCreateCallbackRequest(path, 0, (s32)effCompleteRetainedResourceJob, (s32)outInstance);
@@ -13586,7 +13589,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     u32 sourceAddress;
     u32 allocation;
     EffMappedResource *mappedResource;
-    func_0035C860(path, D_004387E8, base, name);
+    sprintf(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
@@ -13610,7 +13613,7 @@ void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResourc
 /* Initialize the output to zero and schedule mapped-record completion. */
 void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource) {
     char path[EFF_RESOURCE_PATH_BYTES];
-    func_0035C860(path, D_004387E8, base, name);
+    sprintf(path, D_004387E8, base, name);
     *outMappedResource = 0;
     fileCreateCallbackRequest(path, 0, (s32)effCompleteMappedResourceJob, (s32)outMappedResource);
 }

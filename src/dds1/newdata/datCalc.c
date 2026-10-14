@@ -123,14 +123,14 @@ s32 datAdjustCurrentMp(DatPartyRecord *unit, s32 delta) {
 }
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *unit);
-extern u32 func_002CDDB0(u16 profileId, s32 statIndex);
+extern u32 prfGetIndexedProfileByte(u16 profileId, s32 statIndex);
 
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
  * the existing signed result to 1..99. Stat index is not checked here. */
 s32 datGetClampedProfileAdjustedStat(DatPartyRecord *unit, s32 statIndex) {
     s32 adjustedStat = unit->baseStats[statIndex] +
-                func_002CDDB0(ptyGetCurrentProfileId(unit), statIndex);
+                prfGetIndexedProfileByte(ptyGetCurrentProfileId(unit), statIndex);
 
     if (adjustedStat <= 0) {
         adjustedStat = 1;

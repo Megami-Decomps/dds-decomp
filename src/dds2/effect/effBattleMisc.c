@@ -28,7 +28,7 @@ extern void sdfVuLoadRotationMatrixY(f32 angle);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void func_003364B8(f32 value);
+extern void sdfVuLoadRotationMatrixX(f32 value);
 extern void func_00336818(f32 value);
 extern u32 effFieldColorFlags;
 
@@ -359,7 +359,7 @@ void effBattleMiscBuildBasis(EffectVectorRequest *param, u128 *out) {
         if (param->size < 9) {
             angle = D_003AF1D8[param->size];
         }
-        func_003364B8(tilt);
+        sdfVuLoadRotationMatrixX(tilt);
         func_00336818(angle);
         sdfMultiplyVuMatrixInPlace();
     }

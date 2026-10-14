@@ -165,7 +165,7 @@ extern s32 D_0039A0B8[];
 
 extern s32 D_0039A028[];
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern char D_00413F20[];
 
@@ -1115,7 +1115,7 @@ void fldLoadSceneRecordTable(void) {
     s32 header;
 
     fldFormatAreaDirectory(directory, fldAreaState.area, 1);
-    func_0035C860(path, (const char *)D_00413700, directory, fldAreaState.area);
+    sprintf(path, (const char *)D_00413700, directory, fldAreaState.area);
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceHandle, 0);
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
@@ -2601,7 +2601,7 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     }
 }
 
-void func_0014AC18(s32 index) {
+void fldSetPrimaryMapLabelSelection(s32 index) {
     if (index >= 0x40) {
         D_00389834[0] = -1;
     } else {
@@ -2609,7 +2609,7 @@ void func_0014AC18(s32 index) {
     }
 }
 
-void func_0014AC40(s32 index) {
+void fldSetSecondaryMapLabelSelection(s32 index) {
     if (index >= 0x40) {
         D_00389838[0] = -1;
     } else {
@@ -3478,13 +3478,13 @@ void fldLoadNpcPalette(s32 field) {
     if (field < 100) {
         fldFormatAreaDirectory(directory, field, 1);
         if (field == 23 && mdlFlagTest(25) != 0) {
-            func_0035C860(path, "%sF033.NPL", directory);
+            sprintf(path, "%sF033.NPL", directory);
         } else if (field == 24 && mdlFlagTest(25) != 0) {
-            func_0035C860(path, "%sF034.NPL", directory);
+            sprintf(path, "%sF034.NPL", directory);
         } else if (field == 27 && mdlFlagTest(25) != 0) {
-            func_0035C860(path, "%sF037.NPL", directory);
+            sprintf(path, "%sF037.NPL", directory);
         } else {
-            func_0035C860(path, "%sF%03d.NPL", directory, field);
+            sprintf(path, "%sF%03d.NPL", directory, field);
         }
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, &D_0044FD90, 0x200);
@@ -3670,17 +3670,17 @@ void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
     D_00436360 = arg2;
     D_00436364 = 0;
     if ((u32)(field - 8) < 2) {
-        func_0035C860(path, "/fld/f/pnl/df%03d_a.tmx", field);
+        sprintf(path, "/fld/f/pnl/df%03d_a.tmx", field);
     } else if (field == 0xC) {
-        func_0035C860(path, "/fld/f/pnl/df%03d_b.tmx", 0xC);
+        sprintf(path, "/fld/f/pnl/df%03d_b.tmx", 0xC);
     } else {
-        func_0035C860(path, "/fld/f/pnl/df%03d.tmx", field);
+        sprintf(path, "/fld/f/pnl/df%03d.tmx", field);
     }
     handle = sdfReadNamedResource(path, &resourceAddress, 0);
     D_00436368 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (field == 0xC) {
-        func_0035C860(path, "/fld/f/pnl/df_b.tmx");
+        sprintf(path, "/fld/f/pnl/df_b.tmx");
         handle = sdfReadNamedResource(path, &resourceAddress, 0);
         D_0043636C = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
@@ -3925,7 +3925,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_00436378 = id;
     D_00436370 = 0;
     D_00436374 = 0;
-    func_0035C860(path, "/fld/f/pnl/ds_%03d.tmx", id);
+    sprintf(path, "/fld/f/pnl/ds_%03d.tmx", id);
     handle = sdfReadNamedResource(path, &data, 0);
     D_0043637C = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
@@ -4856,7 +4856,7 @@ void fldResetViewState(void) {
     fldTargetGuideState.disabled = 0;
 }
 
-void func_001514F8(void) {
+void fldLoadTargetGuideResource(void) {
     typedef struct {
         u32 firstOffset;
         u32 unk04;
@@ -4871,7 +4871,7 @@ void func_001514F8(void) {
     u32 third;
 
     fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor + 1);
-    func_0035C860(path, D_00413F20, directory, fldAreaState.area, fldAreaState.floor + 1);
+    sprintf(path, D_00413F20, directory, fldAreaState.area, fldAreaState.floor + 1);
     D_004363C4 = (s32)(u32)sdfReadNamedResource(path, &resource, 0);
     base = (u32)resource;
     first = base + resource->firstOffset;
@@ -5957,7 +5957,7 @@ extern s32 D_003898AC[];
 
 extern s32 D_004363DC;
 
-s32 func_00154528(void) {
+s32 fldIsCurrentGridGuideMarkerActive(void) {
     if (D_003898AC[0] != 0) {
         return D_004363DC;
     }
