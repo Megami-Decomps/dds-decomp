@@ -6,7 +6,6 @@
 
 extern ObjBase *dds3GetLightObjectResource(EffWorldNode *object);
 
-extern s32 effObjInnerCreate(EffWorldNode *object);
 
 /* Each object kind keeps its handle in a different structure. */
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object) {

@@ -6,7 +6,6 @@
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */
 
-extern s32 effObjInnerCreate(EffWorldNode *object);
 
 extern void effObjInnerVecBackup(ObjectTransform *node);
 

@@ -11,7 +11,6 @@
 #include "pcp_vu0.h"
 
 
-extern s32 effObjInnerCreate(EffWorldNode *object);
 
 /* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
  * The caller supplies an existing effect resource; this does not free its owner. */

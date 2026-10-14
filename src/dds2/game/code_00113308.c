@@ -46,7 +46,6 @@ enum {
     EFFECT_OPACITY_COLOR_TRANSPARENT = 0x00808080
 };
 
-extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
 extern void evtEndObjectValueTransition(EffWorldNode *object);
 
