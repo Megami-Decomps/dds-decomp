@@ -190,7 +190,16 @@ u32 sdfSoundTryQueueCommand(u32 command) {
     return command;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sndTrySendChannelGroupCommand120);
+/* Send opcode 0x120 with the channel's group (bits 3-6) unless a command is
+ * pending; returns nonzero when busy. */
+s32 sndTrySendChannelGroupCommand120(u8 channel) {
+    if (sdfSoundCommandStatus) {
+        return 1;
+    }
+    channel = (channel >> 3) & 0xF;
+    sndSendCommandPacket(0x120 | channel, 0, 0, 0);
+    return 0;
+}
 
 u32 sdfSoundGetCommandStatus(void) {
     return sdfSoundCommandStatus;
