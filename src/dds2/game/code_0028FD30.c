@@ -538,13 +538,26 @@ void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
 extern void scrSetEntryLowFlags(DatPartyRecord *context, u16 entryId, u16 lowFlags);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
+const s16 D_00427668[4][3] __attribute__((section(".rodata"), aligned(8))) = {
+    { 0x36, 0x93, 0x34 },
+    { 0x28, 0x94, 0x2A },
+    { 0x4C, 0x73, 0x51 },
+    { 0x01, 0x74, 0x03 }
+};
+
+const u16 D_00427680[3][5] __attribute__((section(".rodata"), aligned(8))) = {
+    { 0x36, 0, 0x72, 0x28, 0 },
+    { 0x93, 0x37, 0x33, 0x94, 0 },
+    { 0x38, 0x34, 0x98, 0x2A, 0x2B }
+};
+
+const u16 D_004276A0[3][5] __attribute__((section(".rodata"), aligned(8))) = {
+    { 0x4C, 0, 0x71, 0x01, 0 },
+    { 0x73, 0x4D, 0x02, 0x74, 0 },
+    { 0x4E, 0x51, 0x97, 0x03, 0x04 }
+};
+
 /* Write each panel slot's 0xB0 saved flag words back to its list node's script entries and log the slot number. */
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427668);
-
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427680);
-
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276A0);
-
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
 
 void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *object) {
