@@ -66,7 +66,6 @@ extern s32 btlUpdateDebugEncounterSelector(void);
 extern s32 btlRollMajinEncounter();
 extern s32 btlRollSurpriseAttack();
 extern void btlRequestSceneEventResources();
-extern void btlInitializeBossCallbacks();
 extern void btlSelectSceneAudioTrack();
 
 typedef struct SceneControl {
