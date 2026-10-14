@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "kwln_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
 #include "btl_special_ability.h"
@@ -1102,7 +1103,6 @@ extern void btlReleaseBossData();
 
 extern void fldPollAreaResourceLoad();
 
-extern s32 fldGetResourceReadyFlag();
 
 #include "brs_task_poll_done_api.h"
 

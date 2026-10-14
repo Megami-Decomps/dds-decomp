@@ -4,5 +4,6 @@
 #include "common.h"
 
 u32 fldGetSceneReadyFlag(void);
+u32 fldGetResourceReadyFlag(void);
 
 #endif
