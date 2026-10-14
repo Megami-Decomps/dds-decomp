@@ -22,7 +22,7 @@ extern s32 mnuMantraPanelPositionTable;
 
 extern EvtLoadedRecord *mnuMantraNodePositionTable;
 
-extern s32 func_0026CD50(u32);
+extern EvtLoadedRecord *evtCreateLoadedRecord(u32 sourceAddress);
 
 typedef struct EvtMantraNodePositionRecord {
     union {
@@ -37,7 +37,7 @@ typedef struct EvtMantraNodePositionRecord {
     struct EvtMantraNodePositionRecord *neighbors[6];
 } EvtMantraNodePositionRecord; /* 0x20 */
 
-INCLUDE_ASM(const s32, "game/code_0026CD50", func_0026CD50);
+INCLUDE_ASM(const s32, "game/code_0026CD50", evtCreateLoadedRecord);
 
 extern void mnuRebuildMantraCategoryAvailability(void);
 void mnuLoadMantraNodePositionTable(u32 resourceId);
@@ -61,7 +61,7 @@ void mnuLoadMantraNodePositionTable(u32 resourceId) {
     if (mnuMantraNodePositionTable != 0) {
         mnuReleaseMantraNodePositionTable();
     }
-    mnuMantraNodePositionTable = (EvtLoadedRecord *)func_0026CD50(resourceId);
+    mnuMantraNodePositionTable = evtCreateLoadedRecord(resourceId);
 }
 
 /* Release the retained node-position handle and clear the global table address. */
@@ -113,7 +113,7 @@ void mnuLoadMantraPanelPositionTable(u32 resourceId) {
     if (mnuMantraPanelPositionTable != 0) {
         mnuReleaseMantraPanelPositionTable();
     }
-    mnuMantraPanelPositionTable = func_0026CD50(resourceId);
+    mnuMantraPanelPositionTable = (s32)evtCreateLoadedRecord(resourceId);
 }
 
 /* Release the retained panel-position handle and clear the global table address. */
