@@ -1542,7 +1542,7 @@ extern void mdlFlagClear(s32 flag);
 extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *, BtlOperandEntry *);
 extern s32 btlUpdateBrahmanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlUnitWrapB(BtlLinkedCommand *, BtlCamState *, s32);
-extern s32 func_002181E8(void);
+extern s32 btlFindReadyScriptResource(void);
 extern void func_0021A978(BtlUnit *, s32, s32, s32, s32, f32);
 extern void func_0021B828(ActionStateLink *);
 extern s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
@@ -1594,7 +1594,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         if (mode == 0x302) {
             mdlFlagClear(0x804);
             battle->commandRestrictFlags |= 0x84000;
-            BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, func_002181E8);
+            BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, btlFindReadyScriptResource);
             BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlCheckPhaseOnePartyStatusGate);
         }
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlRestoreEnemyUnitWhenModelFlagSet);

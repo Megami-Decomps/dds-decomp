@@ -1554,7 +1554,7 @@ extern char D_00436CC0[];
 
 /* Look up the primary script resource once the event task, script handle and
  * script-ready state 6 are in place; -1 when it cannot be looked up yet. */
-s32 func_002181E8(void) {
+s32 btlFindReadyScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
     if (battle->eventTaskId == -1 || battle->scriptHandle == 0) {
