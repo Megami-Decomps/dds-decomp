@@ -21,6 +21,7 @@
 #include "eff_event.h"
 #include "eff_node_descriptor.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 
 extern u32 evtWindowMotionUnit;
@@ -111,7 +112,6 @@ extern s32 sdfDebugPrintf(const char *fmt, ...);
 
 extern u8 D_00421AC0[];
 
-extern s32 scrReadStringParameter(s32 idx);
 
 extern void effObjSetFlags(void *object, s32 flags);
 
@@ -125,11 +125,11 @@ extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg
 
 extern u8 D_00421A90[];
 
-extern void *effObjCreateFromResolvedResource(s32 arg0, void *arg1, void *arg2);
+extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
 
 extern u8 D_00421B20[];
 
-extern void *effObjCreateKindFromResource(s32 arg0, s32 arg1);
+extern void *effObjCreateKindFromResource(s32 kind, void *resource);
 
 extern u8 D_00421B70[];
 
@@ -1377,13 +1377,13 @@ u32 func_00240280(void) {
 u32 evtOpResolveAndFlagObjectFromName(void) {
     u8 buf1[16];
     u8 buf2[16];
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
     param0 = scrReadStringParameter(0);
-    unit = effObjSpawnLoadedResourceEffect((const char *)(u32)param0, buf1, buf2);
+    unit = effObjSpawnLoadedResourceEffect((const char *)param0, buf1, buf2);
     if (unit == NULL) {
         sdfDebugPrintf(D_00421A90, 1);
         sdfDebugPrintf(D_00421AC0, scrReadStringParameter(0));
@@ -1398,7 +1398,7 @@ u32 evtOpResolveAndFlagObjectFromName(void) {
 u32 evtOpCreateAndFlagObjectFromResourceName(void) {
     f32 buf1[4];
     f32 buf2[4];
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     memset(buf1, 0, 0x10);
@@ -1513,7 +1513,7 @@ u32 evtOpSetModelCutAndScale(void) {
 }
 
 u32 evtCmdCreateEffectObjectFromResource(void) {
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     param0 = scrReadStringParameter(0);
@@ -1561,7 +1561,7 @@ u32 func_00240800(void) {
 }
 
 u32 evtScriptCreateEffectObjectFromResource(void) {
-    s32 param0;
+    char *param0;
     EvtUnit *unit;
 
     param0 = scrReadStringParameter(0);

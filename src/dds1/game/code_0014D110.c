@@ -12,6 +12,7 @@ extern void func_0013DF60(const char *name);
 #include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 
 
 
@@ -102,7 +103,6 @@ extern void evtSetSolarOverlayFullyVisible(void);
 
 extern void fldResetPlayerSceneObjectState(void);
 
-extern char *scrReadStringParameter(s32 idx);
 
 extern s32 D_0032E400[];
 
