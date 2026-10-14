@@ -1520,7 +1520,7 @@ s32 fldCmdGetActorSlotAttribute(void) {
     return 1;
 }
 
-void func_00156C78(void) {
+void fldCmdGetResolvedEventSelectorTarget(void) {
     scrSetIntegerReturnValue(fldResolveEventSelectorTarget(1));
 }
 
