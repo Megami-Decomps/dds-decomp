@@ -8757,7 +8757,7 @@ void fldClearSceneTransition(void) {
     btlSetCommandPanelFadeMode(0, 8);
 }
 
-void func_001CFB48(void) {
+void btlLoadStartupPanelResources(void) {
     btlPanelResourcesLoad();
 }
 

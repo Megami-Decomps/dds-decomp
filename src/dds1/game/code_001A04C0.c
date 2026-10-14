@@ -592,7 +592,7 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
 
 void btlLoadInputIconsAndSystemSounds(void) {
     btlOpenButtonIconResource();
-    func_001C44F8();
+    btlLoadStartupPanelResources();
     sndLoadSysEffLb();
 }
 
