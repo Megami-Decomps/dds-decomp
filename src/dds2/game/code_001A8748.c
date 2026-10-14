@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "itf_debug_panel_work.h"
 #include "itf_color_panel_row.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
@@ -360,14 +361,7 @@ s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f3
     return 0;
 }
 
-typedef struct ItfBlurPanelWork {
-    s16 editing;
-    s16 selection;
-    u32 blink;
-    u8 pad08[8];
-} ItfBlurPanelWork;
-
-extern ItfBlurPanelWork D_00452E80;
+extern ItfDebugPanelWork D_00452E80;
 
 extern const char *D_003B4D38[6];
 
@@ -536,16 +530,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
     return 0;
 }
 
-typedef struct ItfColorPanelWork {
-    s16 editing;
-    s16 selection;
-    u32 blink;
-    u8 pad08[8];
-} ItfColorPanelWork;
-
-typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
-
-extern ItfColorPanelWork D_00452E90;
+extern ItfDebugPanelWork D_00452E90;
 
 extern ItfColorPanelRow D_003B4D50[6];
 
