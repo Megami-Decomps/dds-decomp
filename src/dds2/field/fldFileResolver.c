@@ -5,6 +5,7 @@
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "fld_light_set.h"
+#include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
 #include "mnu_title_stream.h"
@@ -612,11 +613,6 @@ extern s32 D_004360E8;
 
 extern s32 D_00436118, D_0043611C;
 
-/* FILTER.FLD contains 256 mode words and 8-by-9 color grids. */
-typedef struct FldSkyGradientRecord {
-    s32 mode;
-    s32 colors[8][9];
-} FldSkyGradientRecord;
 extern FldSkyGradientRecord *D_00436104;
 
 extern f32 D_00436120, D_00436124;
