@@ -12,6 +12,7 @@
 #include "par_draw.h"
 #include "eff_vertex_draw_request.h"
 #include "par_kind_api.h"
+#include "par_kind_resource.h"
 #include "par_table.h"
 #include "par_draw_block.h"
 #include "par_emitter_desc.h"
@@ -182,12 +183,6 @@ u8 parObjGetMode(ParObj *object) {
         return 0;
     }
 }
-
-typedef struct ParKindResource {
-    s32 type;
-    s32 offset;
-    u8 pad08[8];
-} ParKindResource;
 
 typedef struct BillObj BillObj;
 
