@@ -11737,3 +11737,31 @@ link them as owner-relative aliases without allocating additional objects.
 The encoded-text control's one-based table lookup can use a native address
 four bytes before the table. This is not a field beyond the system's end;
 preserve the existing unchecked table indexing instead of inventing a sentinel.
+
+### Camera pose uses separate position and collision-query vectors
+
+The 264-byte twins `fldUpdateCameraObjectPose` / `func_00133B10` extend the
+state-first publication pattern above. Save previous field XYZ, publish the
+fetched X/Y+10/Z, then reconstruct a separate three-float collision input.
+Likewise, publish pending target X/Y+44/Z before reconstructing the setter's
+XYZ. A scratch-first equivalent has the same extent but twelve different
+words; state-first construction reproduces the native store schedule.
+
+Keep the aligned four-float position snapshot distinct from that mutable
+three-float input. The collision providers `func_001372D0` / `func_00139EC0`
+read and write only XYZ. The first position fetch sets W=1; that lane must
+survive collision processing and the optional full-quadword position setter.
+The second fetch obtains the actual resulting object position, which is
+copied whole to `inner->smoothedPosition`. Clear
+`OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION` (8), not UPDATE_PENDING (1).
+
+This is another body-specific, pinned-compiler qualification of the legacy
+input-address-only VU store, not a general C/asm memory guarantee. In both
+native bodies the initial store at +0x2C dominates scalar loads at
++0x30/+0x44/+0x50; the distinct buffers occupy SP+0..15 and SP+16..27 in a
+48-byte frame. The pending setter never overwrites W. The second store at
++0xD4 feeds the real memory-clobbered quadword copy at +0xE4/+0xE8. The
+inactive path skips all snapshot consumers. Replacing only this body's two
+stores with truthful `VU0_STORE_VF_TO` outputs produces 260 bytes in DDS1,
+with 56 of 65 words different. Requalify the emitted accesses whenever the
+compiler, source lifetime, control flow, or macro contract changes.

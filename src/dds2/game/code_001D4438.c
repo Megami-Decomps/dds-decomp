@@ -26,6 +26,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
+#include "eff_quaternion_nlerp.h"
 #include "kwln_fade.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
@@ -526,7 +527,6 @@ extern s32 btlCheckModelAssetByMode(u8 *, u32, u32);
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 
-extern void effMiscQuaternionNlerpVU(f32);
 
 extern void btlClearRuntimeFlag2000(void);
 
