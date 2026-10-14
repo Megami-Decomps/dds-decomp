@@ -395,7 +395,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
                 btlDispatchStateHandler(task, 0x1C);
                 return;
             }
-            if (func_001FCAC0(task) != 0) {
+            if (btlCheckStatusActionEligibility(task) != 0) {
                 btlDispatchStateHandler(task, 5);
             } else {
                 btlActionSeqStateSelect(task);
