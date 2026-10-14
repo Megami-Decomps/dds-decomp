@@ -48,6 +48,22 @@ typedef struct BtlActorModelBlendArgs {
 } BtlActorModelBlendArgs;
 typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
 
+/* The model-change task allocates this 0x1C-byte record in both titles. */
+typedef struct BtlModelChangeArgs {
+    struct BtlUnit *unit; /* 0x00 */
+    u32 resourceKind;     /* 0x04 */
+    u32 resourceId;       /* 0x08 */
+    s32 delay;            /* 0x0C */
+    u32 duration;         /* 0x10 */
+    s32 elapsed;          /* 0x14 */
+    u8 phase;             /* 0x18 */
+    u8 transitionMode;    /* 0x19 */
+    u8 opaque_1A[2];      /* 0x1A: allocated but not interpreted by these readers. */
+} BtlModelChangeArgs;
+typedef char BtlModelChangeArgsSizeCheck[sizeof(BtlModelChangeArgs) == 0x1C ? 1 : -1];
+typedef char BtlModelChangeArgsElapsedOffsetCheck[(u32)&((BtlModelChangeArgs *)0)->elapsed == 0x14 ? 1 : -1];
+typedef char BtlModelChangeArgsPhaseOffsetCheck[(u32)&((BtlModelChangeArgs *)0)->phase == 0x18 ? 1 : -1];
+
 /* Shared 0x28-byte record used by battle runtime callbacks and task setup. */
 typedef struct BtlRuntimeTaskArgs {
     union {
