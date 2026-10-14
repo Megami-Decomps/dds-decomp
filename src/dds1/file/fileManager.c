@@ -57,7 +57,6 @@ s32 filePollEntryCleanup(struct FileRequest *request) {
 }
 
 extern char *sdfStrDup(const char *text);
-extern s32 fileStartOrResumeQueuedJob(void);
 
 /* Duplicate the request name, narrow kind to a byte and append under the
  * semaphore. Start processing only after an empty-to-nonempty transition.

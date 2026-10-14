@@ -51,7 +51,6 @@ s32 filePollEntryCleanup(struct FileRequest *request) {
 }
 
 extern char *sdfStrDup(const char *text);
-extern s32 fileStartOrResumeQueuedJob(void);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
