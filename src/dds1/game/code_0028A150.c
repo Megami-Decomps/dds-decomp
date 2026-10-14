@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 #include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "mnu_title_stream.h"
@@ -5295,7 +5296,6 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
 #include "eff_anim.h"
 
 extern void billInvokeCallback(struct BillObj *);
-extern void effCopyVector(void *, void *);
 extern void fileReadRecordSecondVector(void *, u128 *);
 extern void fileReadVectorPtr20(void *, u128 *);
 extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);

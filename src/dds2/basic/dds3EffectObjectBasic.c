@@ -89,7 +89,6 @@ void effObjReleaseObjectData(u32 object) {
 #include "dds3_world_primary.h"
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
-extern void effCopyVector(void *source, void *destination);
 extern void effObjForwardOwnerBillEntry(EffectObj *obj);
 extern void effMiscNormalizeVU(void);
 
@@ -291,8 +290,6 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
 
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
-extern void effCopyVector(void *source, void *destination);
-
 EffectObj *effObjCreateKindTwo(bill, vec, extra)
     void *bill;
     void *vec;
