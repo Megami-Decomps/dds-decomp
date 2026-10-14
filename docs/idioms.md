@@ -11731,6 +11731,40 @@ in [battle camera setup](battle-camera-setup-matching.md). Any change to the
 compiler, scratch initialization, control flow, or read placement requires a
 fresh audit; do not transfer this macro choice to other code without one.
 
+### Emitter instance updates keep the initial count and running count distinct
+
+The paired `billAdvanceEmitterInstances` callbacks (DDS1 `002A0FA0`, DDS2
+`002E3008`, 1,512 bytes each) use the complete 0x88-byte kind-5 configuration
+and 0x18-byte instance row. Preserve reverse start/end ages, equality expiry,
+the native RNG read boundaries, and branch-specific speed acquisition for the
+negative-acceleration clamp. The final width multiplier reuses the genuine
+jitter workspace. Capture respawn before the positive-count guard.
+
+The guard consumes the initial item-count snapshot; initialize the separate
+running countdown only after the positive branch's retirement-state selection.
+Initializing the running count before the guard changes its allocation and
+does not reproduce the native stack count. Every iteration, including skipped
+and spawned rows, advances the row, four positions and four colors.
+
+Pinned cc1 scheduling/allocation observation preserves ordinary output. In the
+five-word input, expansion places the two independent, consumed 16-byte width
+and radial objects in the opposite native slots. Their natural declaration
+layout gives width SP+0x30 and radial SP+0x40. The remaining three words come
+from the loop-derived count copy: sched1 ranks the 128.0f setup above that copy
+(priority 2 versus 1); sched2 ties at priority 2 and chooses the earlier LUID.
+Explicit positive-branch countdown initialization recovers the native count
+ownership and setup order. No dummy state, constraints or order search is used.
+
+The four legacy input-address-only VU stores have a finite pinned-emission
+qualification. Color vectors at SP+0/0x10 are initialized before the guarded
+loop; width at SP+0x30 and radial at SP+0x40 are written before all same-row
+VU consumers. The separate direction at SP+0x20 retains initialized Y/W and
+fresh trig X/Z. No private vector has a C scalar readback or callee escape;
+no current-row store or consumer is hoisted across a backedge. External position/expiry stores keep
+their broad memory effect. The SDK's hard-coded scalar scratch register has
+no unrelated live value at its uses. Reaudit source, compiler, control-flow or
+macro changes; this is not a portable memory guarantee.
+
 ### Font system storage and its indexed-text table
 
 The paired font bootstrap units own `FrFontSystem frFontWork` followed by the
