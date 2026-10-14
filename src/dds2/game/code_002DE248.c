@@ -12226,7 +12226,6 @@ u32 effPollNamedFileJob(void) {
 }
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern void sdfVuLoadRotationMatrixY(f32);
 extern char D_0042D030[], D_0042D048[];
 extern s8 sdfPadButtonStates[];
 extern f32 D_003FFCB0[4];

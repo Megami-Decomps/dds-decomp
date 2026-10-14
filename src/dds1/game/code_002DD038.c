@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_quaternion.h"
 #include "rw_matrix.h"
 #include "sdf_chip.h"

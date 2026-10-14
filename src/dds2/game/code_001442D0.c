@@ -2789,8 +2789,6 @@ void fldReleaseTextureSlots(void) {
 extern u32 fldPlayerObject;
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
-extern void sdfVuLoadRotationMatrixY(f32 angle);
-
 void fldUpdatePositionedTextureNodes(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 matrix[4][4] __attribute__((aligned(16)));

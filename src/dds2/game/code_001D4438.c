@@ -242,7 +242,6 @@ extern s32 func_001B2630();
 
 
 extern s64 mnuGetSoundBufferStateLocked(void);
-extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);

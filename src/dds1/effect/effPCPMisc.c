@@ -478,8 +478,6 @@ void effPcpSetStaggerEffectColor(EffPCPStaggered *work, u32 val) {
     work->color = val;
 }
 
-extern void sdfVuLoadRotationMatrixY(f32 angle);
-
 /* Spawns cross arm (i, j): rotates the model by j sixths of a turn about the axis chosen by i. */
 void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     u128 mtx[4];
