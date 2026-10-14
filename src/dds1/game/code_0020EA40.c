@@ -272,7 +272,7 @@ s32 func_0020A860(void);
 s32 func_0020AB08(DatPartyRecord *, s32);
 s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 void btlUpdateBossUnitScaleTransition(void);
-s32 func_0020D668(BtlLinkedCommand *, s32, s32);
+s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *, s32, s32);
 s32 func_0020DE50(BtlLinkedCommand *, BtlCamState *, s32);
 
 extern u32 kwlnDrawControlFlags;
@@ -515,7 +515,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
         BTL_INSTALL_CALLBACK(battle->pad5E4, 0x0, btlIsSceneUnitModeListed);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlOffsetSpecialTargetPositionForAction);
-        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_0020D668);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlOffsetSpecialTargetPositionForActionHook);
         break;
     case 0x13E:
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlClassifyMetatronAction);
