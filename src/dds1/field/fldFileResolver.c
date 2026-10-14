@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
+#include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "fld_light_set.h"
@@ -2480,15 +2481,6 @@ extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
-/* The marker producers supply the complete model draw input. */
-typedef struct FldMarkerPacket {
-    f32 pos[3];
-    s32 pad0C;
-    BillTextureQuad uv;
-    f32 quad[8];
-    s32 color;
-    f32 scale;
-} FldMarkerPacket;
 void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     DmaPacketHeader *header;
