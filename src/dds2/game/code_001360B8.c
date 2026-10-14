@@ -1,5 +1,6 @@
 #include "common.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "pcp_vu0.h"
 #include "fld.h"
 #include "sdf.h"
@@ -205,9 +206,6 @@ void fldInitializeDisplayPointerTable(void) {
 
 extern u32 fldPlayerObject;
 struct EffWorldNode;
-
-
-extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 
 /* Sky lighting also supplies the player's packed colors and VU direction. */
 void fldApplySkyLightSetToPlayerVU(void) {

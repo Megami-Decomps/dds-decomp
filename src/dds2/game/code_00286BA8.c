@@ -90,7 +90,7 @@ extern void mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 prfReqCheckWithFallback(DatPartyRecord *, u16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
-extern void func_00314868(DatPartyRecord *, u16);
+extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
 
 /* Recompute every mantra node's unlock state for a party member and report changes. */
@@ -140,7 +140,7 @@ void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record) {
             }
             if ((node->selector.packed & 0x10F) == 0x102 && ((*src >> 8) & 1)) {
                 *ptyGetProfileRecordPointer(record, node->id) = ptyGetProfileRecordCap(node->id);
-                func_00314868(record, node->id);
+                ptyApplyProfile(record, node->id);
             }
             if (oldFlags != *cur) {
                 scrSetEntryLowFlags(record, node->id, *cur);

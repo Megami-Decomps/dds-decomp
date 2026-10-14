@@ -9,6 +9,7 @@
 #include "eff.h"
 #include "ee_mmi.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 #include "bill_object_api.h"
@@ -65,8 +66,6 @@ typedef struct EffBattleUnitColorCommand {
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
