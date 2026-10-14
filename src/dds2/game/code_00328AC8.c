@@ -42,7 +42,7 @@ s32 sdfWakeThreadOnCompletionEvent(s32 eventId) {
 }
 
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
-extern void func_003667E8(s32);
+extern void EnableIntc(s32);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern s32 WakeupThread(s32);
@@ -52,7 +52,7 @@ void sdfWakeQueuedThreadWaiters(void) {
     SdfThreadNode *threadEntry;
 
     sdfAddHandler(0, SDF_THREAD_COMPLETION_EVENT, sdfWakeThreadOnCompletionEvent, -1, 0);
-    func_003667E8(SDF_THREAD_COMPLETION_EVENT);
+    EnableIntc(SDF_THREAD_COMPLETION_EVENT);
     for (;;) {
         SleepThread();
         sdfThreadWakeTick++;
