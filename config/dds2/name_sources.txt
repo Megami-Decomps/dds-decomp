@@ -6849,6 +6849,7 @@
 0x00348B10	sdfRebuildPoolChain	inferred	confidence=high; matched-C; src/dds2/game/code_003478C0.c:433:func_00348B10; Peer-matched C proposal: M141; source=names_pending_main.tsv:148 [names_qp13.tsv]
 0x00348B78	sdfUpdatePoolFreeListByMode	inferred	Resets pool state or returns an owned node to the pool free list. [names_reviewed11.tsv]
 0x00348BD8	sdfInstallPoolNodeReleaseCallbacks	inferred	Registers release and recycling callbacks on a pool work item. [names_reviewed10.tsv]
+0x0034EC40	sdfInitializeMemoryCardRpcClient	inferred	Initializes the memory-card IOP RPC client: binds service 0x481F40, issues command 0xFE, and rejects unsupported mcserv/mcman module versions. Called after loading the selected IOP module pair. Retail error strings identify libmc, mcserv.irx, and mcman.irx. (2026-10-13)
 0x0034EFE0	sceMcOpen	inferred	Starts an asynchronous open for a path on the selected memory card; callers pass port, slot, path and open flags. DDS1 counterpart is 0x002F61D8.
 0x0034F150	mcQueueCloseRequest	inferred	Queues the paired memory-card close operation; DDS1 twin 0x002F6338.
 0x0034F370	mcQueueReadRequest	inferred	Queues the paired memory-card read operation; DDS1 twin 0x002F6558.
