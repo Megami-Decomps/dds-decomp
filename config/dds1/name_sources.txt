@@ -3744,6 +3744,7 @@
 0x0020DA40	btlSelectRandomDefeatCamera	inferred	Marks defeat candidates and chooses one of two camera key presets by random roll. [names_reviewed5.tsv]
 0x0020DB90	btlRaiseLinkedActionPose	inferred	Copies action pose into blended vectors and raises both coordinates before refreshing poses. [names_reviewed5.tsv]
 0x0020DC38	btlSetLinkedDefeatCameraPresetB	inferred	readability/matching review (QP16)
+0x0020DE50	btlDefeatCameraHookPresetB	inferred	Three-argument defeatCameraHook callback that forwards the linked command, camera state and rotate mode to btlSetLinkedDefeatCameraPresetB; installed for battle action 0x14C. DDS2 has an analogous callback wrapper named btlUnitWrapB.
 0x0020E058	btlSelectSpecialActionCameraPose	inferred	L13
 0x0020E868	btlHandleLinkedUnitDefeatAction	inferred	Checks linked unit faction, chooses pose elevation or flags all defeat candidates and clears action flags. [names_reviewed18.tsv]
 0x0020E910	btlApplyActionDefeatCamera	inferred	Tests action table flags to choose random or fixed defeat camera and raises linked pose when needed. [names_reviewed18.tsv]
