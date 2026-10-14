@@ -7499,6 +7499,7 @@ fldUpdateModeOneCameraPose = 0x0012F578; // type:func
 sdfVuLoadRotationMatrixZ = 0x002DD688; // type:func
 fldResolveEventSelectorTarget = 0x0013CBA8; // type:func
 sdfVuBuildVisibleTriangleList = 0x002DF128; // type:func
+btlSetEligibleActorPanelTransitionState = 0x001ACC20; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -8806,7 +8807,6 @@ func_001AC080 = 0x001AC080; // type:func
 btlUpdateShrinkingMirroredSprites = 0x001AC398; // type:func
 btlDrawMirroredPanelSprites = 0x001AC4A8; // type:func
 func_001ACB08 = 0x001ACB08; // type:func
-func_001ACC20 = 0x001ACC20; // type:func
 btlAccessRecordedLinkageSkillFlag = 0x001ACD30; // type:func
 btlClearPendingLinkageSkillFlags = 0x001ACDF0; // type:func
 btlAccessPendingLinkageSkillFlag = 0x001ACE28; // type:func
