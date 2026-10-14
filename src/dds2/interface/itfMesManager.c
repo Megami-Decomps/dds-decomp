@@ -1147,8 +1147,6 @@ extern s8 itfTestTextInterfaceMask();
 extern s32 itfGetTextLipsUnitId();
 extern s32 itfGetTextLipsMotionId();
 extern void evtLipsExecFunction();
-extern void itfMesCopyGlyphShade();
-extern void itfMesEnableUnflaggedNodeContexts();
 
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
  * the span count. Existing span helpers require a valid created chain. */
