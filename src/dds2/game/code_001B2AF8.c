@@ -2203,7 +2203,7 @@ s32 btlCountSceneSlots(void) {
     return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
-s32 func_001B7718(void) {
+s32 btlSyncEligibleActorPanelHpMp(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 eligibleCount = btlCountEligibleLinkedActors(battle);
     BtlUnit *unit = battle->units;

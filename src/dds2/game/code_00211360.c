@@ -73,7 +73,7 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 extern s8 btlHistoryCounter;
 
 extern s32 btlExecuteAiTableAction();
-extern void func_001B7718(ActionStateLink *);
+extern void btlSyncEligibleActorPanelHpMp(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
@@ -246,7 +246,7 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
     if (mode == 2) {
-        func_001B7718(task);
+        btlSyncEligibleActorPanelHpMp(task);
     }
     sdfReleaseChipBlock(btlActionScratchWork);
 }
