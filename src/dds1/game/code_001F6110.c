@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_command_partner_output.h"
 #include "sdf_trig.h"
@@ -165,7 +166,6 @@ extern u32 btlGetEventEffectValue(void);
 
 extern u32 btlGetEffectValue(void);
 
-extern u32 btlGetEffectActive(void);
 
 extern u32 btlGetSelectedBossEffectId(void);
 

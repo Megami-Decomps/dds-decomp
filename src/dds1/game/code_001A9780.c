@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
@@ -56,7 +57,6 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 
 
-extern s32 btlGetEffectActive(void);
 
 extern void btlSetCommandPanelFadeMode(s8, s32);
 

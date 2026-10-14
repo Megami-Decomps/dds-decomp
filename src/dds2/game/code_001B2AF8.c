@@ -3,6 +3,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "eff_random.h"
@@ -8016,7 +8017,6 @@ void btlDrawCenteredPanelSegments(s32 width) {
     effDrawSpriteWithCornerColors((0x92 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x15, 0x53);
 }
 
-extern s32 btlGetEffectActive();
 
 
 extern void btlUpdateAndDrawTargetActorPanels();
