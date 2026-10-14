@@ -4101,6 +4101,7 @@ evtGetTestTaskUpdateCallback = 0x0022AB80; // type:func
 evtDestroyTestTaskScripts = 0x0022AEB8; // type:func
 evtStartTestTask = 0x0022AED0; // type:func
 evtStopTestTasks = 0x0022AF18; // type:func
+dds3UpdateWorldNodeDiagnosticListTask = 0x0022AF50; // type:func
 evtInsertListNodeByOrderKey = 0x0022B620; // type:func
 evtUnlinkListNode = 0x0022B6C0; // type:func
 evtReorderListNodes = 0x0022B710; // type:func

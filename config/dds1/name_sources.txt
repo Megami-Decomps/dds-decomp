@@ -4194,6 +4194,7 @@
 0x0022AEB8	evtDestroyTestTaskScripts	inferred	R_Names31 B89
 0x0022AED0	evtStartTestTask	inferred	evt event state and dispatch in game/code_0022A248.c
 0x0022AF18	evtStopTestTasks	inferred	evt event state and dispatch in game/code_0022A248.c
+0x0022AF50	dds3UpdateWorldNodeDiagnosticListTask	inferred	confidence=high; Renders the event/world-node diagnostic selection list, updates its selected scene and node indices from controller input, and returns the follow-up callback when a node is activated. Registered as the recovery/list callback from `dds3DrawWorldNodeDiagnosticTask` when its current node is no longer live. [BN SLUS_209.74 HLIL; evtStopTestTasks and diagnostic-task caller flow, 2026-10-14]
 0x0022B620	evtInsertListNodeByOrderKey	inferred	R_Names31 B89
 0x0022B6C0	evtUnlinkListNode	inferred	Unlinks a node from the owner list and decrements its count.
 0x0022B710	evtReorderListNodes	inferred	Walks the event list and relocates nodes whose order keys are out of sequence.
