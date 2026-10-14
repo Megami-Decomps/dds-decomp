@@ -247,8 +247,6 @@ void mnuFxWorldScrollDelta(EvtRuntime *scene, s32 delta, s32 threshold, s32 base
     evtViewerDispatchFlagMode(scene);
 }
 
-extern void evtEventViewerReleaseQueuedNode();
-
 /* Process keys at or beyond threshold, restarting at the head after each call. */
 void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
     EvtRuntimeGroup *track;

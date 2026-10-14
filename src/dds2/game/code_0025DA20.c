@@ -82,8 +82,6 @@ extern s32 ptyCountBulletItem(s32);
 
 extern s8 mnuCampListedItems[34];
 
-extern void evtEventViewerReleaseQueuedNode();
-
 typedef struct CampFlagRow {
     u32 messageSet;  /* 0x00: shop message resource number */
     s16 flag[8];     /* 0x04 */
