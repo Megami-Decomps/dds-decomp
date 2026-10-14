@@ -4,6 +4,7 @@
 #include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
+#include "mnu_camp_font_api.h"
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -3433,7 +3434,6 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
 
 extern f32 D_00324590[];
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
-extern void mnuCampLinkFontGlyph();
 extern void fldSetTitleDrawMode();
 extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();
