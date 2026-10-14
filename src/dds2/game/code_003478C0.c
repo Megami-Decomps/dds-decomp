@@ -31,12 +31,6 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-typedef struct SdfRequest {
-    u8 active;
-    u8 pad01[3];
-    u32 value;
-} SdfRequest;
-
 extern u8 D_0040B620[];
 
 
@@ -283,9 +277,9 @@ s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
     return 0;
 }
 
-void sdfStoreWordAndSetState(SdfRequest *request, u32 value) {
-    request->value = value;
-    request->active = 1;
+void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output) {
+    decoder->output = output;
+    decoder->state = 1;
 }
 
 extern f32 D_0040B5F0[][4];
