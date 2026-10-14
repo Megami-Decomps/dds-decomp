@@ -3,6 +3,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
 #include "sdf_message.h"
 #include "eff_random.h"

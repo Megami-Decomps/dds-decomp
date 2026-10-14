@@ -8,6 +8,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
 #include "sdf_message.h"
 #include "mnu_title_stream.h"
