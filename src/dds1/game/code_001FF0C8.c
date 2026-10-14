@@ -539,7 +539,7 @@ extern s32 D_00360E98[];
 
 extern s32 btlActorEntryIsExpired();
 
-extern s32 btlGetActorEntryCode();
+#include "btl_actor_entry_code_api.h"
 
 /* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own
    entry. Every failure falls out to the single trailing `return 0`. K&R:
@@ -553,23 +553,23 @@ s32 btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex)
 
     if (conditionIndex == 0xB) {
         for (evenIndex = 0; evenIndex < BTL_ENTRY_CODE_SCAN_COUNT; evenIndex += 2) {
-            if (btlActorEntryIsExpired(actorAddress, D_00360E98[evenIndex]) != 0 && btlGetActorEntryCode(actorAddress, D_00360E98[evenIndex]) > 0) {
+            if (btlActorEntryIsExpired(actorAddress, D_00360E98[evenIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[evenIndex]) > 0) {
                 return 1;
             }
         }
     } else if (conditionIndex == 0xC) {
         for (oddIndex = 1; oddIndex < BTL_ENTRY_CODE_SCAN_COUNT; oddIndex += 2) {
-            if (btlActorEntryIsExpired(actorAddress, D_00360E98[oddIndex]) != 0 && btlGetActorEntryCode(actorAddress, D_00360E98[oddIndex]) <= 0) {
+            if (btlActorEntryIsExpired(actorAddress, D_00360E98[oddIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[oddIndex]) <= 0) {
                 return 1;
             }
         }
     } else if (btlActorEntryIsExpired(actorAddress, D_00360E98[conditionIndex]) != 0 || conditionIndex == 0xA || conditionIndex == 0xD) {
         if ((conditionIndex & 1) == 0 || conditionIndex == 0xD) {
-            if (btlGetActorEntryCode(actorAddress, D_00360E98[conditionIndex]) > 0) {
+            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[conditionIndex]) > 0) {
                 return 1;
             }
         } else {
-            if (btlGetActorEntryCode(actorAddress, D_00360E98[conditionIndex]) <= 0) {
+            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[conditionIndex]) <= 0) {
                 return 1;
             }
         }

@@ -138,7 +138,7 @@ extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
-extern s16 btlGetActorEntryCode(BtlUnit *, s32);
+#include "btl_actor_entry_code_api.h"
 
 extern s8 D_00453068[];
 

@@ -2770,6 +2770,8 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
     unit->entrySlots[index].countdown = -1;
 }
 
+#include "btl_actor_entry_code_api.h"
+
 s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
