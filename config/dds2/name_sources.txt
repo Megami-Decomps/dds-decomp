@@ -7654,6 +7654,7 @@
 0x001300A0	fldUpdateCameraViewFromPlayer	inferred	confidence=high; matched-C; Updates the field camera view from the player's orientation; DDS1 twin 0x0012DB70. LiteG field naming batch.
 0x00130FF0	fldSetCameraModelMotionRequest	inferred	confidence=high; matched-C; Stores the requested camera-model motion selector and duration; DDS1 twin 0x0012EA40. LiteG field naming batch.
 0x00131478	fldDispatchCameraModelFrameEvents	inferred	confidence=high; matched-C; Dispatches camera-motion frame crossings to sequence sounds and queued effects; DDS1 twin 0x0012EEA0. LiteG field naming batch.
+0x001321F8	fldApplyPlayerVerticalStep	inferred	Applies a pending signed verticalStepDirection by saving prior XYZ, shifting the player field/object Y by two units in the opposite direction, then clearing camera transition and highlight flags; called by fldUpdateCameraFrame. [behavior and caller review, 2026-10-14]
 0x001322D8	fldUpdateFieldTransition	inferred	confidence=high; matched-C; Advances the field transition while camera-model motion completes; DDS1 twin 0x0012FD00. LiteG field naming batch.
 0x00132408	fldUpdateAreaDamageReaction	inferred	confidence=high; matched-C; Updates the area-damage camera, fade, and haptic reaction; DDS1 twin 0x0012FE30. LiteG field naming batch.
 0x00133DB8	fldClearCameraFacingPointRequest	inferred	confidence=high; matched-C; Clears the camera-facing point request state; DDS1 twin 0x00131580. LiteG field naming batch.
