@@ -2204,7 +2204,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
     switch (controller->stage) {
     case 0:
         D_00435F78 = 0;
-        fldAreaState.unk130 = 1;
+        fldAreaState.sceneBgmSuppressed = 1;
         fldInitializeAreaWork();
         D_00435CBC = 0x80000000;
         evtEnableSolarPhaseAdvance();
@@ -2262,7 +2262,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         break;
     case 1:
         if (fldStepSceneBgmArchive() != 0) {
-            fldAreaState.unk130 = 0;
+            fldAreaState.sceneBgmSuppressed = 0;
             if (fldAreaState.transitionMode == 0) {
                 if (fldGetSceneStatusCode() == 1 || fldGetSceneStatusCode() == 4 || fldGetSceneStatusCode() == 6) {
                     fldStartSceneBgmAlternate();
