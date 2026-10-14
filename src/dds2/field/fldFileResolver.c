@@ -1536,7 +1536,7 @@ extern char D_00436030[];
 extern char D_00436038[];
 extern FieldPlayerSceneWork D_0038A640;
 extern void fldAllocateBackgroundBuffer(void);
-extern void fldResetObjectSlots();
+#include "fld_object_slot_api.h"
 extern void fldReleaseResourceSlots();
 extern void fldCreateResourceScriptObjects(void);
 extern u8 fldHasAreaResourceNameChanged(void);
@@ -1726,7 +1726,6 @@ extern void fldReleaseResourceSlots();
 
 extern void fldReleaseTextureSlots();
 
-extern void fldResetObjectSlots();
 
 extern void fldResetRecordState();
 
