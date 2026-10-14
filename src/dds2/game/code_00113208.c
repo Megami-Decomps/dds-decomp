@@ -6,8 +6,6 @@
 
 
 
-extern void dds3EnsureSlotData(void *object);
-
 extern void effObjInnerVecBackup(ObjectTransform *node);
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
