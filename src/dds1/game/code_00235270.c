@@ -6,6 +6,7 @@
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
+#include "evt_pad.h"
 #include "evt_serialized_child.h"
 #include "sdf_vu_matrix.h"
 
@@ -298,28 +299,6 @@ void evtDrawFloatValueEditorRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtR
 }
 
 extern SdfPoolNode kwlnPositionedTextSurface;
-typedef struct EvtPad {
-    u8 pad00[6];
-    s8 frameEnd; /* +6: jump from group properties to the last key. */
-    s8 frameStart; /* +7: jump from group properties to the first key. */
-    u8 pad08[0x18];
-    s8 syncKey; /* 0x20 */
-    s8 confirm; /* 0x21 */
-    u8 pad22;
-    s8 cancel;  /* 0x23 */
-    s8 decOne;  /* 0x24 */
-    s8 incOne;  /* 0x25 */
-    s8 decTen;  /* 0x26 */
-    s8 incTen;  /* 0x27 */
-    u8 decHun;  /* 0x28 */
-    s8 unk29; /* 0x29: coarse decrease in the property editor */
-    u8 incHun;  /* 0x2A */
-    s8 unk2B; /* 0x2B: coarse increase in the property editor */
-    s8 apply;   /* 0x2C */
-    s8 unk2D;
-    u8 pad2E[0x12]; /* Complete two-bank, two-port, 16-input backing. */
-} EvtPad;
-
 extern EvtPad D_00324510;
 
 extern void evtDrawFloatValueEditorRow();
