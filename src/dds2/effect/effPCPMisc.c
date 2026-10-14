@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_pcp_beam_draw_params.h"
 #include "eff_pcp_fade_timer.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
@@ -4025,19 +4026,6 @@ void effPcpSetScaledThunderScale(EffPCPGrowWork *work, f32 val) {
 }
 
 /* Shared draw-request parameters are cleared before creating a beam. */
-typedef struct EffPCPBeamDrawParams {
-    u16 unk00;
-    u16 unk02;
-    u16 unk04;
-    u8 pad06[2];
-    u32 color;
-    void *format;
-    f32 *points;
-    u8 pad14[0xC];
-    u32 *colors;
-    u8 pad24[8];
-} EffPCPBeamDrawParams;
-
 extern EffPCPBeamDrawParams D_004520B0;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
@@ -4061,7 +4049,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&D_004520B0, 0, sizeof(D_004520B0));
-    D_004520B0.unk04 = 0x4000;
+    D_004520B0.primitive = 0x4000;
     return node;
 }
 
@@ -4104,8 +4092,8 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     D_004520B0.colors = node->colors;
     D_004520B0.points = node->points;
     D_004520B0.color = node->color;
-    D_004520B0.unk02 = D_004520B0.unk00 = 12;
-    D_004520B0.format = D_003B1F70;
+    D_004520B0.vertexCount = D_004520B0.parameterCount = 12;
+    D_004520B0.parameters = D_003B1F70;
     while (count >= 12) {
         count -= 8;
         sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_004520B0));
@@ -4113,8 +4101,8 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
         D_004520B0.colors += 8;
     }
     if (count >= 8) {
-        D_004520B0.unk00 = 6;
-        D_004520B0.unk02 = 8;
+        D_004520B0.parameterCount = 6;
+        D_004520B0.vertexCount = 8;
         sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_004520B0));
     }
     entry = D_003B1FB8[node->drawKind];
