@@ -59,16 +59,6 @@
 /* Every compact timeline precedes one variant-specific SDK parameter payload.
    Respawn copies that payload only, not its live resource/allocation tail. */
 typedef struct {
-    u8 flags;
-    u8 pad01[3];
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    s32 startExtent;
-    s32 endExtent;
-} EffPCPCompactTimelineParams;
-
-typedef struct {
     u32 left, top, right, bottom;
 } EffPCPRectBounds;
 
