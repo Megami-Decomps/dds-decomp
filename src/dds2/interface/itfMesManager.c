@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
@@ -99,8 +100,6 @@ extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 void itfMesReplaceTextSlotData();
-
-extern void itfResetBattleFadeState();
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
@@ -1120,7 +1119,6 @@ void itfMesClearGlobalWords(void) {
 }
 
 extern ItfMesWindowRec D_00452960[];
-extern void btlReleaseEffectResourceHandles();
 extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
 
 /* Tear down installed content/resources, return the pool record and decrement
@@ -1594,8 +1592,6 @@ extern void sndSetSequenceVolumePan();
 extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
 
 extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *);
-
-extern void itfResetBattleFadeState(BtlFade *, s32);
 
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
 
