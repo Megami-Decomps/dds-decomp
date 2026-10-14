@@ -2433,7 +2433,6 @@ extern s32 btlGetUnitModelFrameCount(BtlUnit *);
 extern s32 btlCountTasksForOwner(u64);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, f32 *);
-extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
