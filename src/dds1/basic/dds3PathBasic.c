@@ -3,11 +3,11 @@
 #include "dds3obj.h"
 #include "dds3_path.h"
 #include "pcp_vu0.h"
+#include "eff_quaternion_nlerp.h"
 
 typedef f32 PathPositionKey[3];
 typedef f32 PathQuaternionKey[4];
 
-void effMiscQuaternionNlerpVU(f32 blendAmount);
 void *memset(void *s, s32 c, u32 n);
 
 void effFreeBuffers(struct EffPrimitiveCurve *primitive);
