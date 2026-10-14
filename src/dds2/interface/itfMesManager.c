@@ -2479,11 +2479,11 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D60);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A7C08);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A81F0);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfUpdateSoundSelectorOptions);
 
 extern s32 itfMesStartEntry(s32 window, s32 entry, s32 option);
 extern void itfPanelSetStatus(s32 window, s8 status);
-extern void func_001A81F0(void);
+extern void itfUpdateSoundSelectorOptions(void);
 extern s32 D_00438F2C;
 extern s32 D_00438F30;
 extern s16 D_00438F34;
@@ -2515,7 +2515,7 @@ s32 itfMesScriptStartEntryAndWait(void) {
             return 1;
         }
     } else {
-        func_001A81F0();
+        itfUpdateSoundSelectorOptions();
         if (D_00438F36 == 0) {
             if (D_0037F531[0] < 0) {
                 D_00438F36 = 1;
