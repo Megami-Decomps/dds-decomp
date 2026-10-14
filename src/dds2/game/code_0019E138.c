@@ -89,13 +89,6 @@ typedef struct ItfBitRange {
     u32 end;
 } ItfBitRange;
 
-
-/* Allocation handle precedes the first queue node by four bytes. */
-typedef struct MemRingHeader {
-    SdfMemBlock *allocation;
-    MemNode first;
-} MemRingHeader;
-
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
