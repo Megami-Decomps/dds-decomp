@@ -2,6 +2,7 @@
 #include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "kwln.h"
+#include "mnu_reset_selection_widths_api.h"
 #include "mnu.h"
 #include "mnu_result.h"
 #include "dsp_name.h"
@@ -420,8 +421,6 @@ extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
 extern s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *);
 extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
-/* The legacy call forwards its request; this initializer reads current task data. */
-extern u32 mnuResetSelectionWidthsFromConfig();
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void sndReleaseTrackHandle(u32);
 extern char D_003D6474[];

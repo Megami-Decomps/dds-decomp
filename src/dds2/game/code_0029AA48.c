@@ -3,6 +3,7 @@
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
+#include "mnu_reset_selection_widths_api.h"
 #include "mnu_result.h"
 
 
