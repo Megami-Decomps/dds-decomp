@@ -1060,8 +1060,8 @@ INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EEB78);
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EF030);
 
 extern f32 func_003532B8(f32);
-extern f32 func_00353040(f32);
-extern f32 func_00353140(f32);
+extern f32 cosf(f32);
+extern f32 sinf(f32);
 /* vu0 routine: fit the action camera around one target and its reach. */
 void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out) {
     BtlUnit *user;
@@ -1112,7 +1112,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
     VU0_MOVE_VF(vf11, vf12);
     VU0_DOT_XYZ(dot, vf10, vf11);
     angle = func_003532B8(dot / (firstLength * secondLength));
-    t = span * func_00353040(angle);
+    t = span * cosf(angle);
     distance = t / tanf(halfFov);
     distance += t * tanf(angle);
     VU0_LOAD_VF(vf10, center);
@@ -1123,7 +1123,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF_UNCLOBBERED(vf10, out->direction);
     diameter = extent + extent;
-    t = diameter / func_00353140(1.5707963f - halfFov);
+    t = diameter / sinf(1.5707963f - halfFov);
     minimum = centerDistance + (extent + t) / tanf(halfFov);
     if (distance < minimum) {
         out->distance = minimum;
@@ -1272,9 +1272,9 @@ void btlFlagUserAndTargetDefeat(BtlLinkedCommand *command, BtlLinkedCommand *unu
     }
 }
 
-extern f32 func_00353140(f32);
+extern f32 sinf(f32);
 
-extern f32 func_00353040(f32);
+extern f32 cosf(f32);
 
 #define BTL_APPROACH_DIST_START 0.55f
 
@@ -1327,8 +1327,8 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     VU0_STORE_VF(vf10, out->position);
     angle = ratio * (BTL_APPROACH_PITCH_END - BTL_APPROACH_PITCH_START);
     angle += BTL_APPROACH_PITCH_START;
-    width = length * func_00353140(angle);
-    length *= func_00353040(angle);
+    width = length * sinf(angle);
+    length *= cosf(angle);
     length += (extent + width) / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (action->flags & 0x200) {
@@ -1441,8 +1441,8 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF(vf10, out->position);
         angle = 0.34906585f;
-        extent += length * func_00353140(angle);
-        length *= func_00353040(angle);
+        extent += length * sinf(angle);
+        length *= cosf(angle);
         out->distance = length + extent / tanf(out->fov * 1.3333333f * 0.5f);
         if (!(action->flags & 0x200)) {
             angle = -0.34906585f;
@@ -1465,7 +1465,7 @@ extern BtlUnit *btlFindNearestUnit(u32, BtlUnit *);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
-extern f32 func_00353040(f32);
+extern f32 cosf(f32);
 
 /* Frame the camera for a two-actor command: place the eye so the actor, the farthest
    and the nearest actors fit the view, then store the resulting distance. */
@@ -1509,7 +1509,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
         VU0_DOT_XYZ(offset, vf10, vf11);
         distance = ffabsf(offset);
         tanHalf = tanf(halfFov);
-        distance = (distance + refReach / func_00353040(halfFov)) / tanHalf;
+        distance = (distance + refReach / cosf(halfFov)) / tanHalf;
         VU0_LOAD_VF(vf10, eye);
         VU0_SCALAR_OP_CLOBBER(focus[1] * heightScale, "vaddx.y vf10, vf0, vf2x");
         VU0_LOAD_VF(vf11, mirror);
@@ -1769,7 +1769,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
 extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
-extern f32 func_00353040(f32);
+extern f32 cosf(f32);
 
 extern f32 tanf(f32);
 
@@ -1897,7 +1897,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     }
     btlDefeatCameraStoreVector(pose->direction);
 
-    tangent = func_00353040(27.5f * 0.017453293f);
+    tangent = cosf(27.5f * 0.017453293f);
     length /= tangent;
     fov *= 1.3333333f;
     tangent = tanf(fov * 0.5f);
@@ -2204,8 +2204,8 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     VU0_STORE_VF(vf10, out->position);
     angle = ratio * (BTL_APPROACH_PITCH_END - BTL_APPROACH_PITCH_START);
     angle += BTL_APPROACH_PITCH_START;
-    width = length * func_00353140(angle);
-    length *= func_00353040(angle);
+    width = length * sinf(angle);
+    length *= cosf(angle);
     length += (extent + width) / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (action->flags & 0x200) {

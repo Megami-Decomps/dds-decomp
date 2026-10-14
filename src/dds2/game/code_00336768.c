@@ -19,16 +19,16 @@ void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
     VU0_LOAD_MATRIX(&matrix);
 }
 
-extern f32 func_00353040(f32 angle);
-extern f32 func_00353140(f32 angle);
+extern f32 cosf(f32 angle);
+extern f32 sinf(f32 angle);
 
 /* Rotation loaders build the matrix in a volatile scratch array: it is read
  * only by the lqc2 asm through its address, and retail stores its four
  * elements in program order. */
 void sdfVuLoadSecondaryRotationMatrixX(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     EE_MMI_UNIT_MATRIX((f32 *)m);
     m[1][1] = c;
@@ -40,8 +40,8 @@ void sdfVuLoadSecondaryRotationMatrixX(f32 angle) {
 
 void sdfVuLoadSecondaryRotationMatrixY(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     EE_MMI_UNIT_MATRIX((f32 *)m);
     m[0][0] = c;
@@ -53,8 +53,8 @@ void sdfVuLoadSecondaryRotationMatrixY(f32 angle) {
 
 void sdfVuLoadSecondaryRotationMatrixZ(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     EE_MMI_UNIT_MATRIX((f32 *)m);
     m[0][0] = c;
@@ -79,8 +79,8 @@ extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
 void sdfRotateVuMatrixAboutX(f32 angle)
 {
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     VU0_ROTATE_BASIS_X(c, s);
 }
@@ -88,8 +88,8 @@ void sdfRotateVuMatrixAboutX(f32 angle)
 /* vu0 routine: rotate the vf28/vf30 pair by angle (vf28 = vf30*s - vf28*c, vf30 = vf30*c + vf28*s) */
 void sdfRotateVuMatrixAboutY(f32 angle)
 {
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     VU0_ROTATE_BASIS_Y(c, s);
 }
@@ -97,8 +97,8 @@ void sdfRotateVuMatrixAboutY(f32 angle)
 /* vu0 routine: rotate the vf28/vf29 pair by angle (vf28 = vf29*s + vf28*c, vf29 = vf28*s - vf29*c) */
 void sdfRotateVuMatrixAboutZ(f32 angle)
 {
-    f32 c = func_00353040(angle);
-    f32 s = func_00353140(angle);
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
     VU0_ROTATE_BASIS_Z(c, s);
 }

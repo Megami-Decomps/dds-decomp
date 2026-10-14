@@ -42,7 +42,7 @@ extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
-extern f32 func_00353140(f32);
+extern f32 sinf(f32);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 #include "sdf_vector_transform.h"

@@ -747,6 +747,8 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 al
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
+#include "btl_actor_entry_code_api.h"
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);
@@ -768,8 +770,6 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6810);
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6848);
-
-#include "btl_actor_entry_code_api.h"
 
 s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
@@ -1428,16 +1428,16 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
     sdfAppendDmaTagToList(list, (u32)tag);
 }
 
-extern f32 func_002F9F60(f32);
+extern f32 cosf(f32);
 
-extern f32 func_002FA060(f32);
+extern f32 sinf(f32);
 
 void btlInitVisibilityGrid(void) {
     f32 angle = 3.1415927f / 6.0f; /* 30 degrees */
     s32 x;
     s32 y;
-    btlRuntimeState.cellWidth = func_002F9F60(angle) * 16.0f + 1.25f;
-    btlRuntimeState.cellHeight = (func_002FA060(angle) * 16.0f + 16.0f + 2.5f) * 0.5f;
+    btlRuntimeState.cellWidth = cosf(angle) * 16.0f + 1.25f;
+    btlRuntimeState.cellHeight = (sinf(angle) * 16.0f + 16.0f + 2.5f) * 0.5f;
     btlRuntimeState.gridWidth = 0x200 / (btlRuntimeState.cellWidth * 2) + 1;
     btlRuntimeState.gridHeight = 0x1C0 / (btlRuntimeState.cellHeight * 2) + 1;
     btlRuntimeState.ownedData = sdfAllocSizeClassBlock(btlRuntimeState.gridWidth * btlRuntimeState.gridHeight);
