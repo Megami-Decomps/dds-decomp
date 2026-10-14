@@ -8980,3 +8980,4 @@
 0x0024B678	evtViewerPushMode5CommandHistory	inferred	Records mode-5 event-viewer command history with fixed 0x90 by 0x48 parameters; paired callback at 0x00230A38 has the identical body.
 0x0033DE60	sdfDevFindDiscFileRecordByCdromPath	inferred	Converts a cdrom path to ISO form, retries CD file search until available, opens and measures the file, stores its record size, writes the sector output and optional success flag, and returns the shared file record. Caller flow invokes this before continuing disc resource lookup. [DDS2 Binary Ninja HLIL and caller references; paired DDS1 implementation, 2026-10-14]
 0x001DC2D8	btlScheduleEscapeResultTasks	inferred	Queues command sounds, party effects and escape-result fades before state dispatch; paired DDS1/DDS2 handlers.
+0x00139B98	fldClassifyMovementAgainstZoneFaces	inferred	Checks the lowered current-position probe against flagged zone faces and stores the resulting zone-hit class.

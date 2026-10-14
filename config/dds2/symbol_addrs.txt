@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+fldClassifyMovementAgainstZoneFaces = 0x00139B98; // type:func
 sdfDevFindDiscFileRecordByCdromPath = 0x0033DE60; // type:func
 sdfBuildFourColorTexturedQuadVifPacket = 0x0033BC98; // type:func
 effObjApplyTransformParameters = 0x00112518; // type:func
@@ -9196,7 +9197,6 @@ func_00136EF8 = 0x00136EF8; // type:func
 func_00137888 = 0x00137888; // type:func
 fldBuildCollisionRecordsFromGeometry = 0x00137F10; // type:func
 fldUpdatePositionZoneHits = 0x00139628; // type:func
-func_00139B98 = 0x00139B98; // type:func
 func_0013AA78 = 0x0013AA78; // type:func
 func_0013AA80 = 0x0013AA80; // type:func
 func_0013AA88 = 0x0013AA88; // type:func
