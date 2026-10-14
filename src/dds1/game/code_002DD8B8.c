@@ -25,7 +25,7 @@ extern f32 func_002FA060(f32 angle);
 /* Rotation loaders build the matrix in a volatile scratch array: it is read
  * only by the lqc2 asm through its address, and retail stores its four
  * elements in program order. */
-void func_002DD8E8(f32 angle) {
+void sdfVuLoadSecondaryRotationMatrixX(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);

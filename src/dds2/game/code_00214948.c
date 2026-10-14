@@ -3425,7 +3425,7 @@ s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, 
     return result;
 }
 
-extern void func_00336798(f32);
+extern void sdfVuLoadSecondaryRotationMatrixX(f32);
 
 
 extern void btlClearAllUnitDefeatCandidatesTask(void);
@@ -3449,7 +3449,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
         } else {
             sdfVuLoadRotationMatrixY(0.87266463f);
         }
-        func_00336798(-0.34906585f);
+        sdfVuLoadSecondaryRotationMatrixX(-0.34906585f);
         sdfMultiplyVuMatrixInPlace();
         VU0_STORE_VF(vf10, command->frontCamera.direction);
         VU0_ROTATE_VEC(vf10, vf10);
