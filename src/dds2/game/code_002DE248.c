@@ -1,4 +1,5 @@
 #include "eff_packet_params.h"
+#include "eff_copied_payload.h"
 #include "eff_class_ops.h"
 #include "eff_particle_shared_resource.h"
 #include "eff_camera_create_request.h"
@@ -8960,25 +8961,6 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
         D_00437E94 = 1;
     }
 }
-
-/* Copied payload plus the five effect/target slots released together. */
-typedef struct EffCopiedPayload {
-    u8 *body;            // 0x00
-    s32 size;            // 0x04
-    u32 slotCount;       // 0x08: populated effect/target pairs
-    u32 selectedTargetIndex; // 0x0C: chosen target path slot
-    EffWorldNode *effects[5]; // 0x10
-    Dds3PathCurveWork *targets[5]; // 0x24
-    SdfMemBlock *allocation; // 0x38
-    u8 pad3C[4];
-} EffCopiedPayload;
-
-typedef struct EffCopiedPayloadWork {
-    u8 pad00[0x30];
-    EffCopiedPayload *payload;
-    u8 pad34[4];
-    u32 parameter;
-} EffCopiedPayloadWork;
 
 void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
     Dds3PathCurveWork **objects = work->payload->targets;
