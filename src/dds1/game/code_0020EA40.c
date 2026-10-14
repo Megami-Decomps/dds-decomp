@@ -441,7 +441,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlCheckSelectedBossUnitFlag);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlRefreshRavanaUnitModelsAndPose);
         battle->cameraModeInitializePredicate = btlDispatchEligibleBossEvent;
-        BTL_INSTALL_CALLBACK(battle->pad668, 0x0, btlCheckAttachedMember);
+        BTL_INSTALL_CALLBACK(battle->cameraUpdatePredicate, 0x0, btlCheckAttachedMember);
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlCheckBossOptionAllowed);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapSelectedBossCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlSyncEffectActorToUnit);

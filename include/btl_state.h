@@ -331,7 +331,7 @@ typedef struct BtlState {
     s32 (*unk658)(BtlUnit *);
     u8 pad65C[8];
     s32 (*cameraModeInitializePredicate)(BtlLinkedCommand *); /* 0x664: permits the mode initializer in 001DB048. */
-    u8 pad668[4];
+    s32 (*cameraUpdatePredicate)(BtlLinkedCommand *); /* 0x668: gates the active camera handler. */
     s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
     u8 pad670[0xC];
     s32 (*actionPointsOverride)(u32, u32, s32); /* 0x67C */
