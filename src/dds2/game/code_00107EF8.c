@@ -1456,7 +1456,7 @@ INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D20);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D28);
 
-INCLUDE_SDATA(ConsNode *, "game/code_00107EF8", evtConsoleFontResourceChain);
+INCLUDE_SDATA(const s32, "game/code_00107EF8", evtConsoleFontResourceChain);
 
 void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     char messageBuffer[EVT_DEV_CONSOLE_BUFFER_BYTES];
