@@ -9,6 +9,7 @@
 #include "itf_mes_window.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_reload_viewer_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf.h"
@@ -3169,7 +3170,6 @@ extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
 extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
-extern void evtReloadEventViewer(s32 slot, EvtRuntime *viewer);
 
 /* Apply one of three viewer selection modes to the selected slots. */
 s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EvtRuntime *viewer) {
