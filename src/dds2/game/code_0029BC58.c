@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
 #include "eff_random.h"
@@ -13,7 +14,6 @@ extern char (*D_00435E48)[17];
 extern char (*D_00435E5C)[25];
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 mnuSelectEventFlagCode(void);
-extern void evtStageTestQueueMotion(s32, u32);
 extern void evtStageTestSetPendingEffect(u32);
 
 void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {

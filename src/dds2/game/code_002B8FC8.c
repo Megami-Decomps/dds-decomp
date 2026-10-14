@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -113,12 +114,6 @@ extern void mnuClearEntries(MenuPageWindow *);
 
 extern s32 D_00435E54;
 
-
-extern u32 evtStageTestCountFlags();
-
-extern s32 evtStageTestHasPendingMotion();
-
-extern void evtStageTestQueueMotion();
 
 extern s32 D_00435E48;
 
