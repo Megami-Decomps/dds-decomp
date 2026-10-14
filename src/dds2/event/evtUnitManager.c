@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
 #include "eff_transform.h"

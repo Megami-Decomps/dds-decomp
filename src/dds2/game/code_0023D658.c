@@ -8,6 +8,7 @@
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
 #include "evt_task.h"
@@ -149,10 +150,6 @@ extern char D_00421AF8[];
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 
 extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
-
-extern void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-
-extern void evtConfigureUnitMotionSlot(EvtUnit *, s32, s32, s32, s32, s32);
 
 extern s32 scrGetWindow(void);
 
