@@ -433,7 +433,7 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
 
 extern void effBillSetEntryValue(s32, s32, u32);
 
-extern void func_0015BCE8(ParSystem *system, s32 index);
+extern void parFadeTriangleCellAlpha(ParSystem *system, s32 index);
 
 void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     u128 axis[3];
@@ -455,7 +455,7 @@ void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[2]);
     parUpdateCellVertexTriangle((ParSystem *)particle, index, axis);
-    func_0015BCE8((ParSystem *)particle, index);
+    parFadeTriangleCellAlpha((ParSystem *)particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
@@ -723,7 +723,7 @@ void parFadeAlphaCell(ParSystem *system, s32 index) {
 
 extern f32 D_0034E5A0[4];
 /* Fade one triangle cell's middle and edge colors toward transparent along its history. */
-void func_0015BCE8(ParSystem *system, s32 index) {
+void parFadeTriangleCellAlpha(ParSystem *system, s32 index) {
     u32 count = system->cells[index].vertexCount / 3;
     ParTriangleVertexColors *vertex;
     u32 middleWord;
