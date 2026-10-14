@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_pcp_paired_event_row.h"
+#include "eff_pcp_spawn_range_event_row.h"
 #include "eff_pcp_drift_event_row.h"
 #include "eff_packet_params.h"
 #include "eff_pcp_fade_timer.h"
@@ -5421,15 +5422,9 @@ typedef struct EffPCPSpawnRangeParams {
     f32 startHeightRange;
 } EffPCPSpawnRangeParams;
 
-typedef struct EffPCPSpawnRangeEvent {
-    EffEventWork *event;
-    s32 frame;
-    f32 height, heightStep, angle, angularStep, position, positionStep;
-} EffPCPSpawnRangeEvent;
-
 typedef struct EffPCPSpawnRangeWork {
     EffPCPSpawnRangeParams params;
-    EffPCPSpawnRangeEvent *entries;
+    EffPCPSpawnRangeEventRow *entries;
     SoundMixer *owner;
     u8 unk9C;
     u8 pad9D[3];
@@ -5444,12 +5439,12 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPSpawnRangeEvent *entry;
+    EffPCPSpawnRangeEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPSpawnRangeEvent *)(work + 1);
+    entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 1;
@@ -5495,12 +5490,12 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPSpawnRangeEvent *entry;
+    EffPCPSpawnRangeEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPSpawnRangeEvent *)(work + 1);
+    entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 0;
@@ -5536,7 +5531,7 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
 void effPcpEventBatchRelease(EffPCPSpawnRangeWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
-    EffPCPSpawnRangeEvent *entry = work->entries;
+    EffPCPSpawnRangeEventRow *entry = work->entries;
 
     if (count != 0) {
         do {
@@ -5554,7 +5549,7 @@ void effPcpEventBatchRelease(EffPCPSpawnRangeWork *work) {
 
 /* Randomises spawn slot `index` inside the ranges held by the work. */
 void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
-    EffPCPSpawnRangeEvent *slot;
+    EffPCPSpawnRangeEventRow *slot;
     f32 spread;
     f32 scale;
 
@@ -5585,7 +5580,7 @@ void effPcpUpdateSpawnRangeEvents(EffPCPSpawnRangeWork *work) {
     s32 fadeOut = work->params.fadeOut;
     f32 angularDamping = work->params.angularDamping;
     f32 heightDamping = work->params.heightDamping;
-    EffPCPSpawnRangeEvent *entry = work->entries;
+    EffPCPSpawnRangeEventRow *entry = work->entries;
     u32 color = work->color;
     u32 i;
     s32 frame;
