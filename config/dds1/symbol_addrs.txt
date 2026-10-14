@@ -30,6 +30,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+btlInitializeBattleUnits = 0x001C4A80; // type:func
 fldClassifyMovementAgainstZoneFaces = 0x00136FE8; // type:func
 btlResolveCommandHitResult = 0x001A7548; // type:func
 btlCheckStatusActionEligibility = 0x001FCAC0; // type:func
@@ -8917,7 +8918,6 @@ func_001C4540 = 0x001C4540; // type:func
 func_001C45F0 = 0x001C45F0; // type:func
 func_001C48A8 = 0x001C48A8; // type:func
 func_001C48B0 = 0x001C48B0; // type:func
-func_001C4A80 = 0x001C4A80; // type:func
 btlQueueSceneActorModelEntry = 0x001C50C0; // type:func
 btlChooseAndStartSceneScript = 0x001C5B90; // type:func
 btlFinalizeBattleRewards = 0x001C5F80; // type:func
