@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ui_color.h"
 #include "fr_font.h"
+#include "fr_font_draw_glyph.h"
 #include "fr_font_context.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -113,7 +114,6 @@ extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 sprintf(char *, const char *, ...);
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_00437C38[];
 
