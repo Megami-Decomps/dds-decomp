@@ -170,7 +170,7 @@ typedef struct BtlDebugMenuWork {
 /* Full battle-work layout for state users; unit/task-only users include btl.h. */
 #ifdef VERSION_DDS1
 
-/* Observed fields of the singleton battle work returned by func_001A17F0.
+/* Observed fields of the singleton battle work returned by btlGetRuntime.
  * This is one object, not separate script/event/actor-update contexts. Holes
  * remain opaque. DDS2 has a different layout, not a uniform offset shift. */
 typedef struct BtlState {
@@ -585,7 +585,7 @@ typedef struct BtlState {
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
     u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x6D4: 001B325C overrides the unsigned scene limit. */
     u8 pad6D8[4];
-    s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: func_001B0B30 calls the range override. */
+    s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: btlSelectCommandHitCount calls the range override. */
     BtlUnit *(*selectSoundEffectTarget)(BtlUnit *); /* 0x6E0: DDS2 00201FD8 consumes the returned actor. */
     s32 (*unk6E4)(BtlUnit *);
     s32 (*unk6E8)(BtlUnit *);

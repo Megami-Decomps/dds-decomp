@@ -85,7 +85,7 @@ typedef char DatCommandHpBaseOffsetCheck[((u32)&((DatCommandRecord *)0)->hpBase 
 typedef char DatCommandMpBaseOffsetCheck[((u32)&((DatCommandRecord *)0)->mpBase == 0x20) ? 1 : -1];
 typedef char DatCommandEffectPercentOffsetCheck[((u32)&((DatCommandRecord *)0)->effectPercent == 0x22) ? 1 : -1];
 
-/* Two-byte command selectors; DDS2 func_001ABB10 reads the signed kind at +1. */
+/* Two-byte command selectors; DDS2 btlGetCommandUseError reads the signed kind at +1. */
 typedef struct DatCommandSelector {
     s8 stat;
     s8 kind;

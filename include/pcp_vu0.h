@@ -635,8 +635,8 @@ typedef struct {
  * This is retail's sequence verbatim, including its two slips: the second key
  * is loaded from the first pointer again, and vf3 is fed the raw z word ($3)
  * instead of the second packed vector ($4). The second pointer is therefore
- * fetched (operand %1) but never read. Users: DDS1 func_002DB900, DDS2
- * func_003347B0 (sdfMotion vec3 key blend).
+ * fetched (operand %1) but never read. Users: DDS1 sdfMotionBlendVectorKeys, DDS2
+ * sdfMotionBlendVectorKeys (sdfMotion vec3 key blend).
  */
 #define VU0_LERP_VEC3_KEYS(first, second, t) __asm__ volatile ( \
     ".set noreorder\n\t" \
@@ -705,7 +705,7 @@ typedef struct {
     : : "r" (dst) : "$1", "$2", "$f0", "$f2", "memory")
 
 /* dst.xyz = a.xyz + b.xyz, retaining dst.w.
- * Retail: vadd.xyz dst,a,b; DDS1 func_00180370 and DDS2 func_00187FC8
+ * Retail: vadd.xyz dst,a,b; DDS1 effPcpDrawBeamGeometryNode and DDS2 effPcpDrawBeamGeometryNode
  * add a beam position to the primary matrix's translation row. */
 #define VU0_ADD_XYZ(dst, a, b) __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyz " #dst ", " #a ", " #b "\n\t.set reorder")

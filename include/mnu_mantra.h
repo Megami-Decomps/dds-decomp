@@ -183,7 +183,7 @@ typedef struct MantraMenuWork {
     struct MantraDrawPool *selectionController;
 } MantraMenuWork;
 
-/* func_00286E98 allocates and clears exactly 0xC08 bytes. The task keeps
+/* mnuAllocateMantraResourceWork allocates and clears exactly 0xC08 bytes. The task keeps
  * this whole pointer while menu consumers address its work subobject. */
 typedef struct MnuStatusResource {
     struct SdfMemBlock *allocation;

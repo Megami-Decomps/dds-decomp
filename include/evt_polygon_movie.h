@@ -133,10 +133,10 @@ void evtPolygonMovieSetFlagBits(struct KwlnTask *task, u32 bits);
 void evtPolygonMovieClearFlagBits(struct KwlnTask *task, u32 bits);
 
 #ifdef VERSION_DDS1
-PolyMovieWork *func_00234DA8(s32 eventId, s32 sceneId, s32 mode);
+PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode);
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
 #elif VERSION_DDS2
-PolyMovieWork *func_0024FB48(s32 eventId, s32 sceneId, s32 mode);
+PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode);
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
 #endif
 

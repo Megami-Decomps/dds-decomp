@@ -129,7 +129,7 @@ typedef struct BrsProgressAnimation {
 } BrsProgressAnimation;
 
 #ifdef VERSION_DDS1
-/* Five 0x14-byte rows occupy +0xD50..+0xDB4. func_00264B08 updates the
+/* Five 0x14-byte rows occupy +0xD50..+0xDB4. brsAnimateSkillIconRows updates the
  * first row and then four following rows, including the last count at +0xDA0.
  * Opacity, X and Y are at row +8, +C and +10; unk04 remains unidentified. */
 typedef struct BrsSkillIconRow {
@@ -206,7 +206,7 @@ typedef struct BrsSkillPackageWork {
         u8 padAEA9[7];
         struct EffectSlotSet *teardownResource;
         u32 opacity;
-        s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
+        s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (mnuDrawUnitProgressRows) */
         s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
         u8 padAEBA[0x66];
         BrsFadeAnimation fadeAnimation[5];

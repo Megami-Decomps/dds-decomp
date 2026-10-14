@@ -378,7 +378,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
  *     mfc1 $2,255.0f; qmtc2.ni $2,vf2; vmulx.xyzw vf10,vf10,vf2x;
  *     vftoi0.xyzw vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out
  * $2 is not declared clobbered, like EE_MMI_RGBA_PACK_F128. Users: DDS1
- * func_001082D8 and DDS2 func_001081F8.
+ * kwlnSetDrawColorTarget and DDS2 kwlnSetDrawColorTarget.
  */
 #define EE_MMI_RGBA_PACK_F255(out) __asm__ volatile ( \
     ".set noreorder\n" \
@@ -410,7 +410,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /*
  * Count the leading sign bits (minus one) of a word: plzcw out,in. Retail:
- * DDS1 func_002CFEB8 / DDS2 func_00328D68 (power-of-two size class of an
+ * DDS1 sdfAllocSizeClassBlock / DDS2 sdfAllocSizeClassBlock (power-of-two size class of an
  * allocation: class = 27 - (plzcw(size - 1) & 0xFF) for sizes above 16).
  * C has no equivalent (cc1 has no clz builtin), so the instruction is
  * written directly; `out` may be the same variable as `in`.
@@ -419,7 +419,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 
 /*
  * Bare `sync` (sync.l): orders the preceding stores before the next access.
- * Retail: the DMA channel kick in DDS1 func_002E4228 / DDS2 func_0033D0D8
+ * Retail: the DMA channel kick in DDS1 sdfDevConsKickPacketDma / DDS2 sdfDevConsKickPacketDma
  * (`*chcr |= 0x40; sync;` before sceDmaSendN), as in Sony's libkernel
  * inline usage.
  */
