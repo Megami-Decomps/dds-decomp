@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_solar.h"
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
@@ -483,7 +484,6 @@ extern s32 datGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
 
 extern s32 datRosterDetails;
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 
 extern EvtScriptContext D_0043E5C0;
