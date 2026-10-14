@@ -3,6 +3,7 @@
 #include "par_vertex_colors.h"
 #include "eff_random.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -73,7 +74,6 @@ extern u16 parGetRestartFlag(ParObj *obj);
 
 extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 
 
