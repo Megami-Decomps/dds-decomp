@@ -254,7 +254,7 @@ extern s32 fileOnAllWritten(void);
 extern void fileSetMemoryCardOperationActive(void);
 extern s8 D_0037F510[];
 extern void sndReleaseTrackHandle(s32 command);
-extern s32 fileBeginWait(s32 result);
+extern s32 fileBeginWait(void *callback);
 
 extern void fileReqStartCardDetection(u32 context);
 
@@ -1034,9 +1034,9 @@ s32 fileStoreSlotHeader(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-s32 fileBeginWait(s32 result) {
+s32 fileBeginWait(void *callback) {
     kwlnFadeInStart(0, 0, 0, 15);
-    fileWaitContinuation = (void *)result;
+    fileWaitContinuation = callback;
     fileWaitTicksRemaining = 0x14;
     return (s32)fileUpdateWait;
 }
@@ -1488,7 +1488,7 @@ s32 mcdFinishFileDetection(void) {
             sndReleaseTrackHandle(0x310000);
         }
         if (D_00439020 == (u32)-1) {
-            return fileBeginWait(-1);
+            return fileBeginWait((void *)-1);
         }
         return ((s32 (*)())D_00439020)();
     }
@@ -1518,7 +1518,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             D_00437D3C = 0;
             D_00437CF8 = 0;
             if (D_00439020 == -1) {
-                return fileBeginWait(-1);
+                return fileBeginWait((void *)-1);
             }
             return ((s32 (*)())D_00439020)();
         }
