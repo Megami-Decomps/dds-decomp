@@ -376,7 +376,7 @@ void btlUpdateEventPlayback(void) {
         if (battle->eventData != NULL) {
             effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
         }
-        battle->eventData = func_00168548((SoundMixer *)battle->eventRequest, 1,
+        battle->eventData = effCreateBattleVoiceOwner((SoundMixer *)battle->eventRequest, 1,
                                           battle->eventUnit, 0);
         battle->eventActive = 3;
         if ((battle->commandRestrictFlags & 0x40000) != 0) {
