@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_position.h"
 #include "fr_font_text_slots.h"
 #include "sdf_image_upload.h"
 #include "sdf_chip.h"
@@ -1117,11 +1118,6 @@ s32 frFontMeasureGlyphStripWidth(s32 requestedLine, FrFontGlyph *glyph) {
     }
     return (s32)(width << FR_FONT_POSITION_SHIFT);
 }
-
-typedef struct FrFontPosition {
-    s32 x;
-    s32 y;
-} FrFontPosition;
 
 /* Write each visited position and stop at requestedIndex. Missing indices leave
  * the last visited position; empty input leaves output unchanged. DDS1 still
