@@ -56,7 +56,7 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
     effMiscSeedRandom(state, t * 0x3C + now.sec);
 }
 
-extern s32 func_002F4460(SdfCdClock *);
+extern s32 sceCdReadClock(SdfCdClock *);
 extern s32 sdfBcdStrToInt(s32);
 extern u8 D_003BD480;
 ClockTime D_003BD488 = {0};
@@ -69,7 +69,7 @@ s32 effMiscReadCachedClockTime(ClockTime *now) {
     s32 year;
 
     if (D_003BD480 == 0) {
-        func_002F4460(&clock);
+        sceCdReadClock(&clock);
         result = -1;
         if ((clock.status & 0x103) == 0) {
             D_003BD488.sec = sdfBcdStrToInt(clock.second);
