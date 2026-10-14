@@ -2296,32 +2296,10 @@ void billReleaseEmitterNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-/* Kind 5 copies this complete 0x88-byte serialized record. */
-typedef struct EffEmitterFrameParameters {
-    EffBillFrameHeader frame;
-    u32 firstColor;
-    u32 secondColor;
-    f32 width;
-    f32 widthJitter;
-    f32 radius;
-    f32 radiusJitter;
-    f32 offset;
-    f32 offsetJitter;
-    f32 speed;
-    f32 speedJitter;
-    f32 acceleration;
-    u8 reverse;
-    u8 padding85[3];
-} EffEmitterFrameParameters;
-typedef char EffEmitterFrameParameters_size_check[
-    sizeof(EffEmitterFrameParameters) == sizeof(EffBillEmitterFrameConfig) ? 1 : -1];
-typedef char EffEmitterFrameParameters_reverse_check[
-    (u32)&((EffEmitterFrameParameters *)0)->reverse == 0x84 ? 1 : -1];
-
 extern s32 effSharedRandomState[4];
 
 void billAdvanceEmitterInstances(EffClassWork *work) {
-    EffEmitterFrameParameters *config = (EffEmitterFrameParameters *)work->payload;
+    EffBillEmitterFrameConfig *config = (EffBillEmitterFrameConfig *)work->payload;
     EffBillFrameState *resource;
     EffTrackSet *asset;
     EffEmitterRow *entries;
