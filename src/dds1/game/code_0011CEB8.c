@@ -3,6 +3,7 @@
 #include "itf.h"
 #include "fr_font.h"
 #include "dds3_owned_node.h"
+#include "pty_roster_api.h"
 
 extern s32 scrReadIntParameter(s32);
 /* The native VM commands pass operands to these parameterless party stubs. */
