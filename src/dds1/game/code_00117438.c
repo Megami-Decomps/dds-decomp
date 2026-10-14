@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_scaled_value.h"
 #include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "dds3obj.h"
@@ -21,17 +22,6 @@ extern void scrDestroyWorkTask(void);
 extern void dds3WorkInit(void *header);
 
 extern void *D_003BAAAC;
-
-typedef struct EvtScaledValue {
-    u32 unk0;
-    u32 flags;
-    f32 base;
-    f32 scaled;
-    u8 pad10[8];
-    u8 pad18[4];
-} EvtScaledValue;
-
-
 
 /* Channel mask occupies the low 15 bits; the high status bit survives updates. */
 #define SDF_PACKED_STATUS_BIT 0x8000

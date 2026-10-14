@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_scaled_value.h"
 #include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "dds3obj.h"
@@ -58,17 +59,6 @@ extern SdfChannel D_00385A90[8];
 extern void sdfReloadChannelSegments(SdfChannel *channel);
 extern void sdfDebugPrintf(const char *fmt, ...);
 const char D_00412AB0[16] = "sys:[%s]\n";
-
-
-typedef struct EvtScaledValue {
-    u32 value;
-    u32 flags;
-    f32 base;
-    f32 scaled;
-    u8 pad10[8];
-    u8 pad18[4];
-} EvtScaledValue;
-
 
 
 #define SDF_PACKED_FLAG 0x8000

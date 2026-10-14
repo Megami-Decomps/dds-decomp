@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_scaled_value.h"
 #include "eff_node.h"
 #include "dds3obj.h"
 #include "dds3_object_mode.h"
@@ -9,7 +10,6 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 
-struct EvtScaledValue;
 extern u32 sdfGetFloatCounterDirection(u32 *handle);
 extern f32 evtGetValueScaleFactor(struct EvtScaledValue *handle);
 
