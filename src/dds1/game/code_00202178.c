@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -89,8 +90,6 @@ extern void *memset(void *, s32, u32);
 extern void *btlSelectFlaggedIndexListEntry(BtlIndexList *, u16 *, u16);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 

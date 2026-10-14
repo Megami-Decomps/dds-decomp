@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
@@ -3141,9 +3142,6 @@ extern u8 D_00436F60;
 extern u8 D_00436F62;
 extern u8 D_00436F96;
 extern s32 D_003C3248[5][24];
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
-extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
-
 /* Apply the debug party bank/preset, refreshed HP/MP and inventory flags. */
 void btlApplyDebugEncounterPartySelection(void) {
     u32 i;

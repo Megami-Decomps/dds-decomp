@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_command_partner_output.h"
@@ -1303,11 +1304,11 @@ void btlComputeProfileMaxMp(DatPartyRecord *unit) {
     ptyComputeMaxMp(unit);
 }
 
-s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *stats) {
+u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *stats) {
     return datComputeSkillBoostedMaxHp(stats);
 }
 
-s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
+u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
     return datComputeSkillBoostedMaxMp(stats);
 }
 

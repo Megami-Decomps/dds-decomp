@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
@@ -146,8 +147,6 @@ typedef struct BtlVec3 {
 
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
-
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
 extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);

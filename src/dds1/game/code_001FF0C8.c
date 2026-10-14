@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "btl_ai_slot.h"
 #include "sdf_chip.h"
 #include "btl_task_condition.h"
@@ -361,8 +362,6 @@ INCLUDE_ASM(const s32, "game/code_001FF0C8", func_001FFE30);
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
 extern u16 btlReadUnitStatusMask(DatPartyRecord *);
-
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 /* Compare HP against a signed percentage using the native products and unsigned comparison. */
 s32 btlIsUnitAtOrBelowHealthRate(BtlUnit *unit, s32 healthPercent) {
@@ -861,8 +860,6 @@ s32 btlIsReadyWithoutTurns(void) {
 }
 
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
-
-extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
 /* Compare a unit stat with a percentage of its maximum.
  * The stat's identity is not established by these two accessors. */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "eff_random.h"
 #include "btl_ai_slot.h"
 #include "sdf_chip.h"
@@ -150,11 +151,7 @@ extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *, s32);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
-extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
-
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
-
-extern s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 

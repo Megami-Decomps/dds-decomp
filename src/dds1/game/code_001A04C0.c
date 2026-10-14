@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
