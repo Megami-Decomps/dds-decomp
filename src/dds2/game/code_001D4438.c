@@ -231,7 +231,6 @@ extern void btlClearPartyRecordStatusBits();
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 extern void datAdjustCurrentHp();
 
-extern s32 brsIsPrimaryPanelUpdateReady();
 extern s32 fldLoadAreaResource();
 extern void btlReleaseEventAssets();
 extern void btlReleaseBossData();

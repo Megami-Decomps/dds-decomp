@@ -1,4 +1,5 @@
 #include "common.h"
+#include "brs_primary_panel_update_api.h"
 #include "btl_unit_base_light_task.h"
 #include "btl_special_ability.h"
 #include "kwln_fade.h"
@@ -1059,7 +1060,6 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
     scene->loadStep = 0;
 }
 
-extern s32 brsIsPrimaryPanelUpdateReady();
 
 
 extern s32 fldLoadAreaResource();

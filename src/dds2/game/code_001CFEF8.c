@@ -1,4 +1,5 @@
 #include "common.h"
+#include "brs_primary_panel_update_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -1098,7 +1099,6 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
     scene->loadStep = 0;
 }
 
-extern s32 brsIsPrimaryPanelUpdateReady();
 
 extern s32 fldLoadAreaResource();
 
