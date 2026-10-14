@@ -5097,7 +5097,7 @@ typedef struct EffSurfaceTrailHistory {
     u32 *endColors;           /* 0x44 */
 } EffSurfaceTrailHistory;
 
-void func_002E9E98(EffSurfaceTrailHistory *history, u32 color) {
+void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
     s32 start[4];
     s32 length[4];
     s32 recent;
