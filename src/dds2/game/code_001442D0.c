@@ -2,6 +2,7 @@
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fld_area_work.h"
+#include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
@@ -2954,17 +2955,6 @@ void fldUpdateMenuResourceEffects(void) {
 
 
 
-typedef struct FldLbNode {
-    struct FldLbNode *next; /* 0x00 */
-    u8 unk04[4];
-    s32 value;              /* 0x08 */
-} FldLbNode;
-
-typedef struct FldLbFile {
-    u8 unk00[0x60];
-    FldLbNode *nodes; /* 0x60 */
-} FldLbFile;
-
 /* Retains field/automap TMX blocks and field-model resources. Unlike DDS1,
  * these map blocks come from separate files; fldmix.LB supplies other nodes. */
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413800);
@@ -2978,8 +2968,8 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
 
 void fldParseMixLb(void) {
-    FldLbFile *lb;
-    FldLbNode *node;
+    FldMixLbHeaderView *lb;
+    FldMixLbNodeView *node;
     u32 index;
 
     fldAreaState.fieldTextures[0].allocation = sdfReadNamedResource("/fld/f/bin/d2_fild1.tmx", &fldAreaState.fieldTextures[0].resourceAddress, 0);
@@ -3004,17 +2994,17 @@ void fldParseMixLb(void) {
     D_00438EDC = sdfReadNamedResource("/fld/f/bin/DAMAGE_1.D3P", &D_00438EE0, 0);
     D_00438EE4 = sdfReadNamedResource("/fld/f/bin/DAMAGE_2.D3P", &D_00438EE8, 0);
     D_00438EEC = sdfReadNamedResource("/fld/f/bin/DAMAGE_3.D3P", &D_00438EF0, 0);
-    lb = (FldLbFile *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
+    lb = (FldMixLbHeaderView *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
     fileWaitForRequestReady((struct FileRequest *)lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 5:
-            D_00436338 = node->value;
-            D_0043633C = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->value);
+            D_00436338 = node->resourceHandle;
+            D_0043633C = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->resourceHandle);
             break;
         case 6:
-            D_004362D4 = node->value;
-            D_004362D8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->value);
+            D_004362D4 = node->resourceHandle;
+            D_004362D8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->resourceHandle);
             break;
         case 0:
         case 1:

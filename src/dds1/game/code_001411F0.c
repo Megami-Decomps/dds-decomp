@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
+#include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "common.h"
 #include "kwln_fade.h"
@@ -2609,18 +2610,6 @@ extern s32 D_003BAF44, D_003BAF48, D_003BD7D4, D_003BD7D8, D_003BD7DC, D_003BD7E
 
 extern s32 D_003BD7E4, D_003BD7E8;
 
-typedef struct FldLbNode {
-    struct FldLbNode *next; /* 0x00 */
-    u8 unk04[4];
-    s32 value;              /* 0x08 */
-} FldLbNode;
-
-typedef struct FldLbFile {
-    u8 unk00[0x60];
-    FldLbNode *nodes; /* 0x60 */
-} FldLbFile;
-
-
 /* Retains fldmix.LB node values and their memory blocks in field work.
  * Nodes 10..13 supply the map resources later acquired by the scene camera. */
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0650);
@@ -2634,83 +2623,83 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0698);
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A06B0);
 
 void fldParseMixLb(void) {
-    FldLbFile *lb;
-    FldLbNode *node;
+    FldMixLbHeaderView *lb;
+    FldMixLbNodeView *node;
     u32 index;
     s32 value;
 
     index = 0;
-    lb = (FldLbFile *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
+    lb = (FldMixLbHeaderView *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
     fileWaitForRequestReady((struct FileRequest *)lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7EC = value;
             D_003BD7F0 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 1:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF68 = value;
             D_003BAF6C = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 2:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF50 = value;
             D_003BAF54 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 3:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF74 = value;
             D_003BAF78 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 4:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF5C = value;
             D_003BAF60 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 5:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF84 = value;
             D_003BAF88 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 6:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF44 = value;
             D_003BAF48 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 7:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7D4 = value;
             D_003BD7D8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 8:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7DC = value;
             D_003BD7E0 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 9:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7E4 = value;
             D_003BD7E8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 10:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[0].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[0].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 11:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[1].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[1].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 12:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[2].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[2].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 13:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[3].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[3].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
