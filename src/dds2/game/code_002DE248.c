@@ -1,4 +1,5 @@
 #include "eff_packet_params.h"
+#include "eff_class_ops.h"
 #include "eff_particle_shared_resource.h"
 #include "eff_camera_create_request.h"
 #include "eff_file_job_request.h"
@@ -513,17 +514,6 @@ typedef struct EffActiveInstanceOps {
 typedef char EffActiveInstanceOpsSizeCheck[(sizeof(EffActiveInstanceOps) == 0x1C) ? 1 : -1];
 
 
-
-/* Native class operations: callbacks followed by the copied payload size.
- * Callback arity varies between creation and frame-notification paths. */
-typedef struct EffClassOps {
-    void (*initialize)();      /* 0x00 */
-    void *(*createResource)(); /* 0x04 */
-    void (*destroyResource)(); /* 0x08 */
-    void (*update)();          /* 0x0C */
-    void (*draw)();            /* 0x10 */
-    u32 payloadSize;           /* 0x14 */
-} EffClassOps;
 
 /* Class-resource callbacks operate on the parent class-work owner. */
 typedef struct EffClassResourceOps {
