@@ -54,7 +54,6 @@ extern char D_003C8BA0[];
 extern char D_003C8C60[];
 extern char D_003C8C80[];
 extern EffWorldNode *dds3AppendWorldNode(void);
-extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);
 extern void sdfSetViewFieldOfView(f32);
 extern void dds3DrawSetIndexedWord(u32, s32);

@@ -46,6 +46,8 @@ EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 inde
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 void dds3RemoveWorldObjectNode(EffWorldNode *node);
+/* Attach the resource indexed by resourceId to the object's world table. */
+void dds3AttachResourceHandleToWorldObject(EffWorldNode *object, u32 resourceId);
 /* Store the source object address used by a slot's later path replacement. */
 void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
