@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_script_resource_api.h"
 #include "btl_event_asset_api.h"
 #include "kwln_background_fade_api.h"
 #include "btl_skill_max_api.h"
@@ -223,7 +224,6 @@ extern u32 btlRunSceneActorEventTask(struct BattleScriptTaskData *);
 
 extern void btlStartSkillEventTask(u32);
 
-extern s32 btlReleaseScriptResource(void);
 
 extern BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
 

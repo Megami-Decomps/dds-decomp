@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_script_resource_api.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "fld_scene_ready_api.h"
@@ -147,9 +148,7 @@ extern void btlSpawnBattleWorldAction();
 
 extern void btlCreateRainEffect();
 
-extern s32 btlReleaseScriptResourceA();
 
-extern s32 btlReleaseScriptResource();
 
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 
