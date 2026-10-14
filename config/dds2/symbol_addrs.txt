@@ -11738,6 +11738,7 @@ strtol = 0x0035D8C0; // type:func
 func_0035D8F0 = 0x0035D8F0; // type:func
 func_0035D938 = 0x0035D938; // type:func
 vfscanf = 0x0035D9F0; // type:func
+__svfscanf_r = 0x0035DA68; // type:func
 func_0035E660 = 0x0035E660; // type:func
 func_0035E6A8 = 0x0035E6A8; // type:func
 func_0035E760 = 0x0035E760; // type:func
