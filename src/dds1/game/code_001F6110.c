@@ -379,7 +379,7 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F66D8);
+INCLUDE_ASM(const s32, "game/code_001F6110", btlMeasureMaskedUnitBounds);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6970);
 
