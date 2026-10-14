@@ -1,6 +1,7 @@
 #include "evt_message_window_api.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
+#include "mnu_panel_position_record.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -620,18 +621,6 @@ s32 mnuValidateProfileEntry(MantraFlagResource *slot, DatPartyRecord *partyRecor
     return 0;
 }
 
-/* Updated as a halfword here, and read as signed high-byte flags elsewhere. */
-typedef struct MenuPanelPositionRecord {
-    s16 id;
-    union {
-        u16 stateFlags;
-        struct {
-            u8 state;
-            s8 flags;
-        };
-    };
-} MenuPanelPositionRecord;
-
 /* Preserve the flags while changing the four-bit panel status. */
 static inline s32 mnuPanelFlagsWithStatus(s32 flags, s32 status) {
     return (flags & ~15) | status;
@@ -678,7 +667,6 @@ MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32 selector, u16 
     }
     return NULL;
 }
-extern MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32 selector, u16 id);
 
 
 void mnuActivatePanelSelection(MnuStatusResource *object, s8 selection) {

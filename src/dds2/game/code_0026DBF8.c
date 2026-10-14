@@ -10,6 +10,7 @@
 #include "sdf_resource.h"
 #include "file_request_api.h"
 #include "mnu_mantra_position_api.h"
+#include "mnu_panel_position_record.h"
 #include "mdl_flag_api.h"
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
@@ -3999,17 +4000,6 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
 /* The full status resource is owned by the menu module. */
 typedef struct MnuStatusResource MnuStatusResource;
 
-typedef struct MenuPanelPositionRecord {
-    s16 id;
-    union {
-        u16 stateFlags;
-        struct {
-            u8 state;
-            s8 flags;
-        };
-    };
-} MenuPanelPositionRecord;
-extern MenuPanelPositionRecord *mnuFindPanelPositionRecordByScriptId(s32, u16);
 extern u16 mnuGetPanelValueAt(MnuStatusResource *, s32);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A98);
