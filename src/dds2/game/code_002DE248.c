@@ -15,6 +15,7 @@
 #include "fld_transfer_chunk.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
+#include "eff_span_work.h"
 #include "common.h"
 #include "eff_resource_list_request.h"
 #include "eff_matrix4.h"
@@ -8112,60 +8113,6 @@ void effLoadScalyTexture(void) {
 u32 effGetScalyTextureHandle(void) {
     return effScalyTextureHandle;
 }
-
-typedef struct EffSpanEntry {
-    f32 first;
-    f32 second;
-    u32 referenceAge;
-} EffSpanEntry;
-
-typedef struct EffSpanRecord {
-    EffSpanEntry *entries;
-    EffPointSet *pointSet;
-    EffTrackSet *references;
-    u32 pointCount;
-} EffSpanRecord;
-
-typedef struct EffSpanTable {
-    EffSpanRecord *records;
-    u32 count;
-    u16 total;
-    u8 pad0A[2];
-    struct SdfMemBlock *allocation;
-} EffSpanTable;
-
-typedef struct EffSpanConfig {
-    SdfColorTrack pointColorTrack;
-    SdfAlphaTrack pointAlphaTrack;
-    u32 progress;
-    u8 drawPoints;
-    u8 pad39[3];
-    u32 middleColor;
-    u32 edgeColor;
-    u8 pad44[4];
-    f32 drawScale;
-    u8 pad4C[4];
-    SdfColorTrack referenceColorTrack;
-    SdfAlphaTrack referenceAlphaTrack;
-    s32 referenceLifetime;
-    u8 drawReferences;
-    u8 allowMultipleReferenceStarts;
-    u8 pad8A[2];
-    s32 geometryStartUpdateCount;
-    u32 referenceColorA;
-    u32 referenceColorB;
-    f32 positionScaleA;
-    f32 positionScaleB;
-    f32 firstRand;
-    f32 secondBase;
-    f32 rangeRand;
-    s32 referenceRampDuration;
-    u32 perSpan;
-    f32 rotationAngularVelocity;
-    f32 rotationAngularAcceleration;
-    u8 pointSetFlag;
-} EffSpanConfig;
-
 
 void effSeedParticleSpanParameters(EffModelResource *work) {
     u32 index = 0;
