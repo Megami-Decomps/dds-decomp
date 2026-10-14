@@ -1215,7 +1215,7 @@ extern BattleStartVoiceRow D_003B5140[16];
 extern s8 D_003B52C0[16];
 extern char D_004158F8[], D_00415920[];
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-extern s32 func_001AF4A0(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
 extern char D_00415878[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_00415898[]; /* "btl:start voice off[SERIAL]\n" */
@@ -1289,7 +1289,7 @@ s8 btlChooseStartVoice(void) {
     for (unit = state->units; unit != NULL; unit = unit->nextActor) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
-                damage = func_001AF4A0(unit, chosen, 0, 1, 1, 1, 0);
+                damage = btlCalculateHpActionAmount(unit, chosen, 0, 1, 1, 1, 0);
                 /* Keep the first decisive category; later damage calls still run.
                  * The high threshold wins even when unsigned arithmetic wraps. */
                 if (category == 2) {
