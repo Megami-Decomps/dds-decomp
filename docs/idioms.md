@@ -12406,3 +12406,20 @@ immediates. The generic constructor really accepts sixteen `f32` arguments;
 the initial m2c draft omits half the second call's arguments and is not a
 usable final reconstruction.
 
+
+## Battle debug-camera toggle counterpart
+
+DDS1 `func_001FAE78` (472 bytes) follows the exact DDS2 `func_0020CEF8` donor.
+The two saved position and rotation slots use the existing
+`PCP_COPY_VECTOR_UNCLOBBERED`: each full-vector LQ/SQ pair has pointer operands
+and a `$2` clobber, and the toggle byte loaded before the pair remains live
+until its XOR/store. The extern two-row views describe the toggled producers
+and the two transform consumers; the existing four adjacent 16-byte BSS
+labels and their storage extents remain unchanged.
+
+Keep the natural front-camera then back-camera FOV assignments from the donor.
+In DDS1 sched1 both stores have priority 2, but the back store owns the FOV's
+last source use and has register weight -1 versus the front store's 0. It
+therefore issues first, giving retail's back-FOV then front-FOV store order.
+Writing C in the emitted order reverses those two words. Direct world and
+motion-transform API declarations preserve the real provider contracts.

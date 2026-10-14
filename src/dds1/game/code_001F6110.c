@@ -1,4 +1,6 @@
 #include "btl_command.h"
+#include "btl_motion_transform.h"
+#include "dds3_world_primary.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
@@ -2325,7 +2327,62 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FAE78);
+extern s8 sdfPadButtonStates[32];
+extern f32 D_003BB768;
+extern f32 D_003BB76C;
+extern u8 D_003BB770;
+extern f32 D_003D7540[2][4];
+extern f32 D_003D7560[2][4];
+
+/* Battle debug camera: one button saves the world camera's position and
+ * rotation into one of two slots (alternating), the other toggles a camera
+ * command built from both saved slots with a 40-degree field of view. The
+ * debug-menu descriptors mirror the command's active bit. */
+void func_001FAE78(void) {
+    BtlState *state = btlGetRuntime();
+    EffWorldNode *camera;
+
+    if (!(state->battleFlags & 2)) {
+        return;
+    }
+    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
+    if (camera == NULL) {
+        return;
+    }
+    if (sdfPadButtonStates[0] < 0) {
+        if ((u8)(D_003BB770 & 1) == 0) {
+            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7540[0], camera->inner->position);
+            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7560[0], camera->inner->rotation);
+        } else {
+            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7540[1], camera->inner->position);
+            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7560[1], camera->inner->rotation);
+        }
+        D_003BB770 ^= 1;
+    } else if (sdfPadButtonStates[1] < 0) {
+        if (state->cameraCommand.flags & 1) {
+            state->cameraCommand.flags &= ~1;
+        } else {
+            f32 fov;
+
+            btlInitMotionTransformFromVectors(&state->cameraCommand.frontCamera, D_003D7540[0], D_003D7560[0]);
+            btlInitMotionTransformFromVectors(&state->cameraCommand.backCamera, D_003D7540[1], D_003D7560[1]);
+            fov = D_003BB768 * 0.0174532925f;
+            state->cameraCommand.flags = 0x41;
+            state->cameraCommand.motionParameter = D_003BB76C;
+            state->cameraCommand.state = 0;
+            state->cameraCommand.frontCamera.fov = fov;
+            state->cameraCommand.backCamera.fov = fov;
+        }
+    }
+    if (state->cameraCommand.flags & 1) {
+        D_00360348[4] |= 0x80;
+        D_0035FFE0[4] |= 0x80;
+    } else {
+        D_00360348[4] &= ~0x80;
+        D_0035FFE0[4] &= ~0x80;
+    }
+}
+
 
 /* Clear bit 0x80 in both battle debug-menu descriptors. */
 void btlResetBattleDebugMenuFlags(void) {
