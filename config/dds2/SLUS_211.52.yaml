@@ -323,6 +323,8 @@ segments:
       # .ctors, .dtors, .reginfo
       - [0x280330, databin, ctors_dtors_reginfo]
       - [0x280380, data, data]
+      - [0x30C810, .data, game/code_003396D0]
+      - [0x30C990, data, data_after_console_glyph_uv]
       - [0x311C68, databin, eh_frame]
       - [0x311C6C, databin, vudata]
       - [0x311F80, rodata, rodata_00410F80]
