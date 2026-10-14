@@ -133,7 +133,7 @@ extern u32 fldSelectedActorEntryIndex;
 
 typedef struct {
     s16 unk0;
-    s16 unk2;
+    s16 requiredModelFlag; /* Shared table halfword tested by mdlFlagTest. */
 } FldIndexPair;
 
 extern FldIndexPair D_0038A3B8[];

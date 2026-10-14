@@ -513,8 +513,8 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
 
 
 typedef struct MenuSlotKind {
-    s16 kind;
-    s16 unk2;
+    s16 kind;                /* 0x0 */
+    s16 requiredModelFlag;   /* 0x2; zero means no flag gate */
 } MenuSlotKind;
 
 extern MenuSlotKind D_0038A3B8[];
@@ -563,8 +563,8 @@ void mnuBuildEligibleSlotList(MenuSlotState *host) {
         if (host->reduced == 0 && host->slot == i) {
             continue;
         }
-        if (mdlFlagTest(D_0038A3B8[i].unk2) == 0 &&
-            D_0038A3B8[i].unk2 != 0) {
+        if (mdlFlagTest(D_0038A3B8[i].requiredModelFlag) == 0 &&
+            D_0038A3B8[i].requiredModelFlag != 0) {
             continue;
         }
         if (mnuSlotKindsInSameGroup(i, kind) == 0) {
