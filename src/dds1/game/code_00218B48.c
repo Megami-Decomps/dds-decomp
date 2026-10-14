@@ -7,6 +7,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "mdl_light_editor_state.h"
 #include "kwln_task_add_child.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -2763,17 +2764,6 @@ void mdlCleanupViewerTasksAndResources(void) {
         }
     }
 }
-
-/* Light-editor state shared with the direction editor. */
-typedef struct MdlLightEditorState {
-    f32 (**lights)[4];
-    f32 *ambient;
-    MdlPadState *pad;
-    u8 editing;
-    u8 blinkTick;
-    s16 selection;
-    SdfListHead *packetList;
-} MdlLightEditorState;
 
 typedef struct MdlOptionLabel {
     u16 x;
