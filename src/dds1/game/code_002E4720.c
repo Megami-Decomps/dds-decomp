@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf_console_packet.h"
 #include "sif_rpc_client_prefix.h"
 #include "sdf.h"
 #include "sdf_timer.h"
@@ -232,36 +233,6 @@ extern u32 D_00398660[96];
 
 /* Cached texture keeps the provider's opaque pointer/address boundary. */
 extern void *D_003BDA34;
-
-/* A DMA tag followed by the console's complete GS setup and glyph GIF tag.
- * The separately emitted glyph stream follows this 0x60-byte fixed header. */
-typedef struct SdfConsolePacketHeader {
-    u16 quadwordCount;
-    u8 reserved02;
-    u8 tagKind;
-    u32 nextAddress;
-    u32 vifNop;
-    u32 vifDirect;
-    u64 setupTag;
-    u64 setupRegisters;
-    u64 textureClamp;
-    u64 textureClampRegister;
-    u64 textureFilter;
-    u64 textureFilterRegister;
-    u64 textureState;
-    u64 textureStateRegister;
-    u64 glyphTag;
-    u64 glyphRegisters;
-} SdfConsolePacketHeader;
-
-/* One sprite in GIF register-list order; two such records fill five qwords. */
-typedef struct SdfConsoleGlyph {
-    u64 color;
-    u64 firstUv;
-    u64 firstPosition;
-    u64 secondUv;
-    u64 secondPosition;
-} SdfConsoleGlyph;
 
 void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void *arguments) {
     char text[0x200];
