@@ -36,6 +36,7 @@
 #include "eff_pcp_group_set.h"
 #include "eff_pcp_map_events.h"
 #include "eff_pcp_block_set.h"
+#include "eff_pcp_rotate_work.h"
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
 #include "eff_pcp_cross.h"
@@ -76,18 +77,6 @@ extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
 extern void *effParamTableGetBlock(void *data, s32 index);
-
-/* Three frame thresholds and their block-set inputs form the copied prefix. */
-typedef struct EffPCPRotateParams {
-    s32 startFrame[3];
-    EffPCPBlockSetParams group[3];
-} EffPCPRotateParams;
-
-typedef struct EffPCPRotateWork {
-    EffPCPRotateParams params;
-    EffPCPBlockSetWork *blockSets[3];
-    s32 frame;
-} EffPCPRotateWork;
 
 extern s8 D_0043643C;
 
