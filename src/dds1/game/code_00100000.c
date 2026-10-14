@@ -57,7 +57,7 @@ extern char D_003BA7E0[]; /* "19\n" */
 extern char D_003BA7E8[]; /* "20\n" */
 extern char D_003BA7F0[]; /* "21\n" */
 extern char D_003BA7F8[]; /* "22\n" */
-extern s32 func_003003F0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 extern s32 kwlnPrepareFrameDrawPackets(KwlnTask *task);
 extern s32 kwlnBuildFrameScenePackets(KwlnTask *task);
 extern s32 kwlnRenderFrame(KwlnTask *task);
@@ -69,61 +69,61 @@ extern s32 kwlnUpdateDevelopmentDumpTask(KwlnTask *task);
 
 /* Kernel startup: create the frame/draw/font tasks and initialize every subsystem, logging each step. */
 s32 kwlnInitializeRuntime(void) {
-    func_003003F0(D_003BA738);
+    sdfDebugPrintf(D_003BA738);
     evtResetDisplayProjectionAndVectorState();
-    func_003003F0(D_003BA740);
+    sdfDebugPrintf(D_003BA740);
     kwlnPadResetInputAndMotorState();
-    func_003003F0(D_003BA748);
+    sdfDebugPrintf(D_003BA748);
     kwlnTaskCreate(D_003BA750, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
-    func_003003F0(D_003BA758);
+    sdfDebugPrintf(D_003BA758);
     kwlnTaskCreate(D_003BA760, 0x2710, 0, 0, kwlnBuildFrameScenePackets, 0, 0);
-    func_003003F0(D_003BA768);
+    sdfDebugPrintf(D_003BA768);
     kwlnTaskCreate("RequestDraw", 0x4E20, 0, 0, kwlnRenderFrame, 0, 0);
-    func_003003F0(D_003BA770);
+    sdfDebugPrintf(D_003BA770);
     kwlnTaskCreate("basic_main", 0x3FC, 1, 1, dds3RunWorldPrimaryCallbacks, 0, 0);
-    func_003003F0(D_003BA778);
+    sdfDebugPrintf(D_003BA778);
     kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, dds3RunWorldSecondaryCallbacks, 0, 0);
-    func_003003F0(D_003BA780);
+    sdfDebugPrintf(D_003BA780);
     frFontInitializeSystem(0x100, 0x200);
     kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontReleaseOppositeDrawBufferGlyphs, frFontReleaseAll, 0);
-    func_003003F0(D_003BA788);
+    sdfDebugPrintf(D_003BA788);
     fileManInit();
-    func_003003F0(D_003BA790);
+    sdfDebugPrintf(D_003BA790);
     itfMesInit();
     mnuInitializeTitleAudioAndEffects();
-    func_003003F0(D_003BA798);
+    sdfDebugPrintf(D_003BA798);
     sdfDevConsInit();
     btlInitializeCommandSemaphoreSlots();
-    func_003003F0(D_003BA7A0);
+    sdfDebugPrintf(D_003BA7A0);
     fldCreateFieldEffectTask();
-    func_003003F0(D_003BA7A8);
+    sdfDebugPrintf(D_003BA7A8);
     fldInitializeDisplayAndTables();
-    func_003003F0(D_003BA7B0);
+    sdfDebugPrintf(D_003BA7B0);
     sdfResetChannels();
     btlLoadInputIconsAndSystemSounds();
-    func_003003F0(D_003BA7B8);
+    sdfDebugPrintf(D_003BA7B8);
     mnuLoadStaffImageHandles();
-    func_003003F0(D_003BA7C0);
+    sdfDebugPrintf(D_003BA7C0);
     mnuCreateMovieManagerTask();
-    func_003003F0(D_003BA7C8);
+    sdfDebugPrintf(D_003BA7C8);
     sdfCreateRuntimeTask();
-    func_003003F0(D_003BA7D0);
+    sdfDebugPrintf(D_003BA7D0);
     D_003BA708 = 0;
     D_003BA700 = 0;
     dds3CreateActiveWorldWithValueCapacity(0x2710);
-    func_003003F0(D_003BA7D8);
+    sdfDebugPrintf(D_003BA7D8);
     kwlnInitMagicState();
     kwlnDebugTaskCreate();
-    func_003003F0(D_003BA7E0);
+    sdfDebugPrintf(D_003BA7E0);
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
     kwlnRuntimeStartupHook();
-    func_003003F0(D_003BA7E8);
+    sdfDebugPrintf(D_003BA7E8);
     kwlnTaskCreate("DbgDevDump", 0x5215, 0, 0, kwlnUpdateDevelopmentDumpTask, 0, 0);
-    func_003003F0(D_003BA7F0);
+    sdfDebugPrintf(D_003BA7F0);
     kwlnFadeClear();
     evtStartSolarOverlay();
     fldCreateEncounterTask();
-    func_003003F0(D_003BA7F8);
+    sdfDebugPrintf(D_003BA7F8);
     return dds3AdminSubmitModeRequest(1, 0, 0, 0);
 }
 

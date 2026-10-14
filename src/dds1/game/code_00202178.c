@@ -4289,17 +4289,17 @@ void btlChooseRandomPresetCameraKeys(unit)
     kind = effMiscRandMod(0, 3);
     switch (kind) {
     case 0:
-        func_003003F0(D_003A5FF0);
+        sdfDebugPrintf(D_003A5FF0);
         btlSetEffectCameraKeys(unit, -34.8f, -203.4f, -1877.1f, -0.042f, 0.006f, -0.012f, 0.99f, 59.4f, -184.8f, -2072.9f,
                       -0.041f, 0.024f, -0.013f, 0.99f, 40.0f, 20.0f);
         break;
     case 1:
-        func_003003F0(D_003A6018);
+        sdfDebugPrintf(D_003A6018);
         btlSetEffectCameraKeys(unit, -391.6f, -567.8f, -2206.8f, 0.032f, -0.062f, -0.014f, 0.989f, -407.1f, -447.8f, -2343.8f,
                       -0.003f, -0.062f, -0.012f, 0.989f, 40.0f, 20.0f);
         break;
     case 2:
-        func_003003F0("A-E:2++++++++++++++++++++++++++\n");
+        sdfDebugPrintf("A-E:2++++++++++++++++++++++++++\n");
         btlSetEffectCameraKeys(unit, 479.7f, -240.2f, -2018.3f, -0.023f, 0.105f, -0.016f, 0.985f, 552.2f, -250.7f, -2300.2f,
                       -0.023f, 0.105f, -0.016f, 0.985f, 40.0f, 20.0f);
         break;
@@ -4543,22 +4543,22 @@ s32 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
             shot = effMiscRandMod(0, 4);
             switch (shot) {
             case 0:
-                func_003003F0("DERUTA:0++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("DERUTA:0++++++++++++++++++++++++++\n");
                 btlInitMotionTransformFromComponents(&command->frontCamera, 3.96f, -295.73f, -2203.02f,
                     -0.03f, 0.0f, 0.0f, 1.0f, 40.0f);
                 break;
             case 1:
-                func_003003F0("DERUTA:1++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("DERUTA:1++++++++++++++++++++++++++\n");
                 btlInitMotionTransformFromComponents(&command->frontCamera, 3.96f, -851.77f, -2549.8f,
                     0.05f, 0.0f, 0.0f, 1.0f, 40.0f);
                 break;
             case 2:
-                func_003003F0("DERUTA:2++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("DERUTA:2++++++++++++++++++++++++++\n");
                 btlInitMotionTransformFromComponents(&command->frontCamera, 790.81f, -117.84f, -2170.96f,
                     -0.07f, 0.15f, -0.02f, 0.98f, 40.0f);
                 break;
             case 3:
-                func_003003F0("DERUTA:3++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("DERUTA:3++++++++++++++++++++++++++\n");
                 btlInitMotionTransformFromComponents(&command->frontCamera, -764.19f, -1539.55f, -2171.55f,
                     0.17f, -0.12f, -0.03f, 0.97f, 40.0f);
                 break;
@@ -4573,27 +4573,27 @@ s32 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
             shot = effMiscRandMod(0, 5);
             switch (shot) {
             case 0:
-                func_003003F0("I-E:0++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("I-E:0++++++++++++++++++++++++++\n");
                 btlSetEffectCameraKeys(command, 1307.2f, -1435.2f, -946.7f, 0.06f, 0.288f, 0.005f, 0.947f, 271.0f,
                                        -238.1f, -1158.7f, -0.108f, 0.068f, -0.021f, 0.983f, 40.0f, 30.0f);
                 return 1;
             case 1:
-                func_003003F0("I-E:1++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("I-E:1++++++++++++++++++++++++++\n");
                 btlSetEffectCameraKeys(command, -719.0f, -115.0f, -1337.4f, -0.147f, -0.166f, 0.015f, 0.966f, -506.0f,
                                        -1117.8f, -1679.8f, 0.064f, -0.099f, -0.016f, 0.984f, 40.0f, 30.0f);
                 return 1;
             case 2:
-                func_003003F0("I-E:2++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("I-E:2++++++++++++++++++++++++++\n");
                 btlSetEffectCameraKeys(command, -369.7f, -44.1f, -939.2f, -0.188f, -0.181f, 0.024f, 0.956f, 140.2f,
                                        -0.4f, -1049.2f, -0.187f, 0.089f, -0.029f, 0.969f, 40.0f, 25.0f);
                 return 1;
             case 3:
-                func_003003F0("I-E:3++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("I-E:3++++++++++++++++++++++++++\n");
                 btlSetEffectCameraKeys(command, -26.9f, -28.0f, -1957.9f, -0.086f, 0.015f, -0.011f, 0.987f, -17.6f,
                                        -1157.3f, -1562.0f, 0.066f, 0.013f, -0.009f, 0.989f, 40.0f, 30.0f);
                 return 1;
             case 4:
-                func_003003F0("I-E:4++++++++++++++++++++++++++\n");
+                sdfDebugPrintf("I-E:4++++++++++++++++++++++++++\n");
                 btlSetEffectCameraKeys(command, 424.0f, -219.1f, -987.8f, -0.163f, 0.165f, -0.041f, 0.963f, -339.8f,
                                        -21.7f, -1033.8f, -0.168f, -0.125f, 0.008f, 0.969f, 40.0f, 25.0f);
                 return 1;
@@ -4655,17 +4655,17 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
                 shot = effMiscRandMod(0, 3);
                 switch (shot) {
                 case 0:
-                    func_003003F0(D_003A6338);
+                    sdfDebugPrintf(D_003A6338);
                     btlSetEffectCameraKeys(command, -2.4f, -166.1f, -1323.8f, -0.092f, 0.024f, -0.017f, 0.986f,
                         19.0f, -158.9f, -1948.8f, -0.075f, 0.013f, -0.016f, 0.988f, 40.0f, 20.0f);
                     return 1;
                 case 1:
-                    func_003003F0(D_003A6358);
+                    sdfDebugPrintf(D_003A6358);
                     btlSetEffectCameraKeys(command, 82.1f, -569.4f, -1408.9f, 0.079f, 0.029f, -0.011f, 0.987f,
                         1016.8f, -1654.4f, -1595.3f, 0.228f, 0.219f, 0.038f, 0.939f, 40.0f, 25.0f);
                     return 1;
                 case 2:
-                    func_003003F0("G:2++++++++++++++++++++++++++\n");
+                    sdfDebugPrintf("G:2++++++++++++++++++++++++++\n");
                     btlSetEffectCameraKeys(command, 51.9f, -580.2f, -1718.4f, 0.078f, 0.021f, -0.017f, 0.987f,
                         -1026.1f, -35.1f, -1465.1f, -0.119f, -0.228f, 0.008f, 0.957f, 40.0f, 25.0f);
                     return 1;
@@ -4685,29 +4685,29 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
                 shot = effMiscRandMod(0, 4);
                 switch (shot) {
                 case 0:
-                    func_003003F0("TP1:0++++++++++++++++++++++++++\n");
+                    sdfDebugPrintf("TP1:0++++++++++++++++++++++++++\n");
                     btlSetEffectCameraKeys(command, 891.3f, -1997.4f, -1332.2f, 0.288f, 0.215f, 0.053f, 0.922f,
                         -618.2f, -1542.5f, -1768.2f, 0.195f, -0.121f, -0.039f, 0.963f, 40.0f, 30.0f);
                     return 1;
                 case 1:
-                    func_003003F0("TP1:1++++++++++++++++++++++++++\n");
+                    sdfDebugPrintf("TP1:1++++++++++++++++++++++++++\n");
                     btlSetEffectCameraKeys(command, -415.1f, -1905.1f, -1588.0f, 0.271f, -0.082f, -0.036f, 0.949f,
                         522.0f, -1223.8f, -1859.6f, 0.138f, 0.107f, 0.004f, 0.975f, 40.0f, 30.0f);
                     return 1;
                 case 2:
-                    func_003003F0("TP1:2++++++++++++++++++++++++++\n");
+                    sdfDebugPrintf("TP1:2++++++++++++++++++++++++++\n");
                     btlSetEffectCameraKeys(command, 1233.9f, -30.9f, -1556.3f, -0.118f, 0.274f, -0.044f, 0.944f,
                         204.4f, -65.2f, -2079.3f, -0.072f, 0.051f, -0.013f, 0.987f, 40.0f, 30.0f);
                     return 1;
                 case 3:
-                    func_003003F0("TP1:3++++++++++++++++++++++++++\n");
+                    sdfDebugPrintf("TP1:3++++++++++++++++++++++++++\n");
                     btlSetEffectCameraKeys(command, -1185.4f, -122.8f, -1094.8f, -0.114f, -0.293f, 0.021f, 0.940f,
                         -705.7f, -449.3f, -1733.9f, -0.018f, -0.130f, -0.011f, 0.982f, 40.0f, 30.0f);
                     return 1;
                 }
                 return 0;
             }
-            func_003003F0("ITP-P:++++++++++++++++++++++++++\n");
+            sdfDebugPrintf("ITP-P:++++++++++++++++++++++++++\n");
             btlFlagAllUnitDefeatCandidatesTask();
             btlSetLinkedDefeatCameraPresetA(command, &command->camera, 0);
             return 1;

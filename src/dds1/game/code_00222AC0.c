@@ -84,7 +84,7 @@ extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern s32 func_003003F0();
+extern s32 sdfDebugPrintf();
 extern u8 D_003AC480[];
 
 extern void *memset(void *dst, s32 c, u32 n);
@@ -555,36 +555,36 @@ u32 evtOpModelLodChg(void) {
     s32 max;
 
     lod = scrReadIntParameter(1);
-    func_003003F0("call: MODEL_LOD_CHG(int,int)\n");
+    sdfDebugPrintf("call: MODEL_LOD_CHG(int,int)\n");
     world = dds3GetWorldObject();
     unit = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 5);
     if (unit == NULL) {
-        func_003003F0("warning!! MODEL_LOD_CHG(int,int) unit pointer null\n");
+        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) unit pointer null\n");
         return 1;
     }
     data = unit->data;
     if (data->modelHolder == NULL) {
-        func_003003F0("warning!! MODEL_LOD_CHG(int,int) workbase pointer null\n");
+        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) workbase pointer null\n");
         return 1;
     }
     modelHolder = data->modelHolder;
     if (modelHolder->resourceHandle == 0) {
-        func_003003F0("warning!! MODEL_LOD_CHG(int,int) mh pointer null\n");
+        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) mh pointer null\n");
         return 1;
     }
     context = (MdlCtx *)modelHolder->resourceHandle;
     model = context->inner;
     if (model == NULL) {
-        func_003003F0("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
+        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
         return 1;
     }
     max = (s32)sdfGetLodChunkValue(model);
     if (max < lod) {
-        func_003003F0("warning!! MODEL_LOD_CHG(int,int) lodno over!! max=%d setval=%d\n", max, lod);
+        sdfDebugPrintf("warning!! MODEL_LOD_CHG(int,int) lodno over!! max=%d setval=%d\n", max, lod);
         return 1;
     }
     model->lodIndex = lod;
-    func_003003F0("success: MODEL_LOD_CHG(int,int)\n");
+    sdfDebugPrintf("success: MODEL_LOD_CHG(int,int)\n");
     return 1;
 }
 
@@ -666,7 +666,7 @@ u32 evtOpDeprecatedModelMotion(void) {
         return 1;
     }
     evtPrepareUnitMotionState(unit, scrReadIntParameter(1), scrReadIntParameter(2), scrReadIntParameter(3), 0);
-    func_003003F0(D_003AC2A0);
+    sdfDebugPrintf(D_003AC2A0);
     return 1;
 }
 
@@ -727,16 +727,16 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         }
     }
     if (unit == NULL) {
-        func_003003F0("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
+        sdfDebugPrintf("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
     if (motion >= mdlGetNodeRefHalf(model, 2)) {
-        func_003003F0("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
+        sdfDebugPrintf("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
     evtConfigureUnitMotionSlot(unit, 2, motion, 0, 5, 1);
     D_003BBDB0 = id;
-    func_003003F0("<lips %d %d> \n", id, motion);
+    sdfDebugPrintf("<lips %d %d> \n", id, motion);
 }
 
 void evtLipsStopFunction(void) {
@@ -755,15 +755,15 @@ void evtLipsStopFunction(void) {
         }
     }
     if (unit == NULL) {
-        func_003003F0("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
+        sdfDebugPrintf("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
     if (mdlGetNodeRefHalf(model, 2) == 0) {
-        func_003003F0("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
+        sdfDebugPrintf("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
     evtConfigureUnitMotionSlot(unit, 2, 0, 0, 3, 2);
-    func_003003F0("<lips_stop> stopunitid = %d\n", D_003BBDB0);
+    sdfDebugPrintf("<lips_stop> stopunitid = %d\n", D_003BBDB0);
     D_003BBDB0 = 0;
 }
 
@@ -956,7 +956,7 @@ u32 evtCmdPrepareUnitMotionAndLogState(void) {
         return 1;
     }
     evtPrepareUnitMotionState(unit, scrReadIntParameter(1), 5, 7, 1);
-    func_003003F0(D_003AC480);
+    sdfDebugPrintf(D_003AC480);
     return 1;
 }
 
@@ -1325,7 +1325,7 @@ u32 evtOpSpawnBoundEffectFromTaskResource(void) {
     }
     object = effObjSpawnDescriptorBoundEffect(descriptor, firstVector, secondVector);
     if (object == NULL) {
-        func_003003F0(D_003AC508, 1);
+        sdfDebugPrintf(D_003AC508, 1);
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(object, 1);
@@ -1345,8 +1345,8 @@ u32 evtOpResolveAndFlagObjectFromName(void) {
     param0 = scrReadStringParameter(0);
     unit = effObjSpawnLoadedResourceEffect((const char *)param0, buf1, buf2);
     if (unit == NULL) {
-        func_003003F0(D_003AC520, 1);
-        func_003003F0(D_003AC550, scrReadStringParameter(0));
+        sdfDebugPrintf(D_003AC520, 1);
+        sdfDebugPrintf(D_003AC550, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -1367,8 +1367,8 @@ u32 evtOpCreateAndFlagObjectFromResourceName(void) {
     param0 = scrReadStringParameter(0);
     unit = effObjCreateFromResolvedResource(param0, buf1, buf2);
     if (unit == NULL) {
-        func_003003F0(D_003AC520, 1);
-        func_003003F0(D_003AC550, scrReadStringParameter(0));
+        sdfDebugPrintf(D_003AC520, 1);
+        sdfDebugPrintf(D_003AC550, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -1479,8 +1479,8 @@ u32 evtCmdCreateEffectObjectFromResource(void) {
     param0 = scrReadStringParameter(0);
     unit = effObjCreateKindFromResource(1, param0);
     if (unit == NULL) {
-        func_003003F0(D_003AC5B0, 1);
-        func_003003F0(D_003AC550, scrReadStringParameter(0));
+        sdfDebugPrintf(D_003AC5B0, 1);
+        sdfDebugPrintf(D_003AC550, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
@@ -1525,8 +1525,8 @@ u32 evtScriptCreateEffectObjectFromResource(void) {
     param0 = scrReadStringParameter(0);
     unit = effObjCreateKindFromResource(2, param0);
     if (unit == NULL) {
-        func_003003F0(D_003AC600, 1);
-        func_003003F0(D_003AC550, scrReadStringParameter(0));
+        sdfDebugPrintf(D_003AC600, 1);
+        sdfDebugPrintf(D_003AC550, scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);

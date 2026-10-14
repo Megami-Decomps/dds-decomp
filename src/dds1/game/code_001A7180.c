@@ -114,7 +114,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 s32 btlFlagToElementIndex(s32 flag);
 
 extern s32 sdfQueryChannelValue(s32, DatPartyRecord *, DatPartyRecord *);
-extern s32 func_003003F0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
     DatPartyRecord *record;
@@ -155,10 +155,10 @@ s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, 
         if (btlHasMappedSpecialAbilityForSlot(defender, guard) || btlHasSpecialAbilityWhenArgumentUnset(defender, guard) ||
             btlHasEnabledSpecialAbilityForSlot(defender, guard)) {
             value = 0;
-            func_003003F0("btl:bad auto guard[%X]\n", guard);
+            sdfDebugPrintf("btl:bad auto guard[%X]\n", guard);
         } else if (btlTestSelectedItemCategoryMask(defender, guard)) {
             value = 0;
-            func_003003F0("btl:bad counter guard[%X]\n", guard);
+            sdfDebugPrintf("btl:bad counter guard[%X]\n", guard);
         }
     }
     return value;

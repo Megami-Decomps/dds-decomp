@@ -34,7 +34,7 @@ extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
 
 extern s32 D_003BC368;
-extern s32 func_003003F0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 extern void mdlLoadViewerPackage(s32, s32, s32, void *, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
 
@@ -57,7 +57,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 case 5:
                     entrySize = entry->dataSize;
                     payload = data->data + entry->dataOffset;
-                    func_003003F0("unit decode rid:%d, size:%d\n", resourceId, entrySize);
+                    sdfDebugPrintf("unit decode rid:%d, size:%d\n", resourceId, entrySize);
                     switch (eventId) {
                     case 0x2A4:
                     case 0x2AC:
@@ -74,7 +74,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                     if (D_003BC368 >= 0x7D0) {
                         D_003BC368 = 0x3E8;
                     }
-                    func_003003F0("BE regist unit %d < %d >\n", D_003BC368, entrySize);
+                    sdfDebugPrintf("BE regist unit %d < %d >\n", D_003BC368, entrySize);
                     return unitKey;
                 }
             }
@@ -174,7 +174,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
             for (cueIndex = 0; cueIndex < data->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == frame) {
                     evtSetBgmVolumePan(params->eventTaskId, cues[cueIndex].fade);
-                    func_003003F0("EVE_SE motno = %d, frame = %d\n", motionId, frame);
+                    sdfDebugPrintf("EVE_SE motno = %d, frame = %d\n", motionId, frame);
                 }
             }
         }
@@ -208,7 +208,7 @@ KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
 
 const char D_003AF270[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
 extern char D_003BC370[];
-extern s32 func_003003F0();
+extern s32 sdfDebugPrintf();
 extern char D_003D8090[];
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
@@ -217,7 +217,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 directoryId;
     struct FileRequest *request;
 
-    func_003003F0(D_003BC370);
+    sdfDebugPrintf(D_003BC370);
     eventId = state->eventId;
     directoryId = eventId - eventId % 10;
     sprintf(D_003D8090, D_003AF270, directoryId, eventId, eventId);
@@ -257,7 +257,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             }
         }
     } else {
-        func_003003F0(D_003BC378);
+        sdfDebugPrintf(D_003BC378);
         state->loaded = EVT_PACK_LOAD_COMPLETE;
     }
 }

@@ -30,7 +30,7 @@ extern void kwlnPrintTaskTreeRecursive(KwlnTask* task, s32 depth);
 
 
 
-extern void func_003003F0();
+extern void sdfDebugPrintf();
 
 extern KwlnTask* kwlnDelayedStartTaskHead;
 
@@ -328,17 +328,17 @@ void kwlnPrintTaskQueueDiagnostics(void)
 
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedStartTaskHead, D_0039DE88);
     tmp = D_0039DEB8;
-    func_003003F0(tmp, kwlnDelayedStartTaskCount);
+    sdfDebugPrintf(tmp, kwlnDelayedStartTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnActiveTaskHead, D_0039DEC8);
-    func_003003F0(tmp, kwlnActiveTaskCount);
+    sdfDebugPrintf(tmp, kwlnActiveTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedDestroyTaskHead, D_0039DEF8);
-    func_003003F0(tmp, kwlnDelayedDestroyTaskCount);
-    func_003003F0(D_003BA828);
+    sdfDebugPrintf(tmp, kwlnDelayedDestroyTaskCount);
+    sdfDebugPrintf(D_003BA828);
 }
 
 void kwlnPrintTaskTreeRecursive(KwlnTask *task, s32 depth)
 {
-    func_003003F0(D_003BA830, D_003BDC48, task);
+    sdfDebugPrintf(D_003BA830, D_003BDC48, task);
     if (task->childList != NULL) {
         if (task->parent == NULL) {
             D_003BDC48[0] = ' ';

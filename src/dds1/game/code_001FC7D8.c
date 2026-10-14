@@ -81,7 +81,7 @@ extern s32 btlPollEffectWaitTask();
 extern s32 btlHasRegisteredAphNamePanelTask();
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
-extern void func_003003F0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 extern s8 D_00324510[];
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
 INCLUDE_ASM(const s32, "game/code_001FC7D8", btlPollResourceNameOverwrite);
@@ -823,7 +823,7 @@ s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
         if (owner != NULL) {
             itfMesSetTextSlotFromValue(state->dialogId, 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
         }
-        func_003003F0("JYOKYO ID : %d\n", state->dialogId);
+        sdfDebugPrintf("JYOKYO ID : %d\n", state->dialogId);
         btlReplaceDialogTasksAndQueueMessage(state->dialogId, link->arg);
     }
     if (btlHasRegisteredAphNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x2D) {
