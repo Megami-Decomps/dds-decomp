@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "dds3_admin_control_api.h"
 #include "common.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
@@ -53,9 +54,6 @@ void effObjSetFlags(void *unit, s32 flag);
 void evtApplyIndexValueToWorldNodes(s32 which, s32 value);
 
 void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
-
-void dds3AdminSetControlFlag(void);
-
 void evtSubmitEventRequest(s32 eventId, s32 mode);
 
 void evtSubmitEventRequestImmediate(s32 eventId);
