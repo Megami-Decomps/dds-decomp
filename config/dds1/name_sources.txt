@@ -9009,3 +9009,4 @@
 0x001122F0	effObjApplyTransformParameters	inferred	Applies the selected transform-parameter record to an effect world object. Paired with DDS2 provider at 0x00112518; callers use it for follow-parameter updates and transform-opacity passes (7 call expressions). [native implementation and paired caller context, 2026-10-14]
 0x00228FB0	evtDrawSolarOverlayMarker	inferred	Draws the fixed 14-point solar overlay marker as a colored triangle fan; the leading vertex alpha derives from intensity.
 0x00229100	evtDrawSolarOverlayShapeWithScaledAlpha	inferred	Loads the indexed SolarOverlayShape, scales its vertex alpha values, draws its triangle fan, and restores the GS alpha state.
+0x001978E8	itfCreateFont2TextGlyph	inferred	Paired with 0x0019F5E8: prepends the default glyph chain, builds font-index-2 text, applies spacing -1, then sets position, render depth, and child colors. UI callers pass text and an optional prior glyph chain.

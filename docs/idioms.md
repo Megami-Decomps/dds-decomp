@@ -701,7 +701,7 @@ functions use trampolines and are a different case.
   `xor` operand order at +0xE8. The complete unit checked at 255 match, 0 differ.
   Its text helper also now follows the matched font provider's real `u32`
   glyph/color and `char *` text contract, rather than old `u64` placeholders.
-  DDS2's corresponding helper now follows matched `func_0019F5E8`'s same
+  DDS2's corresponding helper now follows paired `itfCreateFont2TextGlyph`'s same
   contract. Reusing the existing `BtlResBlock` and `EffectSlotSet` owners also
   replaces that unit's partial panel views: `resC->workEntries[0x16].geometry.bounds[2]`
   and `.sourceWidth` are the old inner offsets 0xDCC and 0xE3C.

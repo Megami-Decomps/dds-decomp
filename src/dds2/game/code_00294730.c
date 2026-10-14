@@ -206,7 +206,7 @@ typedef struct MnuShopListContext {
 } MnuShopListContext;
 
 extern s32 itfSetTextDrawLimit(s32);
-extern struct FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern char D_00437970[];
 
 /* Draw the row label, and draw its numeric value when the list enables it. */
@@ -267,7 +267,7 @@ void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
     }
     value = (s32)node->sortKeyPrimary;
     sprintf(text, D_00437970, value);
-    glyph = func_0019F5E8(0xFF0, (rowOffset + 0x8A) << 3, z, style, text, NULL);
+    glyph = itfCreateFont2TextGlyph(0xFF0, (rowOffset + 0x8A) << 3, z, style, text, NULL);
     if (selected) {
         frFontSetChildChainFirstOption(glyph, 4);
     }

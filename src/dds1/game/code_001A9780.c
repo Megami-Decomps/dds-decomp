@@ -72,7 +72,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern SceneAiWork *fldGetSceneScriptTaskUserData(void);
 
-extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
+extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
@@ -2165,7 +2165,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     sprintf(text, D_003BB400, actor->partyRecord.level);
-                    glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
+                    glyph = (struct FrFontGlyph *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y - 2) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
                     frFontDrawGlyphChain(glyph, 1, 0x53);
@@ -2208,7 +2208,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     sprintf(text, D_003BB408, actor->partyRecord.hp,
                                   actor->partyRecord.maxHp);
                     func_001AFF78(work, 0, work->x, work->y, work->alpha);
-                    glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
+                    glyph = (struct FrFontGlyph *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 17) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
                     frFontDrawGlyphChain(glyph, 1, 0x53);
@@ -2229,7 +2229,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     sprintf(text, D_003BB408, actor->partyRecord.mp,
                                   actor->partyRecord.maxMp);
                     func_001AFF78(work, 1, work->x, work->y, work->alpha);
-                    glyph = (struct FrFontGlyph *)func_001978E8((work->x + xOffset) << 4,
+                    glyph = (struct FrFontGlyph *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 41) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
                     frFontDrawGlyphChain(glyph, 1, 0x53);
@@ -5277,7 +5277,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
     u32 glyph;
 
     itfSetTextDrawLimit(0x13);
-    glyph = func_001978E8(x << 4, y << 3, 0, color, text, 0);
+    glyph = itfCreateFont2TextGlyph(x << 4, y << 3, 0, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     itfSetTextDrawLimit(-1);

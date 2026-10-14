@@ -170,7 +170,7 @@ extern u32 D_00437D44;
 
 extern u32 D_00437D3C;
 
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern struct FrFontGlyph *D_00439004;
 extern struct FrFontGlyph *D_00439008;
 
@@ -618,7 +618,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
 void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
     u32 handle;
 
-    handle = func_0019F5E8(x << 4, y << 3, 0, colors, text, 0);
+    handle = itfCreateFont2TextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }

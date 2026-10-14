@@ -430,7 +430,7 @@ extern void uiDrawSurfaceAtNearDepth(u32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 sprintf(char *, const char *, ...);
-extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 u32 mnuGetPanelRatioColor(s32, s32, s32);
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
@@ -493,7 +493,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     effDrawTextureSlotWithBlendedCornerColors(labelX, labelY, z, alpha, 1, panel->icon[2], 0, surface);
     level = menu->records->slots[panelIndex].level;
     sprintf(text, D_00437C68, level);
-    glyph = func_0019F5E8(labelX + 0x140, labelY - 8,
+    glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 8,
                                        z, textColor, text, 0);
     frFontDrawGlyphChain(glyph, 1, surface);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -1212,7 +1212,7 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
 typedef struct FrFontGlyph FrFontGlyph;
 extern char D_00437C88[];
 extern s32 sprintf(char *, const char *, ...);
-extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawRatioPanelContents);
 
@@ -1400,7 +1400,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     }
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     sprintf(text, D_00437C88, value);
-    glyph = func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
+    glyph = itfCreateFont2TextGlyph(x + 0x2D0, y, depth, color, text, 0);
     frFontSetChildChainFirstOption(glyph, fontFlags);
     frFontDrawGlyphChain(glyph, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
