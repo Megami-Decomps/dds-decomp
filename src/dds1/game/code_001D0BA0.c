@@ -152,7 +152,7 @@ extern u32 kwlnDrawControlFlags;
 
 extern void btlDestroyUnit(u8 *);
 
-extern void func_001D4E60(BtlUnit *, BtlUnit *);
+extern void btlInheritActorModelState(BtlUnit *, BtlUnit *);
 
 
 extern s32 btlSetActorEffectParameter();
@@ -2350,7 +2350,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 
 /* Inherit the source unit's sound owner, transparency model, world node and
  * event work, and mark the destination as an inheriting unit. */
-void func_001D4E60(BtlUnit *dst, BtlUnit *src) {
+void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
     dst->soundSlotOwner = src->soundSlotOwner;
     dst->transparencyModel = src->transparencyModel;
     dst->effectObject = src->effectObject;
@@ -2403,7 +2403,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
                 key = mdlSpawnCameraSlotViewerObject(kind, id);
                 dds3RemoveWorldObjectNode(dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), key, 5));
             }
-            func_001D4E60(unit, reused);
+            btlInheritActorModelState(unit, reused);
         }
     }
     if (battle->prepareModelUnit) {
@@ -3910,7 +3910,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         if (args->duration != 0) {
             unit->mirror = btlCreateUnit();
             unit->mirror->status.flags |= 0x40000;
-            func_001D4E60(unit->mirror, unit);
+            btlInheritActorModelState(unit->mirror, unit);
             if (unit->unkCC == 0) {
                 unit->mirror->unkCC = 0;
                 unit->unkCC = 1;

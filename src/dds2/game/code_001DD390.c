@@ -2408,7 +2408,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 
 /* Inherit the source unit's sound owner, transparency model, world node and
  * event work, and mark the destination as an inheriting unit. */
-void func_001E1B80(BtlUnit *dst, BtlUnit *src) {
+void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
     dst->unk328 = src->unk328;
     dst->unk344 = src->unk344;
     dst->effectObject = src->effectObject;
@@ -2430,7 +2430,7 @@ extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
-extern void func_001E1B80(BtlUnit *unit, BtlUnit *reused);
+extern void btlInheritActorModelState(BtlUnit *unit, BtlUnit *reused);
 
 void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
     BtlUnit *unit = (BtlUnit *)unitAddress;
@@ -2456,7 +2456,7 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
                     (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
                 dds3RemoveWorldObjectNode(object);
             }
-            func_001E1B80(unit, reused);
+            btlInheritActorModelState(unit, reused);
         }
     }
     if (battle->beforeActorModelReady != NULL) {
@@ -3950,7 +3950,7 @@ void btlBeginModelChange(u32 argumentsAddress) {
     }
 }
 
-extern void func_001E1B80(BtlUnit *, BtlUnit *);
+extern void btlInheritActorModelState(BtlUnit *, BtlUnit *);
 
 extern void btlDestroyUnit(BtlUnit *);
 
@@ -3977,7 +3977,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         if (args->duration != 0) {
             unit->mirror = btlCreateUnit();
             unit->mirror->status.flags |= 0x40000;
-            func_001E1B80(unit->mirror, unit);
+            btlInheritActorModelState(unit->mirror, unit);
             if (unit->unkCC == 0) {
                 unit->mirror->unkCC = 0;
                 unit->unkCC = 1;
