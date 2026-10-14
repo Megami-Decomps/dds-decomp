@@ -29,7 +29,7 @@ extern f64 cos(f64);
 
 extern f64 sin(f64);
 
-extern f64 func_003532A0(f64);
+extern f64 sqrt(f64);
 
 extern void *memcpy(void *, const void *, u32);
 
@@ -168,7 +168,7 @@ void sdfMatrixToQuaternion(f32 *out, SdfMat4 *matrix) {
 
     trace = matrix->m[0] + matrix->m[5] + matrix->m[10] + 1.0f;
     if (trace >= 1.0f) {
-        scale = func_003532A0(trace) * 2.0;
+        scale = sqrt(trace) * 2.0;
         out[3] = scale * 0.25f;
         out[0] = (matrix->m[6] - matrix->m[9]) / scale;
         out[1] = (matrix->m[8] - matrix->m[2]) / scale;
@@ -181,7 +181,7 @@ void sdfMatrixToQuaternion(f32 *out, SdfMat4 *matrix) {
         }
         j = (i + 1) % 3;
         k = (j + 1) % 3;
-        scale = func_003532A0(copy.m[i * 4 + i] - copy.m[j * 4 + j] -
+        scale = sqrt(copy.m[i * 4 + i] - copy.m[j * 4 + j] -
                              copy.m[k * 4 + k] + 1.0f) * 2.0;
         if (scale != 0.0f) {
             quaternion[i] = scale * 0.25f;
