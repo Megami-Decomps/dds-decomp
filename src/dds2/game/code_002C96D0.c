@@ -4411,7 +4411,6 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern f32 acosf(f32);
 extern f32 atan2f(f32, f32);
-extern void effMiscQuatMultiplyVU(void);
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target sdfViewEyeVector and up sdfViewUpVector */
 void vuBuildLookAtBasis(void)

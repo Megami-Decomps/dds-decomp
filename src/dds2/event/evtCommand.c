@@ -102,9 +102,6 @@ void effObjSetFlags(void *unit, s32 flag);
 
 
 u32 fldGetPlayerSceneState(void);
-
-
-extern void effMiscQuatMultiplyVU(void);
 extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
 
 extern char D_00421F08[];

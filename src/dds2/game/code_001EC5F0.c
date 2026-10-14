@@ -269,8 +269,6 @@ extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
-extern void effMiscQuatMultiplyVU(void);
-
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);

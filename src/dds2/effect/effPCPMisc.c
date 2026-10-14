@@ -4789,7 +4789,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 /* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
-extern void effMiscQuatMultiplyVU(void);
 extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */

@@ -3,6 +3,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
 #include "sdf_message.h"
@@ -948,7 +949,6 @@ extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceR
 extern void *dds3GetTransformSourceData(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern void fldApplySceneLightSet(s32, s32);
 extern void fldSpawnPlayerUnits(f32 *transform);
 extern void fldCreateChaseCameraObject(void);
@@ -1202,7 +1202,6 @@ typedef struct FieldVec4 {
 
 extern FieldVec4 D_00412EB0;
 extern void effMiscAxisAngleToQuaternionVU(f32);
-extern void effMiscQuatMultiplyVU(void);
 extern s32 D_00389888[];
 extern MdlCtx *fldPlayerModelContext;
 
@@ -1407,8 +1406,6 @@ void fldCreatePlayerObject(void) {
 extern void effObjSetInnerFloat(u32, f32);
 
 extern void effMiscAxisAngleToQuaternionVU(f32);
-
-extern void effMiscQuatMultiplyVU(void);
 
 extern void dds3SetObjectFlags(void *, u32);
 

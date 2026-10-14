@@ -3173,8 +3173,6 @@ s32 btlIsUnitAtStoredPosition(u8 *object) {
 
 extern u8 D_004179E0[];
 
-extern void effMiscQuatMultiplyVU(void);
-
 void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
     f32 result[4];
     if (!(unit->status.stateFlags & 0x100)) {

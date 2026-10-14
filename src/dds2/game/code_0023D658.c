@@ -99,8 +99,6 @@ typedef struct EvtModelHeader {
     void *target2C;     /* 0x2C: scaled by the model-cut opcode */
 } EvtModelHeader;
 
-extern void effMiscQuatMultiplyVU();
-
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 
 

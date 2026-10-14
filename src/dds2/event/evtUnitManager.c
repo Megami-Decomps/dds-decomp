@@ -20,9 +20,6 @@
 extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
 
-
-extern void effMiscQuatMultiplyVU();
-
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 angle);
 extern f32 evtGetValueScaleFactor(s32 path);

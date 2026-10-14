@@ -1533,7 +1533,6 @@ u32 mdlRunViewerAssetSelectionTask(void) {
 }
 
 extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern f32 sdfViewMatrix[];
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
@@ -3374,8 +3373,6 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     dds3SetObjectFlags(object, 0x400);
     return counter;
 }
-
-extern void effMiscQuatMultiplyVU(void);
 
 void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
     f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
