@@ -339,7 +339,7 @@ void mnuCopyPartyEntries(context)
 }
 
 extern void mnuPopulatePartyPanelSlot(DatPartyRecord *, s32, u32, PartyPanel *);
-extern void func_00280048(s32);
+extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Transfer one current party record and refresh the selected panel slot. */
 void mnuTransferPartyEntryToSelection(s32 partyIndex, s32 mode, s32 skipUpdate,
@@ -373,7 +373,7 @@ void mnuTransferPartyEntryToSelection(s32 partyIndex, s32 mode, s32 skipUpdate,
     for (panelIndex = context->partyPanel.unk0; panelIndex < 5; panelIndex++) {
         context->partyWindow.slots[panelIndex].flags |= 0x80;
     }
-    func_00280048((s32)&context->partyWindow);
+    mnuUpdatePartyPanelPercentDisplays((s32)&context->partyWindow);
     context->partyPanel.unk0++;
     context->partyPanel.unk4--;
     menu->selection++;
@@ -405,7 +405,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
     mnuReleasePartyPanelTextures(panelWork);
     mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
     mnuUpdateHandleStates(panelWork);
-    func_00280048((s32)panelWork);
+    mnuUpdatePartyPanelPercentDisplays((s32)panelWork);
 }
 
 /* Count active entries in the five-slot party array, capped at three. */
@@ -552,7 +552,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
             if (menuWork->selection > 0) {
                 mnuInitPartyPanelSlots(&context->partyPanel);
                 mnuClearPartySelectionAndActivateSlots((s32)context);
-                func_00280048((s32)&context->partyWindow);
+                mnuUpdatePartyPanelPercentDisplays((s32)&context->partyWindow);
             } else {
                 mnuSetPopupEntryFlagged(popup, D_0037CA58);
                 mnuActivatePanelAndConfigureGridResources(
@@ -1905,7 +1905,7 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
         }
         window = ptySkillMenuRebuildAfterMutation(0, callback);
         mnuInitPartyPanelSlots(&context->partyPanel);
-        func_00280048((s32)&context->partyWindow);
+        mnuUpdatePartyPanelPercentDisplays((s32)&context->partyWindow);
         mnuSetPopupEntryFlagged(&context->popupState, D_0037CC90);
         ptySkillMenuRefreshEntries(context);
         window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
