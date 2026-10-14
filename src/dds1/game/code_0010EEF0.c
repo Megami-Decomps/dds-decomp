@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -10,7 +11,6 @@
 
 extern s8 ptyReadSignedRosterStatByte(s32);
 extern s32 scrReadIntParameter(s32);
-extern void scrSetIntegerReturnValue(s32);
 extern void ptyApplyEventPenalty(s32);
 
 extern void effMiscNormalizeVU(void);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
@@ -29,7 +30,6 @@ extern s32 scrGetCommandTimer(void);
 
 
 extern char D_00437208[];
-void scrSetIntegerReturnValue(s32 value);
 
 extern char D_00422050[];
 

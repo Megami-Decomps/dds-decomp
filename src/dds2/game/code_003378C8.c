@@ -122,7 +122,11 @@ void sdfVuMultiplyNodeColors(VuWork *work, u32 color) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003378C8", sdfVuInterpolateClipVertex);
+void sdfVuInterpolateClipVertex(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
+    out->sourceA = first;
+    out->sourceB = second;
+    VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
+}
 
 INCLUDE_ASM(const s32, "game/code_003378C8", sdfVuBuildClippedTriangleRefs);
 

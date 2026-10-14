@@ -4,6 +4,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
@@ -11,6 +12,7 @@
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -19,6 +21,9 @@
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
@@ -556,7 +561,6 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
-extern u32 kwlnGetDrawBufferIndex(void);
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
@@ -662,7 +666,7 @@ extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 
-extern void func_0033B530(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
+extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
 extern s32 D_00435F30;
 
@@ -1712,19 +1716,14 @@ extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
 
-extern void fldClearMenuEntries();
-
 extern void fldDestroyTitleTask();
 
 extern void fldFreeSceneResources();
-
-extern void fldPlayPendingSounds();
 
 extern void fldReleaseObjectSlots();
 
 extern void fldReleaseResourceSlots();
 
-extern void fldReleaseTextureSlots();
 
 
 extern void fldResetRecordState();
@@ -1743,7 +1742,6 @@ extern void fldReleaseIndexedResourceEffect();
 
 extern void mnuReleaseResourceEntries();
 
-extern void sdfResourceListRelease();
 
 extern u32 D_00444930[];
 
@@ -2560,7 +2558,7 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     sdfInitGeometryDmaPacket(packet, mat);
     sdfAppendPacket(command, (u32)packet);
     packet = (u8 *)sdfAllocPacketAligned(0x80);
-    func_0033B530(packet, modelData->pos, modelData->color, &modelData->uv, modelData->quad);
+    sdfBuildTexturedQuadVifPacket(packet, modelData->pos, modelData->color, &modelData->uv, modelData->quad);
     sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -3823,9 +3821,9 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
     position.f[3] = 1.0f;
 
     cameraModel = fldPlayerModelContext;
-    previousFrame = fldAreaState.unk178;
+    previousFrame = fldAreaState.previousCameraModelFrame;
     currentFrame = cameraModel->first->currentFrame;
-    fldAreaState.unk178 = currentFrame;
+    fldAreaState.previousCameraModelFrame = currentFrame;
 
     if (fldAreaState.unk8C == 0) {
         switch (fldAreaState.unk88) {
@@ -4141,7 +4139,7 @@ void fldUpdateModeOneCameraPose(void) {
  * Each branch-local SDK snapshot dominates all of its scalar reads; there is
  * no earlier scratch read or loop-carried value. The finite qualification
  * and memory-contract limitation are documented in docs/idioms.md. */
-s32 func_001321F8(void) {
+s32 fldApplyPlayerVerticalStep(void) {
     f32 position[4] __attribute__((aligned(16)));
     if (fldAreaState.verticalStepDirection > 0) {
         effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
@@ -4202,7 +4200,7 @@ s32 fldUpdateFieldTransition(void) {
         {
             Motion *const thresholdMotion = fldPlayerModelContext->first;
             f32 currentFrame = thresholdMotion->currentFrame;
-            if (work->unk178 < 13.0f && 13.0f <= currentFrame) {
+            if (work->previousCameraModelFrame < 13.0f && 13.0f <= currentFrame) {
                 kwlnPadStartMotor(0, 1, 10);
                 kwlnPadStartMotor(1, 0xE6, 10);
                 mnuResetTitleStreamAfterFileIdle();
@@ -4282,7 +4280,7 @@ extern f32 fldSnapAngleToCompassPoint(f32);
 extern f32 fldSnapAngleToCompassOctant(f32);
 extern f32 fldSnapAngleToCardinalDirection(f32);
 extern s32 fldIsNearSpark(f32, f32, f32);
-extern void func_00139B98(f32 *);
+extern void fldClassifyMovementAgainstZoneFaces(f32 *);
 extern void fldRestoreSceneModelColors(void);
 extern void fldClearSceneModelColors(void);
 extern void fldShowSceneModels(void);
@@ -4600,7 +4598,7 @@ s32 func_00132540(void) {
             secondary->smoothedPosition[3] = source->smoothedPosition[3];
         }
     }
-    func_00139B98(position);
+    fldClassifyMovementAgainstZoneFaces(position);
     difference = fldAngleDifference(fldAreaState.angle, heading);
     step = difference / 5.0f;
     if (step < 0.0f) {
@@ -4767,7 +4765,7 @@ clear_highlight:
 }
 
 
-extern s32 func_001321F8(void);
+extern s32 fldApplyPlayerVerticalStep(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);
 extern s32 func_00132540(void);
@@ -4787,7 +4785,7 @@ s32 fldUpdateCameraFrame(void) {
         if (fldAreaState.mode == 1 || fldAreaState.mode == 3) {
             fldClearCameraObjectHighlightFlag();
         }
-        func_001321F8();
+        fldApplyPlayerVerticalStep();
         fldUpdateCameraTarget();
         fldUpdateModeOneCameraPose();
         node = fldPlayerModelContext->current.h.motionIndex;

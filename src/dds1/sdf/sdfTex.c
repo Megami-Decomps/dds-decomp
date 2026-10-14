@@ -19,10 +19,6 @@ extern SdfPendingRequest sdfTextureReleaseQueue;
 void *memcpy(void *arg0, void *arg1, u32 arg2);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
-void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,
-    u32 primaryResourceWord, s32 pixelFormat, u32 secondaryResourceWord,
-    s32 clutFormat, s32 textureColorComponents, s32 maxMipLevel,
-    s32 lodParameters, s32 clampMode, s32 variant);
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 __attribute__((const)) sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;

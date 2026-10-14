@@ -115,7 +115,7 @@ extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void sdfRemoveHandler(void *);
-extern s32 func_0030B5D0(s32);
+extern s32 sdfDisableDmacChannel(s32);
 
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32);
 
@@ -178,7 +178,16 @@ u32 sdfSoundTryQueueCommand(u32 command) {
     return command;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", sndTrySendChannelGroupCommand120);
+/* Send opcode 0x120 with the channel's group (bits 3-6) unless a command is
+ * pending; returns nonzero when busy. */
+s32 sndTrySendChannelGroupCommand120(u8 channel) {
+    if (sdfSoundCommandStatus) {
+        return 1;
+    }
+    channel = (channel >> 3) & 0xF;
+    sndSendCommandPacket(0x120 | channel, 0, 0, 0);
+    return 0;
+}
 
 u32 sdfSoundGetCommandStatus(void) {
     return sdfSoundCommandStatus;
@@ -1350,8 +1359,8 @@ s32 sdfCompleteIpuInputFeedDma(void) {
 /* Return the indexed earlier entry only when enabled; the byte index is unchecked. */
 u32 sdfMidiPreviousEntry(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
-    if (channel->enabled != 0) {
-        selectedEntry = channel->earlierEntries[channel->index];
+    if (channel->isEnabled != 0) {
+        selectedEntry = channel->previousEntries[channel->entryIndex];
     }
     return selectedEntry;
 }
@@ -1359,8 +1368,8 @@ u32 sdfMidiPreviousEntry(SndMidiChannel *channel) {
 /* Return the indexed current entry only when enabled; the byte index is unchecked. */
 u32 sndGetSelectedChannelEntry(SndMidiChannel *channel) {
     u32 selectedEntry = 0;
-    if (channel->enabled != 0) {
-        selectedEntry = channel->entries[channel->index];
+    if (channel->isEnabled != 0) {
+        selectedEntry = channel->currentEntries[channel->entryIndex];
     }
     return selectedEntry;
 }
@@ -1480,7 +1489,7 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *f
 
 extern void sceIpuInit(void);
 extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
-extern void func_0030B638(s32);
+extern void sdfEnableDmacChannel(s32);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void _StartThread();
 extern u8 sdfIpuStreamThreadStack[];
@@ -1493,9 +1502,9 @@ void sdfSoundInitIpuStream(void) {
     sdfSoundNodeHead = 0;
     D_003BDAA4 = NULL;
     D_003BDA9C = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);
-    func_0030B638(3);
+    sdfEnableDmacChannel(3);
     D_003BDAA0 = sdfAddHandler(1, 4, sdfCompleteIpuInputFeedDma, -1, 0);
-    func_0030B638(4);
+    sdfEnableDmacChannel(4);
     thread = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     D_003BDAB4 = thread;
     _StartThread(thread, 0);
@@ -1506,12 +1515,12 @@ s32 sdfSoundShutdownIpuStreamHandlers(void) {
         sdfRemoveHandler((void *)D_003BDA9C);
         D_003BDA9C = 0;
     }
-    func_0030B5D0(3);
+    sdfDisableDmacChannel(3);
     if (D_003BDAA0 != 0) {
         sdfRemoveHandler((void *)D_003BDAA0);
         D_003BDAA0 = 0;
     }
-    return func_0030B5D0(4);
+    return sdfDisableDmacChannel(4);
 }
 
 /* Print the native incoming a0 string and a newline through libc puts.

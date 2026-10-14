@@ -1,9 +1,11 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "snd_pad_step.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
@@ -99,8 +101,6 @@ extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 void itfMesReplaceTextSlotData();
-
-extern void itfResetBattleFadeState();
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
@@ -1120,9 +1120,6 @@ void itfMesClearGlobalWords(void) {
 }
 
 extern ItfMesWindowRec D_00452960[];
-extern void btlReleaseEffectResourceHandles();
-extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
-
 /* Tear down installed content/resources, return the pool record and decrement
  * the pool-array-relative counter. An empty record is a no-op. */
 void itfMesDestroyWindow(s32 window) {
@@ -1594,8 +1591,6 @@ extern void sndSetSequenceVolumePan();
 extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
 
 extern s32 itfMesFindPressedOptionRank(ItfMesBlk40 *);
-
-extern void itfResetBattleFadeState(BtlFade *, s32);
 
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
 
@@ -2484,12 +2479,11 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D60);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A7C08);
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A81F0);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfUpdateSoundSelectorOptions);
 
-extern void scrSetIntegerReturnValue(s32 value);
 extern s32 itfMesStartEntry(s32 window, s32 entry, s32 option);
 extern void itfPanelSetStatus(s32 window, s8 status);
-extern void func_001A81F0(void);
+extern void itfUpdateSoundSelectorOptions(void);
 extern s32 D_00438F2C;
 extern s32 D_00438F30;
 extern s16 D_00438F34;
@@ -2521,7 +2515,7 @@ s32 itfMesScriptStartEntryAndWait(void) {
             return 1;
         }
     } else {
-        func_001A81F0();
+        itfUpdateSoundSelectorOptions();
         if (D_00438F36 == 0) {
             if (D_0037F531[0] < 0) {
                 D_00438F36 = 1;

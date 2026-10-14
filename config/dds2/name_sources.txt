@@ -1,4 +1,6 @@
 # addr	name	evidence|inferred	note
+0x0014BF98	fldInitializeHuntSparkUnit	inferred	Configures a nested field unit for the hunt spark objects: applies phase-derived direction, status, object flags, text float override, and color transitions. Retail callers include creation of HUNT_MDL_UNIT spark objects.
+0x00156F40	fldCmdInitializeHuntSparkUnit	inferred	Reads a script object ID, resolves its nested unit, and initializes its hunt-spark direction and appearance through fldInitializeHuntSparkUnit; paired with DDS1 0x0014F468.
 0x0012AC90	fldLoadAreaRoomResourcesFromRequest	inferred	Configures field area/room state, optionally builds the texture-offset resource-handle list, relocates and processes the supplied packed field request, loads scene request files, then returns fldCachedRoomF1ResourceAllocation. Called by dds3AttachConstructedResourceToWorldObject from evtCreateWorldObjectFromResource; corresponding DDS1 helper at 0x00128780 has the same loader/return role with title-specific callees and globals.
 0x0013F790	fldResolveEventSelectorTarget	inferred	Follows signed INF flag/message links and resolves terminal event/actor action codes; recursive links compile as tail backedges.
 0x00144028	fldUpdateTitleBannerTask	inferred	Checks field/event state before drawing and advancing pending title-banner task state; registered as the callback by fldInitializeTitleBannerTask. [provider registration and callback body, 2026-10-13]
@@ -6,6 +8,8 @@
 0x001AA898	btlInitializePartyRecordFromEnemy	inferred	Zeroes and initializes a party record from the indexed enemy record, copying level, base stats and vitals while compacting nonzero skill IDs into effectData. Paired with DDS1 0x001A1990; used by battle action and debug setup. [code-quality cleanup, 2026-10-13]
 0x00125380	fldRebuildFieldScene	inferred	DDS2 field-scene rebuild called from fldProcSequence stage 0. Configures player/camera scene objects, chase camera, encounter selection and location-flag resource setup. Paired with DDS1 0x001233D0; see docs/idioms.md section “DDS1 field scene initializer and generated axis ownership”. [code-quality cleanup, 2026-10-13]
 0x0019DE70	frFontGetEncodedTextData	inferred	Bounds-checks textId, skips the packed index table and trailing metadata word, and returns the encoded text bytes from FrFontTextBank; itfDrawBankTextWithLayoutFlags passes the result to the glyph-chain parser. Twin 0x001961B0. [code-quality cleanup, 2026-10-13]
+0x001D0140	btlInitializeBattleUnits	inferred	Paired DDS1 initializer: builds active combatant units from encounter records, binds action-sequence tasks/effect vectors, initializes opponent party records, and sets encounter outcome/start voice.
+0x001E1B80	btlInheritActorModelState	inferred	Copies sound-slot ownership, the transparency model, effect object and event work from the source unit, then sets the destination inheritance marker and status bit 2. The actor-model reuse caller and model-change mirror caller both pass an established source unit; paired DDS1 helper 0x001D4E60.
 0x002050D0	btlResetMotionSoundFrameCounters	inferred	Battle initialization resets the paired motion-sound frame counters to -1; the ATRAC3 motion-SE path checks one counter and the frame update advances both. DDS1 twin 0x001F4430. [code-quality cleanup, 2026-10-13]
 0x00100400	kwlnGetDrawBufferIndex	inferred	confidence=high; matched-C; src/dds2/game/code_00100000.c:49:func_00100400; Returns current draw buffer selector used throughout matched frame-packet and scene/viewer double-buffer indexing; twin=0x00100518, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
 0x00100498	fileClearMemoryCardOperationActive	inferred	Clears the file-menu memory-card operation state after polling completes; called when memory-card detection resolves.
@@ -816,6 +820,7 @@
 0x00139950	fldApplyRelativeZoneMotion	inferred	Applies movement deltas from relative zone anchors to the supplied player position and publishes a pending target for fldUpdateCameraTarget.
 0x0013AA90	fldGetPositionZoneClearance	inferred	Finds the closest permitted zone-plane clearance or returns negative one. [names_reviewed8.tsv]
 0x0013B0D0	fldClipSegmentToPositionZones	inferred	Tests the segment against eligible relative zone planes, clips the hit point to zone clearance, and returns the intersected zone index.
+0x0013B4F8	fldAddAxisAlignedCollisionBoxVerticalFaces	inferred	confidence=high; builds eight corner positions and four vertical faces for a field collision box in FldWallMeshRecord; paired title function 0x00138910. Original paired C reconstruction landed in af6a1a958 by red thing.
 0x0013B818	fldResetZoneRecordsAndActorSlots	inferred	Clears all field zone records and resets the actor slots. [names_reviewed8.tsv]
 0x0013D308	fldTestRoomProbeFacingAndRange	inferred	R_Structs55
 0x0013D598	fldTestRoomProbeFacing	inferred	R_Structs55
@@ -2300,6 +2305,7 @@
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
 0x001A7A98	itfMesFindPreviousWindowWithPanelSprite	inferred	Used by the panel layout inspector to walk backward, wrap at the active-list tail, and select a window with a non-null panel sprite.
 0x001A7B00	itfQueueOffsetTexturedRect	inferred	readability/matching review (QP16)
+0x001A81F0	itfUpdateSoundSelectorOptions	inferred	Called each poll by itfMesScriptStartEntryAndWait; formats seven sound-selector rows, consumes selection input and updates the selected setting and sequence volume/pan. Paired with the formatter and shared state protocol described in docs/idioms.md.
 0x001A85E0	itfMesScriptStartEntryAndWait	inferred	Reads script entry argument 0, starts the window entry, polls its transition and completion, then cleans up and publishes the result value.
 0x001A87E8	sndCycleTestMessageResource	inferred	Releases the previous TestMsgMng resource and cycles the four sound-test message choices, loading the next resource when present.
 0x001A8848	itfUpdateTestMessageResourceInput	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:915:func_001A8848; The TestMsgMngC task cycles its test message texture/resource when the corresponding pad state is negative, then returns zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -4234,6 +4240,7 @@
 0x0026F008	mnuDrawMantraCostBadge	inferred	draws a button glyph from a 9-byte table plus a formatted number right-aligned by strlen
 0x0026F138	mnuDrawMantraCostIcon	inferred	cost-record icon index selects marker glyph [names_R_FuncNames.tsv]
 0x0026F190	mnuDrawMantraCostIconOffset	inferred	cost-record icon index selects marker plus eight [names_R_FuncNames.tsv]
+0x0026F1F0	mnuDrawMantraSelectionTransitionNode	inferred	Called for each queued MantraDisplayNode by mnuDrawMantraSelectionListAndCost; draws the node's timed selection transition, advances its frame, and reports completion so the caller can release it. Its frame and transition-kind branches drive the cost badge, icon, and transition sprites.
 0x0026F5B0	mnuReleaseDisplayListNodeAndGetNext	inferred	Reads the node's next link, calls the allocator's release routine, and returns the saved link.
 0x0026F5D8	mnuInitMantraListEntries	inferred	zeros list, copies at most eight entries and index [names_R_FuncNames.tsv]
 0x0026F680	mnuQueueMantraSelectionTransition	inferred	Appends a display transition node from the previous entry to the newly selected entry unless unchanged.
@@ -6150,6 +6157,7 @@
 0x0031C8A8	mnuSetModelNodeBroadcastAlpha	inferred	Keeps model RGB broadcast value and replaces high alpha byte. [names_reviewed22.tsv]
 0x0031C8B0	mnuSetNodeModelBroadcastByte	inferred	Replaces the upper broadcast byte while preserving the remaining model broadcast bits. [names_reviewed15.tsv]
 0x0031C900	mnuSetModelNodeVisibility	inferred	Sets or clears the model inactive bit according to the node visibility selector. [names_reviewed15.tsv]
+0x0031C940	mnuSampleModelMotionAtFrame	inferred	confidence=high; matched-C; src/dds2/game/code_0031C940.c:func_0031C940; Samples motion entry zero on the supplied menu model node: negative frame selects a random in-range frame, otherwise the requested frame is used.
 0x0031CA10	itfProjectScreenPointToViewPlane	inferred	readability/matching review (QP16)
 0x0031CAE8	itfProjectScreenPointToFixedDepth	inferred	Projects screen coordinates with the current view angle onto Z=-300; the timed menu-effect create/update callers use the resulting XYZ for positioned effect records.
 0x0031CF68	itfDrawUniformlyScaledIndexedImage	inferred	medium confidence; src/dds2/game/code_0031C940.c func_0031CF68: Supplies equal horizontal and vertical scales to the table-indexed image renderer, which temporarily changes quad dimensions and restores them after submission. [names_reviewed25.tsv]
@@ -6668,6 +6676,7 @@
 0x0033B678	sdfMeasureVertexAttributePacketBytes	inferred	confidence=high; matched-C; src/dds2/game/code_00336B48.c:1145:func_0033B678; Measures the allocation for the native VIF vertex-attribute packet builder: a fixed header plus packed per-vertex attribute payloads.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0033B688	sdfBuildCompactVertexVifPacket	inferred	readability/matching review (QP16)
 0x0033BA40	sdfMeasureAlignedRecordBufferBytes	inferred	Calculates the 16-byte-aligned allocation length from a record count. [names_reviewed17.tsv]
+0x0033BC98	sdfBuildFourColorTexturedQuadVifPacket	inferred	One-vertex textured-quad VIF packet builder; emits four color words, four UV corner words and eight quad coordinates. Paired implementation at DDS1 0x002E2DE8.
 0x0033BDF0	sdfMeasureAlignedRecordStorage	inferred	medium confidence; src/dds2/game/code_00336B48.c func_0033BDF0: Computes (count * 0x4C + 0x4B) rounded down to a 16-byte boundary for this record-buffer size query. [names_reviewed25.tsv]
 0x0033C240	sdfBuildWideVertexVifPacket	inferred	readability/matching review (QP16)
 0x0033C478	sdfPadUpdatePort	inferred	DDS2 twin of DDS1 port polling routine; invoked once per each of two pad entries.
@@ -7652,6 +7661,7 @@
 0x001300A0	fldUpdateCameraViewFromPlayer	inferred	confidence=high; matched-C; Updates the field camera view from the player's orientation; DDS1 twin 0x0012DB70. LiteG field naming batch.
 0x00130FF0	fldSetCameraModelMotionRequest	inferred	confidence=high; matched-C; Stores the requested camera-model motion selector and duration; DDS1 twin 0x0012EA40. LiteG field naming batch.
 0x00131478	fldDispatchCameraModelFrameEvents	inferred	confidence=high; matched-C; Dispatches camera-motion frame crossings to sequence sounds and queued effects; DDS1 twin 0x0012EEA0. LiteG field naming batch.
+0x001321F8	fldApplyPlayerVerticalStep	inferred	Applies a pending signed verticalStepDirection by saving prior XYZ, shifting the player field/object Y by two units in the opposite direction, then clearing camera transition and highlight flags; called by fldUpdateCameraFrame. [behavior and caller review, 2026-10-14]
 0x001322D8	fldUpdateFieldTransition	inferred	confidence=high; matched-C; Advances the field transition while camera-model motion completes; DDS1 twin 0x0012FD00. LiteG field naming batch.
 0x00132408	fldUpdateAreaDamageReaction	inferred	confidence=high; matched-C; Updates the area-damage camera, fade, and haptic reaction; DDS1 twin 0x0012FE30. LiteG field naming batch.
 0x00133DB8	fldClearCameraFacingPointRequest	inferred	confidence=high; matched-C; Clears the camera-facing point request state; DDS1 twin 0x00131580. LiteG field naming batch.
@@ -8966,3 +8976,20 @@
 0x0034D308	sceCdReadClock	inferred	PS2SDK declares int sceCdReadClock(sceCdCLOCK *) and documents returned clock fields as BCD; its RPC implementation copies the clock result into the supplied buffer. DDS2's sole typed caller passes SdfCdClock and BCD-decodes its date/time fields. https://github.com/ps2dev/ps2sdk/blob/master/common/include/libcdvd-common.h https://github.com/ps2dev/ps2sdk/blob/master/ee/rpc/cdvd/src/scmd.c
 0x0033F3E0	sdfDevDiscRequestWorkerThread	inferred	slot 3 worker services disc-backed open, size, read, seek, write and close requests; dispatch in sdfEnsureDeviceWorkerThreadStarted selects this alternate entry point. Twin: 0x002E6538 (DDS1). [retail-matched C behavior and paired worker dispatch, 2026-10-14]
 0x001B3DD8	btlSelectSerialEncounter	inferred	Choose the follow-up encounter through a scripted override, forced scene or random adjustment rows; btl:serial diagnostics and request mode/argument stores.
+0x00341CA8	sndQueueNoPayloadCommand1A0	inferred	Queues command 0x1A0 with zero arguments, no payload, and length zero; selected by event viewer audio timeline case 6. Paired with DDS1 sndQueueNoPayloadCommand1A0 at 0x002E8E00, whose provider and caller behavior match. [DDS1/DDS2 provider and caller analysis, 2026-10-14]
+0x00156C78	fldCmdGetResolvedEventSelectorTarget	inferred	Field script command stores fldResolveEventSelectorTarget(1) in the script integer-return slot; neighboring commands in the same unit use the fldCmd prefix.
+0x002CE958	fileUpdatePromptDialog	inferred	Asynchronous prompt-dialog state handler: fileBeginPromptDialog stores start/finish callbacks and mode, begins the memory-card request when needed, and returns this handler; it polls request/readiness state, updates prompt audio, invokes the selected continuation, and resumes slot selection on errors. Paired with DDS1 0x0028F630; both handlers have the same prompt-dialog callback role.
+0x00312E28	sdfGridCreate	inferred	Allocates and initializes an SdfGrid and its inline cells; identical DDS1 twin 0x002CB9C0.
+0x0024B678	evtViewerPushMode5CommandHistory	inferred	Records mode-5 event-viewer command history with fixed 0x90 by 0x48 parameters; paired callback at 0x00230A38 has the identical body.
+0x0033DE60	sdfDevFindDiscFileRecordByCdromPath	inferred	Converts a cdrom path to ISO form, retries CD file search until available, opens and measures the file, stores its record size, writes the sector output and optional success flag, and returns the shared file record. Caller flow invokes this before continuing disc resource lookup. [DDS2 Binary Ninja HLIL and caller references; paired DDS1 implementation, 2026-10-14]
+0x001DC2D8	btlScheduleEscapeResultTasks	inferred	Queues command sounds, party effects and escape-result fades before state dispatch; paired DDS1/DDS2 handlers.
+0x00139B98	fldClassifyMovementAgainstZoneFaces	inferred	Checks the lowered current-position probe against flagged zone faces and stores the resulting zone-hit class.
+0x0020EB40	btlCheckStatusActionEligibility	inferred	Checks the unit status low-word mask and applies the 25-bucket roll for cases 0x40/0x400; its sole action-sequence caller dispatches state 5 on success. Paired with DDS1 0x001FCAC0.
+0x0016A578	dds3AdminSubmitEmptyModeRequest	inferred	Paired zero-argument wrapper submits dds3AdminSubmitModeRequest(0, 0, 0, 0), with no higher-level effect inferred.
+0x00307C30	itfGridInterpolateCornerColorsToTarget	inferred	confidence=high; src/dds2/game/code_00306F80.c:518 interpolates saved RGBA corner colors toward the status-record target channels with 16.16 progress; D_00400508[6] registers it as an EffRecordBucket.step, dispatched by effUpdateTimedStates in src/dds2/game/code_002DE248.c. [name-lane-volume-p]
+0x0033B530	sdfBuildTexturedQuadVifPacket	inferred	Exact DDS1 counterpart at 0x002E2680 has identical packet writes; fldSubmitModelPacket and effDrawGeneratedTextureQuad supply position, color, UV and quad corners.
+0x001B1090	btlShouldDistributeRandomTargetHits	inferred	Returns whether the action path should distribute repeated hits across randomized targets; a true result directly gates btlDistributeRandomTargetHits. DDS1 twin 0x001A6EC0. [high-volume naming lane, 2026-10-14]
+0x003667E8	EnableIntc	inferred	wraps _EnableIntc with interrupt-state preservation; exact paired body and sdfWakeQueuedThreadWaiters caller pass event ID 2
+0x0033F898	sdfDevResolvePathForWorker	inferred	Parses device prefixes, selects and allocates the worker path, and returns the worker class; four asynchronous request constructors reject negative results. Paired DDS1 0x002E5D98; corroborated by sdfDevSetFallbackDeviceWorker provenance and allocator call.
+0x0024AD48	evtViewerUpdateWindowShadeFade	inferred	The identical DDS2 body advances windowShadeFade and submits the viewer shade overlay packet from evtUpdateViewerMessageWindow; paired with DDS1 0x00230140.
+0x001B17E8	btlResolveCommandHitResult	inferred	DDS2 twin of DDS1 0x001A7548: evaluates attacker/target eligibility and command hit probability, emits PERDMG/hit diagnostics, and returns the classification consumed by code_001DD390's kind path.

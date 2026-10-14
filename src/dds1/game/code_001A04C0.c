@@ -19,6 +19,7 @@
 #include "sdf_sif_command.h"
 #include "mdl_flag_api.h"
 #include "btl_enc_bg_entry.h"
+#include "itf_color_panel_row.h"
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {
@@ -62,12 +63,7 @@ typedef struct ItfColorPanelWork {
     u8 pad08[8];
 } ItfColorPanelWork;
 
-typedef struct ItfColorPanelRow {
-    const char *title;
-    s32 highlight;
-} ItfColorPanelRow;
 typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
-typedef char ItfColorPanelRowSizeCheck[sizeof(ItfColorPanelRow) == 8 ? 1 : -1];
 
 extern ItfColorPanelWork D_003D73E0;
 extern ItfColorPanelRow D_00358360[6];

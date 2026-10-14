@@ -1275,7 +1275,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
 extern s32 D_0038988C[];
 
 /* Classify flagged zone faces after checking the current movement. */
-void func_00139B98(f32 *position) {
+void fldClassifyMovementAgainstZoneFaces(f32 *position) {
     f32 point[3];
     f32 reference[3];
     f32 distanceVector[3];
@@ -1694,7 +1694,7 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
 }
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
-void func_0013B4F8(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
+void fldAddAxisAlignedCollisionBoxVerticalFaces(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 index;
     f32 minX, minY, minZ, maxX, maxZ;

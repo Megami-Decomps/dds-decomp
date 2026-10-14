@@ -11,6 +11,17 @@ typedef struct BtlHuntExpArgs {
 typedef char BtlHuntExpArgsSizeCheck[sizeof(BtlHuntExpArgs) == 8 ? 1 : -1];
 typedef char BtlHuntExpArgsAmountOffsetCheck[(u32)&((BtlHuntExpArgs *)0)->amount == 4 ? 1 : -1];
 
+/* The battle reward callbacks receive this complete eight-byte task payload. */
+typedef struct BtlRewardPacket {
+    struct BtlUnit *actor; /* 0x00 */
+    s32 amount;            /* 0x04 */
+} BtlRewardPacket;
+typedef char BtlRewardPacketSizeCheck[sizeof(BtlRewardPacket) == 8 ? 1 : -1];
+typedef char BtlRewardPacketActorOffsetCheck[
+    (u32)&((BtlRewardPacket *)0)->actor == 0 ? 1 : -1];
+typedef char BtlRewardPacketAmountOffsetCheck[
+    (u32)&((BtlRewardPacket *)0)->amount == 4 ? 1 : -1];
+
 /* Return the runtime scheduler task's allocated argument block, or NULL. */
 void *btlGetTaskArguments(void *task);
 

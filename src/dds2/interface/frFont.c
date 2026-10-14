@@ -10,6 +10,7 @@
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
 #include "kwln.h"
+#include "kwln_draw_buffer.h"
 
 
 extern s32 mnuQueryTitleSoundBusy(void);
@@ -19,8 +20,6 @@ extern u32 frFontSharedRenderFlags;
 extern u32 frFontContextCursorSpacing;
 
 
-
-extern u32 kwlnGetDrawBufferIndex(void);
 
 extern s32 D_0043656C;
 

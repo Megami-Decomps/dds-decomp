@@ -22,6 +22,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
+#include "fpu.h"
 #include "sdf_texture_file.h"
 #include "sdf_lookup_texture.h"
 #include "sdf_dev_console_node.h"
@@ -414,7 +415,91 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003396D0", sdfBuildLightingPacket);
+extern u8 D_0040B540[]; /* fallback up vector */
+
+/* Pack up to three directional lights and the ambient color for VU1: light
+ * directions as columns (negated, unit length), colors and their sum, and a
+ * basis built from the first light's direction. The axis scratch is volatile:
+ * retail keeps its stores in source order. */
+void sdfBuildLightingPacket(SdfLightingPacketStorage *packet, SdfLightSources sources, f32 *ambient) {
+    f32 direction[4] __attribute__((aligned(16)));
+    volatile f32 axis[4] __attribute__((aligned(16)));
+    f32 (*first)[4];
+    s32 i;
+
+    packet->quadwordCount = 13;
+    packet->flushCode = 0x10000000;
+    packet->unpackCode = 0x6C0D4398;
+    VU0_LOAD_VF(vf11, ambient);
+    VU0_STORE_VF(vf11, packet->ambient);
+    first = NULL;
+    for (i = 0; i < 3; i++) {
+        f32 (*light)[4] = sources[i];
+
+        if (light == NULL) {
+            packet->normal[0][i] = 0.0f;
+            packet->normal[1][i] = 0.0f;
+            packet->normal[2][i] = 0.0f;
+            packet->color[i][0] = 0.0f;
+            packet->color[i][1] = 0.0f;
+            packet->color[i][2] = 0.0f;
+            packet->color[i][3] = 0.0f;
+        } else {
+            if (first == NULL) {
+                first = light;
+            }
+            VU0_LOAD_VF(vf10, light[1]);
+            VU0_NORMALIZE_VF10();
+            VU0_SCALE_VF(vf10, -1.0f);
+            VU0_STORE_VF(vf10, direction);
+            packet->normal[0][i] = direction[0];
+            packet->normal[1][i] = direction[1];
+            packet->normal[2][i] = direction[2];
+            VU0_LOAD_VF(vf10, light[0]);
+            VU0_ADD(vf11, vf11, vf10);
+            VU0_STORE_VF(vf10, packet->color[i]);
+        }
+    }
+    PCP_COPY_VECTOR(packet->normal[3], packet->color[0]);
+    VU0_STORE_VF(vf11, packet->combinedColor);
+    if (first == NULL) {
+        EE_MMI_UNIT_MATRIX(packet->basis);
+        return;
+    }
+    VU0_LOAD_VF(vf10, first[1]);
+    VU0_NORMALIZE_VF10();
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_STORE_VF(vf10, axis);
+    if (ffabsf(axis[0]) < 0.000001f && ffabsf(axis[2]) < 0.000001f) {
+        axis[0] = -axis[1];
+        axis[1] = 0.0f;
+        axis[2] = 0.0f;
+        axis[3] = 0.0f;
+        VU0_LOAD_VF(vf11, axis);
+    } else {
+        VU0_LOAD_VF(vf11, D_0040B540);
+    }
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf28, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_CLEAR_W(vf10);
+    VU0_MOVE_VF(vf29, vf10);
+    VU0_MOVE_VF(vf31, vf0);
+    sdfTransposeVuMatrix();
+    VU0_LOAD_VF(vf10, first[1]);
+    VU0_NORMALIZE_VF10();
+    EE_MMI_LOAD_MATRIX_COLUMN(vf11, D_0040B660 + 8);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(packet->basis);
+}
 
 /* DMA/VIF prefix, projection range terms, then a one-register GIF write
  * and the VU execution command. */
@@ -728,7 +813,42 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
     memset(packet + 0x2C, 0, 12);
 }
 
-INCLUDE_ASM(const s32, "game/code_003396D0", func_0033B530);
+/* Build a one-vertex textured-quad VIF packet: the position, color, the four
+ * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
+void sdfBuildTexturedQuadVifPacket(u8 *packet, const f32 *position, u32 color, const void *uv,
+                                   const f32 *quad) {
+    *(u16 *)packet = 7;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xA0000000;
+    *(u32 *)(packet + 20) = 0x43434310;
+    *(u32 *)(packet + 24) = 0x43;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E01C003;
+    *(u32 *)(packet + 56) = color;
+    *(u32 *)(packet + 60) = 0x6504C004;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 64), (const u8 *)uv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)uv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)uv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv + 12);
+    *(u32 *)(packet + 80) = 0x6404C008;
+    *(f32 *)(packet + 84) = quad[0];
+    *(f32 *)(packet + 88) = quad[1];
+    *(f32 *)(packet + 92) = quad[2];
+    *(f32 *)(packet + 96) = quad[3];
+    *(f32 *)(packet + 100) = quad[4];
+    *(f32 *)(packet + 104) = quad[5];
+    *(f32 *)(packet + 108) = quad[6];
+    *(f32 *)(packet + 112) = quad[7];
+    *(u32 *)(packet + 116) = 0x04000002;
+    *(u32 *)(packet + 120) = 0x14000008;
+    *(u32 *)(packet + 124) = 0;
+}
 
 s32 sdfMeasureVertexAttributePacketBytes(s32 count) {
     return count * 0x40 + 0x40;
@@ -798,7 +918,47 @@ u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttrib
     return (u32)packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_003396D0", func_0033B8B0);
+/* Build a one-vertex VIF packet for a two-texture quad: the position, both
+ * colors, the interleaved primary/secondary UV corners (copied as unaligned
+ * words) and the eight quad corner coordinates. */
+void func_0033B8B0(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
+                   const void *primaryUv, const void *secondaryUv, const f32 *quad) {
+    *(u16 *)packet = 8;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xA0000000;
+    *(u32 *)(packet + 20) = 0x43434310;
+    *(u32 *)(packet + 24) = 0x43;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E02C003;
+    *(u32 *)(packet + 56) = primaryColor;
+    *(u32 *)(packet + 60) = secondaryColor;
+    *(u32 *)(packet + 64) = 0x6D04C005;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)primaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)secondaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)primaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)secondaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)primaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)secondaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv + 12);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv + 12);
+    *(u32 *)(packet + 100) = 0x6404C009;
+    *(f32 *)(packet + 104) = quad[0];
+    *(f32 *)(packet + 108) = quad[1];
+    *(f32 *)(packet + 112) = quad[2];
+    *(f32 *)(packet + 116) = quad[3];
+    *(f32 *)(packet + 120) = quad[4];
+    *(f32 *)(packet + 124) = quad[5];
+    *(f32 *)(packet + 128) = quad[6];
+    *(f32 *)(packet + 132) = quad[7];
+    *(u32 *)(packet + 136) = 0x04000004;
+    *(u32 *)(packet + 140) = 0x14000008;
+}
 
 u32 sdfMeasureAlignedRecordBufferBytes(s32 count) {
     return (count * 0x54 + 0x4bU) & 0xfffffff0;
@@ -863,7 +1023,46 @@ u32 sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAtt
     return (u32)packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_003396D0", func_0033BC98);
+/* Build a one-vertex textured-quad VIF packet with four corner colors: the
+ * position, colors, UV corners (copied as unaligned words) and the eight quad
+ * corner coordinates. */
+void sdfBuildFourColorTexturedQuadVifPacket(u8 *packet, const f32 *position, const u32 *colors, const void *uv, const f32 *quad) {
+    *(u16 *)packet = 8;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xD0000000;
+    *(u32 *)(packet + 20) = 0x34134130;
+    *(u32 *)(packet + 24) = 0x41341;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E04C003;
+    *(u32 *)(packet + 56) = colors[0];
+    *(u32 *)(packet + 60) = colors[1];
+    *(u32 *)(packet + 64) = colors[2];
+    *(u32 *)(packet + 68) = colors[3];
+    *(u32 *)(packet + 72) = 0x6504C007;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)uv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)uv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)uv + 12);
+    *(u32 *)(packet + 92) = 0x6404C00B;
+    *(f32 *)(packet + 96) = quad[0];
+    *(f32 *)(packet + 100) = quad[1];
+    *(f32 *)(packet + 104) = quad[2];
+    *(f32 *)(packet + 108) = quad[3];
+    *(f32 *)(packet + 112) = quad[4];
+    *(f32 *)(packet + 116) = quad[5];
+    *(f32 *)(packet + 120) = quad[6];
+    *(f32 *)(packet + 124) = quad[7];
+    *(u32 *)(packet + 128) = 0x04000006;
+    *(u32 *)(packet + 132) = 0x14000008;
+    *(u32 *)(packet + 136) = 0;
+    *(u32 *)(packet + 140) = 0;
+}
 
 s32 sdfMeasureAlignedRecordStorage(s32 count) {
     return (count * 0x4C + 0x4B) & ~0xF;
@@ -931,7 +1130,41 @@ u32 sdfBuildVertexColorQuadVifPacket(const u128 *positions, const void *attribut
     return (u32)packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_003396D0", func_0033C050);
+/* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
+ * position, colors, interleaved primary/secondary UV corners (copied as
+ * unaligned words) and the eight quad corner coordinates. */
+void func_0033C050(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
+                   const void *secondaryUv, const void *quad) {
+    *(u16 *)packet = 10;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xD0000000;
+    *(u32 *)(packet + 20) = 0x34134130;
+    *(u32 *)(packet + 24) = 0x41341;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x15D;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E08C003;
+    memcpy(packet + 56, colors, 32);
+    *(u32 *)(packet + 88) = 0x6D04C00B;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 100), (const u8 *)primaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 104), (const u8 *)secondaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 108), (const u8 *)primaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 112), (const u8 *)secondaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 116), (const u8 *)primaryUv + 12);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 120), (const u8 *)secondaryUv + 12);
+    *(u32 *)(packet + 124) = 0x6404C00F;
+    memcpy(packet + 128, quad, 32);
+    *(u32 *)(packet + 160) = 0x04000008;
+    *(u32 *)(packet + 164) = 0x14000008;
+    *(u32 *)(packet + 168) = 0;
+    *(u32 *)(packet + 172) = 0;
+}
 
 u32 sdfMeasureAlignedDrawPacketSize(s32 count) {
     return (count * 0x6c + 0x4bU) & 0xfffffff0;

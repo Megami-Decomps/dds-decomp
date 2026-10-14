@@ -395,7 +395,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
                 btlDispatchStateHandler(task, 0x1C);
                 return;
             }
-            if (func_001FCAC0(task) != 0) {
+            if (btlCheckStatusActionEligibility(task) != 0) {
                 btlDispatchStateHandler(task, 5);
             } else {
                 btlActionSeqStateSelect(task);
@@ -2535,7 +2535,7 @@ extern u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value);
 
 /* Queue escape-result sounds and stagger eligible party effects; successful
  * escapes also fade each eligible actor, with its identity as the task owner. */
-void func_001CFB10(BtlTask *task) {
+void btlScheduleEscapeResultTasks(BtlTask *task) {
     BtlState *state = btlGetRuntime();
     BtlUnit *unit;
     BtlRuntimeTask *effect;

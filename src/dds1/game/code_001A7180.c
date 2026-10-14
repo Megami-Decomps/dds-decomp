@@ -212,7 +212,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     return value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A7180", func_001A7548);
+INCLUDE_ASM(const s32, "game/code_001A7180", btlResolveCommandHitResult);
 
 void func_001A7AD0(void) {
 }

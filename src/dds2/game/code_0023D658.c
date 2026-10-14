@@ -1,4 +1,6 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
+#include "sdf_unique_chunk_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_path.h"
@@ -41,9 +43,6 @@ typedef struct EvtLipsLink {
     EvtLipsMh *mh;      /* 0x0C */
 } EvtLipsLink;
 
-extern u32 sdfGetUniqueChunkValue(SdfModel *model);
-
-
 extern u32 sdfGetLodChunkValue(SdfModel *model);
 
 
@@ -72,7 +71,6 @@ extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, 
 #include "dds3_world_primary.h"
 
 
-extern void scrSetIntegerReturnValue(s32 arg0);
 
 extern s32 scrReadIntParameter(s32 idx);
 

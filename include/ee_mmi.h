@@ -373,6 +373,17 @@ static inline u32 eePackRGBAWord(f32 unit) {
     : : "r"(dst), "r"(value) : "$2", "memory")
 
 /*
+ * Load a word from an unaligned address, `lwr` first. cc1's own unaligned
+ * accesses (block moves, packed fields) emit `lwl` first, and block moves
+ * also store with swl/swr. Retail: DDS1 sdfBuildTexturedQuadVifPacket and
+ * DDS2 func_0033B530 (texture-quad UV words).
+ */
+#define EE_LOAD_UNALIGNED_WORD(out, src) __asm__ volatile ( \
+    "lwr %0, 0(%1)\n\t" \
+    "lwl %0, 3(%1)" \
+    : "=&r"(out) : "r"(src))
+
+/*
  * vf10 (floats) -> RGBA8888 word, scale 255.0f through `mfc1 $2` (the draw
  * colour setters; EE_MMI_RGBA_PACK_F128 is the 128.0f twin):
  *     mfc1 $2,255.0f; qmtc2.ni $2,vf2; vmulx.xyzw vf10,vf10,vf2x;
@@ -435,5 +446,14 @@ static inline u32 eePackRGBAWord(f32 unit) {
  * share this texture-intensity conversion instruction.
  * Registers are selected by gcc; the output may reuse the input register. */
 #define EE_MMI_PEXT5(out, in) __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))
+
+/*
+ * Store a zero quadword with `sq $0, off(p)`. EE GCC materializes every C
+ * 128-bit zero (`por $2,$0,$0; sq $2`), so the bare $0 store is SDK asm. It is
+ * volatile and memory-clobbering, so stores keep source order and anything
+ * that must issue before them (a loop test) has to come first in source.
+ */
+#define EE_STORE_ZERO_QUAD(p, off) __asm__ volatile ( \
+    "sq $0, " #off "(%0)" : : "r" (p) : "memory")
 
 #endif

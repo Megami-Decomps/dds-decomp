@@ -2847,11 +2847,11 @@ u32 fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CE958);
+INCLUDE_ASM(const s32, "game/code_002C96D0", fileUpdatePromptDialog);
 
 extern u32 D_00439024;
 extern u32 D_00439028;
-extern s32 func_002CE958(void);
+extern s32 fileUpdatePromptDialog(void);
 
 s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     D_00439024 = (u32)start;
@@ -2861,7 +2861,7 @@ s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     if (D_00437D1C != 4 && D_00437D1C != 8) {
         fileReqBegin(fileMemoryCardRequestIndex);
     }
-    return (s32)func_002CE958;
+    return (s32)fileUpdatePromptDialog;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", fileShowPromptDialog);
@@ -5072,7 +5072,37 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", fileQueueSetColor);
+/* Store the queue's modulation colour, then send every job its own colour
+ * modulated by it ((job / 128) * (queue / 128) * 128 per channel). The tint
+ * store is the unclobbered SDK spelling: as a bare volatile asm it flushes the
+ * CSE table, so the loop's 1/128 is rematerialized rather than copied from the
+ * first unpack's FPR. Reading the payload before the packed store keeps the
+ * store from feeding the argument load. */
+void fileQueueSetColor(FileQueue *queue, u32 color) {
+    f32 tint[4] __attribute__((aligned(16)));
+    u32 queueColor[4] __attribute__((aligned(16)));
+    u32 jobColor[4] __attribute__((aligned(16)));
+    u32 packed[4] __attribute__((aligned(16)));
+    FileJob *job;
+
+    queue->color = color;
+    queueColor[0] = color;
+    EE_MMI_RGBA_UNPACK(queueColor, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, tint);
+    for (job = queue->first; job != NULL; job = job->next) {
+        u32 result;
+        FileJobPayload *payload;
+
+        jobColor[0] = job->color;
+        EE_MMI_RGBA_UNPACK(jobColor, 1.0f / 128.0f);
+        VU0_LOAD_VF(vf11, tint);
+        VU0_MUL(vf10, vf10, vf11);
+        EE_MMI_RGBA_PACK_UNIT(result, 0x43000000);
+        payload = (FileJobPayload *)job->id;
+        packed[0] = result;
+        fileDispatchJobTypeCallback(payload, result);
+    }
+}
 
 void fileQueueReadPosition(const FileQueue *queue, f32 position[4]) {
     PCP_COPY_VECTOR(position, queue->position);

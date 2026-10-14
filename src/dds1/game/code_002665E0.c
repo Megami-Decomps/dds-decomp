@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "scr_string_parameter_api.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
@@ -851,7 +852,6 @@ u32 sndOpStopNamedPlayback(void) {
     return 1;
 }
 
-extern void scrSetIntegerReturnValue(s32 value);
 
 u32 sndOpPushCommandBusyState(void) {
     u32 soundBusy;
@@ -937,7 +937,7 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     sndCopyWordsToIopSynchronously(D_003BC5B8, D_003BC5B0[1], wordCount);
 }
 
-extern s32 func_002F5990(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
 
 /* Send the per-core parameter commands for both sound cores, then the IOP
  * stream buffer with the transfer size. */
@@ -945,13 +945,13 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
     volatile s32 core;
 
     for (core = 0; core < 2; core++) {
-        func_002F5990(1, 0x8010, core | 0x980, 0x3FFF);
-        func_002F5990(1, 0x8010, core | 0xA80, 0x3FFF);
-        func_002F5990(1, 0x8010, core | 0x800, func_002F5990(1, 0x8020, core | 0x800) & ~0x30);
+        sndDispatchIopAudioCommand(1, 0x8010, core | 0x980, 0x3FFF);
+        sndDispatchIopAudioCommand(1, 0x8010, core | 0xA80, 0x3FFF);
+        sndDispatchIopAudioCommand(1, 0x8010, core | 0x800, sndDispatchIopAudioCommand(1, 0x8020, core | 0x800) & ~0x30);
     }
-    func_002F5990(1, 0x80E0, 0, 0x10, D_003BD8C0, transferSize << 3);
-    func_002F5990(1, 0x8010, 0xF80, 0x7FFF);
-    func_002F5990(1, 0x8010, 0x1080, 0x7FFF);
+    sndDispatchIopAudioCommand(1, 0x80E0, 0, 0x10, D_003BD8C0, transferSize << 3);
+    sndDispatchIopAudioCommand(1, 0x8010, 0xF80, 0x7FFF);
+    sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
 }
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
@@ -961,10 +961,10 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
 }
 
 extern u64 D_003BD8B8;
-extern s32 func_002F5990(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
 
 s32 mnuCopySoundStreamOnStatusChange(u32 source, u32 words) {
-    u64 status = func_002F5990(1, 0x8100, 0);
+    u64 status = sndDispatchIopAudioCommand(1, 0x8100, 0);
 
     if ((D_003BD8B8 & 0x1000000) == (status & 0x1000000)) {
         return 0;

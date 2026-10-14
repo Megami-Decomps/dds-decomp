@@ -1,10 +1,10 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "scr.h"
 #include "mdl_flag_api.h"
 
 
 extern s32 scrReadIntParameter(s32);
-extern void scrSetIntegerReturnValue(s32);
 
 
 extern s8 D_00398629[];

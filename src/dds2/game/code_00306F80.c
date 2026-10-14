@@ -506,7 +506,37 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ow
     return 0x10000 / table->divisor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00307C30);
+typedef struct GridColorTargetTable {
+    s32 divisor; /* 0x00 */
+    s32 alpha;   /* 0x04 */
+    s32 blue;    /* 0x08 */
+    s32 green;   /* 0x0C */
+    s32 red;     /* 0x10 */
+} GridColorTargetTable;
+
+/* Blend each saved corner color toward the table's target color. */
+s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+    GridColorTargetTable *table = (GridColorTargetTable *)owner->source->status;
+    u32 *destColor = out->geometry.cornerColors;
+    u32 *sourceColor = rectangle->savedColors;
+    s32 i;
+
+    for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+        u32 color = *sourceColor;
+        s32 alpha = (color & 0xFF000000) >> 24;
+        s32 blue = (color & 0xFF0000) >> 16;
+        s32 green = (color & 0xFF00) >> 8;
+        s32 red = *(u8 *)sourceColor;
+        s32 alphaTarget = table->alpha;
+
+        blue = (blue + (table->blue - blue) * owner->value / 0x10000) & 0xFF;
+        green = (green + (table->green - green) * owner->value / 0x10000) & 0xFF;
+        red = (red + (table->red - red) * owner->value / 0x10000) & 0xFF;
+        *destColor = ((alpha + (alphaTarget - alpha) * owner->value / 0x10000) << 24) | (blue << 16)
+            | (green << 8) | red;
+    }
+    return 0x10000 / table->divisor;
+}
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
 s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {

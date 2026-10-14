@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "scr_integer_return_value_api.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"

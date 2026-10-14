@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "dsp_active_api.h"
 #include "mnu_camp_display.h"
+#include "mnu_camp_font_api.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "itf_mes_window.h"

@@ -1,4 +1,5 @@
 #include "btl_command.h"
+#include "scr_integer_return_value_api.h"
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
@@ -177,7 +178,6 @@ extern u16 scrReadIntParameter(u32);
 
 extern u32 btlButtonIconTexture;
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
-extern void scrSetIntegerReturnValue();
 extern void btlPickCommandTargetWithStatusMask(s32, u16);
 extern u8 *btlAllocTask(s32);
 extern void btlCommandRecenterParty(void);
