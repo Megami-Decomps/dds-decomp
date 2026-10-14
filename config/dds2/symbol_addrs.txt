@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+btlCheckStatusActionEligibility = 0x0020EB40; // type:func
 fldClassifyMovementAgainstZoneFaces = 0x00139B98; // type:func
 sdfDevFindDiscFileRecordByCdromPath = 0x0033DE60; // type:func
 sdfBuildFourColorTexturedQuadVifPacket = 0x0033BC98; // type:func
@@ -10002,7 +10003,6 @@ btlSetResourceNameLengthLimit = 0x0020E850; // type:func
 btlPollResourceNameOverwrite = 0x0020E858; // type:func
 func_0020EA10 = 0x0020EA10; // type:func
 btlDrawActorGroundDisc = 0x0020EA18; // type:func
-func_0020EB40 = 0x0020EB40; // type:func
 btlSelectHpMpDisplayPositionVU = 0x0020EC20; // type:func
 btlDrawCenteredUnsignedNumber = 0x0020F048; // type:func
 btlGetStatusActionEffectId = 0x0020F200; // type:func
