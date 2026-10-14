@@ -538,7 +538,7 @@ s32 btlHasAnyOperandLowFlag(s32 unused, BattleIndexWork *state) {
 
 extern void func_001AA130(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
 
-extern s32 func_001A6EC0(BtlUnit *, s32);
+extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
 
 extern void btlDistributeRandomTargetHits(BtlUnit *, BtlIndexList *, BtlOperandGroup *, s32);
 
@@ -692,7 +692,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
     }
     group = work->groups;
     randomTargets = 0;
-    if (func_001A6EC0(action->unit, command)) {
+    if (btlShouldDistributeRandomTargetHits(action->unit, command)) {
         randomTargets = 1;
         btlDistributeRandomTargetHits(action->unit, work->indices, group, command);
     }

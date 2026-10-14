@@ -513,7 +513,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern void func_001B4AA0(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
 
-extern s32 func_001B1090(BtlUnit *, s32);
+extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
 
 struct BtlTargetResult;
 
@@ -678,7 +678,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     }
     group = work->groups;
     randomTargets = 0;
-    if (func_001B1090(action->unit, command)) {
+    if (btlShouldDistributeRandomTargetHits(action->unit, command)) {
         randomTargets = 1;
         btlDistributeRandomTargetHits(action->unit, work->indices, (struct BtlTargetResult *)group, command);
     }

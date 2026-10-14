@@ -3716,7 +3716,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
     }
 }
 
-s32 func_001B1090(BtlUnit *unit, s32 command) {
+s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
     BtlState *runtime = btlGetRuntime();
     /* 0x6D8: command-availability override (named in DDS1's BtlState). */
     s32 (*availability)(BtlUnit *, s32) = *(s32 (**)(BtlUnit *, s32))runtime->pad6D8;
