@@ -11765,3 +11765,52 @@ inactive path skips all snapshot consumers. Replacing only this body's two
 stores with truthful `VU0_STORE_VF_TO` outputs produces 260 bytes in DDS1,
 with 56 of 65 words different. Requalify the emitted accesses whenever the
 compiler, source lifetime, control flow, or macro contract changes.
+
+### Mode-1 field camera keeps the selected motion across pose work
+
+The 1,704-byte twins `func_0012F578` / `func_00131B50` use the existing
+`FldAreaWork`, `EffWorldNode` and `ObjectTransform` owners. Their mode-1
+heading is `unk174` / `unk180`, produced by the actor-entry trigger; it is
+separate from `targetAngle`. Preserve the six degree-wrap loops, callback-fresh
+runtime flag, pending X/Y+44/Z correction, three independent smoothed-position
+arms, and state-first XYZ publication before reconstructing the collision
+input and setter vector.
+
+The native requested motion 23 has a real lifetime across pose calculation.
+Declare one ordinary `motion` local, assign it after the view inversion, and
+use it for the final current-motion test and the actual motion request.
+With literals only at the two final uses, the first candidate emitted
+1,688 bytes in a 0x90 frame. In the exact source, pinned cc1 pass 00 creates
+p87/uid438 for this real selection; pass 19 records two references, one
+definition, 366 live instructions and ten crossed calls. Global allocation
+places it in S4, matching the native comparison, while the real request
+argument folds to `li a2,23`. This is an actual source role, not a dummy
+frame or register dependency. Both complete scratch owners pass 237/0 and
+154/0, and all ten allocated/REL sections agree between ordinary and
+RTL-dump compilations in each title.
+
+The native distance coefficient is exactly `0x1.3e93e8p-4f`
+(`0x3D9F49F4`). The pinned compiler emits `0x3D9F49F3` for the shorter decimal
+`0.07777777f`, although host
+round-to-nearest gives F4. Rounded `14/180` gives F5. Keep the exact
+hexadecimal literal and the native multiply-by-3.14/divide-by-180 order.
+
+The four existing input-address-only SDK stores have only a body-specific,
+pinned-emission qualification. Position at SP+0..15 is initialized by the
+store at +0x74 before its scalar reads; the provider sets W=1, which survives
+both XYZ reconstructions and full-vector setters. The conditional refetch
+at +0x404 feeds fresh smoothing reads; its skipped path retains the earlier
+setter vector. Quaternion stores at +0x2AC/+0x61C use SP+0x20, with the
+latter feeding the complete rotation setter. No cached scalar quaternion
+read exists. The distinct collision input is XYZ-only at SP+0x40, and the
+axis's actual VU-load slot at SP+0x30 is sixteen-byte aligned despite the
+aggregate type's four-byte alignment. The global axis uses native unaligned
+LDL/LDR copies.
+
+Replacing only those four stores with truthful complete-array
+`VU0_STORE_VF_TO` outputs emits 1,680 bytes in either title, with 402 of 420
+compared words different. Expansion no longer carries the same explicit
+quaternion-address pseudo; the real motion local remains live but shifts
+from S4 to S3. This control limits the qualification; it does not make
+volatile input-only asm a generally sound memory interface. Reaudit any
+compiler, source-lifetime, control-flow, alignment or macro-contract change.
