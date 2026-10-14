@@ -1710,7 +1710,75 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00242608", mnuCampRebuildItemStockWindow);
+extern void mnuDrawCampItemListRow();
+
+/* Rebuild the camp stock window from the shop's source price row, then append the
+ * standard catalog and install the item row drawer. */
+s32 mnuCampRebuildItemStockWindow(ShopScene *scene) {
+    void *block;
+    s32 rowIndex;
+    u32 i;
+
+    if (scene->window != NULL) {
+        if (scene->window->list->context != NULL) {
+            sdfReleaseChipBlock(scene->window->list->context);
+            scene->window->list->context = NULL;
+        }
+        mnuDestroyWindowContainer(scene->window);
+    }
+    rowIndex = campFlagRowValue(scene->initialSelection);
+    scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
+    for (i = 0; i < 0x40; i++) {
+        u32 id = D_00368CF0[rowIndex].entries[i].itemId;
+        u32 mode = D_00368CF0[rowIndex].entries[i].type;
+        struct MenuListNode *node;
+        CampWindowParams *params;
+        u32 price;
+
+        if (mode != 1) {
+            if ((u32)(id - 0xA0) < 0x20) {
+                continue;
+            }
+            if (id == 0) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA84[id]);
+            mnuClearWindowListSelectionFlags(scene->window);
+            mnuAdvanceListCursorDefault(scene->window->list);
+            params = &node->camp;
+            price = mnuCampGetSourceItemPrice(i, scene->initialSelection, 0);
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0) {
+                node->flags48 = 1;
+            }
+        } else {
+            if (id == 0) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA74[id]);
+            mnuAdvanceWindowListSelection(scene->window);
+            params = &node->camp;
+            price = D_00369FA0[id];
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+                node->flags48 = mode;
+            }
+        }
+    }
+    mnuBuildShopStandardCatalogList(scene);
+    mnuSelectFirstListNode(scene->window->list);
+    scene->window->list->drawCallback = mnuDrawCampItemListRow;
+    block = sdfAllocSizeClassBlock(0x10);
+    memset(block, 0, 0x10);
+    scene->window->list->context = block;
+    return scene->window->list->count;
+}
 
 extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
@@ -1771,7 +1839,72 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", mnuCampRebuildFilteredStockWindow);
+extern void mnuDrawCampItemListRow();
+
+/* As mnuCampRebuildItemStockWindow, keeping only the 0xA0-0xBF range of ordinary
+ * stock, then appending the full shop catalog. */
+s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
+    void *block;
+    s32 rowIndex;
+    u32 i;
+
+    if (scene->window != NULL) {
+        if (scene->window->list->context != NULL) {
+            sdfReleaseChipBlock(scene->window->list->context);
+            scene->window->list->context = NULL;
+        }
+        mnuDestroyWindowContainer(scene->window);
+    }
+    rowIndex = campFlagRowValue(scene->initialSelection);
+    scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
+    for (i = 0; i < 0x40; i++) {
+        u32 id = D_00368CF0[rowIndex].entries[i].itemId;
+        u32 mode = D_00368CF0[rowIndex].entries[i].type;
+        struct MenuListNode *node;
+        CampWindowParams *params;
+        u32 price;
+
+        if (mode != 1) {
+            if ((u32)(id - 0xA0) >= 0x20) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA84[id]);
+            mnuClearWindowListSelectionFlags(scene->window);
+            mnuAdvanceListCursorDefault(scene->window->list);
+            params = &node->camp;
+            price = mnuCampGetSourceItemPrice(i, scene->initialSelection, 0);
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0) {
+                node->flags48 = 1;
+            }
+        } else {
+            if (id == 0) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA74[id]);
+            mnuAdvanceWindowListSelection(scene->window);
+            params = &node->camp;
+            price = D_00369FA0[id];
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+                node->flags48 = mode;
+            }
+        }
+    }
+    mnuBuildShopCatalogList(scene);
+    mnuSelectFirstListNode(scene->window->list);
+    scene->window->list->drawCallback = mnuDrawCampItemListRow;
+    block = sdfAllocSizeClassBlock(0x10);
+    memset(block, 0, 0x10);
+    scene->window->list->context = block;
+    return scene->window->list->count;
+}
 extern char (*D_003BAA84)[25];
 
 extern u32 D_0036A260[][16];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_scaled_value.h"
 #include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "dds3obj.h"
@@ -12,6 +13,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "evt_randomize_entry_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -58,17 +60,6 @@ extern SdfChannel D_00385A90[8];
 extern void sdfReloadChannelSegments(SdfChannel *channel);
 extern void sdfDebugPrintf(const char *fmt, ...);
 const char D_00412AB0[16] = "sys:[%s]\n";
-
-
-typedef struct EvtScaledValue {
-    u32 value;
-    u32 flags;
-    f32 base;
-    f32 scaled;
-    u8 pad10[8];
-    u8 pad18[4];
-} EvtScaledValue;
-
 
 
 #define SDF_PACKED_FLAG 0x8000
@@ -907,8 +898,6 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
 void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 value) {
     item->status = (item->status & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
 }
-
-extern void evtRandomizeEntryValue();
 
 /* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value) {

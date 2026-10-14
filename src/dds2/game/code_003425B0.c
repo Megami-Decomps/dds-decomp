@@ -668,7 +668,7 @@ void sdfPrintDmaChain(u32 *dmaTag) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00343468);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfDumpDmaVifCommandStream);
 
 void sdfDumpGsMemoryForward(void) {
     char buf[8];
@@ -1499,7 +1499,7 @@ extern s32 D_00439200;
 extern u8 sdfIpuStreamThreadStack[];
 extern s32 sdfAddHandler();
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
-extern void func_003668B8();
+extern s32 sdfEnableDmacChannel(s32 channel);
 extern void sceIpuInit();
 extern void _StartThread();
 extern void sdfIpuDmaCompletionWorker();
@@ -1510,9 +1510,9 @@ void sdfSoundInitIpuStream(void) {
     sdfSoundNodeHead = 0;
     D_00439204 = NULL;
     D_004391FC = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);
-    func_003668B8(3);
+    sdfEnableDmacChannel(3);
     D_00439200 = sdfAddHandler(1, 4, sdfCompleteIpuInputFeedDma, -1, 0);
-    func_003668B8(4);
+    sdfEnableDmacChannel(4);
     D_00439214 = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     _StartThread(D_00439214, 0);
 }
@@ -1520,7 +1520,7 @@ void sdfSoundInitIpuStream(void) {
 extern s32 D_004391FC;
 extern s32 D_00439200;
 extern void sdfRemoveHandler();
-extern s32 func_00366850();
+extern s32 sdfDisableDmacChannel(s32 channel);
 
 /* Remove both IPU handlers and forward the final completion-source disable result. */
 s32 sdfSoundShutdownIpuStreamHandlers(void) {
@@ -1528,12 +1528,12 @@ s32 sdfSoundShutdownIpuStreamHandlers(void) {
         sdfRemoveHandler(D_004391FC);
         D_004391FC = 0;
     }
-    func_00366850(3);
+    sdfDisableDmacChannel(3);
     if (D_00439200 != 0) {
         sdfRemoveHandler(D_00439200);
         D_00439200 = 0;
     }
-    return func_00366850(4);
+    return sdfDisableDmacChannel(4);
 }
 
 /* Print the native incoming a0 string and a newline through libc puts.

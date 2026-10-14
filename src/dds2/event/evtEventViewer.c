@@ -1,4 +1,6 @@
 #include "common.h"
+#include "evt_scaled_value.h"
+#include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
 #include "sdf_chip.h"
@@ -2088,12 +2090,8 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
     return best;
 }
 
-typedef struct EvtViewerPlaybackData {
-    ObjBase *object;
-    void *counter;
-} EvtViewerPlaybackData;
-extern void sdfFreezeFloatCounter(void *counter);
-extern void sdfUnfreezeFloatCounter(void *counter);
+extern void sdfFreezeFloatCounter(struct EvtScaledValue *counter);
+extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *counter);
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
 void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
@@ -2103,7 +2101,7 @@ void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     EvtRuntimeGroup *found;
     EvtRuntimeChild *key;
     Motion *motion;
-    void *counter;
+    struct EvtScaledValue *counter;
     void *movie;
     s32 useTrackTime;
 

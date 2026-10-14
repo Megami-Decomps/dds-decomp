@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_map_selection.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
@@ -96,13 +97,6 @@ void sdfCounterSelectChannelByIndex(SdfCounterRuntime *rt, s32 target) {
         }
     }
 }
-
-typedef struct {
-    u8 pad00[0x0C];
-    s32 selectedCount; /* 0x0C */
-    u8 pad10[0x10];
-    s32 maxCount;      /* 0x20 */
-} MapSelection;
 
 void fldSetMapSelectedCount(MapSelection *selection, s32 count) {
     if ((count <= selection->maxCount) && (count != 0)) {

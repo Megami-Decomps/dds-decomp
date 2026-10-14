@@ -567,7 +567,7 @@ extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
 extern s32 btlSelectActorAction(s32);
 
-extern s32 func_001B3B28(BtlUnit *);
+extern s32 btlCalculateMoneyDropAmount(BtlUnit *);
 
 extern s32 btlCalculateHuntEpReward(BtlUnit *, BtlUnit *);
 
@@ -577,9 +577,9 @@ extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
 
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *, BtlUnit *);
 
-extern s32 func_001AF4A0(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
-extern s32 func_001AFF38(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateMpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
 extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 
@@ -591,7 +591,7 @@ extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
 extern s32 btlRollFearChance(s32, BtlUnit *, s32, s32);
 
-extern s32 func_001B4600(BtlUnit *, s32);
+extern s32 btlRollPetrifiedDeathChance(BtlUnit *, s32);
 
 extern s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *);
 
@@ -601,7 +601,7 @@ extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
 extern u8 btlGetActorDisplayByteWithDefault(BtlUnit *, s32);
 
-extern s32 func_001B4918(BtlUnit *, BtlUnit *);
+extern s32 btlSelectCounterSkill(BtlUnit *, BtlUnit *);
 
 extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
@@ -934,7 +934,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             target->status.flags |= 0x4000000;
         }
         if (datCommandRecords[command].unk30 == 21) {
-            work->unk60 = func_001B3B28(target);
+            work->unk60 = btlCalculateMoneyDropAmount(target);
             target->status.stateFlags |= 0x10000;
         }
         switch (datCommandRecords[command].unk30) {
@@ -1001,11 +1001,15 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             s32 mpDelta;
             f32 multiplier;
 
-            hpAttack = func_001AF4A0(source, recipient, command, maxHits, press, 1, calculationFlags);
-            hpRestore = func_001AF4A0(source, recipient, command, maxHits, press, 0, calculationFlags);
+            hpAttack = btlCalculateHpActionAmount(source, recipient, command, maxHits,
+                                                  press, 1, calculationFlags);
+            hpRestore = btlCalculateHpActionAmount(source, recipient, command, maxHits,
+                                                   press, 0, calculationFlags);
             hpAttack = hpAttack * ratio;
-            mpAttack = func_001AFF38(source, recipient, command, maxHits, press, 1, calculationFlags);
-            mpRestore = func_001AFF38(source, recipient, command, maxHits, press, 0, calculationFlags);
+            mpAttack = btlCalculateMpActionAmount(source, recipient, command, maxHits,
+                                                  press, 1, calculationFlags);
+            mpRestore = btlCalculateMpActionAmount(source, recipient, command, maxHits,
+                                                   press, 0, calculationFlags);
             group->entries[hitIndex].addedStatus = addedStatus;
             group->entries[hitIndex].deferredStatus = deferredStatus;
             group->entries[hitIndex].removedStatus = removedStatus;
@@ -1087,7 +1091,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 break;
             }
             {
-                if (kind == 1 && func_001B4600(recipient, command)) {
+                if (kind == 1 && btlRollPetrifiedDeathChance(recipient, command)) {
                     hitCount = hitIndex + 1;
                     fearPending = 0;
                     allEmpty = 0;
@@ -1159,7 +1163,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             kind == 1 && !group->inactive && !group->reflected && !group->targetSpecialHit &&
             !absorbed && !(action->pendingFlags & 0x40) && !(target->partyRecord.status & 0x290F) &&
             !(addedStatus & 0x290F)) {
-            s32 counter = func_001B4918(target, action->unit);
+            s32 counter = btlSelectCounterSkill(target, action->unit);
             if (counter > 0) {
                 s32 counterPhase;
                 ActionStateLink *reaction = btlFindUnitByActor(target);
@@ -4469,7 +4473,7 @@ s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
             void *handle = battle->resources[BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT]->sourceHandle;
             unit->status.flags |= 0x80;
             args->mixer = sndMixerClone(handle);
-            args->effect = func_00168548(args->mixer, 2, unit, 0);
+            args->effect = effCreateBattleVoiceOwner(args->mixer, 2, unit, 0);
             args->duration = 0xE;
             args->effect->flags &= 0xFFF9;
             effBattleUpdateSelectedValue(args->effect, 0xE);

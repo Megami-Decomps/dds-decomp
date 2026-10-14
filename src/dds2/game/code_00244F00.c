@@ -170,7 +170,7 @@ void evtStopTestTasks(void) {
     evtDestroySecondaryWorldNode();
 }
 
-INCLUDE_ASM(const s32, "game/code_00244F00", func_002458B8);
+INCLUDE_ASM(const s32, "game/code_00244F00", dds3DrawWorldNodeChainDiagnosticPanel);
 
 void func_00245F80(void) {
     D_0043722C = 0;

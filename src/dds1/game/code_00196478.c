@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_text_vector.h"
 #include "fr_font_text_slots.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
@@ -81,26 +82,11 @@ void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
 extern u32 strlen(const char *str);
 
-/* Allocation handle precedes the first queue node by four bytes. */
-typedef struct MemRingHeader {
-    SdfMemBlock *allocation;
-    MemNode first;
-} MemRingHeader;
-
 /* Two consecutive entries in the four-byte-stride offset table bound a span. */
 typedef struct ItfBitRange {
     u32 start;
     u32 end;
 } ItfBitRange;
-
-
-
-typedef struct TextVector {
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 w;
-} TextVector;
 
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 

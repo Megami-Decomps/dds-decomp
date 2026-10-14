@@ -8,7 +8,7 @@
 
 extern s32 effObjInnerCreate(EffWorldNode *object);
 
-extern void effObjInnerVecBackup();
+extern void effObjInnerVecBackup(ObjectTransform *node);
 
 EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_RESOURCE_OWNER);

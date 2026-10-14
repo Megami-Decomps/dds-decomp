@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "sdf_model.h"
 #include "evt_gradient_rect.h"
 #include "sdf_motion.h"
@@ -90,7 +91,7 @@ void dds3ClearObjectFlags(void *object, u32 mask) {
 }
 
 /* Return whether any requested mask bit is set, not whether all bits are set. */
-u8 dds3TestObjectFlags(void *object, u32 mask) {
+u8 dds3TestObjectFlags(void *object, s32 mask) {
     ObjBase *base;
 
     base = dds3GetObjectOwnedHandle(object);

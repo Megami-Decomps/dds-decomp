@@ -376,7 +376,7 @@ void parBuildHistoryRibbonStrip(ParSystem *system, s32 index, const f32 *origin,
     effBillSetEntryValue(system, index, color);
 }
 
-extern void func_0015BCE8(ParSystem *system, s32 index);
+extern void parFadeTriangleCellAlpha(ParSystem *system, s32 index);
 
 /* Triangle-cell variant of parBuildHistoryRibbonStrip: three vertices per history segment. */
 void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
@@ -429,7 +429,7 @@ void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *orig
             VU0_STORE_VF_UNCLOBBERED(vf11, vertex + 2);
             vertex += 3;
         }
-        func_0015BCE8(system, index);
+        parFadeTriangleCellAlpha(system, index);
     }
     effBillSetEntryValue(system, index, color);
 }

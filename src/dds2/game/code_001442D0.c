@@ -1096,11 +1096,6 @@ void fldCacheMapLabelLengths(s32 world) {
 }
 
 void fldLoadSceneRecordTable(void) {
-    typedef struct {
-        u8 pad00[4];
-        s32 rows;
-        s32 count;
-    } SceneHeader;
     char path[0x80];
     char directory[0x40];
     s32 resourceHandle;
@@ -1113,17 +1108,11 @@ void fldLoadSceneRecordTable(void) {
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
     header = fldGetTransferChunkPayload(transferStart);
-    fldSceneRecords = (FldSceneRecord *)(u32)((SceneHeader *)header)->rows;
-    fldSceneRecordCount = ((SceneHeader *)header)->count;
+    fldSceneRecords = (FldSceneRecord *)(u32)((FldSceneRecordTableHeader *)header)->rows;
+    fldSceneRecordCount = ((FldSceneRecordTableHeader *)header)->count;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
-    /* Descriptor from fldGetTransferChunkPayload precedes the 0x14-byte scene rows. */
-    typedef struct {
-        u8 pad00[4];
-        s32 rows; /* 0x04: first scene row */
-        s32 count; /* 0x08: number of scene rows */
-    } SceneHeader;
     if (D_00389780[0] < 0xC8) {
         u8 *transferStart = chunk + 8;
 
@@ -1131,8 +1120,8 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldRelocatePackedTransferChunk((u32)chunk, (s32)(u32)transferStart);
         {
             s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
-            s32 rows = ((SceneHeader *)header)->rows;
-            s32 count = ((SceneHeader *)header)->count;
+            s32 rows = ((FldSceneRecordTableHeader *)header)->rows;
+            s32 count = ((FldSceneRecordTableHeader *)header)->count;
 
             fldSceneRecordCount = count;
             fldSceneRecords = (FldSceneRecord *)(u32)rows;
@@ -4995,7 +4984,7 @@ f32 fldApproachTargetAngleWithMinimumStep(f32 cur, f32 target, f32 speed, f32 mi
     return delta;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001519E8);
+INCLUDE_ASM(const s32, "game/code_001442D0", fldSetTargetGuideMotionMode);
 
 void func_00151DD8(void) {
 }
@@ -5007,7 +4996,7 @@ void fldTickTargetGuideCounter(void) {
     }
 }
 
-extern void func_001519E8(s32);
+extern void fldSetTargetGuideMotionMode(s32);
 extern FieldGridCoordPair D_00438EF8;
 
 void fldUpdateTargetGuideFastRoute(void) {
@@ -5041,7 +5030,7 @@ void fldUpdateTargetGuideFastRoute(void) {
             state->moveTimer = 20;
             state->stepDistance = 0.0f;
         } else {
-            func_001519E8(3);
+            fldSetTargetGuideMotionMode(3);
         }
     } else {
         state->position[0] += sdfSinPoly(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
@@ -5082,7 +5071,7 @@ void fldUpdateTargetGuideSlowRoute(void) {
             state->moveTimer = 20;
             state->stepDistance = 0.0f;
         } else {
-            func_001519E8(2);
+            fldSetTargetGuideMotionMode(2);
         }
     } else {
         state->position[0] += sdfSinPoly(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
@@ -5101,7 +5090,7 @@ void fldTickTargetGuideAndNotify(void) {
         count = remaining;
     }
     if (count == 0) {
-        func_001519E8(1);
+        fldSetTargetGuideMotionMode(1);
     }
 }
 
@@ -5123,7 +5112,7 @@ void fldUpdateTargetGuideCycleMotion(void) {
         } else {
             state->cycleIndex++;
         }
-        func_001519E8(5);
+        fldSetTargetGuideMotionMode(5);
     } else {
         state->position[0] += sdfSinPoly(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
         state->position[2] += sdfEvaluateCosineViaSinePhaseShift(state->targetYaw * 3.14f / 180.0f) * state->stepDistance;
@@ -5204,7 +5193,7 @@ void fldUpdateTargetGuideMovementState(void) {
             return;
         }
         if (state->gridX != D_00438EF8.x || state->gridY != D_00438EF8.y) {
-            func_001519E8(2);
+            fldSetTargetGuideMotionMode(2);
         }
     }
     state = &fldTargetGuideState;
@@ -5215,7 +5204,7 @@ void fldUpdateTargetGuideMovementState(void) {
     }
     if (state->mode == 3) {
         if (state->gridX == D_00438EF8.x && state->gridY == D_00438EF8.y) {
-            func_001519E8(4);
+            fldSetTargetGuideMotionMode(4);
             state->updateFlags |= 0x80;
             return;
         }
@@ -5223,7 +5212,7 @@ void fldUpdateTargetGuideMovementState(void) {
     state = &fldTargetGuideState;
     if (state->mode == 2) {
         if (state->routeRecord != NULL && (state->routeRecord->flags & 1) != 0) {
-            func_001519E8(3);
+            fldSetTargetGuideMotionMode(3);
             state->updateFlags |= 0x80;
         }
         return;
@@ -5531,7 +5520,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(2);
+        fldSetTargetGuideMotionMode(2);
         fldUpdateTargetGuideEffects();
         sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
@@ -5542,7 +5531,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(5);
+        fldSetTargetGuideMotionMode(5);
         fldUpdateTargetGuideEffects();
         break;
     case 2:
@@ -5550,7 +5539,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 0.0f;
         fldTargetGuideState.yaw = 180.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(6);
+        fldSetTargetGuideMotionMode(6);
         fldUpdateTargetGuideEffects();
         break;
     case 3:
@@ -5560,7 +5549,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(2);
+        fldSetTargetGuideMotionMode(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         sndQueueSoundId(0x690061);
@@ -5573,7 +5562,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 90.0f;
         fldTargetGuideState.yaw = 180.0f - fldTargetGuideState.targetYaw;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(2);
+        fldSetTargetGuideMotionMode(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         sndQueueSoundId(0x690061);
@@ -5586,7 +5575,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(2);
+        fldSetTargetGuideMotionMode(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         sndQueueSoundId(0x690061);
@@ -5599,7 +5588,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(2);
+        fldSetTargetGuideMotionMode(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
@@ -5612,7 +5601,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(6);
+        fldSetTargetGuideMotionMode(6);
         fldUpdateTargetGuideEffects();
         sndQueueSoundId(0x690061);
         break;
@@ -5623,7 +5612,7 @@ void fldSetTargetGuideMode(s32 mode) {
             fldTargetGuideState.targetYaw = 180.0f;
             fldTargetGuideState.yaw = 0.0f;
             fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-            func_001519E8(3);
+            fldSetTargetGuideMotionMode(3);
             fldTargetGuideState.updateFlags |= 2;
             fldUpdateTargetGuideEffects();
             sndQueueSoundId(0x690061);
@@ -5637,7 +5626,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(2);
+        fldSetTargetGuideMotionMode(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
@@ -5650,7 +5639,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(6);
+        fldSetTargetGuideMotionMode(6);
         fldUpdateTargetGuideEffects();
         sndQueueSoundId(0x690061);
         break;
@@ -5661,7 +5650,7 @@ void fldSetTargetGuideMode(s32 mode) {
             fldTargetGuideState.yaw = 180.0f;
             fldTargetGuideState.targetYaw = 0.0f;
             fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-            func_001519E8(3);
+            fldSetTargetGuideMotionMode(3);
             fldTargetGuideState.updateFlags |= 2;
             fldUpdateTargetGuideEffects();
             sndQueueSoundId(0x690061);
@@ -5675,7 +5664,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(7);
+        fldSetTargetGuideMotionMode(7);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
@@ -5688,7 +5677,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(7);
+        fldSetTargetGuideMotionMode(7);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
@@ -5702,7 +5691,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldTargetGuideState.position[0] = fldTargetGuideState.targetYaw;
         fldTargetGuideState.position[2] = fldTargetGuideState.targetYaw;
-        func_001519E8(8);
+        fldSetTargetGuideMotionMode(8);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
@@ -5714,7 +5703,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.targetYaw = 180.0f;
         fldTargetGuideState.yaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
-        func_001519E8(2);
+        fldSetTargetGuideMotionMode(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         sndQueueSoundId(0x690061);

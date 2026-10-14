@@ -158,7 +158,7 @@ extern s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
-extern s32 func_001AC0F8(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitHasNegativeActionQueryResult(void *, s32);
 
@@ -1139,7 +1139,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     }
     contextAddress = (s32)btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
-    func_001AC0F8((void *)contextAddress, indexList, 2, 0, 0);
+    btlBuildUnitIndexList((void *)contextAddress, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {

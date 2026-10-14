@@ -4,6 +4,7 @@
 #include "kwln_task_create.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
+#include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
 #include "kwln_task_add_child.h"
 #include "mdl_motion_api.h"
@@ -208,10 +209,6 @@ extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s6
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
 void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
-
-s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
-
-s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 extern f32 D_00453620[4] __attribute__((aligned(16)));
 
@@ -1006,7 +1003,7 @@ void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
     }
 }
 
-s32 mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
+void *mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
     return sdfCreateBorderedRectanglePacket(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
@@ -2984,7 +2981,7 @@ s32 mdlUpdateLightEditorTask(KwlnTask *task) {
         state->blinkTick = 0;
     }
     sdfAppendPacket(state->packetList,
-                    sdfCreateBorderedRectanglePacket(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
+                    (u32)sdfCreateBorderedRectanglePacket(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
                                   0x60000000, 0x40806020));
     label = D_003C8A90;
     for (labelIndex = 0; labelIndex != 4; labelIndex++, label++) {
@@ -3260,7 +3257,7 @@ s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
     }
 
     sdfAppendPacket(D_00453660.packetList,
-                    sdfCreateBorderedRectanglePacket(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
+                    (u32)sdfCreateBorderedRectanglePacket(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
                                   0x60000000, 0x40806020));
     label = D_003C8B68;
     for (i = 0; i != 4; i++, label++) {

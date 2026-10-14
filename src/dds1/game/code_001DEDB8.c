@@ -724,21 +724,12 @@ extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
-/* One aim pose: quaternion, distance multiplier, height scale and two words this aim leaves unused. */
-typedef struct CameraAimPose {
-    f32 quat[4];
-    f32 distanceScale;
-    f32 heightScale;
-    f32 unk18;
-    f32 unk1C;
-} CameraAimPose;
-
 /* Build the from pose, then aim the to pose at the unit's muzzle using the pose row
  * for the side of the from view the muzzle lies on. */
 void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
     f32 muzzle[4];
     f32 quat[4];
-    CameraAimPose poses[2] = {
+    BattleSideCameraPreset poses[2] = {
         {{0x1.70a3d6p-3f, -0x1.999998p-2f, -0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
         {{0x1.70a3d6p-3f, 0x1.999998p-2f, 0x1.70a3d6p-4f, 0.89f}, 3.0f, 0x1.999998p-1f, 30.0f, 0.0f},
     };
@@ -2169,7 +2160,99 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E5198);
+/* The pair preset row with an integer frame count in place of the motion parameter. */
+typedef struct BattlePairCameraFramePreset {
+    f32 fromQuaternion[4];
+    f32 toQuaternion[4];
+    f32 fromDistanceScale;
+    f32 toDistanceScale;
+    f32 fromHeightScale;
+    s32 frames;
+} BattlePairCameraFramePreset;
+
+/* Frame the first listed target from one of two randomized pair presets: both
+ * cameras start at its muzzle, lowered by the preset height scale, at a distance
+ * that fits the larger of its reach (wider view) and half its height. */
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4190);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4310);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4320);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
+
+void func_001E5198(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 quaternion[4];
+    f32 position[4];
+    BattlePairCameraFramePreset poses[2] = {
+        {{0.058f, -0.871f, 0x1.1eb85p-3f, -0.443f},
+         {-0.03f, -0x1.f0a3d6p-1f, 0.153f, 0x1.c6a7eep-4f},
+         1.3f, 0x1.f33332p0f, 0.775f, 32},
+        {{-0.042f, -0x1.e7ef9cp-1f, 0.117f, 0.232f},
+         {0.03f, -0x1.deb85p-1f, 0x1.418936p-3f, -0x1.1eb85p-2f},
+         1.3f, 0x1.f33332p0f, 0.775f, 32},
+    };
+    BtlUnit *unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    s32 pose;
+    f32 fov;
+    f32 height;
+    f32 reach;
+
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
+    reach = unit->reach * unit->scale;
+    height = unit->height;
+    height *= unit->scale;
+    pose = effMiscRandMod(0, 2);
+    btlCopyUnitRotationQuaternion(unit, quaternion);
+    fov = action->camera.fov;
+    from->fov = fov;
+    to->fov = fov;
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_LOAD_VF(vf10, position);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_STORE_VF(vf10, to->position);
+    to->position[1] = from->position[1] = -height * poses[pose].fromHeightScale;
+    height *= 0.5f;
+    fov *= 0.5f;
+    if (height < reach) {
+        height = reach / tanf(fov * 0x1.555554p+0f);
+    } else {
+        height = height / tanf(fov);
+    }
+    from->distance = height * poses[pose].fromDistanceScale;
+    to->distance = height * poses[pose].toDistanceScale;
+
+    VU0_LOAD_VF(vf10, poses[pose].fromQuaternion);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+
+    VU0_LOAD_VF(vf10, poses[pose].toQuaternion);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+}
 
 /* cameraKind 7 participant preparation; the camera argument is unused. */
 void btlPrepareCameraMode7Participants(BtlLinkedCommand *action, BtlCamState *camera) {
@@ -2294,26 +2377,6 @@ extern void func_001E6668(BtlLinkedCommand *, BtlCamState *, s32, s32);
 static inline s32 btlHasFlag(u32 flags, u32 mask) {
     return (flags & mask) != 0;
 }
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4190);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4310);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4320);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4468);
 
 void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     s16 groupChoices[2];
@@ -8100,7 +8163,77 @@ typedef struct BattleFormationActionTable {
 
 typedef char BattleFormationActionTableSizeCheck[(sizeof(BattleFormationActionTable) == 0x2A8) ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001F5D08);
+extern BattleFormationActionTable *D_003BAA64;
+
+/* Read-only spacing cells from the actor resource archive: first float at
+ * +0x38, then one cell per 0x14-byte slot. This view owns no archive storage. */
+typedef struct BtlFormationSpacingCell {
+    f32 spacing;
+    u8 unread04[0x10];
+} BtlFormationSpacingCell;
+
+typedef char BtlFormationSpacingCellSizeCheck[(sizeof(BtlFormationSpacingCell) == 0x14) ? 1 : -1];
+
+void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
+    BtlUnit *participants[3];
+    f32 targetPosition[4] __attribute__((aligned(16)));
+    f32 oldPosition[4] __attribute__((aligned(16)));
+    f32 newPosition[4] __attribute__((aligned(16)));
+    BtlUnit *target;
+    const BtlFormationSpacingCell *spacing;
+    s32 actorStatusAddress;
+    s32 actionCode;
+    s32 selector;
+    u32 i;
+    f32 distance;
+    f32 flatY;
+
+    actionCode = command->actionCode;
+    if (((u32)actionCode - BATTLE_FORMATION_ACTION_FIRST) >= BATTLE_FORMATION_ACTION_COUNT) {
+        return;
+    }
+    if (btlGetIndexListCount(command->targetList) != 1) {
+        return;
+    }
+    target = btlGetIndexListEntry(command->targetList, 0);
+    btlUnitGetMuzzlePosVU(target);
+    /* Audited SDK store: this vector is read only by the VU load below. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
+    participants[0] = command->linkedA;
+    participants[1] = command->linkedB;
+    participants[2] = command->task->unit;
+    flatY = 0.0f;
+    for (i = 0; i < 3; i++) {
+        BtlUnit *actor = participants[i];
+        const BattleFormationActionRow *row;
+        if (actor == NULL) {
+            continue;
+        }
+        row = (const BattleFormationActionRow *)((u32)D_003BAA64 +
+              actionCode * sizeof(BattleFormationActionRow) -
+              BATTLE_FORMATION_ACTION_FIRST * sizeof(BattleFormationActionRow));
+        selector = row->actorSelector[i];
+        if (selector == -1) {
+            continue;
+        }
+        actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
+        spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + actorStatusAddress + 0x38);
+        distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
+        btlCopyUnitCurrentPosition((u8 *)participants[i], oldPosition);
+        btlUnitGetMuzzlePosVU(participants[i]);
+        VU0_LOAD_VF(vf11, targetPosition);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_SET_VF10_COMPONENT(y, flatY);
+        VU0_NORMALIZE_VF10();
+        VU0_SCALAR_OP_CLOBBER(distance, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, targetPosition);
+        VU0_ADD(vf10, vf10, vf11);
+        /* The vector is complete here; Y is replaced, then the callee consumes it. */
+        VU0_STORE_VF_UNCLOBBERED(vf10, newPosition);
+        newPosition[1] = oldPosition[1];
+        btlSetUnitPosition(participants[i], newPosition);
+    }
+}
 
 typedef struct BattleFormationActionArgs {
     BtlTask *link;
@@ -8110,7 +8243,6 @@ typedef struct BattleFormationActionArgs {
     u32 unk10;
 } BattleFormationActionArgs;
 
-extern BattleFormationActionTable *D_003BAA64;
 
 /* Select the linkage formation by command row; task completion is always one. */
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5328);

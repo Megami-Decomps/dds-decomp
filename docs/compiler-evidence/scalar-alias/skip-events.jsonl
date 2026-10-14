@@ -1,0 +1,10 @@
+{"seq":1,"event":"gen_mem_addressof_enter","phase":"expansion","node":"0x2fac4480","decl":"0x2fdc2680","rtl":{"code":"reg","mode":"SF","regno":85},"raw":"45000f08550000001a0200000000000000000000","alias_storage_before":0}
+{"seq":2,"event":"rewrite_reg_to_mem","phase":"expansion","node":"0x2fac4480","raw":"45000f08550000001a0200000000000000000000","rtl":{"code":"reg","mode":"SF","regno":85},"alias_storage":0,"return_low":802386440,"return_high":802386432}
+{"seq":3,"event":"before_get_alias","phase":"expansion","node":"0x2fac4480","raw":"4a000f802072d32f1a0200000000000000000000","rtl":{"code":"mem","mode":"SF","fields":[{"code":"addressof","mode":"SI","fields":[{"code":"reg","mode":"SF","regno":366},85]},null]},"alias_storage":0,"return_low":802386440,"return_high":802386560}
+{"seq":4,"event":"get_alias_read_decl_rtl","phase":"expansion","node":"0x2fac4480","same_node":true,"raw":"4a000f802072d32f1a0200000000000000000000","alias_value":0}
+{"seq":5,"event":"after_get_alias","phase":"expansion","node":"0x2fac4480","raw":"4a000f802072d32f1a0200000000000000000000","rtl":{"code":"mem","mode":"SF","fields":[{"code":"addressof","mode":"SI","fields":[{"code":"reg","mode":"SF","regno":366},85]},null]},"alias_storage":0,"return_low":0,"return_high":0}
+{"seq":6,"event":"after_alias_store","phase":"expansion","node":"0x2fac4480","raw":"4a000f802072d32f1a0200000000000000000000","rtl":{"code":"mem","mode":"SF","fields":[{"code":"addressof","mode":"SI","fields":[{"code":"reg","mode":"SF","regno":366},85]},null]},"alias_storage":0,"return_low":0,"return_high":0}
+{"seq":7,"event":"get_alias_read_decl_rtl","phase":"expansion","node":"0x2fac4480","same_node":true,"raw":"4a000f802072d32f1a0200000000000000000000","alias_value":0}
+{"seq":8,"event":"get_alias_read_decl_rtl","phase":"expansion","node":"0x2fac4480","same_node":true,"raw":"4a000f802072d32f1a0200000000000000000000","alias_value":0}
+{"seq":9,"event":"expansion_complete","phase":"expansion","node":"0x2fac4480","raw":"4a000f802072d32f1a0200000000000000000000"}
+{"seq":10,"event":"exit","phase":"expansion","status":"W00"}
