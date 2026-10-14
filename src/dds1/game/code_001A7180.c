@@ -408,7 +408,7 @@ s32 btlIsUnitStatusFlagClear(BtlUnit *object) {
 
 /* Terminal policies publish and return; see docs/idioms.md,
  * "Outcome classifiers: late publication sharing". */
-s32 func_001A8188(void) {
+s32 btlResolveBattleTerminalOutcome(void) {
     BtlState *state;
     BtlUnit *unit;
     s32 partyCount = 0;

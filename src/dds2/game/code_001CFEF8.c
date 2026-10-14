@@ -1810,7 +1810,7 @@ ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex) {
     return fldGetSceneGroupResource(((BtlState *)scene)->slots[0].group)[entryIndex];
 }
 
-extern s32 func_001B2630();
+extern s32 btlResolveBattleTerminalOutcome();
 
 /* Per-frame scene advance: picks the next group task (or finishes the
  * slot sequence) and dispatches it once flags 4 and 8 are set. */
@@ -1827,7 +1827,7 @@ void fldAdvanceSceneGroupScheduler(void) {
             if (scene->battleFlags & 0x400) {
                 return;
             }
-            if (func_001B2630() != 0) {
+            if (btlResolveBattleTerminalOutcome() != 0) {
                 scene->battleFlags |= 0x800;
                 return;
             }
