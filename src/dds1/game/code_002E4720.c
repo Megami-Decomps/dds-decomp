@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sif_rpc_client_prefix.h"
 #include "sdf.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
@@ -377,26 +378,20 @@ void sdfDevStartRpcServer(void) {
     sceSifRpcLoop(rpcQueue);
 }
 
-typedef struct SifClient {
-    u8 pad00[0x24];
-    void *server; /* 0x24: non-NULL once the bind succeeded */
-    u8 pad28[8];
-} SifClient;
-
-extern SifClient D_003F9B50;
+extern SifRpcClientContextView D_003F9B50;
 
 extern s8 D_003BD3C8;
 
 extern char D_003BD3D0[];
 
-extern s32 func_002F4FD8(SifClient *, s32, s32, void *, s32, void *, s32, void (*)(void *), void *);
+extern s32 func_002F4FD8(SifRpcClientContextView *, s32, s32, void *, s32, void *, s32, void (*)(void *), void *);
 
 extern s32 func_0030C8E0(const char *, ...);
 
 extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
 
 
-extern s32 sceSifMBindRpc(void *, s32, s32);
+extern s32 sceSifMBindRpc(SifRpcClientDataPrefix *client, s32 id, s32 mode);
 
 extern s32 _StartThread(s32, s32);
 
@@ -405,8 +400,8 @@ void sdfStartDevRpcServerAndBindClient(void) {
     s32 waitStart;
 
     _StartThread(sdfCreateThreadWithAllocatedWorkspace((void *)sdfDevStartRpcServer, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
-    while (sceSifMBindRpc(&D_003F9B50, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
-        if (D_003F9B50.server != NULL) {
+    while (sceSifMBindRpc(&D_003F9B50.client, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
+        if (D_003F9B50.client.server != NULL) {
             D_003BD3C8 = 1;
             break;
         }
