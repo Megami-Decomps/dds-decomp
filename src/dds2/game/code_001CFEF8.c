@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_sound.h"
@@ -830,7 +831,6 @@ extern BtlRuntimeTask *sndCreateCustomTask(s32, s32);
 extern void btlSyncPlayerWork(BtlUnit *);
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 extern s32 btlCountAvailableParticipants(void);
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void brsTaskStart(void);
 
 /* Prepare the outcome tasks, then settle battle money and participant EP. */

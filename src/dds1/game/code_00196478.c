@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_text_slots.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
 #include "fr_font.h"
@@ -131,7 +132,7 @@ u32 itfReadEncodedCode(FrFontCtx *args) {
 }
 
 extern u32 D_003BB15C;
-extern u32 D_003D6E20[];
+
 extern FrFontSystem frFontWork;
 extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
@@ -162,7 +163,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         *position = payloadPosition + 2;
         break;
     case 0xF203:
-        if (D_003D6E20[bytes[*position] - 1] != 0) {
+        if (frFontIndexedTextSlots[bytes[*position] - 1] != 0) {
             frFontCheckPendingGlyphState(stream);
             frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
         }
@@ -351,7 +352,7 @@ u32 itfTestTextInterfaceMask(u32 mask) {
 
 /* Store an unchecked replacement-text address word in the font's indexed table. */
 void itfSetIndexedTextSlot(s32 slotIndex, s32 encodedTextAddress) {
-    D_003D6E20[slotIndex] = encodedTextAddress;
+    frFontIndexedTextSlots[slotIndex] = encodedTextAddress;
 }
 
 /* Return the unit identifier saved by text lip-sync control 0xF416. */
@@ -712,7 +713,7 @@ FrFontGlyph *func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
 }
 
 /* Build text with font index 3; retain the existing glyph chain's spacing. */
-FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
+FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);

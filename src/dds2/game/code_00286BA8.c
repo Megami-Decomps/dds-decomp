@@ -678,7 +678,7 @@ s32 mtrMantraEquipDraw(void) {
     return 0;
 }
 
-extern char D_00437928[];
+extern const char D_00437928[];
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32, s32);
 
@@ -1017,11 +1017,12 @@ s32 mtrDrawSelectedMantraEntry(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource
                                                D_00435E50[entryId].encodedText, 0, drawContext);
 }
 
+TaskWork *mnuMantraSelectionResource __attribute__((section(".sdata"))) = NULL;
+
+const char D_00437928[] __attribute__((section(".sdata"))) = "%2d";
+
+/* The source-list builder publishes its status object's eight-byte entries here. */
+MenuMantraRecord *D_0043792C __attribute__((section(".sdata"))) = NULL;
+
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_004262B0);
-
-INCLUDE_SDATA(const s32, "game/code_00286BA8", mnuMantraSelectionResource);
-
-INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437928);
-
-INCLUDE_SDATA(const s32, "game/code_00286BA8", D_0043792C);
 

@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
@@ -102,7 +103,6 @@ void effObjSetFlags(void *unit, s32 flag);
 u32 fldGetPlayerSceneState(void);
 
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 

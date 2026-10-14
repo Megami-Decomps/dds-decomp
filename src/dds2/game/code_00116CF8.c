@@ -4,9 +4,7 @@
 #include "dds3obj.h"
 #include "eff_transform.h"
 #include "eff.h"
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 typedef struct {
     u8 pad00[0x10];
     u32 value;
@@ -84,16 +82,6 @@ EffWorldNode *evtSpawnActionObj10(s32 a, void *work, const char *name) {
     obj->data = work;
     return obj;
 }
-
-typedef struct Dds3PathCurveEntry {
-    u32 kind;
-    Dds3PathKeyframes *keys;
-} Dds3PathCurveEntry;
-
-typedef struct Dds3PathCurveTable {
-    u32 count;
-    Dds3PathCurveEntry entries[1];
-} Dds3PathCurveTable;
 
 extern void *memset(void *destination, s32 value, u32 bytes);
 extern EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);

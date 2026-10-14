@@ -31,7 +31,7 @@ extern u32 sndReserveIopWorkMemory(s32 size);
 extern s8 D_003BDA80;
 extern s32 D_003BDA8C;
 extern s32 sceSifInitIopHeap(void);
-extern s32 func_002E8700(void);
+extern s32 sndStartIopCommandAndRpcWorkers(void);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
 extern SndRingPacket D_003FB080[SND_COMMAND_RING_ENTRY_COUNT];
@@ -130,7 +130,7 @@ submit:
 
 extern u8 sdfPfsDebugMode;
 extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern s32 func_00310478(const char *, SceIoStat *);
+extern s32 sceGetstat(const char *, SceIoStat *);
 
 /* Load the sound modules; debug PFS may override only the SDF sound manager. */
 void sndLoadIopSoundModules(void) {
@@ -144,7 +144,7 @@ void sndLoadIopSoundModules(void) {
     sceSifLoadModule("cdrom0:\\SOUNDIRX\\MODMSIN.IRX;1", 0, NULL);
     module = "cdrom0:\\USERIRX\\SDFSDMAN.IRX;1";
     if (sdfPfsDebugMode != 0 &&
-        func_00310478("pfs:/userirx/SDFSDMAN.IRX", &info) == 0 &&
+        sceGetstat("pfs:/userirx/SDFSDMAN.IRX", &info) == 0 &&
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs:/userirx/SDFSDMAN.IRX";
     }
@@ -213,7 +213,7 @@ void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 b
     D_003BDA80 = 1;
     sndLoadIopSoundModules();
     sceSifInitIopHeap();
-    func_002E8700();
+    sndStartIopCommandAndRpcWorkers();
     sndMidiTrackState.iopBufferAddress = sndReserveIopWorkMemory(0x4000);
     sndMidiTrackState.iopBufferBytes = 0x4000;
     sndInitializeChannelAndTrackState(unused, header);

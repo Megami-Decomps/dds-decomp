@@ -1,5 +1,6 @@
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
+#include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_message.h"
@@ -80,7 +81,7 @@ extern void fldRebuildFieldScene(void);
 
 extern void fldApplySkyLightSet(u32, s32);
 
-extern void func_001512D8(void);
+extern void fldResetSparkRewardProfileIndex(void);
 
 extern KwlnTask *kwlnTaskFindByPriority(u32);
 
@@ -161,7 +162,7 @@ extern void fldUpdateSelectedValueTransition(void);
 
 extern void func_0013DDC0(EffWorldNode *);
 
-extern void fldUpdateObjectActivation(void);
+extern void fldUpdateObjectSlotActivation(void);
 
 #include "mnu_title_stream.h"
 
@@ -945,22 +946,6 @@ u32 fldGetSceneStatusCode(void) {
     return sceneWork->primaryState != 0 ? 2 : 0;
 }
 
-/* Sixteen area records, each with sixty-four twelve-byte room choices. */
-typedef struct FieldAreaEncounterRow {
-    s32 defaultEncounter;
-    s16 flagA;
-    s16 valueA;
-    s16 flagB;
-    s16 valueB;
-} FieldAreaEncounterRow;
-
-typedef struct FieldAreaEncounterTable {
-    s32 area;
-    FieldAreaEncounterRow rooms[64];
-} FieldAreaEncounterTable;
-
-typedef char FieldAreaEncounterRow_size_check[(sizeof(FieldAreaEncounterRow) == 12) ? 1 : -1];
-typedef char FieldAreaEncounterTable_size_check[(sizeof(FieldAreaEncounterTable) == 0x304) ? 1 : -1];
 extern FieldAreaEncounterTable *D_00435E08;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence);
 
@@ -1699,13 +1684,13 @@ void fldConsumeFieldTransitionFlag(void) {
     }
 }
 
-extern void func_00243320(void);
+extern void evtResetFieldTransitionCounter(void);
 
 /* Clear the transition work flag and its area-state consumption marker. */
 void fldClearFieldTransitionFlag(void) {
     datGameState->world.fieldFlags &= ~FIELD_TRANSITION_WORK_FLAG;
     fldAreaState.consumedFlags &= ~FIELD_TRANSITION_CONSUMED_FLAG;
-    func_00243320();
+    evtResetFieldTransitionCounter();
 }
 
 /* Set the transition work flag and reset its area-state consumption marker. */
@@ -2248,7 +2233,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             fldApplySkyLightSet(0, 0);
             fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
         }
-        if (fldAreaState.transitionMode == 0) func_001512D8();
+        if (fldAreaState.transitionMode == 0) fldResetSparkRewardProfileIndex();
         coordinateFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
         if (coordinateFlags & 0x40) {
             blur.count = 15;
@@ -2418,7 +2403,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             fldHasKiretaLabelProcess() == 0 && fldHasHirakenaiLabelProcess() == 0 &&
             fldHasBadkaifukuLabelProcess() == 0) {
             fldFlushQueuedEffectPositions();
-            fldUpdateObjectActivation();
+            fldUpdateObjectSlotActivation();
         }
     }
     if (fldGetCampSceneControlMode() != 1) fldUpdateCameraFollow();

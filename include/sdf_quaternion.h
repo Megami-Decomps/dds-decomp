@@ -26,4 +26,6 @@ void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle);
  * denominator fallback when sqrt(1-W*W) is near zero. */
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
 
+void sdfQuatMultiply(f32 *output, f32 *left, f32 *right);
+
 #endif /* SDF_QUATERNION_H */

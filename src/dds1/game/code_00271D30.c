@@ -37,9 +37,6 @@ extern void *const D_0037B950[];
 extern void *const D_0037B970[];
 
 extern void *const D_0037B980[];
-
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-
 extern const s32 D_0037C388[];
 
 #define MNU_STAFF_PANEL_COUNT 3
@@ -271,7 +268,7 @@ extern u8 *D_0037B988[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
+    FrFontGlyph *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       D_0037B988[imageIndex], 0);
     frFontDrawGlyphChain(sprite, 1, 0x54);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
@@ -303,14 +300,13 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
     }
 }
 
-extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
-extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 context,
                    s32 drawOption, s32 textOption, s32 layer) {
     StaffMenuWork *menu = (StaffMenuWork *)context;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
     if (kind == 0) {
         itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->staffSlots.baseResources[5], 0x1E, layer);
     } else {
@@ -320,9 +316,9 @@ void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 contex
     itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->staffSlots.baseResources[1], 2, layer);
     if (textTable != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
-        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC366);
-        frFontDrawGlyphChain((FrFontGlyph *)glyph, 0, layer);
-        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
+        frFontSetChildColors(glyph, 0xA09DC366);
+        frFontDrawGlyphChain(glyph, 0, layer);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 

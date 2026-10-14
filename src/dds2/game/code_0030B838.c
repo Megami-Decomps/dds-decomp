@@ -290,8 +290,7 @@ s32 fldAdvanceLocalMapCameraTransition(void) {
 }
 
 typedef struct EffectObject EffectObject;
-
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 #include "dds3_object_payload.h"
 
 /* Fixed-width names identify the corresponding local-map model chain. */

@@ -94,8 +94,7 @@ extern void mnuUpdateHighScoreFlag(MnuShootingWork *);
 extern void func_0031AF60();
 extern void itfClearTintAndWorkBuffers(u8 *);
 extern u32 D_00435CBC;
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 s32 mdlAdvanceViewerPackageTask(KwlnTask *task);
 
 MnuShootingWork *mdlAllocateViewerPackageWork(void);

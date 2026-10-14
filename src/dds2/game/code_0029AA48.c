@@ -23,8 +23,6 @@ struct FrFontGlyph;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
@@ -51,7 +49,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     }
     color = uiBlendColors(0xA09DC380, 0xA09DC300, iconFade);
     func_0035C860(text, D_004379B0, delta);
-    glyph = (struct FrFontGlyph *)itfCreateFont3TextGlyph(x, 0x8E8, 0, color, text, 0);
+    glyph = itfCreateFont3TextGlyph(x, 0x8E8, 0, color, text, 0);
     frFontSetChildChainFirstOption(glyph, 3);
     frFontDrawGlyphChain(glyph, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);

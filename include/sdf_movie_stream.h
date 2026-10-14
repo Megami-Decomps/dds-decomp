@@ -28,7 +28,7 @@ typedef struct MovPacStream {
     u8 *blockMask;
     s32 blockIndex;
     struct SdfMemBlock *allocation;
-    void *pendingCursor;
+    u8 *pacInputBuffer;
     u8 *pacBuffer;
     s32 pacReadOffset;
     s32 pacBufferedBytes;
@@ -50,5 +50,7 @@ typedef char MovPacStream_allocation_must_be_at_0x4C[
     ((u32)&((MovPacStream *)0)->allocation == 0x4C) ? 1 : -1];
 typedef char MovPacStream_scratch_pointer_must_be_at_0x74[
     ((u32)&((MovPacStream *)0)->scratch == 0x74) ? 1 : -1];
+typedef char MovPacStream_pacInputBuffer_must_be_at_0x50[
+    ((u32)&((MovPacStream *)0)->pacInputBuffer == 0x50) ? 1 : -1];
 
 #endif /* SDF_MOVIE_STREAM_H */

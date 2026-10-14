@@ -1,9 +1,11 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
+#include "btl_scene_lighting_task_args.h"
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -404,7 +406,7 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
-extern s32 btlUpdateActorDebugEditor(void);
+extern s32 btlUpdateBattleModelDebugEditor(void);
 extern void mdlSetAmountOnAllContextResources(f32, s32);
 
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
@@ -431,8 +433,7 @@ typedef struct SoundSceneEntry {
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
 
-struct SceneLightRestoreArgs;
-extern s64 btlForceSceneLightingRestore(struct SceneLightRestoreArgs *);
+extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
 
 extern s32 sndPlaySkillSeTask(u32 *);
@@ -600,7 +601,6 @@ extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
 extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
@@ -904,7 +904,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
-extern void func_00211360();
+extern void btlSelectAndRunModeAiAction();
 extern s32 btlGetStatusActionEffectId();
 
 
@@ -1023,19 +1023,19 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
         }
         switch (unit->partyRecord.status & 0x7FFF) {
         case 0x200:
-            func_00211360(task, 0);
+            btlSelectAndRunModeAiAction(task, 0);
             btlDispatchStateHandler(task, 0xC);
             break;
         case 0x20:
             if (((ActionStateLink *)task)->unit->status.flags & 0x200) {
-                func_00211360(task, 2);
+                btlSelectAndRunModeAiAction(task, 2);
             } else {
-                func_00211360(task, 3);
+                btlSelectAndRunModeAiAction(task, 3);
             }
             btlDispatchStateHandler(task, 0xC);
             break;
         case 0x40:
-            func_00211360(task, 4);
+            btlSelectAndRunModeAiAction(task, 4);
             btlDispatchStateHandler(task, 0xC);
             break;
         case 1:
@@ -1409,9 +1409,9 @@ void btlCommandStartSoundTasks(u8 *task) {
         }
         if ((((BtlUnit *)unit)->partyRecord.status & 0x7FFF) == 0x20) {
             if (((ActionStateLink *)task)->unit->status.flags & 0x200) {
-                func_00211360(task, 2);
+                btlSelectAndRunModeAiAction(task, 2);
             } else {
-                func_00211360(task, 3);
+                btlSelectAndRunModeAiAction(task, 3);
             }
             btlDispatchStateHandler(task, 0xC);
         }
@@ -3615,13 +3615,13 @@ void btlUpdateDebugActionState(void) {
 
 /* Initialize the battle debug-menu tables on entry to the retail TEST state. */
 void btlEnterTestActionState(void) {
-    btlInitDrawTables();
+    btlInitializeBattleDebugMenu();
 }
 
 void btlAdvanceUnitWhenActionGateClears(u32 unit) {
     s64 status;
 
-    status = btlUpdateActorDebugEditor();
+    status = btlUpdateBattleModelDebugEditor();
     if (status == 0) {
         btlDispatchStateHandler(unit, 6);
         return;

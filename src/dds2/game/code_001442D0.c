@@ -37,6 +37,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "kwln_fade.h"
+#include "fr_font.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
 
@@ -378,7 +379,7 @@ extern FieldResourceSlot D_0044FFB0[];
 
 extern void fldCacheMapLabelLengths(s32);
 
-extern void fldLoadAreaModelTransfers(void);
+extern void fldLoadSceneRecordTable(void);
 
 extern s32 fldStageSoundBaseTable[];
 
@@ -1101,7 +1102,7 @@ void fldCacheMapLabelLengths(s32 world) {
     D_00438ED8 = strlen(D_0039A1D0[i].s);
 }
 
-void fldLoadAreaModelTransfers(void) {
+void fldLoadSceneRecordTable(void) {
     typedef struct {
         u8 pad00[4];
         s32 rows;
@@ -1149,7 +1150,7 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
 void fldInitSceneMapLabels(void) {
     if (D_00389780[0] < 200) {
         fldCacheMapLabelLengths(D_00389780[0] % 100);
-        fldLoadAreaModelTransfers();
+        fldLoadSceneRecordTable();
     }
 }
 
@@ -1365,7 +1366,6 @@ extern void func_00145A08(s32, f32, f32, f32);
 extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
@@ -1944,7 +1944,7 @@ void fldDrawAutomapScene(void) {
     {
         const u8 *title = (const u8 *)D_0039A1D0[fldAreaState.area % 100].s;
 
-        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_00438ED4 = itfCreateConvertedTextGlyph(
             (450 - D_00438ED8 * 6) << 4, 128, 0, 0xA09DC380,
             title, 0);
         frFontStoreShiftedRenderValue(D_00438ED4, 0xFFFFFF);
@@ -1970,7 +1970,7 @@ void fldDrawAutomapScene(void) {
         }
         labelColor = labelAlpha | 0x78759B00;
         labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_0043628C);
-        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_00438ED4 = itfCreateConvertedTextGlyph(
             (450 - (D_0044FCF0[D_0043628C] / 2) * 12) << 4,
             (D_004362A0 + 44) << 3, 0, labelColor,
             (const u8 *)D_003A25AC[labelIndex].s, 0);
@@ -1992,7 +1992,7 @@ void fldDrawAutomapScene(void) {
         }
         labelColor = labelAlpha | 0x78759B00;
         labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_00436288);
-        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_00438ED4 = itfCreateConvertedTextGlyph(
             (450 - (D_0044FCF0[D_00436288] / 2) * 12) << 4,
             (D_0043629C << 3) + 348, 0, labelColor,
             (const u8 *)D_003A25AC[labelIndex].s, 0);
@@ -3194,7 +3194,7 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-void fldUpdateObjectActivation(void) {
+void fldUpdateObjectSlotActivation(void) {
     s32 i;
     MdlCtx *resource;
 
@@ -4217,7 +4217,7 @@ void fldUpdateSparkSlots(void) {
 extern s32 D_004363B8;
 extern void fldReleaseCameraModel(u32);
 
-void func_0014FD28(void) {
+void fldUpdateSparkSequence(void) {
     FldSparkSequence *sequence;
     s32 i;
     s32 slot;
@@ -4653,7 +4653,7 @@ void func_00150F20(void) {
             dspStartEntry(7);
             fldResetPlayerSceneObjectState();
         } else {
-            func_0014FD28();
+            fldUpdateSparkSequence();
         }
         return;
     } else if (phase == 3) {
@@ -4714,7 +4714,7 @@ void func_00150F20(void) {
 }
 
 
-void func_001512D8(void) {
+void fldResetSparkRewardProfileIndex(void) {
     fldSparkControlState.unk8 = -1;
 }
 

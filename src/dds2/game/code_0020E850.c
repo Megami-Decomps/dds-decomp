@@ -1224,7 +1224,7 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
 
 extern AiSpecies *datEnemyAiRecords;
 extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, u16 species, s32 *row, s32 arg);
-extern s32 func_00211EA8();
+extern s32 btlExecuteAiTableAction();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
 s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task) {
@@ -1241,7 +1241,7 @@ s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task) {
     work[1] = species;
     btlSelectTierMatrixAiRoute(unit, species, &row, 0);
     index = btlPickWeightedAiSlot(unit, species, row);
-    func_00211EA8(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
+    btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
     sdfReleaseChipBlock((void *)btlActionScratchWork);
     return 1;

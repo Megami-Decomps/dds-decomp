@@ -115,10 +115,7 @@ extern s32 fldSceneSoundBase;
 extern s32 D_0032E570[];
 
 extern u8 D_003BAE78[];
-
-extern void *dds3GetWorldSecondaryObject(void);
-
-
+#include "dds3_world_secondary.h"
 extern void func_003003F0(const char *fmt, ...);
 
 extern s32 fldCurrentBgmMode;
@@ -552,11 +549,11 @@ s32 fldFindSearchId(const char *name) {
 
 extern char fldRoomNameSentinel[];
 
-extern s32 func_00302290(char *, const char *);
+extern char *strstr(const char *, const char *);
 
 s32 fldParseRoomNumberFromName(char *name) {
     s32 index;
-    if (func_00302290(name, fldRoomNameSentinel) == 0) return 0;
+    if (strstr(name, fldRoomNameSentinel) == 0) return 0;
     for (index = 0; index < 32; index++) {
         if (name[index] == '\0') {
             if (index < 4) return 0;

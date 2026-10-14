@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "btl_command_partner_output.h"
 #include "btl_enc_bg_entry.h"
 #include "btl_animation_mode_entry.h"
@@ -136,7 +137,6 @@ extern void *D_003B4E40[];
 
 extern f32 D_003B4E28[];
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);

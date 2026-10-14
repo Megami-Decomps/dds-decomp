@@ -32,8 +32,8 @@ typedef struct PacAlloc {
 
 extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
-extern char *func_0035D5B0(const char *text, s32 delimiter);
-extern s32 func_0035CB10(const char *text, const char *suffix);
+extern char *strrchr(const char *text, s32 delimiter);
+extern s32 strcasecmp(const char *text, const char *suffix);
 extern s32 D_00438D08;
 extern s32 D_0043921C;
 extern u8 D_00438D28[];
@@ -50,10 +50,10 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
 
     memset(owner, 0, 0xB0);
     owner->active = 1;
-    extension = func_0035D5B0(name, '.');
+    extension = strrchr(name, '.');
     isPac = 0;
     if (extension != NULL) {
-        isPac = func_0035CB10(extension, (const char *)&D_00438D28) == 0;
+        isPac = strcasecmp(extension, (const char *)&D_00438D28) == 0;
     }
     owner->isPac = isPac;
     owner->remainingBytes = 0x7FFFFFFF;
@@ -95,7 +95,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     allocation = sdfAllocGeneralBlock(0x24000);
     pacWork->allocation = allocation;
     resource = (u8 *)sdfResourceRetainAddress(allocation);
-    pacWork->pendingCursor = resource;
+    pacWork->pacInputBuffer = resource;
     pacWork->pacBuffer = resource + 0x4000;
     pacWork->ringBuffer = (u8 *)((u32)resource + 0x14000);
     pacWork->scratchSize = 0x20;

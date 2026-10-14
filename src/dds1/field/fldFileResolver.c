@@ -7,6 +7,7 @@
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
+#include "fld_npc_motion.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -30,7 +31,7 @@
 
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 struct EffWorldNode;
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
@@ -403,14 +404,6 @@ typedef struct {
 extern FldActorRow fldActorSlots[];
 extern s32 D_0032E530[];
 
-typedef struct FldNpcMotion {
-    s32 defaultMotionId;
-    u8 primaryName[0x10];
-    u8 secondaryName[0x10];
-    u8 unk24[0x10];
-    u8 unk34[0x10];
-    s32 unk44;
-} FldNpcMotion; /* 0x48 bytes */
 extern FldNpcMotion D_00336A60[];
 extern void *D_003BAE44;
 extern void *D_003BAE48;
@@ -433,7 +426,6 @@ typedef struct FldActionSpawn {
     s32 firstValue;
 } FldActionSpawn;
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
-extern void *dds3GetWorldSecondaryObject(void);
 extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
@@ -526,7 +518,6 @@ extern u32 D_003BACF8;
 
 #include "sdf_packet_alloc.h"
 
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 fldBackgroundBuffer;
 
@@ -594,7 +585,7 @@ extern f32 D_00330670[];
 extern u32 D_003308B0[];
 
 extern void *memset(void *s, s32 c, u32 n);
-extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
+extern s32 fldUpdateTitleBannerTask(KwlnTask *task);
 extern s32 btlGetRuntimeResult(void);
 extern s32 fldValueRecordCount;
 extern s32 D_003BADF8;
@@ -2904,11 +2895,11 @@ s32 y;
 u32 first;
 const u8 *second;
 {
-    u32 object;
+    struct FrFontGlyph *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, first, second, 0);
     frFontDrawGlyphInDefaultMode(object);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)object);
+    frFontQueueGlyphForCurrentDrawBuffer(object);
 }
 /* Packed quad input: geometry fields precede the live packet origin and depth.
  * Preserve the unclassified words for the opaque renderer. */
@@ -8524,7 +8515,7 @@ extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
 
-s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task) {
+s32 fldUpdateTitleBannerTask(KwlnTask *task) {
     u16 *ticket;
     u8 *label;
     s32 width;
@@ -8573,7 +8564,7 @@ s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     ticket[2] = 0;
     ticket[3] = 0;
     kwlnTaskSetUserValue(task, (u32)ticket);
-    return (s32)fldDrawPendingTitleBannerWhenIdle;
+    return (s32)fldUpdateTitleBannerTask;
 }
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC10);

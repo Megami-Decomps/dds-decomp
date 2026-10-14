@@ -142,7 +142,6 @@ typedef struct EffectPair {
 extern EffectPair D_003BC400[];
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
-extern u32 itfCreateFont3TextGlyph(s32, s32, s32, s32, char *, s32);
 
 /* Release both visual resources in order; the work object itself is retained. */
 void mnuReleaseVisualResources(MenuTerminalWork *work) {
@@ -156,7 +155,6 @@ void mnuReleaseBothVisualResourceTextures(MenuTerminalWork *work) {
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
 
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 extern MenuTextEntry D_00347C68[];
 extern MenuTextEntry D_003482A8[];
 
@@ -338,7 +336,6 @@ void mnuReleaseSelectedProgressPanel(MenuTerminalWork *work) {
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 extern s32 mnuDispatchByFlag(s32, struct MenuListNode *);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
 void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
                    struct MenuListNode *node, s32 priority) {
@@ -1990,7 +1987,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     char text[16];
     s32 index;
     s32 color;
-    u32 sprite;
+    struct FrFontGlyph *sprite;
 
     index = fldGetModeFrameRecordIndex(scene);
     func_003014F0(text, D_003BC3F0, datGameState->header.currency);
@@ -2001,7 +1998,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     }
     sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
     frFontDrawGlyphChain(sprite, 1, 0x53);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
+    frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
 extern void mnuDrawTerminalAmountText(s32, s32);

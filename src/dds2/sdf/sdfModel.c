@@ -9,6 +9,7 @@
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "sdf_message.h"
 
 
@@ -37,13 +38,11 @@ extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32
 
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
 
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 
 extern void *memcpy(void *dst, const void *src, u32 n);

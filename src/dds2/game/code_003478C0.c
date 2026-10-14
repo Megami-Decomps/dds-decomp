@@ -444,7 +444,6 @@ extern void FlushCache(s32);
 extern s32 SignalSema(s32);
 extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
-extern s32 sdfReadTimerCount(void);
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
@@ -554,7 +553,7 @@ extern s32 sdfCreateSemaphore(s32, s32, s32);
 extern void sceSifSetRpcQueue(void *, s32);
 extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 extern void sceSifRpcLoop(void *);
-extern s32 func_0036B6E0(const char *, SceIoStat *);
+extern s32 sceGetstat(const char *, SceIoStat *);
 extern s32 WakeupThread(s32);
 extern u8 sdfPfsDebugMode;
 extern u8 D_0047BD00[];
@@ -572,7 +571,7 @@ void sdfRunStreamIopRpcServer(void) {
                       D_0047BD00, 0, 0, queue);
     module = "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1";
     if (sdfPfsDebugMode != 0 &&
-        func_0036B6E0("pfs0:/userirx/sdfiopfl.irx", &info) == 0 &&
+        sceGetstat("pfs0:/userirx/sdfiopfl.irx", &info) == 0 &&
         (info.mode & 0xF000) == 0x2000) {
         module = "pfs0:/userirx/sdfiopfl.irx";
     }
@@ -594,7 +593,7 @@ extern char *D_0040BE00[];
 extern s32 sceSifLoadModule(const char *, s32, const char *);
 extern char *strcpy(char *, const char *);
 extern char *strcat(char *, const char *);
-extern void func_0034EC40(void);
+extern void sdfInitializeMemoryCardRpcClient(void);
 
 /* Load the selected pair of IOP module paths from prefix; loader results are not checked. */
 void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
@@ -607,7 +606,7 @@ void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup) {
         strcat(path, moduleNames[moduleIndex]);
         sceSifLoadModule(path, 0, 0);
     }
-    func_0034EC40();
+    sdfInitializeMemoryCardRpcClient();
 }
 
 /* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */

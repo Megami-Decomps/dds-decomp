@@ -16,6 +16,7 @@
 #include "itf.h"
 #include "menu_fade_entry.h"
 #include "ui_color.h"
+#include "fr_font.h"
 struct MenuListNode;
 
 enum MenuPanelKind {
@@ -74,8 +75,6 @@ extern void mnuDrawWindowSprites();
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
-
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
 extern void func_00196088(s32, s32, FrFontGlyph *);
 
@@ -191,7 +190,6 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) 
     }
 }
 
-extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern const char D_003BC718[];

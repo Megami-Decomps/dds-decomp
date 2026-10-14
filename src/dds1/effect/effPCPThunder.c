@@ -1,10 +1,12 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -2357,7 +2359,6 @@ extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.
@@ -2803,7 +2804,6 @@ void effThunderSetCurveGroupTint(s32 arg0, u32 arg1) {
 extern EffThunderDrawParams D_003D64F0;
 extern EffThunderDrawParams D_003D6520;
 
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern const f32 D_00354860[8][4];
 extern const u32 D_003547D0[28];
 extern const u32 D_00354840[8];

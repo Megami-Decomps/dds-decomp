@@ -55,9 +55,7 @@ extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_00437C38[];
@@ -98,7 +96,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     s32 showCurrent = mdlFlagTest(0x901);
     s32 x = page->slideOffset * 16 + 0xC80;
     s32 value;
-    s32 glyph;
+    struct FrFontGlyph *glyph;
 
     do {
         void *resource = *sprite++;
@@ -117,7 +115,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     if (value != 0) {
         glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
         func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
-        glyph = func_0019F5E8(x + 0x1050, 0x360, depth, color, text, glyph);
+        glyph = (struct FrFontGlyph *)(u32)func_0019F5E8(x + 0x1050, 0x360, depth, color, text, (s32)(u32)glyph);
         if (page->unk74 != 0) {
             frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         }
@@ -179,18 +177,17 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 }
 
 extern void prfCopyMantraNamePart(u32, s32, char *);
-extern void frFontSetChildColors(FrFontGlyph *, u32);
 void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
-    s32 item;
+    FrFontGlyph *item;
 
     color = (color & 0xFF) | 0xD7ABFA00;
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
-    item = (s32)(u32)frFontBuildGlyphChain(text, 0, 0, 0, 0);
-    frFontSetChildColors((FrFontGlyph *)(u32)item, color);
-    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)item, x, y);
-    frFontDrawGlyphChain((FrFontGlyph *)item, 1, param);
-    frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)item);
+    item = frFontBuildGlyphChain(text, 0, 0, 0, 0);
+    frFontSetChildColors(item, color);
+    frFontSetGlyphPosition(item, x, y);
+    frFontDrawGlyphChain(item, 1, param);
+    frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
@@ -202,7 +199,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     s32 cost = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
     s32 texture;
-    s32 item;
+    struct FrFontGlyph *item;
 
     texture = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : cost;

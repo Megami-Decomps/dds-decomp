@@ -168,11 +168,10 @@ extern s32 mnuIsSolarPricedItemId(s32);
 
 extern u8 D_003CDA88[];
 
-extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
+extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
-extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
-extern s32 frFontDrawGlyphChain(s32, s32, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -2381,13 +2380,13 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
 }
 
 void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
-    s32 handle;
+    struct FrFontGlyph *handle;
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
-        frFontSetChildColors((struct FrFontGlyph *)(u32)handle, 0x80808040);
+        frFontSetChildColors(handle, 0x80808040);
         frFontDrawGlyphChain(handle, 0, flags);
-        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+        frFontQueueGlyphForCurrentDrawBuffer(handle);
     }
 }
 
@@ -2418,7 +2417,7 @@ extern s32 evtAdvanceSlotFlags(void);
 extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
 extern void mdlFlagClear(s32);
-extern void func_00297320(s32);
+extern void mnuDrawCommandPhaseTransition(s32);
 extern void mnuDrawCampCommandTransition(s32);
 
 
@@ -2625,7 +2624,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
 s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3157,7 +3156,7 @@ s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
 s32 func_002633F0(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3189,7 +3188,7 @@ s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
 s32 func_00263658(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    func_00297320(stateAddress);
+    mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 

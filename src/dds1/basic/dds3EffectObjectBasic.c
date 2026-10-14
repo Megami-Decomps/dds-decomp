@@ -17,6 +17,7 @@
 #include "btl_sound.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 
 #define EFF_OBJ_KIND EFF_WORLD_KIND_EFFECT_OBJECT
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -96,7 +97,6 @@ extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effMiscNormalizeVU(void);
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* Refresh the world position and orientation from the owner link (or the object's own
    inner transform), then forward them to the bound node according to the state. */

@@ -29,7 +29,7 @@
 
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 struct EffWorldNode;
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
@@ -399,7 +399,6 @@ extern s32 fldSecondarySceneObject;
 
 #include "sdf_packet_alloc.h"
 
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern u32 fldPendingArea;
 
@@ -939,9 +938,6 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
         }
     }
 }
-
-extern void *dds3GetWorldSecondaryObject(void);
-
 typedef struct FldActionSpawn {
     u32 unk0;
     u32 secondValue;
@@ -3000,11 +2996,11 @@ void fldSubmitBackgroundDescriptorPacket(void) {
 }
 
 void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 firstPayload, const u8 *secondPayload) {
-    u32 object;
+    struct FrFontGlyph *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     frFontDrawGlyphInDefaultMode(object);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)object);
+    frFontQueueGlyphForCurrentDrawBuffer(object);
 }
 
 void fldAdvanceQuadRow(FldQuadState *quad) {

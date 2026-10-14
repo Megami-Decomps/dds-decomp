@@ -2321,7 +2321,7 @@ extern s32 D_00435E48;
 extern s32 D_00435E4C;
 extern s32 D_00435E5C;
 /* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
-void btlInitDrawTables(void) {
+void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
 
@@ -2430,7 +2430,7 @@ extern BtlActorMotionSlot D_00453530;
 
 /* Advance the battle model/debug editor. The selected state remains active
  * until its pending unit tasks have completed. */
-s32 btlUpdateActorDebugEditor(void) {
+s32 btlUpdateBattleModelDebugEditor(void) {
     f32 position[4] __attribute__((aligned(16)));
     char text[0x70];
     BtlState *battle;
@@ -2951,8 +2951,6 @@ extern void btlDebugMenuAfterRecordNoOp(void);
 extern s32 btlGetConditionalEncounterInterval(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 extern void btlApplyDebugEncounterPartySelection(void);
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
-
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */

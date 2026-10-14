@@ -44,6 +44,7 @@ from pathlib import Path
 import ninja_syntax
 from tools.ee_gcc_aslr import marker_is_valid
 from tools import lb
+from tools.symbol_aliases import load_symbol_aliases, linker_aliases
 
 ROOT = Path(__file__).resolve().parent
 VERSIONS = json.loads((ROOT / "config" / "versions.json").read_text())
@@ -244,6 +245,17 @@ def align_bss(ld_script: Path) -> None:
     for sym in ("main_SBSS_START", "main_BSS_START"):
         text = re.sub(rf"^(\s*)({sym} = \.;)", r"\1. = ALIGN(128);\n\1\2", text, count=1, flags=re.M)
     ld_script.write_text(text)
+
+
+def provide_symbol_aliases(version: str) -> None:
+    """Keep source-owned interior symbols relative to their real C owner."""
+    aliases = load_symbol_aliases(ROOT, version)
+    path = ROOT / "config" / version / "undefined_syms_auto.txt"
+    if path.exists():
+        text = path.read_text()
+        updated = linker_aliases(text, aliases)
+        if updated != text:
+            path.write_text(updated)
 
 LD_OBJECT = re.compile(r"^\s*(build/\S+\.o)\(")
 
@@ -574,6 +586,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         yaml = Path("config") / version / f"{serial}.yaml"
         if not args.no_split:
             run_splat(version, ROOT / yaml, args.force_split)
+        provide_symbol_aliases(version)
         ld_script = Path("build") / version / f"{serial}.ld"
         objects = linker_objects(ROOT / ld_script)
         units[version] = []
@@ -1171,11 +1184,14 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
     write_objdiff_reports(n, units)
 
-    configure_inputs = ["configure.py", "config/versions.json"] + [
+    configure_inputs = ["configure.py", "tools/symbol_aliases.py", "config/versions.json"] + [
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
     ] + [f"config/{v}/symbol_addrs.txt" for v in versions]
     configure_inputs.extend(sorted(dev_configure_inputs))
     for version in versions:
+        alias_metadata = ROOT / "config" / version / "symbol_aliases.json"
+        if alias_metadata.exists():
+            configure_inputs.append(str(alias_metadata.relative_to(ROOT)))
         dev_descriptor = ROOT / "config" / version / "devbuild.json"
         if dev_descriptor.exists():
             configure_inputs.append(str(dev_descriptor.relative_to(ROOT)))

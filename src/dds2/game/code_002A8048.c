@@ -104,11 +104,11 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
     return 1;
 }
 
-extern u8 mnuGetMovieDrawState(void);
+extern u8 mnuGetMoviePlaybackMode(void);
 extern u8 mnuIsMovieDrawContextActive(void);
 
 s32 mnuCanDrawMovie(void) {
-    if (mnuGetMovieDrawState() == 2) {
+    if (mnuGetMoviePlaybackMode() == 2) {
         if (mnuIsMovieDrawContextActive() != 0) {
             return 1;
         }

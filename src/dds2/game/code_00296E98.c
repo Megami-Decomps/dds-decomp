@@ -218,7 +218,7 @@ s32 mnuTickCommandPhase(MenuTerminalContext *owner) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00297320);
+INCLUDE_ASM(const s32, "game/code_00296E98", mnuDrawCommandPhaseTransition);
 
 /* Phase machine of the menu command: phases 4, 5 and 8 wait for the frame
  * counter to pass 10.0f before reporting themselves, 6 and 7 report at once.

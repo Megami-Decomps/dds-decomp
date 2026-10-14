@@ -32,8 +32,8 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
 
-extern s32 func_0036B420(s32 directory);
-extern s32 func_0036B588(s32 directory, SceDirent *entry);
+extern s32 sceDclose(s32 directory);
+extern s32 sceDread(s32 directory, SceDirent *entry);
 
 extern u64 btlStartTask();
 
@@ -146,23 +146,23 @@ extern s8 btlHistoryCounter;
 
 extern void btlRunWeightedAiAction(s32, u16);
 
-extern s8 D_00419570[];
+extern const char D_00419570[];
 
-extern s8 D_00419590[];
+extern const char D_00419590[];
 
-extern s8 D_004195B8[];
+extern const char D_004195B8[];
 
-extern s8 D_004195D8[];
+extern const char D_004195D8[];
 
-extern s8 D_004195F8[];
+extern const char D_004195F8[];
 
-extern s8 D_00419620[];
+extern const char D_00419620[];
 
-extern s8 D_00419648[];
+extern const char D_00419648[];
 
-extern s8 D_00419668[];
+extern const char D_00419668[];
 
-extern s8 D_00419688[];
+extern const char D_00419688[];
 
 extern s32 D_003BEA48[];
 
@@ -787,7 +787,6 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     return activeCount;
 }
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern f32 func_003532E8(f32, f32);
 extern u128 D_003BE0D0;
 
@@ -2796,85 +2795,85 @@ s32 btlCountNonPartOpcodes(BtlCommandEntryList *list) {
     return found;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419570);
+const char D_00419570[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247AI_CHK_BA\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419590);
+const char D_00419590[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247AI_GET_ALLKOUDO\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004195B8);
+const char D_004195B8[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247AI_GET_FUREA\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004195D8);
+const char D_004195D8[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247BTL_CAM_ORG\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004195F8);
+const char D_004195F8[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247BTL_CAM_2SHOT\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419620);
+const char D_00419620[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247BTL_CAM_BOUGAI\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419648);
+const char D_00419648[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247BTL_EVENT\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419668);
+const char D_00419668[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247BTL_TAIKYO\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419688);
+const char D_00419688[] __attribute__((aligned(8))) = "\314\244\274\302\301\365\245\271\245\257\245\352\245\327\245\310\241\247BTL_ALLTAIKYO\n";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004196B0);
+const char D_004196B0[] __attribute__((aligned(8))) = "EFFECT EDIT";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004196C0);
+const char D_004196C0[] __attribute__((aligned(8))) = "POINT LIGHT";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004196D0);
+const char D_004196D0[] __attribute__((aligned(8))) = "FIELD LIGHT";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004196E0);
+const char D_004196E0[] __attribute__((aligned(8))) = "FLD FILTER";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004196F0);
+const char D_004196F0[] __attribute__((aligned(8))) = "CUT23 FIX ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419700);
+const char D_00419700[] __attribute__((aligned(8))) = "ENEMY PARTY";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419710);
+const char D_00419710[] __attribute__((aligned(8))) = "1 SHOT    ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419720);
+const char D_00419720[] __attribute__((aligned(8))) = "CYLINDER F";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419730);
+const char D_00419730[] __attribute__((aligned(8))) = "CYLINDER C";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419740);
+const char D_00419740[] __attribute__((aligned(8))) = "ALL HIDE  ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419750);
+const char D_00419750[] __attribute__((aligned(8))) = "CAMERA    ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419760);
+const char D_00419760[] __attribute__((aligned(8))) = "BGM       ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419770);
+const char D_00419770[] __attribute__((aligned(8))) = "AI        ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419780);
+const char D_00419780[] __attribute__((aligned(8))) = "ENEMY COMM";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419790);
+const char D_00419790[] __attribute__((aligned(8))) = "ALL SELECT";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004197A0);
+const char D_004197A0[] __attribute__((aligned(8))) = "ALL SKILL ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004197B0);
+const char D_004197B0[] __attribute__((aligned(8))) = "ALL DEAD  ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004197C0);
+const char D_004197C0[] __attribute__((aligned(8))) = "ALL CRTICL";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004197D0);
+const char D_004197D0[] __attribute__((aligned(8))) = "ALL HIT   ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004197E0);
+const char D_004197E0[] __attribute__((aligned(8))) = "ALL SAKE  ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_004197F0);
+const char D_004197F0[] __attribute__((aligned(8))) = "ALL HANSYA";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419800);
+const char D_00419800[] __attribute__((aligned(8))) = "ALL KYUSYU";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419810);
+const char D_00419810[] __attribute__((aligned(8))) = "BAD       ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419820);
+const char D_00419820[] __attribute__((aligned(8))) = "PRESS     ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419830);
+const char D_00419830[] __attribute__((aligned(8))) = "DAMAGE    ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419840);
+const char D_00419840[] __attribute__((aligned(8))) = "CHANGE    ";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419850);
+const char D_00419850[] __attribute__((aligned(8))) = "DEBUG MENU";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419860);
+const char D_00419860[] __attribute__((aligned(8))) = "TEST.TLP";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419870);
+const char D_00419870[] __attribute__((aligned(8))) = "TEST.P2A";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419880);
+const char D_00419880[] __attribute__((aligned(8))) = "TEST.EPL";
 
-INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419890);
+const char D_00419890[] __attribute__((aligned(8))) = "test.tmx";
 
 s32 btlOpenPfsDebugDirectory(const char *directoryName) {
     char pathBuffer[BTL_DIRECTORY_PATH_BYTES];
@@ -2894,14 +2893,14 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
     if (sdfPfsDebugMode == 0) {
         return;
     }
-    func_0036B420(directoryHandle);
+    sceDclose(directoryHandle);
 }
 
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
 s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
     if (sdfPfsDebugMode != 0) {
-        return func_0036B588(directoryHandle, reader);
+        return sceDread(directoryHandle, reader);
     }
     if ((u32)D_00438F80 >= BTL_BUILTIN_NAME_COUNT) {
         return 0;

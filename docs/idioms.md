@@ -773,7 +773,7 @@ Confirmed examples:
   match with the recovered distinction.
 - DDS2 `BtlState.debug` starts at `0x728`; its inner table starts at `0x128`.
   The two remainders, `8 + 8`, explain a `0x10` displacement in
-  `btlInitDrawTables`. An invented `aligned(32)` record contradicts the actual
+  `btlInitializeBattleDebugMenu`. An invented `aligned(32)` record contradicts the actual
   allocation and layout guards.
 - `BattleActorPanelEntry.position[2]` and the nested presentation
   `cursorOffset[2]` reproduce the separate x/y address copies in DDS1
@@ -2878,14 +2878,14 @@ units rejoined, the function matches as written.
 Check API contracts before treating a park as one-word-close. For DDS2
 `func_0024D430`, combining the genuine glyph-increment eligibility in the
 completion-first layout removes the old `+0x21C` branch residual. Using
-the existing producer's `u8 mnuGetMovieDrawState(void)` contract leaves three
+the existing producer's `u8 mnuGetMoviePlaybackMode(void)` contract leaves three
 different words at `+0x258/+0x260/+0x264`, not the older park's one word
 with its `s32 (s32)` declaration. A global-byte getter's native body alone
 does not prove its original return width or distinguish zero parameters
 from an unused parameter. Recover independent API evidence rather than
 choosing the declaration with the prettier score.
 
-DDS2 `fldUpdateObjectActivation` (660 bytes) is an exact example of branch-local
+DDS2 `fldUpdateObjectSlotActivation` (660 bytes) is an exact example of branch-local
 complete actions. Its stage-29/30 and default branches select different
 effect descriptors, but each creates the node, publishes it, and restarts
 the base instance. Keeping that complete action in each branch lets GCC
@@ -11440,9 +11440,9 @@ packet payloads; the opcode alone does not establish an IOP-side operation.
 
 ## Actor-debug providers, group slots and radial waves
 
-`btlUpdateActorDebugEditor` is the paired eleven-phase actor editor: its
+`btlUpdateBattleModelDebugEditor` is the paired eleven-phase actor editor: its
 status/model/motion/gun, position and transform menus display FLD/POS and
-current/total-frame values. `btlInitDrawTables` initializes the selected
+current/total-frame values. `btlInitializeBattleDebugMenu` initializes the selected
 unit, menu rows, label-address tables, phase and delay before TEST polling.
 Keep the per-game capacities and the editor's existing local lifetimes.
 

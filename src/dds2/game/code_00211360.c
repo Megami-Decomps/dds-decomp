@@ -71,7 +71,7 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern s8 btlHistoryCounter;
 
-extern s32 func_00211EA8();
+extern s32 btlExecuteAiTableAction();
 extern void func_001B7718(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
@@ -206,7 +206,7 @@ extern AiSpecies D_003BEDD0[];
 
 s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow);
 
-void func_00211360(ActionStateLink *task, u32 mode) {
+void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     BtlAiScratchWork *work;
     BtlUnit *unit;
     s32 table;
@@ -246,7 +246,7 @@ void func_00211360(ActionStateLink *task, u32 mode) {
     work->speciesId = unit->partyRecord.unitId;
     btlSelectConditionalAiRoute((s32)unit, species, (u32 *)&row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
-    func_00211EA8(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
+    btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
     if (mode == 2) {
         func_001B7718(task);
@@ -527,7 +527,7 @@ s32 btlRollAiBucket(void) {
     return roll;
 }
 
-INCLUDE_ASM(const s32, "game/code_00211360", func_00211EA8);
+INCLUDE_ASM(const s32, "game/code_00211360", btlExecuteAiTableAction);
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419A88);
 
@@ -1653,9 +1653,17 @@ INCLUDE_RODATA(const s32, "game/code_00211360", D_00419B68);
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419B88);
 
-INCLUDE_RODATA(const s32, "game/code_00211360", btlRequiredActionCategories);
+const s32 btlRequiredActionCategories[10] = {
+    2, 3, 4, 5, 6, 10, 11, 12, 13, 14
+};
 
-INCLUDE_RODATA(const s32, "game/code_00211360", btlElementMasks);
+const s32 btlElementMasks[20] = {
+    0x00000001, 0x00000002, 0x00000004, 0x00000008,
+    0x00000010, 0x00000020, 0x00000040, 0x00000080,
+    0x00000100, 0x00000200, 0x00000400, 0x00000800,
+    0x00001000, 0x00002000, 0x00004000, 0x00008000,
+    0x00010000, 0x00020000, 0x00040000, 0x00080000
+};
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419C30);
 

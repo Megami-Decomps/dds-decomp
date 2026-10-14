@@ -64,9 +64,7 @@ typedef struct {
     u8 pad;
     u16 entryIndices[0];
 } ActiveList;
-
-extern void *dds3GetWorldSecondaryObject(void);
-
+#include "dds3_world_secondary.h"
 /* Recreate the secondary world selection only when its packed key changes.
  * Preserve the signed shift/add rather than treating this as an unsigned OR. */
 void evtSwitchWorldValueIfChanged(s32 high, s32 low) {

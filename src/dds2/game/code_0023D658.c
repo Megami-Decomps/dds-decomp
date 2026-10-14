@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "dds3_path.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
@@ -57,9 +58,7 @@ typedef struct {
 
 extern Entry270 *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32 *);
-
-
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
 
@@ -95,7 +94,6 @@ typedef struct EvtModelHeader {
     void *target2C;     /* 0x2C: scaled by the model-cut opcode */
 } EvtModelHeader;
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);

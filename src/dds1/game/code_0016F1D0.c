@@ -4,6 +4,7 @@
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -355,7 +356,6 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
 
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
 extern void *memset(void *dst, s32 value, u32 size);
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 /* Allocate five 16-byte positions and five color words per group, then the 0x70-byte header. */
 EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
@@ -491,7 +491,6 @@ void effSetFanRecordPoolScale(EffRecordPool *work, f32 scale) {
 
 
 extern void *memset(void *dst, s32 value, u32 size);
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 /* Allocate three positions and three colors per triangle, then the header.
  * The complete block and shared packet-parameter record are cleared. */
@@ -801,7 +800,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
     work->childWork = effPcpScatterPoolCreate(params->particleCount);
-    work->childWork->unk10 = params->poolMode;
+    work->childWork->poolMode = params->poolMode;
     if (resource != 0) {
         effPcpScatterCreatePoolResource(work->childWork, resource);
     }

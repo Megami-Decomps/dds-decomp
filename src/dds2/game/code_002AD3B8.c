@@ -45,7 +45,6 @@ extern s32 mnuGetItemRequirementCount();
 extern s32 mnuGetItemRequirementValue();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);
@@ -902,7 +901,6 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
 INCLUDE_ASM(const s32, "game/code_002AD3B8", mnuDrawStaffValueGrid);
 
 s32 mnuDrawStaffValuePage(KwlnTask *task) {
-    extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
     extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, s32, s32);
     extern s32 mnuDrawStaffValueGrid(s32, s32, s32, MenuStaffContext *);
     extern char D_0042AD08[];
@@ -941,7 +939,7 @@ s32 mnuDrawStaffValuePage(KwlnTask *task) {
         }
         mnuDrawStaffValueGrid(0, 0, selectionId, context);
         if (owned != 0 && mdlFlagTest(0x990) != 0) {
-            glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
+            glyph = itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
             frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
             mnuDrawRemainingAndTotalCounts(0x770, 0xB98, 0x100, selectionId, (s32)context->resources.baseResources[1], 0x2C);

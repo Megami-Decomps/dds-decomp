@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -31,6 +32,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
@@ -83,8 +85,6 @@ extern void fileLoadCtxSlideUpdate(void);
 extern u8 D_003E8B98[];
 extern u8 D_003E8BB0[];
 extern u8 D_003E8BD0[];
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *glyph, u8 flagValue);
-extern void frFontSetChildColors(struct FrFontGlyph *glyph, u32 colorWord);
 typedef struct EffectSurfaceNode {
     u32 capacity;
     u32 color;
@@ -139,7 +139,7 @@ extern void fldPrepareDeferredSceneTransition(void);
 extern void fileCopySaveHeaderNumbers(FileSavePreviewRecord *);
 extern void filePrintAccessoryLoadNotice(void);
 extern void fileSaveAndDisplayCurrentMoney(void);
-extern s32 fileApplyStoryStatBonuses(s32);
+extern s32 ptyApplyUnlockedUnitStatBonusesOnce(s32);
 extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 extern void mtrMantraEventBitReset(void);
@@ -171,11 +171,10 @@ extern u32 D_00437D44;
 extern u32 D_00437D3C;
 
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern u32 D_00439004;
-extern u32 D_00439008;
+extern struct FrFontGlyph *D_00439004;
+extern struct FrFontGlyph *D_00439008;
 
-extern u32 D_0043900C;
+extern struct FrFontGlyph *D_0043900C;
 
 extern s32 D_00437CD8;
 
@@ -256,7 +255,7 @@ extern s8 D_0037F510[];
 extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(s32 result);
 
-extern void fileRequestMemoryCardFormat(u32 context);
+extern void fileReqStartCardDetection(u32 context);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -591,29 +590,29 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
 }
 
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
+    struct FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439004);
+    frFontQueueGlyphForCurrentDrawBuffer(D_00439004);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
+    struct FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439008 = handle;
-    frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)handle, 3);
+    frFontSetChildChainFirstOption(handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439008);
+    frFontQueueGlyphForCurrentDrawBuffer(D_00439008);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontAddSharedGlyphFlags(1);
-    D_0043900C = (u32)frFontBuildGlyphChain((const char *)(u32)glyphSource, 0, 0, 0, 0);
+    D_0043900C = frFontBuildGlyphChain((const char *)(u32)glyphSource, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_0043900C, 1);
-    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)D_0043900C, x << 4, y << 3);
-    frFontSetChildColors((struct FrFontGlyph *)(u32)D_0043900C, colors);
+    frFontSetSpacingAndMeasureGlyphs(D_0043900C, 1);
+    frFontSetGlyphPosition(D_0043900C, x << 4, y << 3);
+    frFontSetChildColors(D_0043900C, colors);
     frFontDrawGlyphChain(D_0043900C, 0, 0x56);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
+    frFontQueueGlyphForCurrentDrawBuffer(D_0043900C);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -2018,7 +2017,7 @@ s32 mcHandleDetectionResult(void) {
 s32 fileStartMemoryCardFormat(void) {
     fileSetMenuFlowState(5);
     fileSetMemoryCardOperationActive();
-    fileRequestMemoryCardFormat(fileMemoryCardRequestIndex);
+    fileReqStartCardDetection(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
 
@@ -3191,7 +3190,7 @@ s32 fileApplySelectedLoadResult(void) {
     fileSaveAndDisplayCurrentMoney();
     for (i = 0; i < 5; i++) {
         u16 activeFlag = datGameState->party[i].flags & DAT_PARTY_FLAG_OCCUPIED;
-        if (activeFlag && fileApplyStoryStatBonuses(datGameState->party[i].unitId)) {
+        if (activeFlag && ptyApplyUnlockedUnitStatBonusesOnce(datGameState->party[i].unitId)) {
             u32 maximumMp;
             u16 restoredHp;
             datGameState->party[i].maxHp =
@@ -3411,7 +3410,7 @@ extern s32 sdfDebugPrintf(const char *, ...);
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */
-s32 fileApplyStoryStatBonuses(s32 unitId) {
+s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     s32 partyIndex;
     DatPartyRecord *party;
     s32 changed;
@@ -4412,7 +4411,6 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern f32 func_003532B8(f32);
 extern f32 func_003532E8(f32, f32);
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target sdfViewEyeVector and up sdfViewUpVector */
@@ -5923,17 +5921,6 @@ fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
 
 #include "eff_anim.h"
 
-/* Same complete producer view as the generated-texture packet provider. */
-typedef struct EffGeneratedTextureDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    SdfTex *texture;
-} EffGeneratedTextureDescriptor;
-
 extern void billInvokeCallback(struct BillObj *);
 extern void effCopyVector(void *, void *);
 extern void fileReadRecordSecondVector(u8 *, void *);
@@ -7362,7 +7349,6 @@ typedef struct FileOrientedRingMotion {
 
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
-extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
 void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {

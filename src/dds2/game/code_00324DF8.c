@@ -2,6 +2,7 @@
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
 #include "sdf_resource.h"
+#include "sdf_handler_node.h"
 
 extern void (*sdfTickCallback)(void);
 
@@ -42,9 +43,10 @@ void func_00324F20(MnuCallbackList **list, u32 handle) {
 void func_00324F38(MnuCallbackList **list, u32 id) {
     mnuFindResourceNodeById(*list, id);
 }
-INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);
+SdfHandlerNode *D_004389BC __attribute__((section(".sdata"))) = NULL;
 
-INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C0);
+/* Workspace bytes passed to the console DMA setup allocation. */
+s32 D_004389C0 __attribute__((section(".sdata"))) = 0x100000;
 
-INCLUDE_SDATA(const s32, "game/code_00324DF8", sdfTickCallback);
+void (*sdfTickCallback)(void) __attribute__((section(".sdata"))) = NULL;
 

@@ -126,7 +126,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
         return;
     }
     movie->state = SDF_MOVIE_STATE_DATA_READ;
-    sdfDevQueueRead(movie->deviceState, stream->pendingCursor, remaining <= 0x4000 ? remaining : 0x4000);
+    sdfDevQueueRead(movie->deviceState, stream->pacInputBuffer, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */

@@ -2,6 +2,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "itf.h"
+#include "fr_font.h"
 
 
 extern s32 D_00435E70;

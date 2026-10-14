@@ -56,6 +56,45 @@ early register uses and can later look like an allocation problem. Likewise,
 a field incorrectly stored as an integer can create a memory dependency that
 later looks like a scheduler tie.
 
+## Check data in the complete assembly context
+
+A data owner can be read only from other translation units. Check its explicit
+object address, width, relocations and bytes against its owned retail section,
+as well as its placement in the complete unit. `INCLUDE_SDATA` switches back to
+`.text`; the compiler may believe its preceding C data section remains active
+and omit a section directive for the following C object. The isolated C object
+can therefore match while the complete build places it in executable code.
+
+The paired handler registry uses real pointer heads and a separate workspace
+byte count of `0x100000`. Expressing the complete DDS2 data run in C preserves
+the existing tick callback's small-data placement. `check_unit.py` checks the
+full owned `.sdata` span and its source objects, including objects with no local
+function consumer. A full retail link remains required to validate placement
+and alignment across unit boundaries.
+
+Explicit readonly objects can likewise be consumed only by other units or data
+tables. For nonrelocated objects with native symbol addresses, the checker
+verifies their full-unit section offsets, widths and bytes in both compilation
+contexts before accepting their source-owned extents. Unreferenced literals
+and relocated tables retain their existing checks.
+
+## Keep interior symbols separate from NOBITS storage
+
+A native label inside a BSS object can name a field or array element without
+owning another allocation. `config/<version>/symbol_aliases.json` records these
+non-owning symbols as a primary owner plus byte offset, unit and NOBITS section.
+Every alias must agree with its independently known native address. Configure
+writes relative `PROVIDE` expressions and tracks the metadata as a generation
+input, including when an existing split is reused.
+
+The NOBITS checker removes only the validated aliases from object-boundary
+inference, checks each alias lies inside its primary extent, and still requires
+the exact section span and complete source `STT_OBJECT` inventory. Allocating
+another C object for an alias remains an error. The paired `ItfMesGlobals` banks
+are each one 0x520-byte object; `itfWindowSlots` aliases the first node's state
+word at +0x2C. Real-field offset guards validate the other mixed-code aliases.
+These BSS storage extents are distinct from initialized retail bytes.
+
 ## Find the first causal difference
 
 Keep a baseline and one source change justified by the current evidence.
@@ -395,6 +434,15 @@ Measure yield in newly exact bodies and retail bytes, alongside qualified
 parks. A broad sweep that mostly returns negatives still narrows the method's
 scope. Small word counts do not promise easy closure, while one real owner
 correction can unlock several larger bodies and their twins.
+
+The checker's `DIFF` count is **differing** words, not matching words. Its
+`text prefix` line gives both counts explicitly and, when the native assembly
+header is available, reports emitted/native sizes and uncovered/excess bytes.
+Repeated relocation diagnostics for one instruction count once in that line.
+An `OVER` body still fails even if its bounded prefix agrees: the checker shows
+differences only up to the next retail-function boundary. These instruction
+counts use the existing relocation comparison rules and do not grant partial
+matching credit or replace the whole-unit and linked-image gates.
 
 ## Qualify the retained source state
 

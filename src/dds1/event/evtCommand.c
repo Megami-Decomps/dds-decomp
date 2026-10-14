@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
@@ -96,7 +97,6 @@ void evtDestroySecondaryWorldNode(void);
 
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
-extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 void evtScaleSlotByClampedMultiplier(void *unit, f32 value);

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_special_ability.h"
 #include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -116,7 +117,7 @@ extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern s32 btlUpdateActorDebugEditor(void);
+extern s32 btlUpdateBattleModelDebugEditor(void);
 
 u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
@@ -155,7 +156,6 @@ s32 btlGetLoggedIndexedCommandItem(s32 index);
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
-extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
@@ -2854,13 +2854,13 @@ void btlUpdateDebugActionState(void) {
 
 /* Initialize the battle debug-menu tables on entry to the retail TEST state. */
 void btlEnterTestActionState(void) {
-    btlInitDrawTables();
+    btlInitializeBattleDebugMenu();
 }
 
 void btlAdvanceUnitWhenActionGateClears(u32 arg0) {
     s64 temp_v0;
 
-    temp_v0 = btlUpdateActorDebugEditor();
+    temp_v0 = btlUpdateBattleModelDebugEditor();
     if (temp_v0 == 0) {
         btlDispatchStateHandler(arg0, 6);
         return;

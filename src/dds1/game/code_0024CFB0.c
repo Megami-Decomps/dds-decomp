@@ -15,6 +15,7 @@
 #include "sdf_texture_file.h"
 #include "eff_random.h"
 #include "mdl_flag_api.h"
+#include "mnu_event_flag_entries.h"
 
 struct SdfTex;
 struct MenuTerminalWork;
@@ -80,7 +81,7 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
 
 
 extern void dspRequestMessageWindowModeOne(void);
-extern void *dds3GetWorldSecondaryObject(void);
+#include "dds3_world_secondary.h"
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();
 extern void itfPanelSetStatus(s32, s32);
@@ -93,24 +94,8 @@ extern s32 D_003BAA74;
 extern s32 D_003BAA78;
 extern s32 D_003BAA84;
 
-typedef struct SceneFlagEntry {
-    s32 requiredFlag; /* 0x00 */
-    s32 handledFlag;  /* 0x04 */
-    u16 areaIndex;   /* 0x08 */
-    u8 nameIndex;    /* 0x0A */
-    u8 pad0B;
-    u16 dialogIndex; /* 0x0C */
-    u16 pad0E;
-} SceneFlagEntry;
-
-typedef struct PartyFlagPair {
-    s32 requiredFlag;
-    s32 handledFlag;
-} PartyFlagPair;
-
-
-extern SceneFlagEntry mnuSceneFlagEventEntries[4];
-extern PartyFlagPair mnuPartyFlagEventEntries[];
+extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
+extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 /* Close the current display channel before ensuring a replacement window.
  * DDS1 retains the legacy argument taken from the context's resource pair. */
