@@ -1548,7 +1548,202 @@ void effReleaseBillFrameNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceFrameInstances);
+typedef struct EffBillFrameEntry {
+    s32 age;
+    f32 spin;
+    f32 angle;
+    f32 radius;
+    f32 innerWidth;
+    f32 outerWidth;
+} EffBillFrameEntry;
+typedef char EffBillFrameEntrySizeCheck[(sizeof(EffBillFrameEntry) == 0x18) ? 1 : -1];
+typedef char EffBillFrameEntry_age_offset_check[((u32)&((EffBillFrameEntry *)0)->age == 0x0) ? 1 : -1];
+typedef char EffBillFrameEntry_spin_offset_check[((u32)&((EffBillFrameEntry *)0)->spin == 0x4) ? 1 : -1];
+typedef char EffBillFrameEntry_angle_offset_check[((u32)&((EffBillFrameEntry *)0)->angle == 0x8) ? 1 : -1];
+typedef char EffBillFrameEntry_radius_offset_check[((u32)&((EffBillFrameEntry *)0)->radius == 0xC) ? 1 : -1];
+typedef char EffBillFrameEntry_innerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->innerWidth == 0x10) ? 1 : -1];
+typedef char EffBillFrameEntry_outerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->outerWidth == 0x14) ? 1 : -1];
+
+extern s8 effSharedRandomState[];
+extern u8 D_0037E0E0[];
+
+void billAdvanceFrameInstances(EffClassWork *work) {
+    EffBillFrameConfig *config = (EffBillFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffTrackSet *asset;
+    EffBillFrameEntry *entries;
+    s32 lifetime;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 item;
+    s32 itemCount;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 retiredState;
+    s32 waitingState;
+    s32 inactiveState;
+    u32 respawn;
+    u32 innerColor;
+    u32 outerColor;
+    u32 *colors;
+    u128 *vertices;
+    f32 innerVector[4];
+    f32 outerVector[4];
+    f32 direction[4];
+    f32 radius[4];
+    f32 innerWidth[4];
+    f32 outerWidth[4];
+    f32 acceleration;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) return;
+    resource = (EffBillFrameState *)work->resource;
+    lifetime = config->frame.lifetime;
+    entries = (EffBillFrameEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) return;
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+    innerColor = config->innerColor & 0xFFFFFF;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    direction[1] = 0.0f;
+    direction[3] = 0.0f;
+    eeUnpackRGBAWordFloat(innerColor, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, innerVector);
+    outerColor = config->outerColor & 0xFFFFFF;
+    eeUnpackRGBAWordFloat(outerColor, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, outerVector);
+    fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+    fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+    acceleration = config->spinAccel;
+    respawn = config->frame.respawn;
+    item = 0;
+    if (itemCount <= 0) return;
+    waitingState = -1;
+    inactiveState = -2;
+    retiredState = respawn != 0 ? waitingState : inactiveState;
+    for (; item < itemCount; item++, entries++, vertices += 5, colors += 5) {
+        EffBillFrameEntry *entry = entries;
+        s32 age = entry->age;
+        if (age == inactiveState) continue;
+        if (age == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 factor;
+                entry->angle = effMiscRandUnitFloat(effSharedRandomState) * 6.28318500518798828125f;
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
+                if (effMiscRand((EffRandState *)effSharedRandomState) & 1) entry->spin = -entry->spin;
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                entry->radius = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter));
+                randomValue = effMiscRandUnitFloat(effSharedRandomState);
+                factor = randomValue * config->widthJitter + (1.0f - config->widthJitter);
+                entry->innerWidth = config->innerWidth * factor;
+                entry->outerWidth = config->outerWidth * factor;
+                if (randomAge != 0) entry->age = (s32)(effMiscRand((EffRandState *)effSharedRandomState) % (u32)lifetime);
+                else entry->age = 0;
+                remainingSpawn = (s32)((u32)remainingSpawn - 1u);
+            }
+        } else if (age >= lifetime) {
+            u32 *color = colors;
+            u128 *position = vertices;
+            s32 count = 4;
+            do {
+                VU0_STORE_VF(vf0, position);
+                *color = 0;
+                position++;
+                color++;
+            } while (--count >= 0);
+            entry->age = retiredState;
+        } else {
+            f32 spin = entry->spin;
+            f32 time = (f32)age;
+            f32 angle;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 outerPacked;
+            u32 innerPacked;
+            if (spin > 0.0f) angle = (spin + (acceleration * time) * 0.5f) * time;
+            else angle = (spin - (acceleration * time) * 0.5f) * time;
+            angle += entry->angle;
+            VU0_LOAD_VF(vf10, D_0037E0E0);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_SCALE_VF(vf10, entry->radius);
+            VU0_STORE_VF_UNCLOBBERED(vf10, radius);
+            VU0_MOVE_VF(vf10, vf11);
+            VU0_SCALE_VF(vf10, entry->innerWidth);
+            VU0_SCALE_VF(vf11, entry->outerWidth);
+            VU0_STORE_VF_UNCLOBBERED(vf10, innerWidth);
+            VU0_STORE_VF_UNCLOBBERED(vf11, outerWidth);
+            direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            direction[2] = sdfSinPoly(angle);
+            VU0_LOAD_VF(vf10, direction);
+            VU0_MOVE_VF(vf12, vf10);
+            VU0_GET_VF10_X(cosine);
+            VU0_GET_VF10_Z(sine);
+            VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
+            cosine = -cosine;
+            VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, innerWidth);
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, innerWidth);
+            VU0_LOAD_VF(vf10, outerWidth);
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, outerWidth);
+            VU0_MOVE_VF(vf10, vf12);
+            VU0_LOAD_VF(vf11, radius);
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_MOVE_VF(vf12, vf10);
+            VU0_LOAD_VF(vf10, innerWidth);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_STORE_VF(vf10, vertices + 2);
+            VU0_NEGATE_XYZ(vf11);
+            VU0_STORE_VF(vf11, vertices + 4);
+            VU0_LOAD_VF(vf10, outerWidth);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_ADD(vf10, vf10, vf12);
+            VU0_NEGATE_XYZ(vf11);
+            VU0_STORE_VF(vf10, vertices);
+            VU0_ADD(vf11, vf11, vf12);
+            VU0_STORE_VF(vf11, vertices + 1);
+            if (age < fadeStart) alpha = time / (f32)fadeStart;
+            else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
+            else alpha = 1.0f;
+            VU0_LOAD_VF(vf11, D_0037E0E0);
+            VU0_SCALE_VF(vf11, alpha);
+            VU0_LOAD_VF(vf10, outerVector);
+            VU0_MUL(vf10, vf10, vf11);
+            outerPacked = eePackRGBAWord(128.0f);
+            colors[0] = outerPacked;
+            colors[1] = outerPacked;
+            VU0_LOAD_VF(vf10, innerVector);
+            VU0_MUL(vf10, vf10, vf11);
+            innerPacked = eePackRGBAWord(128.0f);
+            if (item & 1) {
+                colors[3] = innerPacked | 0xFF000000;
+                innerPacked = (u32)(alpha * 128.0f) << 24;
+                colors[2] = innerPacked;
+                colors[4] = innerPacked;
+            } else {
+                colors[3] = innerPacked | 0x40000000;
+                innerPacked = (u32)(alpha * 255.0f) << 24;
+                colors[2] = innerPacked;
+                colors[4] = innerPacked;
+            }
+            entry->age = (s32)((u32)age + 1u);
+        }
+    }
+}
+
 
 extern u8 D_0037E0E0[];
 
