@@ -2038,9 +2038,9 @@ s32 fileBuildMainBlobAndWrite(void) {
     memcpy(fileSavePreviewRecords[slot].party, datGameState->header.partyIds, 8);
     memcpy(fileSavePreviewRecords[slot].levels, datGameState->header.partyLevels, 8);
     fileSavePreviewRecords[slot].money = datGameState->header.unk20;
-    fileSavePreviewRecords[slot].stateWords[0] = datGameState->header.unk24;
-    fileSavePreviewRecords[slot].stateWords[1] = datGameState->header.unk28;
-    fileSavePreviewRecords[slot].stateWords[2] = datGameState->header.unk2C;
+    fileSavePreviewRecords[slot].saveWords.words[0] = datGameState->header.unk24;
+    fileSavePreviewRecords[slot].saveWords.words[1] = datGameState->header.unk28;
+    fileSavePreviewRecords[slot].saveWords.words[2] = datGameState->header.unk2C;
     D_003BD8F4 = (u32)datGameState;
     D_003BD8F8 = 0x33600;
     if (D_003BC820 == 0 || D_003BC820 == 2) {
