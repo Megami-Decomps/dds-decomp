@@ -265,7 +265,41 @@ void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
 void sdfNoOpGridDrawCallback(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00312850", func_00312E28);
+/* Allocate a grid header followed by its cells, install the no-op callbacks
+ * (or the caller's destroy hook), and start with every cell released. */
+SdfGrid *func_00312E28(s32 width, s32 height, u16 cellWidth, u16 cellHeight, u16 visibleColumns,
+                       u16 visibleRows, u32 userData, void (*onDestroy)(s32, u32)) {
+    u32 cellCount = width * height;
+    s32 size = sizeof(SdfGrid) + cellCount * sizeof(SdfGridCell);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    SdfGrid *grid = (SdfGrid *)sdfMemoryGetBlockAddress(allocation);
+
+    memset(grid, 0, size);
+    grid->allocation = allocation;
+    grid->width = width;
+    grid->cellCount = cellCount;
+    grid->viewportOrigin = (SdfGridCell *)(grid + 1);
+    grid->cursor = (SdfGridCell *)(grid + 1);
+    grid->cells = (SdfGridCell *)(grid + 1);
+    grid->releaseCell = (void *)sdfNoOpKeyValueCallback;
+    grid->onDestroy = (void *)sdfNoOpKeyValueCallback;
+    grid->drawCell = (void *)sdfNoOpGridDrawCallback;
+    grid->userData = 0;
+    grid->cellWidth = cellWidth;
+    grid->cellHeight = cellHeight;
+    grid->visibleColumns = visibleColumns;
+    grid->visibleRows = visibleRows;
+    grid->columnMargin = 0;
+    grid->rowMargin = 0;
+    if (userData != 0) {
+        grid->userData = userData;
+    }
+    if (onDestroy != NULL) {
+        grid->onDestroy = onDestroy;
+    }
+    sdfGridReleaseAllCells(grid);
+    return grid;
+}
 
 /* Set horizontal/vertical cursor margins without changing the viewport itself. */
 void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
