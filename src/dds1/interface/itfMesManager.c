@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_text_slots_api.h"
 #include "fr_font_glyph_chain_count.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
@@ -60,14 +61,11 @@ s32 itfMesSetOptionValue(s32 window, s32 arg1, s32 arg2);
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
-extern void itfSetIndexedTextSlot();
 
 
 void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
 
-
-s8 itfTestTextInterfaceMask(s32 arg0);
 
 s32 itfGetTextLipsUnitId();
 
@@ -1232,7 +1230,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     FrFontGlyph *glyph;
     FrFontGlyph *previousGlyph;
     s32 lipsValue;
-    s8 interfaceMask;
+    u32 interfaceMask;
     void (*callback)();
 
     previousGlyph = entryBlock->glyphChain;
