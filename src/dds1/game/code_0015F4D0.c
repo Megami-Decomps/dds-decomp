@@ -1,6 +1,7 @@
 #include "eff_packet_params.h"
 #include "sdf_packet_header.h"
 #include "common.h"
+#include "eff_blur.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_blur.h"
 #include "sdf_packet_header.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
