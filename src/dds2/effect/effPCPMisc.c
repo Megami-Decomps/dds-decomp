@@ -4555,7 +4555,7 @@ void effPcpUpdateRadialFragmentGroupSet(EffPCPGroupSet *work) {
     duration = work->head.framesPerEntry;
     fadeIn = work->head.fadeIn;
     fadeOut = work->head.fadeOut;
-    angularDamping = work->head.unk7C;
+    angularDamping = work->head.angularDamping;
     startRadialBlend = work->head.unk84;
     endRadialBlend = work->head.unk88;
     entry = work->entries;

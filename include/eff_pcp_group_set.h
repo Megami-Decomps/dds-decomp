@@ -22,7 +22,7 @@ typedef struct EffPCPGroupHead {
     f32 startJitter; /* 0x70: fractional random variation */
     f32 endJitter; /* 0x74: fractional random variation */
     f32 unk78;
-    f32 unk7C;
+    f32 angularDamping;
     f32 unk80;
     f32 unk84;
     f32 unk88;
