@@ -801,7 +801,7 @@ void func_00122A38(void) {
     memset(datGameState->stageCellBits, 0, sizeof(datGameState->stageCellBits));
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00122B58);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldResetFieldRuntimeState);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00122E50);
 
