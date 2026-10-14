@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
+#include "btl_resolve_unit_value_api.h"
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 
@@ -1353,7 +1354,6 @@ s32 evtPushSecondRosterMaximumHp(void) {
     return 1;
 }
 
-extern s32 btlResolveUnitValueWithOverride(DatPartyRecord *, s32);
 extern u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
