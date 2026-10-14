@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_owner_bill_entry.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
@@ -57,6 +58,7 @@ EffectObj *effObjCreateMagatuhiForKind();
 extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
+extern void effObjForwardOwnerBillEntry(EffectObj *obj);
 
 extern void *effCreateNodeFromParameter(void);
 
@@ -839,34 +841,22 @@ s32 effObjBindValidatedOwner(EffectObj *obj, EffectObj *owner) {
     return 1;
 }
 
-/* Billboard payload: state word and the SDF parameter block it was built from. */
-typedef struct {
-    u8 pad0[8];   /* 0x0 */
-    u32 state;     /* 0x8: only zero permits forwarding the lookup */
-    void *params;  /* 0xC: parameter block */
-} BillPayload;
-
-typedef struct {
-    u8 pad0[0x18]; /* 0x0 */
-    void *param;   /* 0x18: forwarded to sdfLoadMapRecordLookAtBasis */
-} BillParam;
-
 /* Forward the saved entry only for flagged kind-five owners whose bill state is zero.
    Owner/bill/parameter pointers are trusted once the flag selects this path. */
 void effObjForwardOwnerBillEntry(EffectObj *obj) {
     EffectDependencyState *data;
     EffectObj *owner;
-    BillPayload *bill;
+    EffOwnerBillPayloadView *bill;
 
     data = obj->data;
     if (data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) {
         owner = data->owner;
         if (((u8 *)&owner->kindTag)[3] == EFF_OBJ_OWNER_BILL_KIND) {
-            bill = (BillPayload *)((EffectObjectData *)owner->data)->modelHolder;
+            bill = (EffOwnerBillPayloadView *)((EffectObjectData *)owner->data)->modelHolder;
             if (bill->state != 0) {
                 return;
             }
-            sdfLoadMapRecordLookAtBasis(((BillParam *)bill->params)->param, data->entryId);
+            sdfLoadMapRecordLookAtBasis(((EffOwnerBillParamView *)bill->params)->model, data->entryId);
         }
     }
 }
