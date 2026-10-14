@@ -12485,3 +12485,34 @@ discarded expressions, fake variables or unrelated dead stores. The complete
 live unit gates `20 match, 0 differ`, including all 19 previously matched C
 functions and readonly data. Trace paths and exact pass locations are recorded
 in the agent ledger.
+
+## Trace-justified diagnostic row coordinates
+
+`dds3DrawWorldNodeTransformDiagnostic` (DDS1 `0010EF68`, DDS2 `0010F190`)
+prints a node's ID and name, then separate position, rotation and scale
+sections when its `ObjectTransform` exists. Each section uses one screen-row
+coordinate for both its label and its values. The existing `EffWorldNode`
+and `ObjectTransform` owners describe every field; varargs perform ordinary
+float-to-double promotion.
+
+A shared returned line count, two without an inner transform and eight with
+one, reproduces the common native epilogue. Returning eight inside the
+conditional and two afterwards instead adds a branch and eight code bytes.
+
+The deciding allocation property is that the three different section-row
+values have separate lifetimes. Repeatedly assigning one `rowY` leaves a
+global pseudo spanning 16 calls: the trace assigns it `$22`, with format
+pointers already occupying `$16`. With real `positionY`, `rotationY` and
+`scaleY` coordinates, local allocation's quantity-priority tier colors all
+three nonoverlapping row quantities `$16` before their format pointers
+(`$17`). Promoted floating arguments occupy `$18` through `$20`, the value
+column `$21`, and global allocation puts the advancing row counter in `$22`.
+The hooked and unhooked compiler outputs are identical.
+
+These are three genuinely different draw coordinates, each consumed by two
+calls, not dummy values or a declaration-order search. The measured
+trajectory was 772 versus 764 native code bytes, then exact extent with
+87 of 191 words differing, then zero differences in both games. Each whole
+unit gates `26 match, 0 differ`, preserving all previous C and readonly data.
+The existing small-data label symbols remain in place. Exact trace paths and
+pass locations are recorded in the agent ledger.
