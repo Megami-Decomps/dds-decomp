@@ -385,37 +385,37 @@ s32 btlIsSupportedCommandKind(s32 *state) {
     }
 }
 
-s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
-    switch (argument[0]) {
+s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
+    switch (work->phase) {
     case 1:
         if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
             return btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue);
         }
-        if (argument[1] > 0) {
-            return argument[1];
+        if (work->skillId > 0) {
+            return work->skillId;
         }
         return 0;
     case 4:
-        return btlGetLoggedIndexedCommandItem(argument[2]);
+        return btlGetLoggedIndexedCommandItem(work->reference);
     case 2:
     case 3:
     case 7:
     case 8:
-        return argument[1];
+        return work->skillId;
     default:
         return -1;
     }
 }
 
-u32 btlClassifyActionOperand(BtlUnit *actor, u8 *argument) {
-    switch (*(s32 *)argument) {
+u32 btlClassifyActionOperand(BtlUnit *actor, BattleIndexWork *work) {
+    switch (work->phase) {
     case 1: {
-        u32 count = btlGetIndexListCount(*(struct BtlIndexList **)(argument + 0x40));
+        u32 count = btlGetIndexListCount(work->indices);
         if ((btlUnitStatusPair(actor) & 0x1200) == 0x1200 &&
             (*(u16 *)((u8 *)actor + 0x12E) & 0x1000) == 0 &&
             count == 1) {
-            u8 *option = *(u8 **)(argument + 0x60);
-            if (*(s32 *)(option + 0xC) == 2 && option[0x14] == 0) {
+            BtlOperandGroup *group = work->groups;
+            if (group->parameter == 2 && group->reflected == 0) {
                 return 0x17;
             }
         }
@@ -427,7 +427,7 @@ u32 btlClassifyActionOperand(BtlUnit *actor, u8 *argument) {
     case 3:
     case 7:
     case 8:
-        return *(u8 *)(datActionAnimationRecords + *(s32 *)(argument + 4) * 0x20);
+        return ((BtlActionAnimationRecord *)datActionAnimationRecords)[work->skillId].cameraKind;
     default:
         return 0;
     }
@@ -674,7 +674,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
                       action->indexWork.companionA, action->indexWork.companionB);
     runtime = (BtlState *)btlGetRuntime();
     action->options &= ~2;
-    command = btlResolveActionOperand(action->unit, &work->phase);
+    command = btlResolveActionOperand(action->unit, work);
     if (command == -1) {
         return;
     }
@@ -1168,7 +1168,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
     if (btlCompareSkippedAndActiveTargetCounts(work->indices, work->groups)) {
         work->unk2E = 1;
     }
-    work->slot = btlClassifyActionOperand(action->unit, (u8 *)work);
+    work->slot = btlClassifyActionOperand(action->unit, work);
     {
         s32 points;
         if (runtime->actionPointsOverride != NULL) {
