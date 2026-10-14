@@ -815,6 +815,8 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s3
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
+extern void mdlCreateDevSlotList(MdlCtx *, s32, s32, u32, u32);
+
 void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
     mdlCreateDevSlotList(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,

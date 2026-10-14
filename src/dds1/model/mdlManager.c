@@ -1,3 +1,4 @@
+#include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -529,7 +530,39 @@ void mdlUnlinkGroupEntry(MdlCtx *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", mdlCreateDevSlotList);
+extern void mdlReleaseDevSlots(MdlCtx *ctx);
+
+/* vu0 routine: initialize the slot-list endpoint color and interpolation step. */
+void mdlCreateDevSlotList(MdlCtx *ctx, s32 stride, s32 capacity,
+                         u32 endColor, u32 startColor) {
+    MdlDevList *deviceList;
+    f32 inverseSpan;
+    /* Both retail versions home the packed colors 16 bytes apart. */
+    u32 startCarrier[4];
+    u32 endCarrier[4];
+
+    mdlReleaseDevSlots(ctx);
+    if (capacity > 0) {
+        deviceList = sdfAllocAndClearQuadwords(sizeof(MdlDevList));
+        deviceList->growStep = 1;
+        ctx->devList = deviceList;
+        deviceList->usedCount = capacity;
+        deviceList->capacity = capacity;
+        deviceList->stride = stride;
+        /* Final argument use: see docs/idioms.md, "Final argument use: mdlCreateDevSlotList". */
+        deviceList->byteCount = capacity * stride;
+        inverseSpan = 1.0f / deviceList->byteCount;
+        startCarrier[0] = startColor;
+        EE_MMI_RGBA_UNPACK(startCarrier, 0.0078125f);
+        VU0_STORE_VF(vf10, deviceList->color);
+        VU0_MOVE_VF_EXTENDED(vf11, vf10);
+        endCarrier[0] = endColor;
+        EE_MMI_RGBA_UNPACK(endCarrier, 0.0078125f);
+        VU0_SUB_EXTENDED(vf10, vf10, vf11);
+        VU0_SCALAR_OP(inverseSpan, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_STORE_VF(vf10, deviceList->colorStep);
+    }
+}
 
 /* Release every device slot and its list node, then the list owner. A missing
  * list is a no-op; a released list is removed from the context. */
