@@ -2,6 +2,8 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "scr_integer_return_value_api.h"
+#include "btl_marked_command_requested_state_api.h"
 #include "btl_skill_max_api.h"
 #include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
@@ -116,8 +118,6 @@ extern u32 btlButtonIconTexture;
 extern u16 scrReadIntParameter(u32);
 
 
-extern u64 btlGetMarkedCommandRequestedState(void);
-
 extern s32 btlTrackedTaskHandles;
 
 extern u64 btlCreateCommandSoundUpdateTask(void);
@@ -189,8 +189,6 @@ extern u32 btlGetSubtaskTargetMode(void);
 extern void btlPickCommandTargetWithStatusMask(s32, u16);
 
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
-
-extern void scrSetIntegerReturnValue();
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
@@ -2319,7 +2317,7 @@ u32 btlScriptReturnEffectActive(void) {
 
 /* Report the requested byte of mode 0x314's marked-command state; return script success. */
 u32 btlScriptReturnMarkedCommandRequestedState(void) {
-    u64 result;
+    u32 result;
 
     result = btlGetMarkedCommandRequestedState();
     scrSetIntegerReturnValue(result);
