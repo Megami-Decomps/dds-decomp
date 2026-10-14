@@ -3,11 +3,11 @@
 #include "mnu_shop.h"
 #include "itf.h"
 #include "fr_font.h"
+#include "fr_font_draw_glyph.h"
 
 extern s32 D_003BAA9C;
 
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 void itfEmitSelectedGlyph(ShopScene *context, s32 unused, s32 layoutFlags,
                    u32 color, u32 glyphAttribute) {
