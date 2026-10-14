@@ -57,7 +57,7 @@ extern void *effParamTableGetBlock(void *, s32);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern u8 effDefaultRandomState[];
-extern void func_003364B8(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void func_00336818(f32 angle);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
@@ -1297,7 +1297,7 @@ void effScatterRingInit(PcpScatterInstanceA *work, s32 index)
     ring->angleStep = angleStep;
     ring->tiltSpeed = work->params.initialTiltSpeed;
     ring->rise = work->params.initialRise;
-    func_003364B8(ring->orientationAngle);
+    sdfVuLoadRotationMatrixX(ring->orientationAngle);
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
     v = (f32)work->params.vSpan;
@@ -1348,7 +1348,7 @@ void effScatterRingUpdate(PcpScatterInstanceA *work, s32 index)
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
-    func_003364B8(ring->orientationAngle);
+    sdfVuLoadRotationMatrixX(ring->orientationAngle);
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
     ring->tiltAngle += ring->tiltSpeed;
@@ -1571,7 +1571,7 @@ void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
     ring->angleStep = angleStep;
     ring->tiltSpeed = work->params.initialTiltSpeed;
     ring->rise = work->params.initialRise;
-    func_003364B8(ring->orientationAngle);
+    sdfVuLoadRotationMatrixX(ring->orientationAngle);
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
     v = (f32)work->params.vSpan;
@@ -1622,7 +1622,7 @@ void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
-    func_003364B8(ring->orientationAngle);
+    sdfVuLoadRotationMatrixX(ring->orientationAngle);
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
     ring->tiltAngle += ring->tiltSpeed;
@@ -1861,7 +1861,7 @@ void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
     ring->radius = radius;
     ring->tiltSpeed = work->params.initialTiltSpeed;
     ring->rise = work->params.initialRise;
-    func_003364B8(ring->orientationAngle);
+    sdfVuLoadRotationMatrixX(ring->orientationAngle);
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
     v = (f32)work->params.vSpan;
@@ -1912,7 +1912,7 @@ void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
-    func_003364B8(ring->orientationAngle);
+    sdfVuLoadRotationMatrixX(ring->orientationAngle);
     func_00336818(ring->tiltAngle);
     sdfMultiplyVuMatrixInPlace();
     ring->tiltAngle += ring->tiltSpeed;

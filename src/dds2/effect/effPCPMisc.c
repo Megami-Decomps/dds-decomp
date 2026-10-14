@@ -1692,12 +1692,12 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 value) {
     work->unk18 = value;
 }
 
-extern void func_003364B8(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void func_00336898(f32 angle);
 extern EffSpawnParams D_003B1890[];
 
-/* 8 pieces flung sideways from below; the rotation matrix is composed by the
- * three func_003364B8/336898/336B00 calls into the VU0 matrix registers. */
+/* 8 pieces flung sideways from below; three rotation-matrix loads compose the
+ * VU0 matrix before the particle positions are transformed. */
 void effPcpSpawnSidewaysEight(EffPCPThunderGroup *group) {
     s32 i;
     EffSpawnParams *params;
@@ -1714,7 +1714,7 @@ void effPcpSpawnSidewaysEight(EffPCPThunderGroup *group) {
         params->pos[0] = 0;
         params->pos[1] = -600.0f;
         params->pos[2] = 0;
-        func_003364B8((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        sdfVuLoadRotationMatrixX((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         func_00336898((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         sdfMultiplyVuMatrixInPlace();
         VU0_LOAD_VF($vf10, params->pos);

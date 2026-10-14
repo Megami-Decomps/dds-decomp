@@ -7347,7 +7347,7 @@ typedef struct FileOrientedRingMotion {
     f32 angleMultiplier;
 } FileOrientedRingMotion;   /* 0x38, ordinary word alignment */
 
-extern void func_003364B8(f32 angle);
+extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void func_00336818(f32 angle);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
@@ -7446,7 +7446,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             motion->height = 0.0f;
                             motion->orientationAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                             motion->tiltAngle = (effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                            func_003364B8(motion->orientationAngle);
+                            sdfVuLoadRotationMatrixX(motion->orientationAngle);
                             func_00336818(motion->tiltAngle);
                             sdfMultiplyVuMatrixInPlace();
                             direction[0] = sdfEvaluateCosineViaSinePhaseShift(motion->initialPhase) * initialRadius;
@@ -7517,7 +7517,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         motion->height += gravity * age;
                         motion->radius += motion->radiusStep;
                         phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
-                        func_003364B8(motion->orientationAngle);
+                        sdfVuLoadRotationMatrixX(motion->orientationAngle);
                         func_00336818(motion->tiltAngle);
                         sdfMultiplyVuMatrixInPlace();
                         radius = motion->radius;
