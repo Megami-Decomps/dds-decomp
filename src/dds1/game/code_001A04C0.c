@@ -290,7 +290,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         btlUpdateTintAndWorldLight();
         btlPollMotionSoundResources();
         btlUpdateScene();
-        func_001C8330();
+        fldAdvanceSceneGroupScheduler();
         btlUpdateActionSeqs();
         btlUpdateActiveActorModelState();
         btlUpdateActiveFrameNoOp();
