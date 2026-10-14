@@ -34,6 +34,8 @@ typedef char EffParamWorkEx_size_must_be_0xC[(sizeof(EffParamWorkEx) == 0xC) ? 1
 
 typedef char EffParamWork_size_must_be_8[(sizeof(EffParamWork) == 8) ? 1 : -1];
 
+/* Return a borrowed block at the selected record's signed relative offset. */
+void *effParamTableGetBlock(void *table, s32 index);
 EffParamWork *effParamWorkCreate(u16 kind, void *source);
 EffParamWork *effParamCreateFromTable(void *table, s32 index);
 EffParamWork *effParamWorkDuplicate(EffParamWork *source);

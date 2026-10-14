@@ -17,7 +17,7 @@ extern float fldNormalizedVectorDot(float *, float *);
 
 extern float fldVectorLength(float *vector);
 
-extern float func_002FA1C0(float);
+extern float acosf(float);
 
 
 
@@ -163,7 +163,7 @@ float fldNormalizedVectorDot(float *left, float *right) {
 }
 
 float fldVec3AngleBetween(float *left, float *right) {
-    return func_002FA1C0(fldNormalizedVectorDot(left, right));
+    return acosf(fldNormalizedVectorDot(left, right));
 }
 
 /* Cross the normalized input copies; the result itself is not normalized. */
@@ -471,5 +471,5 @@ float sdfSumCrossProductComponents(float *left, float *right) {
 
 /* Pass the four-component dot directly to the angle evaluator, without input normalization. */
 float fldVec4ArcCosDot(float *left, float *right) {
-    return func_002FA1C0(sdfQuatDot(left, right));
+    return acosf(sdfQuatDot(left, right));
 }

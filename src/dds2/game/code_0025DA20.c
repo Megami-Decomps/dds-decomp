@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
 #include "kwln_task_add_child.h"
@@ -1510,7 +1511,53 @@ s32 mnuCampFindActiveSlot(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuHasCampFlaggedItemByClass);
+typedef struct ShopSourcePriceEntry {
+    u16 itemId;
+    u8 type;
+    u8 pricePercent;
+} ShopSourcePriceEntry;
+
+typedef struct ShopSourcePriceRow {
+    u16 pricePercent;
+    ShopSourcePriceEntry entries[0x60];
+} ShopSourcePriceRow;
+
+extern ShopSourcePriceRow D_003C9BC0[];
+
+/* True when the shop's source row or the active rank row stocks an item of the
+ * requested class (1: bullets, otherwise the high item range). */
+s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *scene, s32 itemClass) {
+    s32 row;
+    u32 i;
+    u32 itemId;
+
+    row = mnuCampResolveFlagRowValue(scene->shopRow);
+    for (i = 0; i < 0x60; i++) {
+        itemId = D_003C9BC0[row].entries[i].itemId;
+        if (itemClass == 1) {
+            if (mnuIsBulletItemId(itemId) != 0) {
+                return 1;
+            }
+        } else if (mnuIsHighRangeItemId(itemId) != 0) {
+            return 1;
+        }
+    }
+    row = mnuCampFindActiveSlot();
+    if (row == -1) {
+        return 0;
+    }
+    for (i = 0; i < 0x20; i++) {
+        itemId = D_003CBB70[row].entries[i].itemId;
+        if (itemClass == 1) {
+            if (mnuIsBulletItemId(itemId) != 0) {
+                return 1;
+            }
+        } else if (mnuIsHighRangeItemId(itemId) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 
 void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
@@ -1717,16 +1764,6 @@ s32 mnuFinishCampPopup(KwlnTask *callback) {
     return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
-typedef struct ShopSourcePriceEntry {
-    u16 itemId;
-    u8 type;
-    u8 pricePercent;
-} ShopSourcePriceEntry;
-
-typedef struct ShopSourcePriceRow {
-    u16 pricePercent;
-    ShopSourcePriceEntry entries[0x60];
-} ShopSourcePriceRow;
 
 
 typedef struct ShopProgressPrice {
@@ -1734,7 +1771,6 @@ typedef struct ShopProgressPrice {
     u32 unk4;
 } ShopProgressPrice;
 
-extern ShopSourcePriceRow D_003C9BC0[];
 extern ShopProgressPrice D_003CD0C4[];
 
 s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
@@ -2444,7 +2480,6 @@ extern s32 evtAdvanceSlotFlags(void);
 
 extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
-extern void mdlFlagClear(s32);
 extern void mnuDrawCommandPhaseTransition(s32);
 extern void mnuDrawCampCommandTransition(s32);
 
@@ -3194,7 +3229,39 @@ s32 evtStartProgressResultSecondaryTransition(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00263490);
+extern s32 D_003CE420[8];
+extern s32 D_003CE440[];
+
+/* Start a display entry for the shop row. Message-set two picks one of five
+ * entries from the first group whose flag is clear; sets one and three pick
+ * one of the row's pair by its flag. */
+s32 func_00263490(KwlnTask *callbackContext) {
+    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(callbackContext);
+    s32 row = scene->shopRow;
+    s32 i;
+    s32 entry;
+
+    switch (D_003C9A40[row].messageSet) {
+    case 2:
+        for (i = 0; i < 8; i++) {
+            if (mdlFlagTest(D_003CE420[i]) == 0 || i == 7) {
+                dspStartEntry(i * 5 + effMiscRand(0) % 5 + 0x30);
+                break;
+            }
+        }
+        break;
+    case 1:
+    case 3:
+        entry = row * 2 + 0x58;
+        if (mdlFlagTest(D_003CE440[row])) {
+            dspStartEntry(entry + 1);
+        } else {
+            dspStartEntry(entry);
+        }
+        break;
+    }
+    return 1;
+}
 
 u32 func_002635E0(void) {
     return 1;
@@ -3380,7 +3447,6 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void dspSetActive(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
@@ -4031,10 +4097,8 @@ extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];
 extern char D_00437840[];
-extern void mdlFlagClear();
 extern void dspAdvanceMessageWindowControl();
 extern s32 mnuCampResolveProgressTierValue();
-extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
 extern s32 sprintf(char *, const char *, ...);

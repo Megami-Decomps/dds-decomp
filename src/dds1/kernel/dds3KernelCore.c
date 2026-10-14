@@ -442,7 +442,32 @@ s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 delayTicks)
     return kwlnTaskDestroyWithHierarchy(task, delayTicks);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
+/* Destroy a live task: running tasks queue the request, while a task already
+ * being destroyed finalizes at once when the new delay is zero. */
+s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks)
+{
+    if (task == 0 || task == (KwlnTask*)-1) {
+        return 0;
+    }
+    switch (task->flags & 0xF) {
+    case 1:
+    case 2:
+        task->destroyDelayTicks = delayTicks;
+        kwlnTaskRequestDestroy(task);
+        return 1;
+    case 3:
+        task->destroyDelayTicks = delayTicks;
+        if (task->destroyDelayTicks == 0) {
+            kwlnTaskFinalizeDestroy(task);
+            return 1;
+        }
+        break;
+    case 0:
+    default:
+        return 0;
+    }
+    return 1;
+}
 
 void kwlnTaskMarkDestroyPending(KwlnTask* task)
 {

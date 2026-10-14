@@ -842,7 +842,7 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
 }
 
 void btlResetCommandIndexWork(BtlTask *task) {
-    func_001ACC20();
+    btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
     task->unit->unk2F4 = -1;
 }
@@ -1592,7 +1592,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
     btlStartTask(task);
     sndFormatResourceNameFromIndex(skill, resourceName);
     unit->listNode = sndAllocListNode();
-    task = sndCreateFileLoadTask((struct SoundLoadNode *)unit->listNode, skill, resourceName);
+    task = sndCreateFileLoadTask(unit->listNode, skill, resourceName);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = soundHandle;
     task->ownerId = masterOwner;

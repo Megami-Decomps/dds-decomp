@@ -10,6 +10,7 @@
 #include "mnu_mantra_grid.h"
 #include "mnu_scene_work.h"
 #include "mnu_scene_list.h"
+#include "mnu_sprite_placement.h"
 
 struct EffectSlotSet;
 
@@ -179,13 +180,6 @@ void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue
     itfDrawGlyphChainWithWidthQuery(x + 0xB3, y + 0x173, layer, textColor,
                                   0, valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
-
-typedef struct MnuSpritePlacement {
-    s16 resourceIndex;
-    s16 spriteIndex;
-    s16 x;
-    s16 y;
-} MnuSpritePlacement;
 
 extern MnuSpritePlacement D_0036B510[];
 extern struct EffectSlotSet *D_0036C698[];

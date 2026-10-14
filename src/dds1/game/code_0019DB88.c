@@ -232,7 +232,42 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
     return out;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", itfMesConfigurePanelBoundsAndFadeLimit);
+/* Select the message panel's bounds by layout mode (2 is the wide panel) and
+ * reset its fade channels; nonpositive limits default to 0x80. */
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 value) {
+    switch (mode) {
+    default:
+        block->bounds[0] = -0x390;
+        block->bounds[1] = -0x80;
+        block->bounds[2] = 0x1A30;
+        block->bounds[3] = 0x288;
+        block->unk1C = 0x80;
+        block->unk20 = 0x80;
+        block->unk24 = 0x80;
+        block->fadeLimit = value > 0 ? value : 0x80;
+        break;
+    case 1:
+        block->bounds[0] = -0x390;
+        block->bounds[1] = -0x80;
+        block->bounds[2] = 0x1A30;
+        block->bounds[3] = 0x288;
+        block->unk1C = 0x80;
+        block->unk20 = 0x80;
+        block->unk24 = 0x80;
+        block->fadeLimit = value > 0 ? value : 0x80;
+        break;
+    case 2:
+        block->bounds[0] = -0x610;
+        block->bounds[1] = -0x80;
+        block->bounds[2] = 0x1CB0;
+        block->bounds[3] = 0x288;
+        block->unk1C = 0x80;
+        block->unk20 = 0x80;
+        block->unk24 = 0x80;
+        block->fadeLimit = value > 0 ? value : 0x80;
+        break;
+    }
+}
 
 void itfMesUpdatePanelFades(ItfMesState *panel);
 void btlUpdateFadeIndicator(ItfMesState *panel);

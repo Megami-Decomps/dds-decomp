@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_param.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
@@ -12,7 +13,6 @@
    tintColor multiplies the age-faded packed color; scaleRampTime governs
    scale growth independently of the color fade. */
 
-extern void *effParamTableGetBlock(void *table, s32 index);
 extern void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool);
 extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
 extern void effReleaseRecordGroupResources(EffRecordPool *pool);

@@ -37,7 +37,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 
-extern f32 func_003532B8(f32);
+extern f32 acosf(f32);
 
 
 
@@ -48,7 +48,7 @@ extern void sdfGridFollowCursorWithinMargins(u8 *);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
-extern f32 func_00353140(f32);
+extern f32 sinf(f32);
 
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 #include "sdf_vector_transform.h"
@@ -156,7 +156,7 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
 
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion) {
     f32 w = quaternion[3];
-    f32 twiceAngle = 2.0f * func_003532B8(w);
+    f32 twiceAngle = 2.0f * acosf(w);
     f32 scale = fsqrtf(1.0f - w * w);
     double magnitude = scale;
 
@@ -199,10 +199,10 @@ void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
         memcpy(target, to, 16);
     }
     if (angle < 0.95f) {
-        angle = func_003532B8(angle);
-        firstWeight = func_00353140(angle * (1.0f - fraction));
-        secondWeight = func_00353140(angle * fraction);
-        denominator = func_00353140(angle);
+        angle = acosf(angle);
+        firstWeight = sinf(angle * (1.0f - fraction));
+        secondWeight = sinf(angle * fraction);
+        denominator = sinf(angle);
         out[0] = (from[0] * firstWeight + target[0] * secondWeight) / denominator;
         out[1] = (from[1] * firstWeight + target[1] * secondWeight) / denominator;
         out[2] = (from[2] * firstWeight + target[2] * secondWeight) / denominator;
@@ -215,9 +215,9 @@ void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
 void sdfQuatBlendAngular(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 angle = sdfQuatDot(from, to);
     if (-0.95f < angle && angle < 0.95f) {
-        f32 firstWeight = func_00353140(angle * (1.0f - fraction));
-        f32 secondWeight = func_00353140(angle * fraction);
-        f32 denominator = func_00353140(angle);
+        f32 firstWeight = sinf(angle * (1.0f - fraction));
+        f32 secondWeight = sinf(angle * fraction);
+        f32 denominator = sinf(angle);
         out[0] = (from[0] * firstWeight + to[0] * secondWeight) / denominator;
         out[1] = (from[1] * firstWeight + to[1] * secondWeight) / denominator;
         out[2] = (from[2] * firstWeight + to[2] * secondWeight) / denominator;
@@ -236,7 +236,7 @@ void sdfQuatSquad(f32 *out, f32 *first, f32 *second, f32 *third, f32 *fourth, f3
 }
 
 void sdfQuatLog(f32 *out, f32 *in) {
-    f32 angle = func_003532B8(in[3]);
+    f32 angle = acosf(in[3]);
     f32 sine = sdfSinPoly(angle);
     out[3] = 0.0f;
     if (out[3] < sine) {

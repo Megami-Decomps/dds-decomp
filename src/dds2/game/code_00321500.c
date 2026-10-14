@@ -347,7 +347,7 @@ void mnuDeactivateListRecord(MenuRuntimeList *list, MenuRuntimeRecord *record) {
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern f64 cos(f64);
 extern f64 sin(f64);
-extern s32 func_0035C200(void);
+extern s32 rand(void);
 
 void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
     MenuProgressParameters *parameters;
@@ -389,16 +389,16 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
                     y = parameters->height;
                 }
                 if (x <= 0.0f) {
-                    record->angle = (-135.0f + (func_0035C200() % 100) *
+                    record->angle = (-135.0f + (rand() % 100) *
                                      90.0f / 100.0f) * pi / 180.0f;
                 } else if (x >= parameters->width) {
-                    record->angle = (135.0f - (func_0035C200() % 100) *
+                    record->angle = (135.0f - (rand() % 100) *
                                      90.0f / 100.0f) * pi / 180.0f;
                 } else if (y <= 0.0f) {
-                    record->angle = ((func_0035C200() % 100) *
+                    record->angle = ((rand() % 100) *
                                      90.0f / 100.0f + 135.0f) * pi / 180.0f;
                 } else if (y >= parameters->height) {
-                    record->angle = (-45.0f + (func_0035C200() % 100) *
+                    record->angle = (-45.0f + (rand() % 100) *
                                      90.0f / 100.0f) * pi / 180.0f;
                 }
             } else if (x < -50.0f || x > parameters->width + 50.0f ||

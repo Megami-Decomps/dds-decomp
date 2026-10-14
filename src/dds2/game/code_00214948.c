@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -9,6 +10,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
+#include "btl_camera_pose_api.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
@@ -200,8 +202,6 @@ extern u32 btlAppendEffectActorToCommandIndices(s32);
 
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-
-extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
@@ -589,7 +589,7 @@ s32 btlSelectLowestHealthRateTarget(s32 task) {
         for (i = 0; i < count; i++) {
             DatPartyRecord *stats = &((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord;
             s32 current = btlReadCurrentUnitHp(stats);
-            s32 percent = current * 100 / btlComputeSkillAdjustedMaxHp(stats);
+            s32 percent = current * 100 / (s32)btlComputeSkillAdjustedMaxHp(stats);
 
             if (lowestPercent >= percent && current != 0) {
                 lowestPercent = percent;
@@ -1154,13 +1154,11 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
     }
 }
 
-extern f32 func_00353040(f32);
+extern f32 cosf(f32);
 
-extern f32 func_00353140(f32);
+extern f32 sinf(f32);
 
 extern f32 tanf(f32);
-
-extern void sdfVuLoadRotationMatrixY(f32);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
@@ -1200,8 +1198,8 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, out->position);
     angle *= 0.017453293f;
-    extent += length * func_00353140(angle);
-    length *= func_00353040(angle);
+    extent += length * sinf(angle);
+    length *= cosf(angle);
     length += extent / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (command->flags & 0x200) {
@@ -2501,7 +2499,6 @@ extern s32 btlHasMarkedEntry14();
 
 extern void btlClearRuntimeFlag2000(void);
 
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (command->actionCode != 0x10c) {
@@ -7420,8 +7417,6 @@ void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
     unit->status.flags = flags;
     unit->partyRecord.status &= 0x4000;
 }
-
-extern void effMiscQuatMultiplyVU(void);
 extern const s32 D_0041B4D0[];
 
 void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {

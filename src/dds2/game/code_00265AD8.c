@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
@@ -87,7 +88,6 @@ extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
 extern s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *);
-extern void dspSetActive(s32);
 extern u32 func_00260460(void);
 extern s32 mnuCampFindActiveSlot(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);

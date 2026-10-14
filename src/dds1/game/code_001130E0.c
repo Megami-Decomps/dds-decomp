@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_model.h"
 #include "sdf_chip.h"
@@ -242,7 +243,6 @@ extern s32 func_00222ED8(ObjectTransform *, EffWorldNode *);
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
-extern void effMiscQuatMultiplyVU(void);
 extern void effObjInnerVecBackup(ObjectTransform *);
 extern void effUpdateValueTransitionProximity(EffWorldNode *);
 extern void effObjStepFollowAngleTowardZero(EffWorldNode *);

@@ -3,6 +3,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_unit_fade_task_args.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
@@ -2345,7 +2346,16 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001D4E60);
+/* Inherit the source unit's sound owner, transparency model, world node and
+ * event work, and mark the destination as an inheriting unit. */
+void func_001D4E60(BtlUnit *dst, BtlUnit *src) {
+    dst->soundSlotOwner = src->soundSlotOwner;
+    dst->transparencyModel = src->transparencyModel;
+    dst->effectObject = src->effectObject;
+    dst->ext = src->ext;
+    dst->unkCC = 1;
+    dst->status.flags |= 2;
+}
 
 /* Kind-5 world-node payload attaches the event unit at +8. */
 typedef struct EventUnitData {
@@ -3106,8 +3116,6 @@ s32 btlIsUnitAtStoredPosition(u8 *object) {
 
 extern u8 D_003A3B70[];
 
-extern void effMiscQuatMultiplyVU(void);
-
 void btlSetUnitRotation(BtlUnit *object, void *rotation) {
     u8 vector[16];
     if ((object->status.stateFlags & 0x100) != 0) {
@@ -3306,7 +3314,7 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
         return;
     }
     shape = unit->ext->owner->sub;
-    unit->transparencyModel = (s32)sdfModelCreateWithItems(shape->resourceList, shape->itemList);
+    unit->transparencyModel = sdfModelCreateWithItems(shape->resourceList, shape->itemList);
     dds3SetObjectFlags(unit->effectObject, 1);
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
@@ -3328,7 +3336,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             alpha = color >> 24;
             if (!(flags & 0x20000)) {
                 if (unit->transparencyModel != 0) {
-                    sdfReleaseDevSlot((SdfModel *)unit->transparencyModel, 1, 1);
+                    sdfReleaseDevSlot(unit->transparencyModel, 1, 1);
                     unit->transparencyModel = 0;
                     if (unit->status.flags & 2) {
                         info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
@@ -3345,7 +3353,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             } else if (unit->transparencyModel == 0) {
                 btlCreateUnitTransparency(unit);
             } else {
-                btlDrawUnitTransparencyPasses(unit, info, (SdfModel *)unit->transparencyModel, D_00359D10, color);
+                btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, D_00359D10, color);
             }
         }
     }
@@ -3378,14 +3386,14 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     D_00359D20[0]->append(D_00359D20[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
-        unit->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        unit->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
         dds3SetObjectFlags(unit->effectObject, 1);
         return;
     }
-    btlDrawUnitTransparencyPasses(unit, info, (SdfModel *)unit->transparencyModel, D_00359D20, unit->overlayColor);
+    btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, D_00359D20, unit->overlayColor);
     info = unit->mirror->ext->owner;
     if (unit->mirror->transparencyModel == 0) {
-        unit->mirror->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
+        unit->mirror->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
         dds3SetObjectFlags(unit->mirror->effectObject, 1);
         return;
     }
@@ -3393,7 +3401,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     sdfCreateDescriptorPacket(list, D_003980E0.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
     D_00359D30[0]->append(D_00359D30[0], list);
-    btlDrawUnitTransparencyPasses(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
+    btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
 
 extern char D_003A3BA8[];
@@ -4206,40 +4214,41 @@ u8 *btlCreateUnitFadeOutTask(u8 *owner, u32 value, u32 variant) {
 }
 
 u32 btlStepUnitDefeatFadeIn(u32 *arguments) {
-    BtlUnit *unit = (BtlUnit *)arguments[0];
+    BtlUnitFadeTaskArgs *taskArgs = (BtlUnitFadeTaskArgs *)arguments;
+    BtlUnit *unit = taskArgs->unit;
     u32 alpha;
 
-    if ((s32)arguments[1] == -1) {
+    if (taskArgs->durationOrMode == -1) {
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, unit->overlayColor);
         evtSetUnitAlphaTransition(unit->ext, 0, unit->overlayColor);
         btlClearUnitDefeatCandidate(unit);
         return 1;
     }
-    if (arguments[2] == 0) {
+    if (taskArgs->elapsed == 0) {
         btlFlagUnitDefeatCandidate(unit);
     }
-    if (arguments[1] == 0) {
+    if (taskArgs->durationOrMode == 0) {
         evtSetUnitRgbTransition((struct EvtUnit *)unit->ext, 0, unit->overlayColor);
         evtSetUnitAlphaTransition((struct EvtUnit *)unit->ext, 0,
                                   (unit->overlayColor & 0xFFFFFF) | 0x80000000);
     }
-    if ((s32)arguments[2] >= (s32)arguments[1]) {
+    if (taskArgs->elapsed >= taskArgs->durationOrMode) {
         unit->status.flags &= ~0x20000;
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         return 1;
     }
     unit->status.flags |= 0x20000;
-    alpha = (u32)((f32)(s32)arguments[2] * 128.0f / (f32)(s32)arguments[1]);
+    alpha = (u32)((f32)taskArgs->elapsed * 128.0f / (f32)taskArgs->durationOrMode);
     alpha <<= 24;
     unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
-    arguments[2]++;
+    taskArgs->elapsed++;
     return 0;
 }
 
 u8 *btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
-    u32 *arguments;
+    BtlUnitFadeTaskArgs *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -4247,37 +4256,38 @@ u8 *btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value) {
     *(void **)(task + 0x4C) = btlStepUnitDefeatFadeIn;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
-    arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = value;
-    arguments[2] = 0;
+    arguments = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
+    arguments->unit = (BtlUnit *)owner;
+    arguments->durationOrMode = value;
+    arguments->elapsed = 0;
     return task;
 }
 
 u32 btlStepUnitDefeatFadeOut(u32 *arguments) {
-    BtlUnit *unit = (BtlUnit *)arguments[0];
+    BtlUnitFadeTaskArgs *taskArgs = (BtlUnitFadeTaskArgs *)arguments;
+    BtlUnit *unit = taskArgs->unit;
     u32 alpha;
 
-    if (arguments[2] == 0) {
+    if (taskArgs->elapsed == 0) {
         btlFlagUnitDefeatCandidate(unit);
     }
-    if ((s32)arguments[2] >= (s32)arguments[1]) {
+    if (taskArgs->elapsed >= taskArgs->durationOrMode) {
         unit->status.flags = (u32)unit->status.flags & (~0x20000);
         unit->overlayColor = unit->baseColor & 0xFFFFFF;
         return 1;
     }
     unit->status.flags = (u32)unit->status.flags | (0x20000);
-    alpha = (u32)((1.0f - (f32)(s32)arguments[2] / (f32)(s32)arguments[1]) * 128.0f);
+    alpha = (u32)((1.0f - (f32)taskArgs->elapsed / (f32)taskArgs->durationOrMode) * 128.0f);
     alpha <<= 24;
     unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
-    arguments[2]++;
+    taskArgs->elapsed++;
     return 0;
 }
 
 /* Create the owner-bound defeat fade-out task with a zero elapsed count. */
 u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
-    u32 *arguments;
+    BtlUnitFadeTaskArgs *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -4285,57 +4295,58 @@ u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value) {
     *(void **)(task + 0x4C) = btlStepUnitDefeatFadeOut;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
-    arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = value;
-    arguments[2] = 0;
+    arguments = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
+    arguments->unit = (BtlUnit *)owner;
+    arguments->durationOrMode = value;
+    arguments->elapsed = 0;
     return task;
 }
 
 /* Arguments hold unit, mode and elapsed ticks; return one after the exit fade. */
 u32 btlStepUnitExitFade(u32 *arguments) {
-    BtlUnit *unit = (BtlUnit *)arguments[0];
+    BtlUnitFadeTaskArgs *taskArgs = (BtlUnitFadeTaskArgs *)arguments;
+    BtlUnit *unit = taskArgs->unit;
     s32 finished = 0;
     u32 alpha;
 
-    if (arguments[2] == 0) {
+    if (taskArgs->elapsed == 0) {
         unit->status.flags = (u32)unit->status.flags | (0x80);
         btlFlagUnitDefeatCandidate(unit);
     }
 
-    switch (arguments[1]) {
+    switch (taskArgs->durationOrMode) {
     case 0:
-        if (arguments[2] == 1) {
+        if (taskArgs->elapsed == 1) {
             btlFlagUnitDefeatCandidate(unit);
             evtSetUnitRgbTransition(unit->ext,
                                     10, 0x80000000);
-        } else if (arguments[2] == 10) {
+        } else if (taskArgs->elapsed == 10) {
             evtSetUnitRgbTransition(unit->ext,
                                     0, 0x80000000);
             evtSetUnitAlphaTransition(unit->ext, 6, 0);
             unit->status.flags = (u32)unit->status.flags | (0x200000);
         }
         if (((u32)unit->status.flags & 0x200000) == 0 &&
-            (s32)arguments[2] >= 16) {
+            taskArgs->elapsed >= 16) {
             finished = 1;
         }
         break;
 
     case 1:
-        if ((s32)arguments[2] >= 8) {
+        if (taskArgs->elapsed >= 8) {
             unit->status.flags = (u32)unit->status.flags & (~0x20000);
             unit->overlayColor = unit->baseColor & 0xFFFFFF;
             finished = 1;
         } else {
             unit->status.flags = (u32)unit->status.flags | (0x20000);
-            alpha = (u32)((1.0f - (f32)(s32)arguments[2] * 0.125f) * 128.0f);
+            alpha = (u32)((1.0f - (f32)taskArgs->elapsed * 0.125f) * 128.0f);
             alpha <<= 24;
             unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
         }
         break;
     }
 
-    arguments[2]++;
+    taskArgs->elapsed++;
     if (finished != 0) {
         unit->status.flags = ((u32)unit->status.flags & ~0x80) | 0x40;
         return 1;
@@ -4346,7 +4357,7 @@ u32 btlStepUnitExitFade(u32 *arguments) {
 /* Queue the selected exit-fade mode for this owner, starting at tick zero. */
 u8 *btlCreateUnitExitFadeTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
-    u32 *arguments;
+    BtlUnitFadeTaskArgs *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -4354,10 +4365,10 @@ u8 *btlCreateUnitExitFadeTask(u8 *owner, u32 value) {
     *(void **)(task + 0x4C) = btlStepUnitExitFade;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
-    arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = value;
-    arguments[2] = 0;
+    arguments = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
+    arguments->unit = (BtlUnit *)owner;
+    arguments->durationOrMode = value;
+    arguments->elapsed = 0;
     return task;
 }
 

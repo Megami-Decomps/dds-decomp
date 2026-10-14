@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "fld_scene_ready_api.h"
+#include "fld_encounter_runtime_api.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
 #include "mdl_flag_api.h"
@@ -72,8 +73,6 @@ extern void fldStepIntByPad(void *, s32, s64, s64, s64, s64, s8 *);
 extern s32 fldStepColorChannelByPad(u32 *, s32, s8 *);
 
 extern s32 fldTestDrawUpdate(KwlnTask *task);
-
-extern s32 fldGetEncounterRuntimeResult(void);
 
 extern u8 fldGetCampSceneControlMode(void);
 
@@ -1184,7 +1183,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00123DE8);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldMarkStageExplorationBitmapRegion);
 
 s32 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z) {
     FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldAreaState.area, floor);

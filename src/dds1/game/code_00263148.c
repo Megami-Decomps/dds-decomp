@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "ui_color.h"
@@ -17,7 +18,6 @@ extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
 
 
 
-extern void dspSetActive(s32);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 

@@ -30,6 +30,7 @@
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "eff_thunder_fragment.h"
+#include "eff_pcp_burst_work.h"
 #include "eff_param.h"
 #include "eff_pcp_spawn_once_work.h"
 #include "eff_event.h"
@@ -55,30 +56,8 @@
 #include "ee_mmi.h"
 #include "bill_object_api.h"
 
-/* Shared 0x24-byte thunder ray work. The renderer places its first point
-   startDistance along the muzzle direction, then advances by length. */
-typedef struct {
-    f32 pos[4];
-    u32 unk10;
-    u8 pad14[4];
-    f32 startDistance;
-    f32 length;
-    EffThunderFragmentWork *handle;
-} EffPCPBurstWork;
-
-
 /* Every compact timeline precedes one variant-specific SDK parameter payload.
    Respawn copies that payload only, not its live resource/allocation tail. */
-typedef struct {
-    u8 flags;
-    u8 pad01[3];
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    s32 startExtent;
-    s32 endExtent;
-} EffPCPCompactTimelineParams;
-
 typedef struct {
     u32 left, top, right, bottom;
 } EffPCPRectBounds;
@@ -146,9 +125,6 @@ typedef struct {
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 
-/* Block `index` of a packed effect parameter set: data + offset table entry. */
-extern void *effParamTableGetBlock(void *data, s32 index);
-
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
 
@@ -156,8 +132,6 @@ extern EffPCPSharedTrail *effPcpSharedTrailWork;
  * computed as a signed difference of the parameter words. */
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
-extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 struct EffPCPBeamWork;
@@ -202,7 +176,6 @@ void effPcpDispatchKindAndRelease(EffPCPRingWork *work) {
 
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
-extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *effect);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 
@@ -502,8 +475,6 @@ void effPcpSetStaggerEffectScale(EffPCPStaggered *work, f32 val) {
 void effPcpSetStaggerEffectColor(EffPCPStaggered *work, u32 val) {
     work->color = val;
 }
-
-extern void sdfVuLoadRotationMatrixY(f32 angle);
 
 /* Spawns cross arm (i, j): rotates the model by j sixths of a turn about the axis chosen by i. */
 void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
@@ -1801,7 +1772,7 @@ EffPCPSharedTrailRef *effPcpCreateSharedTrailRef(EffPCPTrailParams *params) {
         effPcpSharedTrailWork->pos[0] = 0;
         effPcpSharedTrailWork->pos[1] = 0;
         effPcpSharedTrailWork->pos[2] = 0;
-        effPcpSharedTrailWork->unk1C = 0;
+        effPcpSharedTrailWork->sizeInput = 0;
         effPcpSharedTrailWork->limit = params->count;
         effPcpSharedTrailWork->unk24 = params->count;
         effPcpSharedTrailWork->colors[0] = params->colors[0];
@@ -1828,13 +1799,18 @@ typedef struct EffPCPTrailWork {
     u32 flags;
     u32 color;
     u32 frame;
-    f32 unk1C;
+    f32 sizeInput;
     u32 count;
     u32 colors[2];
     f32 scale; /* multiplies the computed trail size */
     s32 minSize;
     EffBlurTemplate *obj;
 } EffPCPTrailWork;
+
+typedef char EffPCPTrailWork_size_must_be_0x38[
+    (sizeof(EffPCPTrailWork) == 0x38) ? 1 : -1];
+typedef char EffPCPTrailWork_sizeInput_offset_must_be_0x1C[
+    ((u32)&((EffPCPTrailWork *)0)->sizeInput == 0x1C) ? 1 : -1];
 
 extern s32 effMeasureCameraRightScreenOffsetVU(f32 value);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
@@ -1864,7 +1840,7 @@ void effPcpUpdateSharedTrail(ref)
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
         VU0_LOAD_VF($vf10, work);
-        obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
+        obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->sizeInput) * EFF_SHARED_TRAIL->scale);
         VU0_STORE_VF($vf10, pos);
         obj->body.source.position[0] = (s32)pos[0] - 0x800;
         obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
@@ -1886,7 +1862,7 @@ void effPcpSharedTrailSetFlags(u32 unused, u32 val) {
 }
 
 void effSetSharedScale(u32 unused, f32 value) {
-    effPcpSharedTrailWork->unk1C = value;
+    effPcpSharedTrailWork->sizeInput = value;
 }
 
 
@@ -1900,7 +1876,7 @@ EffPCPTrailWork *effPcpTrailCreate(EffPCPTrailParams *params) {
     work->pos[0] = 0.0f;
     work->pos[1] = 0.0f;
     work->pos[2] = 0.0f;
-    work->unk1C = 0.0f;
+    work->sizeInput = 0.0f;
     work->count = params->count;
     work->colors[0] = params->colors[0];
     work->colors[1] = params->colors[1];
@@ -1922,7 +1898,7 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
 
     obj = work->obj;
     VU0_LOAD_VF($vf10, work->pos);
-    obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->unk1C) * work->scale);
+    obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->sizeInput) * work->scale);
     VU0_STORE_VF($vf10, pos);
     obj->body.source.position[0] = (s32)pos[0] - 0x800;
     obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
@@ -1948,7 +1924,7 @@ void effPcpSetTrailFlags(EffPCPTrailWork *work, u32 val) {
 }
 
 void effPcpTrailSetSizeInput(EffPCPTrailWork *work, f32 val) {
-    work->unk1C = val;
+    work->sizeInput = val;
 }
 
 EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params) {
@@ -3542,7 +3518,7 @@ EffPCPBurstWork *effAllocateThunderFragmentWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_003551C0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003551C0);
     return work;
 }
 
@@ -3556,7 +3532,7 @@ EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_00355220);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_00355220);
     return work;
 }
 
@@ -3570,7 +3546,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_00355280);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_00355280);
     return work;
 }
 
@@ -3584,7 +3560,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_003552E0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003552E0);
     return work;
 }
 
@@ -3598,7 +3574,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_00355340);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_00355340);
     return work;
 }
 
@@ -3612,7 +3588,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_003553A0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003553A0);
     return work;
 }
 
@@ -3626,7 +3602,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_00355400);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_00355400);
     return work;
 }
 
@@ -3640,7 +3616,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_00355460);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_00355460);
     return work;
 }
 
@@ -3654,7 +3630,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_003554C0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003554C0);
     return work;
 }
 
@@ -3668,7 +3644,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_00355520);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_00355520);
     return work;
 }
 
@@ -3682,7 +3658,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_00355580);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_00355580);
     return work;
 }
 
@@ -3696,7 +3672,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = effThunderFragCreate((EffThunderFragmentParams *)D_003555E0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003555E0);
     return work;
 }
 
@@ -3705,7 +3681,7 @@ void effPcpRecreateOrangeVioletFragmentSingle(void) {
 }
 
 void effPcpThunderBurstRelease(EffPCPBurstWork *work) {
-    effThunderReleaseFragmentWork(work->handle);
+    effThunderReleaseFragmentWork(work->fragmentWork);
     sdfReleaseChipBlock(work);
 }
 
@@ -3724,18 +3700,18 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
 
     if (effBTLFieldColorUsesActorSelectors() != 0) {
         btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
-        VU0_LOAD_VF(vf11, work->pos);
+        VU0_LOAD_VF(vf11, work->position);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, direction);
-        params = (u8 *)effThunderGetFragmentParameters(work->handle);
+        params = (u8 *)effThunderGetFragmentParameters(work->fragmentWork);
         distance = work->startDistance;
         dirX = direction[0];
         dirY = direction[1];
         dirZ = direction[2];
-        x = work->pos[0] + dirX * distance;
-        y = work->pos[1] + dirY * distance;
-        z = work->pos[2] + dirZ * distance;
+        x = work->position[0] + dirX * distance;
+        y = work->position[1] + dirY * distance;
+        z = work->position[2] + dirZ * distance;
         point[0] = x;
         point[1] = y;
         point[2] = z;
@@ -3745,8 +3721,8 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
         point[1] = y + dirY * distance;
         point[2] = z + dirZ * distance;
         PCP_COPY_VECTOR(params + 0x10, point);
-        effThunderSetFragmentColor(work->handle, work->unk10);
-        effThunderUpdateFragments(work->handle);
+        effThunderSetFragmentColor(work->fragmentWork, work->tintColor);
+        effThunderUpdateFragments(work->fragmentWork);
     }
 }
 
@@ -3755,7 +3731,7 @@ void effPcpCopyThunderBurstVector(void *dst, void *src) {
 }
 
 void effPcpSetThunderBurstColor(EffPCPBurstWork *work, u32 val) {
-    work->unk10 = val;
+    work->tintColor = val;
 }
 
 
@@ -4704,7 +4680,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
-extern void effMiscQuatMultiplyVU(void);
 extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **table, SdfModel *model);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */

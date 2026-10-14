@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_effect_active_api.h"
+#include "btl_task_state6_api.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "mnu_title_stream.h"
@@ -14,6 +15,7 @@
 #include "dat_command.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
+#include "btl_camera_pose_api.h"
 #include "btl_action.h"
 #include "btl_effect_table.h"
 #include "btl_unit_tasks.h"
@@ -24,6 +26,7 @@
 #include "mdl.h"
 #include "active_sound_node.h"
 #include "btl_scene_initializer.h"
+#include "fld_encounter_runtime_api.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
@@ -62,9 +65,6 @@ extern s32 D_003B6940[];
 extern s32 btlUpdateDebugEncounterSelector(void);
 
 extern s32 btlRollMajinEncounter();
-extern s32 btlRollSurpriseAttack();
-extern void btlRequestSceneEventResources();
-extern void btlInitializeBossCallbacks();
 extern void btlSelectSceneAudioTrack();
 
 typedef struct SceneControl {
@@ -132,7 +132,6 @@ extern s32 btlArrangeOpponentFormationSlots();
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern s32 btlMarkInactiveActorCandidates();
 extern void btlRestorePartySlotSnapshots();
-extern void kwlnFadeBackgroundStartOut();
 extern void kwlnDrawSetOverlayTransition();
 extern void kwlnDrawEnableD88();
 extern void kwlnDrawEnableDc8();
@@ -141,16 +140,11 @@ extern void kwlnDrawSetupC70B();
 extern void kwlnDrawEnableCd0();
 extern void kwlnDrawEnableD30();
 extern void btlMarkRuntimeUpdatePending();
-extern s32 fldGetEncounterRuntimeResult();
-extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();
 extern void btlSyncModelFlagFromEventThresholds();
 extern void btlResetTitleStreamOnBattleFlag();
 extern void btlInitializeWorldCamera();
 extern void btlSpawnBattleWorldAction();
-extern void btlCreateRainEffect();
-extern s32 btlReleaseScriptResourceA();
-extern s32 btlReleaseScriptResource();
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32);
 extern BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32);
@@ -187,8 +181,6 @@ typedef struct SceneGlobalState {
 } SceneGlobalState;
 
 extern u8 *btlTrackedTaskHandles;
-extern s32 btlGetTaskState6();
-
 extern s32 D_00416BB8[];
 
 typedef struct BtlPanelInner {
@@ -231,19 +223,12 @@ extern void btlClearPartyRecordStatusBits();
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 extern void datAdjustCurrentHp();
 
-extern s32 brsIsPrimaryPanelUpdateReady();
-extern s32 fldLoadAreaResource();
-extern void btlReleaseEventAssets();
-extern void btlReleaseBossData();
-extern void fldPollAreaResourceLoad();
-extern s32 fldGetResourceReadyFlag();
 #include "brs_task_poll_done_api.h"
 
 extern s32 func_001B2630();
 
 
 extern s64 mnuGetSoundBufferStateLocked(void);
-extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);
@@ -257,7 +242,6 @@ extern void dds3ClearObjectFlags(s32, s32);
 extern struct SdfPoolNode *D_00380788[13][4];
 extern u8 D_003B6BD0[];
 
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 typedef struct BtlUnit BtlUnit;
 
@@ -2024,8 +2008,7 @@ BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect,
         char *name);
 void sndFormatResourceNameFromIndex(s32 source, char *output);
 struct ActiveSoundNode *sndAllocListNode(void);
-struct SoundFileNode;
-BtlRuntimeTask *sndCreateFileLoadTask(struct SoundFileNode *value, s32 option, char *name);
+BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *value, s32 option, char *name);
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect,
         BtlUnit *sourceOwner, s32 source, s32 target, BtlUnit *actor,
         s32 frames);
@@ -2214,7 +2197,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     btlStartTask(task);
     sndFormatResourceNameFromIndex(skill, resourceName);
     unit->node324 = sndAllocListNode();
-    task = sndCreateFileLoadTask((struct SoundFileNode *)unit->node324, skill, resourceName);
+    task = sndCreateFileLoadTask((ActiveSoundNode *)unit->node324, skill, resourceName);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = soundHandle;
     task->ownerId = masterOwner;

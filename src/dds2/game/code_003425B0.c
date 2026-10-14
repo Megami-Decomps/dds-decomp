@@ -1539,7 +1539,7 @@ s32 sdfSoundShutdownIpuStreamHandlers(void) {
 /* Print the native incoming a0 string and a newline through libc puts.
  * Required to match: retain the zero-formal, void source signature. */
 void sdfPrintTextLine(void) {
-    func_0035B7D8();
+    puts();
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345810);

@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "btl_camera_pose_api.h"
 #include "common.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -767,7 +768,6 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);

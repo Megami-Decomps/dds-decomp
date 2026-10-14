@@ -3,6 +3,8 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_stat_effect_offsets.h"
+#include "btl_task_state6_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
@@ -23,6 +25,7 @@
 #include "itf.h"
 #include "itf_panel_draw.h"
 #include "btl_state.h"
+#include "btl_scene_initializer.h"
 #include "btl_ui.h"
 #include "btl_phase_panel_work.h"
 #include "sdf.h"
@@ -4243,8 +4246,6 @@ s32 btlHasUnmarkedLinkageSkill(s32 arg0) {
     return count;
 }
 
-extern s32 btlGetTaskState6(void);
-
 s32 btlGetTaskState6(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     BattleSceneObject *scene;
@@ -5539,20 +5540,11 @@ void btlAdvancePendingSceneSlotStates(u8 *scene) {
     }
 }
 
-typedef struct UiSlotMatchRow {
-    u8 pad00[0x18];
-    u8 state;
-    u8 pad19;
-    u8 groupIndex; /* index of the matching primary group */
-} UiSlotMatchRow;
-
 /* Map eligible actor rows to command groups, optionally retaining active states. */
 void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWork *work, s8 keepActive) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *node = battle->units;
-    UiSlotMatchRow *row;
     s32 group;
-    s32 offset;
     u8 slot;
 
     for (; node != NULL; node = node->nextActor) {
@@ -5564,11 +5556,10 @@ void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWor
         if (battle->groupPrimary[0] != NULL) {
             while (group < 20 && battle->groupPrimary[group] != NULL) {
                 if (battle->groupPrimary[group]->unit->owner == node->owner) {
-                    offset = slot * 0x290 + 0xE0;
-                    row = (UiSlotMatchRow *)((u8 *)work + offset);
-                    row->groupIndex = group;
-                    if (keepActive == 0 || (u32)(row->state - 1) >= 2) {
-                        row->state = 3;
+                    work->activeEntries[slot].presentation.pendingCursorSelection = group;
+                    if (keepActive == 0 ||
+                        (u32)((u8)work->activeEntries[slot].presentation.pendingSceneState - 1) >= 2) {
+                        work->activeEntries[slot].presentation.pendingSceneState = 3;
                     }
                     break;
                 }
@@ -6291,11 +6282,6 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C6648);
 
-typedef struct BattleStatEffectOffsets {
-    s32 hp[2]; /* x, y */
-    s32 mp[2]; /* x, y */
-} BattleStatEffectOffsets;
-
 extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004168C8);
@@ -6317,8 +6303,8 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
             work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.hpEffectFade;
         func_001C7760(unit, unit->partyRecord.hp, work->activeEntries[slot].presentation.hpTarget,
                       unit->partyRecord.maxHp, 10,
-                      work->activeEntries[slot].position[0] + offsets.hp[0],
-                      work->activeEntries[slot].position[1] + offsets.hp[1], alpha, type, 0);
+                      work->activeEntries[slot].position[0] + offsets.hp.x,
+                      work->activeEntries[slot].position[1] + offsets.hp.y, alpha, type, 0);
         work->activeEntries[slot].presentation.hpEffectFade -= 8;
         work->activeEntries[slot].presentation.hpEffectFade =
             work->activeEntries[slot].presentation.hpEffectFade <= 0 ? 0 :
@@ -6338,8 +6324,8 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
             work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.mpEffectFade;
         func_001C7760(unit, unit->partyRecord.mp, work->activeEntries[slot].presentation.mpTarget,
                       unit->partyRecord.maxMp, 11,
-                      work->activeEntries[slot].position[0] + offsets.mp[0],
-                      work->activeEntries[slot].position[1] + offsets.mp[1], alpha, type, 1);
+                      work->activeEntries[slot].position[0] + offsets.mp.x,
+                      work->activeEntries[slot].position[1] + offsets.mp.y, alpha, type, 1);
         work->activeEntries[slot].presentation.mpEffectFade -= 8;
         work->activeEntries[slot].presentation.mpEffectFade =
             work->activeEntries[slot].presentation.mpEffectFade <= 0 ? 0 :
@@ -7440,8 +7426,6 @@ typedef struct SceneGlobalState {
     s32 fadeKindB;
 } SceneGlobalState;
 
-
-extern s32 btlGetTaskState6();
 
 s32 fldSelectSceneMode(ActionStateLink *task) {
     s32 flag = ((BtlState *)btlGetRuntime())->encounterKind == 3;

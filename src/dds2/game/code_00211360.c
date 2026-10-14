@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "eff_random.h"
 #include "btl_ai_slot.h"
 #include "sdf_chip.h"
@@ -76,7 +77,7 @@ extern void func_001B7718(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
-extern s16 btlGetActorEntryCode(BtlUnit *, s32);
+#include "btl_actor_entry_code_api.h"
 
 extern s32 D_003BF660[];
 
@@ -150,11 +151,7 @@ extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *, s32);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
-extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
-
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
-
-extern s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 

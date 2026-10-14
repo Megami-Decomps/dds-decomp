@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "itf_mes_window.h"
 #include "sdf_packet_list.h"
@@ -6,6 +7,8 @@
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
+#include "evt_pad.h"
+#include "evt_serialized_child.h"
 #include "sdf_vu_matrix.h"
 
 #include "evt_world.h"
@@ -297,28 +300,6 @@ void evtDrawFloatValueEditorRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtR
 }
 
 extern SdfPoolNode kwlnPositionedTextSurface;
-typedef struct EvtPad {
-    u8 pad00[6];
-    s8 frameEnd; /* +6: jump from group properties to the last key. */
-    s8 frameStart; /* +7: jump from group properties to the first key. */
-    u8 pad08[0x18];
-    s8 syncKey; /* 0x20 */
-    s8 confirm; /* 0x21 */
-    u8 pad22;
-    s8 cancel;  /* 0x23 */
-    s8 decOne;  /* 0x24 */
-    s8 incOne;  /* 0x25 */
-    s8 decTen;  /* 0x26 */
-    s8 incTen;  /* 0x27 */
-    u8 decHun;  /* 0x28 */
-    s8 unk29; /* 0x29: coarse decrease in the property editor */
-    u8 incHun;  /* 0x2A */
-    s8 unk2B; /* 0x2B: coarse increase in the property editor */
-    s8 apply;   /* 0x2C */
-    s8 unk2D;
-    u8 pad2E[0x12]; /* Complete two-bank, two-port, 16-input backing. */
-} EvtPad;
-
 extern EvtPad D_00324510;
 
 extern void evtDrawFloatValueEditorRow();
@@ -3973,15 +3954,6 @@ void evtWriteRuntimeHeaderValues(s32 output, EvtRuntime *state) {
     evtWriteSerializedBytes(output, buf, 0x10);
 }
 
-typedef struct EvtSerializedChild {
-    u16 groupType;
-    u16 start;
-    u16 span;
-    u16 value;
-    u8 pad08[4];
-    s32 body[8];
-} EvtSerializedChild;
-
 /* Filter groups by mode and serialize each child body. Type-8 spans use the
  * next start or terminal range halfword, unless their body marker disables them. */
 void evtViewerWriteChildRecords(s32 output, s32 mode, EvtRuntime *runtime) {
@@ -4392,7 +4364,6 @@ extern s32 evtIsBgmLoaded(s32 id);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32 id, s32 mode, s32 frames);
 extern void kwlnFadeBackgroundStartIn(s32 frames);
-extern void kwlnFadeBackgroundStartOut(s32 frames);
 
 typedef struct { u8 bytes[0x18]; } EvtRowPayload18;
 typedef struct { u8 bytes[0x20]; } EvtRowPayload20;
@@ -4645,8 +4616,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
                     key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
-                    key->p08.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
-                    key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                    key->p08.f = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->cameraFieldOfView;
+                    key->p0C.h[0] = ((EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque04;
                     {
                         s32 serializedNameIndex;
                         EffWorldNode *camera;

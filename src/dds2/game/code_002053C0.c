@@ -41,8 +41,6 @@ extern void btlClearAllUnitDefeatCandidates(void);
 
 extern s64 mnuGetSoundBufferStateLocked(void);
 
-extern void sdfVuLoadRotationMatrixY(f32);
-
 typedef struct BtlUnit BtlUnit;
 
 typedef struct BtlAt3Entry {

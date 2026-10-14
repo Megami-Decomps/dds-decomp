@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_script_resource_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_state.h"
 #include "btl_command.h"

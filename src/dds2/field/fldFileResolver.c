@@ -4,7 +4,9 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
@@ -20,6 +22,7 @@
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
+#include "fld_encounter_runtime_api.h"
 #include "fld_scene_request.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
@@ -1436,8 +1439,7 @@ extern void fldCopyActorWaypointTable(FldWaypointBlock *source);
 
 
 extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId);
-
-extern void fldCacheMapLabelLengths();
+#include "fld_label_cache_api.h"
 
 void fldLoadAreaPackedResources(void) {
     char name[32];
@@ -1534,9 +1536,8 @@ extern char D_00436030[];
 extern char D_00436038[];
 extern FieldPlayerSceneWork D_0038A640;
 extern void fldAllocateBackgroundBuffer(void);
-extern void fldResetObjectSlots();
+#include "fld_object_slot_api.h"
 extern void fldReleaseResourceSlots();
-extern void fldReleaseSceneRecordChunk();
 extern void fldCreateResourceScriptObjects(void);
 extern u8 fldHasAreaResourceNameChanged(void);
 extern void fldLoadAreaPackedResources(void);
@@ -1725,7 +1726,6 @@ extern void fldReleaseResourceSlots();
 
 extern void fldReleaseTextureSlots();
 
-extern void fldResetObjectSlots();
 
 extern void fldResetRecordState();
 
@@ -1735,7 +1735,6 @@ extern void fldResetZoneRecordsAndActorSlots();
 
 extern void fldResetPendingSounds();
 
-extern void fldReleaseSceneRecordChunk();
 
 extern void fldReleaseMenuSlotsAfterWait();
 
@@ -1915,20 +1914,7 @@ SdfPoolNode *fldGetDisplayTableRow(void) {
     return &kwlnDrawSurfaces[fldDisplayRow];
 }
 
-typedef struct FldSpriteCorner {
-    s32 u, v;
-    u8 pad08[8];
-    s32 x, y;
-    s32 mask;
-    s16 flag;
-    u8 pad1E[2];
-} FldSpriteCorner;
-
-/* Sprite vertex record (0x50 bytes): colour, then two corners of the quad. */
-typedef struct FldSpriteVertex {
-    s32 r, g, b, a;
-    FldSpriteCorner corner[2];
-} FldSpriteVertex;
+#include "fld_sprite_vertex.h"
 
 void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
     void *handle = sdfConsAllocateColumnPacket(1);
@@ -5015,7 +5001,7 @@ void fldApplyPendingCameraHeading(void) {
 }
 
 /* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00133F08);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraHeadingTransition);
 
 typedef struct FldSkyBuffer {
     u32 word[0x3800];

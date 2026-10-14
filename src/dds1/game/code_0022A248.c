@@ -257,7 +257,7 @@ INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD68);
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD78);
 
-INCLUDE_ASM(const s32, "game/code_0022A248", func_0022AF50);
+INCLUDE_ASM(const s32, "game/code_0022A248", dds3UpdateWorldNodeDiagnosticListTask);
 
 void func_0022B618(void) {
     D_003BBDF0 = 0;

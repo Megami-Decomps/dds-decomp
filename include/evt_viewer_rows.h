@@ -22,8 +22,21 @@ typedef struct EvtExtendedRow {
     u8 payload[0x20];
 } EvtExtendedRow;
 
+/* Timeline row value 2 stores the camera FOV at payload +0. The remaining
+ * bytes shown here retain only the observed halfword access and opaque tail. */
+typedef struct EvtCameraFovRowPayload {
+    f32 cameraFieldOfView;
+    u16 opaque04;
+    u16 opaque06;
+} EvtCameraFovRowPayload;
+
 typedef char EvtCompactRow_size[(sizeof(EvtCompactRow) == 0x10) ? 1 : -1];
 typedef char EvtExtendedRow_size[(sizeof(EvtExtendedRow) == 0x2C) ? 1 : -1];
+typedef char EvtCameraFovRowPayload_size[(sizeof(EvtCameraFovRowPayload) == 8) ? 1 : -1];
+typedef char EvtCameraFovRowPayload_fov_offset[
+    ((u32)&((EvtCameraFovRowPayload *)0)->cameraFieldOfView == 0) ? 1 : -1];
+typedef char EvtCameraFovRowPayload_opaque04_offset[
+    ((u32)&((EvtCameraFovRowPayload *)0)->opaque04 == 4) ? 1 : -1];
 
 u16 evtGetRowValue(PolyMovieWork *work, s32 row);
 s16 evtGetRowVariant(PolyMovieWork *work, s32 row);

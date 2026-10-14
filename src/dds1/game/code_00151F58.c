@@ -22,6 +22,7 @@
 
 #include "sdf_asset_create.h"
 #include "eff.h"
+#include "eff_particle_view.h"
 #include "eff_look_at_ring.h"
 #include "eff_track_poly_list.h"
 #include "par_table.h"
@@ -2675,34 +2676,9 @@ void effFreeSingleParticleTemplate(void *effect) {
     sdfReleaseChipBlock(effect);
 }
 
-typedef struct EffParticle {
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad0C[4];
-    f32 speed;
-    u8 pad14[0x10];
-    u32 unk24; /* 0x24 */
-    u8 pad28[0x24];
-    u32 color; /* 0x4C */
-    u8 pad50[8];
-    u32 alpha; /* 0x58 */
-    u8 pad5C[0x30];
-    f32 lastSpeed; /* 0x8C */
-    u8 pad90[4];
-    f32 speedJitter; /* 0x94 */
-    f32 angleJitter; /* 0x98 */
-    u8 pad9C[0x54];
-    u32 unkF0; /* 0xF0 */
-    u8 padF4[4];
-    EffectBufferTail *buffer; /* 0xF8 */
-} EffParticle;
-
-
-
 /* Initialize the first record at frame -1; speed draws RNG, angle draws it only for nonzero jitter. */
 void effInitParticleRecord(effect)
-    EffParticle *effect;
+    EffParticleOverlay *effect;
 {
     EffParticleRecord *record = (EffParticleRecord *)effect->buffer->records;
     f32 jitter;
@@ -2730,7 +2706,7 @@ void effInitParticleRecord(effect)
 extern u32 effParModulateColors(u32, u32);
 
 /* Frame zero reinitializes to -1 before incrementing; refresh position and modulated packed color. */
-void effUpdateParticleRecord(EffParticle *effect) {
+void effUpdateParticleRecord(EffParticleOverlay *effect) {
     EffParticleRecord *record = (EffParticleRecord *)effect->buffer->records;
     s32 frame = record->frame;
     u32 baseColor;
@@ -2746,7 +2722,7 @@ void effUpdateParticleRecord(EffParticle *effect) {
     baseColor = effect->color | (effect->alpha << 24);
     record->z = effect->z;
     record->color = baseColor;
-    record->color = effParModulateColors(baseColor, effect->unkF0);
+    record->color = effParModulateColors(baseColor, effect->colorMask);
 }
 
 /* Initialize only the native age/tag word of each packet record. */

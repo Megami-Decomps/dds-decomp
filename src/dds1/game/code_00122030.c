@@ -8,6 +8,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
 #include "sdf_message.h"
@@ -112,11 +113,8 @@ extern MdlCtx *fldPlayerModelContext;
 
 extern void fldSetPendingAreaAndFloor(u32, u32);
 
-extern s32 fldIsAreaResourceReady(void);
 
-extern u32 fldPollAreaResourceLoad(void);
 
-extern u32 fldGetResourceReadyFlag(void);
 
 extern void fldFreeDisplayObjects(void);
 
@@ -802,7 +800,6 @@ extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceR
 extern void *dds3GetTransformSourceData(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern void fldPreparePlayerAndCameraScene(u128 *transform);
 extern void fldPreparePlayerSceneCameraTarget(void);
 extern void fldCreateSecondaryWorldCamera(void);
@@ -1030,7 +1027,6 @@ typedef struct FieldVec4 {
 extern FieldVec4 D_0039FC40;
 extern char D_0039FC50[];
 extern void effMiscAxisAngleToQuaternionVU(f32);
-extern void effMiscQuatMultiplyVU(void);
 extern s32 D_0032E4C8[];
 extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
 extern void fldApplySceneLightSet(s32, s32);
@@ -1255,8 +1251,6 @@ extern f32 D_0032F170[12];
 extern char D_003BABB8[];
 
 extern void effMiscAxisAngleToQuaternionVU(f32);
-
-extern void effMiscQuatMultiplyVU(void);
 
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 

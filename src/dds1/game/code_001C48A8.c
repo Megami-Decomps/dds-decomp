@@ -1,4 +1,11 @@
 #include "common.h"
+#include "btl_rain_effect_api.h"
+#include "btl_script_resource_api.h"
+#include "btl_boss_data_api.h"
+#include "btl_event_asset_api.h"
+#include "fld_scene_ready_api.h"
+#include "kwln_background_fade_api.h"
+#include "brs_primary_panel_update_api.h"
 #include "btl_unit_base_light_task.h"
 #include "btl_special_ability.h"
 #include "kwln_fade.h"
@@ -13,6 +20,7 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
+#include "fld_encounter_runtime_api.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -194,7 +202,6 @@ extern void btlInitializeWorldCamera(void);
 
 extern void btlAdvanceWorldCounterAndSpawnActionObject(void);
 
-extern void btlCreateRainEffect(s16, s16);
 
 s32 btlStartOwnerTaskIfClear(u8 *object) {
     if (btlCountTasksForOwner(0x8000000000000001ULL) == 0) {
@@ -215,7 +222,6 @@ extern s32 btlMarkInactiveActorCandidates(void);
 
 extern void btlRestorePartySlotSnapshots(void);
 
-extern void kwlnFadeBackgroundStartOut(s32);
 
 extern void kwlnDrawSetOverlayTransition(s32, s32, s32);
 
@@ -233,10 +239,6 @@ extern void kwlnDrawEnableD30(s32);
 
 extern void btlMarkRuntimeUpdatePending(void);
 
-
-extern s32 fldGetEncounterRuntimeResult(void);
-
-extern void fldSetEncounterPendingValue(s32);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
@@ -789,7 +791,7 @@ s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
 
 extern void btlPushSavedPartyUnitStates(void);
 extern void btlSetTaskPhase5(void);
-extern s32 func_001ACC20(void);
+extern s32 btlSetEligibleActorPanelTransitionState(void);
 extern s32 btlDestroyTaskC(void);
 extern s32 btlDestroyTaskD(void);
 extern s32 btlChooseAvailableUnit(void);
@@ -824,7 +826,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     if (scene->eventReady != 5) {
         btlSetCommandPanelFadeMode(0, 8);
         btlSetTaskPhase5();
-        func_001ACC20();
+        btlSetEligibleActorPanelTransitionState();
         btlDestroyTaskC();
         btlDestroyTaskD();
     }
@@ -1059,18 +1061,12 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
     scene->loadStep = 0;
 }
 
-extern s32 brsIsPrimaryPanelUpdateReady();
 
 
-extern s32 fldLoadAreaResource();
 
-extern void btlReleaseEventAssets();
 
-extern void btlReleaseBossData();
 
-extern void fldPollAreaResourceLoad();
 
-extern s32 fldGetResourceReadyFlag();
 
 extern void btlBossDebugPrintf(const char *format, ...);
 

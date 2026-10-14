@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_text_slots_api.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
 #include "fld_area_work.h"
@@ -99,17 +100,15 @@ extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 void itfMesReplaceTextSlotData();
 
-extern void itfInitializeCursorResetState();
-
-extern void itfResetWindowResourceBlock();
-
-extern void itfClearDrawStateWords();
-
 extern void itfResetBattleFadeState();
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
 extern s32 frFontMeasureLineWidth();
+
+void itfMesInitializePanelPlacementSprite(ItfMesState *panel);
+
+void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel);
 
 extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
@@ -387,7 +386,68 @@ void itfMesDestroyWindowIfPresent(s32 window) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
+/* Install an entry's table into the window, rebuild its text glyphs and the
+ * selected-item caption, then mark the entry block active. */
+s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
+    ItfMesState *mes = itfWindowSlots[window].mes;
+    ItfMesEntryBlock *entryBlock = &mes->entryBlock;
+    ItfMesTable *table = itfMesGetEntry(mes, entryIndex)->table;
+    ItfMesBlk14 *captionBlock;
+    u16 selected;
+    u32 flags;
+
+    entryBlock->itemIndex = itemIndex;
+    entryBlock->table = table;
+    entryBlock->tableCount = table->count;
+    if (table->count == 0) {
+        return 0;
+    }
+    itfMesInitCharTable((s32 *)mes->textSlots.addresses);
+    if (mes->temporaryFontEntry != 0) {
+        frFontLoadTemporaryEntry(mes->temporaryFontEntry);
+    }
+    itfMesBuildEntryGlyph(mes);
+    captionBlock = &mes->blk14;
+    if (captionBlock->selectedIndex != (u16)table->bitCount) {
+        selected = table->bitCount;
+        if (captionBlock->glyphChain != NULL) {
+            frFontQueueGlyphForCurrentDrawBuffer(captionBlock->glyphChain);
+            captionBlock->glyphChain = NULL;
+        }
+        captionBlock->selectedIndex = selected;
+        if (selected != 0xFFFF) {
+            if (mes->blkA4.frame != NULL) {
+                itfPanelReleasePrimitiveResources(mes->blkA4.frame);
+                mes->blkA4.frame = NULL;
+            }
+            if (selected & 0x8000) {
+                captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
+                    (u8 *)itfMesGetWindowTableValue(window, selected & 0x7FFF), NULL);
+            } else {
+                captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
+                    (u8 *)itfMesGetNextEntrySelectedItem(mes), NULL);
+            }
+            if (frFontMeasureLineWidth(0, captionBlock->glyphChain) >= 0x69) {
+                frFontSetGlyphPosition(captionBlock->glyphChain, captionBlock->x, captionBlock->y);
+            } else {
+                frFontCenterGlyphChainAt(0x5C0, captionBlock->y, captionBlock->glyphChain);
+            }
+            itfMesSetNodeChainRenderValue(captionBlock->glyphChain, mes->renderValue);
+        }
+    }
+    itfMesCreatePanelOriginFrameWhenVisible(mes);
+    flags = mes->flags;
+    if ((flags & ITF_MES_SCRIPT_PANEL_BIT) &&
+        ((flags & ITF_MES_LOWER_STATUS_PAIR_MASK) == 0 || (flags & ITF_MES_LOWER_STATUS_PAIR_MASK) == ITF_MES_LOWER_STATUS_PAIR_MASK)) {
+        itfMesInitializePanelPlacementSprite(mes);
+        mes->flags = (mes->flags & ~ITF_MES_ENTRY_STATE_MASK) | 2;
+    } else {
+        mes->flags = (flags & ~ITF_MES_ENTRY_STATE_MASK) | 3;
+    }
+    entryBlock->textState = 1;
+    mes->flags |= 0x1000000;
+    return 1;
+}
 
 extern s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub);
 
@@ -1143,7 +1203,6 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 itemIndex) {
 }
 
 extern s32 frFontCountGlyphBands();
-extern s8 itfTestTextInterfaceMask();
 extern s32 itfGetTextLipsUnitId();
 extern s32 itfGetTextLipsMotionId();
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
@@ -1153,7 +1212,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     FrFontGlyph *glyph;
     FrFontGlyph *previousGlyph;
     s32 lipsValue;
-    s8 interfaceMask;
+    u32 interfaceMask;
     void (*callback)();
 
     previousGlyph = entryBlock->glyphChain;
@@ -1230,7 +1289,6 @@ void itfMesReplaceTextSlotData(mes, slotIndex, source, byteCount)
     memcpy((void *)*textAddress, source, byteCount);
 }
 
-extern void itfSetIndexedTextSlot();
 
 /* Install all replacement-text addresses into the font's fixed slot table. */
 void itfMesInitCharTable(s32 *table) {
@@ -1720,7 +1778,42 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
     return out;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesConfigurePanelBoundsAndFadeLimit);
+/* Select the message panel's bounds by layout mode (2 is the wide panel) and
+ * reset its fade channels; nonpositive limits default to 0x80. */
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 value) {
+    switch (mode) {
+    default:
+        block->bounds[0] = -0x390;
+        block->bounds[1] = -0x80;
+        block->bounds[2] = 0x1A30;
+        block->bounds[3] = 0x288;
+        block->unk1C = 0x80;
+        block->unk20 = 0x80;
+        block->unk24 = 0x80;
+        block->fadeLimit = value > 0 ? value : 0x80;
+        break;
+    case 1:
+        block->bounds[0] = -0x390;
+        block->bounds[1] = -0x80;
+        block->bounds[2] = 0x1A30;
+        block->bounds[3] = 0x288;
+        block->unk1C = 0x80;
+        block->unk20 = 0x80;
+        block->unk24 = 0x80;
+        block->fadeLimit = value > 0 ? value : 0x80;
+        break;
+    case 2:
+        block->bounds[0] = -0x610;
+        block->bounds[1] = -0x80;
+        block->bounds[2] = 0x1CB0;
+        block->bounds[3] = 0x288;
+        block->unk1C = 0x80;
+        block->unk20 = 0x80;
+        block->unk24 = 0x80;
+        block->fadeLimit = value > 0 ? value : 0x80;
+        break;
+    }
+}
 
 void itfMesUpdatePanelFades(ItfMesState *panel);
 

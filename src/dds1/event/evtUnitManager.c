@@ -21,10 +21,6 @@
 extern f32 *D_00324770[];
 extern u8 kwlnDefaultColorVector[];
 
-
-
-extern void effMiscQuatMultiplyVU();
-
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 scale);
 extern f32 evtGetValueScaleFactor(s32 path);
@@ -898,7 +894,62 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtRotateUnitTowardTarget);
+extern const s32 D_003AC070[];
+extern const s32 D_003AC080[];
+extern f32 acosf(f32);
+extern void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b);
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+
+s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 scale) {
+    /* SDK stores end local CSE before the axis and quaternion addresses
+     * are rebuilt. One angle carries the cosine through acos and clamping. */
+    f32 a[4];
+    f32 b[4];
+    f32 q[4];
+    f32 out[4];
+    f32 dot1;
+    f32 rotationAngle;
+    s32 result = 1;
+
+    memcpy(a, D_003AC070, sizeof(a));
+    memcpy(b, D_003AC080, sizeof(b));
+    evtComputePlanarTargetDirectionVu(unit);
+    VU0_STORE_VF(vf10, a);
+    VU0_MOVE_VF(vf12, vf10);
+    evtComputeHorizontalDisplacementVu(dir, unit->effObj->inner->position);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, out);
+    VU0_LOAD_VF(vf11, b);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_DOT_XYZ(dot1, vf10, vf11);
+    VU0_LOAD_VF(vf10, out);
+    VU0_DOT_XYZ(rotationAngle, vf10, vf11);
+    if (0.9998f <= rotationAngle) {
+        return result;
+    }
+    rotationAngle = acosf(rotationAngle);
+    if (dot1 > 0.0f) {
+        rotationAngle = -rotationAngle;
+    }
+    rotationAngle *= scale;
+    if (!(unit->flags & 0x200000)) {
+        if (rotationAngle < (-3.14159265f / 20.0f)) {
+            rotationAngle = (-3.14159265f / 20.0f);
+        }
+        if ((3.14159265f / 20.0f) < rotationAngle) {
+            rotationAngle = (3.14159265f / 20.0f);
+        }
+    }
+    VU0_LOAD_VF(vf10, b);
+    effMiscAxisAngleToQuaternionVU(rotationAngle);
+    VU0_STORE_VF_UNCLOBBERED(vf10, q);
+    effObjMultiplyInnerRotation(unit->effObj, (u128 *)q);
+    return 0;
+}
+
+
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
 s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {

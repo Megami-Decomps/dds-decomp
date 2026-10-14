@@ -4,6 +4,7 @@
 #include "itf.h"
 #include "fr_font.h"
 #include "dds3_owned_node.h"
+#include "pty_roster_api.h"
 
 extern u32 mtrHasEnoughOwnedMantras(void);
 

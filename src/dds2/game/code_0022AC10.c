@@ -1,4 +1,8 @@
 #include "common.h"
+#include "btl_script_resource_api.h"
+#include "btl_event_asset_api.h"
+#include "kwln_background_fade_api.h"
+#include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
@@ -18,6 +22,7 @@
 #include "sdf_resource.h"
 #include "file_pac.h"
 #include "btl_state.h"
+#include "btl_scene_initializer.h"
 #include "btl_action.h"
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
@@ -137,7 +142,7 @@ extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
-extern s16 btlGetActorEntryCode(BtlUnit *, s32);
+#include "btl_actor_entry_code_api.h"
 
 extern s8 D_00453068[];
 
@@ -197,7 +202,7 @@ extern SdfTex *kwlnHeldTextureReference;
 
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
-extern s32 kwlnTextureSetReferenceFlagIfPresent(void);
+#include "kwln_texture_reference_flag_api.h"
 
 extern void func_0022D040(void);
 
@@ -219,7 +224,6 @@ extern u32 btlRunSceneActorEventTask(struct BattleScriptTaskData *);
 
 extern void btlStartSkillEventTask(u32);
 
-extern s32 btlReleaseScriptResource(void);
 
 extern BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
 
@@ -1570,7 +1574,7 @@ extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern f32 tanf(f32);
-extern f32 func_00353140(f32);
+extern f32 sinf(f32);
 extern SdfAsset *D_00436D10;
 extern EffPacketParams D_00453030;
 extern u32 D_003BFB30[];
@@ -1709,7 +1713,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
                     if (influence > 1.0f) {
                         influence = 1.0f;
                     }
-                    angle = func_00353140(radius / waveRadius * 1.5707963f + phase);
+                    angle = sinf(radius / waveRadius * 1.5707963f + phase);
                     axis[0] = -directionY;
                     axis[1] = directionX;
                     axis[2] = 0.0f;
@@ -1930,7 +1934,6 @@ extern char D_0041B9B8[];
 
 extern void fldDrawSkyGradient(void);
 
-extern void kwlnFadeBackgroundStartOut(s32);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -3141,9 +3144,6 @@ extern u8 D_00436F60;
 extern u8 D_00436F62;
 extern u8 D_00436F96;
 extern s32 D_003C3248[5][24];
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
-extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
-
 /* Apply the debug party bank/preset, refreshed HP/MP and inventory flags. */
 void btlApplyDebugEncounterPartySelection(void) {
     u32 i;

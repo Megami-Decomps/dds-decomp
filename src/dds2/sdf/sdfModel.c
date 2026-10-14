@@ -250,7 +250,47 @@ void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelCreateFromAssetData);
+SdfDrawNode *sdfCreateDrawNode(void);
+SdfModel *sdfCreateBufferedTransformSlot(void);
+void sdfResizeBufferedSlotRequest(SdfModel *model, s32 count);
+void sdfAppendBufferedRouteNode(SdfModel *list, SdfDrawNode *owner, SdfDrawNode *node);
+DevRequest *sdfAssetListParse(DevRequest *lookup, u32 *data);
+
+/* Build the buffered model, parse its asset records and create one draw node per
+ * item, linking each node under its parent item's node when it has one. */
+SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef) {
+    s32 i = 0;
+    SdfModel *model = sdfCreateBufferedTransformSlot();
+    SdfItemList *list;
+    s32 count;
+    SdfItem *item;
+    SdfDrawNode *node;
+    SdfDrawNode *parent;
+
+    model->assetData = data;
+    model->resources = sdfAssetListParse(data, listRef->serializedAssetData);
+    model->chunkTable = listRef->chunkTable;
+    sdfModelAllocateSlotPairs(model, listRef->slotPairCount);
+    list = listRef->items;
+    count = list->count;
+    list++;
+    sdfResizeBufferedSlotRequest(model, count);
+    item = (SdfItem *)list;
+    if (count != i) {
+        do {
+            node = sdfCreateDrawNode();
+            parent = NULL;
+            if (item->parentNodeIndex >= 0) {
+                parent = ((SdfDrawNode **)model->list->buffer)[item->parentNodeIndex];
+            }
+            sdfAppendBufferedRouteNode(model, parent, node);
+            i++;
+            node->nodeId = item->nodeId;
+            item++;
+        } while (i != count);
+    }
+    return model;
+}
 
 /* Attach each 0x50-byte item to the corresponding model draw node. */
 SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {

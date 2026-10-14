@@ -87,7 +87,7 @@ void sdfVuApplySelectedWorkFlags(u32 workAddress) {
     }
 }
 
-extern void func_002DF128(VuWork *work);
+extern void sdfVuBuildVisibleTriangleList(VuWork *work);
 
 extern void func_002DF710(VuWork *work);
 
@@ -107,7 +107,7 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
-        func_002DF128(work);
+        sdfVuBuildVisibleTriangleList(work);
         sdfVuApplySelectedWorkFlags((u32)work);
         sdfVuConfigureWorkRingDma(work, work->param1);
         VU0_LOAD_VF(vf24, savedVectors);
@@ -117,7 +117,7 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         func_002DF710(work);
         sdfVuApplySelectedWorkFlags((u32)work);
     } else {
-        func_002DF128(work);
+        sdfVuBuildVisibleTriangleList(work);
         sdfVuApplySelectedWorkFlags((u32)work);
     }
 }

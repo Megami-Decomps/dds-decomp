@@ -65,8 +65,6 @@ extern void *effCreateNodeFromParameter(void);
 
 
 struct EffNode;
-extern void effCopyVector(void *source, void *destination);
-
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 
 extern BillObj *billCreateFromResource(s32 kind, const char *path);

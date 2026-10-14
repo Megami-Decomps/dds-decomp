@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "dds3Admin.h"
 #include "kwln_draw_buffer.h"
 #include "eff_random_mod.h"
@@ -409,7 +410,7 @@ void kwlnPadResetInputAndMotorState(void) {
 }
 
 extern u8 sdfPadAnalogSticks[8];
-extern f32 func_002FA1C0(f32);
+extern f32 acosf(f32);
 extern void kwlnUpdatePadMotorDurations(void);
 
 /* vu0 routine: native stick length, normalization and forward dot product. */
@@ -474,7 +475,7 @@ void kwlnUpdatePadInputState(void) {
             if (dot > 1.0f) {
                 dot = 1.0f;
             }
-            angle = func_002FA1C0(dot);
+            angle = acosf(dot);
             if (v[0] < 0.0f) {
                 angle = 6.283185307179586f - angle;
             }
@@ -1254,6 +1255,8 @@ void kwlnTextureReleaseHeldReference(void) {
 }
 
 /* Set the flag and return 1 when a held handle exists; otherwise leave it and return 0. */
+#include "kwln_texture_reference_flag_api.h"
+
 s32 kwlnTextureSetReferenceFlagIfPresent(void) {
     s32 result = 0;
 

@@ -206,38 +206,7 @@ extern s32 D_004361B4;
 
 extern s32 D_004361BC;
 
-typedef struct FldTriggerSphere {
-    u32 kind;
-    f32 radius;
-} FldTriggerSphere;
-
-typedef struct FldTriggerPlane {
-    u32 kind;
-    f32 width;
-    f32 height;
-} FldTriggerPlane;
-
-typedef struct FldTriggerBox {
-    u32 kind;
-    f32 size[3];
-} FldTriggerBox;
-
-/* Serialized kind0/1/2 records occupy8/12/16 bytes. The action constructor
- * embeds only the real8-byte sphere prefix, followed by its task descriptor;
- * shape pointers inspect the member selected by kind, not a padded view. */
-typedef union FldTriggerShape {
-    u32 kind;
-    FldTriggerSphere sphere;
-    FldTriggerPlane plane;
-    FldTriggerBox box;
-} FldTriggerShape;
-
-typedef struct FldTaskInfo {
-    s32 unk0;
-    s32 slot;
-    u32 unk08;
-    FldTriggerShape *shape;
-} FldTaskInfo;
+#include "fld_trigger_shape.h"
 
 
 
@@ -2926,7 +2895,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            func_00123DE8(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();

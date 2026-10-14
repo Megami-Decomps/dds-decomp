@@ -1,4 +1,11 @@
 #include "common.h"
+#include "btl_rain_effect_api.h"
+#include "btl_script_resource_api.h"
+#include "btl_boss_data_api.h"
+#include "btl_event_asset_api.h"
+#include "fld_scene_ready_api.h"
+#include "kwln_background_fade_api.h"
+#include "brs_primary_panel_update_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -13,6 +20,7 @@
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
+#include "fld_encounter_runtime_api.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
 
@@ -69,11 +77,8 @@ extern s32 btlUpdateDebugEncounterSelector(void);
 
 extern s32 btlRollMajinEncounter();
 
-extern s32 btlRollSurpriseAttack();
 
-extern void btlRequestSceneEventResources();
 
-extern void btlInitializeBossCallbacks();
 
 extern void btlSelectSceneAudioTrack();
 
@@ -109,7 +114,6 @@ extern s32 btlMarkInactiveActorCandidates();
 
 extern void btlRestorePartySlotSnapshots();
 
-extern void kwlnFadeBackgroundStartOut();
 
 extern void kwlnDrawSetOverlayTransition();
 
@@ -133,10 +137,6 @@ extern s32 func_001B3DD8(void);
 extern void btlAddItemDrop(u16);
 
 
-extern s32 fldGetEncounterRuntimeResult();
-
-extern void fldSetEncounterPendingValue();
-
 extern void evtSetSolarOverlayFullyVisible();
 
 extern void btlSyncModelFlagFromEventThresholds();
@@ -147,11 +147,8 @@ extern void btlInitializeWorldCamera();
 
 extern void btlSpawnBattleWorldAction();
 
-extern void btlCreateRainEffect();
 
-extern s32 btlReleaseScriptResourceA();
 
-extern s32 btlReleaseScriptResource();
 
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 
@@ -1098,17 +1095,11 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
     scene->loadStep = 0;
 }
 
-extern s32 brsIsPrimaryPanelUpdateReady();
 
-extern s32 fldLoadAreaResource();
 
-extern void btlReleaseEventAssets();
 
-extern void btlReleaseBossData();
 
-extern void fldPollAreaResourceLoad();
 
-extern s32 fldGetResourceReadyFlag();
 
 #include "brs_task_poll_done_api.h"
 

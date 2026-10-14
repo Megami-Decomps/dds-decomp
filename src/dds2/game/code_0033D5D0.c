@@ -1303,7 +1303,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 }
 
 /* Worker slot 3 services disc-backed requests through serialized disc operations. */
-void D_0033F3E0(DevWorkerEntry *worker) {
+void sdfDevDiscRequestWorkerThread(DevWorkerEntry *worker) {
     DevState *state;
     void (*callback)(DevState *, s32, s32, s32, s32);
     s32 result;
@@ -1704,7 +1704,7 @@ void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
     thread = worker->threadId;
     if (thread < 0) {
         worker->semaphore = sdfCreateSemaphore(0, 0xFF, 0);
-        entry = D_0033F3E0;
+        entry = sdfDevDiscRequestWorkerThread;
         if (index != 3) {
             entry = sdfDevWorkerThread;
         }

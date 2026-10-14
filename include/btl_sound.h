@@ -107,8 +107,6 @@ struct SdfMemBlock;
 struct FileRequest;
 struct BtlUnit;
 struct BtlRuntimeTask;
-struct SoundLoadNode;
-struct SoundFileNode;
 
 typedef struct SoundMixer {
     SoundBank banks[2];
@@ -299,11 +297,7 @@ typedef char SoundDataFileArgs_size_must_be_4[
 
 /* Fixed header followed by the copied filename in sound MotSE load tasks. */
 typedef struct SoundFileTaskArgs {
-#ifdef VERSION_DDS1
-    struct SoundLoadNode *node; /* 0x00 */
-#else
-    struct SoundFileNode *node; /* 0x00 */
-#endif
+    ActiveSoundNode *node; /* 0x00: sound-list owner; file-load view is shared. */
     struct FileRequest *request; /* 0x04: queued file request */
     struct SdfMemBlock *resourceAllocation; /* 0x08: retained file allocation */
 #ifdef VERSION_DDS1
@@ -331,7 +325,7 @@ typedef char SoundFileTaskArgs_index_offset_must_be_C[
 typedef char SoundFileTaskArgs_filename_offset_must_be_10[
     ((u32)&((SoundFileTaskArgs *)0)->filename == 0x10) ? 1 : -1];
 
-/* Known SoundLoadNode/SoundFileNode phase bits; other flag bits stay opaque. */
+/* Known active sound-node phase bits; other flag bits stay opaque. */
 enum {
     SOUND_FILE_STATE_REQUEST_PENDING = 0x01,
     SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED = 0x02,
@@ -344,9 +338,9 @@ struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);
 void sndStartFileLoad(SoundFileTaskArgs *args);
 u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *args);
 #ifdef VERSION_DDS1
-struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundLoadNode *node, u32 blockIndex, const char *filename);
+struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, u32 blockIndex, const char *filename);
 #else
-struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundFileNode *node, s32 frames, char *filename);
+struct BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 frames, char *filename);
 #endif
 
 /* Both factories store full words; callbacks use the low 16 duration bits. */

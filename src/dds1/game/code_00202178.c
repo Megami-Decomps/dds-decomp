@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_skill_max_api.h"
 #include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -67,8 +68,6 @@ extern void btlSetUnitPosition(BtlUnit *, void *);
 
 extern void btlSetUnitRotation(BtlUnit *, void *);
 
-extern void effMiscQuatMultiplyVU(void);
-
 extern const s32 D_003A5D50[];
 
 extern AiSpecies *datEnemyAiRecords;
@@ -89,8 +88,6 @@ extern void *memset(void *, s32, u32);
 extern void *btlSelectFlaggedIndexListEntry(BtlIndexList *, u16 *, u16);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
-
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
@@ -761,9 +758,9 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern f32 btlGetActorEffectScale(BtlTask *);
 
-extern f32 func_002F9F60(f32);
+extern f32 cosf(f32);
 
-extern f32 func_002FA060(f32);
+extern f32 sinf(f32);
 
 extern f32 tanf(f32);
 
@@ -813,8 +810,8 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     VU0_STORE_VF(vf10, out->position);
     angle = ratio * 0.0f;
     angle += 0.6108652f;
-    width = extent + length * func_002FA060(angle);
-    length *= func_002F9F60(angle);
+    width = extent + length * sinf(angle);
+    length *= cosf(angle);
     length += width / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (command->flags & 0x200) {
@@ -991,7 +988,7 @@ s32 btlClearUnitRestrictionFlag(void) {
 
 /* After the special enemy acts, clear its restriction flag unless the action
  * was phase 10, skill 0x1A6 in phase 2, or it was set this same turn. */
-void func_00204D08(BtlTask *task) {
+void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *task) {
     BtlState *battle;
     BtlUnit *unit;
     s32 *effect;
@@ -1728,7 +1725,71 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00206180);
+/* With no unit, report phase 18/19 from the last eligible pair.
+ * A qualifying first unit instead reports 15 when its inactive effect is ready. */
+s32 func_00206180(BtlUnit *unit) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleEffectState *effect = (BattleEffectState *)battle->effect;
+    BtlUnit *node;
+    BtlUnit *first;
+    BtlUnit *second;
+
+    if (unit == NULL) {
+        if (effect->active != 1) {
+            goto unavailable_pair;
+        }
+        first = NULL;
+        second = NULL;
+        for (node = battle->units; node != NULL; node = node->next) {
+            if (node->status.flags & 1) {
+                if (node->status.flags & 0x400) {
+                    switch (node->partyRecord.unitId) {
+                    case 0x107:
+                        first = node;
+                        break;
+                    case 0x108:
+                        second = node;
+                        break;
+                    }
+                }
+            }
+        }
+        if (first == NULL) {
+            goto unavailable_pair;
+        }
+        if (second == NULL) {
+            goto unavailable_pair;
+        }
+        if (first->unkEC < 0x14) {
+            if (first->unkEC >= 0x12) {
+                return first->unkEC;
+            }
+        }
+        if (second->unkEC < 0x14) {
+            if (second->unkEC >= 0x12) {
+                return second->unkEC;
+            }
+        }
+/* Share pair rejections so early conversion does not hoist the return
+ * value into the phase test. Keep single-unit rejection paths separate. */
+unavailable_pair:
+        return -1;
+    }
+    if (!(unit->status.flags & 1)) {
+        return -1;
+    }
+    if (!(unit->status.flags & 0x400)) {
+        return -1;
+    }
+    if (unit->partyRecord.unitId != 0x107) {
+        return -1;
+    }
+    if (effect->active != 0) {
+        return -1;
+    }
+    return effect->header.owner == 0 ? -1 : 0xF;
+}
+
 
 s32 btlAdjustDamageKind(BtlUnit *unit, s32 damageKind) {
     u32 id;

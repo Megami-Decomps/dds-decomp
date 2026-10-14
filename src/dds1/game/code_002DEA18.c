@@ -114,7 +114,7 @@ INCLUDE_ASM(const s32, "game/code_002DEA18", func_002DEAC0);
 
 INCLUDE_ASM(const s32, "game/code_002DEA18", func_002DEB40);
 
-INCLUDE_ASM(const s32, "game/code_002DEA18", func_002DF128);
+INCLUDE_ASM(const s32, "game/code_002DEA18", sdfVuBuildVisibleTriangleList);
 
 INCLUDE_ASM(const s32, "game/code_002DEA18", func_002DF710);
 

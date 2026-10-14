@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "eff_param.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "sdf_quaternion.h"
@@ -9,9 +10,6 @@
 #include "sdf_vu_transform_api.h"
 #include "eff.h"
 #include "eff_math.h"
-
-/* Packed effect parameter-set accessor (see game/code_001624D0). */
-extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
