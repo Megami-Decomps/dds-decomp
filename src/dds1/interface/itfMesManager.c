@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "fr_font_glyph_chain_count.h"
 #include "itf_mes_window.h"
 #include "itf_panel_api.h"
 #include "kwln.h"
@@ -61,8 +62,6 @@ void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int 
 
 extern void itfSetIndexedTextSlot();
 
-
-s32 frFontCountGlyphChainNodes();
 
 void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
