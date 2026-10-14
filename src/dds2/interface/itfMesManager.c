@@ -111,6 +111,10 @@ extern void frFontCenterGlyphChainAt(s32 x, s32 y, FrFontGlyph *glyphChain);
 
 extern s32 frFontMeasureLineWidth();
 
+void itfMesInitializePanelPlacementSprite(ItfMesState *panel);
+
+void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel);
+
 extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
@@ -387,7 +391,68 @@ void itfMesDestroyWindowIfPresent(s32 window) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
+/* Install an entry's table into the window, rebuild its text glyphs and the
+ * selected-item caption, then mark the entry block active. */
+s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
+    ItfMesState *mes = itfWindowSlots[window].mes;
+    ItfMesEntryBlock *entryBlock = &mes->entryBlock;
+    ItfMesTable *table = itfMesGetEntry(mes, entryIndex)->table;
+    ItfMesBlk14 *captionBlock;
+    u16 selected;
+    u32 flags;
+
+    entryBlock->itemIndex = itemIndex;
+    entryBlock->table = table;
+    entryBlock->tableCount = table->count;
+    if (table->count == 0) {
+        return 0;
+    }
+    itfMesInitCharTable((s32 *)mes->textSlots.addresses);
+    if (mes->temporaryFontEntry != 0) {
+        frFontLoadTemporaryEntry(mes->temporaryFontEntry);
+    }
+    itfMesBuildEntryGlyph(mes);
+    captionBlock = &mes->blk14;
+    if (captionBlock->selectedIndex != (u16)table->bitCount) {
+        selected = table->bitCount;
+        if (captionBlock->glyphChain != NULL) {
+            frFontQueueGlyphForCurrentDrawBuffer(captionBlock->glyphChain);
+            captionBlock->glyphChain = NULL;
+        }
+        captionBlock->selectedIndex = selected;
+        if (selected != 0xFFFF) {
+            if (mes->blkA4.frame != NULL) {
+                itfPanelReleasePrimitiveResources(mes->blkA4.frame);
+                mes->blkA4.frame = NULL;
+            }
+            if (selected & 0x8000) {
+                captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
+                    (u8 *)itfMesGetWindowTableValue(window, selected & 0x7FFF), NULL);
+            } else {
+                captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
+                    (u8 *)itfMesGetNextEntrySelectedItem(mes), NULL);
+            }
+            if (frFontMeasureLineWidth(0, captionBlock->glyphChain) >= 0x69) {
+                frFontSetGlyphPosition(captionBlock->glyphChain, captionBlock->x, captionBlock->y);
+            } else {
+                frFontCenterGlyphChainAt(0x5C0, captionBlock->y, captionBlock->glyphChain);
+            }
+            itfMesSetNodeChainRenderValue(captionBlock->glyphChain, mes->renderValue);
+        }
+    }
+    itfMesCreatePanelOriginFrameWhenVisible(mes);
+    flags = mes->flags;
+    if ((flags & ITF_MES_SCRIPT_PANEL_BIT) &&
+        ((flags & ITF_MES_LOWER_STATUS_PAIR_MASK) == 0 || (flags & ITF_MES_LOWER_STATUS_PAIR_MASK) == ITF_MES_LOWER_STATUS_PAIR_MASK)) {
+        itfMesInitializePanelPlacementSprite(mes);
+        mes->flags = (mes->flags & ~ITF_MES_ENTRY_STATE_MASK) | 2;
+    } else {
+        mes->flags = (flags & ~ITF_MES_ENTRY_STATE_MASK) | 3;
+    }
+    entryBlock->textState = 1;
+    mes->flags |= 0x1000000;
+    return 1;
+}
 
 extern s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub);
 
