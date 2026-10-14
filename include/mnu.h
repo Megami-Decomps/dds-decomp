@@ -521,8 +521,7 @@ typedef struct MenuPageSlot {
     u32 flags;
     u8 pad08[8];
     struct EffectSlotSet *icon[3];
-    MenuEffectPair hp; /* 0x1C */
-    MenuEffectPair mp; /* 0x70 */
+    MenuEffectPair bars[2]; /* 0x1C: HP, then MP at 0x70 */
     struct EffectSlotSet *frame[6];
     struct MenuPageResources *resources;
     struct MenuSprites *windowSprites;
@@ -538,8 +537,8 @@ typedef char MenuPageSlot_icon_check_dds1[
     ((u32)&((MenuPageSlot *)0)->icon == 0x10) ? 1 : -1];
 typedef char MenuPageSlot_frame_check_dds1[
     ((u32)&((MenuPageSlot *)0)->frame == 0xC4) ? 1 : -1];
-typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->hp == 0x1C) ? 1 : -1];
-typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->mp == 0x70) ? 1 : -1];
+typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->bars[0] == 0x1C) ? 1 : -1];
+typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->bars[1] == 0x70) ? 1 : -1];
 typedef char MenuPageSlot_work_check[((u32)&((MenuPageSlot *)0)->work == 0xF4) ? 1 : -1];
 #endif
 
