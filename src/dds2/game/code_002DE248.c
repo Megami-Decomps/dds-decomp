@@ -15,6 +15,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_active_resource.h"
 #include "eff_object_node.h"
 #include "btl_effect_position.h"
 #include "eff_random.h"
@@ -8283,25 +8284,6 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
     }
 }
 
-/* Header common to the resource-instance constructors and callback dispatchers. */
-typedef struct EffActiveResource {
-    f32 position[4];
-    f32 orientation[4];  // 0x10: quaternion consumed by model callbacks
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    union {
-        u32 index;       // 0x2C
-        s32 signedIndex;
-        u16 shortIndex;
-    } kind;
-    void *resource;      // 0x30; heterogeneous kind-specific resource pointer
-    u8 pad_34[4];
-    void *payload;       // 0x38
-    u8 pad_3C[4];
-} EffActiveResource;
-typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
-typedef char EffActiveResourceResourceOffsetCheck[((u32)&((EffActiveResource *)0)->resource == 0x30) ? 1 : -1];
 
 /* Entire 40-byte payload copied for resource kind 1. */
 typedef struct EffActorLightConfig {
