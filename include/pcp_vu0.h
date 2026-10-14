@@ -207,6 +207,12 @@ typedef struct {
     "vmove.w vf10, vf0\n\t.set reorder" \
     : : "f" (t))
 /* Same lerp, finishing with vmove.xyzw vf11, vf10 (copy the result into vf11). */
+/* Same lerp, then clear w with vmulx.w vf10,vf10,vf0x (an Euler-angle triple). */
+#define VU0_LERP_VF10_CLEAR_W(t) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
+    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t" \
+    "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
+    : : "f" (t))
 #define VU0_LERP_VF10_COPY(t) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
     "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t" \
