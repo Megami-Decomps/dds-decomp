@@ -22,7 +22,7 @@ extern u32 *sdfCloneSpriteRecords(const void *, u32);
 
 extern void *dds3ReadRelocatedSpriteFile(const char *, const char *, u32 *);
 
-extern u32 *func_00325790(const void *, s32);
+extern u32 *sdfCloneOwnedSpriteRecordList(const void *, s32);
 
 extern void (*sdfTickCallback)(void);
 
@@ -648,7 +648,7 @@ u32 *dds3LoadOwnedSpriteRecordList(const char *source, const char *request) {
     u32 metadata[4];
 
     buffer = dds3ReadRelocatedSpriteFile(source, request, metadata);
-    result = func_00325790(buffer, metadata[0]);
+    result = sdfCloneOwnedSpriteRecordList(buffer, metadata[0]);
     sdfFreeHeapMemory(buffer);
     return result;
 }
@@ -696,7 +696,7 @@ u32 *dds3LoadOwnedSpriteRecordListDuplicate(const char *source, const char *requ
     u32 metadata[4];
 
     buffer = dds3ReadRelocatedSpriteFile(source, request, metadata);
-    result = func_00325790(buffer, metadata[0]);
+    result = sdfCloneOwnedSpriteRecordList(buffer, metadata[0]);
     sdfFreeHeapMemory(buffer);
     return result;
 }
