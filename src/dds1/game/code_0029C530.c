@@ -1102,7 +1102,6 @@ void effUpdateFadeBlendC(EffKindWork *work) {
 }
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 
 u32 effCreateFadeColorWorkFromOutput(void *work) {
     return (u32)effCloneResourceTemplate((EffResourceRectParams *)((u8 *)work + 0xc0));
