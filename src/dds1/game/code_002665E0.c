@@ -91,7 +91,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
             if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level) && work->levelAnimation[index].state == 2) {
                 work->levelAnimation[index].level++;
                 work->levelAnimation[index].level = work->levelAnimation[index].level < 2 ? 1 : (work->levelAnimation[index].level > 99 ? 99 : work->levelAnimation[index].level);
-                if (work->unkD4D != 0) {
+                if (work->skipProgressAnimation != 0) {
                     finished = 0;
                     while (work->levelAnimation[index].level < 99) {
                         nextLevel = work->levelAnimation[index].level + 1;
@@ -440,7 +440,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
             } else {
                 step = 10000;
             }
-            if (work->unkD4D != 0) {
+            if (work->skipProgressAnimation != 0) {
                 step = work->levelAnimation[index].remaining;
             }
             work->levelAnimation[index].remaining -= step;
@@ -465,7 +465,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
             } else {
                 step = 10000;
             }
-            if (work->unkD4D != 0) {
+            if (work->skipProgressAnimation != 0) {
                 step = work->profileAnimation[index].remaining;
             }
             work->profileAnimation[index].remaining -= step;
