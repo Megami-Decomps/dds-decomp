@@ -7500,6 +7500,7 @@ sdfVuLoadRotationMatrixZ = 0x002DD688; // type:func
 fldResolveEventSelectorTarget = 0x0013CBA8; // type:func
 sdfVuBuildVisibleTriangleList = 0x002DF128; // type:func
 btlSetEligibleActorPanelTransitionState = 0x001ACC20; // type:func
+fldMarkStageExplorationBitmapRegion = 0x00121DE0; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -8350,7 +8351,6 @@ fldFindMapLabelIndexByCoordinate = 0x00121818; // type:func
 fldFindSecondaryMapLabelIndexByCoordinate = 0x00121870; // type:func
 fldGetStageBitmapBitCoordinates = 0x00121A58; // type:func
 fldMarkStageExplorationCellsAroundPosition = 0x00121B88; // type:func
-func_00121DE0 = 0x00121DE0; // type:func
 fldTestStageExplorationCell = 0x00121ED8; // type:func
 fldGetDirectionAngleBetweenXZPositions = 0x001228D8; // type:func
 fldGetTriangleHeightAtXZ = 0x00122A00; // type:func
