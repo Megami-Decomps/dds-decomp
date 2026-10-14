@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_param.h"
 #include "sdf_vu_matrix.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
@@ -25,9 +26,6 @@
 #include "eff_pcp_flash.h"
 #include "eff_pcp_thunder_group.h"
 #include "pcp_vu0.h"
-
-/* Packed effect parameter-set accessor shared with the effect constructors. */
-extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern u8 effDefaultRandomState[];
 

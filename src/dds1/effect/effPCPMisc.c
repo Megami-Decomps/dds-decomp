@@ -125,9 +125,6 @@ typedef struct {
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 
-/* Block `index` of a packed effect parameter set: data + offset table entry. */
-extern void *effParamTableGetBlock(void *data, s32 index);
-
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
 

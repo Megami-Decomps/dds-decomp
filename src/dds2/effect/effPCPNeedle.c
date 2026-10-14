@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_param.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "sdf_quaternion.h"
@@ -9,9 +10,6 @@
 #include "eff.h"
 #include "eff_math.h"
 #include "sdf_projection.h"
-
-/* Parameter block zero supplies the work passed to the needle initializer. */
-extern void *effParamTableGetBlock(void *, s32);
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);

@@ -52,8 +52,6 @@
 #define EFF_SCATTER_CHILD_BLOCK 2
 
 
-extern void *effParamTableGetBlock(void *, s32);
-
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern u8 effDefaultRandomState[];

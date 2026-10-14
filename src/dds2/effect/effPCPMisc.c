@@ -76,9 +76,6 @@ extern u8 D_003B1A88[];
 extern void sdfVuLoadRotationMatrixY(f32 scale);
 extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
-/* Block `index` of a packed effect parameter set: data + offset table entry. */
-extern void *effParamTableGetBlock(void *data, s32 index);
-
 extern s8 D_0043643C;
 
 
