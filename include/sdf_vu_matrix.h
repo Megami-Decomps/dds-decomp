@@ -8,9 +8,6 @@
  * DDS1 game/code_002DD8B8.c and DDS2 game/code_00336768.c. */
 void sdfComposeVuMatrixFromRegisters(void);
 
-/* Load the X-axis rotation matrix rows into the primary VU0 matrix registers. */
-void sdfVuLoadRotationMatrixX(f32 angle);
-
 /* Load the Z-axis rotation matrix rows into the primary VU0 matrix registers. */
 void sdfVuLoadRotationMatrixZ(f32 angle);
 
