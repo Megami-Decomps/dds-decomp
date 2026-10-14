@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
@@ -1932,7 +1933,6 @@ extern char D_0041B9B8[];
 
 extern void fldDrawSkyGradient(void);
 
-extern void kwlnFadeBackgroundStartOut(s32);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
 #include "btl_unit_base_light_task.h"
 #include "btl_special_ability.h"
@@ -217,7 +218,6 @@ extern s32 btlMarkInactiveActorCandidates(void);
 
 extern void btlRestorePartySlotSnapshots(void);
 
-extern void kwlnFadeBackgroundStartOut(s32);
 
 extern void kwlnDrawSetOverlayTransition(s32, s32, s32);
 

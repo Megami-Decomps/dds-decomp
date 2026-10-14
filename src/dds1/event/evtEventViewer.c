@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "evt_scaled_value.h"
 #include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
@@ -829,7 +830,6 @@ extern void itfMesBuildOptionList(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 extern void mnuStopMovieDrawTask(void);
 extern void mnuRequestIndexedMovieResource(s32);
-extern void kwlnFadeBackgroundStartOut(s32);
 extern void kwlnFadeBackgroundStartIn(s32);
 extern u16 D_003BBE78;
 extern char D_003ACFE8[];

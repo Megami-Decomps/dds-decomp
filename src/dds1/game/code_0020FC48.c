@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
@@ -1680,7 +1681,6 @@ void btlInitializeOverlayGraphics(void) {
 
 extern void fldDrawSkyGradient(void);
 
-extern void kwlnFadeBackgroundStartOut(s32);
 
 extern u32 kwlnDrawControlFlags;
 

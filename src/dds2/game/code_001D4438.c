@@ -132,7 +132,6 @@ extern s32 btlArrangeOpponentFormationSlots();
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern s32 btlMarkInactiveActorCandidates();
 extern void btlRestorePartySlotSnapshots();
-extern void kwlnFadeBackgroundStartOut();
 extern void kwlnDrawSetOverlayTransition();
 extern void kwlnDrawEnableD88();
 extern void kwlnDrawEnableDc8();

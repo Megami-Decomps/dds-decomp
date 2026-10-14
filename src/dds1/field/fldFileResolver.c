@@ -4,6 +4,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_gradient_record.h"

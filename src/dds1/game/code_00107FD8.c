@@ -8,6 +8,7 @@
 #include "sdf_packet_builders.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -1229,7 +1230,6 @@ void evtCreateTestAndSkyTasks(void) {
     evtCreateSkyTask();
 }
 
-extern void kwlnFadeBackgroundStartOut();
 
 u32 evtInitializeSelectionScene(void) {
     D_003BA730 = 1;

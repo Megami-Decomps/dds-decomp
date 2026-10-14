@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "dds3Admin.h"
 #include "kwln_draw_buffer.h"
 #include "eff_random_mod.h"

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "itf_mes_window.h"
 #include "sdf_packet_list.h"
@@ -4363,7 +4364,6 @@ extern s32 evtIsBgmLoaded(s32 id);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32 id, s32 mode, s32 frames);
 extern void kwlnFadeBackgroundStartIn(s32 frames);
-extern void kwlnFadeBackgroundStartOut(s32 frames);
 
 typedef struct { u8 bytes[0x18]; } EvtRowPayload18;
 typedef struct { u8 bytes[0x20]; } EvtRowPayload20;

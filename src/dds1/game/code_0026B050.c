@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -6,7 +7,6 @@
 #include "mnu_sprite_resource.h"
 
 
-extern void kwlnFadeBackgroundStartOut(s32);
 extern void mnuStopMovieDrawTask(void);
 extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
