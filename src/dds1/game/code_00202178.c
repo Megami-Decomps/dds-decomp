@@ -788,7 +788,7 @@ extern f32 func_002FA060(f32);
 
 extern f32 tanf(f32);
 
-extern void func_002DD688(f32);
+extern void sdfVuLoadRotationMatrixZ(f32);
 
 
 /* Pull-back uses 0.55 + ratio * (0.60 - 0.55), with progress capped only above 1.
@@ -841,7 +841,7 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     if (command->flags & 0x200) {
         angle = -angle;
     }
-    func_002DD688(angle);
+    sdfVuLoadRotationMatrixZ(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);

@@ -10332,7 +10332,7 @@ u32 effPollNamedFileJob(void) {
 }
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern void func_002DD688(f32);
+extern void sdfVuLoadRotationMatrixZ(f32);
 extern char D_003B3A90[], D_003B3AA8[];
 extern s8 sdfPadButtonStates[];
 extern f32 D_0038F530[4];
@@ -10386,7 +10386,7 @@ s32 effHandleDebugOrbitInput(void) {
             flags |= 2;
         }
         if (angle != 0.0f) {
-            func_002DD688(angle);
+            sdfVuLoadRotationMatrixZ(angle);
             VU0_LOAD_VF(vf10, vector);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, vector);

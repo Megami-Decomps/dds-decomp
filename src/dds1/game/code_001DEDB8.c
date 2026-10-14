@@ -541,7 +541,7 @@ void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose)
     btlBuildBattleUnitFramingCameraPose(command, pose, 27.5f);
 }
 
-extern void func_002DD688(f32 angle);
+extern void sdfVuLoadRotationMatrixZ(f32 angle);
 
 void btlPrepareUnitPoseWithTiltRotation(command, pose, out)
 BtlLinkedCommand *command;
@@ -551,9 +551,9 @@ BtlCamState *out;
     btlBuildBattleUnitFramingCameraPose(command, pose, 20.0f);
     btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
-        func_002DD688(-(20.0f * 0.017453293f));
+        sdfVuLoadRotationMatrixZ(-(20.0f * 0.017453293f));
     } else {
-        func_002DD688(20.0f * 0.017453293f);
+        sdfVuLoadRotationMatrixZ(20.0f * 0.017453293f);
     }
     VU0_STORE_VF(vf10, pose->direction);
     VU0_ROTATE_VEC(vf10, vf10);
@@ -1381,7 +1381,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     if (action->flags & 0x200) {
         angle = -angle;
     }
-    func_002DD688(angle);
+    sdfVuLoadRotationMatrixZ(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -1494,7 +1494,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         if (!(action->flags & 0x200)) {
             angle = -0.34906585f;
         }
-        func_002DD688(angle);
+        sdfVuLoadRotationMatrixZ(angle);
         VU0_LOAD_VF(vf10, dir);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, out->direction);
@@ -1908,9 +1908,9 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
     }
     if (mode == 0) {
         if (action->camera.direction[0] > 0.0f) {
-            func_002DD688(27.5f * 0.017453293f);
+            sdfVuLoadRotationMatrixZ(27.5f * 0.017453293f);
         } else {
-            func_002DD688(-(27.5f * 0.017453293f));
+            sdfVuLoadRotationMatrixZ(-(27.5f * 0.017453293f));
         }
     }
 
@@ -2028,7 +2028,7 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from,
     from->distance = length + selected->cameraRadius * selected->scale * 3.5f /
                               tanf(fov * 0.5f);
     btlCopyMotionTransform(to, from);
-    func_002DD688(-(45.0f * 0.017453293f));
+    sdfVuLoadRotationMatrixZ(-(45.0f * 0.017453293f));
     VU0_LOAD_VF(vf10, to->direction);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
@@ -2237,7 +2237,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     if (action->flags & 0x200) {
         angle = -angle;
     }
-    func_002DD688(angle);
+    sdfVuLoadRotationMatrixZ(angle);
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
@@ -4314,7 +4314,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
                     if (command->flags & 0x200) value[1] = -value[1];
-                    func_002DD688(value[1]);
+                    sdfVuLoadRotationMatrixZ(value[1]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -4326,7 +4326,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     break;
                 case 2:
                     if (command->flags & 0x200) value[1] = -value[1];
-                    func_002DD688(value[1]);
+                    sdfVuLoadRotationMatrixZ(value[1]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
@@ -7967,9 +7967,9 @@ void btlPlaceTripleFormationAroundMiddleActor(BtlTask *link, BtlUnit *first, Btl
         radius += 100.0f;
         if (i != 1) {
             if (i == 0) {
-                func_002DD688(2.094395f);
+                sdfVuLoadRotationMatrixZ(2.094395f);
             } else if (i == 2) {
-                func_002DD688(-2.094395f);
+                sdfVuLoadRotationMatrixZ(-2.094395f);
             }
             VU0_LOAD_VF(vf10, dir);
             VU0_ROTATE_VEC(vf10, vf10);
