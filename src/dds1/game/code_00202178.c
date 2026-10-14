@@ -1727,7 +1727,7 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
 
 /* With no unit, report phase 18/19 from the last eligible pair.
  * A qualifying first unit instead reports 15 when its inactive effect is ready. */
-s32 func_00206180(BtlUnit *unit) {
+s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleEffectState *effect = (BattleEffectState *)battle->effect;
     BtlUnit *node;
