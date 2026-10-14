@@ -9019,3 +9019,4 @@
 0x0020CEF8	btlUpdateDebugCameraFromPad	inferred	Requires battle flag 2 and a world camera; pad input saves alternating camera position/rotation slots or toggles a camera command assembled from both saved views, then mirrors active state into debug-menu descriptors. Paired body in DDS1 at 0x001FAE78.
 0x0012B0D0	fldDrawMapSlotAndSceneFlagGrid	inferred	Renders a 31-floor by 16-slot grid of map-slot values (GMC) beside room scene flags (HIT). Paired DDS1 body at 0x00128BB8.
 0x0012B2B8	fldDrawRoomModeAndObjectModeFlagGrid	inferred	Renders a 31-floor by 16-slot grid of room-mode flags (VIS) beside room-object-mode flags (ANM). Paired DDS1 body at 0x00128DA0.
+0x00291DD0	mnuSpawnMantraPanelSequence	inferred	Spawn the fixed endpoints and two eight-record mantra-panel sequences with three animated slots per record.
