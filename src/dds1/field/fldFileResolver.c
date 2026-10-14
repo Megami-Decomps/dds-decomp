@@ -7387,7 +7387,7 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
 }
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
-void func_00138910(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
+void fldAddAxisAlignedCollisionBoxVerticalFaces(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 index;
     f32 minX, minY, minZ, maxX, maxZ;
