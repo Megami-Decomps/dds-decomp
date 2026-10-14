@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+effObjApplyTransformParameters = 0x00112518; // type:func
 scrTestEntryFlagBit15 = 0x0026DB48; // type:func
 scrClearEntryFlagAtZeroBit0 = 0x0026DB70; // type:func
 scrTestEntryFlagAtZeroBit0 = 0x0026DB90; // type:func
@@ -9076,7 +9077,6 @@ dds3SelectOwnerWorldIndexSlot = 0x00111388; // type:func
 dds3RemoveObjectFromOwnerWorldIndex = 0x00111480; // type:func
 dds3LoadObjectResourceSlotIds = 0x00111E00; // type:func
 dds3RebuildObjectModelContext = 0x00112058; // type:func
-func_00112518 = 0x00112518; // type:func
 dds3SetObjectSlot1MoverCallback = 0x001129C8; // type:func
 dds3GetEffectObjectModelHolder = 0x00113230; // type:func
 effUpdateFadingModelTransform = 0x00114150; // type:func
