@@ -90,7 +90,6 @@ extern void effEnableRectangleBlur(void);
 extern void effDisableColorRectangle(void);
 extern void effDisableTexturedSquare(void);
 extern void effDisableRectangleBlur(void);
-extern u32 effGetCh72Work(void);
 extern void effEnableTexturedBlur(void);
 extern void effEnableFilterBlur(void);
 extern void effDisableFilterBlur(void);
@@ -493,7 +492,7 @@ void kwlnDrawSetCd0Triple(u32 positionSpread, u32 x, u32 y) {
 
 /* Save live filter-blur params; zero copies the staged body immediately. */
 void kwlnSetFilterBlurParameterTransition(s32 duration) {
-    D_003C2CA0 = *(EffBlurScatterParams *)effGetCh72Work();
+    D_003C2CA0 = effGetCh72Work()->params;
     D_003BD72C = 0;
     D_003BD72E = duration;
     if (duration == 0) {
