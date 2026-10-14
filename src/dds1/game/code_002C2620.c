@@ -300,7 +300,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *sdfCreateBorderedRectanglePacket();
+#include "sdf_bordered_rectangle_packet.h"
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
 void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 argument, s32 index, const char *command, s32 surfaceIndex) {
