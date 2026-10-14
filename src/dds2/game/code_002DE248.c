@@ -10984,8 +10984,6 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
     }
 }
 
-extern void effMiscQuatMultiplyVU();
-
 extern void camAimRotation();
 
 void effMultiplyQuatWithFlag(u8 *work) {

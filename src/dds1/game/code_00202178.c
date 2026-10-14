@@ -68,8 +68,6 @@ extern void btlSetUnitPosition(BtlUnit *, void *);
 
 extern void btlSetUnitRotation(BtlUnit *, void *);
 
-extern void effMiscQuatMultiplyVU(void);
-
 extern const s32 D_003A5D50[];
 
 extern AiSpecies *datEnemyAiRecords;

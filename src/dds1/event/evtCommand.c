@@ -98,8 +98,6 @@ void evtDestroySecondaryWorldNode(void);
 
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
-extern void effMiscQuatMultiplyVU(void);
-
 void evtScaleSlotByClampedMultiplier(void *unit, f32 value);
 
 s32 fldParseRoomNumberFromName(char *name);

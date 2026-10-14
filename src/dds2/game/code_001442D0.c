@@ -6,6 +6,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "fld_scene_ready_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
@@ -48,7 +49,6 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuatMultiplyVU(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
@@ -13,7 +14,6 @@ extern void scrSetIntegerReturnValue(s32);
 extern void ptyApplyEventPenalty(s32);
 
 extern void effMiscNormalizeVU(void);
-extern void effMiscQuatMultiplyVU(void);
 
 
 

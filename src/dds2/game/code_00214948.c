@@ -7419,8 +7419,6 @@ void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
     unit->status.flags = flags;
     unit->partyRecord.status &= 0x4000;
 }
-
-extern void effMiscQuatMultiplyVU(void);
 extern const s32 D_0041B4D0[];
 
 void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {

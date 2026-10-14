@@ -4683,7 +4683,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
-extern void effMiscQuatMultiplyVU(void);
 extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **table, SdfModel *model);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */

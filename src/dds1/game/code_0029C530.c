@@ -9164,8 +9164,6 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
 
 extern void camAimRotation(void *, void *);
 
-extern void effMiscQuatMultiplyVU(void);
-
 void effMultiplyQuatWithFlag(u8 *effect) {
     if ((((FileJob *)effect)->xformFlags & 0x60) != 0) {
         u128 quaternion;
