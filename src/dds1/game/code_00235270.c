@@ -7,6 +7,7 @@
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
+#include "evt_float_panel_row.h"
 #include "evt_pad.h"
 #include "evt_serialized_child.h"
 #include "sdf_vu_matrix.h"
@@ -2407,13 +2408,6 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023A968);
 void func_0023B1F8(void) {
 }
 
-typedef struct EvtFloatPanelRow {
-    u16 x;
-    u16 y;
-    s32 parameter;
-    const char *format;
-} EvtFloatPanelRow;
-
 /* This coordinate table is supplied by the ordinary data segment. */
 extern const u16 D_00368AE0[];
 extern const EvtFloatPanelRow D_00368AE8[4];
@@ -2450,7 +2444,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
     do {
         sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
             0x85C0 + (runtime->horizontalOffset << 4), row->y, 0xFF0080,
-            row->parameter, row->format));
+            row->commandIndex, row->format));
         ++row;
         ++i;
     } while (i != 4);
