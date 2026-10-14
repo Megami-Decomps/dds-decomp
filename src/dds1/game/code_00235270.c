@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
 #include "sdf_vu_matrix.h"
 

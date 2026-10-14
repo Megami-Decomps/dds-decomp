@@ -5,6 +5,7 @@
 #include "mnu_title_stream.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
+#include "evt_reload_viewer_api.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "mdl_motion_api.h"
@@ -957,7 +958,6 @@ extern u16 D_004372B2;
 extern u8 D_00423050[];
 extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
-extern void evtReloadEventViewer();
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32);
 
