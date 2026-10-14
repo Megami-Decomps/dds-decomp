@@ -18,6 +18,7 @@
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
+#include "btl_camera_pose_api.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
@@ -836,7 +837,6 @@ extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
 extern void func_001EF030(void *, void *);
 
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
@@ -845,7 +845,6 @@ extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlSelectActionCameraPose(BtlLinkedCommand *);
 extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);

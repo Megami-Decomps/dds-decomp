@@ -15,6 +15,7 @@
 #include "dat_command.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
+#include "btl_camera_pose_api.h"
 #include "btl_action.h"
 #include "btl_effect_table.h"
 #include "btl_unit_tasks.h"
@@ -256,7 +257,6 @@ extern void dds3ClearObjectFlags(s32, s32);
 extern struct SdfPoolNode *D_00380788[13][4];
 extern u8 D_003B6BD0[];
 
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 typedef struct BtlUnit BtlUnit;
 

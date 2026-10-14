@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "btl_camera_pose_api.h"
 #include "btl_camera_cursor.h"
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
@@ -235,8 +236,6 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s32 btlSetActorEffectParameter();
 
-
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 

@@ -29,6 +29,7 @@
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
+#include "btl_camera_pose_api.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_field_load_task_args.h"
@@ -84,8 +85,6 @@ extern u8 effSharedRandomState[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
 extern void func_001EF030(void *, void *);
-
-extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlSetDefaultActionCameraPose();
 
