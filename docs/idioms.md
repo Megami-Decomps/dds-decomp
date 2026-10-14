@@ -12485,3 +12485,27 @@ discarded expressions, fake variables or unrelated dead stores. The complete
 live unit gates `20 match, 0 differ`, including all 19 previously matched C
 functions and readonly data. Trace paths and exact pass locations are recorded
 in the agent ledger.
+
+## A field cursor over copied record banks
+
+DDS2 `mnuSpawnMantraPanelSequence` (00291DD0, 1668 bytes) snapshots one
+eight-byte table and two 32-byte tables before any callbacks. Each four-byte
+record has a signed halfword ID and a signed byte kind at offset2. Retail
+walks the kind field, loading the ID at−2 and the kind at0. A record-base
+iterator instead retains the copy destination across earlier calls through
+PRE, changing the cursor and register allocation.
+
+Derive the byte cursor from the complete actual array representation, recover
+the containing record for its ID, and read the real kind byte. Advance by the
+record size only when another row exists. This preserves defined access within
+the actual bank and gives retail's single cursor. Keep the second-bank snapshot
+used by its copy and traversal; the final kind read is the direct
+`secondRows[1].kind` member, while its ID comes from `initialRows[1]`.
+
+Keep the small external table's declaration unsized. Its native extent is
+still eight bytes and the local snapshot bounds the copy. A `[2]` external
+bound makes cc1 select a GP-small address; the unsized declaration gives
+retail's full address. Explicit builtin copies also preserve retail's table
+initialization order here; automatic local initializers reorder the first
+two copies. These are properties of the actual owners and accesses, not
+permission to invent a biased layout or an extra use.

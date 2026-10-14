@@ -824,7 +824,141 @@ void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *object, s32 selector
     mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
     mnuStorePanelEntry(0x20007, 20);
 }
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291DD0);
+/* Four-byte spawn records: signed lookup ID, signed slot kind, reserved byte. */
+typedef struct MantraPanelSpawnRecord {
+    s16 id;
+    s8 kind;
+    u8 pad03;
+} MantraPanelSpawnRecord;
+
+/* Keep the external bound unspecified: retail uses a full address here.
+ * The local two-record snapshot still copies the proven eight bytes. */
+extern const MantraPanelSpawnRecord D_00437958[];
+extern const MantraPanelSpawnRecord D_00427720[8];
+extern const MantraPanelSpawnRecord D_00427740[8];
+extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16 id);
+
+void mnuSpawnMantraPanelSequence(MnuStatusResource *object, s32 selector) {
+    MantraPanelSpawnRecord initialRows[2];
+    MantraPanelSpawnRecord firstRows[8];
+    MantraPanelSpawnRecord secondRows[8];
+    MantraPanelAnimation *animation;
+    s32 delay;
+    u32 row;
+    u16 panelId;
+    const u8 *cursor;
+    MantraPanelSpawnRecord *secondBank = secondRows;
+
+    __builtin_memcpy(initialRows, D_00437958, sizeof(initialRows));
+    __builtin_memcpy(firstRows, D_00427720, sizeof(firstRows));
+    __builtin_memcpy(secondBank, D_00427740, sizeof(secondRows));
+
+    panelId = (u16)initialRows[0].id;
+    mnuGetMantraPanelPositionRecord(initialRows[0].id);
+    mnuFindPanelPositionRecordByScriptId(selector, panelId);
+    animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, 0, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 1, 0);
+
+    animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, 20, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 3, 0);
+
+    animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, initialRows[0].kind, 80, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 8, 0);
+
+    delay = 0;
+    row = 0;
+    /* Retail walks the kind byte; recover the containing row for each ID.
+     * Start from the whole array representation and stop before advancing
+     * beyond its last row. */
+    cursor = (const u8 *)&firstRows + 2;
+    for (;;) {
+        const MantraPanelSpawnRecord *entry =
+            (const MantraPanelSpawnRecord *)(cursor - 2);
+        f32 oldDelay;
+        s32 interpolatedX;
+
+        panelId = (u16)entry->id;
+        row++;
+
+        mnuGetMantraPanelPositionRecord(entry->id);
+        mnuFindPanelPositionRecordByScriptId(selector, panelId);
+        animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, (s16)delay, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+        mnuQueuePanelAnimationTransition(animation, 1, 0);
+
+        oldDelay = (f32)delay;
+        interpolatedX = (s32)(oldDelay * 5.0f / 3.0f + 20.0f);
+        delay += 3;
+        animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, (s16)interpolatedX, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+        mnuQueuePanelAnimationTransition(animation, 3, 0);
+
+        animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, *(const s8 *)cursor, 80, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+        mnuQueuePanelAnimationTransition(animation, 8, 0);
+        if (row >= 8U) {
+            break;
+        }
+        cursor += sizeof(firstRows[0]);
+    }
+
+    delay = 0;
+    row = 0;
+    cursor = (const u8 *)secondBank + 2;
+    for (;;) {
+        const MantraPanelSpawnRecord *entry =
+            (const MantraPanelSpawnRecord *)(cursor - 2);
+        f32 oldDelay;
+        s32 interpolatedX;
+
+        panelId = (u16)entry->id;
+        row++;
+
+        mnuGetMantraPanelPositionRecord(entry->id);
+        mnuFindPanelPositionRecordByScriptId(selector, panelId);
+        animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, (s16)delay, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+        mnuQueuePanelAnimationTransition(animation, 1, 0);
+
+        oldDelay = (f32)delay;
+        interpolatedX = (s32)(oldDelay * 5.0f / 3.0f + 20.0f);
+        delay += 3;
+        animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, (s16)interpolatedX, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+        mnuQueuePanelAnimationTransition(animation, 3, 0);
+
+        animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, *(const s8 *)cursor, 80, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+        mnuQueuePanelAnimationTransition(animation, 8, 0);
+        if (row >= 8U) {
+            break;
+        }
+        cursor += sizeof(secondRows[0]);
+    }
+
+    panelId = (u16)initialRows[1].id;
+    mnuGetMantraPanelPositionRecord(initialRows[1].id);
+    mnuFindPanelPositionRecordByScriptId(selector, panelId);
+    animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, (s16)delay, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 1, 0);
+
+    {
+        f32 oldDelay = (f32)delay;
+        s32 interpolatedX = (s32)(oldDelay * 5.0f / 3.0f + 20.0f);
+        animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, 13, (s16)interpolatedX, 0, 0);
+    }
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 3, 0);
+
+    animation = mnuSpawnPanelSlotB(object->menu.resource, panelId, secondRows[1].kind, 80, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    mnuQueuePanelAnimationTransition(animation, 8, 0);
+    mnuStorePanelEntry(0x20006, 20);
+}
 
 void itfClearSelectionFlags(MnuStatusResource *object) {
     MantraMenuWork *state = &object->menu;
@@ -842,7 +976,7 @@ extern void mnuSpawnMantraShortLoopIconFadeIn(struct MantraDrawPool *pool);
 extern void mnuSpawnMantraShortLoopIconFadeOut(struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconAtPositionWithShortLoop(s32, s32, struct MantraDrawPool *pool);
 extern void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *, s32, u16);
-extern void func_00291DD0(MnuStatusResource *, s32);
+extern void mnuSpawnMantraPanelSequence(MnuStatusResource *, s32);
 extern void mnuHideMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuHideMantraTitle(struct MantraDrawPool *pool);
@@ -969,7 +1103,7 @@ play_selection_sound:
         sndSetSequenceVolumePan(4, 127, 63);
         return 0;
     case 14:
-        func_00291DD0(object, 0);
+        mnuSpawnMantraPanelSequence(object, 0);
         return 0;
     case 15:
         return 1;
