@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "eff_owner_bill_entry.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
@@ -223,7 +224,6 @@ s32 effObjUpdateOwnedVectorsAndState(EffectObj *obj) {
 struct BillObj;
 struct EffNode;
 
-extern u8 dds3TestObjectFlags(u32 unused, u32 flags);
 extern void billInvokeCallback(struct BillObj *bill);
 
 s32 effObjUpdateDependencies(EffectObj *obj) {
@@ -234,7 +234,7 @@ s32 effObjUpdateDependencies(EffectObj *obj) {
     if ((data->flags & 1) == 0) {
         return 1;
     }
-    if (dds3TestObjectFlags((u32)obj, 1)) {
+    if (dds3TestObjectFlags(obj, 1)) {
         return 1;
     }
 
