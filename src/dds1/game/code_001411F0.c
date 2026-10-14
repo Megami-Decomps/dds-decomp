@@ -3031,7 +3031,7 @@ void fldDrawTitleBanner(s32 x, s32 y) {
     }
 }
 
-extern s32 func_0014CAF8(void);
+extern s32 fldGetSparkDialogPhase(void);
 extern s16 *fldFindLocationCoordinateRecord(s32, s32);
 extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
     u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
@@ -3040,7 +3040,7 @@ void fldDrawLocationPanel(void) {
     FldAreaWork *work;
     u32 color;
 
-    if (func_0014CAF8() != 0) {
+    if (fldGetSparkDialogPhase() != 0) {
         return;
     }
     work = &fldAreaState;
@@ -3939,7 +3939,7 @@ void fldUpdateSparkSlots(void) {
     }
 }
 
-void func_0014BDF8(void) {
+void fldUpdateSparkSequence(void) {
     FldSparkSequence *sequence;
     s32 i;
     s32 slot;
@@ -4268,7 +4268,7 @@ void fldUpdateSparkMessageSequence(void) {
     }
 }
 
-s32 func_0014CAF8(void) {
+s32 fldGetSparkDialogPhase(void) {
     return D_003D62C8[0];
 }
 
@@ -4317,7 +4317,7 @@ void fldUpdateSparkEncounterScene(void) {
             }
         }
 
-        if (func_0014CAF8() == 0 && fldTestSceneControlFlags(0x40) != 0) {
+        if (fldGetSparkDialogPhase() == 0 && fldTestSceneControlFlags(0x40) != 0) {
             if (fldSparkControlState.countdown == 300) {
                 sndSetSequenceVolumePan(0x670017, 0x7F, 0x3F);
             }
@@ -4341,7 +4341,7 @@ void fldUpdateSparkEncounterScene(void) {
             fldClearObjectEntryHandles();
             fldReleaseWeatherEffects();
         } else {
-            func_0014BDF8();
+            fldUpdateSparkSequence();
         }
 
         if (fldSparkControlState.terminated != 0) {

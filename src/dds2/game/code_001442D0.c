@@ -3347,13 +3347,13 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     }
 }
 
-extern s32 func_00150F10(void);
+extern s32 fldGetSparkDialogPhase(void);
 extern s16 *fldFindLocationCoordinateRecord(s32, s32);
 
 void fldDrawLocationPanel(void) {
     u32 color;
 
-    if (func_00150F10() != 0) {
+    if (fldGetSparkDialogPhase() != 0) {
         return;
     }
     if (fldAreaState.unk118 == 1 || fldAreaState.deferredExit != 0) {
@@ -4310,7 +4310,7 @@ extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s3
 /* Draw the countdown, pickup total, and expanding pickup pulse. */
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DE8);
 
-void func_00150138(void) {
+void fldDrawSparkStatusOverlay(void) {
     s32 timerOrigins[10][2] = {
         {2, 2}, {21, 2}, {40, 2}, {59, 2}, {78, 2}, {97, 2},
         {2, 21}, {21, 21}, {40, 21}, {59, 21}
@@ -4437,7 +4437,7 @@ extern void effObjClearFlags(struct EffectObj *, u32);
 extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
 extern void fldSetCameraModelMotionRequest(u32, u32);
-extern void func_00150138(void);
+extern void fldDrawSparkStatusOverlay(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 
 void fldUpdateDevilizeEventSequence(void) {
@@ -4564,7 +4564,7 @@ void fldUpdateDevilizeEventSequence(void) {
         kwlnFadeOutStart(0xFF, 0xFF, 0xFF, 4);
         break;
     case 10:
-        func_00150138();
+        fldDrawSparkStatusOverlay();
         if (++fldSparkControlState.unk30 > 10) {
             effObjClearFlags(fldSparkControlState.object, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
@@ -4575,7 +4575,7 @@ void fldUpdateDevilizeEventSequence(void) {
         }
         break;
     case 7:
-        func_00150138();
+        fldDrawSparkStatusOverlay();
         fldSparkControlState.dialogPhase = 0;
         fldSparkControlState.phase = 1;
         fldPreparePlayerSceneCameraTarget();
@@ -4589,12 +4589,12 @@ void fldUpdateDevilizeEventSequence(void) {
 }
 
 
-s32 func_00150F10(void) {
+s32 fldGetSparkDialogPhase(void) {
     return fldSparkControlState.dialogPhase;
 }
 
 /* Update the spark encounter, its timeout dialog, and the return-to-field fade. */
-void func_00150F20(void) {
+void fldUpdateSparkEncounterScene(void) {
     s32 phase;
     s32 value;
 
@@ -4632,7 +4632,7 @@ void func_00150F20(void) {
             }
         }
 
-        if (func_00150F10() == 0 && fldTestSceneControlFlags(0x40) != 0) {
+        if (fldGetSparkDialogPhase() == 0 && fldTestSceneControlFlags(0x40) != 0) {
             if (fldSparkControlState.countdown == 300) {
                 sndSetSequenceVolumePan(0x680017, 0x7F, 0x3F);
             }
@@ -4641,7 +4641,7 @@ void func_00150F20(void) {
             }
         }
 
-        func_00150138();
+        fldDrawSparkStatusOverlay();
         if (fldSparkControlState.countdown < 31) {
             sndQueueSoundId(0x680017);
             fldSparkControlState.countdown = 0;
