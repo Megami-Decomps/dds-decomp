@@ -2531,7 +2531,73 @@ void btlRecordEscapeAttemptOutcome(BtlTask *task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001CFB10);
+extern u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value);
+
+/* Queue escape-result sounds and stagger eligible party effects; successful
+ * escapes also fade each eligible actor, with its identity as the task owner. */
+void func_001CFB10(BtlTask *task) {
+    BtlState *state = btlGetRuntime();
+    BtlUnit *unit;
+    BtlRuntimeTask *effect;
+    s32 delay;
+    u32 flags;
+
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
+    btlStartTask(btlCreateCommandSoundTask((s32)task, 0xF));
+    if (state->battleFlags & 0x2000) {
+        if (!btlCheckSpecialAbility(&task->unit->partyRecord, 0x230)) {
+            btlStartTask(btlCreateEffObjA(task->unit, task->indexWork.phase));
+        } else {
+            btlStartTask(btlCreateEffObjD(task->unit, 0x230));
+        }
+        delay = 0xF;
+        for (unit = state->units; unit; unit = unit->next) {
+            flags = unit->status.flags;
+            /* Retail tests these three admission bits independently. */
+            if (!(flags & 1)) continue;
+            if (!(flags & 0x200)) continue;
+            if (flags & 0xE0) continue;
+            if (btlTestActorStatusPredicate(unit)) continue;
+            effect = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0xD, 2, 1.0f);
+            effect->startDelay = delay;
+            btlStartTask(effect);
+            effect = (BtlRuntimeTask *)btlCreateUnitDefeatFadeOutTask((u8 *)unit, 6);
+            {
+                /* Capture the full-width owner before deriving the fade delay:
+                 * see docs/idioms.md, "Trace-justified staging: escape-result task metadata". */
+                u64 ownerId = unit->identity;
+                s32 fadeDelay = delay + 0xE;
+                effect->ownerId = ownerId;
+                effect->startDelay = fadeDelay;
+            }
+            btlStartTask(effect);
+            delay++;
+        }
+    } else {
+        delay = 7;
+        btlStartTask(btlCreateEffObjA(task->unit, task->indexWork.phase));
+        for (unit = state->units; unit; unit = unit->next) {
+            flags = unit->status.flags;
+            if (!(flags & 1)) continue;
+            if (!(flags & 0x200)) continue;
+            if (flags & 0xE0) continue;
+            if (btlTestActorStatusPredicate(unit)) continue;
+            effect = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, 0xD, 2, 1.0f);
+            effect->startDelay = delay++;
+            btlStartTask(effect);
+        }
+        /* Retail passes the exhausted (null) traversal cursor to this effect. */
+        effect = btlCreateEffObjB(unit, 0xA8);
+        effect->startDelay = delay + 0xA;
+        btlStartTask(effect);
+    }
+    if ((task->unit->partyRecord.status & 0x480) && !(state->battleFlags & 0x2000)) {
+        btlDispatchStateHandler(task, 0x18);
+    } else {
+        btlDispatchStateHandler(task, 0x1A);
+    }
+}
 
 /* Empty entry callback for the retail BAD DAMAGE action state. */
 void btlEnterStatusDamageState(void) {
