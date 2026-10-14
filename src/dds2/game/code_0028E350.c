@@ -1,10 +1,10 @@
 #include "common.h"
 #include "dat_state.h"
 #include "mnu_list.h"
+#include "prf_profile_cap.h"
 #include "mnu_mantra.h"
 
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
-extern u32 ptyGetProfileRecordCap(u16);
 extern DatProfileRecord *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 struct MantraPanelAnimation;
 extern struct MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
