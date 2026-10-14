@@ -94,7 +94,6 @@ extern s16 evtSkyTransitionTargetValue;
 /* Native 0x2490-byte viewer runtime shared by dialogs, task polls and file writers. */
 
 
-extern void fldApplyCameraColorKeyWords(EvtRuntime *runtime, const EvtBlendKey *source);
 
 typedef struct {
     s16 enabled;
@@ -1476,7 +1475,6 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
 extern char D_003BC240[]; /* "P%d:" */
 extern char D_003BC248[]; /* "   %s" */
-extern EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *runtime);
 
 void evtViewerDrawPendingNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EffWorldNode *node;

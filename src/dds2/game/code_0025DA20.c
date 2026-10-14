@@ -240,7 +240,6 @@ void mnuCampDestroyAllTasks(void) {
 /* Event-viewer timeline data and the camp/shop state that owns those tracks. */
 
 
-extern void fldApplyCameraColorKeyWords(EvtRuntime *scene, const EvtBlendKey *source);
 
 /* Shift the selected track's frames; values exactly at the upper limit are kept. */
 void mnuShopScrollList(EvtRuntime *scene, s32 delta) {

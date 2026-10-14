@@ -87,7 +87,6 @@ extern s32 effEventAdvanceSolidRectangleSetup(void);
 /* Native 0x24BC-byte viewer runtime shared by dialogs, task polls and file writers. */
 
 
-extern void fldApplyCameraColorKeyWords(EvtRuntime *runtime, const EvtBlendKey *source);
 extern s32 effUpdateCh72Params(void);
 extern s32 effEventAdvanceBlurTemplateSetup(void);
 extern s32 effEventAdvanceScatterBlurSetup(void);
@@ -1572,7 +1571,6 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
 extern char D_004376A8[]; /* "P%d:" */
 extern char D_004376B0[]; /* "   %s" */
-extern EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *runtime);
 
 /* The pending-node's signed slot indices begin at +0xC (also used in DDS1). */
 void evtViewerDrawPendingNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
