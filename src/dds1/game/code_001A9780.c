@@ -6957,7 +6957,7 @@ typedef s32 SceneSlotCoordinate[3];
 extern const BattlePanelColors D_003A3130;
 extern const SceneSlotCoordinate D_003A3140[8];
 extern const SceneSlotCoordinate D_003A31A0[8];
-extern void func_001C27B0(EffectSlotSet *, s32, s32, s32, s32, s32, s32);
+extern void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *, s32, s32, s32, s32, s32, s32);
 
 /* Draw enabled bank-selected slot-order sprites with their current colors and scales. */
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3130);
@@ -7047,11 +7047,11 @@ void btlDrawActorSlotOrder(void) {
         }
         case 4:
         case 5:
-            func_001C27B0(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 0);
-            func_001C27B0(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 1);
@@ -7066,11 +7066,11 @@ void btlDrawActorSlotOrder(void) {
                           coordinates[index][1] << 3,
                           0, colors, 0, btlResourceBlock->resC,
                           coordinates[index][2], 0x53);
-            func_001C27B0(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 0);
-            func_001C27B0(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 1);
@@ -7082,7 +7082,7 @@ void btlDrawActorSlotOrder(void) {
 extern const u32 D_003A3220[4];
 
 /* Draw one bank-selected secondary actor slot, rereading offsets after scaling. */
-void func_001C27B0(EffectSlotSet *work, s32 entry, s32 x, s32 y,
+void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *work, s32 entry, s32 x, s32 y,
                    s32 bank, s32 row, s32 variant) {
     u32 colors[4];
     s32 channel;
