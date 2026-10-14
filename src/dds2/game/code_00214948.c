@@ -4681,7 +4681,7 @@ extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f3
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAF8);
 
-void func_0021F848(ActionStateLink *actor, BtlUnit *target, u64 handle, u64 unused) {
+void btlScheduleCherunShadowSkillPresentation(ActionStateLink *actor, BtlUnit *target, u64 handle, u64 unused) {
     BtlUnit *boss;
     BtlState *battle;
     BtlUnit *unit;
