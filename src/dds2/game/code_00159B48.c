@@ -12,6 +12,7 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
+#include "bill_linked_value.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
@@ -240,13 +241,6 @@ s32 billGetKindOneEntry(BillObj *effect) {
     }
     return 0;
 }
-
-/* Kind-one payload's +4 link leads to another +4 value word. */
-typedef struct BillLinkedValue {
-    s32 unk00;
-    s32 value;
-} BillLinkedValue;
-
 
 s32 billGetLinkedChildValue(s32 billboard) {
     if (((BillObj *)billboard)->kind == 1) {
