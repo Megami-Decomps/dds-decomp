@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "itf_color_panel_row.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
@@ -542,14 +543,7 @@ typedef struct ItfColorPanelWork {
     u8 pad08[8];
 } ItfColorPanelWork;
 
-typedef struct ItfColorPanelRow {
-    const char *title;
-    s32 highlight;
-} ItfColorPanelRow;
-
 typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
-
-typedef char ItfColorPanelRowSizeCheck[sizeof(ItfColorPanelRow) == 8 ? 1 : -1];
 
 extern ItfColorPanelWork D_00452E90;
 
