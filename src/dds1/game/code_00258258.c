@@ -3,10 +3,10 @@
 #include "sdf_task_work.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_profile_progress.h"
+#include "prf_profile_cap.h"
 #include "mnu_scene_work.h"
 #include "sdf_grid.h"
 
-extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 
 
