@@ -7,6 +7,7 @@
 #include "eff_resource_slots.h"
 #include "mnu_input.h"
 #include "kwln.h"
+#include "pty_skill_menu_api.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"
 #include "sdf_resource.h"

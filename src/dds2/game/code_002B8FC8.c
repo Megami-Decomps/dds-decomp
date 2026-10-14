@@ -9,6 +9,7 @@
 #include "eff_resource_records.h"
 #include "mnu_input.h"
 #include "kwln.h"
+#include "pty_skill_menu_api.h"
 #include "mnu_list.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -542,10 +543,6 @@ void mnuSwapPartySkillSlots(DatPartyRecord *party, s32 firstSlot, s32 secondSlot
 
 /* First confirm stores a slot; a different second slot swaps and rebuilds.
  * Cancel clears the saved slot, opening the exit popup only if none was saved. */
-void ptySkillMenuHandleSlotReorder(s32 callback);
-
-s32 ptySkillMenuUpdate(s32 callback);
-
 typedef struct MenuPanelBlock {
     u32 word[14];
 } MenuPanelBlock;
@@ -578,8 +575,6 @@ s32 ptySkillMenuHandleFieldUse(s32 callback);
 s32 ptySkillMenuOpenSelectedSkillPage(s32 callback);
 
 s32 ptySkillMenuDispatchConfirmRequest(s32 callback);
-
-s32 ptySkillMenuOpenPartyPage(s32 callback);
 
 u32 ptySkillMenuClosePartyPage(u32 callback);
 

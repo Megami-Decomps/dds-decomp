@@ -13,6 +13,7 @@
 #include "dat_state.h"
 #include "prf_skill_list_buffer.h"
 #include "kwln.h"
+#include "pty_skill_menu_api.h"
 #include "eff.h"
 #include "itf.h"
 #include "sdf_chip.h"
@@ -1664,7 +1665,6 @@ s32 mnuCloseItemSelectionState(KwlnTask *contextArg) {
 extern u8 D_0037CC58[];
 extern u8 D_0037CC90[];
 extern u8 D_0037CC20[];
-extern s32 ptySkillMenuBuildEquippedSlots(s32, KwlnTask *);
 
 s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(callback);
