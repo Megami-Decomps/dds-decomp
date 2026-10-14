@@ -15,6 +15,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_matrix4.h"
 #include "eff_active_resource.h"
 #include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
@@ -484,14 +485,6 @@ extern u32 D_00438774;
 
 
 extern u32 effSharedTextureReferenceCount;
-
-/* 4x4 float matrix with 128-bit row access for VU0/DMA transfers. */
-typedef struct Matrix4 {
-    union {
-        float m[4][4];
-        s128 rows[4];
-    } u; // 0x00
-} Matrix4; // 0x40
 
 extern void effAssetQueueRelease(EffPointSet *);
 extern void effDrawFourPointGroups(EffPointSet *, Matrix4 *);
