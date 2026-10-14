@@ -74,7 +74,7 @@ INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427258);
 
 INCLUDE_ASM(const s32, "game/code_0028E568", func_0028E858);
 
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028EB38);
+INCLUDE_ASM(const s32, "game/code_0028E568", mnuAdvanceMantraSelectionCursor);
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427278);
 
