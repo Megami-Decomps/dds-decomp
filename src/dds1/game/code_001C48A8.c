@@ -1754,7 +1754,7 @@ s32 fldGetSceneGroupEntry(s32 entryIndex) {
 extern s32 func_001A8188(void);
 
 /* Advance one scene group task after both scene gates have opened. */
-void func_001C8330(void) {
+void fldAdvanceSceneGroupScheduler(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     BtlTask *task;
 
