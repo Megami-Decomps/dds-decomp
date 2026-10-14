@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "eff_pcp_paired_event_row.h"
 #include "eff_pcp_drift_event_row.h"
 #include "eff_packet_params.h"
 #include "eff_pcp_fade_timer.h"
@@ -5031,18 +5032,9 @@ typedef struct EffPCPPairedEventParams {
     EffThunderFragmentParams fragmentParams;
 } EffPCPPairedEventParams;
 
-typedef struct EffPCPPairedEvent {
-    EffThunderFragmentWork *fragment;
-    EffEventWork *eventA, *eventB;
-    f32 phase, radius;
-    f32 tilt;
-    f32 tiltStep;
-    s32 frame;
-} EffPCPPairedEvent;
-
 typedef struct EffPCPPairedEventWork {
     EffPCPPairedEventParams params;
-    EffPCPPairedEvent *entries;
+    EffPCPPairedEventRow *entries;
     SoundMixer *ownerA, *ownerB;
     u8 unk98;
     u8 pad99[3];
@@ -5056,12 +5048,12 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPPairedEvent *entry;
+    EffPCPPairedEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPPairedEvent *)(work + 1);
+    entry = (EffPCPPairedEventRow *)(work + 1);
     work->handle = handle;
     work->entries = entry;
     work->color = 0x80808080;
@@ -5110,12 +5102,12 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPPairedEvent *entry;
+    EffPCPPairedEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPPairedEvent *)(work + 1);
+    entry = (EffPCPPairedEventRow *)(work + 1);
     work->handle = handle;
     work->entries = entry;
     work->color = 0x80808080;
@@ -5149,7 +5141,7 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
 void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
-    EffPCPPairedEvent *entry = work->entries;
+    EffPCPPairedEventRow *entry = work->entries;
 
     if (count != 0) {
         do {
@@ -5173,7 +5165,7 @@ void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
 /* Randomises slot `index`: phase spread evenly around a full turn, jittered
  * radius, and a tiltStep whose sign is picked at random. */
 void effPcpRandomizeSlot(EffPCPPairedEventWork *work, s32 index) {
-    EffPCPPairedEvent *slot;
+    EffPCPPairedEventRow *slot;
     f32 spread;
 
     slot = &work->entries[index];
@@ -5205,7 +5197,7 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
     s32 delaySpread;
     u32 count;
     u32 color;
-    EffPCPPairedEvent *entry;
+    EffPCPPairedEventRow *entry;
     u32 i;
     s32 frame;
 
