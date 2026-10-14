@@ -4033,7 +4033,7 @@ void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
     }
 }
 
-void func_001B7880(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+void btlAdvanceReservePanelPresentation(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
     switch (work->reserveEntries[slot].presentation.presentationState) {
@@ -4234,7 +4234,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
                 btlUpdateActorVitalPulseTrail(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
             }
 
-            func_001B7880(unit, work, i);
+            btlAdvanceReservePanelPresentation(unit, work, i);
             btlDrawReservePanelPulse(unit, work, i);
 
             if ((unit->partyRecord.flags & 0x1000) == 0) {
