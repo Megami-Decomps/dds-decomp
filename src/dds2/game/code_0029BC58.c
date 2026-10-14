@@ -164,7 +164,64 @@ s32 itfRunPanelMode2(KwlnTask *request) {
     return menuSetHandler(panel, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", brsAnimateSkillIconRows);
+/* Step the result screen's skill-icon rows: the lead row fades in with the
+ * panel and releases the four following rows, which slide in (+0x20 opacity
+ * per frame), hold for ten frames and fade back out. */
+void brsAnimateSkillIconRows(BrsSkillPackageWork *work) {
+    s32 weight = 0x100 - work->fadeProgress;
+    s32 positions[5][2] = { { 12, 54 }, { 11, 53 }, { 11, 55 }, { 13, 53 }, { 13, 55 } };
+    s32 i;
+
+    switch (work->leadIconRow.count) {
+    case 2:
+        break;
+    case 0:
+        work->leadIconRow.x = 12;
+        work->leadIconRow.y = 54;
+        work->leadIconRow.opacity =
+            uiBlendColors(0x80808080, 0x80808000, weight) & 0xFF;
+        if (work->leadIconRow.opacity >= 0x40) {
+            for (i = 0; i < 4; i++) {
+                if (work->followIconRows[i].count == 0 && work->followIconRows[i].unk04 == 0) {
+                    work->followIconRows[i].count = 1;
+                }
+            }
+        }
+        if (work->leadIconRow.opacity >= 0x80) {
+            work->leadIconRow.count = 1;
+        }
+        break;
+    case 1:
+        work->leadIconRow.count++;
+        break;
+    }
+    for (i = 0; i < 4; i++) {
+        switch (work->followIconRows[i].count) {
+        case 1:
+            work->followIconRows[i].x = positions[i][0];
+            work->followIconRows[i].y = positions[i][1];
+            work->followIconRows[i].opacity += 0x20;
+            work->followIconRows[i].opacity = (work->followIconRows[i].opacity <= 0) ? 0 : (work->followIconRows[i].opacity >= 0x100) ? 0xFF : work->followIconRows[i].opacity;
+            if (work->followIconRows[i].opacity >= 0xFF) {
+                work->followIconRows[i].count++;
+            }
+            work->followIconRows[i].unk04 = 0;
+            break;
+        case 2:
+            if (++work->followIconRows[i].unk04 >= 10) {
+                work->followIconRows[i].count++;
+            }
+            break;
+        case 3:
+            work->followIconRows[i].opacity -= 0x20;
+            work->followIconRows[i].opacity = (work->followIconRows[i].opacity <= 0) ? 0 : (work->followIconRows[i].opacity >= 0x100) ? 0xFF : work->followIconRows[i].opacity;
+            if (work->followIconRows[i].opacity <= 0) {
+                work->followIconRows[i].count = 0;
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029BC58", brsPackProgressPanelColor);
 

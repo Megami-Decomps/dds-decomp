@@ -411,7 +411,64 @@ s32 itfRunPanelMode2(KwlnTask *request) {
     return menuRunPanel(panel, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", brsAnimateSkillIconRows);
+/* Step the result screen's skill-icon rows: the lead row fades in with the
+ * panel and releases the four following rows, which slide in (+0x20 opacity
+ * per frame), hold for ten frames and fade back out. */
+void brsAnimateSkillIconRows(BrsSkillPackageWork *work) {
+    s32 weight = 0x100 - work->fadeProgress;
+    s32 positions[5][2] = { { 12, 54 }, { 11, 53 }, { 11, 55 }, { 13, 53 }, { 13, 55 } };
+    s32 i;
+
+    switch (work->leadIconRow.count) {
+    case 2:
+        break;
+    case 0:
+        work->leadIconRow.x = 12;
+        work->leadIconRow.y = 54;
+        work->leadIconRow.opacity =
+            uiBlendColors(0x80808080, 0x80808000, weight) & 0xFF;
+        if (work->leadIconRow.opacity >= 0x40) {
+            for (i = 0; i < 4; i++) {
+                if (work->followIconRows[i].count == 0 && work->followIconRows[i].unk04 == 0) {
+                    work->followIconRows[i].count = 1;
+                }
+            }
+        }
+        if (work->leadIconRow.opacity >= 0x80) {
+            work->leadIconRow.count = 1;
+        }
+        break;
+    case 1:
+        work->leadIconRow.count++;
+        break;
+    }
+    for (i = 0; i < 4; i++) {
+        switch (work->followIconRows[i].count) {
+        case 1:
+            work->followIconRows[i].x = positions[i][0];
+            work->followIconRows[i].y = positions[i][1];
+            work->followIconRows[i].opacity += 0x20;
+            work->followIconRows[i].opacity = (work->followIconRows[i].opacity <= 0) ? 0 : (work->followIconRows[i].opacity >= 0x100) ? 0xFF : work->followIconRows[i].opacity;
+            if (work->followIconRows[i].opacity >= 0xFF) {
+                work->followIconRows[i].count++;
+            }
+            work->followIconRows[i].unk04 = 0;
+            break;
+        case 2:
+            if (++work->followIconRows[i].unk04 >= 10) {
+                work->followIconRows[i].count++;
+            }
+            break;
+        case 3:
+            work->followIconRows[i].opacity -= 0x20;
+            work->followIconRows[i].opacity = (work->followIconRows[i].opacity <= 0) ? 0 : (work->followIconRows[i].opacity >= 0x100) ? 0xFF : work->followIconRows[i].opacity;
+            if (work->followIconRows[i].opacity <= 0) {
+                work->followIconRows[i].count = 0;
+            }
+            break;
+        }
+    }
+}
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 extern const u32 D_003AFB20[4]; /* Shared with mnuDrawTitleFadeSprites. */
@@ -426,14 +483,14 @@ void mnuDrawItemPanelStatusIcons(BrsSkillPackageWork *work) {
     BrsSkillIconRow *rows;
 
     memcpy(colors, D_003AFB20, sizeof(colors));
-    value = work->skillIconRows[0].opacity | 0x80808000;
+    value = work->leadIconRow.opacity | 0x80808000;
     colors[0] = value;
     colors[1] = value;
     colors[2] = value;
     colors[3] = value;
-    effDrawSpriteWithCornerColors(work->skillIconRows[0].x << 4,
-        work->skillIconRows[0].y << 3, 0, colors, 0, work->teardownResource, 0x1D, 0x53);
-    rows = work->skillIconRows;
+    effDrawSpriteWithCornerColors(work->leadIconRow.x << 4,
+        work->leadIconRow.y << 3, 0, colors, 0, work->teardownResource, 0x1D, 0x53);
+    rows = &work->leadIconRow; /* rows[1] is followIconRows[0]. */
     value = rows[1].count;
     if (value >= 4) {
         return;
