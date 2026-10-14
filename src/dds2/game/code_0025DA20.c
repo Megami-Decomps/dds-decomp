@@ -137,7 +137,7 @@ extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
 
 extern s32 dspCloseChannel(void);
 
-extern void evtReleaseResourcePairHandle();
+extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
@@ -1337,26 +1337,26 @@ void mnuShopLoadSpriteAssets(MenuTerminalContext *scene) {
 }
 
 
-extern void evtLoadResourcePair();
+extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 extern void evtCreateMessageWindowIfMissing();
 
 void mnuShopLoadMessageResource(MenuTerminalContext *scene) {
     scene->type = D_003C9A40[scene->shopRow].messageSet;
     switch (scene->type) {
     case 0:
-        evtLoadResourcePair("/facility/msg/shop/mes_01.bmd", scene->messageResources);
+        evtLoadResourcePair("/facility/msg/shop/mes_01.bmd", &scene->messageResources);
         break;
     case 1:
-        evtLoadResourcePair("/facility/msg/shop/mes_02.bmd", scene->messageResources);
+        evtLoadResourcePair("/facility/msg/shop/mes_02.bmd", &scene->messageResources);
         break;
     case 2:
-        evtLoadResourcePair("/facility/msg/shop/mes_03.bmd", scene->messageResources);
+        evtLoadResourcePair("/facility/msg/shop/mes_03.bmd", &scene->messageResources);
         break;
     case 3:
-        evtLoadResourcePair("/facility/msg/shop/mes_04.bmd", scene->messageResources);
+        evtLoadResourcePair("/facility/msg/shop/mes_04.bmd", &scene->messageResources);
         break;
     }
-    evtCreateMessageWindowIfMissing(scene->messageResources[1]);
+    evtCreateMessageWindowIfMissing(scene->messageResources.dataAddress);
 }
 
 
@@ -1684,7 +1684,7 @@ void mnuTerminalReleaseContextAndResources(KwlnTask *arg) {
         mnuShopReleaseSceneObjects(scene);
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
-        evtReleaseResourcePairHandle(scene->messageResources);
+        evtReleaseResourcePairHandle(&scene->messageResources);
         sdfReleaseResourceAllocation(scene->resourceHandle);
         mnuPanelTaskCompletionState = 2;
     }

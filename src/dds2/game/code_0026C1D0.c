@@ -198,7 +198,7 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
 void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
     u32 handle;
 
-    handle = (u32)sdfReadNamedResource((const char *)(u32)resourceId, &record->unk04, 0);
+    handle = (u32)sdfReadNamedResource((const char *)(u32)resourceId, &record->dataAddress, 0);
     record->handle = handle;
 }
 

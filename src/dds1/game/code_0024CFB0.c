@@ -444,16 +444,16 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
 }
 
 /* Store the resource handle in word zero and the loader's data address in word one. */
-void evtLoadResourcePair(u32 resourceId, u32 *record) {
+void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
     u32 handle;
 
-    handle = (u32)sdfReadNamedResource((const char *)(u32)resourceId, record + 1, 0);
-    *record = handle;
+    handle = (u32)sdfReadNamedResource((const char *)(u32)resourceId, &record->dataAddress, 0);
+    record->handle = handle;
 }
 
 /* Release the handle without clearing either word of the caller's record. */
-void evtReleaseResourcePairHandle(u32 *record) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*record));
+void evtReleaseResourcePairHandle(EvtResourcePair *record) {
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)record->handle);
 }
 
 /* Create the singleton message window only when its handle is negative.
