@@ -75,7 +75,7 @@ extern s64 mnuGetSoundBufferStateLocked(void);
 
 extern void sdfVuLoadRotationMatrixY(f32);
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 
 extern u8 effSharedRandomState[];
 
@@ -3128,7 +3128,7 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                     VU0_LOAD_VF(vf11, pose->position);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
-                    func_003364B8(value[0]);
+                    sdfVuLoadRotationMatrixX(value[0]);
                     VU0_LOAD_VF(vf10, pose->direction);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);

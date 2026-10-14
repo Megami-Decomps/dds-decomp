@@ -830,7 +830,7 @@ void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
     }
 }
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
@@ -842,7 +842,7 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_003364B8(f32);
+extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
@@ -1058,7 +1058,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         }
         if (btlIsSpecialActorCategory((s32)action) != 0) {
             btlBuildBattleUnitFramingCameraPose(action, &action->camera, 0.0f);
-            func_003364B8(-(10.0f * 0.017453293f));
+            sdfVuLoadRotationMatrixX(-(10.0f * 0.017453293f));
             VU0_STORE_VF_UNCLOBBERED(vf10, action->camera.direction);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF(vf10, action->camera.direction);
