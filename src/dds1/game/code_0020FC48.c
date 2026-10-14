@@ -4,6 +4,7 @@
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -1314,7 +1315,7 @@ void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s
                          depth, 0);
 }
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
 #include "sdf_packet_alloc.h"
 
@@ -1335,7 +1336,7 @@ void btlDrawScaledFrameBufferQuad(SdfListHead *list, s32 primitive, s32 color, f
 
     packet = (void *)sdfAllocPacketAligned(0x20);
     index = kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary(list, (u32)(kwlnFrameDrawPacketRecords + index * 0x1F40), (SdfDmaNode *)packet);
+    sdfAppendDmaPrimary(list, (u32)(kwlnFrameDrawPacketRecords[index].baseBytes), (SdfDmaNode *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1384,7 +1385,7 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
@@ -1419,7 +1420,7 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
     tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
 }
 
