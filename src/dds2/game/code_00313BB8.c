@@ -240,7 +240,7 @@ void ptySelectProfileStage(DatPartyRecord *work) {
     }
 }
 
-extern void func_00314868(DatPartyRecord *, u16);
+extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void mtrMantraSetBit(DatPartyRecord *);
 extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *);
 
@@ -292,7 +292,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
         profileId = D_004052A8[presetIndex].profileIds[selectedGroup][i];
         if (profileId != 0) {
             selectedProfileId = profileId;
-            func_00314868(unit, selectedProfileId);
+            ptyApplyProfile(unit, selectedProfileId);
             ptySetSecondaryProfileFlag(unit, selectedProfileId);
         }
     }
@@ -361,7 +361,7 @@ void ptyRebuildProfileSkills(s32 mode, DatPartyRecord *unit) {
         profile = ptyGetCurrentProfileId(unit);
         profileId = profile;
         if (profile != 0 && ptyTestPrimaryProfileFlag(unit, profileId) == 0) {
-            func_00314868(unit, profileId);
+            ptyApplyProfile(unit, profileId);
             memset(&list, 0, sizeof(list));
             prfBuildRawSkillList(profileId, &list);
             if (list.count != 0) {
@@ -559,7 +559,7 @@ void scrClearProfileFlagsTable(void) {
     memset(datGameState->mantraBits, 0, sizeof(datGameState->mantraBits));
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314868);
+INCLUDE_ASM(const s32, "game/code_00313BB8", ptyApplyProfile);
 
 /* Test the first bit of the decoded profile flag pair for this unit. */
 s32 ptyTestPrimaryProfileFlag(DatPartyRecord *work, u16 id) {

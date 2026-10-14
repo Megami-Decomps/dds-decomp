@@ -9,7 +9,7 @@ extern DatProfileRecord *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 struct MantraPanelAnimation;
 extern struct MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
 extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
-extern void func_00314868(DatPartyRecord *, u16);
+extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void mnuStorePanelEntry(s32, s32);
 
 static inline u16 *mantraFlagEntry(MantraFlagResource *work, s32 id) {
@@ -40,7 +40,7 @@ void mnuApplyMantraUnlockToPartyList(MnuStatusResource *resource, u16 id) {
                 *selected = (*selected & 0xFFF0) | 0x901;
                 profile = ptyGetProfileRecordPointer(party, id);
                 profile->value = ptyGetProfileRecordCap(id);
-                func_00314868(party, id);
+                ptyApplyProfile(party, id);
             } else {
                 MantraNodePos **neighbors;
                 MantraNodePos *neighbor;

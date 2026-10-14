@@ -43,6 +43,7 @@
 #include "btl_unit_tasks.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "eff_transform.h"
 #include "eff_object.h"
 #include "mdl.h"
@@ -127,8 +128,6 @@ extern u32 kwlnDrawControlFlags;
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
-
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s64 btlForceReleaseTintTransition(const BtlTintReleaseArgs *args);
 

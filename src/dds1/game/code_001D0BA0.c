@@ -39,6 +39,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "btl_action.h"
@@ -143,7 +144,6 @@ typedef struct SoundTask {
 } SoundTask;
 
 extern SndPad D_00324510;
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern u32 kwlnDrawControlFlags;
 

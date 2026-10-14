@@ -11,7 +11,7 @@ extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32)
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
-extern void func_00314868(DatPartyRecord *, u16);
+extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
 
 const char D_00425F30[] = "*****************[mtrMantraSetBit():[0x%x]]*****************\n";
@@ -32,7 +32,7 @@ void mtrMantraSetBit(DatPartyRecord *record) {
             scrSetEntryLowFlags(record, i, work->flags[i]);
             if ((node->selector.packed & 0x10F) == 0x102 && ((work->flags[i] >> 8) & 1)) {
                 *ptyGetProfileRecordPointer(record, node->id) = ptyGetProfileRecordCap(node->id);
-                func_00314868(record, node->id);
+                ptyApplyProfile(record, node->id);
             }
         }
         evtReleaseMantraSelectionWork(work);
