@@ -416,14 +416,15 @@ typedef struct Entry4 {
 
 typedef struct EvtScriptContext {
     u16 stateFlags;      /* 0x00 */
-    u16 pad02;
-    s32 third;           /* 0x04 */
-    s32 first;           /* 0x08 */
-    s32 second;          /* 0x0C */
-    s32 result;          /* 0x10 */
+    u16 pad02;           /* 0x02 opaque */
+    s32 commandIndex;    /* 0x04 */
+    s32 firstArgument;   /* 0x08 */
+    s32 secondArgument;  /* 0x0C */
+    s32 returnValue;     /* 0x10 */
     u16 options;         /* 0x14 */
-    u8 pad16[2];
+    u8 pad16[2];         /* 0x16 opaque */
 } EvtScriptContext;
+typedef char EvtScriptContextSizeCheck[sizeof(EvtScriptContext) == 0x18 ? 1 : -1];
 
 extern PtyRosterValueRecord D_0032AEA8[];
 extern Entry4 D_0032AEE8[];
@@ -1297,15 +1298,15 @@ s32 evtClearRandomStatusFlags(void) {
 extern s32 scrStartProcessProcedure(ScrData *context, s32 procedureIndex);
 
 /* Step the script with these context values; clear the written flag, not the stored result. */
-s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 options) {
+s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options) {
     scrStartProcessProcedure(evtWorkScriptTask, script);
-    ((EvtScriptContext *)D_003C2E70)->third = third;
-    ((EvtScriptContext *)D_003C2E70)->first = first;
-    ((EvtScriptContext *)D_003C2E70)->second = second;
+    ((EvtScriptContext *)D_003C2E70)->commandIndex = commandIndex;
+    ((EvtScriptContext *)D_003C2E70)->firstArgument = firstArgument;
+    ((EvtScriptContext *)D_003C2E70)->secondArgument = secondArgument;
     ((EvtScriptContext *)D_003C2E70)->options = options;
     ((EvtScriptContext *)D_003C2E70)->stateFlags &= EVT_RESULT_RESET_MASK;
     bfStepContext(evtWorkScriptTask);
-    return ((EvtScriptContext *)D_003C2E70)->result;
+    return ((EvtScriptContext *)D_003C2E70)->returnValue;
 }
 
 /* Create the script task and clear its separate 24-byte context. */
@@ -1356,7 +1357,7 @@ s32 evtPushSecondRosterMaximumHp(void) {
 extern u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
-    s8 statIndex = datCommandSelectors[((EvtScriptContext *)D_003C2E70)->third].stat;
+    s8 statIndex = datCommandSelectors[((EvtScriptContext *)D_003C2E70)->commandIndex].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -1368,10 +1369,10 @@ s32 evtPushFirstRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->first, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->firstArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->first, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->firstArgument, statIndex);
         }
         break;
     }
@@ -1381,7 +1382,7 @@ s32 evtPushFirstRosterSelectedStat(void) {
 
 /* Push the second entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushSecondRosterSelectedStat(void) {
-    s8 statIndex = datCommandSelectors[((EvtScriptContext *)D_003C2E70)->third].stat;
+    s8 statIndex = datCommandSelectors[((EvtScriptContext *)D_003C2E70)->commandIndex].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -1393,10 +1394,10 @@ s32 evtPushSecondRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument, statIndex);
         }
         break;
     }
@@ -1417,10 +1418,10 @@ s32 evtPushFirstRosterOptionStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->first, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->firstArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->first, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->firstArgument, statIndex);
         }
         break;
     }
@@ -1441,10 +1442,10 @@ s32 evtPushSecondRosterOptionStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument, statIndex);
         } else {
             statValue = datReadLowHalfOfCalculatedValue(
-                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second, statIndex);
+                (DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument, statIndex);
         }
         break;
     }
@@ -1471,10 +1472,10 @@ s32 evtPushSecondRosterStatEligibility(void) {
 /* Kind 5 selects the first entry's roster detail instead of the command-table stat. */
 s32 evtPushSelectedStatOrRosterLowValue(void) {
     EvtScriptContext *scriptContext = (EvtScriptContext *)D_003C2E70;
-    s32 commandIndex = scriptContext->third;
+    s32 commandIndex = scriptContext->commandIndex;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        statValue = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].alternateA;
+        statValue = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->firstArgument)->unitId].alternateA;
     } else {
         statValue = datCommandRecords[commandIndex].stat11;
     }
@@ -1485,10 +1486,10 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
 /* Kind 5 scales the command stat by the first entry's roster multiplier, then truncates. */
 s32 evtPushSelectedScaledStat(void) {
     EvtScriptContext *scriptContext = (EvtScriptContext *)D_003C2E70;
-    s32 commandIndex = scriptContext->third;
+    s32 commandIndex = scriptContext->commandIndex;
     s32 statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        f32 rosterScale = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].multiplier;
+        f32 rosterScale = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->firstArgument)->unitId].multiplier;
         statValue = (s32)((f32)statValue * rosterScale);
     }
     scrSetIntegerReturnValue(statValue);
@@ -1506,10 +1507,10 @@ s32 evtSelectScriptStatValue(void) {
 
     switch (((EvtScriptContext *)D_003C2E70)->options) {
     case 1:
-        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].hpPower;
+        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->commandIndex].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].mpPower;
+        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->commandIndex].mpPower;
         break;
     default:
         statValue = 0;
@@ -1544,10 +1545,10 @@ s32 evtPushEntryIndexedStatOption(void) {
 /* Kind 5 selects the first entry's high roster detail instead of the command total. */
 s32 evtPushSelectedTotalOrRosterHighValue(void) {
     EvtScriptContext *scriptContext = (EvtScriptContext *)D_003C2E70;
-    s32 commandIndex = scriptContext->third;
+    s32 commandIndex = scriptContext->commandIndex;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        statValue = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].alternateB;
+        statValue = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->firstArgument)->unitId].alternateB;
     } else {
         statValue = datCommandRecords[commandIndex].stat34;
     }
@@ -1565,7 +1566,7 @@ s32 evtStoreScriptParameterResult(void) {
     u16 stateFlags = ((EvtScriptContext *)D_003C2E70)->stateFlags | EVT_RESULT_WRITTEN_FLAG;
 
     ((EvtScriptContext *)D_003C2E70)->stateFlags = stateFlags;
-    ((EvtScriptContext *)D_003C2E70)->result = scrReadIntParameter(0);
+    ((EvtScriptContext *)D_003C2E70)->returnValue = scrReadIntParameter(0);
     return 1;
 }
 
@@ -1686,8 +1687,8 @@ extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 void evtSelectStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second);
-    s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second)->hp;
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument);
+    s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 
@@ -1748,8 +1749,8 @@ void evtPushRosterBaseValue(void) {
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 void evtSelectFineStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second);
-    s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second)->hp;
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument);
+    s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->secondArgument)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
 
