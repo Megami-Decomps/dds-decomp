@@ -5134,7 +5134,89 @@ void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
     sdfConsAppendVuPacket(effCurrentRenderPacket, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E9E98);
+extern EffPacketParams D_00458310;
+extern EffPacketParams D_00458340;
+
+/* Point history of a grid-surface trail: a ring of 16-byte points with packed colors,
+ * drawn as triangle strips into the current render packet, then a fixed end cap. */
+typedef struct EffSurfaceTrailHistory {
+    u8 pad00[0x20];
+    s32 pointCapacity;        /* 0x20 */
+    s32 activePointCount;     /* 0x24 */
+    s32 nextPointWriteIndex;  /* 0x28 */
+    u8 pad2C[0x08];
+    u128 *points;             /* 0x34 */
+    u32 *colors;              /* 0x38 */
+    s32 resourceHandle;       /* 0x3C */
+    u128 *endPoints;          /* 0x40 */
+    u32 *endColors;           /* 0x44 */
+} EffSurfaceTrailHistory;
+
+void func_002E9E98(EffSurfaceTrailHistory *history, u32 color) {
+    s32 start[4];
+    s32 length[4];
+    s32 recent;
+    s32 wrapped;
+    s32 i;
+    s32 remaining;
+    EffPacketParams *draw;
+    u32 *colors;
+    u32 edgeColor;
+    u32 centerColor;
+    SdfListHead *list;
+
+    if ((color & 0xFF000000) == 0) {
+        return;
+    }
+    if (history->activePointCount < 6) {
+        return;
+    }
+    sdfConsAppendAssetPacket(effCurrentRenderPacket, history->resourceHandle, 0);
+    recent = history->activePointCount;
+    start[0] = history->nextPointWriteIndex - recent;
+    if (start[0] < 3) {
+        wrapped = start[0] - 3;
+        start[1] = 0;
+        start[0] = wrapped + history->pointCapacity;
+        length[0] = -wrapped;
+        length[1] = recent - length[0] + 3;
+    } else {
+        length[0] = recent;
+        length[1] = 0;
+    }
+    D_00458310.colors = history->colors;
+    for (i = 0; i < 2; i++) {
+        draw = &D_00458310;
+        draw->positions = history->points + start[i];
+        draw->color = color;
+        draw->parameterCount = 16;
+        remaining = length[i];
+        draw->vertexCount = 15;
+        while (remaining >= 15) {
+            remaining -= 12;
+            list = effCurrentRenderPacket;
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_00458310));
+            D_00458310.positions += 12;
+            D_00458310.colors += 12;
+        }
+        if (remaining >= 6) {
+            draw->parameterCount = (remaining / 3) * 4 - 4;
+            draw->vertexCount = remaining;
+            list = effCurrentRenderPacket;
+            sdfAppendPacket(list, effCreateVertexDrawPacket(draw));
+            draw->colors += remaining;
+        }
+    }
+    colors = history->endColors;
+    D_00458340.positions = history->endPoints;
+    colors[0] = D_00458310.colors[-2];
+    D_00458340.colors = colors;
+    colors[7] = colors[6] = colors[5] = colors[4] =
+        colors[3] = colors[2] = colors[1] = D_00458310.colors[-3];
+    D_00458340.color = color;
+    list = effCurrentRenderPacket;
+    sdfAppendPacket(list, effCreateVertexDrawPacket(&D_00458340));
+}
 
 typedef struct EffDrawEntry {
     u32 handle;
