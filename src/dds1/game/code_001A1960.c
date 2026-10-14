@@ -918,7 +918,7 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
 extern BtlTask *fldGetSceneGroupEntry(s32 entryIndex);
 extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, void **second);
 
-s32 func_001A3CE0(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
+s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
     BattleController *controller = (BattleController *)btlGetRuntime();
     s32 *requirementCursor;
     u32 requiredCount;
