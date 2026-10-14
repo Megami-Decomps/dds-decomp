@@ -228,7 +228,7 @@ void evtResetWorldAndProfileRuntime(void) {
     mdlResetViewerFlagsAndSolarOverlay();
     datGameState->world.updateMode = 8;
     ptyInitRuntime();
-    func_00122B58(0);
+    fldResetFieldRuntimeState(0);
     ptyClearProfileRecords();
     mtrLoadMantraNodePositions();
     ptyRebuildAllProfiles();
@@ -386,7 +386,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     ptyInitRuntime();
     mdlFlagClear(0xC0E);
     mdlFlagSet(0x801);
-    func_00122B58(0);
+    fldResetFieldRuntimeState(0);
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();

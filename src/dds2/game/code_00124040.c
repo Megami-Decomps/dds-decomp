@@ -733,7 +733,7 @@ void fldPrepareDeferredSceneTransition(void) {
     }
 }
 
-extern void func_00122B58();
+extern void fldResetFieldRuntimeState();
 
 extern char D_00435F48[];
 
@@ -749,7 +749,7 @@ void fldStartSequenceRecord(void) {
         dds3AdminSubmitModeRequest(0x1E, &mode, 4, 0);
         return;
     }
-    func_00122B58(1);
+    fldResetFieldRuntimeState(1);
     D_00389988[0x4C / 4] = 0;
     D_00389988[0x44 / 4] = 1;
     mdlFlagSet(0xC0F);
