@@ -9075,3 +9075,4 @@
 0x001FCAC0	btlCheckStatusActionEligibility	inferred	Checks the unit status low-word mask and applies the 25-bucket roll for cases 0x40/0x400; its sole action-sequence caller dispatches state 5 on success. Paired with DDS2 0x0020EB40.
 0x00162948	dds3AdminSubmitEmptyModeRequest	inferred	Paired zero-argument wrapper submits dds3AdminSubmitModeRequest(0, 0, 0, 0), with no higher-level effect inferred.
 0x001A6EC0	btlShouldDistributeRandomTargetHits	inferred	Returns whether the action path should distribute repeated hits across randomized targets; a true result directly gates btlDistributeRandomTargetHits. DDS2 twin 0x001B1090. [high-volume naming lane, 2026-10-14]
+0x0030B568	EnableIntc	inferred	wraps _EnableIntc with interrupt-state preservation; exact paired body and sdfWakeQueuedThreadWaiters caller pass event ID 2
