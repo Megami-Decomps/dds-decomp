@@ -1755,7 +1755,65 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", ptySkillMenuDrawEquippedSkillEntry);
+extern void mnuDispatchEntryWords(EffectSlotSet *, s32, MenuListNode *);
+extern void itfGridCopyEntryQuad(s32, s32);
+
+/* Draw one equipped-skill row: the skill's range icon and cost, or an empty
+ * placeholder bar. The row is highlighted under an unlocked cursor or when
+ * the node is flagged. */
+void ptySkillMenuDrawEquippedSkillEntry(s32 x, s32 y, s32 depth, MenuList *list,
+                   MenuListNode *node, s32 texture) {
+    MenuContext *context = (MenuContext *)list->context;
+    u32 skill = node->sortKeyPrimary;
+    s32 selected = 0;
+    DatPartyRecord *actor;
+    s32 entryIndex;
+    s32 markerX;
+    s32 markerY;
+
+    if (list->cursor == node) {
+        u32 locked = list->stateFlags & 8;
+
+        selected = locked == 0;
+    }
+    actor = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    if (node->flags48 & 2) {
+        selected = 1;
+    }
+    {
+        s32 highlight = selected != 0;
+
+        entryIndex = highlight + 0x1B;
+    }
+    if (skill != 0) {
+        s32 icon;
+        s32 dim;
+
+        markerX = x + 0x20;
+        markerY = y;
+        icon = mnuLookupRangeEntry((u16)skill);
+        if (selected) {
+            icon += 4;
+        }
+        effDrawTextureSlotWithBlendedCornerColors(markerX, markerY, depth, list->scale, 1,
+                      (EffectSlotSet *)context->labelHandle, icon + 1, texture);
+        dim = node->flags48 & 1;
+        mnuDrawRangeCostAndIcon(x + 0x970, y + 0x30, depth, 0x1F0, list->scale, actor,
+                      (u16)skill, selected, dim,
+                      (EffectSlotSet *)context->resourceHandle, texture);
+        return;
+    }
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)context->resourceHandle;
+
+        markerX = x + 0x1C0;
+        markerY = y + 0x40;
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        mnuDrawRepeatedPanelSprites(markerX, markerY, depth, list->scale, 8,
+                                    resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+    }
+}
 
 s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
