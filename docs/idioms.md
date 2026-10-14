@@ -12351,3 +12351,58 @@ does not use the grid formal. Its six-byte special-entry map is copied from
 the original `D_003BC4A0` sdata owner, not duplicated as a new literal table.
 The inventory's DDS2 `0x00285148` candidate is a background burst-pool updater,
 not a semantic twin of this grid-entry renderer.
+
+## Cherun camera preset staging
+
+DDS2 `func_0021F848` (`0x0021F848`, 2844 bytes) is Cherun's Calamity
+task callback, not a counterpart of DDS1's field-map renderer at `0x00144D30`.
+It schedules defeat, facing, indexed-effect and sound tasks, then selects two
+sixteen-float camera paths. Its native jump table contains cases 0 through 9;
+case 9 shares the default body.
+
+Two ordinary, genuinely consumed constants have independently traced staging
+requirements. These are compiler-side properties, not proof that the original
+source used the same local names. Canonical `tools/cc1probe.sh --all` runs agree
+with the unhooked compiler for every retained form.
+
+- **Establish the real two-unit camera mode before task setup.** The direct
+  comparison with literal 2 creates its pseudo only after the task calls
+  (`cse1`, UID 323), whereas native `0x0021F954` establishes it before them and
+  consumes it at `0x0021F9D4`. Assigning `twoUnitCameraMode = 2` before starting
+  the facing task makes that real comparison value live across six calls.
+  The diagnostic trace's local-allocation quantity has lifetime `[30,90]`,
+  six calls and SI mode. This restores the eighth saved GPR and the native
+  `0xA0` frame; the unstaged form has a `0x90` frame and differs in 703 of
+  708 covered words, with three words missing. The staged form differs in
+  nine of 711 words, all in the remaining selector.
+- **Create the first-unit camera preset before the default preset.** The
+  failure-first selector and a real default of 6 with a zero-index override
+  of 8 leave only the two constant loads exchanged. Both sched1 and sched2
+  show equal priority 2, register weight 1 and cost 1: LUID decides their order.
+  In that control, six's UID 364 precedes eight's UID 2110 (sched1 LUIDs 93
+  and 95). Declaring the real `firstUnitCameraPreset = 8` in the mode-2
+  branch before `preset = 6`, then consuming it for `lookupId == 0`, gives
+  eight's UID 364/LUID 93 before six's UID 367/LUID 94. No independent
+  placement or declaration-order search is involved.
+
+The intermediate negative-first selector leaves three words different; replacing
+its ternary with the real default and zero override leaves two. The final named
+preset staging reproduces all 711 words. The complete unit gates
+`267 match, 0 differ`, including every previously matched C function and all
+rodata. Trace logs and the complete step sequence are recorded in the agent's
+ledger, not as machine-local paths in source.
+
+The existing earlier provider `btlFindUnitByMode` uses an old-style empty
+parameter list: the native caller at `0x0021F8B8` passes zero, although the
+provider does not use arguments. Its return type and body remain unchanged;
+existing no-argument callback declarations remain compatible.
+
+Recover camera literals from their native `.lit4` words using this compiler's
+actual decimal conversion, not a host's round-to-nearest printed float.
+For example, canonical cc1 emits `0x3C656041` for `0.014f`, but
+`0x3C656040` for the superficially more precise `0.0139999995f`.
+All 320 camera argument words were checked against the native literals and
+immediates. The generic constructor really accepts sixteen `f32` arguments;
+the initial m2c draft omits half the second call's arguments and is not a
+usable final reconstruction.
+
