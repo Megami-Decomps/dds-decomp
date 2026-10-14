@@ -1,5 +1,6 @@
 #include "eff_packet_params.h"
 #include "eff_camera_create_request.h"
+#include "eff_file_job_request.h"
 #include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
@@ -9250,21 +9251,6 @@ void effApplyBattleCameraToObject(work)
     fileJobInvokeScaleCallback(work, ((FileJob *)D_003DF9A0)->scale * effFileQueue->scaleMultiplier);
     fileDispatchJobTypeCallback(work, ((FileJob *)D_003DF9A0)->color);
 }
-
-/* A 0x20-byte creation command, not the runtime FileJob queue entry. */
-typedef struct EffFileJobRequest {
-    char *name;
-    u16 fileKind;
-    u8 pad6[2];
-    u16 transferMode;
-    u8 padA[2];
-    void *output;
-    u32 size;
-    SdfMemBlock *allocation;
-    u16 resourceMode;
-    u8 pad1A[2];
-    const char *secondaryCommandPath;
-} EffFileJobRequest;
 
 u32 effCreateBattleCameraJob(u8 *request) {
     void *output = ((EffFileJobRequest *)request)->output;
