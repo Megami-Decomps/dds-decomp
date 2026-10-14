@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "eff_generated_texture_descriptor.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -87,7 +88,6 @@ extern s32 effBillResourceOwners[];
 #include "sdf_packet_alloc.h"
 
 
-typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
 void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
 typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
@@ -505,18 +505,6 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A4B0);
-
-/* Generated texture quad input. Producers initialize fields through +0x28;
- * +0x18..+0x1F are not accessed by this packet builder. */
-struct EffGeneratedTextureDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    SdfTex *texture;
-};
 
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
