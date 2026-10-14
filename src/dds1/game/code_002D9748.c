@@ -7,6 +7,7 @@
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
 #include "sdf_model_scalars.h"
+#include "sdf_unique_chunk_value_api.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "sdf.h"
