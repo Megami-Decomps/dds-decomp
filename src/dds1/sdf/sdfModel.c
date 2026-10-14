@@ -14,8 +14,6 @@
 #include "sdf_model_command_views.h"
 
 extern void *memcpy(void *dst, const void *src, u32 n);
-extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
-extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 extern vu8 sdfCurrentBufferIndex;
 
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
