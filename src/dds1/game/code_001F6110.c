@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_command_partner_output.h"
