@@ -84,7 +84,61 @@ extern u8 D_0037B980[];
 
 extern u8 D_0037C388[];
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", mnuDrawStaffRollFrame);
+extern u32 D_0037AF80[];
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+extern void mnuUpdateMovieRollEntry(MnuMovieRollEntry *);
+extern void mnuDrawAnimatedMovieRollEntry(MnuMovieRollEntry *, EffectSlotSet *, s32);
+
+/* Draw the five-tile staff backdrop and both 32-entry roll passes.
+ * Phases1/2/3 add the selected image overlay; keep every fresh movie-work read
+ * after callbacks and the final GS TEST/ALPHA restore in native order. */
+void mnuDrawStaffRollFrame(s32 surface) {
+    s32 i;
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x3000D, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    mnuDrawIconAlphaSprite(-53, -10, 400, 128, mnuMovieWork->spriteSet, 12, 32, surface);
+    mnuDrawIconAlphaSprite(85, -10, 400, 128, mnuMovieWork->spriteSet, 12, 32, surface);
+    mnuDrawIconAlphaSprite(223, -10, 400, 128, mnuMovieWork->spriteSet, 12, 32, surface);
+    mnuDrawIconAlphaSprite(361, -10, 400, 128, mnuMovieWork->spriteSet, 12, 32, surface);
+    mnuDrawIconAlphaSprite(499, -10, 400, 128, mnuMovieWork->spriteSet, 12, 32, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
+    for (i = 0; i < 32; i++) {
+        mnuUpdateMovieRollEntry(&D_003DC1E0[i]);
+        sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
+        sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+        mnuDrawAnimatedMovieRollEntry(&D_003DC1E0[i], mnuMovieWork->spriteSet, surface);
+    }
+    if (D_003BC618 == 1 || D_003BC618 == 3 || D_003BC618 == 2) {
+        uiDrawActiveSurfaceRegion(surface);
+        sdfSubmitGsTestOneRegisterPacket(0x3001B, surface);
+        mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5,
+                              D_0037AFC0[D_003BC614].y - 5, 1, 128,
+                              mnuMovieWork->spriteSet,
+                              D_0037AF80[mnuMovieWork->imageIndex], 32, surface);
+        sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+        sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+        sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
+        for (i = 0; i < 32; i++) {
+            mnuDrawMovieRollEntry(&D_003DC1E0[i], mnuMovieWork->spriteSet, surface);
+        }
+    }
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x5100D, surface);
+    /* Retail has jal+epilogue; reset this function's completed roll-loop counter.
+     * .01.sibling keeps the call; .13.life deletes this reset. See docs/idioms.md,
+     * "Native post-call loop reset: DDS1 staff frame". */
+    i = 0;
+}
 
 void mnuPrepareStaffRollText(void) {
     mnuLoadStaffFonts();
