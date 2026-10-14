@@ -1511,7 +1511,53 @@ s32 mnuCampFindActiveSlot(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuHasCampFlaggedItemByClass);
+typedef struct ShopSourcePriceEntry {
+    u16 itemId;
+    u8 type;
+    u8 pricePercent;
+} ShopSourcePriceEntry;
+
+typedef struct ShopSourcePriceRow {
+    u16 pricePercent;
+    ShopSourcePriceEntry entries[0x60];
+} ShopSourcePriceRow;
+
+extern ShopSourcePriceRow D_003C9BC0[];
+
+/* True when the shop's source row or the active rank row stocks an item of the
+ * requested class (1: bullets, otherwise the high item range). */
+s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *scene, s32 itemClass) {
+    s32 row;
+    u32 i;
+    u32 itemId;
+
+    row = mnuCampResolveFlagRowValue(scene->shopRow);
+    for (i = 0; i < 0x60; i++) {
+        itemId = D_003C9BC0[row].entries[i].itemId;
+        if (itemClass == 1) {
+            if (mnuIsBulletItemId(itemId) != 0) {
+                return 1;
+            }
+        } else if (mnuIsHighRangeItemId(itemId) != 0) {
+            return 1;
+        }
+    }
+    row = mnuCampFindActiveSlot();
+    if (row == -1) {
+        return 0;
+    }
+    for (i = 0; i < 0x20; i++) {
+        itemId = D_003CBB70[row].entries[i].itemId;
+        if (itemClass == 1) {
+            if (mnuIsBulletItemId(itemId) != 0) {
+                return 1;
+            }
+        } else if (mnuIsHighRangeItemId(itemId) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 
 void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
@@ -1718,16 +1764,6 @@ s32 mnuFinishCampPopup(KwlnTask *callback) {
     return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
-typedef struct ShopSourcePriceEntry {
-    u16 itemId;
-    u8 type;
-    u8 pricePercent;
-} ShopSourcePriceEntry;
-
-typedef struct ShopSourcePriceRow {
-    u16 pricePercent;
-    ShopSourcePriceEntry entries[0x60];
-} ShopSourcePriceRow;
 
 
 typedef struct ShopProgressPrice {
@@ -1735,7 +1771,6 @@ typedef struct ShopProgressPrice {
     u32 unk4;
 } ShopProgressPrice;
 
-extern ShopSourcePriceRow D_003C9BC0[];
 extern ShopProgressPrice D_003CD0C4[];
 
 s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
