@@ -1136,10 +1136,6 @@ void itfMesClearGlobalWords(void) {
 /* Slot record reached through the pool base, one 0x14 bytes per window. */
 extern ItfMesWindowRec D_003D6EC0[];
 
-extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
-
-
-
 /* Tear down installed content/resources, return the pool record and decrement
  * the pool-array-relative counter. An empty record is a no-op. */
 void itfMesDestroyWindow(s32 window) {
