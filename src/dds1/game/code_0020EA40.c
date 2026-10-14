@@ -7,6 +7,7 @@
 #include "dat_state.h"
 #include "ee_mmi.h"
 #include "sdf_resource.h"
+#include "btl_scene_initializer.h"
 
 
 extern void btlBossDebugPrintf(const char *format, ...);

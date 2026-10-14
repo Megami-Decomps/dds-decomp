@@ -74,7 +74,6 @@ extern s32 btlRollSurpriseAttack();
 
 extern void btlRequestSceneEventResources();
 
-extern void btlInitializeBossCallbacks();
 
 extern void btlSelectSceneAudioTrack();
 

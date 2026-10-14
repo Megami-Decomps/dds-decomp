@@ -17,6 +17,7 @@
 #include "dat_state.h"
 #include "sdf_resource.h"
 #include "mdl_flag_api.h"
+#include "btl_scene_initializer.h"
 
 extern void btlInterpolateVectorStep();
 

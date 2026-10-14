@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+void btlInitializeBossCallbacks(s32 mode);
+
 /* One indexed scene row stores its initializer, updater, and behavior flags. */
 typedef struct SceneInitializer {
     void (*initialize)(s32 scene);
