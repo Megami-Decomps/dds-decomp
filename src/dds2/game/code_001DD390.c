@@ -107,22 +107,6 @@ typedef struct BtlVectorTaskArgs {
     u32 unit30;
 } BtlVectorTaskArgs;
 
-typedef struct BtlCommandOption {
-    u8 pad00[0xC];
-    s32 kind;           /* 0x0C */
-    u8 pad10[4];
-    u8 inactive;        /* 0x14 */
-} BtlCommandOption;
-
-typedef struct BtlCommandArgument {
-    s32 command;        /* 0x00 */
-    s32 index;          /* 0x04 */
-    u8 pad08[0x38];
-    struct BtlIndexList *actorIndices;   /* 0x40 */
-    u8 pad44[0x24];
-    BtlCommandOption *option; /* 0x68 */
-} BtlCommandArgument;
-
 typedef struct BtlActiveSlot {
     u8 pad00[0x18];
     void *unit;         /* 0x18 */
@@ -350,15 +334,15 @@ s32 btlIsSupportedCommandKind(s32 *state) {
     }
 }
 
-s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
+s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
     s32 value;
-    switch (argument[0]) {
+    switch (work->phase) {
     case 1:
         if ((btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->partyRecord.flags & 0x10) == 0) {
             return btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue);
         }
-        if (argument[1] > 0) {
-            return argument[1];
+        if (work->skillId > 0) {
+            return work->skillId;
         }
         value = btlSelectRandomAutoAttackSkill();
         if (value > 0) {
@@ -366,25 +350,25 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
         }
         return 0;
     case 4:
-        return btlGetLoggedIndexedCommandItem(argument[2]);
+        return btlGetLoggedIndexedCommandItem(work->reference);
     case 2:
     case 3:
     case 7:
     case 8:
-        return argument[1];
+        return work->skillId;
     default:
         return -1;
     }
 }
 
-u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
-    switch (((BtlCommandArgument *)argument)->command) {
+u32 btlClassifyActionOperand(BtlUnit *unit, BattleIndexWork *work) {
+    switch (work->phase) {
     case 1: {
-        u32 count = btlGetIndexListCount(((BtlCommandArgument *)argument)->actorIndices);
+        u32 count = btlGetIndexListCount(work->indices);
         if ((unit->status.flags & 0x200) && ((unit->status.flags & 0x1000) || (unit->partyRecord.flags & 0x10)) &&
             (unit->partyRecord.status & 0x1000) == 0 && count == 1) {
-            BtlCommandOption *option = ((BtlCommandArgument *)argument)->option;
-            if (option->kind == 2 && option->inactive == 0) {
+            BtlOperandGroup *group = work->groups;
+            if (group->parameter == 2 && group->reflected == 0) {
                 return 0x17;
             }
         }
@@ -396,7 +380,7 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
     case 3:
     case 7:
     case 8: {
-        s32 index = ((BtlCommandArgument *)argument)->index;
+        s32 index = work->skillId;
         if (index == 0xD6 && (btlUnitStatusPair(unit) & 0x1200) == 0x200 && (unit->partyRecord.flags & 0x10) == 0) {
             return 0xC;
         }
@@ -676,7 +660,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                       action->indexWork.companionA, action->indexWork.companionB);
     runtime = (BtlState *)btlGetRuntime();
     action->flags &= ~2;
-    command = btlResolveActionOperand(action->unit, &work->phase);
+    command = btlResolveActionOperand(action->unit, work);
     if (command == -1) {
         return;
     }
@@ -1226,7 +1210,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     if (btlCompareSkippedAndActiveTargetCounts(work->indices, (struct BtlTargetResult *)work->groups)) {
         work->unk2E = 1;
     }
-    work->slot = btlClassifyActionOperand(action->unit, (u8 *)work);
+    work->slot = btlClassifyActionOperand(action->unit, work);
     if (btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xEB)) {
         combinedKinds &= ~2;
         combinedKinds &= ~4;
