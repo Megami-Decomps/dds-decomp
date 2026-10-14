@@ -678,7 +678,34 @@ void mnuTickMapTimers(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030D3A8);
+/* DDS2 keeps the map timer hint shaping but no longer draws the hints. */
+void func_0030D3A8(void) {
+    SdfCounterTimer *timer = sdfActiveCounterRuntime->state.timer;
+    s32 primary = timer->mapTimerPrimary;
+    s32 secondary;
+    f32 fade = 1.0f - (f32)timer->value / 10.0f;
+    f32 value;
+
+    if (primary > 0) {
+        value = (f32)abs(primary) / 60.0f;
+        if (value < 0.5f) {
+            value = 1.0f - value;
+        }
+    } else {
+        value = 0.0f;
+    }
+    value *= fade;
+    secondary = timer->mapTimerSecondary;
+    if (secondary > 0) {
+        value = (f32)abs(secondary) / 60.0f;
+        if (value < 0.5f) {
+            value = 1.0f - value;
+        }
+    } else {
+        value = 0.0f;
+    }
+    value *= fade;
+}
 
 s32 sdfCounterGetSelectionBoundaryFlags(void) {
     SdfCounterRuntime *rt = sdfActiveCounterRuntime;
