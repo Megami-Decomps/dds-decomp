@@ -847,7 +847,47 @@ u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttrib
     return (u32)packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E0820", func_002E2A00);
+/* Build a one-vertex VIF packet for a two-texture quad: the position, both
+ * colors, the interleaved primary/secondary UV corners (copied as unaligned
+ * words) and the eight quad corner coordinates. */
+void func_002E2A00(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
+                   const void *primaryUv, const void *secondaryUv, const f32 *quad) {
+    *(u16 *)packet = 8;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xA0000000;
+    *(u32 *)(packet + 20) = 0x43434310;
+    *(u32 *)(packet + 24) = 0x43;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E02C003;
+    *(u32 *)(packet + 56) = primaryColor;
+    *(u32 *)(packet + 60) = secondaryColor;
+    *(u32 *)(packet + 64) = 0x6D04C005;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)primaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)secondaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)primaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)secondaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)primaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)secondaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv + 12);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv + 12);
+    *(u32 *)(packet + 100) = 0x6404C009;
+    *(f32 *)(packet + 104) = quad[0];
+    *(f32 *)(packet + 108) = quad[1];
+    *(f32 *)(packet + 112) = quad[2];
+    *(f32 *)(packet + 116) = quad[3];
+    *(f32 *)(packet + 120) = quad[4];
+    *(f32 *)(packet + 124) = quad[5];
+    *(f32 *)(packet + 128) = quad[6];
+    *(f32 *)(packet + 132) = quad[7];
+    *(u32 *)(packet + 136) = 0x04000004;
+    *(u32 *)(packet + 140) = 0x14000008;
+}
 
 u32 sdfMeasureAlignedRecordBufferBytes(s32 count) {
     return (count * 0x54 + 0x4bU) & 0xfffffff0;
