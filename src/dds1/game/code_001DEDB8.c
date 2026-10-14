@@ -486,7 +486,7 @@ void btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *action) {
     action->flags |= 0x41;
 }
 
-void func_001DEEC0(void) {
+void btlUpdateDevilizeCameraNoOp(void) {
 }
 
 extern void btlBuildGroupFramingCameraPose(BtlCamState *, BtlCamState *);
@@ -502,7 +502,7 @@ void btlUpdateLinkedActionEffectVectorByTarget(BtlLinkedCommand *action) {
     }
 }
 
-void func_001DEF20(void) {
+void btlUpdateEscapeCameraNoOp(void) {
 }
 
 void btlInitializeCursorForLinkedAction(BtlLinkedCommand *action) {
@@ -512,7 +512,7 @@ void btlInitializeCursorForLinkedAction(BtlLinkedCommand *action) {
     }
 }
 
-void func_001DEF58(void) {
+void btlUpdateSingleActionCameraNoOp(void) {
 }
 
 /* Run the timed camera setup hook; return its result, or zero when unset. */

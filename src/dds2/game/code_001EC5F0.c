@@ -438,7 +438,7 @@ void btlAppendLinkedUnitToActorIndices(BtlLinkedCommand *action) {
     func_001F2E30(action, &action->frontCamera, &action->backCamera);
 }
 
-void func_001EC6C8(void) {
+void btlUpdateDevilizeCameraNoOp(void) {
 }
 
 void btlUpdateLinkedActionEffectVectorByTarget(BtlLinkedCommand *action) {
@@ -452,7 +452,7 @@ void btlUpdateLinkedActionEffectVectorByTarget(BtlLinkedCommand *action) {
     }
 }
 
-void func_001EC728(void) {
+void btlUpdateEscapeCameraNoOp(void) {
 }
 
 void btlInitializeCursorForLinkedAction(s32 action) {
@@ -462,7 +462,7 @@ void btlInitializeCursorForLinkedAction(s32 action) {
     }
 }
 
-void func_001EC760(void) {
+void btlUpdateSingleActionCameraNoOp(void) {
 }
 
 extern void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
