@@ -5538,20 +5538,11 @@ void btlAdvancePendingSceneSlotStates(u8 *scene) {
     }
 }
 
-typedef struct UiSlotMatchRow {
-    u8 pad00[0x18];
-    u8 state;
-    u8 pad19;
-    u8 groupIndex; /* index of the matching primary group */
-} UiSlotMatchRow;
-
 /* Map eligible actor rows to command groups, optionally retaining active states. */
 void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWork *work, s8 keepActive) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *node = battle->units;
-    UiSlotMatchRow *row;
     s32 group;
-    s32 offset;
     u8 slot;
 
     for (; node != NULL; node = node->nextActor) {
@@ -5563,11 +5554,10 @@ void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWor
         if (battle->groupPrimary[0] != NULL) {
             while (group < 20 && battle->groupPrimary[group] != NULL) {
                 if (battle->groupPrimary[group]->unit->owner == node->owner) {
-                    offset = slot * 0x290 + 0xE0;
-                    row = (UiSlotMatchRow *)((u8 *)work + offset);
-                    row->groupIndex = group;
-                    if (keepActive == 0 || (u32)(row->state - 1) >= 2) {
-                        row->state = 3;
+                    work->activeEntries[slot].presentation.pendingCursorSelection = group;
+                    if (keepActive == 0 ||
+                        (u32)((u8)work->activeEntries[slot].presentation.pendingSceneState - 1) >= 2) {
+                        work->activeEntries[slot].presentation.pendingSceneState = 3;
                     }
                     break;
                 }
