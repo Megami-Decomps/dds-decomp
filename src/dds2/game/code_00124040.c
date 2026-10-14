@@ -244,7 +244,6 @@ extern s32 fldIsAreaResourceReady(void);
 
 extern u32 fldPollAreaResourceLoad(void);
 
-extern u32 fldGetResourceReadyFlag(void);
 
 extern void fldFreeDisplayObjects(void);
 
