@@ -4,6 +4,7 @@
 #include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
 #include "sdf_math_vector4.h"
@@ -50,7 +51,6 @@ extern u8 D_003BA878[2][2];
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewUpVector[4];
-extern u32 fldGetSceneReadyFlag(void);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 
 
