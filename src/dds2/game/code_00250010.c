@@ -4559,7 +4559,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
         }
     }
-    for (row = 0; row < (s32)work->unk_44; row++) {
+    for (row = 0; row < (s32)work->mainEntry7Count; row++) {
         switch (((EvtPmdAuxResource *)work->mainEntry7Data)[row].kind) {
         case 0: group = evtEventViewerCreateEntry(3, runtime); break;
         case 1: group = evtEventViewerCreateEntry(0x12, runtime); break;
@@ -4572,7 +4572,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             ((EvtPmdAuxResource *)work->mainEntry7Data)[row].nameIndex * 32, runtime);
         group->resourceData = (u8 *)work->data + ((EvtPmdAuxResource *)work->mainEntry7Data)[row].dataOffset;
     }
-    for (row = 0; row < (s32)work->unk_54; row++) {
+    for (row = 0; row < (s32)work->mainEntry22Count; row++) {
         group = evtEventViewerCreateEntry(0x18, runtime);
         group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +
             ((EvtPmdAuxResource *)work->mainEntry22Data)[row].nameIndex * 32, runtime);

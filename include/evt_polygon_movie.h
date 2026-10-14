@@ -58,11 +58,11 @@ typedef struct PolyMovieWork {
     u32 unk_38;        /* 0x38 */
     u8 *mainEntry9Data;   /* 0x3C */
     u8 *mainEntry7Data;   /* 0x40 */
-    u32 unk_44;        /* 0x44 */
+    u32 mainEntry7Count; /* 0x44: PMD type-7 resource row count */
     u8 *mainEntry8Data;   /* 0x48 */
     u8 *mainEntry6Data;   /* 0x4C */
     u8 *mainEntry22Data;  /* 0x50 */
-    u32 unk_54;        /* 0x54 */
+    u32 mainEntry22Count; /* 0x54: PMD type-22 texture row count */
     u8 *mainEntry23Data;  /* 0x58 */
     PolyMovieResourceSlot secondaryResource; /* 0x5C */
     PolyMovieResourceSlot tertiaryResource; /* 0x68 */

@@ -506,8 +506,8 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     work->unk_1C = 0;
     work->unk_24 = 0;
     work->unk_38 = 0;
-    work->unk_44 = 0;
-    work->unk_54 = 0;
+    work->mainEntry7Count = 0;
+    work->mainEntry22Count = 0;
     work->entries = data->entries;
     work->data = data;
     work->mainEntry1Data = NULL;
@@ -557,14 +557,14 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             break;
         case 7:
             work->mainEntry7Data = (u8 *)data + work->entries[i].offset;
-            work->unk_44 = work->entries[i].value;
+            work->mainEntry7Count = work->entries[i].value;
             break;
         case 8:
             work->mainEntry8Data = (u8 *)data + work->entries[i].offset;
             break;
         case 22:
             work->mainEntry22Data = (u8 *)data + work->entries[i].offset;
-            work->unk_54 = work->entries[i].value;
+            work->mainEntry22Count = work->entries[i].value;
             break;
         case 23:
             work->mainEntry23Data = (u8 *)data + work->entries[i].offset;
