@@ -192,7 +192,7 @@ void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuff
         sdfDevConsKickPacketDma(packetBuffers);
     }
     packet = (vu64 *)packetBuffers->currentTag;
-    origin = (u16)(console->unk8 - 0x30) | ((u32)console->unkA << 16);
+    origin = (u16)(console->screenOriginX - 0x30) | ((u32)console->screenOriginY << 16);
     extent = (u16)(console->columns * 3 * 0x40 + 0x70) | ((u32)(console->rows * packetBuffers->rowStep) << 16);
     if (console->controlByte & 4) {
         origin += 0xFFD00000;
@@ -243,9 +243,9 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
     writeCursor = (vu64 *)buffers->writeCursor;
     packetStart = buffers->packetStart;
     cells = console->cells;
-    y = console->unkA;
+    y = console->screenOriginY;
     do {
-        top = (u32)console->unk8 | ((u32)y << 16);
+        top = (u32)console->screenOriginX | ((u32)y << 16);
         column = 0;
         do {
             character = cells[0];
@@ -323,7 +323,7 @@ void sdfDevConsRenderAll(void) {
 
     if (D_00438AB0 != NULL) {
         sdfDevConsInitPacketBuffers(&packetBuffers, storage.data, 0x1000);
-        for (console = D_00438AB0; console != NULL; console = console->unk4) {
+        for (console = D_00438AB0; console != NULL; console = console->previousNode) {
             sdfDevConsDrawGlyphGrid(console, &packetBuffers);
         }
         sdfDevConsKickPacketDma(&packetBuffers);

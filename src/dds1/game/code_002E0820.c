@@ -1606,14 +1606,14 @@ void sdfDevConsResetNode(ConsNode *node) {
 /* Allocate a two-byte character grid and link it for cleanup.
  * Allocation uses the supplied dimensions; clearing uses their stored s16
  * values. Dimensions and the two opaque halfword inputs are not validated. */
-ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
+ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
     ConsNode *node;
     u32 bufferHandle;
 
     sdfDevConsInit();
     node = sdfAllocSizeClassBlock(SDF_CONSOLE_NODE_BYTES);
-    node->opaque08[0] = first;
-    node->opaque08[1] = second;
+    node->screenOriginX = screenOriginX;
+    node->screenOriginY = screenOriginY;
     node->columns = columns;
     node->rows = rows;
     node->opaque17 = 8;
