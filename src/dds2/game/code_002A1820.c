@@ -99,7 +99,7 @@ extern char D_00428610[];
 
 extern char D_00428628[];
 
-extern s32 func_0034E820(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
 
 s32 sndCopyWordsToIopSynchronously(u32 sourceAddress, u32 iopAddress, u32 wordCount);
 
@@ -111,9 +111,9 @@ s32 mnuCopySoundStreamOnStatusChange(u32 source, u32 words);
 void sndUploadStreamToBothIopBuffers(u32 wordCount) {
     sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], wordCount);
     sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
-    func_0034E820(1, 0x8010, 0xf80, 0);
-    func_0034E820(1, 0x8010, 0x1080, 0);
-    func_0034E820(1, 0x80e0, 0, 2, 0, 0);
+    sndDispatchIopAudioCommand(1, 0x8010, 0xf80, 0);
+    sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0);
+    sndDispatchIopAudioCommand(1, 0x80e0, 0, 2, 0, 0);
 }
 
 /* Copy the second source, add the first, and clamp to [-32767, 32767].

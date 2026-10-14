@@ -930,11 +930,11 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     D_00437A2C = 0;
 }
 
-extern s32 func_0034E820(s32, s32, ...);
+extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
 extern u64 D_00438FD0;
 
 s32 mnuCopySoundStreamOnStatusChange(u32 source, u32 words) {
-    u64 status = func_0034E820(1, 0x8100, 0);
+    u64 status = sndDispatchIopAudioCommand(1, 0x8100, 0);
 
     if ((D_00438FD0 & 0x1000000) == (status & 0x1000000)) {
         return 0;
