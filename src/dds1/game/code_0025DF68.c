@@ -6,6 +6,7 @@
 #include "mnu_shop.h"
 #include "itf.h"
 #include "fr_font.h"
+#include "fr_font_draw_glyph.h"
 
 
 typedef s16 BrsIconRecord[4];
@@ -173,7 +174,6 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
 #include "pty_bullet_item_count_api.h"
 extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC4F0[];
 
 /* Draw the selected item quantity; bullets include matching party slot values. */

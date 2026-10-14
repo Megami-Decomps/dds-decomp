@@ -3,6 +3,7 @@
 #include "kwln_task_add_child.h"
 #include "evt_message_window_api.h"
 #include "fr_font.h"
+#include "fr_font_draw_glyph.h"
 #include "mnu_text_entry.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -315,7 +316,6 @@ void mnuReleaseMenuResourceGroup(s32 address, u32 preserveWork) {
 void mnuReleaseResourceGroupTextureHandles(u32 address) {
     mnuReleaseMenuResourceGroup(address, 0);
 }
-extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
