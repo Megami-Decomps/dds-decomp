@@ -444,7 +444,7 @@ void fileReqInit(s32 request) {
 void fileReqBegin(s32 request) {
     D_003BD8E8 = request;
     fileReqInit(request);
-    fileRequestEntries[request].unk10 = 0;
+    fileRequestEntries[request].requestRetryCount = 0;
 }
 
 /* Keep the zero-status tail distinct and the ready path after retry work;
@@ -469,9 +469,9 @@ s32 fileReqPoll(void) {
             break;
         case 2:
             if (entry->unkC == 0) {
-                retries = entry->unk10;
+                retries = entry->requestRetryCount;
                 if (retries < 5) {
-                    entry->unk10 = retries + 1;
+                    entry->requestRetryCount = retries + 1;
                     fileReqInit(D_003BD8E8);
                     return 0;
                 }
