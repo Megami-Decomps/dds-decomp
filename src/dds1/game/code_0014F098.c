@@ -74,7 +74,7 @@ u32 fldCmdUpdateTaskRecordScene(void) {
     return 1;
 }
 
-s32 func_0014F110(void) {
+s32 fldCmdDispatchInteractionAction(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
