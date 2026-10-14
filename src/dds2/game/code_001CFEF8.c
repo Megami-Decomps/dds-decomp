@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_rain_effect_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
@@ -146,7 +147,6 @@ extern void btlInitializeWorldCamera();
 
 extern void btlSpawnBattleWorldAction();
 
-extern void btlCreateRainEffect();
 
 
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_rain_effect_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
@@ -201,7 +202,6 @@ extern void btlInitializeWorldCamera(void);
 
 extern void btlAdvanceWorldCounterAndSpawnActionObject(void);
 
-extern void btlCreateRainEffect(s16, s16);
 
 s32 btlStartOwnerTaskIfClear(u8 *object) {
     if (btlCountTasksForOwner(0x8000000000000001ULL) == 0) {

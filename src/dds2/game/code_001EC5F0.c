@@ -3,6 +3,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "mnu_title_stream.h"
 #include "eff_random_mod.h"

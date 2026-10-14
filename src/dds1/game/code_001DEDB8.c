@@ -4,6 +4,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
@@ -275,7 +276,6 @@ extern void btlResetTitleStreamOnBattleFlag(void);
 
 extern void btlAdvanceWorldCounterAndSpawnActionObject(void);
 
-extern void btlCreateRainEffect(u32, u32);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 

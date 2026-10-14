@@ -145,7 +145,6 @@ extern void btlSyncModelFlagFromEventThresholds();
 extern void btlResetTitleStreamOnBattleFlag();
 extern void btlInitializeWorldCamera();
 extern void btlSpawnBattleWorldAction();
-extern void btlCreateRainEffect();
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32);
 extern BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32);
