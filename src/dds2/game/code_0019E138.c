@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_text_vector.h"
 #include "fr_font_text_slots.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
@@ -98,12 +99,7 @@ typedef struct MemRingHeader {
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
-typedef struct TextVector {
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 w;
-} TextVector;
+
 
 
 extern s32 dds3AdminGetActiveMode(void);
