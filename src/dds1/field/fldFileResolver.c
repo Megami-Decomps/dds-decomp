@@ -5,6 +5,7 @@
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "fld_light_set.h"
+#include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
 #include "kwln_fade.h"
@@ -4923,11 +4924,6 @@ extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting D_003306D0;
 extern void *fldSkyLightSetBuffer;
 extern void *D_003BAD60;
-/* The sky file has 256 records of 0x124 bytes: mode and an 8-by-9 color grid. */
-typedef struct FldSkyGradientRecord {
-    s32 mode;
-    s32 colors[8][9];
-} FldSkyGradientRecord;
 extern FldSkyGradientRecord *D_003BAD74;
 extern s32 D_003BAD88, D_003BAD8C;
 extern f32 D_003BAD90, D_003BAD94;
