@@ -1,5 +1,6 @@
 #include "common.h"
 #include "scr_integer_return_value_api.h"
+#include "sdf_unique_chunk_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_path.h"
@@ -65,8 +66,6 @@ typedef struct EvtLipsLink {
     void *unit;         /* 0x08 */
     EvtLipsMh *mh;      /* 0x0C */
 } EvtLipsLink;
-
-extern u32 sdfGetUniqueChunkValue(SdfModel *model);
 
 extern s32 scrReadIntParameter(s32 idx);
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
