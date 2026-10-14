@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "eff_pcp_fade_timer.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -2176,27 +2177,6 @@ void effPcpSetLongCompactColor(EffPCPCompactFadeWork *work, u32 val) {
 void effPcpSetLongCompactFadeInput(EffPCPCompactFadeWork *work, f32 input) {
     work->unk34 = input;
 }
-
-/* Timer constructors copy these parameter prefixes before initializing
-   the live source/target colors and frame counter. */
-typedef struct EffPCPFadeTimerParams {
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    u32 color;
-    u8 pad10[4];
-    u32 unk14;
-    u32 unk18;
-    u32 width;
-    u32 height;
-} EffPCPFadeTimerParams;
-
-typedef struct EffPCPFadeTimer {
-    EffPCPFadeTimerParams params;
-    u32 colorFrom;
-    u32 colorTo;
-    s32 frame;
-} EffPCPFadeTimer;
 
 void *effPcpCopyWork(src)
     EffPCPFadeTimerParams *src;
