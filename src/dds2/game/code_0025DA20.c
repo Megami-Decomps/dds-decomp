@@ -1662,7 +1662,7 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BC0);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424BD0);
 
-void func_00260708(const s32 *stockGroup) {
+void mnuCreateCampShopPopupTasks(const s32 *stockGroup) {
     MenuTerminalContext *scene = mnuTerminalCreateContext();
     KwlnTask *drawTask;
     KwlnTask *fadeTask;
@@ -3184,14 +3184,14 @@ s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
     return dispatchResult;
 }
 
-s32 func_002633F0(KwlnTask *callbackContext) {
+s32 evtStartProgressResultPrimaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_00263448(KwlnTask *callbackContext) {
+s32 evtStartProgressResultSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3216,14 +3216,14 @@ s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
     return dispatchResult;
 }
 
-s32 func_00263658(KwlnTask *callbackContext) {
+s32 mnuStartTerminalPanelPrimaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     mnuDrawCommandPhaseTransition(stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 func_002636B0(KwlnTask *callbackContext) {
+s32 mnuStartTerminalPanelSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0026C900();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -3478,7 +3478,7 @@ s32 evtIsAllowedId(s32 itemId) {
 }
 
 /* Add progress, treating zero as one. The unsigned check also clamps negative totals. */
-s32 func_00263F50(s32 progressDelta) {
+s32 evtApplyShopProgressDelta(s32 progressDelta) {
     if (progressDelta == 0) {
         progressDelta = 1;
     }
@@ -3512,7 +3512,7 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
             datGameState->inventory.counts[itemId] += state->multiplier;
         }
         if (!evtIsAllowedId(itemId)) {
-            func_00263F50(total / 100);
+            evtApplyShopProgressDelta(total / 100);
         }
         break;
     case 4:
@@ -3521,7 +3521,7 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
         if (itemId == 0x54) {
             mdlFlagClear(0xA20);
         }
-        func_00263F50(total / 100);
+        evtApplyShopProgressDelta(total / 100);
         break;
     }
     values->value = values->price;

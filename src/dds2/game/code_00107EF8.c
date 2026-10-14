@@ -1247,7 +1247,7 @@ u8 mnuCheckCampStateAndAcknowledge(void) {
 
 void evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {
     evtCreateSkyTask();
-    func_00260708(campMode);
+    mnuCreateCampShopPopupTasks(campMode);
 }
 
 u32 evtDestroySkyAndCampTasks(void) {
