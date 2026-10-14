@@ -15,6 +15,7 @@
 #include "common.h"
 #include "eff_matrix4.h"
 #include "eff_active_resource.h"
+#include "eff_frame_asset.h"
 #include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
 #include "eff_random_mod.h"
@@ -1488,20 +1489,6 @@ typedef struct EffFrameState {
     u8 *asset;          // 0x04
     struct SdfMemBlock *allocation; // 0x08: allocation descriptor
 } EffFrameState;
-
-/* Per-instance frame storage and transform rows, as accessed by reset/initialization. */
-typedef struct EffFrameAsset {
-    u8 pad_00[8];       // 0x00
-    u32 frameCount;     // 0x08
-    u8 pad_0C[0xC];     // 0x0C
-    s32 *animationFrames; // 0x18
-    void *frameStorage; // 0x1C
-    f32 *transformRows; // 0x20
-    u32 pad_24;
-    u32 *colorRows; // 0x28
-} EffFrameAsset;
-
-
 
 void effClearBillFrames(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;

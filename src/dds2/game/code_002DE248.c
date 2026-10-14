@@ -17,6 +17,7 @@
 #include "common.h"
 #include "eff_matrix4.h"
 #include "eff_active_resource.h"
+#include "eff_frame_asset.h"
 #include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
 #include "btl_effect_position.h"
@@ -1666,18 +1667,6 @@ void effSetBillboardColor(s32 work, u32 value) {
 void effSetBillboardMatrixComponent(EffBillboardWork *work, float value) {
     work->scale = value;
 }
-
-/* DDS1/DDS2 frame asset: storage at +0x1C, count at +0x08. */
-typedef struct EffFrameAsset {
-    u8 pad_00[8];
-    u32 frameCount;
-    u8 pad_0C[0xC];
-    u32 *animationFrames; // 0x18, per-frame reset flags
-    void *frameStorage;
-    f32 *transformRows;
-    u32 pad_24;
-    u32 *colorRows;
-} EffFrameAsset;
 
 /* Per-instance frame entries and the descriptor that owns their storage. */
 typedef struct EffFrameState {
