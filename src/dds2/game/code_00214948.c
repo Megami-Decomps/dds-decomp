@@ -205,7 +205,7 @@ extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
-extern s32 func_001AC0F8(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
@@ -879,7 +879,7 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
             break;
         }
     }
-    func_001AC0F8((void *)actor, list, 1, 2, 0);
+    btlBuildUnitIndexList((void *)actor, list, 1, 2, 0);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -914,7 +914,7 @@ INCLUDE_ASM(const s32, "game/code_00214948", func_00216B40);
 
 u32 btlAppendSelfAfterTargetScan(s32 battle) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    func_001AC0F8((void *)battle, list, 1, 1, 0);
+    btlBuildUnitIndexList((void *)battle, list, 1, 1, 0);
     btlGetIndexListCount(list);
     btlAppendIndexListEntry(((ActionStateLink *)battle)->indexWork.indices, ((ActionStateLink *)battle)->unit);
     btlFreeIndexList(list);
