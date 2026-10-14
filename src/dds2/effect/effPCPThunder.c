@@ -15,6 +15,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_thunder_particle_records.h"
 #include "eff_pcp_thunder_cell.h"
 #include "eff_thunder_draw_params.h"
 #include "eff_math.h"
@@ -48,26 +49,6 @@ extern u8 effDefaultRandomState[];
 #define EFF_THUNDER_SINGLE_CELL 1
 #define EFF_THUNDER_ENDPOINT_VECTOR_BYTES 0x10
 #define EFF_THUNDER_MIN_ACTIVE_FRAMES 1
-
-/* Delay and active countdowns, followed by an alpha fade of the sampled color. */
-typedef struct {
-    u32 delayFrames;  /* 0x00: modulo startDelayRange */
-    u32 activeFrames; /* 0x04: modulo activeFrameRange, plus one */
-    u32 color;        /* 0x08: fades after activeFrames reaches zero */
-} EffThunderFrag; /* 0x0C */
-
-/* Each spark owns a separate particle cell system. */
-typedef struct {
-    s32 age;            /* 0x00 negative during the initial delay */
-    f32 verticalOffset; /* 0x04 */
-    f32 verticalSpeed;  /* 0x08 */
-    f32 orbitAngle;     /* 0x0C */
-    f32 angularSpeed;   /* 0x10 */
-    f32 orbitRadius;    /* 0x14 */
-    f32 heightOffset;   /* 0x18 subtracted from the moving Y position */
-    ParSystem *system;  /* 0x1C released by parReleaseCellSystem */
-} EffThunderSpark; /* 0x20 */
-
 
 /* Create the first vector variant from the first packed parameter block. */
 void *effPCPThunderCreate(void *parameterTable) {
