@@ -4149,7 +4149,7 @@ extern f32 fldSnapAngleToCompassPoint(f32);
 extern f32 fldSnapAngleToCompassOctant(f32);
 extern f32 fldSnapAngleToCardinalDirection(f32);
 extern s32 fldIsNearSpark(f32, f32, f32);
-extern void func_00136FE8(f32 *);
+extern void fldClassifyMovementAgainstZoneFaces(f32 *);
 extern void fldRestoreCameraModelColor(void);
 extern void fldClearCameraModelColor(void);
 extern void fldDisableCameraObjectFlag(void);
@@ -4425,7 +4425,7 @@ s32 func_0012FF48(void) {
         }
         ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
     }
-    func_00136FE8(position);
+    fldClassifyMovementAgainstZoneFaces(position);
     difference = fldAngleDifference(fldAreaState.angle, heading);
     step = difference / 5.0f;
     if (step < 0.0f) {
@@ -6979,7 +6979,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
 extern s32 D_0032E4CC[];
 
 /* Classify flagged zone faces after checking the current movement. */
-void func_00136FE8(f32 *position) {
+void fldClassifyMovementAgainstZoneFaces(f32 *position) {
     f32 point[3];
     f32 reference[3];
     f32 distanceVector[3];
