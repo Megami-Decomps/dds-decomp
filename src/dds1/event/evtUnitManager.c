@@ -14,6 +14,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_vu_matrix.h"
+#include "eff_quaternion_nlerp.h"
 
 
 
@@ -60,7 +61,6 @@ extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void kwlnBuildShortestArcQuaternion(void);
-extern void effMiscQuaternionNlerpVU(f32);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
