@@ -4436,7 +4436,7 @@ void fldTickWeatherEffectNodes(void) {
 }
 
 
-s32 func_0014D100(void) {
+s32 fldGetEncounterSelection(void) {
     return *(s16 *)((u8 *)D_003D62A4[0] + 0xC);
 }
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE78);
