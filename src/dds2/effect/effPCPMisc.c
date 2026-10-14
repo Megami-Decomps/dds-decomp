@@ -1,5 +1,5 @@
 #include "common.h"
-#include "eff_pcp_beam_draw_params.h"
+#include "eff_packet_params.h"
 #include "eff_pcp_fade_timer.h"
 #include "btl_effect_position.h"
 #include "sdf_trig.h"
@@ -4026,7 +4026,7 @@ void effPcpSetScaledThunderScale(EffPCPGrowWork *work, f32 val) {
 }
 
 /* Shared draw-request parameters are cleared before creating a beam. */
-extern EffPCPBeamDrawParams D_004520B0;
+extern EffPacketParams D_004520B0;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
@@ -4063,7 +4063,7 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
 extern u8 D_003B1F70[];
 extern SdfPoolNode *D_003B1FB8[];
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffPCPBeamDrawParams *params);
+extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
@@ -4090,14 +4090,14 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     sdfConsAppendAssetPacket(list, node->assetHandle, 0);
     count = node->vertexCount;
     D_004520B0.colors = node->colors;
-    D_004520B0.points = node->points;
+    D_004520B0.positions = (u128 *)node->points;
     D_004520B0.color = node->color;
     D_004520B0.vertexCount = D_004520B0.parameterCount = 12;
-    D_004520B0.parameters = D_003B1F70;
+    D_004520B0.parameters = (u32 *)D_003B1F70;
     while (count >= 12) {
         count -= 8;
         sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_004520B0));
-        D_004520B0.points += 32;
+        D_004520B0.positions += 8;
         D_004520B0.colors += 8;
     }
     if (count >= 8) {
