@@ -21,6 +21,7 @@
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
 #include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
@@ -1717,8 +1718,6 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequ
 extern void fldDestroyTitleTask();
 
 extern void fldFreeSceneResources();
-
-extern void fldPlayPendingSounds();
 
 extern void fldReleaseObjectSlots();
 
