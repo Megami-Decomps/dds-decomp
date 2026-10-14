@@ -404,7 +404,6 @@ u8 scrIsCurrentWorkTask(u32 expectedValue) {
 
 extern void sdfDebugPrintf(const char *, ...);
 extern void *sdfAllocateBlockBySizeThreshold(s32);
-extern void sdfFreeMemoryFromEitherHeap(void *);
 
 /* Channel table row: a file name, then {destination slot, unused} pairs ending with a null slot. */
 typedef struct SdfResourceTable {
