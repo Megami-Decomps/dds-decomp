@@ -836,7 +836,7 @@ void fldReleaseCurrentBgm(void) {
 }
 
 void func_00144F48(void) {
-    func_00341CA8();
+    sndQueueNoPayloadCommand1A0();
 }
 
 void fldPlayCurrentBgmSound(void) {
