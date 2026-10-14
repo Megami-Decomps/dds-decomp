@@ -4038,6 +4038,7 @@
 0x00263380	evtOpenProgressResultPopupWhenIdle	inferred	Waits for dispatch and message-window idle before opening the progress result popup. [names_reviewed15.tsv]
 0x002633F0	evtStartProgressResultPrimaryTransition	inferred	Progress-result transition callback draws the shop panel and command transition, then installs the primary operation handler. [high-volume naming lane, 2026-10-14]
 0x00263448	evtStartProgressResultSecondaryTransition	inferred	Progress-result transition callback advances the secondary operation and installs its handler. [high-volume naming lane, 2026-10-14]
+0x00263490	mnuStartShopRowMessage	inferred	Callback registered at 0x003CE544 in the D_003CE498 camp popup table; reads MenuTerminalContext.shopRow, selects its messageSet and flag-dependent display entry, then starts that shop-row message.
 0x00263658	mnuStartTerminalPanelPrimaryTransition	inferred	Terminal-panel transition callback draws the shop panel and command transition, then installs the primary operation handler. [high-volume naming lane, 2026-10-14]
 0x002636B0	mnuStartTerminalPanelSecondaryTransition	inferred	Terminal-panel transition callback advances the secondary operation and installs its handler. [high-volume naming lane, 2026-10-14]
 0x002636F8	evtResetStateProgressTimer	inferred	Clears the context's progress timer and submits its primary scene object's child to func_002B8988.
