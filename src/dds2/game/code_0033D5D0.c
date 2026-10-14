@@ -137,7 +137,7 @@ extern s32 sceCdSearchFile(void *, s32);
 extern DevState *sdfDevCreateCallbackState(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 arg2);
 
-extern s32 func_0033F898(const char *, void **);
+extern s32 sdfDevResolvePathForWorker(const char *, void **);
 
 extern void sdfDevEnqueueStateAndWakeWorker(DevState *);
 
@@ -1550,7 +1550,7 @@ char *sdfDevAllocateWorkerPath(char *path, s32 worker) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
+INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfDevResolvePathForWorker);
 
 /* Allocate a request state and retain the callback's opaque context word. */
 DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
@@ -1570,7 +1570,7 @@ DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
 DevState *sdfDevCreateCallbackState(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext) {
     void *resource;
-    s32 workerIndex = func_0033F898(path, &resource);
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resource);
     DevState *state;
 
     if (workerIndex < 0) {
@@ -1585,7 +1585,7 @@ DevState *sdfDevCreateCallbackState(const char *path, void (*callback)(DevState 
 DevState *sdfDevCreateModeState(const char *path, void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
     void *resource;
-    s32 workerIndex = func_0033F898(path, &resource);
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resource);
     DevState *state;
 
     if (workerIndex < 0) {
@@ -1680,7 +1680,7 @@ s32 sdfDevQueueReleaseState(DevState *state) {
 DevState *sdfDevCreateRequest(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
     void *resource;
-    s32 workerIndex = func_0033F898(path, &resource);
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resource);
     DevState *state;
 
     if (workerIndex < 0) {
@@ -1699,7 +1699,7 @@ DevState *sdfDevOpenRequest(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(DevState *, s32, s32, s32, s32),
                         s32 callbackContext, s32 options) {
     void *resource;
-    s32 workerIndex = func_0033F898(path, &resource);
+    s32 workerIndex = sdfDevResolvePathForWorker(path, &resource);
     DevState *state;
 
     if (workerIndex < 0) {
