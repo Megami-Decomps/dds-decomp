@@ -4,6 +4,7 @@
 #include "eff_resource_list.h"
 #include "mnu_staff.h"
 #include "brs_task.h"
+#include "brs_task_poll_done_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
@@ -632,8 +633,8 @@ u32 brsTaskAllowUpdate(void) {
     return 1;
 }
 
-void brsTaskPollDone(void) {
-    brsTaskConsumeDone();
+s32 brsTaskPollDone(void) {
+    return brsTaskConsumeDone();
 }
 
 s8 brsTaskHasPendingRows(void) {

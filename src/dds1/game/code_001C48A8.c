@@ -1074,7 +1074,7 @@ extern s32 fldGetResourceReadyFlag();
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern s32 brsTaskPollDone();
+#include "brs_task_poll_done_api.h"
 
 /* Drive field loading or dispatch linked nodes to state 30; return 0xB while pending. */
 u32 fldStepAreaLoad(BattleSceneWork *work) {
