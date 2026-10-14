@@ -1015,7 +1015,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 }
 
 struct RefObj;
-extern SdfTex *func_002DDD60(void *, struct RefObj *);
+extern SdfTex *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 extern s32 D_003BE0E0[];
 
@@ -1032,7 +1032,7 @@ void btlDrawIconAtSize(SdfPoolNode *surface, s32 x, s32 y,
     s32 yFixed;
 
     battle = (BtlState *)btlGetRuntime();
-    texture = func_002DDD60(surface, (struct RefObj *)battle->buttonTextureHandle);
+    texture = sdfGetOrCreateTextureForReference(surface, (struct RefObj *)battle->buttonTextureHandle);
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     sdfConsCreateDrawPacket(packet, texture, 0);
@@ -1103,7 +1103,7 @@ void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32
         case 0x4000: uv = D_003BE1A0; break;
         default: uv = 0; break;
         }
-        texture = func_002DDD60(surface, (struct RefObj *)((BtlState *)btlGetRuntime())->buttonTextureHandle);
+        texture = sdfGetOrCreateTextureForReference(surface, (struct RefObj *)((BtlState *)btlGetRuntime())->buttonTextureHandle);
         packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(packet);
         sdfConsCreateDrawPacket(packet, texture, 0);

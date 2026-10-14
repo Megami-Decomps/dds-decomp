@@ -3631,7 +3631,7 @@ extern u32 D_003E9A50[20];
 extern u32 D_003E9AA0[12];
 extern u32 D_003E9AD0[20];
 extern u32 D_003E9B20[16];
-extern SdfTex *func_002DDD60(void *, RefObj *);
+extern SdfTex *sdfGetOrCreateTextureForReference(void *, RefObj *);
 struct SdfAsset;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
@@ -3676,9 +3676,9 @@ void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
                 texture = NULL;
                 goto setTexture;
             }
-            texture = func_002DDD60(surface, reference);
+            texture = sdfGetOrCreateTextureForReference(surface, reference);
         } else {
-            texture = func_002DDD60(surface, reference);
+            texture = sdfGetOrCreateTextureForReference(surface, reference);
         }
 setTexture:
         sdfSetAssetPrimaryTextureAddress(track->handle, texture);
