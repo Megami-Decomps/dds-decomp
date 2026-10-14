@@ -4371,7 +4371,8 @@
 0x00239DE0	mnuDrawMotionChangeLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
 0x0023A0D0	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state. [names_qp9.tsv]
 0x0023A4B0	evtDrawGroupListRow	evidence	strings "DISABLE"/"ALL"/"UNIT ALL" then the type-1 group names [names_M95_Event.tsv]
-0x0023B200	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds1/game/code_00235270.c:2449; Draws and handles the X/Y slot-vector editor, applies .1/.01 edits through evtSetSlotVector, and restores saved values on cancel. DDS2 twin 0x002560B0.
+0x0023B200	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds1/game/code_00235270.c:2449; Draws and handles the X/Y slot-vector editor, uses evtNoOpXYSlotVectorEditorRow for the frame's blank row, applies .1/.01 edits through evtSetSlotVector, and restores saved values on cancel. DDS2 twin 0x002560B0.
+0x0023B1F8	evtNoOpXYSlotVectorEditorRow	inferred	Empty row callback passed to evtDrawMenuFrame by evtDrawAndHandleXYSlotVectorEditor; the editor draws its values directly. DDS2 twin at 0x002560A8.
 0x0023B848	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
 0x0023B8F8	mnuDrawTimedPrompt	inferred	Window builder with a countdown at work+0x23E4 and confirm/cancel from the pad state
 0x0023B9D8	evtSetRuntimeCommandValues	inferred	Stores the three supplied values in successive runtime command fields at offsets 0x23E4, 0x23E8 and 0x23EC.
