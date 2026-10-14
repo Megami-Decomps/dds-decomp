@@ -4,6 +4,7 @@
 #include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
+#include "mnu_camp_font_api.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
@@ -3593,7 +3594,6 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 }
 
 extern f32 D_0037F590[];
-extern void mnuCampLinkFontGlyph();
 extern void fldSetTitleDrawMode();
 extern void kwlnCancelConfiguredFadeFrames();
 extern s32 sdfCheckPendingWorkWithInterrupts();
