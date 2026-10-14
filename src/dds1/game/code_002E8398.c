@@ -4,6 +4,7 @@
 #include "eff_random_mod.h"
 #include "clock_time.h"
 #include "sdf_cd_clock.h"
+#include "sdf_kernel_thread_param.h"
 
 extern s8 D_003BDA80;
 extern u16 D_00398910[];
@@ -124,19 +125,6 @@ void sdfServiceUnblockedWorkerThread(void) {
         }
     }
 }
-
-/* Native CreateThread storage has six modeled fields and an untouched tail.
- * The static descriptor and sdfCreateThread's cleared workspace both span 0x30.
- * _gp is the linker's GP address, as in the EE kernel API. */
-typedef struct {
-    s32 status;
-    void (*entry)(void);
-    void *stack;
-    s32 stackSize;
-    void *gp;
-    s32 priority;
-    u8 opaque18[0x18];
-} SdfKernelThreadParam; /* native descriptor storage: 0x30 bytes */
 
 extern SdfKernelThreadParam D_003FB000;
 extern u8 D_003FC080[];
