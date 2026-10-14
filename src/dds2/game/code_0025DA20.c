@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
 #include "kwln_task_add_child.h"
@@ -3379,7 +3380,6 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void dspSetActive(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
@@ -4032,7 +4032,6 @@ extern u32 D_003CE460[];
 extern char D_00437840[];
 extern void dspAdvanceMessageWindowControl();
 extern s32 mnuCampResolveProgressTierValue();
-extern void dspSetActive();
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
 extern s32 sprintf(char *, const char *, ...);

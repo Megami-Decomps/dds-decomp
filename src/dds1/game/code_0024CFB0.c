@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"
 #include "kwln_task_state.h"
@@ -83,7 +84,6 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
 extern void dspRequestMessageWindowModeOne(void);
 #include "dds3_world_secondary.h"
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void dspSetActive();
 extern void itfPanelSetStatus(s32, s32);
 extern void itfPanelSetPairFirst(s32, s32);
 extern void itfMesStartEntry(s32, s32, s32);
