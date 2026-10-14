@@ -16,6 +16,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_camera_color_track_api.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_shop.h"
