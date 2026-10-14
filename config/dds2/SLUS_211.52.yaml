@@ -415,7 +415,7 @@ segments:
       - [0x3293D0, .rodata, game/code_0029BC58]
       - [0x329550, .rodata, game/code_0029CC90]
       - [0x329560, .rodata, game/code_0029DF18]
-      - [0x329590, .rodata, game/code_002A1820]
+      - [0x3295B0, .rodata, game/code_002A1820]  # result-row palettes at 0x428590/0x4285A0 belong to the preceding consumer
       - [0x3297A0, .rodata, game/code_002A5260]
       - [0x32B3C8, .rodata, game/code_002A8048]  # `movieMan` (func_002A8080)
       - [0x32B440, .rodata, game/code_002A9068]  # 16-aligned block start (jump tables); movie strings end at 0x42A438
