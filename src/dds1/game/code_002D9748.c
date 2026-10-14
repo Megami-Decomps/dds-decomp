@@ -1,6 +1,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
@@ -86,7 +87,6 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *, DevRequest *, u8 *);
 void sdfAppendAssetToResourceList(DevRequest *, SdfAsset *);
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
-void sdfPostmultiplyVuMatrixFromMemory(void *);
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
 extern void sdfBuildSubParameterTransform(SdfDrawTransform *, const SdfSubParam *);
 extern u16 D_00398198[];

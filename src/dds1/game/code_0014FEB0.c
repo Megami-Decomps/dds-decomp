@@ -25,7 +25,7 @@ EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
     return copy;
 }
 
-extern s32 func_003003F0(const char *format, ...);
+extern s32 sdfDebugPrintf(const char *format, ...);
 
 /* Normalize legacy payloads before the effect manager constructs their nodes. */
 void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
@@ -61,7 +61,7 @@ void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
                 *(f32 *)(payload + 0x10);
         }
         if (type < 2 && descriptor->arg == 0) {
-            func_003003F0("effManager:par spiral old version!![%f]\n", descriptor->version);
+            sdfDebugPrintf("effManager:par spiral old version!![%f]\n", descriptor->version);
         }
     }
 }

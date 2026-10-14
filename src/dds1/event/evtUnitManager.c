@@ -941,7 +941,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
 
 
 extern s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit);
-extern void func_003003F0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 /* Run a copy of the unit until evtUnitHasReachedMotionEndpoint reports done, and derive its per-step Y speed. */
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC060);
@@ -971,7 +971,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         unit->effObj->inner->rotation[i] = savedB[i];
     }
     if (count == 0) {
-        func_003003F0("ymove frameno = 0\n");
+        sdfDebugPrintf("ymove frameno = 0\n");
         unit->stepCount = 0;
         unit->speedY = 0;
         return 0;
@@ -982,7 +982,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     VU0_STORE_VF(vf10, delta);
     unit->stepCount = count;
     unit->speedY = delta[1] / (f32)count;
-    func_003003F0("ymove frameno = %d addvalue = %f total yzahyo=%f\n", count, unit->speedY, delta[1]);
+    sdfDebugPrintf("ymove frameno = %d addvalue = %f total yzahyo=%f\n", count, unit->speedY, delta[1]);
     return count;
 }
 

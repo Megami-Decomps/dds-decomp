@@ -359,11 +359,11 @@ void effFloorModelListPush(EffModelOwner *obj) {
 
 extern char D_003B2AA0[];
 
-extern void func_003003F0(const char *, void *);
+extern void sdfDebugPrintf(const char *, void *);
 
 void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->object != NULL) {
-        func_003003F0(D_003B2AA0, node->object);
+        sdfDebugPrintf(D_003B2AA0, node->object);
         effDestroyModelOwner(node->object);
         node->object = NULL;
     }

@@ -1,9 +1,11 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_actor_transform_parameters.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -139,7 +141,7 @@ typedef struct BattleRuntimeState {
 
 extern BattleRuntimeState btlRuntimeState;
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
@@ -321,7 +323,7 @@ void btlRequestSceneEventResources(void) {
     }
     eventId = (s16)rawEventId;
     battleState->eventTaskId = eventId;
-    func_003014F0(scriptPath, D_003A6738, eventId - eventId % 10, eventId, eventId);
+    sprintf(scriptPath, D_003A6738, eventId - eventId % 10, eventId, eventId);
     battleState->eventAssets = sdfReadNamedResource(scriptPath, &battleState->scriptHandle, 0);
     btlBossDebugPrintf(D_003A6758, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
@@ -1085,9 +1087,9 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A68F8);
 
 void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
     if (isDevil == 0) {
-        func_003014F0(pathOut, "%spc%03X_ms.LB", "/model/human/", modelId);
+        sprintf(pathOut, "%spc%03X_ms.LB", "/model/human/", modelId);
     } else {
-        func_003014F0(pathOut, "%s%03X_ms.LB", "/model/devil/", modelId);
+        sprintf(pathOut, "%s%03X_ms.LB", "/model/devil/", modelId);
     }
 }
 
@@ -1316,7 +1318,7 @@ void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s
                          depth, 0);
 }
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
 #include "sdf_packet_alloc.h"
 
@@ -1337,7 +1339,7 @@ void btlDrawScaledFrameBufferQuad(SdfListHead *list, s32 primitive, s32 color, f
 
     packet = (void *)sdfAllocPacketAligned(0x20);
     index = kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary(list, (u32)(kwlnFrameDrawPacketRecords + index * 0x1F40), (SdfDmaNode *)packet);
+    sdfAppendDmaPrimary(list, (u32)(kwlnFrameDrawPacketRecords[index].baseBytes), (SdfDmaNode *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1386,7 +1388,7 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
@@ -1421,7 +1423,7 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
     tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
 }
 
@@ -2160,14 +2162,6 @@ void btlInitializeBattleDebugMenu(void) {
     state->unk_E0E = -1;
 }
 
-/* Battle debug editors use the same complete records as their live owners. */
-typedef struct BtlDebugTransform {
-    f32 position[3];
-    f32 overrideEnabled;
-    f32 reach;
-    f32 height;
-} BtlDebugTransform;
-
 typedef struct BtlDebugPosition {
     f32 value[4];
 } __attribute__((aligned(16))) BtlDebugPosition;
@@ -2188,7 +2182,6 @@ typedef struct BtlParameterEditor {
     s32 rowCount;
 } BtlParameterEditor;
 
-typedef char BtlDebugTransformSize[sizeof(BtlDebugTransform) == 0x18 ? 1 : -1];
 typedef char BtlParameterEditorRowSize[sizeof(BtlParameterEditorRow) == 0x18 ? 1 : -1];
 
 extern DatPartyRecord *D_003BAA04;
@@ -2203,7 +2196,7 @@ extern char D_003BBAB0[];
 extern u16 D_003D75D0[7];
 extern DatPartyRecord D_003D75E0;
 extern BtlDebugPosition D_003D7790;
-extern BtlDebugTransform D_003D77A0;
+extern BtlActorTransformParameters D_003D77A0;
 extern BtlActorStatusRecord D_003D77C0;
 extern BtlActorMotionSlot D_003D7A30;
 extern u8 D_003BD870;
@@ -2246,7 +2239,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     BtlUnit *unit;
     BtlRuntimeTask *dependent;
     BtlActorStatusRecord *record;
-    BtlDebugTransform *transform;
+    BtlActorTransformParameters *transform;
     u32 motion;
     f32 savedOverride;
 
@@ -2413,7 +2406,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if (state->unk_E0E > 0) {
             state->unk_E0E--;
-            func_003014F0(text, D_003BBAB0, state->unk_E0E / state->timingRate + 1);
+            sprintf(text, D_003BBAB0, state->unk_E0E / state->timingRate + 1);
             btlDebugDrawText(32, 400, 6, text);
         }
         if (state->unk_E0E == 0) {
@@ -2430,7 +2423,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             }
         }
         if (state->unk_E0E <= 0) {
-            func_003014F0(text, "%3d/%3d\n", (s32)btlGetUnitModelCurrentFrame(unit),
+            sprintf(text, "%3d/%3d\n", (s32)btlGetUnitModelCurrentFrame(unit),
                 btlGetUnitModelFrameCount(unit));
             btlDebugDrawText(32, 400, 0, text);
         }
@@ -2473,7 +2466,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 btlRefreshUnitMotionSelection(unit);
                 state->debug.unk00 = 2;
             } else {
-                transform = (BtlDebugTransform *)btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
+                transform = (BtlActorTransformParameters *)btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
                 if (sdfPadButtonStates[2] < 0) {
                     record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
                     transform->reach = record->unk18;
@@ -2482,7 +2475,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                     transform->position[1] = record->position[1];
                     transform->position[2] = record->position[2];
                 }
-                memcpy(&D_003D77A0, transform, sizeof(D_003D77A0));
+                memcpy(&D_003D77A0, transform, sizeof(BtlActorTransformParameters));
                 btlDebugMenuSetupNoOp(&D_00361728);
                 btlDebugMenuBeforeRecordNoOp();
                 btlDebugMenuRecordNoOp(&D_00361728);
@@ -2632,56 +2625,56 @@ void btlWriteActorModelTableFile(void) {
     buffer = sdfAllocateBlockBySizeThreshold(10000);
     cursor = buffer;
     if (unit->status.flags & 0x200) {
-        cursor += func_003014F0(cursor, D_003BBAB8, D_00361388[0]);
+        cursor += sprintf(cursor, D_003BBAB8, D_00361388[0]);
     } else {
-        cursor += func_003014F0(cursor, D_003BBAB8, D_00361388[1]);
+        cursor += sprintf(cursor, D_003BBAB8, D_00361388[1]);
     }
-    cursor += func_003014F0(cursor, "ID:0x%X\n", unit->species);
-    cursor += func_003014F0(cursor, "%s: %.2f,%.2f,%.2f\n", D_00361388[2],
+    cursor += sprintf(cursor, "ID:0x%X\n", unit->species);
+    cursor += sprintf(cursor, "%s: %.2f,%.2f,%.2f\n", D_00361388[2],
                             (double)D_003D77C0.position[0], (double)D_003D77C0.position[1],
                             (double)D_003D77C0.position[2]);
-    cursor += func_003014F0(cursor, "%s: %.2f\n", D_00361388[3], (double)D_003D77C0.scale);
-    cursor += func_003014F0(cursor, "%s: %.2f\n", D_00361388[4], (double)D_003D77C0.z);
-    cursor += func_003014F0(cursor, "%s: %.2f\n", D_00361388[5], (double)D_003D77C0.unk18);
-    cursor += func_003014F0(cursor, "%s: %.2f\n", D_00361388[6], (double)D_003D77C0.unk1C);
-    cursor += func_003014F0(cursor, "%s: %.2f\n", D_00361388[7], (double)D_003D77C0.unk20);
-    cursor += func_003014F0(cursor, "%s: %.2f\n", D_00361388[8], (double)D_003D77C0.unk24);
-    cursor += func_003014F0(cursor, D_003BBAC0, D_00361388[9]);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[3], (double)D_003D77C0.scale);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[4], (double)D_003D77C0.z);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[5], (double)D_003D77C0.unk18);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[6], (double)D_003D77C0.unk1C);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[7], (double)D_003D77C0.unk20);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[8], (double)D_003D77C0.unk24);
+    cursor += sprintf(cursor, D_003BBAC0, D_00361388[9]);
     switch (D_003D77C0.shadowKind) {
-    case 0: cursor += func_003014F0(cursor, D_003BBAB8, "UV_SHADOW_NON"); break;
-    case 1: cursor += func_003014F0(cursor, D_003BBAB8, "UV_SHADOW_S"); break;
-    case 2: cursor += func_003014F0(cursor, D_003BBAB8, "UV_SHADOW_M"); break;
-    case 3: cursor += func_003014F0(cursor, D_003BBAB8, "UV_SHADOW_L"); break;
-    case 4: cursor += func_003014F0(cursor, D_003BBAB8, "UV_SHADOW_LL"); break;
+    case 0: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_NON"); break;
+    case 1: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_S"); break;
+    case 2: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_M"); break;
+    case 3: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_L"); break;
+    case 4: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_LL"); break;
     }
-    cursor += func_003014F0(cursor, D_003BBAC8, D_00361388[10], D_003D77C0.model);
-    cursor += func_003014F0(cursor, D_003BBAD0, D_00361388[11]);
+    cursor += sprintf(cursor, D_003BBAC8, D_00361388[10], D_003D77C0.model);
+    cursor += sprintf(cursor, D_003BBAD0, D_00361388[11]);
     rowCursor = (u8 *)record;
     for (i = 0; i < 29; i++) {
         motion = (BtlActorMotionSlot *)(rowCursor + 0x2C);
-        cursor += func_003014F0(cursor, D_003BBAD8, i);
+        cursor += sprintf(cursor, D_003BBAD8, i);
         switch (motion->moveKind) {
-        case 0: cursor += func_003014F0(cursor, D_003BBAE0, "UV_MV_NON "); break;
-        case 1: cursor += func_003014F0(cursor, D_003BBAE0, "UV_MV_ROT "); break;
-        case 2: cursor += func_003014F0(cursor, D_003BBAE0, "UV_MV_DASH"); break;
+        case 0: cursor += sprintf(cursor, D_003BBAE0, "UV_MV_NON "); break;
+        case 1: cursor += sprintf(cursor, D_003BBAE0, "UV_MV_ROT "); break;
+        case 2: cursor += sprintf(cursor, D_003BBAE0, "UV_MV_DASH"); break;
         }
-        cursor += func_003014F0(cursor, D_003BBAE8, motion->frameCount);
+        cursor += sprintf(cursor, D_003BBAE8, motion->frameCount);
         switch (motion->kind) {
-        case 0: cursor += func_003014F0(cursor, "{%s,%2d},", "UV_END_NORM ", motion->alphaStartFrame); break;
-        case 1: cursor += func_003014F0(cursor, "{%s,%2d},", "UV_END_PAUSE", motion->alphaStartFrame); break;
-        case 2: cursor += func_003014F0(cursor, "{%s,%2d},", "UV_END_OUT  ", motion->alphaStartFrame); break;
-        case 3: cursor += func_003014F0(cursor, "{%s,%2d},", "UV_END_STOP ", motion->alphaStartFrame); break;
+        case 0: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_NORM ", motion->alphaStartFrame); break;
+        case 1: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_PAUSE", motion->alphaStartFrame); break;
+        case 2: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_OUT  ", motion->alphaStartFrame); break;
+        case 3: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_STOP ", motion->alphaStartFrame); break;
         }
         rowCursor += sizeof(BtlActorMotionSlot);
-        cursor += func_003014F0(cursor, D_003BBAF0, (double)motion->alphaFrameScale);
-        cursor += func_003014F0(cursor, D_003BBAF8, (double)motion->unk0C);
-        cursor += func_003014F0(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
-        cursor += func_003014F0(cursor, D_003BBB00);
+        cursor += sprintf(cursor, D_003BBAF0, (double)motion->alphaFrameScale);
+        cursor += sprintf(cursor, D_003BBAF8, (double)motion->unk0C);
+        cursor += sprintf(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
+        cursor += sprintf(cursor, D_003BBB00);
     }
     if (sdfPfsDebugMode) {
         fd = func_0030E8F0("pfs0:/model/table.txt", 0x602, 0666);
     } else {
-        func_003014F0(path, "%smodel/table.txt", sdfDevGetPathBuffer());
+        sprintf(path, "%smodel/table.txt", sdfDevGetPathBuffer());
         fd = func_0030E8F0(path, 0x602);
     }
     func_0030F190(fd, buffer, cursor - buffer);

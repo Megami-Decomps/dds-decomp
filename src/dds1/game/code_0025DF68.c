@@ -171,7 +171,7 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
 }
 
 extern s32 ptyCountBulletItem(s32);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC4F0[];
@@ -198,7 +198,7 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
         if (item->mode == 2) {
             quantity = ptyCountBulletItem(item->id);
         }
-        func_003014F0(text, D_003BC4F0, quantity);
+        sprintf(text, D_003BC4F0, quantity);
         glyph = itfCreateTightFont3TextGlyph(0x1A70, 0xAA0, depth, style, text, 0);
         frFontDrawGlyphChain(glyph, 1, mode);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -267,7 +267,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
         style = (s32)(fade * 64.0f + 64.0f) | 0xA09DC300;
     }
     value = (s32)node->sortKeyPrimary;
-    func_003014F0(text, D_003BC500, value);
+    sprintf(text, D_003BC500, value);
     glyph = func_001978E8(0xFF0, (rowOffset + 0x9D) << 3, z, style, text, NULL);
     if (selected) {
         frFontSetChildChainFirstOption(glyph, 4);
@@ -362,7 +362,7 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, ShopScene *scene, s3
                       (D_0036C728[29][BRS_ICON_Y] + row * 21) << 3,
                       0, 0x100, 0, texture,
                       D_0036C728[29][BRS_ICON_ID], option);
-        func_003014F0(text, D_003BC4F0, scene->counter);
+        sprintf(text, D_003BC4F0, scene->counter);
         glyph = itfCreateTightFont3TextGlyph(0xDD0, (155 + row * 21) << 3, depth,
                               0xA09DC380, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
@@ -400,7 +400,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, ShopScene *
                       0, (u32)(opacity * 256.0f), 0, texture,
                       D_0036C728[29][BRS_ICON_ID], option);
         color = (s32)(opacity * 128.0f) | 0xA09DC300;
-        func_003014F0(text, D_003BC4F0, scene->counter);
+        sprintf(text, D_003BC4F0, scene->counter);
         glyph = itfCreateTightFont3TextGlyph(0xDD0, (155 + row * 21) << 3, depth,
                               color, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
@@ -454,7 +454,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
                   0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
     inner = object->list;
     if (inner->count != 0) {
-        func_003014F0(text, D_003BC508, 0);
+        sprintf(text, D_003BC508, 0);
         glyph = itfCreateTightFont3TextGlyph(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
@@ -472,7 +472,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
 
     effDrawSpriteWithCornerFade(x + (D_0036C728[25][BRS_ICON_X] << 4), y + (D_0036C728[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, D_0036C728[25][BRS_ICON_ID], option);
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
-    func_003014F0(text, D_003BC508, 0);
+    sprintf(text, D_003BC508, 0);
     glyph = itfCreateTightFont3TextGlyph(x + 0x17C0, y + 0x380, z, value, text, 0);
     frFontSetChildChainFirstOption(glyph, 4);
     frFontDrawGlyphChain(glyph, 1, option);
@@ -492,7 +492,7 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
                   0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
     inner = object->list;
     if (inner->count != 0) {
-        func_003014F0(text, D_003BC508, inner->cursor->camp.value * panel->counter);
+        sprintf(text, D_003BC508, inner->cursor->camp.value * panel->counter);
         glyph = itfCreateTightFont3TextGlyph(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frFontSetChildChainFirstOption(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
@@ -513,13 +513,13 @@ void mnuDrawShopCurrencyBalance(ShopScene *state, s32 style) {
         displayedValue = state->previousValue +
                          ((datGameState->header.currency - state->previousValue) * state->elapsedFrames) /
                              transitionFrames;
-        func_003014F0(text, D_003BC508, displayedValue);
+        sprintf(text, D_003BC508, displayedValue);
         if (state->elapsedFrames == transitionFrames) {
             state->previousValue = datGameState->header.currency;
             state->elapsedFrames = 0;
         }
     } else {
-        func_003014F0(text, D_003BC508, datGameState->header.currency);
+        sprintf(text, D_003BC508, datGameState->header.currency);
     }
 
     {

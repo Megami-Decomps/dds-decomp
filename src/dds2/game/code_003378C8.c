@@ -122,13 +122,13 @@ void sdfVuMultiplyNodeColors(VuWork *work, u32 color) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003378C8", func_00337970);
+INCLUDE_ASM(const s32, "game/code_003378C8", sdfVuInterpolateClipVertex);
 
-INCLUDE_ASM(const s32, "game/code_003378C8", func_003379F0);
+INCLUDE_ASM(const s32, "game/code_003378C8", sdfVuBuildClippedTriangleRefs);
 
-INCLUDE_ASM(const s32, "game/code_003378C8", func_00337FD8);
+INCLUDE_ASM(const s32, "game/code_003378C8", sdfVuBuildRingTriangleRefs);
 
-INCLUDE_ASM(const s32, "game/code_003378C8", func_003385C0);
+INCLUDE_ASM(const s32, "game/code_003378C8", sdfVuBuildIndexedTriangleRefs);
 
 void sdfVuEmitTexturedTriangleBatches(work)
     VuWork *work;

@@ -43,7 +43,7 @@ extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFo
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern char D_003BC7A0[];
 
 #define MNU_PANEL_ITEM_COUNT 5
@@ -1037,7 +1037,7 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
         color = 0xA09DC380;
     }
     color = uiBlendColors(color, color & ~0xFF, opacity);
-    func_003014F0(buffer, D_003BC7A0, value);
+    sprintf(buffer, D_003BC7A0, value);
     glyph = func_001978E8(x + 0x340, y + 0x28, depth, color, buffer, 0);
     frFontDrawGlyphChain(glyph, 1, layer);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);

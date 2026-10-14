@@ -6,6 +6,15 @@
 /* Return the runtime scheduler task's allocated argument block, or NULL. */
 void *btlGetTaskArguments(void *task);
 
+/* Category-stat damage task arguments, written by both title constructors. */
+typedef struct BtlCategoryStatDamageArgs {
+    struct BtlUnit *unit; /* 0x00 */
+    s32 amount;           /* 0x04: HP or MP cost. */
+    s32 category;         /* 0x08: indexes datCommandRecords. */
+} BtlCategoryStatDamageArgs;
+typedef char BtlCategoryStatDamageArgsSizeCheck[
+    (sizeof(BtlCategoryStatDamageArgs) == 0x0C) ? 1 : -1];
+
 /* The scene scheduler copies these request records into its argument block. */
 typedef struct BtlSceneCounterArgs {
 #ifdef VERSION_DDS1

@@ -311,7 +311,7 @@ extern MnuSpritePlacement D_0036B510[];
 extern struct EffectSlotSet *D_0036C698[];
 extern char D_003BC4C8[];
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Interpolate currency changes over twenty draws, with the native ticking sound. */
@@ -336,7 +336,7 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
     if (datGameState->header.currency != scene->displayedCurrency) {
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         scene->currencyFrame++;
-        func_003014F0(currencyText, D_003BC4C8,
+        sprintf(currencyText, D_003BC4C8,
                       scene->displayedCurrency +
                       (datGameState->header.currency - scene->displayedCurrency) *
                           scene->currencyFrame / 20);
@@ -345,7 +345,7 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
             scene->currencyFrame = 0;
         }
     } else {
-        func_003014F0(currencyText, D_003BC4C8, datGameState->header.currency);
+        sprintf(currencyText, D_003BC4C8, datGameState->header.currency);
     }
     itfDrawGlyphChainWithWidthQuery(x + 0x191, y + 0x39, depth, color,
                                     0, currencyText, 0, context);

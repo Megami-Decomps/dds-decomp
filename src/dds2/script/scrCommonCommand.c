@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "kwln_task_lifecycle.h"
 

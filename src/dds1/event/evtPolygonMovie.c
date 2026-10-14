@@ -65,7 +65,7 @@ extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
-extern void func_003003F0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 s32 evtPolygonMovieTestFlag(KwlnTask *task)
 {
@@ -679,7 +679,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
         case 21:
             work->subEntry21Data = (u8 *)sub + work->subEntries[i].offset;
             work->unk_F8 = work->subEntries[i].value;
-            func_003003F0("object table set ok.\n");
+            sdfDebugPrintf("object table set ok.\n");
             break;
         case 25:
             work->subEntry25Data = (u8 *)sub + work->subEntries[i].offset;
@@ -736,7 +736,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
         if (mnuQueryTitleSoundBusy() == 1) {
             mnuStopTitleVoicePlayback();
         }
-        func_003003F0("sound stop all. \n");
+        sdfDebugPrintf("sound stop all. \n");
         sdfReleaseChipBlock(work);
     }
 }
@@ -793,14 +793,14 @@ SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(u8 **out) {
     return handle;
 }
 
-s32 func_003014F0(char *output, const char *format, ...);
+s32 sprintf(char *output, const char *format, ...);
 
 s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3) {
-    func_003014F0(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
+    sprintf(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
                   event / 10 * 10, event, event, id, event, id);
-    func_003014F0(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+    sprintf(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
                   event / 10 * 10, event, event, id, event, id);
-    return func_003014F0(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+    return sprintf(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
                          event / 10 * 10, event, event, id, event, id);
 }
 
@@ -825,12 +825,12 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     PolyMovieWork *work;
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
-    func_003003F0(D_003ADD10);
+    sdfDebugPrintf(D_003ADD10);
     handle1 = sdfReadNamedResource(path1, &address1, 0);
     if (address1 == 0) {
         return NULL;
     }
-    func_003003F0(D_003ADD30);
+    sdfDebugPrintf(D_003ADD30);
     if (mode == 0) {
         handle2 = sdfReadNamedResource(path2, &address2, 0);
     } else {
@@ -838,17 +838,17 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     }
     if (mode == 0 && sdfPathExists(path3) == 1) {
         handle3 = sdfReadNamedResource(path3, &address3, 0);
-        func_003003F0(D_003ADD50);
+        sdfDebugPrintf(D_003ADD50);
     } else {
         handle3 = (SdfMemBlock *)evtPolygonMovieSynthesizePmd3Header((u8 **)&address3);
     }
-    func_003003F0(D_003ADD70);
+    sdfDebugPrintf(D_003ADD70);
     work = evtPolygonMovieAllocWork();
     evtPolygonMovieInitWork(work, (PmdHeader *)address1, (PmdHeader *)address2, (PmdHeader *)address3);
     if (work == NULL) {
         return NULL;
     }
-    func_003003F0(D_003ADD90);
+    sdfDebugPrintf(D_003ADD90);
     work->mainResource.handle = handle1;
     work->secondaryResource.handle = handle2;
     work->tertiaryResource.handle = handle3;

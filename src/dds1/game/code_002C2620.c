@@ -27,7 +27,7 @@ extern u32 D_003BD970;
 extern s32 D_003BD974;
 
 extern u32 sdfCounterGetDisplayWordPointer(void);
-extern void func_003014F0(char *, char *, s32);
+extern void sprintf(char *, char *, s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
@@ -667,7 +667,7 @@ u32 fldGetLmapStage(void) {
 void fldDisplayLocalMapCounterMessage(void) {
     char text[32];
 
-    func_003014F0(text, D_003BD250, sdfCounterGetDisplayWordPointer());
+    sprintf(text, D_003BD250, sdfCounterGetDisplayWordPointer());
     evtCopyEntryStringToActiveWindow(0, text);
     evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);

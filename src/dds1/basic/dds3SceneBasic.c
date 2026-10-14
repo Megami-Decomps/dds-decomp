@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "evt_world_object_api.h"
 #include "evt_world.h"
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
@@ -9,7 +10,6 @@ struct SdfMemBlock;
 
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern s32 scrCreateTaskForProcessId(s32, void *, s32);
-extern void evtReleaseSceneResource(EffWorldNode *worldNode);
 
 /* Release field resources before clearing the scene object's state word.
  * The scene resource handle/address are released separately. */

@@ -135,6 +135,15 @@ lines:
 `ASMBODY` lines are informational: they list functions whose body is mostly
 inline asm without a `libvu0`/`vu0 routine` marker, which don't count as C.
 
+For owned `.bss`/`.sbss`, the checker requires the complete native primary
+symbol inventory, exact object addresses and extents, and validated interior
+aliases. A proven `size:` in `symbol_addrs.txt` can distinguish an object's
+extent from alignment before the next primary. It must be positive and fit
+within that address interval; conflicting same-address sizes, oversized
+objects and aliases into the alignment gap still fail. Without an explicit
+extent, the full interval remains required. Do not infer a size merely to
+accommodate a draft's padding or representation.
+
 Always check the whole unit after an edit. A changed declaration, or even a
 new name, can change how other functions compile. Then build:
 

@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "ui_color.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
@@ -57,7 +58,7 @@ extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
 extern void effDrawSpriteWithWorkCornerColors(s32, s32, s32, s32, EffectSlotSet *, s32, void *, s32);
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
@@ -940,7 +941,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
@@ -957,7 +958,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_string_parameter_api.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -466,9 +467,9 @@ extern KwlnTask *mnuTitleSoundTask;
 extern char D_003771D8[];
 
 /* libc sprintf returns the signed vfprintf character count. */
-extern s32 func_003014F0(char *dst, const char *fmt, ...);
+extern s32 sprintf(char *dst, const char *fmt, ...);
 
-extern s32 func_003003F0(const char *fmt, ...);
+extern s32 sdfDebugPrintf(const char *fmt, ...);
 
 extern void mnuCreateTitleEffectTask(void);
 
@@ -738,11 +739,11 @@ void mnuPlayTitleVoiceFile(char *voiceArgument) {
     TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
 
     if (sdfSoundIsCommandBusy() != 0) {
-        func_003003F0("now playeng start...\n");
+        sdfDebugPrintf("now playeng start...\n");
         sdfSoundStopNamedPlayback();
     }
-    func_003014F0(voicePath, "%s%04d.ADB", D_003771D8 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
-    func_003003F0("--------------- VOICE -> %s\n", voicePath);
+    sprintf(voicePath, "%s%04d.ADB", D_003771D8 + MNU_TITLE_VOICE_PREFIX_BYTES * effectState->soundNameIndex, voiceArgument);
+    sdfDebugPrintf("--------------- VOICE -> %s\n", voicePath);
     sdfSoundSendNamedCommand(voicePath, 0x64);
     effectState->frameCounter = 0;
 }

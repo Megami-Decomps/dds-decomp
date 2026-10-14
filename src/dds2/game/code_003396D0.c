@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_pad_entry.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
@@ -178,7 +179,6 @@ extern SdfTex *D_00438A80;
 
 extern vu8 sdfCurrentBufferIndex;
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void sdfPostmultiplyVuMatrixFromMemory(void *matrix);
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void sdfPremultiplyVuMatrixFromMemory(void *matrix);
 
@@ -362,7 +362,7 @@ extern f32 D_00438A5C;
 
 extern f32 D_00438A60;
 
-extern f32 func_00353228(f32);
+extern f32 tanf(f32);
 
 /* Compose camera projection and screen parameters without reassociating floats. */
 void sdfCameraBuildProjection(SdfCamera *camera) {
@@ -383,7 +383,7 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
     VU0_LOAD_MATRIX(projectionMatrix);
     EE_MMI_UNIT_MATRIX(projectionMatrix);
     if (camera->flags & SDF_CAMERA_USE_FOV_FLAG) {
-        projectionScale = camera->height / (func_00353228(camera->fov * 0.5f) * 2.0f);
+        projectionScale = camera->height / (tanf(camera->fov * 0.5f) * 2.0f);
     } else {
         projectionScale = camera->scale;
     }
@@ -1377,6 +1377,30 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     sdfDevConsListInsert(node);
     return node;
 }
+
+/* Packed console glyph UVs for characters 0x20 through 0x7F. */
+u32 D_0040B810[96] __attribute__((aligned(8))) = {
+    0x00000000, 0x000000C0, 0x00000180, 0x00000240, 0x00000300, 0x000003C0, 0x00000480, 0x00000540,
+    0x00000600, 0x000006C0, 0x00C00000, 0x00C000C0, 0x00C00180, 0x00C00240, 0x00C00300, 0x00C003C0,
+    0x00C00480, 0x00C00540, 0x00C00600, 0x00C006C0, 0x01800000, 0x018000C0, 0x01800180, 0x01800240,
+    0x01800300, 0x018003C0, 0x01800480, 0x01800540, 0x01800600, 0x018006C0, 0x02400000, 0x024000C0,
+    0x02400180, 0x02400240, 0x02400300, 0x024003C0, 0x02400480, 0x02400540, 0x02400600, 0x024006C0,
+    0x03000000, 0x030000C0, 0x03000180, 0x03000240, 0x03000300, 0x030003C0, 0x03000480, 0x03000540,
+    0x03000600, 0x030006C0, 0x03C00000, 0x03C000C0, 0x03C00180, 0x03C00240, 0x03C00300, 0x03C003C0,
+    0x03C00480, 0x03C00540, 0x03C00600, 0x03C006C0, 0x04800000, 0x048000C0, 0x04800180, 0x04800240,
+    0x04800300, 0x048003C0, 0x04800480, 0x04800540, 0x04800600, 0x048006C0, 0x05400000, 0x054000C0,
+    0x05400180, 0x05400240, 0x05400300, 0x054003C0, 0x05400480, 0x05400540, 0x05400600, 0x054006C0,
+    0x06000000, 0x060000C0, 0x06000180, 0x06000240, 0x06000300, 0x060003C0, 0x06000480, 0x06000540,
+    0x06000600, 0x060006C0, 0x06C00000, 0x06C000C0, 0x06C00180, 0x06C00240, 0x06C00300, 0x06C003C0,
+};
+
+/* Mutable colors used by the device console and packet command setter. */
+u32 D_0040B990[16] = {
+    0x80808080, 0x80800000, 0x80000080, 0x80800080,
+    0x80008000, 0x80808000, 0x80008080, 0x80606060,
+    0x80202020, 0x80400000, 0x80000040, 0x80400040,
+    0x80004000, 0x80404000, 0x80004040, 0x00000000,
+};
 
 INCLUDE_RODATA(const s32, "game/code_003396D0", D_0042E258);
 

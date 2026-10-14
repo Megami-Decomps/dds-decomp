@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_thread_workspace_api.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
@@ -38,7 +39,6 @@ typedef struct SdfRequest {
 
 extern u8 D_0040B620[];
 
-extern void sdfPostmultiplyVuMatrixFromMemory();
 
 
 extern SdfStreamState D_0047BCC0;

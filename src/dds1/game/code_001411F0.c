@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
+#include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "common.h"
 #include "kwln_fade.h"
@@ -804,7 +805,7 @@ void fldCacheMapLabelLengths(s32 map) {
     D_003BD7D0 = strlen(D_0033EC90[i]);
 }
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 /* The base format occupies the first 16-byte-aligned AMB format record. */
 const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
@@ -824,15 +825,15 @@ void fldLoadSceneRecordTable(void) {
     area = fldAreaState.area;
     if (area == 0x1C) {
         if (mdlFlagTest(0x5E1)) {
-            func_003014F0(path, D_003A04B0, directory, fldAreaState.area);
+            sprintf(path, D_003A04B0, directory, fldAreaState.area);
         } else if (mdlFlagTest(0x5E2)) {
-            func_003014F0(path, "%sf%03da.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03da.amb", directory, fldAreaState.area);
         } else if (mdlFlagTest(0x5E3)) {
-            func_003014F0(path, "%sf%03db.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03db.amb", directory, fldAreaState.area);
         } else if (mdlFlagTest(0x5E4)) {
-            func_003014F0(path, "%sf%03dc.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
         } else {
-            func_003014F0(path, "%sf%03dd.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
         }
     } else if (area == 0x1B) {
         room = fldAreaState.floor;
@@ -851,29 +852,29 @@ void fldLoadSceneRecordTable(void) {
         case 19:
         case 20:
         case 21:
-            func_003014F0(path, "%sf%03da.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03da.amb", directory, fldAreaState.area);
             break;
         case 7:
-            func_003014F0(path, "%sf%03db.amb", directory, fldAreaState.area);
+            sprintf(path, "%sf%03db.amb", directory, fldAreaState.area);
             break;
         case 22:
         case 23:
         case 27:
             if (mdlFlagTest(0x58D)) {
-                func_003014F0(path, "%sf%03dd.amb", directory, fldAreaState.area);
+                sprintf(path, "%sf%03dd.amb", directory, fldAreaState.area);
             } else {
-                func_003014F0(path, "%sf%03dc.amb", directory, fldAreaState.area);
+                sprintf(path, "%sf%03dc.amb", directory, fldAreaState.area);
             }
             break;
         case 24:
         case 25:
         case 26:
         default:
-            func_003014F0(path, D_003A04B0, directory, fldAreaState.area);
+            sprintf(path, D_003A04B0, directory, fldAreaState.area);
             break;
         }
     } else {
-        func_003014F0(path, D_003A04B0, directory, fldAreaState.area);
+        sprintf(path, D_003A04B0, directory, fldAreaState.area);
     }
 
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceAddress, 0);
@@ -2609,18 +2610,6 @@ extern s32 D_003BAF44, D_003BAF48, D_003BD7D4, D_003BD7D8, D_003BD7DC, D_003BD7E
 
 extern s32 D_003BD7E4, D_003BD7E8;
 
-typedef struct FldLbNode {
-    struct FldLbNode *next; /* 0x00 */
-    u8 unk04[4];
-    s32 value;              /* 0x08 */
-} FldLbNode;
-
-typedef struct FldLbFile {
-    u8 unk00[0x60];
-    FldLbNode *nodes; /* 0x60 */
-} FldLbFile;
-
-
 /* Retains fldmix.LB node values and their memory blocks in field work.
  * Nodes 10..13 supply the map resources later acquired by the scene camera. */
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0650);
@@ -2634,83 +2623,83 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0698);
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A06B0);
 
 void fldParseMixLb(void) {
-    FldLbFile *lb;
-    FldLbNode *node;
+    FldMixLbHeaderView *lb;
+    FldMixLbNodeView *node;
     u32 index;
     s32 value;
 
     index = 0;
-    lb = (FldLbFile *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
+    lb = (FldMixLbHeaderView *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
     fileWaitForRequestReady((struct FileRequest *)lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7EC = value;
             D_003BD7F0 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 1:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF68 = value;
             D_003BAF6C = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 2:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF50 = value;
             D_003BAF54 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 3:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF74 = value;
             D_003BAF78 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 4:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF5C = value;
             D_003BAF60 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 5:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF84 = value;
             D_003BAF88 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 6:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BAF44 = value;
             D_003BAF48 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 7:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7D4 = value;
             D_003BD7D8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 8:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7DC = value;
             D_003BD7E0 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 9:
-            value = node->value;
+            value = node->resourceHandle;
             D_003BD7E4 = value;
             D_003BD7E8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 10:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[0].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[0].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 11:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[1].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[1].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 12:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[2].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[2].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 13:
-            value = node->value;
+            value = node->resourceHandle;
             fldAreaState.mapResources[3].allocation = (struct SdfMemBlock *)(u32)value;
             fldAreaState.mapResources[3].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
@@ -3132,7 +3121,7 @@ void fldFireRoomEffects(void) {
 extern u8 D_003D44A0[0x200];
 
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
 
@@ -3144,7 +3133,7 @@ void fldLoadNpcPalette(s32 field) {
 
     if (field < 100) {
         fldFormatAreaDirectory(directory, field, 1);
-        func_003014F0(path, "%sF%03d.NPL", directory, field);
+        sprintf(path, "%sF%03d.NPL", directory, field);
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, D_003D44A0, 0x200);
         sdfDevWaitThenReleaseCommandState(command);
@@ -3326,7 +3315,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAF9C = 0;
     D_003BAFA0 = 0;
     D_003BAFB0 = 0;
-    func_003014F0(path, D_003A0810, field);
+    sprintf(path, D_003A0810, field);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&resourceAddress, 0);
     D_003BAFB4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
@@ -3612,7 +3601,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_003BAFC0 = id;
     D_003BAFB8 = 0;
     D_003BAFBC = 0;
-    func_003014F0(path, "/fld/f/pnl/ds%03d.tmx", id);
+    sprintf(path, "/fld/f/pnl/ds%03d.tmx", id);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&data, 0);
     D_003BAFC4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));

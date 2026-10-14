@@ -11,32 +11,12 @@
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
 #include "sdf_message.h"
+#include "sdf_model_command_views.h"
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 extern vu8 sdfCurrentBufferIndex;
-
-/* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
-typedef struct {
-    union {
-        s64 bits;
-        struct {
-            u16 quadwordCount;
-            u8 reservedByte;
-            u8 control; /* PCE, tag ID and IRQ in the high tag byte */
-            u32 address;
-        } fields;
-    } dmaTag;
-    union {
-        s64 bits;
-        struct {
-            s32 firstCode;
-            s32 secondCode;
-        } fields;
-    } vifCodes;
-} SdfPacket; /* 0x10 */
-
 
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
@@ -68,7 +48,7 @@ SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
 }
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
-SdfPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfPacket *packet, s32 index) {
+SdfModelPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfModelPacket *packet, s32 index) {
     u32 address = (u32)(node->workspace + (index << 7)) & 0x0FFFFFFF;
 
     packet->dmaTag.bits = ((s64)address << 32) | 0x30000008;
@@ -78,7 +58,7 @@ SdfPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfPacket *packet, s32 
 }
 
 /* Append a DMA RET tag with no transferred quadwords and zero VIF codes. */
-SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
+SdfModelPacket *sdfModelWriteFixedPacket(SdfModelPacket *packet) {
     packet->vifCodes.bits = 0;
     packet->dmaTag.bits = 0x60000000;
     return packet + 1;
@@ -140,14 +120,7 @@ s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
     return bytes != 0 ? bytes + 0x20 : 0;
 }
 
-typedef struct {
-    u8 kind;
-    u8 pad01[3];
-    u32 assetIndexAndCount;
-    u32 address;
-} SdfIndexedCommand;
-
-SdfDmaTagHeader *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexedCommand *command,
+SdfDmaTagHeader *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexedCommandView *command,
                                                     SdfDmaTagHeader *packet, s32 frame) {
     u32 packed = command->assetIndexAndCount;
     u16 assetIndex = packed >> 16;

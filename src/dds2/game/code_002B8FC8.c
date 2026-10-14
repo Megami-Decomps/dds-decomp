@@ -1306,7 +1306,7 @@ typedef struct MenuPosTable3 {
     MenuPos pos[3];
 } MenuPosTable3;
 
-extern MenuPosTable3 D_0042AF48;
+extern const MenuPosTable3 D_0042AF48;
 
 void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 arg) {
     MenuPosTable3 table = D_0042AF48;
@@ -1334,7 +1334,7 @@ void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, 
     }
 }
 
-extern MenuPosTable D_0042AF60;
+extern const MenuPosTable D_0042AF60;
 
 void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
     MenuPosTable table = D_0042AF60;
@@ -1353,7 +1353,7 @@ typedef struct MenuOffsets {
     s32 y1;
 } MenuOffsets;
 
-extern MenuOffsets D_0042AF90;
+extern const MenuOffsets D_0042AF90;
 
 void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
     MenuOffsets offset = D_0042AF90;
@@ -1557,11 +1557,16 @@ s32 mnuCompareTertiaryKeyAscending(s32 *left, s32 *right) {
 /* Sort the walked node pointers and rebuild the list from the cursor.
  * Nonzero ascending selects the last three comparators, not descending order.
  * Allocation uses the stored count; key bounds and the relinker's minimum count remain unchecked. */
-INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AF48);
+const MenuPosTable3 D_0042AF48 = {
+    { { 0, 0 }, { 0x10, 0x8 }, { -0x20, -0x8 } }
+};
 
-INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AF60);
+const MenuPosTable D_0042AF60 = {
+    { { 0x70, 0xD10 }, { 0x1E80, 0xD10 }, { 0x140, 0xCD0 },
+      { 0xA0, 0xCD0 }, { 0x1DA0, 0xCD0 }, { 0x1E40, 0xCD0 } }
+};
 
-INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AF90);
+const MenuOffsets D_0042AF90 = { 0x1F0, 0x150, 0xF60, 0x150 };
 
 void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     s32 (*comparators[MNU_SORT_COMPARATOR_COUNT])(MenuListNode **, MenuListNode **) = {
@@ -2055,7 +2060,7 @@ typedef struct MenuIconLayout {
     MenuIconEntry entry[3];
 } MenuIconLayout;
 
-extern MenuIconLayout D_0042AFD8;
+extern const MenuIconLayout D_0042AFD8;
 
 MenuIconBundle *mnuCreateIconBundle(EffectSlotSet *resource) {
     MenuIconLayout layout = D_0042AFD8;
@@ -2593,5 +2598,7 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFB8);
 
-INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFD8);
+const MenuIconLayout D_0042AFD8 = {
+    { { 3, 0xCA0, 0xA8 }, { 17, 0xDD0, 0xE0 }, { 1, 0x14C0, 0xE0 } }
+};
 

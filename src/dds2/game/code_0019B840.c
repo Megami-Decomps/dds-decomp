@@ -193,6 +193,15 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
 
 extern void frFontInitializeGlyphAtlas(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 extern void frFontUploadImageBlocks(void);
+/* Native interior labels refer to fields of this single font-system owner. */
+typedef char FrFontResourceHeaderAliasCheck[((u32)&((FrFontSystem *)0)->entries[0].resourceHeader == 0x4) ? 1 : -1];
+typedef char FrFontCachedCountAliasCheck[((u32)&((FrFontSystem *)0)->cachedItemCount == 0x144) ? 1 : -1];
+typedef char FrFontItemCountAliasCheck[((u32)&((FrFontSystem *)0)->itemCount == 0x148) ? 1 : -1];
+typedef char FrFontGlyphCountAliasCheck[((u32)&((FrFontSystem *)0)->glyphCount == 0x14C) ? 1 : -1];
+typedef char FrFontAtlasAliasCheck[((u32)&((FrFontSystem *)0)->atlas == 0x160) ? 1 : -1];
+typedef char FrFontImageBuffersAliasCheck[((u32)&((FrFontSystem *)0)->imageBuffers == 0x178) ? 1 : -1];
+typedef char FrFontGlyphSlotsAliasCheck[((u32)&((FrFontSystem *)0)->glyphSlots == 0x194) ? 1 : -1];
+FrFontSystem frFontWork __attribute__((section(".bss"))) = {0};
 u32 frFontIndexedTextSlots[FR_FONT_INDEXED_TEXT_SLOT_COUNT] __attribute__((section(".bss")));
 extern s32 D_00438F1C;
 

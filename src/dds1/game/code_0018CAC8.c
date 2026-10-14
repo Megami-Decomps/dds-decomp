@@ -1,6 +1,7 @@
 #include "eff_resource_browser.h"
 #include "sdf_sif_command.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
 #include "kwln_sprite.h"
 #include "sdf_packet_list.h"
@@ -46,7 +47,7 @@ extern char *D_003557A8[];
 extern s32 func_00310320(s32 directory, EffDirEnt *entry);
 extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_003101B8(s32 directory);
-extern s32 func_003014F0(char *destination, const char *format, ...);
+extern s32 sprintf(char *destination, const char *format, ...);
 extern s32 sceDopen(void *arg0);
 extern s32 sdfConsMeasurePacketWithHeader(s32 arg0);
 extern void *sdfConsAllocateColumnPacket(s32 arg0);
@@ -62,7 +63,6 @@ extern u8 D_00324660[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 /* Allocate the dispatch owner before calling the selected payload constructor. */
@@ -295,7 +295,7 @@ s32 effOpenDataDir(void *name) {
     u8 path[EFF_DIRECTORY_PATH_BYTES];
 
     if (sdfPfsDebugMode != 0) {
-        func_003014F0(path, D_003BB058, name);
+        sprintf(path, D_003BB058, name);
         return sceDopen(path);
     } else {
         effDataDirectoryIndex = 0;
@@ -525,7 +525,7 @@ s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
                 switch (category) {
                 case 1: {
                     char resourceName[0x70];
-                    func_003014F0(resourceName, D_003BB060,
+                    sprintf(resourceName, D_003BB060,
                         descriptor->resourceList->directoryPath, selectedEntry->name);
                     effSetWorkTextureResource(descriptor, resourceName);
                     descriptor->previewActive = category;
@@ -619,7 +619,7 @@ u32 effGetWorkLink(EffResourceDescriptor *work) {
 /* Format the prefix/name records through the native template and return the name record's first word.
    Buffer capacity and record pointers remain unchecked. */
 u32 effFormatMsgNames(EffResourceDescriptor *message, void *destination) {
-    func_003014F0(destination, D_003BB060, message->resourceList->directoryPath, message->selectedEntry->name);
+    sprintf(destination, D_003BB060, message->resourceList->directoryPath, message->selectedEntry->name);
     return message->selectedEntry->type;
 }
 

@@ -1,5 +1,6 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
+#include "btl_actor_transform_parameters.h"
 #include "common.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -56,7 +57,7 @@
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 
-extern s32 func_003014F0(char *dst, const char *format, ...);
+extern s32 sprintf(char *dst, const char *format, ...);
 
 extern s32 fileTestSavedSlotFlags(u32);
 
@@ -232,21 +233,6 @@ void btlSetTrackedTaskDisplayMode(s32 mode);
 void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
 
 void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
-
-typedef struct BtlStatArgs {
-    BtlUnit *unit;
-    s32 amount;
-    s32 category;
-} BtlStatArgs;
-
-typedef struct BtlFxSrcA {
-    f32 f0;
-    f32 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-} BtlFxSrcA;
 
 typedef struct BtlRotationTaskArgs {
     s128 from;
@@ -1434,7 +1420,7 @@ void *btlCreateDeferredUnitStatusTask(u8 *owner, u32 value) {
     return task;
 }
 
-u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
+u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *unit = args->unit;
     if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
@@ -1460,11 +1446,11 @@ u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     }
 }
 
-extern u32 btlApplyCategoryStatDamage(BtlStatArgs *);
+extern u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *);
 
 void *btlCreateCategoryStatDamageTask(u8 *owner, u32 value, u32 extra) {
     u8 *task = btlAllocTask(12);
-    u32 *arguments;
+    BtlCategoryStatDamageArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -1473,9 +1459,9 @@ void *btlCreateCategoryStatDamageTask(u8 *owner, u32 value, u32 extra) {
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[2] = value;
-    arguments[1] = extra;
+    arguments->unit = (BtlUnit *)owner;
+    arguments->category = value;
+    arguments->amount = extra;
     return task;
 }
 
@@ -2337,21 +2323,21 @@ void btlInitFxLights(u8 *fx) {
 }
 
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 index) {
-    BtlFxSrcA *alt = (BtlFxSrcA *)btlSelectSharedOrIndexedTransformParameters(kind, index);
+    BtlActorTransformParameters *alt = (BtlActorTransformParameters *)btlSelectSharedOrIndexedTransformParameters(kind, index);
     BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
 
-    if (alt->fC == 0.0f) {
+    if (alt->overrideEnabled == 0.0f) {
         PCP_COPY_VECTOR(fx->bodyOffset, base);
         fx->reach = base->reach;
         fx->height = base->height;
         fx->cameraRadius = base->cameraRadius;
     } else {
-        fx->bodyOffset[0] = alt->f0;
-        fx->bodyOffset[1] = alt->f4;
-        fx->bodyOffset[2] = alt->f8;
+        fx->bodyOffset[0] = alt->position[0];
+        fx->bodyOffset[1] = alt->position[1];
+        fx->bodyOffset[2] = alt->position[2];
         fx->bodyOffset[3] = 0.0f;
-        fx->reach = alt->f10;
-        fx->height = alt->f14;
+        fx->reach = alt->reach;
+        fx->height = alt->height;
     }
     PCP_COPY_VECTOR(fx->muzzleOffset, base);
     fx->unkBC = base->reach;
@@ -3442,10 +3428,10 @@ s32 btlFormatUnitBedName(BtlUnit *actor, char *filename) {
         return 0;
     }
     if (flags & 0x1000) {
-        func_003014F0(filename, D_003A3BA8, D_003BB5F8, 0,
+        sprintf(filename, D_003A3BA8, D_003BB5F8, 0,
                       *(u16 *)((u8 *)actor + 0x124));
     } else {
-        func_003014F0(filename, D_003A3BA8, D_003BB5F8,
+        sprintf(filename, D_003A3BA8, D_003BB5F8,
                       btlGetActorBedAssetIdFromIndex(actor->partyRecord.menuValue),
                       *(u16 *)((u8 *)actor + 0x124));
     }

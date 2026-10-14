@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "kwln_task_lifecycle.h"
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);

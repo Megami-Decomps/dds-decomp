@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
 #include "bill_state_packet.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
@@ -181,7 +182,7 @@ void billFlushPendingChildPackets(void) {
     D_003BD7F4 = NULL;
 }
 
-extern u8 kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 extern f32 D_0034E040[4];
 extern f32 D_0034E050[4];
@@ -210,7 +211,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         node->packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(node->packetList);
         framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-        sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
+        sdfBuildMaskedFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), framePacket, 0);
         sdfAppendDmaTagToList(node->packetList, (u32)framePacket);
         state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
         state->dmaTag = 3;
@@ -405,7 +406,7 @@ void billFlushPendingRenderPairs(void) {
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
-    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
+    sdfBuildFrameRegisterReference((s32)(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     packet = (BillStatePacket *)sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;
@@ -696,7 +697,7 @@ void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     out->framesRemaining = value;
 }
 
-extern s32 func_003003F0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 /* Select an animation and initialize the plural records' signed start delays. */
 void billSetAnimationEntry(BillObj *obj, s32 index) {
@@ -711,7 +712,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
         BillPluralRecord *records;
         u32 i = 0;
 
-        func_003003F0("billAnim..PLURAL SET\n");
+        sdfDebugPrintf("billAnim..PLURAL SET\n");
         obj->modeFlags = 0x10000000;
         obj->animationEntryIndex = index;
         obj->entryCount = entry->frameCount;
@@ -721,7 +722,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
             (obj->resolvedEntries)[i].frameIndex = -records[i].delay;
         }
     } else if (entry->entryModeFlags & 0xC0) {
-        func_003003F0("billAnim..(A)MTEX SET\n");
+        sdfDebugPrintf("billAnim..(A)MTEX SET\n");
         obj->modeFlags = entry->entryModeFlags;
         obj->animationEntryIndex = index;
         obj->entryCount = 2;
@@ -734,12 +735,12 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
         billResolveEntry(data, index, obj->resolvedEntries);
     }
     if (entry->entryModeFlags & 0x100) {
-        func_003003F0("billAnim..P2A POLYGON\n");
+        sdfDebugPrintf("billAnim..P2A POLYGON\n");
     }
     obj->animationActive = 1;
 }
 
-extern s32 func_003003F0(const char *format, ...);
+extern s32 sdfDebugPrintf(const char *format, ...);
 
 BillData *billCreateAnimationDataFromResource(void *resource) {
     u8 *sourceBytes = resource;
@@ -770,14 +771,14 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
         BillAnimationEntry *entry = &data->entries[resourceIndex];
         if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
             data->entryCount = entry->frameCount;
-            func_003003F0("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
+            sdfDebugPrintf("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
         } else {
             if (entry->entryModeFlags & 0x40) {
                 data->entryCount = 2;
-                func_003003F0("billAnim no[%d][%d]...MTEX\n", resourceIndex, 2);
+                sdfDebugPrintf("billAnim no[%d][%d]...MTEX\n", resourceIndex, 2);
             } else if (entry->entryModeFlags & 0x80) {
                 data->entryCount = 2;
-                func_003003F0("billAnim no[%d][%d]...AMTEX\n", resourceIndex, 2);
+                sdfDebugPrintf("billAnim no[%d][%d]...AMTEX\n", resourceIndex, 2);
             }
         }
     }

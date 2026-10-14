@@ -86,7 +86,7 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
     return sndRequestedMidiBankId == id ? 2 : 0;
 }
 
-extern s32 func_003014F0();
+extern s32 sprintf();
 extern void (*fileIdleUpdateCallback)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
@@ -99,7 +99,7 @@ void sndEnsureMidiBankResident(s32 packed) {
     switch (status) {
     case 0:
         id = packed >> 16;
-        func_003014F0(name, "MIDI%04X.SMG", id);
+        sprintf(name, "MIDI%04X.SMG", id);
         mnuBuildSoundResourcePath(path, name);
         sndSendCommandPacket(0xA0, 0, path, strlen(path) + 1);
         sndRequestedMidiBankId = id;

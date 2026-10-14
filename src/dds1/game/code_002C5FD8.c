@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "sdf_counter_runtime.h"
@@ -23,7 +24,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern s32 D_003BD984;
 
@@ -184,7 +185,7 @@ s32 fldLoadLocalMapResources(void) {
     MapResource *item = fldLocalMapNameTextures;
 
     for (i = 0; i < 10; i++) {
-        func_003014F0(name, "/lmap/sname_%02d.tmx", i + 1);
+        sprintf(name, "/lmap/sname_%02d.tmx", i + 1);
         fldLoadMapResource(name, item);
         item++;
     }
@@ -696,7 +697,6 @@ extern u8 D_00324650[];
 
 extern u8 D_00324660[];
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
 
 /* vu0 routine: project a world point to the screen and return its GS grid cell. */
 void fldProjectPointToGridCell(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {

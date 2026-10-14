@@ -11686,3 +11686,54 @@ state 3 and begins its fade-out updates. Neither native function reduces
 alpha or performs cleanup. The older DDS2 name and provenance described an
 alpha reduction that its body does not implement; the corrected name states
 the observed transition role while preserving the original naming credit.
+
+### Publish field state before reconstructing the vertical-step vector
+
+The paired vertical-step updates `func_0012FC20` / `func_001321F8` (220 bytes
+in each title) first snapshot the object's XYZW, save previous field XYZ,
+publish the adjusted field position, then reconstruct object XYZ from that
+published state. Positive direction subtracts 2 from Y; negative adds 2;
+zero skips all work. The apparently redundant native Z scratch store belongs
+to this reconstruction. Merely changing scratch Y and publishing scratch to
+field state omits that store. Keep the complete update in each signed arm;
+late tail sharing produces the native join.
+
+The existing SDK input-address-only `VU0_STORE_VF_UNCLOBBERED` is qualified
+only for the pinned compiler and these audited emitted paths. Each arm's
+complete `sqc2` dominates its fresh scalar XYZ loads. Zero skips every scratch
+consumer; there are no earlier scratch reads, cross-arm paths, or backedges.
+The provider sets W to 1, and that fourth lane survives the XYZ reconstruction
+and complete quadword setter. Scratch occupies aligned SP+0..15 in the
+32-byte frame; saved S0 and RA occupy SP+16 and SP+24.
+
+Do not mistake this for a portable memory contract: the macro does not declare
+its write, and volatile alone does not make C readbacks sound in general.
+Changing either store to the truthful full-array `VU0_STORE_VF_TO` output
+preserves the state-first behavior, including the Z store, but emits 208 bytes
+in DDS1: CSE retains a field-state base instead of the legacy form's native
+rematerialization. In the paired DDS1 RTL control, pass 03 preserves fresh
+HIGH/LO_SUM definitions after each top-level SDK asm; the output-memory SET
+form removes those definitions and reuses the pre-branch full base. This
+establishes an early CSE difference, not a guessed late register preference.
+The finite qualification follows the scalar-read precedent
+in [battle camera setup](battle-camera-setup-matching.md). Any change to the
+compiler, scratch initialization, control flow, or read placement requires a
+fresh audit; do not transfer this macro choice to other code without one.
+
+### Font system storage and its indexed-text table
+
+The paired font bootstrap units own `FrFontSystem frFontWork` followed by the
+32-word indexed-text table. The system's recovered fields end at `0x19C`;
+the table begins at `+0x1A0`. Ordinary eight-byte object alignment accounts
+for the four-byte gap. Keep the system's real `0x19C` extent and explicit
+zero initialization in `.bss`; do not enlarge the type to include the gap or
+the table. Together the two objects occupy a `0x220` section span.
+
+The `frFontResourceRecords` label is system `+4`, the first entry's resource
+header pointer. Subsequent pointers have the real `FrFontEntry` stride of
+`0x24`, rather than forming a contiguous pointer array. The count, atlas,
+image-buffer and glyph-slot labels likewise denote existing system fields;
+link them as owner-relative aliases without allocating additional objects.
+The encoded-text control's one-based table lookup can use a native address
+four bytes before the table. This is not a field beyond the system's end;
+preserve the existing unchecked table indexing instead of inventing a sentinel.

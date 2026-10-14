@@ -14,6 +14,7 @@
 #include "evt_world.h"
 #include "evt_event_pack.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "evt_solar.h"
 #include "dds3_world_counter.h"
@@ -66,7 +67,6 @@ void fldStopCurrentBgm(void);
 
 void fldReleaseCurrentBgm(void);
 
-char *scrReadStringParameter(s32 idx);
 
 void fldInitializeSequenceAndResetFlags(s32 request, s32 sequence, s32 variant, char *name);
 

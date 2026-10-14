@@ -13,6 +13,8 @@
 #include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_active_resource.h"
+#include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
@@ -184,7 +186,7 @@ extern EffPacketParams D_003DC9E0;
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u32, u32);
 extern void effReleaseResourceRefs(EffTrackSet *);
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
 extern void effDrawSolidRectangle(void *);
@@ -7847,41 +7849,6 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
 }
 
 
-/* Header common to the resource-instance constructors and callback dispatchers. */
-typedef struct EffActiveResource {
-    f32 position[4];
-    f32 orientation[4];
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    union {
-        u32 index;       // 0x2C
-        s32 signedIndex;
-        u16 shortIndex;
-    } kind;
-    void *resource;      // 0x30; heterogeneous kind-specific resource pointer
-    u8 pad_34[4];
-    void *payload;       // 0x38
-    u8 pad_3C[4];
-} EffActiveResource;
-typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
-typedef char EffActiveResourceResourceOffsetCheck[((u32)&((EffActiveResource *)0)->resource == 0x30) ? 1 : -1];
-
-/* Entire 40-byte payload copied for resource kind 1. */
-typedef struct EffActorLightConfig {
-    u32 duration;
-    s32 colorFadeIn;
-    s32 colorFadeOut;
-    s32 directionFadeIn;
-    s32 directionFadeOut;
-    u32 firstColor;
-    u32 secondColor;
-    u8 actorSelection;
-    u8 pad1D[3];
-    EffectVectorRequest direction;
-} EffActorLightConfig;
-typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 1 : -1];
-
 
 #include "btl_effect_position.h"
 extern void btlUnitGetEffectPosVU(BtlUnit *);
@@ -8041,17 +8008,6 @@ void effSyncLinkedActorChildParameter(void) {
     }
 }
 
-
-/* Entire copied payload for resource kind 2. */
-typedef struct EffActorTintConfig {
-    u32 duration;
-    u32 fadeIn;
-    u32 fadeOut;
-    u32 color;
-    u8 actorSelection;
-    u8 pad11[3];
-} EffActorTintConfig;
-typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 : -1];
 
 /* Apply a temporary tint to eligible actors, then restore their original RGB. */
 void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
@@ -8961,7 +8917,7 @@ void effFileJobQueueRelease(u32 job) {
 
 extern char D_003BD080[];
 
-extern s32 func_003014F0(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern const char D_003BD078[];
 
@@ -8985,7 +8941,7 @@ u32 effPollPrimaryFile(void) {
         result = 0x400000;
     } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effQueuedFileHandle != 0) {
-            func_003014F0(path, D_003BD080, D_003B39C8, record.nameWithExtension);
+            sprintf(path, D_003BD080, D_003B39C8, record.nameWithExtension);
             fileWriteToPfs(effQueuedFileHandle, path);
             result = 0x400002;
         }
@@ -9011,7 +8967,7 @@ u32 effPollNamedFile(void) {
     } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_003DF8D0, record.name);
-            func_003014F0(path, D_003BD080, D_003B39E0, record.nameWithExtension);
+            sprintf(path, D_003BD080, D_003B39E0, record.nameWithExtension);
             fileQueueSaveImage(effFileQueue, path);
             result = 0x400002;
         }
@@ -9037,7 +8993,7 @@ u32 effPollAttachedFile(void) {
     } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_003DF8D0, record.name);
-            func_003014F0(path, D_003BD080, D_003B39E0, record.nameWithExtension);
+            sprintf(path, D_003BD080, D_003B39E0, record.nameWithExtension);
             fileQueueSaveVersionedImage(effFileQueue, path);
             result = 0x400002;
         }
@@ -9754,7 +9710,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
     for (i = 0; i < capacity; i++) {
         const EffCameraCreateRequest *request = &requests[i].request;
         if (request->resource != NULL) {
-            func_003014F0(nameBuffer, D_003BD0E8, request->resource->name);
+            sprintf(nameBuffer, D_003BD0E8, request->resource->name);
             entries[count].name = nameBuffer;
             entries[count].selected = 0;
             entries[count].unk08 = 0;
@@ -10481,7 +10437,7 @@ void effPollResourceBank(s32 flags, void *out) {
             if (count != 0) {
                 do {
                     char name[0x70];
-                    func_003014F0(name, "GENERAL %d", i);
+                    sprintf(name, "GENERAL %d", i);
                     btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
                     i++;
                 } while (i < count);

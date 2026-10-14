@@ -810,7 +810,38 @@ void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
 
 
 /* The genuine three-row typed candidate remains non-matching. */
-INCLUDE_ASM(const s32, "game/code_00242608", fldApplyCameraColorKeyWords);
+void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source) {
+    FldCameraSetting setting;
+    s32 i;
+
+    fldCopyCameraSetting(&setting);
+    setting.color.vectorZ = source->x;
+    setting.color.red = source->w[0];
+    setting.color.green = source->w[1];
+    setting.color.blue = source->w[2];
+    setting.color.vectorY = source->w[3];
+    setting.color.mode = source->flagWord;
+    /* Copy the z/y banks into columns 1 and 2 of the three value rows. */
+    {
+        u8 *destinationA = (u8 *)&setting + 8;
+        const u8 *sourceA = (const u8 *)source + 0x0C;
+        u8 *destinationB = (u8 *)&setting + 0x0C;
+        s32 sourceOffset = 0x20;
+        s32 destinationOffset = 0x20;
+        for (i = 2; i >= 0; i--) {
+            *(s32 *)(destinationA + destinationOffset) = *(const s32 *)(sourceA + sourceOffset);
+            *(s32 *)(destinationB + destinationOffset) = *(const s32 *)((const u8 *)source + sourceOffset);
+            sourceOffset += 4;
+            destinationOffset += 0x10;
+        }
+    }
+    fldUpdateCameraColorEffect(&setting);
+    if (source->w[3] == 0 && source->z[0] == 0 && source->z[1] == 0 && source->z[2] == 0) {
+        viewer->cameraColorActive = 0;
+    } else {
+        viewer->cameraColorActive = 1;
+    }
+}
 
 void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
     evtApplyCameraColorTrackAtFrame(scene);
@@ -2525,7 +2556,7 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void func_003014F0(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 extern char D_003BC3B8[];
 extern void evtCopyEntryStringToActiveWindow(s32 window, char *text);
 extern void evtSetMessageWindowOptionWhenOpen(s32 option);
@@ -2565,7 +2596,7 @@ s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     if (operation == 3) {
         message = (u32)(values->value * scene->counter + datGameState->header.currency) > 9999999 ? 0xC : 7;
     }
-    func_003014F0(text, D_003BC3B8, values->value * scene->counter);
+    sprintf(text, D_003BC3B8, values->value * scene->counter);
     evtCopyEntryStringToActiveWindow(3, text);
     dspSetActive(1);
     dspStartEntry(message);

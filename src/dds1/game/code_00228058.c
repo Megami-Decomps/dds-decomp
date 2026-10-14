@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "dat_state.h"
 #include "scr.h"
+#include "scr_string_parameter_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "evt_world.h"
@@ -19,7 +20,6 @@
 void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 
-char *scrReadStringParameter(s32 idx);
 
 void scrSetIntegerReturnValue(s32 value);
 
@@ -84,7 +84,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     if (work->task == NULL) {
-        func_003003F0(D_003ACA78);
+        sdfDebugPrintf(D_003ACA78);
         return 1;
     }
     id = scrReadIntParameter(0);
@@ -108,7 +108,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     if (work->task == NULL) {
-        func_003003F0(D_003ACAE0);
+        sdfDebugPrintf(D_003ACAE0);
         return 1;
     }
     task = evtCreateTask(0x2afe, scrReadStringParameter(0));

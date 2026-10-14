@@ -1,6 +1,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
@@ -266,7 +267,6 @@ u32 sdfCountMapPositionRecords(SdfModel *model) {
     return 0;
 }
 
-extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 /* vu0 routine: build basis rows in vf28-vf31 from the map record, then
  * postmultiply using its draw-node matrix. */
 void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record) {
