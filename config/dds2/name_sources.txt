@@ -2304,6 +2304,7 @@
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
 0x001A7A98	itfMesFindPreviousWindowWithPanelSprite	inferred	Used by the panel layout inspector to walk backward, wrap at the active-list tail, and select a window with a non-null panel sprite.
 0x001A7B00	itfQueueOffsetTexturedRect	inferred	readability/matching review (QP16)
+0x001A81F0	itfUpdateSoundSelectorOptions	inferred	Called each poll by itfMesScriptStartEntryAndWait; formats seven sound-selector rows, consumes selection input and updates the selected setting and sequence volume/pan. Paired with the formatter and shared state protocol described in docs/idioms.md.
 0x001A85E0	itfMesScriptStartEntryAndWait	inferred	Reads script entry argument 0, starts the window entry, polls its transition and completion, then cleans up and publishes the result value.
 0x001A87E8	sndCycleTestMessageResource	inferred	Releases the previous TestMsgMng resource and cycles the four sound-test message choices, loading the next resource when present.
 0x001A8848	itfUpdateTestMessageResourceInput	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:915:func_001A8848; The TestMsgMngC task cycles its test message texture/resource when the corresponding pad state is negative, then returns zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
