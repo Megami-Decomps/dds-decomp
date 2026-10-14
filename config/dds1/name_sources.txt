@@ -2799,6 +2799,7 @@
 0x001A2F68	btlResolveUnitValueWithOverride	inferred	Uses a registered callback value unless it declines, then uses the default result. [names_reviewed8.tsv]
 0x001A2FD8	btlGetSideIndexedActorStatusTable	inferred	Selects one of two indexed battle status record tables according to side. [names_reviewed16.tsv]
 0x001A3020	btlSelectSharedOrIndexedTransformParameters	inferred	Chooses global transform parameters or indexed record parameters by selector; caller copies vector and scale data. [names_reviewed17.tsv]
+0x001A30F8	btlBuildEligibleTargetIndexList	inferred	BN traversal and callers: filters linked battle units by actor side, status and mask flags, then appends eligible targets to the supplied BtlIndexList; used by command policy, AI list construction and battle queries.
 0x001A3050	btlSelectSideIndexedActorParameterTable	inferred	Chooses between indexed actor parameter tables based on the selected side. [names_reviewed19.tsv]
 0x001A3098	btlGetLoggedIndexedCommandItem	inferred	Reads an indexed battle command item and logs it. [names_reviewed8.tsv]
 0x001A30E0	btlGetActorBedAssetIdFromIndex	inferred	Returns an indexed halfword used as the actor BED filename identifier. [names_reviewed19.tsv]

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
+#include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
 #include "eff_random_mod.h"
@@ -2440,7 +2441,6 @@ extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuAfterRecordNoOp(void);
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuRecordNoOp(u32);
-extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern s32 D_003BFB50[], D_003BFB70[];
 extern BtlDebugValueMenu D_003BFE40, D_003BFEC0, D_003BFF88, D_003C0260;

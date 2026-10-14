@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "btl_actor_transform_parameters.h"
+#include "btl_select_transform_parameters_api.h"
 #include "common.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -2302,7 +2303,7 @@ void btlInitFxLights(u8 *fx) {
 }
 
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 index) {
-    BtlActorTransformParameters *alt = (BtlActorTransformParameters *)btlSelectSharedOrIndexedTransformParameters(kind, index);
+    BtlActorTransformParameters *alt = btlSelectSharedOrIndexedTransformParameters(kind, index);
     BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(kind, index);
 
     if (alt->overrideEnabled == 0.0f) {

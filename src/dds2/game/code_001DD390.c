@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "btl_actor_transform_parameters.h"
+#include "btl_select_transform_parameters_api.h"
 #include "common.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -2383,8 +2384,6 @@ void btlInitFxLights(BtlUnit *unit) {
     unit->overlayColor = 0x80808080;
     unit->positionZOffset = 0.0f;
 }
-
-extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
 
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 index) {
     BtlActorTransformParameters *alt = btlSelectSharedOrIndexedTransformParameters(kind, index);
