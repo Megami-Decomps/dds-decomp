@@ -16,6 +16,7 @@
 #include "par_table.h"
 #include "par_draw_block.h"
 #include "par_emitter_desc.h"
+#include "par_object_client_view.h"
 #include "eff.h"
 #include "eff_track_poly_list.h"
 
@@ -28,47 +29,6 @@ typedef struct ParListNode ParListNode;
 extern ParSystem *D_003BB014;
 
 extern ParListNode *parRecordListHead;
-
-/* Particle object (layout mirrors effect/parManager.c ParObj, which owns
- * the type; only the fields this TU touches are named here). */
-struct ParTable;
-struct EffTrackPolyList;
-struct ParSystem;
-
-typedef struct ParObj {
-    u8 pad00[0x10];    /* 0x00 */
-    f32 scaleX;         /* 0x10: billboard child X scale */
-    f32 scaleY;         /* 0x14: billboard child Y scale */
-    u8 pad18[8];
-    s32 particleCount; /* 0x20 */
-    s32 lifetimeFrames; /* 0x24 */
-    s32 billboardCloneMarker; /* 0x28: PAR_BILLBOARD_CLONE_FROM_RESOURCE */
-    s16 billboardMode;  /* 0x2C */
-    u8 pad2E[2];
-    ParKindState kindState; /* 0x30 */
-    u8 pad48[0x44];    /* 0x48: includes the existing color ramp */
-    f32 scale8C;       /* 0x8C scaled by effParScaleComponent */
-    f32 spinDegrees; /* 0x90 */
-    u8 pad94[8];
-    u8 alternateSpin; /* 0x9C */
-    u8 pad9D[7];
-    u32 unkA4;         /* 0xA4 */
-    u8 padA8[0x48];    /* 0xA8 */
-    u32 valueF0;       /* 0xF0 settable param */
-    BillObj *billboard;         /* 0xF4 */
-    EffectBufferTail *buffer;       /* 0xF8 */
-    u32 pendingRestartSteps;       /* 0xFC */
-    u8 pad100[0x40];   /* 0x100 */
-    u16 dispatchIndex; /* 0x140: particle dispatch table index */
-    u16 restartFlag;   /* 0x142 set to 1 after mode changes */
-    u8 pad144[0x0C];   /* 0x144 */
-    u8 mode150;        /* 0x150 mode byte for some kinds */
-    u8 mode151;        /* 0x151 mode byte for the other kinds */
-    u8 pad152[0x22];   /* 0x152 */
-    void *child;       /* 0x174 */
-} ParObj;
-
-
 
 /* Free-list links mirror the DDS2 particle unit. */
 struct ParListNode {
@@ -135,7 +95,7 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 
 void parSetObjectParameterWord(ParObj *work, u32 value) {
-    work->valueF0 = value;
+    work->parameterWord = value;
 }
 
 void parObjSetMode(ParObj *object, s32 mode) {
@@ -144,7 +104,7 @@ void parObjSetMode(ParObj *object, s32 mode) {
     case 1:
     case 5:
     case 11:
-        object->mode150 = mode;
+        ((ParObjClientView *)object)->mode150 = mode;
         break;
     case 0:
     case 2:
@@ -155,7 +115,7 @@ void parObjSetMode(ParObj *object, s32 mode) {
     case 8:
     case 10:
     case 12:
-        object->mode151 = mode;
+        ((ParObjClientView *)object)->mode151 = mode;
         break;
     case 9:
         break;
@@ -168,7 +128,7 @@ u8 parObjGetMode(ParObj *object) {
     case 1:
     case 5:
     case 11:
-        return object->mode150;
+        return ((ParObjClientView *)object)->mode150;
     case 0:
     case 2:
     case 3:
@@ -178,7 +138,7 @@ u8 parObjGetMode(ParObj *object) {
     case 8:
     case 10:
     case 12:
-        return object->mode151;
+        return ((ParObjClientView *)object)->mode151;
     default:
         return 0;
     }
@@ -194,7 +154,7 @@ ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
         object->billboardCloneMarker = PAR_BILLBOARD_CLONE_FROM_RESOURCE;
         object = parKindConstructorEntries[kind].func(object);
         billboard = billCreateIndexed(resource->type, (u32)(resource + 1));
-        billSetChildScaleComponents(billboard, object->scaleX, object->scaleY);
+        billSetChildScaleComponents(billboard, object->billboardScale, object->billboardScaleY);
         billSetBillboardMode(billboard, object->billboardMode);
         billMarkKindOneFlag(billboard);
         object->billboard = billboard;
@@ -210,7 +170,7 @@ ParObj *parInstantiateKind(ParObj *source) {
     particle->dispatchIndex = source->dispatchIndex;
     if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
         BillObj *billboard = billCloneObjectRetainingSharedData(source->billboard);
-        billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
+        billSetChildScaleComponents(billboard, particle->billboardScale, particle->billboardScaleY);
         billSetBillboardMode(billboard, particle->billboardMode);
         billMarkKindOneFlag(billboard);
         particle->billboard = billboard;
@@ -246,7 +206,7 @@ void effParUpdateAndDrawInstance(ParObj *effect) {
             parKindConstructorEntries[effect->dispatchIndex].update(effect);
         }
         particleCount = effect->particleCount;
-        scaleStep = (effect->scale8C - effect->scaleX) / effect->lifetimeFrames;
+        scaleStep = (effect->scaleEnd - effect->billboardScale) / effect->lifetimeFrames;
         spinStep = effect->spinDegrees * (3.14159265f / 180.0f);
         alternate = effect->alternateSpin ? -1.0f : 1.0f;
         for (step = 0; step < effect->pendingRestartSteps; step++) {
@@ -268,7 +228,7 @@ void effParUpdateAndDrawInstance(ParObj *effect) {
     record = effect->buffer->records;
     billboard = effect->billboard;
     particleCount = effect->particleCount;
-    scaleStep = (effect->scale8C - effect->scaleX) / effect->lifetimeFrames;
+    scaleStep = (effect->scaleEnd - effect->billboardScale) / effect->lifetimeFrames;
     lifetime = effect->lifetimeFrames;
     spinStep = effect->spinDegrees * (3.14159265f / 180.0f);
     alternate = effect->alternateSpin ? -1.0f : 1.0f;
@@ -305,7 +265,7 @@ void parRestartInstanceCallback(void) {
 
 void effParScaleComponent(float scale, ParObj *work) {
     parScaleAndRestartKind();
-    work->scale8C *= scale;
+    work->scaleEnd *= scale;
 }
 
 /* Descriptor query: return the complete 16-bit restart state. */
@@ -322,7 +282,7 @@ void parRebuildInstanceTransforms(void) {
 }
 
 void effParSetInstanceParameterWord(ParObj *work, u32 value) {
-    work->valueF0 = value;
+    work->parameterWord = value;
 }
 
 void parChangeInstanceMode(ParObj *work, u8 mode) {
