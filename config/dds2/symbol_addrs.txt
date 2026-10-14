@@ -7156,6 +7156,7 @@ fldRefreshAreaStateFromPosition = 0x00139EC0; // type:func
 fldUpdateModeOneCameraPose = 0x00131B50; // type:func
 dspRequestMessageWindowModeOne = 0x0026C900; // type:func
 fldResolveEventSelectorTarget = 0x0013F790; // type:func
+fldMarkStageExplorationBitmapRegion = 0x00123DE8; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -9138,7 +9139,6 @@ fldFindMapLabelIndexByCoordinate = 0x001237B0; // type:func
 fldFindSecondaryMapLabelIndexByCoordinate = 0x00123808; // type:func
 fldGetStageBitmapBitCoordinates = 0x00123A58; // type:func
 fldMarkStageExplorationCellsAroundPosition = 0x00123B88; // type:func
-func_00123DE8 = 0x00123DE8; // type:func
 fldIsStageExplorationCellMarked = 0x00123EE0; // type:func
 fldGetDirectionAngleBetweenXZPositions = 0x001248E8; // type:func
 fldGetTriangleHeightAtXZ = 0x00124A10; // type:func

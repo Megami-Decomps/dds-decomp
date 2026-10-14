@@ -268,7 +268,7 @@ extern s32 D_0038984C[];
 
 extern s32 fldIsSceneStateEight(void);
 
-extern void func_00123DE8(s32, s32, s32, s32, s32, s32);
+extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 
 
 
@@ -1708,7 +1708,7 @@ s32 fldCmdMarkBitmapRegion(void) {
     s32 second = scrReadIntParameter(1);
     s32 third = scrReadIntParameter(2);
     s32 fourth = scrReadIntParameter(3);
-    func_00123DE8(D_00389780[0], first, second, third, fourth, scrReadIntParameter(4));
+    fldMarkStageExplorationBitmapRegion(D_00389780[0], first, second, third, fourth, scrReadIntParameter(4));
     return 1;
 }
 

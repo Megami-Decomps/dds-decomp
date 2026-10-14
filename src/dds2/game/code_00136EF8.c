@@ -2926,7 +2926,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            func_00123DE8(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
