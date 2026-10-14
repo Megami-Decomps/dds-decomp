@@ -273,7 +273,7 @@ extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
 extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
-extern void func_0014BF98(EvtUnit *unit);
+extern void fldInitializeHuntSparkUnit(EvtUnit *unit);
 
 extern s32 fldFindEffectByName(char *str);
 
@@ -3107,7 +3107,7 @@ void fldResetObjectSlots(void) {
     D_0043630C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BF98);
+INCLUDE_ASM(const s32, "game/code_001442D0", fldInitializeHuntSparkUnit);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413AE8);
 
@@ -4043,7 +4043,7 @@ void fldCreateSparkSlotObjects(void) {
             mdlAddEntryFlagged(model, 0, 0);
             model->flags |= 1;
             dds3SetObjectFlags(entry->objectHandle, 0x400);
-            func_0014BF98(evtUnitGetNestedValue(entry->objectHandle));
+            fldInitializeHuntSparkUnit(evtUnitGetNestedValue(entry->objectHandle));
         }
     }
 }

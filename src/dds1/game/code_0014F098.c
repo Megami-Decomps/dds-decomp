@@ -39,7 +39,7 @@ extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
 extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
-extern void func_00147DB0(struct EvtUnit *unit);
+extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
 
 extern s32 fldFindEffectByName(char *str);
 
@@ -192,8 +192,8 @@ s32 fldScriptReturnSelectedActorMotionId(void) {
     return 1;
 }
 
-s32 func_0014F468(void) {
-    func_00147DB0(evtGetWorldUnitNestedValue(scrReadIntParameter(0)));
+s32 fldCmdInitializeHuntSparkUnit(void) {
+    fldInitializeHuntSparkUnit(evtGetWorldUnitNestedValue(scrReadIntParameter(0)));
     return 1;
 }
 
