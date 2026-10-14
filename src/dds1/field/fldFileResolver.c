@@ -458,9 +458,9 @@ extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
 extern void fldProbeCameraSupportSurface(void);
 extern void fldRestoreCameraModelColor(void);
-extern void func_0012D528(void);
+extern void fldUpdateCameraFollowPlayer(void);
 extern void fldInterpolateCameraEndpoints(void);
-extern void func_0012DD70(void);
+extern void fldUpdateCameraFollowLinkedObject(void);
 extern void fldUpdateCameraMoveOscillation(void);
 extern u8 fldTestSceneControlFlags(u32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
@@ -3459,7 +3459,7 @@ void fldInterpolateCameraEndpoints(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012D528);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraFollowPlayer);
 
 extern void dds3SetCameraVector(EffWorldNode *camera, u128 *worldEye);
 extern f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by);
@@ -3501,7 +3501,7 @@ void fldUpdateCameraViewFromPlayer(void) {
     fldAreaState.negatedAngle = fldGetNormalizedComplementaryAngle(farPoint[0], farPoint[2], nearPoint[0], nearPoint[2]) + 180.0f;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012DD70);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraFollowLinkedObject);
 
 /* Suppress the world object's current entry when it is already selected. */
 s64 fldGetUnselectedWorldEntry(void) {
@@ -3640,13 +3640,13 @@ s32 fldUpdateCameraFollow(void) {
         dds3SetCameraFieldOfView(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
         switch (cam->mode) {
         case 0:
-            func_0012D528();
+            fldUpdateCameraFollowPlayer();
             if (cam->dist < 50.0f) {
-                func_0012D528();
+                fldUpdateCameraFollowPlayer();
             }
             break;
         case 1:
-            func_0012DD70();
+            fldUpdateCameraFollowLinkedObject();
             break;
         case 4:
             fldInterpolateCameraEndpoints();

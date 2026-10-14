@@ -988,6 +988,8 @@
 0x0012C7D8	fldCreateEncounterTask	inferred	Creates task whose update is fldEncProc and cleanup resets battle async state. [names_R_FuncNames6.tsv]
 0x0012C818	fldUpdateLookAtSegmentDistance	inferred	Stores Euclidean distance between look-at segment endpoints minus 50. [names_R_FuncNames6.tsv]
 0x0012D240	fldUpdateCameraProjectionEndpoints	inferred	Writes start and target camera endpoints from position angle and camera row. [names_R_FuncNames6.tsv]
+0x0012D528	fldUpdateCameraFollowPlayer	inferred	Mode-0 branch of fldUpdateCameraFollow computes player-facing camera endpoints from heading and the selected camera row, smooths their approach and applies camera-support distance handling; called twice when close. Paired DDS2 0x0012FA58.
+0x0012DD70	fldUpdateCameraFollowLinkedObject	inferred	Mode-1 branch of fldUpdateCameraFollow follows the position copied from a resolved scene camera-link object into focusPos; interpolates linked camera transforms. Paired DDS2 0x001302A0.
 0x0012E488	fldGetUnselectedWorldEntry	inferred	Returns the world object's current entry unless it equals the selected entry. [names_reviewed5.tsv]
 0x0012E4C8	fldSetCameraMoveMode	inferred	Stores camera movement mode in D_003BAD1C, passes current camera object to func_00112EE8 and resets D_003BAD20; neighboring func_0012E510 handles modes -2,-1,1,2.
 0x0012E510	fldUpdateCameraMoveOscillation	inferred	U1
