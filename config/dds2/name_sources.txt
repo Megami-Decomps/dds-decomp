@@ -6151,6 +6151,7 @@
 0x0031C8A8	mnuSetModelNodeBroadcastAlpha	inferred	Keeps model RGB broadcast value and replaces high alpha byte. [names_reviewed22.tsv]
 0x0031C8B0	mnuSetNodeModelBroadcastByte	inferred	Replaces the upper broadcast byte while preserving the remaining model broadcast bits. [names_reviewed15.tsv]
 0x0031C900	mnuSetModelNodeVisibility	inferred	Sets or clears the model inactive bit according to the node visibility selector. [names_reviewed15.tsv]
+0x0031C940	mnuSampleModelMotionAtFrame	inferred	confidence=high; matched-C; src/dds2/game/code_0031C940.c:func_0031C940; Samples motion entry zero on the supplied menu model node: negative frame selects a random in-range frame, otherwise the requested frame is used.
 0x0031CA10	itfProjectScreenPointToViewPlane	inferred	readability/matching review (QP16)
 0x0031CAE8	itfProjectScreenPointToFixedDepth	inferred	Projects screen coordinates with the current view angle onto Z=-300; the timed menu-effect create/update callers use the resulting XYZ for positioned effect records.
 0x0031CF68	itfDrawUniformlyScaledIndexedImage	inferred	medium confidence; src/dds2/game/code_0031C940.c func_0031CF68: Supplies equal horizontal and vertical scales to the table-indexed image renderer, which temporarily changes quad dimensions and restores them after submission. [names_reviewed25.tsv]
