@@ -4,6 +4,7 @@
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "fld_light_set.h"
+#include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
@@ -573,21 +574,7 @@ extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
 
 extern u32 D_0040B2A0[];
 
-/* Packed quad input: geometry fields precede the live packet origin and depth.
- * Preserve the unclassified words for the opaque renderer. */
-typedef struct {
-    s32 baseX;
-    s32 baseY;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 rgba;
-    s32 rowX;      /* 0x1C: quad origin X */
-    s32 rowY;      /* 0x20: quad origin Y */
-    s32 drawDepth;
-    SdfListHead *packetList; /* 0x28 */
-} FldQuadState; /* 0x2C bytes */
+
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 
@@ -3028,9 +3015,9 @@ void fldDrawProjectedValue(f32 x, f32 y, f32 z, s32 drawValue) {
     quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x73C0;
-    quad.baseY = 0x8440;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x73C0;
+    quad.unk4 = 0x8440;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
@@ -3050,9 +3037,9 @@ void fldDrawFloorQuad(s32 x, s32 y, const char *format) {
     quad.drawDepth = 0x0FFFFF7E;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x73C0;
-    quad.baseY = 0x7CC0;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x73C0;
+    quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
     fldStartQuadPacketList(&quad);
@@ -3071,9 +3058,9 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x73C0;
-    quad.baseY = 0x7CC0;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x73C0;
+    quad.unk4 = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
@@ -3092,9 +3079,9 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 drawValue) {
     quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x7000;
-    quad.baseY = 0x7900;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
@@ -3113,9 +3100,9 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 drawValue) {
     quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x7000;
-    quad.baseY = 0x7900;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
@@ -3134,9 +3121,9 @@ void fldDrawMapQuad(s32 x, s32 y, s32 drawValue) {
     quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x7000;
-    quad.baseY = 0x7900;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
@@ -3155,9 +3142,9 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x7000;
-    quad.baseY = 0x7900;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
@@ -3176,9 +3163,9 @@ void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
     quad.drawDepth = 0x0FFFFF80;
     quad.unkC = 0;
     quad.unk14 = 0x10000000;
-    quad.rgba = 0x80806020;
-    quad.baseX = 0x7000;
-    quad.baseY = 0x7900;
+    quad.unk18 = 0x80806020;
+    quad.unk0 = 0x7000;
+    quad.unk4 = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     fldStartQuadPacketList(&quad);
