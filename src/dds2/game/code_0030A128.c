@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "evt_message_window_api.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "file_pac.h"
@@ -469,7 +470,6 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void *sdfPacGetExtensionData(SdfPacStreamPacketHeader *);
-extern s32 btlStageTaskCleanupCallback(void *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D280);
