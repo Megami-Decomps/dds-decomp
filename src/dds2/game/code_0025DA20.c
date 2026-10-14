@@ -2444,7 +2444,6 @@ extern s32 evtAdvanceSlotFlags(void);
 
 extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
-extern void mdlFlagClear(s32);
 extern void mnuDrawCommandPhaseTransition(s32);
 extern void mnuDrawCampCommandTransition(s32);
 
@@ -4031,7 +4030,6 @@ extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];
 extern char D_00437840[];
-extern void mdlFlagClear();
 extern void dspAdvanceMessageWindowControl();
 extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
