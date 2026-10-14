@@ -1,4 +1,5 @@
 #include "eff_packet_params.h"
+#include "eff_camera_create_request.h"
 #include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
@@ -9842,13 +9843,6 @@ extern void btlDebugMenuSetupNoOp(void *context);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(void *context);
 extern void btlDebugMenuAfterRecordNoOp(void);
-
-typedef struct EffCameraCreateRequest {
-    EffFileJobRequest *resource;
-    EffQueuedFileObject *object;
-    u32 existingJob;
-    f32 position[3];
-} EffCameraCreateRequest;
 
 typedef struct EffCameraCreateRow {
     EffCameraCreateRequest request;
