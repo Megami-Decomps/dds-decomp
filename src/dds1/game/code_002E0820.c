@@ -345,7 +345,7 @@ extern f32 D_003BD36C;
 
 extern f32 D_003BD370;
 
-extern f32 func_002FA148(f32);
+extern f32 tanf(f32);
 
 /* Compose camera projection and screen parameters without reassociating floats. */
 void sdfCameraBuildProjection(SdfCamera *camera) {
@@ -366,7 +366,7 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
     VU0_LOAD_MATRIX(projectionMatrix);
     EE_MMI_UNIT_MATRIX(projectionMatrix);
     if (camera->flags & SDF_CAMERA_USE_FOV_FLAG) {
-        projectionScale = camera->height / (func_002FA148(camera->fov * 0.5f) * 2.0f);
+        projectionScale = camera->height / (tanf(camera->fov * 0.5f) * 2.0f);
     } else {
         projectionScale = camera->scale;
     }

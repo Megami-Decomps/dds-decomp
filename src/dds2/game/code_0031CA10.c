@@ -3,7 +3,7 @@
 #include "sdf_resource.h"
 #include "mnu_shooting.h"
 
-extern f32 func_00353228(f32);
+extern f32 tanf(f32);
 
 extern f32 D_0037F5EC[];
 
@@ -26,9 +26,9 @@ void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
 
     halfViewAngle = D_0037F5EC[0] * 0.5f;
     eyeTargetDepth = sdfViewEyeVector[2] - sdfViewTargetVector[2];
-    position[0] = eyeTargetDepth * func_00353228(halfViewAngle * 1.3f) *
+    position[0] = eyeTargetDepth * tanf(halfViewAngle * 1.3f) *
         ((f32)(screenX - 256) * 0.00390625f);
-    position[1] = eyeTargetDepth * func_00353228(halfViewAngle) *
+    position[1] = eyeTargetDepth * tanf(halfViewAngle) *
         ((f32)(screenY - 224) / 224.0f);
     position[2] = 0.0f;
 }
@@ -40,9 +40,9 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
 
     halfViewAngle = D_0037F5EC[0] * 0.5f;
     depth = -300.0f - sdfViewTargetVector[2];
-    position[0] = depth * func_00353228(halfViewAngle * 1.3f) *
+    position[0] = depth * tanf(halfViewAngle * 1.3f) *
         ((f32)(screenX - 256) * 0.00390625f);
-    position[1] = depth * func_00353228(halfViewAngle) *
+    position[1] = depth * tanf(halfViewAngle) *
         ((f32)(screenY - 224) / 224.0f);
     position[2] = -300.0f;
 }

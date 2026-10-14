@@ -785,7 +785,7 @@ extern f32 func_002F9F60(f32);
 
 extern f32 func_002FA060(f32);
 
-extern f32 func_002FA148(f32);
+extern f32 tanf(f32);
 
 extern void func_002DD688(f32);
 
@@ -835,7 +835,7 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     angle += 0.6108652f;
     width = extent + length * func_002FA060(angle);
     length *= func_002F9F60(angle);
-    length += width / func_002FA148(out->fov * 1.3333333f * 0.5f);
+    length += width / tanf(out->fov * 1.3333333f * 0.5f);
     out->distance = length;
     if (command->flags & 0x200) {
         angle = -angle;
@@ -894,8 +894,8 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, front->direction);
     angle = front->fov * 1.3333333f * 0.5f;
-    front->distance = front->distance + targetExtent * 1.5f / func_002FA148(angle);
-    minDistance = userExtent / func_002FA148(angle);
+    front->distance = front->distance + targetExtent * 1.5f / tanf(angle);
+    minDistance = userExtent / tanf(angle);
     if (front->distance < minDistance) {
         front->distance = minDistance;
     }
