@@ -386,7 +386,7 @@ void effThunderScaleIndexedVectorDimensions(f32 factor, EffThunderVectorWork *wo
 }
 
 /* Preserve the caller's word unchanged; its wider callback role is unknown. */
-u32 func_00164070(u32 value) {
+u32 effThunderPassThroughValue(u32 value) {
     return value;
 }
 
