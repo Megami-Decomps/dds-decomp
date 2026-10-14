@@ -10,6 +10,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
+#include "evt_model_header.h"
 #include "evt_unit.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "evt_unit_motion_slot.h"
@@ -92,15 +93,6 @@ extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 
 
 /* World object views used by the model-parameter opcodes. */
-typedef struct EvtModelHeader {
-    u8 pad00[0x04];
-    u32 flags;          /* 0x04: bit 2 selects the header transform */
-    u8 pad08[0x08];
-    f32 positionX;      /* 0x10: script-supplied translation */
-    f32 positionY;      /* 0x14 */
-    f32 positionZ;      /* 0x18 */
-} EvtModelHeader;
-
 extern char D_003AC588[];
 extern u8 D_003AC2A0[];
 extern u8 D_003AC550[];
