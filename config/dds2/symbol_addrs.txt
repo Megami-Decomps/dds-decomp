@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+parDrawPendingParticleRecords = 0x00163010; // type:func
 fldConfigureCameraMoveTracking = 0x001206D0; // type:func
 sdfLoadMapCounterCameraVectorsForMask = 0x0030B880; // type:func
 btlInitializeBattleUnits = 0x001D0140; // type:func
@@ -9332,7 +9333,6 @@ effParGetInstanceMode = 0x001629A0; // type:func
 parGetEmitterCellGroupDivisor = 0x00162E10; // type:func
 parInitializeParticleSubsystem = 0x00162E40; // type:func
 func_00162E48 = 0x00162E48; // type:func
-func_00163010 = 0x00163010; // type:func
 effParSetAssetRecordTexture = 0x00163238; // type:func
 parFadeTriangleCellAlpha = 0x001638D8; // type:func
 effParSetCellColorsWithAlphaFade = 0x00164690; // type:func

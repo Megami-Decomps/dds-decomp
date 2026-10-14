@@ -66,7 +66,7 @@ s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
 
 s32 effManagerUpdateAndDispatch(KwlnTask *task) {
     (void)task;
-    func_0015B420();
+    parDrawPendingParticleRecords();
     parDrawPendingCellSystems();
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();

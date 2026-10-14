@@ -1178,6 +1178,7 @@
 0x00162D38	parUpdateTrackPolygonCrossAxes	inferred	Builds crossed axes for track polygon and sets indexed color. [names_reviewed8.tsv]
 0x00162FC8	parReleaseAssetRecord	inferred	Marks release record then queues asset and frees allocation. [names_reviewed8.tsv]
 0x00163000	parPrependRecordListNode	inferred	Links record node at front of particle system list. [names_reviewed8.tsv]
+0x00163010	parDrawPendingParticleRecords	inferred	paired DDS1 routine; iterates pending particle draw records, emits vertex packets from record geometry and selected axes, then clears and dispatches records
 0x00163290	parAllocateCellSystem	inferred	Allocates cell history vertices colors and model object for system. [names_reviewed8.tsv]
 0x001634A8	parReleaseCellSystem	inferred	Releases cell system model object and allocation handle. [names_reviewed8.tsv]
 0x00163508	parPrependCellNode	inferred	Links cell node at front of particle cell list. [names_reviewed8.tsv]
