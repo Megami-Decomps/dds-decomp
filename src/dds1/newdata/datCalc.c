@@ -1,6 +1,7 @@
 #include "common.h"
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
+#include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
@@ -1256,11 +1257,11 @@ void ptySaveActiveUnitsToStock(void) {
     } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
 }
 
-void evtRandomizeEntryValue(s32 entryAddress) {
+void evtRandomizeEntryValue(DatPartyRecord *entry) {
     s32 randomOffset;
 
     randomOffset = effMiscRandMod(0, 4);
-    ((DatPartyRecord *)entryAddress)->randomizedValue = 0x12 - randomOffset;
+    entry->randomizedValue = 0x12 - randomOffset;
 }
 
 
