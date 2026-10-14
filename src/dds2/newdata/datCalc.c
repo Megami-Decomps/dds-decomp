@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
 #include "mdl_flag_api.h"
@@ -440,12 +441,7 @@ extern ScrData *evtWorkScriptTask;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-typedef struct TableEntry32 {
-    u16 value; /* 0x0: copied to active roster entry */
-    u16 unk2; /* 0x2 */
-} TableEntry32;
-
-extern TableEntry32 D_00386248[];
+extern PtyRosterValueRecord D_00386248[];
 
 typedef struct Entry4 {
     u16 unk0; /* 0x0 */
