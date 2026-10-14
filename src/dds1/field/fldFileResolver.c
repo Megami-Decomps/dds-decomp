@@ -4,6 +4,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
@@ -617,7 +618,6 @@ extern void fldResetZoneRecordsAndActorSlots();
 extern void fldResetPendingSounds();
 extern void fldReleaseMenuSlotsAfterWait();
 extern void mnuReleaseResourceEntries();
-extern void sdfResourceListRelease();
 extern void fldReleaseBackgroundBuffer(void);
 
 extern FldWaypointBlock fldActorWaypointRows;

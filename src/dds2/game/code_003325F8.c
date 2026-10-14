@@ -1,6 +1,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_asset_packets.h"
