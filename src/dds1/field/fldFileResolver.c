@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "sdf_packet_header.h"
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
@@ -469,7 +470,6 @@ extern f32 D_00330660[];
 extern void btlActivateRuntime(s32 mode);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void *sdfConsAllocateColumnPacket(s32);
 

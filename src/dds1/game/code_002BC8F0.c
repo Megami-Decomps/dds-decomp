@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_header.h"
 #include "eff_object_node.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
@@ -972,7 +973,6 @@ typedef union EffSpriteColor {
 #include "sdf_packet_alloc.h"
 extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);

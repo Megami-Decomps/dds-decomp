@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_header.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
@@ -33,7 +34,6 @@ extern BillDispatch effBillConstructorEntries[];
 
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void effBattleReleaseParameterBanks(SoundMixer *);
 extern void dds3EndCrossfade();
 extern const char D_00414430[];
