@@ -996,9 +996,10 @@ typedef struct MovieMenuEffectSlot {
 
 typedef struct PickEntry {
     s8 id;
-    u8 unk1;
-    s8 unk2;
+    u8 paletteIndex; /* Current index in the five-entry fade palette. */
+    s8 fadeDelay;    /* Ticks until the next palette step. */
 } PickEntry;
+typedef char PickEntry_size_must_be_3[(sizeof(PickEntry) == 3) ? 1 : -1];
 
 /* Paired bar with the randomly picked title-movie slots (0x94 bytes). */
 typedef struct PickList {
@@ -1010,6 +1011,7 @@ typedef struct PickList {
     s32 unk70;
     MovieMenuEffectSlot effectSlots[4]; /* 0x74 */
 } PickList;
+typedef char PickList_size_must_be_0x94[(sizeof(PickList) == 0x94) ? 1 : -1];
 
 #endif /* VERSION_DDS2 */
 
