@@ -25,6 +25,7 @@
 #include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
+#include "file_scroll_arrow_state.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
 #include "file_save_record.h"
@@ -61,13 +62,6 @@ typedef struct MenuWork {
     u16 unk3A;
     struct SdfMemBlock *unk3C;
 } MenuWork;
-
-typedef struct FileScrollArrowState {
-    s32 angle;
-    s32 upAlpha;
-    s32 unk08;
-    s32 downAlpha;
-} FileScrollArrowState;
 
 extern FileScrollArrowState D_003E7FF8;
 extern f32 D_00437D24;

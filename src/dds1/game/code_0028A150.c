@@ -23,6 +23,7 @@
 #include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
+#include "file_scroll_arrow_state.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
 #include "file_save_record.h"
@@ -56,13 +57,6 @@ enum {
     FILE_CONFIG_Y
 };
 extern s16 D_0037E008[27][4];
-
-typedef struct FileScrollArrowState {
-    s32 angle;
-    s32 upAlpha;
-    s32 unk08;
-    s32 downAlpha;
-} FileScrollArrowState;
 
 extern FileScrollArrowState D_0037D4C0;
 extern f32 D_003BC83C;
