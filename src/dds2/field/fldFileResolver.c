@@ -3606,6 +3606,7 @@ extern void fldSetCameraObjectHighlightFlag(void);
 extern void fldClearSceneModelColors(void);
 extern void fldMarkPrimaryObjectByPeerPresence(void);
 extern void fldClearCameraObjectTransitionFlags(void);
+extern void fldClearCameraObjectHighlightFlag(void);
 
 extern u8 fldTestSceneControlFlags(u32 mask);
 
@@ -4037,8 +4038,49 @@ void fldUpdateCameraTarget(void) {
 /* ASM mode-1 path: save previous XYZ, consume positionPending, and wrap degree angles. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00131B50);
 
-/* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_001321F8);
+/* Signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
+/* Publish the vertical step to field state, then rebuild the object vector.
+ * Each branch-local SDK snapshot dominates all of its scalar reads; there is
+ * no earlier scratch read or loop-carried value. The finite qualification
+ * and memory-contract limitation are documented in docs/idioms.md. */
+s32 func_001321F8(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    if (fldAreaState.verticalStepDirection > 0) {
+        effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        fldAreaState.previousX = fldAreaState.x;
+        fldAreaState.previousY = fldAreaState.y;
+        fldAreaState.previousZ = fldAreaState.z;
+        fldAreaState.x = position[0];
+        fldAreaState.y = position[1] - 2.0f;
+        fldAreaState.z = position[2];
+        position[0] = fldAreaState.x;
+        position[1] = fldAreaState.y;
+        position[2] = fldAreaState.z;
+        effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        fldClearCameraObjectTransitionFlags();
+        fldClearCameraObjectHighlightFlag();
+    } else if (fldAreaState.verticalStepDirection < 0) {
+        effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        fldAreaState.previousX = fldAreaState.x;
+        fldAreaState.previousY = fldAreaState.y;
+        fldAreaState.previousZ = fldAreaState.z;
+        fldAreaState.x = position[0];
+        fldAreaState.y = position[1] + 2.0f;
+        fldAreaState.z = position[2];
+        position[0] = fldAreaState.x;
+        position[1] = fldAreaState.y;
+        position[2] = fldAreaState.z;
+        effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)position);
+        fldClearCameraObjectTransitionFlags();
+        fldClearCameraObjectHighlightFlag();
+    } else {
+        return 0;
+    }
+    return 0;
+}
+
 
 extern void mnuResetTitleStreamAfterFileIdle(void);
 
@@ -4131,7 +4173,6 @@ s32 fldUpdateAreaDamageReaction(void) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00132540);
 
 extern u32 fldGetSceneReadyFlag(void);
-extern void fldClearCameraObjectHighlightFlag(void);
 extern s32 func_001321F8(void);
 extern void func_00131B50(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);
