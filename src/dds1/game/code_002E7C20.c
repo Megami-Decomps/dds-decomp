@@ -73,7 +73,35 @@ void effMiscQuaternionToMatrixVU(void)
     VU0_QUAT_TO_MATRIX_VF10();
 }
 
-INCLUDE_ASM(const s32, "game/code_002E7C20", sdfConvertWrappedEulerAnglesToQuaternionVU);
+extern f32 sdfWrapAngle(f32 angle);
+
+/* The quaternion scratch is read only by the lqc2 asm through its address, so
+ * it is volatile: retail stores its four components in program order. */
+void sdfConvertWrappedEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
+    volatile f32 quaternion[4] __attribute__((aligned(16)));
+    f32 half;
+    f32 cx;
+    f32 sx;
+    f32 cy;
+    f32 sy;
+    f32 cz;
+    f32 sz;
+
+    half = sdfWrapAngle(-x) * 0.5f;
+    cx = sdfEvaluateCosineViaSinePhaseShift(half);
+    sx = sdfSinPoly(half);
+    half = sdfWrapAngle(-y) * 0.5f;
+    cy = sdfEvaluateCosineViaSinePhaseShift(half);
+    sy = sdfSinPoly(half);
+    half = sdfWrapAngle(-z) * 0.5f;
+    cz = sdfEvaluateCosineViaSinePhaseShift(half);
+    sz = sdfSinPoly(half);
+    quaternion[0] = sz * sy * cx + cz * cy * sx;
+    quaternion[1] = cz * sy * cx - sz * cy * sx;
+    quaternion[2] = sz * cy * cx + cz * sy * sx;
+    quaternion[3] = cz * cy * cx - sz * sy * sx;
+    VU0_LOAD_VF(vf10, (f32 *)quaternion);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E7C20", sdfConvertEulerAnglesToQuaternionVU);
 
