@@ -267,17 +267,9 @@ extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
 
 extern s32 btlCountTasksByKind(u16 kind);
 
-extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
-
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 
-extern BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *, f32 *, f32);
-
-extern BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *, f32 *, f32);
-
 extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
-
-extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
 
 extern void btlResetUnitLinks(BtlUnit *);
 
