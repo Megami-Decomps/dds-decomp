@@ -9,6 +9,7 @@
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "fr_font_glyph_chain_count.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
 #include "sdf.h"
@@ -742,7 +743,6 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 }
 
 extern u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode);
-extern s32 frFontCountGlyphChainNodes(FrFontGlyph *text);
 extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 

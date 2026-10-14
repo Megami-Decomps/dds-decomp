@@ -6,6 +6,7 @@
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "fr_font_glyph_measure.h"
+#include "fr_font_glyph_chain_count.h"
 #include "itf.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
