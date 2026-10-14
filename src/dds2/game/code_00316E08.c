@@ -55,7 +55,7 @@ extern void mnuUpdateTimedEffectPosition(void);
 typedef struct SoundSlot SoundSlot;
 extern SoundSlot *dds3ClaimSoundSlot(u32, u32);
 extern s32 D_00438934;
-void func_00319F48(void);
+void mnuClaimTimedEntryEffectRecord(void);
 
 extern MnuEffectRecord *D_00438930;
 
@@ -673,13 +673,13 @@ extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
 extern void mnuProcessMenuWorkEntryLifecycle(MenuWorkEntry *, MnuShootingWork *);
 extern s32 mnuUpdateActiveMenuWorkEntries(s32);
-extern void func_003223F8(void);
-extern s32 func_00324840(void);
-extern s32 func_0031A0B8(MnuShootingWork *);
+extern void mnuAdvanceRuntimeHitTargets(void);
+extern s32 mnuUpdateShootingPlayerInput(void);
+extern s32 mnuAdvanceShootingPlayerEntryReset(MnuShootingWork *);
 extern MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *, MnuShootingWork *);
-extern s32 func_00323BB8(MnuShootingWork *);
+extern s32 mnuDispatchRuntimeListPairOverlaps(MnuShootingWork *);
 extern s32 mnuAdvanceWorkEntriesOverlappingInput(MenuWorkEntry *);
-extern MenuRuntimeList *func_00321ED8(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
 extern void mnuUpdateShootingCameraVectors(void);
 extern void mnuTickScoreProgressState(MnuShootingWork *);
@@ -738,7 +738,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     mnuProcessMenuWorkEntryLifecycle(&D_0040ABF8, work);
     if (work->phase == 2) mnuUpdateActiveMenuWorkEntries(0);
     else mnuUpdateActiveMenuWorkEntries(1);
-    func_003223F8();
+    mnuAdvanceRuntimeHitTargets();
     memset(&input, 0, sizeof(input));
     if (!((work->flags >> 2) & 1)) {
         if ((s8)D_0037F510[1][0][6] != 0) input.verticalNegative = 1;
@@ -763,7 +763,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             input.actionSlot1 = 1;
     }
     mnuSetInputActionSnapshot(&input);
-    if (func_00324840() == 0) func_0031A0B8(work);
+    if (mnuUpdateShootingPlayerInput() == 0) mnuAdvanceShootingPlayerEntryReset(work);
     if (!((work->flags >> 5) & 1)) {
         record = mnuFindOverlappingRuntimeRecord(&D_0040ABF8, work);
         if (record != NULL) {
@@ -772,10 +772,10 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         }
     }
     if (work->phase < 3) {
-        func_00323BB8(work);
+        mnuDispatchRuntimeListPairOverlaps(work);
         if (work->phase < 3) mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
     }
-    mnuDispatchRuntimeWorkOverlaps(func_00321ED8(), work);
+    mnuDispatchRuntimeWorkOverlaps(mnuGetRuntimeAnimationList(), work);
     mnuUpdateShootingCameraVectors();
     mnuTickScoreProgressState(work);
     switch (mnuAdvanceShootingRoundPhase(work)) {
@@ -803,7 +803,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->completed = 0;
         work->unk94 = mode;
         itfSetFadeGaugeDisplayValue(&work->gauge, 0);
-        mnuClearRuntimeRecordStorage(func_00321ED8());
+        mnuClearRuntimeRecordStorage(mnuGetRuntimeAnimationList());
         func_0031A090();
         if (work->round >= 3) {
             work->state = -1;
@@ -830,8 +830,8 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
 
 extern u32 mnuGetWorkEntryPool(void);
 extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
-extern MenuRuntimeList *func_00321ED8(void);
-extern MenuRuntimeList *func_00321EC8(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
+extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
 extern void itfDrawAndAdvanceModelInstances(ModelInstanceWork *work, u32 flags);
 extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
 extern void func_0031CF88(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale,
@@ -871,7 +871,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
         itfDrawAndAdvanceModelInstances(work->work24, 1);
     }
 
-    list = func_00321ED8();
+    list = mnuGetRuntimeAnimationList();
     record = list->records;
     index = 0;
     while (index < list->capacity) {
@@ -921,7 +921,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
         record++;
     }
 
-    list = func_00321EC8();
+    list = mnuGetRuntimeHitTargetList();
     record = list->records;
     index = 0;
     while (index < list->capacity) {
@@ -1055,7 +1055,7 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00319388);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319A58);
 
-void func_00319E48(MenuRuntimeRecord *record) {
+void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *record) {
     MnuModelNode *node;
 
     if ((record->state.kind & 0xF0) == 0x40) {
@@ -1074,12 +1074,12 @@ void func_00319E48(MenuRuntimeRecord *record) {
         sdfMotionSampleAtFrame(node->model->first, 20.0f);
         D_00438934 = node->model->first->frameCount - 20;
         evtPrintDeveloperConsoleMessage("ModelFrame [%d]\n", D_00438934);
-        func_00319F48();
+        mnuClaimTimedEntryEffectRecord();
     }
 }
 
 /* Acquire a record from the third effect list at the timed UI position. */
-void func_00319F48(void) {
+void mnuClaimTimedEntryEffectRecord(void) {
     MenuProgressParameters *origin;
     s32 y, x;
     f32 value;
@@ -1120,7 +1120,7 @@ void func_0031A090(void) {
     }
 }
 
-s32 func_0031A0B8(MnuShootingWork *work) {
+s32 mnuAdvanceShootingPlayerEntryReset(MnuShootingWork *work) {
     MenuWorkEntry *entry = &D_0040ABF8;
     MnuModelNode *node = entry->object.modelNode;
     s32 finished = 0;

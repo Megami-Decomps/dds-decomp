@@ -434,7 +434,7 @@ void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
 MenuRegistry *mnuGetMenuRecordRegistryEntry(u32);
 MenuRegistryRecord *mnuResolveTaggedRegistryRecord(MenuWorkEntry *work);
 MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list);
-MenuShortRecord *func_003225C0(MenuShortRecordList *list);
+MenuShortRecord *mnuFindFrameKeyedMotionRecord(MenuShortRecordList *list);
 void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
 /* The native selector uses the low byte; the stored count is not checked. */
 MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex);
@@ -452,7 +452,7 @@ void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback);
 void mnuCreateShootingEntryObject(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319388(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319A58(MenuWorkEntry *, struct MnuShootingWork *);
-void func_00319E48(MenuRuntimeRecord *);
+void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *);
 void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *, MenuWorkEntry *, struct MnuShootingWork *);
 void mnuAdvanceShootingProgressFromRecord(MenuRuntimeRecord *, MenuRuntimeRecord *, struct MnuShootingWork *);
 #endif
