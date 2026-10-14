@@ -19,10 +19,6 @@
 
 extern void mnuDrawCampScreenDefault(s32);
 
-extern void mnuCreateStaffImageSprite(s32);
-
-
-
 extern void mnuDrawCampGridEntry(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 
