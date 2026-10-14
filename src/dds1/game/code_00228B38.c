@@ -235,7 +235,6 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
     return timer->active;
 }
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 void evtAdvanceSolarPhaseParticles(SolarNoiseState *state) {
     u8 phase = evtGetMirroredSolarPhase();
