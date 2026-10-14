@@ -5,6 +5,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
 #include "kwln_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"

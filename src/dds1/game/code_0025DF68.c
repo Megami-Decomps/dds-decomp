@@ -170,7 +170,7 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
     effDrawSpriteWithCornerFade(D_0036C728[22][BRS_ICON_X] << 4, D_0036C728[22][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[22][BRS_ICON_ID], c);
 }
 
-extern s32 ptyCountBulletItem(s32);
+#include "pty_bullet_item_count_api.h"
 extern s32 sprintf(char *, const char *, ...);
 extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
