@@ -4,6 +4,7 @@
 #include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
+#include "mnu_camp_font_api.h"
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -2234,7 +2235,7 @@ extern void itfPanelSetPairFirst(s32,s16);
 extern void itfMesCleanupWindow(s32,s32);
 extern void itfMesResetWindow(s32);
 void evtViewerMarkWindowInactive(EvtRuntime *);
-void func_00230140(EvtRuntime *);
+void evtViewerUpdateWindowShadeFade(EvtRuntime *);
 
 void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     if (viewer->windowContext == 0) {
@@ -2257,7 +2258,7 @@ void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
         viewer->flags ^= 1;
         evtViewerDispatchFlagMode(viewer);
     }
-    func_00230140(viewer);
+    evtViewerUpdateWindowShadeFade(viewer);
 }
 
 
@@ -2292,7 +2293,7 @@ void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
     viewer->windowActive = 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_00230140);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateWindowShadeFade);
 
 s32 evtViewerTestIndexedCondition(u32 condition) {
     u32 index;
@@ -2384,7 +2385,7 @@ s32 evtEventViewerOpenInputMenu(s32 arg0, s32 arg1, EvtRuntime *viewer) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00230660);
 
-u32 func_00230A38(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+u32 evtViewerPushMode5CommandHistory(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     evtViewerPushCommandHistory(5, 0x90, 0x48, viewer);
     return 0;
 }
@@ -3433,7 +3434,6 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
 
 extern f32 D_00324590[];
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
-extern void mnuCampLinkFontGlyph();
 extern void fldSetTitleDrawMode();
 extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();

@@ -233,7 +233,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
 
 /* Requires task bit 6 clear and a matching 0x2A49 status bit.
  * The masked-status switch assigns 25-bucket tests to cases 0x40/0x400. */
-s32 func_0020EB40(ActionStateLink *task) {
+s32 btlCheckStatusActionEligibility(ActionStateLink *task) {
     BtlUnit *unit = task->unit;
     u16 flags;
 

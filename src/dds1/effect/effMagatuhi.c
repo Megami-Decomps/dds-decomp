@@ -1,4 +1,5 @@
 #include "eff.h"
+#include "eff_magatuhi_orbit.h"
 #include "eff_magatuhi_ring_particle.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -967,49 +968,6 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
         }
     }
 }
-
-/* Orbit parameters have an independent height step (0xE0). */
-typedef struct {
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u8 respawn;
-    u8 pad11[3];
-    s32 lifetimeFrames;
-    s32 delaySpread;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 angleStep;
-    f32 angleJitter;
-    f32 heightStep;
-    f32 heightJitter;
-    f32 startRadius;
-    f32 endRadius;
-    f32 startJitter;
-    f32 endJitter;
-    u32 particleCount;
-    u32 maxSteps;
-    u8 pad4C[0x94];
-} EffMagatuhiOrbitParams;
-
-/* One 0x1C-byte orbit slot; replay visits the first slot in each triplet. */
-typedef struct {
-    s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
-    f32 height;
-    f32 heightStep;
-    f32 angle;
-    f32 angleStep;
-    f32 radius;
-    f32 radiusStep;
-} EffMagatuhiOrbitParticle;
-
-/* Work precedes the orbit slots (0x130). */
-typedef struct {
-    f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
-    EffMagatuhiOrbitParams head;
-    EffMagatuhiOrbitParticle *particles;
-    EffMagatuhiOwner *managedResource;
-    u32 tintColor;
-    SdfMemBlock *allocationHandle;
-} EffMagatuhiOrbitWork;
 
 /* Clone orbit parameters; the returned work precedes its individual slots. */
 EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {

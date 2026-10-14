@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
 #include "sdf_chip.h"
 #include "snd_sequence_volume_pan.h"
@@ -123,12 +124,6 @@ extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32)
 
 extern s32 D_00435E54;
 
-
-extern u32 evtStageTestCountFlags();
-
-extern s32 evtStageTestHasPendingMotion();
-
-extern void evtStageTestQueueMotion();
 
 extern s32 D_00435E48;
 

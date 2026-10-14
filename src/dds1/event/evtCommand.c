@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "dds3_admin_control_api.h"
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
@@ -34,7 +35,6 @@ enum {
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
 
-void scrSetIntegerReturnValue(s32 value);
 
 s32 scrGetCommandTimer(void);
 

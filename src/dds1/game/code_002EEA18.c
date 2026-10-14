@@ -251,15 +251,9 @@ s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
     return 0;
 }
 
-typedef struct {
-    u8 state;    /* 0x00 */
-    u8 pad01[3];
-    u32 value;   /* 0x04 */
-} SdfWordState;
-
-void sdfStoreWordAndSetState(SdfWordState *work, u32 value) {
-    work->value = value;
-    work->state = 1;
+void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output) {
+    decoder->output = output;
+    decoder->state = 1;
 }
 
 extern f32 D_00398440[][4];
@@ -733,7 +727,6 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
     }
 }
 
-extern void sdfInsertFloatKeyTreeItem();
 extern void sdfRebuildPoolChain();
 
 void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
@@ -742,7 +735,8 @@ void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
             node->next = pool->freeHead;
             pool->freeHead = node;
         } else {
-            sdfInsertFloatKeyTreeItem(pool->keyTree, node);
+            /* The key tree views the pool node's +0xC word as its float key. */
+            sdfInsertFloatKeyTreeItem(pool->keyTree, (SdfKeyTreeItem *)node);
         }
     }
 }

@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_stage_test_api.h"
 #include "mnu_input.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"

@@ -1,7 +1,9 @@
 #include "ee_mmi.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
+#include "mdl_part_tag_record.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
@@ -62,7 +64,6 @@ extern BattleGroupIdEntry *btlGroupIdHeads[];
 
 extern void mdlDestroyPartList(DevRequest *);
 
-extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Create the model-job semaphore and clear both lists for all eight groups. */
 void btlInitializeCommandSemaphoreSlots(void) {
@@ -664,7 +665,6 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
 
 extern void mdlDestroyResourceItem(MdlResourceItem *);
 
-extern void sdfResourceListRelease(DevRequest *, s32);
 
 /* Destroy motions, resources, device slots and the context itself. Motion
  * destruction must unlink inner->motionList; save each resource's next link before
@@ -1277,19 +1277,13 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
 }
 
 
-typedef struct MdlPartTagRecord {
-    u32 tag;
-    u8 state;
-    u8 pad05[3];
-} MdlPartTagRecord;
 extern u32 mdlGetViewerRecordPayloadWord(MdlRecord *record);
-extern u16 mdlGetRecordSlotCount(MdlRecord *record);
 extern void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, struct SdfMemBlock *allocation, s32 size);
 
 /* Apply the group's counted parts and entity slots; return the next packet. */
 PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     MdlLoadPayload groupSetup;
-    MdlPartTagRecord unknownPart;
+    MdlPartTagRecord partTagRecord;
     SdfPacModelPacketHeader *packetHeader;
     MdlRecord *record;
     MdlRecord *slotRecord;
@@ -1343,8 +1337,8 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
                 /* Retail retains these metadata stores: DDS1 2188E0/2188E4,
                  * DDS2 2333F8/2333FC. */
                 packetHeader = (SdfPacModelPacketHeader *)packetWork->packet;
-                unknownPart.tag = packetHeader->tag;
-                unknownPart.state = 0;
+                partTagRecord.tag = packetHeader->tag;
+                partTagRecord.state = 0;
                 break;
             }
             packetWork = sdfPacRemovePacket(packetWork);

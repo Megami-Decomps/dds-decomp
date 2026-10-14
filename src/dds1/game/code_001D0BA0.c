@@ -152,7 +152,7 @@ extern u32 kwlnDrawControlFlags;
 
 extern void btlDestroyUnit(u8 *);
 
-extern void func_001D4E60(BtlUnit *, BtlUnit *);
+extern void btlInheritActorModelState(BtlUnit *, BtlUnit *);
 
 
 extern s32 btlSetActorEffectParameter();
@@ -538,7 +538,7 @@ s32 btlHasAnyOperandLowFlag(s32 unused, BattleIndexWork *state) {
 
 extern void func_001AA130(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
 
-extern s32 func_001A6EC0(BtlUnit *, s32);
+extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
 
 extern void btlDistributeRandomTargetHits(BtlUnit *, BtlIndexList *, BtlOperandGroup *, s32);
 
@@ -560,7 +560,7 @@ extern s32 btlSelectedEntryHitsElement(s32, BtlUnit *, s32);
 
 extern s32 btlGetActionRecordLookupValue(s32);
 
-extern s32 func_001A7548(BtlUnit *, BtlUnit *, s32);
+extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
@@ -692,7 +692,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
     }
     group = work->groups;
     randomTargets = 0;
-    if (func_001A6EC0(action->unit, command)) {
+    if (btlShouldDistributeRandomTargetHits(action->unit, command)) {
         randomTargets = 1;
         btlDistributeRandomTargetHits(action->unit, work->indices, group, command);
     }
@@ -792,7 +792,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
             kind = btlGetActionRecordLookupValue(target->selectedEntryIndex);
             group->targetSpecialHit = 1;
         } else {
-            kind = func_001A7548(source, target, command);
+            kind = btlResolveCommandHitResult(source, target, command);
             if (runtime->actionHitOverride != NULL) {
                 helperResult = runtime->actionHitOverride(source, target, command, kind);
                 if (helperResult != 0) {
@@ -828,7 +828,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
                 kind = btlGetActionRecordLookupValue(recipient->selectedEntryIndex);
                 group->sourceSpecialHit = 1;
             } else {
-                kind = func_001A7548(action->unit, recipient, command);
+                kind = btlResolveCommandHitResult(action->unit, recipient, command);
                 group->sourceSpecialHit = 0;
             }
             if (datCommandRecords[command].flags & 2) {
@@ -1666,15 +1666,16 @@ u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
 
 u32 btlAddEpFromPacket(s32 arg0) {
     s32 context = (s32)(u32)btlGetRuntime();
+    BtlRewardPacket *packet = (BtlRewardPacket *)arg0;
 
-    if (((s32 *)arg0)[1] == 0) {
+    if (packet->amount == 0) {
         return 1;
     }
-    if ((u32)((BtlUnit *)((u32 *)arg0)[0])->status.flags & 0x400) {
+    if ((u32)packet->actor->status.flags & 0x400) {
         return 1;
     }
-    *(s32 *)(context + 0x2CC) += ((s32 *)arg0)[1];
-    btlBossDebugPrintf("btl:epall=%d[%d](packet)\n", *(s32 *)(context + 0x2CC), ((s32 *)arg0)[1]);
+    *(s32 *)(context + 0x2CC) += packet->amount;
+    btlBossDebugPrintf("btl:epall=%d[%d](packet)\n", *(s32 *)(context + 0x2CC), packet->amount);
     return 1;
 }
 
@@ -1698,15 +1699,16 @@ u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
 
 u32 btlAddMoneyFromPacket(void *arg0) {
     s32 context = (s32)(u32)btlGetRuntime();
+    BtlRewardPacket *packet = arg0;
 
-    if (((s32 *)arg0)[1] == 0) {
+    if (packet->amount == 0) {
         return 1;
     }
-    if ((u32)((BtlUnit *)((u32 *)arg0)[0])->status.flags & 0x400) {
+    if ((u32)packet->actor->status.flags & 0x400) {
         return 1;
     }
-    *(s32 *)(context + 0x2C0) += ((s32 *)arg0)[1];
-    btlBossDebugPrintf("btl:money=%d[%d](packet)\n", *(s32 *)(context + 0x2C0), ((s32 *)arg0)[1]);
+    *(s32 *)(context + 0x2C0) += packet->amount;
+    btlBossDebugPrintf("btl:money=%d[%d](packet)\n", *(s32 *)(context + 0x2C0), packet->amount);
     return 1;
 }
 
@@ -2348,7 +2350,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 
 /* Inherit the source unit's sound owner, transparency model, world node and
  * event work, and mark the destination as an inheriting unit. */
-void func_001D4E60(BtlUnit *dst, BtlUnit *src) {
+void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
     dst->soundSlotOwner = src->soundSlotOwner;
     dst->transparencyModel = src->transparencyModel;
     dst->effectObject = src->effectObject;
@@ -2401,7 +2403,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
                 key = mdlSpawnCameraSlotViewerObject(kind, id);
                 dds3RemoveWorldObjectNode(dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), key, 5));
             }
-            func_001D4E60(unit, reused);
+            btlInheritActorModelState(unit, reused);
         }
     }
     if (battle->prepareModelUnit) {
@@ -3908,7 +3910,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         if (args->duration != 0) {
             unit->mirror = btlCreateUnit();
             unit->mirror->status.flags |= 0x40000;
-            func_001D4E60(unit->mirror, unit);
+            btlInheritActorModelState(unit->mirror, unit);
             if (unit->unkCC == 0) {
                 unit->mirror->unkCC = 0;
                 unit->unkCC = 1;

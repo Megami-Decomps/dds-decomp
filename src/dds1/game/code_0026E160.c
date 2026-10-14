@@ -199,7 +199,44 @@ void mnuLoadMovieRollSprite(void) {
     mnuMovieWork->spriteSet = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026E160", mnuInitializeMovieRollEntry);
+/* Assign the 32 roll entries to columns 1-6 (1, 1, 4, 5, 9 and 12 entries) with a
+ * random 600-1599 frame start delay. Every run is its own loop, the single-entry
+ * ones included; that keeps the running index live between runs as in retail. */
+void mnuInitializeMovieRollEntry(void) {
+    s32 i;
+    s32 n = 0;
+
+    for (i = 0; i < 1; i++) {
+        D_003DC1E0[n].column = 1;
+        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        n++;
+    }
+    for (i = 0; i < 1; i++) {
+        D_003DC1E0[n].column = 2;
+        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        n++;
+    }
+    for (i = 0; i < 4; i++) {
+        D_003DC1E0[n].column = 3;
+        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        n++;
+    }
+    for (i = 0; i < 5; i++) {
+        D_003DC1E0[n].column = 4;
+        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        n++;
+    }
+    for (i = 0; i < 9; i++) {
+        D_003DC1E0[n].column = 5;
+        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        n++;
+    }
+    for (i = 0; i < 12; i++) {
+        D_003DC1E0[n].column = 6;
+        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        n++;
+    }
+}
 
 
 void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {

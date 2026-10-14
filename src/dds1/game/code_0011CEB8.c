@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
 #include "itf.h"
 #include "fr_font.h"

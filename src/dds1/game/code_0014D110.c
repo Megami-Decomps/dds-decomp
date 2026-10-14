@@ -1165,7 +1165,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
     return 1;
 }
 
-u32 func_0014EEF8(void) {
+u32 fldCmdDispatchSceneAction(void) {
     s32 value;
 
     value = scrReadIntParameter(0);

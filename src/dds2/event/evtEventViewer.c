@@ -4,6 +4,7 @@
 #include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
+#include "mnu_camp_font_api.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
@@ -734,7 +735,7 @@ extern void evtTransitionBgm(s32, s32);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
-extern void func_00341CA8(void);
+extern void sndQueueNoPayloadCommand1A0(void);
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern void kwlnFadeSetupFrames(s32 mode, s32 frames);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
@@ -858,7 +859,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             sndStopReducedBgm();
             break;
         case 6:
-            func_00341CA8();
+            sndQueueNoPayloadCommand1A0();
             break;
         }
         break;
@@ -2305,7 +2306,7 @@ extern void itfPanelSetPairFirst(s32,s16);
 extern void itfMesCleanupWindow(s32,s32);
 extern void itfMesResetWindow(s32);
 void evtViewerMarkWindowInactive(EvtRuntime *);
-void func_0024AD48(EvtRuntime *);
+void evtViewerUpdateWindowShadeFade(EvtRuntime *);
 
 void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     if (viewer->windowContext == 0) {
@@ -2328,7 +2329,7 @@ void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
         viewer->flags ^= 1;
         evtViewerDispatchFlagMode(viewer);
     }
-    func_0024AD48(viewer);
+    evtViewerUpdateWindowShadeFade(viewer);
 }
 
 
@@ -2363,7 +2364,7 @@ void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
     viewer->windowActive = 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0024AD48);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateWindowShadeFade);
 
 s32 evtViewerTestIndexedCondition(u32 encodedId) {
     u32 idx;
@@ -2455,7 +2456,7 @@ s32 evtEventViewerOpenInputMenu(s32 arg0, s32 arg1, EvtRuntime *viewer) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0024B268);
 
-u32 func_0024B678(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+u32 evtViewerPushMode5CommandHistory(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     evtViewerPushCommandHistory(5, 0x90, 0x48, viewer);
     return 0;
 }
@@ -3593,7 +3594,6 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 }
 
 extern f32 D_0037F590[];
-extern void mnuCampLinkFontGlyph();
 extern void fldSetTitleDrawMode();
 extern void kwlnCancelConfiguredFadeFrames();
 extern s32 sdfCheckPendingWorkWithInterrupts();

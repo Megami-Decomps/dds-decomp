@@ -214,7 +214,7 @@ s32 btlStartOwnerTaskIfClear(u8 *object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C4A80);
+INCLUDE_ASM(const s32, "game/code_001C48A8", btlInitializeBattleUnits);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 

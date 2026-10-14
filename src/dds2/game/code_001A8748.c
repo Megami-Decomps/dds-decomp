@@ -1,11 +1,13 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "itf_color_panel_row.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
+#include "dat_unit_has_skill_api.h"
 #include "btl_command_partner_output.h"
 #include "btl_enc_bg_entry.h"
 #include "btl_animation_mode_entry.h"
@@ -45,6 +47,7 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "btl_target_result.h"
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
@@ -540,14 +543,7 @@ typedef struct ItfColorPanelWork {
     u8 pad08[8];
 } ItfColorPanelWork;
 
-typedef struct ItfColorPanelRow {
-    const char *title;
-    s32 highlight;
-} ItfColorPanelRow;
-
 typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
-
-typedef char ItfColorPanelRowSizeCheck[sizeof(ItfColorPanelRow) == 8 ? 1 : -1];
 
 extern ItfColorPanelWork D_00452E90;
 
@@ -2305,9 +2301,6 @@ s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);
 }
 
-extern s32 datUnitHasSkill(DatPartyRecord *, s32);
-
-
 s32 btlCheckSpecialAbility(DatPartyRecord *record, s32 ability) {
     if (datUnitHasSkill(record, ability) == 0) {
         return 0;
@@ -3418,23 +3411,6 @@ INCLUDE_ASM(const s32, "game/code_001A8748", btlCalculateHpActionAmount);
 
 INCLUDE_ASM(const s32, "game/code_001A8748", btlCalculateMpActionAmount);
 
-typedef struct BtlHitResult {
-    s32 amount;
-    u8 pad04[0x28];
-} BtlHitResult;
-
-typedef struct BtlTargetResult {
-    u8 hitCount;
-    u8 pad01[7];
-    u32 kind;
-    u8 pad0C[4];
-    u8 skipped;
-    u8 pad11[3];
-    u8 blocked;
-    u8 pad15[7];
-    BtlHitResult hits[32];
-} BtlTargetResult;
-
 s32 btlSumOtherTargetHitAmounts(u8 *action) {
     BtlTargetResult *result = *(BtlTargetResult **)(action + 0x88);
     u32 count = btlGetIndexListCount(*(BtlIndexList **)(action + 0x60));
@@ -3734,7 +3710,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
     }
 }
 
-s32 func_001B1090(BtlUnit *unit, s32 command) {
+s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
     BtlState *runtime = btlGetRuntime();
     /* 0x6D8: command-availability override (named in DDS1's BtlState). */
     s32 (*availability)(BtlUnit *, s32) = *(s32 (**)(BtlUnit *, s32))runtime->pad6D8;

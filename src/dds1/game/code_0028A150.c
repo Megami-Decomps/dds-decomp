@@ -445,12 +445,21 @@ typedef struct Cb3714C {
 extern Cb3714C D_0037E14C[];
 
 typedef struct FileTypeCallbacks {
-    void *(*create)(void *);
-    void (*unk4)(void *);
-    void (*destroy)(void *);
-    void *(*createChild)(void *, u16);
-    u8 unk10[0x18];
+    void *(*create)(void *);       /* 0x00 */
+    void (*unk4)(void *);          /* 0x04 */
+    void (*destroy)(void *);       /* 0x08 */
+    void *(*createChild)(void *, u16); /* 0x0C */
+    u8 unk10[4];                   /* 0x10 */
+    void (*reset)(void *);         /* 0x14 */
+    u8 unk18[0x10];                /* 0x18 */
 } FileTypeCallbacks;
+
+typedef char FileTypeCallbacksResetOffsetAssert[
+    sizeof(FileTypeCallbacks) - sizeof(((FileTypeCallbacks *)0)->reset) -
+            sizeof(((FileTypeCallbacks *)0)->unk18) == 0x14
+        ? 1
+        : -1];
+typedef char FileTypeCallbacksSizeAssert[sizeof(FileTypeCallbacks) == 0x28 ? 1 : -1];
 
 extern FileTypeCallbacks fileJobTypeOperations[];
 
@@ -2746,13 +2755,13 @@ u32 fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_0028F630);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileUpdatePromptDialog);
 
 extern void *D_003BD908;
 extern void *D_003BD90C;
 extern s32 D_003BC830;
 extern s32 D_003BC838;
-extern s32 func_0028F630(void);
+extern s32 fileUpdatePromptDialog(void);
 s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     D_003BD908 = start;
     D_003BD90C = finish;
@@ -2761,7 +2770,7 @@ s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     if (D_003BC834 != 4 && D_003BC834 != 8) {
         fileReqBegin(fileMemoryCardRequestIndex);
     }
-    return (s32)func_0028F630;
+    return (s32)fileUpdatePromptDialog;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileShowPromptDialog);
@@ -4540,7 +4549,37 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", fileQueueSetColor);
+/* Store the queue's modulation colour, then send every job its own colour
+ * modulated by it ((job / 128) * (queue / 128) * 128 per channel). The tint
+ * store is the unclobbered SDK spelling: as a bare volatile asm it flushes the
+ * CSE table, so the loop's 1/128 is rematerialized rather than copied from the
+ * first unpack's FPR. Reading the payload before the packed store keeps the
+ * store from feeding the argument load. */
+void fileQueueSetColor(FileQueue *queue, u32 color) {
+    f32 tint[4] __attribute__((aligned(16)));
+    u32 queueColor[4] __attribute__((aligned(16)));
+    u32 jobColor[4] __attribute__((aligned(16)));
+    u32 packed[4] __attribute__((aligned(16)));
+    FileJob *job;
+
+    queue->color = color;
+    queueColor[0] = color;
+    EE_MMI_RGBA_UNPACK(queueColor, 1.0f / 128.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, tint);
+    for (job = queue->first; job != NULL; job = job->next) {
+        u32 result;
+        FileJobPayload *payload;
+
+        jobColor[0] = job->color;
+        EE_MMI_RGBA_UNPACK(jobColor, 1.0f / 128.0f);
+        VU0_LOAD_VF(vf11, tint);
+        VU0_MUL(vf10, vf10, vf11);
+        EE_MMI_RGBA_PACK_UNIT(result, 0x43000000);
+        payload = (FileJobPayload *)job->id;
+        packed[0] = result;
+        fileDispatchJobTypeCallback(payload, result);
+    }
+}
 
 void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]) {
     s128 vec;

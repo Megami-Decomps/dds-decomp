@@ -838,7 +838,7 @@ void btlEnterStartActionState(s32 task) {
 }
 
 extern s32 btlBothSidesActive(BtlUnit *);
-extern s32 func_0020EB40(u8 *);
+extern s32 btlCheckStatusActionEligibility(u8 *);
 
 void btlActionSeqCheckDispatch(u8 *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
@@ -860,7 +860,7 @@ void btlActionSeqCheckDispatch(u8 *task) {
                 btlDispatchStateHandler(task, 0x1D);
                 return;
             }
-            if (func_0020EB40(task) != 0) {
+            if (btlCheckStatusActionEligibility(task) != 0) {
                 btlDispatchStateHandler(task, 5);
             } else {
                 btlActionSeqStateSelect(task);
@@ -3275,7 +3275,7 @@ extern u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value);
 
 /* Queue escape-result sounds and stagger eligible party effects; successful
  * escapes also fade each eligible actor, with its identity as the task owner. */
-void func_001DC2D8(ActionStateLink *task) {
+void btlScheduleEscapeResultTasks(ActionStateLink *task) {
     BtlState *state = btlGetRuntime();
     BtlUnit *unit;
     BtlRuntimeTask *effect;

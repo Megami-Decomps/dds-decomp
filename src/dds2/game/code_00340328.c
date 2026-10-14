@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "ee_mmi.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -92,7 +93,36 @@ extern char D_00438B38[]; /* pfs0: */
 
 extern char D_00438B60[];
 
-INCLUDE_ASM(const s32, "game/code_00340328", sdfClearQuadwords);
+/* Clear `count` quadwords at dst: four per pass, then a falling 3/2/1
+ * remainder. The pass is a goto loop (no loop notes, so no loop alignment),
+ * and its exit test is taken before the four stores. */
+void *sdfClearQuadwords(void *dst, s32 count) {
+    u128 *p = dst;
+    s32 done;
+
+    if (count >= 4) {
+loop:
+        count -= 4;
+        done = count < 4;
+        EE_STORE_ZERO_QUAD(p, 0x0);
+        EE_STORE_ZERO_QUAD(p, 0x10);
+        EE_STORE_ZERO_QUAD(p, 0x20);
+        EE_STORE_ZERO_QUAD(p, 0x30);
+        p += 4;
+        if (!done) {
+            goto loop;
+        }
+    }
+    switch (count) {
+    case 3:
+        EE_STORE_ZERO_QUAD(p, 0x20);
+    case 2:
+        EE_STORE_ZERO_QUAD(p, 0x10);
+    case 1:
+        EE_STORE_ZERO_QUAD(p, 0x0);
+    }
+    return dst;
+}
 
 char *sdfStrDup(const char *text) {
     u32 length;

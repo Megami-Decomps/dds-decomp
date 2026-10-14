@@ -21,13 +21,6 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 
-
-
-void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,
-    u32 primaryResourceWord, s32 pixelFormat, u32 secondaryResourceWord,
-    s32 clutFormat, s32 textureColorComponents, s32 maxMipLevel,
-    s32 lodParameters, s32 clampMode, s32 variant);
-
 extern SdfPendingRequest sdfTextureReleaseQueue;
 
 

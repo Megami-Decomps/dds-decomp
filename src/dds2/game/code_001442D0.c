@@ -8,8 +8,11 @@
 #include "common.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_ready_api.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_object_slot_api.h"
+#include "fld_release_texture_slots_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
 #include "sdf_math_vector4.h"
@@ -271,7 +274,7 @@ extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
 extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
-extern void func_0014BF98(EvtUnit *unit);
+extern void fldInitializeHuntSparkUnit(EvtUnit *unit);
 
 extern s32 fldFindEffectByName(char *str);
 
@@ -836,7 +839,7 @@ void fldReleaseCurrentBgm(void) {
 }
 
 void func_00144F48(void) {
-    func_00341CA8();
+    sndQueueNoPayloadCommand1A0();
 }
 
 void fldPlayCurrentBgmSound(void) {
@@ -3105,7 +3108,7 @@ void fldResetObjectSlots(void) {
     D_0043630C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014BF98);
+INCLUDE_ASM(const s32, "game/code_001442D0", fldInitializeHuntSparkUnit);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413AE8);
 
@@ -4041,7 +4044,7 @@ void fldCreateSparkSlotObjects(void) {
             mdlAddEntryFlagged(model, 0, 0);
             model->flags |= 1;
             dds3SetObjectFlags(entry->objectHandle, 0x400);
-            func_0014BF98(evtUnitGetNestedValue(entry->objectHandle));
+            fldInitializeHuntSparkUnit(evtUnitGetNestedValue(entry->objectHandle));
         }
     }
 }

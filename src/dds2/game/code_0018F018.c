@@ -61,7 +61,6 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern u32 fldIsUpdateInhibited(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
-extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix(void *packet);
 extern void effBlurBuildSamplingQuad();

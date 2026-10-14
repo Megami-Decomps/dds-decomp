@@ -73,7 +73,7 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 extern s8 btlHistoryCounter;
 
 extern s32 btlExecuteAiTableAction();
-extern void func_001B7718(ActionStateLink *);
+extern void btlSyncEligibleActorPanelHpMp(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
@@ -167,7 +167,7 @@ extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 btlAnyUnitHasActionInSlots();
+extern s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action);
 
 extern s32 btlCanSpawnAnotherEnemy(s32);
 
@@ -246,7 +246,7 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
     if (mode == 2) {
-        func_001B7718(task);
+        btlSyncEligibleActorPanelHpMp(task);
     }
     sdfReleaseChipBlock(btlActionScratchWork);
 }
@@ -1369,10 +1369,7 @@ s32 btlActionMatchesStatMask(s32 mask, s16 actionId, s8 force) {
 }
 
 /* Return whether an eligible unit has a queued action in the requested category. */
-s32 btlAnyUnitHasActionInSlots(mask, action)
-    s32 mask;
-    s32 action;
-{
+s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action) {
     ActionStateLink *actor;
     BtlUnit *unit;
     u32 flags;

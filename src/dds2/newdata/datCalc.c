@@ -6,6 +6,7 @@
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 #include "pty_roster_api.h"
+#include "dat_unit_has_skill_api.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -36,9 +37,6 @@
 
 extern s32 ptyComputeMaxHp(DatPartyRecord *unit);
 extern s32 ptyComputeMaxMp(DatPartyRecord *unit);
-extern s32 datUnitHasSkill(DatPartyRecord *unit, s32 skillId);
-
-
 
 typedef struct UiObject {
     u8 unk_00[0x110];
@@ -516,8 +514,6 @@ extern s32 ptyRebalanceFrontline(s32);
 
 extern void scrRemoveAvailableSkillFlagAndSlot(DatPartyRecord *, s32);
 
-
-extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 
 extern s32 scrStartProcessProcedure(ScrData *context, s32 procedureIndex);
 

@@ -513,7 +513,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern void func_001B4AA0(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
 
-extern s32 func_001B1090(BtlUnit *, s32);
+extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
 
 struct BtlTargetResult;
 
@@ -541,7 +541,7 @@ extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlGetActionRecordLookupValue(s32);
 
-extern s32 func_001B17E8(BtlUnit *, BtlUnit *, s32);
+extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
@@ -678,7 +678,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     }
     group = work->groups;
     randomTargets = 0;
-    if (func_001B1090(action->unit, command)) {
+    if (btlShouldDistributeRandomTargetHits(action->unit, command)) {
         randomTargets = 1;
         btlDistributeRandomTargetHits(action->unit, work->indices, (struct BtlTargetResult *)group, command);
     }
@@ -785,7 +785,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 }
             }
         } else {
-            kind = func_001B17E8(source, target, command);
+            kind = btlResolveCommandHitResult(source, target, command);
             if (runtime->actionHitOverride != NULL) {
                 helperResult = runtime->actionHitOverride(source, target, command, kind);
                 if (helperResult != 0) {
@@ -823,7 +823,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 kind = btlGetActionRecordLookupValue(recipient->selectedEntryIndex);
                 group->sourceSpecialHit = 1;
             } else {
-                kind = func_001B17E8(action->unit, recipient, command);
+                kind = btlResolveCommandHitResult(action->unit, recipient, command);
                 group->sourceSpecialHit = 0;
             }
             if (datCommandRecords[command].flags & 2) {
@@ -1711,15 +1711,9 @@ BtlRuntimeTask *btlCreateItemQuantityIncrementTask(BtlUnit *actor, u16 itemId) {
     return task;
 }
 
-/* Task payload shared by the experience and money reward callbacks. */
-typedef struct BattleRewardPacket {
-    BtlUnit *actor;
-    s32 amount;
-} BattleRewardPacket;
-
 u32 btlAddEpFromPacket(s32 packetAddress) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BattleRewardPacket *packet = (BattleRewardPacket *)packetAddress;
+    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
     if (packet->amount == 0) {
         return 1;
     }
@@ -1735,7 +1729,7 @@ extern u32 btlAddEpFromPacket(s32);
 
 BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+    BtlRewardPacket *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x53;
@@ -1744,13 +1738,13 @@ BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = amount;
+    args->amount = amount;
     return task;
 }
 
 u32 btlAddMoneyFromPacket(s32 packetAddress) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BattleRewardPacket *packet = (BattleRewardPacket *)packetAddress;
+    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
     if (packet->amount == 0) {
         return 1;
     }
@@ -1766,7 +1760,7 @@ extern u32 btlAddMoneyFromPacket(s32);
 
 BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+    BtlRewardPacket *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x54;
@@ -1775,7 +1769,7 @@ BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = amount;
+    args->amount = amount;
     return task;
 }
 
@@ -2414,7 +2408,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 
 /* Inherit the source unit's sound owner, transparency model, world node and
  * event work, and mark the destination as an inheriting unit. */
-void func_001E1B80(BtlUnit *dst, BtlUnit *src) {
+void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
     dst->unk328 = src->unk328;
     dst->unk344 = src->unk344;
     dst->effectObject = src->effectObject;
@@ -2436,7 +2430,7 @@ extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
-extern void func_001E1B80(BtlUnit *unit, BtlUnit *reused);
+extern void btlInheritActorModelState(BtlUnit *unit, BtlUnit *reused);
 
 void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
     BtlUnit *unit = (BtlUnit *)unitAddress;
@@ -2462,7 +2456,7 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
                     (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
                 dds3RemoveWorldObjectNode(object);
             }
-            func_001E1B80(unit, reused);
+            btlInheritActorModelState(unit, reused);
         }
     }
     if (battle->beforeActorModelReady != NULL) {
@@ -3956,7 +3950,7 @@ void btlBeginModelChange(u32 argumentsAddress) {
     }
 }
 
-extern void func_001E1B80(BtlUnit *, BtlUnit *);
+extern void btlInheritActorModelState(BtlUnit *, BtlUnit *);
 
 extern void btlDestroyUnit(BtlUnit *);
 
@@ -3983,7 +3977,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         if (args->duration != 0) {
             unit->mirror = btlCreateUnit();
             unit->mirror->status.flags |= 0x40000;
-            func_001E1B80(unit->mirror, unit);
+            btlInheritActorModelState(unit->mirror, unit);
             if (unit->unkCC == 0) {
                 unit->mirror->unkCC = 0;
                 unit->unkCC = 1;

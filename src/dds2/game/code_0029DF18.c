@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "scr_string_parameter_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -509,41 +510,14 @@ extern u32 D_00437A28;
 
 extern char D_00428550[]; /* "result2_draw" */
 
-typedef struct BrsResultCounter {
-    u8 pad00[0x14];
-    s8 phase;
-    u8 pad15[7];
-    s32 alpha;
-    u8 pad20[0x10];
-    s32 shown;
-    s32 remaining;
-    s32 increment;
-    u8 pad3C[5];
-    s8 unk41;
-    u8 pad42[2];
-    s32 unk44;
-    s32 unk48;
-    s8 unk4C;
-    u8 pad4D[0x13];
-    s8 unk60;
-    u8 pad61[7];
-} BrsResultCounter;
-
-typedef char BrsResultCounter_shared_view_size[
-    (sizeof(BrsResultCounter) == sizeof(BrsResultCounterView)) ? 1 : -1];
-typedef char BrsResultCounter_shared_phase_offset[
-    ((u32)&((BrsResultCounter *)0)->phase == 0x14) ? 1 : -1];
-typedef char BrsResultCounter_shared_remaining_offset[
-    ((u32)&((BrsResultCounter *)0)->remaining == 0x34) ? 1 : -1];
-
 typedef struct BrsResultWork {
     u8 pad00[0xAEAC];
     s32 settledFrames;
     u8 padAEB0[8];
     s8 soundStarted;
     u8 padAEB9[0x193];
-    BrsResultCounter levelCounters[8];
-    BrsResultCounter profileCounters[8];
+    BrsResultCounterView levelCounters[8];
+    BrsResultCounterView profileCounters[8];
     u8 padB6CC[0x14];
     s32 fadeProgress;
     u8 padB6E4[0x20];
@@ -635,8 +609,8 @@ s32 brsPollResultCounterCompletion(void) {
     for (counterIndex = 0; counterIndex < BRS_RESULT_COUNTER_PAIR_COUNT; counterIndex++) {
         if (resultWork->levelCounters[counterIndex].phase >= 2) {
             if (resultWork->levelCounters[counterIndex].remaining != 0 ||
-                resultWork->levelCounters[counterIndex].unk4C != 0 ||
-                resultWork->levelCounters[counterIndex].unk60 != 0) {
+                resultWork->levelCounters[counterIndex].pad4C[0] != 0 ||
+                resultWork->levelCounters[counterIndex].pad60[0] != 0) {
                 return 0;
             }
         } else if (resultWork->levelCounters[counterIndex].remaining != 0) {

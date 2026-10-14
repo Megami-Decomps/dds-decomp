@@ -8,7 +8,7 @@ void sndEnsureMidiBankResident(s32 arg0);
 u32 sndSendCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 
-void func_00341CA8(void) {
+void sndQueueNoPayloadCommand1A0(void) {
     sndQueueCommandPacket(0x1a0, 0, 0, 0);
 }
 

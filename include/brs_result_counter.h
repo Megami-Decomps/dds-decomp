@@ -20,5 +20,9 @@ typedef char BrsResultCounterView_phase_must_be_at_0x14[
     ((u32)&((BrsResultCounterView *)0)->phase == 0x14) ? 1 : -1];
 typedef char BrsResultCounterView_remaining_must_be_at_0x34[
     ((u32)&((BrsResultCounterView *)0)->remaining == 0x34) ? 1 : -1];
+typedef char BrsResultCounterView_pad4C_must_be_at_0x4C[
+    ((u32)&((BrsResultCounterView *)0)->pad4C == 0x4C) ? 1 : -1];
+typedef char BrsResultCounterView_pad60_must_be_at_0x60[
+    ((u32)&((BrsResultCounterView *)0)->pad60 == 0x60) ? 1 : -1];
 
 #endif

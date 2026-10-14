@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_stage_test_api.h"
 #include "brs_primary_panel_update_api.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
@@ -1030,7 +1031,6 @@ extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused
                                  u32 retainScale);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
-extern void evtStageTestQueueMotion(s32 kind, u32 index);
 extern void sndQueueSoundId(u32 sequence);
 extern void sndStartTrackDefault(s32 track);
 

@@ -23,16 +23,17 @@ typedef struct SndListenerState {
     s32 scaledValues[6];
 } SndListenerState;
 
-/* Paired MIDI getters index the two history words and eight entry words
- * directly with the stored byte index. The owner's allocation extent is not
- * established here, so this view asserts fields/array counts only. */
+/* The paired MIDI getters use one byte index for two entry tables: the
+ * previous-entry getter reads the two-word history table, while the current
+ * entry getter reads the eight-word table. Bytes outside the observed fields
+ * stay opaque; the owning allocation's extent is not established here. */
 typedef struct SndMidiChannel {
     u8 opaque000[0x19];
-    u8 index;
-    u8 enabled;
+    u8 entryIndex;
+    u8 isEnabled;
     u8 opaque01B[5];
-    u32 earlierEntries[2];
-    u32 entries[8];
+    u32 previousEntries[2];
+    u32 currentEntries[8];
 } SndMidiChannel;
 
 typedef char SndMidiStateWordsLayoutAssert[
@@ -49,11 +50,12 @@ typedef char SndListenerStateLayoutAssert[
      (u32)&((SndListenerState *)0)->scaledValues == 8) ? 1 : -1];
 
 typedef char SndMidiChannelLayoutAssert[
-    ((u32)&((SndMidiChannel *)0)->index == 0x19 &&
-     (u32)&((SndMidiChannel *)0)->enabled == 0x1A &&
-     (u32)&((SndMidiChannel *)0)->earlierEntries == 0x20 &&
-     sizeof(((SndMidiChannel *)0)->earlierEntries) == 2 * sizeof(u32) &&
-     (u32)&((SndMidiChannel *)0)->entries == 0x28 &&
-     sizeof(((SndMidiChannel *)0)->entries) == 8 * sizeof(u32)) ? 1 : -1];
+    ((u32)&((SndMidiChannel *)0)->entryIndex == 0x19 &&
+     (u32)&((SndMidiChannel *)0)->isEnabled == 0x1A &&
+     (u32)&((SndMidiChannel *)0)->previousEntries == 0x20 &&
+     sizeof(((SndMidiChannel *)0)->previousEntries) == 2 * sizeof(u32) &&
+     (u32)&((SndMidiChannel *)0)->currentEntries == 0x28 &&
+     sizeof(((SndMidiChannel *)0)->currentEntries) == 8 * sizeof(u32) &&
+     sizeof(SndMidiChannel) == 0x48) ? 1 : -1];
 
 #endif

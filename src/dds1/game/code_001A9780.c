@@ -1261,7 +1261,7 @@ s32 btlCountSceneSlots(void) {
     return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
-s32 func_001ACB08(void) {
+s32 btlSyncEligibleActorPanelHpMp(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 eligibleCount = btlCountEligibleLinkedActors(battle);
     BtlUnit *unit = battle->units;
@@ -7080,7 +7080,37 @@ void btlDrawActorSlotOrder(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001C27B0);
+extern const u32 D_003A3220[4];
+
+/* Draw one bank-selected secondary actor slot, rereading offsets after scaling. */
+void func_001C27B0(EffectSlotSet *work, s32 entry, s32 x, s32 y,
+                   s32 bank, s32 row, s32 variant) {
+    u32 colors[4];
+    s32 channel;
+
+    memcpy(colors, D_003A3220, sizeof(colors));
+    for (channel = 0; channel < 4; channel++) {
+        colors[channel] = btlSetSlotLowByteClamped(work, entry, channel,
+                            D_003BD840[bank]->slotValues[row][variant]);
+    }
+    {
+        ActorSlotOrder **selectedBank = &D_003BD840[bank];
+        ActorSlotOrder *owner = *selectedBank;
+        f32 scale = owner->scalePercent[row][variant];
+        ActorSlotOrder *scaled;
+        s32 drawX;
+        s32 drawY;
+
+        func_001C2E90(work, entry, &owner->drawOffsets[row][variant][0],
+                      &owner->drawOffsets[row][variant][1], scale);
+        scaled = *selectedBank;
+        drawX = scaled->drawOffsets[row][variant][0];
+        drawY = scaled->drawOffsets[row][variant][1];
+        effDrawSpriteWithCornerColors((x + drawX) << 4, (y + drawY) << 3,
+                      0, colors, 0, work, entry, 0x53);
+    }
+    fldScaleSceneCoordinateRecord(work, entry);
+}
 
 /* Advance one slot-order secondary state and its four corner-color adjustments. */
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3220);

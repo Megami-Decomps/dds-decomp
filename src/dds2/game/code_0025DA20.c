@@ -4,6 +4,7 @@
 #include "common.h"
 #include "kwln_task_add_child.h"
 #include "mnu_camp_display.h"
+#include "mnu_camp_font_api.h"
 #include "evt_solar.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"

@@ -11,6 +11,7 @@
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
 #include "kwln.h"
+#include "kwln_draw_buffer.h"
 
 
 
@@ -28,8 +29,6 @@ extern s32 frFontDefaultGlyphCellSize;
 
 void frFontCreateContext();
 
-
-extern s32 kwlnGetDrawBufferIndex(void);
 
 extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
 

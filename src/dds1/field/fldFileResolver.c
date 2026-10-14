@@ -4,6 +4,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
@@ -11,6 +12,7 @@
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
@@ -21,6 +23,9 @@
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
@@ -604,20 +609,16 @@ extern s32 fldTaskSlotCount;
 extern s16 D_003C9510[];
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
-extern void fldClearMenuEntries();
 extern void fldDestroyTitleTask();
-extern void fldPlayPendingSounds();
 extern void fldReleaseObjectSlots();
 extern void fldReleaseTitleSlots();
 extern void fldReleaseResourceHandles();
-extern void fldReleaseTextureSlots();
 #include "fld_object_slot_api.h"
 extern s32 fldTitleMiniIsActive();
 extern void fldResetZoneRecordsAndActorSlots();
 extern void fldResetPendingSounds();
 extern void fldReleaseMenuSlotsAfterWait();
 extern void mnuReleaseResourceEntries();
-extern void sdfResourceListRelease();
 extern void fldReleaseBackgroundBuffer(void);
 
 extern FldWaypointBlock fldActorWaypointRows;
@@ -2492,7 +2493,6 @@ void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     descriptor->append(descriptor, command);
 }
 
-extern s32 kwlnGetDrawBufferIndex(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
@@ -3714,9 +3714,9 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
     position.f[3] = 1.0f;
 
     cameraModel = fldPlayerModelContext;
-    previousFrame = fldAreaState.unk16C;
+    previousFrame = fldAreaState.previousCameraModelFrame;
     currentFrame = cameraModel->first->currentFrame;
-    fldAreaState.unk16C = currentFrame;
+    fldAreaState.previousCameraModelFrame = currentFrame;
 
     if (fldAreaState.unk8C == 0) {
         switch (fldAreaState.unk88) {
@@ -4074,7 +4074,7 @@ s32 fldUpdateFieldTransition(void) {
         {
             Motion *const thresholdMotion = fldPlayerModelContext->first;
             f32 currentFrame = thresholdMotion->currentFrame;
-            if (work->unk16C < 13.0f && 13.0f <= currentFrame) {
+            if (work->previousCameraModelFrame < 13.0f && 13.0f <= currentFrame) {
                 kwlnPadStartMotor(0, 1, 10);
                 kwlnPadStartMotor(1, 0xE6, 10);
                 mnuTitleStreamUpdateAndLogBgm();
@@ -4149,7 +4149,7 @@ extern f32 fldSnapAngleToCompassPoint(f32);
 extern f32 fldSnapAngleToCompassOctant(f32);
 extern f32 fldSnapAngleToCardinalDirection(f32);
 extern s32 fldIsNearSpark(f32, f32, f32);
-extern void func_00136FE8(f32 *);
+extern void fldClassifyMovementAgainstZoneFaces(f32 *);
 extern void fldRestoreCameraModelColor(void);
 extern void fldClearCameraModelColor(void);
 extern void fldDisableCameraObjectFlag(void);
@@ -4425,7 +4425,7 @@ s32 func_0012FF48(void) {
         }
         ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
     }
-    func_00136FE8(position);
+    fldClassifyMovementAgainstZoneFaces(position);
     difference = fldAngleDifference(fldAreaState.angle, heading);
     step = difference / 5.0f;
     if (step < 0.0f) {
@@ -6979,7 +6979,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
 extern s32 D_0032E4CC[];
 
 /* Classify flagged zone faces after checking the current movement. */
-void func_00136FE8(f32 *position) {
+void fldClassifyMovementAgainstZoneFaces(f32 *position) {
     f32 point[3];
     f32 reference[3];
     f32 distanceVector[3];
@@ -7387,7 +7387,7 @@ s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
 }
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
-void func_00138910(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
+void fldAddAxisAlignedCollisionBoxVerticalFaces(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 index;
     f32 minX, minY, minZ, maxX, maxZ;

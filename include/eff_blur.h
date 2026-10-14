@@ -124,6 +124,8 @@ typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots 
 /* Reset burst state and selected quad fields from the owning work parameters;
  * corner coordinates remain for the slot's updater to recompute. */
 void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
+/* Allocate the native effect draw packet from its height and GS flags. */
+void *effCreateSizedDrawPacket(s32 height, s32 flags);
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params);

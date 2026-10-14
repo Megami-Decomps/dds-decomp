@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -97,7 +98,6 @@ extern s32 scrCommandIsProcessControlFlagClear(void);
 
 extern s32 itfPanelReleaseHold(void);
 
-extern void scrSetIntegerReturnValue(s32);
 
 extern s8 D_00324530[];
 

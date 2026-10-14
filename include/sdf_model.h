@@ -72,6 +72,10 @@ typedef char SdfItemListRef_chunkTable_at_C[((u32)&((SdfItemListRef *)0)->chunkT
 SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef);
 SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef);
 SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef);
+void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
+                                s32 packetSelector, s32 alternateSelector,
+                                s32 listIndex);
+void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 /* The draw node owns the lazily allocated workspace; callers receive a borrowed
  * pointer to it, and must not release it independently. */
 void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root);
