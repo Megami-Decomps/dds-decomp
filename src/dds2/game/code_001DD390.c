@@ -3949,25 +3949,6 @@ BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit) {
 }
 
 /* Task-start callbacks do not return a status to the scheduler. */
-/* Exact 0x1C argument allocation owned by the model-change task creator. */
-typedef struct BtlModelChangeArgs {
-    BtlUnit *unit;
-    u32 resourceKind;
-    u32 resourceId;
-    s32 delay;
-    u32 duration;
-    s32 elapsed;
-    u8 phase;
-    u8 transitionMode;
-    u8 pad1A[2];
-} BtlModelChangeArgs;
-
-typedef char BtlModelChangeArgsSizeCheck[sizeof(BtlModelChangeArgs) == 0x1C ? 1 : -1];
-
-typedef char BtlModelChangeArgsElapsedOffsetCheck[((u32)&((BtlModelChangeArgs *)0)->elapsed == 0x14) ? 1 : -1];
-
-typedef char BtlModelChangeArgsPhaseOffsetCheck[((u32)&((BtlModelChangeArgs *)0)->phase == 0x18) ? 1 : -1];
-
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417AF0);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);

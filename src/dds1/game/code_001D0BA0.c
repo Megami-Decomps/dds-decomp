@@ -243,19 +243,6 @@ typedef struct BtlRotationTaskArgs {
     BtlUnit *unit;
 } BtlRotationTaskArgs;
 
-/* Constructor-owned model-change arguments; btlAllocTask reserves 0x1C bytes. */
-typedef struct BtlModelChangeArgs {
-    BtlUnit *unit;
-    u32 resourceKind;
-    u32 resourceId;
-    s32 delay;
-    u32 duration;
-    s32 elapsed;
-    u8 phase;
-    u8 transitionMode;
-    u8 reserved1A[2];
-} BtlModelChangeArgs;
-
 typedef struct BtlFadeArgs {
     BtlUnit *unit;
     s32 fadeIn;
