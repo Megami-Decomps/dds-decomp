@@ -225,7 +225,7 @@ extern void datAdjustCurrentHp();
 
 #include "brs_task_poll_done_api.h"
 
-extern s32 func_001B2630();
+extern s32 btlResolveBattleTerminalOutcome(void);
 
 
 extern s64 mnuGetSoundBufferStateLocked(void);
