@@ -1711,15 +1711,9 @@ BtlRuntimeTask *btlCreateItemQuantityIncrementTask(BtlUnit *actor, u16 itemId) {
     return task;
 }
 
-/* Task payload shared by the experience and money reward callbacks. */
-typedef struct BattleRewardPacket {
-    BtlUnit *actor;
-    s32 amount;
-} BattleRewardPacket;
-
 u32 btlAddEpFromPacket(s32 packetAddress) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BattleRewardPacket *packet = (BattleRewardPacket *)packetAddress;
+    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
     if (packet->amount == 0) {
         return 1;
     }
@@ -1735,7 +1729,7 @@ extern u32 btlAddEpFromPacket(s32);
 
 BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+    BtlRewardPacket *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x53;
@@ -1744,13 +1738,13 @@ BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = amount;
+    args->amount = amount;
     return task;
 }
 
 u32 btlAddMoneyFromPacket(s32 packetAddress) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BattleRewardPacket *packet = (BattleRewardPacket *)packetAddress;
+    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
     if (packet->amount == 0) {
         return 1;
     }
@@ -1766,7 +1760,7 @@ extern u32 btlAddMoneyFromPacket(s32);
 
 BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    BtlRuntimeTaskArgs *args;
+    BtlRewardPacket *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x54;
@@ -1775,7 +1769,7 @@ BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = amount;
+    args->amount = amount;
     return task;
 }
 
