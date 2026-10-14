@@ -3,6 +3,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_blend_color_api.h"
 #include "mnu_title_stream.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
@@ -3902,8 +3903,6 @@ void btlQueueTintTransitionToZero(u16 frames) {
     transition->framesRemaining = frames;
     transition->durationFrames = frames;
 }
-
-extern u32 btlBlendColor(u32, u32, f32);
 
 void btlStepBlendColor(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_003BDCA0;

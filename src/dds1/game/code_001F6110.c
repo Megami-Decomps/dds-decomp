@@ -2,6 +2,8 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_blend_color_api.h"
+#include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_command_partner_output.h"
 #include "sdf_trig.h"
@@ -165,7 +167,6 @@ extern u32 btlGetEventEffectValue(void);
 
 extern u32 btlGetEffectValue(void);
 
-extern u32 btlGetEffectActive(void);
 
 extern u32 btlGetSelectedBossEffectId(void);
 
@@ -379,7 +380,7 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001F66D8);
+INCLUDE_ASM(const s32, "game/code_001F6110", btlMeasureMaskedUnitBounds);
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F6970);
 

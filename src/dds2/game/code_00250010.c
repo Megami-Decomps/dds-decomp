@@ -6,6 +6,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
 #include "sdf_vu_matrix.h"
 
@@ -4315,7 +4316,7 @@ extern char *sdfDevGetPathBuffer(void);
 extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 sceOpen(const char *path, s32 flags, ...);
 extern s32 sceClose(s32 descriptor);
-extern s32 func_0036BCD0(const char *device, s32 flags);
+extern s32 sdfPfsSendPathRequest(const char *device, s32 flags);
 extern void evtViewerWriteTrackDirectory(s32 output, s32 format, EvtRuntime *runtime);
 extern char D_004377C0[];
 extern char D_004377C8[];
@@ -4398,7 +4399,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         }
     }
     sceClose(pm2);
-    func_0036BCD0(D_004377C8, 0);
+    sdfPfsSendPathRequest(D_004377C8, 0);
     evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
@@ -4407,7 +4408,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     }
     sceClose(pm3);
     sdfDebugPrintf("save pm3 file\n");
-    func_0036BCD0(D_004377C8, 0);
+    sdfPfsSendPathRequest(D_004377C8, 0);
     return 1;
 }
 

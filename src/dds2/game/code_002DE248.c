@@ -1,4 +1,9 @@
 #include "eff_packet_params.h"
+#include "eff_class_ops.h"
+#include "eff_particle_shared_resource.h"
+#include "eff_camera_create_request.h"
+#include "eff_file_job_request.h"
+#include "eff_emitter_row.h"
 #include "sdf_packet_header.h"
 #include "fld.h"
 #include "btl_command.h"
@@ -14,6 +19,8 @@
 #include "fld_transfer_chunk.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
+#include "eff_point_set_table.h"
+#include "eff_span_work.h"
 #include "common.h"
 #include "eff_resource_list_request.h"
 #include "eff_matrix4.h"
@@ -507,17 +514,6 @@ typedef struct EffActiveInstanceOps {
 typedef char EffActiveInstanceOpsSizeCheck[(sizeof(EffActiveInstanceOps) == 0x1C) ? 1 : -1];
 
 
-
-/* Native class operations: callbacks followed by the copied payload size.
- * Callback arity varies between creation and frame-notification paths. */
-typedef struct EffClassOps {
-    void (*initialize)();      /* 0x00 */
-    void *(*createResource)(); /* 0x04 */
-    void (*destroyResource)(); /* 0x08 */
-    void (*update)();          /* 0x0C */
-    void (*draw)();            /* 0x10 */
-    u32 payloadSize;           /* 0x14 */
-} EffClassOps;
 
 /* Class-resource callbacks operate on the parent class-work owner. */
 typedef struct EffClassResourceOps {
@@ -2291,42 +2287,10 @@ void billReleaseEmitterNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-/* Kind 5 copies this complete 0x88-byte serialized record. */
-typedef struct EffEmitterFrameParameters {
-    EffBillFrameHeader frame;
-    u32 firstColor;
-    u32 secondColor;
-    f32 width;
-    f32 widthJitter;
-    f32 radius;
-    f32 radiusJitter;
-    f32 offset;
-    f32 offsetJitter;
-    f32 speed;
-    f32 speedJitter;
-    f32 acceleration;
-    u8 reverse;
-    u8 padding85[3];
-} EffEmitterFrameParameters;
-typedef char EffEmitterFrameParameters_size_check[
-    sizeof(EffEmitterFrameParameters) == sizeof(EffBillEmitterFrameConfig) ? 1 : -1];
-typedef char EffEmitterFrameParameters_reverse_check[
-    (u32)&((EffEmitterFrameParameters *)0)->reverse == 0x84 ? 1 : -1];
-
-typedef struct EffEmitterRow {
-    s32 age;
-    f32 speed;
-    f32 angle;
-    f32 radius;
-    f32 offset;
-    f32 width;
-} EffEmitterRow;
-typedef char EffEmitterRow_size_check[sizeof(EffEmitterRow) == 0x18 ? 1 : -1];
-
 extern s32 effSharedRandomState[4];
 
 void billAdvanceEmitterInstances(EffClassWork *work) {
-    EffEmitterFrameParameters *config = (EffEmitterFrameParameters *)work->payload;
+    EffBillEmitterFrameConfig *config = (EffBillEmitterFrameConfig *)work->payload;
     EffBillFrameState *resource;
     EffTrackSet *asset;
     EffEmitterRow *entries;
@@ -5337,17 +5301,6 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 
 
 
-typedef struct EffPointSetRow {
-    EffPointSet *set; /* 0x00 */
-    s32 key;          /* 0x04 */
-    u32 color;        /* 0x08: packed color written by the class updater */
-    f32 angle;        /* 0x0C: phase of the radial class instance */
-} EffPointSetRow;
-
-typedef struct EffPointSetTable {
-    EffPointSetRow *rows;
-} EffPointSetTable;
-
 void effRandomizeParticleFields(EffClassWork *work) {
     u32 count = ((EffBillTimedHeader *)work->payload)->count;
     EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
@@ -8112,60 +8065,6 @@ u32 effGetScalyTextureHandle(void) {
     return effScalyTextureHandle;
 }
 
-typedef struct EffSpanEntry {
-    f32 first;
-    f32 second;
-    u32 referenceAge;
-} EffSpanEntry;
-
-typedef struct EffSpanRecord {
-    EffSpanEntry *entries;
-    EffPointSet *pointSet;
-    EffTrackSet *references;
-    u32 pointCount;
-} EffSpanRecord;
-
-typedef struct EffSpanTable {
-    EffSpanRecord *records;
-    u32 count;
-    u16 total;
-    u8 pad0A[2];
-    struct SdfMemBlock *allocation;
-} EffSpanTable;
-
-typedef struct EffSpanConfig {
-    SdfColorTrack pointColorTrack;
-    SdfAlphaTrack pointAlphaTrack;
-    u32 progress;
-    u8 drawPoints;
-    u8 pad39[3];
-    u32 middleColor;
-    u32 edgeColor;
-    u8 pad44[4];
-    f32 drawScale;
-    u8 pad4C[4];
-    SdfColorTrack referenceColorTrack;
-    SdfAlphaTrack referenceAlphaTrack;
-    s32 referenceLifetime;
-    u8 drawReferences;
-    u8 allowMultipleReferenceStarts;
-    u8 pad8A[2];
-    s32 geometryStartUpdateCount;
-    u32 referenceColorA;
-    u32 referenceColorB;
-    f32 positionScaleA;
-    f32 positionScaleB;
-    f32 firstRand;
-    f32 secondBase;
-    f32 rangeRand;
-    s32 referenceRampDuration;
-    u32 perSpan;
-    f32 rotationAngularVelocity;
-    f32 rotationAngularAcceleration;
-    u8 pointSetFlag;
-} EffSpanConfig;
-
-
 void effSeedParticleSpanParameters(EffModelResource *work) {
     u32 index = 0;
     EffSpanTable *table = work->childResource;
@@ -10456,25 +10355,11 @@ void effSetActiveResourceScale(EffActiveResource *work, f32 value) {
 }
 
 /* Alternate particle handles share a header but occupy distinct slots. */
-typedef struct EffParticleShared {
-    u32 color;
-    u32 option;
-    u32 state;
-    u8 pad0C[0x98];
-    BillObj *billHandle;  // 0xA4: retained billboard cloned from the source resource.
-    struct EffExpandedList *reference; // 0xA8
-} EffParticleShared;
-typedef char EffParticleSharedSizeCheck[(sizeof(EffParticleShared) == 0xAC) ? 1 : -1];
-typedef char EffParticleSharedBillboardOffsetCheck[
-    ((u32)&((EffParticleShared *)0)->billHandle == 0xA4) ? 1 : -1];
-typedef char EffParticleSharedReferenceOffsetCheck[
-    ((u32)&((EffParticleShared *)0)->reference == 0xA8) ? 1 : -1];
-
-EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *source) {
-    EffParticleShared *work = sdfAllocSizeClassBlock(sizeof(EffParticleShared));
+EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayload *source) {
+    EffParticleSharedResource *work = sdfAllocSizeClassBlock(sizeof(EffParticleSharedResource));
     void *buffer;
 
-    memset(work, 0, sizeof(EffParticleShared));
+    memset(work, 0, sizeof(EffParticleSharedResource));
     work->color = 0x80808080;
     work->billHandle = NULL;
     work->reference = NULL;
@@ -10483,7 +10368,7 @@ EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *sourc
     }
     work->option = source->option;
     buffer = fileResolvePrimaryBuffer(source);
-    memcpy(work->pad0C, buffer, sizeof(work->pad0C));
+    memcpy(work->opaquePayload, buffer, sizeof(work->opaquePayload));
     buffer = fileResolveSecondaryBuffer(source);
     if (buffer != NULL) {
         switch (source->primary.selector) {
@@ -10507,7 +10392,7 @@ EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *sourc
     return work;
 }
 
-void effReleaseParticleResources(EffParticleShared *p) {
+void effReleaseParticleResources(EffParticleSharedResource *p) {
     BillObj *billboard = p->billHandle;
     if (billboard != NULL) {
         billDispatchByKind(billboard);
@@ -10518,16 +10403,16 @@ void effReleaseParticleResources(EffParticleShared *p) {
     sdfReleaseChipBlock(p);
 }
 
-void effReplaceSharedResource(EffParticleShared *, EffParticleShared *);
+void effReplaceSharedResource(EffParticleSharedResource *, EffParticleSharedResource *);
 
-EffParticleShared *effCloneParticleSharedResource(EffParticleShared *source) {
-    EffParticleShared *effect = effCreateParticleSharedResourceFromFile(NULL);
-    memcpy(effect->pad0C, source->pad0C, sizeof(effect->pad0C));
+EffParticleSharedResource *effCloneParticleSharedResource(EffParticleSharedResource *source) {
+    EffParticleSharedResource *effect = effCreateParticleSharedResourceFromFile(NULL);
+    memcpy(effect->opaquePayload, source->opaquePayload, sizeof(effect->opaquePayload));
     effReplaceSharedResource(effect, source);
     return effect;
 }
 
-void effReplaceSharedResource(EffParticleShared *dst, EffParticleShared *src) {
+void effReplaceSharedResource(EffParticleSharedResource *dst, EffParticleSharedResource *src) {
     BillObj *billboard;
 
     if (src->billHandle != 0) {
@@ -10546,8 +10431,8 @@ void effReplaceSharedResource(EffParticleShared *dst, EffParticleShared *src) {
     }
 }
 
-void effResetParticleStateWord(EffParticleShared *work) {
-    work->state = 0;
+void effResetParticleStateWord(EffParticleSharedResource *work) {
+    work->opaque08 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F9DF0);
@@ -11137,21 +11022,6 @@ void effApplyBattleCameraToObject(work)
     fileJobInvokeScaleCallback(work, ((FileJob *)D_0045C270)->scale * effFileQueue->scaleMultiplier);
     fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
 }
-
-/* Effect asset/creation descriptor (0x20), separate from the runtime FileJob. */
-typedef struct EffFileJobRequest {
-    char *name;
-    u16 fileKind;
-    u8 pad6[2];
-    u16 transferMode;
-    u8 padA[2];
-    void *output;
-    u32 size;
-    struct SdfMemBlock *allocation;
-    u16 resourceMode;
-    u8 pad1A[2];
-    const char *secondaryCommandPath;
-} EffFileJobRequest;
 
 /* Debug parameter table: each 0x18-byte row points at the variable it edits. */
 typedef struct EffTunableRow {
@@ -11745,13 +11615,6 @@ INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042CF90);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FCA58);
 
-
-typedef struct EffCameraCreateRequest {
-    EffFileJobRequest *resource;
-    EffQueuedFileObject *object;
-    u32 existingJob;
-    f32 position[3];
-} EffCameraCreateRequest;
 
 extern void fileQueueInitTransform(void *);
 extern FileJob *fileAppendJob(FileQueue *, u32);

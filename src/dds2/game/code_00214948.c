@@ -98,11 +98,11 @@ extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern void func_002152D8(s32, s32);
 
-extern s32 func_00215C70(s32, s32);
+extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
 
 extern void *memset(void *, s32, u32);
 
-extern s32 func_00216888(s32, s32);
+extern s32 btlSelectHighestCurrentMpTarget(s32, s32);
 
 extern void *btlSelectRandomUnitFromMask(BtlIndexList *, u16 *, u16);
 
@@ -522,7 +522,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_002152D8);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00215C70);
+INCLUDE_ASM(const s32, "game/code_00214948", btlSelectLowestNonzeroHpTarget);
 
 /* Prefer the lowest nonzero HP among element-blocking units; otherwise use the list. */
 s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
@@ -855,7 +855,7 @@ s32 btlSelectLowestRankTarget(s32 task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00216888);
+INCLUDE_ASM(const s32, "game/code_00214948", btlSelectHighestCurrentMpTarget);
 
 s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
@@ -1551,7 +1551,25 @@ s32 btlCheckPhaseOnePartyStatusGate(void) {
     return 6;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_002181E8);
+extern char D_00436CC0[];
+
+/* Look up the primary script resource once the event task, script handle and
+ * script-ready state 6 are in place; -1 when it cannot be looked up yet. */
+s32 func_002181E8(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+
+    if (battle->eventTaskId == -1 || battle->scriptHandle == 0) {
+        return -1;
+    }
+    if ((battle->battleFlags & 0x800) == 0 || battle->eventReady != 6) {
+        return -1;
+    }
+    /* Retail calls and returns here instead of sibcalling: GCC does not sibcall
+     * while a loop is still open, so the return sits in a one-pass loop. */
+    do {
+        return btlFindScriptResource(D_00436CC0);
+    } while (0);
+}
 
 /* Clear the unit word shared by the command-claim and ready-unit action callbacks. */
 void btlClearClaimedCommandUnit(void) {
@@ -7266,7 +7284,32 @@ s32 btlSelectDisabledCommand(BtlUnit *battler) {
     return (battler->partyRecord.flags & 0x2000) ? 15 : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlTrackSpecialEnemyCommandRestrictionByTurn);
+void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *unit, BtlOperandEntry *command) {
+    BtlState *battle;
+    s32 *effect;
+
+    if ((unit->status.flags & 0x400) == 0) {
+        return;
+    }
+    battle = btlGetRuntime();
+    effect = (s32 *)battle->effect;
+    if (unit->partyRecord.unitId != 0x118) {
+        return;
+    }
+    if (command->flags & 0x10) {
+        unit->partyRecord.flags |= 0x2000;
+        *effect = battle->turnCount;
+    }
+    /* Retail reloads the flag word here on both paths. A second load with a
+     * different alias set keeps GCSE from merging it with the 0x10 test. */
+    if ((u32)*(void **)&command->flags & 0x100) {
+        if (command->hpDelta < 0 || command->mpDelta < 0 || command->addedStatus != 0) {
+            if (*effect != battle->turnCount) {
+                unit->partyRecord.flags &= ~0x2000;
+            }
+        }
+    }
+}
 
 s32 btlClearUnitRestrictionFlag(void) {
     BattleActionContext *battle = (BattleActionContext *)btlGetRuntime();

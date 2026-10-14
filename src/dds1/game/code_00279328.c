@@ -2,6 +2,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
+#include "pty_skill_menu_api.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"
 #include "mnu_list.h"
@@ -11,8 +12,6 @@
 
 
 extern void mnuCampMenuHandleInput(s32);
-extern void ptySkillMenuHandleSelection(s32);
-extern void ptySkillMenuHandleSlotReorder(s32);
 extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void ptySkillMenuCopyPageState(s32);
@@ -254,7 +253,6 @@ s32 ptySkillMenuDispatchConfirmRequest(KwlnTask *selection) {
 }
 
 extern void mnuSelectPage(MenuPageWindow *, s32);
-extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
 s32 ptySkillMenuOpenPartyPage(KwlnTask *menu) {

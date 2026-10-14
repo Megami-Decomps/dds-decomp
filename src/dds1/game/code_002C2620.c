@@ -12,6 +12,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
+#include "sdf_counter_channel.h"
 
 extern void fldShutdownLmapResources(void);
 
@@ -26,8 +27,7 @@ extern u32 D_003BD970;
 
 extern s32 D_003BD974;
 
-extern u32 sdfCounterGetDisplayWordPointer(void);
-extern void sprintf(char *, char *, s32);
+extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);

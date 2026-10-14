@@ -2604,7 +2604,7 @@ extern s32 sceWrite(s32, const void *, s32);
 
 extern s32 sceClose(s32);
 
-extern s32 func_00310A68(const char *, s32);
+extern s32 sdfPfsSendPathRequest(const char *, s32);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
 void btlWriteActorModelTableFile(void) {
@@ -2677,7 +2677,7 @@ void btlWriteActorModelTableFile(void) {
     }
     sceWrite(fd, buffer, cursor - buffer);
     sceClose(fd);
-    func_00310A68(D_003BBB08, 0);
+    sdfPfsSendPathRequest(D_003BBB08, 0);
     sdfFreeMemoryFromEitherHeap(buffer);
 }
 

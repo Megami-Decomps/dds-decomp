@@ -254,6 +254,7 @@ typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection ==
 typedef char EvtRuntime_color_at240C[((u32)&((EvtRuntime *)0)->colorEditorActive == 0x240C) ? 1 : -1];
 
 EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
+void evtEventViewerReleaseQueuedNode(EvtRuntime *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *node);
 void evtViewerDispatchFlagMode(EvtRuntime *viewer);
 void evtEventViewerReset(EvtRuntime *viewer);
 void evtEventViewerShutdown(EvtRuntime *viewer);

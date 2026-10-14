@@ -20,6 +20,8 @@ typedef struct SdfCounterChannel {
     SdfCounterDisplay *display;       /* 0x70 */
 } SdfCounterChannel;
 
+u32 *sdfCounterGetDisplayWordPointer(void);
+
 typedef char SdfCounterDisplaySizeCheck[(sizeof(SdfCounterDisplay) == 0x10) ? 1 : -1];
 typedef char SdfCounterDisplayValueOffset[
     ((unsigned int)&((SdfCounterDisplay *)0)->value == 0x08) ? 1 : -1

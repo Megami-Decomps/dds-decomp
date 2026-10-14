@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
+#include "bf_flw0_header.h"
 extern void btlStartSkillEventTask(u32);
 
 
@@ -26,7 +27,7 @@ s32 btlFindScriptResource(char *name) {
         return -1;
     }
     sprintf(path, "e%03d_%s", battle->eventTaskId, name);
-    return bfFindScriptIndexByName(battle->scriptHandle, path);
+    return bfFindScriptIndexByName((BfFlw0Header *)battle->scriptHandle, path);
 }
 
 /* Start the requested skill script as a child of the battle owner task.

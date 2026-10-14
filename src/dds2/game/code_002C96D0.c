@@ -22,6 +22,7 @@
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
 #include "sdf_dev_state.h"
@@ -253,7 +254,7 @@ extern s32 fileOnAllWritten(void);
 extern void fileSetMemoryCardOperationActive(void);
 extern s8 D_0037F510[];
 extern void sndReleaseTrackHandle(s32 command);
-extern s32 fileBeginWait(s32 result);
+extern s32 fileBeginWait(void *callback);
 
 extern void fileReqStartCardDetection(u32 context);
 
@@ -535,7 +536,7 @@ extern s32 sceOpen(const char *path, s32 flags, ...);
 
 extern s32 sceClose(s32 fd);
 
-extern s32 func_0036BCD0(const char *path, s32 arg1);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 arg1);
 
 void fileDestroyMenuTask(void) {
     if (D_00437CD8 != 0) {
@@ -1033,9 +1034,9 @@ s32 fileStoreSlotHeader(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-s32 fileBeginWait(s32 result) {
+s32 fileBeginWait(void *callback) {
     kwlnFadeInStart(0, 0, 0, 15);
-    fileWaitContinuation = (void *)result;
+    fileWaitContinuation = callback;
     fileWaitTicksRemaining = 0x14;
     return (s32)fileUpdateWait;
 }
@@ -1487,7 +1488,7 @@ s32 mcdFinishFileDetection(void) {
             sndReleaseTrackHandle(0x310000);
         }
         if (D_00439020 == (u32)-1) {
-            return fileBeginWait(-1);
+            return fileBeginWait((void *)-1);
         }
         return ((s32 (*)())D_00439020)();
     }
@@ -1517,7 +1518,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             D_00437D3C = 0;
             D_00437CF8 = 0;
             if (D_00439020 == -1) {
-                return fileBeginWait(-1);
+                return fileBeginWait((void *)-1);
             }
             return ((s32 (*)())D_00439020)();
         }
@@ -4679,7 +4680,7 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     }
     fileJobWriteSerializedPayload(fd, job);
     sceClose(fd);
-    func_0036BCD0(D_00437E20, 0);
+    sdfPfsSendPathRequest(D_00437E20, 0);
 }
 
 FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
@@ -5331,7 +5332,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
     }
     sceClose(fd);
-    func_0036BCD0(D_00437E20, 0);
+    sdfPfsSendPathRequest(D_00437E20, 0);
 }
 
 /* Sixteen-byte preamble of a saved file queue. */
@@ -5436,7 +5437,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
     }
     sceClose(fd);
-    func_0036BCD0(D_00437E20, 0);
+    sdfPfsSendPathRequest(D_00437E20, 0);
 }
 
 FileQueue *fileQueueCreateFromCommandState(const char *entry) {

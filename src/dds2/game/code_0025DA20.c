@@ -82,8 +82,6 @@ extern s32 ptyCountBulletItem(s32);
 
 extern s8 mnuCampListedItems[34];
 
-extern void evtEventViewerReleaseQueuedNode();
-
 typedef struct CampFlagRow {
     u32 messageSet;  /* 0x00: shop message resource number */
     s16 flag[8];     /* 0x04 */
@@ -1459,13 +1457,13 @@ typedef struct CampEntryEnableSet {
 } CampEntryEnableSet;
 
 extern const CampEntryEnableSet D_00424BA0;
-extern s32 func_00260250(MenuTerminalContext *, s32);
+extern s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *, s32);
 
 void mnuBuildEnabledCampEntryWindow(MenuTerminalContext *scene) {
     CampEntryEnableSet options = D_00424BA0;
-    scene->unkA0 = func_00260250(scene, 1);
+    scene->unkA0 = mnuHasCampFlaggedItemByClass(scene, 1);
     if (mdlFlagTest(0x901)) {
-        scene->unkA2 = func_00260250(scene, 3);
+        scene->unkA2 = mnuHasCampFlaggedItemByClass(scene, 3);
     }
     switch (D_003C9A40[scene->shopRow].messageSet) {
     case 1:
@@ -1512,7 +1510,7 @@ s32 mnuCampFindActiveSlot(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260250);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuHasCampFlaggedItemByClass);
 
 
 void mnuShopReleaseWindowSprites(s32 keepExtra, MenuTerminalContext *scene) {
@@ -3633,7 +3631,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
 }
 
 extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, void *, s32, s32);
-extern void func_00294D50(s32, s32, s32, void *, s32, s32);
+extern void mnuDrawTerminalPanelListRows(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawTerminalPanelValues(s32, s32, s32, void *, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
@@ -3662,7 +3660,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
     case 2:
         if (state->stateTable == (s32)D_003CE498) {
             mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
-            func_00294D50(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawTerminalPanelListRows(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(
                 0, 0, 0, (u8 *)state->ownedWindows[0]->list, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);

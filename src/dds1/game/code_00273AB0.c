@@ -117,8 +117,6 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
-extern s32 mnuIsStaffWindowReadyForItem(s32 itemId, s32 context);
-
 s32 mnuStaffImageExitA(KwlnTask *task) {
     StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = context->menu;
@@ -129,7 +127,8 @@ s32 mnuStaffImageExitA(KwlnTask *task) {
         item = menu->pendingItem;
         if (item != 0) {
             menu->pendingItem = 0;
-            if (mnuIsStaffWindowReadyForItem((u16)item, (s32)context) == 0) {
+            if (mnuIsStaffWindowReadyForItem((u16)item,
+                                             (struct StaffDisplayContext *)context) == 0) {
                 mnuSetPopupEntry(&context->popupState, (void *)D_0037C9AC);
             }
         }
@@ -257,8 +256,6 @@ u32 func_00274048(void) {
 
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern s32 mnuUseStaffItem(s32, s32);
-extern s32 mnuIsStaffWindowReadyForItem(s32, s32);
 extern char D_0037C9C8[];
 
 s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
@@ -285,9 +282,10 @@ s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
         staff->pageWindow.flags |= 0x20;
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        buttons = mnuUseStaffItem(itemId, userValue) == 0 ? 0x8000 : 0;
+        buttons = mnuUseStaffItem(itemId, (struct StaffDisplayContext *)staff) == 0 ? 0x8000 : 0;
         menu->primaryObject->list->cursor->sortKeyPrimary = datGameState->inventory.counts[itemId];
-        if (mnuIsStaffWindowReadyForItem((u16)itemId, userValue) == 0) {
+        if (mnuIsStaffWindowReadyForItem((u16)itemId,
+                                         (struct StaffDisplayContext *)staff) == 0) {
             mnuSetPopupEntryFlagged(&staff->popupState, D_0037C9AC);
             mnuClearListFlags(0, &staff->pageWindow);
         } else {

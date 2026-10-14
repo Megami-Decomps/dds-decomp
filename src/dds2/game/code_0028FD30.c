@@ -1541,7 +1541,113 @@ s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateMantraTutorialPanelSprites);
+/* Draw the tutorial node map while its signed-byte transition opens/closes.
+ * The packed state word contains an unsigned state byte and signed flags byte.
+ * Widen the signed pair before masking/decoding kind 2's high flag byte. */
+void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *object) {
+    MantraMenuWork *work = &object->menu;
+    s32 transitionMode = work->unk9B5;
+    u8 drawMode = (u8)work->unk9B5;
+    s32 fade = 0;
+    f32 progress;
+    s32 selector;
+    s32 remaining;
+    MantraNodePos *position;
+
+    switch (transitionMode) {
+    case 0: /* Hidden: no transition timer update. */
+    case 3: /* Visible: no transition timer update. */
+        break;
+    case 1:
+        work->unk9B6++;
+        if (work->unk9B6 < 6) {
+            break;
+        }
+        work->unk9B6 = 0;
+        work->unk9B5 = 3;
+        drawMode = 3;
+        break;
+    case 2:
+        work->unk9B6++;
+        if (work->unk9B6 < 6) {
+            break;
+        }
+        work->unk9B6 = 0;
+        work->unk9B5 = 0;
+        drawMode = 0;
+        break;
+    }
+
+    progress = (f32)work->unk9B6 / 5.0f;
+    switch ((s8)drawMode) {
+    case 0:
+        return;
+    case 1:
+        fade = (s32)(progress * 128.0f);
+        break;
+    case 2:
+        fade = (s32)((1.0f - progress) * 128.0f);
+        break;
+    case 3:
+        fade = 0x80;
+        break;
+    }
+
+    position = mnuGetMantraPanelPositionRecord(0);
+    remaining = 0xAF;
+    for (; remaining >= 0; remaining--, position++) {
+        s32 id = position->selector.fields.index;
+        if (id != 0) {
+            MenuPanelPositionRecord *record;
+            s32 modelFlagState = position->modelFlagState;
+            u32 menuFlags = work->flags;
+            u16 *flagWord;
+
+            if (modelFlagState > (s32)((menuFlags >> 28) & 1)) {
+                continue;
+            }
+            selector = (menuFlags >> 24) & 0xF;
+            record = mnuFindPanelPositionRecordByScriptId(
+                selector, (u16)position->selector.fields.index);
+            flagWord = &record->stateFlags;
+            if ((*flagWord & 0xF) != 3) {
+                s32 x = (s32)((((((f32)position->x / 10.0f) * 20.0f) - 180.0f) + 241.0f) - 10.0f);
+                s32 y = (s32)((((f32)position->y / 10.0f) * 20.0f) - 180.0f + 221.0f);
+                switch (position->kind) {
+                case 1:
+                case 3:
+                case 4: {
+                    s32 headerFlags = (s8)(*flagWord >> 8);
+                    if (headerFlags & 1) {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x105, 0, 0x52);
+                    } else if (mnuFindOtherPanelSelectorForScriptId(
+                                   object, (u16)position->id) != -1) {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x106, 0, 0x52);
+                    } else {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x107, 0, 0x52);
+                    }
+                    break;
+                }
+                case 2: {
+                    s32 high = ((s16)*flagWord & 0xFF00) >> 8;
+                    if (high & 8) {
+                        if (position->selector.packed & 0x100) {
+                            mnuDrawMantraSprite(x, y, 0, fade, 0x108, 0, 0x52);
+                        } else {
+                            mnuDrawMantraSprite(x, y, 0, fade, 0x10A, 0, 0x52);
+                        }
+                    } else if (high & 1) {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x105, 0, 0x52);
+                    } else {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x109, 0, 0x52);
+                    }
+                    break;
+                }
+                }
+            }
+        }
+    }
+}
 
 extern void *memset(void *, s32, u32);
 /* Allocate twenty countdown entries for sounds attached to this panel. */

@@ -1,9 +1,12 @@
 #include "sdf_gs_header.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
+#include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_light_set.h"
+#include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
 #include "mnu_title_stream.h"
@@ -611,11 +614,6 @@ extern s32 D_004360E8;
 
 extern s32 D_00436118, D_0043611C;
 
-/* FILTER.FLD contains 256 mode words and 8-by-9 color grids. */
-typedef struct FldSkyGradientRecord {
-    s32 mode;
-    s32 colors[8][9];
-} FldSkyGradientRecord;
 extern FldSkyGradientRecord *D_00436104;
 
 extern f32 D_00436120, D_00436124;
@@ -2558,16 +2556,6 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
 }
-
-/* The marker producers supply the complete model draw input. */
-typedef struct FldMarkerPacket {
-    f32 pos[3];
-    s32 pad0C;
-    BillTextureQuad uv;
-    f32 quad[8];
-    s32 color;
-    f32 scale;
-} FldMarkerPacket;
 
 void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -4793,7 +4781,6 @@ clear_highlight:
 }
 
 
-extern u32 fldGetSceneReadyFlag(void);
 extern s32 func_001321F8(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);

@@ -8,6 +8,8 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "fld_scene_status_api.h"
+#include "fld_scene_ready_api.h"
 #include "sdf_message.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -32,6 +34,8 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "fld_resource_wait_api.h"
+#include "fld_sequence_controller.h"
+#include "file_selection_api.h"
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -40,16 +44,6 @@ extern u32 D_003BABE0;
 extern s32 fldDeferredCommand;
 
 extern u32 fldSceneControlFlags;
-
-/* The native controller keeps the flags base and accesses its stage at +4.
- * Both original four-byte SDATA labels retain their storage. */
-typedef struct FldSequenceController {
-    u32 flags;
-    s32 stage;
-} FldSequenceController;
-
-typedef char FldSequenceController_size_check[
-    sizeof(FldSequenceController) == 8 ? 1 : -1];
 
 extern FldSequenceController fldSceneLifecycleFlags;
 
@@ -95,9 +89,8 @@ extern char D_0039FCB0[];
 
 extern char D_0039FCC8[];
 
-extern void func_0013E5A8(u32 arg0);
+extern void fldDispatchSceneAction(u32 arg0);
 
-extern u32 fldGetSceneReadyFlag(void);
 
 extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 
@@ -188,7 +181,7 @@ extern FieldEncounterRequest D_003BAC08;
 
 extern void fldResetEventSceneState(void);
 
-extern s32 func_0014D100(void);
+extern s32 fldGetEncounterSelection(void);
 
 extern void fldResetTaskSlots(void);
 
@@ -579,8 +572,6 @@ void fldPrepareDeferredSceneTransition(void) {
     }
 }
 
-extern s32 fileGetSelectionPendingFlag(void);
-
 extern void fldResetFieldRuntimeState(s32);
 
 extern char D_003BAB68[];
@@ -816,7 +807,7 @@ extern void fldPreparePlayerAndCameraScene(u128 *transform);
 extern void fldPreparePlayerSceneCameraTarget(void);
 extern void fldCreateSecondaryWorldCamera(void);
 extern void fldUpdateCameraViewFromPlayer(void);
-extern void func_0012CB48(void);
+extern void fldUpdateFieldCameraViewState(void);
 extern void func_0012CED0(void);
 extern void fldActivateCameraColorSetting(s32 enabled);
 extern void mnuInitializeResourceEntries(void);
@@ -949,7 +940,7 @@ void fldRebuildFieldScene(void) {
                     fldUpdateCameraViewFromPlayer();
                 } else {
                     fldAreaState.mode = 0;
-                    func_0012CB48();
+                    fldUpdateFieldCameraViewState();
                 }
             } else {
                 if (cameraLinkMode == 2) {
@@ -960,7 +951,7 @@ void fldRebuildFieldScene(void) {
                 if (sceneWork->secondaryState == 3) {
                     func_0012CED0();
                 } else {
-                    func_0012CB48();
+                    fldUpdateFieldCameraViewState();
                 }
             }
         }
@@ -1759,7 +1750,7 @@ s32 fldAdvanceToNextScene(void) {
 
     fldResetEventSceneState();
     D_003BAC08.tableIndex = 0;
-    D_003BAC08.encounterSelection = func_0014D100();
+    D_003BAC08.encounterSelection = fldGetEncounterSelection();
     scene = fldAreaState.floor;
     area = fldAreaState.area;
     fldAreaState.nextArea = area;
@@ -2434,7 +2425,7 @@ void fldRunPendingSceneAction(void) {
 
     argument = D_003BABE0;
     if (argument != 0) {
-        func_0013E5A8(argument);
+        fldDispatchSceneAction(argument);
         D_003BABE0 = 0;
     }
 }
