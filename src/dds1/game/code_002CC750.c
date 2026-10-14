@@ -1,6 +1,7 @@
 #include "dsp_name.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_kernel_thread_param.h"
 #include "sdf_thread_workspace_api.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
@@ -10,7 +11,6 @@
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "itf.h"
-#include "sdf_kernel_thread_param.h"
 #include "fr_font.h"
 #include "dat_state.h"
 #include "file.h"
@@ -1532,9 +1532,11 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
     return CreateSema(&sema);
 }
 
-extern s32 CreateThread(SdfKernelThreadParam *);
 extern void *_gp;
+extern s32 CreateThread(SdfKernelThreadParam *);
 
+/* Create a kernel thread from a zeroed descriptor that uses the caller's
+ * workspace as its stack and the program's GP. */
 s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
     SdfKernelThreadParam param;
 

@@ -3,6 +3,8 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_scene_status_api.h"
+#include "fld_scene_ready_api.h"
 #include "sdf_message.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -30,6 +32,8 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "fld_resource_wait_api.h"
+#include "fld_sequence_controller.h"
+#include "file_selection_api.h"
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
@@ -59,12 +63,6 @@ extern void *dds3GetWorldSecondaryObject(void);
 #include "dds3_object_payload.h"
 
 extern u32 D_00435F60;
-
-/* The stage member also has the assembler label D_00435F8C. */
-typedef struct FldSequenceController {
-    u32 flags;
-    s32 stage;
-} FldSequenceController;
 
 extern FldSequenceController fldSceneLifecycleFlags;
 
@@ -213,7 +211,6 @@ u8 fldTestSceneControlFlags(u32 arg0);
 
 extern s32 D_00435F80;
 
-extern u32 fldGetSceneReadyFlag(void);
 
 extern u32 fldDeferredCommandParameter;
 
@@ -737,9 +734,7 @@ void fldPrepareDeferredSceneTransition(void) {
     }
 }
 
-extern u32 fileGetSelectionPendingFlag(void);
-
-extern void func_00122B58();
+extern void fldResetFieldRuntimeState();
 
 extern char D_00435F48[];
 
@@ -755,7 +750,7 @@ void fldStartSequenceRecord(void) {
         dds3AdminSubmitModeRequest(0x1E, &mode, 4, 0);
         return;
     }
-    func_00122B58(1);
+    fldResetFieldRuntimeState(1);
     D_00389988[0x4C / 4] = 0;
     D_00389988[0x44 / 4] = 1;
     mdlFlagSet(0xC0F);

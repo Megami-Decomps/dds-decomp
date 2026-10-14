@@ -6,6 +6,7 @@
 #include "kwln_task_create.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
 #include "mdl_flag_api.h"
@@ -73,7 +74,6 @@ extern void fldClearCameraMoveMode(void);
 
 extern void fldSetCameraMoveMode(s32);
 
-extern u32 fldGetSceneReadyFlag(void);
 
 
 extern FldActivationEntry D_0034C8F0[256];
@@ -573,7 +573,7 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void fldSetGsAlphaBlendEquation(s32);
 
-extern void func_00134348(void);
+extern void fldDrawCameraColorScrollingGradient(void);
 
 extern void fldDrawSkyGradient(void);
 
@@ -593,7 +593,7 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
     fldSelectDisplayBuffer(0x53);
     fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
     fldSetGsAlphaBlendEquation(0);
-    func_00134348();
+    fldDrawCameraColorScrollingGradient();
     fldDrawSkyGradient();
     if (D_0032E570[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {

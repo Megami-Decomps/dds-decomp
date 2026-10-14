@@ -3729,7 +3729,25 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A8748", func_001B1090);
+s32 func_001B1090(BtlUnit *unit, s32 command) {
+    BtlState *runtime = btlGetRuntime();
+    /* 0x6D8: command-availability override (named in DDS1's BtlState). */
+    s32 (*availability)(BtlUnit *, s32) = *(s32 (**)(BtlUnit *, s32))runtime->pad6D8;
+
+    if (availability != NULL) {
+        if (availability(unit, command) == 0) {
+            return 0;
+        }
+    }
+    if ((unit->status.flags & 0x200) && datCommandSelectors[command].kind == 5) {
+        if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
+            return 1;
+        }
+    } else if (datCommandRecords[command].unk_0A[1] == 1) {
+        return 1;
+    }
+    return 0;
+}
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
                    BtlTargetResult *results, s32 command) {

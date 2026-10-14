@@ -1,9 +1,12 @@
 #include "sdf_gs_header.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
+#include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_light_set.h"
+#include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
 #include "kwln_fade.h"
@@ -434,7 +437,6 @@ typedef struct FldActionSpawn {
     s32 firstValue;
 } FldActionSpawn;
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
-extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
 extern void fldSetCameraObjectHighlightFlag(void);
@@ -2480,15 +2482,6 @@ extern void sdfVuLoadRotationMatrixY(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
-/* The marker producers supply the complete model draw input. */
-typedef struct FldMarkerPacket {
-    f32 pos[3];
-    s32 pad0C;
-    BillTextureQuad uv;
-    f32 quad[8];
-    s32 color;
-    f32 scale;
-} FldMarkerPacket;
 void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
     SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     DmaPacketHeader *header;
@@ -3336,7 +3329,7 @@ void fldProbeCameraSupportSurface(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012CB48);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateFieldCameraViewState);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012CED0);
 
@@ -4931,11 +4924,6 @@ extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting D_003306D0;
 extern void *fldSkyLightSetBuffer;
 extern void *D_003BAD60;
-/* The sky file has 256 records of 0x124 bytes: mode and an 8-by-9 color grid. */
-typedef struct FldSkyGradientRecord {
-    s32 mode;
-    s32 colors[8][9];
-} FldSkyGradientRecord;
 extern FldSkyGradientRecord *D_003BAD74;
 extern s32 D_003BAD88, D_003BAD8C;
 extern f32 D_003BAD90, D_003BAD94;
@@ -5997,7 +5985,7 @@ s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     return color | (scaled << 24);
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00134348);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldDrawCameraColorScrollingGradient);
 
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
@@ -6015,7 +6003,7 @@ void fldInitializeCameraColorResource(void) {
 }
 
 void fldDrawCameraColorLayerPass(void) {
-    func_00134348();
+    fldDrawCameraColorScrollingGradient();
 }
 
 void fldReleaseCameraColorEffect(void) {
@@ -8567,7 +8555,7 @@ void fldApplySceneRoomSelection(FldActorEntry *entry) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013DF60);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013E5A8);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldDispatchSceneAction);
 
 void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
     switch (mode) {

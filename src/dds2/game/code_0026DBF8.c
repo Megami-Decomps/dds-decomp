@@ -4445,9 +4445,9 @@ void mnuReleaseMantraPanelSpriteView(u32 obj) {
     mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027CDD0);
+INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraPanelBaseLayer);
 
-extern s32 func_0027CDD0(s32, s32, s32, s32, MantraPanelPool *, MantraPanelAnimation *, s32);
+extern s32 mnuDrawMantraPanelBaseLayer(s32, s32, s32, s32, MantraPanelPool *, MantraPanelAnimation *, s32);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425B68);
 
@@ -4478,24 +4478,24 @@ s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool
     switch ((panel->flags >> 19) & 0xF) {
     case 6:
         fade = panel->frame * 0.25f;
-        func_0027CDD0(x, y, z, (s32)(alpha * fade), pool, panel, packet);
+        mnuDrawMantraPanelBaseLayer(x, y, z, (s32)(alpha * fade), pool, panel, packet);
         break;
     case 8:
         fade = panel->frame / 10.0f;
-        func_0027CDD0(x, y, z, (s32)(alpha * fade), pool, panel, packet);
+        mnuDrawMantraPanelBaseLayer(x, y, z, (s32)(alpha * fade), pool, panel, packet);
         break;
     case 7:
         fade = panel->frame * 0.25f;
         fade = 1.0f - fade;
-        func_0027CDD0(x, y, z, (s32)(alpha * fade), pool, panel, packet);
+        mnuDrawMantraPanelBaseLayer(x, y, z, (s32)(alpha * fade), pool, panel, packet);
         break;
     case 9:
         fade = panel->frame / 10.0f;
         fade = 1.0f - fade;
-        func_0027CDD0(x, y, z, (s32)(alpha * fade), pool, panel, packet);
+        mnuDrawMantraPanelBaseLayer(x, y, z, (s32)(alpha * fade), pool, panel, packet);
         break;
     case 0:
-        func_0027CDD0(x, y, z, alpha, pool, panel, packet);
+        mnuDrawMantraPanelBaseLayer(x, y, z, alpha, pool, panel, packet);
         break;
     case 1:
         /* Fade the old panel while the ring and shards expand. */
@@ -4573,7 +4573,7 @@ s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool
             glowFade = 0.0f;
         }
         mask = 0;
-        func_0027CDD0(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
+        mnuDrawMantraPanelBaseLayer(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
         mnuDrawMantraScaledRotatedCenteredSprite(x, y, 0, (s32)(alpha * ringFade), 0xB8, 0, packet,
                                                ringExpansion * 0.8f + 1.0f, ringExpansion * 1024.0f);
         drawAlpha = alpha * shardFade;

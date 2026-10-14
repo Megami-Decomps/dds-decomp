@@ -17,6 +17,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
+#include "sdf_counter_channel.h"
 
 typedef struct SdfSlotSet SdfSlotSet;
 
@@ -66,7 +67,6 @@ extern void evtSetSolarOverlayFullyTransparent(void);
 extern s32 dspCloseChannel(void);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
-extern s32 sdfCounterGetDisplayWordPointer(void);
 extern void sprintf(char *, char *, ...);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);

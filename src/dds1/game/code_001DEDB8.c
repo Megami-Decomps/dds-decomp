@@ -3,6 +3,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_blend_color_api.h"
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "eff_random_mod.h"
@@ -336,7 +337,7 @@ extern u8 D_0037E110[];
 extern f32 btlUnitGetTopY(BtlUnit *);
 
 /* With a qualifying unit, the span query leaves its last muzzle point in VF10. */
-extern f32 func_001F66D8(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 extern void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
@@ -672,7 +673,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
-        span = func_001F66D8(flags & 0x600, 0, 0) * 1.25f;
+        span = btlMeasureMaskedUnitBounds(flags & 0x600, 0, 0) * 1.25f;
         VU0_STORE_VF(vf10, from->position);
         if (btlSampleActorModelPositionVU(unit, 1) == 0) {
             btlUnitGetMuzzlePosVU(unit);
@@ -842,7 +843,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
                     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, i);
                     targetFlags |= target->status.flags & 0x600;
                 }
-                func_001F66D8(targetFlags, 0, 0);
+                btlMeasureMaskedUnitBounds(targetFlags, 0, 0);
                 VU0_STORE_VF_UNCLOBBERED(vf10, center);
                 if (btlAimHorizontalDirectionVU(bodyPosition, center) != 0) {
                     VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
@@ -1030,7 +1031,7 @@ f32 angle, f32 blend) {
     }
     fov = command->camera.fov;
     pose->fov = fov;
-    projected = func_001F66D8(groups, NULL, NULL);
+    projected = btlMeasureMaskedUnitBounds(groups, NULL, NULL);
     VU0_LOAD_VF(vf11, firstPosition);
     VU0_LERP_VF10(blend);
     VU0_STORE_VF(vf10, pose->position);
@@ -1134,7 +1135,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
     btlFlagAllUnitsDefeatCandidate();
     out->fov = action->camera.fov;
     extent = target->reach * target->scale;
-    span = func_001F66D8(user->status.flags & 0x600, 0, &height);
+    span = btlMeasureMaskedUnitBounds(user->status.flags & 0x600, 0, &height);
     VU0_STORE_VF_UNCLOBBERED(vf10, center);
     center[1] = -height * 0.5f;
     btlUnitGetMuzzlePosVU(target);
@@ -1194,7 +1195,7 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
         mask |= ((BtlUnit *)btlGetIndexListEntry(command->targetList, i))->status.flags & 0x600;
     }
     if (unit->status.flags & 0x80000) {
-        func_001F66D8(mask, 0, 0);
+        btlMeasureMaskedUnitBounds(mask, 0, 0);
         VU0_STORE_VF(vf10, &vec[0]);
         btlUnitGetBodyPosVU(unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
@@ -1567,9 +1568,9 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
         unitExtent = unit->reach * unit->scale;
         btlUnitGetMuzzlePosVU(unit);
         VU0_STORE_VF(vf10, focus);
-        func_001F66D8(0x200, &span[0], NULL);
+        btlMeasureMaskedUnitBounds(0x200, &span[0], NULL);
         focus[1] = -span[0];
-        fit = func_001F66D8(0x400, &span[1], &span[2]);
+        fit = btlMeasureMaskedUnitBounds(0x400, &span[1], &span[2]);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         eye[0] = 0.0f;
         ref = btlFindFarthestUnit(0x400, eye);
@@ -1755,7 +1756,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
         btlBuildShoulderActionCamera(action, pose, target, mode);
     }
 
-    func_001F66D8(0x400, NULL, NULL);
+    btlMeasureMaskedUnitBounds(0x400, NULL, NULL);
     VU0_STORE_VF_UNCLOBBERED(vf10, vectors.center);
     for (unit = runtime->units; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
@@ -1774,7 +1775,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
         }
     }
 
-    func_001F66D8(0x200, NULL, NULL);
+    btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
     VU0_STORE_VF_UNCLOBBERED(vf10, vectors.center);
     for (unit = runtime->units; unit != NULL; unit = unit->next) {
         s32 flags = unit->status.flags;
@@ -1848,7 +1849,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
                 if ((entry->status.flags & 0x20) != 0) {
                     btlInterpolateVectorStep(pose->position);
                     btlDefeatCameraStoreVector(vectors.interpolated);
-                    func_001F66D8(0x200, NULL, NULL);
+                    btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
                     btlDefeatCameraStoreVector(pose->position);
                     pose->position[1] = 0.0f;
                     pose->position[2] *= 0.5f;
@@ -1875,7 +1876,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
         sideFlags |= entry->status.flags & 0x600;
     }
     if (mode == 0) {
-        span = func_001F66D8((s32)sideFlags, &height, &depth);
+        span = btlMeasureMaskedUnitBounds((s32)sideFlags, &height, &depth);
     } else {
         span = func_001F6E28(indices, &height, &depth);
     }
@@ -1889,7 +1890,7 @@ void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
         span *= 1.25f;
     }
 
-    func_001F66D8(0x400, NULL, &depth);
+    btlMeasureMaskedUnitBounds(0x400, NULL, &depth);
     btlDefeatCameraStoreVector(vectors.edge);
     vectors.edge[0] = 0.0f;
     if (depth > 150.0f) {
@@ -1943,7 +1944,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
     }
     btlSetDefaultActionCameraPose(command, out);
     btlCopyMotionTransform(pose, out);
-    span = func_001F66D8(0x200, 0, 0) * 0.5f;
+    span = btlMeasureMaskedUnitBounds(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;
     out->position[0] += span;
     out->distance *= 0.8f;
@@ -1983,7 +1984,7 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from,
     fov = source->fov;
     from->fov = fov;
     to->fov = fov;
-    func_001F66D8(0x400, &height, 0);
+    btlMeasureMaskedUnitBounds(0x400, &height, 0);
     VU0_STORE_VF(vf10, center);
     center[1] = -height;
     first = 1;
@@ -2039,10 +2040,10 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
     btlFlagAllUnitsDefeatCandidate();
     fov = source->fov;
     out->fov = fov;
-    span = func_001F66D8(0x200, &height, 0);
+    span = btlMeasureMaskedUnitBounds(0x200, &height, 0);
     VU0_STORE_VF(vf10, out->position);
     out->position[1] = -height * 1.15f;
-    func_001F66D8(0x400, &height, 0);
+    btlMeasureMaskedUnitBounds(0x400, &height, 0);
     VU0_STORE_VF(vf10, target);
     target[1] = -height * 0.75f;
     if (target[0] > 100.0f) {
@@ -2104,11 +2105,11 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
         return;
     }
     if (action->state == endFrame) {
-        func_001F66D8(0x400, &height[0], 0);
+        btlMeasureMaskedUnitBounds(0x400, &height[0], 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
         targetPos[0] = 0.0f;
         targetPos[1] = -height[0] * 0.5f;
-        length = func_001F66D8(0x200, &height[1], 0);
+        length = btlMeasureMaskedUnitBounds(0x200, &height[1], 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
         userPos[1] = -height[1] * 0.25f;
         if (height[0] < 600.0f) {
@@ -3030,7 +3031,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, worldAxis);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         if (p->focusPolicy.kind != 0x28) {
-            func_001F66D8(0x200, NULL, NULL);
+            btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
             VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
         } else {
             func_001EE658(0x200, action->task->unit, action->linkedA,
@@ -3128,7 +3129,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, worldAxis);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
         boundsMask = 0x600;
-        func_001F66D8(0x400, NULL, NULL);
+        btlMeasureMaskedUnitBounds(0x400, NULL, NULL);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
         span = func_001ED5C8(boundsMask, NULL, NULL, NULL, NULL,
                             terminalPoint, 600.0f);
@@ -3239,7 +3240,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
         terminalPoint[1] += p->focusPolicy.height;
         if (p->focusPolicy.kind == 0x2C) {
-            func_001F66D8(0x400, NULL, NULL);
+            btlMeasureMaskedUnitBounds(0x400, NULL, NULL);
             VU0_STORE_VF_UNCLOBBERED(vf10, destination);
             terminalPoint[0] = destination[0];
         }
@@ -3550,7 +3551,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf11, eye);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        func_001F66D8(centerMask, 0, 0);
+        btlMeasureMaskedUnitBounds(centerMask, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
         if (actorPoint[1] - 165.0f <= focus[1]) {
             if (focus[1] <= -150.0f) destination[1] -= 165.0f;
@@ -3596,7 +3597,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         worldAxis[2] = -worldAxis[2];
         VU0_LOAD_VF(vf10, worldAxis);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        span = func_001F66D8(0x200, 0, 0);
+        span = btlMeasureMaskedUnitBounds(0x200, 0, 0);
         measuredDistance = span / tanf(halfFov);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
@@ -3645,7 +3646,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             }
             VU0_LOAD_VF(vf10, worldAxis);
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-            span = func_001F66D8(0x200, 0, 0);
+            span = btlMeasureMaskedUnitBounds(0x200, 0, 0);
             measuredDistance = span / tanf(halfFov);
             VU0_STORE_VF_UNCLOBBERED(vf10, eye);
             if ((s32)btlCountUnitsByFlags(0x200) < 3) {
@@ -3775,7 +3776,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             if (p->eyePolicy.kind == 8) mask = 0x200;
             else mask = 0x400;
         }
-        func_001F66D8(mask, 0, 0);
+        btlMeasureMaskedUnitBounds(mask, 0, 0);
         tanf(halfFov); /* scalar ignored, call exists, vf10 preserved */
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         VU0_LOAD_VF(vf10, direction);
@@ -3976,7 +3977,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             if (p->eyePolicy.kind == 0x10) mask = 0x200;
             else mask = 0x400;
         }
-        span = func_001F66D8(mask, 0, 0);
+        span = btlMeasureMaskedUnitBounds(mask, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         measuredDistance = span / tanf(halfFov);
         VU0_LOAD_VF(vf10, direction);
@@ -4011,7 +4012,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             if (p->eyePolicy.kind == 0xE) mask = 0x200;
             else mask = 0x400;
         }
-        span = func_001F66D8(mask, 0, 0);
+        span = btlMeasureMaskedUnitBounds(mask, 0, 0);
         measuredDistance = span / tanf(halfFov);
         measuredDistance += p->eyePolicy.distance;
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
@@ -4047,7 +4048,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_LOAD_VF(vf10, p->boundsSeed);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
         if (p->eyePolicy.kind == 0x20) {
-            func_001F66D8(0x400, 0, 0);
+            btlMeasureMaskedUnitBounds(0x400, 0, 0);
             VU0_STORE_VF_UNCLOBBERED(vf10, destination);
             terminalPoint[0] = destination[0];
         }
@@ -4067,7 +4068,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         worldAxis[0] = p->eyePolicy.side;
         VU0_LOAD_VF(vf10, worldAxis);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        func_001F66D8(0x400, 0, 0);
+        btlMeasureMaskedUnitBounds(0x400, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
         VU0_LOAD_VF(vf10, angles);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint); /* the first store is intentionally overwritten */
@@ -4195,7 +4196,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             if (p->terminalPolicy.kind == 8) mask = 0x200;
             else mask = 0x400;
         }
-        func_001F66D8(mask, 0, 0);
+        btlMeasureMaskedUnitBounds(mask, 0, 0);
         tanf(halfFov); /* ignored scalar, vf10 survives */
         VU0_STORE_VF_UNCLOBBERED(vf10, destination);
         VU0_LOAD_VF(vf10, direction);
@@ -4221,7 +4222,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         worldAxis[0] = p->terminalPolicy.side;
         VU0_LOAD_VF(vf10, worldAxis);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        func_001F66D8(0x600, 0, 0);
+        btlMeasureMaskedUnitBounds(0x600, 0, 0);
         tanf(halfFov); /* ignored scalar, vf10 survives */
         VU0_STORE_VF_UNCLOBBERED(vf10, destination);
         VU0_LOAD_VF(vf10, direction);
@@ -4800,9 +4801,9 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
         VU0_STORE_VF_UNCLOBBERED(vf10, aimPosition);
         target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
         if (target->status.flags & 0x400) {
-            func_001F66D8(0x400, 0, 0);
+            btlMeasureMaskedUnitBounds(0x400, 0, 0);
         } else {
-            func_001F66D8(0x200, 0, 0);
+            btlMeasureMaskedUnitBounds(0x200, 0, 0);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         btlAimHorizontalDirectionVU(aimPosition, position);
@@ -5062,8 +5063,6 @@ void btlQueueTintTransitionToZero(u16 frames) {
     transition->framesRemaining = frames;
     transition->durationFrames = frames;
 }
-
-extern s32 btlBlendColor(s32, s32, f32);
 
 void btlStepBlendColor(void) {
     BtlTintTransition *transition = (BtlTintTransition *)D_0035F5D0;
@@ -7708,7 +7707,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             }
         }
     }
-    func_001F66D8(0x400, 0, 0);
+    btlMeasureMaskedUnitBounds(0x400, 0, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, target);
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
@@ -7900,7 +7899,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     slot[link->unit->lookupId] = link->unit;
     slot[first->lookupId] = first;
     slot[second->lookupId] = second;
-    radius = func_001F66D8(0x400, 0, 0) + 200.0f;
+    radius = btlMeasureMaskedUnitBounds(0x400, 0, 0) + 200.0f;
     VU0_STORE_VF_UNCLOBBERED(vf10, center);
     pos[0] = center[0];
     pos[1] = 0.0f;
@@ -8084,7 +8083,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
     } else {
         btlUnitGetMuzzlePosVU(front);
         VU0_STORE_VF(vf10, &vec[0]);
-        func_001F66D8(target->status.flags & 0x600, 0, 0);
+        btlMeasureMaskedUnitBounds(target->status.flags & 0x600, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
         if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)&vec[1]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);

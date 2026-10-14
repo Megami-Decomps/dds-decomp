@@ -3,6 +3,7 @@
 #include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
 #include "mdl_flag_api.h"
@@ -53,7 +54,6 @@ extern void fldResetSparkRewardProfileIndex(void);
 
 extern FieldStageCoordinate D_00389170[];
 
-extern u32 fldGetSceneReadyFlag(void);
 
 
 
@@ -801,7 +801,7 @@ void func_00122A38(void) {
     memset(datGameState->stageCellBits, 0, sizeof(datGameState->stageCellBits));
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00122B58);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldResetFieldRuntimeState);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00122E50);
 

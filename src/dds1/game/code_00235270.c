@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
 #include "sdf_vu_matrix.h"
 
@@ -4196,7 +4197,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 extern u8 sdfPfsDebugMode;
 extern s32 sceOpen(const char *path, s32 flags, ...);
 extern s32 sceClose(s32 descriptor);
-extern s32 func_00310A68(const char *path, s32 mode);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 mode);
 extern void *sdfDevGetPathBuffer(void);
 extern char D_003BC350[];
 extern char D_003BC358[];
@@ -4277,7 +4278,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         }
     }
     sceClose(pm2);
-    func_00310A68(D_003BC358, 0);
+    sdfPfsSendPathRequest(D_003BC358, 0);
     evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
@@ -4286,7 +4287,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     }
     sceClose(pm3);
     sdfDebugPrintf("save pm3 file\n");
-    func_00310A68(D_003BC358, 0);
+    sdfPfsSendPathRequest(D_003BC358, 0);
     return 1;
 }
 

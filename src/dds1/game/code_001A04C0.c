@@ -46,7 +46,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 extern void btlUpdateScene(void);
 extern s32 btlRuntime;
 
-extern s32 kwlnTaskFindByPriority(u32);
+extern KwlnTask *kwlnTaskFindByPriority(u32);
 
 extern u64 D_003BB2E8;
 #include "sdf_packet_alloc.h"
@@ -343,10 +343,10 @@ void btlCreateDrawTasks(void) {
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
-    s64 temp_v0;
+    KwlnTask *task;
 
-    temp_v0 = kwlnTaskFindByPriority(0x3f9);
-    if (temp_v0 != 0) {
+    task = kwlnTaskFindByPriority(0x3f9);
+    if (task != NULL) {
         kwlnTaskDestroyWithHierarchy((KwlnTask *)*(u32 *)(btlRuntime + 0x29c), 1);
         return;
     }

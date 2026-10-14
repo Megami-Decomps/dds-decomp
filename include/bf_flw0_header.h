@@ -24,4 +24,7 @@ typedef char BfFlw0Header_sectionCount_offset_must_be_0x10[
 typedef char BfFlw0Header_sections_offset_must_be_0x20[
     ((unsigned long)&((BfFlw0Header *)0)->sections == 0x20) ? 1 : -1];
 
+/* Return the procedure-table index for an exact name match, or -1. */
+s32 bfFindScriptIndexByName(BfFlw0Header *header, const char *name);
+
 #endif /* BF_FLW0_HEADER_H */

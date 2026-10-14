@@ -1,5 +1,8 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "eff_pcp_paired_event_row.h"
+#include "eff_pcp_spawn_range_event_row.h"
+#include "eff_pcp_drift_event_row.h"
 #include "eff_packet_params.h"
 #include "eff_pcp_fade_timer.h"
 #include "btl_effect_position.h"
@@ -34,6 +37,7 @@
 #include "eff_pcp_group_set.h"
 #include "eff_pcp_map_events.h"
 #include "eff_pcp_block_set.h"
+#include "eff_pcp_rotate_work.h"
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
 #include "eff_pcp_cross.h"
@@ -156,18 +160,6 @@ extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *para
 extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
-/* Three frame thresholds and their block-set inputs form the copied prefix. */
-typedef struct EffPCPRotateParams {
-    s32 startFrame[3];
-    EffPCPBlockSetParams group[3];
-} EffPCPRotateParams;
-
-typedef struct EffPCPRotateWork {
-    EffPCPRotateParams params;
-    EffPCPBlockSetWork *blockSets[3];
-    s32 frame;
-} EffPCPRotateWork;
-
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 extern void sdfVuLoadRotationMatrixZ(f32 scale);
@@ -2715,7 +2707,7 @@ void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
 
 
 
-extern f32 func_001F66D8(s32 mask, f32 *maxTop, f32 *minTop);
+extern f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern f32 sdfAtan2(f32 y, f32 x);
 
@@ -2739,7 +2731,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         return;
     }
     if (effBTLFieldColorUsesActorSelectors() && work->frame == 0) {
-        func_001F66D8(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
+        btlMeasureMaskedUnitBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
         btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF(vf10, muzzle);
@@ -4797,15 +4789,9 @@ typedef struct EffPCPDriftEventParams {
     u8 pad84[0x80];
 } EffPCPDriftEventParams;
 
-typedef struct EffPCPDriftEvent {
-    EffEventWork *event;
-    s32 frame;
-    f32 position, positionStep, angle, angleStep;
-} EffPCPDriftEvent;
-
 typedef struct EffPCPDriftEventWork {
     EffPCPDriftEventParams params;
-    EffPCPDriftEvent *entries;
+    EffPCPDriftEventRow *entries;
     SoundMixer *owner;
     u8 unk10C;
     u8 pad10D[3];
@@ -4820,12 +4806,12 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPDriftEvent *entry;
+    EffPCPDriftEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPDriftEvent *)(work + 1);
+    entry = (EffPCPDriftEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk10C = 1;
@@ -4871,12 +4857,12 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPDriftEvent *entry;
+    EffPCPDriftEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPDriftEvent *)(work + 1);
+    entry = (EffPCPDriftEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk10C = 0;
@@ -4912,7 +4898,7 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
 void effPcpEventGroupRelease(EffPCPDriftEventWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
-    EffPCPDriftEvent *entry = work->entries;
+    EffPCPDriftEventRow *entry = work->entries;
 
     if (count != 0) {
         do {
@@ -4929,7 +4915,7 @@ void effPcpEventGroupRelease(EffPCPDriftEventWork *work) {
 
 
 void effPcpDriftRandomizeSlot(EffPCPDriftEventWork *work, s32 index) {
-    EffPCPDriftEvent *slot;
+    EffPCPDriftEventRow *slot;
     f32 spread;
     f32 scale;
 
@@ -4954,7 +4940,7 @@ void effPcpUpdateDriftEventRing(EffPCPDriftEventWork *work) {
     s32 fadeIn = work->params.fadeIn;
     s32 fadeOut = work->params.fadeOut;
     f32 angleDecay = work->params.angleDecay;
-    EffPCPDriftEvent *entry = work->entries;
+    EffPCPDriftEventRow *entry = work->entries;
     u32 color = work->color;
     u32 i;
     s32 frame;
@@ -5036,18 +5022,9 @@ typedef struct EffPCPPairedEventParams {
     EffThunderFragmentParams fragmentParams;
 } EffPCPPairedEventParams;
 
-typedef struct EffPCPPairedEvent {
-    EffThunderFragmentWork *fragment;
-    EffEventWork *eventA, *eventB;
-    f32 phase, radius;
-    f32 tilt;
-    f32 tiltStep;
-    s32 frame;
-} EffPCPPairedEvent;
-
 typedef struct EffPCPPairedEventWork {
     EffPCPPairedEventParams params;
-    EffPCPPairedEvent *entries;
+    EffPCPPairedEventRow *entries;
     SoundMixer *ownerA, *ownerB;
     u8 unk98;
     u8 pad99[3];
@@ -5061,12 +5038,12 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPPairedEvent *entry;
+    EffPCPPairedEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPPairedEvent *)(work + 1);
+    entry = (EffPCPPairedEventRow *)(work + 1);
     work->handle = handle;
     work->entries = entry;
     work->color = 0x80808080;
@@ -5115,12 +5092,12 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPPairedEvent *entry;
+    EffPCPPairedEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPPairedEvent *)(work + 1);
+    entry = (EffPCPPairedEventRow *)(work + 1);
     work->handle = handle;
     work->entries = entry;
     work->color = 0x80808080;
@@ -5154,7 +5131,7 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
 void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
-    EffPCPPairedEvent *entry = work->entries;
+    EffPCPPairedEventRow *entry = work->entries;
 
     if (count != 0) {
         do {
@@ -5178,7 +5155,7 @@ void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
 /* Randomises slot `index`: phase spread evenly around a full turn, jittered
  * radius, and a tiltStep whose sign is picked at random. */
 void effPcpRandomizeSlot(EffPCPPairedEventWork *work, s32 index) {
-    EffPCPPairedEvent *slot;
+    EffPCPPairedEventRow *slot;
     f32 spread;
 
     slot = &work->entries[index];
@@ -5210,7 +5187,7 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
     s32 delaySpread;
     u32 count;
     u32 color;
-    EffPCPPairedEvent *entry;
+    EffPCPPairedEventRow *entry;
     u32 i;
     s32 frame;
 
@@ -5332,15 +5309,9 @@ typedef struct EffPCPSpawnRangeParams {
     f32 startHeightRange;
 } EffPCPSpawnRangeParams;
 
-typedef struct EffPCPSpawnRangeEvent {
-    EffEventWork *event;
-    s32 frame;
-    f32 height, heightStep, angle, angularStep, position, positionStep;
-} EffPCPSpawnRangeEvent;
-
 typedef struct EffPCPSpawnRangeWork {
     EffPCPSpawnRangeParams params;
-    EffPCPSpawnRangeEvent *entries;
+    EffPCPSpawnRangeEventRow *entries;
     SoundMixer *owner;
     u8 unk9C;
     u8 pad9D[3];
@@ -5355,12 +5326,12 @@ EffPCPSpawnRangeWork *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *sr
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPSpawnRangeEvent *entry;
+    EffPCPSpawnRangeEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = *src;
-    entry = (EffPCPSpawnRangeEvent *)(work + 1);
+    entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 1;
@@ -5406,12 +5377,12 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
-    EffPCPSpawnRangeEvent *entry;
+    EffPCPSpawnRangeEventRow *entry;
     s32 life;
     u32 i;
 
     work->params = src->params;
-    entry = (EffPCPSpawnRangeEvent *)(work + 1);
+    entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 0;
@@ -5446,7 +5417,7 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
 void effPcpEventBatchRelease(EffPCPSpawnRangeWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
-    EffPCPSpawnRangeEvent *entry = work->entries;
+    EffPCPSpawnRangeEventRow *entry = work->entries;
 
     if (count != 0) {
         do {
@@ -5464,7 +5435,7 @@ void effPcpEventBatchRelease(EffPCPSpawnRangeWork *work) {
 
 /* Randomises spawn slot `index` inside the ranges held by the work. */
 void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
-    EffPCPSpawnRangeEvent *slot;
+    EffPCPSpawnRangeEventRow *slot;
     f32 spread;
     f32 scale;
 
@@ -5495,7 +5466,7 @@ void effPcpUpdateSpawnRangeEvents(EffPCPSpawnRangeWork *work) {
     s32 fadeOut = work->params.fadeOut;
     f32 angularDamping = work->params.angularDamping;
     f32 heightDamping = work->params.heightDamping;
-    EffPCPSpawnRangeEvent *entry = work->entries;
+    EffPCPSpawnRangeEventRow *entry = work->entries;
     u32 color = work->color;
     u32 i;
     s32 frame;

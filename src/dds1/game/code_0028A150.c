@@ -20,6 +20,7 @@
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
 #include "sdf_dev_state.h"
@@ -4136,7 +4137,7 @@ extern char D_003BC938[];
 extern char *sdfDevGetPathBuffer(void);
 extern s32 sceOpen(const char *path, s32 flags, ...);
 extern s32 sceClose(s32 fd);
-extern s32 func_00310A68(const char *path, s32 mode);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 mode);
 
 void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];
@@ -4151,7 +4152,7 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     }
     fileJobWriteSerializedPayload(fd, job);
     sceClose(fd);
-    func_00310A68(D_003BC938, 0);
+    sdfPfsSendPathRequest(D_003BC938, 0);
 }
 
 FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
@@ -4778,7 +4779,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
     }
     sceClose(fd);
-    func_00310A68(D_003BC938, 0);
+    sdfPfsSendPathRequest(D_003BC938, 0);
 }
 
 /* Sixteen-byte preamble of a saved file queue. */
@@ -4883,7 +4884,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
     }
     sceClose(fd);
-    func_00310A68(D_003BC938, 0);
+    sdfPfsSendPathRequest(D_003BC938, 0);
 }
 
 FileQueue *fileQueueCreateFromCommandState(const char *entry) {

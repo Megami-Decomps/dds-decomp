@@ -6,7 +6,9 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "fld_scene_ready_api.h"
 #include "fld_spark_object_entry.h"
+#include "fld_spark_slot.h"
 #include "sdf_math_vector4.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -71,7 +73,6 @@ extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern u8 D_00435C48[2][2];
 extern f32 sdfViewUpVector[4];
-extern u32 fldGetSceneReadyFlag(void);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 typedef struct EffNode EffNode;
 
@@ -456,17 +457,7 @@ extern void dds3SetObjectFlags();
 
 
 
-typedef struct FieldPair48 {
-    f32 pos[4];
-    f32 vel[4];
-    s32 hasVectors;
-    s32 active;
-    s32 unk28;
-    s16 objectSlot;
-    s16 unk2E;
-} FieldPair48; /* 0x30 bytes */
-
-extern FieldPair48 fldSparkSlots[];
+extern FldSparkSlot fldSparkSlots[];
 
 
 
@@ -4087,9 +4078,9 @@ void fldInitSparkTable(void) {
         for (i = 0; i < 64; i++) {
             fldSparkSlots[i].hasVectors = 0;
             fldSparkSlots[i].active = 0;
-            fldSparkSlots[i].unk28 = 0;
+            fldSparkSlots[i].reservedObjectSlot = 0;
             fldSparkSlots[i].objectSlot = -1;
-            fldSparkSlots[i].unk2E = effMiscRand(0) % 60 + 15;
+            fldSparkSlots[i].tickCounter = effMiscRand(0) % 60 + 15;
         }
     } else {
         for (i = 0; i < 64; i++) {
@@ -4104,15 +4095,15 @@ void fldResetSparkTable(void) {
 
     for (i = 0; i < 64; i++) {
         fldSparkSlots[i].active = 0;
-        fldSparkSlots[i].unk28 = 0;
+        fldSparkSlots[i].reservedObjectSlot = 0;
         fldSparkSlots[i].objectSlot = -1;
-        fldSparkSlots[i].unk2E = effMiscRand(0) % 60 + 15;
+        fldSparkSlots[i].tickCounter = effMiscRand(0) % 60 + 15;
     }
 }
 
 s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
-    PCP_COPY_VECTOR(fldSparkSlots[index].pos, pos);
-    PCP_COPY_VECTOR(fldSparkSlots[index].vel, vel);
+    PCP_COPY_VECTOR(fldSparkSlots[index].position, pos);
+    PCP_COPY_VECTOR(fldSparkSlots[index].rotation, vel);
     fldSparkSlots[index].hasVectors = 1;
     return 1;
 }
@@ -4141,9 +4132,9 @@ s32 fldAttachSparkSlotToWorldObject(s32 index, s32 reserved) {
     }
     fldSparkControlState.cursor = (slot + 1) % 16;
     if (fldSparkSlots[index].hasVectors == 1) {
-        PCP_COPY_VECTOR(&position, fldSparkSlots[index].pos);
-        effObjSetInnerPosition((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
-        effObjSetInnerRotation((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
+        PCP_COPY_VECTOR(&position, fldSparkSlots[index].position);
+        effObjSetInnerPosition((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].position);
+        effObjSetInnerRotation((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].rotation);
         model = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSparkObjectEntries[slot].objectHandle);
         model->flags &= ~MDL_SKIP_TRANSFORMS;
         fldSparkSlots[index].objectSlot = slot;
@@ -4161,8 +4152,8 @@ void fldFreeSparkSlot(s32 index) {
 
     vec = D_00413DE8;
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
-        vec.x = fldSparkSlots[index].pos[0];
-        vec.z = fldSparkSlots[index].pos[2];
+        vec.x = fldSparkSlots[index].position[0];
+        vec.z = fldSparkSlots[index].position[2];
         effObjSetInnerPosition((EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
         flags = (s32 *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)obj);
@@ -4180,7 +4171,7 @@ void fldUpdateSparkSlots(void) {
     fldCreateSparkSlotObjects();
     for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
-            fldAttachSparkSlotToWorldObject(i, fldSparkSlots[i].unk28);
+            fldAttachSparkSlotToWorldObject(i, fldSparkSlots[i].reservedObjectSlot);
         }
     }
 }
@@ -4216,10 +4207,10 @@ void fldUpdateSparkSequence(void) {
         for (i = 0; i < sequence->count; i++) {
             slot = sequence->slots[i];
             fldAttachSparkSlotToWorldObject(slot, 0);
-            fldSparkSlots[slot].unk28 = 0;
+            fldSparkSlots[slot].reservedObjectSlot = 0;
             fldSparkSlots[slot].active = 1;
             fldSparkControlState.scheduledSounds++;
-            fldSparkSlots[slot].unk2E = 0;
+            fldSparkSlots[slot].tickCounter = 0;
         }
         fldSparkControlState.sequenceIndex++;
     }
@@ -4228,10 +4219,10 @@ void fldUpdateSparkSequence(void) {
         case 0:
             break;
         case 1:
-            fldSparkSlots[i].unk2E++;
+            fldSparkSlots[i].tickCounter++;
             if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
                 fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
-                PCP_COPY_VECTOR(&position, fldSparkSlots[i].pos);
+                PCP_COPY_VECTOR(&position, fldSparkSlots[i].position);
                 dx = fldAreaState.x - position.x;
                 dy = fldAreaState.y - position.y;
                 dz = fldAreaState.z - position.z;
@@ -4245,9 +4236,9 @@ void fldUpdateSparkSequence(void) {
                     fldReleaseCameraModel(3);
                     fldSparkControlState.modeCountdown += 3;
                     fldFreeSparkSlot(i);
-                    fldSparkSlots[i].unk28 = 0;
+                    fldSparkSlots[i].reservedObjectSlot = 0;
                     fldSparkSlots[i].active = 0;
-                    fldSparkSlots[i].unk2E = effMiscRand(0) % 270 + 30;
+                    fldSparkSlots[i].tickCounter = effMiscRand(0) % 270 + 30;
                     fldSparkControlState.pulse = 0;
                 }
             }
@@ -4262,9 +4253,9 @@ s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
 
     for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].active == 1 && fldSparkSlots[i].objectSlot != -1) {
-            f32 dx = x - fldSparkSlots[i].pos[0];
-            f32 dy = y - fldSparkSlots[i].pos[1];
-            f32 dz = z - fldSparkSlots[i].pos[2];
+            f32 dx = x - fldSparkSlots[i].position[0];
+            f32 dy = y - fldSparkSlots[i].position[1];
+            f32 dz = z - fldSparkSlots[i].position[2];
 
             if (fsqrtf(dx * dx + dy * dy + dz * dz) < 50.0f) {
                 return 1;

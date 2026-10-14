@@ -236,7 +236,19 @@ typedef struct EffBillAnimatedFrameConfig {
 
 typedef struct EffBillEmitterFrameConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x30];
+    u32 firstColor;     /* 0x58 */
+    u32 secondColor;    /* 0x5C */
+    f32 width;          /* 0x60 */
+    f32 widthJitter;    /* 0x64 */
+    f32 radius;         /* 0x68 */
+    f32 radiusJitter;   /* 0x6C */
+    f32 offset;         /* 0x70 */
+    f32 offsetJitter;   /* 0x74 */
+    f32 speed;          /* 0x78 */
+    f32 speedJitter;    /* 0x7C */
+    f32 acceleration;  /* 0x80 */
+    u8 reverse;         /* 0x84 */
+    u8 padding85[3];
 } EffBillEmitterFrameConfig; /* kind 5, 0x88 */
 
 /* Kind-6 radial strip simulation: copied 0xA4-byte configuration. */
@@ -684,6 +696,14 @@ typedef char EffBillCellConfigSizeCheck[(sizeof(EffBillCellConfig) == 0x8C) ? 1 
 typedef char EffBillParticleConfigSizeCheck[(sizeof(EffBillParticleConfig) == 0x9C) ? 1 : -1];
 typedef char EffBillAnimatedFrameConfigSizeCheck[(sizeof(EffBillAnimatedFrameConfig) == 0x80) ? 1 : -1];
 typedef char EffBillEmitterFrameConfigSizeCheck[(sizeof(EffBillEmitterFrameConfig) == 0x88) ? 1 : -1];
+typedef char EffBillEmitterFrameConfigFirstColorOffsetCheck[
+    ((u32)&((EffBillEmitterFrameConfig *)0)->firstColor == 0x58) ? 1 : -1];
+typedef char EffBillEmitterFrameConfigWidthOffsetCheck[
+    ((u32)&((EffBillEmitterFrameConfig *)0)->width == 0x60) ? 1 : -1];
+typedef char EffBillEmitterFrameConfigAccelerationOffsetCheck[
+    ((u32)&((EffBillEmitterFrameConfig *)0)->acceleration == 0x80) ? 1 : -1];
+typedef char EffBillEmitterFrameConfigReverseOffsetCheck[
+    ((u32)&((EffBillEmitterFrameConfig *)0)->reverse == 0x84) ? 1 : -1];
 typedef char EffBillStripFrameConfigSizeCheck[(sizeof(EffBillStripFrameConfig) == 0xA4) ? 1 : -1];
 typedef char EffBillTrailFrameConfigSizeCheck[(sizeof(EffBillTrailFrameConfig) == 0xA8) ? 1 : -1];
 typedef char EffBillQuadFrameConfigSizeCheck[(sizeof(EffBillQuadFrameConfig) == 0x98) ? 1 : -1];

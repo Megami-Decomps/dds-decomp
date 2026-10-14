@@ -922,7 +922,22 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
     sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", mnuConfigureTitleAudioStream);
+extern s32 sndDispatchIopAudioCommand(s32, s32, ...);
+
+/* Send the per-core parameter commands for both sound cores, then the IOP
+ * stream buffer with the transfer size. */
+void mnuConfigureTitleAudioStream(s32 transferSize) {
+    volatile s32 core;
+
+    for (core = 0; core < 2; core++) {
+        sndDispatchIopAudioCommand(1, 0x8010, core | 0x980, 0x3FFF);
+        sndDispatchIopAudioCommand(1, 0x8010, core | 0xA80, 0x3FFF);
+        sndDispatchIopAudioCommand(1, 0x8010, core | 0x800, sndDispatchIopAudioCommand(1, 0x8020, core | 0x800) & ~0x30);
+    }
+    sndDispatchIopAudioCommand(1, 0x80E0, 0, 0x10, D_00438FD8, transferSize << 3);
+    sndDispatchIopAudioCommand(1, 0x8010, 0xF80, 0x7FFF);
+    sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
+}
 
 void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     sceSdRemoteInit();

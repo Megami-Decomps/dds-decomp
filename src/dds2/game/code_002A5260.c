@@ -453,7 +453,16 @@ u32 mnuIsTitleMovieDrawActive(void) {
 
 extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", mnuStartTitleMovieDraw);
+void mnuStartTitleMovieDraw(void) {
+    s32 mode = 1;
+
+    sdfSetStreamFrameDrawMode(mode);
+    sdfSetGridScaledDrawBounds(0, 0, 0x200, 0x100, 0x80808080);
+    mnuArmTitleMovieDrawAndResetFrame(0x5A, 0);
+    /* cc1 keeps this local mode reset through 01.sibling, then deletes it in
+     * 03.cse. The final movie-arm call retains retail's jal and epilogue. */
+    mode = 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_004287E0);
 

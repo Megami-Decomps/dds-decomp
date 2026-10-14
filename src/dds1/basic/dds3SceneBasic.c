@@ -5,10 +5,10 @@
 #include "evt_world.h"
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
+#include "bf_flw0_header.h"
 
 struct SdfMemBlock;
 
-extern s32 bfFindScriptIndexByName(void *, const char *);
 extern s32 scrCreateTaskForProcessId(s32, void *, s32);
 
 /* Release field resources before clearing the scene object's state word.

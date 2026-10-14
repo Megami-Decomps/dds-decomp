@@ -228,10 +228,10 @@ s32 btlCheckActorDistanceLimit(void) {
 }
 
 /* With a qualifying unit, the span query leaves its last muzzle point in VF10. */
-extern f32 func_001F66D8(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 s32 btlIsEntryHeightWithinLimit(void) {
-    if (func_001F66D8(0x400, 0, 0) > 600.0f) {
+    if (btlMeasureMaskedUnitBounds(0x400, 0, 0) > 600.0f) {
         return 0;
     }
     return 1;

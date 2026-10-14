@@ -9,6 +9,7 @@
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
 #include "evt_unit.h"
+#include "evt_reset_unit_vector_slots_api.h"
 #include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"

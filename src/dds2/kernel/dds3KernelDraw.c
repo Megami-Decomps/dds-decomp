@@ -530,13 +530,12 @@ void kwlnDrawSetCd0Triple(u32 positionSpread, u32 x, u32 y) {
 }
 
 extern EffBlurScatterParams D_0043E420;
-extern u32 effGetCh72Work(void);
 extern u16 D_00438E2C;
 extern u16 D_00438E2E;
 
 /* Save live filter-blur params; zero copies the staged body immediately. */
 void kwlnSetFilterBlurParameterTransition(s32 duration) {
-    D_0043E420 = *(EffBlurScatterParams *)effGetCh72Work();
+    D_0043E420 = effGetCh72Work()->params;
     D_00438E2C = 0;
     D_00438E2E = duration;
     if (duration == 0) {

@@ -10,6 +10,7 @@
 #include "ee_mmi.h"
 #include "eff.h"
 #include "poly_ring_head.h"
+#include "poly_ring_records.h"
 
 struct SdfMemBlock;
 
@@ -42,12 +43,6 @@ typedef struct {
     s32 *ages;
 } PolyNode;
 
-/* +4 is the per-update radius delta, not an absolute radius. */
-typedef struct {
-    s32 age;
-    f32 radiusStep;
-} PolyBandRecord; /* 0x08 */
-
 typedef struct {
     PolyRingHead head;
     u32 spawnDelayStep;
@@ -69,11 +64,6 @@ typedef struct {
 } PolyBand; /* 0x100, followed by eight-byte records */
 
 typedef struct {
-    s32 age;
-    u32 radius; /* Native initializer deliberately converts a float to u32. */
-} PolyArcRecord; /* 0x08 */
-
-typedef struct {
     PolyRingHead head;
     u32 spawnDelayStep;
     u32 segments;
@@ -88,15 +78,6 @@ typedef struct {
     struct SdfMemBlock *allocation; /* 0xE8 */
     u8 padEC[4];
 } PolyArc; /* 0xF0, followed by eight-byte records */
-
-typedef struct {
-    s32 age;
-    f32 radius;
-    f32 radiusStep;
-    f32 rotationXRadians;
-    f32 rotationYRadians;
-} PolyRotatingBandRecord; /* 0x14 */
-
 
 typedef struct {
     PolyRingHead head;

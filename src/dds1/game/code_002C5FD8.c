@@ -4,6 +4,7 @@
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "sdf_counter_runtime.h"
+#include "sdf_counter_runtime_api.h"
 #include "sdf_textured_rect.h"
 #include "sdf_resource.h"
 #include "fpu.h"
@@ -148,7 +149,6 @@ s32 fldCollectMapSelectionMask(MapSelectionContext *context) {
     return mask;
 }
 
-extern SdfCounterRuntime *sdfActiveCounterRuntime;
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, const u8 *);
 

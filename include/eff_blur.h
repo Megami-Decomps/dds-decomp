@@ -139,6 +139,8 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 /* Borrow the live textured-blur owner; callers do not acquire or release it. */
 EffBlurTemplate *effGetCh71Work(void);
+/* Borrow the live scatter-blur owner; callers do not acquire or release it. */
+EffBlurScatterWork *effGetCh72Work(void);
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *body);
 void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters);
 void effCopyFilterBlurParameters(EffBlurScatterParams *parameters);
