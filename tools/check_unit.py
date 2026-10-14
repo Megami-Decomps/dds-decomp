@@ -78,10 +78,11 @@ def text_section(obj):
 
 
 # Only units with their own .rodata subsegment (tools/split_rodata.py) may emit
-# rodata, and only jump tables, which are verified entry by entry. Strings and
-# constants still come from INCLUDE_RODATA. A unit may emit zero-initialized
-# data only when the YAML gives the matching section an exact, bounded
-# dict-form subsegment; other data remains fail-closed.
+# rodata; jump tables are checked entry by entry and literals against native
+# bytes. Initialized .data additionally requires an explicit bounded YAML owner
+# and exact object/byte/relocation checks. A unit may emit zero-initialized data
+# only when the YAML gives the matching section an exact, bounded dict-form
+# subsegment; all other data remains fail-closed.
 DATA_SECTIONS = (".rodata", ".data", ".sdata", ".sbss", ".bss", ".lit4", ".lit8")
 YAML_ITEM = re.compile(
     r"^(?P<indent>[ \t]*)-\s*(?P<body>[^\n#]*?)(?:\s+#.*)?$", re.M
@@ -357,7 +358,7 @@ def source_owned_item_size(definitions, syms, offset, retail_addr):
 
 def relocations(obj):
     """{section: {offset: (type, symbol)}} for verified content sections."""
-    out, section = {name: {} for name in (".text", ".rodata", ".sdata")}, None
+    out, section = {name: {} for name in (".text", ".rodata", ".data", ".sdata")}, None
     for line in run(str(BIN / "mips-ps2-decompals-objdump"), "-r", str(obj)).splitlines():
         if line.startswith("RELOCATION RECORDS FOR"):
             section = line.split("[", 1)[1].rstrip("]:")
@@ -370,7 +371,7 @@ def relocations(obj):
 
 def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
                         section_bases=None):
-    """Apply resolvable R_MIPS_32 relocations to one emitted .sdata item.
+    """Apply resolvable R_MIPS_32 relocations to one emitted data item.
 
     Object files store section-relative addends for pointers into their own
     text. Resolve those through the owning function's retail address so the
@@ -408,6 +409,85 @@ def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
             continue
         struct.pack_into("<I", linked, at, target & 0xFFFFFFFF)
     return bytes(linked), problems
+
+
+def initialized_data_problems(section_range, section_origin, retail_span,
+                               data, definitions, relocs, funcs,
+                               full_data, full_definitions, full_relocs,
+                               full_funcs, syms, section_bases):
+    """Validate one explicitly owned, initialized .data section in both builds.
+
+    The YAML range owns the section's possible extent. Every emitted object
+    must have an unambiguous native symbol, exact STT_OBJECT placement/size in
+    both contexts, and every nonzero byte must belong to an object. Relocated
+    standalone and full-unit contents are resolved before comparison.
+    """
+    problems = []
+    if section_range is None:
+        return ["unit has no unambiguous YAML-owned .data range"]
+    if section_origin is None:
+        return ["YAML-owned .data range has no retail section address"]
+    start, end = section_range
+    span = end - start
+    if len(retail_span) != span:
+        return ["retail .data span is unavailable or truncated"]
+    if len(data) > span or len(full_data) > span:
+        problems.append(
+            f"emitted extent exceeds its 0x{span:X}-byte YAML-owned span")
+    if len(data) != len(full_data):
+        problems.append(
+            f"standalone/full .data extents differ (0x{len(data):X} vs 0x{len(full_data):X})")
+    if not definitions or not full_definitions:
+        problems.append(".data has no STT_OBJECT definitions in both contexts")
+        return problems
+
+    standalone = {(name): (off, size) for off, size, name in definitions}
+    full = {(name): (off, size) for off, size, name in full_definitions}
+    if len(standalone) != len(definitions) or len(full) != len(full_definitions):
+        problems.append(".data has duplicate STT_OBJECT names")
+    if standalone != full:
+        problems.append("standalone/full .data STT_OBJECT inventories differ")
+
+    def check_inventory(blob, inventory, blob_relocs, label):
+        covered = bytearray(len(blob))
+        for off, size, name in inventory:
+            if size <= 0 or off < 0 or off + size > len(blob):
+                problems.append(f"{label} {name}: invalid STT_OBJECT extent +0x{off:X}/0x{size:X}")
+                continue
+            if any(covered[off:off + size]):
+                problems.append(f"{label} {name}: overlapping STT_OBJECT extent")
+            covered[off:off + size] = b"\1" * size
+            addr = address(name, syms)
+            if addr is None:
+                problems.append(f"{label} {name}: no unambiguous native symbol address")
+            elif addr < section_origin or addr - section_origin != off:
+                problems.append(
+                    f"{label} {name}: object offset +0x{off:X} does not match native address 0x{addr:08X}")
+        for reloc_off in blob_relocs:
+            if reloc_off < 0 or reloc_off + 4 > len(blob):
+                problems.append(f"{label} relocation outside emitted .data at +0x{reloc_off:X}")
+            elif not any(off <= reloc_off and reloc_off + 4 <= off + size
+                         for off, size, _ in inventory):
+                problems.append(f"{label} relocation is outside an STT_OBJECT at +0x{reloc_off:X}")
+        for off, byte in enumerate(blob):
+            if byte and not covered[off]:
+                problems.append(f"{label} unowned nonzero byte at +0x{off:X}")
+                break
+
+    check_inventory(data, definitions, relocs, "standalone")
+    check_inventory(full_data, full_definitions, full_relocs, "full-unit")
+    for blob, blob_relocs, blob_funcs, label in (
+            (data, relocs, funcs, "standalone"),
+            (full_data, full_relocs, full_funcs, "full-unit")):
+        linked, relocation_problems = relocate_sdata_item(
+            blob, 0, blob_relocs, blob_funcs, syms, section_bases)
+        if relocation_problems:
+            problems.extend(f"{label} {problem}" for problem in relocation_problems)
+        elif linked != retail_span[:len(blob)]:
+            problems.append(f"{label} .data bytes/relocations differ from retail")
+        if len(blob) <= span and any(retail_span[len(blob):]):
+            problems.append(f"{label} omits nonzero bytes at the end of its YAML-owned .data span")
+    return problems
 
 
 def trim_sdata_item(item, item_offset, relocs):
@@ -572,6 +652,7 @@ def main():
     yaml_text = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
     sdata_range = owned_rom_range(yaml_text, unit_name, ".sdata")
     rodata_range = owned_rom_range(yaml_text, unit_name, ".rodata")
+    data_range = owned_rom_range(yaml_text, unit_name, ".data")
 
     with tempfile.TemporaryDirectory() as tmp:
         obj = Path(tmp) / "unit.o"
@@ -598,6 +679,8 @@ def main():
         sdata = data[sd_off:sd_off + sd_size]
         ro_off, ro_size = secs.get(".rodata", (0, 0))
         rodata = data[ro_off:ro_off + ro_size]
+        da_off, da_size = secs.get(".data", (0, 0))
+        data_section = data[da_off:da_off + da_size]
         all_relocs = relocations(obj)
         relocs, rodata_relocs = all_relocs[".text"], all_relocs[".rodata"]
         sdata_relocs = all_relocs[".sdata"]
@@ -605,7 +688,8 @@ def main():
             str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)
         )
         has_nobits = any(emitted.get(section) for section in (".sbss", ".bss"))
-        needs_object_symbols = has_nobits or bool(emitted.get(".sdata") or emitted.get(".rodata"))
+        needs_object_symbols = has_nobits or bool(
+            emitted.get(".sdata") or emitted.get(".rodata") or emitted.get(".data"))
         object_symbols = run(
             str(BIN / "mips-ps2-decompals-objdump"), "-t", str(obj)
         ) if needs_object_symbols else ""
@@ -615,6 +699,7 @@ def main():
         }
         sdata_symbols = section_symbols(object_symbols, ".sdata")
         rodata_symbols = section_symbols(object_symbols, ".rodata")
+        data_symbols = section_symbols(object_symbols, ".data")
         funcs = []
         for line in defined_symbols.splitlines():
             parts = line.split()
@@ -629,6 +714,7 @@ def main():
         context = {}
         data_context = []
         owned_rodata = []
+        owned_data_checked = False
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         ro_diff = None    # first retail address where the full unit's .rodata differs
         full = Path(tmp) / "full.o"
@@ -668,6 +754,29 @@ def main():
             # retail's, in retail order. Catches string literals and
             # INCLUDE_RODATA items that come out in a different order.
             fdata, fsecs = sections(full)
+            full_objdump = run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full))
+            if emitted.get(".data") and not args.func and data_range is not None:
+                owned_data_checked = True
+                data_start, data_end = data_range
+                full_data_off, full_data_size = fsecs.get(".data", (0, 0))
+                section_bases = {}
+                for section, owned_range in (
+                        (".data", data_range), (".rodata", rodata_range),
+                        (".sdata", sdata_range)):
+                    if owned_range is not None:
+                        origin = off_to_va(segs, owned_range[0])
+                        if origin is not None:
+                            section_bases[section] = origin
+                initialized_problems = initialized_data_problems(
+                    data_range, off_to_va(segs, data_start),
+                    retail[data_start:data_end], data_section, data_symbols,
+                    all_relocs[".data"], funcs,
+                    fdata[full_data_off:full_data_off + full_data_size],
+                    section_symbols(full_objdump, ".data"),
+                    relocations(full)[".data"],
+                    [(off, size, name) for name, (off, size) in fsyms.items()],
+                    syms, section_bases)
+                data_context.extend(f".data {problem}" for problem in initialized_problems)
             if sdata_symbols and sdata_range:
                 full_sdata = {
                     name: (off, size) for off, size, name in section_symbols(
@@ -1174,6 +1283,10 @@ def main():
             del emitted[section]  # every failure was reported specifically
         elif not problems:
             del emitted[section]
+    if owned_data_checked:
+        # Its bounded source/full-unit payload was either validated above or
+        # reported with a specific DATA CONTEXT diagnostic.
+        emitted.pop(".data", None)
     # --func compares one function: the rest of the unit's data is not its business.
     if not args.func:
         for name, size in common:
@@ -1184,11 +1297,13 @@ def main():
         bad += 1
         if name == ".rodata" and owns_rodata(version, unit_name):
             why = "rodata no instruction refers to (unused static data?)"
+        elif name == ".data":
+            why = "initialized data needs an explicit bounded YAML owner and matching native objects"
         elif name in owned_nobits and owned_nobits[name] is not None:
             why = f"the unit's retail {name} span is 0x{owned_nobits[name]:X} bytes"
         else:
             why = ("reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
-                   "(this data is not split per unit yet)")
+                   "(this section has no accepted per-unit source owner)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
     # Constructs that force codegen rather than express the original source.
     source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", unit.read_text(), flags=re.S)

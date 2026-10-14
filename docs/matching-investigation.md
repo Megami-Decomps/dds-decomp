@@ -78,6 +78,19 @@ verifies their full-unit section offsets, widths and bytes in both compilation
 contexts before accepting their source-owned extents. Unreferenced literals
 and relocated tables retain their existing checks.
 
+Initialized writable objects may be emitted in a unit's `.data` only when its
+YAML explicitly bounds that section with a named per-unit subsegment. The
+checker requires every emitted object to have the same `STT_OBJECT` name,
+offset and size in the standalone and full-unit builds, and its symbol address
+must agree with the section origin plus that offset. Nonzero bytes and
+relocations outside those object extents fail. It resolves supported
+`R_MIPS_32` relocations against functions, known symbols, and explicitly owned
+local sections before comparing both builds with the complete native payload;
+unsupported or unresolved relocations fail. The emitted section may not exceed
+the YAML span, and omitted bytes at its end are allowed only when native bytes
+there are zero. An unowned, ambiguous or malformed YAML range does not qualify
+the data.
+
 ## Keep interior symbols separate from NOBITS storage
 
 A native label inside a BSS object can name a field or array element without
