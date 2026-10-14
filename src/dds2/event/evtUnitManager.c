@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_scaled_value.h"
 #include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
@@ -22,7 +23,6 @@ extern u8 kwlnDefaultColorVector[];
 
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 angle);
-extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
@@ -46,7 +46,7 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
     f32 t = step;
     f32 segment;
 
-    saved = evtGetValueScaleFactor((s32)path);
+    saved = evtGetValueScaleFactor((EvtScaledValue *)path);
     evtScaleValueByMultiplier((s32)path, 0.0f);
     dds3InterpolatePathVectorVU(path);
     do {

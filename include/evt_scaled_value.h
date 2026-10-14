@@ -23,4 +23,9 @@ typedef char EvtScaledValue_scaled_at_0C[
 typedef char EvtScaledValue_size_must_be_0x1C[
     sizeof(EvtScaledValue) == 0x1C ? 1 : -1];
 
+/* This reader accesses only base/scaled at +0x08/+0x0C. Path callers pass
+ * Dds3PathCurveWork through this prefix, where duration/time occupy those
+ * offsets; those calls do not require a complete EvtScaledValue object. */
+f32 evtGetValueScaleFactor(EvtScaledValue *value);
+
 #endif
