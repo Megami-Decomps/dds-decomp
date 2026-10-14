@@ -577,9 +577,9 @@ extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
 
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *, BtlUnit *);
 
-extern s32 func_001AF4A0(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
-extern s32 func_001AFF38(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateMpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
 
 extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 
@@ -1001,11 +1001,15 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             s32 mpDelta;
             f32 multiplier;
 
-            hpAttack = func_001AF4A0(source, recipient, command, maxHits, press, 1, calculationFlags);
-            hpRestore = func_001AF4A0(source, recipient, command, maxHits, press, 0, calculationFlags);
+            hpAttack = btlCalculateHpActionAmount(source, recipient, command, maxHits,
+                                                  press, 1, calculationFlags);
+            hpRestore = btlCalculateHpActionAmount(source, recipient, command, maxHits,
+                                                   press, 0, calculationFlags);
             hpAttack = hpAttack * ratio;
-            mpAttack = func_001AFF38(source, recipient, command, maxHits, press, 1, calculationFlags);
-            mpRestore = func_001AFF38(source, recipient, command, maxHits, press, 0, calculationFlags);
+            mpAttack = btlCalculateMpActionAmount(source, recipient, command, maxHits,
+                                                  press, 1, calculationFlags);
+            mpRestore = btlCalculateMpActionAmount(source, recipient, command, maxHits,
+                                                   press, 0, calculationFlags);
             group->entries[hitIndex].addedStatus = addedStatus;
             group->entries[hitIndex].deferredStatus = deferredStatus;
             group->entries[hitIndex].removedStatus = removedStatus;
