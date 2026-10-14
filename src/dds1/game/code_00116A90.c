@@ -4,16 +4,8 @@
 #include "dds3obj.h"
 #include "eff_transform.h"
 #include "eff.h"
+#include "dds3_path_state.h"
 
-typedef struct {
-    u8 pad0[0x10];
-    u32 value;
-} PathState;
-
-typedef struct {
-    u8 pad0[0x18];
-    PathState *state;
-} PathObject;
 #include "dds3_world_secondary.h"
 typedef struct ActionSub {
     u8 unk0[0x10];
@@ -30,17 +22,17 @@ EffWorldNode *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
     return obj;
 }
 
-void dds3SetPathStateValue(PathObject *path, u32 value) {
-    path->state->value = value;
+void dds3SetPathStateValue(EffWorldNode *path, u32 value) {
+    ((Dds3PathStatePayload *)path->data)->value = value;
 }
 
 u32 dds3GetPathStateValueById(u32 id) {
-    PathObject *path;
+    EffWorldNode *path;
     EffWorldNode *world;
 
     world = dds3GetWorldSecondaryObject();
-    path = (PathObject *)dds3FindWorldObjectNodeByKey(world, id, 6);
-    return path->state->value;
+    path = dds3FindWorldObjectNodeByKey(world, id, 6);
+    return ((Dds3PathStatePayload *)path->data)->value;
 }
 
 EffWorldNode *evtSpawnActionObjD(s32 a, void *work, s32 c) {
