@@ -3281,7 +3281,7 @@ extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415340);
 
-s32 func_001AF0B0(BtlUnit *attacker, BtlUnit *defender, u32 command) {
+s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 element;
     s32 mask;
