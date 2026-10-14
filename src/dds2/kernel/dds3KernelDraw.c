@@ -5,6 +5,7 @@
 #include "eff_blur.h"
 #include "eff_event_draw.h"
 #include "eff.h"
+#include "kwln_draw_params.h"
 
 extern u32 D_0037F770[4];
 
@@ -27,69 +28,6 @@ extern s16 D_00438DBA;
 extern s16 D_00438DBC;
 
 extern s16 D_00438DBE;
-
-/* These are pending/saved parameter bodies, not the allocated effect owners.
- * Copies exclude each owner's resource handle, allocation and slot pointers. */
-typedef union {
-    u32 rgba;
-    u8 channels[4];
-} KwlnColor;
-
-typedef struct {
-    u32 left;
-    u32 top;
-    u32 right;
-    u32 bottom;
-} KwlnRectBounds;
-
-
-typedef struct {
-    KwlnColor color;
-    u32 blendControl;
-    KwlnRectBounds bounds;
-} KwlnSolidRectParams;
-
-typedef struct {
-    u32 extent;
-    u32 centerX;
-    u32 centerY;
-    KwlnColor color;
-    u32 blendControl;
-    KwlnRectBounds bounds;
-} KwlnResourceRectParams;
-
-typedef struct {
-    KwlnColor color;
-    u32 blendControl;
-    f32 rotation;
-    f32 scale;
-    u32 centerX;
-    u32 centerY;
-    KwlnRectBounds bounds;
-} KwlnBlurRectParams;
-
-typedef struct {
-    u32 extent;
-    KwlnBlurRectParams source;
-} KwlnPixelBlurParams;
-
-/* Staggered (ripple) blur parameters. The staged block and the interpolated
- * body are both 8-byte aligned and the compiler copies between them with
- * aligned 8-byte moves, so the type carries that alignment; a body reached
- * through a cast pointer is still copied four bytes at a time. */
-typedef struct {
-    u32 count;
-    f32 phaseStep;
-    f32 spacing;
-    KwlnColor color;
-    u32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 angleStep;
-    u32 x;
-    u32 y;
-    u32 size;
-} KwlnScaleBlurParams __attribute__((aligned(8)));
 
 typedef char KwlnSolidRectParamsLayoutCheck[sizeof(KwlnSolidRectParams) == sizeof(EffSolidRectParams) ? 1 : -1];
 typedef char KwlnResourceRectParamsLayoutCheck[sizeof(KwlnResourceRectParams) == sizeof(EffResourceRectParams) ? 1 : -1];
