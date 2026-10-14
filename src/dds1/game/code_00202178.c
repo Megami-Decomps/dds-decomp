@@ -96,7 +96,7 @@ extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
-extern s32 func_001A30F8(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
@@ -534,7 +534,7 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
         mode = 0;
         break;
     }
-    func_001A30F8((void *)actor, list, 1, 2, 0);
+    btlBuildEligibleTargetIndexList((void *)actor, list, 1, 2, 0);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -569,7 +569,7 @@ INCLUDE_ASM(const s32, "game/code_00202178", func_00203E38);
 
 s32 btlAppendSelfAfterTargetScan(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    func_001A30F8((void *)actor, list, 1, 1, 0);
+    btlBuildEligibleTargetIndexList((void *)actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
     btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
     btlFreeIndexList(list);

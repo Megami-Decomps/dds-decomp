@@ -568,9 +568,9 @@ s32 btlGetActorBedAssetIdFromIndex(s32 arg0) {
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A30F8);
+INCLUDE_ASM(const s32, "game/code_001A1960", btlBuildEligibleTargetIndexList);
 
-extern s32 func_001A30F8(void *, BtlIndexList *, s32, s32, s32);
+extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
 
 u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
@@ -635,7 +635,7 @@ u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 un
         mask = 0;
     }
     if (destination != NULL) {
-        func_001A30F8(task, destination, mode, flags, mask);
+        btlBuildEligibleTargetIndexList(task, destination, mode, flags, mask);
     }
     return category;
 }
