@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_trig.h"
+#include "sdf_quaternion.h"
 #include "sdf_chip.h"
 #include "fr_font_context.h"
 #include "fr_font.h"
@@ -33,7 +34,6 @@ extern f32 acosf(f32);
 
 
 
-extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
