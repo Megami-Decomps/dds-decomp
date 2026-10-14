@@ -651,7 +651,7 @@ extern s32 sceOpen();
 
 extern s32 sdfDevSeekFile(s32, s32, s32);
 
-extern s32 func_0035A828(s32);
+extern s32 sdfAllocHeapMemory(s32);
 
 extern s32 sdfDevReadFileBytes(s32, s32, s32);
 
@@ -668,7 +668,7 @@ void sdfDevLoadWholeFile(const char *fileName) {
     }
     fileBytes = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
     sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
-    bufferAddress = func_0035A828(fileBytes);
+    bufferAddress = sdfAllocHeapMemory(fileBytes);
     D_004391A4 = bufferAddress;
     sdfDevReadFileBytes(fileHandle, bufferAddress, fileBytes);
     sceClose(fileHandle);

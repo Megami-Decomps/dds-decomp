@@ -12,7 +12,7 @@ typedef struct SdfVec4 {
 
 extern f32 sdfVec3Normalize(f32 *);
 
-extern void *func_0035A828(u32);
+extern void *sdfAllocHeapMemory(u32);
 
 extern u64 func_00325790(u64, u32);
 
@@ -57,7 +57,7 @@ extern void *memcpy(void *, const void *, u32);
 void *sdfAllocateOwnedResourceBuffer(u32 *owner, u32 bytes) {
     void *handle;
 
-    handle = func_0035A828(bytes);
+    handle = sdfAllocHeapMemory(bytes);
     dds3AppendIndexedListNode((MnuCallbackList *)owner[1], 0, (u32)handle);
     return handle;
 }
@@ -324,7 +324,7 @@ extern u32 *dds3WritePendingNamedReferenceValues(u32 *);
 
 extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
 
-extern void func_0035A880(void *);
+extern void sdfFreeHeapMemory(void *);
 
 SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, MnuCallbackList **source,
                                   MnuCallbackList **groups) {
@@ -353,7 +353,7 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, MnuCallbackLis
     relocations = sdfAllocateOwnedResourceBuffer(owner, *relocationHeader);
     memset(relocations, 0, *relocationHeader);
     dds3ApplyRelocationOffsets(data, data, relocations, *relocationHeader);
-    func_0035A880(relocations);
+    sdfFreeHeapMemory(relocations);
     result->data = data;
     result->firstCount = (*source)->count;
     for (node = (*groups)->head; node != NULL; node = node->next) {
