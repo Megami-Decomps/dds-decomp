@@ -778,7 +778,7 @@ void fldStartSceneBgm(void) {
                 fldAreaState.sequenceCode = idx;
                 handle = fldSceneSoundBase + idx;
             }
-            if (fldAreaState.unk130 != 1) {
+            if (fldAreaState.sceneBgmSuppressed != 1) {
                 if (fldCurrentBgmHandle != handle) {
                     sndReleaseTrackHandle(fldCurrentBgmHandle);
                 }
@@ -817,7 +817,7 @@ void fldStartSceneBgmAlternate(void) {
                 fldAreaState.sequenceCode = idx;
                 handle = fldSceneSoundBase + idx;
             }
-            if (fldAreaState.unk130 != 1) {
+            if (fldAreaState.sceneBgmSuppressed != 1) {
                 fldCurrentBgmHandle = handle;
                 sndStartTrackAlternate(handle, handle);
             }
