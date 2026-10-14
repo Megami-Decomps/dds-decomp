@@ -7216,7 +7216,7 @@ extern void mnuPrintTitleDebugBanner(void);
 
 extern void mnuInstallTitleSoundBufferFromData(u32, u32, s32);
 
-extern s32 func_003003F0(const char *, ...);
+extern s32 sdfDebugPrintf(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5178);
 
@@ -7267,7 +7267,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
             data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->slot]);
             size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->slot]);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
-            func_003003F0("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
+            sdfDebugPrintf("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
             work->unk264 = 0;
             btlBossDebugPrintf("btl:motSE play(ATRAC3)\n");
@@ -7432,7 +7432,7 @@ u32 sndFinishEarringPlayback(void) {
         return 1;
     }
     if (status == 2) {
-        func_003003F0("%%%%%%%%%%%%%%%% EARRING(2)\n");
+        sdfDebugPrintf("%%%%%%%%%%%%%%%% EARRING(2)\n");
         mnuPrintTitleDebugBanner();
     }
     return 0;
@@ -7548,7 +7548,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
             filePollEntryCleanup(args->request);
             mnuInstallTitleSoundBufferFromData(data, size, 2);
             mnuPrintTitleDebugBanner();
-            func_003003F0(D_003A5390);
+            sdfDebugPrintf(D_003A5390);
             btlBossDebugPrintf(D_003A53B0);
         }
         return 0;

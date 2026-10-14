@@ -232,7 +232,7 @@ extern char fileConfigLoadTaskName[]; /* "config_draw" */
 extern char fileConfigOwnerTaskName[]; /* "config_update" */
 
 
-extern void func_003003F0(void *arg);
+extern void sdfDebugPrintf(void *arg);
 
 extern char D_003BC900[];
 
@@ -3700,15 +3700,15 @@ void fileDrawConfigurationMenuBackground(void *unused) {
 
 
 void fileManagerResetSubsystems(void) {
-    func_003003F0(D_003BC900);
+    sdfDebugPrintf(D_003BC900);
     effLoadFlashTextures();
-    func_003003F0(D_003BC908);
+    sdfDebugPrintf(D_003BC908);
     effLoadWindTexture();
-    func_003003F0(D_003BC910);
+    sdfDebugPrintf(D_003BC910);
     effLoadScalyTexture();
-    func_003003F0(D_003BC918);
+    sdfDebugPrintf(D_003BC918);
     fileResetRenderFlags();
-    func_003003F0(D_003BC920);
+    sdfDebugPrintf(D_003BC920);
 }
 
 void fileSetRenderFlag(u32 bits) {
@@ -4577,7 +4577,7 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
 }
 
 FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
-    func_003003F0(D_003BC940);
+    sdfDebugPrintf(D_003BC940);
     return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 

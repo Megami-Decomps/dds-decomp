@@ -492,12 +492,12 @@ void btlSelectRandomDefeatCamera(BtlLinkedCommand *command) {
     btlFlagAllUnitDefeatCandidatesTask();
     switch (effMiscRandMod(0, 2)) {
     case 0:
-        func_003003F0(D_003A5FF0);
+        sdfDebugPrintf(D_003A5FF0);
         btlSetEffectCameraKeys(command, -307.2f, -72.7f, -1292.7f, -0.096f, -0.085f, -0.004f, 0.983f, 148.3f, -84.1f, -1407.1f,
                       -0.079f, 0.064f, -0.018f, 0.986f, 40.0f, 25.0f);
         break;
     case 1:
-        func_003003F0(D_003A6018);
+        sdfDebugPrintf(D_003A6018);
         btlSetEffectCameraKeys(command, -207.7f, -76.6f, -1176.0f, -0.108f, -0.099f, -0.002f, 0.98f, -282.2f, -106.6f, -1451.2f,
                       -0.071f, -0.1f, -0.006f, 0.984f, 40.0f, 25.0f);
         break;
@@ -720,11 +720,11 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
                 btlApplyCombinedActorFlags((u8 *)command);
                 switch (effMiscRandMod(0, 2)) {
                 case 0:
-                    func_003003F0(D_003A6338);
+                    sdfDebugPrintf(D_003A6338);
                     btlSetEffectCameraKeys(command, 180.8f, -79.0f, 157.0f, -0.158f, -0.053f, -0.004f, 0.977f, 125.8f, -22.7f, -332.7f, -0.115f, -0.02f, -0.01f, 0.984f, 40.0f, 30.0f);
                     return 1;
                 case 1:
-                    func_003003F0(D_003A6358);
+                    sdfDebugPrintf(D_003A6358);
                     btlSetEffectCameraKeys(command, 592.3f, -17.2f, 86.0f, -0.142f, 0.157f, -0.035f, 0.968f, 842.9f, -427.9f, -389.8f, -0.001f, 0.159f, -0.013f, 0.978f, 40.0f, 30.0f);
                     return 1;
                 }
@@ -741,11 +741,11 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
                 btlApplyCombinedActorFlags((u8 *)command);
                 switch (effMiscRandMod(0, 2)) {
                 case 0:
-                    func_003003F0(D_003A6398);
+                    sdfDebugPrintf(D_003A6398);
                     btlSetEffectCameraKeys(command, 55.7f, -307.7f, -1258.9f, -0.087f, -0.034f, -0.007f, 0.986f, 1388.6f, -73.1f, -784.7f, -0.137f, 0.146f, -0.029f, 0.969f, 40.0f, 25.0f);
                     return 1;
                 case 1:
-                    func_003003F0(D_003A63C0);
+                    sdfDebugPrintf(D_003A63C0);
                     btlSetEffectCameraKeys(command, -1900.7f, -88.3f, 749.5f, 0.108f, 0.542f, -0.052f, -0.819f, -1276.4f, -60.8f, -57.8f, 0.122f, 0.326f, -0.026f, -0.925f, 40.0f, 25.0f);
                     return 1;
                 }
@@ -793,15 +793,15 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
         btlFlagAllUnitDefeatCandidatesTask();
         switch (effMiscRandMod(0, 3)) {
         case 0:
-            func_003003F0("ITP0:++++++++++++++++++++++++++\n");
+            sdfDebugPrintf("ITP0:++++++++++++++++++++++++++\n");
             btlSetEffectCameraKeys(command, -591.4f, -38.0f, -1158.0f, -0.124f, -0.211f, 0.018f, 0.96f, 251.8f, -58.2f, -1388.8f, -0.089f, 0.09f, -0.017f, 0.983f, 40.0f, 25.0f);
             return 1;
         case 1:
-            func_003003F0("ITP1:++++++++++++++++++++++++++\n");
+            sdfDebugPrintf("ITP1:++++++++++++++++++++++++++\n");
             btlSetEffectCameraKeys(command, 156.4f, -82.5f, -1252.4f, -0.1f, 0.037f, -0.014f, 0.985f, -314.9f, -62.2f, -1168.6f, -0.093f, -0.156f, 0.005f, 0.974f, 40.0f, 25.0f);
             return 1;
         case 2:
-            func_003003F0("ITP2:++++++++++++++++++++++++++\n");
+            sdfDebugPrintf("ITP2:++++++++++++++++++++++++++\n");
             btlSetEffectCameraKeys(command, -201.5f, -129.8f, -971.6f, -0.153f, -0.139f, 0.011f, 0.969f, -267.3f, -88.1f, -1237.4f, -0.071f, -0.142f, -0.0f, 0.978f, 40.0f, 25.0f);
             return 1;
         }

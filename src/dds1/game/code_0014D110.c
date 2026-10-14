@@ -116,7 +116,7 @@ extern s32 D_0032E570[];
 
 extern u8 D_003BAE78[];
 #include "dds3_world_secondary.h"
-extern void func_003003F0(const char *fmt, ...);
+extern void sdfDebugPrintf(const char *fmt, ...);
 
 extern s32 fldCurrentBgmMode;
 
@@ -543,7 +543,7 @@ s32 fldFindSearchId(const char *name) {
     if (entry != 0) {
         return entry->key;
     }
-    func_003003F0("field SEARCH_ID NotFound:[%s]\n", name);
+    sdfDebugPrintf("field SEARCH_ID NotFound:[%s]\n", name);
     return -1;
 }
 

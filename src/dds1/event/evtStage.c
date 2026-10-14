@@ -21,7 +21,7 @@ Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
 void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
 extern const char D_003AC038[0x28];
-extern void func_003003F0(const char *format, ...);
+extern void sdfDebugPrintf(const char *format, ...);
 
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
@@ -141,7 +141,7 @@ void evtKillFieldScriptTasks(void)
         for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
             task = kwlnTaskGetByStateAndIndex(state, taskIndex);
             if (task->priority == 0x3EA) {
-                func_003003F0(D_003AC038, task->name);
+                sdfDebugPrintf(D_003AC038, task->name);
                 kwlnTaskDestroyWithHierarchy(task, 0);
                 /* Destruction changes the queue, so restart the current scan. */
                 goto restartStateScan;
