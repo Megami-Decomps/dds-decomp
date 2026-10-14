@@ -5997,7 +5997,7 @@ s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     return color | (scaled << 24);
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00134348);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldDrawCameraColorScrollingGradient);
 
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
@@ -6015,7 +6015,7 @@ void fldInitializeCameraColorResource(void) {
 }
 
 void fldDrawCameraColorLayerPass(void) {
-    func_00134348();
+    fldDrawCameraColorScrollingGradient();
 }
 
 void fldReleaseCameraColorEffect(void) {
