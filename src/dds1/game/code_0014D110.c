@@ -365,7 +365,7 @@ extern s32 fldUpdateCameraObjectPose();
 
 extern void fldClearCameraObjectHighlightFlag();
 
-extern void func_0012CB48();
+extern void fldUpdateFieldCameraViewState();
 
 s32 fldUpdateLookAtSegment(void) {
     FldAreaWork *cam = &fldAreaState;
@@ -388,7 +388,7 @@ s32 fldUpdateLookAtSegment(void) {
     fldLookAtFarPoint.z = far.z;
     fldUpdateCameraObjectPose();
     fldClearCameraObjectHighlightFlag();
-    func_0012CB48();
+    fldUpdateFieldCameraViewState();
     return 1;
 }
 
@@ -420,7 +420,7 @@ s32 fldCmdSetLookAtHeading(void) {
     fldLookAtFarPoint.x = far.x;
     fldLookAtFarPoint.y = far.y;
     fldLookAtFarPoint.z = far.z;
-    func_0012CB48();
+    fldUpdateFieldCameraViewState();
     return 1;
 }
 
