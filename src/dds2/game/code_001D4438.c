@@ -28,6 +28,7 @@
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
 #include "kwln_fade.h"
+#include "btl_ai_table.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
@@ -1258,14 +1259,7 @@ void btlEnterAiActionState(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xffffff7f;
 }
 
-typedef struct SceneAiEntry {
-    u8 kind;                  /* 0x000 */
-    u8 pad01;
-    u16 slot;                 /* 0x002 */
-    u8 pad04[0x158];
-} SceneAiEntry;
-
-extern SceneAiEntry *datEnemyAiRecords;
+extern AiSpecies *datEnemyAiRecords;
 extern s32 btlAllocAndCheck();
 extern void btlAssignTaskResultAndArgument();
 extern void btlBindActorSlot();
@@ -1285,8 +1279,8 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     scene->boundTask = 0;
                     if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck(task) != 0) {
                         btlAssignTaskResultAndArgument(task);
-                    } else if (datEnemyAiRecords[index].slot != 0) {
-                        btlBindActorSlot(task, datEnemyAiRecords[index].slot);
+                    } else if (datEnemyAiRecords[index].sceneSlot != 0) {
+                        btlBindActorSlot(task, datEnemyAiRecords[index].sceneSlot);
                     } else {
                         btlRunRandomWeightedAiTableAction(task);
                     }

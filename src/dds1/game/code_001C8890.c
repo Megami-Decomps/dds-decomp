@@ -38,6 +38,7 @@
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "dat_affinity.h"
+#include "btl_ai_table.h"
 
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 
@@ -45,14 +46,7 @@ void btlPrepareSavedCommandTargets(BtlTask *, BattleIndexWork *);
 
 extern s32 btlIsUnitInActiveList(void *unit);
 
-typedef struct SceneAiEntry {
-    u8 kind;
-    u8 pad01;
-    u16 slot;
-    u8 pad04[0x158];
-} SceneAiEntry;
-
-extern SceneAiEntry *datEnemyAiRecords;
+extern AiSpecies *datEnemyAiRecords;
 
 extern s32 btlAllocAndCheck(s32);
 
@@ -778,8 +772,8 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     scene->boundTask = 0;
                     if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck((s32)task) != 0) {
                         btlAssignTaskResultAndArgument((s32)task);
-                    } else if (datEnemyAiRecords[index].slot != 0) {
-                        btlBindActorSlot(task, datEnemyAiRecords[index].slot);
+                    } else if (datEnemyAiRecords[index].sceneSlot != 0) {
+                        btlBindActorSlot(task, datEnemyAiRecords[index].sceneSlot);
                     } else {
                         btlRunRandomWeightedAiTableAction(task);
                     }
