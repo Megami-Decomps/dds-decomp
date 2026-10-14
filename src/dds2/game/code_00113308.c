@@ -492,8 +492,6 @@ ObjBase *effObjGetDataHandle(EffWorldNode *object) {
 }
 
 
-extern void dds3EnsureSlotData();
-
 /* Spawn a world object of kind 6 and seed its stored vector. */
 EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     f32 zero[4];
