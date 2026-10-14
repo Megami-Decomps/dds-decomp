@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_event_asset_api.h"
 #include "fld_scene_ready_api.h"
 #include "kwln_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
@@ -1061,7 +1062,6 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
 
 
 
-extern void btlReleaseEventAssets();
 
 extern void btlReleaseBossData();
 

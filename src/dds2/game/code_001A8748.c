@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"

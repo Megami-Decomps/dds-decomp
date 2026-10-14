@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_event_asset_api.h"
 #include "kwln_background_fade_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
