@@ -66,7 +66,58 @@ void mnuActivateMantraNode(MnuStatusResource *menu, u16 nodeId) {
     mnuStorePanelEntry(0x20009, 0x14);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028E568", mnuUpdateMantraNodeState);
+/* Set a mantra node's state for every listed unit (1 when a neighbour has
+ * flag bit 8 set, otherwise 2), then play its panel animation and, when the
+ * selected unit's state is 1, the second panel. `slot` is reassigned for the
+ * selected unit so the pointer is allocated globally. */
+void mnuUpdateMantraNodeState(MnuStatusResource *menu, u16 nodeId) {
+    MantraNodePos *node;
+    struct MenuListNode *unit;
+    s32 index;
+    struct MantraPanelAnimation *panel;
+    u32 selected;
+    u16 *entry;
+    MantraFlagResource *slot;
+
+    node = mnuGetMantraNodePositionRecord((s16)nodeId);
+    index = 0;
+    for (unit = menu->list->first; unit != NULL; unit = unit->next, index++) {
+        MantraNodePos **neighbor;
+        s32 i;
+
+        slot = menu->menu.slots[index];
+        entry = &slot->flags[node->id];
+        *entry = (*entry & 0xFFF0) | 2;
+        i = 0;
+        neighbor = node->neighbors;
+        do {
+            MantraNodePos *next = *neighbor++;
+
+            if (next != NULL) {
+                u16 *other = &slot->flags[next->id];
+
+                if ((u16)((*other >> 8) & 1) != 0) {
+                    *entry = (*entry & 0xFFF0) | 1;
+                    break;
+                }
+            }
+        } while (++i < 6);
+    }
+    panel = mnuSpawnPanelSlotA(menu->menu.resource, nodeId, 10, 0, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+    mnuQueuePanelAnimationTransition(panel, 1, 0);
+    selected = mnuGetSelectedMantraUnitIndex(menu);
+    slot = menu->menu.slots[selected];
+    entry = &slot->flags[node->id];
+    if ((*entry & 0xF) == 1) {
+        mnuQueuePanelAnimationTransition(panel, 3, 0x28);
+        panel = mnuSpawnPanelSlotA(menu->menu.resource, nodeId, 11, 100, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+        mnuQueuePanelAnimationTransition(panel, 0, 0);
+        mnuStorePanelEntry(0x2000B, 0x2D);
+    }
+    mnuStorePanelEntry(0x2000A, 5);
+}
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_00427218);
 
