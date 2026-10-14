@@ -82,7 +82,6 @@ extern u32 fldIsUpdateInhibited(void);
 #include "sdf_packet_alloc.h"
 struct SdfListHead;
 extern void effAppendBlurRenderState(void *list, s32 blendControl, struct SdfTex *resource);
-extern void effAppendBlurRectanglePackets(void *list, EffBlurQuad *quad, u8 fixedPoint);
 extern void effDrawBlurListWithFramePacket(void *list);
 extern f64 fabs(f64 value);
 
