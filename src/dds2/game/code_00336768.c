@@ -10,8 +10,6 @@ typedef float f32;
 
 
 extern void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d* axis, RwMatrix* matrix);
-extern f32 func_00353040(f32 angle);
-extern f32 func_00353140(f32 angle);
 
 /* Persona 4 func_004bd380 @ 004BD380 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
@@ -21,7 +19,24 @@ void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
     VU0_LOAD_MATRIX(&matrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_00336768", func_00336798);
+extern f32 func_00353040(f32 angle);
+extern f32 func_00353140(f32 angle);
+
+/* Rotation loaders build the matrix in a volatile scratch array: it is read
+ * only by the lqc2 asm through its address, and retail stores its four
+ * elements in program order. */
+void func_00336798(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = func_00353040(angle);
+    f32 s = func_00353140(angle);
+
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[1][1] = c;
+    m[1][2] = s;
+    m[2][1] = -s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX_B((f32 *)m);
+}
 
 INCLUDE_ASM(const s32, "game/code_00336768", sdfVuLoadSecondaryRotationMatrixY);
 

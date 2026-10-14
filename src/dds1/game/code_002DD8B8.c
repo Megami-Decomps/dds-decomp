@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "sdf_quaternion.h"
 #include "rw_matrix.h"
 #include "pcp_vu0.h"
@@ -18,7 +19,24 @@ void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
     VU0_LOAD_MATRIX(&matrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DD8E8);
+extern f32 func_002F9F60(f32 angle);
+extern f32 func_002FA060(f32 angle);
+
+/* Rotation loaders build the matrix in a volatile scratch array: it is read
+ * only by the lqc2 asm through its address, and retail stores its four
+ * elements in program order. */
+void func_002DD8E8(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = func_002F9F60(angle);
+    f32 s = func_002FA060(angle);
+
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[1][1] = c;
+    m[1][2] = s;
+    m[2][1] = -s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX_B((f32 *)m);
+}
 
 INCLUDE_ASM(const s32, "game/code_002DD8B8", sdfVuLoadSecondaryRotationMatrixY);
 
@@ -32,8 +50,6 @@ void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
     VU0_LOAD_MATRIX_B(&matrix);
 }
 
-extern f32 func_002F9F60(f32 angle);
-extern f32 func_002FA060(f32 angle);
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
 void sdfRotateVuMatrixAboutX(f32 angle)
