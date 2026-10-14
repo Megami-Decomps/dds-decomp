@@ -41,7 +41,7 @@ typedef struct {
 
 extern Entry270 *D_003BAA20;
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 

@@ -105,7 +105,7 @@ void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
 
 
 
-extern EffWorldNode *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
     EffWorldNode *world = dds3GetWorldObject();

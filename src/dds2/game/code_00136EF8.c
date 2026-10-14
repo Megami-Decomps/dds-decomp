@@ -51,7 +51,7 @@ static inline f32 fldNormalizeProbeVector(void) {
 
 
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 #include "mdl_flag_api.h"
 extern int strcmp(const char *, const char *);

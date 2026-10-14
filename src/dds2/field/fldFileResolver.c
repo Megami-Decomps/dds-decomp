@@ -413,7 +413,7 @@ extern s32 fldBackgroundBuffer;
 
 extern u32 D_00436088;
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 
 extern s64 fldGetPlayerSceneState(void);

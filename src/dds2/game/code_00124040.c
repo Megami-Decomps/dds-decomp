@@ -35,7 +35,7 @@
  * step-before-index, and all callers are verified. */
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern void func_00133F08(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 
@@ -1993,7 +1993,6 @@ u8 fldGetCampSceneControlMode(void) {
     return fldTestSceneControlFlags(0x20) != 0 ? 0 : 3;
 }
 
-extern void *dds3GetWorldObject(void);
 
 
 

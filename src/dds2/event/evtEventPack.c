@@ -15,7 +15,7 @@
 #include "file_request_api.h"
 #include "sdf_texture_offset_list.h"
 
-extern EffWorldNode *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern Motion *mdlFindNodeById(MdlCtx *, s32);
 extern s32 evtSetBgmVolumePan(s32, s32);
 

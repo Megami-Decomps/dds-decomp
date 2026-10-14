@@ -57,7 +57,7 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
 }
 
 extern f32 D_003BD358, D_003BD35C;
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void kwlnBuildShortestArcQuaternion(void);

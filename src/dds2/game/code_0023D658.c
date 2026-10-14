@@ -67,7 +67,7 @@ extern void sdfSetFloatCounterDirection(s32, s32);
 
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 
-extern void *dds3GetWorldObject(void);
+#include "dds3_world_primary.h"
 
 
 extern void scrSetIntegerReturnValue(s32 arg0);
