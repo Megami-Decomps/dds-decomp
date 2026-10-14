@@ -5,9 +5,9 @@
 
 typedef struct DevConsState {
     u8 pad0[4]; /* 0x00 */
-    struct DevConsState *unk4; /* 0x04 */
-    u16 unk8; /* 0x08 */
-    u16 unkA; /* 0x0A */
+    struct DevConsState *previousNode; /* 0x04: linked-list predecessor; the global head is the tail. */
+    u16 screenOriginX; /* 0x08: GS 12.4 X coordinate used for the console sprite/grid. */
+    u16 screenOriginY; /* 0x0A: GS 12.4 Y coordinate used for the console sprite/grid. */
     s16 columns; /* 0x0C */
     s16 rows; /* 0x0E */
     s16 cursorColumn; /* 0x10 */
@@ -37,6 +37,12 @@ void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute);
 s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...);
 
 typedef char DevConsState_size_must_be_0x20[(sizeof(DevConsState) == 0x20) ? 1 : -1];
+typedef char DevConsState_previousNode_at_0x04[
+    ((u32)&((DevConsState *)0)->previousNode == 0x04) ? 1 : -1];
+typedef char DevConsState_screenOriginX_at_0x08[
+    ((u32)&((DevConsState *)0)->screenOriginX == 0x08) ? 1 : -1];
+typedef char DevConsState_screenOriginY_at_0x0A[
+    ((u32)&((DevConsState *)0)->screenOriginY == 0x0A) ? 1 : -1];
 typedef char DevConsState_cells_at_0x1C[((u32)&((DevConsState *)0)->cells == 0x1C) ? 1 : -1];
 typedef char ConsBuf_size_must_be_0x20[(sizeof(ConsBuf) == 0x20) ? 1 : -1];
 typedef char ConsBuf_bufferAddresses_at_0x10[((u32)&((ConsBuf *)0)->bufferAddresses == 0x10) ? 1 : -1];
