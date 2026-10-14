@@ -245,7 +245,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D0140);
+INCLUDE_ASM(const s32, "game/code_001CFEF8", btlInitializeBattleUnits);
 
 s32 fldSceneStateRestoreDisplay(BtlState *scene) {
     if (btlCountTasksForOwner(0x8000000000000002LL) == 0) {

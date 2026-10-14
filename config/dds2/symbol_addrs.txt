@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+btlInitializeBattleUnits = 0x001D0140; // type:func
 evtViewerUpdateWindowShadeFade = 0x0024AD48; // type:func
 sdfDevResolvePathForWorker = 0x0033F898; // type:func
 btlCheckStatusActionEligibility = 0x0020EB40; // type:func
@@ -9751,7 +9752,6 @@ func_001CFB90 = 0x001CFB90; // type:func
 func_001CFC40 = 0x001CFC40; // type:func
 func_001CFEF8 = 0x001CFEF8; // type:func
 func_001CFF00 = 0x001CFF00; // type:func
-func_001D0140 = 0x001D0140; // type:func
 btlQueueSceneActorModelEntry = 0x001D08A8; // type:func
 btlFinalizeBattleRewards = 0x001D18D8; // type:func
 btlFinishScenePartyRecovery = 0x001D2A78; // type:func
