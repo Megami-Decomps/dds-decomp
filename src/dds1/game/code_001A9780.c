@@ -1169,7 +1169,38 @@ s32 btlCountSceneSlots(void) {
     return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001ACB08);
+s32 func_001ACB08(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 eligibleCount = btlCountEligibleLinkedActors(battle);
+    BtlUnit *unit = battle->units;
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3B0);
+    BattleActorPanelWork *panel;
+    s32 i;
+
+    if (task == NULL) {
+        return 0;
+    }
+    panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    /* i is never advanced: the count only gates the walk on any eligible actor. */
+    for (i = 0; unit != NULL && i < eligibleCount; unit = unit->next) {
+        if (btlHasRequiredActorStatusBits(unit) != 0) {
+            s32 slot = unit->lookupId;
+
+            if (panel->activeEntries[slot].presentation.hpState == 3) {
+                panel->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+                panel->activeEntries[slot].presentation.hpTarget = unit->partyRecord.hp;
+            }
+            if (panel->activeEntries[slot].presentation.mpState == 3) {
+                panel->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
+                panel->activeEntries[slot].presentation.mpTarget = unit->partyRecord.mp;
+            }
+        }
+    }
+    return 1;
+}
+
+extern s32 btlCountEligibleLinkedActors(BtlState *);
+extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
 
 s32 func_001ACC20(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -1193,6 +1224,7 @@ s32 func_001ACC20(void) {
     }
     return 1;
 }
+
 
 void btlClearSharedBattleStateWords(void) {
     u32 *puVar1;
