@@ -30,6 +30,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sdfBuildFourColorTexturedQuadVifPacket = 0x002E2DE8; // type:func
 effObjApplyTransformParameters = 0x001122F0; // type:func
 fldAddAxisAlignedCollisionBoxVerticalFaces = 0x00138910; // type:func
 fldInitializeHuntSparkUnit = 0x00147DB0; // type:func

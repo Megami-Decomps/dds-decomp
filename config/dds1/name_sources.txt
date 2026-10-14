@@ -6898,6 +6898,7 @@
 0x002E27C8	sdfMeasureVertexAttributePacketBytes	inferred	confidence=high; matched-C; src/dds1/game/code_002DDC98.c:1126:func_002E27C8; Measures the allocation for the native VIF vertex-attribute packet builder: a fixed header plus packed per-vertex attribute payloads.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002E27D8	sdfBuildCompactVertexVifPacket	inferred	readability/matching review (QP16)
 0x002E2B90	sdfMeasureAlignedRecordBufferBytes	inferred	Calculates the 16-byte-aligned allocation length from a record count. [names_reviewed17.tsv]
+0x002E2DE8	sdfBuildFourColorTexturedQuadVifPacket	inferred	One-vertex textured-quad VIF packet builder; emits four color words, four UV corner words and eight quad coordinates. Paired implementation at DDS2 0x0033BC98.
 0x002E3368	sdfMeasureAlignedDrawPacketSize	inferred	confidence=high; src/dds1/game/code_002DDC98.c:func_002E3368; Computes a count-dependent draw packet size and rounds it to a 16-byte boundary. [names_qp9.tsv]
 0x002E3390	sdfBuildWideVertexVifPacket	inferred	readability/matching review (QP16)
 0x002E35C8	sdfPadUpdatePort	inferred	Polls one controller port and updates pad mode, buttons, sticks, pressure, and motors.
