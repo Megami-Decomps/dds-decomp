@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "scr_string_parameter_api.h"
 #include "evt_solar.h"
 #include "eff_random_mod.h"

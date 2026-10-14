@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "scr_integer_return_value_api.h"
 #include "common.h"
 #include "dds3_admin_control_api.h"
 #include "kwln_task_add_child.h"
@@ -46,7 +47,6 @@ s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *
 s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
 
 
-void scrSetIntegerReturnValue(s32 value);
 
 void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
 

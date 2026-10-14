@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
@@ -12,7 +13,6 @@
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
-void scrSetIntegerReturnValue(s32 value);
 
 extern char D_003ACAE0[];
 

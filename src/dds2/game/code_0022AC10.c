@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_event_asset_api.h"
 #include "kwln_background_fade_api.h"
@@ -210,7 +211,6 @@ extern u8 D_003BF961[];
 
 extern u16 D_003BF962[];
 
-extern void scrSetIntegerReturnValue();
 
 extern void ptyAdjustItemQuantity(u32, u32);
 

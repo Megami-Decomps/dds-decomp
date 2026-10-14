@@ -1,11 +1,11 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 
 struct EvtUnit;
 
 
-extern void scrSetIntegerReturnValue(s32 value);
 
 extern const char *fldGetTaskRecordValue(u32 key);
 

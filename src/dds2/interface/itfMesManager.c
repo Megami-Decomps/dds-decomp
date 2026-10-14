@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "snd_pad_step.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
@@ -2480,7 +2481,6 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A7C08);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A81F0);
 
-extern void scrSetIntegerReturnValue(s32 value);
 extern s32 itfMesStartEntry(s32 window, s32 entry, s32 option);
 extern void itfPanelSetStatus(s32 window, s8 status);
 extern void func_001A81F0(void);

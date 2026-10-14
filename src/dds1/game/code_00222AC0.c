@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_path.h"
@@ -115,7 +116,6 @@ extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
 extern u8 D_003AC520[];
 extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
-extern void scrSetIntegerReturnValue(s32 arg0);
 extern void mdlAttachWorldObjectToSourceVector(s32 arg0, s32 arg1);
 
 extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);

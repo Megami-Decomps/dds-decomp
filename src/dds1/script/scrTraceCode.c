@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"

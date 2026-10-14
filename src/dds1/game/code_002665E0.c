@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_return_value_api.h"
 #include "scr_string_parameter_api.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
@@ -851,7 +852,6 @@ u32 sndOpStopNamedPlayback(void) {
     return 1;
 }
 
-extern void scrSetIntegerReturnValue(s32 value);
 
 u32 sndOpPushCommandBusyState(void) {
     u32 soundBusy;

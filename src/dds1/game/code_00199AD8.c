@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "scr_integer_return_value_api.h"
 #include "sdf_packet_list.h"
 #include "itf.h"
 #include "itf_mes_window.h"
@@ -31,7 +32,6 @@
 extern PanelEntry itfWindowSlots[];
 extern void (*itfPanelHandlers[])(UiSprite *, SdfListHead *);
 extern u32 scrGetWindow(void);
-extern void scrSetIntegerReturnValue(s32);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesResetWindow(s32 window);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
