@@ -78,7 +78,7 @@ extern void mdlFlagClear(s32);
 
 extern void scrClearProfileFlagsTable(void);
 
-extern void func_00315A50(void);
+extern void mnuRebuildMantraCategoryAvailability(void);
 
 extern void scrResetAndSetPairedGlobalFlags(void);
 
@@ -128,7 +128,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     }
     mdlFlagClear(0x901);
     scrClearProfileFlagsTable();
-    func_00315A50();
+    mnuRebuildMantraCategoryAvailability();
     scrResetAndSetPairedGlobalFlags();
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();

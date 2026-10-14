@@ -284,7 +284,7 @@ extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32)
 extern s32 mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
 extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
 extern void mnuMergePartyMantraProfileCapStates(MantraFlagResource **);
-extern void func_00315A50(void);
+extern void mnuRebuildMantraCategoryAvailability(void);
 extern void mnuBuildMantraSourceList(MnuStatusResource *);
 extern s32 mnuScanMantraSourceCandidates(MnuStatusResource *);
 extern s32 mnuRefreshMantraSelectionResources(MnuStatusResource *);
@@ -328,7 +328,7 @@ void mnuInitializeMantraSelectionWork(MnuStatusResource *object) {
     }
     state->slots[5] = evtAllocateMantraSelectionWork(NULL, 0);
     mnuMergePartyMantraProfileCapStates(state->slots);
-    func_00315A50();
+    mnuRebuildMantraCategoryAvailability();
     mnuBuildMantraSourceList(object);
     state->drawBits.hasSource = mnuScanMantraSourceCandidates(object);
     if (state->src == NULL) {

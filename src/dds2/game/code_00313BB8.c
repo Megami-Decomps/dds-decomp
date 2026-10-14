@@ -1078,7 +1078,7 @@ s32 prfCheckAdjacentMantraRequirements(s32 id, DatPartyRecord *context, s32 mode
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315A50);
+INCLUDE_ASM(const s32, "game/code_00313BB8", mnuRebuildMantraCategoryAvailability);
 
 s32 mnuIsResourceCategoryAvailable(s32 id) {
     MantraNodePos *info = mnuGetMantraNodePositionRecord(id);

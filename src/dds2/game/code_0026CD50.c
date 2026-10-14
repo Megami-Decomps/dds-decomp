@@ -39,7 +39,7 @@ typedef struct EvtMantraNodePositionRecord {
 
 INCLUDE_ASM(const s32, "game/code_0026CD50", func_0026CD50);
 
-extern void func_00315A50(void);
+extern void mnuRebuildMantraCategoryAvailability(void);
 void mnuLoadMantraNodePositionTable(u32 resourceId);
 
 /* Load the mantra node-position table synchronously and release the request. */
@@ -51,7 +51,7 @@ void mtrLoadMantraNodePositions(void) {
     while (!fileIsRequestReadyInCurrentMode(request)) {
     }
     mnuLoadMantraNodePositionTable(fileGetLoadedDataAddress(request));
-    func_00315A50();
+    mnuRebuildMantraCategoryAvailability();
     sdfReleaseResourceAllocation(fileGetResourceHandle(request));
     filePollEntryCleanup(request);
 }
