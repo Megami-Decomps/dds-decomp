@@ -466,7 +466,30 @@ void sdfMotionApplyInterpolatedEulerRotation(SdfMotionDrawBinding *binding, f32 
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", sdfMotionBlendInterpolatedEulerRotation);
+/* vu0 routine: as above, then nlerp the result with the captured quaternion. */
+void sdfMotionBlendInterpolatedEulerRotation(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
+    SdfMotionKeyInterval keyInterval;
+    volatile f32 angles[4] __attribute__((aligned(16)));
+    SdfDrawNode *drawNode;
+    f32 (*matrix)[4];
+
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
+    EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
+    EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
+    VU0_LERP_VF10_CLEAR_W(keyInterval.weight);
+    VU0_STORE_VF(vf10, (f32 *)angles);
+    sdfConvertEulerAnglesToQuaternionVU(angles[0], angles[1], angles[2]);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, binding->capturedVector);
+    effMiscQuaternionNlerpVU(blendWeight);
+    drawNode = binding->node;
+    VU0_STORE_VF(vf10, drawNode->quaternion);
+    matrix = drawNode->localMatrix;
+    effMiscQuaternionToMatrixVU();
+    VU0_STORE_VF_UNCLOBBERED(vf28, matrix[0]);
+    VU0_STORE_VF_UNCLOBBERED(vf29, matrix[1]);
+    VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
+}
 
 SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
