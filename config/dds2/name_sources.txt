@@ -4239,6 +4239,7 @@
 0x0026F008	mnuDrawMantraCostBadge	inferred	draws a button glyph from a 9-byte table plus a formatted number right-aligned by strlen
 0x0026F138	mnuDrawMantraCostIcon	inferred	cost-record icon index selects marker glyph [names_R_FuncNames.tsv]
 0x0026F190	mnuDrawMantraCostIconOffset	inferred	cost-record icon index selects marker plus eight [names_R_FuncNames.tsv]
+0x0026F1F0	mnuDrawMantraSelectionTransitionNode	inferred	Called for each queued MantraDisplayNode by mnuDrawMantraSelectionListAndCost; draws the node's timed selection transition, advances its frame, and reports completion so the caller can release it. Its frame and transition-kind branches drive the cost badge, icon, and transition sprites.
 0x0026F5B0	mnuReleaseDisplayListNodeAndGetNext	inferred	Reads the node's next link, calls the allocator's release routine, and returns the saved link.
 0x0026F5D8	mnuInitMantraListEntries	inferred	zeros list, copies at most eight entries and index [names_R_FuncNames.tsv]
 0x0026F680	mnuQueueMantraSelectionTransition	inferred	Appends a display transition node from the previous entry to the newly selected entry unless unchanged.

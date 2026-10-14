@@ -764,8 +764,8 @@ void mnuDrawMantraCostIconOffset(u32 unusedX, u32 unusedY, u32 depth, u32 record
     mnuDrawMantraSprite(0, 0, depth, amount, markers[index] + 8, 0, drawArg);
 }
 
-extern s32 func_0026F1F0(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 index, s32 drawArg);
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F1F0);
+extern s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 index, s32 drawArg);
+INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraSelectionTransitionNode);
 
 MantraDisplayNode *mnuAllocateDisplayListNode(void) {
     MantraDisplayNode *node = (MantraDisplayNode *)sdfAllocSizeClassBlock(sizeof(MantraDisplayNode));
@@ -919,7 +919,7 @@ s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraListState *
         return 1;
     }
     do {
-        if (func_0026F1F0(x, y, depth, node, index, drawArg) != 0) {
+        if (mnuDrawMantraSelectionTransitionNode(x, y, depth, node, index, drawArg) != 0) {
             node = mnuReleaseDisplayListNodeAndGetNext(node);
             state->head = node;
         } else {
