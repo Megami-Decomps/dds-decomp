@@ -180,7 +180,7 @@ extern FieldEncounterRequest D_003BAC08;
 
 extern void fldResetEventSceneState(void);
 
-extern s32 func_0014D100(void);
+extern s32 fldGetEncounterSelection(void);
 
 extern void fldResetTaskSlots(void);
 
@@ -1749,7 +1749,7 @@ s32 fldAdvanceToNextScene(void) {
 
     fldResetEventSceneState();
     D_003BAC08.tableIndex = 0;
-    D_003BAC08.encounterSelection = func_0014D100();
+    D_003BAC08.encounterSelection = fldGetEncounterSelection();
     scene = fldAreaState.floor;
     area = fldAreaState.area;
     fldAreaState.nextArea = area;
