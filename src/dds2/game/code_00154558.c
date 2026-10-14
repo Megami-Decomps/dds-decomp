@@ -1463,7 +1463,7 @@ u32 func_00156AA8(void) {
     return 1;
 }
 
-u32 func_00156AD0(void) {
+u32 fldCmdConfigureCameraMoveTracking(void) {
     u64 first;
     u64 second;
 

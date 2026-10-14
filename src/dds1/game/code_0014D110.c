@@ -1221,7 +1221,7 @@ u32 func_0014EFE8(void) {
     return 1;
 }
 
-u32 func_0014F010(void) {
+u32 fldCmdConfigureCameraMoveTracking(void) {
     s32 first;
     s32 second;
 
