@@ -11,7 +11,7 @@
 
 
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
 
@@ -146,7 +146,7 @@ s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
 s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
@@ -213,7 +213,7 @@ s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
 s32 mnuAdvanceStatAssignmentPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
@@ -271,7 +271,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
 s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 

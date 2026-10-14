@@ -464,7 +464,7 @@ s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *object) {
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028A1D0);
 
-extern void func_0026C900(MnuStatusResource *);
+extern void dspRequestMessageWindowModeOne(MnuStatusResource *);
 extern s32 mnuUpdateMantraPanelVisualState(s32, s32, s32, s32, MnuStatusResource *, s32);
 extern s32 func_00293DB0(MnuStatusResource *);
 extern s32 mnuUpdateMantraPanelStatusFromFlags(s32, s32, s32, s32, MnuStatusResource *, s32);
@@ -473,7 +473,7 @@ s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *object) {
     MantraMenuWork *work;
     f32 ratio;
 
-    func_0026C900(object);
+    dspRequestMessageWindowModeOne(object);
     work = &object->menu;
     switch (work->drawBits.mode) {
     case 2:

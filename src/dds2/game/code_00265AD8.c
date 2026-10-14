@@ -13,7 +13,7 @@
 
 
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 typedef struct EventCallbackContext {
     u8 pad00[0xC];
@@ -254,7 +254,7 @@ s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
 s32 evtSetupDispatchSyncI(KwlnTask *callback) {
     s32 eventContext = kwlnTaskGetUserValue(callback);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
 }
 
@@ -296,7 +296,7 @@ s32 func_00265FE8(KwlnTask *callback) {
 
 s32 evtAdvanceTerminalMenuMessage(KwlnTask *callback) {
     s32 eventContext = kwlnTaskGetUserValue(callback);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
 }
 

@@ -47,7 +47,7 @@ extern s32 dspWindowHandle;
 
 extern s8 dspWindowControlState;
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 extern s32 D_00437888;
 
@@ -396,7 +396,7 @@ void func_0026C8E8(u32 value) {
 }
 
 /* Request value one from the existing mode-one message-window worker. */
-void func_0026C900(void) {
+void dspRequestMessageWindowModeOne(void) {
     func_0026C8E8(1);
 }
 

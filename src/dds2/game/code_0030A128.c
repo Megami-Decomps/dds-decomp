@@ -72,7 +72,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 extern void dds3SetWorldObject(void *);
 #include "dds3_world_secondary.h"
@@ -844,7 +844,7 @@ s32 fldLmapToggleOverlay(void) {
     s32 result = 0;
 
     if (evtGetMessageWindowControlState() != 0) {
-        func_0026C900();
+        dspRequestMessageWindowModeOne();
     } else {
         evtFinishMessageWindowAndNotify();
         result = 1;

@@ -2487,7 +2487,7 @@ extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 extern u8 D_003CE4B4[];
 
@@ -2660,7 +2660,7 @@ s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSync(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -2787,7 +2787,7 @@ s32 evtStageDispatchStart(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSyncB(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -2904,7 +2904,7 @@ s32 evtStageDispatchStartB(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSyncC(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3024,7 +3024,7 @@ s32 evtStageDispatchStartC(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSyncD(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3128,7 +3128,7 @@ s32 mnuRunCampCommandPrimaryTransition(KwlnTask *callbackContext) {
 
 s32 mnuRunCampCommandSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3192,7 +3192,7 @@ s32 evtStartProgressResultPrimaryTransition(KwlnTask *callbackContext) {
 
 s32 evtStartProgressResultSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3224,7 +3224,7 @@ s32 mnuStartTerminalPanelPrimaryTransition(KwlnTask *callbackContext) {
 
 s32 mnuStartTerminalPanelSecondaryTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3267,7 +3267,7 @@ s32 evtDispatchProgressCallback(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSyncE(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3378,7 +3378,7 @@ s32 evtAlignDispatchStart(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3581,7 +3581,7 @@ s32 evtDispatchSceneReadyFollowup(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3683,7 +3683,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
 
 s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3829,7 +3829,7 @@ s32 evtDrawPendingRewardTransition(KwlnTask *callbackContext) {
 
 s32 evtAdvancePendingRewardMessage(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3885,7 +3885,7 @@ s32 evtDrawSlotAdvanceTransition(KwlnTask *callbackContext) {
 
 s32 evtAdvanceSlotAdvanceMessage(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -3952,7 +3952,7 @@ s32 evtDrawProgressGateTransition(KwlnTask *callbackContext) {
 
 s32 evtAdvanceProgressGateMessage(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
@@ -4014,7 +4014,7 @@ void mnuSetFlagForMenuEntry(s32 index) {
 
 
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 
@@ -4238,7 +4238,7 @@ s32 evtDrawGrantedRewardTransition(KwlnTask *callback) {
 
 s32 evtAdvanceGrantedRewardMessage(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return evtMenuSetHandler((void *)context, 2, (void *)callback);
 }
 

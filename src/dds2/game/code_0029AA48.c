@@ -11,7 +11,7 @@ extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 
 extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
@@ -112,7 +112,7 @@ s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
     }
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(context, 2, (void *)request);
 }
 

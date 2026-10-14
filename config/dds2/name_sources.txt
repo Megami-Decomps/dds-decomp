@@ -8877,3 +8877,4 @@
 0x00131B50	fldUpdateModeOneCameraPose	inferred	When positionMode is 1, updates field player camera position and heading, smooths position, and refreshes area state through fldRefreshAreaStateFromPosition; called by fldUpdateCameraFrame. Paired DDS1 0x0012F578.
 0x00300578	effEditColorTrack	inferred	Paired with DDS1 effEditColorTrack; ASM helper called by effect color/alpha track callbacks and uses the active mapping options.
 0x003018C8	effEditScalarTrack	inferred	Paired with DDS1 effEditScalarTrack; scale, rotation, and area callbacks route scalar property curves through this editor and its active option tables.
+0x0026C900	dspRequestMessageWindowModeOne	inferred	Paired DDS1 0x0024DD78 role: requests message-window mode one; DDS2 wrapper passes notification value 1 to its mode-one control worker, matching the DDS1 wrapper request.

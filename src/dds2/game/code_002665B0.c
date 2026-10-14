@@ -1687,7 +1687,7 @@ void mnuApplyGridPanelHostSetting(u32 kind, MenuSlotState *host) {
 
 
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 
@@ -1898,7 +1898,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(KwlnTask *request) {
 s32 evtBSetupDispatchSync(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
@@ -1968,7 +1968,7 @@ s32 evtBDispatchStart(KwlnTask *request) {
 s32 evtBSetupDispatchSyncB(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
@@ -2050,7 +2050,7 @@ s32 mnuUpdateAndDrawTerminalScene(KwlnTask *request) {
 s32 evtBSetupDispatchSyncC(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
@@ -2164,7 +2164,7 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *request) {
 s32 evtBSetupDispatchSyncD(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
@@ -2220,7 +2220,7 @@ s32 mnuBeginTerminalExitTransition(KwlnTask *request) {
 s32 evtBSetupDispatchSyncE(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
@@ -2371,7 +2371,7 @@ s32 mnuDrawTerminalSelectionPanel(KwlnTask *request) {
 s32 evtBSetupDispatchSyncF(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 
@@ -2421,7 +2421,7 @@ s32 mnuPrepareDispatchStateAndBindHandler(KwlnTask *request) {
 s32 evtBSetupDispatchSyncG(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
 
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler(state, 2, (void *)request);
 }
 

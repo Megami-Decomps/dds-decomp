@@ -349,7 +349,7 @@ extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 
 
 
-extern void func_0026C900(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 extern void *memset(void *, s32, u32);
@@ -443,7 +443,7 @@ s32 mnuAdvanceStaffValuePopup(KwlnTask *callback) {
 
 s32 mnuFinishStaffValuePopup(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
@@ -502,7 +502,7 @@ s32 mnuStartPanelDispatch(KwlnTask *callback) {
 
 s32 mnuStartPanelExit(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
@@ -570,7 +570,7 @@ s32 mnuAdvancePartyClearPopup(KwlnTask *callback) {
 
 s32 mnuFinishPartyClearPopup(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_0026C900();
+    dspRequestMessageWindowModeOne();
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
