@@ -3728,24 +3728,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
     }
 }
 
-/* Share the policy rejection; see docs/idioms.md, "Shared rejection blocks: battle command availability". */
-s32 func_001B1090(BtlUnit *unit, s32 command) {
-    BtlState *runtime = btlGetRuntime();
-
-    if (runtime->commandAvailabilityOverride != NULL) {
-        if (runtime->commandAvailabilityOverride(unit, command) == 0) {
-            return 0;
-        }
-    }
-    if ((unit->status.flags & 0x200) && datCommandSelectors[command].kind == 5) {
-        if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
-            return 1;
-        }
-    } else if (datCommandRecords[command].unk_0A[1] == 1) {
-        return 1;
-    }
-    return 0;
-}
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001B1090);
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
                    BtlTargetResult *results, s32 command) {
