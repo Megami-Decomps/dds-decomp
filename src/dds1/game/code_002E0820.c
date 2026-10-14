@@ -935,7 +935,7 @@ u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttrib
 /* Build a one-vertex VIF packet for a two-texture quad: the position, both
  * colors, the interleaved primary/secondary UV corners (copied as unaligned
  * words) and the eight quad corner coordinates. */
-void func_002E2A00(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
+void sdfBuildTwoTextureQuadVifPacket(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
                    const void *primaryUv, const void *secondaryUv, const f32 *quad) {
     *(u16 *)packet = 8;
     *(u32 *)(packet + 8) = 0x6C01C000;

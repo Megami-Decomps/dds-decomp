@@ -597,7 +597,7 @@ typedef char EffCompositeGsDescriptor_size_must_be_0x68[
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
-extern void func_0033B8B0(u8 *, const f32 *, u32, u32,
+extern void sdfBuildTwoTextureQuadVifPacket(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
 void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *source) {
@@ -719,7 +719,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     }
 
     geometry = (u8 *)sdfAllocPacketAligned(0x90);
-    func_0033B8B0((u8 *)geometry, source->position, source->color, source->color,
+    sdfBuildTwoTextureQuadVifPacket((u8 *)geometry, source->position, source->color, source->color,
                   &source->primaryUv, &source->secondaryUv, &corners[0][0]);
     sdfAppendPacket(list, (u32)geometry);
 
