@@ -7,6 +7,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
+#include "eff_param.h"
 #include "kwln_sprite.h"
 
 #include "pcp_vu0.h"
@@ -608,9 +609,80 @@ void sndUnlinkVoice(BattleEffect *voice) {
     }
 }
 
+extern f32 func_001696B8(struct BtlUnit *unit);
+
+/* Create a voice on the mixer bank selected by kind (0/1: first bank, 2+:
+ * second): link it into the mixer, duplicate each parameter row's work (with
+ * the optional unit-scale callback) and count it as active. */
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414430);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", effCreateBattleVoiceOwner);
+BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value) {
+    EffBattleEntryList *bank;
+    EffBattleEntryList *parameters;
+    BattleEffect *effect;
+    EffBattleEntry *entry;
+    struct EffParamWork **workSlot;
+    s32 remaining;
+    u16 entryCount;
+    u32 callbackEnabled;
+
+    effect = sdfAllocSizeClassBlock(sizeof(BattleEffect));
+    memset(effect, 0, sizeof(BattleEffect));
+    effect->color = 0x80808080;
+
+    {
+        EffBattleEntryList *upper = &mixer->banks[1].list;
+        EffBattleEntryList *lower = &mixer->banks[0].list;
+
+        bank = kind < 2 ? lower : upper;
+    }
+    effect->next = mixer->voiceList;
+    effect->flags = 0xE;
+    effect->triggerFrame = bank->triggerFrame;
+    mixer->voiceList = effect;
+    effect->state = mixer;
+    effect->kind = kind;
+    effect->list = bank;
+    if (kind == 2) {
+        effect->colorRampEndFrame = bank->triggerFrame;
+    } else {
+        effect->colorRampEndFrame = bank->colorRampEndFrame;
+    }
+    effect->unk20 = value;
+    effect->owner = owner;
+
+    parameters = effect->list;
+    entry = parameters->entries;
+    workSlot = effect->parameterWorks;
+    entryCount = parameters->count;
+    callbackEnabled = parameters->actorScaleEnabled;
+    if (entryCount != 0) {
+        remaining = entryCount;
+        do {
+            if (entry->paramKind != 0xFFFE) {
+                *workSlot = effParamWorkDuplicate(entry->value.work);
+                if (callbackEnabled != 0 && owner != NULL &&
+                    (entry->aimParams.scaleKind == 0 || entry->aimParams.scaleKind == 4)) {
+                    f32 scale = func_001696B8((struct BtlUnit *)effect->owner);
+                    effParamWorkCallback1(*workSlot, scale);
+                }
+            } else {
+                *workSlot = NULL;
+            }
+
+            workSlot++;
+            entry++;
+            remaining--;
+        } while (remaining != 0);
+    }
+
+    effect->currentFrame = 0;
+    sdfDebugPrintf("effBTL:cut %d handle create(%p)[%d]\n",
+                  effect->kind, effect->state,
+                  effect->state->active);
+    effect->state->active++;
+    return effect;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414478);
 
