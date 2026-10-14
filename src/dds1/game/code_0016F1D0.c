@@ -41,8 +41,6 @@
 #define EFF_DIRECT_SURFACE_COUNT 4
 
 
-extern void *effParamTableGetBlock(void *table, s32 index);
-
 extern void effReleaseRingRecordPool(EffRecordPool *pool);
 
 extern u32 effMultiplyPackedColors(u32 color, u32 param);
