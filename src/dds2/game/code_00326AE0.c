@@ -23,7 +23,7 @@ extern void (*sdfTickCallback)(void);
 
 extern f32 sdfVec3DotNormalized(void *, void *);
 
-extern f32 func_003532B8(f32);
+extern f32 acosf(f32);
 
 extern f64 cos(f64);
 
@@ -34,7 +34,7 @@ extern f64 func_003532A0(f64);
 extern void *memcpy(void *, const void *, u32);
 
 f32 sdfVec3AngleBetween(void *a, void *b) {
-    return func_003532B8(sdfVec3DotNormalized(a, b));
+    return acosf(sdfVec3DotNormalized(a, b));
 }
 
 void sdfCrossNormalizedVectors(float *out, float *left, float *right) {

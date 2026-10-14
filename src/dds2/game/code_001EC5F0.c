@@ -1059,7 +1059,7 @@ INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EEB78);
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EF030);
 
-extern f32 func_003532B8(f32);
+extern f32 acosf(f32);
 extern f32 cosf(f32);
 extern f32 sinf(f32);
 /* vu0 routine: fit the action camera around one target and its reach. */
@@ -1111,7 +1111,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
     VU0_LENGTH_VF10(secondLength);
     VU0_MOVE_VF(vf11, vf12);
     VU0_DOT_XYZ(dot, vf10, vf11);
-    angle = func_003532B8(dot / (firstLength * secondLength));
+    angle = acosf(dot / (firstLength * secondLength));
     t = span * cosf(angle);
     distance = t / tanf(halfFov);
     distance += t * tanf(angle);

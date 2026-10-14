@@ -95,8 +95,8 @@ extern s32 D_003BC87C;
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
-extern f32 func_002FA1C0(f32);
-extern f32 func_002FA1F0(f32, f32);
+extern f32 acosf(f32);
+extern f32 atan2f(f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 
@@ -5051,9 +5051,9 @@ void camAimRotation(CamAim *obj, void *dst)
     VU0_STORE_VF(vf10, v);
     pitch = 0.0f;
     if ((flags & 0x40) == 0) {
-        pitch = -func_002FA1C0(-v[1]);
+        pitch = -acosf(-v[1]);
     }
-    sdfConvertEulerAnglesToQuaternionVU(pitch, func_002FA1F0(v[0], v[2]), 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(v[0], v[2]), 0.0f);
     if (obj->flags & 0x40) {
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, obj->quat);
@@ -5739,7 +5739,7 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, delta);
     if (delta[0] != 0.0f || delta[1] != 0.0f) {
-        out->angle = func_002FA1F0(delta[1], delta[0]);
+        out->angle = atan2f(delta[1], delta[0]);
     }
     VU0_MOVE_VF(vf28, vf20);
     VU0_MOVE_VF(vf29, vf21);
