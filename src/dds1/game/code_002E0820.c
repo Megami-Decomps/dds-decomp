@@ -952,7 +952,46 @@ u32 sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAtt
     return (u32)packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E0820", func_002E2DE8);
+/* Build a one-vertex textured-quad VIF packet with four corner colors: the
+ * position, colors, UV corners (copied as unaligned words) and the eight quad
+ * corner coordinates. */
+void func_002E2DE8(u8 *packet, const f32 *position, const u32 *colors, const void *uv, const f32 *quad) {
+    *(u16 *)packet = 8;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xD0000000;
+    *(u32 *)(packet + 20) = 0x34134130;
+    *(u32 *)(packet + 24) = 0x41341;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E04C003;
+    *(u32 *)(packet + 56) = colors[0];
+    *(u32 *)(packet + 60) = colors[1];
+    *(u32 *)(packet + 64) = colors[2];
+    *(u32 *)(packet + 68) = colors[3];
+    *(u32 *)(packet + 72) = 0x6504C007;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)uv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)uv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)uv + 12);
+    *(u32 *)(packet + 92) = 0x6404C00B;
+    *(f32 *)(packet + 96) = quad[0];
+    *(f32 *)(packet + 100) = quad[1];
+    *(f32 *)(packet + 104) = quad[2];
+    *(f32 *)(packet + 108) = quad[3];
+    *(f32 *)(packet + 112) = quad[4];
+    *(f32 *)(packet + 116) = quad[5];
+    *(f32 *)(packet + 120) = quad[6];
+    *(f32 *)(packet + 124) = quad[7];
+    *(u32 *)(packet + 128) = 0x04000006;
+    *(u32 *)(packet + 132) = 0x14000008;
+    *(u32 *)(packet + 136) = 0;
+    *(u32 *)(packet + 140) = 0;
+}
 
 /* Preserve the native 76-byte-record formula and 16-byte alignment rounding. */
 u32 sdfMeasureAlignedRecordStorage(s32 count) {
