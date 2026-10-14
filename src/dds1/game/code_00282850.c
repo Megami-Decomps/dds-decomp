@@ -1204,7 +1204,7 @@ s32 mnuHasPopupSelectionFlag(s32 *flags) {
     return (*flags & 0x200000) > 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00285670);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDispatchPopupTransition);
 
 /* Compare the popup state's current entry address, not an entry payload value. */
 

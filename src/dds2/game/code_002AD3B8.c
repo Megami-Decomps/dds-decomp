@@ -127,7 +127,7 @@ s32 mnuStaffImageInputA(KwlnTask *task) {
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
 
-    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
+    state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -178,7 +178,7 @@ s32 mnuPollStaffSlotSelectionConfirmation(KwlnTask *task) {
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
 
-    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
+    state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -229,7 +229,7 @@ s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
 
-    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
+    state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -289,7 +289,7 @@ s32 mnuHandleSecondaryStaffObjectInput(KwlnTask *task) {
     s32 state;
     MenuWindowContainer *object;
 
-    state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
+    state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -354,7 +354,7 @@ s32 mnuStaffUseSelectedItemTask(KwlnTask *task) {
     s32 state;
     MenuPageWindow *party;
 
-    state = func_002C4038(&context->transitionWork, popup, 0, (void *)task);
+    state = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
@@ -553,7 +553,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
         &datGameState->party[context->partyWindow.lists[0]->cursor->index];
     MenuWindowContainer *countWindow;
 
-    state = func_002C4038(&context->transitionWork, popup, 0, task);
+    state = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, task);
     if (state != 0) {
         return state;
     }

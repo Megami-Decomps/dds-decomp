@@ -1828,7 +1828,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
     struct MenuListNode *node;
     s32 result;
 
-    result = func_002C4038(&context->transitionWork, state, 0, input);
+    result = mnuDispatchPopupTransition(&context->transitionWork, state, 0, input);
     if (result != 0) {
         return result;
     }
@@ -1938,7 +1938,7 @@ extern void fileStartMemoryCardMenuForMode(s32 mode);
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
     s32 *dispatch = &state->dispatchStatus;
-    s32 result = func_002C4038(&state->transitionWork, dispatch, 0, request);
+    s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
     if (result != 0) {
         return result;
@@ -2010,7 +2010,7 @@ s32 mnuUpdateTerminalSelectionInput(KwlnTask *request) {
     MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(request);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &context->dispatchStatus;
-    s32 result = func_002C4038(&context->transitionWork, dispatch, 0, request);
+    s32 result = mnuDispatchPopupTransition(&context->transitionWork, dispatch, 0, request);
 
     if (result != 0 || context->secondaryList->scale < 0x100) {
         return result;
@@ -2083,7 +2083,7 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *task) {
     MenuSlotState *host = (MenuSlotState *)kwlnTaskGetUserValue(task);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &host->dispatchStatus;
-    s32 result = func_002C4038(&host->transitionWork, dispatch, 0, task);
+    s32 result = mnuDispatchPopupTransition(&host->transitionWork, dispatch, 0, task);
     MenuListNode *node;
     MenuThresholdEntry *entry;
 
@@ -2180,7 +2180,7 @@ u32 evtSelectFinalVisualNode(KwlnTask *task) {
 s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     s32 *panel = (s32 *)(state + 0x54);
-    s32 result = func_002C4038((u8 *)state + 8, panel, 0, (void *)request);
+    s32 result = mnuDispatchPopupTransition((u8 *)state + 8, panel, 0, (void *)request);
     if (result != 0) {
         return result;
     }
@@ -2268,7 +2268,7 @@ extern char D_003CE848[];
 s32 evtPollDispatchAfterFade(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
     s32 *dispatch = &state->dispatchStatus;
-    s32 result = func_002C4038(&state->transitionWork, dispatch, 0, request);
+    s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
     if (result == 0) {
         if (kwlnFadeIsActive() == 0) {
             if (state->fadeStarted == 0) {
@@ -2338,7 +2338,7 @@ extern char D_003CE928[];
 s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
     s32 *dispatch = &state->dispatchStatus;
-    s32 result = func_002C4038(&state->transitionWork, dispatch, 0, (void *)request);
+    s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, (void *)request);
 
     if (result == 0) {
         /* Choose the follow-up only after menu and message-window work is idle. */
@@ -2398,7 +2398,7 @@ s32 evtBContinueDispatchOrRestoreTable(KwlnTask *request) {
 
     state = (MenuSlotState *)kwlnTaskGetUserValue(request);
     dispatch = &state->dispatchStatus;
-    result = func_002C4038(&state->transitionWork, dispatch, 0, request);
+    result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
     if (result != 0) {
         return result;
     }
@@ -2463,7 +2463,7 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
 s32 evtBStartSelectionChainAfterFade(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
     s32 *dispatch = &state->dispatchStatus;
-    s32 result = func_002C4038(&state->transitionWork, dispatch, 0, request);
+    s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
     if (result == 0) {
         if (*dispatch == 0 && fldClassifyRemainingFrames((void *)state) == 0) {
@@ -2545,7 +2545,7 @@ s32 evtWaitForTerminalExitPopup(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
     s32 *dispatch = &state->dispatchStatus;
     s32 ready = 0;
-    s32 result = func_002C4038(&state->transitionWork, dispatch, 0, request);
+    s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
     if (result != 0) {
         return result;

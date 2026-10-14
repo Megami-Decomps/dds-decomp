@@ -126,7 +126,7 @@ s32 prfCapTaskStep(KwlnTask *request) {
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 *dispatchStatus = &scene->transition.state;
 
-    result = func_00285670(&scene->transition.data, dispatchStatus, 0, request);
+    result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, request);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
             (result = evtGetMessageWindowControlState(), result == 0)) {
@@ -281,7 +281,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;
-    result = func_00285670(&scene->transition.data, dispatchStatus, 0, request);
+    result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, request);
     if (result != 0) {
         return result;
     }

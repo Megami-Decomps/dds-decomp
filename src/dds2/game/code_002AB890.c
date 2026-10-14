@@ -491,7 +491,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
     popup = &context->popupState;
     resources = (MenuStaffChoices *)context->menu;
     input = mnuMapPadMaskToFlags(0x33);
-    result = func_002C4038(&context->transitionWork, popup, 0, callback);
+    result = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, callback);
     if (result != 0) {
         return result;
     }
@@ -631,7 +631,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
     resources = (MenuStaffChoices *)context->menu;
     popup = &context->popupState;
     input = mnuMapPadMaskToFlags(0xC33);
-    result = func_002C4038(&context->transitionWork, popup, 0, callback);
+    result = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, callback);
     if (result != 0) {
         return result;
     }

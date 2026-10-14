@@ -59,7 +59,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     context = (MenuStaffContext *)kwlnTaskGetUserValue(callback);
     input = mnuMapPadMaskToFlags(0x33);
     popup = &context->popupState;
-    state = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
+    state = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -153,7 +153,7 @@ u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
 s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     s32 *dispatchEntry = &((MenuStaffContext *)context)->popupState;
-    s32 state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, dispatchEntry, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, dispatchEntry, 0, (void *)callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, D_003E7034);

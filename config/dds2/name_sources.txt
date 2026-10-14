@@ -4030,7 +4030,7 @@
 0x00263658	mnuStartTerminalPanelPrimaryTransition	inferred	Terminal-panel transition callback draws the shop panel and command transition, then installs the primary operation handler. [high-volume naming lane, 2026-10-14]
 0x002636B0	mnuStartTerminalPanelSecondaryTransition	inferred	Terminal-panel transition callback advances the secondary operation and installs its handler. [high-volume naming lane, 2026-10-14]
 0x002636F8	evtResetStateProgressTimer	inferred	Clears the context's progress timer and submits its primary scene object's child to func_002B8988.
-0x002637E0	evtDispatchProgressCallback	inferred	Passes the context's progress timer to mnuDrawSpriteMenuFadeOut before dispatching the callback through func_002C4038.
+0x002637E0	evtDispatchProgressCallback	inferred	Passes the context's progress timer to mnuDrawSpriteMenuFadeOut before dispatching the callback through mnuDispatchPopupTransition.
 0x00263880	evtApplyBaseRateProgressStep	inferred	Sets the progress multiplier to one and advances the camp counter once. [names_reviewed15.tsv]
 0x00263920	evtPollQuantitySelection	inferred	U3
 0x00263B98	evtAlignDispatchStart	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3329; Calls func_0025FD78, draws the command-close phase and installs the primary event handler. DDS1 twin 0x002470F8.
@@ -8869,3 +8869,4 @@
 0x00243C68	evtDrawSolarOverlayMarker	inferred	Draws the fixed 14-point solar overlay marker as a colored triangle fan; the leading vertex alpha derives from intensity.
 0x00243DB8	evtDrawSolarOverlayShapeWithScaledAlpha	inferred	Loads the indexed SolarOverlayShape, scales its vertex alpha values, draws its triangle fan, and restores the GS alpha state.
 0x0019F5E8	itfCreateFont2TextGlyph	inferred	Paired with 0x001978E8: prepends the default glyph chain, builds font-index-2 text, applies spacing -1, then sets position, render depth, and child colors. UI callers pass text and an optional prior glyph chain.
+0x002C4038	mnuDispatchPopupTransition	inferred	Dispatches popup transition actions and callbacks while maintaining the popup entry stack; paired with DDS1 0x00285670. The matching 0x268-byte body, shared transition helpers, and cross-title caller pattern confirm the role.

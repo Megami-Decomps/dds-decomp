@@ -1703,7 +1703,7 @@ s32 mnuCampConsumePanelTaskCompletion(void) {
 }
 
 static inline s32 campSetHandler(MenuTerminalContext *context, s32 mode, void *callback) {
-    return func_002C4038(&context->transitionWork, &context->popupState, mode, callback);
+    return mnuDispatchPopupTransition(&context->transitionWork, &context->popupState, mode, callback);
 }
 
 s32 mnuPreparePopupAndDispatchSelection(KwlnTask *callback) {
@@ -2578,7 +2578,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
     inputFlags = mnuMapPadMaskToFlags(0x33);
     window = state->ownedWindows[0];
     list = window->list;
-    dispatchResult = func_002C4038(&state->transitionWork, &state->popupState, 0,
+    dispatchResult = mnuDispatchPopupTransition(&state->transitionWork, &state->popupState, 0,
                                    task);
     if (dispatchResult != 0) {
         return dispatchResult;
@@ -2710,7 +2710,7 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
     window = state->window;
     list = window->list;
     cursor = list->cursor;
-    dispatchResult = func_002C4038(&state->transitionWork, &state->popupState,
+    dispatchResult = mnuDispatchPopupTransition(&state->transitionWork, &state->popupState,
                                    EVT_DISPATCH_OPERATION_POLL, task);
     if (dispatchResult != 0) {
         return dispatchResult;
@@ -2836,7 +2836,7 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
     dispatchSlot = &state->popupState;
     linkedList = state->window->list;
     cursor = linkedList->cursor;
-    dispatchResult = func_002C4038(&state->transitionWork, dispatchSlot, 0, task);
+    dispatchResult = mnuDispatchPopupTransition(&state->transitionWork, dispatchSlot, 0, task);
     if (dispatchResult == 0) {
         switch (mnuTickExtendedCommandPhase(state)) {
         case -1:
@@ -2953,7 +2953,7 @@ s32 mnuShopPollRangeFilteredCommandSelection(KwlnTask *callbackContext) {
     list = state->window->list;
     selected = list->cursor;
     popup = &state->popupState;
-    result = func_002C4038(&state->transitionWork, popup,
+    result = mnuDispatchPopupTransition(&state->transitionWork, popup,
                           EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (result != 0) {
         return result;
@@ -3070,7 +3070,7 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
     inputFlags = mnuMapPadMaskToFlags(0xC33);
     dispatchSlot = &state->popupState;
     linkedList = state->window->list;
-    dispatchResult = func_002C4038(&state->transitionWork, dispatchSlot, 0, task);
+    dispatchResult = mnuDispatchPopupTransition(&state->transitionWork, dispatchSlot, 0, task);
     if (dispatchResult == 0) {
         switch (mnuTickExtendedCommandPhase(state)) {
         case -1:
@@ -3174,7 +3174,7 @@ u32 func_00263378(void) {
 s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
+    s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
@@ -3206,7 +3206,7 @@ u32 func_002635E0(void) {
 s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
+    s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
@@ -3242,7 +3242,7 @@ u32 evtResetStateProgressTimer(KwlnTask *task) {
 s32 evtQueryStateProgress(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
+    s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -3303,7 +3303,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
     CampWindowParams *values =
         &((MenuTerminalContext *)stateAddress)->window->list->cursor->camp;
     s32 input = mnuMapPadMaskToFlags(0xF000F3);
-    s32 result = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot,
+    s32 result = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot,
                              EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
 
     if (result != 0) {
@@ -3537,7 +3537,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
     MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 *dispatchSlot = &state->popupState;
     s32 operation;
-    s32 result = func_002C4038(&state->transitionWork, dispatchSlot,
+    s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatchSlot,
                              EVT_DISPATCH_OPERATION_POLL, task);
 
     if (result != 0) {
@@ -3623,7 +3623,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
 
     stateAddress = kwlnTaskGetUserValue(callbackContext);
     dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    result = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
+    result = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
         if ((*dispatchSlot == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
             mnuSetPopupEntryFlagged(dispatchSlot, (void *)((MenuTerminalContext *)stateAddress)->stateTable);
@@ -3759,7 +3759,7 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
 
     state = (MenuTerminalContext *)kwlnTaskGetUserValue(callbackContext);
     dispatchSlot = &state->popupState;
-    result = func_002C4038(&state->transitionWork, dispatchSlot,
+    result = mnuDispatchPopupTransition(&state->transitionWork, dispatchSlot,
                          EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (result == 0) {
         if (*dispatchSlot == 0 &&
@@ -3865,7 +3865,7 @@ u32 func_00264C58(void) {
 s32 evtOpenSlotAdvancePopupWhenIdle(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
+    s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -3930,7 +3930,7 @@ u32 func_00264EF8(void) {
 s32 evtTriggerProgressGateThenOpenPopup(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
-    s32 dispatchResult = func_002C4038(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
+    s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -4088,7 +4088,7 @@ u32 func_002652D8(void) {
 s32 evtMenuPollWindow(KwlnTask *callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
     s32 *window = &context->popupState;
-    s32 state = func_002C4038(&context->transitionWork, window, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&context->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
@@ -4168,7 +4168,7 @@ s32 evtMenuUpdateProgressRewardPopup(KwlnTask *callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
     s32 slotIndex = mnuSelectUnclaimedProgressRewardTier();
     s32 *popup = &context->popupState;
-    s32 dispatch = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
+    s32 dispatch = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, (void *)callback);
     s32 choice;
 
     if (dispatch != 0) {

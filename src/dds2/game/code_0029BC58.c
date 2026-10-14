@@ -129,7 +129,7 @@ s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
     s32 result;
 
     evtStageTestUpdateCamera();
-    result = func_002C4038(&panel->transition, &panel->transition.state, 0, request);
+    result = mnuDispatchPopupTransition(&panel->transition, &panel->transition.state, 0, request);
     if (result != 0) {
         return result;
     }

@@ -102,7 +102,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
     s32 allowed;
     s32 result;
 
-    result = func_002C4038(&state->transitionWork, dispatchSlot,
+    result = mnuDispatchPopupTransition(&state->transitionWork, dispatchSlot,
                           0, task);
     if (result == 0) {
         if (*dispatchSlot == 0) {
@@ -273,7 +273,7 @@ extern u8 D_003CE690[];
 s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     s32 *window = (s32 *)(context + 0x58);
-    s32 state = func_002C4038(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
 
     if (state == 0) {
         if (*window == 0) {
@@ -317,7 +317,7 @@ u32 evtStartFadeOut(void) {
 s32 mnuWaitForFadeBeforePopup(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     s32 *window = (s32 *)(context + 0x58);
-    s32 state = func_002C4038(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
+    s32 state = mnuDispatchPopupTransition(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
         if (*window == 0) {
             if (kwlnFadeIsActive() == 0) {
