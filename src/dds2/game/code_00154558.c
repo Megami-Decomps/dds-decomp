@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "fld_scene_status_api.h"
 #include "evt_solar.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
@@ -21,7 +22,6 @@ struct EvtUnit;
 
 struct SdfTex;
 
-extern s32 fldGetSceneStatusCode(void);
 
 extern void fldSetTitleBannerChoice(s32);
 

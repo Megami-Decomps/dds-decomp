@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fld_scene_status_api.h"
 #include "sdf_trig.h"
 #include "fld_scene_record.h"
 #include "dds3_path.h"
