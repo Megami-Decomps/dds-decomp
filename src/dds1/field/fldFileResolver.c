@@ -451,7 +451,7 @@ extern void fldSetCameraObjectHighlightFlag(void);
 extern s32 func_0012FC20(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);
-extern s32 func_0012FF48(void);
+extern s32 fldUpdateFieldPlayerMovement(void);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
 extern void dds3SetCameraFieldOfView(s32, f32);
@@ -4161,7 +4161,7 @@ extern void fldSetCameraObjectHighlightFlag(void);
  * actual stack alignment and every subsequent consumer are audited. */
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0048);
 
-s32 func_0012FF48(void) {
+s32 fldUpdateFieldPlayerMovement(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
     f32 quaternion[4] __attribute__((aligned(16)));
@@ -4611,9 +4611,9 @@ s32 fldUpdateCameraFrame(void) {
     }
     if (D_0032E400[0] == 1) {
         fldClearCameraObjectHighlightFlag();
-        func_0012FF48();
+        fldUpdateFieldPlayerMovement();
     } else {
-        func_0012FF48();
+        fldUpdateFieldPlayerMovement();
     }
     return 0;
 }
