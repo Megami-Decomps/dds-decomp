@@ -4,6 +4,7 @@
 #include "file.h"
 #include "file_slot_flags.h"
 #include "file_request_entry.h"
+#include "file_manager_api.h"
 #include "file_pac.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
@@ -65,7 +66,6 @@ s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
 
 
-s32 fileManUpdate(void);
 
 extern s32 sdfDevQueueControlRequest(DevState *);
 extern s32 sdfDevQueueActiveOperation(DevState *);
