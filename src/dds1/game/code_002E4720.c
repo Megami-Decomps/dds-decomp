@@ -1837,6 +1837,9 @@ void sdfLoadDevModule(void) {
     }
 }
 
+/* Writable device directory; its suffix is replaced by the path setter. */
+char D_00398820[64] = "host0:";
+
 INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4690);
 
 INCLUDE_SDATA(const s32, "game/code_002E4720", D_003BD3C8);
