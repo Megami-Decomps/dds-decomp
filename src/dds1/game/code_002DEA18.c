@@ -110,7 +110,7 @@ void sdfVuMultiplyNodeColors(VuWork *work, u32 color) {
     }
 }
 
-void func_002DEAC0(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
+void sdfVuInterpolateClipVertex(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
     out->sourceA = first;
     out->sourceB = second;
     VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
