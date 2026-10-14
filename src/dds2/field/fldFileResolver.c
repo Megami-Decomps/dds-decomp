@@ -20,6 +20,7 @@
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
@@ -1712,8 +1713,6 @@ extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
                         const SdfTextureOffsetListHeader *, u32);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
-
-extern void fldClearMenuEntries();
 
 extern void fldDestroyTitleTask();
 

@@ -22,6 +22,7 @@
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
@@ -605,7 +606,6 @@ extern s32 fldTaskSlotCount;
 extern s16 D_003C9510[];
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
-extern void fldClearMenuEntries();
 extern void fldDestroyTitleTask();
 extern void fldPlayPendingSounds();
 extern void fldReleaseObjectSlots();
