@@ -435,7 +435,7 @@ extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
 extern void fldSetCameraObjectHighlightFlag(void);
 extern s32 func_0012FC20(void);
-extern void func_0012F578(void);
+extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);
 extern void func_0012FF48(void);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
@@ -3904,12 +3904,12 @@ void fldUpdateCameraTarget(void) {
 extern const PcpVectorCopyF32 D_003A0048;
 extern f32 fldAngleDifference(f32 current, f32 target);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void func_001372D0(f32 *);
+extern void fldRefreshAreaStateFromPosition(f32 *);
 
 /* Follow the selected mode-1 heading while preserving field position history.
  * The four legacy SDK stores are qualified only for this pinned emitted body;
  * each vector consumer and conditional join requires a fresh audit on changes. */
-void func_0012F578(void) {
+void fldUpdateModeOneCameraPose(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
     f32 quaternion[4] __attribute__((aligned(16)));
@@ -3984,7 +3984,7 @@ void func_0012F578(void) {
         current[0] = fldAreaState.x;
         current[1] = fldAreaState.y;
         current[2] = fldAreaState.z;
-        func_001372D0(current);
+        fldRefreshAreaStateFromPosition(current);
         if (fldAreaState.positionPending != 0) {
             fldAreaState.x = fldAreaState.targetX;
             fldAreaState.y = fldAreaState.targetY + 44.0f;
@@ -4194,7 +4194,7 @@ s32 fldUpdateCameraFrame(void) {
         }
         func_0012FC20();
         fldUpdateCameraTarget();
-        func_0012F578();
+        fldUpdateModeOneCameraPose();
         node = fldPlayerModelContext->current.h.motionIndex;
         fldDispatchCameraModelFrameEvents(node, node);
         if (fldAreaState.unk118 == 1) {
@@ -4280,7 +4280,7 @@ s32 fldUpdateCameraObjectPose(void) {
     current[0] = fldAreaState.x;
     current[1] = fldAreaState.y;
     current[2] = fldAreaState.z;
-    func_001372D0(current);
+    fldRefreshAreaStateFromPosition(current);
     if (fldAreaState.positionPending != 0) {
         fldAreaState.x = fldAreaState.targetX;
         fldAreaState.y = fldAreaState.targetY + 44.0f;
@@ -6636,7 +6636,7 @@ void fldApplyRelativeZoneMotion(f32 *position) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00136FE8);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_001372D0);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldRefreshAreaStateFromPosition);
 
 void func_00137E90(void) {
 }
