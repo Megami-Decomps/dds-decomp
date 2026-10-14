@@ -15,14 +15,6 @@
 #include "dds3obj.h"
 #include "itf.h"
 
-/* Global event state behind kwlnTaskGetUserValue; the polygon-movie word at 0x0 and
- * the pointer to the shared flag word at 0x8. */
-typedef struct EvtGlobal {
-    u32 movieFlags; /* 0x0 */
-    u32 unk_4;      /* 0x4 */
-    u32 *flags;     /* 0x8 */
-} EvtGlobal;
-
 /* Polygon-movie event parameter blocks blended by the functions below.
  * Each field is named for how the blend functions use it:
  *   lerpN  -> evtMovieInterpolateFloatIfEnabled, the float lerp
@@ -69,10 +61,10 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 
 s32 evtPolygonMovieTestFlag(KwlnTask *task)
 {
-    EvtGlobal *state;
+    EvtPolygonMovieTaskState *state;
     s32 set;
 
-    state = (EvtGlobal *)kwlnTaskGetUserValue(task);
+    state = (EvtPolygonMovieTaskState *)kwlnTaskGetUserValue(task);
     set = 0;
     if (state->movieFlags & 8) {
         set = 1;
@@ -426,17 +418,17 @@ void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, 
 /* Apply a caller-provided mask to the event state's flag word. */
 void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits)
 {
-    EvtGlobal *state;
+    EvtPolygonMovieTaskState *state;
 
-    state = (EvtGlobal *)kwlnTaskGetUserValue(task);
+    state = (EvtPolygonMovieTaskState *)kwlnTaskGetUserValue(task);
     *state->flags = *state->flags | bits;
 }
 
 void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 {
-    EvtGlobal *state;
+    EvtPolygonMovieTaskState *state;
 
-    state = (EvtGlobal *)kwlnTaskGetUserValue(task);
+    state = (EvtPolygonMovieTaskState *)kwlnTaskGetUserValue(task);
     *state->flags = *state->flags & ~bits;
 }
 

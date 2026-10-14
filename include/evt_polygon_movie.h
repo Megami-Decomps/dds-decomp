@@ -7,6 +7,16 @@
 struct KwlnTask;
 struct EvtRuntime;
 
+/* User-value state shared by the DDS1 and DDS2 polygon-movie providers. */
+typedef struct EvtPolygonMovieTaskState {
+    u32 movieFlags; /* 0x0 */
+    u32 opaque_04;  /* 0x4 */
+    u32 *flags;     /* 0x8 */
+} EvtPolygonMovieTaskState;
+
+typedef char EvtPolygonMovieTaskState_size_must_be_0x0C[(sizeof(EvtPolygonMovieTaskState) == 0x0C) ? 1 : -1];
+typedef char EvtPolygonMovieTaskState_flags_at_0x8[((u32)&((EvtPolygonMovieTaskState *)0)->flags == 0x8) ? 1 : -1];
+
 /* PMD2 records and the complete 0x11C-byte owner cleared by both games'
  * evtPolygonMovieAllocWork. Movie parsing, asynchronous resource loading,
  * viewer dialogs and message-window lifetime all use this single object. */
