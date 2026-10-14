@@ -61,7 +61,6 @@ extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);
-extern void fileStartOrResumeQueuedJob(void);
 extern DevState *sdfDevCreateCallbackState(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
 extern DevState *sdfDevCreateModeState(const char *path,
