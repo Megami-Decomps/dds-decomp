@@ -1843,7 +1843,54 @@ void func_00128BB8(void) {
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FF88);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00128DA0);
+extern s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern char D_003BACB0[];
+extern char D_003BACB8[];
+extern char D_003BACC0[];
+
+/* Same debug grid as func_00128BB8 for the room mode (VIS) and room object
+ * mode (ANM) flags. */
+void func_00128DA0(void) {
+    char text[32];
+    s32 floor;
+    s32 slot;
+
+    sprintf(text, "VIS-HOJI");
+    fldDrawFloorQuad(0, -0x320, text);
+    sprintf(text, "ANM-HOJI");
+    fldDrawFloorQuad(0xDC0, -0x320, text);
+    sprintf(text, D_0039FF88);
+    fldDrawFloorQuad(0, -0x2C0, text);
+    fldDrawFloorQuad(0xDC0, -0x2C0, text);
+    for (floor = 0; floor < 0x1F; floor++) {
+        s32 gmcX;
+        s32 hitX;
+
+        sprintf(text, D_003BACB0, floor + 1);
+        fldDrawFloorQuad(-0x200, (floor * 12 - 0x4C) << 3, text);
+        hitX = 0xDC0;
+        gmcX = 0;
+        for (slot = 0; slot < 0x10; slot++) {
+            s32 value = fldTestRoomModeFlag(fldAreaState.area, floor + 1, slot);
+
+            if (value == 0) {
+                sprintf(text, D_003BACB8);
+            } else {
+                sprintf(text, D_003BACC0, value);
+            }
+            fldDrawFloorQuad(gmcX, (floor * 12 - 0x4C) << 3, text);
+            gmcX += 0xC0;
+            value = fldTestRoomObjectModeFlag(fldAreaState.area, floor + 1, slot);
+            if (value == 0) {
+                sprintf(text, D_003BACB8);
+            } else {
+                sprintf(text, D_003BACC0, value);
+            }
+            fldDrawFloorQuad(hitX, (floor * 12 - 0x4C) << 3, text);
+            hitX += 0xC0;
+        }
+    }
+}
 
 /* Enable or skip relocation of remaining transfer chunks during field teardown. */
 void fldSetRelocateOnRelease(u32 relocateOnRelease) {
