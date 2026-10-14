@@ -480,12 +480,12 @@ void btlUpdateLinkedHeightCamera(BtlLinkedCommand *action) {
     btlStepUnitHeightFramedCamera(action);
 }
 
-extern void func_001E5198(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *action) {
     BtlTask *task = action->task;
     btlAppendIndexListEntry(action->targetList, task->unit);
-    func_001E5198(action, &action->frontCamera, &action->backCamera);
+    btlBuildRandomDefeatCandidateCameraPair(action, &action->frontCamera, &action->backCamera);
     btlClearAllUnitDefeatCandidates();
     task = action->task;
     btlFlagUnitDefeatCandidate(task->unit);
@@ -2198,7 +2198,7 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
 
-void func_001E5198(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4];
     f32 position[4];
     BattlePairCameraFramePreset poses[2] = {
