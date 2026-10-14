@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_active_api.h"
 #include "kwln_task_add_child.h"
 #include "evt_message_window_api.h"
 #include "fr_font.h"
@@ -1711,7 +1712,6 @@ extern void mnuSelectFirstListNode(s32);
 
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
-extern void dspSetActive(s32);
 
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 

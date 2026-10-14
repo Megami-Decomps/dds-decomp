@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -10,7 +11,6 @@
 #include "kwln_fade.h"
 
 
-extern void dspSetActive(s32 index);
 
 extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
 

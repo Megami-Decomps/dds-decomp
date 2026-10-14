@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_active_api.h"
 #include "mnu_camp_display.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
@@ -3027,7 +3028,6 @@ u32 func_00247D50(void) {
 
 extern const char D_003AF528[];
 extern s32 evtIsActiveFlagSet(s32);
-extern void dspSetActive(s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
 
