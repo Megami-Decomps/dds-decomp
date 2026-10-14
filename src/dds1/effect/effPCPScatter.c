@@ -62,13 +62,6 @@ extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
-extern PcpScatterSpinWork *effScatterCreateSpinWork();
-extern PcpScatterRibbonWork *effScatterCreateRibbonWork();
-extern PcpScatterInstanceB *effScatterCreateDampedRing();
-extern PcpScatterInstanceC *effScatterCreateTwoColorRing();
-extern PcpScatterPlainInstance *effPcpScatterCreatePlainInstance();
-
-
 /* Serialized parameter heads precede each scatter effect's runtime state. */
 extern void effPcpScatterSharePoolResource(PcpScatterPool *work, PcpScatterPool *src);
 
@@ -90,7 +83,6 @@ extern PcpScatterRadialWork *effScatterCreateRadialWork(
 
 
 
-extern PcpScatterInstanceA *effPcpScatterCreateParticleInstance();
 extern void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source);
 
 
