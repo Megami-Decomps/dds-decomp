@@ -19,6 +19,7 @@
 #include "itf_draw_grid.h"
 #include "fld_transfer_chunk.h"
 #include "eff_class_work_api.h"
+#include "eff_random.h"
 #include "eff_point_set.h"
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
@@ -263,9 +264,6 @@ typedef struct EffModelCreateRequest {
     u8 pad38[4];
     void *source;
 } EffModelCreateRequest;
-
-extern float effMiscRandUnitFloat(void *);
-
 
 extern s32 effUpdateCameraDiagnostics(EffectStateSnapshot *, s8);
 
@@ -2588,7 +2586,6 @@ void billReleaseStripNode(s32 work) {
 }
 
 extern s32 effSharedRandomState[4];
-extern f32 effMiscRandUnitFloat(void *);
 
 void billAdvanceStripInstances(EffClassWork *work) {
     EffBillStripFrameConfig *config = (EffBillStripFrameConfig *)work->payload;
@@ -10416,8 +10413,6 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F9DF0);
 void effSetParticleSharedColor(u32 *target, u32 value) {
     *target = value;
 }
-
-extern f32 effMiscRandUnitFloat(void *);
 
 typedef struct EffectSlotNode80 {
     u32 count;
