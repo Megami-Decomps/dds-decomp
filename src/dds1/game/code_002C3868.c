@@ -468,8 +468,8 @@ s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     return 1;
 }
 
-u32 sdfCounterGetDisplayWordPointer(void) {
-    return (u32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->display->word;
+u32 *sdfCounterGetDisplayWordPointer(void) {
+    return ((SdfCounterRuntime *)sdfActiveCounterRuntime)->state.channel->display->word;
 }
 
 s32 sdfCounterGetDisplayValue(void) {
