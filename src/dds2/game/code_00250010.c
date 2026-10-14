@@ -8,6 +8,7 @@
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
+#include "evt_serialized_child.h"
 #include "sdf_vu_matrix.h"
 
 #include "evt_world.h"
@@ -4091,15 +4092,6 @@ void evtWriteRuntimeHeaderValues(s32 output, EvtRuntime *state) {
     buffer[3] = state->headerMetadata;
     evtWriteOutputBytes(output, buffer, 0x10);
 }
-
-typedef struct EvtSerializedChild {
-    u16 groupType;
-    u16 start;
-    u16 span;
-    u16 value;
-    u8 pad08[4];
-    s32 body[8];
-} EvtSerializedChild;
 
 /* Filter groups by mode and serialize each child body. Type-8 spans use the
  * next start or terminal range halfword, unless their body marker disables them. */
