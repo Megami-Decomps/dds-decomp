@@ -5,6 +5,7 @@
 
 void btlInitializeBossCallbacks(s32 mode);
 void btlRequestSceneEventResources(void);
+s32 btlRollSurpriseAttack(void);
 
 /* One indexed scene row stores its initializer, updater, and behavior flags. */
 typedef struct SceneInitializer {

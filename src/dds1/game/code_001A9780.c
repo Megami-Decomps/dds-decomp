@@ -26,6 +26,7 @@
 #include "sdf.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_scene_initializer.h"
 #include "eff.h"
 #include "btl_action.h"
 #include "kwln.h"
