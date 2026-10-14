@@ -120,11 +120,11 @@ typedef struct FldAreaWork {
     f32 angle;
     f32 targetAngle;
 #ifdef VERSION_DDS1
-    f32 unk16C;
+    f32 previousCameraModelFrame;
     f32 unk170;
     f32 unk174;
 #else
-    f32 unk178;
+    f32 previousCameraModelFrame;
     f32 unk17C;
     f32 unk180;
 #endif
@@ -171,10 +171,12 @@ typedef char FldAreaWork_colorEffectSuppressed_offset_check[(FLD_AREA_OFFSET(col
 #ifdef VERSION_DDS1
 typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x1BC) ? 1 : -1];
 typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x140) ? 1 : -1];
+typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x16C) ? 1 : -1];
 typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x19C) ? 1 : -1];
 #else
 typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x218) ? 1 : -1];
 typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x14C) ? 1 : -1];
+typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x178) ? 1 : -1];
 typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x1A8) ? 1 : -1];
 typedef char FldAreaWork_fieldTextures_offset_check[(FLD_AREA_OFFSET(fieldTextures) == 0x1E8) ? 1 : -1];
 #endif
