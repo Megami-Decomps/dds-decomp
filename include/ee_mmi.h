@@ -447,4 +447,13 @@ static inline u32 eePackRGBAWord(f32 unit) {
  * Registers are selected by gcc; the output may reuse the input register. */
 #define EE_MMI_PEXT5(out, in) __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))
 
+/*
+ * Store a zero quadword with `sq $0, off(p)`. EE GCC materializes every C
+ * 128-bit zero (`por $2,$0,$0; sq $2`), so the bare $0 store is SDK asm. It is
+ * volatile and memory-clobbering, so stores keep source order and anything
+ * that must issue before them (a loop test) has to come first in source.
+ */
+#define EE_STORE_ZERO_QUAD(p, off) __asm__ volatile ( \
+    "sq $0, " #off "(%0)" : : "r" (p) : "memory")
+
 #endif
