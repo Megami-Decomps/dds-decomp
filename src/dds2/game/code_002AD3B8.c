@@ -6,6 +6,7 @@
 #include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_item_requirement_api.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -41,8 +42,6 @@ extern void mnuSetPanelItemAuxiliaryValue(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
 extern s32 D_003E7400[];
-extern s32 mnuGetItemRequirementCount();
-extern s32 mnuGetItemRequirementValue();
 extern s32 sprintf(char *, const char *, ...);
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;

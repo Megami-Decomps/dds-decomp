@@ -6,6 +6,7 @@
 #include "dat_command.h"
 #include "eff.h"
 #include "mnu.h"
+#include "mnu_item_requirement_api.h"
 #include "mdl_flag_api.h"
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuGetPanelWindowTransitionState);
