@@ -4456,7 +4456,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             }
         }
     }
-    for (row = 0; row < (s32)work->unk_44; row++) {
+    for (row = 0; row < (s32)work->mainEntry7Count; row++) {
         s32 entryNameIndex;
         EvtViewerResourceRecord *resources;
         u8 *resourceBase;
@@ -4476,7 +4476,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         group->resourceData = resourceBase + resources[row].offset;
     }
     row = 0;
-    if ((s32)work->unk_54 > 0) {
+    if ((s32)work->mainEntry22Count > 0) {
         s32 textureCount;
         do {
             s32 entryNameIndex;
@@ -4491,7 +4491,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             resourceBase = (u8 *)work->data;
             texture = sdfTexAcquireResourceTexture(
                 (SdfTextureFileHeader *)(resourceBase + resources[row].offset));
-            textureCount = (s32)work->unk_54;
+            textureCount = (s32)work->mainEntry22Count;
             group->texture = texture;
             row++;
         } while (row < textureCount);
