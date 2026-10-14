@@ -299,7 +299,7 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern void frFontDrawGlyphChain(s32, s32, s32);
-extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
+extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 
 
@@ -1573,7 +1573,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     if (ascending != 0) {
         keyIndex += MNU_SORT_KEY_COUNT;
     }
-    func_0035B7F8(items, nodeCount, MNU_LIST_POINTER_BYTES, comparators[keyIndex]);
+    qsort(items, nodeCount, MNU_LIST_POINTER_BYTES, comparators[keyIndex]);
     mnuLinkItemList(items, nodeCount);
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
