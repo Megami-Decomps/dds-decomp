@@ -132,7 +132,7 @@ extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern char D_00436CA8[];
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern s32 D_00435E64;
 extern u8 D_003BEB28[];
@@ -1075,7 +1075,7 @@ s32 btlAdvanceActorEffectLabelTask(void *arguments) {
     if (link->elapsedTicks == 0) {
         if (owner != 0) {
             itfMesSetTextSlotFromValue(battleState->messageWindows[0], 0, owner->partyRecord.unitId, (owner->partyRecord.flags & 0x20) ? 0xE : 0xF);
-            func_0035C860(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
+            sprintf(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
             itfMesCopyStringToWindowTableSlot(battleState->messageWindows[0], 1, text);
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], 0xD5);

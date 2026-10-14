@@ -176,7 +176,7 @@ extern SdfFlagListParams fldCameraColorParameters[];
 
 
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
@@ -2209,7 +2209,7 @@ void fldLoadInfoTable(s32 field) {
     DevState *command;
     if (field < 200) {
         fldFormatAreaDirectory(directory, field, 1);
-        func_0035C860(path, D_00413448, directory, field);
+        sprintf(path, D_00413448, directory, field);
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, &D_0038E2D0, sizeof(D_0038E2D0));
         sdfDevWaitThenReleaseCommandState(command);
@@ -2863,7 +2863,7 @@ void fldLoadActorWaypointTable(s32 field) {
         memset(&fldActorWaypointRows, 0, 0x6D00);
     } else {
         fldFormatAreaDirectory(directory, field, 1);
-        func_0035C860(path, "%sF%03d.WAP", directory, field);
+        sprintf(path, "%sF%03d.WAP", directory, field);
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, &fldActorWaypointRows, 0x6D00);
         sdfDevWaitThenReleaseCommandState(command);

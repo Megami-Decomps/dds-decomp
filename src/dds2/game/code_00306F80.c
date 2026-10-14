@@ -1447,7 +1447,7 @@ s32 itfGetGridChildLayoutMode(GridTextWidget *widget, GridTextListItem *target) 
 
 extern s32 strlen(const char *);
 extern char *strcpy(char *, const char *);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern double fptodp(f32);
 
 /* Format a native value row, then optionally prefix its decimal/hex row number. */
@@ -1459,25 +1459,25 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
     if (entry->format != NULL) {
         entry->format(widget, entry, text, 0x100);
     } else if (entry->parameter == NULL) {
-        func_0035C860(text, "%s", entry->text);
+        sprintf(text, "%s", entry->text);
     } else {
         if (strlen(entry->text) == 0) {
             strcpy(prefix, "");
         } else {
-            func_0035C860(prefix, "%s ", entry->text);
+            sprintf(prefix, "%s ", entry->text);
         }
         switch (((GridNumericDescriptor *)entry->parameter)->mode) {
         case GRID_NUMERIC_FORMAT_DECIMAL:
-            func_0035C860(format, "%%s%%0%dd", entry->formatWidth);
-            func_0035C860(text, format, prefix, (s32)entry->number);
+            sprintf(format, "%%s%%0%dd", entry->formatWidth);
+            sprintf(text, format, prefix, (s32)entry->number);
             break;
         case GRID_NUMERIC_FORMAT_HEXADECIMAL:
-            func_0035C860(format, "%%s0x%%0%dX", entry->formatWidth - 2);
-            func_0035C860(text, format, prefix, (s32)entry->number);
+            sprintf(format, "%%s0x%%0%dX", entry->formatWidth - 2);
+            sprintf(text, format, prefix, (s32)entry->number);
             break;
         case GRID_NUMERIC_FORMAT_FLOAT:
-            func_0035C860(format, "%%s%%0%d.1f", entry->formatWidth);
-            func_0035C860(text, format, prefix, (double)entry->number);
+            sprintf(format, "%%s%%0%d.1f", entry->formatWidth);
+            sprintf(text, format, prefix, (double)entry->number);
             break;
         }
     }
@@ -1485,9 +1485,9 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
         s32 row = entry->index + widget->rowOffset;
 
         if (!(widget->flags & GRID_TEXT_HEX_ROW_INDEX)) {
-            func_0035C860(out, "%03d:%s", row, text);
+            sprintf(out, "%03d:%s", row, text);
         } else {
-            func_0035C860(out, "0x%03X:%s", row, text);
+            sprintf(out, "0x%03X:%s", row, text);
         }
     } else {
         strcpy(out, text);

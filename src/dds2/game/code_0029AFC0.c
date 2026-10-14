@@ -32,7 +32,7 @@ extern void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *, BrsSkillPackageWor
 
 extern u8 brsGetLevelStepCrossedBy(s32, s32);
 extern u8 brsGetLevelStepForValue(s32);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern void dspSetActive(s32);
 extern char D_004379B0[];
 extern char D_004379B8[];
@@ -228,9 +228,9 @@ s32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     gain = context->selectedRewardRow->values.amount;
     context->crossedSteps = brsGetLevelStepCrossedBy(item->level - gain, gain);
     if (context->crossedSteps != 0) {
-        func_0035C860(text, D_004379B8, D_00435E48 + item->unitId * 17);
+        sprintf(text, D_004379B8, D_00435E48 + item->unitId * 17);
         evtCopyEntryStringToActiveWindow(0, text);
-        func_0035C860(text, D_004379B0, brsGetLevelStepForValue(item->level));
+        sprintf(text, D_004379B0, brsGetLevelStepForValue(item->level));
         evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         dspStartEntry(0x18);

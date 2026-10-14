@@ -10835,7 +10835,7 @@ extern const char D_004386D0[];
 
 extern char D_004386D8[];
 
-extern s32 func_0035C860(char *, char *, ...);
+extern s32 sprintf(char *, char *, ...);
 
 
 
@@ -10851,7 +10851,7 @@ s32 effPollPrimaryFile(void) {
         result = 0x400000;
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effQueuedFileHandle != 0) {
-            func_0035C860(path, D_004386D8, D_0042CF58, request.nameWithExtension);
+            sprintf(path, D_004386D8, D_0042CF58, request.nameWithExtension);
             result = 0x400002;
             fileWriteToPfs(effQueuedFileHandle, path);
         }
@@ -10875,7 +10875,7 @@ s32 effPollNamedFile(void) {
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithExtension);
+            sprintf(path, D_004386D8, D_0042CF70, request.nameWithExtension);
             result = 0x400002;
             fileQueueSaveImage(effFileQueue, path);
         }
@@ -10899,7 +10899,7 @@ s32 effPollAttachedFile(void) {
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithExtension);
+            sprintf(path, D_004386D8, D_0042CF70, request.nameWithExtension);
             result = 0x400002;
             fileQueueSaveVersionedImage(effFileQueue, path);
         }
@@ -11684,7 +11684,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, 
     for (i = 0; i < capacity; i++) {
         const EffCameraCreateRequest *request = &requests[i].request;
         if (request->resource != NULL) {
-            func_0035C860(nameBuffer, D_00438740, request->resource->name);
+            sprintf(nameBuffer, D_00438740, request->resource->name);
             entries[count].name = nameBuffer;
             entries[count].selected = 0;
             entries[count].unk08 = 0;
@@ -12415,7 +12415,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
         if (mode & BTL_RESOURCE_SCAN_GENERAL) {
             count = effGetGeneralResourceCount();
             for (i = 0; i < count; i++) {
-                func_0035C860(name, "GENERAL %d", i);
+                sprintf(name, "GENERAL %d", i);
                 btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
             }
         }
@@ -13539,7 +13539,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
     u32 sourceAddress;
     u32 allocation;
     EffectSlotSet *instance;
-    func_0035C860(path, D_004387E8, base, name);
+    sprintf(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
@@ -13574,7 +13574,7 @@ void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
 /* Clear the output first; only mode one selects the retained-allocation completion path. */
 void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u32 *outInstance) {
     char path[EFF_RESOURCE_PATH_BYTES];
-    func_0035C860(path, D_004387E8, prefix, name);
+    sprintf(path, D_004387E8, prefix, name);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
         fileCreateCallbackRequest(path, 0, (s32)effCompleteRetainedResourceJob, (s32)outInstance);
@@ -13589,7 +13589,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     u32 sourceAddress;
     u32 allocation;
     EffMappedResource *mappedResource;
-    func_0035C860(path, D_004387E8, base, name);
+    sprintf(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
@@ -13613,7 +13613,7 @@ void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResourc
 /* Initialize the output to zero and schedule mapped-record completion. */
 void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource) {
     char path[EFF_RESOURCE_PATH_BYTES];
-    func_0035C860(path, D_004387E8, base, name);
+    sprintf(path, D_004387E8, base, name);
     *outMappedResource = 0;
     fileCreateCallbackRequest(path, 0, (s32)effCompleteMappedResourceJob, (s32)outMappedResource);
 }

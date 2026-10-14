@@ -190,7 +190,7 @@ void evtFreeMotionSeTaskParams(KwlnTask *task) {
     sdfReleaseChipBlock(params);
 }
 
-extern void func_0035C860(char *, const char *, ...);
+extern void sprintf(char *, const char *, ...);
 /* Preserve the complete native format record, including its trailing zeros. */
 const char D_00424890[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 
@@ -199,7 +199,7 @@ KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
     EvtMotionSeTaskParams *params;
 
-    func_0035C860(taskName, D_00424890, eventTaskId, resourceId);
+    sprintf(taskName, D_00424890, eventTaskId, resourceId);
     params = sdfAllocSizeClassBlock(0xC);
     memset(params, 0, 0xC);
     params->modelKey = modelKey;
@@ -221,7 +221,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     sdfDebugPrintf(D_004377E0);
     eventId = state->eventId;
     directoryId = eventId - eventId % 10;
-    func_0035C860(D_00453C50, D_004248A0, directoryId, eventId, eventId);
+    sprintf(D_00453C50, D_004248A0, directoryId, eventId, eventId);
     request = fileQueueDefaultCallbackRequest(D_00453C50);
     state->pendingRequest = request;
     state->loaded = 1;

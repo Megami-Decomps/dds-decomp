@@ -952,7 +952,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
-extern s32 func_0035C860(char *buffer, const char *format, ...);
+extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
@@ -3326,7 +3326,7 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EvtRuntime *viewer) {
 
     if (mode < 3) {
         if (mode >= 0) {
-            func_0035C860(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
+            sprintf(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
             mode = viewer->inputA;
             if (mode == 0) {
                 evtViewerSaveTrackFiles(0, viewer);
@@ -3582,7 +3582,7 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
     sceneId = context->sceneId;
     D_004372B0 = eventId;
     D_004372B2 = sceneId;
-    func_0035C860(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
+    sprintf(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
     viewer->flags = 1;
     evtViewerDispatchFlagMode(viewer);
     viewer->unk2238 = 0;

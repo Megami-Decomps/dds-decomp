@@ -110,7 +110,7 @@ void itfReleaseWideSlot(WideSlot *slot) {
 }
 
 extern void itfDrawCenteredIndexedImage(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
-extern s32 func_0035C860(char *destination, const char *format, ...);
+extern s32 sprintf(char *destination, const char *format, ...);
 
 /* Draw decimal digits and optional tags with fade/rise; bit 0 pauses aging. */
 void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
@@ -145,7 +145,7 @@ void itfUpdateAndDrawSpriteNumbers(WideSlotPool *pool, u32 flags) {
             }
             memset(text, 0, sizeof(text));
             length = 0;
-            func_0035C860(text, "%d", slot->value);
+            sprintf(text, "%d", slot->value);
             x = slot->x;
             y = slot->y;
             width = 0;

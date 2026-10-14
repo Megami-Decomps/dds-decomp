@@ -2712,14 +2712,14 @@ void mdlLoadViewerPresentationConfig(void) {
 }
 
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 void mdlSaveViewerPresentationConfig(void) {
     char buffer[0x130];
     s32 size;
     struct FileRequest *request;
 
-    size = func_0035C860(buffer, D_00421488, D_00435CBC,
+    size = sprintf(buffer, D_00421488, D_00435CBC,
                         D_00453620[0], D_00453620[1], D_00453620[2],
                         D_00453630[0], D_00453630[1], D_00453630[2],
                         sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.fogNear,

@@ -20,7 +20,7 @@
 #include "fld_map_resource.h"
 #include "mdl_flag_api.h"
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;
 
 typedef struct {
@@ -947,7 +947,7 @@ s32 fldLoadLocalMapResources(void) {
     MapResource *item = fldLocalMapNameTextures;
 
     for (i = 0; i < 10; i++) {
-        func_0035C860(name, "/lmap/sname_%02d.tmx", i + 1);
+        sprintf(name, "/lmap/sname_%02d.tmx", i + 1);
         fldLoadMapResource(name, item);
         item++;
     }

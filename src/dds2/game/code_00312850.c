@@ -63,7 +63,7 @@ extern void *memset(void *, s32, u32);
 
 
 extern u32 strlen(const char *);
-extern s32 func_0035C860(char *buffer, const char *fmt, ...);
+extern s32 sprintf(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 
@@ -109,8 +109,8 @@ TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, vo
     sdfSetTaskSecondaryCallback(work->list, sdfCallbackWorkOnRemove);
     work->primaryTaskName = sdfAllocSizeClassBlock(strlen(name));
     work->secondaryTaskName = sdfAllocSizeClassBlock(strlen(name) + 5);
-    func_0035C860(work->primaryTaskName, D_004388D8, name);
-    func_0035C860(work->secondaryTaskName, D_004388E0, name);
+    sprintf(work->primaryTaskName, D_004388D8, name);
+    sprintf(work->secondaryTaskName, D_004388E0, name);
     return work;
 }
 

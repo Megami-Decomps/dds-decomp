@@ -216,7 +216,7 @@ extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
 extern s32 D_00437D88;
-extern s32 func_0035C860(char *dst, const char *fmt, ...);
+extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern s32 fileSlotSelectPoll(void);
 
@@ -559,7 +559,7 @@ void mcdFormatSaveSlotName(void *buffer, s32 slot) {
         titleId = 0x51ee;
     }
     D_00437D88 = titleId;
-    func_0035C860(buffer, "BASLUS-%05d-new-%d", titleId, slot);
+    sprintf(buffer, "BASLUS-%05d-new-%d", titleId, slot);
 }
 
 void fileReqGetSlotCode(void) {
@@ -2460,11 +2460,11 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 hours = ticks / 108000;
                 minutes = (ticks % 108000) / 1800;
                 seconds = (ticks % 1800) / 30;
-                func_0035C860(text, D_00437D98, hours);
+                sprintf(text, D_00437D98, hours);
                 fileDrawMenuImageAtPoint(0x187, y + 0x15, titleColor, text);
-                func_0035C860(text, D_00437DA0, minutes);
+                sprintf(text, D_00437DA0, minutes);
                 fileDrawMenuImageAtPoint(0x1A7, y + 0x15, titleColor, text);
-                func_0035C860(text, D_00437DA0, seconds);
+                sprintf(text, D_00437DA0, seconds);
                 fileDrawMenuImageAtPoint(0x1BD, y + 0x15, titleColor, text);
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
@@ -2514,7 +2514,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
             break;
                             }
                             evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(D_003E7FA8[portrait]));
-                            func_0035C860(text, D_00437DA8, fileSavePreviewRecords[slot].levels[partyIndex]);
+                            sprintf(text, D_00437DA8, fileSavePreviewRecords[slot].levels[partyIndex]);
                             fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
                         }
                     }
@@ -4672,10 +4672,10 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     s32 fd;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, filePath);
+        sprintf(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
     fileJobWriteSerializedPayload(fd, job);
@@ -5260,10 +5260,10 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, filePath);
+        sprintf(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
     header = *queue;
@@ -5360,10 +5360,10 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, filePath);
+        sprintf(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
+        sprintf(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
     image.version = 5;

@@ -124,7 +124,7 @@ extern u32 D_00444920[];
 extern u32 D_00444940[];
 extern char D_00435FD0[];
 extern void *memset(void *, int, unsigned int);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern struct EffectObj *effObjCreateResourceKindZero(const char *, void *, s32);
 extern struct EffectObj *effObjCreateResourceKindOne(const char *, void *, s32);
 extern struct EffectObj *effObjSpawnSharedBillNodeClone(struct EffectObj *, void *, s32);
@@ -207,7 +207,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                     cacheByteOffset = config->resourceIndex * sizeof(*cached);
                     if (loaded[config->resourceIndex] == 0) {
                         fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
-                        func_0035C860(path, D_00435FD0, directory,
+                        sprintf(path, D_00435FD0, directory,
                                      resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
                         object = effObjCreateResourceKindZero(path, position, (s32)rotation);
                         effObjSetFlags(object, 1);
@@ -225,7 +225,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                     cacheByteOffset = config->resourceIndex * sizeof(*cached);
                     if (loaded[config->resourceIndex] == 0) {
                         fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
-                        func_0035C860(path, D_00435FD0, directory,
+                        sprintf(path, D_00435FD0, directory,
                                      resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
                         object = effObjCreateResourceKindOne(path, position, (s32)rotation);
                         effObjSetFlags(object, 1);
@@ -515,16 +515,16 @@ extern f32 D_003897DC[];
 
 extern char D_004130D8[]; /* "%sf%03d_%03d.LB" */
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 
 
@@ -1092,7 +1092,7 @@ extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern void evtScaleSlotByClampedMultiplier(void *, f32);
 extern void dds3InvokeMoverUpdate(EffWorldNode *);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 extern char D_004130A8[], D_004130B8[], D_004130C8[];
 
 /* Restore the room's named objects and enable their retained path controllers. */
@@ -1112,9 +1112,9 @@ void fldActivateRoomFlagObjects(void) {
             EffWorldNode *slot;
             Dds3SlotResource *resource;
 
-            func_0035C860(modelName, D_004130A8, index);
-            func_0035C860(collisionName, D_004130B8, index);
-            func_0035C860(pathName, D_004130C8, index);
+            sprintf(modelName, D_004130A8, index);
+            sprintf(collisionName, D_004130B8, index);
+            sprintf(pathName, D_004130C8, index);
             modelKey = fldFindSearchId(modelName);
             collisionKey = fldFindSearchId(collisionName);
             if (modelKey == -1) {
@@ -1145,7 +1145,7 @@ void fldActivateRoomFlagObjects(void) {
             s32 key;
             EffWorldNode *object;
 
-            func_0035C860(modelName, D_004130A8, index);
+            sprintf(modelName, D_004130A8, index);
             key = fldFindSearchId(modelName);
             object = (EffWorldNode *)dds3FindWorldObjectNodeByKey(world, key, 6);
             dds3SetObjectPayloadWord8(object, 2);
@@ -1173,7 +1173,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
         for (i = 0; i < 4; i++) {
             if (D_00444920[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor + 1);
-                func_0035C860(path, D_00435FD0, directory, D_00444920[i]);
+                sprintf(path, D_00435FD0, directory, D_00444920[i]);
                 D_00444930[i] = (u32)sdfReadNamedResource(path, &D_00444940[i], 0);
             }
         }
@@ -1251,7 +1251,7 @@ s32 fldLoadAreaResource(void) {
         fldAreaState.resourceArea = area;
         fldAreaState.resourceFloor = floor;
         fldFormatAreaDirectory(directory, area, 1);
-        func_0035C860(path, D_004130D8, directory, area, floor);
+        sprintf(path, D_004130D8, directory, area, floor);
         fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
         fldAreaState.resourceFlag = 1;
         return 1;
@@ -1289,7 +1289,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     sdfRaiseDeviceThreadPriority();
     D_00435BB4 = 1;
     fldFormatAreaDirectory(directory, area, 1);
-    func_0035C860(path, D_004130D8, directory, area, room);
+    sprintf(path, D_004130D8, directory, area, room);
     fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
     fldAreaState.resourceFlag = 1;
     return 1;
@@ -1426,18 +1426,18 @@ void fldFormatAreaResourceName(char *out) {
 
     fldFormatAreaDirectory(directory, area, 1);
     if (area == 0x17 && mdlFlagTest(0x19)) {
-        func_0035C860(out, "%sf%03d_00a.LB", directory, 0x17);
+        sprintf(out, "%sf%03d_00a.LB", directory, 0x17);
         return;
     }
     if (area == 0x18 && mdlFlagTest(0x19)) {
-        func_0035C860(out, "%sf%03d_00a.LB", directory, 0x18);
+        sprintf(out, "%sf%03d_00a.LB", directory, 0x18);
         return;
     }
     if (area == 0x1B && mdlFlagTest(0x19)) {
-        func_0035C860(out, "%sf%03d_00a.LB", directory, 0x1B);
+        sprintf(out, "%sf%03d_00a.LB", directory, 0x1B);
         return;
     }
-    func_0035C860(out, "%sf%03d_000.LB", directory, area);
+    sprintf(out, "%sf%03d_000.LB", directory, area);
 }
 
 u8 fldHasAreaResourceNameChanged(void) {
@@ -1627,7 +1627,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
             fldFreeDisplayObjects();
         } else {
             fldFormatAreaDirectory(directory, area, 1);
-            func_0035C860(path, D_004130D8, directory, area, room);
+            sprintf(path, D_004130D8, directory, area, room);
             request = fileQueuePlainDispatchRequest(path);
             D_00435FC8 = request;
             fileWaitForRequestReady(request);
@@ -1668,7 +1668,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     if (isField == 0) {
         fldCachedRoomResourceAllocation = (u32)fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == 0) {
-            func_0035C860(path, D_00436028, name);
+            sprintf(path, D_00436028, name);
             D_00435FA4 = sndLoadNamedOffsetResourceList(path);
         } else {
             D_00435FA4 = sndBuildResourceHandleListFromOffsets(roomOffsets);
@@ -1677,7 +1677,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         }
     }
     if (isField == 0) {
-        func_0035C860(path, D_00436030, name);
+        sprintf(path, D_00436030, name);
         fldCachedRoomF2ResourceAllocation = (u32)fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF2ResourceAllocation == 0) {
             fldCachedRoomF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
@@ -1690,7 +1690,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     }
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
         fldFormatAreaDirectory(directory, area, 1);
-        func_0035C860(path, D_00413128, directory, area, room);
+        sprintf(path, D_00413128, directory, area, room);
         fldCachedRoomKF2ResourceAllocation = (u32)fldLoadCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomKF2ResourceAllocation == 0) {
             fldCachedRoomKF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
@@ -1702,7 +1702,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
     }
     if (isField == 0) {
-        func_0035C860(path, D_00436038, name);
+        sprintf(path, D_00436038, name);
         fldCachedRoomF1ResourceAllocation = (u32)fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF1ResourceAllocation == 0) {
             fldCachedRoomF1ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
@@ -1904,11 +1904,11 @@ void fldReleaseFieldResources(void) {
 
 void fldFormatAreaDirectory(char *buffer, s32 area, s32 unused) {
     if (area < 200) {
-        func_0035C860(buffer, "/fld/f/f%03d/", area);
+        sprintf(buffer, "/fld/f/f%03d/", area);
     } else if (area < 500) {
-        func_0035C860(buffer, "/fld/b/f%03d/", area);
+        sprintf(buffer, "/fld/b/f%03d/", area);
     } else {
-        func_0035C860(buffer, "/fld/e/f%03d/", area);
+        sprintf(buffer, "/fld/e/f%03d/", area);
     }
 }
 
@@ -4406,13 +4406,13 @@ void fldLoadSkyResource(s32 area) {
     if (area < 200) {
         fldFormatAreaDirectory(directory, area, 1);
         if (area == 0x17 && mdlFlagTest(0x19)) {
-            func_0035C860(path, "%sF%03dt.SKY", directory, 0x17);
+            sprintf(path, "%sF%03dt.SKY", directory, 0x17);
         } else if (area == 0x18 && mdlFlagTest(0x19)) {
-            func_0035C860(path, "%sF%03dt.SKY", directory, 0x18);
+            sprintf(path, "%sF%03dt.SKY", directory, 0x18);
         } else if (area == 0x1B && mdlFlagTest(0x19)) {
-            func_0035C860(path, "%sF%03dT.SKY", directory, 0x1B);
+            sprintf(path, "%sF%03dT.SKY", directory, 0x1B);
         } else {
-            func_0035C860(path, "%sF%03d.SKY", directory, area);
+            sprintf(path, "%sF%03d.SKY", directory, area);
         }
         command = sdfDevCreateCommandState(path);
         sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);

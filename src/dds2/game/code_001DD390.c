@@ -157,7 +157,7 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 btlSampleActorModelPositionVU(BtlUnit *, s32);
 
-extern s32 func_0035C860(char *, const char *, ...);
+extern s32 sprintf(char *, const char *, ...);
 
 extern u32 btlApplyDeferredUnitStatus(void *);
 
@@ -3509,11 +3509,11 @@ s32 btlFormatUnitBedName(BtlUnit *unit, char *name) {
     btlGetRuntime();
     if (unit->status.flags & 0x200) {
         if (unit->partyRecord.flags & 0x10) {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId + 0x20);
+            sprintf(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId + 0x20);
         } else if (unit->status.flags & 0x1000) {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId);
+            sprintf(name, "%s%03X_%02X.BED", D_00436A28, 0, unit->partyRecord.unitId);
         } else {
-            func_0035C860(name, "%s%03X_%02X.BED", D_00436A28, btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue), unit->partyRecord.unitId);
+            sprintf(name, "%s%03X_%02X.BED", D_00436A28, btlGetActorBedAssetIdFromIndex(unit->partyRecord.menuValue), unit->partyRecord.unitId);
         }
         return 1;
     }
