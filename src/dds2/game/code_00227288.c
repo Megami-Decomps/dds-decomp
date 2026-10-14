@@ -1094,8 +1094,8 @@ void btlArmEventResourceTrigger(void) {
     trigger->consumed = 0;
 }
 
-/* Mode 0x313's scene callback returns unsigned -1; its interpretation is unknown. */
-u32 func_00229278(void) {
+/* Mode 0x313's -1 keeps the automatically toggled scene variant unchanged. */
+u32 btlMode313KeepDefaultSceneVariant(void) {
     return 0xffffffff;
 }
 
@@ -1183,7 +1183,7 @@ void btlInitializeSpecialUnitHpOverride(BtlUnit *unit) {
 }
 
 /* Mode 0x336's fixed value 6 is not proven to be an actor ID. */
-u32 func_00229470(void) {
+u32 btlMode336FixedCallbackValue(void) {
     return 6;
 }
 
@@ -1466,7 +1466,7 @@ extern f32 btlGetSatanCommandAmountScale(BtlUnit *unit, s32 actor, s32 command, 
 extern s32 btlGetFutilityActionPoints(u32 unused1, u32 unused2, s32 action);
 extern s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command);
 extern u32 btlSelectNoBossScriptArgument(void);
-extern s64 func_00226820(ActionStateLink *unit);
+extern s64 btlMode311TurnEndCallback(ActionStateLink *unit);
 extern u32 btlResetSpiralEdgeMotionProgress(BtlLinkedCommand *unit);
 extern u32 btlUpdateSpiralEdgeMarkedCamera(BtlLinkedCommand *unit);
 extern void btlApplyRahuOperandEffects(BtlUnit *unit, BtlOperandEntry *entry);
@@ -1888,7 +1888,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlSelectDisabledCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlTrackSpecialEnemyCommandRestrictionByTurn);
         BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, btlClearUnitRestrictionFlag);
-        BTL_INSTALL_CALLBACK(battle->commandTurnEndHook, 0x0, func_00226820);
+        BTL_INSTALL_CALLBACK(battle->commandTurnEndHook, 0x0, btlMode311TurnEndCallback);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlResetUnitPlacement);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetSpiralEdgeMotionProgress);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlUpdateSpiralEdgeMarkedCamera);
@@ -1940,7 +1940,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = commandFlags | 0x100001;
         battle->commandRestrictFlags = commandFlags | 0x200000;
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlArmEventResourceTrigger);
-        BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, func_00229278);
+        BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, btlMode313KeepDefaultSceneVariant);
         BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, btlConsumeReadyEventScriptResource);
         allocation = sdfAllocateBlockBySizeThreshold(0x2);
         battle->effect = allocation;
@@ -1972,7 +1972,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         }
         battle->commandRestrictFlags |= 0x82800;
         BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlInitializeSpecialUnitHpOverride);
-        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, func_00229470);
+        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlMode336FixedCallbackValue);
         break;
     }
     case 0x32D: {

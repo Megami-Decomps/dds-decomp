@@ -1207,7 +1207,8 @@ MenuWorkEntry *mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) 
     return entry;
 }
 
-void func_00324D28(u32 unused, u32 ptr) {
+/* Removal supplies an index and value; release only the non-null value allocation. */
+void mnuFreeListValueCallback(u32 unused, u32 ptr) {
     if (ptr != 0) {
         func_0035A880(ptr);
     }
@@ -1221,13 +1222,14 @@ typedef struct MnuCallbackPair8 {
 
 typedef char MnuCallbackPair8_size_check[(sizeof(MnuCallbackPair8) == 8) ? 1 : -1];
 
-u32 *func_00324D50(void) {
+/* Create two callback lists; removing a value from the second list releases it. */
+u32 *mnuCreateCallbackPair(void) {
     MnuCallbackPair8 *pair = (MnuCallbackPair8 *)func_0035A828(sizeof(*pair));
 
     memset(pair, 0, sizeof(*pair));
     pair->first = mnuCreateCallbackNode(0);
     pair->second = mnuCreateCallbackNode(0);
-    pair->second->onRemove = func_00324D28;
+    pair->second->onRemove = mnuFreeListValueCallback;
     return (u32 *)pair;
 }
 

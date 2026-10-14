@@ -35,7 +35,7 @@ extern SdkFileStream *func_00359A98(const char *name, const char *mode);
 extern u32 func_00359B18(void *data, u32 size, u32 count, SdkFileStream *stream);
 extern u32 func_0035A648(const void *data, u32 size, u32 count, SdkFileStream *stream);
 extern s32 func_003594A8(SdkFileStream *stream);
-extern void func_003211F0(u32, u32);
+extern void mnuCallbackNodeNoOp(u32, u32);
 
 #define DDS_NAMED_RECORD_NAME_BYTES 0x40
 
@@ -600,7 +600,8 @@ u32 *dds3PackExtendedSpriteRecords(u32 **source) {
     return (u32 *)object;
 }
 
-u32 func_00320380(void) {
+/* The native SDK entry returns zero; no more specific caller role is established. */
+u32 dds3ReturnZero(void) {
     return 0;
 }
 
@@ -847,8 +848,8 @@ MnuCallbackList *mnuCreateCallbackNode(u32 userData) {
     MnuCallbackList *node = (MnuCallbackList *)func_0035A828(0x18);
     memset(node, 0, 0x18);
     node->userData = userData;
-    node->onRemove = func_003211F0;
-    node->onDestroy = func_003211F0;
+    node->onRemove = mnuCallbackNodeNoOp;
+    node->onDestroy = mnuCallbackNodeNoOp;
     return node;
 }
 

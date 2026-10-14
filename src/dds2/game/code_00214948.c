@@ -1016,7 +1016,8 @@ s32 btlSelectTargetsBlockingElement(s32 task, s32 action) {
     return 1;
 }
 
-u32 func_00217020(void) {
+/* AI operation 22 has no state/selection effect; void dispatch ignores its native 1. */
+u32 btlAiActionOperation22NoOp(void) {
     return 1;
 }
 
@@ -7288,7 +7289,8 @@ s32 btlClearUnitRestrictionFlag(void) {
     return -1;
 }
 
-s64 func_00226820(ActionStateLink *unit) {
+/* Mode 0x311's turn-end hook; preserve the native nonvoid fallthrough when bit 3 is clear. */
+s64 btlMode311TurnEndCallback(ActionStateLink *unit) {
     if (unit->pendingFlags & 8) {
         return (s32)(u32)btlGetRuntime();
     }

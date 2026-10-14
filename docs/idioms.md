@@ -11590,8 +11590,11 @@ script integer result. Do not infer cross-game twins from a trivial return.
 `itfMesCopyWindowTextSlot` resolves the window's `mes` pointer and supplies
 only that argument to the slot-data copier. Preserve the existing legacy
 short-arity call: it does not specify slot/source or the other parameters.
-`btlReturnInputValue` is simply the native unsigned-word identity function;
-its name does not invent an otherwise unobserved caller role.
+`btlReturnInputValue` is simply the native unsigned-word identity function.
+The FIELD LIGHT descriptors store it at `+0x20` (DDS1 `0x0035FC00`, DDS2
+`0x003BE300`); that registration does not establish a lifecycle/slot meaning.
+Search the global `data.data.s` as well as per-function assembly before
+claiming a callback is unregistered.
 
 `sndPostQueueCommandNoOp` receives the sequence immediately after queuing
 in `sndSendCommandPacket`, then does nothing. It does not wait, synchronize
@@ -11603,3 +11606,65 @@ relocated-SPR0 reader and owned-list decoder, then release the intermediate
 file buffer. The decoder tracks allocations and copies record data into
 owned storage. Different neighboring writers do not establish a distinct
 word-array-versus-nested loader behavior; retain the shared implementation.
+
+## Registered callback roles and generic SDK ownership
+
+Name a constant callback from both its registration and its consumer, not
+from the literal alone. DDS1 modes `0x101`/`0x102` install the two
+`btlSelectNoBossScriptArgument` copies: their unsigned minus-one results
+decline selection of a boss-script argument. `btlMode107SelectSceneVariant`
+returns two, which replaces the automatic scene variant. Conversely,
+`btlMode313KeepDefaultSceneVariant` returns minus one, so the DDS2 consumer
+retains its automatic one/two toggle.
+
+`btlCerberDeclineResourceTypeOverride` returns minus one and leaves the
+resource-type getter's action-record fallback intact. Hariti's update hook
+reuses formation restoration, while `btlGetHaritiActiveEnemyLimit` supplies
+the active-enemy cap of seven. The mode-`0x140` predicate rejects action
+`0xD3`; the mode-`0x336` callback's value six remains uninterpreted.
+`btlMode311TurnEndCallback` retains its original `s64` return surface,
+conditional runtime getter and nonvoid fallthrough. Do not repair that
+fallthrough merely as part of a name change.
+
+Both AI action-handler tables register `btlAiActionOperation22NoOp` at slot
+22: DDS1 base `0x00360E38`, word `0x00360E90`; DDS2 base `0x003BF5F8`,
+word `0x003BF650`. The dispatcher extracts the operation with `packed >> 22`
+and calls a void three-word handler. This native entry changes no state and
+returns one, which is ignored. Preserve its existing `u32(void)` definition
+and the legacy dispatch interface rather than changing either signature.
+
+The `sdfDevDetectDiscPathDisabled`, `Host` and `Pfs` probes always return
+zero. Their ordered dispatch selects the disc, `host0:` and `pfs0:` builders
+on a positive result, or the configured device otherwise. This caller
+context establishes the twins and roles; no filesystem detection or
+validation implementation is present in the stubs.
+
+`btlEnsureModelAndSoundReady` requests/polls model and motion-sound work,
+returns zero while pending and one when ready. The DDS2 helper shares the
+established DDS1 name and body. Keep the legacy implicit/unprototyped
+callers, including the caller that supplies an extra zero, and do not
+collapse repeated model requests as a readability cleanup.
+
+The `itfReturnZeroDuplicate` twins are separate native copies of the
+existing unsigned-zero entry. Their paired admin/widget position helps
+identify the twins but does not prove an admin-status meaning.
+`dds3ReturnZero` similarly states only its observed result.
+`fldDrawScaledGrayTintMapTexture` supplies equal vertex RGB and caller alpha
+to a textured map quad with the native asymmetric scaled `309 x 205`
+extents and `256 x 192` UV span. It does not convert the image to grayscale.
+
+The callback-node constructor assigns `mnuCallbackNodeNoOp` to both removal
+and destruction listeners. The runtime-record initialization default is
+`mnuRuntimeRecordInitializationNoOp`. Three work-entry globals share
+`mnuWorkEntryCallbackNoOp` (start, finish/deactivation and active visitor),
+while the runtime/work hit and runtime-record-pair globals select their
+respective typed no-ops. Preserve that sharing and the supplied argument
+types; an empty default does not implement the notified operation.
+
+`mnuCreateCallbackPair` allocates the real eight-byte pair and two callback
+lists. The second list's removal listener, `mnuFreeListValueCallback`, frees
+the non-null node value, not the index or the list's user data. The generic
+list-clear path passes `node->index` and `node->value` before freeing the
+node itself. Keep the complete typed constructor, allocation ownership
+declaration and layout unchanged; its existing upstream destructor name
+does not establish an effect-only payload type.

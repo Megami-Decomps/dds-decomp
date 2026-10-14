@@ -345,8 +345,8 @@ INCLUDE_ASM(const s32, "game/code_002C5FD8", fldDrawLocalMapTransitionFrame);
 
 extern void evtSetDrawSurfaceIndex(u32);
 
-/* Draw the map texture with its native asymmetric scaled extents. */
-void func_002C6EC8(s32 x, s32 y, s8 grey, s8 alpha, struct SdfTex *texture, f32 scale) {
+/* Draw the supplied map texture with uniform grey/alpha and native asymmetric scaled extents. */
+void fldDrawScaledGrayTintMapTexture(s32 x, s32 y, s8 grey, s8 alpha, struct SdfTex *texture, f32 scale) {
     u32 color;
     f32 left, top, width, height;
 

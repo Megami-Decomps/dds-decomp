@@ -448,11 +448,14 @@ s32 dds3MeasureRecordBlock(DdsCountedPayload *records, s32 count) {
     return byteSize;
 }
 
-void func_003224B0(MenuWorkEntry *entry, struct MnuShootingWork *context) {
+/* Shared empty default for start, finish/deactivation and active-work visitation. */
+void mnuWorkEntryCallbackNoOp(MenuWorkEntry *entry, struct MnuShootingWork *context) {
 }
 
-void func_003224B8(MenuRuntimeRecord *record, MenuWorkEntry *entry, struct MnuShootingWork *context) {
+/* Default runtime/work overlap callback leaves both supplied records unchanged. */
+void mnuRuntimeWorkHitNoOp(MenuRuntimeRecord *record, MenuWorkEntry *entry, struct MnuShootingWork *context) {
 }
 
-void func_003224C0(MenuRuntimeRecord *record, MenuRuntimeRecord *other, struct MnuShootingWork *context) {
+/* Default callback for a runtime-record pair has no state effect. */
+void mnuRuntimeRecordPairNoOp(MenuRuntimeRecord *record, MenuRuntimeRecord *other, struct MnuShootingWork *context) {
 }
