@@ -1548,7 +1548,7 @@ extern void func_0021B828(ActionStateLink *);
 extern s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *, s32, s32);
 extern s32 func_0021E8C0(BtlLinkedCommand *);
-extern void func_0021F848(ActionStateLink *, BtlUnit *, u64, u64);
+extern void btlScheduleCherunShadowSkillPresentation(ActionStateLink *, BtlUnit *, u64, u64);
 extern void btlSetSpecialEnemyGeometry(void);
 extern s32 func_00223350(BtlLinkedCommand *, s32, s32);
 extern s32 func_002247D0(BtlLinkedCommand *, s32, s32);
@@ -1762,7 +1762,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlStartOtherMarkedUnitTasks);
         BTL_INSTALL_CALLBACK(battle->pad674, 0x4, btlIsNonCalamityAction);
         BTL_INSTALL_CALLBACK(battle->pad6C0, 0x4, btlMapActorMotionId);
-        BTL_INSTALL_CALLBACK(battle->pad694, 0x0, func_0021F848);
+        BTL_INSTALL_CALLBACK(battle->pad694, 0x0, btlScheduleCherunShadowSkillPresentation);
         BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSpecialMotion);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
         allocation = sdfAllocateBlockBySizeThreshold(0x8);
