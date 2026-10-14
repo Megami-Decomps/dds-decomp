@@ -374,8 +374,7 @@ typedef struct {
 } FieldResourceSlot;
 
 extern FieldResourceSlot D_0044FFB0[];
-
-extern void fldCacheMapLabelLengths(s32);
+#include "fld_label_cache_api.h"
 
 extern void fldLoadSceneRecordTable(void);
 

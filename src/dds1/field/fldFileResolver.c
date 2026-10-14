@@ -1389,7 +1389,7 @@ extern void fldUploadSkyBuffer(void *source);
 extern void fldCopyActorWaypointTable(const void *source);
 extern void fldCopyInfoTable(const void *);
 extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle);
-extern void fldCacheMapLabelLengths();
+#include "fld_label_cache_api.h"
 
 void fldLoadAreaPackedResources(void) {
     char name[32];
