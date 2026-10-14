@@ -445,12 +445,21 @@ typedef struct Cb3714C {
 extern Cb3714C D_0037E14C[];
 
 typedef struct FileTypeCallbacks {
-    void *(*create)(void *);
-    void (*unk4)(void *);
-    void (*destroy)(void *);
-    void *(*createChild)(void *, u16);
-    u8 unk10[0x18];
+    void *(*create)(void *);       /* 0x00 */
+    void (*unk4)(void *);          /* 0x04 */
+    void (*destroy)(void *);       /* 0x08 */
+    void *(*createChild)(void *, u16); /* 0x0C */
+    u8 unk10[4];                   /* 0x10 */
+    void (*reset)(void *);         /* 0x14 */
+    u8 unk18[0x10];                /* 0x18 */
 } FileTypeCallbacks;
+
+typedef char FileTypeCallbacksResetOffsetAssert[
+    sizeof(FileTypeCallbacks) - sizeof(((FileTypeCallbacks *)0)->reset) -
+            sizeof(((FileTypeCallbacks *)0)->unk18) == 0x14
+        ? 1
+        : -1];
+typedef char FileTypeCallbacksSizeAssert[sizeof(FileTypeCallbacks) == 0x28 ? 1 : -1];
 
 extern FileTypeCallbacks fileJobTypeOperations[];
 
