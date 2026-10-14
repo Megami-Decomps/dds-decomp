@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_event_asset_api.h"
+#include "btl_skill_max_api.h"
 #include "kwln_background_fade_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
@@ -2864,11 +2865,6 @@ extern u8 D_003BBB58;
 extern DatPartyRecord D_00361DA0[5];
 
 extern s32 D_003625D8[5][24];
-
-extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
-
-extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
-
 
 /* Apply the debug party preset/overrides, refreshed HP/MP and inventory flags. */
 void btlApplyDebugEncounterPartySelection(void) {
