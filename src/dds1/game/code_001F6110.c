@@ -34,8 +34,8 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
 
-extern s32 func_003101B8(s32 directory);
-extern s32 func_00310320(s32 directory, SceDirent *entry);
+extern s32 sceDclose(s32 directory);
+extern s32 sceDread(s32 directory, SceDirent *entry);
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
     BTL_RESOURCE_NAME_RECORD_BYTES = 0x38,
@@ -2596,7 +2596,7 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
     if (sdfPfsDebugMode == 0) {
         return;
     }
-    func_003101B8(directoryHandle);
+    sceDclose(directoryHandle);
 }
 
 
@@ -2606,7 +2606,7 @@ extern char *D_00360380[];
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
 s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
     if (sdfPfsDebugMode != 0) {
-        return func_00310320(directoryHandle, reader);
+        return sceDread(directoryHandle, reader);
     }
     if ((u32)D_003BD868 >= BTL_BUILTIN_NAME_COUNT) {
         return 0;
