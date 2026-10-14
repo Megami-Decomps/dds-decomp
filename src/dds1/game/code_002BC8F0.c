@@ -1071,7 +1071,7 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BE8A8);
+INCLUDE_ASM(const s32, "game/code_002BC8F0", sdfDrawTexturedQuad);
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
