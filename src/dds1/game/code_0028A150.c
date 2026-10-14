@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
@@ -5304,17 +5305,6 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
 }
 
 #include "eff_anim.h"
-
-/* Same complete producer view as the generated-texture packet provider. */
-typedef struct EffGeneratedTextureDescriptor {
-    f32 position[4];
-    f32 scaleX;
-    f32 scaleY;
-    u8 unk18[8];
-    f32 angle;
-    u32 color;
-    SdfTex *texture;
-} EffGeneratedTextureDescriptor;
 
 extern void billInvokeCallback(struct BillObj *);
 extern void effCopyVector(void *, void *);
