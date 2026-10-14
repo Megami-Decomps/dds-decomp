@@ -1766,7 +1766,7 @@ extern void parSysReset(void);
 
 extern void effSeedEmitterDelayRandomState(void);
 
-extern void func_00194A70(void);
+extern void effFieldTaskStartupHook(void);
 
 extern void effInitWorks(void);
 
@@ -1784,7 +1784,7 @@ void fldCreateFieldEffectTask(void) {
     effSeedEmitterDelayRandomState();
     kwlnTaskCreate("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
     kwlnTaskCreate(D_004363F8, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
-    func_00194A70();
+    effFieldTaskStartupHook();
     effInitWorks();
     effBTLFieldColorResetFlags();
 }
