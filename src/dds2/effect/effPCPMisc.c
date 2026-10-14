@@ -40,6 +40,7 @@
 #include "eff_pcp_rotate_work.h"
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
+#include "eff_pcp_vector_copy_api.h"
 #include "eff_pcp_cross.h"
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
@@ -179,76 +180,6 @@ extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 
 
 
-extern void effPcpViewAlignedRingSetPosition();
-
-extern void effPcpCopyTwinVector();
-
-extern void effPcpCopyStaggerVector();
-
-extern void effPcpCopyCrossVector();
-
-extern void effPcpCopyDelayedPairVector();
-
-extern void effPcpCopySpawnOnceVector();
-
-extern void effPcpCopyRadialParticleVector();
-
-extern void effPcpCopyNarrowConeVector();
-
-extern void effPcpCopyVariableHeightVector();
-
-extern void effPcpCopyWideConeVector();
-
-extern void effPcpCopyFixedOriginVector();
-
-extern void effPcpCopySideBurstVector();
-
-extern void effPcpCopyThunderHandleVector();
-
-extern void effPcpCopyDenseConeVector();
-
-extern void effPcpCopyGrowingThunderFadeVector();
-
-extern void effPcpCopySharedTrailVector();
-
-extern void effPcpCopyCompactResourceRectVector();
-
-extern void effPcpCopyCompactTexturedBlurVector();
-
-extern void effPcpCopyCompactBlurVector();
-
-extern void effPcpCopyShortThunderFadeVector();
-
-extern void effPcpCopyScalingThunderFadeVector();
-
-extern void effPcpCopyThunderScaleFadeVector();
-
-extern void effPcpCopySpanVector();
-
-extern void effPcpCopySpinSingleVector();
-
-extern void effPcpCopySpinPairVector();
-
-extern void effPcpCopySpinningPairVector();
-
-extern void effPcpCopyThunderBurstVector();
-
-extern void effPcpCopyScaledThunderVector();
-
-extern void effPcpCopyBeamVector();
-
-extern void effPcpCopyLinkedBeamVector();
-
-extern void effPcpCopyGroupSetVector();
-
-extern void effPcpCopyCaptureNodeVector();
-
-extern void effPcpCopyDriftVector();
-
-extern void effPcpCopyRandomizedVector();
-
-extern void effPcpCopySpawnRangeVector();
-
 /* Boss effect work: settable param plus two handles released on free. */
 typedef struct {
     u8 pad00[0x10];
@@ -306,8 +237,6 @@ typedef struct {
     void *tail[5];
     void *block15;
 } EffPCPBlockSet;
-
-extern void effPcpCopyVectorAF0(void *dst, void *src);
 
 extern void effPcpSpanSetHeadVector(void *dst, void *src);
 
