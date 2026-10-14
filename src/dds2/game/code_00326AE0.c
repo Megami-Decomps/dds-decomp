@@ -4,6 +4,7 @@
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
 #include "sdf_resource.h"
+#include "sdf_kernel_thread_param.h"
 
 typedef struct SdfVec4 {
     f32 x;
@@ -31,6 +32,12 @@ extern f64 sin(f64);
 extern f64 func_003532A0(f64);
 
 extern void *memcpy(void *, const void *, u32);
+
+extern void *memset(void *, s32, u32);
+
+extern s32 CreateThread(SdfKernelThreadParam *);
+
+extern void *_gp;
 
 f32 sdfVec3AngleBetween(void *a, void *b) {
     return func_003532B8(sdfVec3DotNormalized(a, b));
@@ -268,7 +275,17 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
     return CreateSema(&sema);
 }
 
-INCLUDE_ASM(const s32, "game/code_00326AE0", sdfCreateThread);
+s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
+    SdfKernelThreadParam param;
+
+    memset(&param, 0, sizeof(param));
+    param.entry = entryAddress;
+    param.stack = workspace;
+    param.stackSize = stackBytes;
+    param.priority = priority;
+    param.gp = &_gp;
+    return CreateThread(&param);
+}
 
 s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority) {
     void *workspace;
