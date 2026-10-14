@@ -3684,7 +3684,7 @@ s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
 }
 
 void func_002588A0(s32 output, s32 data, s32 size) {
-    func_0036A420();
+    sceWrite();
 }
 
 s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {
@@ -4313,8 +4313,8 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 extern u8 sdfPfsDebugMode;
 extern char *sdfDevGetPathBuffer(void);
 extern s32 sprintf(char *buffer, const char *format, ...);
-extern s32 func_00369B70(const char *path, s32 flags, ...);
-extern s32 func_00369DF8(s32 descriptor);
+extern s32 sceOpen(const char *path, s32 flags, ...);
+extern s32 sceClose(s32 descriptor);
 extern s32 func_0036BCD0(const char *device, s32 flags);
 extern void evtViewerWriteTrackDirectory(s32 output, s32 format, EvtRuntime *runtime);
 extern char D_004377C0[];
@@ -4359,12 +4359,12 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
 
     if (sdfPfsDebugMode) {
         sdfDebugPrintf("hdd -> %s\n", pm2Path);
-        pm2 = func_00369B70(pm2Path, 0x602, 0666);
-        pm3 = func_00369B70(pm3Path, 0x602, 0666);
+        pm2 = sceOpen(pm2Path, 0x602, 0666);
+        pm3 = sceOpen(pm3Path, 0x602, 0666);
     } else {
         sdfDebugPrintf("pc -> %s\n", pm2Path);
-        pm2 = func_00369B70(pm2Path, 0x602);
-        pm3 = func_00369B70(pm3Path, 0x602);
+        pm2 = sceOpen(pm2Path, 0x602);
+        pm3 = sceOpen(pm3Path, 0x602);
     }
     if (pm2 < 0 || pm3 < 0) {
         sdfDebugPrintf(D_004377C0);
@@ -4397,7 +4397,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
             break;
         }
     }
-    func_00369DF8(pm2);
+    sceClose(pm2);
     func_0036BCD0(D_004377C8, 0);
     evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
@@ -4405,7 +4405,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
             evtViewerWriteChildRecords(pm3, 3, runtime);
         }
     }
-    func_00369DF8(pm3);
+    sceClose(pm3);
     sdfDebugPrintf("save pm3 file\n");
     func_0036BCD0(D_004377C8, 0);
     return 1;

@@ -3561,7 +3561,7 @@ s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
 }
 
 void evtWriteSerializedBytes(s32 output, void *data, s32 size) {
-    func_0030F190(output, data, size);
+    sceWrite(output, data, size);
 }
 
 s32 evtAssignRuntimeChildSequenceAndCount(EvtRuntime *runtime) {
@@ -4194,8 +4194,8 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 }
 
 extern u8 sdfPfsDebugMode;
-extern s32 func_0030E8F0(const char *path, s32 flags, ...);
-extern s32 func_0030EB78(s32 descriptor);
+extern s32 sceOpen(const char *path, s32 flags, ...);
+extern s32 sceClose(s32 descriptor);
 extern s32 func_00310A68(const char *path, s32 mode);
 extern void *sdfDevGetPathBuffer(void);
 extern char D_003BC350[];
@@ -4238,12 +4238,12 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
 
     if (sdfPfsDebugMode) {
         sdfDebugPrintf("hdd -> %s\n", pm2Path);
-        pm2 = func_0030E8F0(pm2Path, 0x602, 0666);
-        pm3 = func_0030E8F0(pm3Path, 0x602, 0666);
+        pm2 = sceOpen(pm2Path, 0x602, 0666);
+        pm3 = sceOpen(pm3Path, 0x602, 0666);
     } else {
         sdfDebugPrintf("pc -> %s\n", pm2Path);
-        pm2 = func_0030E8F0(pm2Path, 0x602);
-        pm3 = func_0030E8F0(pm3Path, 0x602);
+        pm2 = sceOpen(pm2Path, 0x602);
+        pm3 = sceOpen(pm3Path, 0x602);
     }
     if (pm2 < 0 || pm3 < 0) {
         sdfDebugPrintf(D_003BC350);
@@ -4276,7 +4276,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
             break;
         }
     }
-    func_0030EB78(pm2);
+    sceClose(pm2);
     func_00310A68(D_003BC358, 0);
     evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
@@ -4284,7 +4284,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
             evtViewerWriteChildRecords(pm3, 3, runtime);
         }
     }
-    func_0030EB78(pm3);
+    sceClose(pm3);
     sdfDebugPrintf("save pm3 file\n");
     func_00310A68(D_003BC358, 0);
     return 1;

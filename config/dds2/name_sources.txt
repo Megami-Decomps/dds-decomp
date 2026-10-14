@@ -8870,3 +8870,6 @@
 0x00243DB8	evtDrawSolarOverlayShapeWithScaledAlpha	inferred	Loads the indexed SolarOverlayShape, scales its vertex alpha values, draws its triangle fan, and restores the GS alpha state.
 0x0019F5E8	itfCreateFont2TextGlyph	inferred	Paired with 0x001978E8: prepends the default glyph chain, builds font-index-2 text, applies spacing -1, then sets position, render depth, and child colors. UI callers pass text and an optional prior glyph chain.
 0x002C4038	mnuDispatchPopupTransition	inferred	Dispatches popup transition actions and callbacks while maintaining the popup entry stack; paired with DDS1 0x00285670. The matching 0x268-byte body, shared transition helpers, and cross-title caller pattern confirm the role.
+0x00369B70	sceOpen	inferred	Opens the path with flags and an optional mode; callers use the returned descriptor for reads or writes. Paired with DDS1 0x0030E8F0, which has the same open call contract.
+0x00369DF8	sceClose	inferred	Closes the descriptor returned by sceOpen after file loading, serialization, or queued I/O. Paired with DDS1 0x0030EB78.
+0x0036A420	sceWrite	inferred	Writes the supplied byte range to an open descriptor; file queue serialization and the SDF write operation pass descriptor, data, and size. Paired with DDS1 0x0030F190.
