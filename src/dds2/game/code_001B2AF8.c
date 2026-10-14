@@ -8555,7 +8555,37 @@ void btlDrawActorSlotOrder(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CDD38);
+extern const u32 D_00416ED0[4];
+
+/* Draw one bank-selected secondary actor slot, rereading offsets after scaling. */
+void func_001CDD38(EffectSlotSet *work, s32 entry, s32 x, s32 y,
+                   s32 bank, s32 row, s32 variant) {
+    u32 colors[4];
+    s32 channel;
+
+    memcpy(colors, D_00416ED0, sizeof(colors));
+    for (channel = 0; channel < 4; channel++) {
+        colors[channel] = btlSetSlotLowByteClamped(work, entry, channel,
+                            D_00438F58[bank]->slotValues[row][variant]);
+    }
+    {
+        ActorSlotOrder **selectedBank = &D_00438F58[bank];
+        ActorSlotOrder *owner = *selectedBank;
+        f32 scale = owner->scalePercent[row][variant];
+        ActorSlotOrder *scaled;
+        s32 drawX;
+        s32 drawY;
+
+        func_001CE418(work, entry, &owner->drawOffsets[row][variant][0],
+                      &owner->drawOffsets[row][variant][1], scale);
+        scaled = *selectedBank;
+        drawX = scaled->drawOffsets[row][variant][0];
+        drawY = scaled->drawOffsets[row][variant][1];
+        effDrawSpriteWithCornerColors((x + drawX) << 4, (y + drawY) << 3,
+                      0, colors, 0, work, entry, 0x53);
+    }
+    fldScaleSceneCoordinateRecord(work, entry);
+}
 
 /* Advance one slot-order secondary state and its four corner-color adjustments. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416ED0);
