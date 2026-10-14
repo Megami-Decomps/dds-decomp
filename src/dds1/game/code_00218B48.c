@@ -3083,7 +3083,7 @@ void mdlViewerStepEditedNumericValue(s32 index) {
     *target = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ECF0);
+INCLUDE_ASM(const s32, "game/code_00218B48", evtEventViewerEditDrawVectorTargetTask);
 typedef union MdlOptionControl {
     u32 packed;
     struct {
