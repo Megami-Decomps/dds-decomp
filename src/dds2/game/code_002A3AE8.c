@@ -530,9 +530,46 @@ void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
     }
 }
 
-extern void mnuDrawAndAdvanceMovieMenuSlidePath(PickList *, s32);
+/* Truthful void return releases V0 for the following flag load;
+ * see docs/idioms.md, "Movie path drawing: real outputs and surface return". */
+extern void uiDrawSurfaceAtNearDepth(u32);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuDrawAndAdvanceMovieMenuSlidePath);
+void mnuDrawAndAdvanceMovieMenuSlidePath(PickList *work, s32 drawContext) {
+    s32 offsets[2];
+    s32 x;
+    s32 y;
+    s32 i;
+    s32 phase;
+    s32 pulse;
+    s32 alpha;
+
+    uiDrawActiveSurfaceWithTestMode(drawContext);
+    mnuDrawSprite(0, 0, 0, 0x80, 0x20, 0x16, drawContext);
+    uiConfigureSurfaceAlphaState(drawContext);
+    /* 0x002A4BD8..0x002A4BE4 initializes both offsets; retail draws one path. */
+    offsets[0] = 0;
+    offsets[1] = mnuGetSlidePathSegmentStart(2);
+    for (i = 0; i < 1; i++) {
+        phase = (work->pathProgress + offsets[i]) % 4096;
+        pulse = (s32)((f32)phase / 2.67f) % 512;
+        if (pulse > 256) {
+            pulse = 512 - pulse;
+        }
+        alpha = pulse / 2;
+        alpha = work->control.pos * alpha / 128;
+        mnuSlidePathPoint(phase, &x, &y);
+        mnuDrawSprite(x, y, 0, alpha, 0, 0x1E, drawContext);
+    }
+    mnuStartRandomMovieMenuPulse(work);
+    mnuDrawMovieMenuPulses(work, drawContext);
+    uiDrawSurfaceAtNearDepth(drawContext);
+    if (work->control.active != 0) {
+        work->pathProgress += 8;
+    }
+    if (work->pathProgress > 4096) {
+        work->pathProgress = 4096;
+    }
+}
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
