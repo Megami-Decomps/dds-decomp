@@ -6,6 +6,7 @@
 #include "common.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
@@ -614,7 +615,6 @@ extern void fldResetObjectSlots();
 extern s32 fldTitleMiniIsActive();
 extern void fldResetZoneRecordsAndActorSlots();
 extern void fldResetPendingSounds();
-extern void fldReleaseSceneRecordChunk();
 extern void fldReleaseMenuSlotsAfterWait();
 extern void mnuReleaseResourceEntries();
 extern void sdfResourceListRelease();
@@ -1491,7 +1491,6 @@ extern FieldPlayerSceneWork D_0032F1A0;
 extern void fldAllocateBackgroundBuffer(void);
 extern void fldResetObjectSlots();
 extern void fldReleaseTitleSlots();
-extern void fldReleaseSceneRecordChunk();
 extern void fldCreateResourceScriptObjects(void);
 extern u8 fldHasAreaResourceNameChanged(void);
 extern void fldLoadAreaPackedResources(void);

@@ -5,6 +5,7 @@
 #include "evt_world.h"
 #include "common.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
 #include "fld_spark_object_entry.h"
 #include "fld_spark_slot.h"
 #include "sdf_math_vector4.h"
