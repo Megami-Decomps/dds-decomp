@@ -8,6 +8,7 @@
 #include "sdf_pac_reloc.h"
 #include "sdf_resource_list_item.h"
 #include "sdf_texture_file.h"
+#include "sdf_pac_decoder.h"
 
 enum {
     PAC_COMMAND_PAYLOAD = 1,
@@ -33,8 +34,6 @@ void sdfPacStartRelocatingPacket(PacState *state, SdfPacStreamPacketHeader *pack
 void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
-
-s32 sdfPacDecodeInputChunk(void *decoder, void *input, s32 available);
 
 void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 
@@ -199,7 +198,7 @@ void sdfPacCopyPendingBytes(PacState *state) {
 /* Feed compressed input to the active decoder until it finishes. */
 void sdfPacDecodePendingBytes(PacState *state) {
     s32 inputBytes = state->inputAvailable;
-    s32 finished = sdfPacDecodeInputChunk(state->decoder, state->inputCursor, inputBytes);
+    s32 finished = sdfPacDecodeInputChunk((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
     sdfPacAdvanceInput(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
     if (finished == 0) {
         return;
@@ -338,7 +337,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
 void sdfPacDecodeResourceChunk(PacState *state) {
     /* This handler offers pendingBytes, unlike the packet-level decoder. */
     s32 inputBytes = state->pendingBytes;
-    s32 finished = sdfPacDecodeInputChunk(state->decoder, state->inputCursor, inputBytes);
+    s32 finished = sdfPacDecodeInputChunk((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
     sdfPacAdvanceInput(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
     if (finished == 0) {
         return;
