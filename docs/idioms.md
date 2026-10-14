@@ -12409,7 +12409,7 @@ usable final reconstruction.
 
 ## Battle debug-camera toggle counterpart
 
-DDS1 `func_001FAE78` (472 bytes) follows the exact DDS2 `func_0020CEF8` donor.
+DDS1 `btlUpdateDebugCameraFromPad` at `0x001FAE78` (472 bytes) follows the exact DDS2 twin at `0x0020CEF8`.
 The two saved position and rotation slots use the existing
 `PCP_COPY_VECTOR_UNCLOBBERED`: each full-vector LQ/SQ pair has pointer operands
 and a `$2` clobber, and the toggle byte loaded before the pair remains live
