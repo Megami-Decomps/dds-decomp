@@ -37,9 +37,9 @@ typedef struct EffWorldNode EffWorldNode;
  * VU0 vector transfers and scalar camera reads use the same float vectors. */
 typedef struct ObjectTransform {
     u128 matrix[4];
-    f32 position[4];
-    f32 rotation[4];
-    f32 scale[4];
+    f32 position[4]; /* 0x40: used as the returned inner-position vector. */
+    f32 rotation[4]; /* 0x50: used as the returned inner-rotation vector. */
+    f32 scale[4]; /* 0x60: used as the returned inner-scale vector. */
     f32 smoothedPosition[4];
     f32 savedPosition[4];
     f32 savedRotation[4];

@@ -233,14 +233,6 @@ void evtDestroyEffectObjectData(EffWorldNode *object) {
     sdfReleaseChipBlock(object->data);
 }
 
-typedef struct EffLocalNode {
-    u8 pad00[0x40];
-    u128 vec40; /* 0x40 */
-    u128 vec50; /* 0x50 */
-    u128 vec60; /* 0x60 */
-    u8 pad70[0x60];
-} EffLocalNode; /* 0xD0, a transform node built on the stack */
-
 typedef struct EffVec4 {
     f32 v[4];
 } EffVec4;
@@ -249,8 +241,8 @@ extern EffVec4 D_004128A0;
 extern EffVec4 D_004128B0;
 extern u8 dds3TestObjectFlags(void *object, u32 mask);
 extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
-extern void effObjInnerVecInit(EffLocalNode *);
-extern s32 func_0023DA70(EffLocalNode *, EffWorldNode *);
+extern void effObjInnerVecInit(ObjectTransform *);
+extern s32 func_0023DA70(ObjectTransform *, EffWorldNode *);
 
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern void effMiscNormalizeVU(void);
@@ -265,7 +257,7 @@ extern void *dds3GetWorldNodeData(EffWorldNode *node);
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
 s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     EffVec4 axis = D_004128B0;
-    EffLocalNode node;
+    ObjectTransform node;
     EffectObjectData *data;
     void *model;
     s32 flag;
@@ -275,9 +267,9 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     if (data->transitionWork != 0) {
         effObjInnerVecInit(&node);
         if (func_0023DA70(&node, obj) != 0) {
-            effObjMultiplyInnerScale(obj, &node.vec60);
-            effObjMultiplyInnerRotation(obj, &node.vec50);
-            effObjAddInnerPosition(obj, &node.vec40);
+            effObjMultiplyInnerScale(obj, (u128 *)node.scale);
+            effObjMultiplyInnerRotation(obj, (u128 *)node.rotation);
+            effObjAddInnerPosition(obj, (u128 *)node.position);
         }
     }
     model = (void *)data->modelHolder->resourceHandle;
