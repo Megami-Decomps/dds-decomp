@@ -129,7 +129,20 @@ void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
     sdfDrawUniformlyScaledSlotImage(x, y, 0, alpha, 0x20, 0, 0x54, scale);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E390", fldDrawMapRequestHalo);
+/* DDS2 keeps the halo's progress shaping but no longer draws anything. */
+void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
+    if (progress >= 0.7f) {
+        progress = (1.0f - progress) / 0.3f;
+    } else {
+        progress /= 0.7f;
+    }
+    if (state->next->prev != node) {
+        progress -= 0.2f;
+        if (progress < 0.0f) {
+            progress = 0.0f;
+        }
+    }
+}
 
 /* The current request pulses; other requests enlarge and fade in later. */
 void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
