@@ -78,7 +78,7 @@ extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
 extern s32 mnuCampGetCurrentRowQuantityLimit();
 extern s32 mnuCampScalePriceByTier();
-extern s32 ptyCountBulletItem(s32);
+#include "pty_bullet_item_count_api.h"
 
 extern s8 mnuCampListedItems[34];
 

@@ -71,7 +71,7 @@ extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];
 
-extern s32 ptyCountBulletItem(s32);
+#include "pty_bullet_item_count_api.h"
 
 extern s8 D_003BC39C;
 
