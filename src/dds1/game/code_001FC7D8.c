@@ -143,9 +143,43 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCAC0);
-
 extern u32 btlRollAiBucket(void);
+
+/* Requires task bit 6 clear and a matching 0x2A49 status bit.
+ * The masked-status switch assigns 25-bucket tests to cases 0x40/0x400. */
+s32 func_001FCAC0(BtlTask *task) {
+    BtlUnit *unit = task->unit;
+    u16 flags;
+
+    if (task->flags & 0x40) {
+        return 0;
+    }
+    flags = unit->partyRecord.status;
+    if (!(flags & 0x2A49)) {
+        return 0;
+    }
+    switch (flags & 0x7FFF) {
+    /* Separate arms keep two failure predecessors through 15.ce, so the
+     * zero return is not hoisted over either roll test. After allocation,
+     * 27.jump2 merges their identical call tails (qualified cc1probe). */
+    case 0x40:
+        if ((u32)btlRollAiBucket() >= 25) {
+            break;
+        }
+        return 1;
+    case 0x400:
+        if ((u32)btlRollAiBucket() >= 25) {
+            break;
+        }
+        return 1;
+    case 0x800:
+        return 1;
+    default:
+        return 1;
+    }
+    return 0;
+}
+
 
 /* Accepts a task's unit only when status bit 5 is set and task bit 6 is clear.
  * If bit 5 is the sole low status bit, the final check uses an external value. */
