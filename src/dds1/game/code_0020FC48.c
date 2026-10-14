@@ -21,6 +21,7 @@
 #include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
+#include "btl_scene_initializer.h"
 #include "btl_action.h"
 #include "btl_sound.h"
 #include "evt_unit.h"
