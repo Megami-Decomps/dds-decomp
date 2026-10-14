@@ -842,7 +842,7 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
 }
 
 void btlResetCommandIndexWork(BtlTask *task) {
-    func_001ACC20();
+    btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
     task->unit->unk2F4 = -1;
 }

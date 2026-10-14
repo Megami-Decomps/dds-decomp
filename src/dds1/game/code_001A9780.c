@@ -1202,7 +1202,7 @@ s32 func_001ACB08(void) {
 extern s32 btlCountEligibleLinkedActors(BtlState *);
 extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
 
-s32 func_001ACC20(void) {
+s32 btlSetEligibleActorPanelTransitionState(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3B0);
     BattleActorPanelWork *panel;
