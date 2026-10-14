@@ -286,7 +286,7 @@ extern s32 D_003BC7F0;
 typedef struct LoadCtx374A0 {
     u8 unk0[4]; /* 0x00 */
     s32 unk4;   /* 0x04 */
-    s32 unk8;   /* 0x08 */
+    s32 inputRepeatTimer; /* 0x08 */
     s32 unkC;   /* 0x0C */
     s8 unk10;   /* 0x10 */
     u8 pad11[3]; /* 0x11 */
@@ -2267,12 +2267,12 @@ s32 fileSlotBrowserUpdate(void) {
 
     if (D_003BC82C == 0) {
         offset = oldSelection - D_003BC840;
-        fileLoadMenuState.unk8++;
-        fileLoadMenuState.unk8 = fileLoadMenuState.unk8 <= 0 ? 0 : fileLoadMenuState.unk8 > 3 ? 3 : fileLoadMenuState.unk8;
+        fileLoadMenuState.inputRepeatTimer++;
+        fileLoadMenuState.inputRepeatTimer = fileLoadMenuState.inputRepeatTimer <= 0 ? 0 : fileLoadMenuState.inputRepeatTimer > 3 ? 3 : fileLoadMenuState.inputRepeatTimer;
 
-        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x26] >> 1) & 1) != 0 && fileLoadMenuState.unk8 >= 3) {
+        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x26] >> 1) & 1) != 0 && fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_003BC840;
-            fileLoadMenuState.unk8 = 0;
+            fileLoadMenuState.inputRepeatTimer = 0;
             if (selection > 0) {
                 if (offset == 2) {
                     offset = 1;
@@ -2286,9 +2286,9 @@ s32 fileSlotBrowserUpdate(void) {
             }
         }
 
-        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x27] >> 1) & 1) != 0 && fileLoadMenuState.unk8 >= 3) {
+        if (fileIsLoadedWithActiveFlow(((u8)D_00324510[0x27] >> 1) & 1) != 0 && fileLoadMenuState.inputRepeatTimer >= 3) {
             selection = D_003BC840;
-            fileLoadMenuState.unk8 = 0;
+            fileLoadMenuState.inputRepeatTimer = 0;
             if (selection < 7) {
                 if (offset == 0) {
                     offset = 1;
