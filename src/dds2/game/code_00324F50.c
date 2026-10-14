@@ -14,7 +14,7 @@ extern f32 sdfVec3Normalize(f32 *);
 
 extern void *sdfAllocHeapMemory(u32);
 
-extern u64 func_00325790(u64, u32);
+extern u64 sdfCloneOwnedSpriteRecordList(u64, u32);
 
 extern void (*sdfTickCallback)(void);
 
@@ -261,7 +261,7 @@ u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
     return owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324F50", func_00325790);
+INCLUDE_ASM(const s32, "game/code_00324F50", sdfCloneOwnedSpriteRecordList);
 
 /* Deep-copy count basic sprite headers and their sixteen-byte vectors.
  * Return the resource-list owner; each copied header points to its own vector. */
