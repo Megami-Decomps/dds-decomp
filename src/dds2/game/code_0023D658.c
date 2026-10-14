@@ -1344,7 +1344,7 @@ u32 evtOpEndUnitValueTransition(void) {
 
 const char D_00421A58[] = "EFFECT_BE not fount RID = %d\n";
 
-u32 func_00240280(void) {
+u32 evtOpSpawnBoundEffectFromTaskResource(void) {
     u8 firstVector[16];
     u8 secondVector[16];
     s32 taskId;
@@ -1425,7 +1425,7 @@ INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421AC0);
 
 const char D_00421AD8[] = "EFFBED_BE not fount RID = %d\n";
 
-u32 func_002404E0(void) {
+u32 evtOpCreateEffectNodeFromTaskResource(void) {
     u8 position[16];
     u8 scale[16];
     s32 taskId;
@@ -1454,7 +1454,7 @@ u32 func_002404E0(void) {
     return 1;
 }
 
-u32 func_002405B8(void) {
+u32 evtOpBuiltin359NoOp(void) {
     return 1;
 }
 
@@ -1535,7 +1535,7 @@ INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421B20);
 
 const char D_00421B50[] = "EFFMG1_BE not fount RID = %d\n";
 
-u32 func_00240800(void) {
+u32 evtOpCreateMagatuhiEffect1FromTaskResource(void) {
     s32 taskId;
     s32 key;
     struct EffNodeDescriptor *descriptor;
@@ -1581,7 +1581,7 @@ INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421B70);
 
 const char D_00421BA0[] = "EFFMG2_BE not fount RID = %d\n";
 
-u32 func_00240938(void) {
+u32 evtOpCreateMagatuhiEffect2FromTaskResource(void) {
     s32 taskId;
     s32 key;
     struct EffNodeDescriptor *descriptor;
@@ -1606,7 +1606,7 @@ u32 func_00240938(void) {
     return 1;
 }
 
-u32 func_002409E0(void) {
+u32 evtOpRunWorldEffectReadyAction(void) {
     s32 id;
     void *obj;
 
@@ -1618,7 +1618,7 @@ u32 func_002409E0(void) {
     return 1;
 }
 
-u32 func_00240A20(void) {
+u32 evtOpRunWorldEffectReadyActionDuplicate(void) {
     s32 id;
     void *obj;
 
