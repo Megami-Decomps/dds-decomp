@@ -611,7 +611,7 @@ extern void fldReleaseObjectSlots();
 extern void fldReleaseTitleSlots();
 extern void fldReleaseResourceHandles();
 extern void fldReleaseTextureSlots();
-extern void fldResetObjectSlots();
+#include "fld_object_slot_api.h"
 extern s32 fldTitleMiniIsActive();
 extern void fldResetZoneRecordsAndActorSlots();
 extern void fldResetPendingSounds();
@@ -1489,7 +1489,6 @@ extern char D_003BACA0[];
 extern char D_003BACA8[];
 extern FieldPlayerSceneWork D_0032F1A0;
 extern void fldAllocateBackgroundBuffer(void);
-extern void fldResetObjectSlots();
 extern void fldReleaseTitleSlots();
 extern void fldCreateResourceScriptObjects(void);
 extern u8 fldHasAreaResourceNameChanged(void);
