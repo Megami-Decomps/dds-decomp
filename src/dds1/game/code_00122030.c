@@ -87,7 +87,7 @@ extern char D_0039FCB0[];
 
 extern char D_0039FCC8[];
 
-extern void func_0013E5A8(u32 arg0);
+extern void fldDispatchSceneAction(u32 arg0);
 
 extern u32 fldGetSceneReadyFlag(void);
 
@@ -2424,7 +2424,7 @@ void fldRunPendingSceneAction(void) {
 
     argument = D_003BABE0;
     if (argument != 0) {
-        func_0013E5A8(argument);
+        fldDispatchSceneAction(argument);
         D_003BABE0 = 0;
     }
 }
