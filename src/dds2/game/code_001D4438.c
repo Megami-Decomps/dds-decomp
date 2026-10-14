@@ -26,6 +26,7 @@
 #include "mdl.h"
 #include "active_sound_node.h"
 #include "btl_scene_initializer.h"
+#include "fld_encounter_runtime_api.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
@@ -140,8 +141,6 @@ extern void kwlnDrawSetupC70B();
 extern void kwlnDrawEnableCd0();
 extern void kwlnDrawEnableD30();
 extern void btlMarkRuntimeUpdatePending();
-extern s32 fldGetEncounterRuntimeResult();
-extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();
 extern void btlSyncModelFlagFromEventThresholds();
 extern void btlResetTitleStreamOnBattleFlag();

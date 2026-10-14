@@ -20,6 +20,7 @@
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
 #include "fld.h"
+#include "fld_encounter_runtime_api.h"
 #include "fld_scene_request.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"

@@ -6,6 +6,7 @@
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_encounter_runtime_api.h"
 #include "sdf_message.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -255,8 +256,6 @@ struct EffWorldNode;
 extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
 
 extern u8 D_0037F530[];
-
-extern s32 fldGetEncounterRuntimeResult(void);
 
 extern u8 fldGetCampSceneControlMode(void);
 

@@ -14,6 +14,7 @@
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
+#include "fld_encounter_runtime_api.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
 
@@ -130,10 +131,6 @@ extern s32 btlResetSceneSlotFades(void);
 extern s32 func_001B3DD8(void);
 extern void btlAddItemDrop(u16);
 
-
-extern s32 fldGetEncounterRuntimeResult();
-
-extern void fldSetEncounterPendingValue();
 
 extern void evtSetSolarOverlayFullyVisible();
 
