@@ -815,7 +815,7 @@ s32 fldSceneStateWaitScriptRelease(BtlState *scene) {
 
 extern void btlPushSavedPartyUnitStates(void);
 extern void btlSetTaskPhase5(void);
-extern s32 func_001B7830(void);
+extern s32 btlSetEligibleActorPanelTransitionState(void);
 extern s32 btlDestroyTaskC(void);
 extern s32 btlDestroyTaskD(void);
 extern s32 btlChooseAvailableUnit(void);
@@ -850,7 +850,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     if (scene->eventReady != 5) {
         btlSetCommandPanelFadeMode(0, 8);
         btlSetTaskPhase5();
-        func_001B7830();
+        btlSetEligibleActorPanelTransitionState();
         btlDestroyTaskC();
         btlDestroyTaskD();
     }

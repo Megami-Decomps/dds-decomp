@@ -1323,6 +1323,8 @@ void btlEnterAutoActionState(void) {
 extern void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument);
 extern s32 btlIsActiveActor();
 
+extern s32 btlSetEligibleActorPanelTransitionState(void);
+
 s32 btlCommandStateSelectC(ActionStateLink *task) {
     s32 command;
     s32 ready;
@@ -1355,7 +1357,7 @@ s32 btlCommandStateSelectC(ActionStateLink *task) {
 }
 
 void btlResetCommandIndexWork(ActionStateLink *task) {
-    func_001B7830();
+    btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
     task->unit->unk314 = 0xffffffff;
 }

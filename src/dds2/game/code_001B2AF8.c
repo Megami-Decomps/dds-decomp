@@ -2236,7 +2236,7 @@ s32 btlSyncEligibleActorPanelHpMp(void) {
 extern s32 btlCountEligibleLinkedActors(BtlState *);
 extern u8 btlHasRequiredActorStatusBits(BtlUnit *);
 
-s32 func_001B7830(void) {
+s32 btlSetEligibleActorPanelTransitionState(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     KwlnTask *task = kwlnTaskGetTaskByName(D_004367CC);
     BattleActorPanelWork *panel;
