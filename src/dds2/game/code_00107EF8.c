@@ -276,7 +276,41 @@ void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color) {
 }
 
 /* Normalize the requested light direction; replace it immediately or prepare its blend. */
-INCLUDE_ASM(const s32, "game/code_00107EF8", kwlnSetLightDirectionTarget);
+extern s16 D_00438DD8[4];
+extern s16 D_00438DE0[4];
+extern f32 D_0043E340[][4];
+extern f32 D_0043E370[][4];
+extern void kwlnBuildShortestArcQuaternion(void);
+
+void kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction) {
+    u32 blendFlag;
+
+    if (D_0037F770[lightIndex] != NULL) {
+        blendFlag = 8 << (lightIndex * 2);
+        if (blendFrames == 0) {
+            kwlnDrawControlFlags &= ~blendFlag;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_CLEAR_W(vf10);
+            VU0_STORE_VF(vf10, D_0037F770[lightIndex] + 4);
+        } else {
+            D_00438DE0[lightIndex] = blendFrames;
+            D_00438DD8[lightIndex] = 0;
+            kwlnDrawControlFlags |= blendFlag;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_CLEAR_W(vf10);
+            VU0_NORMALIZE_VF10();
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, D_0037F770[lightIndex] + 4);
+            VU0_CLEAR_W(vf10);
+            VU0_NORMALIZE_VF10();
+            /* No memory clobber here: retail recomputes the slot offset after the call. */
+            VU0_STORE_VF_UNCLOBBERED(vf10, D_0043E340[lightIndex]);
+            kwlnBuildShortestArcQuaternion();
+            VU0_STORE_VF(vf10, D_0043E370[lightIndex]);
+        }
+    }
+}
 
 extern u16 D_00438DE6;
 extern u16 D_00438DE8;
