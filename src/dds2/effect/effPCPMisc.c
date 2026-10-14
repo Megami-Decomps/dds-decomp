@@ -216,7 +216,7 @@ struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 
 
-extern void func_00336798(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixX(f32 angle);
 
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
 
@@ -4321,7 +4321,7 @@ void effPcpCopyNestedMatrix(EffPCPBeamWork *work, void *src) {
 
 void effRotateNested(EffPCPBeamWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
-    func_00336798(1.5707963f);
+    sdfVuLoadSecondaryRotationMatrixX(1.5707963f);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work->node);
 }

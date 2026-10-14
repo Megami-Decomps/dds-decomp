@@ -184,7 +184,7 @@ struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 extern void sdfVuLoadRotationMatrixZ(f32 scale);
 extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
-extern void func_002DD8E8(f32 angle);
+extern void sdfVuLoadSecondaryRotationMatrixX(f32 angle);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
 extern u32 effBTLFieldColorUsesActorSelectors(void);
@@ -4199,7 +4199,7 @@ void effPcpCopyNestedMatrix(EffPCPBeamWork *work, void *src) {
 
 void effRotateNested(EffPCPBeamWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
-    func_002DD8E8(1.5707963f);
+    sdfVuLoadSecondaryRotationMatrixX(1.5707963f);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work->node);
 }
