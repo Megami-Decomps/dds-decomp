@@ -417,7 +417,7 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
     evtSubmitPrimaryGsTest(1, 5, 0x80, 1, 0, 0, 1, 2);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112518);
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", effObjApplyTransformParameters);
 
 /* Create and attach kind-3 slot data only when the data slot is empty.
  * Existing data is retained; attachment still uses the new object's kind. */
