@@ -974,8 +974,6 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", sdfRefreshSceneNodePackets);
 
 
 
-extern void sdfRefreshSceneNodePackets();
-
 /* Retain the render-target view and initialize the scene callback and fixed drawing state. */
 void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);

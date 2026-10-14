@@ -45,7 +45,8 @@ typedef struct SdfSceneNode {
     SdfGsContextRegisters contextTwo;
     SdfGsCenteredBoundsRegisters centeredBounds;
     SdfGsSceneBlendRegisters blendState;
-    u64 framePacketWords[4]; /* FRAME_1/2 writes with FBMSK 0x00FFFFFF. */
+    SdfGsRegisterWrite frameContextOne; /* 0x180: FRAME_1 with FBMSK 0x00FFFFFF. */
+    SdfGsRegisterWrite frameContextTwo; /* 0x190: FRAME_2 with FBMSK 0x00FFFFFF. */
     SdfTexBuf texturePackets[2];
 } SdfSceneNode;
 
@@ -55,11 +56,18 @@ typedef char SdfSceneNode_view_at_0x08[
     ((u32)&((SdfSceneNode *)0)->view == 0x08) ? 1 : -1];
 typedef char SdfSceneNode_header_at_0x10[
     ((u32)&((SdfSceneNode *)0)->header == 0x10) ? 1 : -1];
-typedef char SdfSceneNode_framePacket_at_0x180[
-    ((u32)&((SdfSceneNode *)0)->framePacketWords == 0x180) ? 1 : -1];
+typedef char SdfSceneNode_frameContextOne_at_0x180[
+    ((u32)&((SdfSceneNode *)0)->frameContextOne == 0x180) ? 1 : -1];
+typedef char SdfSceneNode_frameContextTwo_at_0x190[
+    ((u32)&((SdfSceneNode *)0)->frameContextTwo == 0x190) ? 1 : -1];
+typedef char SdfSceneNode_frameContextOne_registerId_at_0x188[
+    ((u32)&((SdfSceneNode *)0)->frameContextOne.registerId == 0x188) ? 1 : -1];
+typedef char SdfSceneNode_frameContextTwo_registerId_at_0x198[
+    ((u32)&((SdfSceneNode *)0)->frameContextTwo.registerId == 0x198) ? 1 : -1];
 typedef char SdfSceneNode_textures_at_0x1A0[
     ((u32)&((SdfSceneNode *)0)->texturePackets == 0x1A0) ? 1 : -1];
 
 void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view);
+void sdfRefreshSceneNodePackets(SdfSceneNode *node, s32 bufferIndex);
 
 #endif
