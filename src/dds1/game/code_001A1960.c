@@ -25,6 +25,7 @@
 #include "btl_action.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "btl_resolve_unit_value_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -515,23 +516,21 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index) {
     return datCommandSelectors[index].stat;
 }
 
-extern s32 btlResolveUnitValueWithOverride(s32, s32);
-
 s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
-    return btlResolveUnitValueWithOverride((s32)&battler->partyRecord, element);
+    return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
 }
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 
-s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
+s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 value) {
     s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x670);
     if (handler != 0) {
-        s32 result = handler(object, value);
+        s32 result = handler((s32)record, value);
         if (result != -1) {
             return result;
         }
     }
-    return datGetEffectiveAffinity((DatPartyRecord *)object, value);
+    return datGetEffectiveAffinity(record, value);
 }
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
