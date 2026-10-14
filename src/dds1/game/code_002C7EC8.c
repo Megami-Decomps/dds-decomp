@@ -411,19 +411,8 @@ void sdfConvertMatrixToQuaternion(f32 quaternion[4], f32 matrix[4][4]) {
     }
 }
 
-typedef struct QuatF {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} QuatF;
-
-typedef struct Mat4F {
-    f32 m[16];
-} Mat4F;
-
 /* Convert a unit quaternion into a 4x4 rotation matrix (translation zero). */
-void sdfConvertQuaternionRotationMatrix(Mat4F *out, QuatF *q) {
+void sdfConvertQuaternionRotationMatrix(SdfMat4 *out, SdfMathVector4 *q) {
     f32 xx = q->x * q->x;
     f32 yy = q->y * q->y;
     f32 zz = q->z * q->z;
