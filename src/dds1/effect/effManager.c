@@ -9,6 +9,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_gs_packet.h"
 #include "eff_manager_task.h"
+#include "eff_legacy_node_instance.h"
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_packet_alloc.h"
@@ -152,17 +153,10 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
 }
 extern void sdfDebugPrintf(const char *fmt, ...);
 
-typedef struct EffNodeInstance {
-    u8 pad00[0x20];
-    u8 matrix20[0x40]; /* 0x20 */
-    u8 pad60[0x50];
-    u8 matrixB0[0x40]; /* 0xB0 */
-} EffNodeInstance;
-
 /* Build the effect node for a resource descriptor; descriptors older than 1.03 are converted first, and ones up to 1.02 get an identity matrix. */
 EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
     EffNode *node;
-    EffNodeInstance *instance;
+    EffLegacyNodeInstanceView *instance;
 
     if (descriptor->version < 1.03f) {
         sdfDebugPrintf("old version!![%f]\n", descriptor->version);
@@ -173,12 +167,12 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
         switch (node->type) {
         case 0:
         case 1:
-            instance = (EffNodeInstance *)node->instance;
-            EE_MMI_UNIT_MATRIX(instance->matrixB0);
+            instance = (EffLegacyNodeInstanceView *)node->instance;
+            EE_MMI_UNIT_MATRIX(&instance->matrixAtB0);
             break;
         case 2:
-            instance = (EffNodeInstance *)node->instance;
-            EE_MMI_UNIT_MATRIX(instance->matrix20);
+            instance = (EffLegacyNodeInstanceView *)node->instance;
+            EE_MMI_UNIT_MATRIX(&instance->matrixAt20);
             break;
         }
         sdfDebugPrintf("effManager:set Identity matrix\n");
