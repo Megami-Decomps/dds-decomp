@@ -1060,7 +1060,41 @@ u32 sdfBuildVertexColorQuadVifPacket(const u128 *positions, const void *attribut
     return (u32)packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E0820", func_002E31A0);
+/* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
+ * position, colors, interleaved primary/secondary UV corners (copied as
+ * unaligned words) and the eight quad corner coordinates. */
+void func_002E31A0(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
+                   const void *secondaryUv, const void *quad) {
+    *(u16 *)packet = 10;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xD0000000;
+    *(u32 *)(packet + 20) = 0x34134130;
+    *(u32 *)(packet + 24) = 0x41341;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x15D;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E08C003;
+    memcpy(packet + 56, colors, 32);
+    *(u32 *)(packet + 88) = 0x6D04C00B;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 100), (const u8 *)primaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 104), (const u8 *)secondaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 108), (const u8 *)primaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 112), (const u8 *)secondaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 116), (const u8 *)primaryUv + 12);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 120), (const u8 *)secondaryUv + 12);
+    *(u32 *)(packet + 124) = 0x6404C00F;
+    memcpy(packet + 128, quad, 32);
+    *(u32 *)(packet + 160) = 0x04000008;
+    *(u32 *)(packet + 164) = 0x14000008;
+    *(u32 *)(packet + 168) = 0;
+    *(u32 *)(packet + 172) = 0;
+}
 
 u32 sdfMeasureAlignedDrawPacketSize(s32 count) {
     return (count * 0x6c + 0x4bU) & 0xfffffff0;
