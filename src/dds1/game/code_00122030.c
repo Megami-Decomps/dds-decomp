@@ -581,7 +581,7 @@ void fldPrepareDeferredSceneTransition(void) {
 
 extern s32 fileGetSelectionPendingFlag(void);
 
-extern void func_00120C08(s32);
+extern void fldResetFieldRuntimeState(s32);
 
 extern char D_003BAB68[];
 
@@ -595,7 +595,7 @@ void fldStartSequenceRecord(void) {
         fldPrepareDeferredSceneTransition();
         return;
     }
-    func_00120C08(1);
+    fldResetFieldRuntimeState(1);
     D_0032E570[0x4C / 4] = 0;
     D_0032E570[0x44 / 4] = 1;
     mdlFlagSet(0xC0F);

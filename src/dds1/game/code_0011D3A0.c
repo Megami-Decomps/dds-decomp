@@ -772,7 +772,7 @@ void func_00120AE8(void) {
     memset(datGameState->pad159D0, 0, sizeof(datGameState->pad159D0));
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120C08);
+INCLUDE_ASM(const s32, "game/code_0011D3A0", fldResetFieldRuntimeState);
 
 extern u32 D_0032E570[];
 
