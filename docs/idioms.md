@@ -578,6 +578,13 @@ functions use trampolines and are a different case.
   EE_MMI_UNIT_MATRIX((f32 *)m); <four cells>; VU0_LOAD_MATRIX((f32 *)m);`.
   The family is DDS1 `game/code_002DD038`/`code_002DD8B8` and DDS2
   `game/code_00335EE8`/`code_00336768`.
+  The rule is general: a stack scratch vector or matrix that only VU0 `lqc2`
+  asm reads, through its address, is `volatile` in the original. The
+  Euler-to-quaternion converters (`sdfConvertEulerAnglesToQuaternionVU`,
+  `sdfConvertWrappedEulerAnglesToQuaternionVU`, both games) match only with a
+  `volatile f32 quaternion[4]`: the plain array lets the scheduler reorder the
+  four component stores. If retail stores a scratch vector strictly in program
+  order just before `lqc2`, try the volatile scratch first.
 - A walking pointer that is the call-result variable itself, plus a second
   variable for the unmoved base: `cursor = f(h); base = cursor; cursor +=
   *(u32 *)(cursor + 0xC); for (...; cursor += 8) { r = base + *(u32 *)(cursor + 4);`.
