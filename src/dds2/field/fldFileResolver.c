@@ -3823,9 +3823,9 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
     position.f[3] = 1.0f;
 
     cameraModel = fldPlayerModelContext;
-    previousFrame = fldAreaState.unk178;
+    previousFrame = fldAreaState.previousCameraModelFrame;
     currentFrame = cameraModel->first->currentFrame;
-    fldAreaState.unk178 = currentFrame;
+    fldAreaState.previousCameraModelFrame = currentFrame;
 
     if (fldAreaState.unk8C == 0) {
         switch (fldAreaState.unk88) {
@@ -4202,7 +4202,7 @@ s32 fldUpdateFieldTransition(void) {
         {
             Motion *const thresholdMotion = fldPlayerModelContext->first;
             f32 currentFrame = thresholdMotion->currentFrame;
-            if (work->unk178 < 13.0f && 13.0f <= currentFrame) {
+            if (work->previousCameraModelFrame < 13.0f && 13.0f <= currentFrame) {
                 kwlnPadStartMotor(0, 1, 10);
                 kwlnPadStartMotor(1, 0xE6, 10);
                 mnuResetTitleStreamAfterFileIdle();
