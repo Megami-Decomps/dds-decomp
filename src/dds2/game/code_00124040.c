@@ -76,7 +76,7 @@ extern u32 D_004360E8;
 
 extern s32 D_003898AC[];
 
-extern void func_00122E50(void);
+extern void fldInitializeAreaWork(void);
 
 extern void fldRebuildFieldScene(void);
 
@@ -2206,7 +2206,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
     case 0:
         D_00435F78 = 0;
         fldAreaState.unk130 = 1;
-        func_00122E50();
+        fldInitializeAreaWork();
         D_00435CBC = 0x80000000;
         evtEnableSolarPhaseAdvance();
         D_004360E8 = 0;

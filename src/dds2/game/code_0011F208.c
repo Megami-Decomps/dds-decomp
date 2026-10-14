@@ -49,7 +49,7 @@ enum {
 #include "dds3_world_secondary.h"
 #include "sdf_packet_alloc.h"
 
-extern void func_00122E50(void);
+extern void fldInitializeAreaWork(void);
 
 extern void fldResetSparkRewardProfileIndex(void);
 
@@ -802,7 +802,7 @@ void fldResetFieldMapState(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldResetFieldRuntimeState);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00122E50);
+INCLUDE_ASM(const s32, "game/code_0011F208", fldInitializeAreaWork);
 
 /* Map IDs select 1920-byte banks of 30-byte slots; flag banks are halfwords.
  * The guards check only the upper map-ID bound: negative IDs and slot/bit
