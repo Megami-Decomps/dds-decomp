@@ -567,7 +567,7 @@ extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
 extern s32 btlSelectActorAction(s32);
 
-extern s32 func_001B3B28(BtlUnit *);
+extern s32 btlCalculateMoneyDropAmount(BtlUnit *);
 
 extern s32 btlCalculateHuntEpReward(BtlUnit *, BtlUnit *);
 
@@ -934,7 +934,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             target->status.flags |= 0x4000000;
         }
         if (datCommandRecords[command].unk30 == 21) {
-            work->unk60 = func_001B3B28(target);
+            work->unk60 = btlCalculateMoneyDropAmount(target);
             target->status.stateFlags |= 0x10000;
         }
         switch (datCommandRecords[command].unk30) {
