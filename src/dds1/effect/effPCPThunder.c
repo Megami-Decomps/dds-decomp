@@ -15,6 +15,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_pcp_thunder_cell.h"
 #include "eff_thunder_draw_params.h"
 #include "eff_math.h"
 #include "eff_thunder_fragment.h"
@@ -54,16 +55,6 @@ typedef struct {
     u32 activeFrames; /* 0x04: modulo activeFrameRange, plus one */
     u32 color;        /* 0x08: fades after activeFrames reaches zero */
 } EffThunderFrag; /* 0x0C */
-
-/* 20-byte thunder element (see effThunderRandomizeCell/effThunderCellUpdate): randomized on
- * setup (direction floats plus moduli), then counted down while active. */
-typedef struct {
-    f32 directionX; /* 0x00 randomized to [-1, 1] */
-    f32 directionY; /* 0x04 randomized to [-1, 1] */
-    f32 directionZ; /* 0x08 randomized to [-1, 1] */
-    u32 delayFrames;  /* 0x0C countdown before emitting geometry */
-    u32 activeFrames; /* 0x10 countdown before the color fade */
-} EffThunderCell; /* 0x14 */
 
 /* Each spark owns a separate particle cell system. */
 typedef struct {
@@ -1622,37 +1613,6 @@ void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
     parPrependCellNode(work->state.secondarySystem);
     parPrependCellNode(work->system);
 }
-
-/* Parameter head (0x48 bytes) of the cell effect, copied verbatim into the work. */
-typedef struct {
-    f32 origin[4];          /* 0x00: complete origin quadword */
-    u16 systemParam;         /* 0x10 */
-    u8 pad12[2];
-    f32 length;             /* 0x14: travel distance scale */
-    u32 cellCount;           /* 0x18 */
-    u8 pad1C[8];
-    u32 startDelayRange;     /* 0x24 modulus of delayFrames */
-    u32 activeFrameRange;    /* 0x28 modulus of activeFrames before adding one */
-    u16 halfLife;            /* 0x2C */
-    u8 pad2E[2];
-    f32 coreWidth;          /* 0x30 */
-    u32 arg34;               /* 0x34 */
-    f32 bandWidth;          /* 0x38 */
-    u32 arg3C;               /* 0x3C */
-    f32 edgeWidth;          /* 0x40 */
-    u32 arg44;               /* 0x44 */
-} EffThunderCellParams;
-typedef char EffThunderCellParamsSizeCheck[sizeof(EffThunderCellParams) == 0x48 ? 1 : -1];
-
-/* The counted-down cell effect has its own 0x58-byte work and 0x14-byte
-   particles, not the fragment or vector variants' resource offsets. */
-typedef struct {
-    EffThunderCellParams head;
-    EffThunderCell *cells;   /* 0x48 */
-    u32 unk4C;               /* 0x4C: settable, otherwise unobserved */
-    ParSystem *system;       /* 0x50: allocated cell system */
-    SdfMemBlock *allocationHandle; /* 0x54 */
-} EffThunderCellWork; /* 0x58 */
 
 extern void effThunderRandomizeCell(EffThunderCellWork *work, s32 index);
 
