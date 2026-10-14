@@ -76,8 +76,6 @@ extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
 extern s64 mnuGetSoundBufferStateLocked(void);
 
-extern void sdfVuLoadRotationMatrixY(f32);
-
 extern void sdfVuLoadRotationMatrixX(f32);
 
 extern u8 effSharedRandomState[];

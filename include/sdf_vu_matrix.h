@@ -11,6 +11,9 @@ void sdfComposeVuMatrixFromRegisters(void);
 /* Load the Z-axis rotation matrix rows into the primary VU0 matrix registers. */
 void sdfVuLoadRotationMatrixZ(f32 angle);
 
+/* Load a Y-axis rotation matrix into the primary VU0 matrix registers. */
+void sdfVuLoadRotationMatrixY(f32 angle);
+
 /* Convert three Euler angle components to the VU0 quaternion output.
  * Providers: DDS1 game/code_002E7C20.c and DDS2 game/code_00340AC8.c. */
 void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);

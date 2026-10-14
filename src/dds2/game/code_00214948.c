@@ -1160,8 +1160,6 @@ extern f32 sinf(f32);
 
 extern f32 tanf(f32);
 
-extern void sdfVuLoadRotationMatrixY(f32);
-
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
 

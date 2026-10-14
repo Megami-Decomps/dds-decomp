@@ -73,7 +73,6 @@ extern u8 D_003B1A38[];
 
 extern u8 D_003B1A88[];
 
-extern void sdfVuLoadRotationMatrixY(f32 scale);
 extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 extern s8 D_0043643C;
