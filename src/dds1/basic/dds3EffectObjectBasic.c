@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "eff_owner_bill_entry.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
@@ -231,7 +232,6 @@ s32 effUpdateLinkedWorldObjectConsumers(EffectObj *obj) {
 struct BillObj;
 struct EffNode;
 
-extern u8 dds3TestObjectFlags(void *obj, s32 flags);
 extern void billInvokeCallback(struct BillObj *bill);
 
 s32 effObjUpdateDependencies(EffectObj *obj) {

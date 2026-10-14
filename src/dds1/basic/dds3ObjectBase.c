@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_object_flags.h"
 #include "sdf_model.h"
 #include "evt_gradient_rect.h"
 #include "sdf_motion.h"
