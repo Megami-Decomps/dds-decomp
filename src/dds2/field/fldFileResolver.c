@@ -5014,7 +5014,7 @@ void fldApplyPendingCameraHeading(void) {
 }
 
 /* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00133F08);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraHeadingTransition);
 
 typedef struct FldSkyBuffer {
     u32 word[0x3800];
