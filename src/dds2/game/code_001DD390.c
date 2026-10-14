@@ -38,6 +38,7 @@
 #include "btl_unit_tasks.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "eff_transform.h"
 #include "eff_object.h"
 #include "mdl.h"
@@ -144,8 +145,6 @@ extern struct BtlRuntimeTask *btlDeferredTaskTail;
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern u32 kwlnDrawControlFlags;
-
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s32 datActionAnimationRecords;
 

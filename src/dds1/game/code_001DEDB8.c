@@ -45,6 +45,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "btl_action.h"
@@ -202,8 +203,6 @@ extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
-
-extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *);
 

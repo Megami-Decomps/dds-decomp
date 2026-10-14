@@ -350,6 +350,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
 #include "evt_unit.h"
+#include "evt_unit_color_transition.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
@@ -4635,9 +4636,6 @@ void fldBeginSelectedValueTransition(u32 value) {
 }
 
 extern char D_003A0138[];
-
-
-extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 
 /* Alternate the selected value at the requested rate, and apply live lighting edits. */
 void fldUpdateSelectedValueTransition(void) {
