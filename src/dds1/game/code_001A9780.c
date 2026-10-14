@@ -1171,7 +1171,28 @@ s32 btlCountSceneSlots(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001ACB08);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001ACC20);
+s32 func_001ACC20(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3B0);
+    BattleActorPanelWork *panel;
+    s32 i;
+    BtlUnit *unit;
+    s32 eligibleCount;
+
+    if (task == NULL) {
+        return 0;
+    }
+    panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    eligibleCount = btlCountEligibleLinkedActors(battle);
+    unit = battle->units;
+    /* i is never advanced: the count only gates the walk on any eligible actor. */
+    for (i = 0; unit != NULL && i < eligibleCount; unit = unit->next) {
+        if (btlHasRequiredActorStatusBits(unit) != 0) {
+            panel->activeEntries[unit->lookupId].presentation.transitionState = 4;
+        }
+    }
+    return 1;
+}
 
 void btlClearSharedBattleStateWords(void) {
     u32 *puVar1;
