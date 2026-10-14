@@ -826,7 +826,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) 
     }
 }
 
-extern struct FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern s32 sprintf(char *, const char *, ...);
 extern const char D_00437C28[];
 
@@ -864,7 +864,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
             frFontSetChildChainFirstOption(glyph, chainFlag);
             if ((list->id & 1) != 0) {
                 sprintf(text, D_00437C28, (s32)node->sortKeyPrimary);
-                glyph = func_0019F5E8(x + 0x1180, rowY + 0x20, depth,
+                glyph = itfCreateFont2TextGlyph(x + 0x1180, rowY + 0x20, depth,
                                       color, text, glyph);
                 frFontSetChildChainFirstOption(glyph, chainFlag);
             }

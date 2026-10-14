@@ -129,7 +129,7 @@ extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
 extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, MenuSimpleSpriteState *, s32);
-extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
 extern char mnuNumberSpriteFormat[];
 
@@ -223,7 +223,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     struct FrFontGlyph *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
-    sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
+    sprite = itfCreateFont2TextGlyph(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }

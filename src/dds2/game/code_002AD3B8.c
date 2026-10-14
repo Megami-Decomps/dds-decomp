@@ -44,7 +44,7 @@ extern s32 D_003E7400[];
 extern s32 mnuGetItemRequirementCount();
 extern s32 mnuGetItemRequirementValue();
 extern s32 sprintf(char *, const char *, ...);
-extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
+extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);
@@ -622,7 +622,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
     itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->titleFrames[0], 2, 0x53);
     if (entryId != 0) {
         sprintf(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
-        fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
+        fontHandle = itfCreateFont2TextGlyph(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)fontHandle, 4);
         frFontDrawGlyphChain((FrFontGlyph *)fontHandle, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)fontHandle);

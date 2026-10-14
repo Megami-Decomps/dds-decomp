@@ -3025,7 +3025,7 @@ extern void func_001BAB90(BtlAnalysisPanelWork *, s32, s32, s32, s32);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
 extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
-extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 extern s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *);
@@ -3105,7 +3105,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         btlDrawPanelIconGroup(0, work->fade);
                     } else {
                         sprintf((char *)text, D_00436818, work->unit->partyRecord.level);
-                        glyph = func_0019F5E8((work->x + xOffset) << 4, (work->y - 2) << 3,
+                        glyph = itfCreateFont2TextGlyph((work->x + xOffset) << 4, (work->y - 2) << 3,
                                              0xFF0000, 0x80808000 | work->fade, (char *)text, 0);
                         frFontDrawGlyphChain(glyph, 1, 0x53);
                         frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -3135,7 +3135,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         sprintf((char *)text, D_00436820,
                                       work->unit->partyRecord.hp, work->unit->partyRecord.maxHp);
                         func_001BAB90(work, 0, work->x, work->y, work->fade);
-                        glyph = func_0019F5E8((work->x + xOffset) << 4, (work->y + 17) << 3,
+                        glyph = itfCreateFont2TextGlyph((work->x + xOffset) << 4, (work->y + 17) << 3,
                                              0xFF0000, 0x80808000 | work->fade, (char *)text, 0);
                         frFontDrawGlyphChain(glyph, 1, 0x53);
                         frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -3150,7 +3150,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         sprintf((char *)text, D_00436820,
                                       work->unit->partyRecord.mp, work->unit->partyRecord.maxMp);
                         func_001BAB90(work, 1, work->x, work->y, work->fade);
-                        glyph = func_0019F5E8((work->x + xOffset) << 4, (work->y + 41) << 3,
+                        glyph = itfCreateFont2TextGlyph((work->x + xOffset) << 4, (work->y + 41) << 3,
                                              0xFF0000, 0x80808000 | work->fade, (char *)text, 0);
                         frFontDrawGlyphChain(glyph, 1, 0x53);
                         frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -6390,7 +6390,7 @@ extern void func_001CE418(EffectSlotSet *, s32, s32 *, s32 *, f32);
 
 extern SceneSlotFadeWork *D_00438F54;
 extern ActorSlotOrder *D_00438F58[2];
-extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 
 
@@ -6484,7 +6484,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
     u32 glyph;
 
     itfSetTextDrawLimit(0x13);
-    glyph = func_0019F5E8(x << 4, y << 3, 0, color, text, 0);
+    glyph = itfCreateFont2TextGlyph(x << 4, y << 3, 0, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     itfSetTextDrawLimit(-1);

@@ -34,7 +34,7 @@ extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern s32 sprintf(char *, const char *, ...);
-extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
@@ -1280,7 +1280,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         color = uiBlendColors(color, color & 0xFFFFFF00, 0x80);
     }
     sprintf(text, D_003BC700, value);
-    glyph = func_001978E8(x - 0x90, y, depth, color, text, 0);
+    glyph = itfCreateFont2TextGlyph(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
     frFontSetChildChainFirstOption(glyph, chainFlag);
     frFontDrawGlyphChain(glyph, 1, texture);

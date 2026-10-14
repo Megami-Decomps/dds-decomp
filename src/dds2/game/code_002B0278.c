@@ -92,7 +92,7 @@ extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern s32 mnuGetRangeEntryFlatValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern s32 sprintf(char *, const char *, ...);
-extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437BF8[];
 
@@ -1620,7 +1620,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
             color = uiBlendColors(color, color & 0xFFFFFF00, 0x80);
         }
         sprintf(text, D_00437BF8, value);
-        glyph = func_0019F5E8(x + hpOffset, y - 8, depth, color, text, 0);
+        glyph = itfCreateFont2TextGlyph(x + hpOffset, y - 8, depth, color, text, 0);
         frFontSetChildChainFirstOption(glyph, chainFlag);
         frFontDrawGlyphChain(glyph, 1, texture);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);

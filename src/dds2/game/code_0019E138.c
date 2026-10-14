@@ -710,7 +710,7 @@ FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, co
     return frFontLinkGlyph(parent, glyph, 0);
 }
 
-FrFontGlyph *func_0019F5E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
+FrFontGlyph *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_00436580, 0, 0, 0, previousGlyph);

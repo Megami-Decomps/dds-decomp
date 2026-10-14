@@ -209,7 +209,7 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawMenuItemListRow);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawCampItemListRow);
 
-extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char D_003BC500[];
 
 /* Draw the row label, and draw its numeric value when the list enables it. */
@@ -268,7 +268,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
     }
     value = (s32)node->sortKeyPrimary;
     sprintf(text, D_003BC500, value);
-    glyph = func_001978E8(0xFF0, (rowOffset + 0x9D) << 3, z, style, text, NULL);
+    glyph = itfCreateFont2TextGlyph(0xFF0, (rowOffset + 0x9D) << 3, z, style, text, NULL);
     if (selected) {
         frFontSetChildChainFirstOption(glyph, 4);
     }

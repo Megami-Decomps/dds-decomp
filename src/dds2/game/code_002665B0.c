@@ -125,7 +125,7 @@ extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern s32 sprintf(char *, const char *, ...);
 typedef struct FrFontGlyph FrFontGlyph;
-extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];
 
 typedef struct EffectPair {
@@ -387,7 +387,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     FrFontGlyph *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
-    sprite = func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
+    sprite = itfCreateFont2TextGlyph(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }

@@ -55,7 +55,7 @@ extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 sprintf(char *, const char *, ...);
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_00437C38[];
@@ -73,14 +73,14 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sp
         required = mnuGetItemRequirementValue(entryId);
         sprintf(text, D_00437C38, required - current);
         color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
-        glyph = func_0019F5E8(x, y, 0, color, text, 0);
+        glyph = itfCreateFont2TextGlyph(x, y, 0, color, text, 0);
         frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
         effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
         sprintf(text, D_00437C38, required);
         color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
-        glyph = func_0019F5E8(thresholdX, y, 0, color, text, 0);
+        glyph = itfCreateFont2TextGlyph(thresholdX, y, 0, color, text, 0);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
@@ -115,7 +115,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     if (value != 0) {
         glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
         sprintf(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
-        glyph = (struct FrFontGlyph *)(u32)func_0019F5E8(x + 0x1050, 0x360, depth, color, text, (s32)(u32)glyph);
+        glyph = (struct FrFontGlyph *)(u32)itfCreateFont2TextGlyph(x + 0x1050, 0x360, depth, color, text, (s32)(u32)glyph);
         if (page->unk74 != 0) {
             frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         }
@@ -235,7 +235,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
             sprintf(text, D_00437C48, remainingExp);
-            glyph = (FrFontGlyph *)func_0019F5E8(0x1A50,
+            glyph = (FrFontGlyph *)itfCreateFont2TextGlyph(0x1A50,
                 0xD8, depth, color, text, 0);
             frFontSetChildChainFirstOption(glyph, 3);
             frFontDrawGlyphChain(glyph, 1, surface);

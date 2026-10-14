@@ -39,7 +39,7 @@
 #include "kwln_task_lifecycle.h"
 
 struct FrFontGlyph;
-extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
@@ -1038,7 +1038,7 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     }
     color = uiBlendColors(color, color & ~0xFF, opacity);
     sprintf(buffer, D_003BC7A0, value);
-    glyph = func_001978E8(x + 0x340, y + 0x28, depth, color, buffer, 0);
+    glyph = itfCreateFont2TextGlyph(x + 0x340, y + 0x28, depth, color, buffer, 0);
     frFontDrawGlyphChain(glyph, 1, layer);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }

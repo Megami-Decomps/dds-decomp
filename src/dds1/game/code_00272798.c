@@ -13,7 +13,7 @@
 extern void mnuCreateConfigTasks(s32 mode);
 
 typedef struct FrFontGlyph FrFontGlyph;
-extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
+extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 sprintf(char *, const char *, ...);
 extern char D_003BC6C8[];
@@ -181,12 +181,12 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
         if (node->flags48 & 1) {
             color = 0xA09DC340;
         }
-        label = (FrFontGlyph *)func_001978E8(x + 0x810, y + 0x10, z, color,
+        label = (FrFontGlyph *)itfCreateFont2TextGlyph(x + 0x810, y + 0x10, z, color,
                                           D_003BC6C8, 0);
         frFontSetChildChainFirstOption(label, 0);
         sprintf(buffer, D_003BC6D0,
                        datGameState->inventory.counts[node->sortKeySecondary]);
-        count = (FrFontGlyph *)func_001978E8(x + 0x910, y + 0x20, z, color,
+        count = (FrFontGlyph *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
         frFontDrawGlyphChain(count, 1, drawArg);
         frFontQueueGlyphForCurrentDrawBuffer(count);
