@@ -1364,7 +1364,7 @@ void btlBuildOverlayQuadPacket(SdfListHead *list, s32 primitive, s32 color, s32 
                      0x8700, 0x9000, 0x8700, depth, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
+INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawWindOverlaySweep);
 
 extern u32 effGetWindTextureHandle(void);
 
@@ -1374,7 +1374,7 @@ extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s3
 
 extern u32 btlMulColor(u32, u32);
 
-extern void func_00211D40(SdfListHead *, s32, u32, s32, f32, f32, f32);
+extern void btlDrawWindOverlaySweep(SdfListHead *, s32, u32, s32, f32, f32, f32);
 
 /* Draw the wind overlay: three tinted sweeps over the grey quad, then advance the sweep phase. */
 void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
@@ -1410,11 +1410,11 @@ void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
     registers[1].unk18 = 0x42;
     sdfAppendPacket(list, (u32)registers);
     tint = btlMulColor(0x3C808080, color);
-    func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 5.0f, 2.0f);
+    btlDrawWindOverlaySweep(list, 0x240, tint, depth, btlRuntimeState.phase, 5.0f, 2.0f);
     btlDrawScaledFrameBufferQuad(list, 0x40, 0x98989898, 1.01f, depth);
-    func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.5f);
+    btlDrawWindOverlaySweep(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.5f);
     btlDrawScaledFrameBufferQuad(list, 0x40, 0x98989898, 1.01f, depth);
-    func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.0f);
+    btlDrawWindOverlaySweep(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.0f);
     btlDrawScaledFrameBufferQuad(list, 0x40, 0x98989898, 1.01f, depth);
     btlRuntimeState.phase += btlRuntimeState.phaseSpeed;
     btlRuntimeState.phaseSpeed *= 0x1.f851eap-1f;
