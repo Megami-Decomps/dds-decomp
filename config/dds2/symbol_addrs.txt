@@ -22,6 +22,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+sdfLoadMapCounterCameraVectorsForMask = 0x0030B880; // type:func
 btlInitializeBattleUnits = 0x001D0140; // type:func
 evtViewerUpdateWindowShadeFade = 0x0024AD48; // type:func
 sdfDevResolvePathForWorker = 0x0033F898; // type:func
@@ -11092,7 +11093,6 @@ fldUpdateLmapResourceLoad = 0x0030ABF0; // type:func
 fldAdvanceLmapResourceLoad = 0x0030AC10; // type:func
 fldUpdateLocalMapCounterSelection = 0x0030B1E8; // type:func
 sdfGetInitialMapCameraTransitionState = 0x0030B678; // type:func
-func_0030B880 = 0x0030B880; // type:func
 sdfTickMapCameraTransition = 0x0030BCF0; // type:func
 fldAdvanceLocalMapCameraTransition = 0x0030C0C0; // type:func
 sdfPollCounterSelectionInput = 0x0030C690; // type:func

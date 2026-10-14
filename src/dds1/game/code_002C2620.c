@@ -62,7 +62,7 @@ extern void fldCreateLocalMapCamera(void);
 extern s32 mdlCollectLowFlagBits(void);
 extern s32 fldCountMaskBitsBeforeOrdinal(s32, s32);
 extern s32 sdfCreateMaskedCounterChannels(s32, s32);
-extern s32 func_002C38B0(s32);
+extern s32 sdfLoadMapCounterCameraVectorsForMask(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern s32 fldLoadLocalMapResources();
 extern void fldCreateMapRequestQueues(void);
@@ -482,7 +482,7 @@ void fldInitializeLocalMapScene(void) {
     index = fldCountMaskBitsBeforeOrdinal(mask, D_003BD23C);
     D_003BD240 = index;
     sdfCreateMaskedCounterChannels(mask, index);
-    sdfInitializeMapCounterSelection(D_003BD240, func_002C38B0(mask));
+    sdfInitializeMapCounterSelection(D_003BD240, sdfLoadMapCounterCameraVectorsForMask(mask));
     fldLoadLocalMapResources(mask);
     fldCreateMapRequestQueues();
     dspCloseChannel();
