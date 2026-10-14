@@ -11921,3 +11921,57 @@ alternate matching implementations.
 See [field controller matching](field-controller-matching.md) for the paired
 4,428/4,864-byte controller reconstruction: complete action joins, two-sided
 speed choices, actual final-use scheduler evidence, and finite SDK qualification.
+
+### Snapshot, normalize, then measure: an actual local-allocation lifetime boundary
+
+The paired zone-motion consumers `func_00136FE8` (DDS1, 740 bytes) and
+`func_00139B98` (DDS2, 808 bytes) become exact when both current and reference XYZ
+snapshots are complete before lowering the current point Y by `35.0f`, followed
+by constructing the XYZ distance vector. This preserves the real preparation
+phases, all arithmetic precision, and the pre-call snapshot epoch. It adds no
+operation, artificial use, source flag, or register constraint.
+
+The retained reconstruction lowered current Y between the two snapshots. Eight
+early instruction words differed: literal/Y register homes and dependent stores.
+Qualified live observation of the shipped compiler showed that local allocation
+coalesced the original and adjusted Y pseudos into quantity 0 (five references,
+birth 6, death 46). Its integer priority was 2500, exactly tied with the literal
+35 quantity 2 (two references, birth 10, death 18). The comparator's zero cost
+difference fell through to the quantity-number tie-break: Y took F0 and 35 took
+F1. This was an actual tie, not evidence that a particular pseudo name was needed.
+
+The source phase boundary changes expansion order, and pre-reload scheduling
+places the three reference stores ahead of the final adjusted-Y store. Those
+stores share priority 7, register weight 0 and cost 2; their source LUID ordering
+is material only after the earlier scheduler tiers agree. Y's last store moves
+from scheduled instruction 23 to 26. The coalesced quantity still has five
+references and birth 6, but now dies at 52: its priority falls from 2500 to 2173.
+The literal remains at 2500, and the observed comparator cost difference becomes
+327. Literal 35 therefore obtains F0, adjusted Y F1, and post-reload scheduling
+emits the native Y/X/Z point-publication order. Both paired bodies match exactly.
+
+This is a lifetime intervention with a predicted, measured deciding comparison,
+not a declaration-order search. A prior Y-first array assignment was a different
+control: it changed acquisition/publication order and disturbed other homes. A
+real coordinate-local control remained non-exact. Clearing the same state word
+through its enclosing owner produced the desired initial float block but added
+a real retained owner-high address and S7 save/restore (820 bytes). A pointer to
+the real member removed that base retention but returned to the original eight
+word gap. These controls isolate address lifetime from the successful snapshot
+boundary; they do not justify fake padding or dummy lifetime uses.
+
+Keep the real ownership and mutation contracts. The native entry labels are
+validated non-owning aliases of `FldAreaWork.unk11C` at +0x11C, accessed as one
+aligned signed word. Linked-node translations intentionally accumulate across
+records and both passes; no restore belongs on a skip or acceptance edge. Only
+XYZ is touched. Direct-call record/count reloads and the games' different
+accepted classifications remain intact, including the negated float comparison.
+
+Both read-only live-observer runs recorded the deciding comparator and
+allocation events and passed byte equality for all 28 artifacts (baseline 4,639 events; exact control 4,632). The final commented source
+passed fresh whole-owner checks, DDS1 240/0 and DDS2 81/0. Ordinary/probe objects
+match all 10 allocated/relocation sections in each game; final DDS2 also matches
+the qualified observed object in all those sections. This closes Brass Osprey's retained indexed draft, preserving Garnet Tern, Quartz
+Kestrel, Tidal Quill, Sable Forge and Cedar Ridge predecessor/compiler work.
+The independent native contract audit passes without shared header or compiler
+changes. Production integration/retail gates remain separate.

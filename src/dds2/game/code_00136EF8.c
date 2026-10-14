@@ -1313,7 +1313,128 @@ void fldApplyRelativeZoneMotion(f32 *position) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00139B98);
+/* Non-owning native alias of fldAreaState.unk11C (FldAreaWork + 0x11C). */
+extern s32 D_0038988C[];
+
+/* Classify flagged zone faces after checking the current movement. */
+void func_00139B98(f32 *position) {
+    f32 point[3];
+    f32 reference[3];
+    f32 distanceVector[3];
+    f32 savedPoint[3];
+    f32 savedReference[3];
+    f32 axisDistance[3];
+    f32 margin;
+    f32 planeDistance;
+    f32 classifiedMargin;
+    FldAreaWork *areaState;
+    s32 selectedAxis;
+    s32 pass;
+    s32 recordIndex;
+
+    D_0038988C[0] = 0;
+
+    /* Capture both snapshots before lowering the current probe for testing. */
+    point[0] = position[0];
+    point[1] = position[1];
+    point[2] = position[2];
+    reference[0] = D_0038BBF0[0];
+    reference[1] = D_0038BBF0[1];
+    reference[2] = D_0038BBF0[2];
+    point[1] -= 35.0f;
+    distanceVector[0] = point[0] - reference[0];
+    distanceVector[1] = point[1] - reference[1];
+    distanceVector[2] = point[2] - reference[2];
+
+    if (fldCalculateVectorLength(distanceVector) < 0.1f) {
+        position[0] = reference[0];
+        position[1] = reference[1];
+        position[2] = reference[2];
+        return;
+    }
+
+    axisDistance[0] = ffabsf(point[0] - reference[0]);
+    axisDistance[2] = ffabsf(point[2] - reference[2]);
+    selectedAxis = axisDistance[2] < axisDistance[0] ? 0 : 2;
+
+    fldUpdatePositionZoneHits(position);
+
+    /* Linked-node translations accumulate across records and both passes. */
+    for (pass = 0; pass < 2; pass++) {
+        recordIndex = 0;
+        if (fldValueRecordCount > 0) {
+            areaState = &fldAreaState;
+            do {
+                EffWorldNode *node;
+
+                margin = ((FldValueRecord *)fldValueRecords)[recordIndex].mode == 1 ? 45.0f : 60.0f;
+                if (pass == 0) {
+                    if (((FldValueRecord *)fldValueRecords)[recordIndex].mode == selectedAxis) {
+                        continue;
+                    }
+                } else if (((FldValueRecord *)fldValueRecords)[recordIndex].mode != selectedAxis) {
+                    continue;
+                }
+
+                if (fldTestRoomSceneFlag(areaState->area, areaState->floor + 1, ((FldValueRecord *)fldValueRecords)[recordIndex].sceneFlag) != 0) {
+                    continue;
+                }
+
+                savedPoint[0] = point[0];
+                savedPoint[1] = point[1];
+                savedPoint[2] = point[2];
+                savedReference[0] = reference[0];
+                savedReference[1] = reference[1];
+                savedReference[2] = reference[2];
+
+                node = (EffWorldNode *)((FldValueRecord *)fldValueRecords)[recordIndex].value;
+                if (node != 0) {
+                    point[0] = savedPoint[0] - node->inner->position[0];
+                    point[1] = savedPoint[1] - node->inner->position[1];
+                    point[2] = savedPoint[2] - node->inner->position[2];
+                    reference[0] = savedReference[0] - node->inner->position[0];
+                    reference[1] = savedReference[1] - node->inner->position[1];
+                    reference[2] = savedReference[2] - node->inner->position[2];
+                }
+
+                planeDistance = fldDotVector(point, ((FldValueRecord *)fldValueRecords)[recordIndex].normal);
+                {
+                    u32 faceAttributes = ((FldValueRecord *)fldValueRecords)[recordIndex].face->attributes;
+                    planeDistance = ffabsf(planeDistance - ((FldValueRecord *)fldValueRecords)[recordIndex].planeConstant);
+                    if ((faceAttributes & 0x4000) == 0) {
+                        continue;
+                    }
+                    {
+                        s32 accepted = 0;
+                        if (!(planeDistance < margin)) {
+                            continue;
+                        }
+                        fldClassifyPositionInZoneWithMargin(
+                            &classifiedMargin,
+                            ((FldValueRecord *)fldValueRecords)[recordIndex].mode,
+                            ((FldValueRecord *)fldValueRecords)[recordIndex].count,
+                            margin, point,
+                            &((FldValueRecord *)fldValueRecords)[recordIndex]);
+                        if (!(classifiedMargin < 0.0f)) {
+                            accepted = 1;
+                        }
+                        if (accepted == 1) {
+                            FldCollisionFace *face = ((FldValueRecord *)fldValueRecords)[recordIndex].face;
+                            s32 soundClass = face->sound & 0xF0;
+                            if (soundClass == 0x20) {
+                                areaState->unk11C = 3;
+                            } else if (soundClass == 0x30) {
+                                areaState->unk11C = 2;
+                            } else {
+                                areaState->unk11C = accepted;
+                            }
+                        }
+                    }
+                }
+            } while (++recordIndex < fldValueRecordCount);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldRefreshAreaStateFromPosition);
 
