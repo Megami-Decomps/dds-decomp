@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "evt_scaled_value.h"
 #include "evt_viewer_playback.h"
 #include "kwln_task_add_child.h"
@@ -741,7 +742,6 @@ extern void mnuStartMoviePlaybackByResourceIndex(s32 value);
 extern s32 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(s32 enabled);
 extern void fldBeginTitleAnimation(void);
-extern void kwlnFadeBackgroundStartOut(s32 duration);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern u32 itfMesGetWindowEntryItems(s32 window, s32 entry);

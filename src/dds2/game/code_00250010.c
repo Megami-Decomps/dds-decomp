@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "dat_state.h"
 #include "sdf_texture_offset_list.h"
@@ -4492,7 +4493,6 @@ extern s32 evtIsBgmLoaded(s32);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32, s32, s32);
 extern void kwlnFadeBackgroundStartIn(s32);
-extern void kwlnFadeBackgroundStartOut(s32);
 
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime) {
     char motionName[0x40];

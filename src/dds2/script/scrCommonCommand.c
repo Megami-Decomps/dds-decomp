@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "eff_random_mod.h"
 #include "fpu.h"
 #include "kwln.h"
