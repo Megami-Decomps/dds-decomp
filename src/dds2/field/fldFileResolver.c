@@ -4292,7 +4292,7 @@ extern void fldGetFieldFloatPair(f32 *, f32 *);
 /* Field movement, player pose and camera input controller. */
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413280);
 
-s32 func_00132540(void) {
+s32 fldUpdateFieldPlayerMovement(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
     f32 quaternion[4] __attribute__((aligned(16)));
@@ -4768,7 +4768,7 @@ clear_highlight:
 extern s32 fldApplyPlayerVerticalStep(void);
 extern void fldUpdateModeOneCameraPose(void);
 extern void fldDispatchCameraModelFrameEvents(s32, s32);
-extern s32 func_00132540(void);
+extern s32 fldUpdateFieldPlayerMovement(void);
 extern u32 D_00389988[];
 extern s32 D_003897C0[];
 
@@ -4798,10 +4798,10 @@ s32 fldUpdateCameraFrame(void) {
     }
     if (D_003897C0[0] == 1) {
         fldClearCameraObjectHighlightFlag();
-        func_00132540();
+        fldUpdateFieldPlayerMovement();
         fldSyncObjectFlagsB();
     } else {
-        func_00132540();
+        fldUpdateFieldPlayerMovement();
         fldSyncObjectFlagsB();
     }
     return 0;
