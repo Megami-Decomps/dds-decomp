@@ -14,6 +14,7 @@
 #include "eff_point_set.h"
 #include "common.h"
 #include "eff_active_resource.h"
+#include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
@@ -7849,22 +7850,6 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
 
 
 
-/* Entire 40-byte payload copied for resource kind 1. */
-typedef struct EffActorLightConfig {
-    u32 duration;
-    s32 colorFadeIn;
-    s32 colorFadeOut;
-    s32 directionFadeIn;
-    s32 directionFadeOut;
-    u32 firstColor;
-    u32 secondColor;
-    u8 actorSelection;
-    u8 pad1D[3];
-    EffectVectorRequest direction;
-} EffActorLightConfig;
-typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 1 : -1];
-
-
 #include "btl_effect_position.h"
 extern void btlUnitGetEffectPosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
@@ -8023,17 +8008,6 @@ void effSyncLinkedActorChildParameter(void) {
     }
 }
 
-
-/* Entire copied payload for resource kind 2. */
-typedef struct EffActorTintConfig {
-    u32 duration;
-    u32 fadeIn;
-    u32 fadeOut;
-    u32 color;
-    u8 actorSelection;
-    u8 pad11[3];
-} EffActorTintConfig;
-typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 : -1];
 
 /* Apply a temporary tint to eligible actors, then restore their original RGB. */
 void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
