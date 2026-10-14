@@ -26,6 +26,7 @@
 #include "bf_flw0_header.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
+#include "fld_resource_wait_api.h"
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
@@ -63,8 +64,6 @@ extern s32 fileMenuOperationSucceeded(void);
 
 extern s32 fileMenuTaskExists(void);
 extern void fileStartMemoryCardMenuForMode(s32 mode);
-
-extern s32 fldIsFieldResourceWaitFinished(void);
 
 extern u32 D_00435BB0;
 

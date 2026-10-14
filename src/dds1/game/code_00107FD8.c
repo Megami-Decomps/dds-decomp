@@ -27,6 +27,7 @@
 #include "bf_flw0_header.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
+#include "fld_resource_wait_api.h"
 
 extern void mnuCreateConfigTasks(s32 mode);
 
@@ -71,8 +72,6 @@ extern s32 fileConsumeConfigTaskReady(void);
 extern s32 mnuAcknowledgeCampState(void);
 
 extern u32 D_003BA730;
-
-extern s32 fldIsFieldResourceWaitFinished(void);
 
 extern s32 fileMenuTaskExists(void);
 extern void fileEnterMcPackScene(s32 mode);
