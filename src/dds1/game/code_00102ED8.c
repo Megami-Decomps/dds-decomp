@@ -1254,6 +1254,8 @@ void kwlnTextureReleaseHeldReference(void) {
 }
 
 /* Set the flag and return 1 when a held handle exists; otherwise leave it and return 0. */
+#include "kwln_texture_reference_flag_api.h"
+
 s32 kwlnTextureSetReferenceFlagIfPresent(void) {
     s32 result = 0;
 

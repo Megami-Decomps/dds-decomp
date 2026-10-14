@@ -198,7 +198,7 @@ extern SdfTex *kwlnHeldTextureReference;
 
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
-extern s32 kwlnTextureSetReferenceFlagIfPresent(void);
+#include "kwln_texture_reference_flag_api.h"
 
 extern void func_0022D040(void);
 

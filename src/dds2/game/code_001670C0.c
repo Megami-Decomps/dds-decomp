@@ -39,7 +39,7 @@ extern void effBattleReleaseParameterBanks(SoundMixer *);
 extern void dds3EndCrossfade();
 extern const char D_00414430[];
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
-extern s32 kwlnTextureSetReferenceFlagIfPresent();
+#include "kwln_texture_reference_flag_api.h"
 extern void kwlnTextureClearReferenceFlag(void);
 extern void kwlnTextureReleaseHeldReference(void);
 extern void sdfDebugPrintf(const char *fmt, ...);

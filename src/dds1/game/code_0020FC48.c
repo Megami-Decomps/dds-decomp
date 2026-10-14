@@ -1605,6 +1605,8 @@ extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
 extern u8 D_00325870[];
 
+#include "kwln_texture_reference_flag_api.h"
+
 void btlClearOverlayBuffers(void) {
     u8 *entry;
     s32 i;
