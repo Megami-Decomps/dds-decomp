@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_sif_command.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
@@ -260,7 +261,6 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
-extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 
 /* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
