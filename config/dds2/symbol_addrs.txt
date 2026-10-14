@@ -7161,6 +7161,7 @@ fldResolveEventSelectorTarget = 0x0013F790; // type:func
 fldMarkStageExplorationBitmapRegion = 0x00123DE8; // type:func
 fldUpdateCameraHeadingTransition = 0x00133F08; // type:func
 sdfDevDiscRequestWorkerThread = 0x0033F3E0; // type:func
+btlSelectSerialEncounter = 0x001B3DD8; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -9623,7 +9624,6 @@ btlAverageAllLevelsForMask = 0x001B3A00; // type:func
 __udivdi3 = 0x001B3B10; // type:func
 btlCalculateMoneyDropAmount = 0x001B3B28; // type:func
 btlSelectPreemptiveOutcome = 0x001B3BE0; // type:func
-func_001B3DD8 = 0x001B3DD8; // type:func
 btlRollMajinEncounter = 0x001B4040; // type:func
 btlRollSurpriseAttack = 0x001B4210; // type:func
 btlRollPetrifiedDeathChance = 0x001B4600; // type:func

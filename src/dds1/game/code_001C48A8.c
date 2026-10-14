@@ -505,7 +505,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
         *(u8 *)(arg0 + 0x258) = 0;
-        func_001A9780();
+        btlSelectSerialEncounter();
         if (datBattleSceneRecords[work->sceneId].unk01 != 0) {
             for (i = 0; i < datBattleSceneRecords[work->sceneId].unk02; i++) {
                 btlAddItemDrop(datBattleSceneRecords[work->sceneId].unk01);

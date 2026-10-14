@@ -7503,6 +7503,7 @@ sdfVuBuildVisibleTriangleList = 0x002DF128; // type:func
 btlSetEligibleActorPanelTransitionState = 0x001ACC20; // type:func
 fldMarkStageExplorationBitmapRegion = 0x00121DE0; // type:func
 sdfDevDiscRequestWorkerThread = 0x002E6538; // type:func
+btlSelectSerialEncounter = 0x001A9780; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -8794,7 +8795,6 @@ btlCollectAvailableOptionSkills = 0x001A8DD8; // type:func
 btlAverageAllLevelsForMask = 0x001A94A0; // type:func
 __udivdi3 = 0x001A95B0; // type:func
 btlSelectPreemptiveOutcome = 0x001A95C8; // type:func
-func_001A9780 = 0x001A9780; // type:func
 btlRollSurpriseAttack = 0x001A99B0; // type:func
 btlRollStoneDeathChance = 0x001A9D38; // type:func
 func_001AA130 = 0x001AA130; // type:func

@@ -12295,3 +12295,39 @@ Sharing every failure across both query branches is a measured negative:
 it changes the unit-present guards and emits 316 bytes. The accepted form
 shares only the actual pair-query failures; it uses no flags, extra references,
 alternate types or artificial lifetimes. Complete owners check 153/0 and 44/0.
+
+
+### Field guards and publication can use separate ordinary reads
+
+The paired `btlSelectSerialEncounter` bodies (DDS1 560 bytes, DDS2 616 bytes)
+use a table field to test whether a forced encounter exists, then acquire that
+field for publication inside the success branch:
+
+```c
+if (datBattleSceneRecords[state->battleMode].serialScene != 0) {
+    forcedScene = datBattleSceneRecords[state->battleMode].serialScene;
+    state->requestMode = 2;
+    state->requestArgument = forcedScene;
+    btlBossDebugPrintf("btl:serial 100%% [%X]\n", forcedScene);
+    return 1;
+}
+```
+
+There is no intervening call or write before the second expression. CSE merges
+these same-epoch reads into retail's single load and separate publication copy.
+A single captured value shared by the guard, store and call changes allocation.
+The candidate scan similarly keeps a captured fallback scene while comparing
+the current scene field against indexed entries. Its loop writes only the local
+candidate array and has no callbacks; the compiler shares the field load.
+
+The entries pointer addresses the actual six-byte entry array, after its group
+header. Direct member indexing gives retail's offset-first address addition.
+Publishing `candidates[count] = row;` before `count++` avoids the extra old-count
+copy emitted for the postincrement subscript. Preserve the unsigned halfword
+count, row and RNG-index truncations. DDS2 additionally rejects encounter kind 3
+on the non-override path and excludes weighted candidates with scene flag 0x40.
+
+These ordinary source phases close both selectors from the earlier Basalt Finch
+and Copper Swift reconstruction. They introduce no extra state, alias views,
+qualifiers, wrappers or compiler flags. Real compiler probes agree with ordinary
+assembly and every RTL dump; both complete owners must remain exact.

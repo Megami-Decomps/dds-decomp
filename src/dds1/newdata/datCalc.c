@@ -2041,7 +2041,8 @@ void func_0011CE30(void) {
 void btlPreemptiveChanceHook(void) {
 }
 
-void btlSerialBattleChanceHook(void) {
+/* The serial-battle caller supplies its clamped chance; retail leaves this hook empty. */
+void btlSerialBattleChanceHook(s32 chance) {
 }
 
 /* The surprise-probability diagnostic hook receives the final chance. */
