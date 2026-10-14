@@ -10,6 +10,8 @@ typedef struct EffFieldColorRecord {
 
 typedef char EffFieldColorRecordSizeCheck[sizeof(EffFieldColorRecord) == 0x14 ? 1 : -1];
 
+extern u32 effFieldColorFlags;
+
 EffFieldColorRecord *effBTLFieldColorGetBaseColor(s32 colorId, s16 variant, s16 kind, f32 *output);
 EffFieldColorRecord *effBTLFieldColorLookupNarrowSelectors(s32 colorId, s16 variant, s16 kind, f32 *output);
 
