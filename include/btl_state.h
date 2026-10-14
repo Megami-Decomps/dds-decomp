@@ -584,7 +584,7 @@ typedef struct BtlState {
     u8 pad6CC[4];
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
     u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x6D4: 001B325C overrides the unsigned scene limit. */
-    s32 (*commandAvailabilityOverride)(BtlUnit *, s32); /* 0x6D8: 001B10AC loads the callback; 001B10BC calls it with unit and command. */
+    u8 pad6D8[4];
     s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: btlSelectCommandHitCount calls the range override. */
     BtlUnit *(*selectSoundEffectTarget)(BtlUnit *); /* 0x6E0: DDS2 00201FD8 consumes the returned actor. */
     s32 (*unk6E4)(BtlUnit *);
