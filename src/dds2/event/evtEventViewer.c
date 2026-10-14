@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_camera_color_track_api.h"
 #include "kwln_background_fade_api.h"
 #include "evt_scaled_value.h"
 #include "evt_viewer_playback.h"
@@ -668,8 +669,6 @@ extern void effEnableFramebufferQuad(void);
 extern void effDisableFramebufferQuad(void);
 extern void effEnableColorRectangle(void);
 extern void effDisableColorRectangle(void);
-extern void evtUpdateCameraColorTrackEffect(EvtRuntime *);
-
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
         effDrawBlurRectangle(&effGetLoadDescA()->source);
@@ -1076,9 +1075,6 @@ extern void effEnableFramebufferQuad(void);
 extern void effDisableFramebufferQuad(void);
 extern void effEnableColorRectangle(void);
 extern void effDisableColorRectangle(void);
-extern void evtUpdateCameraColorTrackEffect(EvtRuntime *);
-
-
 extern s32 sdfDebugPrintf(const char *, ...);
 
 /* Applies duration-scaled alpha to the selected effect for supported track

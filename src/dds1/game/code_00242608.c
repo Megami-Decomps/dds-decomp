@@ -13,6 +13,7 @@
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
 #include "evt_viewer.h"
+#include "evt_camera_color_track_api.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
