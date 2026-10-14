@@ -5862,7 +5862,104 @@ BtlRuntimeTask *btlScheduleContextReset(void) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E9130);
+extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
+extern f32 D_003B6D30[4], D_003B6D40[4];
+
+/* Per-frame battle camera update: run the active camera mode's update hook,
+ * advance the command's pose blend, optionally re-express the pose through
+ * the command rotation, then push the pose into the world camera. */
+void func_001E9130(void) {
+    BtlState *scene = (BtlState *)btlGetRuntime();
+    u32 kind;
+    EffWorldNode *camera;
+    CameraData *data;
+    u32 flags;
+    s32 result;
+    f32 position[4];
+
+    if (!(scene->battleFlags & 0x10)) {
+        return;
+    }
+    kind = scene->cameraCommand.status;
+    if (kind == 0) {
+        return;
+    }
+    if (D_003B6C00[kind].update != NULL && !(scene->cameraCommand.flags & 0x400)) {
+        result = 1;
+        if (scene->cameraUpdatePredicate != NULL) {
+            result = scene->cameraUpdatePredicate(&scene->cameraCommand);
+        }
+        if (result != 0) {
+            D_003B6C00[kind].update(&scene->cameraCommand);
+        }
+    }
+    camera = dds3GetWorldCameraObject(dds3GetWorldObject());
+    if (camera == NULL || camera->value == NULL) {
+        return;
+    }
+    flags = scene->cameraCommand.flags;
+    data = camera->data;
+    if (flags & 1) {
+        if (scene->cameraCommand.state == 0) {
+            btlNormalizeActionCameraKeyScales(&scene->cameraCommand);
+            flags = scene->cameraCommand.flags;
+        }
+        result = 0;
+        if (flags & 8) {
+            result = btlCompleteCameraFlag08Mode(&scene->cameraCommand);
+        } else if (flags & 0x10) {
+            result = btlStepPoseBlendHalf(&scene->cameraCommand);
+            flags = scene->cameraCommand.flags;
+        } else if (flags & 0x20) {
+            result = btlCompleteCameraFlag20Mode(&scene->cameraCommand);
+        } else if (flags & 0x40) {
+            result = btlStepPoseBlend(&scene->cameraCommand);
+            flags = scene->cameraCommand.flags;
+        } else if (flags & 0x80) {
+            result = btlCompleteCameraFlag80Mode(&scene->cameraCommand);
+        } else if (flags & 0x100) {
+            result = btlStepPoseBlendFrame(&scene->cameraCommand);
+            flags = scene->cameraCommand.flags;
+        } else if (flags & 0x20000) {
+            result = btlStepPoseBlendRatio(&scene->cameraCommand);
+            flags = scene->cameraCommand.flags;
+        }
+        if (result == 1) {
+            scene->cameraCommand.progressBits = 0;
+            scene->cameraCommand.flags = flags & ~1;
+            flags = scene->cameraCommand.flags;
+        }
+        if (flags & 0x80000) {
+            VU0_LOAD_VF(vf10, scene->cameraCommand.rotation);
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf10, scene->cameraCommand.camera.position);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_LOAD_VF(vf11, scene->cameraCommand.translation);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, scene->cameraCommand.camera.position);
+            VU0_LOAD_VF(vf10, scene->cameraCommand.camera.direction);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF(vf10, scene->cameraCommand.camera.direction);
+            flags = scene->cameraCommand.flags;
+        }
+    }
+    if (flags & 0x2000) {
+        return;
+    }
+    VU0_LOAD_VF(vf10, scene->cameraCommand.camera.direction);
+    VU0_STORE_VF(vf10, &data->localEyeOffset);
+    VU0_SCALAR_OP(-scene->cameraCommand.camera.distance, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, scene->cameraCommand.camera.position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf11, &data->worldEye);
+    VU0_STORE_VF(vf10, position);
+    effObjSetInnerPosition(camera, (u128 *)position);
+    dds3SetCameraFieldOfView(camera, scene->cameraCommand.camera.fov);
+    data->fovUpdatePending |= 1;
+    effObjSetInnerRotation(camera, (u128 *)D_003B6D40);
+    PCP_COPY_VECTOR(&data->localUp, D_003B6D30);
+    scene->cameraCommand.state++;
+}
 
 extern f32 D_003B6D70[4], D_003B6D80[4];
 
@@ -5872,7 +5969,6 @@ extern u32 D_00436A98;
 
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
 
-extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
