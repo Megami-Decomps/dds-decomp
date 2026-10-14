@@ -45,6 +45,7 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "btl_target_result.h"
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
@@ -3417,23 +3418,6 @@ s32 func_001AF0B0(BtlUnit *attacker, BtlUnit *defender, u32 command) {
 INCLUDE_ASM(const s32, "game/code_001A8748", btlCalculateHpActionAmount);
 
 INCLUDE_ASM(const s32, "game/code_001A8748", btlCalculateMpActionAmount);
-
-typedef struct BtlHitResult {
-    s32 amount;
-    u8 pad04[0x28];
-} BtlHitResult;
-
-typedef struct BtlTargetResult {
-    u8 hitCount;
-    u8 pad01[7];
-    u32 kind;
-    u8 pad0C[4];
-    u8 skipped;
-    u8 pad11[3];
-    u8 blocked;
-    u8 pad15[7];
-    BtlHitResult hits[32];
-} BtlTargetResult;
 
 s32 btlSumOtherTargetHitAmounts(u8 *action) {
     BtlTargetResult *result = *(BtlTargetResult **)(action + 0x88);
