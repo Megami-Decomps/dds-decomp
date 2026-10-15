@@ -1,3 +1,4 @@
+#include "sdf_gs_alpha_register_api.h"
 #include "common.h"
 #include "sdf_packet_header.h"
 #include "eff_object_node.h"
@@ -1010,8 +1011,6 @@ extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void effSelectPresetByKind(u32, u32);
-extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
-
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {

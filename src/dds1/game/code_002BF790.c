@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "sdf_gs_alpha_register_api.h"
 #include "sdf_gs_register_submit_api.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"

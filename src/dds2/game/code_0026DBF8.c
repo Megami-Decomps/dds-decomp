@@ -1,3 +1,4 @@
+#include "sdf_gs_alpha_register_api.h"
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
 #include "common.h"
@@ -52,7 +53,6 @@ extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8
 extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, FrFontTextBank *, s32, s32, s32);
 /* GS TEST packets carry a full-width register value; kind selects the surface. */
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
-extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);

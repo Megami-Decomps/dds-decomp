@@ -70,6 +70,7 @@
 #include "eff_billboard_work.h"
 #include "eff_update_flags.h"
 #include "eff_resource_list.h"
+#include "sdf_gs_alpha_register_api.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "eff_record_bucket.h"
@@ -14580,8 +14581,6 @@ u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
     return 1;
 }
 
-extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
-
 void effSelectPresetByKind(u32 kind, u32 arg) {
     switch (kind) {
     case 0:
@@ -14620,8 +14619,6 @@ extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void effSelectPresetByKind(u32, u32);
-extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
-
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
