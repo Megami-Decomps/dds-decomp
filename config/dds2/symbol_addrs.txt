@@ -12561,3 +12561,16 @@ mnuTerminalSpriteDirectory = 0x00424E48;
 mnuTerminalPrimarySpriteNames = 0x003CE7A8;
 mnuTerminalReducedModeSpriteNames = 0x003CE7B8;
 mnuTerminalCharacterBackgroundSpriteNames = 0x003CE7C0;
+
+effMuzzleThunderRayParams = 0x003B1AF0;
+effOffsetMuzzleThunderRayParams = 0x003B1B50;
+effCyanBlueRayPairParams = 0x003B1BB0;
+effCyanBlueRaySingleParams = 0x003B1C10;
+effWhiteYellowRayPairParams = 0x003B1C70;
+effWhiteYellowRaySingleParams = 0x003B1CD0;
+effYellowOrangeRayPairParams = 0x003B1D30;
+effYellowOrangeRaySingleParams = 0x003B1D90;
+effBrownRedRayPairParams = 0x003B1DF0;
+effBrownRedRaySingleParams = 0x003B1E50;
+effOrangeVioletRayPairParams = 0x003B1EB0;
+effOrangeVioletRaySingleParams = 0x003B1F10;

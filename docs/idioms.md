@@ -13911,3 +13911,25 @@ uses, without claiming a new owner layout. The motion path remains
 Keep all literal bytes, terminators, declarations, casts, bounds, alignments,
 pointer ordering and copy operations unchanged. Existing Harbor Maple/Luna
 reconstruction credit is retained; these are identifier-only data names.
+
+
+## Thunder ray fragment presets: counts and color ramps
+
+`effMuzzleThunderRayParams` and `effOffsetMuzzleThunderRayParams` are the
+parameter records consumed by the existing muzzle-ray wrappers. Their
+fragment counts are two and one; the work constructors retain their native
+start-distance/length pairs `(0,375)` and `(325,225)` respectively.
+
+The CyanBlue, WhiteYellow, YellowOrange, BrownRed and OrangeViolet ray
+preset families inherit their role names from the matched constructors.
+Each `*RayPairParams` record has native fragmentCount two, and its separate
+`*RaySingleParams` record has count one. The three packed color words at
+0x40, 0x48 and 0x50 agree within each color family; retain all alpha bits,
+widths, time fields and separate storage rather than synthesizing records.
+
+Every native parameter head is 0x54 bytes followed by twelve zero alignment
+bytes in the checked 0x60-byte window, identical to its counterpart in the
+other game. The existing unsized byte arrays and casts to the shared
+fragment-parameter owner are unchanged. These names add no type, bound,
+initializer, copy, prototype, callback or instruction changes and do not
+claim new function or data-ownership credit.

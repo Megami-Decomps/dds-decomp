@@ -11193,3 +11193,16 @@ mnuTerminalKarma01SpriteName = 0x003AF580;
 mnuTerminalSpriteDirectory = 0x003AF590;
 mnuTerminalPrimarySpriteNames = 0x0036AC78;
 btlSceneStreamCycleEntries = 0x0035F998;
+
+effMuzzleThunderRayParams = 0x003551C0;
+effOffsetMuzzleThunderRayParams = 0x00355220;
+effCyanBlueRayPairParams = 0x00355280;
+effCyanBlueRaySingleParams = 0x003552E0;
+effWhiteYellowRayPairParams = 0x00355340;
+effWhiteYellowRaySingleParams = 0x003553A0;
+effYellowOrangeRayPairParams = 0x00355400;
+effYellowOrangeRaySingleParams = 0x00355460;
+effBrownRedRayPairParams = 0x003554C0;
+effBrownRedRaySingleParams = 0x00355520;
+effOrangeVioletRayPairParams = 0x00355580;
+effOrangeVioletRaySingleParams = 0x003555E0;
