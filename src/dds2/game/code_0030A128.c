@@ -1,7 +1,9 @@
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
+#include "evt_solar.h"
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
@@ -85,11 +87,9 @@ extern s32 sdfLoadMapCounterCameraVectorsForMask(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern void fldCreateMapRequestQueues(void);
 extern void evtCreateMessageWindowIfMissing(s32);
-extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void sdfEnableFlagListViewTargetRelativeMode(void);
-extern void sndStartTrackDefault(s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
 extern u32 kwlnDrawControlFlags;
 extern u32 D_00435CBC;
@@ -654,7 +654,6 @@ extern void sdfCounterTickCountdownAndMapTimers(void);
 extern void fldUpdateMapRequestQueues(s32);
 extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
-extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 sdfStepSelectedMapCameraTransition(void);
 extern s32 fldAdvanceLocalMapCameraTransition(void);
 extern s8 D_0037F510[];
@@ -664,7 +663,6 @@ extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
 extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void evtBeginSolarOverlayFadeIn(s32);
 /* Legacy calls pass the RGB bytes as promoted integer arguments. */
 extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);

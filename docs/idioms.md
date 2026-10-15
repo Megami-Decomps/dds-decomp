@@ -6029,16 +6029,26 @@ and a signed word countdown at `+8`. The destructor releases that model
 before the slot allocation. Keep the complete owner in `mdl.h`, not an
 eight-byte prefix or another private slot view.
 
-`SdfModel.unk94` is one four-byte value with genuinely different uses.
-DDS1 `0021755C` and DDS2 `00232074` store the float `1000.0f`;
-DDS1 renderer `002D9530` loads its unchanged word and `002D953C`
-forwards those bits into a VIF packet at `+0x2C`. The Nocturne debug
-renderer independently reads the same member as a float at `002B07D4`
-and as a packet word at `002B089C` / `002B08A8`. Use the primary
-owner's documented `scalar` / `word` union, preserving its `0x9C` extent.
-These type completions do not match the still-assembly afterimage body:
-its unobserved local packed-color store needs genuine source/API evidence,
-not a padded temporary or fabricated memory-output packing primitive.
+`SdfModel.unk94` is a binary32 model scale. DDS1 `0021755C` and DDS2
+`00232074` store `1000.0f`; DDS1 `002D9454` loads it as a float for
+`sdfVuSetGlobalScale`. The renderer copies its unchanged bits at `002D9530`
+into the first word of a three-scalar VIF payload at `+0x2C`, followed by
+another two float words. Raw packet transport does not require an integer
+member or a union. The primary owner remains `0x9C` bytes.
+
+The paired updaters load the initial color, per-frame color step and source
+model tint into `vf10`, `vf11` and `vf12`. `mdlPackDevSlotColor` evaluates
+`(color + step * age) * tint`, scales by 128, converts and packs the result.
+Its early-clobber result and both real age/scale inputs form one COP2/MMI
+operation, using the existing `eePackRGBAWord` 16-byte carrier pattern.
+This is a reconstructed operation shared by the two afterimage updaters.
+
+Initialize a new slot and model scale before publishing the list head. In
+the update loop, read the reset period before the copy callback, then publish
+the countdown once after either callback. The common publication gives the
+early optimizer one join; `sched1` then shares argument setup across the
+branch, and delay-slot filling produces the native call slots. Separate
+stores in the two C arms leave three differing instruction words.
 
 
 ## DDS2 scene-slot flags and the retained fade-count argument
@@ -12745,3 +12755,34 @@ register pinning, an artificial use or a type change. All 156 functions and
 the unit's readonly data remain exact. The sequel's semantic counterpart,
 `func_002C2AE8`, has additional auxiliary bars and phase animation; it is not
 a byte-identical donor.
+
+
+### Action-filtered group camera pairs: keep projection paths complete
+
+`btlBuildFilteredGroupCameraPair` (DDS1 `001E0718`, DDS2 `001EDFB8`) copies
+eight 48-byte preset rows. These rows have a float parameter at `+0x28` and
+an integer category mask at `+0x2C`; they differ from the other camera preset
+layout whose last field is a float. Preserve the complete local snapshot
+before callbacks, selection before target traversal, and the unsigned actor
+count used for mean muzzle height and the field-of-view branch.
+
+One count workspace serves three completed phases: preset candidates,
+target-list entries and eligible actors. Independent eligibility guards
+preserve the separate native tests for active, excluded and selected flags.
+A combined condition lets the compiler replace them with a masked equality
+and introduces a saved constant that changes the remaining register homes.
+
+Keep the full projection in each count arm: compute its half-FOV argument,
+call `tanf`, then divide the bound. In the qualified compiler trace, the bound
+has five references over 29 live instructions (priority 3448), ahead of FOV
+at 3225 and accumulated Y at 2872. A source join before the call gives the
+bound four references over 31 instructions and different float registers.
+After allocation, `jump2` merges the common tangent-call and quotient tail,
+leaving the single native call. Destructive reuse of the bound for the final
+quotient fixes its incoming home but keeps the result in the wrong register.
+
+The wider FOV factor is the literal `0x1.555554p+0f` (bits `0x3FAAAAAA`),
+multiplied before `0.5f`; its native `.lit4` address is not a mutable global.
+Capture the selected parameter after both direction callbacks and before
+publishing the action flags and motion parameter. DDS2 additionally preserves
+its single-target fallback, disabled by animation flag `0x80`.

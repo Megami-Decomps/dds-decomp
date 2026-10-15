@@ -154,6 +154,7 @@ void sdfDevConsFinalizeGlyphTag(ConsBuf *buffers) {
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
+void *sceDmaGetChan(s32 id);
 
 /* Finalize the current GIF tag and submit completed packets, then rotate buffers.
  * Keep the eight-byte pending-data test distinct from the quadword DMA count.

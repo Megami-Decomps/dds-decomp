@@ -14,17 +14,17 @@
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
 
-s32 evtToggleSavedDrawVectors(s32 arg0, f32 arg1, f32 arg2);
-s32 kwlnSetDrawColorTarget(s32 arg0, void *arg1);
+s32 evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget);
+s32 kwlnSetDrawColorTarget(s32 blendFrames, void *color);
 void kwlnDrawSetC70FloatTriple(f32 rotation, f32 scale, u32 blendControl);
-s32 kwlnSetLightColorTarget(s32 arg0, s32 arg1, void *arg2);
-s32 kwlnSetBackgroundColorTarget(s32 arg0, void *arg1);
-s32 kwlnSetLightDirectionTarget(s32 arg0, s32 arg1, void *arg2);
+s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
+s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
+s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
 void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 s32 kwlnDrawSetDc8Second(s32 arg0);
 s32 kwlnDrawSetE08Fifth(s32 arg0);
-void sdfSetViewFieldOfView(f32 arg0);
-s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
+void sdfSetViewFieldOfView(f32 fieldOfView);
+s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 s32 fptodp(void);
 extern ScrComGlobals *datGameState;
 extern s8 sdfPadButtonStates[];

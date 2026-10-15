@@ -707,12 +707,12 @@ s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {
     return 1;
 }
 
-void btlAverageFilteredMaximumForMask(u32 arg0) {
-    btlAverageMaximumValueForMask(arg0, 1);
+void btlAverageFilteredMaximumForMask(u32 partyRecordFlagsMask) {
+    btlAverageMaximumValueForMask(partyRecordFlagsMask, 1);
 }
 
-s32 btlAverageAllMaximumForMask(u32 arg0) {
-    return btlAverageMaximumValueForMask(arg0, 0);
+s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask) {
+    return btlAverageMaximumValueForMask(partyRecordFlagsMask, 0);
 }
 
 s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
@@ -737,13 +737,13 @@ s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
     return 1;
 }
 
-void btlAverageFilteredCurrentForMask(u32 arg0) {
-    btlAverageCurrentValueForMask(arg0, 1);
+void btlAverageFilteredCurrentForMask(u32 partyRecordFlagsMask) {
+    btlAverageCurrentValueForMask(partyRecordFlagsMask, 1);
 }
 
 /* Return mean current HP for the mask, including bit-0x20 actors. */
-s32 btlAverageAllCurrentForMask(u32 arg0) {
-    return btlAverageCurrentValueForMask(arg0, 0);
+s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask) {
+    return btlAverageCurrentValueForMask(partyRecordFlagsMask, 0);
 }
 
 s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
@@ -799,8 +799,8 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
     return sum;
 }
 
-void btlAverageFilteredActorAttribute(u32 arg0, u32 arg1) {
-    btlSumOrAverageActorAttribute(arg0, arg1, 1);
+void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, u32 statIndex) {
+    btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 1);
 }
 
 /* Keep this name: evtPushAvailableChoiceRatio in newdata/datCalc.c lowers its u64 division to __udivdi3. */
@@ -8422,7 +8422,7 @@ void btlUpdateActorSlotOrderAnimation(void) {
 
 typedef s32 SceneSlotCoordinate[3];
 
-extern void func_001CDD38(EffectSlotSet *resource, s32 slot, s32 x, s32 y,
+extern void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *resource, s32 slot, s32 x, s32 y,
                           s32 bank, s32 index, s32 mode);
 extern void fldScaleSceneCoordinateRecord(EffectSlotSet *resource, s32 slot);
 
@@ -8522,11 +8522,11 @@ void btlDrawActorSlotOrder(void) {
         }
         case 4:
         case 5:
-            func_001CDD38(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 0);
-            func_001CDD38(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 1);
@@ -8541,11 +8541,11 @@ void btlDrawActorSlotOrder(void) {
                           coordinates[index][1] << 3,
                           0, colors, 0, btlResourceBlock->resC,
                           coordinates[index][2], 0x53);
-            func_001CDD38(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 0);
-            func_001CDD38(btlResourceBlock->resC,
+            btlDrawActorSlotOrderSecondarySprite(btlResourceBlock->resC,
                           coordinates[index][2] + 0x32,
                           coordinates[index][0], coordinates[index][1],
                           bank, index, 1);
@@ -8558,7 +8558,7 @@ void btlDrawActorSlotOrder(void) {
 extern const u32 D_00416ED0[4];
 
 /* Draw one bank-selected secondary actor slot, rereading offsets after scaling. */
-void func_001CDD38(EffectSlotSet *work, s32 entry, s32 x, s32 y,
+void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *work, s32 entry, s32 x, s32 y,
                    s32 bank, s32 row, s32 variant) {
     u32 colors[4];
     s32 channel;

@@ -24,12 +24,12 @@ extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 
 
 
-void mnuDrawStaffBulletItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    mnuDrawCampGridEntry(arg0, arg1, arg2, 0, arg3, arg4, arg5);
+void mnuDrawStaffBulletItemListEntry(s32 x, s32 y, s32 z, s32 list, s32 node, s32 drawArg) {
+    mnuDrawCampGridEntry(x, y, z, 0, list, node, drawArg);
 }
 
-void mnuDrawStaffItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    mnuDrawCampGridEntry(arg0, arg1, arg2, 0x200, arg3, arg4, arg5);
+void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, s32 list, s32 node, s32 drawArg) {
+    mnuDrawCampGridEntry(x, y, z, 0x200, list, node, drawArg);
 }
 
 extern char (*D_00435E5C)[25];
@@ -231,7 +231,103 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, MenuStaffConte
     return window->list->count != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", mnuDrawOrderedStaffItemEntry);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern s32 mnuHasOwnedUnblockedItem(void);
+extern s32 mnuIsEntryBlocked(s32 index);
+extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
+extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
+extern void itfGridCopyEntryQuad(s32, s32);
+
+/* Draw one ordered staff item row. The head row advances the shared pulse
+ * and marks an owned unblocked item; the first row is the header bar; other
+ * rows draw an empty-slot bar or the item's availability marker. */
+void mnuDrawOrderedStaffItemEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
+                                  struct MenuListNode *node, s32 texture) {
+    MenuStaffContext *context = (MenuStaffContext *)list->context;
+    MenuStaffChoices *choices = (MenuStaffChoices *)context->menu;
+    s32 selected = 0;
+    s32 scale = list->scale;
+    struct MenuListNode *cursor;
+    s32 opacity;
+    BdWork *work;
+    EffectSlotSet *resource;
+    s32 entryIndex;
+    u32 itemId;
+    s32 markerX;
+    s32 placementY;
+
+    if (choices->pulse < 0x100) {
+        opacity = choices->pulse;
+    } else {
+        opacity = 0x200 - choices->pulse;
+    }
+    opacity = scale * opacity / 256;
+    if (node == list->head) {
+        if (choices->pulse > 0x19C) {
+            choices->pulse -= 0x138;
+        }
+        choices->pulse += 6;
+        if (mnuHasOwnedUnblockedItem()) {
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x750, y - 0xB0, depth, scale, 1,
+                context->resources.baseResources[1], 0x1E, texture);
+        }
+    }
+    mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
+    cursor = list->cursor;
+    if (cursor == node) {
+        u32 locked = list->stateFlags & 8;
+
+        selected = locked == 0;
+    }
+    if (node == list->first) {
+        if (selected) {
+            work = context->titleFrames[0]->workEntries;
+            work[0x14].geometry.cornerColors[0] = 0x89FEFF80;
+            work[0x14].geometry.cornerColors[1] = 0x89FEFF80;
+            work[0x14].geometry.cornerColors[2] = 0x89FEFF80;
+            work[0x14].geometry.cornerColors[3] = 0x89FEFF80;
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x1B0, y + 0x10, 0, scale, 0,
+                context->titleFrames[0], 0x14, 0x53);
+            placementY = y - 8;
+            itfGridCopyEntryQuad((s32)context->titleFrames[0], 0x14);
+            effDrawTextureSlotWithBlendedCornerColors(x - 0x20, placementY, 0, 0x100, 0,
+                context->resources.baseResources[1], 0x1F, 0x53);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x960, placementY, 0, 0x100, 0,
+                context->resources.baseResources[1], 0x1F, 0x53);
+        } else {
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x1B0, y + 0x10, 0, scale, 0,
+                context->titleFrames[0], 0x14, 0x53);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x60, y, 0, 0xFF, 0,
+                context->resources.baseResources[1], 0xA, 0x53);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x950, y, 0, 0xFF, 0,
+                context->resources.baseResources[1], 0xA, 0x53);
+        }
+        return;
+    }
+    itemId = node->sortKeySecondary;
+    if (datGameState->inventory.counts[itemId] == 0) {
+        resource = context->resources.baseResources[1];
+        {
+            s32 highlight = cursor == node;
+
+            entryIndex = highlight + 0x1B;
+        }
+        markerX = x + 0x1C0;
+        placementY = y + 0x40;
+        node->value = D_00437BC8;
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        mnuDrawRepeatedPanelSprites(markerX, placementY, depth, scale, 8,
+                                    resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+        return;
+    }
+    if (mnuIsEntryBlocked(itemId)) {
+        return;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(x + 0x60, y + 0x10, depth, opacity, 1,
+        context->resources.baseResources[1], 0x1E, texture);
+}
+
 
 extern void mnuDrawOrderedStaffItemEntry();
 extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);

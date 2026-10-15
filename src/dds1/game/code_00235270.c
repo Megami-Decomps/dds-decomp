@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "kwln_background_fade_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "itf_mes_window.h"
@@ -52,7 +53,6 @@ extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void fldDrawSkyGradient(void);
 extern void fldSelectDisplayBuffer(s32 id);
 extern void fldSubmitTexturedOverlaySprite(void);
-extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
 extern void sndTransitionBgm(s32 sequence);
 extern void sdfDebugPrintf(char *fmt, ...);

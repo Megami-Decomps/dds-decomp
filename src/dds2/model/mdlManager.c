@@ -1,3 +1,4 @@
+#include "mdl_dev_slot_color.h"
 #include "ee_mmi.h"
 #include "common.h"
 #include "sdf_resource_list_release_api.h"
@@ -24,7 +25,9 @@
 #include "sdf_pac_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "btl_grouped_entity_api.h"
 #include "sdf_model.h"
+#include "sdf_model_copy.h"
 #include "sdf_dev_slot_api.h"
 #include "mdl_resource_entries.h"
 #include "mdl_asset_request.h"
@@ -48,8 +51,6 @@
 #define BTL_GROUP_RESOURCE_SLOT_COUNT 8
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
-
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 
 void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 
@@ -255,11 +256,6 @@ Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
 
 extern u32 mdlGroupJobSemaphore;
 
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
-
-
-
-
 extern s32 btlGroupContainsId(s32 group, s32 id);
 
 
@@ -452,7 +448,6 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 extern s32 btlGroupContainsId(s32, s32);
 extern void btlAddGroupId(s32, s32);
 extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);
@@ -613,7 +608,54 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", mdlUpdateDevSlotTransforms);
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
+
+/* Grow the afterimage list, advance each model, then apply its age and tint. */
+void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
+    MdlDevList *list = ctx->devList;
+    SdfModel *original = ctx->inner;
+    MdlDevSlot *slot;
+    SdfModel *model;
+    f32 tint[4];
+    s32 remaining;
+    u32 color;
+
+    if (list->usedCount != 0 && --list->growStep == 0) {
+        list->usedCount--;
+        list->growStep = list->stride;
+        slot = sdfAllocSizeClassBlock(sizeof(MdlDevSlot));
+        model = sdfModelCreateWithItems(ctx->sub->resourceList, ctx->sub->itemList);
+        /* Finish initialization before publishing the new list head. */
+        slot->next = list->first;
+        slot->model = model;
+        slot->remaining = 1;
+        model->unk94 = 1000.0f;
+        list->first = slot;
+    }
+    eeUnpackRGBAWordFloat(original->color, 1.0f / 128.0f);
+    VU0_STORE_VF(vf10, tint);
+    slot = list->first;
+    while (slot != NULL) {
+        remaining = slot->remaining;
+        model = slot->model;
+        remaining--;
+        if (remaining == 0) {
+            remaining = list->byteCount;
+            sdfModelCopyRuntimeState(model, original);
+        } else {
+            sdfModelUpdateCurrentFrameTransforms(model);
+        }
+        /* Both callbacks complete before the countdown is published. */
+        slot->remaining = remaining;
+        VU0_LOAD_VF(vf10, list->color);
+        VU0_LOAD_VF(vf11, list->colorStep);
+        VU0_LOAD_VF(vf12, tint);
+        color = mdlPackDevSlotColor(remaining - 1, 128.0f);
+        model->color = color;
+        sdfModelBuildNodeResourcePackets(surfaces, model);
+        slot = slot->next;
+    }
+}
 
 extern DevRequest *sdfResourceListClone(DevRequest *list);
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
@@ -943,10 +985,10 @@ f32 mdlGetNodeFrameStep(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Replace the stored float only when the searched node exists. */
-void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 value) {
+void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 frameStep) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode != NULL) {
-        matchedNode->frameStep = value;
+        matchedNode->frameStep = frameStep;
     }
 }
 

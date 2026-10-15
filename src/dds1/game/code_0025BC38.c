@@ -14,6 +14,7 @@
 #include "mnu_mantra_grid.h"
 #include "mnu_scene.h"
 #include "mdl_flag_api.h"
+#include "prf_requirement_fallback.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -433,7 +434,6 @@ typedef struct MnuPanelRegions {
 extern const MnuRequirementIds D_003BC4D8[];
 extern const MnuPanelRegions D_003AFA18;
 extern u32 mnuGetSelectedNodeValue(void);
-extern s32 prfReqCheckWithFallback(void *, u16);
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
@@ -460,7 +460,7 @@ void mnuDrawMantraProfileSelectionSurface(s32 x, s32 y, s32 unusedDepth, s32 alp
         MnuPanelRegion *region;
         s32 remaining;
 
-        if (prfReqCheckWithFallback((void *)profileOwner->partyRecord,
+        if (prfReqCheckWithFallback(profileOwner->partyRecord,
                                     requirementIds.ids[0]) != 0) {
             uiDrawUniformColorRect(0x1980, 0, 0, 0x680, 0x280, 0x80,
                                    context);
@@ -472,19 +472,19 @@ void mnuDrawMantraProfileSelectionSurface(s32 x, s32 y, s32 unusedDepth, s32 alp
         requirement = &requirementIds.ids[1];
         for (remaining = 2; remaining >= 0;
              remaining--, requirement++, region++) {
-            if (prfReqCheckWithFallback((void *)profileOwner->partyRecord,
+            if (prfReqCheckWithFallback(profileOwner->partyRecord,
                                         *requirement) != 0) {
                 uiDrawUniformColorRect(region->x << 4, region->y << 3, 0,
                                        0x200, 0x100, 0x80, context);
             }
         }
 
-        if (prfReqCheckWithFallback((void *)profileOwner->partyRecord, 0x4E) != 0 ||
+        if (prfReqCheckWithFallback(profileOwner->partyRecord, 0x4E) != 0 ||
             mdlFlagTest(0x908) != 0) {
             uiDrawUniformColorRect(0x1C90, 0x640, 0, 0x200, 0xA0, 0x80,
                                    context);
         }
-        if (prfReqCheckWithFallback((void *)profileOwner->partyRecord, 0x4F) != 0) {
+        if (prfReqCheckWithFallback(profileOwner->partyRecord, 0x4F) != 0) {
             uiDrawUniformColorRect(0x1C90, 0x6E0, 0, 0x200, 0xA0, 0x80,
                                    context);
         }

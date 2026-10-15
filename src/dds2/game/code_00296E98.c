@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "evt_stage_test_api.h"
 #include "brs_primary_panel_update_api.h"
@@ -896,13 +897,13 @@ extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 
 /* Release the panel and task resources, then mark the result task finished. */
-void brsStaffTaskDestroy(KwlnTask *taskArg) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(taskArg);
+void brsStaffTaskDestroy(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
 
     if (context->teardownResource != NULL) {
         effDestroyResourceSlotSet(context->teardownResource);
     }
-    mnuDrainPanelTransitions(&context->transition.data, taskArg);
+    mnuDrainPanelTransitions(&context->transition.data, task);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }
@@ -1032,7 +1033,6 @@ extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void sndQueueSoundId(u32 sequence);
-extern void sndStartTrackDefault(s32 track);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
     if (selectLevelUp == 0) {

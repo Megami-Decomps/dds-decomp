@@ -79,7 +79,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-void sdfSetViewFieldOfView(f32 arg0);
+void sdfSetViewFieldOfView(f32 fieldOfView);
 void mnuStopMovieDrawTask(void);
 void mnuCheckMovieDecoderStatus(void);
 
@@ -1038,7 +1038,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-void sdfSetViewFieldOfView(f32 arg0);
+void sdfSetViewFieldOfView(f32 fieldOfView);
 void mnuStopMovieDrawTask(void);
 void mnuCheckMovieDecoderStatus(void);
 

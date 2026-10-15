@@ -12,6 +12,7 @@
 #include "btl_ai_table.h"
 #include "btl.h"
 #include "btl_model_record.h"
+#include "sdf_chunk.h"
 #include "evt_unit.h"
 #include "mdl.h"
 #include "btl_state.h"
@@ -20,11 +21,8 @@
 #include "dat_command.h"
 #include "eff.h"
 
-struct SdfModel;
-
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s8 btlHistoryCounter;

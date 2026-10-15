@@ -13,7 +13,7 @@ typedef struct SndChannel {
     u8 unk1;
     s16 unk2;
     u32 unk4;
-    u32 unk8;
+    u32 iopWorkAddress;
     u32 unkC;
 } SndChannel;
 

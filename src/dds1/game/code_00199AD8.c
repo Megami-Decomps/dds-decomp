@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "scr_integer_return_value_api.h"
+#include "scr_command_timer_api.h"
 #include "sdf_packet_list.h"
 #include "itf.h"
 #include "itf_mes_window.h"
@@ -756,7 +757,6 @@ s32 itfMesScriptWaitForOptionSelection(void) {
     return 0;
 }
 
-extern u32 scrGetCommandTimer(void);
 extern void kwlnDrawSetDc8Second(u32);
 extern void kwlnDrawSetDc8First(u32);
 extern void kwlnDrawSetupDc8(s32);

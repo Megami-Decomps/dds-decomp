@@ -126,7 +126,7 @@ typedef struct {
     u8 pad0C[4];
     f32 unk10, unk14, unk18;
     u8 pad1C[4];
-    f32 initialRadius, unk24;
+    f32 initialRadius, captureDistance;
 } EffMagatuhiFloatParams; /* 0x28 */
 
 
@@ -472,7 +472,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams
     dst->head.unk10 = src->unk10;
     dst->head.unk14 = src->unk14;
     dst->head.unk18 = src->unk18;
-    dst->head.captureDistance = src->unk24;
+    dst->head.captureDistance = src->captureDistance;
 }
 
 /* Clone history parameters; signed delays follow the returned work block. */

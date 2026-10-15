@@ -10,6 +10,7 @@
 #include "eff_track_poly_list.h"
 #include "mdl.h"
 #include "sdf.h"
+#include "sdf_chunk.h"
 #include "pcp_vu0.h"
 #include "eff_track_poly_data.h"
 #include "eff_vertex_draw_request.h"
@@ -25,7 +26,6 @@ void effTrackPolyReset(EffTrackPolyWork *work) {
     effTrackPolyInitData(work->data);
 }
 
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src);
 
 void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {

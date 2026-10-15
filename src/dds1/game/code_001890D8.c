@@ -46,7 +46,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     struct SdfMemBlock *allocation;
     s32 positions;
     s32 colorTable;
-    s32 unknownValues;
+    s32 historyScalars;
     s32 values;
     s32 writeIndices;
     s32 validCounts;
@@ -62,8 +62,8 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     allocation = sdfAllocGeneralBlock(allocationSize);
     positions = sdfResourceRetainAddress(allocation);
     colorTable = positions + (countFrames << 4);
-    unknownValues = colorTable + (frames << 2);
-    values = unknownValues + (countFrames << 2);
+    historyScalars = colorTable + (frames << 2);
+    values = historyScalars + (countFrames << 2);
     writeIndices = values + (count << 2);
     validCounts = writeIndices + (count << 1);
     angleValues = validCounts + (count << 1);
@@ -76,7 +76,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     resource->unk10 = param;
     resource->positions = (f32 (*)[4])positions;
     resource->colorTable = (u32 *)colorTable;
-    resource->unk1C = (f32 *)unknownValues;
+    resource->unk1C = (f32 *)historyScalars;
     resource->slotColors = (u32 *)values;
     resource->writeIndices = (u16 *)writeIndices;
     resource->validCounts = (u16 *)validCounts;

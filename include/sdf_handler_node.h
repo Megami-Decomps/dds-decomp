@@ -8,7 +8,7 @@
  * and +0xC; removal dispatch reads the three payload words. */
 typedef struct SdfHandlerNode {
     struct SdfHandlerNode *next;
-    s32 kind;
+    s32 handlerKind;
     s32 channel;
     s32 handlerId;
 } SdfHandlerNode;
@@ -16,7 +16,7 @@ typedef struct SdfHandlerNode {
 typedef char SdfHandlerNodeLayoutAssert[
     (sizeof(SdfHandlerNode) == 0x10 &&
      (u32)&((SdfHandlerNode *)0)->next == 0x00 &&
-     (u32)&((SdfHandlerNode *)0)->kind == 0x04 &&
+     (u32)&((SdfHandlerNode *)0)->handlerKind == 0x04 &&
      (u32)&((SdfHandlerNode *)0)->channel == 0x08 &&
      (u32)&((SdfHandlerNode *)0)->handlerId == 0x0C) ? 1 : -1];
 

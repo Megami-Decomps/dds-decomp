@@ -414,7 +414,7 @@ u32 btlClassifyActionOperand(BtlUnit *actor, BattleIndexWork *work) {
     }
 }
 
-s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 commandIndex) {
+s32 btlClassifyActionResult(BtlUnit *actor, u32 actionKind, s32 press, u32 elementMask, s32 hitCount, u8 groupInactive, s32 commandIndex) {
     s32 resultCode;
 
     btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
@@ -430,20 +430,20 @@ s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 ar
     if ((datCommandRecords[commandIndex].attribute.bits & 0x400000FF) == 0x40000002) {
         return -1;
     }
-    if (arg1 & 0x50004) {
+    if (actionKind & 0x50004) {
         return -1;
     }
-    if (arg3 & 0xE0001) {
+    if (elementMask & 0xE0001) {
         resultCode = -1;
-    } else if ((actor->status.flags & 0x200) != 0 && arg2 == 2 && arg4 == 1 && arg5 == 0) {
+    } else if ((actor->status.flags & 0x200) != 0 && press == 2 && hitCount == 1 && groupInactive == 0) {
         resultCode = 0x12;
     } else {
         resultCode = 1;
     }
-    if (arg5 != 0 && (btlUnitStatusPair(actor) & 0x4000000200) == 0x200) {
+    if (groupInactive != 0 && (btlUnitStatusPair(actor) & 0x4000000200) == 0x200) {
         resultCode = 0xB;
     }
-    if ((arg1 & 0x20001) == 0) {
+    if ((actionKind & 0x20001) == 0) {
         resultCode = -1;
     }
     return resultCode;

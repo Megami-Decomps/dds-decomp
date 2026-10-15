@@ -97,7 +97,7 @@ Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
          i < count;
          i++, command++) {
         ((void **)motion->request->buffer)[i] =
-            sdfDispatchAssetCommandWord(motion, command->command, command->argument);
+            sdfDispatchAssetCommandWord(motion, command->packedCommand, command->targetIndex);
     }
     motion->state = SDF_MOTION_STATE_UNINITIALIZED;
     motion->frameStep = 1.0f;

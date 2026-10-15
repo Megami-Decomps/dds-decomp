@@ -407,6 +407,34 @@ This is a classifier and an experiment guide, not a register-binding recipe.
 An allocation-driven source idiom should be documented only after natural C
 matches exactly and transfers to a function that was not used to derive it.
 
+### Start from retail's registers
+
+For a near miss, start from the words that differ instead of the whole
+allocation table:
+
+```sh
+python3 tools/ee_gcc_retail_regs.py src/dds2/game/code_00169418.c \
+  --source UNIT_WITH_DRAFT.c --func effBTLFieldColorGetBaseColor
+```
+
+The tool compiles the draft with `-dp`, maps each differing instruction to its
+insn UID, and runs `cc1probe.sh --alloc`. For every operand register that
+differs from retail, it names the pseudo that produced it, with its priority
+terms and defining RTL. It also lists each conflicting pseudo that holds the
+register retail used. For a global blocker colored first, it gives the live
+length or reference count that would reverse the order. Local-allocation rows
+use pass-19 lifetimes, which are block-local. For those, compare the probe's
+`qty_compare` lines. Differences whose retail instruction appears within
+eight words of the draft are listed as order-only. With `--order` the tool also
+runs the scheduler probe. For each such pair it prints the sched1/sched2
+`rank` comparison between the two insns and the tier that decided it (luid,
+priority, dependents, register weight or last-insn class). If no comparison
+exists, dependences or ready times ordered them.
+
+The arithmetic is a target for a truthful source change, not a recipe. Two
+contests can interact through shared live lengths, so recheck the whole
+report after every change.
+
 ### Check whether the required saved roles are feasible
 
 For a candidate with a broad saved-register residual, combine the existing

@@ -20,10 +20,10 @@ typedef struct FldLoadRequest {
     FldLoadRecord *record;
 } FldLoadRequest;
 
-/* The first two words are forwarded to placement spawning without decoding. */
+/* Counted placement-batch input consumed by both field request paths. */
 typedef struct FldSceneRequest {
-    u32 unk00;
-    u32 unk04;
+    u32 spawnBatchCount;
+    FldSpawnBatch *spawnBatches;
     FldLoadRecord *record;
     u32 spawnCount;
     struct FldActionSpawn *spawnList;
@@ -39,10 +39,10 @@ typedef char FldLoadRequest_spawnBatches_offset_check[
     ((u32)&((FldLoadRequest *)0)->spawnBatches == 0x04) ? 1 : -1];
 typedef char FldLoadRequest_record_offset_check[
     ((u32)&((FldLoadRequest *)0)->record == 0x08) ? 1 : -1];
-typedef char FldSceneRequest_unk00_offset_check[
-    ((u32)&((FldSceneRequest *)0)->unk00 == 0x00) ? 1 : -1];
-typedef char FldSceneRequest_unk04_offset_check[
-    ((u32)&((FldSceneRequest *)0)->unk04 == 0x04) ? 1 : -1];
+typedef char FldSceneRequest_spawnBatchCount_offset_check[
+    ((u32)&((FldSceneRequest *)0)->spawnBatchCount == 0x00) ? 1 : -1];
+typedef char FldSceneRequest_spawnBatches_offset_check[
+    ((u32)&((FldSceneRequest *)0)->spawnBatches == 0x04) ? 1 : -1];
 typedef char FldSceneRequest_record_offset_check[
     ((u32)&((FldSceneRequest *)0)->record == 0x08) ? 1 : -1];
 typedef char FldSceneRequest_spawnCount_offset_check[

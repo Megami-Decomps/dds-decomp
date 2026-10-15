@@ -9,6 +9,7 @@
 #include "mnu_staff.h"
 #include "dat_state.h"
 #include "prf_profile_cap.h"
+#include "prf_requirement_fallback.h"
 #include "dsp_name.h"
 #include "sdf_task_work.h"
 #include "mdl_flag_api.h"
@@ -88,7 +89,6 @@ extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
-extern s32 prfReqCheckWithFallback(DatPartyRecord *, u16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
 extern void ptyApplyProfile(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);

@@ -587,7 +587,7 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node) {
 }
 
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-extern void sdfSetViewFieldOfView(f32);
+extern void sdfSetViewFieldOfView(f32 fieldOfView);
 extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
@@ -948,7 +948,7 @@ extern u8 D_00423050[];
 extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
-extern void sdfSetViewFieldOfView(f32);
+extern void sdfSetViewFieldOfView(f32 fieldOfView);
 
 
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);

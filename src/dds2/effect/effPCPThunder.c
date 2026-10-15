@@ -27,6 +27,13 @@
 #include "eff_pcp_thunder_group.h"
 #include "pcp_vu0.h"
 
+typedef char EffThunderFragmentParamsSizeCheck[
+    sizeof(EffThunderFragmentParams) == 0x54 ? 1 : -1];
+typedef char EffThunderFragmentParamsColorOffsetsCheck[
+    ((u32)&((EffThunderFragmentParams *)0)->centerColorWord == 0x40 &&
+     (u32)&((EffThunderFragmentParams *)0)->middleColorWord == 0x48 &&
+     (u32)&((EffThunderFragmentParams *)0)->edgeColorWord == 0x50) ? 1 : -1];
+
 extern u8 effDefaultRandomState[];
 
 /* Keep literal types and arithmetic associations identical to the native code. */
@@ -936,7 +943,7 @@ EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameter
     work->fragments = (EffThunderFrag *)(work + 1);
     work->allocationHandle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
-    parRiseFallSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
+    parRiseFallSymmetricCellAlpha(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
     parSetCellDrawBucket(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
         effThunderRandomizeFrag(work, i);
@@ -976,17 +983,17 @@ EffThunderFragmentParams *effThunderGetFragmentParameters(EffThunderFragmentWork
 
 /* Apply decreasing alpha along each fragment cell using the retained color words. */
 void effThunderApplyFragmentDecreasingAlphaRamp(EffThunderFragmentWork *work) {
-    parDecreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
+    parDecreaseSymmetricCellAlpha(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
 }
 
 /* Apply increasing alpha along each fragment cell using the retained color words. */
 void effThunderApplyFragmentIncreasingAlphaRamp(EffThunderFragmentWork *work) {
-    parIncreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
+    parIncreaseSymmetricCellAlpha(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
 }
 
 /* Apply symmetric cell-color bands using the fragment configuration's native arguments. */
 void effThunderApplyFragmentColorBands(EffThunderFragmentWork *work) {
-    parFillSymmetricCellColors(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
+    parFillSymmetricCellColors(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
 }
 
 /* Resample delay/active countdowns and restore the fixed fragment grey.
@@ -1258,10 +1265,10 @@ EffThunderFragmentWork *effThunderCreateDualFragmentWork(EffThunderFragmentParam
     work->fragments = (EffThunderFrag *)(work + 1);
     work->allocationHandle = allocationHandle;
     work->state.secondarySystem = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_TRIANGLE);
-    parDispatchSub(work->state.secondarySystem, 2, work->head.arg48, work->head.arg50);
+    parDispatchSub(work->state.secondarySystem, 2, work->head.middleColorWord, work->head.edgeColorWord);
     parSetCellDrawBucket(work->state.secondarySystem, work->head.systemParam);
     work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub(work->system, 2, work->head.arg40, work->head.arg40);
+    parDispatchSub(work->system, 2, work->head.centerColorWord, work->head.centerColorWord);
     parSetCellDrawBucket(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
         effThunderRandomizeFrag2(work, i);

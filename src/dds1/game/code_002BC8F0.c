@@ -1109,10 +1109,10 @@ INCLUDE_ASM(const s32, "game/code_002BC8F0", sdfDrawTexturedQuad);
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
-void effSelectPresetAndDispatch(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4, u32 arg5, u32 presetMode, u32 presetValue) {
+void effSelectPresetAndDispatch(u32 x, u32 y, u32 z, u32 width,
+                                    u32 height, u32 vertexColors, u32 presetMode, u32 presetValue) {
     effSelectPresetByKind(presetMode, presetValue);
-    uiDrawGradientColorRect(arg0, arg1, arg2, arg3, arg4, (const u32 *)arg5, presetValue);
+    uiDrawGradientColorRect(x, y, z, width, height, (const u32 *)vertexColors, presetValue);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, presetValue);
 }
 
