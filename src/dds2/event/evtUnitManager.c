@@ -745,8 +745,8 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 duration) {
     }
 }
 
-EvtUnit *evtGetWorldUnitNestedValue(s32 id) {
-    EffWorldNode *obj = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, EFF_WORLD_KIND_FOLLOW_MODEL);
+EvtUnit *evtGetWorldUnitNestedValue(s32 worldObjectKey) {
+    EffWorldNode *obj = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
         return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
