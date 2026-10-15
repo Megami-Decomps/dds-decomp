@@ -72,7 +72,7 @@ void effInitializeSlotWorkFromDescription(struct EffectSlotSet *owner, s32 slotI
 void effReleaseSlotTextureReferencesAndResetWork(struct EffectSlotSet *owner, s32 preserveWork);
 #endif
 void effReleaseTextureHandlesAndResetSlots(struct EffectSlotSet *owner);
-u8 effHasFirstTextureHandle(struct EffectSlotSet *owner);
+u8 effHasFirstTextureHandle(const struct EffectSlotSet *owner);
 u32 effDestroyResourceSlotSet(struct EffectSlotSet *owner);
 
 #ifdef VERSION_DDS2
