@@ -13703,3 +13703,27 @@ invented uniform float table. DDS1-only `mnuMantraDisplayParameterLabels`
 contains nine 24-byte rows with one through nine encoded 0x81CA glyphs;
 both consumers index with the display parameter minus one. DDS2 draws its
 parameter numerically instead, so no artificial counterpart is introduced.
+
+
+## Sound command transport and startup storage
+
+`sndCommandRing` is the existing thirty-two-entry, 0x80-byte packet ring.
+`sndCommandReadIndex` and `sndCommandWriteIndex` retain their volatile u16
+declarations, signed cursor casts and unchecked payload-copy contract.
+The worker consumes entries and advances the read cursor; the producer
+publishes the write cursor. No synchronization or wrap logic changes.
+
+`sndSynchronousCommandMode` is set only during sound initialization: the
+producer dispatches commands itself while this flag is nonzero, and otherwise
+wakes `sndCommandThreadId`. The startup descriptor
+`sndCommandThreadParameters` retains its 0x30-byte owner, priority 0x42 and
+0x1000-byte `sndCommandThreadStack`; `sndRpcServerThreadStack` is the separate
+0x1000-byte RPC-server stack submitted at priority 0x43.
+
+`sndIopDmaTransfer` is the existing SIF transfer descriptor filled before
+`sceSifSetDma`. Naming leaves its type, fields and existing retry body alone.
+`sndCachedListenerState` caches six scaled integer values for command 0x160;
+preserve the opaque two-word prefix and the complete 32-byte copy rather
+than initializing or reinterpreting those words. All names are inferred
+from matched consumers and paired native storage; no code, flags, layouts,
+bounds, casts, volatility, imports or assembly changes.
