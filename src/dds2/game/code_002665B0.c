@@ -51,7 +51,7 @@ extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, s
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern void evtCreateEventScriptProcess(s32);
 extern void evtClearActiveFlag(s32);
-extern void evtSetBoundedDisplayValue(s32, s32);
+extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern s8 D_00437859;
 
 typedef struct MenuSlotState {
@@ -1801,7 +1801,26 @@ void mnuDispatchTransitionHostCallbacks(MenuSlotState *host) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", mnuBeginTerminalSlotSelection);
+s32 mnuBeginTerminalSlotSelection(KwlnTask *task) {
+    MenuSlotState *work;
+
+    work = (MenuSlotState *)kwlnTaskGetUserValue(task);
+    if ((work->initFlags & 1) == 0) {
+        mnuConfigureTerminalSlotEffects(1, work);
+        mnuTerminalSelectSlot(1, 0, work);
+        mnuSetTerminalPanelMotionMode(1, work);
+        evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, work);
+        work->initFlags |= 1;
+    }
+    work->selectionStep = work->secondaryList->count;
+    work->slotCopy = work->slot;
+    work->mode = work->reduced;
+    evtClearActiveFlag(0);
+    evtSetBoundedDisplayValue(0, 2);
+    mnuTerminalSelectResourceBank(work);
+    mnuApplyFadeTrackMode(0, work);
+    return 1;
+}
 
 u32 func_00269C48(void) {
     return 1;
