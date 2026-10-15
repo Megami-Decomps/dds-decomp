@@ -2330,8 +2330,8 @@ extern s8 sdfPadButtonStates[32];
 extern f32 D_003BB768;
 extern f32 D_003BB76C;
 extern u8 D_003BB770;
-extern f32 D_003D7540[2][4];
-extern f32 D_003D7560[2][4];
+extern f32 btlDebugCameraPositions[2][4];
+extern f32 btlDebugCameraRotations[2][4];
 
 /* Battle debug camera: one button saves the world camera's position and
  * rotation into one of two slots (alternating), the other toggles a camera
@@ -2350,11 +2350,11 @@ void btlUpdateDebugCameraFromPad(void) {
     }
     if (sdfPadButtonStates[0] < 0) {
         if ((u8)(D_003BB770 & 1) == 0) {
-            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7540[0], camera->inner->position);
-            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7560[0], camera->inner->rotation);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[0], camera->inner->position);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[0], camera->inner->rotation);
         } else {
-            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7540[1], camera->inner->position);
-            PCP_COPY_VECTOR_UNCLOBBERED(D_003D7560[1], camera->inner->rotation);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[1], camera->inner->position);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[1], camera->inner->rotation);
         }
         D_003BB770 ^= 1;
     } else if (sdfPadButtonStates[1] < 0) {
@@ -2363,8 +2363,8 @@ void btlUpdateDebugCameraFromPad(void) {
         } else {
             f32 fov;
 
-            btlInitMotionTransformFromVectors(&state->cameraCommand.frontCamera, D_003D7540[0], D_003D7560[0]);
-            btlInitMotionTransformFromVectors(&state->cameraCommand.backCamera, D_003D7540[1], D_003D7560[1]);
+            btlInitMotionTransformFromVectors(&state->cameraCommand.frontCamera, btlDebugCameraPositions[0], btlDebugCameraRotations[0]);
+            btlInitMotionTransformFromVectors(&state->cameraCommand.backCamera, btlDebugCameraPositions[1], btlDebugCameraRotations[1]);
             fov = D_003BB768 * 0.0174532925f;
             state->cameraCommand.flags = 0x41;
             state->cameraCommand.motionParameter = D_003BB76C;

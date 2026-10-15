@@ -12198,3 +12198,5 @@ brsStatConfirmationPopupEntry = 0x003D6490;
 brsLevelChangePopupEntry = 0x003D64AC;
 brsRewardMessagePopupEntry = 0x003D64C8;
 brsRewardFadeWaitPopupEntry = 0x003D64E4;
+btlDebugCameraPositions = 0x00452FF0;
+btlDebugCameraRotations = 0x00453010;

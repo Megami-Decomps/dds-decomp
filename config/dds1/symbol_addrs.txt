@@ -10881,3 +10881,5 @@ mnuMantraSpriteSlots = 0x0036C698;
 mnuMantraSpriteResourceNames = 0x0036C568;
 mnuMantraPrerequisiteRecords = 0x0036AE80;
 mnuStaffRollTextRows = 0x00379F70;
+btlDebugCameraPositions = 0x003D7540;
+btlDebugCameraRotations = 0x003D7560;
