@@ -12,6 +12,7 @@
 #include "sdf_chip.h"
 #include "mdl_flag_api.h"
 #include "prf_profile_cap.h"
+#include "prf_requirement_fallback.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -394,7 +395,6 @@ s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
     return 0;
 }
 
-extern s32 prfReqCheckWithFallback(ScrVmOperand *, u16);
 extern u16 prfGetRequiredProfileLevel(u16);
 extern u8 prfGetProfileParameterByte5(u16);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
@@ -408,7 +408,7 @@ extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfileProgress *selection) {
     MnuMantraGridEntry *entry;
 
-    if (prfReqCheckWithFallback((ScrVmOperand *)selection->partyRecord, profileId) == 0) {
+    if (prfReqCheckWithFallback(selection->partyRecord, profileId) == 0) {
         if (profileId != 0x4E || mdlFlagTest(0x908) == 0) {
             return NULL;
         }
