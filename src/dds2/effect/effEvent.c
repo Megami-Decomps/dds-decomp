@@ -1231,7 +1231,7 @@ void effEventUpdateEffectParameters(EffEventWork *work) {
 
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
-EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
+EffEventLight *effEventLightCreate(SoundMixer *mixer, f32 param) {
     EffEventLight *work = sdfAllocSizeClassBlock(sizeof(EffEventLight));
 
     work->init.orientation[3] = 1.0f;
@@ -1246,7 +1246,7 @@ EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
     work->init.position[0] = 0;
     work->init.position[2] = 0;
     work->init.position[3] = 0;
-    work->handle = effEventCloneSoundMixer(arg);
+    work->handle = effEventCloneSoundMixer(mixer);
     work->owner = effEventCreate(work->handle, 0, &work->init);
     work->active = 1;
     return work;
