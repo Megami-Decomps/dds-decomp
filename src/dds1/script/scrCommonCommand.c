@@ -34,7 +34,7 @@ extern ScrComGlobals *datGameState;
 extern s8 sdfPadButtonStates[];
 extern char D_0039F4D8[];
 extern char D_0039F4E8[];
-extern const char D_0039F508[];
+extern const char scrSceneLightDirectionZeroWarning[];
 extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
@@ -303,7 +303,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4D8);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4E8);
 
-const char D_0039F508[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
+const char scrSceneLightDirectionZeroWarning[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
 
 s32 scrCommandSetSceneLightDirection(void) {
     ScrVecW direction;
@@ -315,7 +315,7 @@ s32 scrCommandSetSceneLightDirection(void) {
     if (ffabsf(direction.x) <= 0.01f &&
         ffabsf(direction.y) <= 0.01f &&
         ffabsf(direction.z) <= 0.01f) {
-        evtPrintDeveloperConsoleMessage(D_0039F508);
+        evtPrintDeveloperConsoleMessage(scrSceneLightDirectionZeroWarning);
         return 1;
     }
     kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction);

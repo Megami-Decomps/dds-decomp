@@ -54,7 +54,7 @@ extern u8 D_003BA830[];
 
 extern u8 D_003BDC48[];
 
-extern s8 D_003244D0[2][2][16];
+extern s8 kwlnPadButtonStates[2][2][16];
 
 extern u8 D_00324510[2][2][16];
 
@@ -123,8 +123,8 @@ s32 kwlnTaskStep(KwlnTask *task) {
     } else {
         for (port = 0; port < 2; port++) {
             for (i = 0; i < 16; i++) {
-                D_00324510[0][port][i] = D_003244D0[0][port][i];
-                D_00324510[1][port][i] = D_003244D0[1][port][i];
+                D_00324510[0][port][i] = kwlnPadButtonStates[0][port][i];
+                D_00324510[1][port][i] = kwlnPadButtonStates[1][port][i];
             }
             for (i = 0; i < 2; i++) {
                 D_003BA870[port][i][0] = D_003BA860[port][i][0];

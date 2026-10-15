@@ -387,9 +387,9 @@ s32 kwlnDebugPulsePadMotors(KwlnTask *task) {
     return 0;
 }
 
-extern u32 D_0037F3C0[4][16];
-extern u32 D_0037F4C0[2][2];
-extern s8 D_0037F4D0[2][2][16];
+extern u32 kwlnPadButtonHoldCounters[4][16];
+extern u32 kwlnPadStickHoldCounters[2][2];
+extern s8 kwlnPadButtonStates[2][2][16];
 extern u8 D_00435C30[2][2][2];
 extern s8 D_00435C38[2][2];
 extern u8 D_00435C40[2][2][2];
@@ -401,18 +401,18 @@ void kwlnResetPadInputAndMotorState(void) {
     s32 port;
     s32 bank;
     s32 i;
-    u32 (*inputTimers)[16] = D_0037F3C0;
+    u32 (*inputTimers)[16] = kwlnPadButtonHoldCounters;
 
     for (port = 0; port < 2; port++) {
         for (bank = 0; bank < 2; bank++) {
             for (i = 0; i < 16; i++) {
-                D_0037F4D0[bank][port][i] = 0;
+                kwlnPadButtonStates[bank][port][i] = 0;
                 D_0037F510[bank * 32 + port * 16 + i] = 0;
                 inputTimers[bank * 2 + port][i] = 0;
             }
         }
         for (i = 0; i < 2; i++) {
-            D_0037F4C0[port][i] = 0;
+            kwlnPadStickHoldCounters[port][i] = 0;
             D_00435C30[port][i][0] = 0;
             D_00435C30[port][i][1] = 0;
             D_00435C38[port][i] = 0;
@@ -536,16 +536,16 @@ void kwlnUpdatePadInputState(void) {
         for (j = 0; j < 2; j++) {
             for (i = 0; i < 16; i++) {
                 if (buttons[j][i] != 0) {
-                    D_0037F4D0[j][pad][i] = 1;
-                    if (++D_0037F3C0[j * 2 + pad][i] == 1) {
-                        D_0037F4D0[j][pad][i] = -0x7D;
+                    kwlnPadButtonStates[j][pad][i] = 1;
+                    if (++kwlnPadButtonHoldCounters[j * 2 + pad][i] == 1) {
+                        kwlnPadButtonStates[j][pad][i] = -0x7D;
                     }
                 } else {
-                    D_0037F4D0[j][pad][i] = 0;
-                    D_0037F3C0[j * 2 + pad][i] = 0;
+                    kwlnPadButtonStates[j][pad][i] = 0;
+                    kwlnPadButtonHoldCounters[j * 2 + pad][i] = 0;
                 }
-                if (D_0037F3C0[j * 2 + pad][i] >= 8 && !(D_0037F3C0[j * 2 + pad][i] & 1)) {
-                    D_0037F4D0[j][pad][i] |= 2;
+                if (kwlnPadButtonHoldCounters[j * 2 + pad][i] >= 8 && !(kwlnPadButtonHoldCounters[j * 2 + pad][i] & 1)) {
+                    kwlnPadButtonStates[j][pad][i] |= 2;
                 }
             }
         }
@@ -560,14 +560,14 @@ void kwlnUpdatePadInputState(void) {
             VU0_LENGTH_VF10(stickLength);
             if (stickLength >= 64.0f) {
                 D_00435C38[pad][i] = 1;
-                if (++D_0037F4C0[pad][i] == 1) {
+                if (++kwlnPadStickHoldCounters[pad][i] == 1) {
                     D_00435C38[pad][i] = -0x7D;
                 }
             } else {
                 D_00435C38[pad][i] = 0;
-                D_0037F4C0[pad][i] = 0;
+                kwlnPadStickHoldCounters[pad][i] = 0;
             }
-            if (D_0037F4C0[pad][i] >= 8 && !(D_0037F4C0[pad][i] & 1)) {
+            if (kwlnPadStickHoldCounters[pad][i] >= 8 && !(kwlnPadStickHoldCounters[pad][i] & 1)) {
                 D_00435C38[pad][i] |= 2;
             }
         }

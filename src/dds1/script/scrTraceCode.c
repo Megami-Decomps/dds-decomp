@@ -6,7 +6,7 @@
 
 extern ScrVM *datGameState;
 extern const ScrCommand D_0039E288[];
-extern u32 (*D_00329930[])(ScrData *scr);
+extern u32 (*scrOpcodeHandlers[])(ScrData *scr);
 
 void bfOpBinaryEval(ScrData *scr, s32 op);
 
@@ -159,175 +159,175 @@ u32 scrJumpLabel(ScrData *scr)
     return 1;
 }
 
-extern s32 D_003BD76C;
-extern s32 D_003BD770;
-extern s32 D_003BD774;
-extern f32 D_003BD778;
-extern f32 D_003BD77C;
-extern f32 D_003BD780;
-extern s32 D_003BD784;
-extern s32 D_003BD788;
+extern s32 scrBinaryIntegerLeftOperand;
+extern s32 scrBinaryIntegerRightOperand;
+extern s32 scrBinaryIntegerResult;
+extern f32 scrBinaryFloatLeftOperand;
+extern f32 scrBinaryFloatRightOperand;
+extern f32 scrBinaryFloatResult;
+extern s32 scrBinaryLeftOperandType;
+extern s32 scrBinaryRightOperandType;
 
 void bfOpBinaryEval(ScrData *scr, s32 op)
 {
-    D_003BD784 = scr->stackTypes[scr->sp - 1];
-    D_003BD788 = scr->stackTypes[scr->sp - 2];
-    if ((D_003BD784 == 0 || D_003BD784 == 2) && (D_003BD788 == 0 || D_003BD788 == 2)) {
-        D_003BD76C = bfStackPopInt(scr);
-        D_003BD770 = bfStackPopInt(scr);
+    scrBinaryLeftOperandType = scr->stackTypes[scr->sp - 1];
+    scrBinaryRightOperandType = scr->stackTypes[scr->sp - 2];
+    if ((scrBinaryLeftOperandType == 0 || scrBinaryLeftOperandType == 2) && (scrBinaryRightOperandType == 0 || scrBinaryRightOperandType == 2)) {
+        scrBinaryIntegerLeftOperand = bfStackPopInt(scr);
+        scrBinaryIntegerRightOperand = bfStackPopInt(scr);
         switch (op) {
         case 0:
-            D_003BD774 = D_003BD76C + D_003BD770;
+            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand + scrBinaryIntegerRightOperand;
             break;
         case 1:
-            D_003BD774 = D_003BD76C - D_003BD770;
+            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand - scrBinaryIntegerRightOperand;
             break;
         case 2:
-            D_003BD774 = D_003BD76C * D_003BD770;
+            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand * scrBinaryIntegerRightOperand;
             break;
         case 3:
-            D_003BD774 = D_003BD76C / D_003BD770;
+            scrBinaryIntegerResult = scrBinaryIntegerLeftOperand / scrBinaryIntegerRightOperand;
             break;
         case 4:
-            if (D_003BD76C != 0 || D_003BD770 != 0) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand != 0 || scrBinaryIntegerRightOperand != 0) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         case 5:
-            if (D_003BD76C != 0 && D_003BD770 != 0) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand != 0 && scrBinaryIntegerRightOperand != 0) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         case 6:
-            if (D_003BD76C == D_003BD770) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand == scrBinaryIntegerRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         case 7:
-            if (D_003BD76C != D_003BD770) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand != scrBinaryIntegerRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         case 8:
-            if (D_003BD76C < D_003BD770) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand < scrBinaryIntegerRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         case 9:
-            if (D_003BD76C > D_003BD770) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand > scrBinaryIntegerRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         case 10:
-            if (D_003BD76C <= D_003BD770) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand <= scrBinaryIntegerRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         case 11:
-            if (D_003BD76C >= D_003BD770) {
-                D_003BD774 = 1;
+            if (scrBinaryIntegerLeftOperand >= scrBinaryIntegerRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
             break;
         }
-        scrPushInteger(scr, D_003BD774);
+        scrPushInteger(scr, scrBinaryIntegerResult);
     } else {
-        D_003BD778 = bfStackPopFloat(scr);
-        D_003BD77C = bfStackPopFloat(scr);
+        scrBinaryFloatLeftOperand = bfStackPopFloat(scr);
+        scrBinaryFloatRightOperand = bfStackPopFloat(scr);
         switch (op) {
         case 0:
-            D_003BD780 = D_003BD778 + D_003BD77C;
+            scrBinaryFloatResult = scrBinaryFloatLeftOperand + scrBinaryFloatRightOperand;
             break;
         case 1:
-            D_003BD780 = D_003BD778 - D_003BD77C;
+            scrBinaryFloatResult = scrBinaryFloatLeftOperand - scrBinaryFloatRightOperand;
             break;
         case 2:
-            D_003BD780 = D_003BD778 * D_003BD77C;
+            scrBinaryFloatResult = scrBinaryFloatLeftOperand * scrBinaryFloatRightOperand;
             break;
         case 3:
-            D_003BD780 = D_003BD778 / D_003BD77C;
+            scrBinaryFloatResult = scrBinaryFloatLeftOperand / scrBinaryFloatRightOperand;
             break;
         case 4:
-            if (D_003BD778 != 0.0 || D_003BD77C != 0.0) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand != 0.0 || scrBinaryFloatRightOperand != 0.0) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         case 5:
-            if (D_003BD778 != 0.0 && D_003BD77C != 0.0) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand != 0.0 && scrBinaryFloatRightOperand != 0.0) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         case 6:
-            if (D_003BD778 == D_003BD77C) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand == scrBinaryFloatRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         case 7:
-            if (D_003BD778 != D_003BD77C) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand != scrBinaryFloatRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         case 8:
-            if (D_003BD778 < D_003BD77C) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand < scrBinaryFloatRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         case 9:
-            if (D_003BD778 > D_003BD77C) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand > scrBinaryFloatRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         case 10:
-            if (D_003BD778 <= D_003BD77C) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand <= scrBinaryFloatRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         case 11:
-            if (D_003BD778 >= D_003BD77C) {
-                D_003BD774 = 1;
+            if (scrBinaryFloatLeftOperand >= scrBinaryFloatRightOperand) {
+                scrBinaryIntegerResult = 1;
             } else {
-                D_003BD774 = 0;
+                scrBinaryIntegerResult = 0;
             }
-            scrPushInteger(scr, D_003BD774);
+            scrPushInteger(scr, scrBinaryIntegerResult);
             return;
         }
-        bfStackPushFloat(scr, D_003BD780);
+        bfStackPushFloat(scr, scrBinaryFloatResult);
     }
 }
 
@@ -489,7 +489,7 @@ s32 bfContextStep(ScrData *scr)
     u32 result;
 
     while (1) {
-        result = D_00329930[scr->instructions[scr->pc].parts.opCode](scr);
+        result = scrOpcodeHandlers[scr->instructions[scr->pc].parts.opCode](scr);
         if (result == 0) {
             scr->cmdTimer = 0;
             return 2;
