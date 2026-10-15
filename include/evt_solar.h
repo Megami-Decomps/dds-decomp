@@ -125,6 +125,7 @@ void evtActivateNextSolarPoint(SolarOverlayWork *overlay);
 void evtDeactivateLastSolarPoint(SolarOverlayWork *overlay);
 void evtSetSolarPointActiveCount(SolarOverlayWork *overlay, u32 desiredCount);
 void evtUpdateSolarPointTimers(SolarOverlayWork *overlay);
+void evtSetSolarOverlayFullyVisible(void);
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite);
 void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite);
 

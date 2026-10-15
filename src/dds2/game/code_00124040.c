@@ -1998,7 +1998,6 @@ extern void fldMarkStageExplorationCellsAroundPosition(s32, s32, f32, f32, f32);
 
 extern void mnuCreateCampTasks(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
 
 extern void fldApplySkyLightSetToPlayerVU(void);
 extern void fldClearSceneLifecycleFlags(u32 mask);
