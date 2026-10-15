@@ -897,13 +897,13 @@ extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 
 /* Release the panel and task resources, then mark the result task finished. */
-void brsStaffTaskDestroy(KwlnTask *taskArg) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(taskArg);
+void brsStaffTaskDestroy(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
 
     if (context->teardownResource != NULL) {
         effDestroyResourceSlotSet(context->teardownResource);
     }
-    mnuDrainPanelTransitions(&context->transition.data, taskArg);
+    mnuDrainPanelTransitions(&context->transition.data, task);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }

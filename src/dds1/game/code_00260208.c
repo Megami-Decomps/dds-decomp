@@ -929,13 +929,13 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
 }
 
 
-void brsStaffTaskDestroy(KwlnTask *arg0) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(arg0);
+void brsStaffTaskDestroy(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
 
     if (context->teardownResource != NULL) {
         effDestroyResourceSlotSet(context->teardownResource);
     }
-    mnuDrainPanelTransitions(&context->transition.data, arg0);
+    mnuDrainPanelTransitions(&context->transition.data, task);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }
