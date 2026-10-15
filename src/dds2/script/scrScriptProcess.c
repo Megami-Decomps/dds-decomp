@@ -144,17 +144,17 @@ void scrDestroyAllNamedProcesses(void)
     }
 }
 
-/* Start procedure `index` on a script process: copy its name, set pc, clear the stack and timers. Returns 0 for an out-of-range index. */
-s32 scrStartProcessProcedure(ScrData *process, s32 index)
+/* Start a procedure on a script process: copy its name, set pc, clear the stack and timers. */
+s32 scrStartProcessProcedure(ScrData *process, s32 procedureIndex)
 {
     s32 i;
 
-    if (index < 0 || index >= process->sections->count) {
+    if (procedureIndex < 0 || procedureIndex >= process->sections->count) {
         return 0;
     }
-    for (i = 0; (process->name[i] = process->procedures[index].name[i]) != 0; i++) {
+    for (i = 0; (process->name[i] = process->procedures[procedureIndex].name[i]) != 0; i++) {
     }
-    process->pc = process->procedures[index].addr;
+    process->pc = process->procedures[procedureIndex].addr;
     process->sp = 0;
     {
         ScrStackValue *value = process->stackValues;
@@ -165,7 +165,7 @@ s32 scrStartProcessProcedure(ScrData *process, s32 index)
             value++->i = 0;
         }
     }
-    process->procedureIndex = index;
+    process->procedureIndex = procedureIndex;
     process->timer = 0;
     process->cmdTimer = 0;
     return 1;
