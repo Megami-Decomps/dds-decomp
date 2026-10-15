@@ -1832,9 +1832,9 @@ extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 mnuTerminalActionTable[];
 extern char mnuTerminalPopupEntries[];
-extern char D_003CE880[];
-extern char D_003CE8B8[];
-extern char D_003CE8F0[];
+extern char mnuTerminalSelectionPopupEntry[];
+extern char mnuTerminalSelectionCancelPopupEntry[];
+extern char mnuTerminalEntryMessagePopupEntry[];
 
 /* Event panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
 s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
@@ -1867,9 +1867,9 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
                     switch (action) {
                     case 2:
                         if (context->secondaryList->count == 1) {
-                            mnuSetPopupEntryFlagged(state, D_003CE8F0);
+                            mnuSetPopupEntryFlagged(state, mnuTerminalEntryMessagePopupEntry);
                         } else {
-                            mnuSetPopupEntryFlagged(state, D_003CE880);
+                            mnuSetPopupEntryFlagged(state, mnuTerminalSelectionPopupEntry);
                         }
                         break;
                     case 1:
@@ -1884,7 +1884,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
             }
         }
         if (buttons & 2) {
-            mnuSetPopupEntryFlagged(state, D_003CE8B8);
+            mnuSetPopupEntryFlagged(state, mnuTerminalSelectionCancelPopupEntry);
         }
         if (!(buttons & 0x300000)) {
             mnuClearListFlagsOneAndTwo((u32 *)context->menuList);
@@ -2036,7 +2036,7 @@ s32 mnuUpdateTerminalSelectionInput(KwlnTask *request) {
     }
     if (*dispatch == 0) {
         if (buttons & 1) {
-            mnuSetPopupEntryFlagged(dispatch, D_003CE8F0);
+            mnuSetPopupEntryFlagged(dispatch, mnuTerminalEntryMessagePopupEntry);
         }
         if (buttons & 2) {
             context->menuActive = 1;
@@ -2353,7 +2353,7 @@ u32 mnuTerminalEntryMessageLeaveNoOp(void) {
 }
 
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern char D_003CE928[];
+extern char mnuTerminalReturnToMenuPopupEntry[];
 
 s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
@@ -2365,10 +2365,10 @@ s32 evtOpenTerminalOwnerStatePopup(KwlnTask *request) {
         if (*dispatch == 0 && evtGetMessageWindowControlState() == 0) {
             if (evtGetCapturedWindowPanelValue() == 0) {
                 mnuResetProgressModeFromOwner((u8 *)state);
-                mnuSetPopupEntryFlagged(dispatch, D_003CE928);
+                mnuSetPopupEntryFlagged(dispatch, mnuTerminalReturnToMenuPopupEntry);
             } else if (state->secondaryList->count >= 2) {
                 state->menuActive = 1;
-                mnuSetPopupEntryFlagged(dispatch, D_003CE880);
+                mnuSetPopupEntryFlagged(dispatch, mnuTerminalSelectionPopupEntry);
             } else {
                 mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
             }

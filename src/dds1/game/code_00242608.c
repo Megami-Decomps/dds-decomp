@@ -96,7 +96,7 @@ extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
-extern s32 D_0036AA60[];
+extern s32 mnuShopPrimarySpriteNames[];
 
 #define CAMP_TASK_PRIORITY 0x3EC
 
@@ -1138,7 +1138,7 @@ INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
 void mnuShopLoadSpriteAssets(ShopScene *scene) {
     struct EffectSlotSet **resource = &scene->spriteResource;
-    *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
+    *resource = effLoadIndexedResource("/facility/spr/shop/", mnuShopPrimarySpriteNames[0], 0);
 }
 
 void mnuReleaseShopSceneSpriteResources(ShopScene *scene) {
@@ -2020,7 +2020,7 @@ extern s32 mnuDrawCommandClosePhase(ShopScene *);
 
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 extern void mnuDrawCampItemListRow();
-extern u8 D_0036AB64[];
+extern u8 mnuShopReturnFadePopupEntry[];
 
 extern void mnuStepShopWindowTransition(ShopScene *, s32);
 
@@ -2038,7 +2038,7 @@ extern void dspRequestMessageWindowModeOne(void);
 extern MenuPopupEntry mnuShopCommandPopupEntries[];
 extern MenuPopupEntry mnuShopCatalogPopupEntries[];
 extern MenuPopupEntry mnuShopFilteredCatalogPopupEntries[];
-extern u8 D_0036AABC[];
+extern u8 mnuShopSaleCommandPopupEntries[];
 
 
 
@@ -2062,7 +2062,7 @@ extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 D_0036AAF4[];
+extern u8 mnuShopQuantityPopupEntry[];
 extern void mnuSelectLastListNode(struct MenuList *);
 
 
@@ -2277,7 +2277,7 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAF4);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2398,7 +2398,7 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAF4);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2456,7 +2456,7 @@ s32 evtSetupDispatchSyncC(KwlnTask *callbackContext) {
 
 void evtInstallStateTableD(ShopScene *state) {
     if (state->menuMode == 2) {
-        MNU_INSTALL_STATE_TABLE(state, D_0036AABC, D_0036AABC + 0x70);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopSaleCommandPopupEntries, mnuShopSaleCommandPopupEntries + 0x70);
     }
 }
 
@@ -2514,7 +2514,7 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAF4);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopQuantityPopupEntry);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2584,7 +2584,7 @@ s32 evtQueryStateProgress(KwlnTask *callbackContext) {
             if ((f32)progressTicks < 20.0f) {
                 ((ShopScene *)stateAddress)->progressTicks = progressTicks + 1;
             } else {
-                mnuSetPopupEntry(&((ShopScene *)stateAddress)->dispatchState, D_0036AB64);
+                mnuSetPopupEntry(&((ShopScene *)stateAddress)->dispatchState, mnuShopReturnFadePopupEntry);
             }
         }
         dispatchResult = 0;
@@ -2894,7 +2894,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCatalogPopupEntries);
             break;
         case 3:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AABC);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)mnuShopSaleCommandPopupEntries);
             break;
         }
     }
@@ -3220,7 +3220,7 @@ u32 evtStartFadeOut(void) {
 }
 
 extern const char D_003AF528[];
-extern s32 D_0036AB80[];
+extern s32 mnuShopFadeCompletePopupEntry[];
 extern s32 evtIsActiveFlagSet(s32 flagIndex);
 
 s32 evtUpdateMainTaskPopupEntry(KwlnTask *task) {
@@ -3239,7 +3239,7 @@ s32 evtUpdateMainTaskPopupEntry(KwlnTask *task) {
             shouldFlag = 1;
         }
         if (shouldFlag != 0) {
-            mnuSetPopupEntryFlagged(&scene->dispatchState, D_0036AB80);
+            mnuSetPopupEntryFlagged(&scene->dispatchState, mnuShopFadeCompletePopupEntry);
         }
     }
     result = 0;

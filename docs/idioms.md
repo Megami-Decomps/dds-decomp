@@ -13933,3 +13933,27 @@ other game. The existing unsized byte arrays and casts to the shared
 fragment-parameter owner are unchanged. These names add no type, bound,
 initializer, copy, prototype, callback or instruction changes and do not
 claim new function or data-ownership credit.
+
+## Shop and terminal popup-record data roles
+
+Keep the saved `mnuShopSaleCommandPopupEntries` view and the separate DDS2
+`mnuShopRangeFilteredCommandPopupEntries` view, including their native bank
+overlaps and fixed-offset selections. Quantity, terminal selection/cancel,
+entry-message and return-to-menu names describe observed callback-table use;
+they do not introduce new record layouts or meanings for sentinel words.
+
+Both games have `mnuShopReturnFadePopupEntry` followed by
+`mnuShopFadeCompletePopupEntry`. DDS1 reaches the latter through its main-task
+and active-flag barrier; retain the distinct DDS2 polling mechanism. The
+three zero words, three all-one words and fade-idle callback in the final
+marker are native values, not newly inferred flags.
+
+`mnuShopProgressSlotRows` retains eight twelve-byte rows, including its zero
+tail. Its completion-flag and price-percent views remain at offsets four
+and eight. Do not merge this percent column with
+`mnuShopQuantityPriceTiers`: the latter's final two percentages are 100,
+whereas the progress rows include 160. `mnuShopCurrencyAwardTiers` likewise
+retains its repeated threshold rather than inventing a new award rule.
+The per-title primary, man/woman and character sprite-name banks keep their
+original counts and null cells. These are identifier-only names: preserve
+all pointer words, imported pointees, declarations, casts, storage and flow.
