@@ -229,7 +229,8 @@ s32 mnuFinishFieldSkillPopup(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_002AB550(void) {
+/* Always allow entry to the registered staff-display return popup. */
+u32 mnuAllowStaffDisplayReturn(void) {
     return 1;
 }
 

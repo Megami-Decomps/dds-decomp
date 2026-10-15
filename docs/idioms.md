@@ -12916,3 +12916,38 @@ function identities are preserved in both games.
 | `00263140` | `00299FE0` | `mnuResultSelectionLeaveNoOp` | leave |
 | `002642C8` | `0029B410` | `mnuStatAssignmentMessageLeaveNoOp` | leave |
 | `00264608` | `0029B778` | `mnuLevelChangeMessageLeaveNoOp` | leave |
+
+### Reward hooks and return-popup entry gates
+
+The primary-reward, stat-point, and staff value-selection records register
+constant-one enter or leave hooks with no side effects. In contrast, a
+`canEnter` hook returning one actively allows popup entry; its name must not
+suggest a wait, a completion test, or a disabled feature.
+
+The three always-true gates below belong to return records selected by the
+staff display, party-selection, and skill-shell/list cancellation paths.
+Their shared normal handlers do not establish three unknown feature names;
+the evidenced installer paths distinguish the return roles.
+
+DDS1 has item-use enter/leave no-ops where DDS2 has null slots in its
+`0x003E74DC` record. Do not manufacture function twins for null pointers.
+DDS2 separately registers constant-one leave hooks on its party-slot
+assignment and clearing confirmation records. Identical tiny code alone
+does not identify a DDS1 counterpart for those records.
+
+All existing signatures and return constants remain unchanged, including
+four prototype-only identifier updates in the DDS2 menu support unit.
+
+| DDS1 | DDS2 | Name | Native role |
+|---|---|---|---|
+| `00263638` | `0029A650` | `mnuPrimaryRewardPanelLeaveNoOp` | leave |
+| `00263E30` | `0029AF40` | `mnuStatPointPanelLeaveNoOp` | leave |
+| `00272BB8` | `002AB550` | `mnuAllowStaffDisplayReturn` | canEnter |
+| `00273C40` | `002AD8E8` | `mnuStaffValueSelectionEnterNoOp` | enter |
+| `00273C48` | `002AD8F0` | `mnuStaffValueSelectionLeaveNoOp` | leave |
+| `00274040` | — | `mnuStaffItemUseEnterNoOp` | enter |
+| `00274048` | — | `mnuStaffItemUseLeaveNoOp` | leave |
+| — | `002B06A0` | `mnuPartySlotAssignmentLeaveNoOp` | leave |
+| — | `002B0B88` | `mnuPartySlotClearLeaveNoOp` | leave |
+| `00274B78` | `002B0D48` | `mnuAllowPartySelectionReturn` | canEnter |
+| `00277638` | `002B3A58` | `mnuAllowSkillMenuReturn` | canEnter |

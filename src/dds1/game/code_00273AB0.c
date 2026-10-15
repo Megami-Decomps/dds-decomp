@@ -137,11 +137,13 @@ s32 mnuStaffImageExitA(KwlnTask *task) {
 }
 
 
-u32 func_00273C40(void) {
+/* Registered staff value-selection enter hook: no side effects; returns one. */
+u32 mnuStaffValueSelectionEnterNoOp(void) {
     return 1;
 }
 
-u32 func_00273C48(void) {
+/* Registered staff value-selection leave hook: no side effects; returns one. */
+u32 mnuStaffValueSelectionLeaveNoOp(void) {
     return 1;
 }
 
@@ -246,11 +248,13 @@ s32 mnuStaffImageExitD(KwlnTask *task) {
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
-u32 func_00274040(void) {
+/* Registered staff item-use enter hook: no side effects; returns one. */
+u32 mnuStaffItemUseEnterNoOp(void) {
     return 1;
 }
 
-u32 func_00274048(void) {
+/* Registered staff item-use leave hook: no side effects; returns one. */
+u32 mnuStaffItemUseLeaveNoOp(void) {
     return 1;
 }
 
@@ -579,6 +583,7 @@ s32 mnuExitStaffValuePage(KwlnTask *task) {
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
-u32 func_00274B78(void) {
+/* Always allow entry to the registered party-selection return popup. */
+u32 mnuAllowPartySelectionReturn(void) {
     return 1;
 }

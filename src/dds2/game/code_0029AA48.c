@@ -156,7 +156,8 @@ u32 mnuResetSelectionWidthsFromConfig(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0029AF40(void) {
+/* Registered stat-point panel leave hook: no side effects; returns one. */
+u32 mnuStatPointPanelLeaveNoOp(void) {
     return 1;
 }
 

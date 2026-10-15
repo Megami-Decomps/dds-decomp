@@ -160,7 +160,8 @@ s32 mnuFinishStaffImagePopup(KwlnTask *request) {
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-u32 func_00272BB8(void) {
+/* Always allow entry to the registered staff-display return popup. */
+u32 mnuAllowStaffDisplayReturn(void) {
     return 1;
 }
 

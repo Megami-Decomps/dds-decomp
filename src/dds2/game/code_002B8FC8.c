@@ -321,7 +321,7 @@ s32 mnuFinishStaffValuePopup(s32 callback);
 /* Initialize the menu display using a value from the resource chain. */
 u32 mnuEnterSelectedResourceLabel(void);
 
-u32 func_002B06A0(void);
+u32 mnuPartySlotAssignmentLeaveNoOp(void);
 
 
 
@@ -337,7 +337,7 @@ void mnuClearPartySelectionValues(DatPartyRecord *entry, s32 selection);
 
 u32 mnuEnterSlotLabel(void);
 
-u32 func_002B0B88(void);
+u32 mnuPartySlotClearLeaveNoOp(void);
 
 s32 mnuPartySlotConfirmClearUpdate(s32 callback);
 
@@ -345,7 +345,7 @@ s32 mnuAdvancePartyClearPopup(s32 callback);
 
 s32 mnuFinishPartyClearPopup(s32 callback);
 
-u32 func_002B0D48(void);
+u32 mnuAllowPartySelectionReturn(void);
 
 void mnuSelectPartySelectionVisuals(u32 context);
 
@@ -467,7 +467,7 @@ void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 s32 mnuStaffIdlePartyUpdate(s32 callback);
 
-u32 func_002B3A58(void);
+u32 mnuAllowSkillMenuReturn(void);
 
 
 

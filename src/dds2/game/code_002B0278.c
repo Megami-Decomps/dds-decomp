@@ -458,7 +458,8 @@ u32 mnuEnterSelectedResourceLabel(KwlnTask *task) {
     return 1;
 }
 
-u32 func_002B06A0(void) {
+/* Registered party-slot assignment leave hook: no side effects; returns one. */
+u32 mnuPartySlotAssignmentLeaveNoOp(void) {
     return 1;
 }
 
@@ -588,7 +589,8 @@ u32 mnuEnterSlotLabel(KwlnTask *task) {
     return 1;
 }
 
-u32 func_002B0B88(void) {
+/* Registered party-slot clearing leave hook: no side effects; returns one. */
+u32 mnuPartySlotClearLeaveNoOp(void) {
     return 1;
 }
 
@@ -628,7 +630,8 @@ s32 mnuFinishPartyClearPopup(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_002B0D48(void) {
+/* Always allow entry to the registered party-selection return popup. */
+u32 mnuAllowPartySelectionReturn(void) {
     return 1;
 }
 
@@ -1691,7 +1694,8 @@ s32 mnuStaffIdlePartyUpdate(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_002B3A58(void) {
+/* Always allow entry to the registered skill-menu return popup. */
+u32 mnuAllowSkillMenuReturn(void) {
     return 1;
 }
 

@@ -341,7 +341,8 @@ s32 mnuResetItemSelectionMarkers(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0029A650(void) {
+/* Registered primary-reward panel leave hook: no side effects; returns one. */
+u32 mnuPrimaryRewardPanelLeaveNoOp(void) {
     return 1;
 }
 
