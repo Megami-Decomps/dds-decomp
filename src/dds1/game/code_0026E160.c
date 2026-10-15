@@ -185,8 +185,11 @@ void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *sprit
     effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), flag, sprite, mode, param);
 }
 
+/* EE integer/FPU argument banks are independent. The callers establish the
+ * scale pair before index; keep this mixed-class source order consistent. */
 void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set,
-                   s32 index, f32 scaleX, f32 scaleY, s32 option, s32 texture) {
+                                f32 scaleX, f32 scaleY, s32 index,
+                                s32 option, s32 texture) {
     set->workEntries[index].geometry.bounds[2] = (s32)(scaleX * set->workEntries[index].sourceWidth) << 4;
     set->workEntries[index].geometry.bounds[3] = (s32)(scaleY * set->workEntries[index].sourceHeight) << 3;
     effDrawSpriteWithCornerFade(x << 4, y << 3, z,
