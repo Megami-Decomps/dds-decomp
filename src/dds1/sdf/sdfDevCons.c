@@ -12,12 +12,12 @@
 #define SDF_DMA_CHCR_TTE 0x40
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
-void sdfDevConsStoreCharacter(DevConsState *arg0, s32 arg1, s32 arg2);
-void sdfDevConsFinalizeGlyphTag(ConsBuf *arg0);
+void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute);
+void sdfDevConsFinalizeGlyphTag(ConsBuf *packetBuffers);
 void sdfDevConsKickPacketDma(ConsBuf *packetBuffers);
-void sdfDevConsAppendBackgroundSprite(DevConsState *arg0, ConsBuf *arg1);
-void sdfDevConsDrawGlyphGrid(DevConsState *arg0, ConsBuf *arg1);
-void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);
+void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuffers);
+void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *packetBuffers);
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes);
 s32 sdfVFormatString(char *destination, const char *format, void *args);
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
