@@ -121,8 +121,8 @@ typedef struct BtlUnit {
     f32 muzzleOffset[4]; /* 0xA0: read by btlUnitGetBodyPosVU */
     f32 height; /* 0xB0 */
     f32 reach; /* 0xB4 */
-    f32 unkB8; /* Setup stores mirror height/reach; meaning otherwise unknown. */
-    f32 unkBC;
+    f32 unkB8; /* Setup mirrors height; its distinct geometry role is not established. */
+    f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
     f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
     s32 resourceKind; /* 0xC4: selects the actor resource table, as in DDS2 */
     u32 species; /* 0xC8 */
@@ -207,8 +207,8 @@ typedef struct BtlUnit {
     f32 muzzleOffset[4]; /* 0xA0 */
     f32 height;     /* 0xB0 */
     f32 reach;      /* 0xB4 */
-    f32 unkB8; /* 0xB8: formation setup copies height here, alongside reach at +0xBC. */
-    f32 unkBC;
+    f32 unkB8; /* 0xB8: formation setup copies height here. */
+    f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
     f32 unkC0;
     s32 resourceKind; /* 0xC4 */
     s32 resourceIndex; /* 0xC8 */
