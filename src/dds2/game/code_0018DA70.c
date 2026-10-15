@@ -406,7 +406,7 @@ extern u32 fldIsUpdateInhibited(void);
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
-void effDrawBlurSource(BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
+void effDrawBlurSource(const BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
     void *list;
 
     if (fldIsUpdateInhibited() == 0) {

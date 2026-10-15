@@ -135,7 +135,7 @@ EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
 void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 
 void effAppendBlurRectanglePackets(void *list, const EffBlurQuad *source, u8 fixedPointCoordinates);
-void effDrawBlurSource(EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
+void effDrawBlurSource(const EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
 void effDrawBlurRectangle(const EffBlurQuad *source);
 void effBlurDrawFramebufferQuad(const EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
