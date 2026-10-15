@@ -1246,8 +1246,6 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     effDrawSolidRectangle(out);
 }
 
-extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-
 u32 effCreateFadeColorWorkFromOutput(void *work) {
     return (u32)effCloneResourceTemplate((EffResourceRectParams *)((u8 *)work + 0xc0));
 }

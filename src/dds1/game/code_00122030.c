@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
@@ -2027,13 +2028,6 @@ extern s32 fldGetSparkDialogPhase(void);
 extern void fldUpdateSparkEncounterScene(void);
 
 extern void func_0014DAF0(s32);
-
-
-struct KwlnTask;
-
-extern struct KwlnTask *kwlnTaskFindByPriority(u32);
-
-
 
 
 extern u32 D_003BABE8;

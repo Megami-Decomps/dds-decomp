@@ -1045,9 +1045,9 @@ u32 btlNextScaledRandom(u32 limit) {
 
 extern u32 btlNextScaledRandom(u32 limit);
 
-s32 btlRandomInclusiveRange(s32 a0, s32 a1) {
-    s32 lo = a1;
-    s32 hi = a0;
+s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
+    s32 lo = upper;
+    s32 hi = lower;
 
     if (lo < hi) {
         s32 t = lo;

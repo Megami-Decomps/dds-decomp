@@ -3351,7 +3351,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
         currentScale /= modelAScale - modelBScale;
         nextZ = (modelA->z - modelB->z) * currentScale + modelB->z;
         selected->unk58 = nextZ;
-        selected->zOffset = nextZ;
+        selected->positionZOffset = nextZ;
         btlSetUnitPosition(selected, selected->currentPosition);
     }
 }

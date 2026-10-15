@@ -7,6 +7,7 @@
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -51,7 +52,6 @@ extern void btlUpdateScene(void);
 extern void btlUpdateBattleCameraFrame(void);
 extern s32 btlRuntime;
 
-extern KwlnTask *kwlnTaskFindByPriority(u32);
 
 extern u64 D_003BB2E8;
 #include "sdf_packet_alloc.h"
@@ -628,7 +628,7 @@ void btlResetActorEntryState(void) {
     ((BtlState *)context)->moneyTotal = 0;
     ((BtlState *)context)->experienceEarned = 0;
     ((BtlState *)context)->epEarned = 0;
-    ((BtlState *)context)->unk2D0 = 0;
+    ((BtlState *)context)->totalAp = 0;
     for (i = 0; i < 5; i++) {
         entries[i].huntExp = 0;
 
@@ -653,7 +653,7 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
     runtime = (BtlState *)btlRuntime;
     rewards->macca = (u32)runtime->moneyTotal;
     rewards->totalExp = runtime->experienceEarned;
-    rewards->totalAp = runtime->unk2D0;
+    rewards->totalAp = runtime->totalAp;
     btlBossDebugPrintf(D_003A1698);
     btlBossDebugPrintf(D_003A16B8, rewards->macca);
     btlBossDebugPrintf(D_003A16C8, rewards->totalExp);

@@ -25,6 +25,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "evt_world.h"
@@ -111,7 +112,6 @@ extern s32 D_003C99B8[];
 extern void evtViewerCleanupMessageWindow();
 
 
-extern KwlnTask *kwlnTaskFindByPriority(u32 priority);
 
 
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);

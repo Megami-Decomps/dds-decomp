@@ -9,6 +9,7 @@
 #include "sdf_tex_create.h"
 #include "sdf_tex_packet.h"
 #include "sdf_pending.h"
+#include "sdf_tex_copy_image_data_api.h"
 #include "ee_mmi.h"
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
@@ -16,7 +17,7 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 extern SdfPendingRequest sdfTextureReleaseQueue;
 
-void *memcpy(void *arg0, void *arg1, u32 arg2);
+void *memcpy(void *arg0, const void *arg1, u32 arg2);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
@@ -40,8 +41,8 @@ void sdfTexAllocatePaletteData(SdfTex *texture) {
 }
 
 /* Copy retained palette bytes without changing the texture resource metadata. */
-void *sdfTexCopyImageData(SdfTex *texture, void *source) {
-    return memcpy(texture->paletteData, source, texture->paletteDataSize);
+void sdfTexCopyImageData(SdfTex *texture, const void *source) {
+    memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexCreateWithAllocatedResources);

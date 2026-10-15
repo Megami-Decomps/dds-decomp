@@ -4,6 +4,10 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff_param.h"
+#include "btl.h"
+#include "eff.h"
+#include "mdl.h"
+#include "evt_unit.h"
 
 enum {
     EFF_BATTLE_COPY_TRIGGER_FRAME = 0,
@@ -139,7 +143,269 @@ INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DF0);
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0E00);
 
-INCLUDE_ASM(const s32, "effect/effBattle", effBattleUpdate);
+extern void sdfDebugPrintf(const char *, ...);
+typedef struct EffBattleUnitRgbCommand {
+    u32 color; u32 startFrame; s32 startDurationIndex; u32 endFrame; s32 endDurationIndex;
+} EffBattleUnitRgbCommand;
+typedef struct EffBattleUnitColorCommand {
+    EffectVectorRequest request; u32 firstColor; u32 secondColor; u32 startFrame;
+    s32 startDurationIndex; u32 endFrame; s32 endDurationIndex;
+} EffBattleUnitColorCommand;
+extern f32 D_003A0DE0[4]; extern f32 D_003A0DF0[4]; extern f32 D_003A0E00[4];
+extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
+extern u32 effFieldColorFlags;
+extern void effMiscQuatMultiplyVU(void); extern void effMiscQuaternionToMatrixVU(void);
+extern void sdfComposeVuMatrixFromRegisters(void);
+extern void effBattleMiscQueryPosition(void *, EffectVectorRequest *, u128 *);
+extern void effBattleMiscBuildBasis(EffectVectorRequest *, u128 *);
+extern f32 effBattleMiscQueryScalar(BtlUnit *, EffectVectorRequest *);
+extern u32 effBTLFieldColorGetOverrideSelector(void); extern u32 effBTLFieldColorGetFinalSelector(void);
+extern u32 effMultiplyPackedColors(u32, u32); extern u32 effBattleCalcFadeTint(u32, u32);
+extern void kwlnFadeSetupFrames(s32, s32); extern void mdlLoadTertiaryVectorVU(MdlCtx *);
+extern void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *, s32);
+extern void effBattleApplyUnitRgbKeyframe(BtlUnit *, EffBattleUnitRgbCommand *, s32);
+extern void effParamWorkCallback0(EffParamWork *, void *); extern void effParamWorkCallback2(EffParamWork *, void *);
+extern void effParamWorkCallback3(EffParamWork *, u32); extern void effParamWorkCallback4(EffParamWork *, void *);
+extern void effParamWorkCallback5(EffParamWork *, f32); extern void effParamWorkInvokeCallback(EffParamWork *);
+extern void fileSetRenderFlag(u32); extern void fileClearRenderFlag(u32);
+extern void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *, s32);
+void effBattleUpdate(BattleEffect *work) {
+    BtlUnit *unit;
+    EffBattleEntryList *list;
+    EffBattleEntry *entry;
+    s32 index;
+    s32 count;
+    const u32 frame = work->currentFrame;
+    u16 flags = work->flags;
+    u32 color;
+    f32 localVector[4];
+    f32 baseMatrix[4][4];
+    f32 overrideMatrix[4][4];
+    f32 finalMatrix[4][4];
+    f32 alternateMatrix[4][4];
+    f32 oppositeMatrix[4][4];
+    f32 basisMatrix[4][4];
+    BtlUnit *overrideOwner;
+    BtlUnit *finalOwner;
+
+    list = work->list;
+    unit = (BtlUnit *)work->owner;
+
+    if ((flags & 8) != 0) {
+        if ((flags & 2) != 0) {
+            effBattleApplyUnitColorDirection(unit, (EffBattleUnitColorCommand *)list->colorKeys, frame);
+            flags = work->flags;
+        }
+        if ((flags & 4) != 0) {
+            effBattleApplyUnitRgbKeyframe(unit,
+                (EffBattleUnitRgbCommand *)list->rgbKeys, frame);
+        }
+
+        if (list->shake != 0 && list->shakeFrame == frame) {
+            if (list->shake < 0x1F) {
+                kwlnFadeSetupFrames(list->shakeFade, list->shake * 10);
+            } else {
+                sdfDebugPrintf("effBattle : shake over[%d]\n", list->shake);
+                kwlnFadeSetupFrames(list->shakeFade, 0x12C);
+            }
+        }
+
+        VU0_LOAD_VF(vf10, unit->orientation);
+        VU0_LOAD_VF(vf11, D_003A0DE0);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_STORE_MATRIX(baseMatrix);
+
+        overrideOwner = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
+        if (overrideOwner != NULL) {
+            VU0_LOAD_VF(vf10, overrideOwner->orientation);
+            VU0_LOAD_VF(vf11, D_003A0DE0);
+            effMiscQuatMultiplyVU();
+            effMiscQuaternionToMatrixVU();
+            VU0_STORE_MATRIX(overrideMatrix);
+        } else {
+            EE_MMI_UNIT_MATRIX(overrideMatrix);
+        }
+
+        finalOwner = (BtlUnit *)effBTLFieldColorGetFinalSelector();
+        if (finalOwner != NULL) {
+            VU0_LOAD_VF(vf10, finalOwner->orientation);
+            VU0_LOAD_VF(vf11, D_003A0DE0);
+            effMiscQuatMultiplyVU();
+            effMiscQuaternionToMatrixVU();
+            VU0_STORE_MATRIX(finalMatrix);
+        } else {
+            EE_MMI_UNIT_MATRIX(finalMatrix);
+        }
+
+        if ((unit->status.flags & 0x200) != 0) {
+            VU0_LOAD_VF(vf10, D_003A0DF0);
+            effMiscQuaternionToMatrixVU();
+            VU0_STORE_MATRIX(alternateMatrix);
+            VU0_LOAD_VF(vf10, D_003A0E00);
+            effMiscQuaternionToMatrixVU();
+            VU0_STORE_MATRIX(oppositeMatrix);
+        } else {
+            VU0_LOAD_VF(vf10, D_003A0E00);
+            effMiscQuaternionToMatrixVU();
+            VU0_STORE_MATRIX(alternateMatrix);
+            VU0_LOAD_VF(vf10, D_003A0DF0);
+            effMiscQuaternionToMatrixVU();
+            VU0_STORE_MATRIX(oppositeMatrix);
+        }
+
+        if ((work->flags & 1) == 0) {
+            color = effMultiplyPackedColors(
+                effBattleCalcFadeTint(frame, work->colorRampEndFrame), work->color);
+        } else {
+            color = work->color;
+        }
+
+        entry = list->entries;
+        count = list->count;
+        for (index = 0; index < count; index++, entry++) {
+            f32 scalar = 0.0f;
+            f32 matrixOutput[4][4];
+            s32 hidden;
+
+            if (entry->zeroKindCount >= frame) {
+                continue;
+            }
+            if (entry->kind != 0) {
+                u16 eligibilityFlags = unit->effectLink.flags;
+                if (entry->kind == 3) {
+                    if ((eligibilityFlags & 2) == 0) {
+                        continue;
+                    }
+                } else {
+                    if ((eligibilityFlags & 4) == 0) {
+                        continue;
+                    }
+                    if (entry->kind == 1 && (eligibilityFlags & 1) != 0) {
+                        continue;
+                    }
+                    if (entry->kind == 2 && (eligibilityFlags & 1) == 0) {
+                        continue;
+                    }
+                }
+            }
+            if (work->parameterWorks[index] == NULL) {
+                continue;
+            }
+
+            hidden = 1;
+            if ((effFieldColorFlags & 1) != 0) {
+                effBattleMiscQueryPosition(unit, (EffectVectorRequest *)&entry->aimParams, (u128 *)localVector);
+                if (localVector[2] > -150.0f) {
+                    hidden = 0;
+                }
+            }
+            if (hidden == 0) {
+                fileSetRenderFlag(1);
+            } else {
+                fileClearRenderFlag(1);
+            }
+            if ((work->flags & 0x10) == 0) {
+                EffectVectorRequest *request = (EffectVectorRequest *)&entry->aimParams;
+                effBattleMiscQueryPosition(unit, request, (u128 *)localVector);
+                effParamWorkCallback0(work->parameterWorks[index], localVector);
+                switch (request->kind) {
+                case 0:
+                case 4:
+                    effParamWorkCallback2(work->parameterWorks[index], baseMatrix);
+                    break;
+                case 6:
+                    effParamWorkCallback2(work->parameterWorks[index], overrideMatrix);
+                    break;
+                case 7:
+                    effParamWorkCallback2(work->parameterWorks[index], finalMatrix);
+                    break;
+                case 1:
+                    effParamWorkCallback2(work->parameterWorks[index], alternateMatrix);
+                    break;
+                case 2:
+                    effParamWorkCallback2(work->parameterWorks[index], oppositeMatrix);
+                    break;
+                case 3:
+                    break;
+                case 5:
+                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.aimMode);
+                    VU0_LOAD_MATRIX_B(baseMatrix);
+                    sdfComposeVuMatrixFromRegisters();
+                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    break;
+                case 8:
+                    if ((unit->status.flags & 2) != 0) {
+                        mdlLoadTertiaryVectorVU(unit->ext->owner);
+                        VU0_GET_VF10_X(scalar);
+                    } else {
+                        scalar = 0.0f;
+                    }
+                    btlSetAlternateEffectParameterOrMuzzlePosition(unit, entry->aimParams.aimMode);
+                    if (scalar != 0.0f) {
+                        VU0_SET_ONES_XYZ(vf10);
+                        VU0_SCALE_VF(vf10, 1.0f / scalar);
+                        VU0_SCALE_MATRIX_ROWS(vf10);
+                    }
+                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    break;
+
+                case 9:
+                    if ((overrideOwner->status.flags & 2) != 0) {
+                        mdlLoadTertiaryVectorVU(overrideOwner->ext->owner);
+                        VU0_GET_VF10_X(scalar);
+                    } else {
+                        scalar = 0.0f;
+                    }
+                    btlSetAlternateEffectParameterOrMuzzlePosition(overrideOwner, entry->aimParams.aimMode);
+                    if (scalar != 0.0f) {
+                        VU0_SET_ONES_XYZ(vf10);
+                        VU0_SCALE_VF(vf10, 1.0f / scalar);
+                        VU0_SCALE_MATRIX_ROWS(vf10);
+                    }
+                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    break;
+
+                case 10:
+                    if ((finalOwner->status.flags & 2) != 0) {
+                        mdlLoadTertiaryVectorVU(finalOwner->ext->owner);
+                        VU0_GET_VF10_X(scalar);
+                    } else {
+                        scalar = 0.0f;
+                    }
+                    btlSetAlternateEffectParameterOrMuzzlePosition(finalOwner, entry->aimParams.aimMode);
+                    if (scalar != 0.0f) {
+                        VU0_SET_ONES_XYZ(vf10);
+                        VU0_SCALE_VF(vf10, 1.0f / scalar);
+                        VU0_SCALE_MATRIX_ROWS(vf10);
+                    }
+                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    effParamWorkCallback2(work->parameterWorks[index], matrixOutput);
+                    break;
+                default:
+                    break;
+                }
+                effBattleMiscBuildBasis(request, (u128 *)basisMatrix);
+                effParamWorkCallback4(work->parameterWorks[index], basisMatrix);
+                scalar = effBattleMiscQueryScalar(unit, request);
+                effParamWorkCallback5(work->parameterWorks[index], scalar);
+                effParamWorkCallback3(work->parameterWorks[index], color);
+            }
+            effParamWorkInvokeCallback(work->parameterWorks[index]);
+        }
+    }
+
+    if (list->callbackFrame == frame && work->sourceFrameCallback != 0) {
+        ((void (*)(BattleEffect *))work->sourceFrameCallback)(work);
+    }
+    if (work->triggerFrame == frame && work->triggerFrameCallback != 0) {
+        ((void (*)(BattleEffect *))work->triggerFrameCallback)(work);
+    }
+    work->currentFrame++;
+}
 
 void effBattleSetScale(BattleEffect *effect, f32 scale) {
     s32 i;

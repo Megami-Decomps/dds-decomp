@@ -98,7 +98,7 @@ typedef struct BattleSceneWork {
     u8 pad_2A0[0xC];
     s32 spriteObject;
     u8 pad2B0[0x20];
-    s32 unk2D0;
+    s32 totalAp; /* 0x2D0: defeat EP accumulated for the result screen. */
     BtlSceneSlot slots[8];
     BtlTask *groupPrimary[20];
     BtlTask *groupSecondary[45];
@@ -126,6 +126,8 @@ typedef char BattleSceneWorkSceneIdOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->sceneId == 0x27C) ? 1 : -1];
 typedef char BattleSceneWorkOnUnitCreatedOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->onUnitCreated == 0x5C0) ? 1 : -1];
+typedef char BattleSceneWorkTotalApOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->totalAp == 0x2D0) ? 1 : -1];
 typedef char BattleSceneWorkSizeCheck[(sizeof(BattleSceneWork) == 0x5FC) ? 1 : -1];
 
 extern s32 btlCountTasksForOwner(s64);
@@ -508,9 +510,9 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         btlResetSceneSlotFades();
         *(u8 *)(arg0 + 0x258) = 0;
         btlSelectSerialEncounter();
-        if (datBattleSceneRecords[work->sceneId].unk01 != 0) {
-            for (i = 0; i < datBattleSceneRecords[work->sceneId].unk02; i++) {
-                btlAddItemDrop(datBattleSceneRecords[work->sceneId].unk01);
+        if (datBattleSceneRecords[work->sceneId].itemDropId != 0) {
+            for (i = 0; i < datBattleSceneRecords[work->sceneId].itemDropCount; i++) {
+                btlAddItemDrop(datBattleSceneRecords[work->sceneId].itemDropId);
             }
         }
         return 8;
@@ -1002,8 +1004,8 @@ void btlFinalizeBattleRewards(BtlState *scene) {
             }
         }
     }
-    scene->unk2D0 += scene->epEarned;
-    btlBossDebugPrintf("btl:epTotal = %d\n", scene->unk2D0);
+    scene->totalAp += scene->epEarned;
+    btlBossDebugPrintf("btl:epTotal = %d\n", scene->totalAp);
     scene->epEarned = 0;
     scene->moneyTotal += scene->moneyEarned;
     btlBossDebugPrintf("btl:moneyTotal = %d\n", scene->moneyTotal);
@@ -1045,7 +1047,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
         if (!(scene->subFlags & 0x40)) {
             if (datGameState->party[i].flags & 2) {
                 if (scene->unk258 == 1) {
-                    if (datGameState->party[i].huntExp != 0 || scene->unk2D0 != 0) {
+                    if (datGameState->party[i].huntExp != 0 || scene->totalAp != 0) {
                         if (!(datGameState->party[i].status & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
                                 datAdjustCurrentHp(&datGameState->party[i],

@@ -370,7 +370,19 @@ void fileManDispatchDone(void) {
 
 extern void fileManCancelRequest(struct FileNode *request);
 
-/* PAC completion linkage occupies the request's final four bytes. */
+/* This one-word overlay is used only for the PAC callback chain; the shared
+ * request view keeps its otherwise unobserved trailing bytes opaque. */
+typedef struct FilePacCallbackLinkView {
+    u8 pad00[0x6C];
+    FilePacRequest *next;
+} FilePacCallbackLinkView;
+
+typedef char FilePacCallbackLinkView_size_check[
+    (sizeof(FilePacCallbackLinkView) == 0x70) ? 1 : -1];
+typedef char FilePacCallbackLinkView_next_offset_check[
+    ((u32)&((FilePacCallbackLinkView *)0)->next == 0x6C) ? 1 : -1];
+
+/* Deliver callbacks queued after PAC input completes. */
 s32 fileManUpdate(void) {
     FileManWork *work = &fileManagerWork;
     u32 activeSlots;
@@ -392,11 +404,11 @@ s32 fileManUpdate(void) {
                 fileManCancelRequest((struct FileNode *)request);
                 request->readinessEnabled = kind;
                 if (request->callback != NULL) {
-                    FilePacRequest **append = (FilePacRequest **)&work->unk14;
+                    FilePacRequest **append = &work->pacCallbackHead;
                     FilePacRequest *next;
 
                     while ((next = *append) != NULL) {
-                        append = (FilePacRequest **)&next->pad6C[0];
+                        append = &((FilePacCallbackLinkView *)next)->next;
                     }
                     *append = request;
                 }
@@ -414,13 +426,13 @@ s32 fileManUpdate(void) {
         }
     }
     fileStartOrResumeQueuedJob();
-    link = (FilePacRequest **)&work->unk14;
+    link = &work->pacCallbackHead;
     while ((request = *link) != NULL) {
         if (request->state == 6) {
-            *link = *(FilePacRequest **)&request->pad6C[0];
+            *link = ((FilePacCallbackLinkView *)request)->next;
             ((void (*)(FilePacRequest *, void *))request->callback)(request, request->userData);
         } else {
-            link = (FilePacRequest **)&request->pad6C[0];
+            link = &((FilePacCallbackLinkView *)request)->next;
         }
     }
     return work->head != NULL;

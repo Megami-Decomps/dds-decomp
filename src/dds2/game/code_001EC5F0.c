@@ -1,3 +1,4 @@
+#include "btl_effect_node.h"
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "btl_pair_camera_preset.h"
@@ -92,7 +93,7 @@ extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 
 typedef struct BtlUnit BtlUnit;
 
-extern void func_001F2758(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern BattleSoundArchiveEntry D_003BDE18[BTL_SOUND_ENTRY_COUNT];
 
@@ -419,7 +420,7 @@ void btlAdvanceCommandCursorTask(BtlLinkedCommand *action) {
 
 /* Initialize front/back framing for the native marked-unit selection path. */
 void btlInitializeMarkedUnitCameraPair(BtlLinkedCommand *action) {
-    func_001F2758(action, &action->frontCamera, &action->backCamera);
+    btlFrameEarliestAnimatedUnitCameraPair(action, &action->frontCamera, &action->backCamera);
 }
 
 extern void btlStepUnitHeightFramedCamera(BtlLinkedCommand *);
@@ -429,11 +430,11 @@ void btlUpdateLinkedHeightCamera(BtlLinkedCommand *action) {
     btlStepUnitHeightFramedCamera(action);
 }
 
-extern void func_001F2E30(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlAppendLinkedUnitToActorIndices(BtlLinkedCommand *action) {
     btlAppendIndexListEntry(action->targetList, action->link->unit);
-    func_001F2E30(action, &action->frontCamera, &action->backCamera);
+    btlBuildSpeciesFramedCameraPair(action, &action->frontCamera, &action->backCamera);
 }
 
 void btlUpdateDevilizeCameraNoOp(void) {
@@ -475,14 +476,14 @@ typedef struct {
     s32 (*allowDefaultSound)(void *);
 } SoundEventCallbacks;
 
-extern void func_001F3888(void *, void *, void *);
+extern void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlRunDefaultActionPoseUnlessHooked(void *actor) {
     SoundEventCallbacks *callbacks = (SoundEventCallbacks *)btlGetRuntime();
     if (callbacks->allowDefaultSound && callbacks->allowDefaultSound(actor)) {
         return;
     }
-    func_001F3888(actor, &((BtlLinkedCommand *)actor)->frontCamera, &((BtlLinkedCommand *)actor)->backCamera);
+    btlInitializeActorClearanceCameraPair(actor, &((BtlLinkedCommand *)actor)->frontCamera, &((BtlLinkedCommand *)actor)->backCamera);
 }
 
 /* Run the timed camera setup hook; return its result, or zero when unset. */
@@ -1672,7 +1673,123 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F0968);
+extern u8 D_00418310[];
+extern u8 D_00418320[];
+
+/* vu0 routine: frame the action's target groups from the actor's side, widening
+ * for several targets, then keep the actor clear of the near camera plane. */
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00417F30);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180B0);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180C0);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418240);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418250);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418310);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418320);
+
+void func_001F0968(BtlLinkedCommand *action) {
+    BtlState *state;
+    BtlUnit *unit;
+    BtlUnit *actor;
+    f32 *cameraPosition;
+    f32 heightPosition[4];
+    f32 focus[4];
+    f32 position[4];
+    f32 height;
+    f32 span;
+    f32 fov;
+    f32 framing;
+    f32 zero = 0.0f;
+    u32 count;
+    s32 groups;
+    u32 i;
+
+    state = (BtlState *)btlGetRuntime();
+    unit = action->link->unit;
+    if (unit == 0) {
+        return;
+    }
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF(vf10, focus);
+    cameraPosition = action->camera.position;
+
+    count = btlGetIndexListCount(action->targetList);
+    groups = 0;
+    for (i = 0; i < count; i++) {
+        BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(action->targetList, i);
+        groups |= target->status.flags & 0x600;
+    }
+
+    height = 0.0f;
+    count = 0;
+    actor = state->units;
+    while (actor != 0) {
+        s32 flags = actor->status.flags;
+        if (flags & 1) {
+            if (!(flags & 0xC0)) {
+                if (flags & groups) {
+                    btlUnitGetMuzzlePosVU(actor);
+                    VU0_STORE_VF(vf10, heightPosition);
+                    height += heightPosition[1];
+                    count++;
+                }
+            }
+        }
+        actor = actor->nextActor;
+    }
+
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(groups);
+    fov = action->camera.fov;
+    span = btlMeasureFilteredUnitGroupBounds(groups, 0, 0);
+    VU0_STORE_VF(vf10, cameraPosition);
+    height /= (f32)count;
+    action->camera.position[1] = height;
+
+    span = (f32)((double)span * 1.3);
+    if (span < 500.0f) {
+        span = 500.0f;
+    }
+    if (count >= 2) {
+        framing = 1.3333333f;
+        framing = fov * framing;
+        framing *= 0.5f;
+    } else {
+        framing = 0.5f;
+        framing = fov * framing;
+    }
+    framing = span / tanf(framing);
+    action->camera.distance = framing;
+
+    if (focus[0] > zero) {
+        VU0_LOAD_VF(vf10, D_00418310);
+    } else {
+        VU0_LOAD_VF(vf10, D_00418320);
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, action->camera.direction);
+    btlAdjustCameraDirectionForDefaultPlane(&action->camera);
+
+    {
+        u8 *statusTable = (u8 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        f32 clearance = *(f32 *)(statusTable + unit->unkEC * 0x14 + 0x38) * unit->scale;
+        btlCopyUnitCurrentPosition(unit, position);
+        if (position[2] - clearance < -100.0f) {
+            position[2] += -100.0f - (position[2] - clearance);
+            if (position[2] > 2000.0f - unit->reach * unit->scale) {
+                position[2] = 2000.0f - unit->reach * unit->scale;
+            }
+            btlSetUnitPosition(unit, position);
+        }
+    }
+}
 
 extern BtlUnit *btlFindFarthestUnit(u32, f32 *);
 
@@ -2362,7 +2479,96 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
     btlAdjustCameraDirectionForDefaultPlane(to);
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F2308);
+/* vu0 routine: frame the leftmost marked unit from the group centre, raised
+ * by a share of the group size, at a distance that also fits the group. */
+void func_001F2308(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
+    f32 point[4];
+    f32 center[4];
+    f32 height;
+    f32 fov;
+    f32 minX;
+    f32 width;
+    f32 length;
+    f32 extent;
+    f32 distance;
+    f32 top;
+    BtlState *work;
+    BtlUnit *unit;
+    BtlUnit *selected;
+    s32 first;
+    u32 flags;
+
+    work = (BtlState *)btlGetRuntime();
+    fov = source->fov;
+    from->fov = fov;
+    to->fov = fov;
+    extent = btlMeasureFilteredUnitGroupBounds(0x400, &width, &height);
+    VU0_STORE_VF(vf10, center);
+    if (width < 620.0f) {
+        if (width - height < 250.0f) {
+            if (100.0f < height) {
+                center[1] = -height * 0.55f;
+            } else {
+                center[1] = -height * 0.45f;
+            }
+        } else {
+            center[1] = -height * 0.75f;
+        }
+    } else {
+        center[1] = -width * 0.6f;
+    }
+    width = 0.0f;
+    first = 1;
+    selected = NULL;
+    minX = width;
+    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+        flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                btlUnitGetMuzzlePosVU(unit);
+                VU0_STORE_VF(vf10, point);
+                if (first) {
+                    selected = unit;
+                    first = 0;
+                    minX = point[0];
+                } else if (point[0] < minX) {
+                    minX = point[0];
+                    selected = unit;
+                }
+                top = btlUnitGetTopY(unit);
+                if (width < top) {
+                    width = top;
+                }
+            }
+        }
+    }
+    btlUnitGetMuzzlePosVU(selected);
+    VU0_STORE_VF(vf10, point);
+    point[1] = -width;
+    point[0] += selected->reach * selected->scale * 0.25f;
+    VU0_LOAD_VF(vf10, center);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_LOAD_VF(vf11, point);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, from->direction);
+    length += selected->reach * selected->scale * 2.85f / tanf(fov * 0.5f);
+    distance = extent / tanf(fov * 0.5f);
+    if (distance < length) {
+        from->distance = length;
+    } else {
+        from->distance = distance;
+    }
+    to->distance = from->distance;
+    btlCopyMotionTransform(to, from);
+    sdfVuLoadRotationMatrixY(-(45.0f * 0.017453293f));
+    VU0_LOAD_VF(vf10, to->direction);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+}
 
 /* vu0 routine: frame the two unit groups using their bounding extents. */
 void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
@@ -2402,7 +2608,113 @@ void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 0.0f);
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F2758);
+/* Front and back camera rotations of one animated-unit framing preset. */
+typedef struct BtlCameraQuaternionPair {
+    f32 front[4];
+    f32 back[4];
+} BtlCameraQuaternionPair;
+
+extern const BtlCameraQuaternionPair D_00418338[3];
+
+/* vu0 routine: frame the marked kind-11 unit that is earliest in its
+ * animation; the back camera sits between the front camera and the group. */
+void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 position[4];
+    BtlCameraQuaternionPair presets[3];
+    BtlState *work;
+    BtlUnit *unit;
+    BtlUnit *selected;
+    f32 frame;
+    f32 earliest;
+    f32 halfFov;
+    f32 extent;
+    s32 pose;
+    u32 flags;
+
+    memcpy(presets, D_00418338, sizeof(presets));
+    /* Initialize before the runtime lookup: sched2 ties this zero with the
+     * selected-unit zero and issues the earlier initializer first. */
+    earliest = 0.0f;
+    work = (BtlState *)btlGetRuntime();
+    selected = NULL;
+    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+        flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                if ((flags & 0xE0) && unit->unkEC == 11) {
+                    frame = btlGetUnitModelCurrentFrame(unit);
+                    if (selected == NULL) {
+                        earliest = frame;
+                        selected = unit;
+                    } else if (frame < earliest) {
+                        earliest = frame;
+                        selected = unit;
+                    }
+                }
+            }
+        }
+    }
+    if (selected == NULL) {
+        btlSetDefaultActionCameraPose(action, &action->camera);
+        return;
+    }
+    btlFlagAllUnitsDefeatCandidate();
+    action->focus = selected;
+    switch (work->unk268) {
+    case 0:
+    case 1:
+        pose = 1;
+        break;
+    case 2:
+        pose = selected->lookupId ? 2 : 0;
+        break;
+    default:
+        pose = selected->lookupId;
+        break;
+    }
+    halfFov = action->camera.fov;
+    from->fov = halfFov;
+    to->fov = halfFov;
+    halfFov *= 0.5f;
+    btlUnitGetMuzzlePosVU(selected);
+    VU0_STORE_VF(vf10, position);
+    if (btlSampleActorModelPositionVU(selected, 1) == 0) {
+        VU0_LOAD_VF(vf10, position);
+    }
+    VU0_STORE_VF(vf10, from->position);
+    earliest = selected->reach * selected->scale;
+    from->distance = (earliest + earliest) / tanf(halfFov * 1.3333333f);
+    VU0_LOAD_VF(vf10, presets[pose].front);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    if (selected->status.flags & 0x400) {
+        VU0_NEGATE_XYZ(vf10);
+    }
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+    extent = btlMeasureFilteredUnitGroupBounds(0x200, NULL, NULL);
+    VU0_LOAD_VF(vf11, from->position);
+    VU0_LERP_VF10(0.7f);
+    VU0_STORE_VF(vf10, to->position);
+    VU0_LOAD_VF(vf10, presets[pose].back);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    if (selected->status.flags & 0x400) {
+        VU0_NEGATE_XYZ(vf10);
+    }
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    extent *= 0.8f;
+    if (extent < 200.0f) {
+        extent = 200.0f;
+    }
+    to->distance = extent / tanf(halfFov);
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+    action->motionParameter = 100.0f;
+    action->flags = (action->flags | 0x41) & ~0x4000;
+}
+
 
 /* vu0 routine: follow the tracked unit until its animation tail, then frame both groups. */
 void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
@@ -2495,7 +2807,115 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F2E30);
+/* Each unit species has front/back framing scales and a muzzle-height scale. */
+typedef struct BtlSpeciesCameraFactors {
+    f32 fromDistanceScale;
+    f32 toDistanceScale;
+    f32 heightScale;
+} BtlSpeciesCameraFactors;
+extern BtlSpeciesCameraFactors D_003B6DD0[10];
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418338);
+
+/* vu0 routine: frame the first target with one of two paired quaternion poses. */
+void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 quaternion[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    BtlCameraQuaternionPair presets[2] = {
+        {{-0x1.47ae14p-4f, -0x1.d1eb84p-1f, 0x1.47ae14p-3f, 0x1.5c28f4p-2f},
+         {-0x1.999998p-5f, -0x1.eb851ep-1f, -0x1.47ae14p-3f, -0x1.1eb850p-3f}},
+        {{0x1.47ae14p-5f, -0x1.dc28f4p-1f, 0x1.eb851ep-4f, -0x1.3d70a2p-2f},
+         {0x1.47ae14p-7f, -0x1.f0a3d6p-1f, -0x1.47ae14p-3f, 0x1.eb851ep-5f}}
+    };
+    BtlUnit *unit;
+    BtlEffectResource *resource;
+    u32 species;
+    s32 resourceKind;
+    s32 resourceIndex;
+    s32 pose;
+    f32 width;
+    f32 height;
+    f32 initialHalfHeight;
+    f32 fov;
+    f32 distance;
+    f32 tangent;
+
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    species = unit->partyRecord.unitId;
+    if (species >= 10) return;
+    btlClearAllUnitDefeatCandidates();
+    btlFlagUnitDefeatCandidate(unit);
+    if (unit->resourceIndex == unit->modelVariant) {
+        resourceKind = unit->unkDC;
+        resourceIndex = unit->combatantKind;
+    } else {
+        resourceKind = unit->modelId;
+        resourceIndex = unit->modelVariant;
+    }
+    width = unit->reach * unit->scale;
+    height = unit->height * unit->scale;
+    pose = effMiscRandMod(NULL, 2);
+    btlCopyUnitRotationQuaternion(unit, quaternion);
+    fov = action->camera.fov;
+    from->fov = fov;
+    to->fov = fov;
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_LOAD_VF(vf10, position);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_STORE_VF(vf10, to->position);
+    from->position[1] = -height * D_003B6DD0[species].heightScale;
+    initialHalfHeight = height * 0.5f;
+    fov *= 0.5f;
+    if (initialHalfHeight < width) {
+        distance = width / tanf(fov * 0x1.555554p+0f);
+    } else {
+        distance = initialHalfHeight / tanf(fov);
+    }
+    from->distance = distance * D_003B6DD0[species].fromDistanceScale;
+    VU0_LOAD_VF(vf10, presets[pose].front);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+    VU0_LOAD_VF(vf10, presets[pose].back);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(resourceKind, resourceIndex);
+    btlGetUnitWorldPos(unit, position);
+    position[2] += resource->zOffset;
+    VU0_LOAD_VF(vf10, unit->orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, &resource->baseOffset);
+    VU0_SCALE_VF(vf10, unit->scale);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, to->position);
+    to->position[1] -= resource->height * 0x1.333332p-3f;
+    {
+        f32 halfHeight = resource->height * 0.5f;
+        if (halfHeight < resource->reach) {
+            width = resource->reach;
+        } else {
+            width = halfHeight;
+        }
+    }
+    tangent = tanf(to->fov * 0.5f);
+    distance = (width * resource->actorScale) / tangent;
+    to->distance = distance * D_003B6DD0[species].toDistanceScale;
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+    action->motionParameter = 65.0f;
+    action->motionProgress = 0;
+    action->flags |= 0x41;
+}
 
 /* cameraKind 7 participant preparation; the camera argument is unused. */
 void btlPrepareCameraMode7Participants(BtlLinkedCommand *action, BtlCamState *camera) {
@@ -2657,7 +3077,87 @@ void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *action, BtlCamState *fr
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F3888);
+/* vu0 routine: choose the linked actor's clearance camera after its opening motion. */
+void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *action, BtlCamState *unused, BtlCamState *out) {
+    f32 groupCenter[4] __attribute__((aligned(16)));
+    f32 rotatedPosition[4] __attribute__((aligned(16)));
+    f32 worldPosition[4] __attribute__((aligned(16)));
+    f32 maxHeight;
+    BtlUnit *unit;
+    BtlEffectResource *resource;
+    f32 scaledReach;
+    f32 scaledHeight;
+    f32 span;
+    f32 distance;
+    f32 fovScale;
+    f32 requiredDistance;
+    f64 difference;
+
+    if (action->motionProgress != 0) return;
+    if (action->state < btlGetUnitMotionDurationFrames(action->link->unit, 16) + 15) return;
+    btlCopyMotionTransform(&action->frontCamera, &action->camera);
+    /* Publish the duration before the latch and flags; retail sets up the
+     * 15-frame value first after copying the current pose. */
+    action->motionParameter = 15.0f;
+    action->state = 0;
+    action->motionProgress = 1;
+    action->flags = (action->flags & ~0x14) | 0x41;
+    unit = action->link->unit;
+    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(1, action->link->indexWork.unk18);
+    scaledReach = resource->reach * resource->actorScale;
+    scaledHeight = resource->height * resource->actorScale;
+    if (scaledReach > 100.0f || scaledHeight > 400.0f) {
+        btlGetUnitWorldPos(unit, worldPosition);
+        worldPosition[2] += unit->positionZOffset;
+        VU0_LOAD_VF(vf10, unit->orientation);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, &resource->baseOffset);
+        VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, worldPosition);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, rotatedPosition);
+        rotatedPosition[1] += scaledHeight * 0x1.333332p-2f;
+        difference = (f64)(action->frontCamera.position[1] - rotatedPosition[1]);
+        if (difference < 0.0) difference = 0.0 - difference;
+        if ((f32)difference > 200.0f) {
+            PCP_COPY_VECTOR(action->frontCamera.position, rotatedPosition);
+        }
+        btlFlagAllUnitsDefeatCandidate();
+        span = btlMeasureFilteredUnitGroupBounds(0x200, &maxHeight, NULL);
+        VU0_STORE_VF(vf10, groupCenter);
+        groupCenter[1] = -(maxHeight + 30.0f);
+        VU0_LOAD_VF(vf10, action->frontCamera.position);
+        VU0_LOAD_VF(vf11, groupCenter);
+        VU0_STORE_VF(vf10, action->backCamera.position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, action->backCamera.direction);
+        VU0_STORE_VF(vf10, action->frontCamera.direction);
+        fovScale = 0x1.555554p+0f;
+        span /= tanf((action->camera.fov * fovScale) * 0.5f);
+        distance += span;
+        distance += 100.0f;
+        requiredDistance = tanf(action->camera.fov * fovScale);
+        if (scaledHeight < scaledReach) {
+            requiredDistance = scaledReach / requiredDistance;
+        } else {
+            requiredDistance = scaledHeight / requiredDistance;
+        }
+        if (distance > requiredDistance) action->backCamera.distance = distance;
+        else action->backCamera.distance = requiredDistance;
+        btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+    } else {
+        btlClearAllUnitDefeatCandidates();
+        btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
+        out->distance = ((resource->cameraRadius * resource->actorScale) / tanf(action->camera.fov * 0.5f)) * 4.0f;
+        if (btlSampleActorModelPositionVU(unit, 1) == 0) btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF(vf10, out->position);
+        btlAdjustCameraDirectionForDefaultPlane(out);
+    }
+}
+
 
 /* Nine actor camera rows, each containing two 0x74-byte mode records. */
 typedef struct BtlActionCameraPose {
@@ -3183,26 +3683,6 @@ void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00417F30);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180B0);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180C0);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418240);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418250);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418310);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418320);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418330);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418338);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418398);
-
 const BattlePairCameraPresetSet D_004183D8 = {
     {
         {{0x1.a9fbe6p-6f, -0x1.916872p-1f, -0x1.c28f5cp-5f, 0x1.34bc6ap-1f},
@@ -3340,7 +3820,43 @@ BtlUnit *btlFindActorLinkByCategory(BtlLinkedCommand *command, s32 category) {
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F5320);
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F5780);
+/* Camera clearance for a unit: mode 1 is the scaled camera radius plus any
+ * negative horizontal offset; mode 0 is the larger of the scaled reach plus the
+ * offset and half the scaled height plus any negative vertical offset. */
+f32 func_001F5780(BtlUnit *unit, u8 mode, f32 horizontalOffset, f32 verticalOffset) {
+    f32 result = 0.0f;
+    f32 verticalBias = 0.0f;
+    f32 clearance = 0.0f;
+    f32 halfHeight;
+
+    if (mode != 0) {
+        if (mode == 1) {
+            if (horizontalOffset < 0.0f) {
+                clearance = -horizontalOffset;
+            }
+            /* The return sits in a one-pass loop, which retail's register
+             * choice for the compare needs. */
+            do {
+                return unit->unkC0 * unit->scale + clearance;
+            } while (0);
+        }
+    } else {
+        if (verticalOffset < 0.0f) {
+            verticalBias = -verticalOffset;
+        }
+        clearance = unit->height * unit->scale;
+        verticalBias += clearance;
+        halfHeight = verticalBias * 0.5f;
+        result = unit->reach * unit->scale + horizontalOffset;
+        if (result < halfHeight) {
+            clearance = halfHeight;
+        } else {
+            clearance = result;
+        }
+        return clearance;
+    }
+    return result;
+}
 
 void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     s128 pos;
@@ -5866,8 +6382,8 @@ void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
     if (soundIndex != 0) {
         v = D_00435E0C[soundIndex].opaque04[0];
     }
-    if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
-        v = datBattleSceneRecords[sceneIndex].unk24;
+    if (((DatBattleSceneAudioSelectionView *)&datBattleSceneRecords[sceneIndex])->audioStreamSelectionOverride != 0) {
+        v = ((DatBattleSceneAudioSelectionView *)&datBattleSceneRecords[sceneIndex])->audioStreamSelectionOverride;
     } else if (*(u8 *)(work + 0x26E) == 3) {
         v = 1;
     }

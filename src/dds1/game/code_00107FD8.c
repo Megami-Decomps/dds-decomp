@@ -21,6 +21,7 @@
 #include "sdf_primitive.h"
 
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_asset_state.h"
@@ -87,7 +88,6 @@ extern u32 kwlnDrawControlFlags;
 
 
 
-extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 
 extern s32 kwlnTaskNoopCallback(KwlnTask *task);
 
@@ -167,7 +167,7 @@ extern void evtSelStateDestroy(void);
 
 extern s32 D_0032E3C0[];
 
-extern void fldStartLmapTask(s32 arg0);
+extern void fldStartLmapTask(s32 mode);
 
 extern u32 scrNamedProcessCount;
 

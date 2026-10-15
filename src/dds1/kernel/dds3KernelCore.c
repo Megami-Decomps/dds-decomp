@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "kwln_task_queue_query.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "kwln_task_flags.h"
 #include "kwln_task_state.h"

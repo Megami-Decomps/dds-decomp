@@ -9,6 +9,7 @@
 #include "par_color_ramp.h"
 #include "par_object.h"
 #include "par_history.h"
+#include "sdf_quaternion.h"
 
 #include "ee_mmi.h"
 
@@ -143,7 +144,145 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     parDispatchKindInit(&effect->head.kindState, particleIndex);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", parUpdateBurstEmitter);
+/* Age tag of a packet waiting for parInitializeRadialParticle. */
+#define PAR_PACKET_INITIAL_TAG 0xF0000001
+
+extern u32 parEvaluateColorRampAtAge(void *fade, u32 color, s32 age);
+extern u32 effParModulateColors(u32 colorA, u32 colorB);
+extern void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
+                                       ParHistoryTable *source, f32 scale);
+extern void parBuildHistoryRibbonStrip(struct ParSystem *system, s32 index, const f32 *origin, u32 color,
+                                       ParHistoryTable *source);
+extern void parDrawHistoryRibbonTriangles(struct ParSystem *system, s32 index, const f32 *origin, u32 color,
+                                          ParHistoryTable *source);
+
+/* Grow each radial offset toward its target radius, spin it about the particle axis,
+ * rebuild position from the origin, and feed the kind's point history. */
+void parUpdateBurstEmitter(ParBurstEmitter *effect) {
+    ParBurstPacket *packet = (ParBurstPacket *)effect->head.buffer->records;
+    u32 kind;
+    ParHistory *history = effect->history.records;
+    f32 origin[4];
+    f32 previousOrigin[4];
+    f32 rotationAxis[4];
+    f32 scaleVector[4];
+    f32 radius;
+    f32 rotationStep;
+    s32 completedCount;
+    s32 lifetimeFrames;
+    u32 capacity;
+    s32 repeatEnabled;
+    s32 packetCount;
+    s32 packetIndex;
+
+    capacity = effect->history.capacity;
+    kind = effect->head.kindState.kind;
+    parUpdateSharedScaleAndDelta(&effect->head.kindState);
+    VU0_LOAD_MATRIX_B(effect->head.matrix);
+    packetCount = effect->head.particleCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
+    completedCount = 0;
+    rotationStep = effect->rotationStepDegrees * (3.14159265f / 180.0f);
+    repeatEnabled = effect->loop;
+    PCP_COPY_VECTOR(origin, effect->head.origin);
+    previousOrigin[0] = effect->previousOrigin[0];
+    previousOrigin[1] = effect->previousOrigin[1];
+    previousOrigin[2] = effect->previousOrigin[2];
+    previousOrigin[3] = 0;
+    for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++, history++) {
+        s32 age = packet->age;
+
+        if (age == PAR_PACKET_INITIAL_TAG) {
+            parInitializeRadialParticle(effect, packetIndex);
+            age = packet->age;
+        }
+        if (age >= 0) {
+            packet->color = parEvaluateColorRampAtAge(&effect->head.colorRamp, packet->color, age);
+            packet->color = effParModulateColors(packet->color, effect->head.parameterWord);
+            if (kind != 0) {
+                VU0_LOAD_VF(vf12, packet->radialOffset);
+            }
+            VU0_LOAD_VF(vf10, packet->radialOffset);
+            VU0_LENGTH_VF10(radius);
+            radius += packet->radiusStep;
+            scaleVector[0] = radius;
+            scaleVector[1] = radius;
+            scaleVector[2] = radius;
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF(vf11, scaleVector);
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, packet->radialOffset);
+            VU0_MOVE_VF(vf28, vf24);
+            VU0_MOVE_VF(vf29, vf25);
+            VU0_MOVE_VF(vf30, vf26);
+            VU0_MOVE_VF(vf31, vf27);
+            rotationAxis[0] = packet->rotationAxis[0];
+            rotationAxis[1] = packet->rotationAxis[1];
+            rotationAxis[2] = packet->rotationAxis[2];
+            rotationAxis[3] = 0;
+            VU0_LOAD_VF(vf10, rotationAxis);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, rotationAxis);
+            sdfBuildVuRotationFromAxisAngle(rotationStep, (const RwV3d *)rotationAxis);
+            VU0_LOAD_VF(vf10, packet->radialOffset);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_LOAD_VF(vf11, origin);
+            VU0_STORE_VF(vf10, packet->radialOffset);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, packet->position);
+            if (kind != 0) {
+                u32 color;
+
+                history->points[history->nextIndex][0] = packet->radialOffset[0];
+                history->points[history->nextIndex][1] = packet->radialOffset[1];
+                history->points[history->nextIndex][2] = packet->radialOffset[2];
+                color = (packet->color & 0xFF000000) | (effect->head.parameterWord & 0xFFFFFF);
+                history->nextIndex++;
+                if ((u32)history->nextIndex >= capacity) {
+                    history->nextIndex = 0;
+                }
+                if ((u32)history->count < capacity) {
+                    history->count++;
+                }
+                switch (effect->head.kindState.kind) {
+                case 1:
+                    parPopulateSlotFromHistory(effect->head.kindState.payload.history.table, packetIndex,
+                                               previousOrigin, packet->color, &effect->history,
+                                               packet->billboardScale);
+                    break;
+                case 2:
+                    parBuildHistoryRibbonStrip(effect->head.kindState.payload.crossStrip.drawSystem,
+                                               packetIndex, previousOrigin, color, &effect->history);
+                    break;
+                case 3:
+                    parDrawHistoryRibbonTriangles(effect->head.kindState.payload.crossTriangle.drawSystem,
+                                                  packetIndex, previousOrigin, color, &effect->history);
+                    break;
+                }
+            }
+        }
+        age++;
+        if (age >= lifetimeFrames) {
+            if (repeatEnabled) {
+                age = PAR_PACKET_INITIAL_TAG;
+            } else {
+                parDispatchKindInit(&effect->head.kindState, packetIndex);
+                completedCount++;
+                if (completedCount >= packetCount) {
+                    effect->head.restartFlag = 0;
+                }
+            }
+            if (kind != 0) {
+                history->nextIndex = 0;
+                history->count = 0;
+            }
+        }
+        packet->age = age;
+    }
+    effect->previousOrigin[0] = origin[0];
+    effect->previousOrigin[1] = origin[1];
+    effect->previousOrigin[2] = origin[2];
+}
 
 
 void parInitColorRamp(ParColorRamp *p, s32 frames) {
