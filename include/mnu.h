@@ -971,7 +971,7 @@ typedef struct MenuStaffChoices {
     s32 thirdListIndex;
     s32 thirdListValue;
     s32 thirdListReset;
-    u8 pad50[4];
+    s32 pulse; /* 0x50: ordered staff marker pulse */
 } MenuStaffChoices;
 
 typedef char MenuStaffChoices_size_must_be_0x54[(sizeof(MenuStaffChoices) == 0x54) ? 1 : -1];
