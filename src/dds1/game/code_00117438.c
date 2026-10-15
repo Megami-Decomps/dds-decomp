@@ -36,7 +36,7 @@ extern void *D_003BAAAC;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed);
+extern u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed);
 extern char sdfRuntimeTaskName[];
 void sdfRuntimeTaskTeardownHook(void);
 s32 sdfBumpTickCounters(KwlnTask *task);
@@ -711,7 +711,7 @@ extern void sdfDebugPrintf(const char *, ...);
 extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
+u32 sdfRollActionHit(s32 channel, s32 queryArg, DatPartyRecord *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -722,8 +722,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
     s32 hit;
     u16 flag;
 
-    mask = datCommandRecords[index].attribute.parts.valueMask;
-    if (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
+    mask = datCommandRecords[channel].attribute.parts.valueMask;
+    if (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         count = 0;
         for (bit = 0; bit < 16; bit++) {
             if ((mask >> bit) & 1) {
@@ -734,10 +734,10 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
         mask = 1 << list[effMiscRandMod(0, count)];
     }
     if (mask != 0 &&
-        (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
-         datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
+        (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
+         datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
         kind = datFlagToElementIndex(mask);
-        if (!(datCommandRecords[index].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
+        if (!(datCommandRecords[channel].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
             if (datGetEffectiveAffinity(packed, kind) & 0x170000) {
                 return 0;
             }
@@ -780,8 +780,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
         return 0;
     }
     hit = 1;
-    if (datCommandRecords[index].attribute.parts.hitChance < 100) {
-        scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
+    if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
+        scaled = evtRunContext(0xC, queryArg, packed, channel, mask) * ((f32)ratio / 100.0f);
         sdfDebugPrintf(D_0039F980, scaled, ratio, mask);
         hit = (s32)effMiscRandMod(0, 100) < scaled;
     }
