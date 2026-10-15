@@ -1,6 +1,6 @@
-# decomp-permuter import settings (https://github.com/simonlindholm/decomp-permuter)
-#   ../decomp-permuter/import.py src/dds1/game/itfMesManager.c \
-#       asm/dds1/nonmatchings/game/itfMesManager/func_0019D958.s
+# decomp-permuter import settings (https://github.com/simonlindholm/decomp-permuter).
+# Prefer tools/perm_unit.py, which compiles candidates inside the real unit;
+# these settings serve the permuter's own import.py.
 compiler_type = "gcc"
 compiler_command = "tools/cc.sh -Iinclude -Isrc"
 assembler_command = "tools/bin/mips-ps2-decompals-as -EL -march=r5900 -mabi=eabi -G8 -Iinclude"

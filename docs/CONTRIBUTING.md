@@ -19,8 +19,13 @@ bytes, and it has to reach that the way the original developers would have.
   - computed gotos or label tables standing in for a `switch`
   - dummy variables or `volatile` added to steer codegen
   - one-off inline wrappers that exist only to change codegen
-  - decomp-permuter, or any scripted/enumerated search over statement or
-    declaration order: every change has to be one a person made for a reason
+  - permuter output landed as it came out: a decomp-permuter or other search
+    hit is a hint. Reduce it to the smallest change that still matches and
+    land that only if it is code a person would write (no `new_var`
+    temporaries, self-assignments, masks or comma tricks). Name what the
+    change gives the compiler in the commit message.
+    `tools/perm_unit.py` runs the permuter inside the real unit with only
+    those kinds of mutations enabled
 - **Compiler-trace justification.** When a residual comes from a compiler
   decision (scheduler tie, allocation priority, CSE choice, delay-slot fill),
   a trace of the real cc1 can show the property the source must have, e.g.
