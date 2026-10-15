@@ -77,7 +77,7 @@ typedef struct BrsProgressAnimation {
     s32 applied;
     s32 frames;
     s8 skipRamp;
-    s8 unk2D;
+    s8 completionFlashActive;
     u8 pad2E[2];
     s32 iconFrame;
     s32 iconOpacity;
@@ -108,7 +108,7 @@ typedef struct BrsProgressAnimation {
     s32 appliedStep; /* 0x24: increment consumed by the level-progress update. */
     s32 frames; /* 0x28: progress ramp counter, clamped to 0..120. */
     s8 skipRamp; /* 0x2C: use the fixed fast step instead of the ramp. */
-    s8 unk2D;
+    s8 completionFlashActive;
     u8 pad2E[2];
     s32 flashFrame;
     s32 flashOpacity;
@@ -269,8 +269,8 @@ typedef char BrsProgressAnimation_alpha_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->alpha == 0x08) ? 1 : -1];
 typedef char BrsProgressAnimation_currentProgress_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->currentProgress == 0x1C) ? 1 : -1];
-typedef char BrsProgressAnimation_unk2D_offset_check[
-    ((u32)&((BrsProgressAnimation *)0)->unk2D == 0x2D) ? 1 : -1];
+typedef char BrsProgressAnimation_completionFlashActive_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->completionFlashActive == 0x2D) ? 1 : -1];
 typedef char BrsProgressAnimation_iconFrame_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->iconFrame == 0x30) ? 1 : -1];
 typedef char BrsProgressAnimation_iconOpacity_offset_check[
@@ -311,8 +311,8 @@ typedef char BrsProgressAnimation_frames_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->frames == 0x28) ? 1 : -1];
 typedef char BrsProgressAnimation_skipRamp_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->skipRamp == 0x2C) ? 1 : -1];
-typedef char BrsProgressAnimation_unk2D_offset_check[
-    ((u32)&((BrsProgressAnimation *)0)->unk2D == 0x2D) ? 1 : -1];
+typedef char BrsProgressAnimation_completionFlashActive_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->completionFlashActive == 0x2D) ? 1 : -1];
 typedef char BrsProgressAnimation_flashFrame_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->flashFrame == 0x30) ? 1 : -1];
 typedef char BrsProgressAnimation_flashOpacity_offset_check[
