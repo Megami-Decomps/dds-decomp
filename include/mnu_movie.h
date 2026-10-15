@@ -20,7 +20,7 @@ typedef struct MnuMovieRollEntry {
 typedef char MnuMovieRollEntry_size_must_be_0x1C[
     (sizeof(MnuMovieRollEntry) == 0x1C) ? 1 : -1];
 
-extern MnuMovieRollEntry D_003DC1E0[];
+extern MnuMovieRollEntry mnuMovieRollEntries[];
 
 /* Shared caption row; the final row's baseline also sets each title's
  * staff-roll end threshold. */

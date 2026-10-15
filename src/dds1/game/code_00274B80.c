@@ -220,8 +220,8 @@ extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
 extern void mnuClearWindowListSelectionFlags(s32);
 
 extern void mnuPlayInputSound(s32, u32, s32);
-extern u8 D_0037CC74[];
-extern u8 D_0037CC3C[];
+extern u8 mnuSkillMenuFieldUsePopupEntry[];
+extern u8 mnuSkillMenuEquippedSlotsPopupEntry[];
 extern u8 D_0037CAB0[];
 extern u8 D_0037CA78[];
 extern void evtStageTestInit(s32);
@@ -1770,9 +1770,9 @@ s32 mnuCloseItemSelectionState(KwlnTask *contextArg) {
     return 1;
 }
 
-extern u8 D_0037CC58[];
-extern u8 D_0037CC90[];
-extern u8 D_0037CC20[];
+extern u8 mnuSkillMenuPagePopupEntry[];
+extern u8 mnuSkillMenuDetailPopupEntry[];
+extern u8 mnuCampFieldSkillPopupEntry[];
 
 s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(callback);
@@ -1803,12 +1803,12 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
                     ptySkillMenuBuildEquippedSlots(1, callback);
                     mnuSeekFirstAvailableStaffListNode(callback);
                 }
-                mnuSetPopupEntry(popup, D_0037CC58);
+                mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
             } else {
                 inputFlags = 0x8000;
             }
         } else {
-            mnuSetPopupEntry(popup, D_0037CC90);
+            mnuSetPopupEntry(popup, mnuSkillMenuDetailPopupEntry);
         }
     }
 
@@ -1816,9 +1816,9 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
         mnuClearListFlags(0, &context->partyWindow);
         /* Both category paths select the same cancel entry in retail. */
         if (((MenuWindowContainer *)context->panel)->list->cursor->index == 0) {
-            mnuSetPopupEntryFlagged(popup, D_0037CC20);
+            mnuSetPopupEntryFlagged(popup, mnuCampFieldSkillPopupEntry);
         } else {
-            mnuSetPopupEntryFlagged(popup, D_0037CC20);
+            mnuSetPopupEntryFlagged(popup, mnuCampFieldSkillPopupEntry);
         }
         mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->display,
                                   (struct EffectSlotSet *)(u32)context->displayVariant, 0, 1);
@@ -1952,13 +1952,13 @@ void mnuCampMenuHandleInput(KwlnTask *task) {
         s32 sortKey = ((MenuInputInfo *)selectedNode)->target;
 
         if (!(((MenuInputInfo *)selectedNode)->flags & MNU_STAFF_NODE_UNAVAILABLE) && sortKey != 0) {
-            mnuSetPopupEntry((s32 *)(u32)(context + 0x54), D_0037CC74);
+            mnuSetPopupEntry((s32 *)(u32)(context + 0x54), mnuSkillMenuFieldUsePopupEntry);
         } else {
             inputFlags = MNU_STAFF_INPUT_REJECTED;
         }
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntryFlagged((s32 *)(u32)(context + 0x54), D_0037CC3C);
+        mnuSetPopupEntryFlagged((s32 *)(u32)(context + 0x54), mnuSkillMenuEquippedSlotsPopupEntry);
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
@@ -1976,7 +1976,7 @@ void mnuCampMenuHandleInput(KwlnTask *task) {
 }
 
 extern void ptySkillMenuRefreshEntries(CampMenuContext *);
-extern u8 D_0037CC90[];
+extern u8 mnuSkillMenuDetailPopupEntry[];
 
 void ptySkillMenuHandleSelection(KwlnTask *callback) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(callback);
@@ -2014,12 +2014,12 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
         window = ptySkillMenuRebuildAfterMutation(0, callback);
         mnuInitPartyPanelSlots(&context->partyPanel);
         mnuUpdatePartyPanelPercentDisplays((s32)&context->partyWindow);
-        mnuSetPopupEntryFlagged(&context->popupState, D_0037CC90);
+        mnuSetPopupEntryFlagged(&context->popupState, mnuSkillMenuDetailPopupEntry);
         ptySkillMenuRefreshEntries(context);
         window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntryFlagged(&context->popupState, D_0037CC90);
+        mnuSetPopupEntryFlagged(&context->popupState, mnuSkillMenuDetailPopupEntry);
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
@@ -2048,7 +2048,7 @@ void mnuSwapPartySkillSlots(s32 entry, s32 firstSlot, s32 secondSlot) {
 }
 
 
-extern u8 D_0037CC90[];
+extern u8 mnuSkillMenuDetailPopupEntry[];
 /* First confirm stores a slot; a different second slot swaps and rebuilds.
  * Cancel clears the saved slot, opening the exit popup only if none was saved. */
 void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
@@ -2076,7 +2076,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
     if (inputFlags & MNU_STAFF_REORDER_CANCEL_MASK) {
         inputFlags = MNU_STAFF_INPUT_CANCEL;
         if (mnuHasSelectedListNodeId(callback) == 0) {
-            mnuSetPopupEntryFlagged((s32 *)(u32)(context + 0x54), D_0037CC90);
+            mnuSetPopupEntryFlagged((s32 *)(u32)(context + 0x54), mnuSkillMenuDetailPopupEntry);
         }
         mnuClearSelectedListNodeId(callback);
     }

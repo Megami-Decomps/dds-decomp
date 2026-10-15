@@ -17,7 +17,7 @@ enum {
     BRS_ICON_Y = 3,
 };
 
-extern BrsIconRecord D_0036C728[];
+extern BrsIconRecord mnuCommonIconPlacements[];
 extern struct EffectSlotSet *D_003BC520;
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
@@ -40,15 +40,15 @@ void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
         fraction = 1.0f;
     }
     scale = (s32)(fraction * 256.0f);
-    effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,
-                  D_0036C728[32][BRS_ICON_Y] << 3,
-                  0, scale, 0, texture, D_0036C728[32][BRS_ICON_ID], 0x53);
-    effDrawSpriteWithCornerFade(D_0036C728[27][BRS_ICON_X] << 4,
-                  D_0036C728[27][BRS_ICON_Y] << 3,
-                  0, scale, 0, texture, D_0036C728[27][BRS_ICON_ID], 0x53);
-    effDrawSpriteWithCornerFade(D_0036C728[28][BRS_ICON_X] << 4,
-                  D_0036C728[28][BRS_ICON_Y] << 3,
-                  0, scale, 0, texture, D_0036C728[28][BRS_ICON_ID], 0x53);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[32][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[32][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, mnuCommonIconPlacements[32][BRS_ICON_ID], 0x53);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[27][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[27][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, mnuCommonIconPlacements[27][BRS_ICON_ID], 0x53);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[28][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[28][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, mnuCommonIconPlacements[28][BRS_ICON_ID], 0x53);
     ticks = progress - 5;
     if (ticks < 0) {
         ticks = 0;
@@ -58,9 +58,9 @@ void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
         fraction = 1.0f;
     }
     scale = (s32)(fraction * 256.0f);
-    effDrawSpriteWithCornerFade(D_0036C728[0][BRS_ICON_X] << 4,
-                  D_0036C728[0][BRS_ICON_Y] << 3,
-                  0, scale, 0, texture, D_0036C728[0][BRS_ICON_ID], 0x53);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[0][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[0][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, mnuCommonIconPlacements[0][BRS_ICON_ID], 0x53);
 }
 
 extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
@@ -87,15 +87,15 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
     }
     fraction = 1.0f - fraction;
     backgroundScale = (s32)(fraction * 256.0f);
-    effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,
-                  D_0036C728[32][BRS_ICON_Y] << 3,
-                  0, backgroundScale, 0, texture, D_0036C728[32][BRS_ICON_ID], 0x53);
-    effDrawSpriteWithCornerFade(D_0036C728[27][BRS_ICON_X] << 4,
-                  D_0036C728[27][BRS_ICON_Y] << 3,
-                  0, backgroundScale, 0, texture, D_0036C728[27][BRS_ICON_ID], 0x53);
-    effDrawSpriteWithCornerFade(D_0036C728[28][BRS_ICON_X] << 4,
-                  D_0036C728[28][BRS_ICON_Y] << 3,
-                  0, backgroundScale, 0, texture, D_0036C728[28][BRS_ICON_ID], 0x53);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[32][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[32][BRS_ICON_Y] << 3,
+                  0, backgroundScale, 0, texture, mnuCommonIconPlacements[32][BRS_ICON_ID], 0x53);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[27][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[27][BRS_ICON_Y] << 3,
+                  0, backgroundScale, 0, texture, mnuCommonIconPlacements[27][BRS_ICON_ID], 0x53);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[28][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[28][BRS_ICON_Y] << 3,
+                  0, backgroundScale, 0, texture, mnuCommonIconPlacements[28][BRS_ICON_ID], 0x53);
 
     ticks = (s32)elapsed;
     fraction = (f32)ticks / 20.0f;
@@ -105,9 +105,9 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
     fraction = 1.0f - fraction;
     mnuDrawShopCurrencyBalance(scene, (s32)(fraction * 128.0f) | 0xA09DC300);
     {
-        s32 x = D_0036C728[0][BRS_ICON_X] << 4;
-        s32 y = D_0036C728[0][BRS_ICON_Y] << 3;
-        s32 icon = D_0036C728[0][BRS_ICON_ID];
+        s32 x = mnuCommonIconPlacements[0][BRS_ICON_X] << 4;
+        s32 y = mnuCommonIconPlacements[0][BRS_ICON_Y] << 3;
+        s32 icon = mnuCommonIconPlacements[0][BRS_ICON_ID];
 
         foregroundScale = (s32)(fraction * 256.0f);
         effDrawSpriteWithCornerFade(x, y, 0, foregroundScale, 0, texture, icon, 0x53);
@@ -119,18 +119,18 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
 void mnuDrawShopPanelWithPulsingIcon(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
 
-    effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,
-                  D_0036C728[32][BRS_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_0036C728[32][BRS_ICON_ID], mode);
-    effDrawSpriteWithCornerFade(D_0036C728[27][BRS_ICON_X] << 4,
-                  D_0036C728[27][BRS_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_0036C728[27][BRS_ICON_ID], mode);
-    effDrawSpriteWithCornerFade(D_0036C728[28][BRS_ICON_X] << 4,
-                  D_0036C728[28][BRS_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_0036C728[28][BRS_ICON_ID], mode);
-    effDrawSpriteWithCornerFade(D_0036C728[0][BRS_ICON_X] << 4,
-                  D_0036C728[0][BRS_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_0036C728[0][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[32][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[32][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, mnuCommonIconPlacements[32][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[27][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[27][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, mnuCommonIconPlacements[27][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[28][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[28][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, mnuCommonIconPlacements[28][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[0][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[0][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, mnuCommonIconPlacements[0][BRS_ICON_ID], mode);
     mnuDrawPulsingMenuIcon(scene, 0x100, mode);
 }
 
@@ -141,9 +141,9 @@ void mnuDrawPulsingMenuIcon(ShopScene *object, s32 scale, s32 mode) {
     f32 angle = (f32)phase / 120.0f * 6.2831852f;
     s32 offset = (s32)((f32)scale * sdfSinPoly(angle));
 
-    effDrawSpriteWithCornerFade(D_0036C728[1][BRS_ICON_X] << 4,
-                  D_0036C728[1][BRS_ICON_Y] << 3,
-                  0, offset, 0, texture, D_0036C728[1][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[1][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[1][BRS_ICON_Y] << 3,
+                  0, offset, 0, texture, mnuCommonIconPlacements[1][BRS_ICON_ID], mode);
 
     object->pulseFrame++;
     if ((f32)object->pulseFrame >= 120.0f) {
@@ -159,16 +159,16 @@ void mnuDrawStatusIconAndCompanion(s32 x, s32 y, s32 z, ShopScene *context, s32 
     if (context->extraOption == 0) {
         iconIndex = 9;
     }
-    effDrawSpriteWithCornerFade(x + (D_0036C728[iconIndex][BRS_ICON_X] << 4), y + (D_0036C728[iconIndex][BRS_ICON_Y] << 3), z, width, 0, layer, D_0036C728[iconIndex][BRS_ICON_ID], mode);
-    effDrawSpriteWithCornerFade(D_0036C728[2][BRS_ICON_X] << 4, D_0036C728[2][BRS_ICON_Y] << 3, z, width, 0, layer, D_0036C728[2][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(x + (mnuCommonIconPlacements[iconIndex][BRS_ICON_X] << 4), y + (mnuCommonIconPlacements[iconIndex][BRS_ICON_Y] << 3), z, width, 0, layer, mnuCommonIconPlacements[iconIndex][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[2][BRS_ICON_X] << 4, mnuCommonIconPlacements[2][BRS_ICON_Y] << 3, z, width, 0, layer, mnuCommonIconPlacements[2][BRS_ICON_ID], mode);
 }
 
 void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
     struct EffectSlotSet *layer = D_003BC520;
 
-    effDrawSpriteWithCornerFade(x + (D_0036C728[18][BRS_ICON_X] << 4), y + (D_0036C728[18][BRS_ICON_Y] << 3), 0, b, 0, layer, D_0036C728[18][BRS_ICON_ID], c);
-    effDrawSpriteWithCornerFade(D_0036C728[17][BRS_ICON_X] << 4, D_0036C728[17][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[17][BRS_ICON_ID], c);
-    effDrawSpriteWithCornerFade(D_0036C728[22][BRS_ICON_X] << 4, D_0036C728[22][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[22][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(x + (mnuCommonIconPlacements[18][BRS_ICON_X] << 4), y + (mnuCommonIconPlacements[18][BRS_ICON_Y] << 3), 0, b, 0, layer, mnuCommonIconPlacements[18][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[17][BRS_ICON_X] << 4, mnuCommonIconPlacements[17][BRS_ICON_Y] << 3, 0, b, 0, layer, mnuCommonIconPlacements[17][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[22][BRS_ICON_X] << 4, mnuCommonIconPlacements[22][BRS_ICON_Y] << 3, 0, b, 0, layer, mnuCommonIconPlacements[22][BRS_ICON_ID], c);
 }
 
 #include "pty_bullet_item_count_api.h"
@@ -182,12 +182,12 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
     struct EffectSlotSet *texture = D_003BC520;
     struct MenuList *list;
 
-    effDrawSpriteWithCornerFade(D_0036C728[23][BRS_ICON_X] << 4,
-                  D_0036C728[23][BRS_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_0036C728[23][BRS_ICON_ID], mode);
-    effDrawSpriteWithCornerFade(D_0036C728[24][BRS_ICON_X] << 4,
-                  D_0036C728[24][BRS_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_0036C728[24][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[23][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[23][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, mnuCommonIconPlacements[23][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[24][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[24][BRS_ICON_Y] << 3,
+                  0, alpha, 0, texture, mnuCommonIconPlacements[24][BRS_ICON_ID], mode);
     list = scene->window->list;
     if (list->count != 0) {
         CampWindowParams *item = &list->cursor->camp;
@@ -333,14 +333,14 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, MenuWind
         break;
     }
     if (flags & 1) {
-        effDrawSpriteWithCornerFade(D_0036C728[20][BRS_ICON_X] << 4, D_0036C728[20][BRS_ICON_Y] << 3,
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[20][BRS_ICON_X] << 4, mnuCommonIconPlacements[20][BRS_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
-                      texture, D_0036C728[20][BRS_ICON_ID], option);
+                      texture, mnuCommonIconPlacements[20][BRS_ICON_ID], option);
     }
     if (flags & 2) {
-        effDrawSpriteWithCornerFade(D_0036C728[21][BRS_ICON_X] << 4, D_0036C728[21][BRS_ICON_Y] << 3,
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[21][BRS_ICON_X] << 4, mnuCommonIconPlacements[21][BRS_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
-                      texture, D_0036C728[21][BRS_ICON_ID], option);
+                      texture, mnuCommonIconPlacements[21][BRS_ICON_ID], option);
     }
 }
 
@@ -358,10 +358,10 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, ShopScene *scene, s3
         row = list->cursor->index - firstIndex;
         effDrawSpriteWithCornerFade(0x3D0, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x20, option);
         effDrawSpriteWithCornerFade(0xC90, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x21, option);
-        effDrawSpriteWithCornerFade(D_0036C728[29][BRS_ICON_X] << 4,
-                      (D_0036C728[29][BRS_ICON_Y] + row * 21) << 3,
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[29][BRS_ICON_X] << 4,
+                      (mnuCommonIconPlacements[29][BRS_ICON_Y] + row * 21) << 3,
                       0, 0x100, 0, texture,
-                      D_0036C728[29][BRS_ICON_ID], option);
+                      mnuCommonIconPlacements[29][BRS_ICON_ID], option);
         sprintf(text, D_003BC4F0, scene->counter);
         glyph = itfCreateTightFont3TextGlyph(0xDD0, (155 + row * 21) << 3, depth,
                               0xA09DC380, text, 0);
@@ -385,20 +385,20 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, ShopScene *
         firstIndex = list->head->index;
         opacity = (f32)alpha * 0.00390625f;
         row = list->cursor->index - firstIndex;
-        effDrawSpriteWithCornerFade(D_0036C728[19][BRS_ICON_X] << 4,
-                      (D_0036C728[19][BRS_ICON_Y] + row * 21) << 3,
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[19][BRS_ICON_X] << 4,
+                      (mnuCommonIconPlacements[19][BRS_ICON_Y] + row * 21) << 3,
                       0, (u32)((1.0f - opacity) * 256.0f), 0, texture,
-                      D_0036C728[19][BRS_ICON_ID], option);
+                      mnuCommonIconPlacements[19][BRS_ICON_ID], option);
         effDrawSpriteWithCornerFade(0x3D0, (152 + row * 21) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x20, option);
         effDrawSpriteWithCornerFade(0xC90, (152 + row * 21) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x21, option);
-        effDrawSpriteWithCornerFade(D_0036C728[29][BRS_ICON_X] << 4,
-                      (D_0036C728[29][BRS_ICON_Y] + row * 21) << 3,
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[29][BRS_ICON_X] << 4,
+                      (mnuCommonIconPlacements[29][BRS_ICON_Y] + row * 21) << 3,
                       0, (u32)(opacity * 256.0f), 0, texture,
-                      D_0036C728[29][BRS_ICON_ID], option);
+                      mnuCommonIconPlacements[29][BRS_ICON_ID], option);
         color = (s32)(opacity * 128.0f) | 0xA09DC300;
         sprintf(text, D_003BC4F0, scene->counter);
         glyph = itfCreateTightFont3TextGlyph(0xDD0, (155 + row * 21) << 3, depth,
@@ -415,12 +415,12 @@ void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->atLimit != 1) {
-        effDrawSpriteWithCornerFade(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
-            0, 0x100, 0, texture, D_0036C728[30][BRS_ICON_ID], option);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[30][BRS_ICON_X] << 4, (mnuCommonIconPlacements[30][BRS_ICON_Y] + row * 21) << 3,
+            0, 0x100, 0, texture, mnuCommonIconPlacements[30][BRS_ICON_ID], option);
     }
     if (panel->counter != 1) {
-        effDrawSpriteWithCornerFade(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
-            0, 0x100, 0, texture, D_0036C728[31][BRS_ICON_ID], option);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[31][BRS_ICON_X] << 4, (mnuCommonIconPlacements[31][BRS_ICON_Y] + row * 21) << 3,
+            0, 0x100, 0, texture, mnuCommonIconPlacements[31][BRS_ICON_ID], option);
     }
 }
 
@@ -430,12 +430,12 @@ void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, ShopScene *panel, s32 sca
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->atLimit != 1) {
-        effDrawSpriteWithCornerFade(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
-            0, scale, 0, texture, D_0036C728[30][BRS_ICON_ID], option);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[30][BRS_ICON_X] << 4, (mnuCommonIconPlacements[30][BRS_ICON_Y] + row * 21) << 3,
+            0, scale, 0, texture, mnuCommonIconPlacements[30][BRS_ICON_ID], option);
     }
     if (panel->counter != 1) {
-        effDrawSpriteWithCornerFade(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
-            0, scale, 0, texture, D_0036C728[31][BRS_ICON_ID], option);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[31][BRS_ICON_X] << 4, (mnuCommonIconPlacements[31][BRS_ICON_Y] + row * 21) << 3,
+            0, scale, 0, texture, mnuCommonIconPlacements[31][BRS_ICON_ID], option);
     }
 }
 
@@ -448,10 +448,10 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
     struct MenuList *inner;
     FrFontGlyph *glyph;
 
-    effDrawSpriteWithCornerFade(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
-                  0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
-    effDrawSpriteWithCornerFade(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
-                  0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[25][BRS_ICON_X] << 4, mnuCommonIconPlacements[25][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[26][BRS_ICON_X] << 4, mnuCommonIconPlacements[26][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[26][BRS_ICON_ID], option);
     inner = object->list;
     if (inner->count != 0) {
         sprintf(text, D_003BC508, 0);
@@ -463,14 +463,14 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
 }
 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
-    effDrawSpriteWithCornerFade(x + (D_0036C728[26][BRS_ICON_X] << 4), y + (D_0036C728[26][BRS_ICON_Y] << 3), z, b, 0, D_003BC520, D_0036C728[26][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(x + (mnuCommonIconPlacements[26][BRS_ICON_X] << 4), y + (mnuCommonIconPlacements[26][BRS_ICON_Y] << 3), z, b, 0, D_003BC520, mnuCommonIconPlacements[26][BRS_ICON_ID], c);
 }
 void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
     FrFontGlyph *glyph;
 
-    effDrawSpriteWithCornerFade(x + (D_0036C728[25][BRS_ICON_X] << 4), y + (D_0036C728[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, D_0036C728[25][BRS_ICON_ID], option);
+    effDrawSpriteWithCornerFade(x + (mnuCommonIconPlacements[25][BRS_ICON_X] << 4), y + (mnuCommonIconPlacements[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     sprintf(text, D_003BC508, 0);
     glyph = itfCreateTightFont3TextGlyph(x + 0x17C0, y + 0x380, z, value, text, 0);
@@ -486,10 +486,10 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
     struct MenuList *inner;
     FrFontGlyph *glyph;
 
-    effDrawSpriteWithCornerFade(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
-                  0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
-    effDrawSpriteWithCornerFade(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
-                  0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[25][BRS_ICON_X] << 4, mnuCommonIconPlacements[25][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[25][BRS_ICON_ID], option);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[26][BRS_ICON_X] << 4, mnuCommonIconPlacements[26][BRS_ICON_Y] << 3,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[26][BRS_ICON_ID], option);
     inner = object->list;
     if (inner->count != 0) {
         sprintf(text, D_003BC508, inner->cursor->camp.value * panel->counter);

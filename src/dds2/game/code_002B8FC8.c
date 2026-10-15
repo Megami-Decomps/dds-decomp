@@ -131,16 +131,16 @@ extern struct SdfPoolNode *D_00380788[13][4];
 
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 
-extern char D_003E7790[];
+extern char mnuSkillMenuDetailPopupEntry[];
 
-extern char D_003E7720[];
+extern char mnuCampFieldSkillPopupEntry[];
 
-extern char D_003E7774[];
+extern char mnuSkillMenuFieldUsePopupEntry[];
 
-extern char D_003E773C[];
+extern char mnuSkillMenuEquippedSlotsPopupEntry[];
 
 
-extern char D_003E7758[];
+extern char mnuSkillMenuPagePopupEntry[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
 
@@ -150,9 +150,9 @@ extern u32 D_003E7828[];
 
 extern const CampEffectRows D_003E7858;
 
-extern char *D_003E7818[];
+extern char *mnuCampBackdropSpriteResourceNames[];
 
-extern char *D_003E7820[];
+extern char *mnuCampBackdropAnimationResourceNames[];
 
 
 

@@ -37,7 +37,7 @@ enum {
     BRS_ICON_Y = 3,
 };
 
-extern BrsIconRecord D_0036C728[];
+extern BrsIconRecord mnuCommonIconPlacements[];
 extern struct EffectSlotSet *D_003BC520;
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
@@ -49,14 +49,14 @@ void brsDrawResultIconPairWithAlpha(s32 unused, u32 alpha, s32 iconIndex, s32 op
     layer = D_003BC520;
     strength = (f32)alpha * 0.00390625f;
     iconIndex += 3;
-    effDrawSpriteWithCornerFade(D_0036C728[iconIndex][BRS_ICON_X] << 4,
-                  D_0036C728[iconIndex][BRS_ICON_Y] << 3, 0,
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[iconIndex][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[iconIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(strength * 256.0f), 0, layer,
-                  D_0036C728[iconIndex][BRS_ICON_ID], option);
-    effDrawSpriteWithCornerFade(D_0036C728[8][BRS_ICON_X] << 4,
-                         D_0036C728[8][BRS_ICON_Y] << 3, 0,
+                  mnuCommonIconPlacements[iconIndex][BRS_ICON_ID], option);
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[8][BRS_ICON_X] << 4,
+                         mnuCommonIconPlacements[8][BRS_ICON_Y] << 3, 0,
                          (u32)(strength * 256.0f), 0, layer,
-                         D_0036C728[8][BRS_ICON_ID], option);
+                         mnuCommonIconPlacements[8][BRS_ICON_ID], option);
 }
 
 void brsDrawResultIconPairWithSlidingCompanion(s32 unused, u32 value, s32 iconIndex, s32 option) {
@@ -69,10 +69,10 @@ void brsDrawResultIconPairWithSlidingCompanion(s32 unused, u32 value, s32 iconIn
     layer = D_003BC520;
     normalized = (f32)value * 0.00390625f;
     selectedIndex = iconIndex + 3;
-    effDrawSpriteWithCornerFade(D_0036C728[selectedIndex][BRS_ICON_X] << 4,
-                  D_0036C728[selectedIndex][BRS_ICON_Y] << 3, 0,
+    effDrawSpriteWithCornerFade(mnuCommonIconPlacements[selectedIndex][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[selectedIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(normalized * 256.0f), 0, layer,
-                  D_0036C728[selectedIndex][BRS_ICON_ID], option);
+                  mnuCommonIconPlacements[selectedIndex][BRS_ICON_ID], option);
 
     companionPosition = (normalized + normalized * normalized) * 0.5f;
     if (normalized < 0.5f) {
@@ -80,13 +80,13 @@ void brsDrawResultIconPairWithSlidingCompanion(s32 unused, u32 value, s32 iconIn
     } else {
         normalized = (normalized - 0.5f) * 2.0f;
     }
-    companionX = (s32)((f32)D_0036C728[8][BRS_ICON_X] -
+    companionX = (s32)((f32)mnuCommonIconPlacements[8][BRS_ICON_X] -
                        (1.0f - companionPosition) * 128.0f);
 
     effDrawSpriteWithCornerFade(companionX << 4,
-                         D_0036C728[8][BRS_ICON_Y] << 3, 0,
+                         mnuCommonIconPlacements[8][BRS_ICON_Y] << 3, 0,
                          (u32)(normalized * 256.0f), 0, layer,
-                         D_0036C728[8][BRS_ICON_ID], option);
+                         mnuCommonIconPlacements[8][BRS_ICON_ID], option);
 }
 
 void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {

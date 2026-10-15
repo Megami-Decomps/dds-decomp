@@ -21,7 +21,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern s32 D_003BAA98;
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern char D_0037CC58[];
+extern char mnuSkillMenuPagePopupEntry[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
 /* These context pointers lack a proven allocator path; retain only their
@@ -228,7 +228,7 @@ s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
         mnuFlagMatchingEntries(context);
     }
     if (buttons & 2) {
-        mnuSetPopupEntry(popup, D_0037CC58);
+        mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
         mnuClearListFlags(1, window);
     }
     mnuPlayInputSound(0, buttons, 0);

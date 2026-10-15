@@ -15,7 +15,8 @@ extern void mnuReleaseMenuResourceSlots(void);
 
 extern void mnuDestroyMovieMenuSelectionList(void);
 
-extern s16 D_003E3792[];
+/* Strided column1 view of mnuMovieMenuSpritePlacements, starting at +2 bytes. */
+extern s16 mnuMovieMenuSpriteDrawParameterColumn[];
 
 typedef struct { s32 unk0; s32 gfx[1]; } SprWork;
 
@@ -35,29 +36,29 @@ typedef struct SpriteMenuList {
 } SpriteMenuList;
 
 /* Sprite rows: graphic slot, draw parameter, x offset, y offset. */
-extern s16 D_003E3790[][4];
+extern s16 mnuMovieMenuSpritePlacements[][4];
 
 s32 mnuSpriteGraphicHandle(u32 index) {
     SprWork *work = (SprWork *)mnuMovieMenuState;
-    return work->gfx[D_003E3790[index][0]];
+    return work->gfx[mnuMovieMenuSpritePlacements[index][0]];
 }
 
 s16 mnuSpriteDrawParam(u32 index) {
-    return D_003E3792[index * 4];
+    return mnuMovieMenuSpriteDrawParameterColumn[index * 4];
 }
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
 
 void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                    s32 spriteIndex, s32 drawContext) {
-    effDrawTextureSlotWithBlendedCornerColors((x + D_003E3790[spriteIndex][2]) << 4,
-                  (y + D_003E3790[spriteIndex][3]) << 3,
+    effDrawTextureSlotWithBlendedCornerColors((x + mnuMovieMenuSpritePlacements[spriteIndex][2]) << 4,
+                  (y + mnuMovieMenuSpritePlacements[spriteIndex][3]) << 3,
                   depth,
                   (u32)((f32)alpha * 256.0f * 0.0078125f),
                   drawMode,
                   ((SprWork *)mnuMovieMenuState)
-                      ->gfx[D_003E3790[spriteIndex][0]],
-                  D_003E3790[spriteIndex][1],
+                      ->gfx[mnuMovieMenuSpritePlacements[spriteIndex][0]],
+                  mnuMovieMenuSpritePlacements[spriteIndex][1],
                   drawContext);
 }
 
@@ -114,7 +115,7 @@ s32 mnuIsAnyMenuInputPressed(void) {
 
 extern u8 D_00437A48[];
 
-extern u8 D_003E3760[];
+extern u8 mnuMovieMenuSpriteResourceNames[];
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 
@@ -124,12 +125,12 @@ void mnuLoadMovieMenuResourceSlots(void) {
 
     if (state[1] == 0) {
         resource = (u32)effLoadIndexedResource((const char *)D_00437A48,
-            (const char *)D_003E3760, 0);
+            (const char *)mnuMovieMenuSpriteResourceNames, 0);
         state = (u32 *)mnuMovieMenuState;
         state[1] = resource;
     }
     if (state[3] == 0) {
-        const char *name = (const char *)D_003E3760;
+        const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
         name += 0x20;
         resource = (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
         state = (u32 *)mnuMovieMenuState;
@@ -156,12 +157,12 @@ void mnuEnsureMovieMenuSpriteHandle(s32 mode) {
 
     if (*handle == 0) {
         if (mode != 0) {
-            const char *name = (const char *)D_003E3760;
+            const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
             name += 0x10;
             ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle =
                 (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
         } else {
-            const char *name = (const char *)D_003E3760;
+            const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
             name += 0x10;
             effRequestResourceByMode((const char *)D_00437A48, name, 0,
                                      handle);

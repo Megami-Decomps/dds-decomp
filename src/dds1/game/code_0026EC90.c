@@ -49,8 +49,8 @@ typedef struct StaffImageCorners {
 } StaffImageCorners;
 typedef char StaffImageCornersSizeCheck[(sizeof(StaffImageCorners) == 12) ? 1 : -1];
 
-extern StaffImageCorners D_0037AF90[];
-extern MnuStaffImageRecord D_0037AFC0[];
+extern StaffImageCorners mnuStaffRollImageFadeControlPoints[];
+extern MnuStaffImageRecord mnuStaffRollImageRecords[];
 extern s32 D_003BC614;
 extern f32 sdfSinPoly(f32);
 extern s32 mnuCheckMovieDecoderStatus(void);
@@ -79,13 +79,13 @@ void mnuDrawAnimatedMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set,
     f32 dist;
     s32 alpha;
 
-    x0 = D_0037AFC0[D_003BC614].x + D_0037AF90[mnuMovieWork->imageIndex].x0;
-    y0 = D_0037AFC0[D_003BC614].y + D_0037AF90[mnuMovieWork->imageIndex].y0;
-    x1 = D_0037AFC0[D_003BC614].x + D_0037AF90[mnuMovieWork->imageIndex].x1;
-    y1 = D_0037AFC0[D_003BC614].y + D_0037AF90[mnuMovieWork->imageIndex].y1;
+    x0 = mnuStaffRollImageRecords[D_003BC614].x + mnuStaffRollImageFadeControlPoints[mnuMovieWork->imageIndex].x0;
+    y0 = mnuStaffRollImageRecords[D_003BC614].y + mnuStaffRollImageFadeControlPoints[mnuMovieWork->imageIndex].y0;
+    x1 = mnuStaffRollImageRecords[D_003BC614].x + mnuStaffRollImageFadeControlPoints[mnuMovieWork->imageIndex].x1;
+    y1 = mnuStaffRollImageRecords[D_003BC614].y + mnuStaffRollImageFadeControlPoints[mnuMovieWork->imageIndex].y1;
     farRadius = 20971.51953125f;
-    x2 = D_0037AFC0[D_003BC614].x + D_0037AF90[mnuMovieWork->imageIndex].x2;
-    y2 = D_0037AFC0[D_003BC614].y + D_0037AF90[mnuMovieWork->imageIndex].y2;
+    x2 = mnuStaffRollImageRecords[D_003BC614].x + mnuStaffRollImageFadeControlPoints[mnuMovieWork->imageIndex].x2;
+    y2 = mnuStaffRollImageRecords[D_003BC614].y + mnuStaffRollImageFadeControlPoints[mnuMovieWork->imageIndex].y2;
     if (entry->active != 0) {
         alpha = 21;
         ex = entry->x;
@@ -156,7 +156,7 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
 }
 
 
-extern u32 D_0037AF70[];
+extern u32 mnuStaffRollImageSpriteFrames[];
 
 
 extern u8 D_0037B950[];
@@ -167,7 +167,7 @@ extern u8 D_0037B980[];
 
 extern u8 D_0037C388[];
 
-extern u32 D_0037AF80[];
+extern u32 mnuStaffRollImageMode32SpriteFrames[];
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
@@ -194,23 +194,23 @@ void mnuDrawStaffRollFrame(s32 surface) {
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
     sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
     for (i = 0; i < 32; i++) {
-        mnuUpdateMovieRollEntry(&D_003DC1E0[i]);
+        mnuUpdateMovieRollEntry(&mnuMovieRollEntries[i]);
         sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
         sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
-        mnuDrawAnimatedMovieRollEntry(&D_003DC1E0[i], mnuMovieWork->spriteSet, surface);
+        mnuDrawAnimatedMovieRollEntry(&mnuMovieRollEntries[i], mnuMovieWork->spriteSet, surface);
     }
     if (D_003BC618 == 1 || D_003BC618 == 3 || D_003BC618 == 2) {
         uiDrawActiveSurfaceRegion(surface);
         sdfSubmitGsTestOneRegisterPacket(0x3001B, surface);
-        mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5,
-                              D_0037AFC0[D_003BC614].y - 5, 1, 128,
+        mnuDrawIconAlphaSprite(mnuStaffRollImageRecords[D_003BC614].x - 5,
+                              mnuStaffRollImageRecords[D_003BC614].y - 5, 1, 128,
                               mnuMovieWork->spriteSet,
-                              D_0037AF80[mnuMovieWork->imageIndex], 32, surface);
+                              mnuStaffRollImageMode32SpriteFrames[mnuMovieWork->imageIndex], 32, surface);
         sdfDispatchSurfaceWithPreparedTexturePacket(surface);
         sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
         sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
         for (i = 0; i < 32; i++) {
-            mnuDrawMovieRollEntry(&D_003DC1E0[i], mnuMovieWork->spriteSet, surface);
+            mnuDrawMovieRollEntry(&mnuMovieRollEntries[i], mnuMovieWork->spriteSet, surface);
         }
     }
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
@@ -329,10 +329,10 @@ extern void mnuRequestIndexedMovieResource(s32 index);
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 
 void mnuAdvanceStaffImageSequence(void) {
-    s32 x = D_0037AFC0[D_003BC614].x;
-    s32 y = D_0037AFC0[D_003BC614].y;
-    s32 width = D_0037AFC0[D_003BC614].width;
-    s32 height = D_0037AFC0[D_003BC614].height;
+    s32 x = mnuStaffRollImageRecords[D_003BC614].x;
+    s32 y = mnuStaffRollImageRecords[D_003BC614].y;
+    s32 width = mnuStaffRollImageRecords[D_003BC614].width;
+    s32 height = mnuStaffRollImageRecords[D_003BC614].height;
     s32 alpha = 128;
     s32 i;
 
@@ -389,25 +389,25 @@ void mnuAdvanceStaffImageSequence(void) {
         break;
     case 4:
         mnuMovieWork->imageAlpha = 0;
-        if (mnuMovieWork->scrollTicks < D_0037AFC0[D_003BC614].startFrame ||
+        if (mnuMovieWork->scrollTicks < mnuStaffRollImageRecords[D_003BC614].startFrame ||
             mnuMovieWork->scrollTicks / 60 > (mnuStaffRollTextRows[255].offsetY + 224) / 60 - 4) {
             break;
         }
         for (i = 14; i >= D_003BC614; i--) {
-            if (mnuMovieWork->scrollTicks >= D_0037AFC0[i].startFrame) {
+            if (mnuMovieWork->scrollTicks >= mnuStaffRollImageRecords[i].startFrame) {
                 if (mnuCheckMovieDecoderStatus() == 0 && D_003BC614 != 0) {
                     return;
                 }
-                sdfSetGridScaledDrawBounds(D_0037AFC0[D_003BC614].x, D_0037AFC0[D_003BC614].y,
-                    D_0037AFC0[D_003BC614].width, D_0037AFC0[D_003BC614].height, 0);
+                sdfSetGridScaledDrawBounds(mnuStaffRollImageRecords[D_003BC614].x, mnuStaffRollImageRecords[D_003BC614].y,
+                    mnuStaffRollImageRecords[D_003BC614].width, mnuStaffRollImageRecords[D_003BC614].height, 0);
                 if (D_003BC614 == 0) {
-                    mnuRequestIndexedMovieResource(D_0037AFC0[0].movieIndex);
+                    mnuRequestIndexedMovieResource(mnuStaffRollImageRecords[0].movieIndex);
                     D_003BC614 = 0;
-                    mnuMovieWork->imageIndex = D_0037AFC0[0].imageIndex;
+                    mnuMovieWork->imageIndex = mnuStaffRollImageRecords[0].imageIndex;
                 } else {
-                    mnuRequestIndexedMovieResource(D_0037AFC0[i].movieIndex);
+                    mnuRequestIndexedMovieResource(mnuStaffRollImageRecords[i].movieIndex);
                     D_003BC614 = i;
-                    mnuMovieWork->imageIndex = D_0037AFC0[i].imageIndex;
+                    mnuMovieWork->imageIndex = mnuStaffRollImageRecords[i].imageIndex;
                 }
                 D_003BC618 = 1;
                 return;
@@ -422,7 +422,7 @@ void mnuAdvanceStaffImageSequence(void) {
 
 s32 mnuStaffImageProc(KwlnTask *task) {
     mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);
-    mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, D_0037AF70[mnuMovieWork->imageIndex], 0, 0x53);
+    mnuDrawIconAlphaSprite(mnuStaffRollImageRecords[D_003BC614].x - 5, mnuStaffRollImageRecords[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, mnuStaffRollImageSpriteFrames[mnuMovieWork->imageIndex], 0, 0x53);
     mnuDrawStaffRollFrame(0x53);
     mnuAdvanceStaffImageSequence();
     return 0;
@@ -462,7 +462,7 @@ void mnuInitializeMovieRollViewport(void) {
     sdfSetGridScaledDrawBounds(0x68, 0x69, 0x180, 0xEE, 0x80808080);
     for (i = 0; i < 32; i++) {
         mnuInitializeMovieRollEntry();
-        D_003DC1E0[i].active = 0;
+        mnuMovieRollEntries[i].active = 0;
     }
 }
 

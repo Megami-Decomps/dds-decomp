@@ -16,7 +16,7 @@ enum {
     MENU_ICON_Y
 };
 
-extern MenuIconPlacement D_003D03F0[];
+extern MenuIconPlacement mnuCommonIconPlacements[];
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
                           struct EffectSlotSet *, s32, s32);
 extern void mnuDrawType2PanelEffects(MenuTerminalContext *, s32, s32);
@@ -65,10 +65,10 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
     }
     scale = (s32)(alpha * 256.0f);
 
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[32][MENU_ICON_X] * 16,
-                  D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
-                  D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
-                  D_003D03F0[32][MENU_ICON_FRAME], 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[32][MENU_ICON_X] * 16,
+                  mnuCommonIconPlacements[32][MENU_ICON_Y] * 8, 0, scale, 0,
+                  D_00438FC8->effectSlots[mnuCommonIconPlacements[32][MENU_ICON_TEXTURE]],
+                  mnuCommonIconPlacements[32][MENU_ICON_FRAME], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
     mnuDrawType2PanelEffects(object, scale, 0x53);
@@ -84,10 +84,10 @@ void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFram
     index = evtSelectGraphicSlotBySpriteType(object);
     resources = D_00438FC8;
     scale = (s32)(alpha * 256.0f);
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16,
-                  D_003D03F0[index][MENU_ICON_Y] * 8, 0, scale, 0,
-                  resources->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
-                  D_003D03F0[index][MENU_ICON_FRAME], 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[index][MENU_ICON_X] * 16,
+                  mnuCommonIconPlacements[index][MENU_ICON_Y] * 8, 0, scale, 0,
+                  resources->effectSlots[mnuCommonIconPlacements[index][MENU_ICON_TEXTURE]],
+                  mnuCommonIconPlacements[index][MENU_ICON_FRAME], 0x53);
 }
 
 void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
@@ -111,10 +111,10 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
     alpha = 1.0f - alpha;
     scale = (s32)(alpha * 256.0f);
 
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[32][MENU_ICON_X] * 16,
-                  D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
-                  D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
-                  D_003D03F0[32][MENU_ICON_FRAME], 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[32][MENU_ICON_X] * 16,
+                  mnuCommonIconPlacements[32][MENU_ICON_Y] * 8, 0, scale, 0,
+                  D_00438FC8->effectSlots[mnuCommonIconPlacements[32][MENU_ICON_TEXTURE]],
+                  mnuCommonIconPlacements[32][MENU_ICON_FRAME], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], 0x53);
     mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
     mnuDrawType2PanelEffects(object, scale, 0x53);
@@ -130,10 +130,10 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
     index = evtSelectGraphicSlotBySpriteType(object);
     resources = D_00438FC8;
     scale = (s32)(alpha * 256.0f);
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16,
-                  D_003D03F0[index][MENU_ICON_Y] * 8, 0, scale, 0,
-                  resources->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
-                  D_003D03F0[index][MENU_ICON_FRAME], 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[index][MENU_ICON_X] * 16,
+                  mnuCommonIconPlacements[index][MENU_ICON_Y] * 8, 0, scale, 0,
+                  resources->effectSlots[mnuCommonIconPlacements[index][MENU_ICON_TEXTURE]],
+                  mnuCommonIconPlacements[index][MENU_ICON_FRAME], 0x53);
 }
 
 
@@ -144,16 +144,16 @@ void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContex
                    s32 scale, s32 option) {
     u32 index;
 
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[32][MENU_ICON_X] * 16, D_003D03F0[32][MENU_ICON_Y] * 8,
-                  0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
-                  D_003D03F0[32][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[32][MENU_ICON_X] * 16, mnuCommonIconPlacements[32][MENU_ICON_Y] * 8,
+                  0, scale, 0, D_00438FC8->effectSlots[mnuCommonIconPlacements[32][MENU_ICON_TEXTURE]],
+                  mnuCommonIconPlacements[32][MENU_ICON_FRAME], option);
     mnuDrawAndAdvanceScrollingStrips(0, 0, 0, scale, &object->panelWork[0], option);
     mnuDrawAndAdvanceScrollingStrips(0, 0xCF8, 0, scale, &object->panelWork[1], option);
     mnuDrawType2PanelEffects(object, scale, option);
     index = evtSelectGraphicSlotBySpriteType(object);
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[index][MENU_ICON_X] * 16, D_003D03F0[index][MENU_ICON_Y] * 8,
-                  0, scale, 0, D_00438FC8->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
-                  D_003D03F0[index][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[index][MENU_ICON_X] * 16, mnuCommonIconPlacements[index][MENU_ICON_Y] * 8,
+                  0, scale, 0, D_00438FC8->effectSlots[mnuCommonIconPlacements[index][MENU_ICON_TEXTURE]],
+                  mnuCommonIconPlacements[index][MENU_ICON_FRAME], option);
 }
 
 
@@ -162,8 +162,8 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
     s32 alpha;
 
     alpha = (s32)((f32)amplitude * sdfSinPoly((object->pulseFrame / 120.0f) * 6.2831853f));
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[1][MENU_ICON_X] << 4, D_003D03F0[1][MENU_ICON_Y] << 3,
-                  0, alpha, 0, texture, D_003D03F0[1][MENU_ICON_FRAME], drawArg);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[1][MENU_ICON_X] << 4, mnuCommonIconPlacements[1][MENU_ICON_Y] << 3,
+                  0, alpha, 0, texture, mnuCommonIconPlacements[1][MENU_ICON_FRAME], drawArg);
     object->pulseFrame++;
     if (object->pulseFrame >= 120.0f) {
         object->pulseFrame = 0;
@@ -176,17 +176,17 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 i;
 
-    effDrawTextureSlotWithBlendedCornerColors(x + (D_003D03F0[57][MENU_ICON_X] << 4),
-                  y + (D_003D03F0[57][MENU_ICON_Y] << 3),
-                  0, scale, 0, texture, D_003D03F0[57][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(x + (mnuCommonIconPlacements[57][MENU_ICON_X] << 4),
+                  y + (mnuCommonIconPlacements[57][MENU_ICON_Y] << 3),
+                  0, scale, 0, texture, mnuCommonIconPlacements[57][MENU_ICON_FRAME], option);
     for (i = 0; i < object->window->list->visibleCount; i++) {
-        effDrawTextureSlotWithBlendedCornerColors(x + (D_003D03F0[18][MENU_ICON_X] << 4),
-                      y + (D_003D03F0[18][MENU_ICON_Y] << 3),
-                      0, scale, 0, texture, D_003D03F0[18][MENU_ICON_FRAME], option);
+        effDrawTextureSlotWithBlendedCornerColors(x + (mnuCommonIconPlacements[18][MENU_ICON_X] << 4),
+                      y + (mnuCommonIconPlacements[18][MENU_ICON_Y] << 3),
+                      0, scale, 0, texture, mnuCommonIconPlacements[18][MENU_ICON_FRAME], option);
         y += 0xB0;
     }
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[17][MENU_ICON_X] << 4, D_003D03F0[17][MENU_ICON_Y] << 3,
-                  0, scale, 0, texture, D_003D03F0[17][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[17][MENU_ICON_X] << 4, mnuCommonIconPlacements[17][MENU_ICON_Y] << 3,
+                  0, scale, 0, texture, mnuCommonIconPlacements[17][MENU_ICON_FRAME], option);
     mnuDrawListScrollbar(0x2D0, 0x450, 0, scale, object->window->list, object->windowResource, option);
 }
 
@@ -215,13 +215,13 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
     s32 row;
 
     if (showFrame != 0) {
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[55][MENU_ICON_X] << 4, D_003D03F0[55][MENU_ICON_Y] << 3,
-                      0, scale, 0, texture, D_003D03F0[55][MENU_ICON_FRAME], option);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[55][MENU_ICON_X] << 4, mnuCommonIconPlacements[55][MENU_ICON_Y] << 3,
+                      0, scale, 0, texture, mnuCommonIconPlacements[55][MENU_ICON_FRAME], option);
     }
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[23][MENU_ICON_X] << 4, D_003D03F0[23][MENU_ICON_Y] << 3,
-                  0, scale, 0, texture, D_003D03F0[23][MENU_ICON_FRAME], option);
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[24][MENU_ICON_X] << 4, D_003D03F0[24][MENU_ICON_Y] << 3,
-                  0, scale, 0, texture, D_003D03F0[24][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[23][MENU_ICON_X] << 4, mnuCommonIconPlacements[23][MENU_ICON_Y] << 3,
+                  0, scale, 0, texture, mnuCommonIconPlacements[23][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[24][MENU_ICON_X] << 4, mnuCommonIconPlacements[24][MENU_ICON_Y] << 3,
+                  0, scale, 0, texture, mnuCommonIconPlacements[24][MENU_ICON_FRAME], option);
     if (object->window->list->count == 0) {
         return;
     }
@@ -233,8 +233,8 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
     case 1: {
         s32 left;
 
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[54][MENU_ICON_X] << 4, D_003D03F0[54][MENU_ICON_Y] << 3,
-                      0, scale, 0, texture, D_003D03F0[54][MENU_ICON_FRAME], option);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[54][MENU_ICON_X] << 4, mnuCommonIconPlacements[54][MENU_ICON_Y] << 3,
+                      0, scale, 0, texture, mnuCommonIconPlacements[54][MENU_ICON_FRAME], option);
         value = datCommandRecords[evtGetIndexedEventRecordId(id)].hpPower;
         sprintf(text, D_00437968, value);
         left = 0x990;
@@ -251,18 +251,18 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
             value = ptyGetCombinedRecordAndSlotValue(id, i);
             if (value != 0) {
                 row = 44 + i * 2;
-                effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[row][MENU_ICON_X] << 4,
-                                                          D_003D03F0[row][MENU_ICON_Y] << 3, 0, scale, 0, texture,
-                                                          D_003D03F0[row][MENU_ICON_FRAME], option);
+                effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[row][MENU_ICON_X] << 4,
+                                                          mnuCommonIconPlacements[row][MENU_ICON_Y] << 3, 0, scale, 0, texture,
+                                                          mnuCommonIconPlacements[row][MENU_ICON_FRAME], option);
                 sprintf(text, D_00437968, value);
                 glyph = itfCreateFont2TextGlyph(textX, 0xB18, z, color, text, NULL);
                 frFontDrawGlyphChain(glyph, 1, option);
                 frFontQueueGlyphForCurrentDrawBuffer(glyph);
             } else {
                 row = 45 + i * 2;
-                effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[row][MENU_ICON_X] << 4,
-                                                          D_003D03F0[row][MENU_ICON_Y] << 3, 0, scale, 0, texture,
-                                                          D_003D03F0[row][MENU_ICON_FRAME], option);
+                effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[row][MENU_ICON_X] << 4,
+                                                          mnuCommonIconPlacements[row][MENU_ICON_Y] << 3, 0, scale, 0, texture,
+                                                          mnuCommonIconPlacements[row][MENU_ICON_FRAME], option);
             }
         }
         break;
@@ -414,16 +414,16 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *obje
         break;
     }
     if (flags & 1) {
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[20][MENU_ICON_X] << 4,
-                      D_003D03F0[20][MENU_ICON_Y] << 3,
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[20][MENU_ICON_X] << 4,
+                      mnuCommonIconPlacements[20][MENU_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
-                      texture, D_003D03F0[20][MENU_ICON_FRAME], option);
+                      texture, mnuCommonIconPlacements[20][MENU_ICON_FRAME], option);
     }
     if (flags & 2) {
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[21][MENU_ICON_X] << 4,
-                      D_003D03F0[21][MENU_ICON_Y] << 3,
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[21][MENU_ICON_X] << 4,
+                      mnuCommonIconPlacements[21][MENU_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
-                      texture, D_003D03F0[21][MENU_ICON_FRAME], option);
+                      texture, mnuCommonIconPlacements[21][MENU_ICON_FRAME], option);
     }
 }
 
@@ -447,10 +447,10 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext 
         row = list->cursor->index - firstIndex;
         effDrawTextureSlotWithBlendedCornerColors(0x600, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x20, option);
         effDrawTextureSlotWithBlendedCornerColors(0xD10, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x21, option);
-        effDrawTextureSlotWithBlendedCornerColors((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
-                      (D_003D03F0[29][MENU_ICON_Y] + row * 22) << 3,
+        effDrawTextureSlotWithBlendedCornerColors((mnuCommonIconPlacements[29][MENU_ICON_X] + 8) << 4,
+                      (mnuCommonIconPlacements[29][MENU_ICON_Y] + row * 22) << 3,
                       0, 0x100, 0, texture,
-                      D_003D03F0[29][MENU_ICON_FRAME], option);
+                      mnuCommonIconPlacements[29][MENU_ICON_FRAME], option);
         if (scene->multiplier / 10 != 0) {
             textOffset = 0;
         } else {
@@ -482,20 +482,20 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
         firstIndex = list->head->index;
         opacity = (f32)alpha * 0.00390625f;
         row = list->cursor->index - firstIndex;
-        effDrawTextureSlotWithBlendedCornerColors((D_003D03F0[19][MENU_ICON_X] + 8) << 4,
-                      (D_003D03F0[19][MENU_ICON_Y] + row * 22) << 3,
+        effDrawTextureSlotWithBlendedCornerColors((mnuCommonIconPlacements[19][MENU_ICON_X] + 8) << 4,
+                      (mnuCommonIconPlacements[19][MENU_ICON_Y] + row * 22) << 3,
                       0, (u32)((1.0f - opacity) * 256.0f), 0, texture,
-                      D_003D03F0[19][MENU_ICON_FRAME], option);
+                      mnuCommonIconPlacements[19][MENU_ICON_FRAME], option);
         effDrawTextureSlotWithBlendedCornerColors(0x600, (152 + row * 22) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x20, option);
         effDrawTextureSlotWithBlendedCornerColors(0xD10, (152 + row * 22) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x21, option);
-        effDrawTextureSlotWithBlendedCornerColors((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
-                      (D_003D03F0[29][MENU_ICON_Y] + row * 22) << 3,
+        effDrawTextureSlotWithBlendedCornerColors((mnuCommonIconPlacements[29][MENU_ICON_X] + 8) << 4,
+                      (mnuCommonIconPlacements[29][MENU_ICON_Y] + row * 22) << 3,
                       0, (u32)(opacity * 256.0f), 0, texture,
-                      D_003D03F0[29][MENU_ICON_FRAME], option);
+                      mnuCommonIconPlacements[29][MENU_ICON_FRAME], option);
         color = (s32)(opacity * 128.0f) | 0xA09DC300;
         textOffset = 0x70;
         if (scene->multiplier / 10 != 0) {
@@ -517,14 +517,14 @@ void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->quantityAtLimit != 1) {
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[30][MENU_ICON_X] << 4,
-            (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
-            0, 0x100, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[30][MENU_ICON_X] << 4,
+            (mnuCommonIconPlacements[30][MENU_ICON_Y] + row * 22) << 3,
+            0, 0x100, 0, texture, mnuCommonIconPlacements[30][MENU_ICON_FRAME], option);
     }
     if (panel->multiplier != 1) {
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[31][MENU_ICON_X] << 4,
-            (D_003D03F0[31][MENU_ICON_Y] + row * 22) << 3,
-            0, 0x100, 0, texture, D_003D03F0[31][MENU_ICON_FRAME], option);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[31][MENU_ICON_X] << 4,
+            (mnuCommonIconPlacements[31][MENU_ICON_Y] + row * 22) << 3,
+            0, 0x100, 0, texture, mnuCommonIconPlacements[31][MENU_ICON_FRAME], option);
     }
 }
 
@@ -534,14 +534,14 @@ void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, MenuTerminalContext *pane
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->quantityAtLimit != 1) {
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[30][MENU_ICON_X] << 4,
-            (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
-            0, scale, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[30][MENU_ICON_X] << 4,
+            (mnuCommonIconPlacements[30][MENU_ICON_Y] + row * 22) << 3,
+            0, scale, 0, texture, mnuCommonIconPlacements[30][MENU_ICON_FRAME], option);
     }
     if (panel->multiplier != 1) {
-        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[31][MENU_ICON_X] << 4,
-            (D_003D03F0[31][MENU_ICON_Y] + row * 22) << 3,
-            0, scale, 0, texture, D_003D03F0[31][MENU_ICON_FRAME], option);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[31][MENU_ICON_X] << 4,
+            (mnuCommonIconPlacements[31][MENU_ICON_Y] + row * 22) << 3,
+            0, scale, 0, texture, mnuCommonIconPlacements[31][MENU_ICON_FRAME], option);
     }
 }
 
@@ -554,10 +554,10 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     struct MenuList *inner;
     struct FrFontGlyph *glyph;
 
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
-                  0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
-                  0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[25][MENU_ICON_X] * 16, mnuCommonIconPlacements[25][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[25][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[26][MENU_ICON_X] * 16, mnuCommonIconPlacements[26][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[26][MENU_ICON_FRAME], option);
     inner = object->list;
     if (inner->count != 0) {
         sprintf(text, D_00437980, 0);
@@ -570,10 +570,10 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     effDrawTextureSlotWithBlendedCornerColors(
-        x + D_003D03F0[26][MENU_ICON_X] * 16,
-        y + D_003D03F0[26][MENU_ICON_Y] * 8,
+        x + mnuCommonIconPlacements[26][MENU_ICON_X] * 16,
+        y + mnuCommonIconPlacements[26][MENU_ICON_Y] * 8,
         z, scale, 0, D_00438FC8->effectSlots[0],
-        D_003D03F0[26][MENU_ICON_FRAME], option
+        mnuCommonIconPlacements[26][MENU_ICON_FRAME], option
     );
 }
 void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
@@ -582,10 +582,10 @@ void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale,
     struct FrFontGlyph *glyph;
 
     effDrawTextureSlotWithBlendedCornerColors(
-        x + D_003D03F0[25][MENU_ICON_X] * 16,
-        y + D_003D03F0[25][MENU_ICON_Y] * 8,
+        x + mnuCommonIconPlacements[25][MENU_ICON_X] * 16,
+        y + mnuCommonIconPlacements[25][MENU_ICON_Y] * 8,
         z, scale, 0, D_00438FC8->effectSlots[0],
-        D_003D03F0[25][MENU_ICON_FRAME], option
+        mnuCommonIconPlacements[25][MENU_ICON_FRAME], option
     );
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     sprintf(text, D_00437980, 0);
@@ -602,10 +602,10 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *p
     struct MenuList *inner;
     struct FrFontGlyph *glyph;
 
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[25][MENU_ICON_X] * 16, D_003D03F0[25][MENU_ICON_Y] * 8,
-                  0, 0x100, 0, texture, D_003D03F0[25][MENU_ICON_FRAME], option);
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[26][MENU_ICON_X] * 16, D_003D03F0[26][MENU_ICON_Y] * 8,
-                  0, 0x100, 0, texture, D_003D03F0[26][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[25][MENU_ICON_X] * 16, mnuCommonIconPlacements[25][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[25][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[26][MENU_ICON_X] * 16, mnuCommonIconPlacements[26][MENU_ICON_Y] * 8,
+                  0, 0x100, 0, texture, mnuCommonIconPlacements[26][MENU_ICON_FRAME], option);
     inner = object->list;
     if (inner->count != 0) {
         sprintf(text, D_00437980, inner->cursor->camp.value * panel->multiplier);

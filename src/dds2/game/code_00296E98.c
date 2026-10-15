@@ -98,7 +98,7 @@ enum {
     BRS_ICON_Y = 3,
 };
 
-extern BrsIconRecord D_003D03F0[];
+extern BrsIconRecord mnuCommonIconPlacements[];
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw the selected result icon, then the fixed companion at the same alpha. */
@@ -109,14 +109,14 @@ void brsDrawResultIconPairWithAlpha(s32 unused, u32 alpha, s32 iconIndex, s32 op
     layer = D_00438FC8->effectSlots[0];
     strength = (f32)alpha * 0.00390625f;
     iconIndex += 3;
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[iconIndex][BRS_ICON_X] << 4,
-                  D_003D03F0[iconIndex][BRS_ICON_Y] << 3, 0,
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[iconIndex][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[iconIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(strength * 256.0f), 0, layer,
-                  D_003D03F0[iconIndex][BRS_ICON_ID], option);
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[8][BRS_ICON_X] << 4,
-                         D_003D03F0[8][BRS_ICON_Y] << 3, 0,
+                  mnuCommonIconPlacements[iconIndex][BRS_ICON_ID], option);
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[8][BRS_ICON_X] << 4,
+                         mnuCommonIconPlacements[8][BRS_ICON_Y] << 3, 0,
                          (u32)(strength * 256.0f), 0, layer,
-                         D_003D03F0[8][BRS_ICON_ID], option);
+                         mnuCommonIconPlacements[8][BRS_ICON_ID], option);
 }
 
 void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
@@ -129,10 +129,10 @@ void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, 
     layer = D_00438FC8->effectSlots[0];
     normalized = (f32)value * 0.00390625f;
     selectedIndex = entryIndex + 3;
-    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[selectedIndex][BRS_ICON_X] << 4,
-                  D_003D03F0[selectedIndex][BRS_ICON_Y] << 3, 0,
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[selectedIndex][BRS_ICON_X] << 4,
+                  mnuCommonIconPlacements[selectedIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(normalized * 256.0f), 0, layer,
-                  D_003D03F0[selectedIndex][BRS_ICON_ID], drawArg);
+                  mnuCommonIconPlacements[selectedIndex][BRS_ICON_ID], drawArg);
 
     companionPosition = (normalized + normalized * normalized) * 0.5f;
     if (normalized < 0.5f) {
@@ -140,13 +140,13 @@ void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, 
     } else {
         normalized = (normalized - 0.5f) * 2.0f;
     }
-    companionX = (s32)((f32)D_003D03F0[8][BRS_ICON_X] -
+    companionX = (s32)((f32)mnuCommonIconPlacements[8][BRS_ICON_X] -
                        (1.0f - companionPosition) * 128.0f);
 
     effDrawTextureSlotWithBlendedCornerColors(companionX << 4,
-                         D_003D03F0[8][BRS_ICON_Y] << 3, 0,
+                         mnuCommonIconPlacements[8][BRS_ICON_Y] << 3, 0,
                          (u32)(normalized * 256.0f), 0, layer,
-                         D_003D03F0[8][BRS_ICON_ID], drawArg);
+                         mnuCommonIconPlacements[8][BRS_ICON_ID], drawArg);
 }
 
 void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {
