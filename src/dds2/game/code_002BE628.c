@@ -145,9 +145,9 @@ extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 
 extern void evtStageTestStop(void);
 
-extern u8 D_003E7940[];
+extern u8 evtStageTestViewEyeVector[];
 
-extern u8 D_003E7950[];
+extern u8 evtStageTestViewTargetVector[];
 
 
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
@@ -2837,7 +2837,7 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
     rotation[2] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[2];
 }
 
-extern u8 D_003E7960[];
+extern u8 evtStageTestViewUpVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
@@ -2875,9 +2875,9 @@ void evtStageTestResetViewAndLighting(void)
     kwlnSetDrawColorTarget(0, drawColor);
     evtSetDrawVectorTarget(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     sdfSceneProjectionParameters.camera.fov = 0.7551905f;
-    PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
-    PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
-    PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);
+    PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
+    PCP_COPY_VECTOR(sdfViewUpVector, evtStageTestViewUpVector);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
@@ -3053,7 +3053,7 @@ f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
 typedef struct MenuWorkCamera {
     s32 x;
     s32 y;
-    f32 depth; /* third component uses float in D_003E7950 */
+    f32 depth; /* third component uses float in evtStageTestViewTargetVector */
 } MenuWorkCamera;
 
 typedef struct MenuWorkPosition {
@@ -3064,12 +3064,12 @@ typedef struct MenuWorkPosition {
 
 /* Reset target XYZ to (0, 0, -400) and eye XYZ to zero; leave their fourth words untouched. */
 void mnuResetWorkPair(void) {
-    ((MenuWorkCamera *)D_003E7950)->x = 0;
-    ((MenuWorkCamera *)D_003E7950)->y = 0;
-    ((MenuWorkCamera *)D_003E7950)->depth = EVT_STAGE_DEFAULT_TARGET_Z;
-    ((MenuWorkPosition *)D_003E7940)->x = 0;
-    ((MenuWorkPosition *)D_003E7940)->y = 0;
-    ((MenuWorkPosition *)D_003E7940)->z = 0;
+    ((MenuWorkCamera *)evtStageTestViewTargetVector)->x = 0;
+    ((MenuWorkCamera *)evtStageTestViewTargetVector)->y = 0;
+    ((MenuWorkCamera *)evtStageTestViewTargetVector)->depth = EVT_STAGE_DEFAULT_TARGET_Z;
+    ((MenuWorkPosition *)evtStageTestViewEyeVector)->x = 0;
+    ((MenuWorkPosition *)evtStageTestViewEyeVector)->y = 0;
+    ((MenuWorkPosition *)evtStageTestViewEyeVector)->z = 0;
 }
 
 
@@ -3095,7 +3095,7 @@ void mnuApplyModelCamera(MdlCtx *model) {
         position[0] -= stageEntry->position[0] - stageEntry->position[0] * scale;
         position[1] -= stageEntry->position[1] - stageEntry->position[1] * scale;
         position[2] = 0.0f;
-        ((MenuWorkCamera *)D_003E7950)->depth = (EVT_STAGE_DEFAULT_TARGET_Z - stageEntry->position[2]) * scale;
+        ((MenuWorkCamera *)evtStageTestViewTargetVector)->depth = (EVT_STAGE_DEFAULT_TARGET_Z - stageEntry->position[2]) * scale;
     }
     VU0_LOAD_VF(vf10, position);
     mdlStorePrimaryVectorVU(model);
@@ -3120,9 +3120,9 @@ void evtStageTestUpdateCamera(void)
 
     drawBufferIndex = kwlnGetDrawBufferIndex();
     evtStageTestResetViewAndLighting();
-    PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
-    PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
-    PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);
+    PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
+    PCP_COPY_VECTOR(sdfViewUpVector, evtStageTestViewUpVector);
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);

@@ -119,7 +119,7 @@ extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern u8 D_00324590[];
-extern u8 D_0037CE80[];
+extern u8 evtStageTestViewUpVector[];
 extern u8 sdfViewMatrix[];
 extern u8 D_003270F0[];
 extern void evtStageTestAdvanceMotionQueue(void);
@@ -161,9 +161,9 @@ extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
 
 extern char D_003B2608[]; /* "battle stage test" */
 
-extern u8 D_0037CE60[];
+extern u8 evtStageTestViewEyeVector[];
 
-extern u8 D_0037CE70[];
+extern u8 evtStageTestViewTargetVector[];
 
 
 /* Battle stage test viewer state. Retail addresses it partly through
@@ -2262,9 +2262,9 @@ void evtStageTestResetViewAndLighting(void)
     kwlnSetDrawColorTarget(0, drawColor);
     evtSetDrawVectorTarget(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     sdfSceneProjectionParameters.camera.fov = 0.7551905f;
-    PCP_COPY_VECTOR(sdfViewTargetVector, D_0037CE70);
-    PCP_COPY_VECTOR(sdfViewEyeVector, D_0037CE60);
-    PCP_COPY_VECTOR(sdfViewUpVector, D_0037CE80);
+    PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
+    PCP_COPY_VECTOR(sdfViewUpVector, evtStageTestViewUpVector);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
@@ -2478,12 +2478,12 @@ f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
 
 /* Reset target XYZ to (0, 0, -400) and eye XYZ to zero; leave their fourth words untouched. */
 void mnuResetWorkPair(void) {
-    *(s32 *)(D_0037CE70 + 0) = 0;
-    *(s32 *)(D_0037CE70 + 4) = 0;
-    *(f32 *)(D_0037CE70 + 8) = EVT_STAGE_DEFAULT_TARGET_Z;
-    *(s32 *)(D_0037CE60 + 0) = 0;
-    *(s32 *)(D_0037CE60 + 4) = 0;
-    *(s32 *)(D_0037CE60 + 8) = 0;
+    *(s32 *)(evtStageTestViewTargetVector + 0) = 0;
+    *(s32 *)(evtStageTestViewTargetVector + 4) = 0;
+    *(f32 *)(evtStageTestViewTargetVector + 8) = EVT_STAGE_DEFAULT_TARGET_Z;
+    *(s32 *)(evtStageTestViewEyeVector + 0) = 0;
+    *(s32 *)(evtStageTestViewEyeVector + 4) = 0;
+    *(s32 *)(evtStageTestViewEyeVector + 8) = 0;
 }
 
 
@@ -2509,7 +2509,7 @@ void mnuApplyModelCamera(MdlCtx *model) {
         position[0] -= stageEntry->position[0] - stageEntry->position[0] * scale;
         position[1] -= stageEntry->position[1] - stageEntry->position[1] * scale;
         position[2] = 0.0f;
-        *(f32 *)(D_0037CE70 + 8) = (EVT_STAGE_DEFAULT_TARGET_Z - stageEntry->position[2]) * scale;
+        *(f32 *)(evtStageTestViewTargetVector + 8) = (EVT_STAGE_DEFAULT_TARGET_Z - stageEntry->position[2]) * scale;
     }
     VU0_LOAD_VF(vf10, position);
     mdlStorePrimaryVectorVU((void *)model);
@@ -2533,9 +2533,9 @@ void evtStageTestUpdateCamera(void)
 
     drawBufferIndex = kwlnGetDrawBufferIndex();
     evtStageTestResetViewAndLighting();
-    PCP_COPY_VECTOR(sdfViewTargetVector, D_0037CE70);
-    PCP_COPY_VECTOR(sdfViewEyeVector, D_0037CE60);
-    PCP_COPY_VECTOR(sdfViewUpVector, D_0037CE80);
+    PCP_COPY_VECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    PCP_COPY_VECTOR(sdfViewEyeVector, evtStageTestViewEyeVector);
+    PCP_COPY_VECTOR(sdfViewUpVector, evtStageTestViewUpVector);
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
