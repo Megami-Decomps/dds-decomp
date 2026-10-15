@@ -1103,7 +1103,7 @@ extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource
                                  s32 option);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
 extern void sndQueueSoundId(u32 sequence);
 
