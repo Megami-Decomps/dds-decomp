@@ -299,7 +299,7 @@ s32 btlProjectForwardPositionToPackedScreen(s32 screenPosition[4]) {
 void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
-    pos[2] += unit->zOffset;
+    pos[2] += unit->positionZOffset;
     VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, unit->bodyOffset);
@@ -314,7 +314,7 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
 void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
-    pos[2] += unit->zOffset;
+    pos[2] += unit->positionZOffset;
     VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, unit->muzzleOffset);
