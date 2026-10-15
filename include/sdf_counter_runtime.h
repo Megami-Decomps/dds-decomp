@@ -10,7 +10,7 @@ typedef void (*SdfCounterDrawFn)(s32, s32, s32, struct SdfCounterRuntime *, SdfC
 /* Allocated and cleared as 0x24 bytes by both counter-channel providers. */
 typedef struct SdfCounterTimer {
     s32 value;                     /* 0x00 */
-    s16 countdown;                 /* 0x04 */
+    s16 selectionPulseFramesRemaining; /* 0x04 */
     s16 mode;                      /* 0x06 */
     u8 opaque08[4];                /* 0x08 */
     s16 mapTimerPrimary;           /* 0x0C */
@@ -31,8 +31,8 @@ typedef char SdfCounterTimer_size_must_be_0x24[
 typedef char SdfCounterTimer_value_at_0x00[
     ((u32)&((SdfCounterTimer *)0)->value == 0x00) ? 1 : -1
 ];
-typedef char SdfCounterTimer_countdown_at_0x04[
-    ((u32)&((SdfCounterTimer *)0)->countdown == 0x04) ? 1 : -1
+typedef char SdfCounterTimer_selectionPulseFramesRemaining_at_0x04[
+    ((u32)&((SdfCounterTimer *)0)->selectionPulseFramesRemaining == 0x04) ? 1 : -1
 ];
 typedef char SdfCounterTimer_mode_at_0x06[
     ((u32)&((SdfCounterTimer *)0)->mode == 0x06) ? 1 : -1
