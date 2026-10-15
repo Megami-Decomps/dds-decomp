@@ -261,11 +261,11 @@ typedef char EffCreateHandler_size_must_be_0x18[
 /* Effect subrecord with byte fields at +0x20/+0x40/+0x50 (0x51); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffSub {
     u8 unk0[0x20];
-    u8 unk20;
+    u8 type0SubSlot;
     u8 unk21[0x1F];
-    u8 unk40;
+    u8 type1SubSlot;
     u8 unk41[0xF];
-    u8 unk50;
+    u8 type2To4SubSlot;
 } EffSub;
 
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
