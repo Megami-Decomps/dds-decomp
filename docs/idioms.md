@@ -13456,3 +13456,37 @@ pair. The `.be` pack loader uses `evtPackScriptPathFormat` and its separate
 `evtScriptResourcePathBuffer`. Both native pack buffers have a generated
 0x40-byte BSS span; their existing unsized declarations are retained. All
 record bounds, alignment, trailing zeros, imports and control flow stay put.
+
+## Camp command banks and skill-category range aliases
+
+`mnuCampCommandLabels` contains eight command pointers in each game, but
+the command order differs. The item-command bank contains three labels in
+DDS1 and five in DDS2; the set-command bank contains two in both games.
+`mnuCampCommandVisibilityFlagIds` controls inclusion, not disabling:
+the provider includes a row when its flag is zero or `mdlFlagTest`
+succeeds. DDS2 also has `mnuCampItemCommandVisibilityFlagIds`; DDS1 passes
+NULL for the corresponding item-bank flags.
+
+`mnuSkillCategoryRangeBounds` contains twenty u16 bounds describing ten
+half-open skill-ID intervals. `mnuSkillCategoryRangeUpperBounds` is the
+existing two-byte-shifted view into that same storage, not another table.
+The final two intervals differ between games. The six signed-byte rows of
+`mnuSkillCategoryRangeMapRows` select a group, category and bound-word
+index. `mnuSkillCategoryRangeBoundWordIndices` is the two-byte-shifted
+view of each row's third byte, accessed with stride three. Its values are
+even u16 indices, not byte offsets; retain the original declarations and
+index arithmetic rather than replacing these overlapping views.
+
+`mnuCampPartySelectionReturnPopupEntry` is a seven-word popup descriptor,
+installed during preparation and cancellation without a selection. Its
+last callback is `mnuAllowPartySelectionReturn` in both games; DDS2's
+additional preparation callback is retained.
+
+Only DDS1 uses `mnuReservePartyPanelRowParameters`: fifteen pairs selected
+by `((firstCount * 5 + totalCount) << 1) - 12`. The selected pair supplies
+the base Y and per-reserve-panel step, and the result is shifted left
+three. The next pointer bank starts immediately after those 120 bytes;
+do not extend this table into it. DDS2 instead calculates spacing from a
+local three-element array, so no external table twin is invented. These
+names leave every native byte, overlapping alias, type and control-flow
+choice unchanged.

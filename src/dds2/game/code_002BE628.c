@@ -152,13 +152,13 @@ extern u8 evtStageTestViewTargetVector[];
 
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
 
-extern s8 D_003E7928[];
+extern s8 mnuSkillCategoryRangeMapRows[];
 
-extern u16 D_003E7900[];
+extern u16 mnuSkillCategoryRangeBounds[];
 
-extern u16 D_003E7902[];
+extern u16 mnuSkillCategoryRangeUpperBounds[];
 
-extern s8 D_003E792A[];
+extern s8 mnuSkillCategoryRangeBoundWordIndices[];
 
 
 
@@ -2012,8 +2012,8 @@ s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry) {
 
 /* Match a half-open range, then return its signed mapping value; unmatched IDs return zero. */
 s32 mnuLookupRangeEntry(u16 rangeId) {
-    u16 *rangeBounds = D_003E7900;
-    s8 *mappingRows = D_003E7928;
+    u16 *rangeBounds = mnuSkillCategoryRangeBounds;
+    s8 *mappingRows = mnuSkillCategoryRangeMapRows;
     u32 rangeKey = rangeId & MNU_COMMAND_ID_MASK;
     u32 boundWordIndex;
     for (boundWordIndex = 0; boundWordIndex < 0x14; boundWordIndex += 2, rangeBounds += 2) {
@@ -2039,14 +2039,14 @@ s32 mnuLookupRangeEntry(u16 rangeId) {
 
 /* Read a bound word from the primary table or its one-word-shifted alternate view. */
 u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate) {
-    return (alternate == 0) ? D_003E7900[boundWordIndex] : D_003E7902[boundWordIndex];
+    return (alternate == 0) ? mnuSkillCategoryRangeBounds[boundWordIndex] : mnuSkillCategoryRangeUpperBounds[boundWordIndex];
 }
 
 /* For nonnegative indices, select among nonzero signed mapping values in row order. */
 s32 mnuGetIndexedNonzeroEffect(s32 valueIndex) {
     s32 nonzeroCount = 0;
     s32 mappingIndex;
-    s8 *mappingCursor = D_003E7928;
+    s8 *mappingCursor = mnuSkillCategoryRangeMapRows;
     for (mappingIndex = 0; mappingIndex < 6; mappingIndex++, mappingCursor += 3) {
         s32 mappingValue = *mappingCursor;
         if (mappingValue != 0) nonzeroCount++;
@@ -2064,9 +2064,9 @@ u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
         mappingSum += mnuGetIndexedNonzeroEffect(valueIndex);
     }
     if (alternate == 0) {
-        return D_003E7900[D_003E792A[(baseIndex + mappingSum) * 3]];
+        return mnuSkillCategoryRangeBounds[mnuSkillCategoryRangeBoundWordIndices[(baseIndex + mappingSum) * 3]];
     }
-    return D_003E7902[D_003E792A[(baseIndex + mappingSum) * 3]];
+    return mnuSkillCategoryRangeUpperBounds[mnuSkillCategoryRangeBoundWordIndices[(baseIndex + mappingSum) * 3]];
 }
 
 /* Return the attribute mask only for kind 2, which selects flag-mask semantics. */

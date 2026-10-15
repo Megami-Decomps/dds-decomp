@@ -682,10 +682,10 @@ MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 
 }
 
 
-extern void *const D_003E56D0[];
-extern void *const D_003E56F0[];
-extern void *const D_003E5708[];
-extern const s32 D_003E6978[], D_003E6998[];
+extern void *const mnuCampCommandLabels[];
+extern void *const mnuCampItemCommandLabels[];
+extern void *const mnuCampSetCommandLabels[];
+extern const s32 mnuCampCommandVisibilityFlagIds[], mnuCampItemCommandVisibilityFlagIds[];
 
 void mnuStaffInitResourceLists(u8 *work) {
     MenuStaffContext *context = (MenuStaffContext *)work;
@@ -695,11 +695,11 @@ void mnuStaffInitResourceLists(u8 *work) {
     ((StaffResourceHeader *)work)->baseHandles[0] = mnuCreatePanelIconState(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
     ((StaffResourceHeader *)work)->baseHandles[1] = mnuCreatePanelIconState(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
     ((StaffResourceHeader *)work)->baseHandles[2] = mnuCreatePanelIconState(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
-    ((StaffResourceHeader *)work)->resourceLists[0] = mnuCreateStaffResourceListWindow(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
-    list = mnuCreateStaffResourceListWindow(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
+    ((StaffResourceHeader *)work)->resourceLists[0] = mnuCreateStaffResourceListWindow(mnuCampCommandLabels, 8, 0x1C0, 0x10, work, mnuCampCommandVisibilityFlagIds);
+    list = mnuCreateStaffResourceListWindow(mnuCampItemCommandLabels, 5, 0x1C0, 0x10, work, mnuCampItemCommandVisibilityFlagIds);
     ((StaffResourceHeader *)work)->resourceLists[1] = list;
     mnuSetWindowFadeScale(list, 0x100);
-    list = mnuCreateStaffResourceListWindow(D_003E5708, 2, 0x1C0, 0x10, work, 0);
+    list = mnuCreateStaffResourceListWindow(mnuCampSetCommandLabels, 2, 0x1C0, 0x10, work, 0);
     context->resourceListWindow = list;
     mnuSetWindowFadeScale(list, 0x100);
     mnuInitializeWindowFadeState(ctx);

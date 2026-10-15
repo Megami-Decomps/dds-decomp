@@ -35,12 +35,12 @@ extern char mnuCampOwnerTaskName[]; /* "camp_update" */
 
 extern s8 mnuCampTaskState;
 
-extern void *const D_0037B950[];
+extern void *const mnuCampCommandLabels[];
 
-extern void *const D_0037B970[];
+extern void *const mnuCampItemCommandLabels[];
 
-extern void *const D_0037B980[];
-extern const s32 D_0037C388[];
+extern void *const mnuCampSetCommandLabels[];
+extern const s32 mnuCampCommandVisibilityFlagIds[];
 
 #define MNU_STAFF_PANEL_COUNT 3
 
@@ -65,11 +65,11 @@ s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu);
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
     menu->resourceList = mnuCreatePanelSpriteHandles(
         0, menu->staffSlots.baseResources[3], menu->secondaryImage);
-    menu->images[0] = mnuCreateFilteredStaffEntryWindow(D_0037B950, 8, 0x300, menu, D_0037C388);
+    menu->images[0] = mnuCreateFilteredStaffEntryWindow(mnuCampCommandLabels, 8, 0x300, menu, mnuCampCommandVisibilityFlagIds);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
-    menu->images[1] = mnuCreateFilteredStaffEntryWindow(D_0037B970, 3, 0x2C0, menu, 0);
+    menu->images[1] = mnuCreateFilteredStaffEntryWindow(mnuCampItemCommandLabels, 3, 0x2C0, menu, 0);
     mnuSetWindowFadeScale(menu->images[1], 0x100);
-    menu->images[2] = mnuCreateFilteredStaffEntryWindow(D_0037B980, 2, 0x200, menu, 0);
+    menu->images[2] = mnuCreateFilteredStaffEntryWindow(mnuCampSetCommandLabels, 2, 0x200, menu, 0);
     mnuSetWindowFadeScale(menu->images[2], 0x100);
 }
 

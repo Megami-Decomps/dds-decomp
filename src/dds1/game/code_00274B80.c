@@ -235,7 +235,7 @@ extern FrFontGlyph *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *,
 extern s32 D_003BAA70;
 extern void mnuDestroyWindowContainer(u32);
 
-extern u8 D_0037CA58[];
+extern u8 mnuCampPartySelectionReturnPopupEntry[];
 extern struct MenuPanelState *mnuCreatePanelState(s32, s32);
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
@@ -535,7 +535,7 @@ s32 mnuShopReleaseResources(KwlnTask *task) {
 
 void mnuPreparePartyPanelTransition(s32 menu) {
     mnuRestorePartyEntriesAndRefresh();
-    mnuSetPopupEntryFlagged((s32 *)(u32)(menu + 0x54), (void *)D_0037CA58);
+    mnuSetPopupEntryFlagged((s32 *)(u32)(menu + 0x54), (void *)mnuCampPartySelectionReturnPopupEntry);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)((CampMenuContext *)menu)->display,
         (struct EffectSlotSet *)(u32)((CampMenuContext *)menu)->displayVariant, 0, 1);
@@ -590,7 +590,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
                 mnuClearPartySelectionAndActivateSlots((s32)context);
                 mnuUpdatePartyPanelPercentDisplays((s32)&context->partyWindow);
             } else {
-                mnuSetPopupEntryFlagged(popup, D_0037CA58);
+                mnuSetPopupEntryFlagged(popup, mnuCampPartySelectionReturnPopupEntry);
                 mnuActivatePanelAndConfigureGridResources(
                     (MenuScrollPanel *)(u32)context->display,
                     (struct EffectSlotSet *)(u32)context->displayVariant, 0, 1);
