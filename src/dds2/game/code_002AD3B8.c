@@ -28,7 +28,7 @@
 extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
-extern u8 D_003E7050[];
+extern u8 mnuCampItemCommandHelpTextBank[];
 extern char D_003E7207[20];
 extern char D_003E7202[];
 extern void mnuDestroyStaffBulletItemWindow(s32);
@@ -55,10 +55,10 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void ptyAdjustItemQuantity();
 extern void mnuRefreshStaffWindowDescription();
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
-extern char D_003E74F8[];
+extern char mnuCampAmmoEquipmentPopupEntry[];
 extern char D_003E7514[];
 extern char D_003E7530[];
-extern char D_003E7434[];
+extern char mnuCampItemCategoryPopupEntry[];
 extern char D_003E7488[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
@@ -135,11 +135,11 @@ s32 mnuStaffImageInputA(KwlnTask *task) {
     mnuStepPartyPanelListFromInput(4, &((MenuStaffContext *)context)->partyWindow);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         menu->currentSelection = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
-        mnuSetPopupEntryFlagged(popup, D_003E74F8);
+        mnuSetPopupEntryFlagged(popup, mnuCampAmmoEquipmentPopupEntry);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
-        mnuSetPopupEntryFlagged(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
     }
     mnuPlayInputSound(0, buttons, 0);
     return 0;
@@ -152,7 +152,7 @@ s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
     mnuCreateStaffImageSprite(7);
     mnuDrawCampGridAndLabelDefault(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
-        (s32)D_003E7050, context, 1, 0x53);
+        (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)task);
@@ -192,7 +192,7 @@ s32 mnuPollStaffSlotSelectionConfirmation(KwlnTask *task) {
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
-        mnuSetPopupEntryFlagged(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
     }
     mnuPlayInputSound(0, buttons, 0);
     return 0;
@@ -205,7 +205,7 @@ s32 mnuDrawAlternateStaffImagePage(KwlnTask *task) {
     mnuCreateStaffImageSprite(9);
     mnuDrawCampGridAndLabelDefault(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
-        (s32)D_003E7050, context, 1, 0x53);
+        (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)task);
@@ -245,7 +245,7 @@ s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
-        mnuSetPopupEntryFlagged(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
     }
     mnuPlayInputSound(0, buttons, 0);
     return 0;
@@ -257,7 +257,7 @@ s32 mnuDrawStaffValueImagePage(KwlnTask *task) {
     mnuCreateStaffImageSprite(11);
     mnuDrawCampGridAndLabelDefault(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
-        (s32)D_003E7050, context, 1, 0x53);
+        (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)task);
@@ -302,7 +302,7 @@ s32 mnuHandleSecondaryStaffObjectInput(KwlnTask *task) {
         buttons = 0;
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntryFlagged(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
     }
     object = menu->windows[1];
     if (object != 0) {
@@ -378,7 +378,7 @@ s32 mnuStaffUseSelectedItemTask(KwlnTask *task) {
         buttons = mnuUseStaffItem(item, context) ? 0 : 0x8000;
         menu->windows[0]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[item];
         if (mnuIsStaffWindowReadyForItem(item & 0xFFFF, context) == 0) {
-            mnuSetPopupEntryFlagged(popup, D_003E7434);
+            mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
             mnuClearActionFlags(0, party);
             mnuBeginWindowFadeTransition(0, &context->fade);
         } else {
@@ -408,7 +408,7 @@ s32 mnuStaffImageEnterB(KwlnTask *task) {
     } else {
         mnuDrawCampGridAndLabelDefault(0,
             ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
-            (s32)D_003E7050, context, 1, 0x53);
+            (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)task);
@@ -544,8 +544,8 @@ s32 mnuStaffListInput(KwlnTask *task) {
 s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
     extern s32 mnuRefreshStaffBulletItemList(s32, s32, MenuStaffContext *);
     extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
-    extern char D_003E7434[];
-    extern char D_003E746C[];
+    extern char mnuCampItemCategoryPopupEntry[];
+    extern char mnuCampAmmoPartySelectionPopupEntry[];
 
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
@@ -603,7 +603,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
             }
             if (input & MNU_STAFF_INPUT_CANCEL) {
                 menu->thirdListEnabled = 1;
-                mnuSetPopupEntryFlagged(popup, D_003E746C);
+                mnuSetPopupEntryFlagged(popup, mnuCampAmmoPartySelectionPopupEntry);
                 input = buttons;
             }
             mnuPlayInputSound(0, input, &window->list->stateFlags);
@@ -611,7 +611,7 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
     } else {
         if (mnuRefreshStaffBulletItemList(menu->previous, menu->requested, context) == 0) {
             mnuClearActionFlags(0, &context->partyWindow);
-            mnuSetPopupEntryFlagged(popup, D_003E7434);
+            mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
         } else {
             menu->firstListState = 0;
         }
@@ -894,7 +894,7 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
         if (mnuUpdateStaffEntrySelectionFlags(menu->alternatePrevious,
                 menu->alternateRequested, context) == 0) {
             mnuClearActionFlags(0, &context->partyWindow);
-            mnuSetPopupEntryFlagged(&context->popupState, D_003E7434);
+            mnuSetPopupEntryFlagged(&context->popupState, mnuCampItemCategoryPopupEntry);
         } else {
             menu->secondListReset = 0;
         }
@@ -1257,7 +1257,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
         mnuPlayInputSound(0, input, &window->list->stateFlags);
     } else {
         if (mnuRefreshOwnedCatalogItemList(menu->thirdListState, context) == 0) {
-            mnuSetPopupEntryFlagged(&context->popupState, D_003E7434);
+            mnuSetPopupEntryFlagged(&context->popupState, mnuCampItemCategoryPopupEntry);
             mnuClearActionFlags(0, &context->partyWindow);
             mnuBeginWindowFadeTransition(0, &context->fade);
         } else {

@@ -560,13 +560,13 @@ extern void mnuClearWindowListSelectionFlags(s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_003E7450[];
-extern char D_003E746C[];
+extern char mnuCampAmmoPartySelectionPopupEntry[];
 extern char D_003E7488[];
 extern char D_003E74A4[];
 extern char D_003E74C0[];
 extern char D_003E7418[];
 extern void mnuSetStateValue(u32 *, u32);
-extern char D_003E7434[];
+extern char mnuCampItemCategoryPopupEntry[];
 extern char D_003E74DC[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
@@ -596,7 +596,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
                 mnuSetPopupEntry(popup, D_003E7450);
                 break;
             case 1:
-                mnuSetPopupEntry(popup, D_003E746C);
+                mnuSetPopupEntry(popup, mnuCampAmmoPartySelectionPopupEntry);
                 break;
             case 2:
                 mnuSetPopupEntry(popup, D_003E7488);
@@ -635,7 +635,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
 }
 
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
-extern u8 D_003E7050[];
+extern u8 mnuCampItemCommandHelpTextBank[];
 
 s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -643,7 +643,7 @@ s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
     mnuCreateStaffImageSprite(4);
     mnuDrawCampGridAndLabelDefault(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
-        (s32)D_003E7050, context, 1, 0x53);
+        (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
     mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)callback);
@@ -751,11 +751,11 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
             }
         }
         if (input & 2) {
-            mnuSetPopupEntryFlagged(popup, D_003E7434);
+            mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
         }
     } else {
         if (mnuIsStaffWindowReadyForItem(resources->secondListState & 0xFFFF, context) == 0) {
-            mnuSetPopupEntryFlagged(popup, D_003E7434);
+            mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
             mnuClearActionFlags(0, &context->partyWindow);
             mnuBeginWindowFadeTransition(0, &context->fade);
         } else {

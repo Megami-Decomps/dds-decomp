@@ -100,7 +100,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
 
 extern void mnuDrawCampScreenDefault(KwlnTask *);
 extern void mnuDrawCampGridFrameAndLabel(s32, u32, u32, u32, u32, u32, u32, u32, u32);
-extern char D_003E69B0[];
+extern char mnuCampCommandHelpTextBank[];
 extern char D_003E6F18[];
 
 s32 mnuDrawCampFieldSkillPage(KwlnTask *task) {
@@ -114,7 +114,7 @@ s32 mnuDrawCampFieldSkillPage(KwlnTask *task) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    mnuDrawCampGridFrameAndLabel(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+    mnuDrawCampGridFrameAndLabel(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)mnuCampCommandHelpTextBank, (u32)context,
                   1, 0, (u32)D_003E6F18, 8, layer);
     mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, layer);
     mnuDrawStaffGridLabelsForKind(0, context->resources.baseResources[0]);
@@ -216,7 +216,7 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    mnuDrawCampGridFrameAndLabel(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+    mnuDrawCampGridFrameAndLabel(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)mnuCampCommandHelpTextBank, (u32)context,
                   1, 0, (u32)D_003E6F18, 8, layer);
     mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, layer);
     mnuDrawStaffGridLabelsForKind(0, context->resources.baseResources[0]);

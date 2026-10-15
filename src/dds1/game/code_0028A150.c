@@ -148,7 +148,7 @@ extern s32 sprintf(char *dst, const char *fmt, ...);
 
 extern u32 fileSaveReadBuffer;
 
-extern struct FrFontGlyph *D_003BD8EC;
+extern struct FrFontGlyph *fileMenuConvertedTextGlyph;
 extern void *fileWaitContinuation;
 
 extern s32 fileWaitTicksRemaining;
@@ -165,9 +165,9 @@ extern char D_003BC940[];
 
 extern char D_003B2688[]; /* "base.ico"; retail record includes padding */
 
-extern u32 D_003BD914;
+extern u32 fileSaveIconData;
 
-extern u32 D_003BD918;
+extern u32 fileSaveIconDataSize;
 
 extern u32 *D_003BD928;
 
@@ -263,15 +263,15 @@ extern s32 D_003BC864;
 
 extern s8 D_003DC803[];
 
-extern u32 D_003BD904;
+extern u32 fileMenuContinuation;
 
-extern u32 D_003BD910;
+extern u32 fileSaveIconResourceHandle;
 
 extern u32 fileSaveIconRequest;
 
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 
-extern struct FrFontGlyph *D_003BD8F0;
+extern struct FrFontGlyph *fileMenuStringGlyph;
 
 extern s32 D_003BC7FC;
 
@@ -553,20 +553,20 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 }
 
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    D_003BD8EC = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(D_003BD8EC);
+    fileMenuConvertedTextGlyph = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
+    frFontDrawGlyphWithSharedFlags(fileMenuConvertedTextGlyph, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(fileMenuConvertedTextGlyph);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontAddSharedGlyphFlags(1);
-    D_003BD8F0 = frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
+    fileMenuStringGlyph = frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetSpacingAndMeasureGlyphs(D_003BD8F0, 1);
-    frFontSetGlyphPosition(D_003BD8F0, x << 4, y << 3);
-    frFontSetChildColors(D_003BD8F0, color);
-    frFontDrawGlyphChain(D_003BD8F0, 0, 0x56);
-    frFontQueueGlyphForCurrentDrawBuffer(D_003BD8F0);
+    frFontSetSpacingAndMeasureGlyphs(fileMenuStringGlyph, 1);
+    frFontSetGlyphPosition(fileMenuStringGlyph, x << 4, y << 3);
+    frFontSetChildColors(fileMenuStringGlyph, color);
+    frFontDrawGlyphChain(fileMenuStringGlyph, 0, 0x56);
+    frFontQueueGlyphForCurrentDrawBuffer(fileMenuStringGlyph);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -1090,7 +1090,7 @@ s32 fileResolveAbortSlotFlow(void) {
 }
 
 s32 fileLoadIconFileAndResetSelection(void) {
-    D_003BD910 = 0;
+    fileSaveIconResourceHandle = 0;
     fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_003B2668);
     return fileResetSelection();
 }
@@ -1100,7 +1100,7 @@ s32 fileResetSlotSelection(void) {
 }
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
-    D_003BD910 = 0;
+    fileSaveIconResourceHandle = 0;
     fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_003B2668);
     return fileBeginSlotReset();
 }
@@ -1339,7 +1339,7 @@ s32 fileUpdateWait(void) {
     s32 remaining = fileWaitTicksRemaining - 1;
     fileWaitTicksRemaining = remaining;
     if (remaining <= 0) {
-        if (D_003BD904 == -1) {
+        if (fileMenuContinuation == -1) {
             return -1;
         }
         return ((s32 (*)())fileWaitContinuation)();
@@ -1348,7 +1348,7 @@ s32 fileUpdateWait(void) {
 }
 
 s32 fileSetMenuCallbackAndClearResult(u32 callback) {
-    D_003BD904 = callback;
+    fileMenuContinuation = callback;
     D_003BC858 = 0;
     return (s32)mcdFinishFileDetection;
 }
@@ -1360,16 +1360,16 @@ s32 mcdFinishFileDetection(void) {
         D_003BC854 = 0;
         D_003BC810 = 0;
         sndReleaseTrackHandle(0x310000);
-        if (D_003BD904 == -1) {
+        if (fileMenuContinuation == -1) {
             return fileBeginWait((void *)-1);
         }
-        return ((s32 (*)())D_003BD904)();
+        return ((s32 (*)())fileMenuContinuation)();
     }
     return 0;
 }
 
 s32 fileBeginDetectionRequest(u32 callback) {
-    D_003BD904 = callback;
+    fileMenuContinuation = callback;
     D_003BC858 = 0;
     fileReqBegin(fileMemoryCardRequestIndex);
     return (s32)filePollSlotRequestAndResumeFlow;
@@ -1390,10 +1390,10 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             fileSetMenuFlowState(0);
             D_003BC854 = 0;
             D_003BC810 = 0;
-            if (D_003BD904 == -1) {
+            if (fileMenuContinuation == -1) {
                 return fileBeginWait((void *)-1);
             }
-            return ((s32 (*)())D_003BD904)();
+            return ((s32 (*)())fileMenuContinuation)();
         }
         fileStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         switch (fileStatus) {
@@ -1729,7 +1729,7 @@ s32 fileBeginLabeledSlotWrite(void) {
 }
 
 s32 fileRequestBaseIcon(void) {
-    return fileBeginRequest(D_003B2688, &D_003BD914, &D_003BD918,
+    return fileBeginRequest(D_003B2688, &fileSaveIconData, &fileSaveIconDataSize,
                           fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
@@ -2637,9 +2637,9 @@ s32 fileRunMenuState(KwlnTask *task) {
     fileMenuStateHandler = cur;
     if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
-        D_003BD910 = fileGetResourceHandle((struct FileRequest *)(u32)job);
-        D_003BD914 = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
-        D_003BD918 = fileGetResourceSize((struct FileRequest *)(u32)job);
+        fileSaveIconResourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)job);
+        fileSaveIconData = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
+        fileSaveIconDataSize = fileGetResourceSize((struct FileRequest *)(u32)job);
         filePollEntryCleanup((struct FileRequest *)(u32)job);
     }
     return 0;
@@ -2732,11 +2732,11 @@ void fileReleaseMenuResources(void) {
         }
         if (fileSaveIconRequest != 0) {
             fileWaitReady((struct FileRequest *)fileSaveIconRequest);
-            D_003BD910 = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
+            fileSaveIconResourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
             filePollEntryCleanup((struct FileRequest *)(u32)fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfReleaseMemorySlot((s32 *)&D_003BD910);
+        sdfReleaseMemorySlot((s32 *)&fileSaveIconResourceHandle);
         kwlnTaskDestroyWithHierarchyByName(D_003B26C8, 1);
         fileClearMemoryCardOperationActive();
     }
