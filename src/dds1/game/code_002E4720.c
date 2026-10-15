@@ -107,9 +107,9 @@ extern u32 sdfDiscRequestSemaphore;
 
 extern u32 D_003BDA44;
 
-extern u32 D_003987E0[];
+extern u32 sdfConsoleColorPalette[];
 
-extern char D_00398820[];
+extern char sdfDevCurrentDirectory[];
 
 extern DevWorkerEntry sdfDeviceWorkerEntries[];
 
@@ -209,11 +209,11 @@ extern s32 func_002F4620(void);
 
 extern s32 D_003BDA4C;
 
-extern s32 D_003BDA54;
+extern s32 sdfDevReadSectorBytesAvailable;
 
-extern u8 *D_003BDA50;
+extern u8 *sdfDevReadSectorCursor;
 
-extern u8 D_003FA000[SDF_DEV_DISC_SECTOR_BYTES];
+extern u8 sdfDevReadSectorBuffer[SDF_DEV_DISC_SECTOR_BYTES];
 
 extern void sdfServicePendingOperationUnderSemaphore(void);
 
@@ -229,10 +229,10 @@ extern s32 sdfVFormatString(char *destination, const char *format, void *args);
 struct SdfTex;
 
 
-extern u32 D_00398660[96];
+extern u32 sdfConsoleGlyphTexcoords[96];
 
 /* Cached texture keeps the provider's opaque pointer/address boundary. */
-extern void *D_003BDA34;
+extern void *sdfConsoleFontTexture;
 
 void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void *arguments) {
     char text[0x200];
@@ -265,7 +265,7 @@ void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void
         while ((character = *textCursor++) != 0) {
             if (character >= 0x20) {
                 SdfConsoleGlyph *glyph = (SdfConsoleGlyph *)cursor;
-                u32 uv = D_00398660[character - 0x20];
+                u32 uv = sdfConsoleGlyphTexcoords[character - 0x20];
 
                 glyph->color = color;
                 glyph->firstUv = uv;
@@ -293,7 +293,7 @@ void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void
         header->textureClampRegister = 8;
         header->textureFilter = 1;
         header->textureFilterRegister = 0x14;
-        header->textureState = sdfTexGetPrimaryTextureState((struct SdfTex *)D_003BDA34);
+        header->textureState = sdfTexGetPrimaryTextureState((struct SdfTex *)sdfConsoleFontTexture);
         header->textureStateRegister = 6;
         header->glyphTag = 0x5400000000008000ULL | glyphCount;
         header->glyphRegisters = 0x53531;
@@ -319,7 +319,7 @@ void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index,
 }
 
 void sdfPktSetCmd(SifCommand *packet, s32 index) {
-    packet->command = D_003987E0[index];
+    packet->command = sdfConsoleColorPalette[index];
 }
 
 void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
@@ -349,7 +349,7 @@ void sdfDevStartRpcServer(void) {
     sceSifRpcLoop(rpcQueue);
 }
 
-extern SifRpcClientContextView D_003F9B50;
+extern SifRpcClientContextView sdfDevRpcClient;
 
 extern s8 D_003BD3C8;
 
@@ -368,8 +368,8 @@ void sdfStartDevRpcServerAndBindClient(void) {
     s32 waitStart;
 
     _StartThread(sdfCreateThreadWithAllocatedWorkspace((void *)sdfDevStartRpcServer, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
-    while (sceSifMBindRpc(&D_003F9B50.client, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
-        if (D_003F9B50.client.server != NULL) {
+    while (sceSifMBindRpc(&sdfDevRpcClient.client, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
+        if (sdfDevRpcClient.client.server != NULL) {
             D_003BD3C8 = 1;
             break;
         }
@@ -390,7 +390,7 @@ void sdfDevPrintText(const char *text) {
         if (length != 0) {
             alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
             memcpy(alignedBuffer, text, length);
-            func_002F4FD8(&D_003F9B50, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
+            func_002F4FD8(&sdfDevRpcClient, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
         func_0030C8E0(D_003BD3D0, text);
@@ -605,7 +605,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     if (file != 0) {
         D_003BDA4C = *(s32 *)(file + 8);
         sdfOpenDiscFileRecord = file;
-        D_003BDA54 = 0;
+        sdfDevReadSectorBytesAvailable = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
             sdfDevSeekDiscWithRequestGate(request[0]);
         } else {
@@ -635,15 +635,15 @@ s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
     }
 
     bytes = size;
-    transferBytes = D_003BDA54;
+    transferBytes = sdfDevReadSectorBytesAvailable;
     if (transferBytes > 0) {
         if (transferBytes > size) {
             transferBytes = size;
         }
-        memcpy(destination, D_003BDA50, transferBytes);
+        memcpy(destination, sdfDevReadSectorCursor, transferBytes);
         destination += transferBytes;
-        D_003BDA50 += transferBytes;
-        D_003BDA54 -= transferBytes;
+        sdfDevReadSectorCursor += transferBytes;
+        sdfDevReadSectorBytesAvailable -= transferBytes;
         bytes -= transferBytes;
     }
     if (bytes > 0) {
@@ -656,23 +656,23 @@ s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
                 sdfDevReadDiscUntilComplete(transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT, (s32)destination);
             }
             if (t > 0) {
-                sdfDevReadDiscUntilComplete(1, (s32)D_003FA000);
-                memcpy(destination + transferBytes, D_003FA000, t);
-                D_003BDA50 = D_003FA000 + t;
-                D_003BDA54 = SDF_DEV_DISC_SECTOR_BYTES - t;
+                sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
+                memcpy(destination + transferBytes, sdfDevReadSectorBuffer, t);
+                sdfDevReadSectorCursor = sdfDevReadSectorBuffer + t;
+                sdfDevReadSectorBytesAvailable = SDF_DEV_DISC_SECTOR_BYTES - t;
             }
         } else {
             while (transferBytes >= SDF_DEV_DISC_SECTOR_BYTES) {
-                sdfDevReadDiscUntilComplete(1, (s32)D_003FA000);
-                memcpy(destination, D_003FA000, SDF_DEV_DISC_SECTOR_BYTES);
+                sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
+                memcpy(destination, sdfDevReadSectorBuffer, SDF_DEV_DISC_SECTOR_BYTES);
                 transferBytes -= SDF_DEV_DISC_SECTOR_BYTES;
                 destination += SDF_DEV_DISC_SECTOR_BYTES;
             }
             if (transferBytes > 0) {
-                sdfDevReadDiscUntilComplete(1, (s32)D_003FA000);
-                memcpy(destination, D_003FA000, transferBytes);
-                D_003BDA50 = D_003FA000 + transferBytes;
-                D_003BDA54 = SDF_DEV_DISC_SECTOR_BYTES - transferBytes;
+                sdfDevReadDiscUntilComplete(1, (s32)sdfDevReadSectorBuffer);
+                memcpy(destination, sdfDevReadSectorBuffer, transferBytes);
+                sdfDevReadSectorCursor = sdfDevReadSectorBuffer + transferBytes;
+                sdfDevReadSectorBytesAvailable = SDF_DEV_DISC_SECTOR_BYTES - transferBytes;
             }
         }
     }
@@ -819,7 +819,7 @@ extern char *strcat(char *, char *);
 
 char *sdfDevBuildPath(char *dst, char *src) {
     if (*src == 0x2F) {
-        strcpy(dst, D_00398820);
+        strcpy(dst, sdfDevCurrentDirectory);
         return strcat(dst, src);
     }
     *(Bytes7 *)dst = D_003BD400[0];
@@ -956,19 +956,19 @@ u32 sdfDevQueueOperationAndWait(void) {
 void sdfDevSetCurrentDirectory(char *path) {
     s32 length = strlen(path);
 
-    ((DevPathPrefix *)D_00398820)->head = ((DevPathPrefix *)D_003BD400)->head;
-    ((DevPathPrefix *)D_00398820)->tail = ((DevPathPrefix *)D_003BD400)->tail;
-    memcpy(D_00398820 + 6, path, length);
+    ((DevPathPrefix *)sdfDevCurrentDirectory)->head = ((DevPathPrefix *)D_003BD400)->head;
+    ((DevPathPrefix *)sdfDevCurrentDirectory)->tail = ((DevPathPrefix *)D_003BD400)->tail;
+    memcpy(sdfDevCurrentDirectory + 6, path, length);
     if (path[length - 1] != '/') {
-        D_00398820[length + 6] = '/';
-        D_00398820[length + 7] = 0;
+        sdfDevCurrentDirectory[length + 6] = '/';
+        sdfDevCurrentDirectory[length + 7] = 0;
     } else {
-        D_00398820[length + 6] = 0;
+        sdfDevCurrentDirectory[length + 6] = 0;
     }
 }
 
 char *sdfDevGetPathBuffer(void) {
-    return D_00398820;
+    return sdfDevCurrentDirectory;
 }
 
 /* Select the default path-construction worker and the no-prefix fallback worker. */
@@ -1791,9 +1791,9 @@ void sdfPowerOffInterruptCallback(void *semaphore) {
 
 extern u8 sdfPfsDebugMode;
 
-extern char D_003988C0[];
+extern char sdfDevHddModuleArguments[];
 
-extern char D_003988D0[];
+extern char sdfDevPfsModuleArguments[];
 
 extern char D_003FA800[];
 
@@ -1830,11 +1830,11 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     if (result < 0 || resident != 0) {
         return;
     }
-    result = func_00312618("cdrom0:\\IRX\\HDD.IRX;1", 0xC, D_003988C0, &resident);
+    result = func_00312618("cdrom0:\\IRX\\HDD.IRX;1", 0xC, sdfDevHddModuleArguments, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
-    result = func_00312618("cdrom0:\\IRX\\PFS.IRX;1", 0x12, D_003988D0, &resident);
+    result = func_00312618("cdrom0:\\IRX\\PFS.IRX;1", 0x12, sdfDevPfsModuleArguments, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
@@ -1866,7 +1866,7 @@ void sdfLoadDevModule(void) {
 }
 
 /* Writable device directory; its suffix is replaced by the path setter. */
-char D_00398820[64] = "host0:";
+char sdfDevCurrentDirectory[64] = "host0:";
 
 INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4690);
 

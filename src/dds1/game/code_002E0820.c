@@ -109,7 +109,7 @@
 
 #define SDF_CAMERA_HALF_HEIGHT_FLAG 1
 
-extern void *D_003BDA34;
+extern void *sdfConsoleFontTexture;
 
 extern u32 D_003BD378;
 
@@ -127,7 +127,7 @@ extern u8 D_00315BA0[];
 
 extern SdfPadEntry sdfPadPorts[];
 
-extern u32 D_00398660[];
+extern u32 sdfConsoleGlyphTexcoords[];
 
 extern u128 D_003F9890;
 
@@ -1536,19 +1536,19 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
-        D_003BDA34 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_00315BA0));
+        sdfConsoleFontTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_00315BA0));
     }
 }
 
 /* Ensure initialization and return the cached console texture. */
 void *sdfDevConsGetResourceHandle(void) {
     sdfDevConsInit();
-    return D_003BDA34;
+    return sdfConsoleFontTexture;
 }
 
 /* Return the packed glyph-UV table indexed by character minus 0x20. */
 u32 *sdfDevConsGetGlyphUvTable(void) {
-    return D_00398660;
+    return sdfConsoleGlyphTexcoords;
 }
 
 /* Append to the next-linked list and move its stored tail to this node. */
@@ -1622,7 +1622,7 @@ ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns
 }
 
 /* Packed console glyph UVs for characters 0x20 through 0x7F. */
-u32 D_00398660[96] __attribute__((aligned(8))) = {
+u32 sdfConsoleGlyphTexcoords[96] __attribute__((aligned(8))) = {
     0x00000000, 0x000000C0, 0x00000180, 0x00000240, 0x00000300, 0x000003C0, 0x00000480, 0x00000540,
     0x00000600, 0x000006C0, 0x00C00000, 0x00C000C0, 0x00C00180, 0x00C00240, 0x00C00300, 0x00C003C0,
     0x00C00480, 0x00C00540, 0x00C00600, 0x00C006C0, 0x01800000, 0x018000C0, 0x01800180, 0x01800240,
@@ -1638,7 +1638,7 @@ u32 D_00398660[96] __attribute__((aligned(8))) = {
 };
 
 /* Mutable colors used by the device console and packet command setter. */
-u32 D_003987E0[16] = {
+u32 sdfConsoleColorPalette[16] = {
     0x80808080, 0x80800000, 0x80000080, 0x80800080,
     0x80008000, 0x80808000, 0x80008080, 0x80606060,
     0x80202020, 0x80400000, 0x80000040, 0x80400040,
