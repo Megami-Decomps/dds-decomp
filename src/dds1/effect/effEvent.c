@@ -1351,24 +1351,24 @@ extern u8 sdfViewUpVector[];
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */
-void effEventLoadSelectedAimPositionVu(EffEventInit *src, EffAimParams *param) {
+void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffAimParams *params) {
     f32 out[EFF_EVENT_VECTOR_COMPONENTS];
     f32 dir[EFF_EVENT_VECTOR_COMPONENTS];
     f32 pos[EFF_EVENT_VECTOR_COMPONENTS];
     f32 radius;
     f32 half;
     f32 y;
-    s32 rangeOverride = param->rangeOverride;
-    u8 directionMode = param->directionMode;
-    u8 aimMode = param->aimMode;
+    s32 rangeOverride = params->rangeOverride;
+    u8 directionMode = params->directionMode;
+    u8 aimMode = params->aimMode;
 
     if (rangeOverride == 0) {
-        radius = src->range;
+        radius = source->range;
     } else {
         radius = (f32)rangeOverride;
     }
-    half = src->height * 0.5f;
-    PCP_COPY_VECTOR(pos, src->position);
+    half = source->height * 0.5f;
+    PCP_COPY_VECTOR(pos, source->position);
     if (aimMode == 5) {
         if (directionMode == 8 || directionMode == 10) {
             y = -1.0f;
@@ -1407,7 +1407,7 @@ void effEventLoadSelectedAimPositionVu(EffEventInit *src, EffAimParams *param) {
         dir[0] = 0.0f;
         dir[2] = 1.0f;
         dir[1] = 0.0f;
-        VU0_LOAD_VF(vf10, src->orientation);
+        VU0_LOAD_VF(vf10, source->orientation);
         effMiscQuaternionToMatrixVU();
         sdfVuLoadSecondaryRotationMatrixY(D_003563B8[directionMode]);
         sdfComposeVuMatrixFromRegisters();
