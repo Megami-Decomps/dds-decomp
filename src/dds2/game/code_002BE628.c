@@ -665,7 +665,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 extern void mnuDrawPartyMemberCommandPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
-void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 param) {
+void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 surface) {
     MenuPageSlot *panel = &menu->slots[panelIndex];
     s32 mode = panel->kind;
 
@@ -677,10 +677,10 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
     }
     switch (mode) {
     case 1:
-        mnuDrawPartyMemberCommandPanel(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberCommandPanel(x, y, z, menu, panelIndex, surface);
         return;
     case 2:
-        mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, surface);
         break;
     }
 }
@@ -736,7 +736,7 @@ void mnuAdvancePanelTransition(MenuPageWindow *menu) {
 }
 
 /* Apply a temporary override to the selected node while drawing its panel. */
-void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
+void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface) {
     s32 positionOffset[2];
     MenuPageSlot *panel = &menu->slots[menu->selected];
     MenuSprites *node;
@@ -750,9 +750,9 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     /* Both arms are identical in retail; kept as written. */
     if (menu->flags & MNU_PAGE_WINDOW_SPRITE_MODE) {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, surface);
     } else {
-        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
+        mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, surface);
     }
     node = panel->windowSprites;
     if (node != NULL) {
@@ -761,7 +761,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
 }
 
 /* Draw the selected panel or all visible/additional panels, then advance the transition. */
-void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 param) {
+void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface) {
     s32 positionOffset[2];
     PartyPanel *layout = menu->records;
     s32 panelCount;
@@ -770,18 +770,18 @@ void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *m
     panelCount = layout->frontlineCount;
     panelCount += layout->reserveCount;
     if (menu->selected >= 0) {
-        mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
+        mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, surface);
     } else {
         for (panelIndex = 0; panelIndex < panelCount; panelIndex++) {
             mnuCalcListEntryOffset(positionOffset, menu, panelIndex);
-            mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, panelIndex, param);
+            mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, panelIndex, surface);
         }
     }
     mnuAdvancePanelTransition(menu);
 }
 
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 mode) {
-    mnuDrawListPanels(x, y, depth, 0, window, mode);
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 surface) {
+    mnuDrawListPanels(x, y, depth, 0, window, surface);
 }
 
 
