@@ -8,7 +8,7 @@ struct FileRequest;
 /* Loaded resource values remain 32-bit words; only the request owner is opaque. */
 u32 fileGetResourceHandle(struct FileRequest *request);
 u32 fileGetLoadedDataAddress(struct FileRequest *request);
-u32 fileGetResourceSize(struct FileRequest *request);
+u32 fileGetResourceSize(const struct FileRequest *request);
 s32 filePollEntryCleanup(struct FileRequest *request);
 
 #ifdef VERSION_DDS1
