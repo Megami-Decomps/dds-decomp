@@ -193,9 +193,9 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
 /* Return this category's handle array and count; unknown categories have none. */
 const char D_0042A440[] = "SP Items";
 
-const char D_0042A450[] = "Customize Ring";
+const char mnuCampCustomizeRingLabel[] = "Customize Ring";
 
-const char D_0042A460[] = "Equip Ring";
+const char mnuCampEquipRingLabel[] = "Equip Ring";
 
 const char D_0042A470[] = "Combo List";
 
@@ -223,13 +223,13 @@ const char D_0042A558[] = "Set whose skills? ";
 
 const char D_0042A570[] = "View which item? ";
 
-const char D_0042A588[] = "Use which gem? ";
+const char mnuCampUseWhichGemPrompt[] = "Use which gem? ";
 
-const char D_0042A598[] = "Who will customize? ";
+const char mnuCampWhoWillCustomizePrompt[] = "Who will customize? ";
 
-const char D_0042A5B0[] = "Equip which ring? ";
+const char mnuCampEquipWhichRingPrompt[] = "Equip which ring? ";
 
-const char D_0042A5C8[] = "Who will equip? ";
+const char mnuCampWhoWillEquipPrompt[] = "Who will equip? ";
 
 const char D_0042A5E0[] = "Load which bullet? ";
 
