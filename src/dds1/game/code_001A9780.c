@@ -2971,10 +2971,10 @@ s32 btlUpdateRegisteredPanelTask(KwlnTask *task) {
     return 0;
 }
 
-void btlReleaseRegisteredChildTaskWork(KwlnTask *arg0) {
+void btlReleaseRegisteredChildTaskWork(KwlnTask *task) {
     u32 temp_v0;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock((void *)temp_v0);
     btlSetTrackedTaskHandle(7, 0);
 }
@@ -3120,10 +3120,10 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
     return state->frames < 50 ? 0 : -1;
 }
 
-void btlReleasePsechgPanelWork(KwlnTask *arg0) {
+void btlReleasePsechgPanelWork(KwlnTask *task) {
     BattlePhasePanelWork *work;
 
-    work = (BattlePhasePanelWork *)kwlnTaskGetUserValue(arg0);
+    work = (BattlePhasePanelWork *)kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock(work);
     btlSetTrackedTaskHandle(6, 0);
 }
@@ -3200,10 +3200,10 @@ void btlCreateSelectionTrailTask(s32 unused, s32 previousRow, s32 targetRow) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3FB0);
 
-void btlReleaseCmsleffPanelWork(KwlnTask *arg0) {
+void btlReleaseCmsleffPanelWork(KwlnTask *task) {
     u32 temp_v0;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock((void *)temp_v0);
     btlSetTrackedTaskHandle(5, 0);
 }
@@ -3969,10 +3969,10 @@ void btlUpdateActivePanelEntryFades(BtlState *battle, BattleActorPanelWork *work
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B6CF8);
 
-void btlReleaseStwrPanelResource(KwlnTask *arg0) {
+void btlReleaseStwrPanelResource(KwlnTask *task) {
     u32 temp_v0;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)temp_v0));
     btlSetTrackedTaskHandle(3, 0);
 }
@@ -6148,11 +6148,11 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
     return 0;
 }
 
-void fldClearBattleSceneObject(KwlnTask *arg0) {
+void fldClearBattleSceneObject(KwlnTask *task) {
     u32 temp_v0;
     BtlState *battle;
 
-    temp_v0 = kwlnTaskGetUserValue(arg0);
+    temp_v0 = kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock((void *)temp_v0);
     battle = (BtlState *)btlGetRuntime();
     battle->sceneObject = 0;
@@ -6850,11 +6850,11 @@ void fldReleaseSceneSpriteWork(SceneAiWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void fldReleaseSceneSprite(KwlnTask *arg0) {
+void fldReleaseSceneSprite(KwlnTask *task) {
     SceneAiWork *temp_v0;
     s32 temp_v1;
 
-    temp_v0 = (SceneAiWork *)kwlnTaskGetUserValue(arg0);
+    temp_v0 = (SceneAiWork *)kwlnTaskGetUserValue(task);
     fldReleaseSceneSpriteWork(temp_v0);
     temp_v1 = (s32)(u32)btlGetRuntime();
     *(u32 *)(temp_v1 + 0x2ac) = 0;
