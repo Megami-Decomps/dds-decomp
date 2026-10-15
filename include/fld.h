@@ -80,7 +80,7 @@ typedef struct FldActorEntry {
     s8 unk45;
     char linkName[0xC]; /* 0x46 */
     s8 unk52;
-    s8 unk53;
+    s8 selectedRoom; /* 0x53: optional one-based room */
     s8 flags54;
     char taskName[0xF]; /* 0x55 */
     u8 flags64;

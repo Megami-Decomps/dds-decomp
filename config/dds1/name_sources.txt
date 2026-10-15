@@ -1080,7 +1080,7 @@
 0x0013DB58	fldQuerySelectedActorMotionState	inferred	Reports a motion-dependent actor interval or tests its state flag. [names_reviewed11.tsv]
 0x0013DC08	fldApplyActorEntryTrigger	inferred	Dispatches the selected field actor entry trigger, including floor-gated sound and fade behavior. [names_reviewed14.tsv]
 0x0013DF18	fldIsSceneStateEight	inferred	Tests scene-state global against eight; caller resets task scene on true. [names_R_FuncNames6.tsv]
-0x0013DF28	fldApplySceneRoomSelection	inferred	Copies the scene's room selector and secondary scene value into field state. [names_reviewed5.tsv]
+0x0013DF28	fldApplySceneRoomSelection	inferred	Reads FldActorEntry.selectedRoom as an optional 1-based room selector, stores selectedRoom - 1 in fldAreaState.unk88 when nonzero, and copies rowIndex; fldInitializeActorLinkedSequence repeats the same room selection for matching linked-sequence rows. [names_reviewed5.tsv]
 0x0013EC10	fldSelectActorFromSceneIndexTables	inferred	Selects an indexed actor record from either scene table and records its index. [names_reviewed11.tsv]
 0x0013EF10	fldInitializeActorLinkedSequence	inferred	U1
 0x0013F4D8	fldGetActorStat0	inferred	switch over actor record (D_00337D00 0x6C stride) returning a stat or flag bit
