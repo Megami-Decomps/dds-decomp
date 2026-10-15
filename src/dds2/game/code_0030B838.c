@@ -555,7 +555,7 @@ void sdfDrawCounterMapSelectionRow(s32 unusedX, s32 unusedY, s32 unused, SdfCoun
     s16 mapNumber = channel->display->value;
     /* Emit the pulse after mapNumber to shorten its constant's live range;
      * see docs/idioms.md, "Local-map row pulse lifetime". */
-    f32 pulse = (f32)timer->countdown * 0.125f;
+    f32 pulse = (f32)timer->selectionPulseFramesRemaining * 0.125f;
     s32 row = mapNumber - 1;
     s32 active = runtime->state.channel->index;
     s32 flag = channel->display->flag;
@@ -630,15 +630,15 @@ void sdfCounterSetMode(s32 mode) {
 
     timer = sdfActiveCounterRuntime->state.timer;
     timer->mode = mode;
-    timer->countdown = 8;
+    timer->selectionPulseFramesRemaining = 8;
 }
 
 void sdfCounterTickCountdown(void) {
     SdfCounterTimer *timer;
 
     timer = sdfActiveCounterRuntime->state.timer;
-    if (0 < timer->countdown) {
-        timer->countdown = timer->countdown - 1;
+    if (0 < timer->selectionPulseFramesRemaining) {
+        timer->selectionPulseFramesRemaining = timer->selectionPulseFramesRemaining - 1;
     }
 }
 
