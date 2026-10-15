@@ -33,6 +33,7 @@
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
 #include "kwln_fade.h"
+#include "evt_solar.h"
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
 
@@ -220,7 +221,6 @@ extern void func_001C16B0(s32);
 
 extern void itfMesClearFlags();
 extern void brsTaskAllowUpdate();
-extern void evtBeginSolarOverlayFadeOut();
 extern void btlClearPartyRecordStatusBits();
 extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 extern void datAdjustCurrentHp();

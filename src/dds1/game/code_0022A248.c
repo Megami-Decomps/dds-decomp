@@ -24,8 +24,6 @@ extern s8 evtSolarOverlayFadeFlags;
 extern u32 D_003BBDF0;
 
 
-void evtBeginSolarOverlayFadeIn(s32 fadeDuration);
-
 s32 evtUpdateScriptTestSelection(KwlnTask *task);
 
 extern s32 evtSolarOverlayFadeCounter;

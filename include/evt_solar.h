@@ -121,6 +121,8 @@ void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha,
     s32 mirroredPhase, SolarOverlayWork *overlay, s32 renderContext);
 void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha,
     SolarOverlayWork *overlay, s32 renderContext);
+void evtBeginSolarOverlayFadeIn(s32 fadeDuration);
+void evtBeginSolarOverlayFadeOut(s32 fadeDuration);
 void evtActivateNextSolarPoint(SolarOverlayWork *overlay);
 void evtDeactivateLastSolarPoint(SolarOverlayWork *overlay);
 void evtSetSolarPointActiveCount(SolarOverlayWork *overlay, u32 desiredCount);

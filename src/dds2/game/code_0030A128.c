@@ -654,7 +654,6 @@ extern void sdfCounterTickCountdownAndMapTimers(void);
 extern void fldUpdateMapRequestQueues(s32);
 extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
-extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 sdfStepSelectedMapCameraTransition(void);
 extern s32 fldAdvanceLocalMapCameraTransition(void);
 extern s8 D_0037F510[];
@@ -664,7 +663,6 @@ extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
 extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void evtBeginSolarOverlayFadeIn(s32);
 /* Legacy calls pass the RGB bytes as promoted integer arguments. */
 extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);
