@@ -13,12 +13,12 @@ extern u32 kwlnDrawControlFlags;
 extern u8 kwlnDrawOverlayEnabled;
 extern s16 kwlnDrawOverlayAlpha;
 extern s16 kwlnDrawOverlayScale;
-extern u16 D_003BD6B4;
-extern u16 D_003BD6B6;
-extern s16 D_003BD6B8;
-extern s16 D_003BD6BA;
-extern s16 D_003BD6BC;
-extern s16 D_003BD6BE;
+extern u16 kwlnDrawOverlayTransitionCounter;
+extern u16 kwlnDrawOverlayTransitionDuration;
+extern s16 kwlnDrawOverlayTransitionStartAlpha;
+extern s16 kwlnDrawOverlayTransitionStartScale;
+extern s16 kwlnDrawOverlayTransitionTargetAlpha;
+extern s16 kwlnDrawOverlayTransitionTargetScale;
 
 extern u32 D_00324770[4];
 
@@ -71,12 +71,12 @@ extern u16 kwlnTexturedBlurFadeDuration;
 extern u16 kwlnFilterBlurStartAlpha;
 extern u16 kwlnFilterBlurFadeCounter;
 extern u16 kwlnFilterBlurTargetAlpha;
-extern u16 D_003BD72C;
-extern u16 D_003BD72E;
+extern u16 kwlnFilterBlurTransitionCounter;
+extern u16 kwlnFilterBlurTransitionDuration;
 extern u16 kwlnFilterBlurFadeDuration;
 extern u16 kwlnStaggeredBlurTargetAlpha;
-extern u16 D_003BD738;
-extern u16 D_003BD73A;
+extern u16 kwlnStaggeredBlurTransitionCounter;
+extern u16 kwlnStaggeredBlurTransitionDuration;
 extern u16 kwlnStaggeredBlurStartAlpha;
 extern u16 kwlnStaggeredBlurFadeCounter;
 extern u16 kwlnStaggeredBlurFadeDuration;
@@ -131,8 +131,8 @@ void kwlnDrawSetDc8First(u32 rgba) {
     kwlnColorRectangleParameters.color.rgba = rgba;
 }
 
-extern u16 D_003BD750;
-extern u16 D_003BD752;
+extern u16 kwlnColorRectangleTransitionCounter;
+extern u16 kwlnColorRectangleTransitionDuration;
 
 extern KwlnSolidRectParams D_003C2DB0;
 /* Alias of kwlnColorRectangleParameters.bounds; the effect setter needs the preceding header. */
@@ -142,8 +142,8 @@ extern KwlnRectBounds D_003C2DD0;
  * Duration storage is 16-bit; the immediate test uses the full argument. */
 void kwlnDrawSnapshotSolidRect(s32 duration) {
     D_003C2DB0 = *(KwlnSolidRectParams *)effGetCh74Params();
-    D_003BD750 = 0;
-    D_003BD752 = duration;
+    kwlnColorRectangleTransitionCounter = 0;
+    kwlnColorRectangleTransitionDuration = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
         kwlnDrawInitRect(&D_003C2DD0);
@@ -207,14 +207,14 @@ void kwlnDrawSetE08Triple(u32 extent, u32 centerX, u32 centerY) {
 }
 
 extern KwlnResourceRectParams D_003C2DE0;
-extern u16 D_003BD75C;
-extern u16 D_003BD75E;
+extern u16 kwlnTexturedSquareTransitionCounter;
+extern u16 kwlnTexturedSquareTransitionDuration;
 
 /* Save the live textured-square params; zero copies the staged body immediately. */
 void kwlnDrawSetupE08FromCh75(s32 duration) {
     D_003C2DE0 = *(KwlnResourceRectParams *)effGetCh75Work();
-    D_003BD75C = 0;
-    D_003BD75E = duration;
+    kwlnTexturedSquareTransitionCounter = 0;
+    kwlnTexturedSquareTransitionDuration = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_SQUARE_TRANSITION;
         effCopyTexturedSquareParameters((EffResourceRectParams *)&kwlnTexturedSquareParameters);
@@ -273,13 +273,13 @@ void kwlnDrawSetOverlayTransition(s32 duration, s32 alpha, s32 scale) {
         kwlnDrawControlFlags = kwlnDrawControlFlags & KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
         return;
     }
-    D_003BD6B8 = kwlnDrawOverlayAlpha;
-    D_003BD6BA = kwlnDrawOverlayScale;
-    D_003BD6BC = (s16)alpha;
-    D_003BD6BE = (s16)scale;
-    D_003BD6B6 = (s16)duration;
+    kwlnDrawOverlayTransitionStartAlpha = kwlnDrawOverlayAlpha;
+    kwlnDrawOverlayTransitionStartScale = kwlnDrawOverlayScale;
+    kwlnDrawOverlayTransitionTargetAlpha = (s16)alpha;
+    kwlnDrawOverlayTransitionTargetScale = (s16)scale;
+    kwlnDrawOverlayTransitionDuration = (s16)duration;
     kwlnDrawControlFlags = kwlnDrawControlFlags | KWLN_DRAW_OVERLAY_TRANSITION_BIT;
-    D_003BD6B4 = 0;
+    kwlnDrawOverlayTransitionCounter = 0;
 }
 
 #define KWLN_DRAW_RECT_FADE_BIT 0x20000
@@ -308,14 +308,14 @@ void kwlnDrawSetD88Pair(u32 centerX, u32 centerY) {
 }
 
 extern KwlnBlurRectParams D_003C2D60;
-extern u16 D_003BD744;
-extern u16 D_003BD746;
+extern u16 kwlnRectangleBlurTransitionCounter;
+extern u16 kwlnRectangleBlurTransitionDuration;
 
 /* Save live rectangle-blur params, then apply now or request interpolation. */
 void kwlnSetRectangleBlurParameterTransition(s32 duration) {
     D_003C2D60 = *(KwlnBlurRectParams *)effGetCh70Params();
-    D_003BD744 = 0;
-    D_003BD746 = duration;
+    kwlnRectangleBlurTransitionCounter = 0;
+    kwlnRectangleBlurTransitionDuration = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_RECT_TRANSITION;
         kwlnDrawInitRect(&kwlnRectangleBlurParameters.bounds);
@@ -381,14 +381,14 @@ void kwlnDrawSetC70Triple(u32 extent, u32 centerX, u32 centerY) {
 }
 
 extern KwlnPixelBlurParams D_003C2C40;
-extern u16 D_003BD720;
-extern u16 D_003BD722;
+extern u16 kwlnTexturedBlurTransitionCounter;
+extern u16 kwlnTexturedBlurTransitionDuration;
 
 /* Save live textured-blur params; zero copies the staged body immediately. */
 void kwlnDrawSetupC70FromCh71(s32 duration) {
     D_003C2C40 = *(KwlnPixelBlurParams *)&effGetCh71Work()->body;
-    D_003BD720 = 0;
-    D_003BD722 = duration;
+    kwlnTexturedBlurTransitionCounter = 0;
+    kwlnTexturedBlurTransitionDuration = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_TEXTURE_TRANSITION;
         effCopyTexturedBlurParameters((EffBlurTemplateBody *)&kwlnTexturedBlurParameters);
@@ -479,8 +479,8 @@ void kwlnDrawSetCd0Triple(u32 positionSpread, u32 x, u32 y) {
 /* Save live filter-blur params; zero copies the staged body immediately. */
 void kwlnSetFilterBlurParameterTransition(s32 duration) {
     D_003C2CA0 = effGetCh72Work()->params;
-    D_003BD72C = 0;
-    D_003BD72E = duration;
+    kwlnFilterBlurTransitionCounter = 0;
+    kwlnFilterBlurTransitionDuration = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_FILTER_TRANSITION;
         effCopyFilterBlurParameters(&kwlnFilterBlurParameters);
@@ -559,8 +559,8 @@ void kwlnDrawSetD30Triple(u32 size, u32 x, u32 y) {
 /* Save live staggered-blur params; zero copies the staged body immediately. */
 void kwlnSetStaggeredBlurParameterTransition(s32 duration) {
     D_003C2D00 = *(KwlnScaleBlurParams *)effGetCh76Work();
-    D_003BD738 = 0;
-    D_003BD73A = duration;
+    kwlnStaggeredBlurTransitionCounter = 0;
+    kwlnStaggeredBlurTransitionDuration = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_STAGGERED_TRANSITION;
         effCopyStaggeredBlurParameters((EffBlurScaleParams *)&kwlnStaggeredBlurParameters);
@@ -636,24 +636,24 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
     s32 alpha;
 
     if (kwlnDrawControlFlags & KWLN_DRAW_OVERLAY_TRANSITION_BIT) {
-        D_003BD6B4++;
-        kwlnDrawOverlayAlpha = D_003BD6B8 + D_003BD6B4 * (D_003BD6BC - D_003BD6B8) / D_003BD6B6;
-        kwlnDrawOverlayScale = D_003BD6BA + D_003BD6B4 * (D_003BD6BE - D_003BD6BA) / D_003BD6B6;
+        kwlnDrawOverlayTransitionCounter++;
+        kwlnDrawOverlayAlpha = kwlnDrawOverlayTransitionStartAlpha + kwlnDrawOverlayTransitionCounter * (kwlnDrawOverlayTransitionTargetAlpha - kwlnDrawOverlayTransitionStartAlpha) / kwlnDrawOverlayTransitionDuration;
+        kwlnDrawOverlayScale = kwlnDrawOverlayTransitionStartScale + kwlnDrawOverlayTransitionCounter * (kwlnDrawOverlayTransitionTargetScale - kwlnDrawOverlayTransitionStartScale) / kwlnDrawOverlayTransitionDuration;
         if (kwlnDrawOverlayAlpha == 0 && kwlnDrawOverlayScale == 0) {
             kwlnDrawOverlayEnabled = 0;
         }
         else {
             kwlnDrawOverlayEnabled = 1;
         }
-        if (D_003BD6B4 >= D_003BD6B6) {
+        if (kwlnDrawOverlayTransitionCounter >= kwlnDrawOverlayTransitionDuration) {
             kwlnDrawControlFlags &= KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
         }
     }
     if (kwlnDrawControlFlags & KWLN_DRAW_RECT_TRANSITION_BIT) {
-        if (D_003BD744 < D_003BD746) {
-            D_003BD744++;
+        if (kwlnRectangleBlurTransitionCounter < kwlnRectangleBlurTransitionDuration) {
+            kwlnRectangleBlurTransitionCounter++;
         }
-        evtBlendParamsA(1, (f32)D_003BD744 / (f32)D_003BD746, &D_003C2D60,
+        evtBlendParamsA(1, (f32)kwlnRectangleBlurTransitionCounter / (f32)kwlnRectangleBlurTransitionDuration, &D_003C2D60,
                         &kwlnRectangleBlurParameters, &D_003C25A0);
         kwlnDrawInitRect(&D_003C25A0.bounds);
         effCopyRectangleBlurParameters(&D_003C25A0);
@@ -663,7 +663,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         else {
             effDisableRectangleBlur();
         }
-        if (D_003BD744 >= D_003BD746) {
+        if (kwlnRectangleBlurTransitionCounter >= kwlnRectangleBlurTransitionDuration) {
             kwlnDrawControlFlags &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
         }
     }
@@ -689,10 +689,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         }
     }
     if (kwlnDrawControlFlags & KWLN_DRAW_TEXTURE_TRANSITION_BIT) {
-        if (D_003BD720 < D_003BD722) {
-            D_003BD720++;
+        if (kwlnTexturedBlurTransitionCounter < kwlnTexturedBlurTransitionDuration) {
+            kwlnTexturedBlurTransitionCounter++;
         }
-        evtBlendParamsB(1, (f32)D_003BD720 / (f32)D_003BD722, &D_003C2C40,
+        evtBlendParamsB(1, (f32)kwlnTexturedBlurTransitionCounter / (f32)kwlnTexturedBlurTransitionDuration, &D_003C2C40,
                         &kwlnTexturedBlurParameters, &D_003C2510);
         effCopyTexturedBlurParameters((EffBlurTemplateBody *)&D_003C2510);
         if (D_003C2510.source.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
@@ -701,7 +701,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         else {
             effDisableTexturedBlur();
         }
-        if (D_003BD720 >= D_003BD722) {
+        if (kwlnTexturedBlurTransitionCounter >= kwlnTexturedBlurTransitionDuration) {
             kwlnDrawControlFlags &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
         }
     }
@@ -726,10 +726,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         }
     }
     if (kwlnDrawControlFlags & KWLN_DRAW_FILTER_TRANSITION_BIT) {
-        if (D_003BD72C < D_003BD72E) {
-            D_003BD72C++;
+        if (kwlnFilterBlurTransitionCounter < kwlnFilterBlurTransitionDuration) {
+            kwlnFilterBlurTransitionCounter++;
         }
-        evtBlendParamsE(1, (f32)D_003BD72C / (f32)D_003BD72E, &D_003C2CA0,
+        evtBlendParamsE(1, (f32)kwlnFilterBlurTransitionCounter / (f32)kwlnFilterBlurTransitionDuration, &D_003C2CA0,
                         &kwlnFilterBlurParameters, &D_003C2540);
         effCopyFilterBlurParameters(&D_003C2540);
         if (((u8 *)&D_003C2540.color)[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
@@ -738,7 +738,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         else {
             effDisableFilterBlur();
         }
-        if (D_003BD72C >= D_003BD72E) {
+        if (kwlnFilterBlurTransitionCounter >= kwlnFilterBlurTransitionDuration) {
             kwlnDrawControlFlags &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
         }
     }
@@ -763,10 +763,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         }
     }
     if (kwlnDrawControlFlags & KWLN_DRAW_STAGGERED_TRANSITION_BIT) {
-        if (D_003BD738 < D_003BD73A) {
-            D_003BD738++;
+        if (kwlnStaggeredBlurTransitionCounter < kwlnStaggeredBlurTransitionDuration) {
+            kwlnStaggeredBlurTransitionCounter++;
         }
-        evtBlendParamsF(1, (f32)D_003BD738 / (f32)D_003BD73A, &D_003C2D00,
+        evtBlendParamsF(1, (f32)kwlnStaggeredBlurTransitionCounter / (f32)kwlnStaggeredBlurTransitionDuration, &D_003C2D00,
                         &kwlnStaggeredBlurParameters, &D_003C2570);
         effCopyStaggeredBlurParameters((EffBlurScaleParams *)&D_003C2570);
         if (D_003C2570.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
@@ -775,7 +775,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         else {
             effDisableStaggeredBlur();
         }
-        if (D_003BD738 >= D_003BD73A) {
+        if (kwlnStaggeredBlurTransitionCounter >= kwlnStaggeredBlurTransitionDuration) {
             kwlnDrawControlFlags &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
         }
     }
@@ -800,10 +800,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         }
     }
     if (kwlnDrawControlFlags & KWLN_DRAW_COLOR_TRANSITION_BIT) {
-        if (D_003BD750 < D_003BD752) {
-            D_003BD750++;
+        if (kwlnColorRectangleTransitionCounter < kwlnColorRectangleTransitionDuration) {
+            kwlnColorRectangleTransitionCounter++;
         }
-        evtPolygonMovieBlendMatrixParam(1, (f32)D_003BD750 / (f32)D_003BD752, &D_003C2DB0,
+        evtPolygonMovieBlendMatrixParam(1, (f32)kwlnColorRectangleTransitionCounter / (f32)kwlnColorRectangleTransitionDuration, &D_003C2DB0,
                                         &kwlnColorRectangleParameters, &D_003C25D0);
         kwlnDrawInitRect(&D_003C25D0.bounds);
         effCopyColorRectangleParameters((EffSolidRectParams *)&D_003C25D0);
@@ -813,7 +813,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         else {
             effDisableColorRectangle();
         }
-        if (D_003BD750 >= D_003BD752) {
+        if (kwlnColorRectangleTransitionCounter >= kwlnColorRectangleTransitionDuration) {
             kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
         }
     }
@@ -839,10 +839,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         }
     }
     if (kwlnDrawControlFlags & KWLN_DRAW_SQUARE_TRANSITION_BIT) {
-        if (D_003BD75C < D_003BD75E) {
-            D_003BD75C++;
+        if (kwlnTexturedSquareTransitionCounter < kwlnTexturedSquareTransitionDuration) {
+            kwlnTexturedSquareTransitionCounter++;
         }
-        evtBlendParamsD(1, (f32)D_003BD75C / (f32)D_003BD75E, &D_003C2DE0,
+        evtBlendParamsD(1, (f32)kwlnTexturedSquareTransitionCounter / (f32)kwlnTexturedSquareTransitionDuration, &D_003C2DE0,
                         &kwlnTexturedSquareParameters, &D_003C25F0);
         effCopyTexturedSquareParameters((EffResourceRectParams *)&D_003C25F0);
         if (D_003C25F0.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
@@ -851,7 +851,7 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         else {
             effDisableTexturedSquare();
         }
-        if (D_003BD75C >= D_003BD75E) {
+        if (kwlnTexturedSquareTransitionCounter >= kwlnTexturedSquareTransitionDuration) {
             kwlnDrawControlFlags &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
         }
     }
