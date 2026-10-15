@@ -777,6 +777,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
     FldSpawnEvent *event;
     u32 *parameters;
     FldSpecialPoint *point;
+    FldPendingSoundParams *pendingSound;
     EffWorldNode *object;
     s32 room;
     u32 id;
@@ -845,7 +846,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                 fldCopySpawnTransform(position, rotation, transform);
                 switch (((FldPlacementData *)resource->data)->kind) {
                 case 8:
-                    point = ((FldPlacementData *)resource->data)->parameters;
+                    point = ((FldPlacementData *)resource->data)->payload.specialPoint;
                     switch (point->kind) {
                     case 1:
                         func_0014D380(0, point->id, rotation, position[0], position[1], position[2]);
@@ -875,7 +876,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                     if (D_00389874[0] != 0) {
                         break;
                     }
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    parameters = ((FldPlacementData *)resource->data)->payload.words;
                     id = parameters[0];
                     room = fldParseRoomNumberFromName((char *)resource->name);
                     if (appended != 0) {
@@ -889,16 +890,16 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                     }
                     break;
                 case 3:
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    parameters = ((FldPlacementData *)resource->data)->payload.words;
                     func_0014C9B0(parameters[0], rotation, position[0], position[1], position[2]);
                     if (appended == 0) {
                         D_00435FA0++;
                     }
                     break;
                 case 7:
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
-                    fldAppendPendingSoundForScene(parameters[1], *(f32 *)parameters,
-                                         position[0], position[1], position[2]);
+                    pendingSound = ((FldPlacementData *)resource->data)->payload.pendingSound;
+                    fldAppendPendingSoundForScene(pendingSound->value, pendingSound->scalar,
+                                                  position[0], position[1], position[2]);
                     break;
                 }
             }
