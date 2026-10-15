@@ -41,9 +41,94 @@ extern void mnuInitializeMovieRollEntry(void);
 extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
 extern void func_002ECCF8(void *, SdfPoolNode *);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", mnuDrawAnimatedMovieRollEntry);
+/* Three signed image-relative control points per movie image bank. */
+typedef struct StaffImageCorners {
+    s16 x0, y0;
+    s16 x1, y1;
+    s16 x2, y2;
+} StaffImageCorners;
+typedef char StaffImageCornersSizeCheck[(sizeof(StaffImageCorners) == 12) ? 1 : -1];
 
-extern void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set, s32 index, f32 scaleX, f32 scaleY, s32 option, s32 texture);
+extern StaffImageCorners D_0037AF90[];
+extern MnuStaffImageRecord D_0037AFC0[];
+extern s32 D_003BC614;
+extern f32 sdfSinPoly(f32);
+extern s32 mnuCheckMovieDecoderStatus(void);
+extern s32 mnuGetMoviePlaybackMode(void);
+extern void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha,
+                                         EffectSlotSet *set, f32 scaleX, f32 scaleY,
+                                         s32 index, s32 option, s32 texture);
+
+/* Attenuate active roll sprites around the current image's three control points.
+ * The coordinate declarations preserve the native equal-priority allocation;
+ * first-point X before Y gives the native integer-sum lifetimes. */
+void mnuDrawAnimatedMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 texture) {
+    f32 ex;
+    f32 ey;
+    f32 nearRadius = 18350.078125f;
+    f32 farRadius;
+    f32 y0;
+    f32 x0;
+    f32 x1;
+    f32 y1;
+    f32 x2;
+    f32 y2;
+    f32 center;
+    f32 dx;
+    f32 dy;
+    f32 dist;
+    s32 alpha;
+
+    x0 = D_0037AFC0[D_003BC614].x + D_0037AF90[mnuMovieWork->imageIndex].x0;
+    y0 = D_0037AFC0[D_003BC614].y + D_0037AF90[mnuMovieWork->imageIndex].y0;
+    x1 = D_0037AFC0[D_003BC614].x + D_0037AF90[mnuMovieWork->imageIndex].x1;
+    y1 = D_0037AFC0[D_003BC614].y + D_0037AF90[mnuMovieWork->imageIndex].y1;
+    farRadius = 20971.51953125f;
+    x2 = D_0037AFC0[D_003BC614].x + D_0037AF90[mnuMovieWork->imageIndex].x2;
+    y2 = D_0037AFC0[D_003BC614].y + D_0037AF90[mnuMovieWork->imageIndex].y2;
+    if (entry->active != 0) {
+        alpha = 21;
+        ex = entry->x;
+        ey = entry->y;
+        center = 128.0f;
+        sdfSinPoly((f32)entry->timer / (f32)entry->duration * 3.141592503f);
+        if ((u32)(D_003BC618 - 1) < 3U && (mnuCheckMovieDecoderStatus() != 0 || mnuGetMoviePlaybackMode() != 0)) {
+            dy = y1 - (ey + center);
+            dx = x1 - (ex + center);
+            dist = dx * dx;
+            dist += dy * 1.5f * dy;
+            if (dist < nearRadius) {
+                alpha = alpha - (nearRadius - dist) / nearRadius * alpha * ((f32)(s32)mnuMovieWork->unk10 * 0.0078125f);
+            }
+            dy = y0 - (ey + center);
+            dx = x0 - (ex + center);
+            dist = dx * dx;
+            dist += dy * 1.5f * dy;
+            if (dist < nearRadius) {
+                alpha = alpha - alpha * ((nearRadius - dist) / nearRadius) * ((f32)(s32)mnuMovieWork->unk10 * 0.0078125f);
+            }
+            dy = y2 - (ey + center);
+            dx = x2 - (ex + center);
+            dist = dx * dx;
+            dist += dy * 1.5f * dy;
+            if (dist < farRadius) {
+                alpha = alpha - alpha * ((farRadius - dist) / farRadius) * ((f32)(s32)mnuMovieWork->unk10 * 0.0078125f);
+            }
+        }
+        switch (entry->sprite) {
+        case 0:
+            mnuDrawScaledMovieRollSprite(ex, ey, 0x1F4, alpha, set, 8.0f, 8.0f, 0xD, 0x60, texture);
+            return;
+        case 1:
+            mnuDrawScaledMovieRollSprite(ex, ey, 0x1F4, alpha, set, 8.0f, 8.0f, 0xE, 0x60, texture);
+            return;
+        case 2:
+            mnuDrawScaledMovieRollSprite(ex, ey, 0x1F4, alpha, set, 8.0f, 8.0f, 0xF, 0x60, texture);
+            break;
+        }
+    }
+}
+
 
 /* Draw an active roll entry with its sprite-specific slot index; alpha follows the staff movie's scroll fade. */
 void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 texture) {
@@ -58,23 +143,21 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
         alpha = alpha * 0.6f;
         switch (entry->sprite) {
         case 0:
-            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 0xD, 8.0f, 8.0f, 0x60, texture);
+            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 8.0f, 8.0f, 0xD, 0x60, texture);
             return;
         case 1:
-            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 0xE, 8.0f, 8.0f, 0x60, texture);
+            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 8.0f, 8.0f, 0xE, 0x60, texture);
             return;
         case 2:
-            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 0xF, 8.0f, 8.0f, 0x60, texture);
+            mnuDrawScaledMovieRollSprite(x, y, 0x64, alpha, set, 8.0f, 8.0f, 0xF, 0x60, texture);
             break;
         }
     }
 }
 
-extern MnuStaffImageRecord D_0037AFC0[];
 
 extern u32 D_0037AF70[];
 
-extern s32 D_003BC614;
 
 extern u8 D_0037B950[];
 
