@@ -6272,6 +6272,13 @@ MantraSparkle *mnuSpawnMantraSparkle(MantraSparkleEmitter *emitter) {
     return 0;
 }
 
+/* Bit 0 marks a live slot; bits 1-2 hold the spawn side. The burst drawer
+ * clears bit 0 through an enum-typed view of the flag word: its distinct
+ * alias set lets the pool count load schedule ahead of the store. */
+typedef enum MantraBurstState {
+    MANTRA_BURST_ACTIVE = 1
+} MantraBurstState;
+
 /* Both burst allocators create this 16-byte pool header followed by 100 slots. */
 typedef struct MantraBurstSlot {
     f32 x;
@@ -6310,7 +6317,88 @@ void mnuReleaseMantraPanelBurstPool(MantraBurstPool *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraPanelBurstParticles);
+extern MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side);
+
+/* Spawn a burst wave every other frame, then advance each live slot along
+ * its heading with an eased speed and draw it with a rise/hold/fall fade. */
+void mnuDrawMantraPanelBurstParticles(s32 x, s32 y, u32 z, s32 alpha, MantraBurstPool *pool,
+                                      s32 wide, u32 packet) {
+    MantraBurstSlot *slot;
+    s32 angleOffset;
+    s32 direction;
+    s32 i;
+    f32 speed;
+    f32 t;
+    s32 drawX;
+    s32 drawY;
+    s16 age;
+    s32 drawAlpha;
+
+    if (wide) {
+        angleOffset = -90;
+        direction = -1;
+    } else {
+        angleOffset = 90;
+        direction = 1;
+    }
+    pool->tick++;
+    if ((s16)pool->tick >= 2) {
+        if (wide) {
+            mnuSpawnBurstSlotSmall(pool, wide, 0);
+            mnuSpawnBurstSlotSmall(pool, wide, 0);
+            mnuSpawnBurstSlotSmall(pool, wide, 1);
+        } else {
+            mnuSpawnBurstSlotSmall(pool, 0, 0);
+            mnuSpawnBurstSlotSmall(pool, 0, 0);
+            mnuSpawnBurstSlotSmall(pool, 0, 0);
+            mnuSpawnBurstSlotSmall(pool, 0, 1);
+            mnuSpawnBurstSlotSmall(pool, 0, 1);
+        }
+        pool->tick = 0;
+    }
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->w.flags & 1) == 0) {
+            continue;
+        }
+        slot->age++;
+        t = 0.0f;
+        if ((s16)slot->age >= 4) {
+            t = (f32)((s16)slot->age - 4) / 10.0f;
+        }
+        speed = sdfSinPoly(t * 1.5707963f) * 15.0f + 1.0f;
+        if (slot->w.flags & 6) {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        } else {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        }
+        drawX = slot->x + (f32)x;
+        drawY = slot->y + (f32)y;
+        age = slot->age;
+        if (age < 6) {
+            t = (f32)age / 6.0f;
+        } else if (age < 8) {
+            t = 1.0f;
+        } else {
+            t = (f32)(14 - age) / 6.0f;
+        }
+        drawAlpha = (f32)alpha * sdfSinPoly(t * 1.5707963f);
+        if (slot->w.flags & 6) {
+            mnuDrawMantraRotatedSprite(drawX, drawY, 0, drawAlpha,
+                                       (f32)(slot->w.polar.angleDegrees + angleOffset), 0xBD, 0, packet);
+        } else {
+            mnuDrawMantraRotatedSprite(drawX, drawY, 0, drawAlpha,
+                                       (f32)(slot->w.polar.angleDegrees + angleOffset), 0xBE, 0, packet);
+        }
+        if ((s16)slot->age >= slot->life) {
+            *(MantraBurstState *)&slot->w.flags &= ~MANTRA_BURST_ACTIVE;
+        }
+    }
+}
 
 
 MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side) {
