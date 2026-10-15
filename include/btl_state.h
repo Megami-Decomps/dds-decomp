@@ -230,10 +230,10 @@ typedef struct BtlState {
     u16 mode; /* 0x24C */
     u8 pad24E[2];
     s32 turnCount; /* 0x250 */
-    u8 pad254[4];
+    s32 escapeAttemptCount; /* 0x254: incremented before each escape chance test. */
     u8 eventReady; /* 0x258 */
     u8 pad259;
-    u16 unk25A;
+    u16 spawnCount; /* 0x25A: enemies spawned, compared with maxEnemySpawns. */
     u16 phase; /* 0x25C */
     u8 requestMode; /* 0x25E: script sets this to 4 with requestArgument */
     u8 pad25F[5];
@@ -345,6 +345,7 @@ typedef struct BtlState {
     u8 unk_E0D;
     s16 debugMotionCountdown; /* Frames until preview motion; -1 when idle. */
 } BtlState;
+typedef char BtlEscapeAttemptCountDds1Offset[((unsigned int)&((BtlState *)0)->escapeAttemptCount == 0x254) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset2[((unsigned int)&((BtlState *)0)->baselineAmbientColor == 0x30) ? 1 : -1];
@@ -458,7 +459,7 @@ typedef struct BtlState {
     u16 mode; /* 0x270 */
     u8 pad272[2];
     s32 turnCount; /* 0x274 */
-    s32 unk278;
+    s32 escapeAttemptCount; /* 0x278: same escape-attempt counter as DDS1. */
     u8 eventReady; /* 0x27C */
     u8 pad27D;
     u16 unk27E;
@@ -616,6 +617,7 @@ typedef struct BtlState {
     u8 unk_E0D; /* 0xFD1 */
     s16 debugMotionCountdown; /* 0xFD2: frames until preview motion; -1 when idle. */
 } BtlState;
+typedef char BtlEscapeAttemptCountDds2Offset[((unsigned int)&((BtlState *)0)->escapeAttemptCount == 0x278) ? 1 : -1];
 typedef char BtlSceneLightOffset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightOffset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
 typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbientColor == 0x30) ? 1 : -1];

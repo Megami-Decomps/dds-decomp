@@ -2513,13 +2513,13 @@ extern s32 btlRollEscapeChance(BtlUnit *);
 
 /* Count an escape attempt and record its chance-test result in battle flags. */
 void btlRecordEscapeAttemptOutcome(BtlTask *task) {
-    s32 context = (s32)(u32)btlGetRuntime();
+    BtlState *context = btlGetRuntime();
     BtlUnit *target = task->unit;
-    *(s32 *)(context + 0x254) += 1;
+    context->escapeAttemptCount += 1;
     if (btlRollEscapeChance(target)) {
-        *(u32 *)(context + 0x1F4) |= 0x2000;
+        context->battleFlags |= 0x2000;
     } else {
-        *(u32 *)(context + 0x1F4) |= 0x1000;
+        context->battleFlags |= 0x1000;
     }
 }
 
