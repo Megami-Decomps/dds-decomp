@@ -83,3 +83,15 @@ not changed table values. Ordinary no-dump and RTL-probe objects reproduce all
 allocated and relocation sections exactly. Final whole-owner checks, both
 retail hashes and an updated emitted audit remain the acceptance gates after
 integration or semantic renaming.
+
+## Escaped guide-coordinate outputs
+
+DDS2's guide query writes one float through each of its two output pointers.
+Keep those real output objects as `f32 guideX[1]` and `guideZ[1]`, passed by
+array decay and consumed through element zero. The pinned compiler leaves
+uninitialized alias metadata on the address-taken scalar form: changing the
+model scale's primary type exchanges zero and an invalid alias number on
+the two guide loads and changes twenty words in the interpolation clusters.
+The one-float buffers give all four output reads the normal float alias set
+and preserve the native `sp+0x90` / `sp+0x94` layout and 4,864-byte body.
+The callbacks, arithmetic and publication epochs are unchanged.
