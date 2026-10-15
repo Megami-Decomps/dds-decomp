@@ -36,7 +36,7 @@ typedef struct MnuStaffTextRow {
 typedef char MnuStaffTextRow_size_must_be_0x10[
     (sizeof(MnuStaffTextRow) == 0x10) ? 1 : -1];
 #ifndef VERSION_DDS2
-extern MnuStaffTextRow D_00379F70[256];
+extern MnuStaffTextRow mnuStaffRollTextRows[256];
 #endif
 
 /* Static staff-image timing/rectangle rows. DDS1 also stores the image-bank

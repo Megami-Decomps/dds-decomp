@@ -45,7 +45,7 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
 
 extern s32 evtStageTestUpdateCamera(void);
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char D_0036D440[];
+extern char brsStatConfirmationPopupEntry[];
 
 s32 mnuHandleStatPointAssignment(KwlnTask *request) {
     BrsSkillPackageWork *work;
@@ -77,7 +77,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *request) {
         dspStartEntry(0x16);
         evtSetMessageWindowOptionWhenOpen(0);
         evtStoreValueAndCaptureWindowPanelValue(0x1D);
-        mnuSetPopupEntryFlagged(&work->transition.state, D_0036D440);
+        mnuSetPopupEntryFlagged(&work->transition.state, brsStatConfirmationPopupEntry);
     } else {
         selection = mnuGetPanelGroupSelection(work->panelHandle);
         if ((inputFlags & 0x81) != 0) {
@@ -161,7 +161,7 @@ u32 mnuStatAssignmentMessageLeaveNoOp(void) {
 
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern char D_0036D45C[];
+extern char brsLevelChangePopupEntry[];
 
 s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     BrsSkillPackageWork *work;
@@ -183,7 +183,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
             btlAddBaseStats(stats, work->selectedRewardRow->unit);
             mnuClearItemSelectionSlots(work);
             mnuClearPanelGroupSelection(work->panelHandle);
-            mnuSetPopupEntryFlagged(&work->transition.state, D_0036D45C);
+            mnuSetPopupEntryFlagged(&work->transition.state, brsLevelChangePopupEntry);
             work->commitComplete = 1;
         } else {
             mnuClearItemSelectionSlots(work);
@@ -237,7 +237,7 @@ u32 mnuLevelChangeMessageLeaveNoOp(void) {
 }
 
 extern s32 evtStageTestUpdateCamera(void);
-extern char D_0036D478[];
+extern char brsRewardMessagePopupEntry[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
 s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
@@ -251,7 +251,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
         return result;
     }
     if (*panelState == 0 && evtGetMessageWindowControlState() == 0) {
-        mnuSetPopupEntryFlagged(panelState, D_0036D478);
+        mnuSetPopupEntryFlagged(panelState, brsRewardMessagePopupEntry);
     }
     return 0;
 }
@@ -360,7 +360,7 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
 
 
 
-extern char D_0036D408[];
+extern char brsPrimaryRewardPopupEntry[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
 s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
@@ -379,7 +379,7 @@ s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
                 kwlnItemUpdateDisplay(panel);
                 panel->rewardMode = 0;
             } else {
-                mnuSetPopupEntryFlagged(&panel->transition.state, D_0036D408);
+                mnuSetPopupEntryFlagged(&panel->transition.state, brsPrimaryRewardPopupEntry);
             }
         }
     }

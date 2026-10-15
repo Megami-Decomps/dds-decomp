@@ -28,7 +28,7 @@ extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 
 void itfUpdateFadeColor(BrsSkillPackageWork *work);
 
-extern struct { s32 v[6]; } D_003D6500;
+extern struct { s32 v[6]; } brsRewardSummaryPositions;
 
 extern void mnuCampDrawMenuIconLayer(s32, s32, s32, u32, const BrsRewardSummary *, s32 flags, BrsSkillPackageWork *);
 
@@ -42,9 +42,9 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     BrsRewardSummary *res = &work->rewards;
     u32 color = uiBlendColors(0xFFF06480, 0xFFF06400, 0x100 - work->fadeProgress);
 
-    mnuCampDrawMenuIconLayer(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
-    brsDrawMaccaRewardTotal(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
-    brsDrawRewardEntryRows(D_003D6500.v[4], D_003D6500.v[5], 0, color, res, 0x53, work);
+    mnuCampDrawMenuIconLayer(brsRewardSummaryPositions.v[0], brsRewardSummaryPositions.v[1], 0, color, res, 0x53, work);
+    brsDrawMaccaRewardTotal(brsRewardSummaryPositions.v[2], brsRewardSummaryPositions.v[3], 0, color, res, 0x53, work);
+    brsDrawRewardEntryRows(brsRewardSummaryPositions.v[4], brsRewardSummaryPositions.v[5], 0, color, res, 0x53, work);
 }
 
 void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {

@@ -118,8 +118,8 @@ u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
-extern char D_0036D494[];
-extern char D_0036D408[];
+extern char brsRewardFadeWaitPopupEntry[];
+extern char brsPrimaryRewardPopupEntry[];
 
 s32 prfCapTaskStep(KwlnTask *request) {
     s32 result;
@@ -151,14 +151,14 @@ s32 prfCapTaskStep(KwlnTask *request) {
             }
             if (scene->primaryRewards.count == 0) {
                 kwlnFadeInStart(0, 0, 0, 0xF);
-                mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
+                mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
                 return 0;
             }
             if (btlHasPendingRuntimeActivity() != 0) {
                 return 0;
             }
             mnuStaffInitPanel(scene);
-            mnuSetPopupEntryFlagged(dispatchStatus, D_0036D408);
+            mnuSetPopupEntryFlagged(dispatchStatus, brsPrimaryRewardPopupEntry);
             sndQueueNoPayloadCommand40();
         }
         result = 0;
@@ -268,8 +268,8 @@ extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *
 extern u32 mnuInitializeItemSelectionExtent(KwlnTask *task);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void sndReleaseTrackHandle(u32);
-extern char D_0036D424[];
-extern char D_0036D45C[];
+extern char brsStatAssignmentPopupEntry[];
+extern char brsLevelChangePopupEntry[];
 
 s32 brsProcessNextPrimaryReward(KwlnTask *request) {
     s32 result;
@@ -303,7 +303,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
             if (scene->selectedRewardRow->unit->unitId == 1) {
                 mnuInitializeItemSelectionExtent(request);
                 if (scene->extentExhausted == 0) {
-                    mnuSetPopupEntry(dispatchStatus, D_0036D424);
+                    mnuSetPopupEntry(dispatchStatus, brsStatAssignmentPopupEntry);
                     return 0;
                 }
             } else {
@@ -311,11 +311,11 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
                 mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit,
                                              scene);
             }
-            mnuSetPopupEntry(dispatchStatus, D_0036D45C);
+            mnuSetPopupEntry(dispatchStatus, brsLevelChangePopupEntry);
         } else {
             sndReleaseTrackHandle(0x50001);
             kwlnFadeInStart(0, 0, 0, 0xF);
-            mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
+            mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
         }
     }
     return 0;

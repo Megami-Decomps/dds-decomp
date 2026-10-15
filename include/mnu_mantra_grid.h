@@ -66,7 +66,7 @@ typedef struct MantraPrerequisiteRecord {
     u8 flags[4];
 } MantraPrerequisiteRecord;
 
-extern MantraPrerequisiteRecord D_0036AE80[89];
+extern MantraPrerequisiteRecord mnuMantraPrerequisiteRecords[89];
 
 typedef char MantraPrerequisiteRecordLayoutAssert[
     (sizeof(MantraPrerequisiteRecord) == 0x10 &&

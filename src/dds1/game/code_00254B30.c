@@ -181,19 +181,19 @@ void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue
                                   0, valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
 
-extern MnuSpritePlacement D_0036B510[];
-extern struct EffectSlotSet *D_0036C698[];
+extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
+extern struct EffectSlotSet *mnuMantraSpriteSlots[];
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 
 void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
                               u16 unusedSceneId, s32 unusedContext) {
-    struct EffectSlotSet *resource = D_0036C698[D_0036B510[41].resourceIndex];
+    struct EffectSlotSet *resource = mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[41].resourceIndex];
 
-    effDrawSpriteWithCornerFade((x + D_0036B510[41].x) << 4,
-                  (y + D_0036B510[41].y) << 3, z,
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[41].x) << 4,
+                  (y + mnuMantraCommonSpritePlacements[41].y) << 3, z,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   (s32)resource,
-                  D_0036B510[41].spriteIndex, 0x53);
+                  mnuMantraCommonSpritePlacements[41].spriteIndex, 0x53);
 }
 
 extern const u8 D_0036C490[][0x18];
@@ -449,7 +449,7 @@ void mnuDrawMantraSparkScene(MenuSceneMetadata *scene, s32 alpha, s32 context) {
     mnuDrawPlacedSpriteFromTable(0, 0, 0, (f32)alpha * factor, 0x2B, context);
     sparkles = &scene->sparkles;
     mnuTickMantraSparkParticles(sparkles);
-    mnuDrawMantraSparkBackdrop(sparkles, (s32)D_0036C698[1], context);
+    mnuDrawMantraSparkBackdrop(sparkles, (s32)mnuMantraSpriteSlots[1], context);
 }
 
 void itfDspDrawMarksA(s32 scale, s32 context) {

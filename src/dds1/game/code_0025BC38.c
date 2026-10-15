@@ -47,10 +47,10 @@ void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *resources) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
-extern struct EffectSlotSet *D_0036C698[];
+extern struct EffectSlotSet *mnuMantraSpriteSlots[];
 
 void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
-    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)D_0036C698[0], 0x25, param);
+    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)mnuMantraSpriteSlots[0], 0x25, param);
 }
 
 struct MovieCueNode {
@@ -208,7 +208,7 @@ enum {
 };
 
 extern MnuSpritePlacement mnuMantraSceneSpritePlacements[];
-extern MnuSceneSpriteEntry D_0036BE38[];
+extern MnuSceneSpriteEntry mnuMantraEntrySpritePlacements[];
 extern s32 D_0036C6CC[];
 
 void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
@@ -218,59 +218,59 @@ void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 pla
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[mnuMantraSceneSpritePlacements[placementIndex][0]],
+                  (s32)mnuMantraSpriteSlots[mnuMantraSceneSpritePlacements[placementIndex][0]],
                   mnuMantraSceneSpritePlacements[placementIndex][1],
                   context);
 }
 
 void mnuDrawSceneEntrySpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 placementIndex, s32 flags, s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] +
+    effDrawSpriteWithCornerFade((x + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] +
                    mnuMantraSceneSpritePlacements[placementIndex][2]) << 4,
-                  (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] +
+                  (y + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] +
                    mnuMantraSceneSpritePlacements[placementIndex][3]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[mnuMantraSceneSpritePlacements[placementIndex][0]],
+                  (s32)mnuMantraSpriteSlots[mnuMantraSceneSpritePlacements[placementIndex][0]],
                   mnuMantraSceneSpritePlacements[placementIndex][1],
                   context);
 }
 
 void mnuDrawSceneEntrySpriteWithOffset(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 flags, s32 context) {
-    if (D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX] != 0) {
-        effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] + 23) << 4,
-                      (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] + 15) << 3,
+    if (mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_INDEX] != 0) {
+        effDrawSpriteWithCornerFade((x + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] + 23) << 4,
+                      (y + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] + 15) << 3,
                       z,
                       (u32)((f32)(alpha << 8) * 0.0078125f),
                       flags,
                       D_0036C6CC[0],
-                      D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX],
+                      mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_INDEX],
                       context);
     }
 }
 
 void mnuDrawSceneEntrySprite(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 flags, s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
-                  (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
+                  (y + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
                   D_0036C6CC[0],
-                  D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX],
+                  mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_INDEX],
                   context);
 }
 
 void mnuDrawSceneEntrySpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 spriteIndex, s32 flags, s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
-                  (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
+                  (y + mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[1],
+                  (s32)mnuMantraSpriteSlots[1],
                   spriteIndex,
                   context);
 }
@@ -531,8 +531,8 @@ void mnuUpdateMantraSelectionCursorPosition(MenuSceneWork *work) {
     moving = 0;
     selectedEntry = (MnuMantraGridEntry *)(u32)work->gridHandle->cursor->value;
     entryIndex = selectedEntry->sceneId;
-    targetX = D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET];
-    targetY = D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET];
+    targetX = mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_X_OFFSET];
+    targetY = mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET];
     memset(direction, 0, sizeof(direction));
     direction[0] = targetX - work->entryPosition.x;
     direction[1] = targetY - work->entryPosition.y;
