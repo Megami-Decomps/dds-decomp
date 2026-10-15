@@ -79,6 +79,6 @@ void effEventReleaseNode(EffEventWork *work);
 void effEventSetScale(EffEventWork *work, f32 scale);
 void effEventUpdateEffectParameters(EffEventWork *work);
 
-ObjBase *dds3GetResourceOwnerHandle(EffWorldNode *object);
+ObjBase *dds3GetResourceOwnerHandle(const EffWorldNode *object);
 
 #endif

@@ -19,8 +19,9 @@ EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *s
     return obj;
 }
 
-ObjBase *dds3GetResourceOwnerHandle(EffWorldNode *object) {
-    return ((DdsSlotResourceBlock *)object->data)->resourceState;
+ObjBase *dds3GetResourceOwnerHandle(const EffWorldNode *object) {
+    const DdsSlotResourceBlock *block = (const DdsSlotResourceBlock *)object->data;
+    return block->resourceState;
 }
 
 /* Allocate the kind-9 light payload and its auxiliary buffer. */
