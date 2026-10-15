@@ -101,7 +101,87 @@ void mnuTitleResetSequenceTimers(void) {
     mnuMovieMenuState->unk1C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026D270", mnuUpdateMovieMenuInputState);
+/* Step the movie menu: fade in, wait, then poll the selection until it
+ * confirms (phase 3, returns 1 when done) or cancels or idles out (phase 4,
+ * returns 2). */
+s32 mnuUpdateMovieMenuInputState(void) {
+    s32 result;
+
+    switch (mnuMovieMenuState->unk34) {
+    case 1:
+        if (mnuMovieMenuState->cursor < 23) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->unk34 = 2;
+        }
+        if (mnuMovieMenuState->cursor >= 4) {
+            result = mnuHandleMovieMenuInput();
+            switch (result) {
+            case 0:
+            default:
+                mnuMovieMenuState->unk1C = 0;
+                break;
+            case 2:
+                mnuMovieMenuState->unk34 = 4;
+                mnuMovieMenuState->cursor = 0;
+                break;
+            case 1:
+                mnuMovieMenuState->unk34 = 3;
+                mnuMovieMenuState->cursor = 0;
+                break;
+            }
+        }
+        break;
+    case 0:
+        if (mnuMovieMenuState->cursor < 14) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->unk34 = 2;
+        }
+        break;
+    case 2:
+        result = mnuHandleMovieMenuInput();
+        switch (result) {
+        case 1:
+            mnuMovieMenuState->unk34 = 3;
+            mnuMovieMenuState->cursor = 0;
+            break;
+        case 2:
+            mnuMovieMenuState->unk34 = 4;
+            mnuMovieMenuState->cursor = 0;
+            break;
+        case 0:
+            if (mnuMovieMenuState->unk1C < 450) {
+                mnuMovieMenuState->unk1C++;
+            } else {
+                mnuMovieMenuState->unk34 = 4;
+                mnuMovieMenuState->unk1C = 0;
+                mnuMovieMenuState->cursor = 0;
+            }
+            break;
+        default:
+            mnuMovieMenuState->unk1C = 0;
+            break;
+        }
+        break;
+    case 3:
+        if (mnuMovieMenuState->cursor < 10) {
+            mnuMovieMenuState->cursor++;
+            break;
+        }
+        return 1;
+    case 4:
+        if (mnuMovieMenuState->cursor < 10) {
+            mnuMovieMenuState->cursor++;
+            break;
+        }
+        return 2;
+    }
+    return 0;
+}
+
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
