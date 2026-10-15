@@ -7220,8 +7220,8 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource) {
     return (flags & 8) > 0;
 }
 
-void sndFormatResourceNameFromIndex(s32 source, char *output) {
-    sprintf(output, D_004192D8, D_00436AE8, (u16)(source + 0x200));
+void sndFormatResourceNameFromIndex(s32 skillIndex, char *output) {
+    sprintf(output, D_004192D8, D_00436AE8, (u16)(skillIndex + 0x200));
 }
 
 void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {

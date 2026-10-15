@@ -2004,7 +2004,7 @@ BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor,
 s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect,
         char *name);
-void sndFormatResourceNameFromIndex(s32 source, char *output);
+void sndFormatResourceNameFromIndex(s32 skillIndex, char *output);
 BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *value, s32 option, char *name);
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect,
         BtlUnit *sourceOwner, s32 source, s32 target, BtlUnit *actor,
