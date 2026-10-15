@@ -750,9 +750,9 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 
     track = scene->groups;
     if (track != 0) {
-        track->unk28 = 0;
+        track->usePendingKey = 0;
         while (track = track->next, track != 0) {
-            track->unk28 = 0;
+            track->usePendingKey = 0;
         }
     }
     scene->colorEditorActive = 0;

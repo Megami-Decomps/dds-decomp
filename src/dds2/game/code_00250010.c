@@ -3245,7 +3245,7 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
 
 
     if (D_0037F510.cancel < 0) {
-        runtime->frameGroup->unk28 = 0;
+        runtime->frameGroup->usePendingKey = 0;
         return 0;
     }
     return 1;
