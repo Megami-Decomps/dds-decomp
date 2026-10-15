@@ -1987,7 +1987,7 @@ extern const char D_00417360[];
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light);
 BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value);
-s32 btlGetActionDefaultOrOverride(s32 index);
+s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);
 BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link,
         u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags);
