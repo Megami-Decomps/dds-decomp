@@ -1766,25 +1766,25 @@ s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 element) {
     return datGetEffectiveAffinity(record, element);
 }
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_00435DE0 + arg1 * 0x270;
+s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
+    if (side == 0) {
+        return D_00435DE0 + index * 0x270;
     }
-    return D_00435DF0 + arg1 * 0x270;
+    return D_00435DF0 + index * 0x270;
 }
 
-BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {
+    if (side == 0) {
         return (BtlActorTransformParameters *)D_003B4DC0;
     }
-    return (BtlActorTransformParameters *)(D_00435E00 + arg1 * 24);
+    return (BtlActorTransformParameters *)(D_00435E00 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_00435DE4 + arg1 * 0x74;
+s32 btlSelectSideIndexedActorParameterTable(s32 side, s32 index) {
+    if (side == 0) {
+        return D_00435DE4 + index * 0x74;
     }
-    return D_00435DF8 + arg1 * 0x74;
+    return D_00435DF8 + index * 0x74;
 }
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
