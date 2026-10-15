@@ -163,11 +163,11 @@ typedef struct {
     u16 halfLife;            /* 0x38 */
     u8 pad3A[2];
     f32 coreWidth;          /* 0x3C: half-width of the primary strip */
-    u32 arg40;               /* 0x40 */
+    u32 centerColorWord;     /* 0x40: packed center color used by symmetric cell ramps */
     f32 bandWidth;          /* 0x44: width of the continued strip */
-    u32 arg48;               /* 0x48 */
+    u32 middleColorWord;    /* 0x48: packed middle color used by symmetric cell ramps */
     f32 edgeWidth;          /* 0x4C: added outer margin */
-    u32 arg50;               /* 0x50 */
+    u32 edgeColorWord;      /* 0x50: packed edge color used by symmetric cell ramps */
 } EffThunderFragmentParams;
 
 typedef struct {
