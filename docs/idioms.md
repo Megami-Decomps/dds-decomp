@@ -13515,3 +13515,24 @@ DDS2 rotation-provider calls are not made uniform. `effBattlePositionCallbacks`
 dispatches by request kind and returns a position through `vf10`; retain the
 unprototyped callback contract. Its fourteen native cells include three null
 tails, not a new array bound or a byte-identical cross-title pointer table.
+
+## File prompt strings: state roles rather than shared literals
+
+`fileNoCardStatus1MessageLine1` through `Line5` and the corresponding
+`fileNoCardStatus2MessageLine1` through `Line5` name the two five-line
+no-card prompts selected by status 1 and 2. Both games draw their lines
+at Y positions 114, 138, 162, 186 and 210, but their bytes are not forced
+to agree. In particular, the native PlayStation font-marker bytes are
+`81 CE` in DDS1 and `85 C1` in DDS2; naming does not claim a decoded glyph.
+Some DDS1 fragments also retain trailing spaces absent from DDS2.
+
+`fileCheckingCardMessageLine1` through `Line3` are the three lines used
+by menu-flow state 1. `fileSavingText`, `fileLoadingText` and
+`fileFormattingText` are the separate leading strings for flow states
+2, 3 and 5. Their following warning lines and the renderers' different
+per-game behavior are unchanged.
+
+These are existing plain NUL-terminated strings, not MSG1 containers or
+new C literals. Only identifiers and symbol metadata change; preserve
+the native string bytes, terminators, spacing, separate addresses and
+all original declarations, casts, draw coordinates and state tests.

@@ -672,30 +672,30 @@ s32 fileDrawStatusDialogFrame(void) {
     return 1;
 }
 
-extern char D_0037D6C8[];
-extern char D_0037D6E8[];
-extern char D_0037D700[];
-extern char D_0037D768[];
+extern char fileCheckingCardMessageLine1[];
+extern char fileCheckingCardMessageLine2[];
+extern char fileCheckingCardMessageLine3[];
+extern char fileSavingText[];
 extern char D_0037D7B8[];
 extern char D_0037D7D8[];
 extern char D_0037D800[];
-extern char D_0037D758[];
+extern char fileLoadingText[];
 extern char D_0037D948[];
-extern char D_0037D778[];
+extern char fileFormattingText[];
 extern char D_0037D960[];
 extern char D_0037D930[];
 extern s32 D_003BC840;
 extern void fileResetLoadContextSlide(void);
-extern char D_0037D520[];
-extern char D_0037D550[];
-extern char D_0037D570[];
-extern char D_0037D580[];
-extern char D_0037D5A8[];
-extern char D_0037D620[];
-extern char D_0037D650[];
-extern char D_0037D668[];
-extern char D_0037D690[];
-extern char D_0037D6A8[];
+extern char fileNoCardStatus1MessageLine1[];
+extern char fileNoCardStatus1MessageLine2[];
+extern char fileNoCardStatus1MessageLine3[];
+extern char fileNoCardStatus1MessageLine4[];
+extern char fileNoCardStatus1MessageLine5[];
+extern char fileNoCardStatus2MessageLine1[];
+extern char fileNoCardStatus2MessageLine2[];
+extern char fileNoCardStatus2MessageLine3[];
+extern char fileNoCardStatus2MessageLine4[];
+extern char fileNoCardStatus2MessageLine5[];
 extern char D_0037D788[];
 extern char D_0037D798[];
 extern char D_0037D7A8[];
@@ -719,22 +719,22 @@ void fileShowStatusDialog(void) {
             D_003BC840 = 0;
             fileResetLoadContextSlide();
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)D_0037D520);
-                fileDrawDialogLine(1, (u32)D_0037D550);
-                fileDrawDialogLine(2, (u32)D_0037D570);
-                fileDrawDialogLine(3, (u32)D_0037D580);
-                fileDrawDialogLine(4, (u32)D_0037D5A8);
+                fileDrawDialogLine(0, (u32)fileNoCardStatus1MessageLine1);
+                fileDrawDialogLine(1, (u32)fileNoCardStatus1MessageLine2);
+                fileDrawDialogLine(2, (u32)fileNoCardStatus1MessageLine3);
+                fileDrawDialogLine(3, (u32)fileNoCardStatus1MessageLine4);
+                fileDrawDialogLine(4, (u32)fileNoCardStatus1MessageLine5);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
         }
         if (D_003BC854 == 2) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)D_0037D620);
-                fileDrawDialogLine(1, (u32)D_0037D650);
-                fileDrawDialogLine(2, (u32)D_0037D668);
-                fileDrawDialogLine(3, (u32)D_0037D690);
-                fileDrawDialogLine(4, (u32)D_0037D6A8);
+                fileDrawDialogLine(0, (u32)fileNoCardStatus2MessageLine1);
+                fileDrawDialogLine(1, (u32)fileNoCardStatus2MessageLine2);
+                fileDrawDialogLine(2, (u32)fileNoCardStatus2MessageLine3);
+                fileDrawDialogLine(3, (u32)fileNoCardStatus2MessageLine4);
+                fileDrawDialogLine(4, (u32)fileNoCardStatus2MessageLine5);
                 fileDrawPulsingSaveHighlight();
                 D_003BC810 = 0;
             }
@@ -797,15 +797,15 @@ void fileShowFlowDialog(void) {
     if (D_003BC850 != 0) {
         if (D_003BC850 == 1) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)D_0037D6C8);
-                fileDrawDialogLine(1, (u32)D_0037D6E8);
-                fileDrawDialogLine(2, (u32)D_0037D700);
+                fileDrawDialogLine(0, (u32)fileCheckingCardMessageLine1);
+                fileDrawDialogLine(1, (u32)fileCheckingCardMessageLine2);
+                fileDrawDialogLine(2, (u32)fileCheckingCardMessageLine3);
                 fileDrawSaveWindow();
             }
         }
         if (D_003BC850 == 2) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)D_0037D768);
+                fileDrawDialogLine(0, (u32)fileSavingText);
                 fileDrawDialogLine(1, (u32)D_0037D7B8);
                 fileDrawDialogLine(2, (u32)D_0037D7D8);
                 fileDrawDialogLine(3, (u32)D_0037D800);
@@ -814,7 +814,7 @@ void fileShowFlowDialog(void) {
         }
         if (D_003BC850 == 3) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)D_0037D758);
+                fileDrawDialogLine(0, (u32)fileLoadingText);
                 fileDrawDialogLine(1, (u32)D_0037D7B8);
                 fileDrawDialogLine(2, (u32)D_0037D7D8);
                 fileDrawDialogLine(3, (u32)D_0037D800);
@@ -830,7 +830,7 @@ void fileShowFlowDialog(void) {
         }
         if (D_003BC850 == 5) {
             if (fileDrawStatusDialogFrame() != 0) {
-                fileDrawDialogLine(0, (u32)D_0037D778);
+                fileDrawDialogLine(0, (u32)fileFormattingText);
                 fileDrawDialogLine(1, (u32)D_0037D7B8);
                 fileDrawDialogLine(2, (u32)D_0037D7D8);
                 fileDrawDialogLine(3, (u32)D_0037D800);
