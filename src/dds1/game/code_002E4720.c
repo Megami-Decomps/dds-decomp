@@ -15,6 +15,7 @@
 #include "sdf_dev_path_prefix.h"
 #include "sdf_dev_worker.h"
 #include "sdf_thread_workspace_api.h"
+#include "sdf_dev_start_load_api.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 
