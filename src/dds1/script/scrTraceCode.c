@@ -111,13 +111,13 @@ u32 scrAdvanceTraceProgramCounter(ScrData *scr)
 u32 bfOpWaitDispatch(ScrData *scr)
 {
     s32 pc = scr->pc;
-    s32 command = scr->instructions[pc].parts.sOperand;
+    s32 commandIndex = scr->instructions[pc].parts.sOperand;
 
     scrCurrentContext = scr;
-    if (D_0039E288[command].func() == 0) {
+    if (D_0039E288[commandIndex].func() == 0) {
         return 2;
     }
-    scr->sp -= D_0039E288[command].paramCount;
+    scr->sp -= D_0039E288[commandIndex].paramCount;
     if (pc == scr->pc) {
         scr->pc = pc + 1;
     }
