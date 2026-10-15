@@ -273,7 +273,7 @@ extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
 extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
-extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
+extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
 extern void fldInitializeHuntSparkUnit(EvtUnit *unit);
 
@@ -3611,7 +3611,7 @@ void fldReleaseTitleTextures(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", fldTitleTaskName);
 
-void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
+void fldStartTitle(s32 field, s32 mode, s32 option) {
     char path[32];
     s32 resourceAddress;
     s32 handle;
@@ -3619,8 +3619,8 @@ void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
     D_00436350 = 0;
     D_00436354 = 0;
     D_00436358 = field;
-    D_0043635C = arg1;
-    D_00436360 = arg2;
+    D_0043635C = mode;
+    D_00436360 = option;
     D_00436364 = 0;
     if ((u32)(field - 8) < 2) {
         sprintf(path, "/fld/f/pnl/df%03d_a.tmx", field);
