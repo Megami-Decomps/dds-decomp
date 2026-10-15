@@ -9026,3 +9026,4 @@
 0x00291DD0	mnuSpawnMantraPanelSequence	inferred	Spawn the fixed endpoints and two eight-record mantra-panel sequences with three animated slots per record.
 0x0033C050	sdfBuildTwoTextureQuadVifPacketWithCornerColors	inferred	Builds a one-vertex VIF packet for a two-texture quad from eight corner color words, interleaved primary/secondary UV values, and eight quad coordinates; paired DDS1 body at 0x002E31A0. Distinct from sdfBuildTwoTextureQuadVifPacket, which takes two scalar colors.
 0x002467A0	evtEventViewerCreateTrackKeyAtFrame	inferred	DDS1 twin at 0x0022BE28; forwards the selected track group, current frame, and viewer to evtCreateViewerTimelineKey. The timeline processing loop calls it when inserting a key at the active frame.
+0x001EDFB8	btlBuildFilteredGroupCameraPair	inferred	Action-category group camera pair with single-target fallback

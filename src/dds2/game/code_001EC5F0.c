@@ -894,7 +894,144 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EDC38);
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EDFB8);
+/* Eight action-filtered preset rows; the final word is a category mask. */
+typedef struct BtlActionCameraPreset {
+    f32 frontQuaternion[4];
+    f32 backQuaternion[4];
+    f32 frontDistanceScale;
+    f32 backDistanceScale;
+    f32 parameter;
+    u32 actionMask;
+} BtlActionCameraPreset;
+
+extern const BtlActionCameraPreset D_004180C0[8];
+extern u8 D_004180B0[];
+extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+/* Frame all selected actor groups using an action-filtered camera preset. */
+void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 muzzle[4];
+    BtlActionCameraPreset presets[8];
+    u16 candidates[8];
+    BtlState *work;
+    BtlUnit *unit;
+    f32 extent;
+    f32 muzzleHeight;
+    f32 fov;
+    f32 halfFov;
+    f32 minimum;
+    f32 distance;
+    f32 parameter;
+    u32 mask;
+    u32 i;
+    u32 selector;
+    u32 selected;
+    u32 count;
+    u32 rowFlags;
+    u32 category;
+    s32 allowSingle;
+
+    memcpy(presets, D_004180C0, sizeof(presets));
+    allowSingle = 1;
+    work = (BtlState *)btlGetRuntime();
+    minimum = 0.0f;
+    selector = (u32)action->actionCode;
+    if (selector - 1 < 0x21F) {
+        rowFlags = ((BtlActionAnimationRecord *)datActionAnimationRecords)[selector].flags;
+        if (rowFlags & 0x80) {
+            minimum = 500.0f;
+            allowSingle = 0;
+        }
+        category = rowFlags & 0x30;
+        count = 0;
+        for (i = 0; i < 8; i++) {
+            if (category == 0 || (presets[i].actionMask & category) != 0) {
+                candidates[count++] = i;
+            }
+        }
+        selected = candidates[effMiscRandMod(0, count) & 0xFFFF];
+    } else {
+        selected = effMiscRandMod(0, 8);
+    }
+    if (btlGetIndexListCount(action->targetList) == 1 && allowSingle != 0) {
+        func_001EDC38(action, &action->frontCamera, &action->backCamera);
+        action->motionParameter = 30.0f;
+        action->flags |= 0x41;
+        return;
+    }
+    /* The candidate count is finished; count now describes targets. */
+    mask = 0;
+    count = btlGetIndexListCount(action->targetList);
+    for (i = 0; i < count; i++) {
+        unit = btlGetIndexListEntry(action->targetList, i);
+        mask |= unit->status.flags & 0x600;
+    }
+    muzzleHeight = 0.0f;
+    /* Reuse the finished target count for eligible actors and their mean Y. */
+    count = 0;
+    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+        u32 flags = unit->status.flags;
+        if (!(flags & 1)) {
+            continue;
+        }
+        if (flags & 0xC0) {
+            continue;
+        }
+        if (!(flags & mask)) {
+            continue;
+        }
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF(vf10, muzzle);
+        muzzleHeight += muzzle[1];
+        count++;
+    }
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(mask);
+    fov = action->camera.fov;
+    from->fov = fov;
+    to->fov = fov;
+    extent = btlMeasureFilteredUnitGroupBounds(mask, NULL, NULL);
+    if (extent < minimum) {
+        extent = minimum;
+    }
+    VU0_STORE_VF(vf10, from->position);
+    VU0_STORE_VF(vf10, to->position);
+    muzzleHeight = muzzleHeight / (f32)count;
+    from->position[1] = muzzleHeight;
+    to->position[1] = muzzleHeight;
+    if (count >= 2) {
+        halfFov = fov * 0x1.555554p+0f * 0.5f;
+        distance = extent / tanf(halfFov);
+    } else {
+        halfFov = fov * 0.5f;
+        distance = extent / tanf(halfFov);
+    }
+    from->distance = distance * presets[selected].frontDistanceScale;
+    to->distance = distance * presets[selected].backDistanceScale;
+    VU0_LOAD_VF(vf10, presets[selected].frontQuaternion);
+    if (mask & 0x400) {
+        VU0_LOAD_VF(vf11, D_004180B0);
+        effMiscQuatMultiplyVU();
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+    VU0_LOAD_VF(vf10, presets[selected].backQuaternion);
+    if (mask & 0x400) {
+        VU0_LOAD_VF(vf11, D_004180B0);
+        effMiscQuatMultiplyVU();
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+    parameter = presets[selected].parameter;
+    action->flags |= 0x41;
+    action->motionParameter = parameter;
+}
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EE458);
 
@@ -2242,7 +2379,7 @@ void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action,
         }
     }
     if (count >= 2) {
-        func_001EDFB8(action, &action->frontCamera, &action->backCamera);
+        btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
         return;
     }
     btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);

@@ -564,7 +564,7 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *actor) {
 }
 
 extern void func_001E0B68(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
 extern void btlPrepareCameraMode6Participants(BtlLinkedCommand *, BtlCamState *);
@@ -612,7 +612,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                     if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         func_001E0B68(action, &action->frontCamera, &action->backCamera);
                     } else {
-                        func_001E0718(action, &action->frontCamera, &action->backCamera);
+                        btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
                     }
                     action->flags |= 0x800;
                 } else if (btlMatchFirstLinkedActorFlags(action) != 0) {
@@ -754,7 +754,7 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 
-extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
@@ -890,14 +890,14 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     action->backCamera.distance = distance + 100.0f;
                     btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
                 } else {
-                    func_001E0718(action, &action->frontCamera, &action->backCamera);
+                    btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
                 }
             }
         } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
             if (btlCanUseActorCategoryFlag4(action)) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else {
-                func_001E0718(action, &action->frontCamera, &action->backCamera);
+                btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
             }
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
@@ -930,7 +930,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (btlCanUseLinkedActor(action) &&
                    ((effMiscRand((EffRandState *)effSharedRandomState) & 1) ||
                     btlCanUseActorCategoryFlag2(action))) {
-            func_001E0718(action, &action->frontCamera, &action->backCamera);
+            btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
             btlAimLinkedUnitAtMuzzle((u8 *)action);
