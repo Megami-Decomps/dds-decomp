@@ -2020,14 +2020,14 @@ void btlResetUnitSelectionStateAndSetMode(void) {
 }
 
 /* Apply Abaddon's selection operand flags and accumulate its reported damage. */
-void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1) {
+void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *operandData) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     u8 *sub = (u8 *)work->sub;
     BtlUnit *actor;
     u32 flags;
     u32 actorFlags;
 
-    flags = *(u32 *)(arg1 + 0x28);
+    flags = *(u32 *)(operandData + 0x28);
     if (flags & 0x2000) {
         btlAttachActionEffectToUnit(unit);
         *(s32 *)(sub + 4) = 0;
@@ -2054,7 +2054,7 @@ void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1) {
         }
     }
     if ((unit->status.flags & 0x400) && unit->partyRecord.unitId == 0x108) {
-        s32 damage = *(s32 *)(sub + 4) - *(s32 *)arg1;
+        s32 damage = *(s32 *)(sub + 4) - *(s32 *)operandData;
         *(s32 *)(sub + 4) = damage;
         btlBossDebugPrintf("btl:ABADON damage = %d\n", damage);
     }
