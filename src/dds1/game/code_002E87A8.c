@@ -1,5 +1,6 @@
 #include "snd_ring.h"
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "snd_command_packet.h"
 #include "snd_work.h"
 #include "sdf_named_resource_request_api.h"

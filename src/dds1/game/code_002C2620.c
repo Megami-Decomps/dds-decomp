@@ -3,6 +3,7 @@
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
@@ -69,7 +70,6 @@ extern void fldCreateMapRequestQueues(void);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void sdfEnableFlagListViewTargetRelativeMode(void);
-extern void sndStartTrackDefault(s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
 extern s32 sdfHandleMapCounterSelectionInput(void);
 extern void sdfCounterTickCountdownAndMapTimers(void);

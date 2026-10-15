@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "kwln_background_fade_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "dat_state.h"
@@ -118,7 +119,6 @@ extern void sndEnsureMidiBankResident(s32 sound);
 
 extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 
-extern void sndStartTrackDefault(s32 track);
 
 extern void sdfDebugPrintf(const char *fmt, ...);
 
