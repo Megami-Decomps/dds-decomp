@@ -8669,10 +8669,10 @@ void func_0013EC68(void) {
         }
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            if (entry->unk65 == 0) {
+            if (entry->explorationArea == 0) {
                 stage = fldAreaState.area;
             } else {
-                stage = entry->unk65;
+                stage = entry->explorationArea;
             }
             room = floorFlags >> 2;
             if (room == 0) {
@@ -8682,7 +8682,7 @@ void func_0013EC68(void) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69,
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor, entry->unk68, entry->unk69,
                                                 entry->unk6A, entry->unk6B);
         }
         if (entry->variant == 1) {

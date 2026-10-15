@@ -61,8 +61,8 @@ typedef struct FldActorEntry {
     s8 flags54;
     char taskName[0xF]; /* 0x55 */
     u8 flags64;
-    s8 unk65;
-    s8 unk66;
+    s8 explorationArea; /* 0x65: area key for exploration and optional floor flags */
+    s8 explorationFloor; /* 0x66: floor key for the exploration map */
     s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
     union {
         s8 unk68;
@@ -98,8 +98,8 @@ typedef struct FldActorEntry {
     s8 flags54;
     char taskName[0xF]; /* 0x55 */
     u8 flags64;
-    s8 unk65;
-    s8 unk66;
+    s8 explorationArea; /* 0x65: area key for exploration and optional floor flags */
+    s8 explorationFloor; /* 0x66: floor key for the exploration map */
     s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
     union {
         s8 unk68;
@@ -120,6 +120,8 @@ typedef struct FldActorEntry {
 #endif
 } FldActorEntry;
 
+typedef char FldActorExplorationAreaOffset[((u32)&((FldActorEntry *)0)->explorationArea == 0x65) ? 1 : -1];
+typedef char FldActorExplorationFloorOffset[((u32)&((FldActorEntry *)0)->explorationFloor == 0x66) ? 1 : -1];
 typedef char FldActorExplorationColumnOffset[((u32)&((FldActorEntry *)0)->explorationColumn == 0x68) ? 1 : -1];
 typedef char FldActorExplorationRowOffset[((u32)&((FldActorEntry *)0)->explorationRow == 0x69) ? 1 : -1];
 typedef char FldActorExplorationColumnCountOffset[((u32)&((FldActorEntry *)0)->explorationColumnCount == 0x6A) ? 1 : -1];
