@@ -18,6 +18,7 @@
 #include "eff_random.h"
 #include "mdl_flag_api.h"
 #include "mnu_event_flag_entries.h"
+#include "eff_event_draw.h"
 
 struct SdfTex;
 struct MenuTerminalWork;

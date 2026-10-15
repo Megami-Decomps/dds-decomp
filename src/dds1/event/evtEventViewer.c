@@ -744,18 +744,6 @@ extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
-extern void effEnableTexturedBlur(void);
-extern void effDisableTexturedBlur(void);
-extern void effEnableTexturedSquare(void);
-extern void effDisableTexturedSquare(void);
-extern void effEnableFilterBlur(void);
-extern void effDisableFilterBlur(void);
-extern void effEnableStaggeredBlur(void);
-extern void effDisableStaggeredBlur(void);
-extern void effEnableFramebufferQuad(void);
-extern void effDisableFramebufferQuad(void);
-extern void effEnableColorRectangle(void);
-extern void effDisableColorRectangle(void);
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
         effDrawBlurRectangle(&effGetLoadDescA()->source);
