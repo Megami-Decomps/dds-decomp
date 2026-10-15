@@ -10,7 +10,7 @@ typedef struct EffAnimSample {
     s32 segment;    // 0x0C
 } EffAnimSample;
 
-void effSampleAnimSet(EffExpandedList *set, u32 frame, EffAnimSample *out);
+void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out);
 struct SdfTex;
 struct SdfTex *effAssignSampledSegmentReference(EffExpandedList *set, void *target, const EffAnimSample *sample);
 
