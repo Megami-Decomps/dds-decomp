@@ -20,7 +20,7 @@ extern void dds3ReplaceObjectResource(EffWorldNode *);
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
 void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
-extern const char D_003AC038[0x28];
+extern const char evtFieldScriptTerminationFormat[0x28];
 extern void sdfDebugPrintf(const char *format, ...);
 
 extern EffWorldNode *dds3AppendWorldNode(void);
@@ -31,7 +31,7 @@ extern void sdfSetViewFieldOfView(f32);
 extern void dds3DrawSetIndexedWord(u32, s32);
 extern void kwlnDrawCopyWords20(void *);
 extern void kwlnDrawCopyRow128(void *);
-extern const char D_003AC008[0x10];
+extern const char evtStageResourcePathFormat[0x10];
 extern char D_00367DF0[];
 extern char D_00367EB0[];
 extern char D_00367ED0[];
@@ -62,7 +62,7 @@ void evtDrainSecondaryWorldNodes(void) {
     }
 }
 
-const char D_003AC008[0x10] = "%sf%03d_%03d";
+const char evtStageResourcePathFormat[0x10] = "%sf%03d_%03d";
 
 /* Build the field world object and load its stage resource. */
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
@@ -77,7 +77,7 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     dds3SetWorldObject(worldObject);
     dds3SetWorldObjectValue(worldObject, (area << 16) + room);
     fldFormatAreaDirectory(directory, area, room);
-    sprintf(resourcePath, D_003AC008, directory, area, room);
+    sprintf(resourcePath, evtStageResourcePathFormat, directory, area, room);
     dds3AttachResourceHandleToWorldObject(worldObject, (u32)resourcePath);
     mdlSpawnViewerWorldObject();
     if (area < 10) {
@@ -127,7 +127,7 @@ void evtCreateEventScriptProcess(s32 eventId) {
     scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 
-const char D_003AC038[0x28] = "kill field script -> [%s]\n";
+const char evtFieldScriptTerminationFormat[0x28] = "kill field script -> [%s]\n";
 
 void evtKillFieldScriptTasks(void)
 {
@@ -140,7 +140,7 @@ void evtKillFieldScriptTasks(void)
         for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
             task = kwlnTaskGetByStateAndIndex(state, taskIndex);
             if (task->priority == 0x3EA) {
-                sdfDebugPrintf(D_003AC038, task->name);
+                sdfDebugPrintf(evtFieldScriptTerminationFormat, task->name);
                 kwlnTaskDestroyWithHierarchy(task, 0);
                 /* Destruction changes the queue, so restart the current scan. */
                 goto restartStateScan;

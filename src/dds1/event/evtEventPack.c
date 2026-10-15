@@ -190,14 +190,14 @@ void evtFreeMotionSeTaskParams(KwlnTask *task)
 
 extern void sprintf(char *, const char *, ...);
 /* Preserve the complete native format record, including its trailing zeros. */
-const char D_003AF260[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
+const char evtMotionSeTaskNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
 KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
     EvtMotionSeTaskParams *params;
 
-    sprintf(taskName, D_003AF260, eventTaskId, resourceId);
+    sprintf(taskName, evtMotionSeTaskNameFormat, eventTaskId, resourceId);
     params = sdfAllocSizeClassBlock(0xC);
     memset(params, 0, 0xC);
     params->modelKey = modelKey;
@@ -206,10 +206,10 @@ KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     return kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeMotionSeTaskParams, (u32)params);
 }
 
-const char D_003AF270[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
+const char evtPackScriptPathFormat[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
 extern char D_003BC370[];
 extern s32 sdfDebugPrintf();
-extern char D_003D8090[];
+extern char evtPackScriptPathBuffer[];
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
@@ -220,8 +220,8 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     sdfDebugPrintf(D_003BC370);
     eventId = state->eventId;
     directoryId = eventId - eventId % 10;
-    sprintf(D_003D8090, D_003AF270, directoryId, eventId, eventId);
-    request = fileQueueDefaultCallbackRequest(D_003D8090);
+    sprintf(evtPackScriptPathBuffer, evtPackScriptPathFormat, directoryId, eventId, eventId);
+    request = fileQueueDefaultCallbackRequest(evtPackScriptPathBuffer);
     state->pendingRequest = request;
     state->loaded = 1;
 }

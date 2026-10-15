@@ -4,9 +4,9 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "evt_picture.h"
-extern u8 D_003C9498[];
-extern u8 D_003C94A8[];
-extern u8 D_003C94B8[];
+extern u8 evtPictureQuadBounds[];
+extern u8 evtPictureQuadTexcoords[];
+extern u8 evtPictureQuadColor[];
 extern SdfPoolNode D_003805A8;
 #include "sdf_packet_alloc.h"
 extern void itfSendTablePacket(SdfListHead *packet, s32 index, s32 flag);
@@ -18,7 +18,7 @@ void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     itfSendTablePacket(packet, 0, 0);
-    itfQueueTextureBoundQuadPacket(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, texture, 0, packet);
+    itfQueueTextureBoundQuadPacket(evtPictureQuadBounds, evtPictureQuadTexcoords, evtPictureQuadColor, 0xFFF, texture, 0, packet);
     D_003805A8.append(&D_003805A8, packet);
 }
 

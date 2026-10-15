@@ -21,7 +21,7 @@ extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 
-const char D_00421578[0x10] = "%sf%03d_%03d";
+const char evtStageResourcePathFormat[0x10] = "%sf%03d_%03d";
 
 const char D_00421588[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";
 
@@ -73,7 +73,7 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
     dds3SetWorldObject(worldObject);
     dds3SetWorldObjectValue(worldObject, (area << 16) + room);
     fldFormatAreaDirectory(directory, area, room);
-    sprintf(resourcePath, D_00421578, directory, area, room);
+    sprintf(resourcePath, evtStageResourcePathFormat, directory, area, room);
     dds3AttachResourceHandleToWorldObject(worldObject, (u32)resourcePath);
     mdlSpawnViewerWorldObject();
     if (area < 10) {
@@ -129,7 +129,7 @@ void evtCreateEventScriptProcess(s32 eventId) {
     scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 
-const char D_004215A8[0x28] = "kill field script -> [%s]\n";
+const char evtFieldScriptTerminationFormat[0x28] = "kill field script -> [%s]\n";
 
 void evtKillFieldScriptTasks(void) {
     s32 state;
@@ -141,7 +141,7 @@ void evtKillFieldScriptTasks(void) {
         for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
             task = kwlnTaskGetByStateAndIndex(state, taskIndex);
             if (task->priority == 0x3EA) {
-                sdfDebugPrintf(D_004215A8, task->name);
+                sdfDebugPrintf(evtFieldScriptTerminationFormat, task->name);
                 kwlnTaskDestroyWithHierarchy(task, 0);
                 /* Destruction changes the queue, so restart the current scan. */
                 goto restartStateScan;
