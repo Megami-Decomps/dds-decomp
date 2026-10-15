@@ -12226,7 +12226,7 @@ typedef struct EffectAlignedBlock128 {
     u64 word[16];
 } EffectAlignedBlock128;
 
-u32 effLoadBattleCameraSnapshot(u32 arg0) {
+u32 effLoadBattleCameraSnapshot(u32 value) {
     FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)D_0045C110 = *(EffectBlock90 *)record;
@@ -12244,10 +12244,10 @@ u32 effLoadBattleCameraSnapshot(u32 arg0) {
             effBattleCameraSnapshotSelection.menu.cursor = 1;
         }
     }
-    return arg0;
+    return value;
 }
 
-u32 effStoreBattleCameraSnapshot(u32 arg0) {
+u32 effStoreBattleCameraSnapshot(u32 value) {
     FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)record = *(EffectBlock90 *)D_0045C110;
@@ -12266,7 +12266,7 @@ u32 effStoreBattleCameraSnapshot(u32 arg0) {
             effBattleCameraSnapshotSelection.menu.cursor = 1;
         }
     }
-    return arg0;
+    return value;
 }
 
 /* The menu state at D_003FFBB0 is distinct from the linked-file object. */
