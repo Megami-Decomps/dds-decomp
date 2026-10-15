@@ -359,15 +359,15 @@ f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval) {
 }
 
 /* vu0 routine: blend the two bracketing vec3 keys by the key weight into vf10. */
-void sdfMotionBlendVectorKeys(SdfMotionKeyInterval *a0) {
-    VU0_LERP_VEC3_KEYS(a0->firstKey, a0->secondKey, a0->weight);
+void sdfMotionBlendVectorKeys(SdfMotionKeyInterval *interval) {
+    VU0_LERP_VEC3_KEYS(interval->firstKey, interval->secondKey, interval->weight);
 }
 
 /* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
-s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0) {
+s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *interval) {
     s32 color;
 
-    EE_MMI_RGBA_LERP(color, *(u32 *)a0->firstKey, *(u32 *)a0->secondKey, a0->weight, 0.5f);
+    EE_MMI_RGBA_LERP(color, *(u32 *)interval->firstKey, *(u32 *)interval->secondKey, interval->weight, 0.5f);
     return color;
 }
 
