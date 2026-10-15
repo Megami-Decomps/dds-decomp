@@ -142,7 +142,7 @@ extern void sceCdPowerOff(void *arg0);
 
 extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
-extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
+extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 
 extern u32 strlen(const char *s);
 
