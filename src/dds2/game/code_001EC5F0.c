@@ -115,7 +115,7 @@ extern u32 D_00436AD4;
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
-extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
+extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
 extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
 
@@ -909,7 +909,7 @@ extern const BtlActionCameraPreset D_00417F30[8];
  * cameras start at its muzzle, lowered by a quarter of its height, at a
  * distance that fits the larger of its reach (at least 135, wider view) and
  * half its height. */
-void func_001EDC38(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4];
     f32 position[4];
     BtlActionCameraPreset presets[8];
@@ -1037,7 +1037,7 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
         selected = effMiscRandMod(0, 8);
     }
     if (btlGetIndexListCount(action->targetList) == 1 && allowSingle != 0) {
-        func_001EDC38(action, &action->frontCamera, &action->backCamera);
+        btlBuildRandomTargetCameraStates(action, &action->frontCamera, &action->backCamera);
         action->motionParameter = 30.0f;
         action->flags |= 0x41;
         return;
@@ -1835,7 +1835,7 @@ INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418310);
 
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418320);
 
-void func_001F0968(BtlLinkedCommand *action) {
+void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
     BtlState *state;
     BtlUnit *unit;
     BtlUnit *actor;
@@ -3965,7 +3965,7 @@ INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F5320);
 /* Camera clearance for a unit: mode 1 is the scaled camera radius plus any
  * negative horizontal offset; mode 0 is the larger of the scaled reach plus the
  * offset and half the scaled height plus any negative vertical offset. */
-f32 func_001F5780(BtlUnit *unit, u8 mode, f32 horizontalOffset, f32 verticalOffset) {
+f32 btlGetUnitCameraClearance(BtlUnit *unit, u8 mode, f32 horizontalOffset, f32 verticalOffset) {
     f32 result = 0.0f;
     f32 verticalBias = 0.0f;
     f32 clearance = 0.0f;
@@ -4399,7 +4399,7 @@ f32 btlGetUnitTargetDistance(BtlUnit *unit, u8 mode, f32 *target, f32 radius) {
     if (unit == 0 || target == 0) {
         return 0.0f;
     }
-    result = func_001F5780(unit, mode, 1.0f, 1.0f);
+    result = btlGetUnitCameraClearance(unit, mode, 1.0f, 1.0f);
     btlUnitGetPosVU(unit, mode);
     VU0_STORE_VF_UNCLOBBERED(vf10, pos);
     result = btlCombineCameraSpheresVU(pos, result, radius, target);
@@ -4416,18 +4416,18 @@ f32 btlBuildUnitTargetSphereVU(BtlUnit *first, BtlUnit *second, u8 firstMode, u8
 
     if (first != 0) {
         if (second != 0) {
-            result = func_001F5780(second, secondMode, 1.0f, 1.0f);
+            result = btlGetUnitCameraClearance(second, secondMode, 1.0f, 1.0f);
             btlUnitGetPosVU(second, secondMode);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
             result = btlGetUnitTargetDistance(first, firstMode, pos, result);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         } else {
-            result = func_001F5780(first, firstMode, 1.0f, 1.0f);
+            result = btlGetUnitCameraClearance(first, firstMode, 1.0f, 1.0f);
             btlUnitGetPosVU(first, firstMode);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         }
     } else {
-        result = func_001F5780(second, secondMode, 1.0f, 1.0f);
+        result = btlGetUnitCameraClearance(second, secondMode, 1.0f, 1.0f);
         btlUnitGetPosVU(second, secondMode);
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
     }

@@ -414,7 +414,7 @@ extern void btlRefreshSoundEntries(void);
 
 extern void btlRetainButtonTexture(void);
 
-extern void func_001C45F0(void);
+extern void btlAllocatePanelTaskWork(void);
 
 extern void btlInitializeRuntimeNoOp(void);
 
@@ -460,7 +460,7 @@ void btlInitializeBattleRuntime(void) {
     btlResetFieldColorAndSweepFlags();
     btlRefreshSoundEntries();
     btlRetainButtonTexture();
-    func_001C45F0();
+    btlAllocatePanelTaskWork();
     btlInitializeRuntimeNoOp();
     btlClearModelFlagRange();
 }

@@ -3714,7 +3714,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
     return 0;
 }
 
-extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomTargetCameraStates(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
@@ -3911,7 +3911,7 @@ flag_defeat_candidates:
             if (cameraMode == 0) {
                 btlBossDebugPrintf("VURI:T-Def ++++\n");
                 if (btlHasSingleLinkedResource(command)) {
-                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                     command->motionParameter = 30.0f;
                     command->flags |= 0x41;
                 } else {
@@ -4146,7 +4146,7 @@ flag_defeat_candidates:
             if (count == 1 && side == 1 && targetSide == 0) {
                 if (cameraMode == 0) {
                     btlBossDebugPrintf("VURI_AB:T-Def ++++\n");
-                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                     command->motionParameter = 30.0f;
                     command->flags |= 0x41;
                     return 1;
@@ -7027,7 +7027,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
                     break;
                 default:
                     btlBossDebugPrintf("SETO:T-Def ++++\n");
-                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                     command->motionParameter = 30.0f;
                     command->flags |= 0x41;
                     return 1;
@@ -7069,7 +7069,7 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
             if (cameraMode == 0) {
                 btlBossDebugPrintf("SETO:T-Def ++++\n");
                 if (btlHasSingleLinkedResource(command)) {
-                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                     command->motionParameter = 30.0f;
                     command->flags |= 0x41;
                 } else {
@@ -7563,7 +7563,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
             }
             if (cameraMode == 0) {
                 btlBossDebugPrintf("SATAN:T-Def ++++\n");
-                func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                 command->motionParameter = 30.0f;
                 command->flags |= 0x41;
                 return 1;
@@ -7593,7 +7593,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
             if (cameraMode == 0) {
                 btlBossDebugPrintf("SATAN:T-Def ++++\n");
                 if (btlHasSingleLinkedResource(command)) {
-                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                     command->motionParameter = 30.0f;
                     command->flags |= 0x41;
                 } else {

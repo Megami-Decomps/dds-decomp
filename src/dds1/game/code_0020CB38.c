@@ -691,7 +691,7 @@ extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlApplyCombinedActorFlags(u8 *);
-extern void func_001E0398(u8 *, u8 *, u8 *);
+extern void btlBuildRandomTargetCameraStates(u8 *, u8 *, u8 *);
 extern void btlBuildFilteredGroupCameraPair(u8 *, u8 *, u8 *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern char D_003A6338[];
@@ -769,7 +769,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
     count = btlGetIndexListCount(task->indexWork.indices);
     if (count == 1 && firstSide == 1 && secondSide == 0) {
         if (choice == 0) {
-            func_001E0398((u8 *)command, (u8 *)&command->frontCamera, (u8 *)&command->backCamera);
+            btlBuildRandomTargetCameraStates((u8 *)command, (u8 *)&command->frontCamera, (u8 *)&command->backCamera);
             command->motionParameter = 30.0f;
             command->flags |= 0x41;
             return 1;
