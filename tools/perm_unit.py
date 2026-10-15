@@ -18,9 +18,10 @@ scores 0.
 Only passes that keep source ordinary are enabled (NEAT_WEIGHTS). A permuter
 hit is a hint, not landable code: reduce it to the smallest ordinary change
 and verify the full build (docs/CONTRIBUTING.md).
-Use --stack-diffs: the permuter otherwise ignores stack-offset differences,
-so a zero score can still hide different local layouts. Independently check
-the reduced source with tools/check_unit.py in the complete unit.
+The dump hook upper-cases sp/s8, so the permuter's stack wildcards never
+apply and frame or local-offset differences always count (with or without
+--stack-diffs). Still check the reduced source with tools/check_unit.py in
+the complete unit before landing.
 
 Needs a decomp-permuter checkout (DECOMP_PERMUTER, default ../decomp-permuter
 next to the repository) and pycparser/toml for the Python running `import`.
@@ -315,7 +316,10 @@ def dump(o: Path) -> list[str]:
             elif kind in ("R_MIPS_HI16", "R_MIPS_LO16", "R_MIPS_GPREL16"):
                 out[-1] = re.sub(r"(,|\t)(-?(0x)?[0-9a-f]+)(\(|$)", r"\1<sym>\4", out[-1])
             continue
-        out.append(re.sub(r"-?\d+\(gp\)", "<sym>(gp)", line))
+        line = re.sub(r"-?\d+\(gp\)", "<sym>(gp)", line)
+        # Upper-case sp/s8 so the scorer's stack wildcards never apply: a zero
+        # score must mean the frame and local offsets match too.
+        out.append(re.sub(r"\b(sp|s8)\b", lambda m: m.group(1).upper(), line))
     return out
 
 
