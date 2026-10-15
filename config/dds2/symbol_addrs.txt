@@ -1,4 +1,5 @@
 // Hand-curated symbols (win over the generated block below)
+btlInitializeActorClearanceCameraPair = 0x001F3888; // type:func
 _start = 0x00100008; // type:func
 // $gp-relative byte spimdisasm leaves unsymbolized (emits an absolute %lo that encodes wrong)
 D_00435CF3 = 0x00435CF3; // type:u8
@@ -9894,7 +9895,6 @@ btlPrepareCameraMode6Participants = 0x001F34C8; // type:func
 btlUpdateApproachCameraPose = 0x001F34E0; // type:func
 func_001F35C0 = 0x001F35C0; // type:func
 btlBuildActorRotatedCameraPresets = 0x001F35C8; // type:func
-func_001F3888 = 0x001F3888; // type:func
 btlInitializeActorCameraPreset = 0x001F3C30; // type:func
 btlAdvanceActorCameraPreset = 0x001F3E48; // type:func
 btlInitSkillCommandCursor = 0x001F41F0; // type:func
