@@ -257,9 +257,6 @@ void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output) {
 }
 
 extern f32 D_00398440[][4];
-extern s32 sdfGetPacketCursor(void);
-extern void sdfSetPacketCursorAligned(s32 cursorAddress);
-
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
 void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SdfPacket *packet;

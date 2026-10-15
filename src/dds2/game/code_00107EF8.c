@@ -1626,8 +1626,6 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     }
 }
 
-extern s32 sdfGetPacketCursor(void);
-extern void sdfSetPacketCursorAligned(s32);
 extern s32 DIntr(void);
 extern u32 sdfGetFirstGeneralHeapBlock(void);
 extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
