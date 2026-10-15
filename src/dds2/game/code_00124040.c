@@ -2446,7 +2446,7 @@ void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
         scene->sequenceCode = record->code;
         scene->room = record->kind;
         scene->sequenceMode = record->unk_62;
-        scene->unk58 = record->enabled;
+        scene->retainCachedAreaResource = record->enabled;
         scene->secondaryState = record->mode;
         scene->cameraLinkMode = record->link;
         strcpy(scene->cameraName, record->detail);

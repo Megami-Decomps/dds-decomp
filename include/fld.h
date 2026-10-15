@@ -32,6 +32,10 @@ typedef struct FieldSequenceRecord {
     u32 options; /* 0x90: record options */
     u8 pad94[0xC];
 } FieldSequenceRecord;
+typedef char FieldSequenceRecord_size_check[
+    (sizeof(FieldSequenceRecord) == 0xA0) ? 1 : -1];
+typedef char FieldSequenceRecord_enabled_offset_check[
+    ((u32)&((FieldSequenceRecord *)0)->enabled == 0x58) ? 1 : -1];
 
 /* Packed actor placement rows used by field searches, motion and sound dispatch.
  * Both games use 0x6C-byte rows, with different signed flags and sequence fields. */
