@@ -1385,14 +1385,14 @@ ShopScene *mnuShopCreateScene(void) {
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
-void mnuShopDestroyScene(KwlnTask *arg) {
-    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(arg);
+void mnuShopDestroyScene(KwlnTask *task) {
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (scene != NULL) {
         mnuShopReleaseSprites(scene);
         mnuReleaseShopSceneSpriteResources(scene);
         mnuShopReleaseSceneObjects(scene);
-        mnuDrainPanelTransitions(&scene->transitionWork, arg);
+        mnuDrainPanelTransitions(&scene->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&scene->messageResource);
         sdfReleaseResourceAllocation(scene->resourceHandle);
