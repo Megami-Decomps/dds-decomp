@@ -2344,7 +2344,7 @@ void btlInitUnitFxDefaults(BtlUnit *unit) {
     PCP_COPY_VECTOR(unit->bodyOffset, &btlDefaultUnitBodyOffset);
     unit->height = 220.0f;
     unit->reach = 80.0f;
-    unit->unkC0 = 75.0f;
+    unit->cameraRadius = 75.0f;
 }
 
 extern s128 btlDefaultUnitPosition;
@@ -2371,7 +2371,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 in
         PCP_COPY_VECTOR(unit->bodyOffset, base);
         unit->reach = base->reach;
         unit->height = base->height;
-        unit->unkC0 = base->cameraRadius;
+        unit->cameraRadius = base->cameraRadius;
     } else {
         unit->bodyOffset[0] = alt->position[0];
         unit->bodyOffset[1] = alt->position[1];
@@ -2383,7 +2383,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 in
     PCP_COPY_VECTOR(unit->muzzleOffset, base);
     unit->bodyRadius = base->reach;
     unit->unkB8 = base->height;
-    unit->unkC0 = base->cameraRadius;
+    unit->cameraRadius = base->cameraRadius;
     unit->scale = base->actorScale;
     unit->actorScale = base->actorScale;
     unit->positionZOffset = base->zOffset;
