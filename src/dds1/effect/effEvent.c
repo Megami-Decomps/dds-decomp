@@ -587,7 +587,7 @@ void effDisableRectangleBlur(void) {
 }
 
 /* Copy only the 0x28-byte source prefix; retain the screen record's trailing bytes. */
-void effCopyRectangleBlurParameters(void *parameters) {
+void effCopyRectangleBlurParameters(const KwlnBlurRectParams *parameters) {
     memcpy(&effBlurRectangleParameters, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 

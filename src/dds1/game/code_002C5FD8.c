@@ -559,15 +559,15 @@ void fldReleaseMapRequestQueue(MapRequestState *state) {
 }
 
 /* Dispatch one queued request per interval; inactive nodes are reused. */
-void fldAdvanceMapRequest(MapRequestState *state, s32 value, s32 argument1, s32 argument2) {
+void fldAdvanceMapRequest(MapRequestState *state, s32 x, s32 y, s32 z) {
     MapRequestNode *node;
 
     node = state->next;
     if (state->elapsed == state->interval) {
         if (node->active == 0) {
-            node->value = value;
-            node->argument1 = argument1;
-            node->argument2 = argument2;
+            node->x = x;
+            node->y = y;
+            node->z = z;
             state->next = node->next;
             node->active = 1;
         }
@@ -666,7 +666,7 @@ loop:
         if (callback == NULL) {
             goto advance;
         }
-        callback(node->value, node->argument1, node->argument2, ring, node, progress);
+        callback(node->x, node->y, node->z, ring, node, progress);
     }
     node = node->next;
     goto loop;

@@ -38,8 +38,8 @@ void dds3DestroyWorld(void) {
     }
 }
 
-/* Set the primary selection without releasing its old pointer; no world is a no-op. */
-void dds3SetWorldObject(void *primaryObject) {
+/* Set the primary world node without releasing it; no world is a no-op. */
+void dds3SetWorldObject(EffWorldNode *primaryObject) {
     if (dds3ActiveWorld != NULL) {
         ((WorldInfo *)dds3ActiveWorld->data)->primaryObject = primaryObject;
     }
@@ -56,8 +56,8 @@ void *dds3GetWorldObject(void) {
     return ((WorldInfo *)world->data)->primaryObject;
 }
 
-/* Set the secondary selection without releasing its old pointer; no world is a no-op. */
-void dds3SetWorldSecondaryObject(void *secondaryObject) {
+/* Set the secondary world node without releasing it; no world is a no-op. */
+void dds3SetWorldSecondaryObject(EffWorldNode *secondaryObject) {
     if (dds3ActiveWorld != NULL) {
         ((WorldInfo *)dds3ActiveWorld->data)->secondaryObject = secondaryObject;
     }

@@ -7,6 +7,7 @@
 #include "dds3_path.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
+#include "mdl_world_object_source_vector_api.h"
 #include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -478,8 +479,8 @@ u32 evtOpBindMotionSoundToModel(void) {
 }
 
 u32 evtOpUseSourceVectorForWorldObject(void) {
-    u64 scriptParam0;
-    u64 scriptParam1;
+    u32 scriptParam0;
+    u32 scriptParam1;
 
     scriptParam0 = scrReadIntParameter(0);
     scriptParam1 = scrReadIntParameter(1);

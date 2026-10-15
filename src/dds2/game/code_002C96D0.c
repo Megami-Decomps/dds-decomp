@@ -1593,7 +1593,51 @@ s32 mcHandleSlotWriteResult(void) {
     return fileBeginSlotOpen();
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", fileBeginReadRemainingSlotIcons);
+s32 fileBeginReadRemainingSlotIcons(void) {
+    s32 found = 0;
+    s32 slot;
+    u32 flags;
+
+    fileSlotScanIndex++;
+    if (fileSlotScanIndex == 10) {
+        fileReqClearSlotMetadataDirty(fileMemoryCardRequestIndex);
+        fileSlotScanIndex = 0;
+        D_00437CEC = slot = 0;
+        if (fileCountSelectableFiles() == 0) {
+            if (D_00437D30 != 0) {
+                D_00437CF8 = 0;
+                fileSetMenuFlowState(0);
+                for (slot = 0; slot < 10; slot++) {
+                    flags = fileReqGetSlotFlags(fileMemoryCardRequestIndex, slot);
+                    if (flags & 2) {
+                        if (!(flags & 8)) {
+                            found = 1;
+                        }
+                    }
+                }
+                if (found) {
+                    D_00437D3C = 9;
+                } else {
+                    D_00437D3C = 7;
+                }
+                D_00437D40 = 0;
+                fileReqBegin(fileMemoryCardRequestIndex);
+                return (s32)filePollSlotDetectionAndBranch;
+            }
+            if (fileIsCardSpaceAboveMinimum() == 0) {
+                fileSetMenuFlowState(0);
+                D_00437CF8 = 0;
+                D_00437D3C = 5;
+                D_00437D40 = 0;
+                fileReqBegin(fileMemoryCardRequestIndex);
+                return (s32)filePollSlotDetectionAndBranch;
+            }
+        }
+        fileSetMenuFlowState(0);
+        return fileScanSlotStates();
+    }
+    return fileBeginReadSlotIcon();
+}
 
 s32 mcResetSlotMetadata(void) {
     s32 index;

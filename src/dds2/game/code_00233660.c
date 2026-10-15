@@ -29,6 +29,7 @@
 #include "mdl_grouped_parts_api.h"
 #include "file_request_api.h"
 #include "mdl_flag_api.h"
+#include "mdl_world_object_source_vector_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 
@@ -3574,15 +3575,15 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return world;
 }
 
-void mdlAttachWorldObjectToSourceVector(s32 firstId, s32 secondId) {
+void mdlAttachWorldObjectToSourceVector(u32 targetKey, u32 sourceKey) {
     f32 axis[4] = {0.0f, 1.0f, 0.0f, 1.0f};
     EffWorldNode *obj;
     EffWorldNode *src;
     EvtWorldSourceTransformPrefix *sourceTransform;
 
-    obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), firstId, 5);
+    obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), targetKey, 5);
     if (obj != NULL) {
-        src = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), secondId, 0x11);
+        src = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceKey, 0x11);
         if (src != NULL) {
             sourceTransform = src->data;
             effObjSetInnerPosition(obj, (u128 *)&sourceTransform->position);

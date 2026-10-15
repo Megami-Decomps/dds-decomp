@@ -256,7 +256,7 @@ BtlUnit *btlFindActiveActorByKind(s32 index) {
     return 0;
 }
 
-extern void btlCopyUnitStats(s32 actorAddress, s32 recordAddress);
+extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
 
 /* Insert a complete party record before actors with a larger priority. */
 void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
@@ -292,7 +292,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
         }
     }
     memcpy(&datGameState->party[i], &saved, sizeof(saved));
-    btlCopyUnitStats((s32)unit, (s32)&saved);
+    btlCopyUnitStats(unit, &saved);
     unit->partyRecord.flags |= 2;
     datGameState->party[i].flags |= 2;
     unit->partyIndex = i;
@@ -340,7 +340,7 @@ void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
         memcpy(&previous, &datGameState->party[actor->partyIndex], sizeof(previous));
         memcpy(&datGameState->party[actor->partyIndex], &datGameState->party[targetIndex], sizeof(previous));
         memcpy(&datGameState->party[targetIndex], &previous, sizeof(previous));
-        btlCopyUnitStats((s32)actor, (s32)&datGameState->party[actor->partyIndex]);
+        btlCopyUnitStats(actor, &datGameState->party[actor->partyIndex]);
         actor->partyRecord.flags |= 2;
         datGameState->party[actor->partyIndex].flags |= 2;
         datGameState->party[targetIndex].flags &= ~2;
@@ -368,22 +368,22 @@ s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
-s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1) {
-    u32 value = datCalculateCommandBaseValue(arg0, arg1);
+s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
+    u32 value = datCalculateCommandBaseValue(battler, command);
     f32 scale;
 
     if (value == 0) {
         return 0;
     }
     scale = 1.0f;
-    switch (datCommandRecords[arg1].costMode) {
+    switch (datCommandRecords[command].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
-        if (btlCheckSpecialAbility(arg0, 0x234)) {
+        if (btlCheckSpecialAbility(battler, 0x234)) {
             scale = datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
-        if (btlCheckSpecialAbility(arg0, 0x235)) {
+        if (btlCheckSpecialAbility(battler, 0x235)) {
             scale = datAbilityParameters[0x235 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
@@ -562,8 +562,8 @@ s32 btlGetLoggedIndexedCommandItem(s32 index) {
     return item;
 }
 
-s32 btlGetActorBedAssetIdFromIndex(s32 arg0) {
-    return datItemSkillRecords[arg0].commandIndex;
+s32 btlGetActorBedAssetIdFromIndex(s32 itemIndex) {
+    return datItemSkillRecords[itemIndex].commandIndex;
 }
 
 extern const char D_003A17A8[];

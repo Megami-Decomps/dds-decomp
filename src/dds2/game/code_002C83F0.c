@@ -13,7 +13,7 @@
 extern s32 D_00437CC0;
 extern s32 fileActiveCardDetectionRequestIndex;
 
-s32 func_0034F7B8(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
+s32 func_0034F7B8(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOut, void *formattedOut);
 
 void fileReqInit(s32 request);
 

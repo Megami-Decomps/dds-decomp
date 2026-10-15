@@ -30,7 +30,7 @@ s32 WaitSema(s32 sema);
 s32 SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
+s32 func_002F6990(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOut, void *formattedOut);
 s32 sceMcSync(s32 arg0, void *arg1, s32 *arg2);
 void func_002F6E90(u32 arg0, s32 arg1);
 s32 fileMan(KwlnTask *task);

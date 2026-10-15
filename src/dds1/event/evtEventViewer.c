@@ -9,6 +9,7 @@
 #include "mnu_camp_font_api.h"
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
+#include "mdl_world_object_source_vector_api.h"
 #include "sdf_motion.h"
 #include "itf_mes_window.h"
 #include "sdf_resource.h"
@@ -1689,7 +1690,6 @@ void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer) {
 }
 
 
-extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
  * restores the saved vectors; losing the active key restores them once too. */

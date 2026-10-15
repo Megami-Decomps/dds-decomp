@@ -4,6 +4,10 @@
 struct ActiveSoundNode;
 struct SoundResourceNode;
 
+/* Allocate the two independently linked sound-node kinds. */
+struct SoundResourceNode *sndAllocResourceNode(void);
+struct ActiveSoundNode *sndAllocListNode(void);
+
 void sndFreeResourceNode(struct SoundResourceNode *node);
 void sndFreeListNode(struct ActiveSoundNode *node);
 
