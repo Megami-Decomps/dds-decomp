@@ -366,7 +366,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer) {
     s32 i;
 
     if (viewer->windowContext != NULL) {
-        for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
+        for (i = 0; i < (s32)viewer->windowContext->mainEntry3Count; i++) {
             btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].type);
         }
     }

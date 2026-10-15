@@ -482,7 +482,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     }
     work->unk_1C = 0;
     work->unk_24 = 0;
-    work->unk_38 = 0;
+    work->mainEntry3Count = 0;
     work->mainEntry7Count = 0;
     work->mainEntry22Count = 0;
     work->entries = data->entries;
@@ -515,7 +515,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             break;
         case 3:
             work->mainEntry3Data = (u8 *)data + work->entries[i].offset;
-            work->unk_38 = work->entries[i].value;
+            work->mainEntry3Count = work->entries[i].value;
             break;
         case 9:
             work->mainEntry9Data = (u8 *)data + work->entries[i].offset;
@@ -578,7 +578,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     work->subEntry20Data = NULL;
     work->unk_E8 = 0;
     work->subEntry21Data = NULL;
-    work->unk_F8 = 0;
+    work->subEntry21Count = 0;
     work->subEntry24Data = NULL;
     work->unk_F0 = 0;
     work->subEntry25Data = NULL;
@@ -647,7 +647,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             break;
         case 21:
             work->subEntry21Data = (u8 *)sub + work->subEntries[i].offset;
-            work->unk_F8 = work->subEntries[i].value;
+            work->subEntry21Count = work->subEntries[i].value;
             sdfDebugPrintf("object table set ok.\n");
             break;
         case 25:
@@ -663,14 +663,14 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
         work->sub2Entries = NULL;
     }
     work->secondEntry4Data = NULL;
-    work->unk_9C = 0;
+    work->extendedEntry4Count = 0;
     if (sub2 == NULL) {
         return work;
     }
     for (i = 0; i < work->sub2->count; i++) {
         if (work->sub2Entries[i].type == 4) {
             work->secondEntry4Data = (u8 *)sub2 + work->sub2Entries[i].offset;
-            work->unk_9C = work->sub2Entries[i].value;
+            work->extendedEntry4Count = work->sub2Entries[i].value;
         }
     }
     return work;

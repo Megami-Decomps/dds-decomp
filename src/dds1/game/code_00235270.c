@@ -4300,7 +4300,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
     if (link->extra1 != 3) {
         link->extra2 = 0;
     } else {
-        for (i = 0; i < (s32)src->unk_F8; i++) {
+        for (i = 0; i < (s32)src->subEntry21Count; i++) {
             for (group = runtime->groups; group != NULL; group = group->next) {
                 if (strcmp(runtime->entryName[group->entryHeader], (char *)src->subEntry1Data + link->extra2 * 32) == 0) {
                     link->extra2 = group->entryHeader;
@@ -4423,7 +4423,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         }
     }
     for (secondaryIndex = 2; secondaryIndex >= 0; secondaryIndex--) {
-        for (row = 0; row < (s32)work->unk_38; row++) {
+        for (row = 0; row < (s32)work->mainEntry3Count; row++) {
             if (((EvtViewerPackageRecord *)work->mainEntry3Data)[row].loadOrder == secondaryIndex) {
                 packageId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].packageId;
                 partId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].partId;
@@ -4970,7 +4970,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->sub->kind < 6) {
         rowCount = work->subEntry4Count;
     } else {
-        rowCount = work->unk_9C;
+        rowCount = work->extendedEntry4Count;
     }
     for (row = 0; row < rowCount; row++) {
         if (work->sub->kind < 6) {
@@ -4989,7 +4989,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->sub->kind < 6) {
         rowCount = work->subEntry4Count;
     } else {
-        rowCount = work->unk_9C;
+        rowCount = work->extendedEntry4Count;
     }
     for (row = 0; row < rowCount; row++) {
         if (work->sub->kind < 6) {
@@ -5135,7 +5135,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
 
     /* Continue with native .L002413F0: work->subEntry21Data link metadata. */
     if (work->subEntry21Data != NULL) {
-        for (row = 0; row < (s32)work->unk_F8; row++) {
+        for (row = 0; row < (s32)work->subEntry21Count; row++) {
             if (((EvtGroupMetadata *)work->subEntry21Data)[row].entry != -1) {
                 for (group = runtime->groups; group != NULL; group = group->next) {
                     if (strcmp(runtime->entryName[group->entryHeader],
