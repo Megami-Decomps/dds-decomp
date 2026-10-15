@@ -158,7 +158,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 /* Search 24 inline skill IDs or eight IDs in the selected external record.
  * Return on the first match; no record-index or pointer validation here. */
-s32 datUnitHasSkill(DatPartyRecord *unit, s32 skillId) {
+s32 datUnitHasSkill(const DatPartyRecord *unit, s32 skillId) {
     s32 skillIndex;
 
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {

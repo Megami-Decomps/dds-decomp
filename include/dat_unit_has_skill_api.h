@@ -5,6 +5,6 @@
 
 struct DatPartyRecord;
 
-s32 datUnitHasSkill(struct DatPartyRecord *unit, s32 skillId);
+s32 datUnitHasSkill(const struct DatPartyRecord *unit, s32 skillId);
 
 #endif /* DAT_UNIT_HAS_SKILL_API_H */
