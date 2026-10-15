@@ -2598,6 +2598,31 @@ dependency graph. Check the active mode, allocation and other field users
 before taking such a pointer; the union remains the owner of heterogeneous
 payloads.
 
+DDS2 `mnuHandleMantraSourceDialogResult` shows the same distinction for an
+existing scalar member:
+
+```c
+u16 *sourceBits = &source->bits;
+*sourceBits &= ~0x2000;
+dspStartEntry(messageEntries.entries[0][activeVariant]);
+```
+
+Take the member address after the null-source check. `source->bits` is the
+actual acquisition record's halfword union member; `messageEntries` is a
+separate 48-byte local snapshot of six dialogue pairs, copied before callbacks.
+No callback receives that snapshot's address. Direct union access gives the
+store alias set zero and adds a false dependency to the private `s32` table
+load. The real cc1 sched2 trace then ranks the mask at priority 6 against the
+address addition's 4, reversing the two native instructions. Access through the
+member pointer restores the halfword's alias set: priorities are 4/4, and the
+existing instruction order selects the address first. No layout, clobber,
+readonly annotation or extra operation is needed.
+
+The current flags snapshot also follows the callbacks: retain it when no
+dialogue is selected, and reload the caller-owned word after `dspStartEntry`
+when one is selected. Selecting a real dialogue entry before the shared call
+expresses those two paths directly and avoids extra flag copies and reloads.
+
 DDS2 `game/code_001442D0::fldInitializeSceneGuideMarkers` provides a packed-record example.
 Each eight-byte preset contains a real `FieldGridCoordPair` of two signed
 halfwords, followed by a float phase. The terminal record encodes both
