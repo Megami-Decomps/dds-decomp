@@ -102,13 +102,13 @@ void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetB
 }
 
 /* Register the thread under the list semaphore before starting it. */
-void sdfStartTrackedThread(SdfThreadNode *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 arg) {
+void sdfStartTrackedThread(SdfThreadNode *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 threadArgument) {
     node->threadId = sdfCreateThread((void *)entry, stack, (s32)stackSize, priority);
     WaitSema(sdfTrackedThreadSemaphore);
     node->next = sdfTrackedThreadHead;
     sdfTrackedThreadHead = node;
     SignalSema(sdfTrackedThreadSemaphore);
-    _StartThread(node->threadId, arg);
+    _StartThread(node->threadId, threadArgument);
 }
 
 /* A previously queued wakeup counts toward the requested sleep count. */
