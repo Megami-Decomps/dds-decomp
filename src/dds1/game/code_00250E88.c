@@ -419,7 +419,7 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
     memset(entry, 0, sizeof(MnuMantraGridEntry));
     entry->sceneId = profileId;
     entry->requiredLevel = prfGetRequiredProfileLevel(entry->sceneId);
-    entry->value05 = prfGetProfileParameterByte5(entry->sceneId);
+    entry->backgroundColorIndex = prfGetProfileParameterByte5(entry->sceneId);
     prfBuildRawSkillList(entry->sceneId, &entry->skills);
     entry->cap = prfGetCapValue(entry->sceneId);
     entry->frame = 0x3C;

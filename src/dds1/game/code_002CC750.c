@@ -1042,7 +1042,7 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
 
     switch (state) {
     case 0:
-        rules = (PrfDds1RequirementSlot *)&D_00391230[requirementId].flags04;
+        rules = (PrfDds1RequirementSlot *)&D_00391230[requirementId].stateZeroFirstOperation;
         if (D_00391230[requirementId].stateFlags & 8) {
             result = 0;
             expected = 1;
@@ -1060,7 +1060,7 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
         return 0;
     }
     for (i = 0; i < 2; i++) {
-        switch (rules[i].status) {
+        switch (rules[i].operation) {
         case 1:
             if (ptyHasAllReqProfiles((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
                 result = expected;

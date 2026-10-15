@@ -36,7 +36,7 @@ typedef struct MnuMantraGridEntry {
     s32 cap;
     u16 sceneId;
     u16 requiredLevel;
-    u32 value05;
+    u32 backgroundColorIndex;
     s32 state;
     PrfSkillList skills;
     MnuMantraGridPulse pulse;
@@ -51,7 +51,7 @@ typedef char MnuMantraGridEntryLayoutAssert[
      (u32)&((MnuMantraGridEntry *)0)->cap == 8 &&
      (u32)&((MnuMantraGridEntry *)0)->sceneId == 0x0C &&
      (u32)&((MnuMantraGridEntry *)0)->requiredLevel == 0x0E &&
-     (u32)&((MnuMantraGridEntry *)0)->value05 == 0x10 &&
+     (u32)&((MnuMantraGridEntry *)0)->backgroundColorIndex == 0x10 &&
      (u32)&((MnuMantraGridEntry *)0)->state == 0x14 &&
      (u32)&((MnuMantraGridEntry *)0)->skills == 0x18 &&
      (u32)&((MnuMantraGridEntry *)0)->pulse == 0x4C &&

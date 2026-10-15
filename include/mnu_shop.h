@@ -54,10 +54,10 @@ typedef struct MenuWindowContainer {
     s32 width;             /* 0x10 */
     s32 height;            /* 0x14 */
     struct MenuList *list; /* 0x18 */
-    s32 field1C;           /* 0x1C */
+    s32 suppressBaseSprite; /* 0x1C */
     struct EffectSlotSet *spriteResource; /* 0x20 */
-    s32 param24;           /* 0x24 */
-    s32 param28;           /* 0x28 */
+    s32 rowSpriteSlot;     /* 0x24 */
+    s32 baseSpriteSlot;    /* 0x28 */
     struct {
         struct EffectSlotSet *sprite;
         u32 parameter;
@@ -186,11 +186,11 @@ typedef struct ShopScene {
     s32 counter;
     s32 menuMode;
     u8 pad88[4];
-    s32 count8C;
+    s32 activePartyCount;
     s16 extraOption;
     s16 pendingSelection;
     s32 scanIndex;
-    s32 count98;
+    s32 pendingPriceStage;
     s32 previousValue;
     s32 elapsedFrames;
     s32 progressTicks;

@@ -1378,8 +1378,8 @@ ShopScene *mnuShopCreateScene(void) {
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", &obj->messageResource);
     evtCreateMessageWindowIfMissing(obj->messageResource.dataAddress);
     D_003BC520 = obj->spriteResource;
-    obj->count98 = mnuCampGetShopPriceStage();
-    obj->count8C = mnuCountActivePartyEntries();
+    obj->pendingPriceStage = mnuCampGetShopPriceStage();
+    obj->activePartyCount = mnuCountActivePartyEntries();
     return obj;
 }
 
@@ -1546,7 +1546,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
     } else {
         operation = operations[scene->sprite->list->cursor->index];
     }
-    capacity = scene->count8C;
+    capacity = scene->activePartyCount;
     switch (operation) {
     case 1:
     case 2: {
@@ -1592,7 +1592,7 @@ s32 mnuCampGetAffordablePurchaseCount(ShopScene *context) {
     s32 divisor = parameters->price;
     s32 kind = parameters->mode;
     s32 limit = globalState->header.currency / divisor;
-    s32 quantity = context->count8C;
+    s32 quantity = context->activePartyCount;
     s32 available;
 
     if (kind == 2) {
@@ -1619,7 +1619,7 @@ s32 mnuCampGetAffordablePurchaseCount(ShopScene *context) {
 
 void mnuCampDisableUnavailableItemEntries(ShopScene *scene) {
     s32 index = 0;
-    s32 capacity = scene->count8C;
+    s32 capacity = scene->activePartyCount;
     struct MenuListNode *node = scene->window->list->first;
     for (; index < scene->window->list->count; index++) {
         CampWindowParams *parameters = &node->camp;
@@ -3086,13 +3086,13 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                     break;
 
                 case 1:
-                    if (state->count98 != 0) {
+                    if (state->pendingPriceStage != 0) {
                         dspSetActive(1);
-                        dspStartEntry(state->count98 + 0xD);
+                        dspStartEntry(state->pendingPriceStage + 0xD);
                         {
                             s32 flagIds[5] = {0x970, 0x971, 0x972, 0x973, 0x974};
 
-                            mdlFlagSet(flagIds[state->count98 - 1]);
+                            mdlFlagSet(flagIds[state->pendingPriceStage - 1]);
                         }
                         state->action = 2;
                     } else {
@@ -3103,7 +3103,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 case 2:
                     if (evtGetMessageWindowControlState() == 0) {
                         evtFinishMessageWindowAndNotify();
-                        state->count98 = mnuCampGetShopPriceStage();
+                        state->pendingPriceStage = mnuCampGetShopPriceStage();
                         state->action = 3;
                         state->scanIndex = 0;
                     }
@@ -3148,7 +3148,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                     if (evtGetMessageWindowControlState() == 0) {
                         evtFinishMessageWindowAndNotify();
                         if (state->scanIndex == -1) {
-                            if (state->count98 == 2) {
+                            if (state->pendingPriceStage == 2) {
                                 state->action = 6;
                             } else {
                                 state->action = 1;

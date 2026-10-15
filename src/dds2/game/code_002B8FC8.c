@@ -924,10 +924,10 @@ void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, struct EffectSlot
 }
 
 void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, EffectSlotSet *spriteResource, u32 third, u32 fourth) {
-    menu->field1C = first;
+    menu->suppressBaseSprite = first;
     menu->spriteResource = spriteResource;
-    menu->param24 = third;
-    menu->param28 = fourth;
+    menu->rowSpriteSlot = third;
+    menu->baseSpriteSlot = fourth;
 }
 
 
@@ -1090,14 +1090,14 @@ void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window,
     s32 i;
     EffectSlotSet *sprite = window->spriteResource;
     s32 state = window->fadeScale;
-    s32 field = window->field1C;
+    s32 field = window->suppressBaseSprite;
     if (sprite != 0) {
         if (field == 0) {
-            effDrawTextureSlotWithBlendedCornerColors(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
+            effDrawTextureSlotWithBlendedCornerColors(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->baseSpriteSlot, option);
         }
         for (i = 0; i < count; i++) {
             effDrawTextureSlotWithBlendedCornerColors(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
-                          window->spriteResource, window->param24, option);
+                          window->spriteResource, window->rowSpriteSlot, option);
         }
     }
 }

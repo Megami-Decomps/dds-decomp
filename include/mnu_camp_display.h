@@ -12,7 +12,7 @@ typedef struct CampDisplayDefaults {
     s32 enabled;    /* 0x14 */
     s32 variant;    /* 0x18 */
 #ifdef VERSION_DDS2
-    s32 opaque1C;   /* 0x1C: DDS2-only initialized extension */
+    s32 preserveAlpha; /* 0x1C: DDS2 RGB-only alpha-fail drawing */
 #endif
 } CampDisplayDefaults;
 
@@ -32,7 +32,7 @@ typedef char CampDisplayDefaults_variant_at_18[
     ((u32)&((CampDisplayDefaults *)0)->variant == 0x18) ? 1 : -1];
 #ifdef VERSION_DDS2
 typedef char CampDisplayDefaults_opaque1C_at_1C[
-    ((u32)&((CampDisplayDefaults *)0)->opaque1C == 0x1C) ? 1 : -1];
+    ((u32)&((CampDisplayDefaults *)0)->preserveAlpha == 0x1C) ? 1 : -1];
 typedef char CampDisplayDefaults_size_is_20[
     (sizeof(CampDisplayDefaults) == 0x20) ? 1 : -1];
 #else
