@@ -173,7 +173,74 @@ void evtBlendVectorRows(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     VU0_STORE_VF(vf10, out + 8);
 }
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtBlendParamsC);
+typedef struct EvtBlendVecColor {
+    f32 vec[4];
+    u32 color;
+} EvtBlendVecColor;
+
+extern f32 D_00368570[4];
+extern u32 D_00368580[4];
+
+/* One asm location for every arm's w set, so jump2 can cross-jump them. */
+static inline void evtSetBlendVecW(f32 w)
+{
+    VU0_SCALAR_OP_CLOBBER(w, "vmulx.w vf10, vf0, vf2x");
+}
+
+/* vu0 routine: blend a vector and an RGBA8888 colour by t (missing input =
+ * default vector/colour) */
+void evtBlendParamsC(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *b, EvtBlendVecColor *out)
+{
+
+    if (enable == 0) {
+        t = 0.0f;
+    }
+    if (a != NULL) {
+        VU0_SET_VF10_COMPONENT(x, a->vec[0]);
+        VU0_SET_VF10_COMPONENT(y, a->vec[1]);
+        VU0_SET_VF10_COMPONENT(z, a->vec[2]);
+        evtSetBlendVecW(a->vec[3]);
+    } else {
+        VU0_SET_VF10_COMPONENT(x, D_00368570[1]);
+        VU0_SET_VF10_COMPONENT(y, D_00368570[0]);
+        VU0_SET_VF10_COMPONENT(z, D_00368570[2]);
+        evtSetBlendVecW(D_00368570[3]);
+    }
+    VU0_SCALE_VF(vf10, 1.0f - t);
+    VU0_MOVE_VF(vf11, vf10);
+    if (b != NULL) {
+        VU0_SET_VF10_COMPONENT(x, b->vec[0]);
+        VU0_SET_VF10_COMPONENT(y, b->vec[1]);
+        VU0_SET_VF10_COMPONENT(z, b->vec[2]);
+        evtSetBlendVecW(b->vec[3]);
+    } else {
+        VU0_SET_VF10_COMPONENT(x, D_00368570[1]);
+        VU0_SET_VF10_COMPONENT(y, D_00368570[0]);
+        VU0_SET_VF10_COMPONENT(z, D_00368570[2]);
+        evtSetBlendVecW(D_00368570[3]);
+    }
+    VU0_SCALE_VF(vf10, t);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_GET_VF10_X(out->vec[0]);
+    VU0_GET_VF10_Y(out->vec[1]);
+    VU0_GET_VF10_Z(out->vec[2]);
+    VU0_GET_VF10_W(out->vec[3]);
+    if (a != NULL) {
+        eeUnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
+    } else {
+        eeUnpackRGBAWordFloat(D_00368580[0], 1.0f / 128.0f);
+    }
+    VU0_SCALE_VF(vf10, 1.0f - t);
+    VU0_MOVE_VF(vf11, vf10);
+    if (b != NULL) {
+        eeUnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
+    } else {
+        eeUnpackRGBAWordFloat(D_00368580[0], 1.0f / 128.0f);
+    }
+    VU0_SCALE_VF(vf10, t);
+    VU0_ADD(vf10, vf10, vf11);
+    out->color = eePackRGBAWord(128.0f);
+}
 
 void evtBlendParamsA(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out)
 {
