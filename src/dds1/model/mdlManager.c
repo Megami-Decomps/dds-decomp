@@ -276,7 +276,7 @@ extern char *strcat(char *dst, const char *src);
 extern MdlResourceTable D_00367900[];
 extern MdlResourceTable D_00365858[];
 
-Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
+Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
@@ -898,11 +898,11 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLea
         ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
-Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
+Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId) {
     Motion *node;
 
     for (node = ctx->inner->motionList; node != NULL; node = node->next) {
-        if (node->searchId == id) {
+        if (node->searchId == searchId) {
             return node;
         }
     }
