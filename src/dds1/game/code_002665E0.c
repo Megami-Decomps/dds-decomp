@@ -740,13 +740,13 @@ void func_00269418(void) {
 }
 
 /* Copy the packed eight-byte prefix, then append the caller's filename. */
-char *mnuBuildSoundResourcePath(char *pathBuffer, char *filename) {
+char *mnuBuildSoundResourcePath(char *pathBuffer, const char *filename) {
     *(u64p *)pathBuffer = *(u64p *)D_003BC590;
     return strcat(pathBuffer, filename);
 }
 
 /* Use the voice prefix with the same packed, unbounded append convention. */
-char *mnuBuildVoiceResourcePath(char *pathBuffer, char *filename) {
+char *mnuBuildVoiceResourcePath(char *pathBuffer, const char *filename) {
     *(u64p *)pathBuffer = *(u64p *)D_003BC598;
     return strcat(pathBuffer, filename);
 }
