@@ -25,6 +25,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "btl_grouped_entity_api.h"
 #include "sdf_model.h"
 #include "sdf_model_copy.h"
 #include "sdf_dev_slot_api.h"
@@ -50,8 +51,6 @@
 #define BTL_GROUP_RESOURCE_SLOT_COUNT 8
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
-
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 
 void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 
@@ -257,11 +256,6 @@ Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
 
 extern u32 mdlGroupJobSemaphore;
 
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
-
-
-
-
 extern s32 btlGroupContainsId(s32 group, s32 id);
 
 
@@ -454,7 +448,6 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 extern s32 btlGroupContainsId(s32, s32);
 extern void btlAddGroupId(s32, s32);
 extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);

@@ -11,6 +11,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "btl_grouped_entity_api.h"
 #include "sdf.h"
 #include "sdf_texture_submit.h"
 #include "sdf_texture_file.h"
@@ -27,8 +28,6 @@ extern u8 btlIsRuntimeAllocated(void);
 extern s32 btlIsCurrentActorFullyMarked(void);
 
 extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
-
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 
 extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
