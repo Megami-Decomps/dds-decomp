@@ -1882,7 +1882,7 @@ EffPCPSharedTrailRef *effPcpCreateSharedTrailRef(EffPCPTrailParams *params) {
         effPcpSharedTrailWork->pos[2] = 0;
         effPcpSharedTrailWork->sizeInput = 0;
         effPcpSharedTrailWork->limit = params->count;
-        effPcpSharedTrailWork->unk24 = params->count;
+        effPcpSharedTrailWork->baseLimit = params->count;
         effPcpSharedTrailWork->colors[0] = params->colors[0];
         effPcpSharedTrailWork->colors[1] = params->colors[1];
         effPcpSharedTrailWork->scale = params->scale;
@@ -1934,7 +1934,7 @@ void effPcpUpdateSharedTrail(ref)
     if (ref->frame == 0) {
         EFF_SHARED_TRAIL->frame &= 1;
         if (EFF_SHARED_TRAIL->frame != 0) {
-            EFF_SHARED_TRAIL->limit = EFF_SHARED_TRAIL->unk24 + 1;
+            EFF_SHARED_TRAIL->limit = EFF_SHARED_TRAIL->baseLimit + 1;
         }
         ref->frame = EFF_SHARED_TRAIL->frame;
     }
