@@ -186,7 +186,7 @@ u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
         }
     }
     if (guardAbility != -1 && (guardMask & result)) {
-        attacker->unk314 = guardAbility;
+        attacker->pendingAbilityId = guardAbility;
     }
     return result;
 }

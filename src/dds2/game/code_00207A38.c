@@ -712,8 +712,8 @@ void btlUpdateUnitActors(void) {
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
             btlRefreshUnitMotionSelection(unit);
-            unit->unkF8 = 0;
-            unit->unkFA = 0;
+            unit->motionStartFrame = 0;
+            unit->motionEndFrame = 0;
             btlApplyUnitMotionSelection(unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
         }
         unit->status.stateFlags &= ~0x8000;

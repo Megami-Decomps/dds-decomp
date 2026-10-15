@@ -1748,8 +1748,8 @@ void btlPrepareUnitMotionWithSavedOverride(BtlUnit *unit, s32 selector, s32 firs
                 case 0x13A:
                     selector = unit->effectIndex;
                     mode = 1;
-                    firstParameter = unit->unkF8;
-                    secondParameter = unit->unkFA;
+                    firstParameter = unit->motionStartFrame;
+                    secondParameter = unit->motionEndFrame;
                     break;
                 }
             }
@@ -3108,8 +3108,8 @@ void btlResetSpecialActionActorPresentation(void) {
                     if (mode >= 0x111) {
                         switch (unit->unkEC) {
                         case 0x10:
-                            unit->unkF8 = 0;
-                            unit->unkFA = 0;
+                            unit->motionStartFrame = 0;
+                            unit->motionEndFrame = 0;
                             btlApplyUnitMotionSelection(unit, unit->effectIndex,
                                                        unit->effectParameter,
                                                        unit->effectScale);
@@ -4446,8 +4446,8 @@ void btlRestoreMarkedUnitMotionOnStateChange(void) {
             }
             if (unit != 0) {
                 btlRefreshUnitMotionSelection(unit);
-                unit->unkF8 = 0;
-                unit->unkFA = 0;
+                unit->motionStartFrame = 0;
+                unit->motionEndFrame = 0;
                 btlApplyUnitMotionSelection(unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
             }
         }
@@ -5010,8 +5010,8 @@ void btlApplyMarkedCommandStateMotion(void) {
             }
             if (unit != 0) {
                 btlRefreshUnitMotionSelection(unit);
-                unit->unkF8 = 0;
-                unit->unkFA = 0;
+                unit->motionStartFrame = 0;
+                unit->motionEndFrame = 0;
                 btlApplyUnitMotionSelection(unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
             }
         }

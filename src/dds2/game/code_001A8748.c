@@ -1391,7 +1391,7 @@ DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
     DatPartyRecord *entry;
 
     if ((actor->status.flags & 0x400) == 0) {
-        entry = btlGetIndexedPartyEntryRecord(actor->unk2E4);
+        entry = btlGetIndexedPartyEntryRecord(actor->partyIndex);
         return entry;
     }
     return &actor->partyRecord;
@@ -1412,7 +1412,7 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_004150B0);
 
 void btlSyncPlayerWork(BtlUnit *actor) {
     DatPartyRecord *src = &actor->partyRecord;
-    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->unk2E4);
+    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->partyIndex);
     s32 maxHp;
     s32 maxMp;
     if (src->flags & 0x1000) {
@@ -1454,7 +1454,7 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                if (kind == unit->unk2E4) {
+                if (kind == unit->partyIndex) {
                     return unit;
                 }
             }
@@ -1490,14 +1490,14 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     for (i = sourceIndex; i < 4; i++) {
         memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(saved));
         if (datGameState->party[i + 1].flags & 2) {
-            btlFindActiveActorByKind(i + 1)->unk2E4 = i;
+            btlFindActiveActorByKind(i + 1)->partyIndex = i;
         }
     }
 
     for (i = 4; i > insertion; i--) {
         memcpy(&datGameState->party[i], &datGameState->party[i - 1], sizeof(saved));
         if (datGameState->party[i - 1].flags & 2) {
-            btlFindActiveActorByKind(i - 1)->unk2E4 = i;
+            btlFindActiveActorByKind(i - 1)->partyIndex = i;
         }
     }
 
@@ -1505,7 +1505,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     btlCopyUnitStats(unit, &saved);
     unit->partyRecord.flags |= 2;
     datGameState->party[i].flags |= 2;
-    unit->unk2E4 = i;
+    unit->partyIndex = i;
     btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
 }
@@ -1516,14 +1516,14 @@ void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     s32 originalIndex;
     s32 index;
 
-    originalIndex = unit->unk2E4;
+    originalIndex = unit->partyIndex;
     memcpy(&saved, &datGameState->party[originalIndex], sizeof(saved));
     index = originalIndex;
     if (index < 4 && (u16)(scanState->party[index + 1].flags & 1)) {
         do {
             memcpy(&datGameState->party[index], &datGameState->party[index + 1], sizeof(saved));
             if (datGameState->party[index + 1].flags & 2) {
-                btlFindActiveActorByKind(index + 1)->unk2E4 = index;
+                btlFindActiveActorByKind(index + 1)->partyIndex = index;
             }
             index++;
             if (index >= 4) {
@@ -1536,7 +1536,7 @@ void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     memcpy(&datGameState->party[index], &saved, sizeof(saved));
     unit->partyRecord.flags &= ~2;
     datGameState->party[index].flags &= ~2;
-    unit->unk2E4 = 6;
+    unit->partyIndex = 6;
     btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index, saved.unitId);
 }
@@ -1547,18 +1547,18 @@ extern const char D_00415130[];
 void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
     DatPartyRecord previous;
 
-    if (actor->unk2E4 != targetIndex) {
-        memcpy(&previous, &datGameState->party[actor->unk2E4], sizeof(previous));
-        memcpy(&datGameState->party[actor->unk2E4], &datGameState->party[targetIndex], sizeof(previous));
+    if (actor->partyIndex != targetIndex) {
+        memcpy(&previous, &datGameState->party[actor->partyIndex], sizeof(previous));
+        memcpy(&datGameState->party[actor->partyIndex], &datGameState->party[targetIndex], sizeof(previous));
         memcpy(&datGameState->party[targetIndex], &previous, sizeof(previous));
 
-        btlCopyUnitStats(actor, &datGameState->party[actor->unk2E4]);
+        btlCopyUnitStats(actor, &datGameState->party[actor->partyIndex]);
         actor->partyRecord.flags |= 2;
-        datGameState->party[actor->unk2E4].flags |= 2;
+        datGameState->party[actor->partyIndex].flags |= 2;
         datGameState->party[targetIndex].flags &= ~2;
         btlOnPartyRosterChange();
         btlBossDebugPrintf(D_00415130,
-                           actor->unk2E4, targetIndex, previous.unitId,
+                           actor->partyIndex, targetIndex, previous.unitId,
                            actor->partyRecord.unitId);
     }
 }
@@ -1820,7 +1820,7 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
         if ((btlUnitStatusPair(actor) & 0x1400) || (actor->partyRecord.flags & 0x10)) {
             if (btlCheckSpecialAbility(&actor->partyRecord, 0x23E) != 0) {
                 category = 1;
-                task->unit->unk314 = 0x23E;
+                task->unit->pendingAbilityId = 0x23E;
             } else {
                 category = 0;
             }
@@ -3375,13 +3375,13 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
         }
         if (btlRollAiBucket() < automatic) {
             if (automaticAbility != -1) {
-                attacker->unk314 = automaticAbility;
+                attacker->pendingAbilityId = automaticAbility;
             }
             return 2;
         }
         if (btlRollAiBucket() < critical) {
             if (criticalAbility != -1) {
-                attacker->unk314 = criticalAbility;
+                attacker->pendingAbilityId = criticalAbility;
             }
             return 2;
         }

@@ -168,7 +168,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
         return;
     }
-    if (unit->unkCC != 0) {
+    if (unit->modelBorrowed != 0) {
         return;
     }
 
