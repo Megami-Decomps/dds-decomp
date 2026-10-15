@@ -1040,7 +1040,7 @@ void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
                 record->face = face;
                 record->stopData = stopData;
                 record->sceneFlag = sceneFlag;
-                record->unkE0 = ownerIndex;
+                record->ownerIndex = ownerIndex;
                 record->unkCA = 0;
                 fldValueRecordCount++;
 next_face:
@@ -1148,9 +1148,9 @@ void fldUpdatePositionZoneHits(f32 *input) {
                                  ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].unkE0 > 0) {
+        if (((FldValueRecord *)fldValueRecords)[index].ownerIndex > 0) {
             if (fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                            ((FldValueRecord *)fldValueRecords)[index].unkE0)) {
+                                            ((FldValueRecord *)fldValueRecords)[index].ownerIndex)) {
                 continue;
             }
         }
