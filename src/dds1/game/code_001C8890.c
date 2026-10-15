@@ -576,10 +576,10 @@ void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
 }
 
 /* Enter COMMAND by clearing its one-shot audio flag and opening the command panel. */
-void btlEnterCommandSelectionState(u32 arg0) {
+void btlEnterCommandSelectionState(u32 task) {
     btlGetRuntime();
-    *(u32 *)((s32)arg0 + 8) = *(u32 *)((s32)arg0 + 8) & 0xfffffffb;
-    btlOpenBattleCommandPanel(arg0);
+    *(u32 *)((s32)task + 8) = *(u32 *)((s32)task + 8) & 0xfffffffb;
+    btlOpenBattleCommandPanel(task);
 }
 
 extern s32 fldGetSceneObjectState(void);
@@ -2913,11 +2913,11 @@ void btlSpawnSceneActionAndSwitchState(void) {
 }
 
 /* Retail PRESS state: start scene action 0x1194, then enter the owner-task wait. */
-void btlSchedulePressStateSceneAction(u8 *arg0) {
-    u8 *task = fldCreateSceneGroupAction(arg0, 0x1194, 1);
+void btlSchedulePressStateSceneAction(u8 *unit) {
+    u8 *task = fldCreateSceneGroupAction(unit, 0x1194, 1);
 
     btlStartTask(task);
-    btlDispatchStateHandler(arg0, 0x1a);
+    btlDispatchStateHandler(unit, 0x1a);
 }
 
 /* Empty entry callback for the retail PACKET action state. */
@@ -3119,8 +3119,8 @@ void btlCommandTaskReleaseActor(s32 task) {
     *(u32 *)(task + 8) |= 2;
 }
 
-void btlFlagLinkedActorActionInProgress(s32 arg0) {
-    ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
+void btlFlagLinkedActorActionInProgress(s32 unit) {
+    ((BtlTask *)unit)->unit->status.flags = (u32)((BtlTask *)unit)->unit->status.flags | 0x4000
     ;
 }
 void btlRunHookAndAdvanceUnitState(s32 object) {
@@ -3144,12 +3144,12 @@ void btlEnterTestActionState(void) {
     btlInitializeBattleDebugMenu();
 }
 
-void btlAdvanceUnitWhenActionGateClears(u32 arg0) {
+void btlAdvanceUnitWhenActionGateClears(u32 unit) {
     s64 temp_v0;
 
     temp_v0 = btlUpdateBattleModelDebugEditor();
     if (temp_v0 == 0) {
-        btlDispatchStateHandler(arg0, 6);
+        btlDispatchStateHandler(unit, 6);
         return;
     }
 }
