@@ -5,6 +5,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "brs_level_progress_api.h"
 #include "mnu_result.h"
 #include "eff_random.h"
 #include "mdl_flag_api.h"
@@ -31,8 +32,6 @@ extern void mnuClearItemSelectionSlots(BrsSkillPackageWork *);
 extern void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
 
-extern u8 brsGetLevelStepCrossedBy(s32, s32);
-extern u8 brsGetLevelStepForValue(s32);
 extern s32 sprintf(char *, const char *, ...);
 extern char D_004379B0[];
 extern char D_004379B8[];

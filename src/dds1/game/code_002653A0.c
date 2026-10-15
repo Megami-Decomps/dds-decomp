@@ -3,6 +3,7 @@
 #include "ui_color.h"
 #include "fr_font_context.h"
 #include "mnu.h"
+#include "brs_level_progress_api.h"
 #include "dat_state.h"
 #include "dat_party_growth.h"
 #include "mnu_result.h"
