@@ -1184,7 +1184,7 @@ s32 btlResetSceneSlotFades(void) {
     state->unk18 = 0;
     state->completed = 0;
     for (i = 0; i < count; i++) {
-        (*bank)->unk6C[i] = 30.0f;
+        (*bank)->rotationAngleDegrees[i] = 30.0f;
         (*bank)->unk8C[i] = 130;
     }
     btlInitializeActorSlotOrder(kind, count);
@@ -6980,9 +6980,9 @@ void btlUpdateActorSlotOrderAnimation(void) {
                 }
                 D_003BD840[side]->slotFade[i] += 0x20;
                 D_003BD840[side]->slotFade[i] = D_003BD840[side]->slotFade[i] <= 0 ? 0 : D_003BD840[side]->slotFade[i] >= 0x81 ? 0x80 : D_003BD840[side]->slotFade[i];
-                D_003BD840[side]->unk6C[i] -= 5.0f;
-                if (D_003BD840[side]->unk6C[i] <= 0.0f) {
-                    D_003BD840[side]->unk6C[i] = 0.0f;
+                D_003BD840[side]->rotationAngleDegrees[i] -= 5.0f;
+                if (D_003BD840[side]->rotationAngleDegrees[i] <= 0.0f) {
+                    D_003BD840[side]->rotationAngleDegrees[i] = 0.0f;
                 }
                 D_003BD840[side]->unk8C[i] = D_003BD840[side]->unk8C[i] - 5.0f;
                 if (D_003BD840[side]->unk8C[i] <= 100.0f) {
@@ -7004,9 +7004,9 @@ void btlUpdateActorSlotOrderAnimation(void) {
             }
             break;
         case 2:
-            D_003BD840[side]->unk6C[i] -= 5.0f;
-            if (D_003BD840[side]->unk6C[i] <= 0.0f) {
-                D_003BD840[side]->unk6C[i] = 0.0f;
+            D_003BD840[side]->rotationAngleDegrees[i] -= 5.0f;
+            if (D_003BD840[side]->rotationAngleDegrees[i] <= 0.0f) {
+                D_003BD840[side]->rotationAngleDegrees[i] = 0.0f;
             }
             D_003BD840[side]->unk8C[i] = D_003BD840[side]->unk8C[i] - 5.0f;
             if (D_003BD840[side]->unk8C[i] <= 100.0f) {
@@ -7023,7 +7023,7 @@ void btlUpdateActorSlotOrderAnimation(void) {
             D_003BD840[side]->state[i]++;
             D_003BD840[side]->scalePercent[i][1] = 120.0f;
             D_003BD840[side]->slotValues[i][1] = 0x80;
-            D_003BD840[side]->unk6C[i] = 0.0f;
+            D_003BD840[side]->rotationAngleDegrees[i] = 0.0f;
             D_003BD840[side]->unk1B4[i][1] = 0;
             D_003BD840[side]->unk8C[i] = 100;
             break;
@@ -7143,7 +7143,7 @@ void btlDrawActorSlotOrder(void) {
             }
 
             btlResourceBlock->resC->workEntries[coordinates[index][2]]
-                .geometry.angleDegrees = D_003BD840[bank]->unk6C[index];
+                .geometry.angleDegrees = D_003BD840[bank]->rotationAngleDegrees[index];
             func_001C2E90(btlResourceBlock->resC, coordinates[index][2],
                           &xOffset, &yOffset,
                           (f32)D_003BD840[bank]->unk8C[index]);
@@ -7156,7 +7156,7 @@ void btlDrawActorSlotOrder(void) {
             fldScaleSceneCoordinateRecord(btlResourceBlock->resC,
                                          coordinates[index][2]);
 
-            if (D_003BD840[bank]->unk6C[index] > 0.0f) {
+            if (D_003BD840[bank]->rotationAngleDegrees[index] > 0.0f) {
                 for (channel = 0; channel < 4; channel++) {
                     colors[channel] = btlSetSlotLowByteClamped(
                         btlResourceBlock->resC, coordinates[index][2],
