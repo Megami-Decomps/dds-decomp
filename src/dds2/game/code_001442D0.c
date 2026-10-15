@@ -4789,7 +4789,7 @@ typedef struct FieldTargetGuideState {
     f32 targetDistance; /* 0x58 */
     f32 targetBearing;  /* 0x5C */
     f32 viewAngleError; /* 0x60 */
-    s32 unk64;
+    s32 guideMode;
     s16 previousGridX;
     s16 previousGridY;
     s32 unk6C;
@@ -4802,7 +4802,7 @@ void fldResetViewState(void) {
     fldTargetGuideState.unk6C = -1;
     fldTargetGuideState.unk54 = 0;
     fldTargetGuideState.updateFlags = 0;
-    fldTargetGuideState.unk64 = 0;
+    fldTargetGuideState.guideMode = 0;
     fldTargetGuideState.mode = 0;
     fldTargetGuideState.cycleIndex = 0;
     fldTargetGuideState.cycleRoute = NULL;
@@ -5409,7 +5409,7 @@ s32 fldReportCampVolumeError(void) {
 void fldUpdateTargetGuideController(void) {
     if (fldTargetGuideState.disabled != 1) {
         if (fldAreaState.targetGuideActive == 0 && fldTestSceneControlFlags(0x40) == 0) {
-            if (fldTargetGuideState.unk64 == 14) {
+            if (fldTargetGuideState.guideMode == 14) {
                 func_00153068();
                 return;
             }
@@ -5487,14 +5487,14 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
 
 void fldSetTargetGuideMode(s32 mode) {
-    s32 previousMode;
+    s32 previousGuideMode;
 
     if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1) == 0) {
         return;
     }
-    previousMode = fldTargetGuideState.unk64;
+    previousGuideMode = fldTargetGuideState.guideMode;
     fldTargetGuideState.updateFlags = 0x40;
-    fldTargetGuideState.unk64 = mode;
+    fldTargetGuideState.guideMode = mode;
 
     switch (mode) {
     case 0:
@@ -5588,7 +5588,7 @@ void fldSetTargetGuideMode(s32 mode) {
         sndQueueSoundId(0x690061);
         break;
     case 8:
-        if (previousMode == 7) {
+        if (previousGuideMode == 7) {
             fldTargetGuideState.gridX = D_003AA6D0[3].x;
             fldTargetGuideState.gridY = D_003AA6D0[3].y;
             fldTargetGuideState.targetYaw = 180.0f;
@@ -5626,7 +5626,7 @@ void fldSetTargetGuideMode(s32 mode) {
         sndQueueSoundId(0x690061);
         break;
     case 11:
-        if (previousMode == 10) {
+        if (previousGuideMode == 10) {
             fldTargetGuideState.gridX = D_003AA6F8[3].x;
             fldTargetGuideState.gridY = D_003AA6F8[3].y;
             fldTargetGuideState.yaw = 180.0f;
