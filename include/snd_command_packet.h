@@ -12,6 +12,9 @@ typedef struct CmdPacket {
     u32 unkC;    /* 0x0C */
 } CmdPacket;
 
+/* Queue sound command 0x40 without a payload. */
+void sndQueueNoPayloadCommand40(void);
+
 typedef char CmdPacket_size_must_be_0x10[(sizeof(CmdPacket) == 0x10) ? 1 : -1];
 typedef char CmdPacket_trackId_offset_must_be_0[
     ((u32)&((CmdPacket *)0)->trackId == 0) ? 1 : -1];

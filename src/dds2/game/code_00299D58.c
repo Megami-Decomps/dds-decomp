@@ -1,3 +1,4 @@
+#include "snd_command_packet.h"
 #include "evt_message_window_api.h"
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
@@ -43,7 +44,6 @@ extern s32 fldGetSparkRewardProfileIndex(void);
 extern s16 fldGetSparkPickupCount(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
-extern void sndQueueNoPayloadCommand40(void);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern char D_003D64E4[];
 extern char D_003D6458[];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_command_packet.h"
 #include "snd_sequence_volume_pan.h"
 
 u32 sndSendCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
