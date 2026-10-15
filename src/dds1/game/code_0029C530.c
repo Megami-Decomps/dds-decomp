@@ -56,6 +56,7 @@
 #include "btl_resource_name.h"
 #include "mdl.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "fpu.h"
 #include "eff.h"
 #include "eff_billboard_work.h"
@@ -8431,7 +8432,6 @@ extern u128 D_003DCBA0[];
 
 extern SdfLightSources D_0037EE80;
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
 s32 effComputeLightDirectionVU(MdlCtx *vector, SdfLightingPacketStorage *target) {
     s32 result = btlIsRuntimeAllocated();

@@ -51,7 +51,6 @@ extern u32 sdfGetLodChunkValue(SdfModel *model);
 extern EvtUnitVectorSlot evtUnitVectorSlots[10];
 
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */

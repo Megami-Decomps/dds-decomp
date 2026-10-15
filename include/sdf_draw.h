@@ -45,6 +45,9 @@ typedef char SdfLightingPacketStorage_combinedColor_offset_check[
 typedef char SdfLightingPacketStorage_basis_offset_check[
     ((u32)&((SdfLightingPacketStorage *)0)->basis == 0xA0) ? 1 : -1];
 
+void sdfBuildLightingPacket(SdfLightingPacketStorage *packet,
+                            SdfLightSources sources, f32 *ambient);
+
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
 struct SdfMemBlock;
 

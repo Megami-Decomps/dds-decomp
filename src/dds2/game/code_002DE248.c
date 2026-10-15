@@ -73,6 +73,7 @@
 #include "eff_record_bucket.h"
 #include "eff_owner_records.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "sdf_primitive.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
@@ -402,7 +403,6 @@ extern u32 effFlashTextureHandles;
 extern u32 effModelUpdateControlFlags;
 
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
 extern u128 D_004584B0[];
 
