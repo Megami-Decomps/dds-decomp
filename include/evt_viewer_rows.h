@@ -38,10 +38,10 @@ typedef char EvtCameraFovRowPayload_fov_offset[
 typedef char EvtCameraFovRowPayload_opaque04_offset[
     ((u32)&((EvtCameraFovRowPayload *)0)->opaque04 == 4) ? 1 : -1];
 
-u16 evtGetRowValue(PolyMovieWork *work, s32 row);
-s16 evtGetRowVariant(PolyMovieWork *work, s32 row);
-u16 evtGetRowParameter(PolyMovieWork *work, s32 row);
-u16 evtGetRowFlags(PolyMovieWork *work, s32 row);
+u16 evtGetRowValue(const PolyMovieWork *work, s32 row);
+s16 evtGetRowVariant(const PolyMovieWork *work, s32 row);
+u16 evtGetRowParameter(const PolyMovieWork *work, s32 row);
+u16 evtGetRowFlags(const PolyMovieWork *work, s32 row);
 u8 *evtGetRowPayloadAddress(PolyMovieWork *work, s32 row);
 
 #endif
