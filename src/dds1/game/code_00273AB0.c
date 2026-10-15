@@ -260,7 +260,7 @@ u32 mnuStaffItemUseLeaveNoOp(void) {
 
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern char D_0037C9C8[];
+extern char mnuCampItemUseListPopupEntry[];
 
 s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
     u32 userValue = kwlnTaskGetUserValue(task);
@@ -297,7 +297,7 @@ s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
         }
     }
     if ((buttons & MNU_STAFF_INPUT_CANCEL) != 0 || itemCountIsZero != 0) {
-        mnuSetPopupEntryFlagged(&staff->popupState, D_0037C9C8);
+        mnuSetPopupEntryFlagged(&staff->popupState, mnuCampItemUseListPopupEntry);
         mnuClearListFlags(0, &staff->pageWindow);
     }
     mnuPlayInputSound(0, buttons, 0);

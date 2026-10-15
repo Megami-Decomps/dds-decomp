@@ -296,10 +296,10 @@ s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char D_0037C9C8[];
+extern char mnuCampItemUseListPopupEntry[];
 extern char mnuCampAmmoPartySelectionPopupEntry[];
-extern char D_0037CA00[];
-extern char D_0037C990[];
+extern char mnuCampSpecialItemListPopupEntry[];
+extern char mnuCampCommandSelectionPopupEntry[];
 
 /* Handle staff-item selection and window navigation while the popup is idle. */
 s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
@@ -325,20 +325,20 @@ s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
             switch (itemKind) {
             case 0:
                 resources->selection = 0;
-                mnuSetPopupEntry(popup, (void *)D_0037C9C8);
+                mnuSetPopupEntry(popup, (void *)mnuCampItemUseListPopupEntry);
                 break;
             case 1:
                 mnuSetPopupEntry(popup, (void *)mnuCampAmmoPartySelectionPopupEntry);
                 break;
             default:
-                mnuSetPopupEntry(popup, (void *)D_0037CA00);
+                mnuSetPopupEntry(popup, (void *)mnuCampSpecialItemListPopupEntry);
                 break;
             }
             mnuSeekListNode(0, resources->windows[0]->list);
             mnuSeekListNode(0, resources->windows[1]->list);
         }
         if (input & 2) {
-            mnuSetPopupEntryFlagged(popup, (void *)D_0037C990);
+            mnuSetPopupEntryFlagged(popup, (void *)mnuCampCommandSelectionPopupEntry);
             mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->unk138,
                                                       (struct EffectSlotSet *)(u32)context->unk6C, 0, 1);
         }
@@ -430,7 +430,7 @@ void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
 }
 
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern char D_0037CA1C[];
+extern char mnuCampItemTargetSelectionPopupEntry[];
 extern char mnuCampItemCategoryPopupEntry[];
 
 /* Use an eligible staff item and update its selection window while messages are idle. */
@@ -464,7 +464,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
                     if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
                         mnuRefreshStaffItemSelection(item, context);
                     } else {
-                        mnuSetPopupEntry(popup, (void *)D_0037CA1C);
+                        mnuSetPopupEntry(popup, (void *)mnuCampItemTargetSelectionPopupEntry);
                     }
                 } else {
                     input = 0x8000;

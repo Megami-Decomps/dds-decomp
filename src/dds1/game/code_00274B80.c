@@ -244,7 +244,7 @@ extern u16 mnuLookupPartyTableValue(u32, s32, s32);
 extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 extern void mnuSortItems(struct MenuList *, s32, s32);
 extern void ptySkillMenuDrawEntry();
-extern u8 D_0037CD08[];
+extern u8 mnuCampSkillHeadingFrameIndices[];
 
 /* Select the visual category used by the party-selection window. */
 void mnuSelectPartySelectionVisuals(u32 context) {
@@ -1635,7 +1635,7 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
         menu->panel = mnuCreatePanelState(4, 0x2B0);
         mnuSetPanelFirstGridSlot(menu->panel, 0, 0, context->unkE8, 8);
         mnuSetPanelThirdGridSlot(menu->panel, 0x5E0, 0x150, (struct EffectSlotSet *)context->variant, 0xA);
-        mnuSetPanelFourthGridSlot(menu->panel, 0x560, 0x48, context->unkE8, 0, (u32)D_0037CD08);
+        mnuSetPanelFourthGridSlot(menu->panel, 0x560, 0x48, context->unkE8, 0, (u32)mnuCampSkillHeadingFrameIndices);
         mnuSetPanelSecondGridSlot(menu->panel, -0x80, -0x38, context->unkE8, 3);
         mnuInitializePanelResource(menu->panel, (struct EffectSlotSet *)context->displayVariant, (struct EffMappedResource *)context->unk120);
         menu->categoryList = mnuCreateListState(0, 1, 1);

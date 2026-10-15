@@ -146,9 +146,9 @@ extern s32 ptySkillMenuApplyFieldUseAndCost();
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
-extern u32 D_003E7828[];
+extern u32 mnuCampBackdropFrameMap[];
 
-extern const CampEffectRows D_003E7858;
+extern const CampEffectRows mnuCampBackdropEffectRows;
 
 extern char *mnuCampBackdropSpriteResourceNames[];
 

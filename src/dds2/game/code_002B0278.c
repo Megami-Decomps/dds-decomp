@@ -157,9 +157,9 @@ extern s32 ptySkillMenuApplyFieldUseAndCost();
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
-extern u32 D_003E7828[];
+extern u32 mnuCampBackdropFrameMap[];
 
-extern const CampEffectRows D_003E7858;
+extern const CampEffectRows mnuCampBackdropEffectRows;
 
 extern char *mnuCampBackdropSpriteResourceNames[];
 
@@ -2091,7 +2091,7 @@ extern void mnuSortItems(MenuList *, s32, s32);
 extern s32 mnuGetIndexedNonzeroEffect(s32);
 extern u16 mnuLookupPartyTableValue(u32, s32, s32);
 extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
-extern const s32 D_003E7808[];
+extern const s32 mnuCampSkillHeadingFrameIndices[];
 
 void ptySkillMenuInitPages(MenuContext *context) {
     SkillMenuRuntime *menu = (SkillMenuRuntime *)context->party;
@@ -2108,7 +2108,7 @@ void ptySkillMenuInitPages(MenuContext *context) {
         menu->skillPanel = mnuCreatePanelState(4, 0x2C0);
         mnuSetPanelFirstGridSlot(menu->skillPanel, 0, 0, (EffectSlotSet *)context->labelHandle, 0x1B);
         mnuSetPanelSecondGridSlot(menu->skillPanel, 0x420, 0x128, (EffectSlotSet *)context->labelHandle, 0x11);
-        mnuSetPanelThirdGridSlot(menu->skillPanel, 0x3A0, 0x10, (EffectSlotSet *)context->labelHandle, D_003E7808);
+        mnuSetPanelThirdGridSlot(menu->skillPanel, 0x3A0, 0x10, (EffectSlotSet *)context->labelHandle, mnuCampSkillHeadingFrameIndices);
         mnuSetPanelCornerGeometry(menu->skillPanel, 0x3E0, 0x108, (EffectSlotSet *)context->labelHandle, 9, 0xF);
         mnuInitializePanelResource(menu->skillPanel, context->labelHandle, context->skillPanelResource);
         menu->categoryList = mnuCreateListState(0, 1, 1);
@@ -2927,7 +2927,7 @@ void mnuDrawSelectionLabel(u16 id) {
 extern MenuPoint D_00437C08[];
 extern MenuPoint D_00437C10[];
 extern MenuPoint D_00437C18[];
-extern const char *D_003E77C8[16];
+extern const char *mnuComboGunRequirementTexts[16];
 extern u8 (*D_00435E68)[33];
 extern s32 ptyGetAffinityKind(s32, s32);
 extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
@@ -2966,7 +2966,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
             }
         } else {
             glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
-                                               0, 0xA09DC380, (const u8 *)D_003E77C8[kind], 0);
+                                               0, 0xA09DC380, (const u8 *)mnuComboGunRequirementTexts[kind], 0);
             itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
                                        0, 1, (EffectSlotSet *)(u32)resource, 0xA, 0x53);
         }
@@ -3257,16 +3257,16 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE48);
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 
 void mnuLoadEffectResources(MenuEffectResources *resources) {
-    mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
-    mnuCopyCampEffectRowData(&D_003E7858, resources);
+    mnuInitializeMapPacket(0, mnuCampBackdropFrameMap, 0xb, &resources->packet);
+    mnuCopyCampEffectRowData(&mnuCampBackdropEffectRows, resources);
     resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], 0);
     resources->animationHandle = effLoadMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0]);
     mnuBindCampEffectAnimation(resources);
 }
 
 void mnuRequestEffectResources(MenuEffectResources *resources) {
-    mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
-    mnuCopyCampEffectRowData(&D_003E7858, resources);
+    mnuInitializeMapPacket(0, mnuCampBackdropFrameMap, 0xb, &resources->packet);
+    mnuCopyCampEffectRowData(&mnuCampBackdropEffectRows, resources);
     effRequestResourceByMode("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], 0,
                              (u32 *)&resources->packet.sheets[0]);
     effRequestMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0], (u32 *)&resources->animationHandle);
