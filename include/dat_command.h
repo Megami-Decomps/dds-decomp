@@ -45,7 +45,8 @@ typedef struct DatCommandRecord {
     u16 costBase;                  /* 0x06 */
     u8 targetType;                 /* 0x08; SKILL.TBL target_type */
     u8 options;                    /* 0x09 */
-    u8 unk_0A[2];
+    u8 targetFlags;                /* 0x0A: command target-policy flags */
+    u8 unk_0B;
     u16 restriction;               /* 0x0C */
     u8 unk_0E[3];
     u8 stat11;
