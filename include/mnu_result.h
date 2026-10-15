@@ -120,7 +120,7 @@ typedef struct BrsProgressAnimation {
     s8 iconState;
     u8 pad4D[3];
     s32 iconOpacity;
-    s32 unk54;
+    s32 auxiliaryColor; /* Auxiliary icon fade intensity, 0..128; shared DDS1 name. */
     s32 unk58[2]; /* Pair initialized by the result animations; no reading role established. */
     s8 progressInitialized;
     u8 pad61[3];
@@ -131,12 +131,12 @@ typedef struct BrsProgressAnimation {
 /* One lead row and four following 0x14-byte rows (DDS1 +0xD50, DDS2 +0xAEBC).
  * brsAnimateSkillIconRows fades the lead row in, then slides/holds/fades the
  * following rows; retail indexes the following rows as their own array (the
- * loop's offset/displacement split depends on it). unk04 is the hold counter
+ * loop's offset/displacement split depends on it). holdTicks is the hold counter
  * of a following row. */
 typedef struct BrsSkillIconRow {
     s8 count;
     u8 pad01[3];
-    s32 unk04;
+    s32 holdTicks;
     s32 opacity;
     s32 x;
     s32 y;

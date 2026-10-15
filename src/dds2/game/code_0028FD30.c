@@ -206,7 +206,7 @@ s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *
     sourceBits = &source->bits;
     state = &object->menu;
     party = object->list->cursor->partyRecord;
-    activeVariant = state->drawBits.unk15 != 0;
+    activeVariant = state->drawBits.sourceDialogVariant != 0;
     memset(attributeSummary, 0, sizeof(attributeSummary));
     if (*sourceBits & 0x8000) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
@@ -534,7 +534,7 @@ s32 mnuRefreshMantraSelectionResources(MnuStatusResource *object) {
     if (node != 0) {
         slot = menu->slots;
         while (node != 0) {
-            source = node->unk70;
+            source = node->userValue;
             if (*slot != 0) {
                 mnuUpdateMantraRecordFlags(*slot, source, 0);
             } else {
@@ -558,7 +558,7 @@ s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
     s32 source;
 
     index = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)object);
-    source = object->list->cursor->unk70;
+    source = object->list->cursor->userValue;
     if (object->menu.slots[index] != 0) {
         mnuUpdateMantraRecordFlags(object->menu.slots[index], source, 0);
     } else {
@@ -1207,8 +1207,8 @@ s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
             state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
             mnuRegisterMantraIconListCDraw(controller, (u32)object);
         }
-        object->menu.unk9B5 = 1;
-        object->menu.unk9B6 = 0;
+        object->menu.tutorialTransitionMode = 1;
+        object->menu.tutorialTransitionFrame = 0;
         break;
     case 10:
         mnuShowMantraInfo(object->menu.selectionController);
@@ -1227,8 +1227,8 @@ s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
             state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
             mnuBeginMantraIconListExit(controller);
         }
-        object->menu.unk9B5 = 2;
-        object->menu.unk9B6 = 0;
+        object->menu.tutorialTransitionMode = 2;
+        object->menu.tutorialTransitionFrame = 0;
         break;
     case 11:
         position = mnuGetMantraPanelPositionRecord((s16)id);
@@ -1462,7 +1462,7 @@ void mnuCollectPanelNodeValues(MnuStatusResource *object) {
     if (node != 0) {
         u32 *slot = object->menu.collectedValues;
         do {
-            u32 value = node->unk70;
+            u32 value = node->userValue;
             count++;
             node = node->next;
             *slot++ = value;
@@ -1474,8 +1474,8 @@ void mnuCollectPanelNodeValues(MnuStatusResource *object) {
 
 void mnuBeginMantraTutorialFromNormalMode(MnuStatusResource *object) {
     object->menu.flagBytes[0] = 3;
-    object->menu.unk9B5 = 0;
-    object->menu.unk9B6 = 0;
+    object->menu.tutorialTransitionMode = 0;
+    object->menu.tutorialTransitionFrame = 0;
     object->menu.flags = (object->menu.flags & 0xF0FFFFFF) | 0x20000000;
     mnuPrepareMantraPanelEntriesForTutorial();
 }
@@ -1838,8 +1838,8 @@ s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id) {
  * Widen the signed pair before masking/decoding kind 2's high flag byte. */
 void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
-    s32 transitionMode = work->unk9B5;
-    u8 drawMode = (u8)work->unk9B5;
+    s32 transitionMode = work->tutorialTransitionMode;
+    u8 drawMode = (u8)work->tutorialTransitionMode;
     s32 fade = 0;
     f32 progress;
     s32 selector;
@@ -1851,26 +1851,26 @@ void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *object) {
     case 3: /* Visible: no transition timer update. */
         break;
     case 1:
-        work->unk9B6++;
-        if (work->unk9B6 < 6) {
+        work->tutorialTransitionFrame++;
+        if (work->tutorialTransitionFrame < 6) {
             break;
         }
-        work->unk9B6 = 0;
-        work->unk9B5 = 3;
+        work->tutorialTransitionFrame = 0;
+        work->tutorialTransitionMode = 3;
         drawMode = 3;
         break;
     case 2:
-        work->unk9B6++;
-        if (work->unk9B6 < 6) {
+        work->tutorialTransitionFrame++;
+        if (work->tutorialTransitionFrame < 6) {
             break;
         }
-        work->unk9B6 = 0;
-        work->unk9B5 = 0;
+        work->tutorialTransitionFrame = 0;
+        work->tutorialTransitionMode = 0;
         drawMode = 0;
         break;
     }
 
-    progress = (f32)work->unk9B6 / 5.0f;
+    progress = (f32)work->tutorialTransitionFrame / 5.0f;
     switch ((s8)drawMode) {
     case 0:
         return;

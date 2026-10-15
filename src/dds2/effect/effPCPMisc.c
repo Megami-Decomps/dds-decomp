@@ -4045,7 +4045,7 @@ void effPcpBuildConcentricBeamVertices(f32 radius, EffPCPBeamWork *work) {
 }
 
 void effResetChild(EffPCPBeamWork *work) {
-    effPcpBuildConcentricBeamVertices(work->params.unk28, work);
+    effPcpBuildConcentricBeamVertices(work->params.startRadius, work);
     work->frame = 0;
 }
 
@@ -4130,8 +4130,8 @@ void effPcpUpdateBeamGrowthAndFade(EffPCPBeamWork *work) {
     if (frame < work->params.radiusGrowthFrames) {
         t = (f32)work->frame / (f32)work->params.radiusGrowthFrames;
         effPcpBuildConcentricBeamVertices(
-            (work->params.endRadius - work->params.unk28) *
-                t + work->params.unk28,
+            (work->params.endRadius - work->params.startRadius) *
+                t + work->params.startRadius,
             work);
     } else {
         effPcpBuildConcentricBeamVertices(work->params.endRadius, work);

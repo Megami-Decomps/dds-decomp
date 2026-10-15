@@ -19,9 +19,9 @@ typedef struct EvtPad {
     s8 decTen; /* 0x26 */
     s8 incTen; /* 0x27 */
     u8 decHun; /* 0x28 */
-    s8 unk29; /* 0x29: coarse decrease in the property editor. */
+    s8 coarseDecrease; /* 0x29: coarse decrease in the property editor. */
     u8 incHun; /* 0x2A */
-    s8 unk2B; /* 0x2B: coarse increase in the property editor. */
+    s8 coarseIncrease; /* 0x2B: coarse increase in the property editor. */
     s8 apply; /* 0x2C */
     s8 unk2D;
     u8 pad2E[0x12]; /* Remaining two-bank, two-port input backing. */

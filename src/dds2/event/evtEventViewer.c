@@ -886,7 +886,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             }
             itfMesStartEntry(viewer->windowContext->handle, nibbles[0], 0);
         } else {
-            viewer->unk23C6 = (s16)(nibbles[1] + 0xC7);
+            viewer->windowResultVariableIndex = (s16)(nibbles[1] + 0xC7);
             itfMesBuildOptionList(viewer->windowContext->handle, nibbles[0]);
             viewer->flags |= 1;
             evtViewerDispatchFlagMode(viewer);
@@ -1904,8 +1904,8 @@ void evtEventViewerFadeBackground(EvtRuntime *viewer) {
 
     kwlnGetDrawBufferIndex();
     if (viewer->updateCount != 0x19) {
-        fade = (s32)(128.0f - ((f32)viewer->unk24A0 +
-                               ((128.0f - (f32)viewer->unk24A0) / 25.0f) * (f32)viewer->updateCount));
+        fade = (s32)(128.0f - ((f32)viewer->backgroundFadeStartAlpha +
+                               ((128.0f - (f32)viewer->backgroundFadeStartAlpha) / 25.0f) * (f32)viewer->updateCount));
     }
     if (fade < 0) {
         fade = 0;
@@ -2294,7 +2294,7 @@ void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     }
     if (itfPanelGetPairFirst(viewer->windowContext->handle) < 0) {
         itfPanelSetPairFirst(viewer->windowContext->handle, 0);
-        datGameState->script.ints[viewer->unk23C6] = itfMesGetWindowClearBitCount(viewer->windowContext->handle);
+        datGameState->script.ints[viewer->windowResultVariableIndex] = itfMesGetWindowClearBitCount(viewer->windowContext->handle);
         itfMesResetWindow(viewer->windowContext->handle);
         evtViewerMarkWindowInactive(viewer);
         viewer->flags ^= 1;

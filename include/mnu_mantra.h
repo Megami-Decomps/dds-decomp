@@ -26,7 +26,7 @@ typedef struct MtrSelectionFlags {
     u32 visible : 1;
     u32 fadeProgress : 1;
     u32 profileReady : 1;
-    u32 unk04 : 1;
+    u32 equipApplied : 1;
     u32 unk05 : 27;
 } MtrSelectionFlags;
 
@@ -66,7 +66,7 @@ typedef struct MantraMenuSrc {
             u16 unk14 : 2;
         } fields;
     };
-    u16 unk02;
+    u16 completionFlagId; /* Set when applying or completing the source transition. */
     u8 pad04;
     s8 selectedIndex; /* party-list row selected by the source search */
     s16 targetId;
@@ -138,7 +138,7 @@ typedef struct MantraMenuWork {
             u32 mode : 8;
             u32 unk10 : 4;
             u32 drawEnabled : 1;
-            u32 unk15 : 1;
+            u32 sourceDialogVariant : 1; /* Selects one of the two source-dialog variants. */
             u32 hasQueuedMastery : 1;
             u32 showOverlay : 1;
             u32 sourceKind : 8;
@@ -177,8 +177,8 @@ typedef struct MantraMenuWork {
         u8 flagBytes[4];
     };
     u8 unk9B4;
-    s8 unk9B5;
-    s16 unk9B6;
+    s8 tutorialTransitionMode; /* 0: hidden, 1: opening, 2: closing, 3: visible. */
+    s16 tutorialTransitionFrame; /* Frame within the five-step tutorial fade. */
     MtrEquipState equip;
     struct MantraDrawPool *selectionController;
 } MantraMenuWork;

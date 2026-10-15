@@ -182,7 +182,7 @@ void brsAnimateSkillIconRows(BrsSkillPackageWork *work) {
             uiBlendColors(0x80808080, 0x80808000, weight) & 0xFF;
         if (work->leadIconRow.opacity >= 0x40) {
             for (i = 0; i < 4; i++) {
-                if (work->followIconRows[i].count == 0 && work->followIconRows[i].unk04 == 0) {
+                if (work->followIconRows[i].count == 0 && work->followIconRows[i].holdTicks == 0) {
                     work->followIconRows[i].count = 1;
                 }
             }
@@ -205,10 +205,10 @@ void brsAnimateSkillIconRows(BrsSkillPackageWork *work) {
             if (work->followIconRows[i].opacity >= 0xFF) {
                 work->followIconRows[i].count++;
             }
-            work->followIconRows[i].unk04 = 0;
+            work->followIconRows[i].holdTicks = 0;
             break;
         case 2:
-            if (++work->followIconRows[i].unk04 >= 10) {
+            if (++work->followIconRows[i].holdTicks >= 10) {
                 work->followIconRows[i].count++;
             }
             break;

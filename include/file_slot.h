@@ -23,7 +23,7 @@ typedef struct FileSlotTable {
     u32 references;        /* 0x10: acquisition/frame counter */
     f32 spawnRemainder;    /* 0x14 */
     FileSlot *slots; /* 0x18 */
-    u8 *unk1C;             /* 0x1C: per-type instance work */
+    u8 *instanceWork;             /* 0x1C: per-type instance work */
     u8 *data0;             /* 0x20 */
     u8 *data1;             /* 0x24 */
     struct SdfMemBlock *allocation; /* 0x28: owns the retained table storage */

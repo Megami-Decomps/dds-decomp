@@ -672,7 +672,7 @@ s32 itfPanelAcquireHold(void) {
     hold = &itfHeldPanelCursor;
     hold->window = window;
     hold->unk4 = -1;
-    hold->unk8 = -1;
+    hold->entryEndFrame = -1;
     hold->queuedCount = 0;
     itfMesSetWindowPageAndRefresh(window, 3, 0);
     return 1;
@@ -688,7 +688,7 @@ s32 itfPanelReleaseHold(void) {
     itfMesCleanupWindow(hold->window, 1);
     hold->window = -1;
     hold->unk4 = -1;
-    hold->unk8 = -1;
+    hold->entryEndFrame = -1;
     hold->queuedCount = 0;
     return 1;
 }
@@ -741,14 +741,14 @@ s32 itfStepHeldPanelMessages(void) {
 
             itfMesStartEntry(itfHeldPanelCursor.window, entry, 0);
             itfHeldPanelCursor.unk4 = entry;
-            itfHeldPanelCursor.unk8 = deadline;
+            itfHeldPanelCursor.entryEndFrame = deadline;
         }
     }
-    if (frame == itfHeldPanelCursor.unk8) {
+    if (frame == itfHeldPanelCursor.entryEndFrame) {
         itfMesCleanupWindow(itfHeldPanelCursor.window, 1);
-        itfHeldPanelCursor.unk4 = itfHeldPanelCursor.unk8 = -1;
+        itfHeldPanelCursor.unk4 = itfHeldPanelCursor.entryEndFrame = -1;
     }
-    if (frame >= latest && frame >= itfHeldPanelCursor.unk8) {
+    if (frame >= latest && frame >= itfHeldPanelCursor.entryEndFrame) {
         itfPanelReleaseHold();
         return 1;
     }

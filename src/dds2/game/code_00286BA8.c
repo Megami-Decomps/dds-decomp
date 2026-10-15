@@ -370,7 +370,7 @@ s32 mtrMantraEquipInit(void) {
     MtrEquipState *equip = &work->menu.equip;
     MantraNodePos *selector;
 
-    work->flags.unk04 = 0;
+    work->flags.equipApplied = 0;
     selector = mnuGetDefaultPanelSelector(work);
     dspCloseChannel();
     evtCreateMessageWindowIfMissing(work->messageWindow);
@@ -411,7 +411,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
 
     mnuReleaseMenuVisualWorkResources(resource->progressHost);
     evtFinishMessageWindowAndNotify();
-    if (resource->flags.unk04) {
+    if (resource->flags.equipApplied) {
         DatPartyRecord *selectedRecord;
         MantraNodePos *position;
         mnuUpdateSelectedPanelSlot(resource);
@@ -572,7 +572,7 @@ s32 mtrMantraEquipUpdate(void) {
             sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
             datGameState->header.currency -= sourceAmount;
         }
-        work->flags.unk04 = 1;
+        work->flags.equipApplied = 1;
         scrSelectScriptEntryAndInitialize(selectedRecord, selectedEntryId);
         break;
 

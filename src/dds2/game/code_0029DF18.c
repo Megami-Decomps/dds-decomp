@@ -290,14 +290,14 @@ void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSki
     }
     switch (work->levelAnimation[index].iconState) {
     case 0:
-        work->levelAnimation[index].unk54 = 0;
+        work->levelAnimation[index].auxiliaryColor = 0;
         work->levelAnimation[index].unk58[0] = 0x95;
         work->levelAnimation[index].unk58[1] = 0x15;
         break;
     case 1:
-        work->levelAnimation[index].unk54 += 10;
-        work->levelAnimation[index].unk54 = (work->levelAnimation[index].unk54 > 0) ? ((work->levelAnimation[index].unk54 > 0x80) ? 0x80 : work->levelAnimation[index].unk54) : 0;
-        if (work->levelAnimation[index].unk54 >= 0x80) {
+        work->levelAnimation[index].auxiliaryColor += 10;
+        work->levelAnimation[index].auxiliaryColor = (work->levelAnimation[index].auxiliaryColor > 0) ? ((work->levelAnimation[index].auxiliaryColor > 0x80) ? 0x80 : work->levelAnimation[index].auxiliaryColor) : 0;
+        if (work->levelAnimation[index].auxiliaryColor >= 0x80) {
             work->levelAnimation[index].iconState++;
             work->levelAnimation[index].iconOpacity = 0;
         }
@@ -310,9 +310,9 @@ void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSki
         }
         break;
     default:
-        work->levelAnimation[index].unk54 -= 0x10;
-        work->levelAnimation[index].unk54 = (work->levelAnimation[index].unk54 > 0) ? ((work->levelAnimation[index].unk54 > 0x80) ? 0x80 : work->levelAnimation[index].unk54) : 0;
-        if (work->levelAnimation[index].unk54 <= 0) {
+        work->levelAnimation[index].auxiliaryColor -= 0x10;
+        work->levelAnimation[index].auxiliaryColor = (work->levelAnimation[index].auxiliaryColor > 0) ? ((work->levelAnimation[index].auxiliaryColor > 0x80) ? 0x80 : work->levelAnimation[index].auxiliaryColor) : 0;
+        if (work->levelAnimation[index].auxiliaryColor <= 0) {
             work->levelAnimation[index].iconState = 0;
         }
         break;
@@ -339,7 +339,7 @@ void brsDrawLevelProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
                          z, color, 0, work->teardownResource, 0x12, depth);
         }
         if (work->levelAnimation[index].iconState != 0) {
-            packed = work->levelAnimation[index].unk54 | 0x80808000;
+            packed = work->levelAnimation[index].auxiliaryColor | 0x80808000;
             color[0] = packed;
             color[1] = packed;
             color[2] = packed;
@@ -390,12 +390,12 @@ void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsS
     }
     switch (work->profileAnimation[index].iconState) {
     case 0:
-        work->profileAnimation[index].unk54 = 0;
+        work->profileAnimation[index].auxiliaryColor = 0;
         work->profileAnimation[index].unk58[0] = 0x122;
         work->profileAnimation[index].unk58[1] = 0x15;
         break;
     case 1:
-        work->profileAnimation[index].unk54 = 0x80;
+        work->profileAnimation[index].auxiliaryColor = 0x80;
         work->profileAnimation[index].iconState++;
         work->profileAnimation[index].iconOpacity = 0;
         break;
