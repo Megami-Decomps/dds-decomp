@@ -3820,7 +3820,43 @@ BtlUnit *btlFindActorLinkByCategory(BtlLinkedCommand *command, s32 category) {
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F5320);
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F5780);
+/* Camera clearance for a unit: mode 1 is the scaled camera radius plus any
+ * negative horizontal offset; mode 0 is the larger of the scaled reach plus the
+ * offset and half the scaled height plus any negative vertical offset. */
+f32 func_001F5780(BtlUnit *unit, u8 mode, f32 horizontalOffset, f32 verticalOffset) {
+    f32 result = 0.0f;
+    f32 verticalBias = 0.0f;
+    f32 clearance = 0.0f;
+    f32 halfHeight;
+
+    if (mode != 0) {
+        if (mode == 1) {
+            if (horizontalOffset < 0.0f) {
+                clearance = -horizontalOffset;
+            }
+            /* The return sits in a one-pass loop, which retail's register
+             * choice for the compare needs. */
+            do {
+                return unit->unkC0 * unit->scale + clearance;
+            } while (0);
+        }
+    } else {
+        if (verticalOffset < 0.0f) {
+            verticalBias = -verticalOffset;
+        }
+        clearance = unit->height * unit->scale;
+        verticalBias += clearance;
+        halfHeight = verticalBias * 0.5f;
+        result = unit->reach * unit->scale + horizontalOffset;
+        if (result < halfHeight) {
+            clearance = halfHeight;
+        } else {
+            clearance = result;
+        }
+        return clearance;
+    }
+    return result;
+}
 
 void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     s128 pos;
