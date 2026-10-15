@@ -1678,9 +1678,9 @@ u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
     return task;
 }
 
-u32 btlAddMoneyFromPacket(void *arg0) {
+u32 btlAddMoneyFromPacket(void *packetAddress) {
     s32 context = (s32)(u32)btlGetRuntime();
-    BtlRewardPacket *packet = arg0;
+    BtlRewardPacket *packet = packetAddress;
 
     if (packet->amount == 0) {
         return 1;
