@@ -1,3 +1,4 @@
+#include "sdf_gs_register_submit_api.h"
 #include "sdf_gs_header.h"
 #include "common.h"
 #include "sdf_chip.h"
@@ -16,8 +17,6 @@
 void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex);
 
 void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind);
-
-void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
 /* Dispatch prepared texture data and configure the menu background surface. */
 void uiPrepareMenuBackgroundSurface(s32 unused, s32 surface) {

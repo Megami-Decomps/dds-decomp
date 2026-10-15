@@ -1,3 +1,4 @@
+#include "sdf_gs_register_submit_api.h"
 #include "sdf_gs_header.h"
 #include "common.h"
 #include "ui_color.h"
@@ -21,8 +22,6 @@ extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 extern s32 sdfGridSeekSelectedNodeByIndex(s32, GridTextWidget *);
 
 void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind);
-
-void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
 void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 
