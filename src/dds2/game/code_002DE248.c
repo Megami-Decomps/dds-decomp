@@ -5188,12 +5188,12 @@ void effReplaceResourceRef(s32 nodeAddr, s32 entryId, s32 resource) {
     node->record = fileAllocateGridRecordSlots(entryId & 0xffff, node->count, (const void *)resource);
 }
 
-void effSetSurfaceRetainedResource(s32 *object, s32 arg) {
-    u8 *work = (u8 *)object;
+void effSetSurfaceRetainedResource(s32 *node, s32 resourceId) {
+    u8 *work = (u8 *)node;
     if (((EffectSlotNode54 *)work)->billResource != 0) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
-    ((EffectSlotNode54 *)work)->billResource = effCreateBillboardSharingIndexedResource(arg);
+    ((EffectSlotNode54 *)work)->billResource = effCreateBillboardSharingIndexedResource(resourceId);
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((EffectSlotNode54 *)work)->record->data0)->alphaTrack.surfaceIndex);
     }
