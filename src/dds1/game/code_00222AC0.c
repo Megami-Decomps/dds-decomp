@@ -7,6 +7,7 @@
 #include "dds3_path.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
+#include "mdl_world_object_source_vector_api.h"
 #include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -108,7 +109,6 @@ extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
 extern u8 D_003AC520[];
 extern void *effObjCreateFromResolvedResource(void *resource, void *arg1, void *arg2);
-extern void mdlAttachWorldObjectToSourceVector(s32 arg0, s32 arg1);
 
 extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
