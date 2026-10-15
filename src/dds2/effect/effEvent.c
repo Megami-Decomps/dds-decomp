@@ -1106,8 +1106,6 @@ void effEventSetState(EffEventWork *work, void *actor) {
 #include "evt_unit.h"
 #include "mdl.h"
 
-extern void effMiscQuatMultiplyVU(void);
-extern void effMiscQuaternionToMatrixVU(void);
 extern void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffAimParams *params);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
