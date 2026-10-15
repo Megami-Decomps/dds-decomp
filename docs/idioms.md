@@ -12610,3 +12610,22 @@ The position temporary's W is never initialized in retail, just as in the
 batched renderer. Keep the existing SDK-style VU load/subtract/cross/
 normalize/store and final vector-add macros: they directly reproduce the
 native COP2 sequences, rather than replacing any ordinary C instructions.
+
+## Bit-editor glyph template block copy
+
+`func_0021F630` / `func_0023A1A0` (DDS1 / DDS2, 1092 bytes each)
+initializes a real two-byte text buffer from native SDATA: space followed
+by NUL at DDS1 `D_003BBD90` / DDS2 `D_004371D0`. The retail loads hit those
+exact symbols at 0021F664..74 / 0023A1D4..E4. The first character later
+becomes `O` or `+`, and the retained terminator is used by all grid draws.
+
+The qualified compiler trace shows why a runtime element-list initializer
+is not this source shape: expansion creates a hidden SP32 aggregate
+workspace, then a MEM:BLK copy to the real glyph at SP16, leaving an extra
+16-byte frame and copy. Direct scalar byte assignments remove that frame
+but select LBU with a register-2 source address, leaving 28/273 words
+different. A single ordinary `memcpy` from the existing native template
+to the actual glyph preserves the block-copy scratch-clobber contract:
+LB transfers with the source in register 7, no hidden aggregate workspace.
+Both complete units then match, including `mdlSaveViewerPresentationConfig`
+and its RODATA. No literal template is duplicated or expected data changed.
