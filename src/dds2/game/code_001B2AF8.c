@@ -1254,7 +1254,7 @@ typedef struct BtlAiActionEntry {
     u8 pad_09[3];
 } BtlAiActionEntry;
 
-extern BtlAiActionEntry D_003B5100[];
+extern BtlAiActionEntry btlPassiveAbilityActions[];
 
 s32 btlSelectCounterSkill(BtlUnit *unit, BtlUnit *target) {
     s32 result;
@@ -1267,10 +1267,10 @@ s32 btlSelectCounterSkill(BtlUnit *unit, BtlUnit *target) {
 
     result = 0;
     for (i = 0; i < 5; i++) {
-        if (btlCheckSpecialAbility(&unit->partyRecord, D_003B5100[i].abilityId) == 0) {
+        if (btlCheckSpecialAbility(&unit->partyRecord, btlPassiveAbilityActions[i].abilityId) == 0) {
             continue;
         }
-        if (D_003B5100[i].unk_08 != 0) {
+        if (btlPassiveAbilityActions[i].unk_08 != 0) {
             if ((unit->status.flags & 0x200) == 0) {
                 continue;
             }
@@ -1289,11 +1289,11 @@ s32 btlSelectCounterSkill(BtlUnit *unit, BtlUnit *target) {
                 continue;
             }
         }
-        threshold = (s32)(datAbilityParameters[D_003B5100[i].abilityId -
+        threshold = (s32)(datAbilityParameters[btlPassiveAbilityActions[i].abilityId -
                                              BTL_ABILITY_PARAMETER_FIRST_SKILL].value *
                           100.0f);
         if (btlRollAiBucket() < threshold) {
-            result = D_003B5100[i].actionCode;
+            result = btlPassiveAbilityActions[i].actionCode;
             break;
         }
     }
@@ -1308,8 +1308,8 @@ typedef struct BattleStartVoiceRow {
     u8 pad16[2];
 } BattleStartVoiceRow;
 
-extern BattleStartVoiceRow D_003B5140[16];
-extern s8 D_003B52C0[16];
+extern BattleStartVoiceRow btlStartVoiceRows[16];
+extern s8 btlMajinStartVoiceIds[16];
 extern char D_004158F8[], D_00415920[];
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
@@ -1352,7 +1352,7 @@ s8 btlChooseStartVoice(void) {
     for (unit = state->units; unit != NULL; unit = unit->nextActor) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
-                s32 flagId = D_003B5140[unit->partyRecord.unitId].flagId;
+                s32 flagId = btlStartVoiceRows[unit->partyRecord.unitId].flagId;
                 if (flagId < 0 || mdlFlagTest(flagId)) {
                     if ((unit->partyRecord.status & 0x7FFF) == 0) {
                         candidates[count++] = unit;
@@ -1377,7 +1377,7 @@ s8 btlChooseStartVoice(void) {
             btlBossDebugPrintf(D_004158F8);
             return -1;
         }
-        voice = D_003B52C0[chosen->partyRecord.unitId];
+        voice = btlMajinStartVoiceIds[chosen->partyRecord.unitId];
         btlBossDebugPrintf(D_00415920, voice);
         return voice;
     }
@@ -1400,9 +1400,9 @@ s8 btlChooseStartVoice(void) {
         }
     }
     if (chosen->status.flags & 0x1000) {
-        voices = D_003B5140[chosen->partyRecord.unitId].voice[1][category];
+        voices = btlStartVoiceRows[chosen->partyRecord.unitId].voice[1][category];
     } else {
-        voices = D_003B5140[chosen->partyRecord.unitId].voice[0][category];
+        voices = btlStartVoiceRows[chosen->partyRecord.unitId].voice[0][category];
     }
     count = 0;
     for (i = 0; i < 3; i++) {
@@ -3175,7 +3175,7 @@ extern s32 sprintf(char *, const char *, ...);
 extern const u8 *D_00435E60;
 extern const u8 *D_00435E4C;
 extern const u8 *D_00435E58;
-extern u8 D_003B6828[0x100];
+extern u8 btlAnalysisTextScratch[0x100];
 extern const char D_00436818[];
 extern const char D_00436820[];
 extern char D_00436828[];
@@ -3328,13 +3328,13 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         btlDrawPanelIconGroup(4, work->fade);
                     } else {
                         position = 0;
-                        memset(D_003B6828, 0, sizeof(D_003B6828));
-                        sprintf((char *)D_003B6828, D_00436828,
+                        memset(btlAnalysisTextScratch, 0, sizeof(btlAnalysisTextScratch));
+                        sprintf((char *)btlAnalysisTextScratch, D_00436828,
                                       D_00435E58 + work->unit->partyRecord.unitId * 189);
-                        while ((character = D_003B6828[position]) != 0) {
+                        while ((character = btlAnalysisTextScratch[position]) != 0) {
                             length = 0;
                             if (character != '_' && character != 0) {
-                                const u8 *cursor = D_003B6828 + position;
+                                const u8 *cursor = btlAnalysisTextScratch + position;
                                 s32 nextCharacter;
                                 do {
                                     text[length++] = *cursor++;
@@ -7699,7 +7699,7 @@ extern s32 btlUpdateMajinTutorialTask(KwlnTask *);
 extern s32 btlUpdateLinkageNoticeTask(KwlnTask *);
 extern void btlReleaseDialogTaskAndMarkBattleState(KwlnTask *);
 extern void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *);
-extern u8 D_003B52D0[];
+extern u8 btlLinkageTutorialMessages[];
 extern u8 D_00385228[];
 extern char D_00436828[];
 
@@ -7736,7 +7736,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
-                evtCreateMessageWindowIfMissing(D_003B52D0);
+                evtCreateMessageWindowIfMissing(btlLinkageTutorialMessages);
                 dspStartEntry(2);
                 btlSetCommandPanelFadeMode(0, 8);
                 break;
@@ -7809,7 +7809,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xC, (s32)handle);
                 dspCloseChannel();
-                evtCreateMessageWindowIfMissing(D_003B52D0);
+                evtCreateMessageWindowIfMissing(btlLinkageTutorialMessages);
                 btlSetCommandPanelFadeMode(0, 8);
                 break;
             default:

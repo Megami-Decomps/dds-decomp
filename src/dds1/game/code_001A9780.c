@@ -445,7 +445,7 @@ u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     return flags & 0x18;
 }
 
-extern s32 D_00358690[];
+extern s32 btlPassiveAbilityActions[];
 
 s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
     u32 i;
@@ -457,10 +457,10 @@ s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
     }
     result = 0;
     for (i = 0; i < 3; i++) {
-        if (btlCheckSpecialAbility(&actor->partyRecord, D_00358690[i * 2])) {
-            threshold = (s32)(datAbilityParameters[D_00358690[i * 2] - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
+        if (btlCheckSpecialAbility(&actor->partyRecord, btlPassiveAbilityActions[i * 2])) {
+            threshold = (s32)(datAbilityParameters[btlPassiveAbilityActions[i * 2] - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
             if (btlRollAiBucket() < threshold) {
-                result = (D_00358690 + i * 2)[1];
+                result = (btlPassiveAbilityActions + i * 2)[1];
                 break;
             }
         }
@@ -476,7 +476,7 @@ typedef struct BattleStartVoiceRow {
     u8 pad16[2];
 } BattleStartVoiceRow;
 
-extern BattleStartVoiceRow D_003586A8[];
+extern BattleStartVoiceRow btlStartVoiceRows[];
 extern u32 btlRollAiBucket(void);
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 extern u32 func_001A5C40(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
@@ -519,7 +519,7 @@ s8 btlChooseStartVoice(void) {
     for (unit = state->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
-                s32 flagId = D_003586A8[unit->partyRecord.unitId].flagId;
+                s32 flagId = btlStartVoiceRows[unit->partyRecord.unitId].flagId;
                 if (flagId < 0 || mdlFlagTest(flagId)) {
                     candidates[count++] = unit;
                 }
@@ -548,9 +548,9 @@ s8 btlChooseStartVoice(void) {
         }
     }
     if (chosen->status.flags & 0x1000) {
-        voices = D_003586A8[chosen->partyRecord.unitId].voice[1][category];
+        voices = btlStartVoiceRows[chosen->partyRecord.unitId].voice[1][category];
     } else {
-        voices = D_003586A8[chosen->partyRecord.unitId].voice[0][category];
+        voices = btlStartVoiceRows[chosen->partyRecord.unitId].voice[0][category];
     }
     count = 0;
     for (i = 0; i < 3; i++) {
@@ -2244,7 +2244,7 @@ extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 extern const u8 *D_003BAA74, *D_003BAA80, *D_003BAA88;
 extern const char D_003BB400[], D_003BB408[], D_003BB410[];
-extern u8 D_00359978[];
+extern u8 btlAnalysisTextScratch[];
 extern s32 sprintf(char *, const char *, ...);
 extern DatBattleSceneRecord *datBattleSceneRecords;
 extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
@@ -2419,13 +2419,13 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                         break;
                     }
                     position = 0;
-                    memset(D_00359978, 0, 256);
-                    sprintf((char *)D_00359978, D_003BB410,
+                    memset(btlAnalysisTextScratch, 0, 256);
+                    sprintf((char *)btlAnalysisTextScratch, D_003BB410,
                         D_003BAA80 + ((BtlUnit *)work->entry)->partyRecord.unitId * 189);
-                    while ((character = D_00359978[position]) != 0) {
+                    while ((character = btlAnalysisTextScratch[position]) != 0) {
                         s32 length = 0;
                         if (character != '_' && character != 0) {
-                            const u8 *cursor = D_00359978 + position;
+                            const u8 *cursor = btlAnalysisTextScratch + position;
                             s32 nextCharacter;
                             do {
                                 text[length++] = *cursor++;
@@ -6169,7 +6169,7 @@ extern s32 btlUpdateLinkageNoticeTask(KwlnTask *task);
 
 extern void func_001B2AC8(BattleSceneObject *object);
 
-extern u8 D_00358828[];
+extern u8 btlLinkageTutorialMessages[];
 
 void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
     memset(object, 0, sizeof(*object));
@@ -6225,7 +6225,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 kwlnTaskAddChild(scene->scriptOwner, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xD, handle);
                 dspCloseChannel();
-                evtCreateMessageWindowIfMissing(D_00358828);
+                evtCreateMessageWindowIfMissing(btlLinkageTutorialMessages);
                 dspStartEntry(2);
                 btlSetCommandPanelFadeMode(0, 8);
             } else if (btlGetTaskState6() != 0) {
@@ -6236,7 +6236,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 kwlnTaskAddChild(scene->scriptOwner, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xC, handle);
                 dspCloseChannel();
-                evtCreateMessageWindowIfMissing(D_00358828);
+                evtCreateMessageWindowIfMissing(btlLinkageTutorialMessages);
                 btlSetCommandPanelFadeMode(0, 8);
             } else {
                 scene->battleFlags |= 0x100000;
