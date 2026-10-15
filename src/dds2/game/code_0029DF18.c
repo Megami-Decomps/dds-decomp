@@ -207,7 +207,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
                 }
                 work->levelAnimation[index].progressIconEnabled = 1;
                 work->levelAnimation[index].iconState = 1;
-                work->levelAnimation[index].unk2D = 1;
+                work->levelAnimation[index].completionFlashActive = 1;
                 work->levelAnimation[index].flashOpacity = 0x80;
                 work->levelAnimation[index].flashFrame = 0;
                 work->levelAnimation[index].alpha = 0;
@@ -228,7 +228,7 @@ flash:
             work->levelAnimation[index].flashOpacity -= 16;
             work->levelAnimation[index].flashOpacity = work->levelAnimation[index].flashOpacity <= 0 ? 0 : (work->levelAnimation[index].flashOpacity > 128 ? 128 : work->levelAnimation[index].flashOpacity);
             if (work->levelAnimation[index].flashOpacity <= 0) {
-                work->levelAnimation[index].unk2D = 0;
+                work->levelAnimation[index].completionFlashActive = 0;
             }
             work->levelAnimation[index].alpha += 8;
             work->levelAnimation[index].alpha = work->levelAnimation[index].alpha <= 0 ? 0 : (work->levelAnimation[index].alpha > 128 ? 128 : work->levelAnimation[index].alpha);
@@ -652,7 +652,7 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
                     if (work->profileAnimation[index].remaining >= cap) {
                         work->profileAnimation[index].progressIconEnabled = 1;
                         work->profileAnimation[index].iconState = 1;
-                        work->profileAnimation[index].unk2D = 1;
+                        work->profileAnimation[index].completionFlashActive = 1;
                         work->profileAnimation[index].flashOpacity = 0x80;
                         work->profileAnimation[index].flashFrame = 0;
                         work->profileAnimation[index].alpha = 0;
