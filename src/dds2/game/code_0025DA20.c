@@ -1448,9 +1448,9 @@ MenuWindowContainer *mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, Me
     storage = sdfAllocSizeClassBlock(0x14);
     memset(storage, 0, 0x14);
     window->list->context = storage;
-    storage->unk0C = settings->unkA0;
-    storage->unk0E = settings->unkA2;
-    storage->unk10 = settings->unkA4;
+    storage->unk0C = settings->hasBulletStock;
+    storage->unk0E = settings->hasHighRangeStock;
+    storage->unk10 = settings->extraEntryEnabled;
     return window;
 }
 
@@ -1463,27 +1463,27 @@ extern s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *, s32);
 
 void mnuBuildEnabledCampEntryWindow(MenuTerminalContext *scene) {
     CampEntryEnableSet options = D_00424BA0;
-    scene->unkA0 = mnuHasCampFlaggedItemByClass(scene, 1);
+    scene->hasBulletStock = mnuHasCampFlaggedItemByClass(scene, 1);
     if (mdlFlagTest(0x901)) {
-        scene->unkA2 = mnuHasCampFlaggedItemByClass(scene, 3);
+        scene->hasHighRangeStock = mnuHasCampFlaggedItemByClass(scene, 3);
     }
     switch (D_003C9A40[scene->shopRow].messageSet) {
     case 1:
     case 2:
     case 3:
-        scene->unkA4 = 1;
+        scene->extraEntryEnabled = 1;
         break;
     }
-    if (scene->unkA0 != 0) {
+    if (scene->hasBulletStock != 0) {
         options.enabled[1] = 1;
     }
-    if (scene->unkA2 != 0) {
+    if (scene->hasHighRangeStock != 0) {
         options.enabled[2] = 1;
     }
     if (datGameState->progressTotal != 0) {
         options.enabled[4] = 1;
     }
-    if (scene->unkA4 != 0) {
+    if (scene->extraEntryEnabled != 0) {
         options.enabled[5] = 1;
     }
     scene->ownedWindows[0] = mnuCreateEnabledCampEntryWindow(7, options.enabled, scene);
@@ -2183,11 +2183,11 @@ s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
     }
     cur = scene->multiplier;
     if (cur >= max) {
-        scene->unkC7 = 1;
+        scene->quantityAtLimit = 1;
         scene->multiplier = max;
         cur = max;
     } else {
-        scene->unkC7 = 0;
+        scene->quantityAtLimit = 0;
     }
     if (scene->ownedWindows[0]->list->cursor->camp.value == 3) {
         slot->value = mnuCampScalePriceByTier(cur, slot->price);
@@ -2413,7 +2413,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
     }
     scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
     for (i = 0; i < 0x100; i++) {
-        scene->unkC7 = 1;
+        scene->quantityAtLimit = 1;
         if (mnuIsBulletItemId(i) != 0 || mnuIsHighRangeItemId(i) != 0) {
             continue;
         }
@@ -3569,7 +3569,7 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
     itemId = values->id;
     operation = state->ownedWindows[0]->list->cursor->camp.value + 1;
     total = values->value * state->multiplier;
-    state->unkC8 = datGameState->progressTotal;
+    state->previousProgressTotal = datGameState->progressTotal;
     switch (operation) {
     case 1:
     case 2:
@@ -3624,10 +3624,10 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
                 evtAccumulateEligibleStageMultiplierValue(state);
                 break;
             }
-            state->unkCD = 1;
+            state->transactionConfirmed = 1;
             mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5CC);
         } else {
-            state->unkCD = 0;
+            state->transactionConfirmed = 0;
             mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5E8);
         }
         evtMarkSceneFollowupReadyAndQueueAction(task);
@@ -3920,7 +3920,7 @@ u32 evtUpdateSlotAdvanceCount(KwlnTask *task) {
     stateAddress = kwlnTaskGetUserValue(task);
     advancedSlots = evtAdvanceSlotFlags();
     ((MenuTerminalContext *)stateAddress)->advancedSlots = advancedSlots;
-    if ((((MenuTerminalContext *)stateAddress)->unkC8 == 0) && (((MenuTerminalContext *)stateAddress)->unkCD == '\x01')) {
+    if ((((MenuTerminalContext *)stateAddress)->previousProgressTotal == 0) && (((MenuTerminalContext *)stateAddress)->transactionConfirmed == '\x01')) {
         dspStartEntry(0x22);
     }
     return 1;
@@ -4122,7 +4122,7 @@ s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
     MnuProgressReward *reward;
     char text[0x40];
 
-    if (context->unkCD != 0) {
+    if (context->transactionConfirmed != 0) {
         if (slotIndex >= 0) {
             i = 0;
             reward = D_003CE1A8[slotIndex].rewards;
@@ -4191,7 +4191,7 @@ s32 evtMenuGrantSelectedProgressReward(KwlnTask *task) {
     s32 rewardValue;
 
     context->rewardGranted = 0;
-    if (context->unkCD != 0 && slotIndex >= 0) {
+    if (context->transactionConfirmed != 0 && slotIndex >= 0) {
         choice = evtGetCapturedWindowPanelValue();
         rewardValue = D_003CE1A8[slotIndex].rewards[choice].value;
         if (D_003CE1A8[slotIndex].rewards[choice].kind == 0) {

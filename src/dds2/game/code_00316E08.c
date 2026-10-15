@@ -660,7 +660,7 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     handle->update = D_0040ABF0[0];
     D_004390B4 = 0;
     handle->initialized = 0;
-    handle->unkB0 = 2;
+    handle->frameDisplayValue = 2;
 }
 
 /* Release the shooting task's owned lists, queues, slots and world object. */
@@ -960,7 +960,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         !D_0040ABF8.flagsBits.inputDisabled) {
         mnuToggleShootingPause(work);
     }
-    if (work->unk70Bit0) {
+    if (work->paused) {
         result = mnuPollPauseChoiceInput(work);
         switch (result) {
         case -1:
@@ -1037,7 +1037,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     case 0:
         break;
     case 3:
-        work->unkB0 = 2;
+        work->frameDisplayValue = 2;
         work->savedPlayerMode = 0;
         work->flags |= 4;
         mnuResetCurrentAndPeakScoresToPending(work);
@@ -1120,7 +1120,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     originY = origin->y;
     mnuVisitActiveWorkAndEffectEntry((s32)work);
 
-    if (work->unk70Bit0 == 0) {
+    if (work->paused == 0) {
         itfDrawAndAdvanceModelInstances(work->work24, 0);
     } else {
         itfDrawAndAdvanceModelInstances(work->work24, 1);
@@ -1206,7 +1206,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
         record++;
     }
 
-    if ((work->unk70Bit0 & 1) == 0) {
+    if ((work->paused & 1) == 0) {
         mnuUpdateEffectQueues(work->effectWork, 0);
         mnuUpdateSectionModelWork(work->modelWork, 0);
         itfUpdateAndDrawSpriteNumbers(work->spriteWork, 0);

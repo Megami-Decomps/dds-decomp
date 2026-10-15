@@ -334,7 +334,7 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
     }
     func_0031E8F0(&work->gauge);
     itfSetFadeMode(&work->frame.fade, 1, 0x80);
-    itfSetFrameFadeDisplayValue(&work->frame, work->unkB0);
+    itfSetFrameFadeDisplayValue(&work->frame, work->frameDisplayValue);
     itfDrawFadeGlyphForFrame(&work->frame);
 }
 

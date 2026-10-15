@@ -465,9 +465,9 @@ s32 mnuUpdateActiveMenuWorkEntries(s32 context) {
             }
 
             if (entry->flagsBits.halfRemainingCountReached) {
-                entry->flagsBits.unk6++;
-                if (entry->flagsBits.unk6 >= 11) {
-                    entry->flagsBits.unk6 = 0;
+                entry->flagsBits.halfRemainingTicks++;
+                if (entry->flagsBits.halfRemainingTicks >= 11) {
+                    entry->flagsBits.halfRemainingTicks = 0;
                 }
             }
         }
@@ -898,7 +898,7 @@ s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode) {
         record->flags.bits.completed = 1;
         record->flags.bits.hasRange = 1;
         record->flags.bits.direction = 1;
-        record->unk18 = 20;
+        record->lifetime = 20;
         record->offsetX = -20;
         record->offsetY = -20;
     }
@@ -1109,11 +1109,11 @@ s32 mnuUpdateShootingPlayerInput(void) {
         flags.word = work->flags;
         if (flags.bits.halfRemainingCountReached) {
             MenuWorkFlags updated = flags;
-            updated.bits.unk6++;
+            updated.bits.halfRemainingTicks++;
             work->flags = updated.word;
-            if (updated.bits.unk6 >= 11) {
+            if (updated.bits.halfRemainingTicks >= 11) {
                 MenuWorkFlags cleared = updated;
-                cleared.bits.unk6 = 0;
+                cleared.bits.halfRemainingTicks = 0;
                 work->flags = cleared.word;
                 flags = cleared;
             } else {

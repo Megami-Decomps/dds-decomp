@@ -464,11 +464,11 @@ typedef struct MenuCommandMotion {
 } MenuCommandMotion;
 
 typedef struct MenuQueuedCommand {
-    u32 unk0;
+    u32 keepActive; /* Nonzero keeps the command alive after its phase is spent. */
     s32 kind;
     s32 option;
-    s32 unkC;
-    s32 unk10;
+    s32 highPhaseDecayStep;
+    s32 lowPhaseDecayStep;
     s32 initialValue;
     s32 argument;
     struct EffectSlotSet *resources; /* 0x1C: the real draw resource instance. */
@@ -749,9 +749,9 @@ typedef struct MenuTerminalContext {
     s32 dispatchMode;
     u8 pad98[4];
     s32 availableCount;
-    s16 unkA0;
-    s16 unkA2;
-    s16 unkA4;
+    s16 hasBulletStock;
+    s16 hasHighRangeStock;
+    s16 extraEntryEnabled;
     u16 selectedSlot;
     u32 rewardCursor;
     u32 options;
@@ -762,10 +762,10 @@ typedef struct MenuTerminalContext {
     s32 phase;
     s16 stateStep;
     s8 pulseFrame;
-    s8 unkC7;
-    s32 unkC8;
+    s8 quantityAtLimit;
+    s32 previousProgressTotal;
     s8 advancedSlots;
-    s8 unkCD;
+    s8 transactionConfirmed;
     s8 rewardMode;
     u8 padCF;
     s8 rewardRow;
@@ -870,7 +870,7 @@ typedef struct MnuStaffMovieWork {
     struct EffectSlotSet *spriteSet; /* 0x04: loaded roll-sprite slot-set owner */
     s32 phase;           /* 0x08 */
     s32 scrollTicks;     /* 0x0C */
-    u32 unk10;           /* 0x10 */
+    u32 imageAlpha; /* 0x10: staff-image fade, also applied to roll entries. */
     u32 imageIndex;      /* 0x14 */
     s32 fadeOutTicks;    /* 0x18: incremented for the staff image's fade-out */
     s32 fadeInTicks;     /* 0x1C: negative values delay the fade-in */
@@ -885,13 +885,13 @@ typedef struct MovieMenuState {
     s32 state;           /* 0x10 */
     s32 cursor;          /* 0x14 */
     s32 mode;            /* 0x18 */
-    s32 unk1C;           /* 0x1C */
+    s32 idleTicks; /* 0x1C: no-input timeout ticks, capped at450. */
     u8 pad20[4];
     s32 orbitFrame;      /* 0x24: camera orbit frame, wraps after 3600 */
     u8 pad28[4];
     struct MenuList *selectionList; /* 0x2C: created by the movie selection-list builder */
     struct MnuSpriteResourceGroup *resources; /* 0x30 */
-    s32 unk34;           /* 0x34 */
+    s32 transitionMode; /* 0x34: backdrop/choice transition. */
     u8 pad38[4];
     s8 movieSkipped;     /* 0x3C: set when the opening movie is skipped */
     u8 pad3D[3];

@@ -98,21 +98,21 @@ void mnuDrawAnimatedMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set,
             dist = dx * dx;
             dist += dy * 1.5f * dy;
             if (dist < nearRadius) {
-                alpha = alpha - (nearRadius - dist) / nearRadius * alpha * ((f32)(s32)mnuMovieWork->unk10 * 0.0078125f);
+                alpha = alpha - (nearRadius - dist) / nearRadius * alpha * ((f32)(s32)mnuMovieWork->imageAlpha * 0.0078125f);
             }
             dy = y0 - (ey + center);
             dx = x0 - (ex + center);
             dist = dx * dx;
             dist += dy * 1.5f * dy;
             if (dist < nearRadius) {
-                alpha = alpha - alpha * ((nearRadius - dist) / nearRadius) * ((f32)(s32)mnuMovieWork->unk10 * 0.0078125f);
+                alpha = alpha - alpha * ((nearRadius - dist) / nearRadius) * ((f32)(s32)mnuMovieWork->imageAlpha * 0.0078125f);
             }
             dy = y2 - (ey + center);
             dx = x2 - (ex + center);
             dist = dx * dx;
             dist += dy * 1.5f * dy;
             if (dist < farRadius) {
-                alpha = alpha - alpha * ((farRadius - dist) / farRadius) * ((f32)(s32)mnuMovieWork->unk10 * 0.0078125f);
+                alpha = alpha - alpha * ((farRadius - dist) / farRadius) * ((f32)(s32)mnuMovieWork->imageAlpha * 0.0078125f);
             }
         }
         switch (entry->sprite) {
@@ -139,7 +139,7 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
     if (entry->active != 0) {
         x = entry->x;
         y = entry->y;
-        alpha = (s32)mnuMovieWork->unk10 * 0.17f;
+        alpha = (s32)mnuMovieWork->imageAlpha * 0.17f;
         alpha = alpha * 0.6f;
         switch (entry->sprite) {
         case 0:
@@ -336,13 +336,13 @@ void mnuAdvanceStaffImageSequence(void) {
     s32 alpha = 128;
     s32 i;
 
-    mnuMovieWork->unk10 = 0;
+    mnuMovieWork->imageAlpha = 0;
     switch (D_003BC618) {
     case 1:
         if (mnuCheckMovieDecoderStatus() != 0) {
             mnuMovieWork->fadeInTicks = 0;
             D_003BC618 = 2;
-            mnuMovieWork->unk10 = 128;
+            mnuMovieWork->imageAlpha = 128;
         } else {
             if (mnuMovieDrawContext.soundNode.playbackFrameIndex < 32) {
                 alpha = mnuMovieDrawContext.soundNode.playbackFrameIndex * 4;
@@ -351,11 +351,11 @@ void mnuAdvanceStaffImageSequence(void) {
                 }
             }
             sdfSetGridScaledDrawBounds(x, y, width, height, ((u32)alpha << 24) | 0x808080);
-            mnuMovieWork->unk10 = alpha;
+            mnuMovieWork->imageAlpha = alpha;
         }
         break;
     case 2:
-        mnuMovieWork->unk10 = 128;
+        mnuMovieWork->imageAlpha = 128;
         mnuMovieWork->fadeInTicks++;
         if (mnuMovieWork->fadeInTicks >= 0) {
             if (mnuMovieWork->fadeInTicks >= 128) {
@@ -372,7 +372,7 @@ void mnuAdvanceStaffImageSequence(void) {
         if (mnuMovieWork->fadeOutTicks >= 260) {
             mnuStopMovieDrawTask();
             i = ++D_003BC614;
-            mnuMovieWork->unk10 = 0;
+            mnuMovieWork->imageAlpha = 0;
             if (i == 15) {
                 D_003BC618 = 5;
             } else {
@@ -384,11 +384,11 @@ void mnuAdvanceStaffImageSequence(void) {
                 alpha = 0;
             }
             sdfSetGridScaledDrawBounds(x, y, width, height, ((u32)alpha << 24) | 0x808080);
-            mnuMovieWork->unk10 = alpha;
+            mnuMovieWork->imageAlpha = alpha;
         }
         break;
     case 4:
-        mnuMovieWork->unk10 = 0;
+        mnuMovieWork->imageAlpha = 0;
         if (mnuMovieWork->scrollTicks < D_0037AFC0[D_003BC614].startFrame ||
             mnuMovieWork->scrollTicks / 60 > (D_00379F70[255].offsetY + 224) / 60 - 4) {
             break;
@@ -415,7 +415,7 @@ void mnuAdvanceStaffImageSequence(void) {
         }
         /* Waiting and finished states both leave the image transparent. */
     case 5:
-        mnuMovieWork->unk10 = 0;
+        mnuMovieWork->imageAlpha = 0;
         break;
     }
 }
@@ -453,7 +453,7 @@ void mnuInitializeMovieRollViewport(void) {
     s32 i;
     MnuStaffMovieWork *movie = mnuMovieWork;
 
-    movie->unk10 = 0;
+    movie->imageAlpha = 0;
     movie->imageIndex = 0;
     D_003BC614 = 0;
     D_003BC618 = 4;

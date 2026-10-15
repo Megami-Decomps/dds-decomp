@@ -167,7 +167,7 @@ typedef struct MnuShootingWork {
     union {
         u32 flags;
         struct {
-            u32 unk70Bit0 : 1;
+            u32 paused : 1;
             u32 initialized : 1;
             u32 unk70Rest : 30;
         };
@@ -190,7 +190,7 @@ typedef struct MnuShootingWork {
     s32 unkA4; /* 0xA4: cleared by the section initializer (mnuInitializeShootingWorkResources). */
     s32 playerResetState; /* 0xA8: mnuAdvanceShootingPlayerEntryReset switch state. */
     s32 playerResetTicks; /* 0xAC: mnuAdvanceShootingPlayerEntryReset per-state tick. */
-    s32 unkB0;
+    s32 frameDisplayValue;
     FadeEntry strip;
     FadeNumber lowerNumber;
     FadeNumber upperNumber;

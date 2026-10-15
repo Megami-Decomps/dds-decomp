@@ -256,10 +256,10 @@ void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
     u8 *row = (u8 *)entry + MOTION_ROWS;
     s32 index;
 
-    entry->unkC = 0x30;
-    entry->unk10 = 0x10;
+    entry->highPhaseDecayStep = 0x30;
+    entry->lowPhaseDecayStep = 0x10;
     entry->particleCount = 0x80;
-    entry->unk0 = 0;
+    entry->keepActive = 0;
 
     index = 0;
     do {
@@ -289,9 +289,9 @@ void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
 }
 
 void mnuInitializeQueuedMenuCommand(MenuQueuedCommand *entry) {
-    entry->unkC = 0x18;
-    entry->unk10 = 5;
-    entry->unk0 = 0;
+    entry->highPhaseDecayStep = 0x18;
+    entry->lowPhaseDecayStep = 5;
+    entry->keepActive = 0;
 }
 
 
@@ -338,11 +338,11 @@ s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) 
 }
 
 void mnuClearSpriteRecord(MenuQueuedCommand *entry) {
-    entry->unk0 = 0;
+    entry->keepActive = 0;
     entry->kind = 0;
     entry->option = 0;
-    entry->unkC = 0;
-    entry->unk10 = 0;
+    entry->highPhaseDecayStep = 0;
+    entry->lowPhaseDecayStep = 0;
     entry->initialValue = 0;
     entry->argument = 0;
 }
@@ -513,7 +513,7 @@ void mnuUpdateAndDrawPartyCommandQueue(s32 x, s32 y, s32 z, MenuQueuedCommand *c
     for (i = 0; i < 2; i++) {
         s32 phase;
 
-        if (commands[i].initialValue != 0 || commands[i].unk0 != 0) {
+        if (commands[i].initialValue != 0 || commands[i].keepActive != 0) {
             if (commands[i].argument == 0) {
                 switch ((u32)commands[i].kind) {
                 case 0:
@@ -532,14 +532,14 @@ void mnuUpdateAndDrawPartyCommandQueue(s32 x, s32 y, s32 z, MenuQueuedCommand *c
                 }
                 phase = commands[i].initialValue;
                 if (phase > 0x100) {
-                    commands[i].initialValue = phase - commands[i].unkC;
+                    commands[i].initialValue = phase - commands[i].highPhaseDecayStep;
                 } else {
-                    commands[i].initialValue = phase - commands[i].unk10;
+                    commands[i].initialValue = phase - commands[i].lowPhaseDecayStep;
                 }
                 if (commands[i].initialValue < 0) {
                     commands[i].initialValue = 0;
                 }
-                if (commands[i].initialValue <= 0 && commands->unk0 == 0) {
+                if (commands[i].initialValue <= 0 && commands->keepActive == 0) {
                     mnuClearSpriteRecord(&commands[i]);
                 }
             } else {

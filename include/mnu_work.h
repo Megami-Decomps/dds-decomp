@@ -64,7 +64,7 @@ typedef struct MenuStateRecord {
     u8 pad12[2];
     s16 waitLimit;
     s16 limit;
-    s16 unk18;
+    s16 lifetime;
     u8 pad1A[2];
     s16 offsetX;
     s16 offsetY;
@@ -74,7 +74,7 @@ typedef struct MenuStateRecord {
 typedef char MenuStateRecordLayoutAssert[
     (sizeof(MenuInitialTag) == 8 && sizeof(MenuStateRecord) == 0x22 &&
      (unsigned long)&((MenuStateRecord *)0)->tag == 0x0A &&
-     (unsigned long)&((MenuStateRecord *)0)->unk18 == 0x18 &&
+     (unsigned long)&((MenuStateRecord *)0)->lifetime == 0x18 &&
      (unsigned long)&((MenuStateRecord *)0)->effect == 0x20) ? 1 : -1];
 
 MenuStateRecord *mnuCreateNamedRecord(const void *tagData);
@@ -117,7 +117,7 @@ typedef struct MenuWorkFlagBits {
     u32 pendingDeactivate : 1; /* bit 3: dispatch then deactivate */
     u32 pendingStart : 1; /* bit 4: set by mnuCreateAnimatedEffect */
     u32 halfRemainingCountReached : 1; /* bit 5: latched at half the initial remaining count */
-    u32 unk6 : 8;
+    u32 halfRemainingTicks : 8;
     u32 inputDisabled : 1;
     u32 mode : 4;
     u32 modelMotionStarted : 1;

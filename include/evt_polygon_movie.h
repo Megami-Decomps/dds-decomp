@@ -22,7 +22,7 @@ typedef char EvtPolygonMovieTaskState_flags_at_0x8[((u32)&((EvtPolygonMovieTaskS
  * viewer dialogs and message-window lifetime all use this single object. */
 typedef struct PmdEntry {
     u32 type;     /* 0x00 */
-    u32 unk_04;   /* 0x04 */
+    u32 elementSize; /* 0x04: serialized payload bytes per element. */
     u32 value;    /* 0x08 */
     u32 offset;   /* 0x0C */
 } PmdEntry;
@@ -101,7 +101,7 @@ typedef struct PolyMovieWork {
     u8 *subEntry21Data;   /* 0xF4 */
     u32 subEntry21Count; /* 0xF8: rows in the sub type-21 group metadata table */
     u8 *subEntry25Data;   /* 0xFC */
-    u32 unk_100;       /* 0x100 */
+    u32 subEntry25Count;       /* 0x100 */
     s32 handle;        /* 0x104 */
     struct KwlnTask *task; /* 0x108: scheduler task created for this viewer */
     s32 eventId;       /* 0x10C */
