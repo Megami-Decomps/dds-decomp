@@ -8417,8 +8417,8 @@ void effGetWorldVector(u32 which) {
 
     request.kind = 0xB;
     request.count = 1;
-    request.size = 8;
-    request.unk04 = 0;
+    request.directionMode = 8;
+    request.extentOverride = 0;
     switch (which) {
     case 0:
         break;
@@ -8494,8 +8494,8 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
             break;
         }
         request.count = source->count;
-        request.size = source->size;
-        request.unk04 = source->unk04;
+        request.directionMode = source->directionMode;
+        request.extentOverride = source->extentOverride;
     } else {
         switch (source->kind) {
         case 0:
@@ -8520,7 +8520,7 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
         }
         request.kind = 8;
         request.count = index;
-        request.size = 0;
+        request.directionMode = 0;
     }
     if (handle == 0) {
         return 0;
@@ -8663,8 +8663,8 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
     EvtUnit *effect;
 
     request.count = config->direction.count;
-    request.size = config->direction.size;
-    request.unk04 = config->direction.unk04;
+    request.directionMode = config->direction.directionMode;
+    request.extentOverride = config->direction.extentOverride;
     switch (config->direction.kind) {
     case 0:
         request.kind = 0;
@@ -8912,8 +8912,8 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
     config = work->payload;
     if (work->frame == 0) {
         request.count = config->direction.count;
-        request.size = config->direction.size;
-        request.unk04 = config->direction.unk04;
+        request.directionMode = config->direction.directionMode;
+        request.extentOverride = config->direction.extentOverride;
         handle = 0;
         switch (config->direction.kind) {
         case 0:

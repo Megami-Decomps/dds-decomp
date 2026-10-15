@@ -14,9 +14,9 @@ struct SdfMemBlock;
 typedef struct EffectVectorRequest {
     u8 kind;
     u8 count;
-    u8 size;
+    u8 directionMode;
     u8 pad_03;
-    s32 unk04;
+    s32 extentOverride;
 } EffectVectorRequest;
 
 typedef char EffectVectorRequest_size_must_be_8[(sizeof(EffectVectorRequest) == 8) ? 1 : -1];
