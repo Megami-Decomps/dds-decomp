@@ -3,6 +3,43 @@
 
 #include "common.h"
 
+struct BtlUnit;
+
+/* The linked-number task allocates the full 0x34-byte variant; the counter
+ * task uses the common prefix and its 0x2C-byte counter variant. */
+typedef struct BtlLinkedEffectArgs {
+    f32 anchorOffset[4]; /* 0x00: initial label anchor minus referencePosition. */
+    f32 referencePosition[4]; /* 0x10: saved reference for the update flags. */
+    struct BtlUnit *unit; /* 0x20: owner used by both finish callbacks. */
+    union {
+        struct {
+            s32 value; /* 0x24: signed number rendered by the update callback. */
+            u32 elapsedTicks; /* 0x28: unsigned frame threshold. */
+            u32 color; /* 0x2C */
+            u8 kind; /* 0x30 */
+            u8 offsetIndex; /* 0x31: indexes the twelve display offsets. */
+        } linked;
+        struct {
+            u32 elapsedTicks; /* 0x24: counter timing and float conversion. */
+            u8 kind; /* 0x28 */
+            u8 offsetIndex; /* 0x29 */
+        } counter;
+    } payload;
+} BtlLinkedEffectArgs;
+
+typedef char BtlLinkedEffectArgsSizeCheck[
+    (sizeof(BtlLinkedEffectArgs) == 0x34) ? 1 : -1];
+typedef char BtlLinkedEffectArgsOwnerOffsetCheck[
+    ((u32)&((BtlLinkedEffectArgs *)0)->unit == 0x20) ? 1 : -1];
+typedef char BtlLinkedEffectArgsPayloadOffsetCheck[
+    ((u32)&((BtlLinkedEffectArgs *)0)->payload == 0x24) ? 1 : -1];
+typedef char BtlLinkedEffectArgsCounterExtentCheck[
+    (sizeof(((BtlLinkedEffectArgs *)0)->payload.counter) == 8) ? 1 : -1];
+typedef char BtlLinkedEffectArgsLinkedFieldsOffsetCheck[
+    ((u32)&((BtlLinkedEffectArgs *)0)->payload.linked.color == 0x2C &&
+     (u32)&((BtlLinkedEffectArgs *)0)->payload.linked.kind == 0x30 &&
+     (u32)&((BtlLinkedEffectArgs *)0)->payload.linked.offsetIndex == 0x31) ? 1 : -1];
+
 /* Complete eight-byte actor/amount block owned by the hunt-EP task. */
 typedef struct BtlHuntExpArgs {
     struct BtlUnit *actor; /* 0x00 */
