@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "mnu_title_stream.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_lifecycle.h"
@@ -746,7 +747,147 @@ u32 mnuRunShootingUpdateCallback(MnuShootingWork *work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingWorkResources);
+extern void mnuResetResourceProgressCounters(void);
+extern void mnuResetWorkEntryPool(void);
+extern void mnuInitializeActiveEffectWorkEntry(MenuWorkEntry *entry);
+extern s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode);
+extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
+extern void mnuClearRuntimeRecordStorage(MenuRuntimeList *);
+extern void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
+extern void mnuBindMovementRecordTable(MenuMovementRecord18 *records, u32 count);
+extern void mnuBindResourceRecordTable(MenuResourceRecord *, s32);
+extern void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
+extern MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts);
+extern void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w);
+extern void mnuPopulateModelNodeList(MnuNodeList *list, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z);
+extern void mnuDeactivateAllModelNodes(MnuNodeList *list);
+extern MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts);
+extern void mnuClearNodeRecords(s32 *listAddress);
+extern void mnuAssignEffectRecordQueues(MnuEffectList *list, s32 resourceIndex, FileQueue **sources);
+extern void mnuClearAllNodeBroadcastFlags(s32 *listAddress);
+extern void itfInstallIndexedImageResourceBanks(u32 *source, s32 count);
+extern ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts);
+extern void itfClearModelInstances(ModelInstanceList *list);
+extern void itfSetModelInstanceParameterBits(ModelInstanceList *list, u32 parameter);
+extern void itfDeactivateModelInstances(ModelInstanceList *list);
+extern void itfApplyWorkTintAndClearBuffers(u8 *work);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void mnuResetTitleStreamLocked(void);
+extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
+extern void mnuResetTitleStreamAfterFileIdle(void);
+extern MnuModelNode *D_00438928;
+
+/* Initialize a shooting section: reset the entry pools, bind the loaded
+ * object tables, then build the section models, effect lists and model
+ * instances (or reuse the instances), and reset the round state. */
+s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
+    MenuRegistryParameters *records;
+    s32 *counts;
+    MnuNodeList *groups;
+    MnuEffectList *effects;
+    ModelInstanceList *instances;
+    s32 i;
+
+    mnuResetResourceProgressCounters();
+    mnuResetWorkEntryPool();
+    mnuInitializeActiveEffectWorkEntry(&D_0040ABF8);
+    if (work->unk94 != 0) {
+        mnuRebuildMenuWorkEntryCallbackRecords(&D_0040ABF8, work->unk94);
+    }
+    D_0040ABF8.currentX = 256.0f;
+    D_0040ABF8.currentY = 320.0f;
+    mnuClearRuntimeRecordStorage(mnuGetRuntimeHitTargetList());
+    mnuClearRuntimeRecordStorage(mnuGetRuntimeAnimationList());
+    mnuBindMenuRecordRegistry((MenuRegistry *)work->objects->objects, work->objects->count);
+    mnuBindMovementRecordTable((MenuMovementRecord18 *)work->playerObjects->objects, work->playerObjects->count);
+    mnuBindResourceRecordTable((MenuResourceRecord *)work->mapObjects->objects, work->mapObjects->count);
+    mnuBindMenuRegistryParameters((MenuRegistryParameters *)work->drawObjects->objects, work->drawObjects->count);
+    counts = sdfAllocSizeClassBlock(work->drawObjects->count * 4);
+    records = (MenuRegistryParameters *)work->drawObjects->objects;
+    for (i = 0; i < work->drawObjects->count; i++) {
+        if (records[i].kind == 3) {
+            counts[i] = records[i].unk06;
+        } else {
+            counts[i] = 0;
+        }
+    }
+    work->modelWork = mnuCreateSectionModelWork(work->drawObjects->count, counts);
+    sdfReleaseChipBlock(counts);
+    D_00438928 = NULL;
+    groups = work->modelWork->groups;
+    records = (MenuRegistryParameters *)work->drawObjects->objects;
+    for (i = 0; i < work->modelWork->count; i++) {
+        mnuInitializeNodeTransforms((u32 *)&groups[i], 1.0f, 1.0f, 1.0f, 1.0f);
+        if (i == 8) {
+            mnuPopulateModelNodeList(&groups[i], records[i].unk08, records[i].unk0A, 0, 1.0f, 1.0f, 3.0f);
+        } else {
+            mnuPopulateModelNodeList(&groups[i], 5, records[i].unk0A, 0, 1.0f, 1.0f, 1.0f);
+        }
+        mnuDeactivateAllModelNodes(&groups[i]);
+        evtPrintDeveloperConsoleMessage("Major:0x%x Minor:0x%x Num:%d\n", records[i].unk08, records[i].unk0A, records[i].unk06);
+    }
+    if (work->effectWork == NULL) {
+        counts = sdfAllocSizeClassBlock(12);
+        counts[1] = 2;
+        counts[2] = 2;
+        counts[0] = 30;
+        work->effectWork = mnuCreateEffectWork(3, counts);
+        sdfReleaseChipBlock(counts);
+        effects = work->effectWork->lists;
+        for (i = 0; i < work->effectWork->count; i++) {
+            MnuEffectList *list = &effects[i];
+
+            mnuClearNodeRecords((s32 *)list);
+            mnuAssignEffectRecordQueues(list, i, work->queueCopies);
+            mnuClearAllNodeBroadcastFlags((s32 *)list);
+            evtPrintDeveloperConsoleMessage("Effect Load!!\n");
+        }
+    }
+    if (work->work24 == NULL) {
+        itfInstallIndexedImageResourceBanks(work->resourceSlots, 7);
+        counts = sdfAllocSizeClassBlock(work->drawObjects->count * 4);
+        records = (MenuRegistryParameters *)work->drawObjects->objects;
+        for (i = 0; i < work->drawObjects->count; i++) {
+            if (records[i].kind == 1) {
+                counts[i] = records[i].unk06;
+            } else {
+                counts[i] = 0;
+            }
+        }
+        work->work24 = itfCreateModelInstanceWork(work->drawObjects->count, counts);
+        sdfReleaseChipBlock(counts);
+        instances = work->work24->lists;
+        for (i = 0; i < work->work24->count; i++) {
+            itfClearModelInstances(&instances[i]);
+            itfSetModelInstanceParameterBits(&instances[i], i);
+        }
+    } else {
+        instances = work->work24->lists;
+        for (i = 0; i < work->work24->count; i++) {
+            itfDeactivateModelInstances(&instances[i]);
+        }
+    }
+    itfApplyWorkTintAndClearBuffers((u8 *)work);
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
+    mnuQueueTitleSoundStreamEntry(0x16);
+    mnuResetTitleStreamAfterFileIdle();
+    work->state = 2;
+    work->update = D_0040ABF0[1];
+    work->unk90 = 0;
+    work->targets = 0;
+    work->unkA4 = 0;
+    D_00438934 = 0;
+    work->flags = ((work->flags & ~4) | 0x10) & ~0x20;
+    work->phase = 0;
+    work->result = 0;
+    work->phaseTicks = 0;
+    work->unkA8 = 0;
+    evtPrintDeveloperConsoleMessage("stgInit_Section\n");
+    return 1;
+}
+
 
 void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
     s32 i;
