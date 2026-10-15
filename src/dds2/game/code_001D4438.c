@@ -26,6 +26,7 @@
 #include "sdf_resource.h"
 #include "mdl.h"
 #include "active_sound_node.h"
+#include "btl_sound_node_api.h"
 #include "btl_scene_initializer.h"
 #include "fld_encounter_runtime_api.h"
 #include "mdl_flag_api.h"
@@ -426,10 +427,6 @@ typedef struct SoundResourceNode {
     struct SoundResourceNode *next;
 } SoundResourceNode;
 
-extern SoundResourceNode *sndAllocResourceNode(void);
-
-
-
 extern s32 datActionAnimationRecords;
 
 extern void btlRunTask(BtlRuntimeTask *);
@@ -663,7 +660,6 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-#include "btl_sound_node_api.h"
 extern s32 btlIsUnitInActiveList(u8 *);
 extern void btlResetActiveUnitList(void);
 extern s32 btlCountTasksByKind(u16);
@@ -2009,7 +2005,6 @@ s32 btlFormatActionEventFilename(s32 source, char *output);
 BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect,
         char *name);
 void sndFormatResourceNameFromIndex(s32 source, char *output);
-struct ActiveSoundNode *sndAllocListNode(void);
 BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *value, s32 option, char *name);
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect,
         BtlUnit *sourceOwner, s32 source, s32 target, BtlUnit *actor,
