@@ -26,7 +26,7 @@ extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
 
-extern u8 D_003CE6AC[];
+extern u8 mnuShopFadeCompletePopupEntry[];
 
 
 typedef struct EventMenuSelection {
@@ -257,7 +257,7 @@ u32 mnuTerminalMenuMessageLeaveNoOp(void) {
     return 1;
 }
 
-extern u8 D_003CE690[];
+extern u8 mnuShopReturnFadePopupEntry[];
 
 s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -268,7 +268,7 @@ s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
                 evtFinishMessageWindowAndNotify();
-                mnuSetPopupEntryFlagged(window, D_003CE690);
+                mnuSetPopupEntryFlagged(window, mnuShopReturnFadePopupEntry);
             }
         }
         return 0;
@@ -310,7 +310,7 @@ s32 mnuWaitForFadeBeforePopup(KwlnTask *callback) {
     if (state == 0) {
         if (*window == 0) {
             if (kwlnFadeIsActive() == 0) {
-                mnuSetPopupEntryFlagged(window, D_003CE6AC);
+                mnuSetPopupEntryFlagged(window, mnuShopFadeCompletePopupEntry);
             }
         }
         return 0;

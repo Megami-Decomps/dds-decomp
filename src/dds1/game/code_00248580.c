@@ -1680,9 +1680,9 @@ extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 mnuTerminalActionTable[];
 extern u8 mnuTerminalPopupEntries[];
-extern u8 D_0036AD30[];
-extern u8 D_0036AD68[];
-extern u8 D_0036ADA0[];
+extern u8 mnuTerminalSelectionPopupEntry[];
+extern u8 mnuTerminalSelectionCancelPopupEntry[];
+extern u8 mnuTerminalEntryMessagePopupEntry[];
 
 /* Event-B panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
 s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
@@ -1715,9 +1715,9 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
                     switch (action) {
                     case 2:
                         if (context->owner->count == 1) {
-                            mnuSetPopupEntryFlagged(state, D_0036ADA0);
+                            mnuSetPopupEntryFlagged(state, mnuTerminalEntryMessagePopupEntry);
                         } else {
-                            mnuSetPopupEntryFlagged(state, D_0036AD30);
+                            mnuSetPopupEntryFlagged(state, mnuTerminalSelectionPopupEntry);
                         }
                         break;
                     case 1:
@@ -1732,7 +1732,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
             }
         }
         if (buttons & 2) {
-            mnuSetPopupEntryFlagged(state, D_0036AD68);
+            mnuSetPopupEntryFlagged(state, mnuTerminalSelectionCancelPopupEntry);
         }
         if (!(buttons & 0x300000)) {
             mnuClearListFlagsOneAndTwo(&context->listResource->stateFlags);
@@ -1889,7 +1889,7 @@ s32 mnuUpdateTerminalSelectionInput(KwlnTask *input) {
     }
     if (*state == 0) {
         if (buttons & 1) {
-            mnuSetPopupEntryFlagged(state, D_0036ADA0);
+            mnuSetPopupEntryFlagged(state, mnuTerminalEntryMessagePopupEntry);
         }
         if (buttons & 2) {
             context->transitionPending = 1;
@@ -2235,7 +2235,7 @@ u32 mnuTerminalEntryMessageLeaveNoOp(void) {
 }
 
 extern s32 evtGetCapturedWindowPanelValue(void);
-extern u8 D_0036ADD8[];
+extern u8 mnuTerminalReturnToMenuPopupEntry[];
 
 s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
     MenuTerminalWork *context;
@@ -2251,10 +2251,10 @@ s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
             if (result == 0) {
                 if (evtGetCapturedWindowPanelValue() == 0) {
                     mnuResetProgressModeFromOwner((u8 *)context);
-                    mnuSetPopupEntryFlagged(state, D_0036ADD8);
+                    mnuSetPopupEntryFlagged(state, mnuTerminalReturnToMenuPopupEntry);
                 } else if (context->owner->count >= 2) {
                     context->transitionPending = 1;
-                    mnuSetPopupEntryFlagged(state, D_0036AD30);
+                    mnuSetPopupEntryFlagged(state, mnuTerminalSelectionPopupEntry);
                 } else {
                     mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries);
                 }
