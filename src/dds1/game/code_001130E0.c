@@ -523,8 +523,8 @@ void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value) {
     payload[2] = value;
 }
 
-u32 dds3GetObjectPayloadWord8(EffWorldNode *object) {
-    u32 *payload = object->data;
+u32 dds3GetObjectPayloadWord8(const EffWorldNode *object) {
+    const u32 *payload = object->data;
 
     return payload[2];
 }
