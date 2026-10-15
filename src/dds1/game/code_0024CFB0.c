@@ -722,11 +722,11 @@ s32 evtOpSetActiveEntryFlag(void) {
 /* Script opcode: return a display-table value, clamping only its upper index.
  * It does not activate or test an active-entry flag. */
 s32 evtOpReadDisplayValue(void) {
-    s32 index = scrReadIntParameter(0);
-    if (index >= EVT_DISPLAY_VALUE_COUNT) {
-        index = EVT_LAST_DISPLAY_VALUE;
+    s32 displayValueIndex = scrReadIntParameter(0);
+    if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
+        displayValueIndex = EVT_LAST_DISPLAY_VALUE;
     }
-    scrSetIntegerReturnValue(evtDisplayValues[index]);
+    scrSetIntegerReturnValue(evtDisplayValues[displayValueIndex]);
     return 1;
 }
 
