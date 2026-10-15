@@ -301,8 +301,8 @@ void sdfPatchPacketResourceField(SdfPatchableResourcePacket *packet, s32 entryIn
 
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
  * The drawing arguments remain opaque and are forwarded to the native builder. */
-void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
-                   s32 arg4, s32 arg5, s32 resourceAddress, s32 arg7, s32 arg8,
+void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *linkedList, s32 sourceX, s32 sourceY,
+                   s32 width, s32 height, s32 resourceAddress, s32 arg7, s32 arg8,
                    s32 (*allocatePacket)(s32)) {
     SdfPatchableResourcePacket *packet;
 
@@ -312,7 +312,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
     packet = (SdfPatchableResourcePacket *)allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     packet->link.patch = sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket(&packet->resourcePacket,
-        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
+        sdfPacketResourceEntries[0], sourceX, sourceY, width, height,
         resourceAddress, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, &packet->link);
     sdfAppendPacketRange(list, (u32)&packet->resourcePacket,
