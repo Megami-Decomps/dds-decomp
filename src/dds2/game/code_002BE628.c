@@ -3314,7 +3314,74 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestDrawCameraTransformDebug);
+extern s32 D_00437CA4;
+extern const char *D_00437CA0;
+extern char D_00437CA8[];
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
+
+void evtStageTestDrawCameraTransformDebug(void) {
+    EffWorldNode *world = (EffWorldNode *)dds3GetWorldObject();
+    EffWorldNode *camera;
+    const char *caption;
+    const char *name;
+    SdfListHead *list;
+    SdfPoolNode *surface;
+
+    if (world == NULL) {
+        return;
+    }
+    if (D_0037F510[0x2D] < 0) {
+        if (D_00437CA4 != 0) {
+            D_00437CA4 = 0;
+        } else {
+            D_00437CA4 = 1;
+        }
+    }
+    if (D_00437CA4 == 0) {
+        return;
+    }
+    camera = dds3GetWorldCameraObject(world);
+    if (camera == NULL) {
+        return;
+    }
+    if (D_0037F510[0x20] < 0) {
+        if (camera->next != NULL) {
+            camera = camera->next;
+        } else {
+            camera = ((EvtWorldTable *)world->data)->slots[4].head;
+        }
+        dds3SetWorldCameraObject((EffWorldNode *)dds3GetWorldObject(), camera);
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(camera));
+    } else if (D_0037F510[0x22] < 0) {
+        if (camera->previous != NULL) {
+            camera = camera->previous;
+        } else {
+            camera = ((EvtWorldTable *)world->data)->slots[4].tail;
+        }
+        dds3SetWorldCameraObject((EffWorldNode *)dds3GetWorldObject(), camera);
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(camera));
+    }
+    name = camera->value;
+    caption = D_00437CA0;
+    if (name != NULL) {
+        caption = name;
+    }
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8680, 0x79C0, 0xFF0000, 5, D_00437CA8, caption));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7240, 0x79C0, 0xFF0000, 0, "P:%.2f %.2f %.2f",
+                                                           camera->inner->position[0],
+                                                           camera->inner->position[1],
+                                                           camera->inner->position[2]));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7240, 0x7A20, 0xFF0000, 0, "R:%.2f %.2f %.2f",
+                                                           camera->inner->rotation[0],
+                                                           camera->inner->rotation[1],
+                                                           camera->inner->rotation[2]));
+    surface = &kwlnDrawSurfaces[96];
+    surface->append(surface, list);
+    list = sdfCreateResetPacketList();
+    (&kwlnDrawSurfaces[40])->append(&kwlnDrawSurfaces[40], list);
+}
 
 u32 evtStageTestCameraUpdate(void) {
     evtStageTestDrawCameraTransformDebug();
