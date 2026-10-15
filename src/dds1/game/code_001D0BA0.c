@@ -4675,14 +4675,14 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         task->amount -= delta;
         if (task->amount <= 0.01f) {
             btlCopyUnitCurrentPosition((u8 *)task->unit, position);
-        position[2] += task->unit->positionZOffset;
+            position[2] += task->unit->positionZOffset;
             effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
     btlCopyUnitCurrentPosition((u8 *)task->unit, position);
     position[0] += offset;
-            position[2] += task->unit->positionZOffset;
+    position[2] += task->unit->positionZOffset;
     effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
     task->tick++;
     return 0;
