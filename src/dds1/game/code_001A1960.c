@@ -232,8 +232,8 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
 
-s32 btlFindPartyEntryIndexForActor(s32 arg0) {
-    return dds3FindEntryIndex(((BtlUnit *)arg0)->partyRecord.unitId);
+s32 btlFindPartyEntryIndexForActor(s32 unit) {
+    return dds3FindEntryIndex(((BtlUnit *)unit)->partyRecord.unitId);
 }
 
 /* Retail no-op after party actor insertion, removal or roster swap. */
