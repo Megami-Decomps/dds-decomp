@@ -49,5 +49,6 @@ u32 sdfCountMapPositionRecords(struct SdfModel *model);
 SdfMapPositionRecord *sdfChunkFindRecordById(struct SdfModel *model, s32 recordId);
 void sdfSetLookAtBasisFromRecord(struct SdfModel *model, SdfMapPositionRecord *record);
 void sdfVuTransformMapRecordPosition(struct SdfModel *model, SdfMapPositionRecord *record);
+s32 sdfLoadMapRecordPositionVector(struct SdfModel *model, s32 id);
 
 #endif /* SDF_CHUNK_H */
