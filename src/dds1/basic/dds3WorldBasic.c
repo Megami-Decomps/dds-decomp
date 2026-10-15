@@ -8,8 +8,8 @@ extern EffWorldNode *dds3ActiveWorld;
 
 void effObjNodeDestroy(EffWorldNode *node);
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
-void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);
-void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);
+void dds3ReleaseWorldValueEntries(WorldValueIndices *object);
+void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *iterator);
 
 #define DDS3_WORLD_NODE_KIND 1
 #define DDS3_WORLD_INDEX_NODE_BYTES 0x10
