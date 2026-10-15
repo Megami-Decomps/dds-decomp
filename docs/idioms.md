@@ -13897,3 +13897,12 @@ does not consume it.
 DDS2 prints the three half-extents between constructing the center and
 selecting its radius. Preserve all three debug calls and the ordinary double
 promotions of their variadic arguments, together with the format strings.
+
+### Keep concrete layout checks with their consumers
+
+The shadow-projection owners in both titles check `EvtUnit.shadowLevel` at
+offset `0xD3` after their function bodies. The field name, type and native
+layout remain shared. Adding the same offset-expression typedef to the common
+header changes unrelated switch-table address selection in this compiler's
+full-unit context. Keeping the unchanged check with the concrete operation
+preserves the contract and the already matching switch dispatches.
