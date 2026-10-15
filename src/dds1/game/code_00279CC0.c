@@ -634,19 +634,19 @@ void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
 
 extern void itfGridLookupValueOrDefault(s32, s32);
 
-void mnuDrawCursorIcons(MenuAssets *assets, s32 arg) {
+void mnuDrawCursorIcons(MenuAssets *assets, s32 surface) {
     EffectSlotSet *icon = assets->sprites[2];
     s32 *state = *(s32 **)((u8 *)icon + 0x18);
 
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    effDrawSpriteWithCornerFade(-0x4800, -0x1F80, 0, 0x50, 0, (s32)icon, 0, arg);
+    effDrawSpriteWithCornerFade(-0x4800, -0x1F80, 0, 0x50, 0, (s32)icon, 0, surface);
     itfGridLookupValueOrDefault((s32)assets->sprites[2], 0);
     icon = assets->sprites[3];
     state = *(s32 **)((u8 *)icon + 0x18);
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    effDrawSpriteWithCornerFade(-0x2800, -0x1180, 0, 0x50, 0, (s32)icon, 0, arg);
+    effDrawSpriteWithCornerFade(-0x2800, -0x1180, 0, 0x50, 0, (s32)icon, 0, surface);
     itfGridLookupValueOrDefault((s32)assets->sprites[3], 0);
 }
 
