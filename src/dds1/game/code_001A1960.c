@@ -1872,13 +1872,13 @@ s32 func_001A5958(BtlUnit *attacker, BtlUnit *target, u32 command) {
         }
         if ((s32)btlRollAiBucket() < autoChance) {
             if (autoReason != -1) {
-                attacker->unk2F4 = autoReason;
+                attacker->pendingAbilityId = autoReason;
             }
             return 2;
         }
         if ((s32)btlRollAiBucket() < chance) {
             if (ratioReason != -1) {
-                attacker->unk2F4 = ratioReason;
+                attacker->pendingAbilityId = ratioReason;
             }
             return 2;
         }

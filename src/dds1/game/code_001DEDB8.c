@@ -1714,6 +1714,8 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
 extern u8 D_003A43E0[];
 extern u8 D_003A43F0[];
 
+/* vu0 routine: frame the action's target groups from the actor's side, widening
+ * for several targets, then keep the actor clear of the near camera plane. */
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
@@ -1728,8 +1730,6 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
 
-/* vu0 routine: frame the action's target groups from the actor's side, widening
- * for several targets, then keep the actor clear of the near camera plane. */
 void func_001E2FF8(BtlLinkedCommand *action) {
     BtlState *state;
     BtlUnit *unit;
