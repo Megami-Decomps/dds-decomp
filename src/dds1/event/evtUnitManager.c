@@ -762,7 +762,7 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     memset(work, 0, sizeof(EvtUnit));
     work->motionState = EVT_UNIT_MOTION_STATE_IDLE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
-    work->unkB8 = 1.0f;
+    work->transitionMotionScale = 1.0f;
     work->effObj = effObj;
     work->owner = owner;
     work->unkC0 = 10;
@@ -817,7 +817,7 @@ void evtUnitSetStoredParameter(EvtUnit *unit, s32 value) {
 }
 
 void evtSetTransitionMotionScale(EvtUnit *work, f32 value) {
-    work->unkB8 = value;
+    work->transitionMotionScale = value;
 }
 
 void evtStoreUnitMotionShortParameters(EvtUnit *work, s32 a, s32 b) {
