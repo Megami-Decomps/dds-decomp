@@ -13431,3 +13431,44 @@ select `fileFinishRequest`, but that continuation checks the hardcoded
 passes `&fileSaveIconRequest`; naming does not generalize or repair this
 native continuation behavior. `fileWriteContinuation` is invoked after
 successful write-close completion.
+
+### Masked actor-group framing preserves its consumed workspaces
+
+The 1,208-byte `btlBuildMaskedGroupFramingCameraPose` twins (DDS1 `001E20C0`,
+DDS2 `001EFA30`) use one actor cursor for traversal and the later endpoint swap.
+That consumed swap keeps the cursor's source role distinct from the plane-point
+address. The projected extent receives both the masked span and later projection
+results. The input lateral-offset workspace later receives the negated center
+length; retain a separate positive length measurement before that assignment.
+The native construction publishes the right endpoint before the left in both
+350-unit clamp arms, and clears right Y before left Y. These are ordinary
+consumed values and native construction phases, with no added operations.
+
+Two existing legacy SDK stores have a finite, body-specific qualification:
+the first selected actor's complete left endpoint and the masked-bounds result
+published to camera position. The standalone SDK boundary clears first CSE's
+quantity table: the former retains the independent actor copy; the latter allows
+a fresh half constant for height after the bounds call. A memory-clobber form
+retains the earlier constant across that call and loses two native instructions.
+This follows the scalar-read qualification in
+[battle camera setup](battle-camera-setup-matching.md), not a portable memory
+contract or permission to change other stores.
+
+On actor-selected paths in these pinned emitted bodies, the left endpoint store
+writes all four aligned lanes before the corresponding endpoint consumers. Each later traversal iteration's complete
+muzzle memory output and the full vector-copy operations retain fresh endpoint-X
+loads; none is hoisted across the provider or backedge. The masked-bounds call
+has no camera input; its full VF10 position store precedes fresh position XYZ
+reads and updates, with no earlier position cache or bypass path. The callers'
+direction vector is separate from the output pose. W survives scalar XYZ changes
+and subsequent complete VU loads. Other VU stores retain their memory effects.
+Reaudit changed source, compiler, control flow, lifetimes or macros.
+
+The existing DDS2 `func_001F2308` keeps its adjacent width/height provider outputs
+in `bounds[2]`, and reuses element zero as the marked actors' top accumulator.
+Two independent address-taken scalar locals demote that reset to alias-set-zero
+memory before scheduling: the unit-head load then waits behind the float store,
+so runtime and selected-actor pointers overlap and require an extra saved GPR.
+The actual typed output pair preserves native stack accesses and removes that
+false dependence. No callback or list-head snapshot moves. This preserves the
+already matched camera from `bbea2f42d`; it is not another new reconstruction.
