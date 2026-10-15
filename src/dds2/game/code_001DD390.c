@@ -1423,14 +1423,14 @@ BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, BtlOperandEntry *
     return task;
 }
 
-u32 btlApplyDeferredUnitStatus(void *arg) {
-    s32 *args = arg;
+u32 btlApplyDeferredUnitStatus(void *taskArgs) {
+    s32 *taskData = taskArgs;
     BtlState *work = (BtlState *)btlGetRuntime();
-    BtlUnit *unit = (BtlUnit *)args[0];
+    BtlUnit *unit = (BtlUnit *)taskData[0];
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, args[1]);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, taskData[1]);
     btlRefreshUnitMotionSelection(unit);
     btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
