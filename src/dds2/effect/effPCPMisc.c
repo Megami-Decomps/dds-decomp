@@ -81,17 +81,17 @@ extern u8 D_003B1A88[];
 extern s8 D_0043643C;
 
 
-extern u8 D_003B1AF0[];
+extern u8 effMuzzleThunderRayParams[];
 
-extern u8 D_003B1BB0[];
+extern u8 effCyanBlueRayPairParams[];
 
-extern u8 D_003B1C70[];
+extern u8 effWhiteYellowRayPairParams[];
 
-extern u8 D_003B1D30[];
+extern u8 effYellowOrangeRayPairParams[];
 
-extern u8 D_003B1DF0[];
+extern u8 effBrownRedRayPairParams[];
 
-extern u8 D_003B1EB0[];
+extern u8 effOrangeVioletRayPairParams[];
 
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
@@ -158,17 +158,17 @@ typedef struct {
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 
-extern u8 D_003B1B50[];
+extern u8 effOffsetMuzzleThunderRayParams[];
 
-extern u8 D_003B1C10[];
+extern u8 effCyanBlueRaySingleParams[];
 
-extern u8 D_003B1CD0[];
+extern u8 effWhiteYellowRaySingleParams[];
 
-extern u8 D_003B1D90[];
+extern u8 effYellowOrangeRaySingleParams[];
 
-extern u8 D_003B1E50[];
+extern u8 effBrownRedRaySingleParams[];
 
-extern u8 D_003B1F10[];
+extern u8 effOrangeVioletRaySingleParams[];
 
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
@@ -3580,7 +3580,7 @@ EffPCPBurstWork *effAllocateThunderFragmentWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1AF0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effMuzzleThunderRayParams);
     return work;
 }
 
@@ -3594,7 +3594,7 @@ EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1B50);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effOffsetMuzzleThunderRayParams);
     return work;
 }
 
@@ -3608,7 +3608,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1BB0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effCyanBlueRayPairParams);
     return work;
 }
 
@@ -3622,7 +3622,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1C10);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effCyanBlueRaySingleParams);
     return work;
 }
 
@@ -3636,7 +3636,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1C70);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effWhiteYellowRayPairParams);
     return work;
 }
 
@@ -3650,7 +3650,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1CD0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effWhiteYellowRaySingleParams);
     return work;
 }
 
@@ -3664,7 +3664,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1D30);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effYellowOrangeRayPairParams);
     return work;
 }
 
@@ -3678,7 +3678,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1D90);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effYellowOrangeRaySingleParams);
     return work;
 }
 
@@ -3692,7 +3692,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1DF0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effBrownRedRayPairParams);
     return work;
 }
 
@@ -3706,7 +3706,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1E50);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effBrownRedRaySingleParams);
     return work;
 }
 
@@ -3720,7 +3720,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1EB0);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effOrangeVioletRayPairParams);
     return work;
 }
 
@@ -3734,7 +3734,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)D_003B1F10);
+    work->fragmentWork = effThunderFragCreate((EffThunderFragmentParams *)effOrangeVioletRaySingleParams);
     return work;
 }
 
