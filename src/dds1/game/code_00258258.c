@@ -87,7 +87,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
             }
         }
     }
-    switch (scene->value05) {
+    switch (scene->backgroundColorIndex) {
     case 1:
         uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10707020, surface);
         break;

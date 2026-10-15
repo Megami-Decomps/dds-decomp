@@ -545,7 +545,7 @@ void mnuCampInitializeDisplayDefaults(CampDisplayDefaults *display) {
     display->scaleY = 1.0f;
     display->enabled = 1;
     display->variant = 0;
-    display->opaque1C = 0;
+    display->preserveAlpha = 0;
 }
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2);
@@ -662,7 +662,7 @@ void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
     display->enabled = from->p08.sb[0];
     display->variant = from->p08.sb[1];
 copyExtraMetadata:
-    display->opaque1C = from->p1C.sb[0];
+    display->preserveAlpha = from->p1C.sb[0];
 }
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2) {
@@ -800,7 +800,7 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
         } else if (variant == 2) {
             itfSendTablePacket(packet, 2, 0);
         }
-        if (display->opaque1C != 0) {
+        if (display->preserveAlpha != 0) {
             surfaceIndex = 0x3E;
             evtSetDrawSurfaceIndex(0x3E);
             evtSubmitPrimaryAlphaBlendMode(0);

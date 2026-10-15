@@ -618,9 +618,9 @@ s32 mnuGetMantraSourceValue(u16 profileId) {
     PrfDds1RequirementRecord *sourceEntry = prfReqGetEntryRecord(profileId);
     s32 slotIndex = 0;
 
-    if (sourceEntry->slots[0].status & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
+    if (sourceEntry->slots[0].operation & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
         slotIndex = 0;
-    } else if (sourceEntry->slots[1].status & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
+    } else if (sourceEntry->slots[1].operation & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
         slotIndex = 1;
     } else {
         return defaultValue;
@@ -930,7 +930,7 @@ u8 *mnuGetProfileRequirementIds(u16 profileId) {
 
     if ((mnuGetProfileRequirementFlags(profileId) & 1) != 0) {
         profileRecord = prfReqGetEntryRecord(profileId);
-        while (profileRecord->slots[slotIndex].status != 1) {
+        while (profileRecord->slots[slotIndex].operation != 1) {
             slotIndex++;
             if (slotIndex >= MNU_REQUIREMENT_SLOT_COUNT) {
                 return NULL;

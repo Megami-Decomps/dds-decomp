@@ -5,9 +5,10 @@ struct DatPartyRecord;
 
 #ifdef VERSION_DDS1
 /* DDS1's 0x54-byte requirement row is distinct from the DDS2 rule record.
- * Bits 0x8/0x10 select state 0/1 rule aggregation; other bits remain unknown. */
+ * Bits 0x8/0x10 select state 0/1 rule aggregation; other bits remain unknown.
+ * State 0 reads two 0x14-byte slots starting at stateZeroFirstOperation. */
 typedef struct PrfDds1RequirementSlot {
-    s32 status;
+    s32 operation;
     u8 unknown04[4];
     s32 sourceValue;
     u8 profileIds[8];
@@ -15,9 +16,9 @@ typedef struct PrfDds1RequirementSlot {
 
 typedef struct PrfDds1RequirementRecord {
     u32 stateFlags;
-    u32 flags04;
+    u32 stateZeroFirstOperation;
     u8 pad08[0x10];
-    u32 flags18;
+    u32 stateZeroSecondOperation;
     u8 pad1C[0x10];
     PrfDds1RequirementSlot slots[2];
 } PrfDds1RequirementRecord;
@@ -26,12 +27,12 @@ extern PrfDds1RequirementRecord D_00391230[];
 PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 index);
 
 typedef char PrfDds1RequirementSlot_size[(sizeof(PrfDds1RequirementSlot) == 0x14) ? 1 : -1];
-typedef char PrfDds1RequirementSlot_status[((u32)&((PrfDds1RequirementSlot *)0)->status == 0) ? 1 : -1];
+typedef char PrfDds1RequirementSlot_status[((u32)&((PrfDds1RequirementSlot *)0)->operation == 0) ? 1 : -1];
 typedef char PrfDds1RequirementSlot_value[((u32)&((PrfDds1RequirementSlot *)0)->sourceValue == 8) ? 1 : -1];
 typedef char PrfDds1RequirementSlot_ids[((u32)&((PrfDds1RequirementSlot *)0)->profileIds == 0xC) ? 1 : -1];
 typedef char PrfDds1RequirementRecord_size[(sizeof(PrfDds1RequirementRecord) == 0x54) ? 1 : -1];
-typedef char PrfDds1RequirementRecord_flags04[((u32)&((PrfDds1RequirementRecord *)0)->flags04 == 4) ? 1 : -1];
-typedef char PrfDds1RequirementRecord_flags18[((u32)&((PrfDds1RequirementRecord *)0)->flags18 == 0x18) ? 1 : -1];
+typedef char PrfDds1RequirementRecord_flags04[((u32)&((PrfDds1RequirementRecord *)0)->stateZeroFirstOperation == 4) ? 1 : -1];
+typedef char PrfDds1RequirementRecord_flags18[((u32)&((PrfDds1RequirementRecord *)0)->stateZeroSecondOperation == 0x18) ? 1 : -1];
 typedef char PrfDds1RequirementRecord_slots[((u32)&((PrfDds1RequirementRecord *)0)->slots == 0x2C) ? 1 : -1];
 #endif
 

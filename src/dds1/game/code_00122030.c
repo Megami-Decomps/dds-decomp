@@ -868,28 +868,28 @@ void fldRebuildFieldScene(void) {
                 if (areaIndex != -1) {
                     room = &encounters[areaIndex].rooms[sceneWork->room];
                     selection = 0;
-                    flag = room->flagB;
+                    flag = room->higherPriorityFlagId;
                     if (flag != -1 && flag != 0) {
                         if (mdlFlagTest(flag)) {
                             selection = 2;
                         } else {
-                            flag = room->flagA;
+                            flag = room->lowerPriorityFlagId;
                             if (flag != -1 && flag != 0 && mdlFlagTest(flag)) {
                                 selection = 1;
                             }
                         }
                     } else {
-                        flag = room->flagA;
+                        flag = room->lowerPriorityFlagId;
                         if (flag != -1 && flag != 0) {
                             selection = mdlFlagTest(flag) != 0;
                         }
                     }
                     switch (selection) {
                         case 1:
-                            encounter = room->valueA;
+                            encounter = room->lowerPriorityEncounterId;
                             break;
                         case 2:
-                            encounter = room->valueB;
+                            encounter = room->higherPriorityEncounterId;
                             break;
                         default:
                             encounter = room->defaultEncounter;
