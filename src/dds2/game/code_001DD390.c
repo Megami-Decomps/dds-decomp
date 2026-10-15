@@ -5306,20 +5306,20 @@ s32 btlIsActiveActor(BtlUnit *actor) {
     return 0;
 }
 
-BtlUnit *btlFindUnitByModeClear(s32 mode) {
+BtlUnit *btlFindUnitByModeClear(s32 unitId) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
-        if (!(unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == mode) {
+        if (!(unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == unitId) {
             return unit;
         }
     }
     return 0;
 }
 
-BtlUnit *btlFindUnitByModeFlagged(s32 mode) {
+BtlUnit *btlFindUnitByModeFlagged(s32 unitId) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
-        if ((unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == mode) {
+        if ((unit->partyRecord.flags & 0x20) && unit->partyRecord.unitId == unitId) {
             return unit;
         }
     }
