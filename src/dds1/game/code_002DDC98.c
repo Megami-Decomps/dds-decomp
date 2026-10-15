@@ -25,8 +25,6 @@ extern u32 D_003BDA28;
 
 extern u8 D_003F98A0[];
 
-extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
-
 extern u16 D_003BDA24;
 
 extern s32 D_003BDA20;
