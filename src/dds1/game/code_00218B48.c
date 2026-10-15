@@ -100,7 +100,7 @@ typedef struct MdlViewState {
     s16 resourceId;    /* 0x1A: ID passed to the resource loader */
     s16 unk1C;
     s16 selectedResourceId; /* 0x1E: resource ID under the selection cursor. */
-    s16 unk20;
+    s16 selectionCursor; /* 0x20: selects one of five controls in the asset panel. */
     s16 activeEntryId;    /* 0x22: assigned from selectedEntryId when adding */
     s16 selectedEntryId;  /* 0x24: key passed to the mdlAddEntry* family;
                            signed in DDS1, unsigned in DDS2. */
@@ -135,6 +135,8 @@ typedef struct MdlViewState {
 } MdlViewState;
 typedef char MdlViewState_selectedResourceId_offset_check[
     ((u32)&((MdlViewState *)0)->selectedResourceId == 0x1E) ? 1 : -1];
+typedef char MdlViewState_selectionCursor_offset_check[
+    ((u32)&((MdlViewState *)0)->selectionCursor == 0x20) ? 1 : -1];
 typedef struct MdlPadState {
     u8 pad00;
     s8 confirm;
@@ -1321,7 +1323,7 @@ void mdlHandleViewerAssetSelection(void) {
     s32 entryCount;
     s32 referenceCount;
 
-    if (mdlUpdateViewerCursor(&mdlViewerState.unk20, 5) != 0) {
+    if (mdlUpdateViewerCursor(&mdlViewerState.selectionCursor, 5) != 0) {
         return;
     }
     pageStep = mdlViewerState.unk0F == 0 ? 10 : 16;
@@ -1336,7 +1338,7 @@ void mdlHandleViewerAssetSelection(void) {
         }
         mdlViewerState.selectedEntryId = motionIndex;
     }
-    switch (mdlViewerState.unk20) {
+    switch (mdlViewerState.selectionCursor) {
     case 0:
         if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1C, mdlGetResourceTableCount(), 1) != 0) {
             entryCount = mdlGetTableWord(mdlViewerState.unk1C);
@@ -1386,7 +1388,7 @@ void mdlHandleViewerAssetSelection(void) {
         mdlLoadViewerResourceAndResetCursors();
         return;
     }
-    if (mdlViewerState.unk20 < 2) {
+    if (mdlViewerState.selectionCursor < 2) {
         if (sdfPadButtonStates[1] >= 0) {
             return;
         }
@@ -1449,7 +1451,7 @@ void mdlDrawViewerAssetSelection(void) {
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
-               0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 0 ? 4 : 0);
+               0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 0 ? 4 : 0);
     formatted = sdfFormatSifPacket(&packet, D_003BBC30, mdlViewerState.unk1C + 0x30);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
@@ -1458,7 +1460,7 @@ void mdlDrawViewerAssetSelection(void) {
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 1 ? 4 : 0);
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 1 ? 4 : 0);
     if (mdlViewerState.unk0F == 0) {
         format = D_003BBC40;
     } else {
@@ -1468,12 +1470,12 @@ void mdlDrawViewerAssetSelection(void) {
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 3 ? 4 : 0);
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 3 ? 4 : 0);
     formatted = sdfFormatSifPacket(&packet, "    %02d", mdlViewerState.entryHeight);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet,
-                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 4 ? 4 : 0);
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 4 ? 4 : 0);
     formatted = sdfFormatSifPacket(&packet, D_003BBC50, mdlViewerState.entryWidth);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
@@ -1483,7 +1485,7 @@ void mdlDrawViewerAssetSelection(void) {
         s32 referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
 
         if (mdlViewerState.selectedNodeId == index) {
-            s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 2 ? 4 : 0;
+            s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 2 ? 4 : 0;
 
             if (referenceCount == 0) {
                 formatted = sdfCreateFormattedSifCommand(
@@ -2715,7 +2717,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlViewerState.selectedResourceId = 0;
     mdlViewerState.unk08 = 0;
     mdlViewerState.unk09 = 0;
-    mdlViewerState.unk20 = 0;
+    mdlViewerState.selectionCursor = 0;
     mdlViewerState.entryHeight = 0;
     mdlViewerState.entryWidth = 0;
     mdlViewerState.labelIndexB = 0;
