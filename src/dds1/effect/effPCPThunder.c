@@ -2699,8 +2699,8 @@ void effCopyResourceGroupVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effThunderSetCurveGroupTint(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x54) = arg1;
+void effThunderSetCurveGroupTint(s32 work, u32 value) {
+    *(u32 *)(work + 0x54) = value;
 }
 
 extern EffThunderDrawParams D_003D64F0;
