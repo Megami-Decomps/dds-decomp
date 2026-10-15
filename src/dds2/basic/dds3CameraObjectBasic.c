@@ -27,7 +27,6 @@ u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjInnerVecBackup(ObjectTransform *inner);
 extern void dds3RebuildCameraBasis(EffWorldNode *obj);
-extern void sdfSetViewFieldOfView(f32 value);
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewUpVector[4];
