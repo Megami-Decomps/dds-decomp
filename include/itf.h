@@ -23,7 +23,7 @@ typedef struct UiSprite {
     SdfMemBlock *allocation;
     SdfMemBlock *payloadAllocation;
     u32 *payload;
-    s32 unk0C;
+    s32 renderValue;
     s32 left;
     s32 top;
     s32 right;
@@ -31,11 +31,11 @@ typedef struct UiSprite {
     s32 unk20;
     s32 screenY;
     s32 scrollSpan; /* Panel edge-fade divisor; both games read it as a signed word. */
-    /* The secondary panel notification copies these four opaque values. */
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-    s32 unk38;
+    /* RGBA words consumed by the panel packet renderers. */
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
     u8 kind; /* Unsigned index into the panel handler tables. */
     u8 pad3D[3];
 } UiSprite;
@@ -229,7 +229,7 @@ typedef struct ItfMesEntryBlock {
     s8 textState;
     u8 unk11;
     u8 color[4];
-    s16 unk16;
+    s16 lineCount;
     s16 itemIndex;
     s16 tableCount;
 } ItfMesEntryBlock;
@@ -244,7 +244,7 @@ typedef struct ItfMesBlk40 {
     u32 y;
     FrFontGlyph *glyphChain;
     u32 panelValue;
-    s16 unk10;
+    s16 selectionState;
     s16 selectedIndex;
     s16 savedIndex;
     s16 rowCount;
@@ -261,9 +261,9 @@ typedef struct ItfMesBlkA4 {
     UiSprite *sprite;
     UiSprite *overlay;
     s32 bounds[4];
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
+    s32 red;
+    s32 green;
+    s32 blue;
     s32 fadeLimit;
 } ItfMesBlkA4;
 
@@ -277,8 +277,8 @@ typedef struct ItfMesState {
     ItfMesSub *sub;
     s32 temporaryFontEntry;
     s32 renderValue;
-    s16 unk10;
-    s16 unk12;
+    s16 drawSurfaceIndex;
+    s16 panelMode;
     ItfMesBlk14 blk14;
     ItfMesEntryBlock entryBlock;
     ItfMesBlk40 blk40;
