@@ -2460,9 +2460,9 @@ s32 btlSelectActorAction(s32 state) {
     return selection;
 }
 
-s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
-    s32 id = arg & 0xFFFF;
-    switch (id) {
+s32 btlIsEventThresholdSatisfiedForEntry(s32 entryValue) {
+    s32 eventId = entryValue & 0xFFFF;
+    switch (eventId) {
     case 0x8A:
         if (evtCheckValueThreshold(0x8A, 1) != 0 || evtCheckValueThreshold(0x93, 1) != 0) {
             return 1;
@@ -2474,7 +2474,7 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
         }
         break;
     }
-    if ((u32)((id + 0xFF80) & 0xFFFF) < 0x20 && evtCheckValueThreshold(id, 1) != 0) {
+    if ((u32)((eventId + 0xFF80) & 0xFFFF) < 0x20 && evtCheckValueThreshold(eventId, 1) != 0) {
         return 1;
     }
     return 0;
