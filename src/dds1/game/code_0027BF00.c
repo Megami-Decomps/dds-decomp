@@ -1273,7 +1273,7 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", mnuDrawStaffScrollPanel);
 typedef struct MenuPageResources {
     u8 pad0[0xC];
     struct EffectSlotSet *sprites[10]; /* 0x0c */
-    u8 pad34[8];
+    s32 values[2];                     /* 0x34: page label values */
 } MenuPageResources;
 
 /* Create a ten-sprite page bundle; the caller chooses its last two slots. */
@@ -1310,7 +1310,43 @@ void mnuDestroyResources(MenuPageResources *resources) {
     sdfReleaseChipBlock(resources);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", mnuDrawPartyPageContents);
+extern char D_003BC720[];
+
+/* Draw a party page: the slot sprites for the page layout, then the two
+ * numeric labels formatted from the page values. The compact layout sits in a
+ * loop scope, so its last glyph call carries no tail-call placeholder and both
+ * layouts share it (retail's cross-jumped label call). */
+void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources *page, s32 drawArg) {
+    char text[0x10];
+    FrFontGlyph *glyph;
+
+    if (layout != 1) {
+        goto compact;
+    }
+    itfDrawGridWithResolvedSlot(x + 0xB0, y + 0x30, z, 1, page->sprites[0], 0, drawArg);
+    itfDrawGridWithResolvedSlot(x + 0x5F0, y + 0xF8, z, 1, page->sprites[2], 0, drawArg);
+    itfDrawGridWithResolvedSlot(x + 0x260, y + 0x30, z, 1, page->sprites[8], 0, drawArg);
+    itfDrawGridWithResolvedSlot(x + 0x100, y + 0xF8, z, 1, page->sprites[9], 0, drawArg);
+    sprintf(text, D_003BC720, page->values[0]);
+    glyph = itfCreateFont2TextGlyph(x + 0x440, y + 0x100, z, 0xA09DC380, text, NULL);
+    sprintf(text, D_003BC720, page->values[1]);
+    glyph = itfCreateFont2TextGlyph(x + 0x710, y + 0x100, z, 0xA09DC380, text, glyph);
+    goto draw;
+
+    do {
+    compact:
+        itfDrawGridWithResolvedSlot(x + 0xB0, y + 0x30, z, 1, page->sprites[1], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x + 0x5F0, y + 0x88, z, 1, page->sprites[2], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x + 0x100, y + 0x78, z, 1, page->sprites[9], 0, drawArg);
+        sprintf(text, D_003BC720, page->values[0]);
+        glyph = itfCreateFont2TextGlyph(x + 0x440, y + 0x90, z, 0xA09DC380, text, NULL);
+        sprintf(text, D_003BC720, page->values[1]);
+        glyph = itfCreateFont2TextGlyph(x + 0x710, y + 0x90, z, 0xA09DC380, text, glyph);
+    } while (0);
+draw:
+    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+}
 
 void mnuCreatePartyPageResources(MenuPageWindow *menu, s32 x, s32 y, s32 style, s32 color) {
     u32 i;
