@@ -125,7 +125,46 @@ DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list
     return buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324F50", func_003251C0);
+/* Clone each nested group into its own owned buffer, relocating the payload
+ * pointers of its two counted lists into the copy. Return the resource-list owner. */
+u32 *func_003251C0(const DdsNestedHeader *header) {
+    u32 *owner = mnuCreateCallbackPair();
+    DdsNestedGroup *group = header->groups;
+    s32 i;
+
+    for (i = 0; i < header->groupCount; i++, group++) {
+        s32 size = dds3MeasureMenuRecord(group);
+        u8 *cursor = sdfAllocateOwnedResourceBuffer(owner, size);
+        DdsNestedGroup *copy;
+        DdsCountedPayload *entry;
+        s32 j;
+
+        memset(cursor, 0, size);
+        copy = (DdsNestedGroup *)cursor;
+        dds3AppendFirstResourceListValue(owner, (u32)cursor);
+        memcpy(cursor, group, sizeof(*group));
+        cursor += sizeof(*group);
+        memcpy(cursor, group->first, group->firstCount * sizeof(*entry));
+        copy->first = (DdsCountedPayload *)cursor;
+        cursor += group->firstCount * sizeof(*entry);
+        entry = copy->first;
+        for (j = 0; j < copy->firstCount; j++, entry++) {
+            memcpy(cursor, entry->data, entry->count * 8);
+            entry->data = cursor;
+            cursor += entry->count * 8;
+        }
+        memcpy(cursor, group->second, group->secondCount * sizeof(*entry));
+        copy->second = (DdsCountedPayload *)cursor;
+        cursor += group->secondCount * sizeof(*entry);
+        entry = copy->second;
+        for (j = 0; j < group->secondCount; j++, entry++) {
+            memcpy(cursor, entry->data, entry->count * 8);
+            entry->data = cursor;
+            cursor += entry->count * 8;
+        }
+    }
+    return owner;
+}
 
 /* Pack both callback lists into separate header and eight-byte payload regions. */
 DdsNestedGroup *sdfPackCountedPayloadLists(u32 *owner, MnuCallbackList **firstList,
