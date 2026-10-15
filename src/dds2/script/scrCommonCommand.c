@@ -23,14 +23,14 @@ extern char D_00412658[];
 extern s8 sdfPadButtonStates[];
 
 
-s32 kwlnSetLightColorTarget(s32 arg0, s32 arg1, void *arg2);
+s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 
-s32 kwlnSetBackgroundColorTarget(s32 arg0, void *arg1);
+s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
 
-s32 kwlnSetDrawColorTarget(s32 arg0, void *arg1);
+s32 kwlnSetDrawColorTarget(s32 blendFrames, void *color);
 
-s32 evtToggleSavedDrawVectors(s32 arg0, f32 arg1, f32 arg2);
-s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
+s32 evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget);
+s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
 s32 kwlnDrawSetDc8Second(s32 arg0);
 
@@ -186,7 +186,7 @@ s32 scrCommandStartPadMotor(void)
 }
 
 extern char D_00412668[];
-void sdfSetViewFieldOfView(f32 arg0);
+void sdfSetViewFieldOfView(f32 fieldOfView);
 
 s32 scrCommandSetCameraFov(void)
 {
