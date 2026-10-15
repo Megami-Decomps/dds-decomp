@@ -1067,7 +1067,7 @@ void fldRebuildFieldScene(void) {
         fldSpawnPlayerUnits(transform);
         if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1)) {
             fldCreateChaseCameraObject();
-            fldAreaState.unk13C = 1;
+            fldAreaState.targetGuideEnabled = 1;
         }
         dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)fldPlayerObject);
         fldPreparePlayerSceneCameraTarget();
@@ -1866,7 +1866,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldAreaState.attritionDistance = 450.0f;
     }
     if (fldGetResourceReadyFlag() == 1) return 0;
-    if (fldAreaState.unk13C && D_00389988[0x5C / 4] &&
+    if (fldAreaState.targetGuideEnabled && D_00389988[0x5C / 4] &&
         D_00389988[0x44 / 4] && fldIsTargetWithinInteractionRange()) {
         fldResetTaskSlots();
         fldSetSceneLifecycleFlags(1);
@@ -2302,7 +2302,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
         if (fldAreaState.deferredExit == 1) fldStartDeferredFieldExit();
         break;
     case 4:
-        if (fldAreaState.unk13C != 0 && D_00389988[0x5C / 4] != 0) fldUpdateTargetGuideController();
+        if (fldAreaState.targetGuideEnabled != 0 && D_00389988[0x5C / 4] != 0) fldUpdateTargetGuideController();
         D_004360E8 = 1;
         if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
         if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.titleFade != 0) {

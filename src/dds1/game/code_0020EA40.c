@@ -377,7 +377,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetKind);
         BTL_INSTALL_CALLBACK(battle->pad65C, 0x0, btlHasDifferentActiveTarget);
         BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlSetLinkFlagOff);
-        BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlSetLinkFlagOn);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlSetLinkFlagOn);
         BTL_INSTALL_CALLBACK(battle->pad65C, 0x4, btlScheduleActionAndSoundSequence);
         BTL_INSTALL_CALLBACK(battle->pad5E4, 0x4, btlTryScheduleMarkedUnitTask);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSetLinkedPairActionCamera);

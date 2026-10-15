@@ -2769,7 +2769,7 @@ void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
     if (actorEntry->selectedRoom != 0) {
         fldAreaState.unk88 = actorEntry->selectedRoom - 1;
     }
-    fldAreaState.rowIdx = actorEntry->unk45;
+    fldAreaState.rowIdx = actorEntry->rowIndex;
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140BC8);
@@ -2870,7 +2870,7 @@ void func_00141898(void) {
             strcpy((char *)D_00387D60, entry->taskName);
             D_00435F28 = i + 1;
         }
-        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->unk52, entry->linkKind, entry->linkName);
+        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         if ((u32)(motion - 3) < 2) {
             record.mode = 5;
         } else {
@@ -2915,7 +2915,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
             index != entry->secondaryMotion || entry->variantMode != 0) {
             continue;
         }
-        fldAreaState.rowIdx = entry->unk45;
+        fldAreaState.rowIdx = entry->rowIndex;
         if (entry->flags54 != 0) {
             D_00435F24 = entry->flags54;
             strcpy((char *)D_00387D60, entry->taskName);
@@ -2931,10 +2931,10 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
         }
         if (field != 0 && kind != 0) {
             fldInitializeLinkedSequence(sequence, field, kind, entry->warpName,
-                                        entry->unk52, entry->linkKind, entry->linkName);
+                                        entry->sequenceCode, entry->linkKind, entry->linkName);
             sequence->mode = 5;
-            if (fldAreaState.sequenceCode != entry->unk52 && entry->unk52 != 0) {
-                fldAreaState.sequenceCode = entry->unk52;
+            if (fldAreaState.sequenceCode != entry->sequenceCode && entry->sequenceCode != 0) {
+                fldAreaState.sequenceCode = entry->sequenceCode;
             }
             if (entry->selectedRoom != 0) {
                 fldAreaState.unk88 = entry->selectedRoom - 1;
@@ -3011,7 +3011,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
             strcpy((char *)D_00387D60, taskName);
             D_00435F28 = i + 1;
         }
-        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->unk52, entry->linkKind, entry->linkName);
+        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         record.mode = 6;
         dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
         return 0;

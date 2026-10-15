@@ -328,7 +328,7 @@ typedef struct BtlState {
     void (*postTargetHook)(BtlTask *, s32, BtlUnit *, u64, u64, s32); /* 0x64C */
     u8 pad650[4];
     s32 (*allowDefeatCandidate)(BtlUnit *); /* 0x654 */
-    s32 (*unk658)(BtlUnit *);
+    s32 (*allowDefeatCandidateClear)(BtlUnit *); /* 0x658: zero vetoes clearing the ordinary defeat flags. */
     u8 pad65C[8];
     s32 (*cameraModeInitializePredicate)(BtlLinkedCommand *); /* 0x664: permits the mode initializer in 001DB048. */
     s32 (*cameraUpdatePredicate)(BtlLinkedCommand *); /* 0x668: gates the active camera handler. */
@@ -547,7 +547,7 @@ typedef struct BtlState {
     u8 pad610[4];
     void (*afterActorModelReady)(BtlUnit *); /* 0x614 */
     s32 (*unk618)(BtlUnit *);
-    s32 (*unk61C)(BtlUnit *);
+    s32 (*allowDefeatMotion)(BtlUnit *); /* 0x61C: nonzero permits the ordinary defeat-motion task. */
     s32 (*serialOverride)(void); /* 0x620: -1 cancels a scripted follow-up encounter. */
     void (*afterUnitUpdate)(void); /* 0x624 */
     s32 (*selectScriptState)(void); /* 0x628 */
@@ -558,8 +558,8 @@ typedef struct BtlState {
     s32 (*commandHook)(s32, s32);
     s32 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x640: mode-specific pose override. */
     s32 (*defeatCameraHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x644: same linked-defeat camera override. */
-    s32 (*unk648)(BtlUnit *);
-    s32 (*unk64C)(BtlUnit *);
+    s32 (*actionCursorSetupHook)(BtlUnit *); /* 0x648: nonzero handles linked-action cursor setup. */
+    s32 (*actionCursorStepHook)(BtlUnit *); /* 0x64C: nonzero handles the linked-action cursor step. */
     s32 (*unk650)(BtlUnit *);
     s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x654: same action-camera setup override. */
     s32 (*unk658)(BtlUnit *);
@@ -567,8 +567,8 @@ typedef struct BtlState {
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x660: same target-side pose override as DDS1 +0x628. */
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
-    s32 (*unk66C)(BtlUnit *);
-    s32 (*unk670)(struct BtlLinkedCommand *);
+    s32 (*actionStageStepHook)(BtlUnit *); /* 0x66C: nonzero handles the actor-stage camera step. */
+    s32 (*heightCameraSetupHook)(struct BtlLinkedCommand *); /* 0x670: nonzero handles height-based camera pose selection. */
     u8 pad674[8];
     s32 (*actionHitOverride)(BtlUnit *, BtlUnit *, s32, s32); /* 0x67C */
     s32 (*reflectedHitOverride)(BtlUnit *, BtlUnit *, s32); /* 0x680 */
@@ -577,8 +577,8 @@ typedef struct BtlState {
     void (*preActionHook)(struct ActionStateLink *, s32, u64, u64, u64);
     void (*postActionHook)(struct ActionStateLink *, s32, BtlUnit *, u64, u64, s32);
     u8 pad694[8];
-    s32 (*unk69C)(BtlUnit *);
-    s32 (*unk6A0)(BtlUnit *);
+    s32 (*allowDefeatCandidate)(BtlUnit *); /* 0x69C: zero vetoes setting the ordinary defeat flags. */
+    s32 (*allowDefeatCandidateClear)(BtlUnit *); /* 0x6A0: zero vetoes clearing the ordinary defeat flags. */
     s32 (*actorEligibilityOverride)(BtlUnit *); /* 0x6A4: optional actor eligibility check. */
     void (*linkedActionHook)(struct ActionStateLink *);
     s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x6AC */

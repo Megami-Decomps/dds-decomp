@@ -3407,8 +3407,8 @@ void fldDrawLocationPanel(void) {
         fldSelectDisplayBuffer(0x53);
         fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
-        if (fldAreaState.unk144 > 0) {
-            color = ((u32)((20 - fldAreaState.unk144) * 128 / 20) << 24) | 0x808080;
+        if (fldAreaState.overlayFadeInFrames > 0) {
+            color = ((u32)((20 - fldAreaState.overlayFadeInFrames) * 128 / 20) << 24) | 0x808080;
         } else {
             color = 0x80808080;
         }
@@ -3794,8 +3794,8 @@ s32 fldTitleMini(KwlnTask *task) {
         }
         break;
     case 2:
-        if (D_00436370 >= 9 && fldAreaState.unk144 > 0) {
-            fldAreaState.unk144--;
+        if (D_00436370 >= 9 && fldAreaState.overlayFadeInFrames > 0) {
+            fldAreaState.overlayFadeInFrames--;
         }
         if (D_00436370 < 30) {
             alpha = (30 - D_00436370) * 128 / 30;
