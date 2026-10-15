@@ -546,8 +546,8 @@ void fileReqSetSelectedSlot(s32 request, s32 selectedSlot) {
     fileRequestEntries[request].selectedSlot = selectedSlot;
 }
 
-void fileReqStartCardDetection(u32 arg0) {
-    func_0034FCE0(arg0, 0);
+void fileReqStartCardDetection(u32 port) {
+    func_0034FCE0(port, 0);
 }
 
 s32 D_00437CC0 __attribute__((section(".sdata"))) = 0;
