@@ -422,7 +422,7 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
             }
             if (selected & 0x8000) {
                 captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
-                    (u8 *)itfMesGetWindowTableValue(window, selected & 0x7FFF), NULL);
+                    itfMesGetWindowTableValue(window, selected & 0x7FFF), NULL);
             } else {
                 captionBlock->glyphChain = itfDrawCustomColorText(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
                     (u8 *)itfMesGetNextEntrySelectedItem(mes), NULL);
@@ -724,9 +724,9 @@ s16 itfMesGetWindowItemIndex(s32 window) {
     return itfWindowSlots[window].mes->entryBlock.itemIndex;
 }
 
-/* Return a replacement-text address; caller supplies an in-range slot index. */
-u32 itfMesGetWindowTableValue(s32 window, s32 slotIndex) {
-    return itfWindowSlots[window].mes->textSlots.addresses[slotIndex];
+/* Return the replacement text stored in a window slot. */
+u8 *itfMesGetWindowTableValue(s32 window, s32 slotIndex) {
+    return (u8 *)itfWindowSlots[window].mes->textSlots.addresses[slotIndex];
 }
 
 extern s32 D_00435E48;
