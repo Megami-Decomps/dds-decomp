@@ -2687,7 +2687,6 @@ void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
 
 extern f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern f32 sdfAtan2(f32 y, f32 x);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */
