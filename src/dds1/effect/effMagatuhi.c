@@ -665,8 +665,8 @@ void effMagatuhiSetControlPointParams(EffMagatuhiCallback *work, EffMagatuhiRows
 
 /* Seed every fourth slot with interpolated samples between two curve positions.
  * Keep the asymmetric duration/age subtraction and unchecked span divisor. */
-void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
-    EffMagatuhiWideSecond *work = effGetHandlerArg(arg->effect);
+void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *callback) {
+    EffMagatuhiWideSecond *work = effGetHandlerArg(callback->effect);
     EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
     u32 historyFrames = work->head.duration;
     s32 lifetimeFrames = work->head.lifetimeFrames;
@@ -901,7 +901,7 @@ void effMagatuhiCopyRingMatrix(EffMagatuhiRingWork *work, void *matrix) {
 extern u32 effGetDispatchType(void *block);
 
 /* Replay the first slot of each three-slot group from a random age. */
-void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
+void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *callback) {
     u32 k;
     EffMagatuhiRingWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -920,9 +920,9 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
     f32 angleStep;
     f32 radiusStep;
 
-    if (arg->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (effGetDispatchType(arg->effect) == EFF_MAGATUHI_REPLAY_RING) {
-            work = effGetHandlerArg(arg->effect);
+    if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
+        if (effGetDispatchType(callback->effect) == EFF_MAGATUHI_REPLAY_RING) {
+            work = effGetHandlerArg(callback->effect);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1110,7 +1110,7 @@ void effMagatuhiCopyOrbitMatrix(EffMagatuhiOrbitWork *work, void *matrix) {
 extern u32 effGetDispatchType(void *block);
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
-void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
+void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *callback) {
     u32 k;
     EffMagatuhiOrbitWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -1130,9 +1130,9 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
     f32 angleStep;
     f32 radiusStep;
 
-    if (arg->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (effGetDispatchType(arg->effect) == EFF_MAGATUHI_REPLAY_ORBIT) {
-            work = effGetHandlerArg(arg->effect);
+    if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
+        if (effGetDispatchType(callback->effect) == EFF_MAGATUHI_REPLAY_ORBIT) {
+            work = effGetHandlerArg(callback->effect);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1351,7 +1351,7 @@ void effMagatuhiCopyDriftMatrix(EffMagatuhiDriftWork *work, void *matrix) {
 
 
 /* Replay the first slot of each three-slot drift group from a random age. */
-void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
+void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *callback) {
     u32 k;
     EffMagatuhiDriftWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -1371,9 +1371,9 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
     f32 angleStep;
     f32 scaleStep;
 
-    if (arg->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (effGetDispatchType(arg->effect) == EFF_MAGATUHI_REPLAY_DRIFT) {
-            work = effGetHandlerArg(arg->effect);
+    if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
+        if (effGetDispatchType(callback->effect) == EFF_MAGATUHI_REPLAY_DRIFT) {
+            work = effGetHandlerArg(callback->effect);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
