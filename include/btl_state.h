@@ -50,7 +50,8 @@ typedef struct BattleLinkedEffectState {
         };
     };
     u16 timer;
-    u8 active, phase;
+    u8 active;
+    s8 phase; /* The Rahu turn hook tests it as a signed byte. */
     union {
         u32 effect;
         f32 height; /* Actor vertical motion in code_00227288. */
