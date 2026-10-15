@@ -107,7 +107,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
 }
 
 void effBlurBuildSamplingQuad(source, data, fixedPoint)
-    EffBlurQuad *source;
+    const EffBlurQuad *source;
     EffBlurDrawData *data;
     u8 fixedPoint;
 {
@@ -166,7 +166,7 @@ void effBlurBuildSamplingQuad(source, data, fixedPoint)
 }
 
 /* Submit a frame-buffer quad with sampling, texture-alpha, blend and clamp packets. */
-void effBlurDrawFramebufferQuad(EffBlurQuad *source)
+void effBlurDrawFramebufferQuad(const EffBlurQuad *source)
 {
     SdfListHead *list;
     void *tag;

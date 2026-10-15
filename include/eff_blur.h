@@ -137,7 +137,7 @@ void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 void effAppendBlurRectanglePackets(void *list, const EffBlurQuad *source, u8 fixedPointCoordinates);
 void effDrawBlurSource(EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
 void effDrawBlurRectangle(const EffBlurQuad *source);
-void effBlurDrawFramebufferQuad(EffBlurQuad *source);
+void effBlurDrawFramebufferQuad(const EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 /* Borrow the live textured-blur owner; callers do not acquire or release it. */
 EffBlurTemplate *effGetCh71Work(void);
