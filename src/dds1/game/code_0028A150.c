@@ -46,6 +46,12 @@
 
 #include "sdf.h"
 #include "kwln_fade.h"
+#include "file_pac.h"
+#include "sdf_pac_work.h"
+#include "btl_stage_task_cleanup.h"
+#include "file_request_api.h"
+#include "sdf_texture_file.h"
+#include "mdl_flag_api.h"
 extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
 struct MenuListNode;
@@ -289,7 +295,6 @@ extern SdfPoolNode *effPacketSubmissionSurfaces[6];
 
 extern char D_003B2668[];
 
-extern char D_003B26C8[];
 
 
 
@@ -2666,7 +2671,120 @@ s32 fileDrawMenuFrame(s32 work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", fileEnterMcPackScene);
+extern s32 D_003BC830;
+extern s32 D_003BC838;
+void fileDestroyMemoryCardMenuTask(void);
+
+/* Load the memory-card pack textures, pick the menu entry state for the
+ * requested mode (0 load, 1 slot select, 2 new-game save, else poll) and
+ * start the file-menu task with every flow counter cleared. */
+void fileEnterMcPackScene(s32 mode) {
+    FilePacRequest *request;
+    PacWork *node;
+    u32 index = 0;
+    void *world;
+    s32 enabled;
+
+    fileSetMemoryCardOperationActive();
+    request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
+    fileWaitForRequestReady((struct FileRequest *)request);
+    node = request->packet.queueHead;
+    while (node != NULL) {
+        switch (index) {
+        case 0:
+            D_003BC868 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 1:
+            D_003BC86C = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 2:
+            D_003BC870 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 3:
+            D_003BC874 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 4:
+            D_003BC878 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 5:
+            D_003BC87C = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 6:
+            D_003BC880 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 7:
+            D_003BC884 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 8:
+            D_0037D488[0] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 9:
+            D_0037D488[1] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 10:
+            D_0037D488[2] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 11:
+            D_0037D488[3] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        case 12:
+            D_0037D488[4] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            break;
+        }
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
+        index++;
+        node = node->next;
+    }
+    btlStageTaskCleanupCallback(request);
+    enabled = 1;
+    if (mode == 0) {
+        D_003BC80C = enabled;
+        D_003BC824 = 0;
+        fileMenuStateHandler = (s32 (*)())fileLoadIconFileAndResetSelection;
+    } else if (mode == 1) {
+        D_003BC824 = 0;
+        D_003BC80C = enabled;
+        fileMenuStateHandler = (s32 (*)())fileResetSlotSelection;
+    } else if (mode == 2) {
+        D_003BC80C = enabled;
+        D_003BC824 = enabled;
+        mdlFlagSet(0xB90);
+        datGameState->header.status = (u16)datGameState->header.status + 1;
+        datGameState->header.transition = enabled;
+        fileMenuStateHandler = (s32 (*)())fileLoadIconFileAndBeginSlotReset;
+    } else {
+        D_003BC824 = 0;
+        D_003BC80C = 0;
+        fileMenuStateHandler = (s32 (*)())fileResetSlotPollState;
+    }
+    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, fileDestroyMemoryCardMenuTask, 0);
+    D_003BC7FC = 1;
+    fileInitCursorPulse();
+    kwlnFadeOutStart(0, 0, 0, 8);
+    fileSetMenuFlowState(0);
+    D_003BC81C = 0;
+    D_003BC848 = mode;
+    D_003BC830 = -1;
+    fileWaitTicksRemaining = 0;
+    fileSelectionPending = 0;
+    D_003BC854 = 0;
+    D_003BC858 = 0;
+    D_003BC810 = 0;
+    D_003BC820 = 0;
+    fileSlotSelectionPollCount = 0;
+    D_003BC814 = 0;
+    D_003BC804 = 0;
+    D_003BC82C = 0;
+    D_003BC834 = 0;
+    D_003BC838 = 0;
+    D_003BC85C = 0;
+    D_003BC860 = 0;
+    fileClearAllSlotFlags();
+    world = dds3GetWorldObject();
+    if (world != 0) {
+        dds3SetWorldObjectDrawEnabled((EffWorldNode *)world, 0);
+    }
+}
 
 void fileDestroyMemoryCardMenuTask(void) {
     fileReleaseMenuResources();
@@ -2737,7 +2855,7 @@ void fileReleaseMenuResources(void) {
             fileSaveIconRequest = 0;
         }
         sdfReleaseMemorySlot((s32 *)&D_003BD910);
-        kwlnTaskDestroyWithHierarchyByName(D_003B26C8, 1);
+        kwlnTaskDestroyWithHierarchyByName("FileMentCalc", 1);
         fileClearMemoryCardOperationActive();
     }
 }
@@ -2747,7 +2865,7 @@ u32 fileMenuOperationSucceeded(void) {
 }
 
 s32 fileMenuTaskExists(void) {
-    return kwlnTaskGetTaskByName(D_003B26C8) != NULL;
+    return kwlnTaskGetTaskByName("FileMentCalc") != NULL;
 }
 
 u32 fileGetSelectionPendingFlag(void) {
@@ -2758,8 +2876,6 @@ INCLUDE_ASM(const s32, "game/code_0028A150", fileUpdatePromptDialog);
 
 extern void *D_003BD908;
 extern void *D_003BD90C;
-extern s32 D_003BC830;
-extern s32 D_003BC838;
 extern s32 fileUpdatePromptDialog(void);
 s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     D_003BD908 = start;
@@ -2830,10 +2946,6 @@ void fileFadeStepDown(void) {
     D_0037D4D0[0] -= 0x10;
     D_0037D4D0[0] = D_0037D4D0[0] <= 0 ? 0 : D_0037D4D0[0] > 0x80 ? 0x80 : D_0037D4D0[0];
 }
-
-INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B26C8);
-
-INCLUDE_RODATA(const s32, "game/code_0028A150", jtbl_003B26E0);
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2718);
 
