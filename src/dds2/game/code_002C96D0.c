@@ -3234,7 +3234,7 @@ s32 fileApplySelectedLoadResult(void) {
         mdlFlagSet(0x80E);
         state = datGameState;
         startBranchFlag = fileLoadSelectionWork->startBranchFlag;
-        state->header.unk2C |= 0x80000000;
+        state->header.saveFlags2 |= 0x80000000;
         if (startBranchFlag) {
             mtrMantraEventBitReset();
             ptyResetPartyRecordsAndProfiles();
@@ -3242,7 +3242,7 @@ s32 fileApplySelectedLoadResult(void) {
         }
     } else {
         mdlFlagClear(0x80E);
-        datGameState->header.unk2C &= 0x7FFFFFFF;
+        datGameState->header.saveFlags2 &= 0x7FFFFFFF;
     }
     if (mdlFlagTest(0xB8F)) {
         mdlFlagClear(0x801);
@@ -3491,8 +3491,8 @@ void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
 
     state->header.savedMoney = source->money;
     state->header.saveFlags = source->saveWords.words[0];
-    state->header.unk28 = source->saveWords.words[1];
-    state->header.unk2C = source->saveWords.words[2];
+    state->header.saveFlags1 = source->saveWords.words[1];
+    state->header.saveFlags2 = source->saveWords.words[2];
 }
 
 void fileCopyRecordHeader(FileSavePreviewRecord *destination, const void *source) {
