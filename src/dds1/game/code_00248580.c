@@ -1670,7 +1670,8 @@ s32 mnuBeginTerminalSlotSelection(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0024B470(void) {
+/* Registered terminal slot-selection leave hook: no side effects; returns one. */
+u32 mnuTerminalSlotSelectionLeaveNoOp(void) {
     return 1;
 }
 
@@ -2228,7 +2229,8 @@ u32 evtPrepareSelectedMenuEntry(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0024C6F8(void) {
+/* Registered terminal entry-message leave hook: no side effects; returns one. */
+u32 mnuTerminalEntryMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -2446,7 +2448,8 @@ u32 evtBEndDispatchAndReloadEffectResource(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0024CE20(void) {
+/* Registered terminal exit-popup leave hook: no side effects; returns one. */
+u32 mnuTerminalExitPopupLeaveNoOp(void) {
     return 1;
 }
 
