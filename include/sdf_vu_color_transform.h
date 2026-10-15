@@ -13,6 +13,11 @@ typedef struct SdfVuColorTransform {
     f32 colorDelta[4]; /* 0x20 */
 } SdfVuColorTransform;
 
+void sdfVuBuildPackedColorTransform(SdfVuColorTransform *result, u32 reference,
+                                    u32 packedColor, u32 firstColor,
+                                    u32 secondColor, f32 blend, f32 scale,
+                                    f32 y);
+
 typedef char SdfVuColorTransform_size_must_be_0x30[
     (sizeof(SdfVuColorTransform) == 0x30) ? 1 : -1];
 typedef char SdfVuColorTransform_opaque00_offset_must_be_0[

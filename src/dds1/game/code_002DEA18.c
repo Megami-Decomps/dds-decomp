@@ -34,8 +34,6 @@ extern u32 D_003BDA28;
 
 extern u128 *D_003EB860[][3];
 
-extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
-
 extern u16 D_003BDA24;
 
 typedef struct VuBlendNode {

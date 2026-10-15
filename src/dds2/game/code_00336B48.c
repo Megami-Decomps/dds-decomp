@@ -75,8 +75,6 @@ typedef struct {
     f32 depth;             /* 0xAC */
 } VuWork;
 
-extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
-
 extern s32 D_00439180;
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
