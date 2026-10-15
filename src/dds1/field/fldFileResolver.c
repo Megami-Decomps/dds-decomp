@@ -567,7 +567,7 @@ extern char D_003C9200[];
 extern u32 D_003C92E0[];
 extern s16 D_003C9518[];
 extern void fldFormatAreaResourceName(char *arg0);
-extern void fldApplySkyLightSet(u32 arg0, s32 arg1);
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 extern s32 strcmp(const char *a, const char *b);
 extern f32 D_003BAD20;
 extern char fldEncounterTaskName[];
@@ -5461,7 +5461,7 @@ extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 
 /* Start fading to the sky light set at index. A zero scene command also applies the set to the
  * display state and player lighting using the (clamped) transition duration. */
-void fldApplySkyLightSet(u32 index, s32 mode) {
+void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode) {
     FldAreaWork *state = &fldAreaState;
     FldLightSet *light;
     f32 vec[4];
@@ -5473,21 +5473,21 @@ void fldApplySkyLightSet(u32 index, s32 mode) {
 
     if (state->area < 200) {
         if (D_003BAD58 == 0 && state->area < 40) {
-            mode = 0;
+            durationMode = 0;
         }
         defaultDuration = 15;
         duration = 0;
-        if (mode != 0) {
+        if (durationMode != 0) {
             duration = defaultDuration;
         }
-        if (mode >= 2) {
-            duration = mode;
+        if (durationMode >= 2) {
+            duration = durationMode;
         }
-        D_003BAD98 = index;
-        D_003BADC8 = index;
+        D_003BAD98 = skyLightSetIndex;
+        D_003BADC8 = skyLightSetIndex;
         D_003BADA8 = 0;
         if (state->sceneCommand == 0) {
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[skyLightSetIndex];
             area = light->fadeArea;
             D_0032E570[13] = area;
             D_0032E570[14] = light->displayStateSlot14;
