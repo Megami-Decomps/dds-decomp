@@ -31,6 +31,7 @@
 #include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "btl_grouped_entity_api.h"
 #include "sdf_model.h"
 #include "sdf_model_copy.h"
 #include "sdf_dev_slot_api.h"
@@ -50,8 +51,6 @@
 #define BTL_GROUP_RESOURCE_SLOT_COUNT 8
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
-
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 
 void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 
@@ -282,8 +281,6 @@ void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
 extern u32 mdlGroupJobSemaphore;
-
-extern BattleGroupNode *btlFindGroupedEntity(s32 group, s32 id);
 
 void mdlClearSlotAndRelease(MdlCtx *ctx, Motion *node) {
     if (ctx->slots[node->slotIndex] == node) {

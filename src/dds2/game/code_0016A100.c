@@ -12,6 +12,7 @@
 #include "evt_unit_color_transition.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "btl_grouped_entity_api.h"
 #include "bill_object_api.h"
 
 #define EFF_PARAM_WORK_BYTES 8
@@ -334,7 +335,6 @@ void effParamInitWork(MdlCtx *work) {
 }
 
 extern u16 D_00436434;
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
 /* Create and initialize a viewer-package context in the fixed effect group.
