@@ -1523,7 +1523,7 @@ s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 in
 
 s32 btlIsActorModeActionCodeAllowed(BtlUnit *object) {
     s32 value;
-    if (object->unkDC != 1) {
+    if (object->modelResourceKind != 1) {
         return 1;
     }
     value = object->combatantKind;

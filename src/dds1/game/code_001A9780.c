@@ -666,7 +666,7 @@ s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 specie
 }
 
 s32 btlIsActorModeActionCodeAllowed(BtlUnit *actor) {
-    if (actor->unkDC != 1) {
+    if (actor->modelResourceKind != 1) {
         return 1;
     }
     switch (actor->displaySpecies) {

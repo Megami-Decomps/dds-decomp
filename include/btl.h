@@ -131,7 +131,7 @@ typedef struct BtlUnit {
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
     u8 padD8[4];
-    s32 unkDC; /* 0xDC: model for the slot-0x10 model-change command, with displaySpecies */
+    s32 modelResourceKind; /* 0xDC: model-asset kind paired with displaySpecies for special-mode loads. */
     u32 displaySpecies; /* 0xE0 */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
@@ -217,7 +217,7 @@ typedef struct BtlUnit {
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
     u8 padD8[4];
-    s32 unkDC; /* 0xDC: mode actor selector paired with combatantKind. */
+    s32 modelResourceKind; /* 0xDC: model-asset kind paired with combatantKind for special-mode loads. */
     u32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
@@ -275,6 +275,7 @@ typedef char BtlUnitStatusAlignmentCheck[(__alignof__(BtlUnitStatus) == 4) ? 1 :
 typedef char BtlUnitAlignmentCheck[(__alignof__(BtlUnit) == 8) ? 1 : -1];
 typedef char BtlUnitStatusOffsetCheck[((u32)&((BtlUnit *)0)->status == 0x110) ? 1 : -1];
 typedef char BtlUnitMotionIdOffsetCheck[((u32)&((BtlUnit *)0)->motionId == 0xEC) ? 1 : -1];
+typedef char BtlUnitModelResourceKindOffsetCheck[((u32)&((BtlUnit *)0)->modelResourceKind == 0xDC) ? 1 : -1];
 typedef char BtlUnitStatusFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.flags == 0x110) ? 1 : -1];
 typedef char BtlUnitStateFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.stateFlags == 0x114) ? 1 : -1];
 typedef char BtlUnitGunResourceFlagsOffsetCheck[((u32)&((BtlUnit *)0)->gunResourceFlags == 0x118) ? 1 : -1];

@@ -343,7 +343,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
     for (unit = scene->units; unit != NULL; unit = unit->nextActor) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
             kind = scene->selectEntryModelVariant != NULL ? scene->selectEntryModelVariant(unit) : unit->combatantKind;
-            load = btlCreateModelLoadPollTask(unit, unit->unkDC, kind, 0);
+            load = btlCreateModelLoadPollTask(unit, unit->modelResourceKind, kind, 0);
             load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             load->startDelay = 1;
             load->startCondition.value.handle = chain;
@@ -415,7 +415,7 @@ void btlQueueSceneActorModelEntry(BtlState *scene) {
     for (unit = tail; unit != NULL; unit = unit->previousActor) {
         if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
             if ((btlUnitStatusPair(unit) & 0x0010000000001000ULL) == 0x1000) {
-                load = btlCreateModelLoadPollTask(unit, unit->unkDC, unit->combatantKind, 0);
+                load = btlCreateModelLoadPollTask(unit, unit->modelResourceKind, unit->combatantKind, 0);
             } else {
                 load = btlCreateModelLoadPollTask(unit, unit->modelId, unit->modelVariant, 0);
             }
