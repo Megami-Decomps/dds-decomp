@@ -2091,7 +2091,85 @@ void fldDrawScrollingLayerOverlay(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00149A00);
+extern s32 fldTestSceneLifecycleFlags(u32);
+extern void fldSetSceneLifecycleFlags(u32);
+extern void evtSetSolarOverlayFullyTransparent(void);
+extern KwlnDrawVectorParams kwlnDrawVector;
+extern SdfMathVector4 D_00413788[];
+extern s32 D_00436268;
+extern s32 D_00436264;
+extern s32 D_00436260;
+extern s32 D_0043625C;
+extern s32 D_00436258;
+extern u128 D_0037FA30;
+extern u128 D_0037FA40;
+extern KwlnDrawVectorParams D_0037FB30;
+
+/* Enter the field scene once: hide the world object, load the scene's map
+ * textures, centre the camera on the floor's entry point and set the
+ * scene fog and camera offsets. DDS2 loads four map textures. */
+void func_00149A00(void) {
+    FldAreaWork *cam;
+    f32 focus[4];
+    f32 eye[4];
+    SdfMathVector4 up;
+    f32 entry[2];
+    s32 ix;
+    s32 iz;
+    s32 cx;
+    s32 cz;
+
+    if (fldTestSceneLifecycleFlags(1) == 1) {
+        return;
+    }
+    dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 0);
+    sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
+    cam = &fldAreaState;
+    D_0044F7F0[1] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));
+    D_0044F7F0[2] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
+    D_0044F7F0[3] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
+    D_0044F7F0[6] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[4].resourceAddress));
+    D_00436268 = 0;
+    D_00436248 = cam->floor;
+    fldSceneReady = 1;
+    D_0043624C = cam->unkC0;
+    D_00436264 = cam->unkC0;
+    fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
+    cx = cam->x;
+    cz = cam->z;
+    D_00436260 = 0;
+    ix = cx + entry[0];
+    iz = cz + entry[1];
+    D_00436258 = ix;
+    D_0043625C = iz;
+    D_00436254 = iz;
+    D_00436250 = ix;
+    fldSetSceneLifecycleFlags(1);
+    fldResetPlayerSceneObjectState();
+    evtSetSolarOverlayFullyTransparent();
+    memcpy(&up, &D_00413788[0], sizeof(up));
+    focus[1] = 0.0f;
+    focus[0] = D_00436250;
+    focus[2] = D_00436254;
+    eye[0] = D_00436250;
+    eye[1] = -24000.0f;
+    eye[2] = D_00436254;
+    PCP_COPY_VECTOR(&D_0037FA30, eye);
+    PCP_COPY_VECTOR(&D_0037FA20, focus);
+    PCP_COPY_VECTOR(&D_0037FA40, &up);
+    D_0037FB30.fogNear = 255.0f;
+    D_0037FB30.depthNear = 1000.0f;
+    D_0037FB30.fogFar = 255.0f;
+    D_0037FB30.depthFar = 20000.0f;
+    D_0037FB30.fogColor = 0x108010;
+    D_0037F980.camera.offsetX = 2048.0f;
+    D_0037F980.camera.offsetY = 2048.0f;
+    kwlnDrawVector.fogNear = 255.0f;
+    kwlnDrawVector.depthNear = 1000.0f;
+    kwlnDrawVector.fogFar = 255.0f;
+    kwlnDrawVector.depthFar = 20000.0f;
+    kwlnDrawVector.fogColor = 0x108010;
+}
 
 void fldReleaseResourceSlots(void) {
     if (D_0044F7F0[1] != 0) {
@@ -2180,7 +2258,7 @@ extern s32 D_00436264;
 extern void fldClearSceneLifecycleFlags(s32);
 
 
-extern SdfMathVector4 D_00413788[]; /* default camera up vectors (3 copies), the first still read by asm func_00149A00 */
+extern SdfMathVector4 D_00413788[]; /* default camera up vectors (3 copies), the first read by func_00149A00 */
 
 extern void fldApplySkyLightSetToPlayerVU(void);
 

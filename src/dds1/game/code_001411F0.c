@@ -1803,7 +1803,75 @@ extern s32 D_003BAECC;
 
 extern s32 D_003BAED4;
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00145B18);
+extern s32 fldTestSceneLifecycleFlags(u32);
+extern void fldSetSceneLifecycleFlags(u32);
+extern void evtSetSolarOverlayFullyTransparent(void);
+extern KwlnDrawVectorParams kwlnDrawVector;
+extern SdfMathVector4 D_003A05D8[];
+
+/* Enter the field scene once: hide the world object, load the scene's two
+ * map textures, centre the camera on the floor's entry point and set the
+ * scene fog and camera offsets. */
+void func_00145B18(void) {
+    FldAreaWork *cam;
+    f32 focus[4];
+    f32 eye[4];
+    SdfMathVector4 up;
+    f32 entry[2];
+    s32 ix;
+    s32 iz;
+    s32 cx;
+    s32 cz;
+
+    if (fldTestSceneLifecycleFlags(1) == 1) {
+        return;
+    }
+    dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 0);
+    sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
+    cam = &fldAreaState;
+    D_003D40A0[2] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[2].resourceAddress));
+    D_003D40A0[3] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
+    D_003BAED4 = 0;
+    D_003BAEB4 = cam->floor;
+    fldSceneReady = 1;
+    D_003BAEB8 = cam->unkC0;
+    D_003BAED0 = cam->unkC0;
+    fldGetSceneEntryPosition(cam->floor, &entry[0], &entry[1]);
+    cx = cam->x;
+    cz = cam->z;
+    D_003BAECC = 0;
+    ix = cx + entry[0];
+    iz = cz + entry[1];
+    D_003BAEC4 = ix;
+    D_003BAEC8 = iz;
+    D_003BAEC0 = iz;
+    D_003BAEBC = ix;
+    fldSetSceneLifecycleFlags(1);
+    fldResetPlayerSceneObjectState();
+    evtSetSolarOverlayFullyTransparent();
+    memcpy(&up, &D_003A05D8[0], sizeof(up));
+    focus[1] = 0.0f;
+    focus[0] = D_003BAEBC;
+    focus[2] = D_003BAEC0;
+    eye[0] = D_003BAEBC;
+    eye[1] = -24000.0f;
+    eye[2] = D_003BAEC0;
+    PCP_COPY_VECTOR(&D_00324A30, eye);
+    PCP_COPY_VECTOR(&D_00324A20, focus);
+    PCP_COPY_VECTOR(&D_00324A40, &up);
+    D_00324B30.fogNear = 255.0f;
+    D_00324B30.depthNear = 1000.0f;
+    D_00324B30.fogFar = 255.0f;
+    D_00324B30.depthFar = 20000.0f;
+    D_00324B30.fogColor = 0x108010;
+    D_00324980.camera.offsetX = 2048.0f;
+    D_00324980.camera.offsetY = 2048.0f;
+    kwlnDrawVector.fogNear = 255.0f;
+    kwlnDrawVector.depthNear = 1000.0f;
+    kwlnDrawVector.fogFar = 255.0f;
+    kwlnDrawVector.depthFar = 20000.0f;
+    kwlnDrawVector.fogColor = 0x108010;
+}
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern void frFontSetSharedRenderFlags(u32);
@@ -1861,7 +1929,7 @@ void fldReleaseMenuSlots(void) {
 extern void fldClearSceneLifecycleFlags(s32);
 
 
-extern SdfMathVector4 D_003A05D8[]; /* default camera up vectors (3 copies), the first still read by asm func_00145B18 */
+extern SdfMathVector4 D_003A05D8[]; /* default camera up vectors (3 copies), the first read by func_00145B18 */
 
 extern void fldApplySkyLightSetToPlayerVU(void);
 
