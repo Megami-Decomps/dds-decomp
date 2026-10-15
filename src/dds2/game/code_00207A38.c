@@ -600,7 +600,7 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
         VU0_LOAD_VF(vf10, unit->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, unit->bodyOffset);
-        VU0_SET_VF2X(unit->unk50);
+        VU0_SET_VF2X(unit->actorScale);
         VU0_MUL_VF2X(vf10, vf10);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_LOAD_VF(vf11, &position);

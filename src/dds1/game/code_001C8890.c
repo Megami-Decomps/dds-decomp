@@ -2768,7 +2768,7 @@ void btlStartActorDefeatTransition(s32 command) {
     }
     if (actor->status.flags & 0x200) {
         if (!(commandTask->flags & 0x100)) {
-            if (!(actor->status.flags & 0x8000000) && actor->unkEC != 11) {
+            if (!(actor->status.flags & 0x8000000) && actor->motionId != 11) {
                 object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
@@ -2800,7 +2800,7 @@ void btlStartActorDefeatTransition(s32 command) {
                     result = work->hook5E8(actor);
                 }
                 if (result != 0) {
-                    if (actor->unkEC != 11) {
+                    if (actor->motionId != 11) {
                         object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
                         object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                         object->startCondition.value.handle = sequence;
