@@ -116,7 +116,7 @@ extern s32 fldIsUpdateInhibited();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
-void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void effBuildBlurTransformedQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
 {
     f32 centerX, centerY, scale, cosine, sine;
     f32 scaledU, scaledV, u, v;
@@ -211,7 +211,7 @@ void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
 }
 
 
-void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void effBuildBlurUnitTextureQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
 {
     quad->color[0] = 0x80;
     quad->color[1] = 0x80;
@@ -390,7 +390,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
 
 
 /* Build the two draw packets for `source` and append them to `list`. */
-void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPointCoordinates) {
+void effAppendBlurRectanglePackets(void *list, const BlurSource *source, u8 fixedPointCoordinates) {
     void *packet;
 
     packet = effCreateSizedDrawPacket(1, 0x200);
