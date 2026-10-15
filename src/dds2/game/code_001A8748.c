@@ -881,9 +881,9 @@ typedef struct BattleInitState {
     u32 unk2B0;
     u8 unk2B4;
     u8 pad2B5[0x20F];
-    u8 unk4C4;
+    u8 timingRate;
     u8 pad4C5[3];
-    f32 unk4C8;
+    f32 modelFrameScale;
     s32 messageWindows[3];
     u8 pad4D8[0xE0];
     u8 unk5B8;
@@ -939,11 +939,11 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
     mnuMovieTaskState = 2;
-    ((BattleInitState *)btlRuntime)->unk4C4 = 0x1E;
+    ((BattleInitState *)btlRuntime)->timingRate = 0x1E;
     {
         BattleInitState *state = (BattleInitState *)btlRuntime;
         state->endCode = 0;
-        state->unk4C8 = 1.0f;
+        state->modelFrameScale = 1.0f;
     }
     ((BattleInitState *)btlRuntime)->unk5B8 = 0;
     ((BattleInitState *)btlRuntime)->unk5BC = 0x80808080;

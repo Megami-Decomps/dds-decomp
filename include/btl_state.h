@@ -294,7 +294,7 @@ typedef struct BtlState {
     u8 pad5A4[8];
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
     u8 pad5B0[4];
-    s32 (*unk5B4)(void); /* 0x5B4: -1 falls through to the unit scan; any other value is stored in eventReady (func_001A8188). */
+    s32 (*battleOutcomeOverride)(void); /* 0x5B4: -1 falls through to the unit scan; any other value is stored in eventReady (func_001A8188). */
     void (*postPlacementCallback)(void); /* 0x5B8: runs after actor positions and rotations. */
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
     u8 pad5C0[4];
@@ -507,9 +507,9 @@ typedef struct BtlState {
     s32 activeGroupCount;
     BtlSceneFadingRecord fading[8]; /* 0x480 */
     struct ActionStateLink *currentTask;
-    s8 unk4C4;
+    s8 timingRate; /* 0x4C4: initialized to 30; motion/countdown rate. */
     u8 pad4C5[3];
-    f32 unk4C8;
+    f32 modelFrameScale; /* 0x4C8: initialized to 1.0f; motion frame multiplier. */
     s32 messageWindows[2];
     s32 scriptTarget;
     u8 pad4D8[4];
@@ -529,8 +529,8 @@ typedef struct BtlState {
     s32 (*selectScriptArg)(void); /* 0x5CC */
     s32 (*hitResultOverride)(BtlUnit *, BtlUnit *, s32); /* 0x5D0: 001B1848 supplies source, target and command. */
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5D4 */
-    s32 (*unk5D8)(BtlUnit *);
-    s32 (*unk5DC)(BtlUnit *, s32);
+    s32 (*statusMotionOverride)(BtlUnit *); /* 0x5D8: nonnegative result replaces status motion. */
+    s32 (*preserveMotionRange)(BtlUnit *, s32); /* 0x5DC: keep the stored motion start/end. */
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5E0 */
     s32 (*sceneCallback)(); /* 0x5E4 */
     s32 (*battleOutcomeOverride)(void); /* 0x5E8: 001B2664 loads the optional signed outcome override. */
@@ -596,10 +596,10 @@ typedef struct BtlState {
     s32 (*unk6E4)(BtlUnit *);
     s32 (*unk6E8)(BtlUnit *);
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
-    void (*unk6F0)(BtlUnit *, s32, s32, s32, s32, f32);
-    void (*unk6F4)(BtlUnit *, s32, f32);
-    void (*unk6F8)(BtlUnit *, s32, s32);
-    s32 (*unk6FC)(BtlUnit *, s32, s32);
+    void (*prepareMotionHook)(BtlUnit *, s32, s32, s32, s32, f32); /* 0x6F0: index, start, end, mode, frame rate. */
+    void (*refreshMotionHook)(BtlUnit *, s32, f32); /* 0x6F4: index and frame rate. */
+    void (*setMotionRangeHook)(BtlUnit *, s32, s32); /* 0x6F8: first and last frame. */
+    s32 (*motionModeOverride)(BtlUnit *, s32, s32); /* 0x6FC: returns a replacement motion mode. */
     void (*unitReturnHook)(struct ActionStateLink *); /* 0x700: custom return-to-group handling */
     f32 (*hitChanceScale)(BtlUnit *, BtlUnit *, s32); /* 0x704: 001B1B20 multiplies the callback result in f0. */
     f32 (*commandAmountScaleHook)(BtlUnit *, BtlUnit *, u32, s32); /* 0x708: HP/MP command amount multiplier. */

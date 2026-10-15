@@ -1585,7 +1585,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
             if ((action->unit->status.flags & indexedTarget->status.flags & 0x600) == 0 ||
                     (indexedTarget->status.flags & 0x200) != 0) {
                 task = btlAllocateApproachTargetTask(action->unit,
-                    (s32)indexedTarget, state->unk4C8);
+                    (s32)indexedTarget, state->modelFrameScale);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = moveHandle;
                 btlStartTask(task);

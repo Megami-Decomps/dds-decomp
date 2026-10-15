@@ -2739,7 +2739,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
             break;
         }
     }
-    keepRange = work->unk5DC;
+    keepRange = work->preserveMotionRange;
     if (keepRange != 0 && keepRange(unit, index) != 0) {
         start = unit->unkF8;
         end = unit->unkFA;
@@ -2748,17 +2748,17 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         end = 8;
         mode &= ~0x100;
     }
-    chooseMode = work->unk6FC;
+    chooseMode = work->motionModeOverride;
     if (chooseMode != 0) {
         mode = chooseMode(unit, index, mode);
     }
     unit->fF4 = rate;
     unit->unkEC = index;
     unit->effectState = mode;
-    rate = rate * (30.0f / work->unk4C4);
-    rate *= work->unk4C8;
-    if (work->unk6F0 != 0) {
-        work->unk6F0(unit, index, start, end, mode, rate);
+    rate = rate * (30.0f / work->timingRate);
+    rate *= work->modelFrameScale;
+    if (work->prepareMotionHook != 0) {
+        work->prepareMotionHook(unit, index, start, end, mode, rate);
     } else {
         evtPrepareUnitMotionState(unit->ext, index, start, end, mode);
         model = unit->ext->owner;
@@ -2774,8 +2774,8 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     if (mode != 0 && mode != 3) {
         return;
     }
-    if (work->unk6F8 != 0) {
-        work->unk6F8(unit, 0, (s16)frameCount);
+    if (work->setMotionRangeHook != 0) {
+        work->setMotionRangeHook(unit, 0, (s16)frameCount);
     } else {
         evtStoreUnitMotionShortParameters(unit->ext, 0, (s16)frameCount);
     }
@@ -2835,7 +2835,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->status.flags &= 0x7FFFFFFF;
         unit->status.flags &= ~0x2000;
     }
-    chooseStatus = work->unk5D8;
+    chooseStatus = work->statusMotionOverride;
     if (chooseStatus != 0) {
         selected = chooseStatus(unit);
         if (selected >= 0) {
@@ -2865,9 +2865,9 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         }
     }
     unit->effectScale = rate;
-    speed = rate * (30.0f / work->unk4C4);
-    speed *= work->unk4C8;
-    setMotion = work->unk6F4;
+    speed = rate * (30.0f / work->timingRate);
+    speed *= work->modelFrameScale;
+    setMotion = work->refreshMotionHook;
     unit->effectIndex = index;
     if (setMotion != 0) {
         setMotion(unit, index, speed);
@@ -2875,7 +2875,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         evtUnitSetStoredParameter(unit->ext, index);
         evtSetTransitionMotionScale(unit->ext, speed);
     }
-    chooseMode = work->unk6FC;
+    chooseMode = work->motionModeOverride;
     mode = index != 11 ? 1 : 2;
     if (chooseMode != 0) {
         mode = chooseMode(unit, index, mode);
@@ -2894,7 +2894,7 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
         return 0;
     }
     work = (BtlState *)btlGetRuntime();
-    if (work->unk5D8 != 0 && work->unk5D8(0) == unit->unkEC) {
+    if (work->statusMotionOverride != 0 && work->statusMotionOverride(0) == unit->unkEC) {
         return 1;
     }
     switch (unit->unkEC) {
@@ -2965,7 +2965,7 @@ void btlApplyUnitModelScaledValue(u8 *object) {
     ((BtlUnit *)object)->updateFlags &= ~1;
     volume = ((BtlUnit *)object)->fF4;
     ((BtlUnit *)object)->ext->owner->first->frameStep =
-        volume * (30.0f / (f32)((BtlState *)context)->unk4C4);
+        volume * (30.0f / (f32)((BtlState *)context)->timingRate);
 }
 
 void btlResetUnitModelProgress(BtlUnit *unit) {
@@ -2981,7 +2981,7 @@ s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
         btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
 
     return (s32)(status->motions[motionIndex].frameCount /
-        (status->motions[motionIndex].alphaFrameScale * state->unk4C8));
+        (status->motions[motionIndex].alphaFrameScale * state->modelFrameScale));
 }
 
 /* Return the unit model's current frame, or zero while its model flag is clear. */
@@ -3585,11 +3585,11 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
     if (unit->status.flags & 0x2000) {
         return;
     }
-    if (work->unk6F0 != 0) {
+    if (work->prepareMotionHook != 0) {
         if (unit->effectIndex != 0xB) {
-            work->unk6F0(unit, unit->effectIndex, 0, 0, 1, 1.0f);
+            work->prepareMotionHook(unit, unit->effectIndex, 0, 0, 1, 1.0f);
         } else {
-            work->unk6F0(unit, unit->effectIndex, 0, 0, 2, 1.0f);
+            work->prepareMotionHook(unit, unit->effectIndex, 0, 0, 2, 1.0f);
         }
     } else {
         if (unit->effectIndex != 0xB) {
@@ -5094,7 +5094,7 @@ void btlUpdateActiveActorModelState(void) {
                     if (frame >= status->motions[index].alphaStartFrame) {
                         evtSetUnitAlphaTransition(unit->ext,
                             (s32)((f32)status->motions[index].alphaDuration /
-                                (status->motions[index].alphaFrameScale * runtime->unk4C8)),
+                                (status->motions[index].alphaFrameScale * runtime->modelFrameScale)),
                             unit->overlayColor & 0xFFFFFF);
                         unit->updateFlags &= ~4;
                     }
