@@ -3196,11 +3196,11 @@ void btlUnitFaceTargetScaled(BtlUnit *object, BtlUnit *target, f32 scale) {
     }
 }
 
-void btlCopyUnitStats(s32 arg0, s32 arg1) {
-    DatPartyRecord *record = &((BtlUnit *)arg0)->partyRecord;
-    *record = *(DatPartyRecord *)arg1;
-    btlRefreshUnitMaximumHpAndClampCurrentHp(record);
-    btlRefreshUnitMaximumMpAndClampCurrentMp(record);
+void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
+    DatPartyRecord *stats = &unit->partyRecord;
+    *stats = *source;
+    btlRefreshUnitMaximumHpAndClampCurrentHp(stats);
+    btlRefreshUnitMaximumMpAndClampCurrentMp(stats);
 }
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
