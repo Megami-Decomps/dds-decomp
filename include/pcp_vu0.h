@@ -161,6 +161,19 @@ typedef struct {
 #define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
     : : "r" (dst) : "memory")
+/* Complete 16-byte memory operands with an explicit register address, as in
+ * the paired actor/group projection camera pipeline. SQc2 writes all four
+ * floats, without barring unrelated compiler memory motion. Each pointer
+ * must address a 16-byte aligned vector, as required by LQc2/SQc2. */
+#define VU0_STORE_VF_PTR(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%1)\n\t.set reorder" \
+    : "=m" (*(PcpVectorCopyF32 *)(dst)) : "r" (dst))
+
+/* LQc2 reads the complete four-float vector at its source. */
+#define VU0_LOAD_VF_PTR(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src), "m" (*(const PcpVectorCopyF32 *)(src)))
+
 /* Legacy SDK input-address-only store, for audited original VU pipelines.
  * This is NOT a general memory barrier: even EE GCC 2.96 can reuse stale
  * reads across branches/loops. Prefer VU0_STORE_VF for new code; see
