@@ -3,6 +3,7 @@
 #include "evt_message_window_api.h"
 #include "evt_solar.h"
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
@@ -89,7 +90,6 @@ extern void evtCreateMessageWindowIfMissing(s32);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void sdfEnableFlagListViewTargetRelativeMode(void);
-extern void sndStartTrackDefault(s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
 extern u32 kwlnDrawControlFlags;
 extern u32 D_00435CBC;
