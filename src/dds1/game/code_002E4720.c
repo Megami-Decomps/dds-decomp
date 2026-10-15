@@ -12,6 +12,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_protocol.h"
 #include "sdf_dev_state.h"
+#include "sdf_dev_path_prefix.h"
 #include "sdf_dev_worker.h"
 #include "sdf_thread_workspace_api.h"
 
@@ -949,12 +950,6 @@ u32 sdfDevQueueOperationAndWait(void) {
     WaitSema(sdfDevReplySemaphore);
     return sdfDevOperationReplyValue;
 }
-
-/* Six-byte device prefix, accessed as a word and a halfword. */
-typedef struct DevPathPrefix {
-    s32 head;
-    u16 tail;
-} DevPathPrefix;
 
 /* Set the current device directory, ending in a slash; path is assumed nonempty. */
 void sdfDevSetCurrentDirectory(char *path) {
