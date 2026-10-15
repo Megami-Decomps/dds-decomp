@@ -3413,7 +3413,7 @@ extern u8 D_0037E110[];
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3BA8);
 
-const char D_003A3BB8[16] = "btl:warp[%p]\n";
+const char btlUnitWarpFormat[16] = "btl:warp[%p]\n";
 
 void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     f32 bodyPos[4] __attribute__((aligned(16)));
@@ -3485,7 +3485,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         if (distance < 2.0f * (unit->bodyRadius * unit->scale)) {
             effObjSetInnerPosition(unit->effectObject, (u128 *)world);
             unit->status.stateFlags |= 0x8000;
-            btlBossDebugPrintf(D_003A3BB8, unit);
+            btlBossDebugPrintf(btlUnitWarpFormat, unit);
         }
     }
 }
@@ -5280,7 +5280,7 @@ typedef struct BtlCameraModeDefinition {
 
 typedef char BtlCameraModeDefinitionSize[(sizeof(BtlCameraModeDefinition) == 16) ? 1 : -1];
 
-extern BtlCameraModeDefinition D_00359D40[];
+extern BtlCameraModeDefinition btlCameraModeDefinitions[];
 
 void btlSetCameraCommandMode(u32 kind, BtlTask *link, BtlUnit *valueA,
                              BtlUnit *valueB, s32 category) {
@@ -5289,7 +5289,7 @@ void btlSetCameraCommandMode(u32 kind, BtlTask *link, BtlUnit *valueA,
     u32 previousKind = scene->cameraCommand.status;
     u32 flags;
     s32 accepted;
-    if (previousKind == kind && D_00359D40[kind].allowRepeat == 0) {
+    if (previousKind == kind && btlCameraModeDefinitions[kind].allowRepeat == 0) {
         return;
     }
     if (kind == 6 && (scene->cameraCommand.flags & 0x800)) {
@@ -5316,7 +5316,7 @@ void btlSetCameraCommandMode(u32 kind, BtlTask *link, BtlUnit *valueA,
     } else {
         btlClearIndexList(scene->cameraCommand.targetList);
     }
-    definition = &D_00359D40[kind];
+    definition = &btlCameraModeDefinitions[kind];
     if (definition->initialize != NULL) {
         accepted = 1;
         if (scene->cameraModeInitializePredicate != NULL) {
@@ -5697,7 +5697,7 @@ SoundTask *btlScheduleContextReset(void) {
 }
 
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
-extern f32 D_00359E60[4], D_00359E70[4];
+extern f32 btlCameraLocalUpVector[4], btlCameraOutputRotation[4];
 
 /* Per-frame battle camera update: run the active camera mode's update hook,
  * advance the command's pose blend, then push the pose into the world camera. */
@@ -5717,13 +5717,13 @@ void btlUpdateBattleCameraFrame(void) {
     if (kind == 0) {
         return;
     }
-    if (D_00359D40[kind].update != NULL && !(scene->cameraCommand.flags & 0x400)) {
+    if (btlCameraModeDefinitions[kind].update != NULL && !(scene->cameraCommand.flags & 0x400)) {
         result = 1;
         if (scene->cameraUpdatePredicate != NULL) {
             result = scene->cameraUpdatePredicate(&scene->cameraCommand);
         }
         if (result != 0) {
-            D_00359D40[kind].update(&scene->cameraCommand);
+            btlCameraModeDefinitions[kind].update(&scene->cameraCommand);
         }
     }
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
@@ -5776,14 +5776,14 @@ void btlUpdateBattleCameraFrame(void) {
     effObjSetInnerPosition(camera, (u128 *)position);
     dds3SetCameraFieldOfView(camera, scene->cameraCommand.camera.fov);
     data->fovUpdatePending |= 1;
-    effObjSetInnerRotation(camera, (u128 *)D_00359E70);
-    PCP_COPY_VECTOR(&data->localUp, D_00359E60);
+    effObjSetInnerRotation(camera, (u128 *)btlCameraOutputRotation);
+    PCP_COPY_VECTOR(&data->localUp, btlCameraLocalUpVector);
     scene->cameraCommand.state++;
 }
 
-extern f32 D_00359EA0[4], D_00359EB0[4];
+extern f32 btlWorldCameraStartOffset[4], btlWorldCameraStartRotation[4];
 
-extern f32 D_00359E80[4], D_00359E90[4];
+extern f32 btlCreatedCameraTarget[4], btlCreatedCameraRotation[4];
 
 extern u32 D_003BB660;
 
@@ -5802,19 +5802,19 @@ void btlInitializeWorldCamera(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
     battle->cameraCommand.camera.fov = 0.6981317f;
-    VU0_LOAD_VF(vf10, D_00359EA0);
+    VU0_LOAD_VF(vf10, btlWorldCameraStartOffset);
     VU0_LOAD_VF(vf11, battle->position);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, position);
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
     if (camera != NULL) {
         effObjSetInnerPosition(camera, (u128 *)position);
-        effObjSetInnerRotation(camera, (u128 *)D_00359EB0);
+        effObjSetInnerRotation(camera, (u128 *)btlWorldCameraStartRotation);
         data = camera->data;
         dds3SetCameraFieldOfView(camera, 0.6981317f);
         data->fovUpdatePending |= 1;
     }
-    camera = dds3CreateCameraObject(dds3AdvanceWorldCounter(), D_00359E80, D_00359E90);
+    camera = dds3CreateCameraObject(dds3AdvanceWorldCounter(), btlCreatedCameraTarget, btlCreatedCameraRotation);
     camera->value = (const char *)D_003BB660;
     effObjSetInnerFloat(camera, 10.0f);
     dds3EnsureSlotData(camera);
@@ -6041,7 +6041,7 @@ void btlApplyCombinedActorFlags(u8 *resource) {
     }
 }
 
-extern f32 D_00359EC0[];
+extern f32 btlCameraMotionResetFrameScales[];
 
 extern char D_003A3DD0[];
 
@@ -6065,7 +6065,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
                                     current = btlGetUnitModelCurrentFrame(unit);
                                     limit = (f32)btlGetUnitModelFrameCount(unit);
                                     if (unit->partyRecord.unitId < 8) {
-                                        limit = limit * D_00359EC0[unit->partyRecord.unitId];
+                                        limit = limit * btlCameraMotionResetFrameScales[unit->partyRecord.unitId];
                                     } else {
                                         limit = limit * fallbackScale;
                                     }
