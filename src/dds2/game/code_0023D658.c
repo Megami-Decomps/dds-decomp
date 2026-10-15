@@ -876,13 +876,13 @@ u32 evtOpTestUnitMotionNodeFlag(void) {
 
 u32 evtCmdDestroySelectedWorldUnit(void) {
     void *ctx;
-    s32 id;
+    s32 worldObjectKey;
     void *unit;
     u32 ret = 1;
 
     ctx = dds3GetWorldObject();
-    id = scrReadIntParameter(0);
-    unit = dds3FindWorldObjectNodeByKey(ctx, id, 5);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = dds3FindWorldObjectNodeByKey(ctx, worldObjectKey, 5);
     if (unit == NULL) {
         return ret;
     }
