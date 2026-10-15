@@ -148,12 +148,6 @@ extern void sceDmaSendN(void *, void *, s32);
 
 extern s32 sceDmaSync(void *, s32, s32);
 
-/* Texture draw packet: three resource-derived values alternate with their
- * GS register addresses after the GIF tag and payload header. */
-extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
-
-extern u64 sdfTexGetPrimaryClampState(SdfTex *);
-
 #include "sdf_packet_alloc.h"
 
 extern u8 D_0040B730[];

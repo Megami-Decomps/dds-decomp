@@ -399,8 +399,10 @@ u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 s32 sdfTexFormatSizeHint(s32 format);
 void sdfTexAllocatePaletteData(SdfTex *texture);
 
-/* Return the packed 64-bit TEX0 state from the texture's primary GS packet. */
+/* Return packed 64-bit TEX0, TEX1, and CLAMP states from the primary GS packet. */
 u64 sdfTexGetPrimaryTextureState(SdfTex *texture);
+u64 sdfTexGetPrimarySamplingState(SdfTex *texture);
+u64 sdfTexGetPrimaryClampState(SdfTex *texture);
 
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
 
