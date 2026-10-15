@@ -31,7 +31,7 @@ extern void fldPlayCurrentBgmSound(void);
 
 extern void fldPlayFieldSeVolumePan(s32 param);
 
-extern void fldPlayFieldSe(s32 param);
+extern void fldPlayFieldSe(s32 soundId);
 
 extern s32 fldPollArchiveLoad(s32 archiveId);
 

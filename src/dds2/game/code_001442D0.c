@@ -266,7 +266,7 @@ extern void fldReleaseCurrentBgm(void);
 
 extern void fldPlayMenuSound(s32 param);
 
-extern void fldPlayFieldSe(s32 param);
+extern void fldPlayFieldSe(s32 soundId);
 
 extern s32 fldPollArchiveLoad(s32 archiveId);
 
@@ -864,16 +864,16 @@ void fldPlayMenuSound(s32 id) {
     }
 }
 
-void fldPlayFieldSe(s32 id) {
+void fldPlayFieldSe(s32 soundId) {
     if (D_00389780[0] < 50) {
-        if (id == 0x100) {
+        if (soundId == 0x100) {
             sndQueueSoundId(0x6D0060);
-        } else if (id == 0x101) {
+        } else if (soundId == 0x101) {
             sndQueueSoundId(0x6D0061);
-        } else if (id == 0x102) {
+        } else if (soundId == 0x102) {
             sndQueueSoundId(0x6D0064);
         } else {
-            sndQueueSoundId(fldSceneSoundBase + id);
+            sndQueueSoundId(fldSceneSoundBase + soundId);
         }
     }
 }
