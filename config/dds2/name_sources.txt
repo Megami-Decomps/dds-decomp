@@ -9143,4 +9143,5 @@
 0x001F3888	btlInitializeActorClearanceCameraPair	inferred	sets the action camera pair from linked actor size after its opening motion
 0x001F2E30	btlBuildSpeciesFramedCameraPair	inferred	frames the first target with species-specific front/back distance and height factors
 0x00225BF8	btlSelectSatanActorCategoryCamera	inferred	Choose Satan action-camera framing by actor category, target count and signed side flags
+0x001DB5E0	btlScheduleSummonActionTasks	inferred	Schedules summon model loads, facing, fade/effect callbacks and completion followers.
 0x0024B268	evtViewerApplyCommandSelection	inferred	Apply viewer menu selections, typed timeline-key edits and range changes; counterpart of DDS1 0x00230660 with additional track fields and cursor-5 reset.

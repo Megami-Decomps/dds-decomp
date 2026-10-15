@@ -3829,7 +3829,7 @@ s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, f32 *target, s8 mode, f32 scale) {
+BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, f32 *target, f32 scale, s8 mode) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
     u8 *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
