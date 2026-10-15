@@ -659,11 +659,11 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
 
     for (i = 0; i < 3; i++) {
         u16 id = refs->id;
-        u8 param = refs->param;
+        u8 quantityDelta = refs->param;
 
         refs++;
         if (id != 0) {
-            ptyAdjustItemQuantity(id, param);
+            ptyAdjustItemQuantity(id, quantityDelta);
         }
     }
 }
