@@ -3299,7 +3299,7 @@ extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
-extern u64 D_003B6BB0[4];
+extern u64 btlTransparencySurfaceTestValues[4];
 
 /* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
 void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
@@ -3361,7 +3361,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
         packet[2] = ((u64)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
-        packet[4] = D_003B6BB0[i];
+        packet[4] = btlTransparencySurfaceTestValues[i];
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
