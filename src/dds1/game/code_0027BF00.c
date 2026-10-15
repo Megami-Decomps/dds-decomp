@@ -102,7 +102,7 @@ extern char D_003B2330[];
 
 extern char D_003B2348[];
 
-extern void itfGridLookupValueOrDefault(s32, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 
 
 
@@ -1259,15 +1259,68 @@ u8 mnuHasScrollPanelOverlay(MenuScrollPanel *panel) {
     return panel->active[0].sprite != 0;
 }
 
-void mnuDrawPanelGridAndSubmitSurface(u8 *panel, s32 y, s32 unknown,
-                   u32 *sprite, s32 flag) {
-    uiDrawActiveSurfaceRegion(flag);
-    itfDrawGridWithResolvedSlot((s32)(panel + 0x10), y + 0xf8, 0xffffff, 1,
-                   (EffectSlotSet *)(u32)sprite[6], sprite[7], flag);
-    sdfDispatchSurfaceWithPreparedTexturePacket(flag);
+void mnuDrawPanelGridAndSubmitSurface(s32 x, s32 y, s32 unused,
+                                      MenuScrollPanel *panel, s32 surface) {
+    uiDrawActiveSurfaceRegion(surface);
+    itfDrawGridWithResolvedSlot(x + 0x10, y + 0xF8, 0xFFFFFF, 1,
+        panel->positions[1].sprite, panel->positions[1].effect, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", mnuDrawStaffScrollPanel);
+void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth,
+                             MenuScrollPanel *panel, s32 surface) {
+    s32 drawX = x + panel->firstSprite;
+    s32 drawY = y + panel->secondSprite;
+    s32 i;
+    s32 completed;
+    s32 effect;
+    EffectSlotSet *object;
+
+    if (panel->selection != 0) {
+        drawX += 0x830;
+        drawY -= 8;
+    }
+    itfDrawGridWithResolvedSlot(drawX, drawY, depth, 1,
+        panel->positions[0].sprite, panel->positions[0].effect, surface);
+    mnuDrawPanelGridAndSubmitSurface(x, y, depth, panel, surface);
+
+    drawX = x + panel->firstSprite;
+    drawY = y + panel->secondSprite;
+    for (i = 0; i < 2; i++) {
+        if (panel->active[i].sprite != NULL) {
+            object = panel->active[i].sprite;
+            effect = panel->active[i].effect;
+            itfDrawGridWithResolvedSlot(drawX + 0x2B0, drawY + 0x108,
+                depth, 0, object, effect, surface);
+            itfGridLookupValueOrDefault(object, effect);
+        }
+    }
+
+    for (i = 0; i < 2; i++) {
+        if (panel->pending[i].sprite != NULL) {
+            object = panel->pending[i].sprite;
+            effect = panel->pending[i].effect;
+            itfDrawGridWithResolvedSlot(drawX + 0x2B0, drawY + 0x108,
+                depth, 0, object, effect, surface);
+            itfGridLookupValueOrDefault(object, effect);
+        }
+    }
+
+    completed = 0;
+    for (i = 0; i < 2; i++) {
+        EffectSlotSet *candidate = panel->active[i].sprite;
+        effect = panel->active[i].effect;
+        if (candidate != NULL && candidate->workEntries[effect].states[0].source == NULL) {
+            completed++;
+        }
+    }
+
+    if (completed == i) {
+        for (i--; i >= 0; i--) {
+            panel->active[i].sprite = NULL;
+        }
+    }
+}
 
 /* Ten resource handles occupy offsets 0x0c through 0x30 in each page bundle. */
 typedef struct MenuPageResources {
