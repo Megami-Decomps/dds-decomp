@@ -2984,13 +2984,13 @@ void btlInitializeRandomCameraCursor(BtlLinkedCommand *action, BtlCamState *stat
     func_001E6668(action, state, 0, D_0035D7F0[CURSOR->index]);
 }
 
-void btlAdvanceCommandCursor(BtlLinkedCommand *arg0, BtlCamState *arg1) {
+void btlAdvanceCommandCursor(BtlLinkedCommand *action, BtlCamState *state) {
     if (CURSOR->mode == 0) {
-        func_001E9DE0(arg0, arg1, D_0035D9F0[CURSOR->index]);
+        func_001E9DE0(action, state, D_0035D9F0[CURSOR->index]);
     } else {
-        func_001E9DE0(arg0, arg1, D_0035DA08[CURSOR->index]);
+        func_001E9DE0(action, state, D_0035DA08[CURSOR->index]);
     }
-    func_001EB368(arg0, arg1);
+    func_001EB368(action, state);
     CURSOR->frame++;
 }
 
@@ -4938,22 +4938,22 @@ void btlAdvanceTimedCameraOrApproach(BtlLinkedCommand *action, BtlCamState *stat
     }
 }
 
-void btlInitCommandCursorForFirstActor(BtlLinkedCommand *arg0, BtlCamState *arg1) {
+void btlInitCommandCursorForFirstActor(BtlLinkedCommand *action, BtlCamState *state) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BtlUnit *first = btlGetIndexListEntry(arg0->targetList, 0);
+    BtlUnit *first = btlGetIndexListEntry(action->targetList, 0);
     memset(CURSOR, 0, 0x130);
     btlRefreshUnitEffectMotionAndEntry(first);
-    if (btlHasFirstLinkedCategoryFlag1000(arg0) != 0) {
-        btlBuildPresetCameraPose(arg0, arg1, 5, 1);
+    if (btlHasFirstLinkedCategoryFlag1000(action) != 0) {
+        btlBuildPresetCameraPose(action, state, 5, 1);
     } else {
-        btlBuildPresetCameraPose(arg0, arg1, 5, 0);
+        btlBuildPresetCameraPose(action, state, 5, 0);
     }
     if (work->battleMode == 0x10E) {
         CURSOR->scriptIndex = 3;
     } else {
         CURSOR->scriptIndex = 0;
     }
-    func_001E6668(arg0, arg1, 0, 0x11);
+    func_001E6668(action, state, 0, 0x11);
 }
 
 void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *action, BtlCamState *state) {
