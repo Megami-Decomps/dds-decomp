@@ -14,6 +14,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "mdl_motion_api.h"
+#include "mdl_world_object_source_vector_api.h"
 #include "sdf_motion.h"
 #include "itf_mes_window.h"
 #include "sdf_resource.h"
@@ -951,7 +952,6 @@ extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32 fieldOfView);
 
 
-extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
 extern void evtEventViewerApplyEffectToggles(EvtRuntime *viewer);

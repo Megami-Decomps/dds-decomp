@@ -165,7 +165,7 @@ extern s32 func_0036D880(const char *, s32, void *, s32 *);
 
 extern void sdfDebugPrintf(const char *fmt, ...);
 
-extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
+extern void sdfPanicHaltPrintf(const char *format, ...) __attribute__((noreturn));
 
 extern char D_0042E288[];
 

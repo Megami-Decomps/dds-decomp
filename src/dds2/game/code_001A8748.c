@@ -1795,8 +1795,8 @@ s32 btlGetLoggedIndexedCommandItem(s32 index) {
     return item;
 }
 
-u16 btlGetActorBedAssetIdFromIndex(s32 arg0) {
-    return datItemSkillRecords[arg0].commandIndex;
+u16 btlGetActorBedAssetIdFromIndex(s32 itemIndex) {
+    return datItemSkillRecords[itemIndex].commandIndex;
 }
 
 extern const char D_00415178[];

@@ -22,6 +22,7 @@
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_sound_node_api.h"
 #include "btl_sound_release_task.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
@@ -109,8 +110,6 @@ typedef struct SoundTask {
 } SoundTask;
 
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
-
-extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern s32 btlUpdateBattleModelDebugEditor(void);
 
@@ -1466,7 +1465,6 @@ extern void *btlCreateCategoryStatDamageTask(u8 *, u32, u32);
 extern u8 *btlCreateFlaggedCommandItemConsumeTask(s32, s32);
 s32 btlFormatActionEventFilename(s32 source, char *output);
 extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
-struct ActiveSoundNode *sndAllocListNode(void);
 extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
 extern SoundTask *sndCreateSkillSeTask(s32, u16);
 extern void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);

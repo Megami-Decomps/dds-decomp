@@ -806,13 +806,13 @@ DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHead
     s32 i = 0;
     s32 count = resource->textureCount;
     DevRequest *handle = sdfCreateConfiguredBufferedResourceList(count);
-    const s32 *entry;
+    const SdfTextureOffsetListEntry *entry;
     if (count != i) {
-        entry = (const s32 *)((const u8 *)resource + sizeof(*resource));
+        entry = (const SdfTextureOffsetListEntry *)((const u8 *)resource + sizeof(*resource));
         do {
             i++;
             sdfAppendResourceListItem(handle, sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(
-                (void *)((const u8 *)resource + *entry))));
+                (void *)((const u8 *)resource + entry->textureHeaderOffset))));
             entry++;
         } while (i != count);
     }

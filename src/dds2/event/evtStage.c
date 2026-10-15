@@ -90,11 +90,11 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
 }
 
 extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
-                                                       const SdfTextureOffsetListHeader *, u32);
+                                                       const SdfTextureOffsetListHeader *, u32 flags);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
-                                     const SdfTextureOffsetListHeader *textureOffsets, s32 arg5)
+                                     const SdfTextureOffsetListHeader *textureOffsets, s32 flags)
 {
     EffWorldNode *worldObject;
     char directory[0x40];
@@ -105,7 +105,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 
     dds3SetWorldObject(worldObject);
     dds3SetWorldObjectValue(worldObject, (area << 16) + room);
     fldFormatAreaDirectory(directory, area, room);
-    dds3AttachConstructedResourceToWorldObject(worldObject, area, room, resource0Data, resource1Data, textureOffsets, arg5);
+    dds3AttachConstructedResourceToWorldObject(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
     mdlSpawnViewerWorldObject();
     sdfSetViewFieldOfView(0.75398216f);
     dds3DrawSetIndexedWord((u32)D_003C8BA0, 0);

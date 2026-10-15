@@ -546,10 +546,10 @@ s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
     return count;
 }
 
-u8 btlHasAvailableOption(u32 arg0) {
+u8 btlHasAvailableOption(u32 actorAddress) {
     s64 temp_v0;
 
-    temp_v0 = btlCollectAvailableOptionSkills(arg0, 0);
+    temp_v0 = btlCollectAvailableOptionSkills(actorAddress, 0);
     return temp_v0 != 0;
 }
 
@@ -607,8 +607,8 @@ f32 btlGetActionCategoryMultiplier(BtlUnit *unit, s32 unused, s32 index) {
     return rate;
 }
 
-f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
-    s32 category = datCommandRecords[index].mpType;
+f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 commandIndex) {
+    s32 category = datCommandRecords[commandIndex].mpType;
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
@@ -617,8 +617,8 @@ f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
     return 0.0f;
 }
 
-f32 btlGetActionRecordPercentAsFraction(s32 unused0, s32 unused1, s32 index) {
-    return (f32)datCommandRecords[index].effectPercent / 100.0f;
+f32 btlGetActionRecordPercentAsFraction(s32 unused0, s32 unused1, s32 commandIndex) {
+    return (f32)datCommandRecords[commandIndex].effectPercent / 100.0f;
 }
 
 s32 btlAdjustPointsForCombatFlags(s32 unused, u32 flags, u32 otherFlags, u32 value, s32 index) {
