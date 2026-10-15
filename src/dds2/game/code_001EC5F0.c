@@ -1674,7 +1674,142 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F0968);
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F0C80);
+extern BtlUnit *btlFindFarthestUnit(u32, f32 *);
+
+void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamState *out,
+                   BtlUnit *actor, s32 side) {
+    BtlState *state;
+    BtlUnit *unit;
+    BtlUnit *farthestUnit;
+    f32 point[4] __attribute__((aligned(16)));
+    /* Retail retains these secondary-center updates without a later read. */
+    f32 shiftedCenter[4] __attribute__((aligned(16)));
+    f32 farthestPos[4] __attribute__((aligned(16)));
+    f32 projected[4] __attribute__((aligned(16)));
+    f32 center[4] __attribute__((aligned(16)));
+    f32 height;
+    f32 span;
+    f32 fov;
+    f32 projectedDistance;
+    f32 length;
+    f32 distance;
+    u32 markedCount;
+
+    state = (BtlState *)btlGetRuntime();
+    span = btlMeasureFilteredUnitGroupBounds(0x400, &height, 0);
+    VU0_STORE_VF_PTR(vf10, shiftedCenter);
+    VU0_STORE_VF_PTR(vf10, center);
+
+    /* sched1 issues the last use of y first in each pair of height stores. */
+    if (height > 750.0f) {
+        f32 y = -height * 0.39999998f;
+        shiftedCenter[1] = y;
+        center[1] = y;
+    }
+
+    markedCount = 0;
+    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+        u32 flags = unit->status.flags;
+        if ((flags & 3) != 0 && (flags & 0x200) != 0) {
+            markedCount++;
+        }
+    }
+
+    if (actor->lookupId != 1 && markedCount == 1) {
+        f32 y = -height * 0.55f;
+        shiftedCenter[1] = y;
+        center[1] = y;
+    }
+
+    btlUnitGetMuzzlePosVU(actor);
+    VU0_STORE_VF_PTR(vf10, point);
+    point[1] = -btlUnitGetTopY(actor) * 0.77499998f;
+    if (actor->lookupId != 1) {
+        if (point[0] > 0.0f) {
+            if (markedCount >= 2) {
+                if (side == 0) {
+                    point[0] += actor->reach * actor->scale * 0.25f;
+                } else {
+                    point[0] -= actor->reach * actor->scale * 1.75f;
+                }
+                shiftedCenter[0] += span;
+            } else {
+                if (side == 0) {
+                    point[0] += actor->reach * actor->scale;
+                } else {
+                    point[0] -= actor->reach * actor->scale;
+                }
+            }
+        } else if (markedCount >= 2) {
+            if (side == 0) {
+                point[0] -= actor->reach * actor->scale * 0.25f;
+            } else {
+                point[0] += actor->reach * actor->scale * 1.75f;
+            }
+            shiftedCenter[0] -= span;
+        } else {
+            if (side == 0) {
+                point[0] -= actor->reach * actor->scale;
+            } else {
+                point[0] += actor->reach * actor->scale;
+            }
+        }
+    } else {
+        if (point[0] > 0.0f) {
+            point[0] += actor->reach * actor->scale;
+            shiftedCenter[0] += span;
+            center[0] = -(actor->reach * actor->scale) * 0.5f;
+        } else {
+            point[0] -= actor->reach * actor->scale;
+            shiftedCenter[0] -= span;
+            center[0] = (actor->reach * actor->scale) * 0.5f;
+        }
+    }
+
+    farthestUnit = btlFindFarthestUnit(0x200, point);
+    btlUnitGetMuzzlePosVU(farthestUnit);
+    VU0_STORE_VF_PTR(vf10, farthestPos);
+    farthestPos[2] -= farthestUnit->reach * farthestUnit->scale;
+    if (actor->lookupId != 1 && side != 0) {
+        farthestPos[2] -= farthestUnit->reach * farthestUnit->scale * 0.75f;
+    }
+
+    fov = source->camera.fov;
+    out->fov = fov;
+    if (actor->lookupId == 1 || markedCount >= 2) {
+        center[2] = -50.0f;
+    }
+    projectedDistance = btlProjectOnPlaneVU(center, point, farthestPos);
+    /* VU-only scratch: no scalar readback or intervening call. The SDK bare
+     * store also ends CSE reuse of the center address, as retail requires. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, projected);
+    VU0_LOAD_VF_PTR(vf10, center);
+    VU0_STORE_VF_PTR(vf10, out->position);
+    VU0_LOAD_VF_PTR(vf11, projected);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_PTR(vf10, out->direction);
+
+    fov *= 0x1.555554p-1f;
+    distance = length + projectedDistance / tanf(fov);
+    if (markedCount == 1) {
+        distance += (actor->reach * actor->scale) * 2.5f /
+                    tanf(fov);
+    }
+    if (distance > 0.0f) {
+        out->distance = distance;
+    } else {
+        out->distance = 0.0f;
+    }
+    if (height > 750.0f) {
+        out->distance += 150.0f;
+    }
+    if (side == 1) {
+        out->distance += 100.0f;
+    }
+}
+
 
 extern BtlUnit *btlFindFarthestUnit(u32, f32 *);
 
@@ -1864,7 +1999,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
     }
 }
 
-extern void func_001F0C80(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+extern void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 extern void btlBuildShoulderActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
@@ -1929,7 +2064,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
     }
 
     if (runtime->cameraActorConfiguration == 0x10003) {
-        func_001F0C80(action, pose, target, mode);
+        btlBuildActorGroupProjectionCameraPose(action, pose, target, mode);
     } else {
         btlBuildShoulderActionCamera(action, pose, target, mode);
     }

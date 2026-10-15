@@ -9031,3 +9031,4 @@
 0x001EDFB8	btlBuildFilteredGroupCameraPair	inferred	Action-category group camera pair with single-target fallback
 0x001CDD38	btlDrawActorSlotOrderSecondarySprite	inferred	Draws a bank-selected secondary actor-slot sprite using the selected row and variant colors, applies and rereads scale-dependent offsets, submits the sprite, and restores the scene coordinate record. The btlDrawActorSlotOrder caller passes the resource, slot entry, coordinates, bank, row, and variants 0 and 1 for states 4 through 6. Paired with DDS1 0x001C27B0.
 0x00367BF0	sceSifGetSreg	inferred	Reads the indexed SIF system register from D_004843C0; adjacent sceSifSetSreg writes the same array. DDS1 twin 0x0030C970; sound worker polls register 31.
+0x001F0C80	btlBuildActorGroupProjectionCameraPose	inferred	Frames an actor against projected group bounds, with side-specific offsets
