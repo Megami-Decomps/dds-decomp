@@ -140,9 +140,9 @@ typedef struct BtlUnit {
     f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
     s16 motionStartFrame; /* 0xF8: retained motion-range start frame. */
     s16 motionEndFrame; /* 0xFA: retained motion-range end frame. */
-    s32 effectArgA; /* 0xFC */
-    s32 effectArgB; /* 0x100 */
-    f32 effectValue; /* 0x104 */
+    s32 effectIndex; /* 0xFC: retained motion-selection index. */
+    s32 effectParameter; /* 0x100: retained motion-selection mode. */
+    f32 effectScale; /* 0x104: retained motion-selection rate. */
     u64 identity; /* 0x108: copied to effect tasks and compared to command IDs */
     BtlUnitStatus status; /* 0x110: complete low/high status record. */
     u32 gunResourceFlags; /* 0x118 */
@@ -161,8 +161,8 @@ typedef struct BtlUnit {
     struct SoundSlotOwner *soundSlotOwner; /* 0x308: shared category/id motion-SE owner. */
     void *gunResource; /* 0x30C */
     BtlEffectLinkState effectLink; /* 0x310: effect flags and outstanding effect-task references. */
-    u8 firstCountdown; /* 0x318: linked-effect destruction decrements this */
-    u8 secondCountdown; /* 0x319 */
+    u8 firstCountdown; /* 0x318: active linked-number displays; selects modulo-12 offset. */
+    u8 counterDisplayCount; /* 0x319: active counter displays; selects modulo-12 offset. */
     u8 pad31A[2];
     struct EffWorldNode *effectObject; /* 0x31C: actor's world node and transform. */
     struct EvtUnit *ext; /* 0x320: the event manager's complete 0x170-byte work. */
@@ -226,9 +226,9 @@ typedef struct BtlUnit {
     f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
     s16 motionStartFrame; /* 0xF8: retained motion-range start frame. */
     s16 motionEndFrame; /* 0xFA: retained motion-range end frame. */
-    s32 effectIndex; /* 0xFC */
-    s32 effectParameter; /* 0x100 */
-    f32 effectScale; /* 0x104 */
+    s32 effectIndex; /* 0xFC: retained motion-selection index. */
+    s32 effectParameter; /* 0x100: retained motion-selection mode. */
+    f32 effectScale; /* 0x104: retained motion-selection rate. */
     u64 owner;      /* 0x108: compared against the battle command's unit ID */
     BtlUnitStatus status; /* 0x110: complete low/high status record. */
     s32 gunResourceFlags;
@@ -247,8 +247,8 @@ typedef struct BtlUnit {
     struct SoundSlotOwner *unk328; /* Owner of the actor model's file slots and allocation handles. */
     void *gunResource;
     BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
-    u8 firstCountdown; /* 0x338: linked-number task selects modulo-12 offset then increments. */
-    u8 secondCountdown; /* 0x339: counter-display task owns the second child count. */
+    u8 linkedNumberCount; /* 0x338: active linked-number displays; selects modulo-12 offset. */
+    u8 counterDisplayCount; /* 0x339: active counter displays; selects modulo-12 offset. */
     u8 pad33A[2];
     struct EffWorldNode *effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */

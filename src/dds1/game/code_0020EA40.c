@@ -317,8 +317,8 @@ void btlInitializeBossCallbacks(s32 mode) {
             battle->commandRestrictFlags = commandFlags | 5;
         }
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterRestrictedCommand);
-        BTL_INSTALL_CALLBACK(battle->pad5A4, 0x4, btlIsCommandCodeF);
-        BTL_INSTALL_CALLBACK(battle->pad5A4, 0x0, btlSelectDisabledCommand);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsCommandCodeF);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlSelectDisabledCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlTrackSpecialEnemyCommandRestrictionByTurn);
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlClearUnitRestrictionFlag);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0xc, btlClearSpecialEnemyRestrictionAfterAction);
@@ -359,8 +359,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         battle->commandRestrictFlags = commandFlags | 1;
         BTL_INSTALL_CALLBACK(battle->pad590, 0x0, btlResetEffectState);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlChooseLinkedPairMotion);
-        BTL_INSTALL_CALLBACK(battle->pad5A4, 0x4, btlIsEffectPhaseInRange);
-        BTL_INSTALL_CALLBACK(battle->pad5A4, 0x0, btlGetLinkedEffectPhase);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsEffectPhaseInRange);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetLinkedEffectPhase);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlApplyRahuOperandEffects);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlCheckActiveEffectForSpecialTarget);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlUpdateLinkedEffectUnitTransforms);

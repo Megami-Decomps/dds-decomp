@@ -620,9 +620,9 @@ void effDecrementSecondCountdown(BtlLinkedEffectArgs *args) {
     BtlUnit *unit;
 
     unit = args->unit;
-    remaining = unit->secondCountdown;
+    remaining = unit->counterDisplayCount;
     if (remaining != 0) {
-        unit->secondCountdown = remaining + 0xff;
+        unit->counterDisplayCount = remaining + 0xff;
     }
 }
 

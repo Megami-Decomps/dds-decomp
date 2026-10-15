@@ -656,8 +656,8 @@ void btlUpdateUnitActors(void) {
             btlRefreshUnitMotionSelection(unit);
             unit->motionStartFrame = 0;
             unit->motionEndFrame = 0;
-            btlApplyUnitMotionSelection(unit, unit->effectArgA, unit->effectArgB,
-                          unit->effectValue);
+            btlApplyUnitMotionSelection(unit, unit->effectIndex, unit->effectParameter,
+                          unit->effectScale);
         }
         unit->status.stateFlags &= ~0x8000;
         unit = unit->next;

@@ -563,8 +563,8 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
     f32 displacement;
 
     if (args->payload.linked.elapsedTicks == 0) {
-        args->payload.linked.offsetIndex = unit->firstCountdown % 12;
-        unit->firstCountdown++;
+        args->payload.linked.offsetIndex = unit->linkedNumberCount % 12;
+        unit->linkedNumberCount++;
         btlSelectHpMpDisplayPositionVU(args->unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
         btlUnitGetMuzzlePosVU(args->unit);
@@ -654,9 +654,9 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
 void effDecrementFirstCountdown(u32 *arguments) {
     BtlLinkedEffectArgs *args = (BtlLinkedEffectArgs *)arguments;
     BtlUnit *unit = args->unit;
-    u8 count = unit->firstCountdown;
+    u8 count = unit->linkedNumberCount;
     if (count != 0) {
-        unit->firstCountdown = count - 1;
+        unit->linkedNumberCount = count - 1;
     }
 }
 
@@ -694,9 +694,9 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FA98);
 void effDecrementSecondCountdown(u32 *arguments) {
     BtlLinkedEffectArgs *args = (BtlLinkedEffectArgs *)arguments;
     BtlUnit *unit = args->unit;
-    u8 count = unit->secondCountdown;
+    u8 count = unit->counterDisplayCount;
     if (count != 0) {
-        unit->secondCountdown = count - 1;
+        unit->counterDisplayCount = count - 1;
     }
 }
 
