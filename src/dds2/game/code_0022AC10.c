@@ -54,6 +54,17 @@
 #include "sdf_gs_packet.h"
 #include "fpu.h"
 
+/* DDS2 stores the linked model-cache head in the word at battle-work +0x264.
+ * Keep the surrounding state opaque while describing this proven field. */
+typedef struct BtlStateModelCacheView {
+    u8 pad00[0x264];
+    BattleModelEntry *modelEntries;
+} BtlStateModelCacheView;
+typedef char BtlStateModelCacheViewModelEntriesOffsetCheck[
+    ((u32)&((BtlStateModelCacheView *)0)->modelEntries == 0x264) ? 1 : -1];
+typedef char BtlStateModelCacheViewSizeCheck[
+    sizeof(BtlStateModelCacheView) == 0x268 ? 1 : -1];
+
 #define BTL_COMMAND_RECORD_BYTES 0x38
 
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -1281,20 +1292,20 @@ u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask) {
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
     BattleModelEntry *cacheEntry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
-    u8 *battleState;
+    BtlStateModelCacheView *battleState;
     BattleModelEntry *previousHead;
     cacheEntry->refCount = 1;
     cacheEntry->state = 0;
-    battleState = (u8 *)btlGetRuntime();
+    battleState = (BtlStateModelCacheView *)btlGetRuntime();
     cacheEntry->prev = 0;
-    previousHead = *(BattleModelEntry **)(battleState + 0x264);
+    previousHead = battleState->modelEntries;
     if (previousHead != 0) {
         previousHead->prev = cacheEntry;
-        cacheEntry->next = *(BattleModelEntry **)(battleState + 0x264);
+        cacheEntry->next = battleState->modelEntries;
     } else {
         cacheEntry->next = 0;
     }
-    *(BattleModelEntry **)(battleState + 0x264) = cacheEntry;
+    battleState->modelEntries = cacheEntry;
     return cacheEntry;
 }
 
@@ -1315,7 +1326,7 @@ void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
     if (cacheEntry->prev != 0) {
         cacheEntry->prev->next = cacheEntry->next;
     } else {
-        *(BattleModelEntry **)((u8 *)btlGetRuntime() + 0x264) = cacheEntry->next;
+        ((BtlStateModelCacheView *)btlGetRuntime())->modelEntries = cacheEntry->next;
     }
     sdfReleaseChipBlock(cacheEntry);
     btlBossDebugPrintf("btl:pack free[%X,%X]\n", cacheEntry->kind, cacheEntry->id);
@@ -1323,7 +1334,7 @@ void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
 
 /* Release one reference from each entry, preserving any retained entries. */
 void btlReleaseAllModelEntries(void) {
-    BattleModelEntry *cacheCursor = *(BattleModelEntry **)((u8 *)btlGetRuntime() + 0x264);
+    BattleModelEntry *cacheCursor = ((BtlStateModelCacheView *)btlGetRuntime())->modelEntries;
     BattleModelEntry *nextEntry;
     while (cacheCursor != 0) {
         nextEntry = cacheCursor->next;
@@ -1361,7 +1372,7 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
 
 /* Return the matching cache entry, or null. */
 BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId) {
-    BattleModelEntry *cacheCursor = *(BattleModelEntry **)((u8 *)btlGetRuntime() + 0x264);
+    BattleModelEntry *cacheCursor = ((BtlStateModelCacheView *)btlGetRuntime())->modelEntries;
     while (cacheCursor != 0) {
         if (cacheCursor->kind == modelKind && cacheCursor->id == modelId) {
             return cacheCursor;
