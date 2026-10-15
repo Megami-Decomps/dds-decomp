@@ -12883,3 +12883,36 @@ is changed.
 | `002482C0` | `00266220` | `mnuPopupStartNoOp` | start |
 | `002482C8` | `00266228` | `mnuPopupUpdateNoOp` | update |
 | `002482D0` | `00266230` | `mnuPopupFinishNoOp` | finish |
+
+### Terminal rebuild and result-panel callbacks
+
+The same native seven-word records identify the remaining terminal rebuild
+and result-panel hooks below. The terminal rebuild descriptor has a real
+`mnuClearTerminalPanelSelection` enter hook and a real
+`mnuRebuildTerminalMenuResources` leave hook; only its start, update, and
+finish hooks are zero-returning no-ops.
+
+The result message record dispatches the message/input panel with the
+`brsTaskIsFadeIdle` gate. Its follow-up record dispatches reward and skill
+selection processing. Separate records host the stat-assignment message and
+the level-change popup. Their registered constant-one hooks perform no work;
+the names describe the record role, not an effect of the constant return.
+
+DDS2 encodes the first result record as bytes within `D_003D6332`: words
+at `0x003D6424` and `0x003D6428` are callback addresses `0x00299EF0` and
+`0x00299EF8`. The absence of `.word` labels there does not remove the native
+registration. Signatures, return constants, definition order, and distinct
+function identities are preserved in both games.
+
+| DDS1 | DDS2 | Name | Native role |
+|---|---|---|---|
+| `0024D260` | `0026B930` | `mnuTerminalPanelLeaveNoOp` | leave |
+| `0024D5F0` | `0026BC68` | `mnuTerminalRebuildStartNoOp` | start |
+| `0024D5F8` | `0026BC70` | `mnuTerminalRebuildUpdateNoOp` | update |
+| `0024D600` | `0026BC78` | `mnuTerminalRebuildFinishNoOp` | finish |
+| `00263050` | `00299EF0` | `mnuResultMessageEnterNoOp` | enter |
+| `00263058` | `00299EF8` | `mnuResultMessageLeaveNoOp` | leave |
+| `00263138` | `00299FD8` | `mnuResultSelectionEnterNoOp` | enter |
+| `00263140` | `00299FE0` | `mnuResultSelectionLeaveNoOp` | leave |
+| `002642C8` | `0029B410` | `mnuStatAssignmentMessageLeaveNoOp` | leave |
+| `00264608` | `0029B778` | `mnuLevelChangeMessageLeaveNoOp` | leave |

@@ -160,7 +160,8 @@ u32 mnuResetGroupSelectionAndStartMessage(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0029B410(void) {
+/* Registered stat-assignment message leave hook: no side effects; returns one. */
+u32 mnuStatAssignmentMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -238,7 +239,8 @@ s32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0029B778(void) {
+/* Registered level-change message leave hook: no side effects; returns one. */
+u32 mnuLevelChangeMessageLeaveNoOp(void) {
     return 1;
 }
 
