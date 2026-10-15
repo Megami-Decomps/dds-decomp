@@ -39,9 +39,9 @@ void dds3DestroyWorld(void) {
 }
 
 /* Set the primary world node without releasing it; no world is a no-op. */
-void dds3SetWorldObject(EffWorldNode *primaryObject) {
+void dds3SetWorldObject(EffWorldNode *primaryWorldNode) {
     if (dds3ActiveWorld != NULL) {
-        ((WorldInfo *)dds3ActiveWorld->data)->primaryObject = primaryObject;
+        ((WorldInfo *)dds3ActiveWorld->data)->primaryObject = primaryWorldNode;
     }
 }
 
@@ -57,9 +57,9 @@ void *dds3GetWorldObject(void) {
 }
 
 /* Set the secondary world node without releasing it; no world is a no-op. */
-void dds3SetWorldSecondaryObject(EffWorldNode *secondaryObject) {
+void dds3SetWorldSecondaryObject(EffWorldNode *secondaryWorldNode) {
     if (dds3ActiveWorld != NULL) {
-        ((WorldInfo *)dds3ActiveWorld->data)->secondaryObject = secondaryObject;
+        ((WorldInfo *)dds3ActiveWorld->data)->secondaryObject = secondaryWorldNode;
     }
 }
 
