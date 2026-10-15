@@ -1645,9 +1645,9 @@ u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
     return task;
 }
 
-u32 btlAddEpFromPacket(s32 arg0) {
+u32 btlAddEpFromPacket(s32 packetAddress) {
     s32 context = (s32)(u32)btlGetRuntime();
-    BtlRewardPacket *packet = (BtlRewardPacket *)arg0;
+    BtlRewardPacket *packet = (BtlRewardPacket *)packetAddress;
 
     if (packet->amount == 0) {
         return 1;
