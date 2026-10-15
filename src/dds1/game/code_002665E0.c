@@ -91,7 +91,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
             if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level) && work->levelAnimation[index].state == 2) {
                 work->levelAnimation[index].level++;
                 work->levelAnimation[index].level = work->levelAnimation[index].level < 2 ? 1 : (work->levelAnimation[index].level > 99 ? 99 : work->levelAnimation[index].level);
-                if (work->unkD4D != 0) {
+                if (work->skipProgressAnimation != 0) {
                     finished = 0;
                     while (work->levelAnimation[index].level < 99) {
                         nextLevel = work->levelAnimation[index].level + 1;
@@ -112,7 +112,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
                 }
                 work->levelAnimation[index].iconState = 1;
                 work->levelAnimation[index].completionState = 1;
-                work->levelAnimation[index].unk2D = 1;
+                work->levelAnimation[index].completionFlashActive = 1;
                 work->levelAnimation[index].iconOpacity = 0x80;
                 work->levelAnimation[index].iconFrame = 0;
                 work->levelAnimation[index].alpha = 0;
@@ -133,7 +133,7 @@ flash:
             work->levelAnimation[index].iconOpacity -= 16;
             work->levelAnimation[index].iconOpacity = work->levelAnimation[index].iconOpacity <= 0 ? 0 : (work->levelAnimation[index].iconOpacity > 128 ? 128 : work->levelAnimation[index].iconOpacity);
             if (work->levelAnimation[index].iconOpacity <= 0) {
-                work->levelAnimation[index].unk2D = 0;
+                work->levelAnimation[index].completionFlashActive = 0;
             }
             work->levelAnimation[index].alpha += 8;
             work->levelAnimation[index].alpha = work->levelAnimation[index].alpha <= 0 ? 0 : (work->levelAnimation[index].alpha > 128 ? 128 : work->levelAnimation[index].alpha);
@@ -440,7 +440,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
             } else {
                 step = 10000;
             }
-            if (work->unkD4D != 0) {
+            if (work->skipProgressAnimation != 0) {
                 step = work->levelAnimation[index].remaining;
             }
             work->levelAnimation[index].remaining -= step;
@@ -465,7 +465,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
             } else {
                 step = 10000;
             }
-            if (work->unkD4D != 0) {
+            if (work->skipProgressAnimation != 0) {
                 step = work->profileAnimation[index].remaining;
             }
             work->profileAnimation[index].remaining -= step;
@@ -665,7 +665,7 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
                     if (work->profileAnimation[index].currentProgress >= cap) {
                         work->profileAnimation[index].iconState = 1;
                         work->profileAnimation[index].completionState = 1;
-                        work->profileAnimation[index].unk2D = 1;
+                        work->profileAnimation[index].completionFlashActive = 1;
                         work->profileAnimation[index].iconOpacity = 0x80;
                         work->profileAnimation[index].iconFrame = 0;
                         work->profileAnimation[index].state++;

@@ -396,7 +396,6 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
 /* Legacy calls forward the selected record to this no-op. */
 extern void func_0026DBB0();
-extern void mnuReleaseMenuVisualWorkResources(MenuProgressHost *);
 extern void mnuSpawnMantraIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraShortLoopIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraIconAtPositionWithShortLoop(u32, u32, struct MantraDrawPool *);

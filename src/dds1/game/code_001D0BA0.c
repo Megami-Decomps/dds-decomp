@@ -4385,7 +4385,7 @@ u32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
             handle = work->sourceHandle;
             unit->status.flags |= 0x80;
             arguments->mixer = sndMixerClone(handle);
-            arguments->effect = func_00160958(arguments->mixer, 2, unit, 0);
+            arguments->effect = effCreateBattleVoiceOwner(arguments->mixer, 2, unit, 0);
             arguments->duration = 0xE;
             arguments->effect->flags &= 0xFFF9;
             effBattleUpdateSelectedValue(arguments->effect, 0xE);
@@ -5712,7 +5712,7 @@ extern f32 D_00359E60[4], D_00359E70[4];
 
 /* Per-frame battle camera update: run the active camera mode's update hook,
  * advance the command's pose blend, then push the pose into the world camera. */
-void func_001DBE68(void) {
+void btlUpdateBattleCameraFrame(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u32 kind;
     EffWorldNode *camera;

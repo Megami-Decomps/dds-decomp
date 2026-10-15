@@ -1120,7 +1120,7 @@ EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
 
     memcpy(work, init, sizeof(*init));
     work->actor = NULL;
-    work->effect = func_00160958(owner, kind, 0, 0);
+    work->effect = effCreateBattleVoiceOwner(owner, kind, 0, 0);
     effBattleSetScale(work->effect, init->param);
     return work;
 }

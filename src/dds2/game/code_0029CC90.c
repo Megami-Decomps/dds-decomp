@@ -520,7 +520,7 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
         work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     }
     if ((D_0037F510[0x21] < 0 || (D_0037F510[0x23] & 2)) && work->opacity >= 0x80) {
-        work->unkAEB9 = 1;
+        work->skipProgressAnimation = 1;
     }
     count = list->count;
     for (i = 0; i < count; i++) {

@@ -16,6 +16,7 @@
 #include "evt_camera_color_track_api.h"
 #include "sdf_resource.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "sdf.h"
@@ -1281,7 +1282,6 @@ s32 mnuShopHasExtraOption(ShopScene *scene) {
 }
 
 
-extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 void mnuShopReleaseSprites(ShopScene *scene) {
     MenuWindowContainer **slot = &scene->sprite;

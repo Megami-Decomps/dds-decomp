@@ -275,7 +275,7 @@ s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
     return state;
 }
 
-s32 func_00265FE8(KwlnTask *callback) {
+s32 mnuDrawShopPanelAfterMessageClose(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
 
     mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
@@ -317,7 +317,7 @@ s32 mnuWaitForFadeBeforePopup(KwlnTask *callback) {
     return state;
 }
 
-s32 func_00266188(KwlnTask *callback) {
+s32 mnuDrawShopPanelAfterFade(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
 
     mnuDrawShopPanelDecorations((MenuTerminalContext *)context);

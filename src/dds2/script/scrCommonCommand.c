@@ -847,19 +847,19 @@ s32 scrCommandResetFieldEffects(void)
 
 s32 scrCommandClearProcessControlFlag(void)
 {
-    datGameState->unk388 = 0;
+    datGameState->processControlFlag = 0;
     return 1;
 }
 
 s32 scrCommandSetProcessControlFlag(void)
 {
-    datGameState->unk388 = 1;
+    datGameState->processControlFlag = 1;
     return 1;
 }
 
 s32 scrCommandIsProcessControlFlagClear(void)
 {
-    return datGameState->unk388 == 0;
+    return datGameState->processControlFlag == 0;
 }
 
 s32 scrCommandAdjustItemQuantity(void)

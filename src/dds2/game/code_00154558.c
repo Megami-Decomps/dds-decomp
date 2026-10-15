@@ -838,7 +838,64 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00154558", fldCmdApplyNumericRoomModeGroupZero);
+extern char D_00414090[];
+
+/* Numeric form of fldCmdApplyRoomModeGroupZero: the room number parameter is
+ * formatted to a name and parsed like the string command's argument. */
+s32 fldCmdApplyNumericRoomModeGroupZero(void) {
+    s32 world;
+    s32 stage;
+    s32 mode;
+    char buffer[32];
+    char *name;
+    s32 room;
+    WorldIndexNode *list;
+    EffWorldNode *node;
+
+    world = scrReadIntParameter(0);
+    if (world == 0) {
+        world = fldAreaState.area;
+    }
+    stage = scrReadIntParameter(1);
+    if (stage == 0) {
+        stage = fldAreaState.floor + 1;
+    }
+    mode = scrReadIntParameter(3);
+    sprintf(buffer, D_00414090, scrReadIntParameter(2));
+    name = buffer;
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            fldSetRoomModeFlag(world, stage, room, 0);
+        }
+    } else {
+        room = fldParseRoomNumberFromName(name);
+        fldSetRoomModeFlag(world, stage, room, 0);
+    }
+    if (world == fldAreaState.area && stage == fldAreaState.floor + 1) {
+        list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
+        if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
+            dds3ResetObjectValueCursor((WorldValueIndices *)list);
+            do {
+                node = (EffWorldNode *)(u32)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
+                if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
+                    switch (mode) {
+                    case 0:
+                        dds3SetObjectPayloadWord8(node, 1);
+                        break;
+                    case 1:
+                        dds3SetObjectPayloadWord8(node, 5);
+                        break;
+                    case 2:
+                        dds3SetObjectPayloadWord8(node, 7);
+                        break;
+                    }
+                }
+            } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
+            dds3DestroyWorldIndexNode(list);
+        }
+    }
+    return 1;
+}
 
 extern char *D_004361D4;
 
@@ -898,7 +955,61 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00154558", fldCmdApplyNumericRoomModeGroupOne);
+/* Numeric form of fldCmdApplyRoomModeGroupOne (without its alias-name remap). */
+s32 fldCmdApplyNumericRoomModeGroupOne(void) {
+    s32 world;
+    s32 stage;
+    s32 mode;
+    char buffer[32];
+    char *name;
+    s32 room;
+    WorldIndexNode *list;
+    EffWorldNode *node;
+
+    world = scrReadIntParameter(0);
+    if (world == 0) {
+        world = fldAreaState.area;
+    }
+    stage = scrReadIntParameter(1);
+    if (stage == 0) {
+        stage = fldAreaState.floor + 1;
+    }
+    mode = scrReadIntParameter(3);
+    sprintf(buffer, D_00414090, scrReadIntParameter(2));
+    name = buffer;
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            fldSetRoomModeFlag(world, stage, room, 1);
+        }
+    } else {
+        room = fldParseRoomNumberFromName(name);
+        fldSetRoomModeFlag(world, stage, room, 1);
+    }
+    if (world == fldAreaState.area && stage == fldAreaState.floor + 1) {
+        list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
+        if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
+            dds3ResetObjectValueCursor((WorldValueIndices *)list);
+            do {
+                node = (EffWorldNode *)(u32)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
+                if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
+                    switch (mode) {
+                    case 0:
+                        dds3SetObjectPayloadWord8(node, 2);
+                        break;
+                    case 1:
+                        dds3SetObjectPayloadWord8(node, 6);
+                        break;
+                    case 2:
+                        dds3SetObjectPayloadWord8(node, 8);
+                        break;
+                    }
+                }
+            } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
+            dds3DestroyWorldIndexNode(list);
+        }
+    }
+    return 1;
+}
 
 s32 fldCmdApplyRoomObjectModeZero(void) {
     s32 world;

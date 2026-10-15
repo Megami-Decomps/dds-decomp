@@ -64,7 +64,6 @@ extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix(void *packet);
 
 extern void effAppendBlurRenderState(void *, s32, SdfTex *);
-extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 

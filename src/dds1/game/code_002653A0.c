@@ -525,7 +525,7 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
         work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     }
     if (((s8)D_00324510[1][0][1] < 0 || (D_00324510[1][0][3] & 2)) && work->opacity >= 0x80) {
-        work->unkD4D = 1;
+        work->skipProgressAnimation = 1;
     }
     count = list->count;
     for (i = 0; i < count; i++) {
