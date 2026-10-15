@@ -288,7 +288,7 @@ void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 
     VU0_SET_W_ONE(vf10);
     mdlStorePrimaryVectorVU(model);
     base->resourceHandle = model;
-    object->inner->radius = model->unk34;
+    object->inner->radius = model->objectRadius;
     base->resourceState = DDS3_OBJECT_RESOURCE_MODEL_CONTEXT;
     base->unk44 = 0;
     {
