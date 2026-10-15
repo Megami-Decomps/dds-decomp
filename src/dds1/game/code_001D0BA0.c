@@ -1581,7 +1581,7 @@ u32 btlAwardHuntExperience(s32 address) {
 
 extern u32 btlAwardHuntExperience(s32);
 
-u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
+u8 *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
     u8 *task = btlAllocTask(8);
     BtlHuntExpArgs *data;
 
@@ -1589,11 +1589,11 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4C;
     *(void **)(task + 0x4C) = btlAwardHuntExperience;
-    *(u64 *)(task + 0x40) = arg0->identity;
+    *(u64 *)(task + 0x40) = actor->identity;
     *(s32 *)(task + 0x48) = 0;
     data = btlGetTaskArguments(task);
-    data->actor = arg0;
-    data->amount = (u32)arg1;
+    data->actor = actor;
+    data->amount = (u32)option;
     return task;
 }
 
