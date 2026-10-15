@@ -1985,7 +1985,7 @@ extern const char D_00417348[];
 extern const char D_00417360[];
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
-void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light);
+void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
 BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);

@@ -6111,7 +6111,7 @@ void btlInitializeSceneLightingAndTint(void) {
     *(u32 *)(context + 0x698) = 0x807E5C5E;
 }
 
-void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
+void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light) {
     u8 *work = (u8 *)btlGetRuntime();
     BtlActionTableEntry *action;
     f32 *vector;
@@ -6120,7 +6120,7 @@ void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
 
     if ((*(u32 *)(work + 0x1F4) & 0x30000000) == 0) {
         /* The record table is stored as an integer address. */
-        action = (BtlActionTableEntry *)(index * sizeof(BtlActionTableEntry) +
+        action = (BtlActionTableEntry *)(skillIndex * sizeof(BtlActionTableEntry) +
                                         datActionAnimationRecords);
         if (action->lightColorMode != 0.0f) {
             light->color[0] = action->lightColor[0];
