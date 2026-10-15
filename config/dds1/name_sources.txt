@@ -9209,3 +9209,4 @@
 0x0036C268	mnuMantraSceneSpritePlacements	inferred	confidence=high; DDS1 scene draw helpers read resource index, sprite index and X/Y offsets from this s16[4] placement bank, optionally adding scene-entry offsets. Distinct from the coordinate-helper bank. Identifier-only: declarations, storage, bytes, extents and aliases retained; no source-owned data import or active INCLUDE_ASM consumer. [Namer1 readability b84; matched-C/native-data evidence]
 0x001E4AC0	btlFrameEarliestAnimatedUnitCameraPair	inferred	frames earliest marked kind-11 animation with paired camera presets
 0x001CF050	btlScheduleSummonActionTasks	inferred	Schedules summon model loads, facing, fades, effects and completion followers.
+0x00230660	evtViewerApplyCommandSelection	inferred	Apply viewer menu selections, typed timeline-key edits and range changes; return -1 when the selected range changes.
