@@ -176,7 +176,7 @@ extern struct FrFontGlyph *fileMenuStringGlyph;
 extern s32 D_00437CD8;
 
 extern s32 D_00437CE4;
-extern s32 D_003E7FA8[];
+extern s32 fileSavePreviewPortraitTextures[];
 extern s32 D_00437D74;
 extern s32 D_00437D6C;
 extern s32 D_00437D68;
@@ -340,7 +340,7 @@ extern s32 fileResetSlotSelection(void);
 
 extern s32 D_00437D50;
 
-extern s8 D_004580C3[];
+extern s8 fileSavePreviewVersionByteView[];
 
 extern s32 (*fileMenuStateHandler)();
 
@@ -468,7 +468,7 @@ extern s32 fileAbortSlotScanOnInput(void);
 
 extern char D_0042B6B8[];
 
-extern u8 D_00458040[];
+extern u8 fileDirectoryEntryScratch[];
 
 extern s32 mcClearSlotMetadata(void);
 
@@ -546,7 +546,7 @@ void mcdFormatSaveSlotName(void *buffer, s32 slot) {
 
 void fileReqGetSlotCode(void) {
     s32 slot = fileReqGetSelectedSlot(fileMemoryCardRequestIndex);
-    D_00437D50 = D_004580C3[slot * 0x30];
+    D_00437D50 = fileSavePreviewVersionByteView[slot * 0x30];
 }
 
 /* Size of the persistent main save block copied during a reload. */
@@ -1565,7 +1565,7 @@ s32 fileScanSlotIconSysBegin(void) {
     }
     if (t == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSlotScanIndex, FILE_REQ_SLOT_DIRECTORY_READY);
-        mcReadDirectoryEntries(fileMemoryCardRequestIndex, D_0042B6B8, D_00458040, 1);
+        mcReadDirectoryEntries(fileMemoryCardRequestIndex, D_0042B6B8, fileDirectoryEntryScratch, 1);
         return (s32)mcHandleSlotWriteResult;
     }
     if (t == MC_POLL_ERROR) {
@@ -1675,7 +1675,7 @@ s32 fileScanSlotIconSysAltBegin(void) {
     }
     if (t == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSlotScanIndex, FILE_REQ_SLOT_DIRECTORY_READY);
-        mcReadDirectoryEntries(fileMemoryCardRequestIndex, D_0042B6B8, D_00458040, 1);
+        mcReadDirectoryEntries(fileMemoryCardRequestIndex, D_0042B6B8, fileDirectoryEntryScratch, 1);
         return (s32)mcHandleDirectoryWriteResult;
     }
     if (t == MC_POLL_ERROR) {
@@ -1837,7 +1837,7 @@ s32 fileWriteIconSysComplete(void) {
     return (s32)fileOnAllWritten;
 }
 
-extern u8 D_003E7BE0[];
+extern u8 fileSaveIconSysData[];
 extern u32 D_00437D90;
 extern u32 D_00437D94;
 
@@ -1846,10 +1846,10 @@ s32 fileBeginLabeledSlotWrite(void) {
     s32 q = v / 10;
     s32 r = v % 10;
 
-    D_003E7BE0[0xF8] = -0x7E;
-    D_003E7BE0[0xFA] = -0x7E;
-    D_003E7BE0[0xF9] = q + 0x4F;
-    D_003E7BE0[0xFB] = r + 0x4F;
+    fileSaveIconSysData[0xF8] = -0x7E;
+    fileSaveIconSysData[0xFA] = -0x7E;
+    fileSaveIconSysData[0xF9] = q + 0x4F;
+    fileSaveIconSysData[0xFB] = r + 0x4F;
     return fileBeginRequest(D_0042B6B8, &D_00437D90, &D_00437D94, (void *)fileWriteIconSysComplete, 0);
 }
 
@@ -2539,7 +2539,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
             portrait = 7;
             break;
                             }
-                            evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(D_003E7FA8[portrait]));
+                            evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(fileSavePreviewPortraitTextures[portrait]));
                             sprintf(text, D_00437DA8, fileSavePreviewRecords[slot].levels[partyIndex]);
                             fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
                         }
@@ -2713,28 +2713,28 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
             D_00437D78 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 8:
-            D_003E7FA8[0] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[0] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 9:
-            D_003E7FA8[1] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[1] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 10:
-            D_003E7FA8[2] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[2] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 11:
-            D_003E7FA8[3] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[3] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 12:
-            D_003E7FA8[4] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[4] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 13:
-            D_003E7FA8[5] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[5] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 14:
-            D_003E7FA8[6] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[6] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 15:
-            D_003E7FA8[7] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
+            fileSavePreviewPortraitTextures[7] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         }
         sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
@@ -2810,7 +2810,7 @@ void fileReleaseMenuResources(void) {
 
     if (D_00437CE4 != 0) {
         D_00437CE4 = 0;
-        slot = D_003E7FA8;
+        slot = fileSavePreviewPortraitTextures;
         i = 7;
         do {
             handle = *slot;

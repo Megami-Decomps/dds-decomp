@@ -106,10 +106,10 @@ const char D_003B2080[] = "/camp/spr/";
 const char D_003B2090[] = "/camp/spr/n_pty/";
 const char D_003B20A8[] = "/camp/spr/n_con/";
 
-extern u32 D_0037C300[][2];
-extern u32 D_0037C310[][2];
-extern u32 D_0037C330[][2];
-extern u32 D_0037C378[][2];
+extern u32 mnuStaffItemResourceNamePairs[][2];
+extern u32 mnuStaffSkillResourceNamePairs[][2];
+extern u32 mnuStaffPartyResourceNamePairs[][2];
+extern u32 mnuStaffCategory5ResourceNamePairs[][2];
 
 /* Queue the category, group, party and single staff resources after the base banks. */
 void mnuAppendStaffResourceRequests(StaffMenuWork *menu) {
@@ -120,15 +120,15 @@ void mnuAppendStaffResourceRequests(StaffMenuWork *menu) {
     mnuAppendCampSpriteRequests(resourceList, &menu->staffSlots);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_003B2080, D_0037C300[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->categoryPair[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_003B2080, mnuStaffItemResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->categoryPair[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < 4; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_003B2080, D_0037C310[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->categoryGroup[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_003B2080, mnuStaffSkillResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->categoryGroup[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < 9; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_003B2090, D_0037C330[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->partyModels[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_003B2090, mnuStaffPartyResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->partyModels[resourceIndex]);
     }
-    effAppendListEntry(resourceList, (u32)D_003B20A8, D_0037C378[0][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->singleResource);
+    effAppendListEntry(resourceList, (u32)D_003B20A8, mnuStaffCategory5ResourceNamePairs[0][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->singleResource);
 }
 
 s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {

@@ -13981,3 +13981,32 @@ advance sixteen vertices and retain the overlap. The four-entry surface
 bank retains its duplicated first two pointers and the kind>=4 fallback.
 No type, bound, clear length, primitive, index bytes, callbacks, imports,
 control flow or existing VU macros change.
+
+## Staff resource banks and save-preview cache views
+
+The item, skill, party and category-five staff banks are pairs of resource
+names, not interchangeable filename lists. DDS1 has two item pairs and
+four skill pairs; DDS2 has one of each. Both party banks have nine pairs,
+but their final two Seraf/Roard rows differ in order. Retain the native
+navigation pairs, null cells and per-title category counts. The numeric
+category-five name deliberately does not infer a role from `n_con01`.
+
+The DDS2 ring/gem prompt names describe their existing displayed text;
+their C-owned bytes, terminators, declaration bounds and alignment remain
+unchanged. No imported DDS1 counterpart is renamed by adjacency alone.
+
+`fileDirectoryEntryScratch` is the existing 64-byte buffer passed with a
+one-entry limit to the memory-card directory provider. The separate
+`fileSavePreviewVersionByteView` remains the signed-byte alias at
+`fileSavePreviewRecords + 3`, indexed at the existing 0x30-byte stride.
+`fileSavePreviewPortraitTextures` is filled by the scene constructor,
+indexed by the preview renderer and released/cleared by menu teardown:
+five used slots in DDS1 and eight in DDS2. Preserve its s32-array storage
+and existing pointer conversions rather than changing its element type.
+`fileSaveIconSysData` retains each native 964-byte `PS2D` icon.sys payload.
+The write callback changes only its existing Shift-JIS slot-number bytes
+(at 0xD0 in DDS1 and 0xF8 in DDS2); its imported pointer/size descriptors
+remain separate and keep their existing names.
+These identifier-only names retain the original data ownership and prior
+Harbor Maple/Luna/Halcyon reconstruction credit; no body, layout, cast,
+initializer, access order or generated assembly is changed.
