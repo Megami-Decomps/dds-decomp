@@ -173,12 +173,9 @@ typedef struct SdfModel {
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
     struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
-    /* Float scalar (DDS2 0x232074 / Nocturne 0x2B07D4), forwarded
-     * as raw packet bits by DDS1 0x2D9530. */
-    union {
-        u32 word;
-        f32 scalar;
-    } unk94;
+    /* Model scale: read as f32 by sdfVuSetGlobalScale's caller and copied
+     * unchanged into the three-scalar VIF payload (DDS1 0x2D9530). */
+    f32 unk94;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
     u8 pad99[3];
 } SdfModel;

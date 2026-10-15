@@ -4397,8 +4397,9 @@ s32 fldUpdateFieldPlayerMovement(void) {
         180.0f, 157.5f, 135.0f, 112.5f, 90.0f, 67.5f, 45.0f, 22.5f
     };
     f32 current[3];
-    f32 guideX;
-    f32 guideZ;
+    /* The guide query writes one float through each output pointer. */
+    f32 guideX[1];
+    f32 guideZ[1];
     f32 heading;
     f32 difference;
     f32 step;
@@ -4577,10 +4578,10 @@ s32 fldUpdateFieldPlayerMovement(void) {
             motion = 1;
         }
         if (fldIsCurrentGridGuideMarkerActive() != 0) {
-            fldGetFieldFloatPair(&guideX, &guideZ);
+            fldGetFieldFloatPair(guideX, guideZ);
             motion = 16;
-            fldAreaState.x -= (fldAreaState.x - guideX) * 0.25f;
-            fldAreaState.z -= (fldAreaState.z - guideZ) * 0.25f;
+            fldAreaState.x -= (fldAreaState.x - guideX[0]) * 0.25f;
+            fldAreaState.z -= (fldAreaState.z - guideZ[0]) * 0.25f;
             position[0] = fldAreaState.x;
             position[1] = fldAreaState.y;
             position[2] = fldAreaState.z;
@@ -4612,10 +4613,10 @@ s32 fldUpdateFieldPlayerMovement(void) {
         }
     } else {
         if (fldIsCurrentGridGuideMarkerActive() != 0) {
-            fldGetFieldFloatPair(&guideX, &guideZ);
+            fldGetFieldFloatPair(guideX, guideZ);
             motion = 16;
-            fldAreaState.x -= (fldAreaState.x - guideX) * 0.25f;
-            fldAreaState.z -= (fldAreaState.z - guideZ) * 0.25f;
+            fldAreaState.x -= (fldAreaState.x - guideX[0]) * 0.25f;
+            fldAreaState.z -= (fldAreaState.z - guideZ[0]) * 0.25f;
             if (fldAreaState.movementSoundActive == 0) {
                 sndSetSequenceVolumePan(0x690062, 0x7F, 0x3F);
             }

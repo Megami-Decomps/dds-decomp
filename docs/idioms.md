@@ -6021,16 +6021,26 @@ and a signed word countdown at `+8`. The destructor releases that model
 before the slot allocation. Keep the complete owner in `mdl.h`, not an
 eight-byte prefix or another private slot view.
 
-`SdfModel.unk94` is one four-byte value with genuinely different uses.
-DDS1 `0021755C` and DDS2 `00232074` store the float `1000.0f`;
-DDS1 renderer `002D9530` loads its unchanged word and `002D953C`
-forwards those bits into a VIF packet at `+0x2C`. The Nocturne debug
-renderer independently reads the same member as a float at `002B07D4`
-and as a packet word at `002B089C` / `002B08A8`. Use the primary
-owner's documented `scalar` / `word` union, preserving its `0x9C` extent.
-These type completions do not match the still-assembly afterimage body:
-its unobserved local packed-color store needs genuine source/API evidence,
-not a padded temporary or fabricated memory-output packing primitive.
+`SdfModel.unk94` is a binary32 model scale. DDS1 `0021755C` and DDS2
+`00232074` store `1000.0f`; DDS1 `002D9454` loads it as a float for
+`sdfVuSetGlobalScale`. The renderer copies its unchanged bits at `002D9530`
+into the first word of a three-scalar VIF payload at `+0x2C`, followed by
+another two float words. Raw packet transport does not require an integer
+member or a union. The primary owner remains `0x9C` bytes.
+
+The paired updaters load the initial color, per-frame color step and source
+model tint into `vf10`, `vf11` and `vf12`. `mdlPackDevSlotColor` evaluates
+`(color + step * age) * tint`, scales by 128, converts and packs the result.
+Its early-clobber result and both real age/scale inputs form one COP2/MMI
+operation, using the existing `eePackRGBAWord` 16-byte carrier pattern.
+This is a reconstructed operation shared by the two afterimage updaters.
+
+Initialize a new slot and model scale before publishing the list head. In
+the update loop, read the reset period before the copy callback, then publish
+the countdown once after either callback. The common publication gives the
+early optimizer one join; `sched1` then shares argument setup across the
+branch, and delay-slot filling produces the native call slots. Separate
+stores in the two C arms leave three differing instruction words.
 
 
 ## DDS2 scene-slot flags and the retained fade-count argument

@@ -1,3 +1,4 @@
+#include "mdl_dev_slot_color.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
@@ -585,7 +586,55 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", mdlUpdateDevSlotTransforms);
+extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
+
+/* Grow the afterimage list, advance each model, then apply its age and tint. */
+void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
+    MdlDevList *list = ctx->devList;
+    SdfModel *original = ctx->inner;
+    MdlDevSlot *slot;
+    SdfModel *model;
+    f32 tint[4];
+    s32 remaining;
+    u32 color;
+
+    if (list->usedCount != 0 && --list->growStep == 0) {
+        list->usedCount--;
+        list->growStep = list->stride;
+        slot = sdfAllocSizeClassBlock(sizeof(MdlDevSlot));
+        model = sdfModelCreateWithItems(ctx->sub->resourceList, ctx->sub->itemList);
+        /* Finish initialization before publishing the new list head. */
+        slot->next = list->first;
+        slot->model = model;
+        slot->remaining = 1;
+        model->unk94 = 1000.0f;
+        list->first = slot;
+    }
+    eeUnpackRGBAWordFloat(original->color, 1.0f / 128.0f);
+    VU0_STORE_VF(vf10, tint);
+    slot = list->first;
+    while (slot != NULL) {
+        remaining = slot->remaining;
+        model = slot->model;
+        remaining--;
+        if (remaining == 0) {
+            remaining = list->byteCount;
+            sdfModelCopyRuntimeState(model, original);
+        } else {
+            sdfModelUpdateCurrentFrameTransforms(model);
+        }
+        /* Both callbacks complete before the countdown is published. */
+        slot->remaining = remaining;
+        VU0_LOAD_VF(vf10, list->color);
+        VU0_LOAD_VF(vf11, list->colorStep);
+        VU0_LOAD_VF(vf12, tint);
+        color = mdlPackDevSlotColor(remaining - 1, 128.0f);
+        model->color = color;
+        sdfModelBuildNodeResourcePackets(surfaces, model);
+        slot = slot->next;
+    }
+}
 
 extern DevRequest *sdfResourceListClone(DevRequest *list);
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
