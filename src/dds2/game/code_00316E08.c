@@ -540,7 +540,8 @@ void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", mnuLoadSectionObjectListWithRelocations);
 
-u32 func_00317AC8(void) {
+/* State-zero update entry in the shooting-scene callback table; no work in retail. */
+u32 mnuShootingState0UpdateNoOp(void) {
     return 0;
 }
 

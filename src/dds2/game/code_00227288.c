@@ -1547,7 +1547,7 @@ extern void func_0021A978(BtlUnit *, s32, s32, s32, s32, f32);
 extern void func_0021B828(ActionStateLink *);
 extern s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *, s32, s32);
-extern s32 func_0021E8C0(BtlLinkedCommand *);
+extern s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *);
 extern void btlScheduleCherunShadowSkillPresentation(ActionStateLink *, BtlUnit *, u64, u64);
 extern void btlSetSpecialEnemyGeometry(void);
 extern s32 func_00223350(BtlLinkedCommand *, s32, s32);
@@ -1729,7 +1729,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk710, 0x0, btlRemapBossResponseForActionPhase);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlPlayStationedSoundForActiveBossAction);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSetupVritraCameraFromActionFlags);
-        BTL_INSTALL_CALLBACK(battle->unk658, 0x0, func_0021E8C0);
+        BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlSetupDefeatCameraFromAnimationFlags);
         allocation = sdfAllocateBlockBySizeThreshold(0xC);
         battle->effect = allocation;
         memset(allocation, 0, 0xC);

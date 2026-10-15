@@ -76,7 +76,7 @@ extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
 extern s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *);
-extern u32 func_00260460(void);
+extern u32 mnuGetTerminalMessageOption(void);
 extern s32 mnuCampFindActiveSlot(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void mnuAwardCampProgressCurrency(void);
@@ -131,7 +131,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 case 2:
                     if (evtGetMessageWindowControlState() == 0) {
                         evtFinishMessageWindowAndNotify();
-                        state->options = func_00260460();
+                        state->options = mnuGetTerminalMessageOption();
                         state->phase = 3;
                         state->rewardCursor = 0;
                     }

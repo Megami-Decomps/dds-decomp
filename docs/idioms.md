@@ -13049,3 +13049,36 @@ reconstruction and the two sine-modulated triangle-fan passes unchanged.
 | `00229ED8` | `00244B90` | `evtDrawSolarPointTransitionShapes` |
 | `0022AB60` | `00245818` | `evtUpdateIdleTestTask` |
 | `00231CC0` | `0024C9D0` | `evtViewCmdNoOp` |
+
+## Animation-camera flags and called retail menu hooks
+
+`btlSetupDefeatCameraFromAnimationFlags` identifies the same installed
+camera callback in DDS1 at `0020CB38` and DDS2 at `0021E8C0`.
+`btlInitializeBossCallbacks` installs it in each game. The input flags come
+from `datActionAnimationRecords`, not a species table: bits `4000`, `8000`,
+and `0008` select defeat-camera paths. Preserve the existing per-path
+returns, command-state writes, and runtime flag clearing; DDS2's repeated
+camera calls in separate arms are part of its matched reconstruction.
+This replaces our former letter-placeholder identity without changing
+either game's types or control flow.
+
+The following small DDS2 hooks have concrete consumers or native table
+entries. Their retail constant/empty bodies do not justify inventing an
+unseen implementation or naming neighboring unreferenced stubs.
+
+| Address | Name | Evidence |
+|---|---|---|
+| `00260460` | `mnuGetTerminalMessageOption` | Returns zero for `MenuTerminalContext.options` at creation and message-sequence refresh. |
+| `0025E7B0` | `mnuShouldBlockViewerEndCountdown` | The viewer returns before countdown setup when this hook returns one; retail always returns zero. |
+| `0029A1E0` | `mnuShouldDeferProfileSelection` | Nonzero defers the follow-up selection work in `mnuDispatchProfileSelectionScene`; retail returns zero. |
+| `00317AC8` | `mnuShootingState0UpdateNoOp` | Native update-table entry at pointer slot `0040ABF0`, installed for shooting state zero and restored after its initialization callback. |
+| `0026DBB0` | `mtrMantraEquipReleaseHookNoOp` | Empty hook called by `mtrMantraEquipRelease` after updating the selected panel. |
+| `0028FD10` | `mnuGetDefaultMantraPanelRecord` | Fallback source queried by `mnuBindMantraMenuSourceRecord` with both selector filters unrestricted. |
+
+The last query's native tail jump forwards the selector's V0 to its
+consumer: it is not evidence that the result is discarded. Preserve the
+existing definition and local caller declarations, including their legacy
+return/argument disagreements, while making this identifier-only change.
+Likewise preserve the countdown hook's extra caller argument and the
+release hook's old-style declaration; this naming pass does not claim a
+prototype reconstruction.

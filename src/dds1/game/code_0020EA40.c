@@ -158,7 +158,7 @@ extern void btlDestroyActiveMemberSlot(void);
 extern void btlDestroySpecialUnitSlot(void);
 extern s32 btlDisableNonBossUnits(void);
 extern s32 btlDisableUnitsIfSpeciesFlagged(void);
-extern s32 btlDispatchActionAnimationB(BtlLinkedCommand *command);
+extern s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command);
 extern s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry);
 extern void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 action);
 extern s32 btlEffectTaskStartFinale(BtlTask *task);
@@ -498,7 +498,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectSpecialDefeatCameraPose);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlChooseDefeatCameraByActionAndTargets);
         BTL_INSTALL_CALLBACK(battle->commandSoundDelay, 0x0, btlGetMillenniaCurseSoundDelay);
-        BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlDispatchActionAnimationB);
+        BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlSetupDefeatCameraFromAnimationFlags);
         BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlInitializeBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->postTargetHook, 0x0, btlStartPairedActorCommandEffect);

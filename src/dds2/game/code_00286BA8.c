@@ -395,7 +395,7 @@ extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
 /* Legacy calls forward the selected record to this no-op. */
-extern void func_0026DBB0();
+extern void mtrMantraEquipReleaseHookNoOp();
 extern void mnuSpawnMantraIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraShortLoopIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraIconAtPositionWithShortLoop(u32, u32, struct MantraDrawPool *);
@@ -415,7 +415,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
         DatPartyRecord *selectedRecord;
         MantraNodePos *position;
         mnuUpdateSelectedPanelSlot(resource);
-        func_0026DBB0(mnuGetSelectedNodeValue(resource));
+        mtrMantraEquipReleaseHookNoOp(mnuGetSelectedNodeValue(resource));
         selectedRecord = mnuGetSelectedNodeValue(resource);
         position = mnuGetMantraNodePositionRecord((s16)scrGetSelectedScriptEntryId(selectedRecord));
         mnuSpawnMantraIconAtPositionWithShortLoop((s32)(((f32)position->x / 10.0f) * 40.0f),
