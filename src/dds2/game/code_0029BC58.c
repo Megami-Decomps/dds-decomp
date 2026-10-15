@@ -248,13 +248,13 @@ extern BurstTable D_00428420;
 
 extern void uiDrawUniformRgbRange(BurstSprite *, u32 *, s32, s32, s32);
 
-void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
+void mnuTitleDrawBurstSprites(s32 scaleInput, s32 surfaceIndex) {
     BurstTable table = D_00428420;
     s32 scaled = scaleInput * 0x13 / 256;
     u32 i;
 
     for (i = 0; i < 8; i++) {
-        uiDrawUniformRgbRange(&table.sprite[i], &table.sprite[i].word[3], 0, scaled, arg1);
+        uiDrawUniformRgbRange(&table.sprite[i], &table.sprite[i].word[3], 0, scaled, surfaceIndex);
     }
 }
 
