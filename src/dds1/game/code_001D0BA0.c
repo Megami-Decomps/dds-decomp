@@ -1458,10 +1458,10 @@ void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *owner, BtlOperandEntry *spec)
     return task;
 }
 
-u32 btlApplyQueuedActorEntrySelection(BtlOperandTaskArgs *arg0) {
-    if (0 < arg0->operand.entrySelection) {
-        btlSetActorSelectedEntryIndex(arg0->unit, arg0->operand.entrySelection);
-        btlRefreshUnitMotionSelection(arg0->unit);
+u32 btlApplyQueuedActorEntrySelection(BtlOperandTaskArgs *taskArgs) {
+    if (0 < taskArgs->operand.entrySelection) {
+        btlSetActorSelectedEntryIndex(taskArgs->unit, taskArgs->operand.entrySelection);
+        btlRefreshUnitMotionSelection(taskArgs->unit);
     }
     return 1;
 }
