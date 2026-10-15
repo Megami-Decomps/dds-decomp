@@ -51,7 +51,7 @@ extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, s
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern void evtCreateEventScriptProcess(s32);
 extern void evtClearActiveFlag(s32);
-extern s32 evtSetBoundedDisplayValue(s32, s32);
+extern s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value);
 extern s8 D_00437859;
 
 typedef struct MenuSlotState {
