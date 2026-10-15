@@ -161,12 +161,12 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
         channel->index = i;
         channel->unk1 = 0x20;
         channel->unk2 = 0;
-        channel->unk8 = 0;
+        channel->iopWorkAddress = 0;
         channel->unk4 = 0;
         channel->unkC = 0;
         channel++;
     }
-    sndMidiTrackState.channels[0].unk8 = sndReserveIopWorkMemory(0x3B600);
+    sndMidiTrackState.channels[0].iopWorkAddress = sndReserveIopWorkMemory(0x3B600);
     sndMidiTrackState.opaque200 = 0;
     sndMidiTrackState.opaque204 = 0;
     for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
