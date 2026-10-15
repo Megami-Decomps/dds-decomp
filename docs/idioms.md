@@ -13564,3 +13564,24 @@ batch submits only sixteen triangles over eighteen vertices. Retain the
 byte-array view, all remaining index words and the four surface pointers.
 Numeric index/scratch bytes agree between games; surface-pointer bytes do
 not. No owner layout, bound, clear size, argument list or import changes.
+
+## File result text and split busy warnings
+
+The matched file status renderers select `fileLoadFailedText`,
+`fileSaveFailedText` and `fileFormatFailedText` for statuses 3, 4 and 6.
+Status 5 draws the five `fileInsufficientSpaceMessageLine1` through
+`fileInsufficientSpaceMessageLine5` strings; their required-space text is
+**304KB in DDS1 and 170KB in DDS2**. Status 7 draws the three
+`fileNoSaveDataMessageLine*` strings, but DDS2 substitutes a different message
+when its original-title transfer mode is active. Preserve the game titles,
+font markers, spacing and every existing string boundary.
+
+The flow renderers use `fileSaveSuccessfulText`, `fileFormatSuccessfulText`
+and `fileLoadSuccessfulText` for flows 4, 6 and 13 respectively. During
+saving/loading/formatting (flows 2, 3 and 5), both games draw
+`fileCardBusyCardWarningText` and `fileCardBusyConsoleWarningText` below the
+operation heading. DDS1 additionally draws the separate middle fragment
+`fileCardBusyControllerWarningText`. DDS2 has no corresponding consumed
+controller fragment: its card string ends at `(8MB)`, not after a combined
+card/controller warning. Keep the two-game line counts and draw positions;
+these are plain NUL-terminated strings, not MSG1 packs or new C literals.
