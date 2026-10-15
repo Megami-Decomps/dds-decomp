@@ -518,11 +518,11 @@ extern void scrRemoveAvailableSkillFlagAndSlot(DatPartyRecord *, s32);
 extern s32 scrStartProcessProcedure(ScrData *context, s32 procedureIndex);
 
 
-extern s32 btlAverageAllCurrentForMask(u32 arg0);
+extern s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask);
 
-extern s32 btlAverageAllMaximumForMask(u32 arg0);
+extern s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask);
 
-extern s32 btlAverageAllLevelsForMask(u32 arg0);
+extern s32 btlAverageAllLevelsForMask(u32 actorMask);
 
 
 extern void *memset(void *dst, s32 c, u32 n);
