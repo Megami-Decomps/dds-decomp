@@ -245,7 +245,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         mnuDrawMovieMenuBackgroundQuad(0x80);
         mnuRequestIndexedMovieResource(0x40);
         mnuMovieMenuState->state = 0xF;
-        mnuMovieMenuState->pad38[4] = 0;
+        mnuMovieMenuState->movieSkipped = 0;
         break;
     case 15:
         mnuDrawMovieMenuBackgroundQuad(0x80);
@@ -260,7 +260,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
             mnuMovieMenuState->cursor = 0;
             kwlnFadeInStart(0, 0, 0, 0x16);
             sdfSoundSetChannelCount(0x2D);
-            mnuMovieMenuState->pad38[4] = 1;
+            mnuMovieMenuState->movieSkipped = 1;
         }
         if (mnuCheckMovieDecoderStatus() != 0) {
             mnuMovieMenuState->state = 0x11;
@@ -280,7 +280,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         break;
     case 18:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        if ((s8)mnuMovieMenuState->pad38[4] != 0) {
+        if (mnuMovieMenuState->movieSkipped != 0) {
             mnuMovieMenuState->state = 0x16;
         } else {
             mnuRequestDefaultMovieResource();
