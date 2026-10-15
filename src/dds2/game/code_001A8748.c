@@ -2927,7 +2927,7 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 3) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2940,10 +2940,10 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 1) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
             if (unit->partyRecord.unitId == 2) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2956,10 +2956,10 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 6) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
             if (unit->partyRecord.unitId == 7) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2972,7 +2972,7 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 5) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2985,7 +2985,7 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 4) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;

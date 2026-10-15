@@ -47,8 +47,8 @@ typedef struct EffMagatuhiValueWork {
     s32 count;
     u16 historyCount;
     u8 pad06[2];
-    f32 unk08;
-    f32 unk0C;
+    f32 historyDistanceScale; /* Segment length is clamped to three times this value. */
+    f32 historyAngleStep; /* Radians per history update. */
     u32 unk10;
     f32 (*positions)[4];
     u32 *colorTable;
@@ -65,11 +65,11 @@ typedef struct EffMagatuhiValueWork {
 typedef struct EffMagatuhiHistoryParams {
     s32 count;
     s32 historyCount;
-    f32 unk08;
+    f32 historyDistanceScale;
     u32 colorA;
     u32 colorB;
     s32 unk14;
-    f32 unk18;
+    f32 historyAngleStep;
 } EffMagatuhiHistoryParams;
 
 typedef struct EffMagatuhiOwner {
@@ -717,10 +717,10 @@ typedef struct EffRingWork {
     u32 updateCount;
     u32 color;
     f32 scale;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
+    f32 orbitRadius;
+    f32 axisOffset;
+    f32 baseHalfWidth;
+    f32 tipHalfWidth;
     SdfMemBlock *allocationHandle;
     EffRecordPool *recordPool;
 } EffRingWork;

@@ -168,7 +168,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
 
     memset(work, 0, 0x1E0);
     work->allocation = block;
-    work->unk68 = 0;
+    work->packageLoadState = 0;
     work->unk1D8 = 0x80;
     work->round = 0;
     work->currentScore = 0;
@@ -258,103 +258,103 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
     MnuShootingWork *work = (MnuShootingWork *)workBytes;
     void *data = NULL;
 
-    switch (work->unk68) {
+    switch (work->packageLoadState) {
     case 0:
-        work->unk6C = 0;
-        work->unk68 = 2;
+        work->packageEntryIndex = 0;
+        work->packageLoadState = 2;
         break;
 
     case 1:
-        work->unk68 = 0;
+        work->packageLoadState = 0;
         work->state = 1;
         evtPrintDeveloperConsoleMessage(D_0042D500);
         return 1;
 
     case 2:
-        switch (D_0040A970[work->unk6C].kind) {
+        switch (D_0040A970[work->packageEntryIndex].kind) {
         case 0:
-            if (work->round == D_0040A970[work->unk6C].value) {
+            if (work->round == D_0040A970[work->packageEntryIndex].value) {
                 work->packageRequest = fileQueueDefaultCallbackRequest(
-                    D_0040A970[work->unk6C].name);
+                    D_0040A970[work->packageEntryIndex].name);
             } else {
-                work->unk6C++;
-                if (work->unk6C < 13) {
-                    work->unk68 = 2;
+                work->packageEntryIndex++;
+                if (work->packageEntryIndex < 13) {
+                    work->packageLoadState = 2;
                 } else {
-                    work->unk68 = 1;
+                    work->packageLoadState = 1;
                 }
                 return 0;
             }
             break;
         case 1:
-            if (work->resourceSlots[D_0040A970[work->unk6C].value] == 0) {
+            if (work->resourceSlots[D_0040A970[work->packageEntryIndex].value] == 0) {
                 effRequestResourceByMode(D_00438920,
-                    D_0040A970[work->unk6C].name, 0,
-                    &work->resourceSlots[D_0040A970[work->unk6C].value]);
+                    D_0040A970[work->packageEntryIndex].name, 0,
+                    &work->resourceSlots[D_0040A970[work->packageEntryIndex].value]);
             } else {
-                work->unk68 = 4;
+                work->packageLoadState = 4;
             }
             break;
         case 2: {
             s32 status = sndFindPackedTrackLoadStatus(
-                D_0040A970[work->unk6C].value);
+                D_0040A970[work->packageEntryIndex].value);
             if (status == 0) {
-                sndEnsureMidiBankResident(D_0040A970[work->unk6C].value);
+                sndEnsureMidiBankResident(D_0040A970[work->packageEntryIndex].value);
             } else {
-                work->unk68 = 4;
+                work->packageLoadState = 4;
                 evtPrintDeveloperConsoleMessage(D_0042D518,
-                    D_0040A970[work->unk6C].name);
+                    D_0040A970[work->packageEntryIndex].name);
             }
             break;
         }
         case 5:
             if (work->queueCopies[0] == NULL) {
                 work->packageDataRequest = fileQueuePlainDispatchRequest(
-                    D_0040A970[work->unk6C].name);
+                    D_0040A970[work->packageEntryIndex].name);
             } else {
-                work->unk6C++;
-                if (work->unk6C < 13) {
-                    work->unk68 = 2;
+                work->packageEntryIndex++;
+                if (work->packageEntryIndex < 13) {
+                    work->packageLoadState = 2;
                 } else {
-                    work->unk68 = 1;
+                    work->packageLoadState = 1;
                 }
                 return 0;
             }
             break;
         case 3:
         case 4:
-            if (work->round == D_0040A970[work->unk6C].value) {
+            if (work->round == D_0040A970[work->packageEntryIndex].value) {
                 work->packageDataRequest = fileQueuePlainDispatchRequest(
-                    D_0040A970[work->unk6C].name);
+                    D_0040A970[work->packageEntryIndex].name);
             } else {
-                work->unk6C++;
-                if (work->unk6C < 13) {
-                    work->unk68 = 2;
+                work->packageEntryIndex++;
+                if (work->packageEntryIndex < 13) {
+                    work->packageLoadState = 2;
                 } else {
-                    work->unk68 = 1;
+                    work->packageLoadState = 1;
                 }
                 return 0;
             }
             break;
         }
-        work->unk68 = 3;
+        work->packageLoadState = 3;
         break;
 
     case 3:
-        switch (D_0040A970[work->unk6C].kind) {
+        switch (D_0040A970[work->packageEntryIndex].kind) {
         case 0:
             if (fileIsRequestReadyInCurrentMode(work->packageRequest) != 0) {
-                work->unk68 = 4;
+                work->packageLoadState = 4;
             }
             break;
         case 1:
-            if (work->resourceSlots[D_0040A970[work->unk6C].value] != 0) {
-                work->unk68 = 4;
+            if (work->resourceSlots[D_0040A970[work->packageEntryIndex].value] != 0) {
+                work->packageLoadState = 4;
             }
             break;
         case 2:
-            if (sndFindPackedTrackLoadStatus(D_0040A970[work->unk6C].value) == 1) {
-                work->unk68 = 4;
+            if (sndFindPackedTrackLoadStatus(D_0040A970[work->packageEntryIndex].value) == 1) {
+                work->packageLoadState = 4;
             }
             break;
         case 3:
@@ -362,7 +362,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         case 5:
             if (fileRequestIsReady(work->packageDataRequest) != 0) {
                 evtPrintDeveloperConsoleMessage(D_0042D530);
-                work->unk68 = 4;
+                work->packageLoadState = 4;
             }
             break;
         }
@@ -378,34 +378,34 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                                             fileGetResourceSize(request));
         }
 
-        switch (D_0040A970[work->unk6C].kind) {
+        switch (D_0040A970[work->packageEntryIndex].kind) {
         case 0:
-            switch (work->unk6C) {
+            switch (work->packageEntryIndex) {
             case 6:
             case 10:
             case 14:
-                evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->unk6C].name);
+                evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->packageEntryIndex].name);
                 work->objects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
             case 7:
             case 11:
             case 15:
-                sdfDebugPrintf(D_0042D588, D_0040A970[work->unk6C].name);
+                sdfDebugPrintf(D_0042D588, D_0040A970[work->packageEntryIndex].name);
                 work->playerObjects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
             case 8:
             case 12:
             case 16:
-                sdfDebugPrintf(D_0042D5B0, D_0040A970[work->unk6C].name);
+                sdfDebugPrintf(D_0042D5B0, D_0040A970[work->packageEntryIndex].name);
                 work->mapObjects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
             case 9:
             case 13:
             case 17:
-                sdfDebugPrintf(D_0042D5D0, D_0040A970[work->unk6C].name);
+                sdfDebugPrintf(D_0042D5D0, D_0040A970[work->packageEntryIndex].name);
                 work->drawObjects = mnuLoadSectionObjectListWithRelocations(data);
                 sdfDebugPrintf(D_0042D578);
                 break;
@@ -415,11 +415,11 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             break;
 
         case 1:
-            sdfDebugPrintf(D_0042D5F0, D_0040A970[work->unk6C].name);
+            sdfDebugPrintf(D_0042D5F0, D_0040A970[work->packageEntryIndex].name);
             break;
 
         case 2:
-            sdfDebugPrintf(D_0042D608, D_0040A970[work->unk6C].name);
+            sdfDebugPrintf(D_0042D608, D_0040A970[work->packageEntryIndex].name);
             break;
 
         case 5: {
@@ -455,25 +455,25 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                 if (entry->packet[0] == 1) {
                     switch (entryIndex) {
                     case 0:
-                        evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->unk6C].name, 0);
+                        evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->packageEntryIndex].name, 0);
                         work->drawObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 1:
-                        evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->unk6C].name, 1);
+                        evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->packageEntryIndex].name, 1);
                         work->playerObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 2:
-                        evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->unk6C].name, 2);
+                        evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->packageEntryIndex].name, 2);
                         work->objects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
                         break;
                     case 3:
-                        evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->unk6C].name, 3);
+                        evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->packageEntryIndex].name, 3);
                         work->mapObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                         evtPrintDeveloperConsoleMessage(D_0042D578);
@@ -511,20 +511,20 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             break;
         }
 
-        evtPrintDeveloperConsoleMessage(D_0042D6B8, D_0040A970[work->unk6C].name);
+        evtPrintDeveloperConsoleMessage(D_0042D6B8, D_0040A970[work->packageEntryIndex].name);
 
-        if (D_0040A970[work->unk6C].kind == 0) {
+        if (D_0040A970[work->packageEntryIndex].kind == 0) {
             sdfReleaseResourceAllocation(
                 (struct SdfMemBlock *)(u32)fileGetResourceHandle(work->packageRequest));
             filePollEntryCleanup(work->packageRequest);
             evtPrintDeveloperConsoleMessage(D_0042D6C8);
         }
 
-        work->unk6C++;
-        if (work->unk6C < 13) {
-            work->unk68 = 2;
+        work->packageEntryIndex++;
+        if (work->packageEntryIndex < 13) {
+            work->packageLoadState = 2;
         } else {
-            work->unk68 = 1;
+            work->packageLoadState = 1;
         }
         break;
     }
@@ -793,8 +793,8 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     mnuResetResourceProgressCounters();
     mnuResetWorkEntryPool();
     mnuInitializeActiveEffectWorkEntry(&D_0040ABF8);
-    if (work->unk94 != 0) {
-        mnuRebuildMenuWorkEntryCallbackRecords(&D_0040ABF8, work->unk94);
+    if (work->savedPlayerMode != 0) {
+        mnuRebuildMenuWorkEntryCallbackRecords(&D_0040ABF8, work->savedPlayerMode);
     }
     D_0040ABF8.currentX = 256.0f;
     D_0040ABF8.currentY = 320.0f;
@@ -808,7 +808,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     records = (MenuRegistryParameters *)work->drawObjects->objects;
     for (i = 0; i < work->drawObjects->count; i++) {
         if (records[i].kind == 3) {
-            counts[i] = records[i].unk06;
+            counts[i] = records[i].instanceCount;
         } else {
             counts[i] = 0;
         }
@@ -821,12 +821,12 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     for (i = 0; i < work->modelWork->count; i++) {
         mnuInitializeNodeTransforms((u32 *)&groups[i], 1.0f, 1.0f, 1.0f, 1.0f);
         if (i == 8) {
-            mnuPopulateModelNodeList(&groups[i], records[i].unk08, records[i].unk0A, 0, 1.0f, 1.0f, 3.0f);
+            mnuPopulateModelNodeList(&groups[i], records[i].major, records[i].minor, 0, 1.0f, 1.0f, 3.0f);
         } else {
-            mnuPopulateModelNodeList(&groups[i], 5, records[i].unk0A, 0, 1.0f, 1.0f, 1.0f);
+            mnuPopulateModelNodeList(&groups[i], 5, records[i].minor, 0, 1.0f, 1.0f, 1.0f);
         }
         mnuDeactivateAllModelNodes(&groups[i]);
-        evtPrintDeveloperConsoleMessage("Major:0x%x Minor:0x%x Num:%d\n", records[i].unk08, records[i].unk0A, records[i].unk06);
+        evtPrintDeveloperConsoleMessage("Major:0x%x Minor:0x%x Num:%d\n", records[i].major, records[i].minor, records[i].instanceCount);
     }
     if (work->effectWork == NULL) {
         counts = sdfAllocSizeClassBlock(12);
@@ -851,7 +851,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
         records = (MenuRegistryParameters *)work->drawObjects->objects;
         for (i = 0; i < work->drawObjects->count; i++) {
             if (records[i].kind == 1) {
-                counts[i] = records[i].unk06;
+                counts[i] = records[i].instanceCount;
             } else {
                 counts[i] = 0;
             }
@@ -876,7 +876,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     mnuResetTitleStreamAfterFileIdle();
     work->state = 2;
     work->update = D_0040ABF0[1];
-    work->unk90 = 0;
+    work->horizontalTilt = 0;
     work->targets = 0;
     work->unkA4 = 0;
     D_00438934 = 0;
@@ -884,7 +884,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     work->phase = 0;
     work->result = 0;
     work->phaseTicks = 0;
-    work->unkA8 = 0;
+    work->playerResetState = 0;
     evtPrintDeveloperConsoleMessage("stgInit_Section\n");
     return 1;
 }
@@ -999,16 +999,16 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         if ((s8)D_0037F510[1][0][6] != 0) input.verticalNegative = 1;
         else if ((s8)D_0037F510[1][0][7] != 0) input.verticalPositive = 1;
         if ((s8)D_0037F510[1][0][4] != 0) {
-            if ((f32)work->unk90 < 20.0f) work->unk90 = (f32)work->unk90 + 1.0f;
+            if ((f32)work->horizontalTilt < 20.0f) work->horizontalTilt = (f32)work->horizontalTilt + 1.0f;
             input.horizontalNegative = 1;
         } else if ((s8)D_0037F510[1][0][5] != 0) {
-            if ((f32)work->unk90 > -20.0f) work->unk90 = (f32)work->unk90 - 1.0f;
+            if ((f32)work->horizontalTilt > -20.0f) work->horizontalTilt = (f32)work->horizontalTilt - 1.0f;
             input.horizontalPositive = 1;
         }
-        if (!input.horizontalNegative && (f32)work->unk90 > 0.0f)
-            work->unk90 = (f32)work->unk90 - 1.0f;
-        if (!input.horizontalPositive && (f32)work->unk90 < 0.0f)
-            work->unk90 = (f32)work->unk90 + 1.0f;
+        if (!input.horizontalNegative && (f32)work->horizontalTilt > 0.0f)
+            work->horizontalTilt = (f32)work->horizontalTilt - 1.0f;
+        if (!input.horizontalPositive && (f32)work->horizontalTilt < 0.0f)
+            work->horizontalTilt = (f32)work->horizontalTilt + 1.0f;
         if (((s8)D_0037F510[1][0][0] < 0) | ((s8)D_0037F510[1][0][1] != 0))
             input.actionSlot0 = 1;
         alternateAction = (s8)D_0037F510[1][0][3];
@@ -1038,7 +1038,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         break;
     case 3:
         work->unkB0 = 2;
-        work->unk94 = 0;
+        work->savedPlayerMode = 0;
         work->flags |= 4;
         mnuResetCurrentAndPeakScoresToPending(work);
         work->progress = 0;
@@ -1056,7 +1056,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         mode = D_0040ABF8.flagsBits.mode;
         work->progress = 0;
         work->completed = 0;
-        work->unk94 = mode;
+        work->savedPlayerMode = mode;
         itfSetFadeGaugeDisplayValue(&work->gauge, 0);
         mnuClearRuntimeRecordStorage(mnuGetRuntimeAnimationList());
         mnuRequestTimedEntryEffectStop();
@@ -1381,9 +1381,9 @@ s32 mnuAdvanceShootingPlayerEntryReset(MnuShootingWork *work) {
     s32 finished = 0;
     s32 mode;
 
-    switch (work->unkA8) {
+    switch (work->playerResetState) {
     case 0:
-        work->unkA8 = 2;
+        work->playerResetState = 2;
         entry->currentX = 120.0f;
         entry->currentY = 500.0f;
         mode = entry->flagsBits.mode;
@@ -1392,16 +1392,16 @@ s32 mnuAdvanceShootingPlayerEntryReset(MnuShootingWork *work) {
             mnuRebuildMenuWorkEntryCallbackRecords(entry, mode);
         }
         entry->flags = ((mode & 0xF) << 15) | 0x4001;
-        work->unkAC = 0;
+        work->playerResetTicks = 0;
         break;
     case 2:
-        work->unkAC++;
-        if (work->unkAC >= 0x1F) {
+        work->playerResetTicks++;
+        if (work->playerResetTicks >= 0x1F) {
             MdlCtx *model = node->model;
             u32 modelFlags;
 
-            work->unkA8 = 3;
-            work->unkAC = 0;
+            work->playerResetState = 3;
+            work->playerResetTicks = 0;
             modelFlags = model->flags & ~1;
             model->flags = modelFlags;
             entry->currentX = 120.0f;
@@ -1410,14 +1410,14 @@ s32 mnuAdvanceShootingPlayerEntryReset(MnuShootingWork *work) {
         }
         break;
     case 3:
-        work->unkAC++;
-        if (work->unkAC >= 0x1F) {
-            work->unkA8 = 1;
+        work->playerResetTicks++;
+        if (work->playerResetTicks >= 0x1F) {
+            work->playerResetState = 1;
         }
         entry->currentY -= 2.0f;
         break;
     case 1:
-        work->unkA8 = 0;
+        work->playerResetState = 0;
         finished = 1;
         entry->flags &= ~0x4000;
         break;
