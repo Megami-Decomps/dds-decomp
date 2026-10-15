@@ -1800,12 +1800,12 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                 btlStartTask(task);
             }
             if (groupIndex == 0 && operandIndex == operandCount - 1) {
-                task = btlScheduleEpPacketTask(action->unit, action->indexWork.unk54);
+                task = btlScheduleEpPacketTask(action->unit, action->indexWork.battleExperienceReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
                 btlStartTask(task);
-                task = btlScheduleMoneyPacketTask(action->unit, action->indexWork.unk58);
+                task = btlScheduleMoneyPacketTask(action->unit, action->indexWork.moneyReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
@@ -2364,12 +2364,12 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 btlStartTask(task);
             }
             if (groupIndex == 0 && operandIndex == operandCount - 1) {
-                task = btlScheduleEpPacketTask(unit, action->indexWork.unk54);
+                task = btlScheduleEpPacketTask(unit, action->indexWork.battleExperienceReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
                 btlStartTask(task);
-                task = btlScheduleMoneyPacketTask(unit, action->indexWork.unk58);
+                task = btlScheduleMoneyPacketTask(unit, action->indexWork.moneyReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;

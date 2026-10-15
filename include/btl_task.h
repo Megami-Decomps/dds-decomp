@@ -156,8 +156,8 @@ typedef struct BattleIndexWork {
     u8 pad44[4];
     u64 ownerId;
     s32 unk50;
-    s32 unk54;
-    s32 unk58;
+    s32 battleExperienceReward; /* 0x54: accumulated per-enemy EP sent to the reward packet. */
+    s32 moneyReward; /* 0x58: accumulated per-enemy currency sent to the reward packet. */
     u16 flags;
 #ifdef VERSION_DDS1
     u8 unk5E;
@@ -171,6 +171,10 @@ typedef struct BattleIndexWork {
     BtlOperandGroup *groups;
     struct SdfMemBlock *allocationHandle;
 } BattleIndexWork;
+typedef char BattleIndexWork_battleExperienceReward_offset_check[
+    ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
+typedef char BattleIndexWork_moneyReward_offset_check[
+    ((u32)&((BattleIndexWork *)0)->moneyReward == 0x58) ? 1 : -1];
 
 void btlInitBattleIndexWork(BattleIndexWork *work);
 void btlResetIndexWork(BattleIndexWork *work);

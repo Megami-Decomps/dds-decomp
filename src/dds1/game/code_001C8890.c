@@ -1268,12 +1268,12 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 btlStartTask(task);
             }
             if (groupIndex == 0 && operandIndex == operandCount - 1) {
-                task = (BtlRuntimeTask *)btlScheduleEpPacketTask((u8 *)action->unit, action->indexWork.unk54);
+                task = (BtlRuntimeTask *)btlScheduleEpPacketTask((u8 *)action->unit, action->indexWork.battleExperienceReward);
                 task->startCondition.kind = 4;
                                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
                 btlStartTask(task);
-                task = btlScheduleMoneyPacketTask((u8 *)action->unit, action->indexWork.unk58);
+                task = btlScheduleMoneyPacketTask((u8 *)action->unit, action->indexWork.moneyReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
@@ -1756,12 +1756,12 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                     btlStartTask(task);
                 }
                 if (groupIndex == 0 && operandIndex == operandCount - 1) {
-                    task = (BtlRuntimeTask *)btlScheduleEpPacketTask((u8 *)unit, action->indexWork.unk54);
+                    task = (BtlRuntimeTask *)btlScheduleEpPacketTask((u8 *)unit, action->indexWork.battleExperienceReward);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     task->ownerId = commandOwner;
                     btlStartTask(task);
-                    task = btlScheduleMoneyPacketTask((u8 *)unit, action->indexWork.unk58);
+                    task = btlScheduleMoneyPacketTask((u8 *)unit, action->indexWork.moneyReward);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     task->ownerId = commandOwner;

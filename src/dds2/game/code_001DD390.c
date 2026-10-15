@@ -1133,11 +1133,11 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
         }
         if (group->inactive && (action->unit->status.flags & 0x200) && (recipient->status.flags & 0x400)) {
             if (!(operandFlags & 1) && !(recipient->status.stateFlags & 2)) {
-                work->unk54 += btlCalculateEnemyExperienceReward(action->unit, recipient);
+                work->battleExperienceReward += btlCalculateEnemyExperienceReward(action->unit, recipient);
                 recipient->status.stateFlags |= 2;
             }
             if (!(recipient->status.stateFlags & 0x400)) {
-                work->unk58 += btlGetEnemyMoney(action->unit, recipient);
+                work->moneyReward += btlGetEnemyMoney(action->unit, recipient);
                 recipient->status.stateFlags |= 0x400;
             }
             runtime->unk292 += recipient->partyRecord.level;
@@ -1265,8 +1265,8 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->unk2D = 0;
     work->unk2E = 0;
     work->unk50 = 0;
-    work->unk54 = 0;
-    work->unk58 = 0;
+    work->battleExperienceReward = 0;
+    work->moneyReward = 0;
     work->flags = 0;
     work->unk64 = 0;
     work->unk60 = 0;
