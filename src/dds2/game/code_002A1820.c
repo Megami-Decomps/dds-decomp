@@ -71,7 +71,7 @@ extern MovieMenuState *mnuMovieMenuState;
 
 extern TitleAudioStreamState mnuTitleStreamStatus;
 
-extern u32 D_00438FEC;
+extern u32 mnuTitleStreamFileRequest;
 
 extern TitleAudioStreamState mnuTitleSoundBufferState;
 
@@ -136,24 +136,24 @@ void sndMixSampleBuffers(s16 *destinationSamples, TitleAudioStreamState *firstSo
 }
 
 extern s32 D_00437A30, D_00437A34, D_00437A38, D_00437A3C;
-extern u32 D_00454D58[], D_00455D98[];
-extern u8 D_00455DB0[], D_003E2760[];
+extern u32 mnuTitleStreamDecoderState[], mnuTitleSoundBufferDecoderState[];
+extern u8 mnuTitleAudioSilenceBuffer[], mnuTitleAudioMixBuffer[];
 
 void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_00437A3C + 1;
     u8 *source;
 
     if (mnuTitleStreamStatus.control == 1 && mnuTitleStreamStatus.loadState == 4) {
-        if (D_00454D58[4] < 31) {
+        if (mnuTitleStreamDecoderState[4] < 31) {
             if (tick < D_00437A38) {
                 D_00437A3C = tick;
             } else {
-                D_00454D58[4]++;
+                mnuTitleStreamDecoderState[4]++;
                 D_00437A3C = 0;
             }
         } else {
             D_00437A3C = tick;
-            D_00454D58[4] = 0;
+            mnuTitleStreamDecoderState[4] = 0;
             mnuTitleStreamStatus.control = 2;
             mnuTitleStreamStatus.frameIndex = 0;
             mnuResetTitleStream();
@@ -164,35 +164,35 @@ void mnuUpdateTitleAudioStreams(void) {
 
     if (mnuTitleStreamStatus.control == 0 ||
         (D_00437A30 != 0 && mnuTitleStreamStatus.control == 1)) {
-        D_00454D58[0] = (u32)(mnuTitleStreamStatus.compressedData
+        mnuTitleStreamDecoderState[0] = (u32)(mnuTitleStreamStatus.compressedData
                               + mnuTitleStreamStatus.frameBytes * mnuTitleStreamStatus.frameIndex);
-        func_00350570(D_00454D58);
+        func_00350570(mnuTitleStreamDecoderState);
     }
     if (mnuTitleStreamStatus.control == 1) {
-        mnuTitleStreamStatus.samples = (s16 *)D_00454D58[1];
+        mnuTitleStreamStatus.samples = (s16 *)mnuTitleStreamDecoderState[1];
     } else {
-        mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
+        mnuTitleStreamStatus.samples = (s16 *)mnuTitleAudioSilenceBuffer;
     }
 
     if (mnuTitleSoundBufferState.control == 0 ||
         (D_00437A30 != 0 && mnuTitleSoundBufferState.control == 1)) {
-        D_00455D98[0] = (u32)(mnuTitleSoundBufferState.compressedData
+        mnuTitleSoundBufferDecoderState[0] = (u32)(mnuTitleSoundBufferState.compressedData
                               + mnuTitleSoundBufferState.frameBytes * mnuTitleSoundBufferState.frameIndex);
-        func_00350570(D_00455D98);
+        func_00350570(mnuTitleSoundBufferDecoderState);
     }
     if (mnuTitleSoundBufferState.control == 1) {
-        mnuTitleSoundBufferState.samples = (s16 *)D_00455D98[1];
+        mnuTitleSoundBufferState.samples = (s16 *)mnuTitleSoundBufferDecoderState[1];
     } else {
-        mnuTitleSoundBufferState.samples = (s16 *)D_00455DB0;
+        mnuTitleSoundBufferState.samples = (s16 *)mnuTitleAudioSilenceBuffer;
     }
 
     if (mnuTitleStreamStatus.control == 2) {
         switch (mnuTitleSoundBufferState.control) {
         case 2:
     
-            D_00437A30 = mnuCopySoundStreamOnStatusChange((u32)D_00455DB0, 0x400);
+            D_00437A30 = mnuCopySoundStreamOnStatusChange((u32)mnuTitleAudioSilenceBuffer, 0x400);
             source = (u8 *)mnuTitleStreamStatus.samples;
-            memcpy(D_00455DB0, source, 0x1000);
+            memcpy(mnuTitleAudioSilenceBuffer, source, 0x1000);
             if (D_00437A34 != 0) {
                 sndUploadStreamToBothIopBuffers(0x400);
             }
@@ -208,10 +208,10 @@ void mnuUpdateTitleAudioStreams(void) {
 
     if (mnuTitleStreamStatus.control != 2 && mnuTitleSoundBufferState.control == 2) {
         D_00437A30 = mnuCopySoundStreamOnStatusChange((u32)mnuTitleStreamStatus.samples, 0x400);
-        memcpy(D_003E2760, mnuTitleStreamStatus.samples, 0x1000);
+        memcpy(mnuTitleAudioMixBuffer, mnuTitleStreamStatus.samples, 0x1000);
     } else {
-        sndMixSampleBuffers((s16 *)D_003E2760, &mnuTitleSoundBufferState, &mnuTitleStreamStatus);
-        D_00437A30 = mnuCopySoundStreamOnStatusChange((u32)D_003E2760, 0x400);
+        sndMixSampleBuffers((s16 *)mnuTitleAudioMixBuffer, &mnuTitleSoundBufferState, &mnuTitleStreamStatus);
+        D_00437A30 = mnuCopySoundStreamOnStatusChange((u32)mnuTitleAudioMixBuffer, 0x400);
     }
 
     if (mnuTitleStreamStatus.control == 0) {
@@ -265,39 +265,39 @@ void mnuCreateTitleStreamThread(void) {
     sdfThreadSleepSelf();
 }
 
-extern u32 D_00454D58[];
-extern u8 D_00455DB0[];
-extern u32 D_00455D98[];
-extern u8 D_00453D30[];
-extern u8 D_00454D70[];
+extern u32 mnuTitleStreamDecoderState[];
+extern u8 mnuTitleAudioSilenceBuffer[];
+extern u32 mnuTitleSoundBufferDecoderState[];
+extern u8 mnuTitleStreamDecodedSamples[];
+extern u8 mnuTitleSoundBufferDecodedSamples[];
 
 void mnuInitializeTitleAudioStreams(void) {
-    memset(D_00455DB0, 0, 0x1000);
+    memset(mnuTitleAudioSilenceBuffer, 0, 0x1000);
 
     mnuTitleStreamStatus.repeatFrame = 0;
     mnuTitleStreamStatus.control = 2;
     mnuTitleStreamStatus.compressedData = 0;
     mnuTitleStreamStatus.allocation = 0;
-    mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
-    mnuTitleStreamStatus.decoder = D_00454D58;
+    mnuTitleStreamStatus.samples = (s16 *)mnuTitleAudioSilenceBuffer;
+    mnuTitleStreamStatus.decoder = mnuTitleStreamDecoderState;
     mnuTitleStreamStatus.loadState = 0;
 
     mnuTitleSoundBufferState.control = 2;
     mnuTitleSoundBufferState.compressedData = 0;
     mnuTitleSoundBufferState.repeatFrame = 0;
     mnuTitleSoundBufferState.allocation = 0;
-    mnuTitleSoundBufferState.samples = (s16 *)D_00455DB0;
-    mnuTitleSoundBufferState.decoder = D_00455D98;
+    mnuTitleSoundBufferState.samples = (s16 *)mnuTitleAudioSilenceBuffer;
+    mnuTitleSoundBufferState.decoder = mnuTitleSoundBufferDecoderState;
     mnuTitleSoundBufferState.loadState = 0;
 
     mnuInitTitleSoundRemoteRequest(0x400);
 
-    D_00454D58[1] = (u32)D_00453D30;
-    D_00454D58[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
-    D_00454D58[4] = 0;
-    D_00455D98[1] = (u32)D_00454D70;
-    D_00455D98[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
-    D_00455D98[4] = 2;
+    mnuTitleStreamDecoderState[1] = (u32)mnuTitleStreamDecodedSamples;
+    mnuTitleStreamDecoderState[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    mnuTitleStreamDecoderState[4] = 0;
+    mnuTitleSoundBufferDecoderState[1] = (u32)mnuTitleSoundBufferDecodedSamples;
+    mnuTitleSoundBufferDecoderState[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    mnuTitleSoundBufferDecoderState[4] = 2;
 
     mnuCreateTitleStreamThread();
 }
@@ -336,7 +336,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamSt
 }
 
 void mnuStoreTaskResult(char *audioPath) {
-    D_00438FEC = (u32)fileQueueDefaultCallbackRequest(audioPath);
+    mnuTitleStreamFileRequest = (u32)fileQueueDefaultCallbackRequest(audioPath);
     mnuTitleStreamStatus.loadState = 1;
 }
 
@@ -347,15 +347,15 @@ extern void func_003504A8(u32 *);
  * and frame counts. Keep those distinct accesses and the cleanup-before-copy
  * ordering; return 1 after a ready file is copied, otherwise its ready result. */
 s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
-    s32 ready = fileIsRequestReadyInCurrentMode((struct FileRequest *)D_00438FEC);
+    s32 ready = fileIsRequestReadyInCurrentMode((struct FileRequest *)mnuTitleStreamFileRequest);
 
     if (ready != 0) {
-        s32 resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)D_00438FEC);
-        u32 fileDataAddress = fileGetLoadedDataAddress((struct FileRequest *)(u32)D_00438FEC);
-        s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)D_00438FEC);
+        s32 resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
+        u32 fileDataAddress = fileGetLoadedDataAddress((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
+        s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
         struct SdfMemBlock *allocation;
 
-        filePollEntryCleanup((struct FileRequest *)(u32)D_00438FEC);
+        filePollEntryCleanup((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
         mnuTitleStreamStatus.compressedData = (u8 *)sdfMemoryGetBlockAddress(allocation);
         mnuTitleStreamStatus.allocation = allocation;
@@ -363,7 +363,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         destinationState->frameCount = fileBytes / destinationState->frameBytes;
         destinationState->frameIndex = 0;
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceHandle);
-        func_003504A8(D_00454D58);
+        func_003504A8(mnuTitleStreamDecoderState);
         mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_COPIED;
         ready = 1;
     }
@@ -390,18 +390,18 @@ INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428628);
 
 void mnuStartFixedSoundStream(void) {
     WaitSema(mnuTitleStreamSemaphore);
-    mnuTitleStreamStatus.decoder = D_00454D58;
-    mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
+    mnuTitleStreamStatus.decoder = mnuTitleStreamDecoderState;
+    mnuTitleStreamStatus.samples = (s16 *)mnuTitleAudioSilenceBuffer;
     mnuTitleStreamStatus.control = 2;
     mnuTitleStreamStatus.repeatFrame = 0;
     mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
-    D_00454D58[2] = 2;
+    mnuTitleStreamDecoderState[2] = 2;
     mnuStoreTaskResult("/soundat3/b_bgm2-2.at3");
     SignalSema(mnuTitleStreamSemaphore);
 }
 
 
-extern MnuTitleStreamEntry D_003E0B60[];
+extern MnuTitleStreamEntry mnuTitleStreamEntries[];
 
 
 
@@ -412,29 +412,29 @@ void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex) {
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
     WaitSema(mnuTitleStreamSemaphore);
-    mnuTitleStreamStatus.decoder = D_00454D58;
-    mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
-    mnuTitleStreamStatus.repeatFrame = D_003E0B60[soundEntryIndex].parameter;
+    mnuTitleStreamStatus.decoder = mnuTitleStreamDecoderState;
+    mnuTitleStreamStatus.samples = (s16 *)mnuTitleAudioSilenceBuffer;
+    mnuTitleStreamStatus.repeatFrame = mnuTitleStreamEntries[soundEntryIndex].parameter;
     mnuTitleStreamStatus.control = 2;
-    switch (D_003E0B60[soundEntryIndex].format) {
+    switch (mnuTitleStreamEntries[soundEntryIndex].format) {
     case 1:
-        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_LARGE;
         break;
     case 2:
-        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         break;
     case 3:
-        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         break;
     case 4:
-        D_00454D58[2] = D_003E0B60[soundEntryIndex].format;
+        mnuTitleStreamDecoderState[2] = mnuTitleStreamEntries[soundEntryIndex].format;
         mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
         break;
     }
-    sprintf(soundPath, D_00428650, D_003E0B60[soundEntryIndex].filename);
+    sprintf(soundPath, D_00428650, mnuTitleStreamEntries[soundEntryIndex].filename);
     mnuStoreTaskResult(soundPath);
     SignalSema(mnuTitleStreamSemaphore);
 }
@@ -506,7 +506,7 @@ void mnuCommitTitleStreamReadyState(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-extern u8 D_00455DB0[];
+extern u8 mnuTitleAudioSilenceBuffer[];
 
 
 /* Reset load/data slots only when an allocation is present; otherwise do nothing. */
@@ -516,7 +516,7 @@ void mnuResetTitleStream(void) {
         mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_IDLE;
         mnuTitleStreamStatus.allocation = 0;
         mnuTitleStreamStatus.compressedData = 0;
-        mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
+        mnuTitleStreamStatus.samples = (s16 *)mnuTitleAudioSilenceBuffer;
     }
 }
 
@@ -532,7 +532,7 @@ INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428650);
 
 void mnuInitializeTitleSoundBuffer(void) {
     TitleAudioStreamState *streamState = &mnuTitleSoundBufferState;
-    u32 *decoder = D_00455D98;
+    u32 *decoder = mnuTitleSoundBufferDecoderState;
     struct SdfMemBlock *allocation;
     s32 bufferAddress;
 
@@ -544,7 +544,7 @@ void mnuInitializeTitleSoundBuffer(void) {
     streamState->control = 2;
     streamState->decoder[2] = 2;
     streamState->compressedData = (u8 *)bufferAddress;
-    streamState->samples = (s16 *)D_00455DB0;
+    streamState->samples = (s16 *)mnuTitleAudioSilenceBuffer;
     streamState->frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
     mnuLoadTitleStreamFrameData("/soundat3/se01-2.at3", streamState);
     func_003504A8(decoder);
@@ -561,28 +561,28 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
     WaitSema(mnuTitleStreamSemaphore);
-    mnuTitleSoundBufferState.samples = (s16 *)D_00455DB0;
+    mnuTitleSoundBufferState.samples = (s16 *)mnuTitleAudioSilenceBuffer;
     mnuTitleSoundBufferState.repeatFrame = D_003E0F60[soundEntryIndex].parameter;
-    mnuTitleSoundBufferState.decoder = D_00455D98;
+    mnuTitleSoundBufferState.decoder = mnuTitleSoundBufferDecoderState;
     mnuTitleSoundBufferState.control = 2;
     switch (D_003E0F60[soundEntryIndex].format) {
     case 1:
-        D_00455D98[2] = 1;
+        mnuTitleSoundBufferDecoderState[2] = 1;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_LARGE;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_LARGE);
         break;
     case 2:
-        D_00455D98[2] = 2;
+        mnuTitleSoundBufferDecoderState[2] = 2;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 3:
-        D_00455D98[2] = 3;
+        mnuTitleSoundBufferDecoderState[2] = 3;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 4:
-        D_00455D98[2] = 4;
+        mnuTitleSoundBufferDecoderState[2] = 4;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
@@ -592,7 +592,7 @@ void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     mnuTitleSoundBufferState.compressedData = (u8 *)bufferAddress;
     sprintf(soundPath, D_00428650, D_003E0F60[soundEntryIndex].filename);
     mnuLoadTitleStreamFrameData(soundPath, &mnuTitleSoundBufferState);
-    func_003504A8(D_00455D98);
+    func_003504A8(mnuTitleSoundBufferDecoderState);
     SignalSema(mnuTitleStreamSemaphore);
 }
 
@@ -605,28 +605,28 @@ void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32
     s32 frameCount;
 
     WaitSema(mnuTitleStreamSemaphore);
-    mnuTitleSoundBufferState.samples = (s16 *)D_00455DB0;
-    mnuTitleSoundBufferState.decoder = D_00455D98;
+    mnuTitleSoundBufferState.samples = (s16 *)mnuTitleAudioSilenceBuffer;
+    mnuTitleSoundBufferState.decoder = mnuTitleSoundBufferDecoderState;
     mnuTitleSoundBufferState.control = 2;
     mnuTitleSoundBufferState.repeatFrame = -1;
     switch (format) {
     case 1:
-        D_00455D98[2] = format;
+        mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_LARGE;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_LARGE);
         break;
     case 2:
-        D_00455D98[2] = format;
+        mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 3:
-        D_00455D98[2] = format;
+        mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_MEDIUM);
         break;
     case 4:
-        D_00455D98[2] = format;
+        mnuTitleSoundBufferDecoderState[2] = format;
         mnuTitleSoundBufferState.frameBytes = MNU_SOUND_FRAME_BYTES_SMALL;
         allocation = sdfAllocGeneralBlock(MNU_SOUND_BUFFER_BYTES_SMALL);
         break;
@@ -638,7 +638,7 @@ void mnuInstallTitleSoundBufferFromData(void *compressedData, s32 dataBytes, s32
     frameCount = dataBytes / mnuTitleSoundBufferState.frameBytes;
     mnuTitleSoundBufferState.frameIndex = 0;
     mnuTitleSoundBufferState.frameCount = frameCount;
-    func_003504A8(D_00455D98);
+    func_003504A8(mnuTitleSoundBufferDecoderState);
     SignalSema(mnuTitleStreamSemaphore);
 }
 
