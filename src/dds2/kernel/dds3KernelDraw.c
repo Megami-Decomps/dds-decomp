@@ -3,6 +3,7 @@
 #include "gs_packet.h"
 #include "pcp_vu0.h"
 #include "eff_blur.h"
+#include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
 #include "eff.h"
 #include "kwln_draw_params.h"
@@ -108,7 +109,6 @@ extern u16 kwlnRectangleBlurTargetAlpha;
 
 extern u16 kwlnRectangleBlurFadeDuration;
 
-extern void effCopyRectangleBlurParameters(void *);
 
 extern u128 kwlnDefaultColorVector;
 
