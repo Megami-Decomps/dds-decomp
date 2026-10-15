@@ -6903,7 +6903,138 @@ s32 btlUnitWrapB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_002247D0);
+/* Seto action-camera selection. Native-led continuation of Sable's earlier
+ * scope, using the exact Harbor/Halcyon Satan dispatcher as a typed sibling. */
+s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
+    s8 modeA = argModeA;
+    s8 modeB = argModeB;
+    ActionStateLink *link;
+    u32 count;
+    u32 cameraMode;
+
+    if (btlIsActorCategoryMarked(command)) {
+        return 0;
+    }
+    link = command->link;
+    btlGetRuntime();
+    if (link->unit->status.flags & 0x200) {
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (modeA == 1 && modeB == 0) {
+            return 0;
+        }
+        if (count == 1 && modeA == 0 && modeB == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            if (btlCanUseActorCategoryFlag4(command)) {
+                return 0;
+            }
+            if (btlCanUseLinkedActor(command) != 0) {
+                cameraMode = 0;
+                if (btlCanUseActorCategoryFlag2(command) == 0) {
+                    cameraMode = effMiscRandMod(0, 2);
+                }
+            } else {
+                cameraMode = 1;
+            }
+            if (cameraMode == 0) {
+                switch (command->actionCode) {
+                case 0xB: case 0xC: case 0xE: case 0xF: case 0x11:
+                case 0x13: case 0x14: case 0x15: case 0x16: case 0x17:
+                case 0x1A: case 0x21: case 0x23: case 0x25: case 0x28:
+                case 0x2A: case 0x30: case 0x44: case 0x51: case 0x52:
+                case 0x59: case 0x5E: case 0x7F: case 0xBE: case 0xDB:
+                case 0xDC: case 0xDF:
+                    btlFlagAllUnitDefeatCandidatesTask();
+                    switch (effMiscRandMod(0, 2)) {
+                    case 0:
+                        btlBossDebugPrintf("SETO:T-0 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -1033.6f, -1347.5f, -567.9f, 0.103f, -0.337f, -0.043f, 0.924f, -1266.6f,
+                            -37.7f, -912.5f, -0.13f, -0.32f, 0.036f, 0.927f, 40.0f, 15.0f);
+                        return 1;
+                    case 1:
+                        btlBossDebugPrintf("SETO:T-1 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            1350.3f, -1477.0f, -696.5f, 0.116f, 0.367f, 0.045f, 0.91f, 1177.6f,
+                            -117.4f, -734.4f, -0.093f, 0.321f, -0.03f, 0.93f, 42.0f, 15.0f);
+                        return 1;
+                    }
+                    break;
+                default:
+                    btlBossDebugPrintf("SETO:T-Def ++++\n");
+                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    command->motionParameter = 30.0f;
+                    command->flags |= 0x41;
+                    return 1;
+                }
+                return 1;
+            }
+            btlBossDebugPrintf("SETO:IT-Def ++++\n");
+            btlRaiseActionCameraPoints(command);
+            return 1;
+        }
+    } else {
+        if (btlCanUseLinkedActor(command) != 0) {
+            cameraMode = 0;
+            if (btlCanUseActorCategoryFlag2(command) == 0) {
+                cameraMode = effMiscRandMod(0, 2);
+            }
+        } else {
+            cameraMode = 1;
+        }
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (btlCanUseActorCategoryFlag4(command) && modeA == 1 && modeB == 0) {
+            btlBossDebugPrintf("SETO:EFFP ++++\n");
+            btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
+            return 1;
+        }
+        if (count == 1 && modeA == 1 && modeB == 0) {
+            if (command->actionCode == 0x12C) {
+                btlBossDebugPrintf("SETO:ATTACK ++++\n");
+                btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
+                                                0.8f, 1.0f, 0.5f, 0, 0);
+                command->frontCamera.distance += 700.0f;
+                command->backCamera.distance += 700.0f;
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+                btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+                return 1;
+            }
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("SETO:T-Def ++++\n");
+                if (btlHasSingleLinkedResource(command)) {
+                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    command->motionParameter = 30.0f;
+                    command->flags |= 0x41;
+                } else {
+                    btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
+                }
+                return 1;
+            }
+            btlBossDebugPrintf("SETO:IT-Def ++++\n");
+            btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
+                                            0.9f, 1.5f, 0.25f, 0, 0);
+            command->frontCamera.distance += 650.0f;
+            command->backCamera.distance += 650.0f;
+            command->motionParameter = 30.0f;
+            command->flags |= 0x41;
+            btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+            btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            return 1;
+        }
+        if (count >= 2 && modeA == 1 && modeB == 0) {
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("SETO:ITP-Def ++++\n");
+                btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
+                return 1;
+            }
+            return 0;
+        }
+    }
+    btlFlagAllUnitDefeatCandidatesTask();
+    btlSetRaisedActionFixedCamera((u32)command);
+    return 1;
+}
 
 s32 btlSelectRaisedCameraFromActionFlags(BtlLinkedCommand *unit) {
     u32 flags = datActionAnimationRecords[unit->actionCode].flags;
