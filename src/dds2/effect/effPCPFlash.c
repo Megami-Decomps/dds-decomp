@@ -276,24 +276,24 @@ extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 
 
 /* Alternate the center alpha arrangement for successive streak vertices. */
-void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 flag, s32 param) {
+void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 index, s32 color) {
     PcpFlashQuadColorSlot *slot;
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, flag);
+    slot = (PcpFlashQuadColorSlot *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle, index);
     colorA = work->centerColor & 0xFFFFFF;
     colorB = work->edgeColor & 0xFFFFFF;
-    slot->color[0] = effMultiplyPackedColors(colorB, param);
-    slot->color[1] = effMultiplyPackedColors(colorB, param);
-    if (flag & 1) {
-        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
-        slot->color[3] = effMultiplyPackedColors(colorA | 0xFF000000, param);
-        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
+    slot->color[0] = effMultiplyPackedColors(colorB, color);
+    slot->color[1] = effMultiplyPackedColors(colorB, color);
+    if (index & 1) {
+        slot->color[2] = effMultiplyPackedColors(0x80000000, color);
+        slot->color[3] = effMultiplyPackedColors(colorA | 0xFF000000, color);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, color);
     } else {
-        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
-        slot->color[3] = effMultiplyPackedColors(colorA | 0x40000000, param);
-        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, color);
+        slot->color[3] = effMultiplyPackedColors(colorA | 0x40000000, color);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, color);
     }
 }
 
