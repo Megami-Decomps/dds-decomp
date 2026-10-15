@@ -535,7 +535,7 @@ s32 btlHasOtherGroup400UnitMode(BtlUnit *excludedUnit, s32 unitMode) {
     return 0;
 }
 
-extern s32 D_00360E98[];
+extern s32 btlEntryCodeConditionIndices[];
 
 extern s32 btlActorEntryIsExpired();
 
@@ -553,23 +553,23 @@ s32 btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex)
 
     if (conditionIndex == 0xB) {
         for (evenIndex = 0; evenIndex < BTL_ENTRY_CODE_SCAN_COUNT; evenIndex += 2) {
-            if (btlActorEntryIsExpired(actorAddress, D_00360E98[evenIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[evenIndex]) > 0) {
+            if (btlActorEntryIsExpired(actorAddress, btlEntryCodeConditionIndices[evenIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[evenIndex]) > 0) {
                 return 1;
             }
         }
     } else if (conditionIndex == 0xC) {
         for (oddIndex = 1; oddIndex < BTL_ENTRY_CODE_SCAN_COUNT; oddIndex += 2) {
-            if (btlActorEntryIsExpired(actorAddress, D_00360E98[oddIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[oddIndex]) <= 0) {
+            if (btlActorEntryIsExpired(actorAddress, btlEntryCodeConditionIndices[oddIndex]) != 0 && btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[oddIndex]) <= 0) {
                 return 1;
             }
         }
-    } else if (btlActorEntryIsExpired(actorAddress, D_00360E98[conditionIndex]) != 0 || conditionIndex == 0xA || conditionIndex == 0xD) {
+    } else if (btlActorEntryIsExpired(actorAddress, btlEntryCodeConditionIndices[conditionIndex]) != 0 || conditionIndex == 0xA || conditionIndex == 0xD) {
         if ((conditionIndex & 1) == 0 || conditionIndex == 0xD) {
-            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[conditionIndex]) > 0) {
+            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[conditionIndex]) > 0) {
                 return 1;
             }
         } else {
-            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, D_00360E98[conditionIndex]) <= 0) {
+            if (btlGetActorEntryCode((struct BtlUnit *)(u32)actorAddress, btlEntryCodeConditionIndices[conditionIndex]) <= 0) {
                 return 1;
             }
         }
@@ -585,7 +585,7 @@ s32 btlUnitMatchesEntryCodeCondition(BtlUnit *unit, s32 conditionIndex, s8 inver
 
     if (conditionIndex == 0xB) {
         for (index = 0; index < BTL_ENTRY_CODE_SCAN_COUNT; index += 2) {
-            result = btlMatchActorEntryCode(unit, D_00360E98[index]);
+            result = btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[index]);
             if (inverse == 0) {
                 if (result == 1) {
                     return 1;
@@ -596,7 +596,7 @@ s32 btlUnitMatchesEntryCodeCondition(BtlUnit *unit, s32 conditionIndex, s8 inver
         }
     } else if (conditionIndex == 0xC) {
         for (index = 1; index < BTL_ENTRY_CODE_SCAN_COUNT; index += 2) {
-            result = btlMatchActorEntryCode(unit, D_00360E98[index]);
+            result = btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[index]);
             if (inverse == 0) {
                 if (result == 2) {
                     return 1;
@@ -606,7 +606,7 @@ s32 btlUnitMatchesEntryCodeCondition(BtlUnit *unit, s32 conditionIndex, s8 inver
             }
         }
     } else {
-        result = btlMatchActorEntryCode(unit, D_00360E98[conditionIndex]);
+        result = btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[conditionIndex]);
         if ((conditionIndex & 1) == 0) {
             if (inverse == 0) {
                 if (result == 1) {

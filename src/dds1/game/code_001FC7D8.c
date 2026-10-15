@@ -397,7 +397,7 @@ s32 btlGetStatusActionEffectId(BtlTask *task) {
     }
 }
 
-extern BtlCommandEffect D_00360468[];
+extern BtlCommandEffect btlCommandEffectMappings[];
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
 
 /* Retained operand groups can suppress the command's effect. */
@@ -420,9 +420,9 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
     effect = -1;
     adjustSide = 0;
     for (i = 0; i < 59; i++) {
-        if (D_00360468[i].command == command) {
-            effect = D_00360468[i].effect;
-            adjustSide = D_00360468[i].adjustSide;
+        if (btlCommandEffectMappings[i].command == command) {
+            effect = btlCommandEffectMappings[i].effect;
+            adjustSide = btlCommandEffectMappings[i].adjustSide;
             break;
         }
     }
@@ -459,7 +459,7 @@ s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
 
 /* Number display: initialize its saved anchor, then project it with the
  * DDS1-specific display gate and twelve fixed screen offsets. */
-extern f32 D_003603C8[12][2];
+extern f32 btlLinkedNumberScreenOffsets[12][2];
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
 s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
@@ -555,8 +555,8 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         VU0_LOAD_VF(vf11, args->anchorOffset);
         VU0_ADD(vf10, vf10, vf11);
         if (btlProjectForwardPositionToPackedScreen(screen) != 0) {
-            screen[0] += (s32)(D_003603C8[args->payload.linked.offsetIndex][0] * 32.0f) << 4;
-            screen[1] += ((s32)(D_003603C8[args->payload.linked.offsetIndex][1] * 32.0f) << 3) + 256;
+            screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][0] * 32.0f) << 4;
+            screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][1] * 32.0f) << 3) + 256;
             btlDrawCenteredUnsignedNumber(screen[0], screen[1] - rise, value, color, offsets);
         }
     }
@@ -739,8 +739,8 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 arg) {
     return task;
 }
 
-extern u8 D_00360428[];
-extern u8 D_00360430[];
+extern u8 btlActionPassLabel[];
+extern u8 btlActionRetreatLabel[];
 extern s32 D_00360438[];
 extern s32 D_00360448[];
 extern s32 D_0036044C[];
@@ -754,7 +754,7 @@ s32 btlPollCategoryLabelTask(BtlObjLink *link) {
     if (link->elapsedTicks == 0) {
         switch (link->arg) {
         case 10:
-            btlCreateSkillNamePanel((s32)D_00360428);
+            btlCreateSkillNamePanel((s32)btlActionPassLabel);
             break;
         case 5:
             if (owner->status.flags & 0x1000) {
@@ -764,7 +764,7 @@ s32 btlPollCategoryLabelTask(BtlObjLink *link) {
             }
             break;
         case 6:
-            btlCreateSkillNamePanel((s32)D_00360430);
+            btlCreateSkillNamePanel((s32)btlActionRetreatLabel);
             break;
         case 9:
             btlCreateSkillNamePanel(D_0036044C[0]);
