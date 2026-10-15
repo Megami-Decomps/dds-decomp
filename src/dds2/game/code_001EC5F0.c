@@ -3445,7 +3445,7 @@ void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from
     btlClearAllUnitDefeatCandidates();
     btlFlagUnitDefeatCandidate(unit);
     if (unit->resourceIndex == unit->modelVariant) {
-        resourceKind = unit->unkDC;
+        resourceKind = unit->modelResourceKind;
         resourceIndex = unit->combatantKind;
     } else {
         resourceKind = unit->modelId;

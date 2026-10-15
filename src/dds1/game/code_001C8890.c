@@ -2100,7 +2100,7 @@ void btlEnterDevilActionState(s32 task) {
 }
 
 /* Slot-0x10 model-change command: the same flow as btlCommandGunChangeStart, swapping to the unit's
- * unkDC/displaySpecies model and back; the return path only clears flag 0x20000000. */
+ * modelResourceKind/displaySpecies model and back; the return path only clears flag 0x20000000. */
 /* Retail DEVIL state: schedule the alternate model tuple and its dependent tasks. */
 void btlScheduleDevilStateModelChange(BtlTask *task) {
     BtlUnit *unit;
@@ -2139,7 +2139,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
                 btlStartTask(spawned);
             }
         }
-        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->unkDC, unit->displaySpecies, motion, 0x18,
+        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x18,
                                                        0);
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
@@ -2195,7 +2195,7 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
     } else {
         unit->status.flags |= 0x1000;
         unit->partyRecord.flags |= 0x1000;
-        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->unkDC, unit->displaySpecies, motion, 0x12,
+        change = (SoundTask *)btlCreateModelChangeTask((u8 *)unit, unit->modelResourceKind, unit->displaySpecies, motion, 0x12,
                                                        3);
         btlStartTask(change);
         btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
@@ -2454,7 +2454,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
         playerFlags = unit->status.flags;
         unit->modelId = 0;
         unit->modelVariant = partyId;
-        unit->unkDC = 0;
+        unit->modelResourceKind = 0;
         unit->displaySpecies = partyId + 0x10;
         if (playerFlags & 0x1000) {
             resourceKind = 0;
@@ -2476,7 +2476,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
         resourceKind = 1;
         btlInitializePartyRecordFromEnemy(&unit->partyRecord, action->indexWork.unk18);
         unit->status.flags |= 0x501;
-        unit->unkDC = resourceKind;
+        unit->modelResourceKind = resourceKind;
         unit->partyRecord.flags |= 0x23;
         modelId = action->indexWork.unk18;
         unit->displaySpecies = modelId;
@@ -2696,7 +2696,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     unit->modelVariant = unitId;
     unit->displaySpecies = unitId + 0x10;
     unit->modelId = 0;
-    unit->unkDC = 0;
+    unit->modelResourceKind = 0;
     species = (unit->status.flags & 0x1000) ? unit->displaySpecies : unitId;
     ((BtlTask *)btlFindUnitByActor((s32)unit))->flags |= 0x100;
     unit->baseColor = 0x80808080;

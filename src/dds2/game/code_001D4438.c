@@ -2718,7 +2718,7 @@ void btlEnterDevilActionState(ActionStateLink *task) {
 }
 
 /* Slot-0x10 model-change command: the same flow as btlCommandGunChangeStart, swapping to the unit's
- * unkDC/combatantKind model and back; the return path only clears flag 0x20000000. */
+ * modelResourceKind/combatantKind model and back; the return path only clears flag 0x20000000. */
 /* Retail DEVIL state: schedule the alternate model tuple and its dependent tasks. */
 void btlScheduleDevilStateModelChange(ActionStateLink *task) {
     BtlUnit *unit;
@@ -2757,7 +2757,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
                 btlStartTask(spawned);
             }
         }
-        change = btlCreateModelChangeTask(unit, unit->unkDC, unit->combatantKind, motion, 0x18, 0);
+        change = btlCreateModelChangeTask(unit, unit->modelResourceKind, unit->combatantKind, motion, 0x18, 0);
         change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
@@ -2813,7 +2813,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
     } else {
         unit->status.flags |= 0x1000;
         unit->partyRecord.flags |= 0x1000;
-        change = btlCreateModelChangeTask(unit, unit->unkDC, unit->combatantKind, motion, 0x12, 3);
+        change = btlCreateModelChangeTask(unit, unit->modelResourceKind, unit->combatantKind, motion, 0x12, 3);
         btlStartTask(change);
         btlStartTask(btlCreateGunLoadPollTask(unit));
         btlStartTask(sndCreateEffectSourceTask(state->resources[47], unit, change->handle));
@@ -3189,7 +3189,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
             modelVariant = unitId + 0x20;
         }
         unit->modelVariant = modelVariant;
-        unit->unkDC = 0;
+        unit->modelResourceKind = 0;
         unit->combatantKind = unitId + 0x10;
         if (unit->status.flags & 0x1000) {
             modelId = unit->combatantKind;
@@ -3211,7 +3211,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         resourceKind = 1;
         btlInitializePartyRecordFromEnemy(&unit->partyRecord, action->indexWork.unk18);
         unit->status.flags |= 0x501;
-        unit->unkDC = resourceKind;
+        unit->modelResourceKind = resourceKind;
         unit->partyRecord.flags |= 0x23;
         modelId = action->indexWork.unk18;
         unit->combatantKind = modelId;
@@ -3459,7 +3459,7 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
         modelVariant = unitId + 0x20;
     }
     unit->modelVariant = modelVariant;
-    unit->unkDC = 0;
+    unit->modelResourceKind = 0;
     unit->combatantKind = unitId + 0x10;
     if (unit->status.flags & 0x1000) {
         species = unit->combatantKind;
