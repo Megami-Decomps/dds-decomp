@@ -862,7 +862,7 @@ struct SdfMemBlock;
 struct MnuSpriteResourceGroup;
 
 void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha,
-                            struct EffectSlotSet *sprite, s32 mode,
+                            struct EffectSlotSet *sprite, s32 slotIndex,
                             s32 flag, s32 surface);
 
 typedef struct MnuStaffMovieWork {
