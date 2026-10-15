@@ -32,6 +32,7 @@ s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
 s32 fileRequestIsReady(struct FileRequest *request);
 void fileWaitReady(struct FileRequest *request);
 void fileWaitForRequestReady(struct FileRequest *request);
+void fileReqStartCardDetection(u32 port);
 
 struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, void *data, s32 size);
 

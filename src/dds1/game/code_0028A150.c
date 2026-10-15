@@ -337,8 +337,6 @@ extern u32 D_003BC804;
 
 extern void fileSetMemoryCardOperationActive(void);
 
-extern void fileReqStartCardDetection(u32 handle);
-
 extern s32 mcHandleDetectionResult(void);
 
 extern void fileQueueInitTransform(void *queue);

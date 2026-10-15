@@ -252,8 +252,6 @@ extern s8 D_0037F510[];
 extern void sndReleaseTrackHandle(s32 command);
 extern s32 fileBeginWait(void *callback);
 
-extern void fileReqStartCardDetection(u32 context);
-
 extern s32 mcHandleDetectionResult(void);
 
 
