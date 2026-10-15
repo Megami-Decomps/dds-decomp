@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
 #include "btl_task_state6_api.h"
 #include "btl_special_ability.h"
@@ -230,7 +231,6 @@ extern s32 btlResolveBattleTerminalOutcome(void);
 
 
 extern s64 mnuGetSoundBufferStateLocked(void);
-extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effSharedRandomState[];

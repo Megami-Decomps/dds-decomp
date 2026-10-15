@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "eff_pcp_paired_event_row.h"
 #include "eff_pcp_spawn_range_event_row.h"
 #include "eff_pcp_drift_event_row.h"
@@ -139,7 +140,6 @@ extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 extern void sdfVuLoadRotationMatrixZ(f32 scale);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixX(f32 angle);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
@@ -1421,7 +1421,6 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 val) {
     work->unk18 = val;
 }
 
-extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 extern EffSpawnParams D_00354F60[];
 

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -831,7 +832,6 @@ void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
     }
 }
 
-extern void sdfVuLoadRotationMatrixX(f32);
 
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
@@ -842,7 +842,6 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 

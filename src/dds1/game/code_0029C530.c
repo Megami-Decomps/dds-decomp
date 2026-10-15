@@ -21,6 +21,7 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "eff_resource_list_request.h"
 #include "eff_resource_bank_slot.h"
 #include "eff_matrix4.h"
@@ -5652,8 +5653,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern void sdfVuLoadRotationMatrixX(f32);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 extern f32 atanf(f32);
 extern f32 func_002F9CD0(f32);
 
