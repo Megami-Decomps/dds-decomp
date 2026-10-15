@@ -4,6 +4,7 @@
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu.h"
+#include "brs_level_progress_api.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -1439,7 +1440,6 @@ extern DspUnitName *D_003BAA8C;
 extern const u8 D_003BC708[];
 extern void ptySkillMenuDrawEquippedSkillEntry();
 extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
-extern u8 brsGetLevelStepForValue(s32);
 
 s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);

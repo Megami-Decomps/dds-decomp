@@ -6,6 +6,7 @@
 #include "ui_color.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "brs_level_progress_api.h"
 #include "mnu_result.h"
 #include "snd_sequence_volume_pan.h"
 #include "fr_font.h"
@@ -15,8 +16,6 @@
 extern void dspRequestMessageWindowModeOne(void);
 extern u8 *D_003BAA70;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern u8 brsGetLevelStepCrossedBy(s32, s32);
-extern u8 brsGetLevelStepForValue(s32);
 extern s32 sprintf(char *, const char *, ...);
 extern char D_003BC550[];
 extern char D_003BC558[];
