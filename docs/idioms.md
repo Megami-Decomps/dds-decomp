@@ -13634,3 +13634,31 @@ The four `fileOriginalTitleSaveBenefitsMessageLine*` fragments form flow
 notices. These latter names describe the text, not an exclusive caller or an
 implementation of the advertised reward/difficulty change. Do not merge the
 individual NUL strings, add C literals, or manufacture DDS1 counterparts.
+
+
+## Graphics workers, general release requests and motion slot dispatch
+
+`sdfGeneralReleaseRequest` is initialized with `sdfReleaseResourceAllocation`
+and receives allocations through the general-release queue. It is distinct
+from the already named chip-release request. `sdfNamedResourceRpcClient`
+is bound to the named-resource service and reused for the packed name/data
+requests; its existing SDK client-prefix declaration is unchanged.
+
+The graphics buffer-service worker uses `sdfGraphicsBufferThread` and its
+0x1000-byte `sdfGraphicsBufferThreadStack`. The transfer worker uses the
+separate 0x8000-byte `sdfGraphicsTransferThreadStack`; its stored
+`sdfGraphicsTransferThreadId` is also woken by the graph interrupt callback.
+Keep the existing byte arrays, stack sizes, priorities and per-game pointer
+versus integer argument carriers. `sdfGsModeResetRequested` is set during
+worker initialization and cleared immediately before the current-mode GS
+reset. `sdfGsCaptureStoreImage` is the existing SDK descriptor reused for
+both color-buffer captures; its existing uncached-address expression stays
+unchanged, not a new alias view.
+
+`sdfMotionCommandHandlers` retains the native constructor pointer followed
+by a null entry and the existing unchecked low-halfword index dispatch.
+`sdfMotionSlotPairDispatch` binds model slot indices and weights; its five
+release/bind/sample/capture/blend callbacks and final opaque word are kept.
+Pointer words differ between titles, so this is common role/shape evidence,
+not byte identity. No callback prototype, declaration, bound, data, storage,
+ABI or control flow changes accompany these names.

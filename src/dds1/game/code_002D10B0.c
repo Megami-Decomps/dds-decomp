@@ -66,7 +66,7 @@ void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *
 }
 
 typedef struct sceGsStoreImage sceGsStoreImage;
-extern sceGsStoreImage D_003E27B0;
+extern sceGsStoreImage sdfGsCaptureStoreImage;
 extern SdfGraphObj D_003980E0;
 extern volatile u8 D_003BD2F1;
 extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16, s16);
@@ -101,10 +101,10 @@ void sdfCaptureDeferredGsImage(void) {
         allocation = sdfAllocGeneralBlock(rowBytes * height);
         pixels = (u8 *)sdfResourceRetainAddress(allocation);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)(((u32)&D_003E27B0 & 0x0FFFFFFF) | 0x20000000),
+            (sceGsStoreImage *)(((u32)&sdfGsCaptureStoreImage & 0x0FFFFFFF) | 0x20000000),
             D_003980E0.buffers[1]->word >> 6,
             width / 64, format, 0, 0, width, height);
-        sceGsExecStoreImage(&D_003E27B0, pixels);
+        sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
         destination = D_003BD2F4;
         source = pixels;
@@ -115,10 +115,10 @@ void sdfCaptureDeferredGsImage(void) {
             source += rowBytes;
         } while (--rows != 0);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)(((u32)&D_003E27B0 & 0x0FFFFFFF) | 0x20000000),
+            (sceGsStoreImage *)(((u32)&sdfGsCaptureStoreImage & 0x0FFFFFFF) | 0x20000000),
             D_003980E0.buffers[0]->word >> 6,
             width / 64, format, 0, 0, width, height);
-        sceGsExecStoreImage(&D_003E27B0, pixels);
+        sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
         destination = D_003BD2F4 + rowBytes;
         source = pixels;
@@ -160,7 +160,7 @@ void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
 }
 
 extern s8 D_003BD9DC;
-extern s8 D_003BD9DD;
+extern s8 sdfGsModeResetRequested;
 extern volatile s32 sdfGsImageUploadSemaphore;
 extern volatile u8 D_003BD32D;
 extern volatile u8 D_003BD32C;
@@ -194,8 +194,8 @@ void sdfRunGraphicsTransferWorker(void) {
             D_003BD9DC = 0;
             sdfGraphRecreateBuffers(&D_003980E0);
         }
-        if (D_003BD9DD != 0) {
-            D_003BD9DD = 0;
+        if (sdfGsModeResetRequested != 0) {
+            sdfGsModeResetRequested = 0;
             sdfGraphResetDeviceForCurrentMode();
         }
         D_003BD32D = 1;
@@ -219,7 +219,7 @@ void sdfRunGraphicsTransferWorker(void) {
 }
 
 extern u8 D_003BD2E1;
-extern s32 D_003BD9D8;
+extern s32 sdfGraphicsTransferThreadId;
 extern s32 D_003BD2FC;
 extern volatile u8 sdfPacketSlotIndex;
 extern void sdfSleepThreadCount(s32);
@@ -245,7 +245,7 @@ void sdfServiceGraphicsBuffers(void) {
         D_003BD2E1 = invertedField ^ 1;
         if (D_003BD2F1 == 1) {
             D_003BD2F1 = 2;
-            WakeupThread(D_003BD9D8);
+            WakeupThread(sdfGraphicsTransferThreadId);
             WaitSema(D_003BD2FC);
         }
         bufferIndex = sdfBufferSlotIndices[D_003BD2E1];
@@ -263,9 +263,9 @@ extern s32 _StartThread(s32, s32);
 
 extern u8 D_003BD2E8;
 extern u8 D_003BD2E9;
-extern SdfThreadNode D_003BD9D0;
-extern u8 D_003E3820[0x8000];
-extern u8 D_003E2820[0x1000];
+extern SdfThreadNode sdfGraphicsBufferThread;
+extern u8 sdfGraphicsTransferThreadStack[0x8000];
+extern u8 sdfGraphicsBufferThreadStack[0x1000];
 extern void sdfResizeDoubleBuffer(s32);
 extern void sdfResetPacketSlotState(void);
 extern void sdfRegisterTextureReleaseRequestHandler(void);
@@ -282,16 +282,16 @@ void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
     D_003BD2E9 = 0;
     sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;
     sdfBusyBufferIndex = -1;
-    D_003BD9DD = 1;
+    sdfGsModeResetRequested = 1;
     sdfResizeDoubleBuffer(packetBufferBytes);
     sdfResetPacketSlotState();
     sdfRegisterTextureReleaseRequestHandler();
     sdfGsImageUploadSemaphore = sdfCreateSemaphore(1, 0x20, 0);
     D_003BD2FC = sdfCreateSemaphore(0, 0x20, 0);
-    thread = sdfCreateThread((void *)sdfRunGraphicsTransferWorker, D_003E3820, 0x8000, 0x44);
-    D_003BD9D8 = thread;
+    thread = sdfCreateThread((void *)sdfRunGraphicsTransferWorker, sdfGraphicsTransferThreadStack, 0x8000, 0x44);
+    sdfGraphicsTransferThreadId = thread;
     _StartThread(thread, 0);
-    sdfStartTrackedThread(&D_003BD9D0, sdfServiceGraphicsBuffers, D_003E2820,
+    sdfStartTrackedThread(&sdfGraphicsBufferThread, sdfServiceGraphicsBuffers, sdfGraphicsBufferThreadStack,
                           0x1000, 0x40, 0);
 }
 
