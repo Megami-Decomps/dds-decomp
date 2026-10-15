@@ -5181,7 +5181,7 @@ extern void mnuStopMovieDrawTask(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern void kwlnTextureReleaseHeldReference(void);
 extern u32 kwlnDrawControlFlags;
-extern void evtFormatPolygonMoviePaths(u16 a, u16 b, char *path0, char *path1, char *path2);
+extern void evtFormatPolygonMoviePaths(u16 eventId, u16 sceneId, char *path0, char *path1, char *path2);
 extern s32 sdfPathExists(char *path);
 extern void evtDestroySecondaryWorldNode(void);
 
