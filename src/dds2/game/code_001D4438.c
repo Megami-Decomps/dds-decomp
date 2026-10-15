@@ -32,6 +32,7 @@
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
 #include "kwln_fade.h"
+#include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
@@ -1956,7 +1957,6 @@ void btlEnterLinkageActionState(void) {
 }
 
 extern char D_00417398[];
-extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
