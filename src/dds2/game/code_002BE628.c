@@ -361,9 +361,102 @@ void mnuClearPairedSpriteRecords(MenuPageWindow *menu, s32 index) {
     } while (-1 < remaining);
 }
 
+typedef struct MenuQueuedRenderContext {
+    s32 panelIndex;
+    MenuPageWindow *menu;
+    MenuPoint origin;
+    MenuPoint extent;
+} MenuQueuedRenderContext;
+typedef char MenuQueuedRenderContext_size_check[
+    sizeof(MenuQueuedRenderContext) == 0x18 ? 1 : -1];
+
+extern void uiDrawSurfaceAtNearDepth(u32);
+
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF000);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF238);
+/* Draw queued random lines and their cropped panel. */
+void mnuDrawQueuedCommandLineEffect(s32 x, s32 y, s32 z, MenuQueuedCommand *command,
+                   MenuQueuedRenderContext *context, s32 surface) {
+    enum {
+        MOTION_ROWS = (s32)&((MenuQueuedCommand *)0)->motion,
+        POSITION_X = (s32)&((MenuQueuedCommand *)0)->positions[0].x - MOTION_ROWS,
+        POSITION_Y = (s32)&((MenuQueuedCommand *)0)->positions[0].y - MOTION_ROWS,
+        TARGET_Y = (s32)&((MenuQueuedCommand *)0)->positions[0].targetY - MOTION_ROWS
+    };
+    s32 baseX;
+    s32 baseY;
+    s32 span;
+    s32 deltaX;
+    s32 phase;
+    s32 opacity;
+    s32 height;
+    s32 cropWidth;
+    s32 i;
+    u8 *row;
+    EffectSlotSet *resources;
+    BdWork *crop;
+
+    if (command->option == 0) {
+        baseX = x + 0x640;
+        baseY = y + 0x2C0;
+        cropWidth = 0x1000;
+        span = 74;
+        deltaX = 0xD0;
+    } else {
+        baseX = x + 0x3C0;
+        baseY = y + 0x168;
+        cropWidth = 0x1000;
+        span = 48;
+        deltaX = 0;
+    }
+
+    height = ((span * (0x200 - command->initialValue)) / 0x200) << 3;
+    resources = command->resources;
+    crop = &resources->workEntries[0x3A];
+    crop->geometry.bounds[2] = cropWidth;
+    crop->geometry.bounds[3] = height;
+
+    i = 0;
+    phase = command->initialValue;
+    if (phase < 0x100) {
+        opacity = phase;
+    } else {
+        opacity = 0x200 - phase;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(baseX + deltaX, baseY - height, z,
+                  opacity, 0, resources, 0x3A, surface);
+
+    if (command->particleCount > 0) {
+        row = (u8 *)command + MOTION_ROWS;
+        do {
+            s32 targetY = *(s32 *)(row + TARGET_Y);
+            s32 startY = *(s32 *)(row + POSITION_Y);
+            s32 positionX = *(s32 *)(row + POSITION_X);
+            s32 deltaY = targetY - startY;
+            s32 xPosition;
+            s32 factor;
+            s32 nextOpacity;
+
+            deltaY = startY + (deltaY * (0x200 - command->initialValue)) / 0x200;
+            xPosition = baseX + positionX;
+            factor = ((MenuCommandMotion *)row)->value;
+            nextOpacity = (opacity * factor) / 0x100;
+
+            i++;
+            row += sizeof(MenuCommandMotion);
+            opacity = nextOpacity;
+            effDrawTextureSlotWithBlendedCornerColors(xPosition, baseY + deltaY, z,
+                          opacity, 0, command->resources, 0x39, surface);
+        } while (i < command->particleCount);
+    }
+
+    uiDrawSurfaceAtNearDepth(surface);
+    if (command->option == 0) {
+        effDrawTextureSlotWithBlendedCornerColors(x + context->origin.x,
+                      y + context->origin.y, z, command->initialValue, 0,
+                      context->menu->slots[context->panelIndex].frame[3], 0, surface);
+    }
+}
 
 typedef struct MenuCommandScatterLayout {
     MenuPoint points[7];
@@ -401,18 +494,9 @@ void mnuDrawQueuedCommandScatterEffect(s32 unusedX, s32 unusedY, s32 unusedDepth
 }
 
 
-typedef struct MenuQueuedRenderContext {
-    s32 panelIndex;
-    MenuPageWindow *menu;
-    MenuPoint origin;
-    MenuPoint extent;
-} MenuQueuedRenderContext;
-typedef char MenuQueuedRenderContext_size_check[
-    sizeof(MenuQueuedRenderContext) == 0x18 ? 1 : -1];
-
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
 extern void func_002BF000(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
-extern void func_002BF238(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
+extern void mnuDrawQueuedCommandLineEffect(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
 extern void mnuDrawPartyStatusValuePanel(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
 
 /* Advance and draw a page's two queued commands. An active command first waits
@@ -438,7 +522,7 @@ void mnuUpdateAndDrawPartyCommandQueue(s32 x, s32 y, s32 z, MenuQueuedCommand *c
                                   commands[i].initialValue, surface);
                     break;
                 case 1:
-                    func_002BF238(x, y, z, &commands[i], context, surface);
+                    mnuDrawQueuedCommandLineEffect(x, y, z, &commands[i], context, surface);
                     mnuDrawPartyStatusValuePanel(x, y, z, context->menu, context->panelIndex, 2,
                                   commands[i].initialValue, surface);
                     break;
@@ -480,7 +564,6 @@ extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *
  * selection helper consumes only its first five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void uiDrawActiveSurfaceRegion(s32);
-extern void uiDrawSurfaceAtNearDepth(u32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 sprintf(char *, const char *, ...);
