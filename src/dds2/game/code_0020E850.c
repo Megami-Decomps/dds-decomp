@@ -72,30 +72,6 @@ extern void btlAppendSelectedOrCurrentActorTarget(s32, s32);
 extern void btlSelectTargetsByMode();
 
 
-/* Linked-effect arguments share an owner and carry task-specific timing data.
- * The linked-number task allocates 0x34 bytes; the counter task uses 0x2C. */
-/* The ASM transfers two qwords, but the argument type retains natural alignment:
- * the existing allocation sizes are 0x34 and 0x2C, not rounded-up vector structs. */
-typedef struct BtlLinkedEffectArgs {
-    f32 anchorOffset[4]; /* Initial label anchor minus referencePosition. */
-    f32 referencePosition[4]; /* Saved reference; the update flags can select a live one. */
-    BtlUnit *unit; /* 0x20: also used by both destruction callbacks */
-    union {
-        struct {
-            s32 value; /* 0x24: signed number rendered by the update callback */
-            u32 elapsedTicks; /* 0x28: unsigned frame threshold tests in the number callback. */
-            u32 color; /* 0x2C */
-            u8 kind; /* 0x30 */
-            u8 offsetIndex; /* 0x31: indexes the twelve display offsets */
-        } linked;
-        struct {
-            u32 elapsedTicks; /* 0x24: unsigned counter timing and float conversion */
-            u8 kind; /* 0x28 */
-            u8 offsetIndex; /* 0x29 */
-        } counter;
-    } payload;
-} BtlLinkedEffectArgs;
-
 extern s8 D_0037F510[];
 
 extern u32 btlRequestAnalysisPanelClose(void);
