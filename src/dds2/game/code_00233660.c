@@ -3123,7 +3123,98 @@ void mdlViewerStepEditedNumericValue(s32 index) {
 
 struct KwlnTask;
 extern s32 evtEventViewerEditDrawVectorTargetTask(struct KwlnTask *);
-INCLUDE_ASM(const s32, "game/code_00233660", evtEventViewerEditDrawVectorTargetTask);
+extern MdlOptionLabel D_003C8AF8;
+extern char D_00437178[];
+extern s8 D_0040B7E8[16];
+
+/* Edit the draw-vector target: four numeric rows and three packed-colour channels. */
+s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task) {
+    MdlCtrlState *state = &mdlViewerControlState;
+    s8 *pad;
+    s32 changed;
+    s32 value;
+    s32 i;
+
+    if (kwlnTaskGetUserValue(task) == 0) {
+        pad = D_0040B7E8;
+    } else {
+        pad = D_0037F510;
+    }
+    state->pad = (MdlPadState *)pad;
+    mdlViewerControlState.packetList = sdfCreateResetPacketList();
+    if (++mdlViewerControlState.blinkTick == 30) {
+        mdlViewerControlState.blinkTick = 0;
+    }
+    if (mdlViewerControlState.editing == 0) {
+        changed = 1;
+        if (mdlViewerControlState.pad->stepUpB & 0x80) {
+            if (mdlViewerControlState.selection >= 6) {
+                mdlViewerControlState.selection = 0;
+            } else {
+                mdlViewerControlState.selection++;
+            }
+        } else if (mdlViewerControlState.pad->stepUpB & 2) {
+            if (mdlViewerControlState.selection < 6) {
+                mdlViewerControlState.selection++;
+            }
+        } else if (mdlViewerControlState.pad->stepDownB & 0x80) {
+            if (mdlViewerControlState.selection > 0) {
+                mdlViewerControlState.selection--;
+            } else {
+                mdlViewerControlState.selection = 6;
+            }
+        } else if (mdlViewerControlState.pad->stepDownB & 2) {
+            if (mdlViewerControlState.selection > 0) {
+                mdlViewerControlState.selection--;
+            }
+        } else if (mdlViewerControlState.pad->confirm & 0x80) {
+            mdlViewerControlState.editing = 1;
+        } else {
+            changed = 0;
+        }
+        if (changed != 0) {
+            mdlViewerControlState.blinkTick = 0;
+        }
+    } else {
+        if (mdlViewerControlState.pad->confirm & 0x80) {
+            mdlViewerControlState.editing = 0;
+        } else if (mdlViewerControlState.pad->cancel & 0x80) {
+            mdlViewerControlState.editing = 0;
+        } else if (mdlViewerControlState.selection < 4) {
+            mdlViewerStepEditedNumericValue(mdlViewerControlState.selection);
+        } else {
+            fldStepColorChannelByPad(&kwlnDrawVector.fogColor, mdlViewerControlState.selection - 4, (s8 *)mdlViewerControlState.pad);
+        }
+    }
+    sdfAppendPacket(mdlViewerControlState.packetList,
+                    (u32)sdfCreateBorderedRectanglePacket(0x8590, 0x79A8, 0xFF007F, 0x960, 0x570, 0x60000000, 0x40806020));
+    sdfAppendPacket(mdlViewerControlState.packetList,
+                    (u32)sdfCreateFormattedSifCommand(D_003C8AF8.x, D_003C8AF8.y, 0xFF0080, D_003C8AF8.style, D_003C8AF8.format));
+    if (mdlViewerControlState.editing == 0 && mdlViewerControlState.blinkTick < 0x14) {
+        s32 y;
+
+        if (mdlViewerControlState.selection < 4) {
+            y = D_003C8B08[mdlViewerControlState.selection].y;
+        } else {
+            y = mdlViewerControlState.selection * 0x60 + 0x7AE0;
+        }
+        sdfAppendPacket(mdlViewerControlState.packetList, (u32)sdfCreateFormattedSifCommand(0x85C0, y, 0xFF0080, 0, D_00437178));
+    }
+    for (i = 0; i != 4; i++) {
+        s32 y = D_003C8B08[i].y;
+
+        sdfAppendPacket(mdlViewerControlState.packetList, (u32)sdfCreateFormattedSifCommand(0x8680, y, 0xFF0080, 0, D_003C8B08[i].label));
+        value = *D_003C8B08[i].target + 0.5f;
+        sdfAppendPacket(mdlViewerControlState.packetList,
+                        (u32)sdfCreateFormattedSifCommand(0x8A40, y, 0xFF0080,
+                                                          (mdlViewerControlState.editing == 1 && mdlViewerControlState.selection == i) ? 6 : 0,
+                                                          D_003C8B08[i].format, value));
+    }
+    mdlDrawViewerLabelWithPackedColor(0x8680, 0x7C60, kwlnDrawVector.fogColor, mdlViewerControlState.selection - 4);
+    D_00380708.append(&D_00380708, mdlViewerControlState.packetList);
+    return 0;
+}
+
 typedef union MdlOptionControl {
     u32 packed;
     struct {
