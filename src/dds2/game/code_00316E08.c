@@ -545,7 +545,121 @@ u32 func_00317AC8(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingScene);
+typedef struct ShootingVector {
+    f32 v[4];
+} ShootingVector;
+
+extern const ShootingVector D_0042D7A0;
+extern struct EffWorldNode *dds3AppendWorldNode(void);
+extern void mnuCreateShootingSceneCamera(void);
+extern s32 kwlnSetLightColorTarget(s32, s32, void *);
+extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
+extern s32 kwlnSetBackgroundColorTarget(s32, void *);
+extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern struct WideSlotPool *itfCreateSpriteWorkPool(u32 count);
+extern struct CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count);
+extern void dds3InitSoundSlotPool(void);
+extern void mnuRegisterWorkEntryPool(u32 entries, u32 count);
+extern void mnuInitializeRuntimeHitTargetList(MenuRuntimeRecord *records, s32 capacity);
+extern void mnuInitializeRuntimeAnimationList(MenuRuntimeRecord *records, s32 capacity);
+extern void mnuResetProgressLimitAndStep(u8 cadenceLimit, u8 progressStep);
+extern void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback);
+extern void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback);
+extern void mnuInitializeHighScoreState(MnuShootingWork *work);
+extern u32 D_0043894C;
+extern MenuProgressParameters D_0040AC40;
+extern s32 D_004390B4;
+
+/* Build the shooting scene: world node, camera and area actor, the three
+ * lights and background, sprite/hit pools, the work-entry pool and the two
+ * runtime record lists, then the progress parameters and callbacks. */
+void mnuInitializeShootingScene(MnuShootingWork *handle) {
+    MnuSectionObjectList *lists[2];
+    f32 direction[4] = { 0 };
+    ShootingVector color;
+    struct SdfMemBlock *block;
+    struct EffWorldNode *node;
+
+    direction[3] = 1.0f;
+    color = D_0042D7A0;
+    D_00435CBC = 0x80000000;
+    node = dds3AppendWorldNode();
+    dds3SetWorldSecondaryObject(node);
+    dds3SetWorldObject(node);
+    mnuCreateShootingSceneCamera();
+    evtSpawnActionObj2(0, (s32)"shooting_Area");
+    color.v[0] = 1.0f;
+    color.v[1] = 1.0f;
+    color.v[2] = 1.0f;
+    kwlnSetLightColorTarget(0, 0, color.v);
+    color.v[0] = 0.0f;
+    color.v[1] = 0.0f;
+    color.v[2] = 0.0f;
+    kwlnSetLightColorTarget(0, 1, color.v);
+    color.v[0] = 0.0f;
+    color.v[1] = 0.0f;
+    color.v[2] = 0.0f;
+    kwlnSetLightColorTarget(0, 2, color.v);
+    direction[0] = 1.0f;
+    direction[1] = 1.0f;
+    direction[2] = 1.0f;
+    kwlnSetLightDirectionTarget(0, 0, direction);
+    direction[0] = 0.0f;
+    direction[1] = 0.0f;
+    direction[2] = 0.0f;
+    kwlnSetLightDirectionTarget(0, 1, direction);
+    direction[0] = 0.0f;
+    direction[1] = 0.0f;
+    direction[2] = 0.0f;
+    kwlnSetLightDirectionTarget(0, 2, direction);
+    color.v[0] = 0.4f;
+    color.v[1] = 0.4f;
+    color.v[2] = 0.4f;
+    kwlnSetBackgroundColorTarget(0, color.v);
+    evtSetDrawVectorTarget(0, 255.0f, 255.0f, 3000.0f, 20000.0f);
+    handle->spriteWork = itfCreateSpriteWorkPool(100);
+    handle->tintWork = itfCreateSpriteHitEffectWorkPool(100);
+    dds3InitSoundSlotPool();
+    D_00438948 = sdfAllocGeneralBlock(0x1C20);
+    D_0043894C = sdfMemoryGetBlockAddress(D_00438948);
+    memset((void *)D_0043894C, 0, 0x1C20);
+    mnuRegisterWorkEntryPool(D_0043894C, 100);
+    block = sdfAllocGeneralBlock(0x1C30);
+    lists[0] = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
+    memset(lists[0], 0, 0x1C30);
+    lists[0]->allocation = block;
+    lists[0]->objects = (u8 *)(lists[0] + 1);
+    lists[0]->count = 200;
+    block = sdfAllocGeneralBlock(0xE20);
+    lists[1] = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
+    memset(lists[1], 0, 0xE20);
+    lists[1]->count = 100;
+    lists[1]->objects = (u8 *)(lists[1] + 1);
+    lists[1]->allocation = block;
+    mnuInitializeRuntimeHitTargetList((MenuRuntimeRecord *)lists[0]->objects, lists[0]->count);
+    mnuInitializeRuntimeAnimationList((MenuRuntimeRecord *)lists[1]->objects, lists[1]->count);
+    handle->progressWork = lists[0];
+    handle->alternateProgressWork = lists[1];
+    memset(&D_0040AC40, 0, sizeof(D_0040AC40));
+    D_0040AC40.width = 0x140;
+    D_0040AC40.height = 0x1C0;
+    D_0040AC40.x = 0x62;
+    D_0040AC40.y = 0;
+    mnuCopyResourceProgressParameters(&D_0040AC40);
+    mnuResetProgressLimitAndStep(1, 1);
+    mnuSetWorkEntryStartCallback(mnuCreateShootingEntryObject);
+    mnuSetWorkEntryFinishOrDeactivateCallback(func_00319388);
+    mnuSetActiveWorkVisitor(func_00319A58);
+    mnuSetRuntimeRecordInitializationCallback(mnuApplyPlayerRuntimeRecordFeedback);
+    mnuSetRuntimeWorkHitCallback(mnuApplyShootingRuntimeRecordEvent);
+    mnuSetRuntimeRecordPairCallback(mnuAdvanceShootingProgressFromRecord);
+    mnuInitializeHighScoreState(handle);
+    handle->initialize = D_0040ABE0[0];
+    handle->update = D_0040ABF0[0];
+    D_004390B4 = 0;
+    handle->initialized = 0;
+    handle->unkB0 = 2;
+}
 
 /* Release the shooting task's owned lists, queues, slots and world object. */
 void mnuDestroyShootingWork(MnuShootingWork *work) {
