@@ -811,13 +811,13 @@ void btlMarkSceneTaskAfterReset(BtlTask *task) {
     task->flags |= 0x20;
 }
 
-s32 btlCommandStateSelectB(s32 arg0) {
+s32 btlCommandStateSelectB(s32 task) {
     if (sndHasActiveActor() == 0) {
-        btlPrepareSavedCommandTargets((BtlTask *)arg0, &((BtlTask *)arg0)->indexWork);
-        if (btlAiCheckStatusRollEligibility(arg0) != 0) {
-            btlDispatchStateHandler(arg0, 0xB);
+        btlPrepareSavedCommandTargets((BtlTask *)task, &((BtlTask *)task)->indexWork);
+        if (btlAiCheckStatusRollEligibility(task) != 0) {
+            btlDispatchStateHandler(task, 0xB);
         } else {
-            btlDispatchStateHandler(arg0, 0xC);
+            btlDispatchStateHandler(task, 0xC);
         }
     }
 }
