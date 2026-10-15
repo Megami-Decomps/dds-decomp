@@ -144,7 +144,7 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sp
     }
 }
 
-void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSprites *page, s32 param) {
+void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex, MenuSprites *page, s32 surface) {
     char text[0x20];
     DatPartyRecord *party = &datGameState->party[partyIndex];
     void **sprite = page->item;
@@ -161,9 +161,9 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 
         if (resource != NULL) {
             if (i == 2) {
-                effDrawTextureSlotWithBlendedCornerColors(x - 0x40, 0x10, depth, alpha, 0, page->item[2], 0, param);
+                effDrawTextureSlotWithBlendedCornerColors(x - 0x40, 0x10, depth, alpha, 0, page->item[2], 0, surface);
             } else {
-                effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, resource, 0, param);
+                effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, resource, 0, surface);
             }
         }
         i++;
@@ -177,10 +177,10 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
         if (page->menuValueStyleOverride != 0) {
             frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         }
-        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, param);
+        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, surface);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     } else {
-        effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, page->cursor[0], 0, param);
+        effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, page->cursor[0], 0, surface);
     }
 
     if (showCurrent != 0) {
@@ -195,14 +195,14 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
             } else if (style == 2) {
                 frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 3);
             }
-            frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, param);
+            frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
             if (page->flags & 1) {
-                effDrawTextureSlotWithBlendedCornerColors(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, param);
+                effDrawTextureSlotWithBlendedCornerColors(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, surface);
                 mnuDrawRemainingAndTotalCounts(x + 0x1020, 0x438, alpha, value, page->cursor[2], 0);
             }
         } else {
-            effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, page->cursor[1], 0, param);
+            effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, page->cursor[1], 0, surface);
         }
     }
 
@@ -235,7 +235,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 }
 
 extern void prfCopyMantraNamePart(u32, s32, char *);
-void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
+void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
     FrFontGlyph *item;
 
@@ -244,7 +244,7 @@ void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 pa
     item = frFontBuildGlyphChain(text, 0, 0, 0, 0);
     frFontSetChildColors(item, color);
     frFontSetGlyphPosition(item, x, y);
-    frFontDrawGlyphChain(item, 1, param);
+    frFontDrawGlyphChain(item, 1, surface);
     frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
@@ -252,7 +252,7 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 scrGetIndexedRecordAddress(s32, s32 *);
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
-                                      s32 partyIndex, s32 param) {
+                                      s32 partyIndex, s32 surface) {
     s32 outValue;
     s32 cost = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
@@ -263,11 +263,11 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     code = selectedCode != 0 ? selectedCode : cost;
     if (code != 0) {
         if (scrGetIndexedRecordAddress(code & 0xFFFF, &outValue) != 0) {
-            mnuDrawMenuTextById(0x16B0, 0x4B8, depth, texture, code, param);
+            mnuDrawMenuTextById(0x16B0, 0x4B8, depth, texture, code, surface);
             return;
         }
         item = itfCreateConvertedTextGlyph(0x16B0, 0x4B8, depth, texture, (const u8 *)outValue, 0);
-        frFontDrawGlyphChain((FrFontGlyph *)item, 1, param);
+        frFontDrawGlyphChain((FrFontGlyph *)item, 1, surface);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)item);
     }
 }
