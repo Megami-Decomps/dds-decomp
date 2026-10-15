@@ -718,16 +718,20 @@ typedef struct EffRingWork {
     u32 updateCount;
     u32 color;
     f32 scale;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
+    f32 currentRadius;
+    f32 currentAxisOffset;
+    f32 currentSideOffsetB;
+    f32 currentSideOffsetA;
     SdfMemBlock *allocationHandle;
     EffRecordPool *recordPool;
 } EffRingWork;
 
 typedef char EffRingParticleSizeCheck[sizeof(EffRingParticle) == 0x10 ? 1 : -1];
 typedef char EffRingWorkSizeCheck[sizeof(EffRingWork) == 0x80 ? 1 : -1];
+typedef char EffRingWork_currentRadius_offset_check[((u32)&((EffRingWork *)0)->currentRadius == 0x68) ? 1 : -1];
+typedef char EffRingWork_currentAxisOffset_offset_check[((u32)&((EffRingWork *)0)->currentAxisOffset == 0x6C) ? 1 : -1];
+typedef char EffRingWork_currentSideOffsetB_offset_check[((u32)&((EffRingWork *)0)->currentSideOffsetB == 0x70) ? 1 : -1];
+typedef char EffRingWork_currentSideOffsetA_offset_check[((u32)&((EffRingWork *)0)->currentSideOffsetA == 0x74) ? 1 : -1];
 
 typedef struct PcpFlashPulseParticle {
     u32 color;
