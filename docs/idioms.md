@@ -12683,7 +12683,7 @@ native COP2 sequences, rather than replacing any ordinary C instructions.
 
 ## Bit-editor glyph template block copy
 
-`func_0021F630` / `func_0023A1A0` (DDS1 / DDS2, 1092 bytes each)
+`mdlUpdateFlagBitEditor` (DDS1 0021F630 / DDS2 0023A1A0, 1092 bytes each)
 initializes a real two-byte text buffer from native SDATA: space followed
 by NUL at DDS1 `D_003BBD90` / DDS2 `D_004371D0`. The retail loads hit those
 exact symbols at 0021F664..74 / 0023A1D4..E4. The first character later
@@ -13007,3 +13007,45 @@ declaration and original argument widths.
 | DDS2 | `0026BBC8` | `mnuDispatchTerminalFadePanelExit` | `0x003CE990` finish |
 | DDS2 | `0028FD30` | `mnuFindPendingMantraPanelRecord` | selector |
 | DDS2 | `002B7588` | `mnuDrawListFrames` | DDS1 twin `0027AA68`; empty DDS2 draw loop |
+
+## Debug-editor identities and intentionally idle callbacks
+
+The model-flag editor identifies itself as `BitEditor`, draws a 16-by-16
+grid, pages through the flag bank, and toggles its selection with
+`mdlFlagTest`, `mdlFlagSet`, and `mdlFlagClear`. Both games use
+`mdlUpdateFlagBitEditor`; keep its native SDATA glyph-template block copy
+described above.
+
+The RGB editors install `evtNoOpRGBEditorRow` in the final row-callback
+argument of `evtDrawMenuFrame`. Native DDS1 0023A9B4..E8 and DDS2
+00255864..98 materialize the callback and store it at SP+8 before the call.
+The frame helper invokes rows with list, X, Y, row index, and context.
+These empty registered renderers are not unreferenced stubs, and are
+distinct from the neighboring XY-slot vector-editor row callbacks.
+Preserve the existing five-formal DDS1 definition and void-formal DDS2
+definition rather than changing their ABI during a naming pass.
+
+`evtUpdateIdleTestTask` is the zero-return test-task update in both games.
+DDS1's selection screen switches to it only after successfully launching
+the selected event script; its call to the existing empty helper stays.
+DDS2 registers its idle update when creating the task and has no such
+selection-screen update. Keep its unused task formal and do not invent a
+draw operation or a call to the neighboring, unreferenced empty function.
+
+`evtViewCmdNoOp` is a zero-return no-action handler in each native viewer
+command table, at DDS1 pointer slot 00368514 and DDS2 slot 003C92EC.
+Neighboring entries store values, select groups, and manipulate positions.
+This evidence establishes a command-table role, not a popup enter/leave
+role or an otherwise unknown command meaning.
+
+DDS1's solar-point drawer now shares the existing upstream DDS2 spelling
+`evtDrawSolarPointTransitionShapes`. Preserve Halcyon's paired
+reconstruction and the two sine-modulated triangle-fan passes unchanged.
+
+| DDS1 address | DDS2 address | Name |
+|---|---|---|
+| `0021F630` | `0023A1A0` | `mdlUpdateFlagBitEditor` |
+| `0023A798` | `00255648` | `evtNoOpRGBEditorRow` |
+| `00229ED8` | `00244B90` | `evtDrawSolarPointTransitionShapes` |
+| `0022AB60` | `00245818` | `evtUpdateIdleTestTask` |
+| `00231CC0` | `0024C9D0` | `evtViewCmdNoOp` |

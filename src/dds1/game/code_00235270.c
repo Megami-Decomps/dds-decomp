@@ -2355,7 +2355,8 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
 }
 
-void func_0023A798(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *runtime) {
+/* Empty RGB-editor row renderer passed to evtDrawMenuFrame. */
+void evtNoOpRGBEditorRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *runtime) {
 }
 
 extern f32 sdfViewMatrix[];

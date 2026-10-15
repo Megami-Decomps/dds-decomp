@@ -3276,6 +3276,7 @@ extern char D_003BBD90[], D_003BBD98[], D_003BBDA0[];
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32,
     s32 *, s32 *, s32 *, s32 *);
 
+/* Draw and toggle model-flag bits; return -1 on cursor exit, otherwise 0. */
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF78);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF88);
@@ -3284,7 +3285,7 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF98);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
 
-s32 func_0021F630(void) {
+s32 mdlUpdateFlagBitEditor(void) {
     char glyph[2];
     SdfListHead *packets;
     s32 column, row, style, result;
