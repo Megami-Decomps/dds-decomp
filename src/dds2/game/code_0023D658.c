@@ -69,7 +69,7 @@ extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
 
-extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
+extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 
 #include "dds3_world_primary.h"
 
@@ -176,10 +176,10 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
+void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     f32 *destination = work->targetVector;
 
-    work->motionSubmode = mode;
+    work->motionSubmode = motionSubmode;
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
     work->linkedUnit = NULL;
@@ -191,14 +191,14 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
-void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
+void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 motionSubmode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     EffWorldNode *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
         source = worldUnit->data;
-        evtBeginUnitVectorTransition(work, mode, (s128 *)&source->position, unused, frames, valueB6, callback, unusedLast);
+        evtBeginUnitVectorTransition(work, motionSubmode, (s128 *)&source->position, unused, frames, valueB6, callback, unusedLast);
         work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
         work->linkedUnit = worldUnit;
     }
@@ -899,11 +899,11 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     }
     unit->motionTicks = 0;
     {
-        s32 mode = scrReadIntParameter(2);
+        s32 motionSubmode = scrReadIntParameter(2);
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(3);
         s32 valueB6 = scrReadIntParameter(4);
-        evtBeginUnitTransitionTowardWorldObject(unit, mode, objectId, -1, frames, valueB6, 0, 0);
+        evtBeginUnitTransitionTowardWorldObject(unit, motionSubmode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         evtUnitPrepareVerticalMoveSteps(unit);
