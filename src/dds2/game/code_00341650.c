@@ -220,8 +220,8 @@ void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 b
     sndInitializeChannelAndTrackState(unused, header);
     sndAllocateAlignedIopBuffers(bufferSizes, bufferCount);
     D_004391EC = sndReserveIopWorkMemory(0x8D0);
-    sndMidiTrackState.opaque1F8 = (u32)&sndMidiTrackState;
-    sndMidiTrackState.opaque1FC = 0x8D0;
+    sndMidiTrackState.eeWorkAddress = &sndMidiTrackState;
+    sndMidiTrackState.eeWorkByteCount = 0x8D0;
     sndCopyToIopAndWait(D_004391EC, &sndMidiTrackState, 0x8D0);
     sndSendCommandPacket(0, 0, &D_004391EC, 4);
     D_004391E0 = 0;
