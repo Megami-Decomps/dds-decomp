@@ -26,6 +26,7 @@
 #include "sdf_packet_builders.h"
 #include "mdl.h"
 #include "sdf_model.h"
+#include "sdf_model_copy.h"
 #include "sdf_dev_slot_api.h"
 #include "mdl_resource_entries.h"
 #include "mdl_asset_request.h"
@@ -614,7 +615,6 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
     }
 }
 
-extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 extern void sdfModelBuildNodeResourcePackets(struct SdfPoolNode **, SdfModel *);
 
 /* Grow the afterimage list, advance each model, then apply its age and tint. */
