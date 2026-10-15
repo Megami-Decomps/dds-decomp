@@ -27,5 +27,8 @@ typedef char EvtScaledValue_size_must_be_0x1C[
  * Dds3PathCurveWork through this prefix, where duration/time occupy those
  * offsets; those calls do not require a complete EvtScaledValue object. */
 f32 evtGetValueScaleFactor(EvtScaledValue *value);
+void evtScaleValueByMultiplier(f32 multiplier, EvtScaledValue *value);
+void sdfFreezeFloatCounter(EvtScaledValue *value);
+void sdfUnfreezeFloatCounter(EvtScaledValue *value);
 
 #endif
