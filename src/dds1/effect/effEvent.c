@@ -1474,14 +1474,116 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     particle->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateBillboardParticles);
+extern f32 sdfViewEyeVector[4];
+extern void billInvokeCallback(BillObj *obj);
+
+/* vu0 routine: camera-right normalization and position addition use the
+ * native SDK pipeline. As in effEventDrawBillSet, position W is untouched. */
+void effEventUpdateBillboardParticles(EffEventBillSet *work) {
+    f32 position[4], origin[4], lateral[4];
+    EffEventBillParticle *particle;
+    s32 repeat;
+    u32 index, particleCount;
+    s32 duration, fadeIn, fadeOut;
+    u32 color;
+    f32 acceleration, swayPhaseStep, swayAmplitudeStep;
+
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, lateral);
+    particle = work->particles;
+    particleCount = work->head.particleCount;
+    acceleration = work->head.accelerationPercent / 100.0f + 1.0f;
+    repeat = work->head.repeat;
+    duration = work->head.duration;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    color = work->head.color;
+    swayPhaseStep = work->head.swayPhaseStep;
+    swayAmplitudeStep = work->head.swayAmplitudeStep;
+    PCP_COPY_VECTOR(origin, work->head.position);
+    billSetBillboardMode((BillObj *)D_003BB144, work->head.drawMode);
+    billSetBillboardMode((BillObj *)D_003BB148, 3);
+    for (index = 0; index < particleCount; index++, particle++) {
+        s32 age = particle->age;
+        if (age == 0) {
+            effEventRandomizeBillboardParticle(work, index);
+        }
+        if (age > 0 && age <= duration) {
+            f32 swaySine, sway, alpha;
+            f32 modulationX, scaleX, scaleY, phaseCosine;
+            u32 drawColor;
+            if (particle->motionDelay >= 0) {
+                f32 lateralSpeed = particle->lateralSpeed;
+                particle->position[0] += lateral[0] * lateralSpeed;
+                particle->position[1] += lateral[1] * lateralSpeed;
+                particle->position[2] += lateral[2] * lateralSpeed;
+                swaySine = sdfSinPoly(particle->swayPhase);
+                sway = particle->swayAmplitude * swaySine;
+                particle->motion[1] += particle->verticalSpeed;
+                position[0] = particle->position[0] + particle->motion[0] * sway;
+                position[1] = particle->position[1] + particle->motion[1];
+                position[2] = particle->position[2] + particle->motion[2] * sway;
+                particle->verticalSpeed *= acceleration;
+                particle->lateralSpeed *= acceleration;
+                particle->swayAmplitude += swayAmplitudeStep;
+                particle->swayPhase += swayPhaseStep;
+            } else {
+                particle->motionDelay++;
+                position[0] = particle->position[0];
+                position[1] = particle->position[1];
+                position[2] = particle->position[2];
+            }
+            if (age < fadeIn) {
+                alpha = (f32)age / (f32)fadeIn;
+            } else if (duration - age <= fadeOut) {
+                alpha = (f32)(duration - age) / (f32)fadeOut;
+            } else {
+                alpha = 1.0f;
+            }
+            drawColor = effBlendColor(color & 0xFFFFFF, color, alpha);
+            scaleY = particle->baseScale;
+            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseX);
+            modulationX = particle->scaleAmplitudeX * phaseCosine;
+            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseY);
+            scaleX = scaleY + modulationX;
+            scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
+            VU0_LOAD_VF(vf10, position);
+            VU0_LOAD_VF(vf11, origin);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, position);
+            effCopyVector((BillObj *)D_003BB144, position);
+            billSetChildScaleComponents((BillObj *)D_003BB144, scaleX, scaleY);
+            billSetChildParameter((BillObj *)D_003BB144, drawColor);
+            billSetRotationAngle((BillObj *)D_003BB144, particle->rotation);
+            billInvokeCallback((BillObj *)D_003BB144);
+            effCopyVector((BillObj *)D_003BB148, position);
+            billSetChildScaleComponents((BillObj *)D_003BB148, scaleX, scaleY);
+            billSetChildParameter((BillObj *)D_003BB148, drawColor);
+            billSetRotationAngle((BillObj *)D_003BB148, particle->rotation);
+            billInvokeCallback((BillObj *)D_003BB148);
+            particle->scalePhaseX += particle->scalePhaseStepX;
+            particle->scalePhaseY += particle->scalePhaseStepY;
+            particle->rotation += particle->angularSpeed;
+        }
+        if (duration == age && repeat) {
+            particle->age = 0;
+        } else {
+            /* Native 00191468..84 reloads after callbacks and wraps the word. */
+            particle->age = (s32)((u32)particle->age + 1U);
+        }
+    }
+}
 
 struct DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
 extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes,
     const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32));
-extern f32 sdfViewEyeVector[4];
 extern SdfPoolNode D_003252A8;
 
 /* DDS1 event-bill renderer, reconstructed from the native owner and its

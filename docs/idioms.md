@@ -12594,3 +12594,20 @@ This direct native reconstruction matches both complete units on its first
 form. It needs no SDK instruction helper, header/prototype change, staged
 constant, declaration-order adjustment or special compiler flags.
 
+## Event billboard update and batched-renderer shared source
+
+`effEventUpdateBillboardParticles` (DDS1 001910C8 / DDS2 00198D00,
+1048 bytes each) shares its camera-right normalization, particle motion,
+fade, scale oscillation and repeat-age kernel with the matched
+`effEventDrawBillSet`. Reusing that real sibling's source and the primary
+`EffEventBillSet` / `EffEventBillParticle` owners matches both units on the
+first form; no historical target draft or compiler-steering form is needed.
+
+The unbatched updater calls the two billboard objects separately. Capture
+the age before randomization, but reload motion and rotation across their
+real callbacks, and reload age again for its wrapping word increment.
+The position temporary's W is never initialized in retail, just as in the
+batched renderer. Keep the existing SDK-style VU load/subtract/cross/
+normalize/store and final vector-add macros: they directly reproduce the
+native COP2 sequences, rather than replacing any ordinary C instructions.
+
