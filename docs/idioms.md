@@ -12610,4 +12610,3 @@ The position temporary's W is never initialized in retail, just as in the
 batched renderer. Keep the existing SDK-style VU load/subtract/cross/
 normalize/store and final vector-add macros: they directly reproduce the
 native COP2 sequences, rather than replacing any ordinary C instructions.
-
