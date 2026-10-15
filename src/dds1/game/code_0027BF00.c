@@ -684,17 +684,17 @@ void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, EffMappedResour
 
 /* Always draw slot zero; masks one/two select the two three-slot banks.
  * Reset the six auxiliary slots through the existing grid lookup after drawing. */
-void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
-    itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[0], 0, param);
+void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 drawArg) {
+    itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[0], 0, drawArg);
     if (mask & 1) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[1], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[2], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[3], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[1], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[2], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[3], 0, drawArg);
     }
     if (mask & 2) {
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[4], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, param);
-        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[4], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, drawArg);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, drawArg);
     }
     itfGridLookupValueOrDefault((s32)(u32)group->sprites[1], 0);
     itfGridLookupValueOrDefault((s32)(u32)group->sprites[2], 0);
