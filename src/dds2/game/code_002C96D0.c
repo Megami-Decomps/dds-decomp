@@ -4204,7 +4204,7 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
 }
 
 
-void fileDrawConfigurationMenuBackground(void *arg) {
+void fileDrawConfigurationMenuBackground(void *unusedTask) {
     s16 sprites[5][4] = {
         {0, 2, 99, -57},
         {0, 3, -31, 365},
