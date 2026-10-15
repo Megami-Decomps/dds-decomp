@@ -229,9 +229,16 @@ typedef struct EffBillParticleConfig {
 
 typedef struct EffBillAnimatedFrameConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x18];
-    u32 drawProgress;
-    u8 unk74[0xC];
+    u32 colorA;
+    u32 colorB;
+    f32 width;
+    f32 widthJitter;
+    f32 radius;
+    f32 radiusJitter;
+    u32 drawProgress; /* 0x70: frames over which the radius grows; at least 1 */
+    f32 spin;
+    f32 spinJitter;
+    f32 spinAccel;
 } EffBillAnimatedFrameConfig; /* kind 4, 0x80 */
 
 typedef struct EffBillEmitterFrameConfig {
