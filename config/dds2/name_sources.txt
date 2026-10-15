@@ -9020,3 +9020,4 @@
 0x0012B0D0	fldDrawMapSlotAndSceneFlagGrid	inferred	Renders a 31-floor by 16-slot grid of map-slot values (GMC) beside room scene flags (HIT). Paired DDS1 body at 0x00128BB8.
 0x0012B2B8	fldDrawRoomModeAndObjectModeFlagGrid	inferred	Renders a 31-floor by 16-slot grid of room-mode flags (VIS) beside room-object-mode flags (ANM). Paired DDS1 body at 0x00128DA0.
 0x00291DD0	mnuSpawnMantraPanelSequence	inferred	Spawn the fixed endpoints and two eight-record mantra-panel sequences with three animated slots per record.
+0x0033C050	sdfBuildTwoTextureQuadVifPacketWithCornerColors	inferred	Builds a one-vertex VIF packet for a two-texture quad from eight corner color words, interleaved primary/secondary UV values, and eight quad coordinates; paired DDS1 body at 0x002E31A0. Distinct from sdfBuildTwoTextureQuadVifPacket, which takes two scalar colors.

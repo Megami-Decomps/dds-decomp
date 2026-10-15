@@ -1133,7 +1133,7 @@ u32 sdfBuildVertexColorQuadVifPacket(const u128 *positions, const void *attribut
 /* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
  * position, colors, interleaved primary/secondary UV corners (copied as
  * unaligned words) and the eight quad corner coordinates. */
-void func_0033C050(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
+void sdfBuildTwoTextureQuadVifPacketWithCornerColors(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
                    const void *secondaryUv, const void *quad) {
     *(u16 *)packet = 10;
     *(u32 *)(packet + 8) = 0x6C01C000;
