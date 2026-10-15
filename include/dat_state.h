@@ -351,6 +351,19 @@ typedef struct DatBattleSceneRecord {
 
 typedef char DatBattleSceneRecordSizeCheck[sizeof(DatBattleSceneRecord) == 0x28 ? 1 : -1];
 
+/* Local typed view for the scene-specific audio selection at record +0x24.
+ * The remaining bytes stay opaque; isolated use preserves unrelated unit codegen. */
+typedef struct DatBattleSceneAudioSelectionView {
+    u8 opaque00[0x24];
+    u16 audioStreamSelectionOverride;
+    u8 opaque26[2];
+} DatBattleSceneAudioSelectionView;
+
+typedef char DatBattleSceneAudioSelectionViewSizeCheck[
+    sizeof(DatBattleSceneAudioSelectionView) == 0x28 ? 1 : -1];
+typedef char DatBattleSceneStreamSelectionOffsetCheck[
+    ((u32)&((DatBattleSceneAudioSelectionView *)0)->audioStreamSelectionOverride == 0x24) ? 1 : -1];
+
 #ifdef VERSION_DDS1
 /* One 0x20C-byte encounter adjustment record. Sound selection shares the
  * header with condition/variant data; four complete weighted groups follow. */
