@@ -1693,7 +1693,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
     }
     fldCreateResourceScriptObjects();
     fldActivateRoomFlagObjects();
-    if (sceneWork->unk58 != 0 && area < 200 && fldAreaCachedResource != 0) {
+    if (sceneWork->retainCachedAreaResource != 0 && area < 200 && fldAreaCachedResource != 0) {
         D_00435FDC = (s32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
         memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00435FDC),
                (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)fldAreaCachedResource),

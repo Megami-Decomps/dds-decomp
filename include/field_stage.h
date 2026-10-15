@@ -34,7 +34,7 @@ typedef struct FieldPlayerSceneWork {
     char entryName[0x10]; /* 0x40: kind-0x11 transform-source name */
     s32 area; /* 0x50: sequence destination area */
     s32 room; /* 0x54: one-based destination room */
-    u32 unk58;
+    u32 retainCachedAreaResource; /* 0x58: preserves the cached room resource for this transition. */
     u32 secondaryState;
     u16 sequenceCode; /* 0x60: copied from FieldSequenceRecord.code */
     s16 sequenceMode; /* 0x62: copied by the sequence initializer */
@@ -47,7 +47,8 @@ typedef struct FieldPlayerSceneWork {
 } FieldPlayerSceneWork;
 
 typedef char FieldPlayerSceneWork_size_must_be_0xA0[(sizeof(FieldPlayerSceneWork) == 0xA0) ? 1 : -1];
-typedef char FieldPlayerSceneWork_unk58_at_58[((u32)&((FieldPlayerSceneWork *)0)->unk58 == 0x58) ? 1 : -1];
+typedef char FieldPlayerSceneWork_retainCachedAreaResource_at_58[
+    ((u32)&((FieldPlayerSceneWork *)0)->retainCachedAreaResource == 0x58) ? 1 : -1];
 typedef char FieldPlayerSceneWork_resourceName_at_80[((u32)&((FieldPlayerSceneWork *)0)->resourceName == 0x80) ? 1 : -1];
 typedef char FieldPlayerSceneWork_sequenceOption_at_90[((u32)&((FieldPlayerSceneWork *)0)->sequenceOption == 0x90) ? 1 : -1];
 typedef char FieldPlayerSceneWork_sequenceWord38_at_38[((u32)&((FieldPlayerSceneWork *)0)->sequenceWord38 == 0x38) ? 1 : -1];
