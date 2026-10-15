@@ -567,7 +567,39 @@ s32 btlSelectEnemyAiConditionalTargets(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_00202178", btlSelectLowestRankTarget);
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00203BA8);
+/* Select the highest current MP, preferring later entries on a tie. */
+s32 func_00203BA8(s32 actor, s32 unused) {
+    u32 matching;
+    u32 count;
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u32 best;
+    u32 bestIndex;
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        best = bestIndex = i = 0;
+        i = bestIndex;
+        if (count != 0) do {
+            BtlUnit *unit = btlGetIndexListEntry(list, i);
+            u16 mp = btlReadCurrentUnitMp(&unit->partyRecord);
+
+            if (mp >= best) {
+                best = mp;
+                bestIndex = i;
+            }
+            i++;
+        } while (i < count);
+        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
