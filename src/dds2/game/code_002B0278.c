@@ -3390,11 +3390,11 @@ void mnuRetireCampSpark(MenuCampEffect *effects, s32 index) {
     effects->count = effects->count - 1;
 }
 
-void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg) {
+void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 surface) {
     s32 i;
     for (i = 0; i < 0x10; i++) {
         if (fx->direction[i] > 0) {
-            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
+            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], surface);
             if (fx->direction[i] == 1) {
                 fx->velocity[i][0] += fx->life[i];
                 if (fx->velocity[i][0] > 0x2000) {
@@ -3486,43 +3486,43 @@ extern MenuBadgeLayout D_0042AED0;
     } \
 }
 
-void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg) {
+void mnuDrawBadgeFade(MenuCampEffect *set, s32 surface) {
     MenuBadgeLayout layout = D_0042AED0;
     s32 handle;
     if (!(set->resources.packet.type & 4)) {
         handle = set->resources.packet.items[layout.place[0].slot];
-        effDrawTextureSlotWithBlendedCornerColors(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, arg);
+        effDrawTextureSlotWithBlendedCornerColors(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, surface);
         itfGridLookupValueOrDefault((s32)set->resources.packet.sheets[0], handle);
         MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
     if (!(set->resources.packet.type & 2)) {
-        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
+        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], surface);
     }
 }
 
 extern MenuBadgeLayout D_0042AEE8;
 
-void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg) {
+void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface) {
     MenuBadgePlace blank[1];
     MenuBadgeLayout layout;
     u32 i;
 
     memset(blank, 0, sizeof(blank));
     layout = D_0042AEE8;
-    sdfSubmitGsTestOneRegisterPacket(0x30000, arg);
-    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, surface);
     for (i = 0; i < 1; i++) {
-        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
+        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], surface);
     }
     if (!(set->resources.packet.type & 2)) {
         for (i = 0; i < 2; i++) {
-            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
+            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], surface);
         }
     }
     if (!(set->resources.packet.type & 4)) {
-        mnuDrawBadgeFade(set, arg);
+        mnuDrawBadgeFade(set, surface);
     }
-    mnuDrawLayeredCampGridAndSparks(set, arg);
+    mnuDrawLayeredCampGridAndSparks(set, surface);
 }
 
 void mnuEnableCampBadgeFade(u32 *flags) {
