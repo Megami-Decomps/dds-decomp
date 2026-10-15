@@ -179,7 +179,7 @@ extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
-extern s32 btlElementToBitIndex(s32, s32);
+extern s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
@@ -1191,14 +1191,14 @@ s32 btlPassesStatusEntryGate(BtlUnit *actor, u32 unused) {
 
 extern const s32 btlElementMasks[20];
 
-s32 btlElementToBitIndex(s32 mask, s32 index) {
+s32 btlElementToBitIndex(s32 mask, s32 elementIndex) {
     s32 table[20];
     memcpy(table, btlElementMasks, sizeof(table));
-    if ((mask & table[index]) == 0) {
+    if ((mask & table[elementIndex]) == 0) {
         return 0x80;
     }
-    if (index != 0) {
-        return index - 1;
+    if (elementIndex != 0) {
+        return elementIndex - 1;
     }
     return -1;
 }

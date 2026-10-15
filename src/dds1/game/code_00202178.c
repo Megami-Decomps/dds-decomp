@@ -104,7 +104,7 @@ extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-s32 btlElementToBitIndex(s32 mask, s32 index);
+s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
 /* Rolls a bucket; if it lands within 3 of the previous one, rolls again. */ u32 btlRollAiBucket(void);
 
