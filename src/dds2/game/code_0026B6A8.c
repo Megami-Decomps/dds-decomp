@@ -161,14 +161,16 @@ s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
     return result;
 }
 
-s32 func_0026BB78(KwlnTask *request) {
+/* Draw the backdrop and dispatch phase one of the terminal fade popup. */
+s32 mnuDispatchTerminalFadePanel(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
 
     mnuDrawTerminalBackdrop(state);
     return menuSetHandler((void *)state, 1, (void *)request);
 }
 
-s32 func_0026BBC8(KwlnTask *request) {
+/* Dispatch phase two of the fade popup without changing message-window mode. */
+s32 mnuDispatchTerminalFadePanelExit(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
 
     return menuSetHandler((void *)state, 2, (void *)request);

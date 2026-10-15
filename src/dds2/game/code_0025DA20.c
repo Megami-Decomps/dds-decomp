@@ -3199,7 +3199,8 @@ s32 evtShowResultText(void) {
     return 1;
 }
 
-u32 func_00263378(void) {
+/* Registered shop progress-result leave hook: no side effects; returns one. */
+u32 mnuShopProgressResultLeaveNoOp(void) {
     return 1;
 }
 
@@ -3263,7 +3264,8 @@ s32 mnuStartShopRowMessage(KwlnTask *callbackContext) {
     return 1;
 }
 
-u32 func_002635E0(void) {
+/* Registered shop row-message leave hook: no side effects; returns one. */
+u32 mnuShopRowMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -3797,7 +3799,8 @@ s32 evtMenuPrepareCampRewardSelection(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00264848(void) {
+/* Registered camp reward-selection leave hook: no side effects; returns one. */
+u32 mnuCampRewardSelectionLeaveNoOp(void) {
     return 1;
 }
 
@@ -3921,7 +3924,8 @@ u32 evtUpdateSlotAdvanceCount(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00264C58(void) {
+/* Registered slot-advance message leave hook: no side effects; returns one. */
+u32 mnuSlotAdvanceMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -3986,7 +3990,8 @@ s32 evtShowSlotText(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00264EF8(void) {
+/* Registered progress-gate message leave hook: no side effects; returns one. */
+u32 mnuProgressGateMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -4141,7 +4146,8 @@ s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
     return 1;
 }
 
-u32 func_002652D8(void) {
+/* Registered selected-reward message leave hook: no side effects; returns one. */
+u32 mnuSelectedRewardMessageLeaveNoOp(void) {
     return 1;
 }
 

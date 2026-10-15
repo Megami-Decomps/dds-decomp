@@ -609,7 +609,7 @@ s32 mnuUpdateSkillListInput(s32 callback);
 
 
 
-void func_002B7588(s32 context);
+void mnuDrawListFrames(s32 context);
 
 s32 mnuCampMenuDrawStatus(s32 callback);
 

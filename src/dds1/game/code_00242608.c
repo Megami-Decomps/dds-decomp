@@ -1676,7 +1676,7 @@ extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
 extern u32 D_00369FA0[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
-extern u32 func_002CD7F8(u32 itemId);
+extern u32 mnuShopIsMode1PurchaseBlocked(u32 itemId);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
 
 s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
@@ -1727,7 +1727,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
             params->id = id;
             params->price = price;
             params->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(id) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -1793,7 +1793,7 @@ s32 mnuCampRebuildItemStockWindow(ShopScene *scene) {
             params->id = id;
             params->price = price;
             params->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(id) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -1811,7 +1811,7 @@ extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
 extern u32 D_00369FA0[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
-extern u32 func_002CD7F8(u32 itemId);
+extern u32 mnuShopIsMode1PurchaseBlocked(u32 itemId);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
 
 s32 mnuBuildShopCatalogList(ShopScene *scene) {
@@ -1857,7 +1857,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
             parameters->id = itemId;
             parameters->price = price;
             parameters->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(itemId) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(itemId) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -1919,7 +1919,7 @@ s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
             params->id = id;
             params->price = price;
             params->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(id) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -2804,7 +2804,7 @@ void evtAccumulateStateScore(s32 stateAddress) {
 }
 
 extern void datAddCurrencyClamped(s32);
-extern u32 func_002CD800(u32);
+extern u32 mnuShopCommitMode1PurchaseNoOp(u32);
 
 /* Apply the selected buy/sell operation, then restore the row's displayed price. */
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
@@ -2832,7 +2832,7 @@ s32 mnuApplyShopSelectionTransaction(KwlnTask *task) {
         case 2:
             datAddCurrencyClamped(-values->value * scene->counter);
             if (values->mode == 1) {
-                func_002CD800((u32)itemId & 0xFFFF);
+                mnuShopCommitMode1PurchaseNoOp((u32)itemId & 0xFFFF);
             } else {
                 datGameState->inventory.counts[itemId] += scene->counter;
             }

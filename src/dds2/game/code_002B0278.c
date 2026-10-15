@@ -3138,7 +3138,9 @@ void mnuDrawSkillMenuFrameIcons(MenuContext *context) {
     } while (i < 4);
 }
 
-void func_002B7588(s32 context) {
+/* DDS2 retains the iteration but the frame drawing is compiled out.
+ * DDS1 mnuDrawListFrames draws the frames at the same call site. */
+void mnuDrawListFrames(s32 context) {
     s32 index;
 
     for (index = **(s32 **)(context + 0x28c); index < 3; index = index + 1) {
@@ -3150,7 +3152,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
     u8 *menu = (u8 *)((MenuContext *)context)->party;
     u32 label;
     mnuDrawCampScreenDefault(callback);
-    func_002B7588(context);
+    mnuDrawListFrames(context);
     mnuCreateStaffImageSprite(0x14);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     label = ((MenuWindowContainer *)*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4))->list->cursor->sortKeyPrimary;
