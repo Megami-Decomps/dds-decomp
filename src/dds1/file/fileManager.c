@@ -208,8 +208,8 @@ u32 fileGetLoadedDataAddress(struct FileRequest *request) {
 }
 
 /* Return the recorded resource size; work is required. */
-u32 fileGetResourceSize(struct FileRequest *request) {
-    FileWork *work = (FileWork *)request;
+u32 fileGetResourceSize(const struct FileRequest *request) {
+    const FileWork *work = (const FileWork *)request;
     return work->size;
 }
 
