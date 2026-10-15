@@ -4328,7 +4328,8 @@ s32 evtStartFadeByState(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00265980(void) {
+/* Registered shop-message leave hook: no side effects; returns one. */
+u32 mnuShopMessageLeaveNoOp(void) {
     return 1;
 }
 

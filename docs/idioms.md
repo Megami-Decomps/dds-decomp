@@ -12851,3 +12851,35 @@ empty parameter lists, constants, and definition order stay unchanged.
 | `0010AA28` | `0010AB68` | `evtAdminModeTwentyFourEntryNoOp` | Mode 24 entry |
 | `0010AA30` | `0010AB70` | `evtAdminModeTwentyFourDestroyNoOp` | Mode 24 destroy |
 | `0010AA38` | `0010AB78` | `evtKeepAdminModeTwentyFourPending` | Mode 24 cleanup |
+
+## Popup callback stubs: registry roles without invented scene identities
+
+`MenuPopupEntry` in `include/mnu_transition.h` is a seven-word record:
+`flags`, `enter`, `leave`, `start`, `update`, `finish`, and `canEnter`.
+The native popup dispatcher uses the same offsets. `mnuApplyPanelTransitionAction`
+calls `enter` when saving an entry and `leave` when popping it; the leave
+result is ignored. A leave hook that only returns one has no side effects.
+
+The shop-message and three terminal descriptors each register their own
+constant-one leave hook. Keep the functions distinct rather than coalescing
+their identical bodies. The terminal exit hooks retain a common role even
+though their neighboring resource-loading entry callbacks differ by game.
+
+The second seven-word record at DDS1 `0x0036AB9C` / DDS2 `0x003CE6C8`
+follows the fade-idle descriptor. Its five hooks have only evidenced registry
+roles: enter and leave return one; start, update, and finish return zero.
+The generic `mnuPopup*NoOp` names do not assert a scene identity or that the
+record is reached. No callback type, parameter list, constant, or body order
+is changed.
+
+| DDS1 | DDS2 | Name | Native role |
+|---|---|---|---|
+| `00247D50` | `00265980` | `mnuShopMessageLeaveNoOp` | leave |
+| `0024B470` | `00269C48` | `mnuTerminalSlotSelectionLeaveNoOp` | leave |
+| `0024C6F8` | `0026ADC0` | `mnuTerminalEntryMessageLeaveNoOp` | leave |
+| `0024CE20` | `0026B4A0` | `mnuTerminalExitPopupLeaveNoOp` | leave |
+| `002482B0` | `00266210` | `mnuPopupEnterNoOp` | enter |
+| `002482B8` | `00266218` | `mnuPopupLeaveNoOp` | leave |
+| `002482C0` | `00266220` | `mnuPopupStartNoOp` | start |
+| `002482C8` | `00266228` | `mnuPopupUpdateNoOp` | update |
+| `002482D0` | `00266230` | `mnuPopupFinishNoOp` | finish |
