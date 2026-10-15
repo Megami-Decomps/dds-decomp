@@ -21,8 +21,8 @@ s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
 s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
 void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
-s32 kwlnDrawSetDc8Second(s32 arg0);
-s32 kwlnDrawSetE08Fifth(s32 arg0);
+s32 kwlnDrawSetDc8Second(s32 blendControl);
+s32 kwlnDrawSetE08Fifth(s32 blendControl);
 void sdfSetViewFieldOfView(f32 fieldOfView);
 s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 s32 fptodp(void);
@@ -680,28 +680,28 @@ s32 scrCmdBeginRectangleBlurDeactivation(void)
 s32 scrCmdSetIndexedDrawMode(void)
 {
     s32 p0;
-    s32 mode;
+    s32 blendControl;
     p0 = scrReadIntParameter(0);
     switch (p0)
     {
     case 1:
-        mode = 0x48;
+        blendControl = 0x48;
         break;
     case 0:
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     case 2:
-        mode = 0x42;
+        blendControl = 0x42;
         break;
     case 3:
-        mode = 6;
+        blendControl = 6;
         break;
     default:
         evtPrintDeveloperConsoleMessage(D_0039F550);
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     }
-    kwlnDrawSetDc8Second(mode);
+    kwlnDrawSetDc8Second(blendControl);
     return 1;
 }
 
@@ -741,28 +741,28 @@ s32 scrCmdBeginColorRectangleDeactivation(void)
 s32 scrCmdSetTexturedSquareDrawMode(void)
 {
     s32 p0;
-    s32 mode;
+    s32 blendControl;
     p0 = scrReadIntParameter(0);
     switch (p0)
     {
     case 1:
-        mode = 0x48;
+        blendControl = 0x48;
         break;
     case 0:
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     case 2:
-        mode = 0x42;
+        blendControl = 0x42;
         break;
     case 3:
-        mode = 6;
+        blendControl = 6;
         break;
     default:
         evtPrintDeveloperConsoleMessage(D_0039F570);
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     }
-    kwlnDrawSetE08Fifth(mode);
+    kwlnDrawSetE08Fifth(blendControl);
     return 1;
 }
 
