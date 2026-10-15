@@ -24,10 +24,10 @@ void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
 void *sceDmaGetChan(s32 id);
 struct SdfTex;
-extern struct SdfTex *D_003BDA34;
+extern struct SdfTex *sdfConsoleFontTexture;
 extern DevConsState *D_003BD3C0;
-extern u32 D_00398660[];
-extern u32 D_003987E0[];
+extern u32 sdfConsoleGlyphTexcoords[];
+extern u32 sdfConsoleColorPalette[];
 extern void *memmove(void *dst, const void *src, u32 n);
 extern void *memset(void *dst, s32 c, u32 n);
 
@@ -259,8 +259,8 @@ void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
                     writeCursor = (vu64 *)buffers->writeCursor;
                     packetStart = buffers->packetStart;
                 }
-                glyph = D_00398660[character - 0x20];
-                color = D_003987E0[attribute];
+                glyph = sdfConsoleGlyphTexcoords[character - 0x20];
+                color = sdfConsoleColorPalette[attribute];
                 writeCursor[0] = color;
                 writeCursor[1] = glyph;
                 writeCursor[2] = top;
@@ -293,7 +293,7 @@ void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 buffe
     packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
     packetBuffers->packetStart = ring;
     packetBuffers->activeBufferIndex = 0;
-    textureState = sdfTexGetPrimaryTextureState(D_003BDA34);
+    textureState = sdfTexGetPrimaryTextureState(sdfConsoleFontTexture);
     packet = (vu64 *)ring;
     packet[0] = 0x10AB400000008005ULL;
     packet[1] = 0xE;

@@ -13764,3 +13764,28 @@ following pulse-position bank. Keep those views and the original
 position banks retain their s16 XY declarations, four versus 32 entries,
 original coordinates and unchecked indexing; no path normalization or
 layout/type migration accompanies these names.
+
+
+## Developer console tables and buffered device-read state
+
+`sdfConsoleGlyphTexcoords` retains the writable, eight-byte-aligned bank of
+96 packed glyph UV words for characters 0x20 through 0x7F.
+`sdfConsoleColorPalette` is the separate mutable sixteen-word RGBA bank,
+also indexed by the packet command setter. Neither is made const or bounded
+differently. `sdfConsoleFontTexture` retains the existing DDS1 pointer and
+DDS2 integer-handle declarations rather than imposing a new common view.
+
+`sdfDevCurrentDirectory` remains the 64-byte, C-owned `host0:` buffer. Its
+six-byte prefix copy and unchecked path/slash/NUL appending are unchanged.
+`sdfDevRpcClient` keeps the existing 0x30-byte context owner and its SDK
+client prefix; naming introduces no alternate RPC layout.
+
+`sdfDevReadSectorBuffer`, `sdfDevReadSectorCursor` and
+`sdfDevReadSectorBytesAvailable` retain partial reads from the same 0x800-byte
+disc sector. Keep the existing signed byte-count arithmetic and transfer
+calls. `sdfDevHddModuleArguments` and `sdfDevPfsModuleArguments` are packed
+NUL-separated arguments, not format strings: the loader consumes 0xC bytes
+for `-o`, `18`, `-n`, `32`, and 0x12 bytes for `-m`, `18`, `-o`, `10`,
+`-n`, `64`, respectively. All native zeros, imports, declarations, casts,
+bounds and control flow remain unchanged. Previous console-data extraction
+credit stays with its existing Cedar lineage; this batch only names objects.
