@@ -13490,3 +13490,28 @@ do not extend this table into it. DDS2 instead calculates spacing from a
 local three-element array, so no external table twin is invented. These
 names leave every native byte, overlapping alias, type and control-flow
 choice unchanged.
+
+## Thunder history draw data and battle effect position tables
+
+`effThunderHistoryIndices` and `effThunderEndCapIndices` are separate packed
+triangle-index banks. The history renderer advances its draw windows by twelve
+points; the cap has six fan triangles over eight points and retains two
+trailing zero index words. `effThunderEndCapPoints` is the full eight-vector
+template copied into newly allocated cap storage. Those three native tables
+are byte-identical between games; no constant is reconstructed or reordered.
+
+`effThunderHistoryDrawParams` and `effThunderEndCapDrawParams` are separate
+0x30-byte BSS descriptors. Creation clears only each native 0x2C prefix, then
+assigns its respective index bank. Rendering fills their different point and
+color inputs. Preserve both owner types and the partial clears. The separate
+`effThunderHistorySurfaces` bank is indexed by `surfaceIndex` before appending
+the combined packet list; its pointer bytes differ between games.
+
+`effBattleAnchorHeightFactors` scales the selected anchor height; its native
+six floats are `(-1,0,1,1.5,0,0)`. `effBattleDirectionAngles` supplies the eight
+compass angles and four zero entries to the existing rotation builders. Both
+tables have identical native bytes across titles, but the existing DDS1 and
+DDS2 rotation-provider calls are not made uniform. `effBattlePositionCallbacks`
+dispatches by request kind and returns a position through `vf10`; retain the
+unprototyped callback contract. Its fourteen native cells include three null
+tails, not a new array bound or a byte-identical cross-title pointer table.
