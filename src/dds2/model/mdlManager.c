@@ -201,7 +201,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
         }
     }
     mdlDestroyPartList(groupNode->partList);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->resourceHandle));
+    sdfReleaseResourceAllocation(groupNode->resourceHandle);
     sdfReleaseChipBlock(groupNode);
 }
 
@@ -1237,7 +1237,7 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
             switch (((SdfPacModelPacketHeader *)work->packet)->tag) {
             case 0x30424950:
                 setup.partInfo = work->dataCursor;
-                setup.resourceHandle = (s32)work->resourceHandle;
+                setup.resourceHandle = (struct SdfMemBlock *)work->resourceHandle;
                 count = mdlGetRecordPartIndex((MdlRecord *)work->dataCursor);
                 if (count > 0) {
                     parts = mdlCreateBufferedPartRequest(count);
@@ -1305,7 +1305,7 @@ PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 
 
     memset(&groupSetup, 0, sizeof(groupSetup));
     groupSetup.partInfo = record;
-    groupSetup.resourceHandle = (s32)packetWork->resourceHandle;
+    groupSetup.resourceHandle = (struct SdfMemBlock *)packetWork->resourceHandle;
     packetWork = sdfPacRemovePacket(packetWork);
     partCount = mdlGetRecordPartIndex(record);
     remainingParts = partCount;
