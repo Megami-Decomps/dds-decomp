@@ -603,7 +603,7 @@ extern s32 sceSifAllocIopHeap(s32 size);
 
 extern void Exit(s32 status);
 
-extern s32 D_003BD8C0;
+extern s32 sndStreamTransferIopHeapAddress;
 
 extern char D_003AFBA0[]; /* "result2_draw" */
 
@@ -974,12 +974,12 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
         ((u16 *)D_003BC5B8)[halfwordIndex] = 0;
     }
     sceSifInitIopHeap();
-    D_003BD8C0 = sceSifAllocIopHeap(wordCount * SND_TRANSFER_PAIR_WORD_BYTES);
-    if (D_003BD8C0 <= 0) {
+    sndStreamTransferIopHeapAddress = sceSifAllocIopHeap(wordCount * SND_TRANSFER_PAIR_WORD_BYTES);
+    if (sndStreamTransferIopHeapAddress <= 0) {
         Exit(0);
     }
-    D_003BC5B0[0] = D_003BD8C0;
-    D_003BC5B0[1] = D_003BD8C0 + bufferBytes;
+    D_003BC5B0[0] = sndStreamTransferIopHeapAddress;
+    D_003BC5B0[1] = sndStreamTransferIopHeapAddress + bufferBytes;
     sndCopyWordsToIopSynchronously(D_003BC5B8, D_003BC5B0[0], wordCount);
     sndCopyWordsToIopSynchronously(D_003BC5B8, D_003BC5B0[1], wordCount);
 }
@@ -996,7 +996,7 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
         sndDispatchIopAudioCommand(1, 0x8010, core | 0xA80, 0x3FFF);
         sndDispatchIopAudioCommand(1, 0x8010, core | 0x800, sndDispatchIopAudioCommand(1, 0x8020, core | 0x800) & ~0x30);
     }
-    sndDispatchIopAudioCommand(1, 0x80E0, 0, 0x10, D_003BD8C0, transferSize << 3);
+    sndDispatchIopAudioCommand(1, 0x80E0, 0, 0x10, sndStreamTransferIopHeapAddress, transferSize << 3);
     sndDispatchIopAudioCommand(1, 0x8010, 0xF80, 0x7FFF);
     sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
 }

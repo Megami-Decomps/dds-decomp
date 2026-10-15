@@ -69,8 +69,8 @@ typedef struct EventDispatchState {
 
 extern const char D_00424D08[];
 extern u8 D_003CE674[];
-extern u8 D_003CE498[];
-extern ShopRankPriceRow D_003CBB70[];
+extern u8 mnuShopCommandPopupEntries[];
+extern ShopRankPriceRow mnuShopRankPriceRows[];
 extern const u8 (*D_00435E5C)[25];
 extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
@@ -148,7 +148,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                     if (index < 32) {
                         u32 stockOffset = index * sizeof(ShopRankPriceEntry) +
                                           activeSlot * (s32)sizeof(ShopRankPriceRow);
-                        u32 flagsAddress = (u32)&D_003CBB70[0].entries[0].flags + stockOffset;
+                        u32 flagsAddress = (u32)&mnuShopRankPriceRows[0].entries[0].flags + stockOffset;
 
                         do {
                             ShopRankPriceEntry *entry = (ShopRankPriceEntry *)(flagsAddress - sizeof(u32));
@@ -217,7 +217,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                         state->retryFrames++;
                     } else {
                         state->phase = 0;
-                        mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
+                        mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
                     }
                     break;
                 }

@@ -13152,3 +13152,41 @@ does not invent a cross-game identity between them. Preserve every existing
 declaration, bound, cast, index, fixed-point conversion and temporary
 sprite-state restoration. None of these names owns a source-level data
 import or changes a held body, its `INCLUDE_ASM` line, or its data reference.
+
+## Camp, shop, Mantra and stream-transfer data roles
+
+Matched consumers establish the following data roles without changing their
+existing storage, declarations or views. The same role uses the same name in
+both games; only the DDS1 mode-1 price bank has no asserted global twin.
+
+- `mnuCampQuadBounds`, `mnuCampQuadTexcoords` and `mnuCampQuadColor` are the
+  four-component scratch arrays filled by `mnuDrawCampScaledTexture` and sent
+  to the texture-bound quad packet builder. The native X<<4/Y<<3 scaling
+  and texture-dimension<<4 shifts stay unchanged.
+- `mnuCampFlagRows` chooses a row value from the highest-index active flag slot, with
+  the existing default value retained. DDS2 also reads the row's message set.
+  `mnuShopSourcePriceRows` and `mnuShopRankPriceRows` supply catalog items,
+  stock flags and row/entry price percentages. Their differing per-game row
+  layouts and byte-versus-typed views are not unified.
+- DDS1 `mnuShopMode1Prices` supplies the direct price lookup in the existing
+  `mode == 1` catalog branches. The name deliberately does not guess an item
+  class from that numeric mode.
+- `mnuShopCommandPopupEntries`, `mnuShopCatalogPopupEntries` and
+  `mnuShopFilteredCatalogPopupEntries` are overlapping suffix views of one
+  contiguous popup bank, not three independent arrays. Their starts differ
+  by one 0x1C-byte entry. The command/catalog/filtered builders and native
+  callback rows establish the roles. The shared terminal entry is at root
+  plus seven rows in DDS1 and ten in DDS2; all pointer arithmetic is retained.
+- `mnuMantraResourceTaskDescriptor` is the single key-zero descriptor passed
+  by the matched Mantra resource-task constructor. The worker provider
+  attaches one descriptor; adjacent selection-task records are separate and
+  are not renamed as part of this root's name.
+- `sndStreamTransferIopHeapAddress` is the address returned by
+  `sceSifAllocIopHeap` for the stream-transfer pair. The allocator rejection,
+  two destination addresses and IOP command all consume the same stored
+  address; its existing signed scalar type remains unchanged.
+
+All selected objects are outside source-owned `INCLUDE_SDATA` and
+`INCLUDE_RODATA` imports. Post-resplit ASM inspection found no selected root
+or interior-storage consumer; bare address mappings do not invent symbol
+sizes or change data placement.

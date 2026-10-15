@@ -583,7 +583,7 @@ extern s32 SignalSema(u32);
 extern s32 sceSifInitIopHeap(void);
 extern s32 sceSifAllocIopHeap(s32 size);
 extern void Exit(s32 status);
-extern s32 D_00438FD8;
+extern s32 sndStreamTransferIopHeapAddress;
 
 /* libc sprintf returns the signed vfprintf character count. */
 extern s32 sprintf(char *dst, const char *fmt, ...);
@@ -969,12 +969,12 @@ void sndInitializeStreamTransferBuffers(s32 wordCount) {
         ((u16 *)D_00437A28)[halfwordIndex] = 0;
     }
     sceSifInitIopHeap();
-    D_00438FD8 = sceSifAllocIopHeap(wordCount * SND_TRANSFER_PAIR_WORD_BYTES);
-    if (D_00438FD8 <= 0) {
+    sndStreamTransferIopHeapAddress = sceSifAllocIopHeap(wordCount * SND_TRANSFER_PAIR_WORD_BYTES);
+    if (sndStreamTransferIopHeapAddress <= 0) {
         Exit(0);
     }
-    D_00437A20[0] = D_00438FD8;
-    D_00437A20[1] = D_00438FD8 + bufferBytes;
+    D_00437A20[0] = sndStreamTransferIopHeapAddress;
+    D_00437A20[1] = sndStreamTransferIopHeapAddress + bufferBytes;
     sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[0], wordCount);
     sndCopyWordsToIopSynchronously(D_00437A28, D_00437A20[1], wordCount);
 }
@@ -991,7 +991,7 @@ void mnuConfigureTitleAudioStream(s32 transferSize) {
         sndDispatchIopAudioCommand(1, 0x8010, core | 0xA80, 0x3FFF);
         sndDispatchIopAudioCommand(1, 0x8010, core | 0x800, sndDispatchIopAudioCommand(1, 0x8020, core | 0x800) & ~0x30);
     }
-    sndDispatchIopAudioCommand(1, 0x80E0, 0, 0x10, D_00438FD8, transferSize << 3);
+    sndDispatchIopAudioCommand(1, 0x80E0, 0, 0x10, sndStreamTransferIopHeapAddress, transferSize << 3);
     sndDispatchIopAudioCommand(1, 0x8010, 0xF80, 0x7FFF);
     sndDispatchIopAudioCommand(1, 0x8010, 0x1080, 0x7FFF);
 }

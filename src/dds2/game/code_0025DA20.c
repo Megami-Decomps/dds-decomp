@@ -94,7 +94,7 @@ typedef struct CampFlagRow {
     u8 pad1D[3];
 } CampFlagRow;
 
-extern CampFlagRow D_003C9A40[];
+extern CampFlagRow mnuCampFlagRows[];
 
 
 
@@ -182,13 +182,13 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 D_003C9988[4];
-extern s32 D_003C9998[4];
-extern s32 D_003C99A8[4];
+extern s32 mnuCampQuadBounds[4];
+extern s32 mnuCampQuadTexcoords[4];
+extern s32 mnuCampQuadColor[4];
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 
-extern ShopRankPriceRow D_003CBB70[];
+extern ShopRankPriceRow mnuShopRankPriceRows[];
 
 /* Schedule the camp task only if no task currently owns this event ID. */
 KwlnTask *mnuCampCreateTask(s32 taskId) {
@@ -777,18 +777,18 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     s32 surfaceIndex = 0x53;
     SdfPoolNode *surface;
 
-    D_003C9998[2] = texture->width << 4;
-    D_003C9998[3] = texture->height << 4;
+    mnuCampQuadTexcoords[2] = texture->width << 4;
+    mnuCampQuadTexcoords[3] = texture->height << 4;
     halfWidth = (s32)(texture->width * display->scaleX) / 2;
     halfHeight = (s32)(texture->height * display->scaleY) / 2;
-    D_003C9988[0] = (display->x - halfWidth) << 4;
-    D_003C9988[1] = (display->y - halfHeight) << 3;
-    D_003C9988[2] = (display->x + halfWidth) << 4;
-    D_003C9988[3] = (display->y + halfHeight) << 3;
-    D_003C99A8[0] = display->color[0];
-    D_003C99A8[1] = display->color[1];
-    D_003C99A8[2] = display->color[2];
-    D_003C99A8[3] = display->color[3];
+    mnuCampQuadBounds[0] = (display->x - halfWidth) << 4;
+    mnuCampQuadBounds[1] = (display->y - halfHeight) << 3;
+    mnuCampQuadBounds[2] = (display->x + halfWidth) << 4;
+    mnuCampQuadBounds[3] = (display->y + halfHeight) << 3;
+    mnuCampQuadColor[0] = display->color[0];
+    mnuCampQuadColor[1] = display->color[1];
+    mnuCampQuadColor[2] = display->color[2];
+    mnuCampQuadColor[3] = display->color[3];
     variant = display->variant;
     if (display->color[3] != 0) {
         packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -805,10 +805,10 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
             evtSetDrawSurfaceIndex(0x3E);
             evtSubmitPrimaryAlphaBlendMode(0);
             evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-            itfQueueTextureBoundQuadPacket(D_003C9988, D_003C9998, D_003C99A8,
+            itfQueueTextureBoundQuadPacket(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
                                           0xFF, texture, 0, packet);
         } else {
-            itfQueueTextureBoundQuadPacket(D_003C9988, D_003C9998, D_003C99A8,
+            itfQueueTextureBoundQuadPacket(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
                                           0xFF, texture, 0, packet);
         }
         surface = &kwlnDrawSurfaces[surfaceIndex];
@@ -1341,7 +1341,7 @@ extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 extern void evtCreateMessageWindowIfMissing();
 
 void mnuShopLoadMessageResource(MenuTerminalContext *scene) {
-    scene->type = D_003C9A40[scene->shopRow].messageSet;
+    scene->type = mnuCampFlagRows[scene->shopRow].messageSet;
     switch (scene->type) {
     case 0:
         evtLoadResourcePair("/facility/msg/shop/mes_01.bmd", &scene->messageResources);
@@ -1467,7 +1467,7 @@ void mnuBuildEnabledCampEntryWindow(MenuTerminalContext *scene) {
     if (mdlFlagTest(0x901)) {
         scene->hasHighRangeStock = mnuHasCampFlaggedItemByClass(scene, 3);
     }
-    switch (D_003C9A40[scene->shopRow].messageSet) {
+    switch (mnuCampFlagRows[scene->shopRow].messageSet) {
     case 1:
     case 2:
     case 3:
@@ -1493,11 +1493,11 @@ s32 mnuCampResolveFlagRowValue(s32 row) {
     s32 i;
 
     for (i = 7; i >= 0; i--) {
-        if (D_003C9A40[row].flag[i] > 0 && mdlFlagTest(D_003C9A40[row].flag[i])) {
-            return D_003C9A40[row].value[i + 1];
+        if (mnuCampFlagRows[row].flag[i] > 0 && mdlFlagTest(mnuCampFlagRows[row].flag[i])) {
+            return mnuCampFlagRows[row].value[i + 1];
         }
     }
-    return D_003C9A40[row].value[0];
+    return mnuCampFlagRows[row].value[0];
 }
 
 /* Scan the twenty-one flag IDs in descending slot order. */
@@ -1505,7 +1505,7 @@ s32 mnuCampResolveFlagRowValue(s32 row) {
 s32 mnuCampFindActiveSlot(void) {
     s32 rowIndex;
     for (rowIndex = CAMP_SLOT_LAST_ROW_INDEX; rowIndex >= 0; rowIndex--) {
-        if (D_003CBB70[rowIndex].unlockFlag > 0 && mdlFlagTest(D_003CBB70[rowIndex].unlockFlag)) {
+        if (mnuShopRankPriceRows[rowIndex].unlockFlag > 0 && mdlFlagTest(mnuShopRankPriceRows[rowIndex].unlockFlag)) {
             return rowIndex;
         }
     }
@@ -1523,7 +1523,7 @@ typedef struct ShopSourcePriceRow {
     ShopSourcePriceEntry entries[0x60];
 } ShopSourcePriceRow;
 
-extern ShopSourcePriceRow D_003C9BC0[];
+extern ShopSourcePriceRow mnuShopSourcePriceRows[];
 
 /* True when the shop's source row or the active rank row stocks an item of the
  * requested class (1: bullets, otherwise the high item range). */
@@ -1534,7 +1534,7 @@ s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *scene, s32 itemClass) {
 
     row = mnuCampResolveFlagRowValue(scene->shopRow);
     for (i = 0; i < 0x60; i++) {
-        itemId = D_003C9BC0[row].entries[i].itemId;
+        itemId = mnuShopSourcePriceRows[row].entries[i].itemId;
         if (itemClass == 1) {
             if (mnuIsBulletItemId(itemId) != 0) {
                 return 1;
@@ -1548,7 +1548,7 @@ s32 mnuHasCampFlaggedItemByClass(MenuTerminalContext *scene, s32 itemClass) {
         return 0;
     }
     for (i = 0; i < 0x20; i++) {
-        itemId = D_003CBB70[row].entries[i].itemId;
+        itemId = mnuShopRankPriceRows[row].entries[i].itemId;
         if (itemClass == 1) {
             if (mnuIsBulletItemId(itemId) != 0) {
                 return 1;
@@ -1785,11 +1785,11 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     s32 progressStage;
 
     rowIndex = (u8)mnuCampResolveFlagRowValue(source);
-    itemId = D_003C9BC0[rowIndex].entries[index].itemId;
+    itemId = mnuShopSourcePriceRows[rowIndex].entries[index].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
-        rowPercent = D_003C9BC0[rowIndex].pricePercent;
-        pricePercent = D_003C9BC0[rowIndex].entries[index].pricePercent;
+        rowPercent = mnuShopSourcePriceRows[rowIndex].pricePercent;
+        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[index].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
@@ -1814,11 +1814,11 @@ s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
     s32 progressStage;
 
     rowIndex = (u8)mnuCampFindActiveSlot();
-    itemId = D_003CBB70[rowIndex].entries[index].itemId;
+    itemId = mnuShopRankPriceRows[rowIndex].entries[index].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
-        rowPercent = D_003CBB70[rowIndex].pricePercent;
-        pricePercent = D_003CBB70[rowIndex].entries[index].pricePercent;
+        rowPercent = mnuShopRankPriceRows[rowIndex].pricePercent;
+        pricePercent = mnuShopRankPriceRows[rowIndex].entries[index].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
@@ -2213,7 +2213,7 @@ s32 mnuCampAppendRankedItemRows(MenuTerminalContext *scene) {
     if (rowIndex == -1) {
         return 0;
     }
-    row = &D_003CBB70[rowIndex];
+    row = &mnuShopRankPriceRows[rowIndex];
     for (i = 0; i < 0x20; i++) {
         u32 id = row->entries[i].itemId;
         u32 mode = row->entries[i].mode;
@@ -2304,7 +2304,7 @@ s32 mnuCampAppendRankedFilteredRows(MenuTerminalContext *scene, s32 filterMode) 
     if (rowIndex == -1) {
         return 0;
     }
-    row = &D_003CBB70[rowIndex];
+    row = &mnuShopRankPriceRows[rowIndex];
     for (i = 0; i < 0x20; i++) {
         u32 id = row->entries[i].itemId;
         u32 mode = row->entries[i].mode;
@@ -2492,7 +2492,7 @@ extern void mnuSetQuantityListTransition(struct MenuList *, u32);
 extern s32 mnuCampAdvanceCounter(s32, MenuTerminalContext *);
 
 
-extern u8 D_003CE498[];
+extern u8 mnuShopCommandPopupEntries[];
 extern s32 D_00435E48;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
@@ -2524,13 +2524,13 @@ extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
 extern void dspRequestMessageWindowModeOne(void);
 
-extern u8 D_003CE4B4[];
+extern u8 mnuShopCatalogPopupEntries[];
 
 extern void mnuSetValueListTransition(struct MenuList *, u32);
 
 extern void mnuDrawFadingValueListRow();
 
-extern u8 D_003CE4D0[];
+extern u8 mnuShopFilteredCatalogPopupEntries[];
 
 extern u8 D_003CE508[];
 
@@ -2565,7 +2565,7 @@ s32 evtIsFadeDispatchIdle(void) {
 
 void evtInstallStateTable(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 2) {
-        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), D_003CE498, D_003CE498 + 0x118);
+        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), mnuShopCommandPopupEntries, mnuShopCommandPopupEntries + 0x118);
     }
 }
 
@@ -2629,7 +2629,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
     case 1: {
         struct MenuListNode *node = state->ownedWindows[0]->list->cursor;
         mnuSetPopupEntryFlagged(&state->popupState,
-                                (void *)(D_003CE4B4 + node->camp.value * 0x1C));
+                                (void *)(mnuShopCatalogPopupEntries + node->camp.value * 0x1C));
         return 0;
     }
     case 2:
@@ -2656,7 +2656,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
                     if (selection >= 5) {
                         mnuSetPopupEntryFlagged(
                             &state->popupState,
-                            (void *)(D_003CE4B4 + node->camp.value * sizeof(MenuPopupEntry)));
+                            (void *)(mnuShopCatalogPopupEntries + node->camp.value * sizeof(MenuPopupEntry)));
                     } else {
                         mnuSetCommandPhase(state, 1);
                         mnuSetSelectionListTransition(list, 4);
@@ -2701,7 +2701,7 @@ s32 evtSetupDispatchSync(KwlnTask *callbackContext) {
 
 void evtInstallStateTableB(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), D_003CE4B4, D_003CE4B4 + 0xfc);
+        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), mnuShopCatalogPopupEntries, mnuShopCatalogPopupEntries + 0xfc);
     }
 }
 
@@ -2757,7 +2757,7 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
         mnuStorePendingMenuCommandValue(list, 10);
         return 0;
     case 5:
-        mnuSetPopupEntryFlagged(&state->popupState, D_003CE498);
+        mnuSetPopupEntryFlagged(&state->popupState, mnuShopCommandPopupEntries);
         mnuStorePendingMenuCommandValue(state->ownedWindows[0]->list, 10);
         return 0;
     case 7:
@@ -2828,7 +2828,7 @@ s32 evtSetupDispatchSyncB(KwlnTask *callbackContext) {
 
 void evtInstallStateTableC(s32 stateAddress) {
     if (((MenuTerminalContext *)stateAddress)->dispatchMode == 1) {
-        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), D_003CE4D0, D_003CE4D0 + 0xe0);
+        MNU_INSTALL_STATE_TABLE(((MenuTerminalContext *)stateAddress), mnuShopFilteredCatalogPopupEntries, mnuShopFilteredCatalogPopupEntries + 0xe0);
     }
 }
 
@@ -2880,7 +2880,7 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedList, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
             mnuStorePendingMenuCommandValue(state->ownedWindows[0]->list, 10);
             break;
         case 7:
@@ -3000,7 +3000,7 @@ s32 mnuShopPollRangeFilteredCommandSelection(KwlnTask *callbackContext) {
         mnuStorePendingMenuCommandValue(list, 10);
         return 0;
     case 5:
-        mnuSetPopupEntryFlagged(popup, D_003CE498);
+        mnuSetPopupEntryFlagged(popup, mnuShopCommandPopupEntries);
         mnuStorePendingMenuCommandValue(state->ownedWindows[0]->list, 10);
         return 0;
     case 7:
@@ -3114,7 +3114,7 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedList, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
             mnuStorePendingMenuCommandValue(state->ownedWindows[0]->list, 10);
             break;
         case 7:
@@ -3212,7 +3212,7 @@ s32 evtOpenProgressResultPopupWhenIdle(KwlnTask *callbackContext) {
     s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (evtGetMessageWindowControlState() == 0) {
-            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
         }
         return 0;
     }
@@ -3244,7 +3244,7 @@ s32 mnuStartShopRowMessage(KwlnTask *callbackContext) {
     s32 i;
     s32 entry;
 
-    switch (D_003C9A40[row].messageSet) {
+    switch (mnuCampFlagRows[row].messageSet) {
     case 2:
         for (i = 0; i < 8; i++) {
             if (mdlFlagTest(D_003CE420[i]) == 0 || i == 7) {
@@ -3277,7 +3277,7 @@ s32 mnuPollTerminalPanelTransition(KwlnTask *callbackContext) {
     s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (evtGetMessageWindowControlState() == 0) {
-            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
         }
         return 0;
     }
@@ -3387,7 +3387,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
         struct MenuList *primaryList =
             ((MenuTerminalContext *)stateAddress)->ownedWindows[0]->list;
         values->value = values->price;
-        mnuSetPopupEntryFlagged(dispatchSlot, (D_003CE4B4 +
+        mnuSetPopupEntryFlagged(dispatchSlot, (mnuShopCatalogPopupEntries +
             primaryList->cursor->camp.value * 0x1C));
         break;
     }
@@ -3674,7 +3674,7 @@ s32 evtApplyDispatchModeState(KwlnTask *task) {
         mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 6);
         break;
     case 2:
-        if (((MenuTerminalContext *)stateAddress)->stateTable != (s32)D_003CE498) {
+        if (((MenuTerminalContext *)stateAddress)->stateTable != (s32)mnuShopCommandPopupEntries) {
             mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 5);
         }
         break;
@@ -3728,7 +3728,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
-        if (state->stateTable == (s32)D_003CE498) {
+        if (state->stateTable == (s32)mnuShopCommandPopupEntries) {
             mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             mnuDrawTerminalPanelListRows(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(
@@ -4261,11 +4261,11 @@ s32 evtMenuUpdateProgressRewardPopup(KwlnTask *callback) {
             switch (choice) {
             case 1:
                 mnuCampRebuildItemStockWindow(context);
-                mnuSetPopupEntryFlagged(popup, D_003CE4B4);
+                mnuSetPopupEntryFlagged(popup, mnuShopCatalogPopupEntries);
                 break;
             case 2:
                 mnuCampRebuildFilteredStockWindow(context, 1);
-                mnuSetPopupEntryFlagged(popup, D_003CE4D0);
+                mnuSetPopupEntryFlagged(popup, mnuShopFilteredCatalogPopupEntries);
                 break;
             case 3:
                 mnuCampRebuildFilteredStockWindow(context, 3);
@@ -4279,13 +4279,13 @@ s32 evtMenuUpdateProgressRewardPopup(KwlnTask *callback) {
         } else {
             switch (choice) {
             case 2:
-                mnuSetPopupEntryFlagged(popup, D_003CE4D0);
+                mnuSetPopupEntryFlagged(popup, mnuShopFilteredCatalogPopupEntries);
                 break;
             case 3:
                 mnuSetPopupEntryFlagged(popup, D_003CE4EC);
                 break;
             case 1:
-                mnuSetPopupEntryFlagged(popup, D_003CE4B4);
+                mnuSetPopupEntryFlagged(popup, mnuShopCatalogPopupEntries);
                 break;
             case 4:
                 if (rewardState == 2) {

@@ -67,7 +67,7 @@ extern u8 mnuResourceTaskName[];
 
 extern void mnuReleaseMantraResourceWork(s32, struct MnuStatusResource *);
 
-extern u8 D_003CFCC0[];
+extern u8 mnuMantraResourceTaskDescriptor[];
 
 extern void mnuReleaseSelectionWorkResources(struct MnuStatusResource *);
 
@@ -210,7 +210,7 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuStatusResource *resourceWork) {
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
     MnuStatusResource *resourceWork = mnuAllocateMantraResourceWork();
-    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_003CFCC0, mnuReleaseMantraResourceWork, resourceWork);
+    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)mnuMantraResourceTaskDescriptor, mnuReleaseMantraResourceWork, resourceWork);
 }
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */

@@ -451,9 +451,9 @@ extern s32 strcmp(const char *a, const char *b);
 #include "sdf_packet_alloc.h"
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-extern s32 D_00368BA8[4];
-extern s32 D_00368BB8[4];
-extern s32 D_00368BC8[4];
+extern s32 mnuCampQuadBounds[4];
+extern s32 mnuCampQuadTexcoords[4];
+extern s32 mnuCampQuadColor[4];
 extern SdfPoolNode D_003255A8;
 
 void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
@@ -715,18 +715,18 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
     s32 variant;
     SdfListHead *packetList;
 
-    D_00368BB8[2] = texture->width << 4;
-    D_00368BB8[3] = texture->height << 4;
+    mnuCampQuadTexcoords[2] = texture->width << 4;
+    mnuCampQuadTexcoords[3] = texture->height << 4;
     halfWidth = (s32)(texture->width * display->scaleX) / 2;
     halfHeight = (s32)(texture->height * display->scaleY) / 2;
-    D_00368BA8[0] = (display->x - halfWidth) << 4;
-    D_00368BA8[1] = (display->y - halfHeight) << 3;
-    D_00368BA8[2] = (display->x + halfWidth) << 4;
-    D_00368BA8[3] = (display->y + halfHeight) << 3;
-    D_00368BC8[0] = display->color[0];
-    D_00368BC8[1] = display->color[1];
-    D_00368BC8[2] = display->color[2];
-    D_00368BC8[3] = display->color[3];
+    mnuCampQuadBounds[0] = (display->x - halfWidth) << 4;
+    mnuCampQuadBounds[1] = (display->y - halfHeight) << 3;
+    mnuCampQuadBounds[2] = (display->x + halfWidth) << 4;
+    mnuCampQuadBounds[3] = (display->y + halfHeight) << 3;
+    mnuCampQuadColor[0] = display->color[0];
+    mnuCampQuadColor[1] = display->color[1];
+    mnuCampQuadColor[2] = display->color[2];
+    mnuCampQuadColor[3] = display->color[3];
     variant = display->variant;
     if (display->color[3] != 0) {
         packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -738,7 +738,7 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
         } else if (variant == 2) {
             itfSendTablePacket(packetList, 2, 0);
         }
-        itfQueueTextureBoundQuadPacket(D_00368BA8, D_00368BB8, D_00368BC8,
+        itfQueueTextureBoundQuadPacket(mnuCampQuadBounds, mnuCampQuadTexcoords, mnuCampQuadColor,
                                       0xFF, texture, 0, packetList);
         D_003255A8.append(&D_003255A8, packetList);
     }
@@ -1209,25 +1209,25 @@ typedef struct CampFlagRow {
     u8 pad19;
 } CampFlagRow;
 
-extern CampFlagRow D_00368C50[];
+extern CampFlagRow mnuCampFlagRows[];
 
 s32 campFlagRowValue(s32 row) {
     s32 i;
 
     for (i = 7; i >= 0; i--) {
-        if (D_00368C50[row].flag[i] > 0 && mdlFlagTest(D_00368C50[row].flag[i])) {
-            return D_00368C50[row].value[i + 1];
+        if (mnuCampFlagRows[row].flag[i] > 0 && mdlFlagTest(mnuCampFlagRows[row].flag[i])) {
+            return mnuCampFlagRows[row].value[i + 1];
         }
     }
-    return D_00368C50[row].value[0];
+    return mnuCampFlagRows[row].value[0];
 }
 
-extern u8 D_00369A88[];
+extern u8 mnuShopRankPriceRows[];
 
 /* Highest matching row wins; rows with nonpositive flags are not queried. */
 s32 mnuCampFindActiveSlot(void) {
     s32 rowIndex;
-    u8 *slotTable = D_00369A88;
+    u8 *slotTable = mnuShopRankPriceRows;
     s16 *flagId = (s16 *)(slotTable + CAMP_SLOT_LAST_ROW_OFFSET);
     for (rowIndex = CAMP_SLOT_LAST_ROW_INDEX; rowIndex >= 0; rowIndex--, flagId = (s16 *)((u8 *)flagId - CAMP_SLOT_ROW_STRIDE)) {
         if (*flagId > 0 && mdlFlagTest(*flagId)) {
@@ -1249,7 +1249,7 @@ typedef struct ShopSourcePriceRow {
     ShopSourcePriceEntry entries[0x40];
 } ShopSourcePriceRow;
 
-extern ShopSourcePriceRow D_00368CF0[];
+extern ShopSourcePriceRow mnuShopSourcePriceRows[];
 
 /* True when the shop's source row or the active rank row stocks an available
  * item in the 0xA0..0xBF range (entries of type 1 are skipped). */
@@ -1261,8 +1261,8 @@ s32 mnuShopHasExtraOption(ShopScene *scene) {
 
     row = campFlagRowValue(scene->initialSelection);
     for (i = 0; i < 0x40; i++) {
-        itemId = D_00368CF0[row].entries[i].itemId;
-        type = D_00368CF0[row].entries[i].type;
+        itemId = mnuShopSourcePriceRows[row].entries[i].itemId;
+        type = mnuShopSourcePriceRows[row].entries[i].type;
         if (type != 1 && itemId - 0xA0 < 0x20) {
             return 1;
         }
@@ -1272,8 +1272,8 @@ s32 mnuShopHasExtraOption(ShopScene *scene) {
         return 0;
     }
     for (i = 0; i < 0x20; i++) {
-        itemId = ((ShopRankPriceRow *)D_00369A88)[row].entries[i].itemId;
-        type = ((ShopRankPriceRow *)D_00369A88)[row].entries[i].mode;
+        itemId = ((ShopRankPriceRow *)mnuShopRankPriceRows)[row].entries[i].itemId;
+        type = ((ShopRankPriceRow *)mnuShopRankPriceRows)[row].entries[i].mode;
         if (type != 1 && itemId - 0xA0 < 0x20) {
             return 1;
         }
@@ -1472,11 +1472,11 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     s32 progressStage;
 
     rowIndex = (u8)campFlagRowValue(source);
-    itemId = D_00368CF0[rowIndex].entries[index].itemId;
+    itemId = mnuShopSourcePriceRows[rowIndex].entries[index].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
-        rowPercent = D_00368CF0[rowIndex].pricePercent;
-        pricePercent = D_00368CF0[rowIndex].entries[index].pricePercent;
+        rowPercent = mnuShopSourcePriceRows[rowIndex].pricePercent;
+        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[index].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
@@ -1503,8 +1503,8 @@ s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
     s32 progressStage;
 
     rowOffset = (u8)mnuCampFindActiveSlot() * sizeof(ShopRankPriceRow);
-    entry = D_00369A88 + index * sizeof(ShopRankPriceEntry) + rowOffset;
-    row = D_00369A88 + rowOffset;
+    entry = mnuShopRankPriceRows + index * sizeof(ShopRankPriceEntry) + rowOffset;
+    row = mnuShopRankPriceRows + rowOffset;
     itemId = *(u16 *)(entry + 4);
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
@@ -1674,7 +1674,7 @@ s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
 
 extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
-extern u32 D_00369FA0[];
+extern u32 mnuShopMode1Prices[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
 extern u32 mnuShopIsMode1PurchaseBlocked(u32 itemId);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
@@ -1688,7 +1688,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
     if (rowIndex == -1) {
         return 0;
     }
-    row = (ShopRankPriceRow *)(D_00369A88 + rowIndex * sizeof(ShopRankPriceRow));
+    row = (ShopRankPriceRow *)(mnuShopRankPriceRows + rowIndex * sizeof(ShopRankPriceRow));
     for (i = 0; i < 0x20; i++) {
         u32 id = row->entries[i].itemId;
         u32 mode = row->entries[i].mode;
@@ -1722,7 +1722,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
             node = mnuAppendWindowListNode(scene->window, D_003BAA74[id]);
             mnuAdvanceWindowListSelection(scene->window);
             params = &node->camp;
-            price = D_00369FA0[id];
+            price = mnuShopMode1Prices[id];
             params->value = price;
             params->id = id;
             params->price = price;
@@ -1756,8 +1756,8 @@ s32 mnuCampRebuildItemStockWindow(ShopScene *scene) {
     rowIndex = campFlagRowValue(scene->initialSelection);
     scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
     for (i = 0; i < 0x40; i++) {
-        u32 id = D_00368CF0[rowIndex].entries[i].itemId;
-        u32 mode = D_00368CF0[rowIndex].entries[i].type;
+        u32 id = mnuShopSourcePriceRows[rowIndex].entries[i].itemId;
+        u32 mode = mnuShopSourcePriceRows[rowIndex].entries[i].type;
         struct MenuListNode *node;
         CampWindowParams *params;
         u32 price;
@@ -1788,7 +1788,7 @@ s32 mnuCampRebuildItemStockWindow(ShopScene *scene) {
             node = mnuAppendWindowListNode(scene->window, D_003BAA74[id]);
             mnuAdvanceWindowListSelection(scene->window);
             params = &node->camp;
-            price = D_00369FA0[id];
+            price = mnuShopMode1Prices[id];
             params->value = price;
             params->id = id;
             params->price = price;
@@ -1809,7 +1809,7 @@ s32 mnuCampRebuildItemStockWindow(ShopScene *scene) {
 
 extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
-extern u32 D_00369FA0[];
+extern u32 mnuShopMode1Prices[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
 extern u32 mnuShopIsMode1PurchaseBlocked(u32 itemId);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
@@ -1823,7 +1823,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
     if (rowIndex == -1) {
         return 0;
     }
-    entryCursor = D_00369A88 + rowIndex * sizeof(ShopRankPriceRow);
+    entryCursor = mnuShopRankPriceRows + rowIndex * sizeof(ShopRankPriceRow);
     for (i = 0; i < 0x20; i++, entryCursor += sizeof(ShopRankPriceEntry)) {
         u16 itemId = *(u16 *)(entryCursor + 4);
         u8 mode = entryCursor[6];
@@ -1851,7 +1851,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
             node = mnuAppendWindowListNode(scene->window, D_003BAA74[itemId]);
             mnuAdvanceWindowListSelection(scene->window);
             parameters = &node->camp;
-            priceEntry = &D_00369FA0[itemId];
+            priceEntry = &mnuShopMode1Prices[itemId];
             price = *priceEntry;
             parameters->value = price;
             parameters->id = itemId;
@@ -1885,8 +1885,8 @@ s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
     rowIndex = campFlagRowValue(scene->initialSelection);
     scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
     for (i = 0; i < 0x40; i++) {
-        u32 id = D_00368CF0[rowIndex].entries[i].itemId;
-        u32 mode = D_00368CF0[rowIndex].entries[i].type;
+        u32 id = mnuShopSourcePriceRows[rowIndex].entries[i].itemId;
+        u32 mode = mnuShopSourcePriceRows[rowIndex].entries[i].type;
         struct MenuListNode *node;
         CampWindowParams *params;
         u32 price;
@@ -1914,7 +1914,7 @@ s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
             node = mnuAppendWindowListNode(scene->window, D_003BAA74[id]);
             mnuAdvanceWindowListSelection(scene->window);
             params = &node->camp;
-            price = D_00369FA0[id];
+            price = mnuShopMode1Prices[id];
             params->value = price;
             params->id = id;
             params->price = price;
@@ -2035,9 +2035,9 @@ extern void sndReleaseTrackHandle(s32);
 extern s32 mnuDrawShopCommandPanel(ShopScene *context);
 
 extern void dspRequestMessageWindowModeOne(void);
-extern MenuPopupEntry D_0036AA68[];
-extern MenuPopupEntry D_0036AA84[];
-extern MenuPopupEntry D_0036AAA0[];
+extern MenuPopupEntry mnuShopCommandPopupEntries[];
+extern MenuPopupEntry mnuShopCatalogPopupEntries[];
+extern MenuPopupEntry mnuShopFilteredCatalogPopupEntries[];
 extern u8 D_0036AABC[];
 
 
@@ -2085,7 +2085,7 @@ s32 evtIsFadeDispatchIdle(void) {
 
 void evtInstallStateTable(ShopScene *state) {
     if (state->menuMode == 2) {
-        MNU_INSTALL_STATE_TABLE(state, D_0036AA68, D_0036AA68 + 7);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopCommandPopupEntries, mnuShopCommandPopupEntries + 7);
     }
 }
 
@@ -2150,13 +2150,13 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
     case 1:
         if (state->extraOption != 0) {
             mnuSetPopupEntryFlagged(&state->dispatchState,
-                                   D_0036AA84 + state->sprite->list->cursor->index);
+                                   mnuShopCatalogPopupEntries + state->sprite->list->cursor->index);
         } else {
             s32 index = state->sprite->list->cursor->index;
             if (index + 1 >= 2) {
-                mnuSetPopupEntryFlagged(&state->dispatchState, D_0036AAA0 + index);
+                mnuSetPopupEntryFlagged(&state->dispatchState, mnuShopFilteredCatalogPopupEntries + index);
             } else {
-                mnuSetPopupEntryFlagged(&state->dispatchState, D_0036AA84 + index);
+                mnuSetPopupEntryFlagged(&state->dispatchState, mnuShopCatalogPopupEntries + index);
             }
         }
         return 0;
@@ -2215,7 +2215,7 @@ s32 evtSetupDispatchSync(KwlnTask *callbackContext) {
 
 void evtInstallStateTableB(ShopScene *state) {
     if (state->menuMode == 1) {
-        MNU_INSTALL_STATE_TABLE(state, D_0036AA84, D_0036AA84 + 6);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopCatalogPopupEntries, mnuShopCatalogPopupEntries + 6);
     }
 }
 
@@ -2273,7 +2273,7 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
@@ -2336,7 +2336,7 @@ s32 evtSetupDispatchSyncB(KwlnTask *callbackContext) {
 
 void evtInstallStateTableC(ShopScene *state) {
     if (state->menuMode == 1) {
-        MNU_INSTALL_STATE_TABLE(state, D_0036AAA0, D_0036AAA0 + 5);
+        MNU_INSTALL_STATE_TABLE(state, mnuShopFilteredCatalogPopupEntries, mnuShopFilteredCatalogPopupEntries + 5);
     }
 }
 
@@ -2394,7 +2394,7 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
@@ -2510,7 +2510,7 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
@@ -2651,7 +2651,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
         break;
     case 10: {
         struct MenuList *primaryTask = ((ShopScene *)stateAddress)->sprite->list;
-        mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA84 + primaryTask->cursor->index);
+        mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCatalogPopupEntries + primaryTask->cursor->index);
         break;
     }
     case 12:
@@ -2888,10 +2888,10 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
         /* Operation two is the additional option; the baseline pair is one/three. */
         switch (selectedOperation) {
         case 2:
-            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AAA0);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopFilteredCatalogPopupEntries);
             break;
         case 1:
-            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA84);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCatalogPopupEntries);
             break;
         case 3:
             mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AABC);
@@ -2954,7 +2954,7 @@ s32 evtPlayDispatchModeCue(KwlnTask *task) {
 }
 
 
-extern MenuPopupEntry D_0036AA68[];
+extern MenuPopupEntry mnuShopCommandPopupEntries[];
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
 
@@ -2965,7 +2965,7 @@ s32 evtApplyDispatchModeState(KwlnTask *task) {
         mnuSetCommandPhase(state, 6);
         break;
     case 2:
-        if (state->stateTable != (s32)D_0036AA68) {
+        if (state->stateTable != (s32)mnuShopCommandPopupEntries) {
             mnuSetCommandPhase(state, 5);
         }
         break;
@@ -3012,7 +3012,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         brsDrawResultIconPairWithAlpha((s32)state, 0x100, 3, 0x53);
         break;
     case 2:
-        if (state->stateTable == (s32)D_0036AA68) {
+        if (state->stateTable == (s32)mnuShopCommandPopupEntries) {
             mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(0, 0, 0, state->sprite->list, 0x53);
@@ -3120,7 +3120,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                     if (index < 32) {
                         u32 stockOffset = index * sizeof(ShopRankPriceEntry) +
                                           activeSlot * (s32)sizeof(ShopRankPriceRow);
-                        u32 flagsAddress = (u32)&D_00369A88[8] + stockOffset;
+                        u32 flagsAddress = (u32)&mnuShopRankPriceRows[8] + stockOffset;
 
                         do {
                             ShopRankPriceEntry *entry = (ShopRankPriceEntry *)(flagsAddress - sizeof(u32));
@@ -3177,7 +3177,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                         state->progressTicks++;
                     } else {
                         state->action = 0;
-                        mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
+                        mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
                     }
                     break;
                 }
