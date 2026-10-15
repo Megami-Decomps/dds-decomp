@@ -4437,11 +4437,107 @@ void mnuReleaseMantraPanelSpriteView(u32 obj) {
     mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraPanelBaseLayer);
+s32 mnuDrawMantraPanelBaseLayer(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+                              MantraPanelAnimation *panel, u32 packet) {
+    s8 markerOffsets[6][2] = {
+        {49, 22}, {69, 32}, {69, 62}, {49, 72}, {29, 62}, {29, 32}
+    };
+    MnuStatusResource *resource = (MnuStatusResource *)pool->unk2DB4;
+    f32 orbitPhase;
+    f32 pulse;
+    f32 angle;
+    f32 orbitRadius;
+    s32 drawX;
+    s32 drawY;
+    s32 drawAlpha;
+    MantraNodePos **neighbor;
+    s16 mask;
+    s32 i;
 
-extern s32 mnuDrawMantraPanelBaseLayer(s32, s32, s32, s32, MantraPanelPool *, MantraPanelAnimation *, s32);
+    panel->stateA++;
+    if (panel->stateA >= 131) {
+        panel->stateA = 0;
+    }
+    panel->stateB++;
+    if (panel->stateB >= 251) {
+        panel->stateB = 0;
+    }
+    orbitPhase = panel->stateB / 250.0f;
+    if (panel->stateA < 30) {
+        pulse = 0.0f;
+    } else if (panel->stateA < 90) {
+        pulse = (panel->stateA - 30) / 60.0f * 0.5f;
+    } else {
+        pulse = (panel->stateA - 90) / 40.0f * 0.5f + 0.5f;
+    }
+    pulse = (sdfSinPoly(pulse * -(3.14159265f * 2.0f)) + 1.0f) * 0.5f;
+    mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, z, (s32)(alpha * 0.8f), 0x8B, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect(((u32)x - 0x80) << 4, ((u32)y - 0x80) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0x8E, 0x20, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    for (i = 0; i < 3; i++) {
+        orbitRadius = 14.0f;
+        angle = orbitPhase * -(3.14159265f * 2.0f) + i * (3.14159265f * 2.0f / 3.0f);
+        drawX = (f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * orbitRadius;
+        drawY = (f32)y + -sdfSinPoly(angle) * orbitRadius;
+        sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
+        drawAlpha = alpha * 0.7f;
+        mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, drawAlpha, 1.2f, 0x8D, 0x40, packet);
+        sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
+        mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, drawAlpha, 1.2f, 0x8D, 0x40, packet);
+    }
+    mask = 0;
+    mnuDrawMantraSprite(x, y, 0, (s32)(alpha * (pulse * 0.5f + 0.3f)), 0x8C, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect(((u32)x - 0x80) << 4, ((u32)y - 0x80) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, 128, 0x90, 0x60, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    mnuUpdateAndDrawMantraSparkleEmitter(x, y, z, alpha, panel->spriteHandle, packet);
+    mnuDrawMantraScaledCenteredSprite(x + 49, y + 47, 0, (s32)(alpha * 0.2f), 1.0f, 0x92, 0, packet);
+    if ((panel->flags >> 28) & 1) {
+        neighbor = mnuGetMantraPanelPositionRecord(panel->id)->neighbors;
+    } else {
+        neighbor = mnuGetMantraNodePositionRecord(panel->id)->neighbors;
+    }
+    for (i = 0; i < 6; neighbor++) {
+        s16 nodeIndex = (*neighbor)->panelIndex;
+        if ((panel->flags >> 28) & 1) {
+            if (mnuFindPanelPositionRecordByScriptId(((u8 *)resource)[0xBF3] & 0xF, (u16)nodeIndex)->flags & 1) {
+                mask |= 3 << i;
+                i++;
+            } else {
+                i++;
+            }
+        } else {
+            u32 value = mnuGetPanelValueAt(resource, nodeIndex);
+            if ((value >> 8) & 1) {
+                mask |= 3 << i;
+            }
+            i++;
+        }
+    }
+    if (mask & 0x40) {
+        mask |= 1;
+    }
+    for (i = 0; i < 6; i++) {
+        if ((mask >> i) & 1) {
+            mnuDrawMantraScaledCenteredSprite(x + markerOffsets[i][0], y + markerOffsets[i][1],
+                0, (s32)(alpha * (pulse * 0.2f + 0.3f)), pulse * 0.3f + 1.0f, 0x92, 0, packet);
+        }
+    }
+    return 0;
+}
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425B68);
+
+extern s32 mnuDrawMantraPanelBaseLayer(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
+
+
 
 s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
                  MantraPanelAnimation *panel, u32 packet) {
