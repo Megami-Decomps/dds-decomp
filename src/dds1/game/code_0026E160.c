@@ -181,8 +181,8 @@ void mnuDrawMovieMenuFrame(s32 alpha) {
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, u32, EffectSlotSet *, s32, s32);
 
-void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *sprite, s32 mode, s32 flag, s32 surface) {
-    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), flag, sprite, mode, surface);
+void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *sprite, s32 slotIndex, s32 flag, s32 surface) {
+    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), flag, sprite, slotIndex, surface);
 }
 
 /* EE integer/FPU argument banks are independent. The callers establish the
