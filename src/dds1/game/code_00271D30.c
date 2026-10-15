@@ -93,7 +93,7 @@ extern void mnuLoadBackdropAssetsAndTintSlots(void *);
 
 extern void evtCreateMessageWindowIfMissing(s32);
 
-extern char D_0037B9E0[];
+extern char mnuCampMessagePack[];
 
 extern void mnuLoadStaffImageResources(void *);
 
@@ -120,7 +120,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     }
     mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuLoadBackdropAssetsAndTintSlots(menu->background);
-    evtCreateMessageWindowIfMissing((s32)D_0037B9E0);
+    evtCreateMessageWindowIfMissing((s32)mnuCampMessagePack);
     mnuLoadStaffImageResources(menu);
     mnuAppendStaffResourceRequests(menu);
     mnuResetGradientFadeColor(menu->timer, 0x40);

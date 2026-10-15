@@ -1626,12 +1626,12 @@ void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *
     }
 }
 
-extern MnuMovieResourceEntry D_003E4C48[];
+extern MnuMovieResourceEntry mnuMovieResourceEntries[];
 
 void mnuRequestIndexedMovieResource(index)
 s32 index;
 {
-    MnuMovieResourceEntry *entry = &D_003E4C48[index];
+    MnuMovieResourceEntry *entry = &mnuMovieResourceEntries[index];
     mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
 
@@ -1643,8 +1643,8 @@ extern char D_0042A380[];
 
 extern u32 D_00437AD0;
 extern u32 sdfSoundGetCommandStatus(void);
-extern SdfMovieDescriptor D_00457DB0;
-extern char D_00457DC8[];
+extern SdfMovieDescriptor mnuMoviePlaybackDescriptor;
+extern char mnuMovieRestartFileNameBuffer[];
 extern char D_0042A3B0[];
 extern u32 D_00437AD4;
 extern SdfTexResource *D_00437AD8;
@@ -1676,7 +1676,7 @@ s32 mnuRestartMovieStreamAfterStop(KwlnTask *task) {
     }
     if (sdfSoundGetCommandStatus() == 0) {
         movie = &mnuMovieDrawContext;
-        sdfMovieInitializeStreamWork(movie, &D_00457DB0, D_00457DC8);
+        sdfMovieInitializeStreamWork(movie, &mnuMoviePlaybackDescriptor, mnuMovieRestartFileNameBuffer);
         movie->soundNode.textureHead = D_00437AD8;
         movie->soundNode.width = D_00437ADC;
         movie->soundNode.height = D_00437AE0;
@@ -1695,7 +1695,7 @@ extern char *strcpy(char *, const char *);
 KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *params) {
     MovObj *context;
 
-    D_00457DB0 = *params;
+    mnuMoviePlaybackDescriptor = *params;
     if (mnuMovieDrawTask != 0) {
         context = &mnuMovieDrawContext;
         D_00437AD4 = 1;
@@ -1703,22 +1703,22 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
         D_00437ADC = context->soundNode.width;
         D_00437AE0 = context->soundNode.height;
         D_00437AE4 = context->soundNode.audioMode;
-        strcpy(D_00457DC8, file);
+        strcpy(mnuMovieRestartFileNameBuffer, file);
         context->soundNode.textureHead = 0;
         sdfCancelAndReleaseMovieStreamWork(context);
-        D_00457DB0.source = D_00437AD8->word;
+        mnuMoviePlaybackDescriptor.source = D_00437AD8->word;
         D_00437AD0 = 0;
         return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, mnuRestartMovieStreamAfterStop, 0, 0);
     } else {
         D_00437AD4 = 0;
-        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, &D_00457DB0, file);
+        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, &mnuMoviePlaybackDescriptor, file);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2AFB, 1, 1, mnuMovieDraw, 0, 0);
     }
     return mnuMovieDrawTask;
 }
 
 void mnuStartMoviePlaybackByResourceIndex(s32 index) {
-    MnuMovieResourceEntry *entry = &D_003E4C48[index];
+    MnuMovieResourceEntry *entry = &mnuMovieResourceEntries[index];
     mnuRequestMoviePlayback(entry->fileName, &entry->descriptor);
 }
 

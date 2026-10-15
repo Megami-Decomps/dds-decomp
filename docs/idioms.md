@@ -13727,3 +13727,40 @@ preserve the opaque two-word prefix and the complete 32-byte copy rather
 than initializing or reinterpreting those words. All names are inferred
 from matched consumers and paired native storage; no code, flags, layouts,
 bounds, casts, volatility, imports or assembly changes.
+
+## Camp resource name views and movie-menu data
+
+`mnuCampBaseResourceNameRows` retains seven DDS1 versus two DDS2 eight-byte
+rows. The loader consumes the first word; do not assume every second word
+is padding or change the per-title declarations. The main/extra/paired
+`mnuCamp*ResourceNamePairs` retain 16/5/2 two-column rows. Request construction
+selects column one only for owner word one, including its native null cells;
+these are not new language banks or null-fallback rules. The shared
+`mnuCampMotionResourceNames` role keeps DDS1's two names versus DDS2's one.
+DDS1 `mnuCampResourceHandles` now uses its already-established DDS2 spelling,
+without changing either array's count or lifetime.
+
+`mnuCampMessagePack` names the existing MSG1 data bank. Call sites retain
+its eight-byte header skip; the DDS1 constructor's currently unused argument
+does not establish an extra consumer or justify rewriting the bank as text.
+All pointed resource-name and path owners stay unchanged.
+
+DDS1 `mnuMantraVariantSpriteSlotView` and `mnuMantraEntrySpriteSlotView` are
+interior views at entries 5 and 13 of `mnuMantraSpriteSlots`, not separately
+allocated slot banks. `mnuFlagSnapshotIds` retains its 41 native IDs and the
+collect/apply routines' asymmetric set-only behavior; zero saved bytes do
+not acquire an invented flag-clear operation.
+
+`mnuMovieResourceEntries` keeps the existing 24-byte filename/descriptor
+records, 76 in DDS1 and 104 in DDS2. The DDS2 playback descriptor and restart
+filename buffer remain separate globals: the existing descriptor copy is
+20 bytes despite the 24-byte native slot, and the filename storage is 128
+bytes. Do not change the copy, padding or existing string-copy behavior.
+
+DDS2 `mnuMovieMenuSlidePathData` is deliberately a generic name: consumers
+index past the unused prefix, and the observed endpoint word overlaps the
+following pulse-position bank. Keep those views and the original
+`dx * dx + dy + dy` weight expression. The separate pulse and pick sprite
+position banks retain their s16 XY declarations, four versus 32 entries,
+original coordinates and unchecked indexing; no path normalization or
+layout/type migration accompanies these names.

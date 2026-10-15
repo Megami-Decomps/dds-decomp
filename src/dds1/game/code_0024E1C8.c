@@ -64,7 +64,7 @@ enum {
 extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 extern u16 mnuMantraCoordinateSpritePlacements[][4];
-extern s32 D_0036C6AC[];
+extern s32 mnuMantraVariantSpriteSlotView[];
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
@@ -459,7 +459,7 @@ void mnuDrawVariantSpriteBySelector(s32 x, s32 y, s32 z, s32 alpha, s32 placemen
                                            [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
-                  flags, D_0036C6AC[0], sprite, context);
+                  flags, mnuMantraVariantSpriteSlotView[0], sprite, context);
 }
 
 
@@ -482,7 +482,7 @@ void mnuDrawVariantSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C6AC[0],
+                  mnuMantraVariantSpriteSlotView[0],
                   sprite,
                   context);
 }

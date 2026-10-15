@@ -16,18 +16,18 @@
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
 
-extern struct EffectSlotSet *D_003DC5C8[];
+extern struct EffectSlotSet *mnuCampResourceHandles[];
 
 extern const char D_003B2058[16];
 
-extern char *D_0037C380[];
+extern char *mnuCampMotionResourceNames[];
 
 typedef struct ResourceRef8 {
     s32 index;
     s32 pad;
 } ResourceRef8;
 
-extern ResourceRef8 D_0037C210[];
+extern ResourceRef8 mnuCampBaseResourceNameRows[];
 
 extern char D_003B2020[];
 
@@ -48,7 +48,7 @@ void mnuLoadStaffImageHandles(void) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        D_003DC5C8[resourceIndex] = effLoadIndexedResource(D_003B2020, (const char *)D_0037C210[resourceIndex].index, MNU_STAFF_RETAIN_RESOURCE);
+        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(D_003B2020, (const char *)mnuCampBaseResourceNameRows[resourceIndex].index, MNU_STAFF_RETAIN_RESOURCE);
     }
 }
 
@@ -57,7 +57,7 @@ void mnuResolveStaffImageHandles(u32 *destination) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        struct EffectSlotSet **sourceSlot = &D_003DC5C8[resourceIndex];
+        struct EffectSlotSet **sourceSlot = &mnuCampResourceHandles[resourceIndex];
         u32 *destinationSlot = &destination[resourceIndex];
 
         effResolveAndReleaseResource(*sourceSlot);
@@ -70,7 +70,7 @@ void mnuReleaseStaffImageHandles(u32 *resources) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         u32 *outputSlot = &resources[resourceIndex];
-        effReleaseTextureHandlesAndResetSlots(D_003DC5C8[resourceIndex]);
+        effReleaseTextureHandlesAndResetSlots(mnuCampResourceHandles[resourceIndex]);
         *outputSlot = 0;
     }
 }
@@ -178,9 +178,9 @@ void mnuLoadStaffImageResources(void *menuData) {
     u32 *statusWords;
     EffMappedResource *primaryResource;
 
-    primaryResource = effLoadMappedResource(D_003B2058, D_0037C380[0]);
+    primaryResource = effLoadMappedResource(D_003B2058, mnuCampMotionResourceNames[0]);
     menu->primaryImage = primaryResource;
-    menu->secondaryImage = effLoadMappedResource(D_003B2058, D_0037C380[1]);
+    menu->secondaryImage = effLoadMappedResource(D_003B2058, mnuCampMotionResourceNames[1]);
 
     batch = effCreateStatusBatch(6);
     record = batch->records;

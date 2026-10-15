@@ -209,7 +209,7 @@ enum {
 
 extern MnuSpritePlacement mnuMantraSceneSpritePlacements[];
 extern MnuSceneSpriteEntry mnuMantraEntrySpritePlacements[];
-extern s32 D_0036C6CC[];
+extern s32 mnuMantraEntrySpriteSlotView[];
 
 void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 flags, s32 context) {
@@ -245,7 +245,7 @@ void mnuDrawSceneEntrySpriteWithOffset(s32 x, s32 y, s32 z, s32 alpha, s32 entry
                       z,
                       (u32)((f32)(alpha << 8) * 0.0078125f),
                       flags,
-                      D_0036C6CC[0],
+                      mnuMantraEntrySpriteSlotView[0],
                       mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_INDEX],
                       context);
     }
@@ -258,7 +258,7 @@ void mnuDrawSceneEntrySprite(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C6CC[0],
+                  mnuMantraEntrySpriteSlotView[0],
                   mnuMantraEntrySpritePlacements[entryIndex][MNU_SCENE_SPRITE_INDEX],
                   context);
 }
@@ -732,26 +732,26 @@ void mnuDrawMantraCostAfterListAdvance(s32 recordAddress, MnuSceneListHead *head
     }
 }
 
-extern u16 D_0036C6D0[];
+extern u16 mnuFlagSnapshotIds[];
 
 void mnuCollectFlagArray(u8 *flags) {
     u32 i;
 
     for (i = 0; i < 0x29; i++, flags++) {
-        if (mdlFlagTest(D_0036C6D0[i]) != 0) {
+        if (mdlFlagTest(mnuFlagSnapshotIds[i]) != 0) {
             *flags = 1;
         }
     }
 }
 
-extern u16 D_0036C6D0[];
+extern u16 mnuFlagSnapshotIds[];
 
 void mnuApplyFlagArray(u8 *flags) {
     u32 i;
 
     for (i = 0; i < 0x29; i++) {
         if (*flags++ != 0) {
-            mdlFlagSet(D_0036C6D0[i]);
+            mdlFlagSet(mnuFlagSnapshotIds[i]);
         }
     }
 }
