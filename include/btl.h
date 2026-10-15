@@ -44,6 +44,9 @@ typedef char BtlBossEffectPayloadSizeCheck[(sizeof(BtlBossEffectPayload) == 0x10
 
 typedef struct BtlUnit BtlUnit;
 
+void btlInitFxLights(BtlUnit *unit);
+void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 index);
+
 struct EvtUnit;
 struct SoundResourceLink;
 struct EffWorldNode;
@@ -89,13 +92,19 @@ typedef struct BtlUnit {
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
     f32 effectScale; /* 0x50: scales the SDK-provided actor effect vectors. */
     u32 baseColor; /* 0x54: RGB restored after temporary battle effects */
-    f32 unk58;
+    union {
+        f32 unk58;
+        u32 unk58Bits;
+    };
     u8 pad5C[4];
     f32 currentPosition[4]; /* 0x60: position retained by the unit setter */
     f32 orientation[4]; /* 0x70: quaternion converted to a VU matrix */
     f32 scale; /* 0x80 */
     u32 overlayColor; /* 0x84: packed transient actor color. */
-    f32 zOffset; /* 0x88: added before rotating a local offset */
+    union {
+        f32 positionZOffset; /* 0x88: added to world Z before rotating a local offset. */
+        u32 positionZOffsetBits; /* Integer-zero initialization preserves the native store view. */
+    };
     u8 pad8C[4];
     union {
         /* Accessor names describe caller intent: GetMuzzlePosVU reads this
@@ -168,6 +177,8 @@ typedef struct BtlUnit {
 } BtlUnit;
 typedef char BtlUnitRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
 typedef char BtlUnitRecordEndCheck[((u32)&((BtlUnit *)0)->unk2C4 == 0x2C4) ? 1 : -1];
+typedef char BtlUnitPositionZOffsetOffsetCheck[
+    ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x348) ? 1 : -1];
 #endif /* VERSION_DDS1 */
 
@@ -253,6 +264,8 @@ typedef struct BtlUnit {
 typedef char BtlUnitPartyRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
 typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->unk2E4 == 0x2E4) ? 1 : -1];
 typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 1 : -1];
+typedef char BtlUnitPositionZOffsetOffsetCheck[
+    ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
 #endif /* VERSION_DDS2 */
 

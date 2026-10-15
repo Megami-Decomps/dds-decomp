@@ -2262,28 +2262,28 @@ void btlDumpTaskQueue(void) {
 
 extern u128 D_00359CC0;
 
-void btlInitUnitFxDefaults(u8 *fx) {
-    PCP_COPY_VECTOR(fx + 0x90, &D_00359CC0);
-    *(f32 *)(fx + 0xB0) = 220.0f;
-    *(f32 *)(fx + 0xB4) = 80.0f;
-    *(f32 *)(fx + 0xC0) = 75.0f;
+void btlInitUnitFxDefaults(BtlUnit *fx) {
+    PCP_COPY_VECTOR(fx->bodyOffset, &D_00359CC0);
+    fx->height = 220.0f;
+    fx->reach = 80.0f;
+    fx->cameraRadius = 75.0f;
 }
 
 extern u128 D_00359CD0;
 
 extern u128 D_00359CE0;
 
-void btlInitFxLights(u8 *fx) {
-    PCP_COPY_VECTOR(fx + 0x30, &D_00359CD0);
-    PCP_COPY_VECTOR(fx + 0x40, &D_00359CE0);
-    *(u32 *)(fx + 0x58) = 0;
-    *(f32 *)(fx + 0x50) = 1.0f;
-    *(u32 *)(fx + 0x54) = 0x80808080;
-    PCP_COPY_VECTOR(fx + 0x60, &D_00359CD0);
-    PCP_COPY_VECTOR(fx + 0x70, &D_00359CE0);
-    *(f32 *)(fx + 0x80) = 1.0f;
-    *(u32 *)(fx + 0x84) = 0x80808080;
-    *(u32 *)(fx + 0x88) = 0;
+void btlInitFxLights(BtlUnit *fx) {
+    PCP_COPY_VECTOR(fx->position, &D_00359CD0);
+    PCP_COPY_VECTOR(fx->rotation, &D_00359CE0);
+    fx->unk58Bits = 0;
+    fx->effectScale = 1.0f;
+    fx->baseColor = 0x80808080;
+    PCP_COPY_VECTOR(fx->currentPosition, &D_00359CD0);
+    PCP_COPY_VECTOR(fx->orientation, &D_00359CE0);
+    fx->scale = 1.0f;
+    fx->overlayColor = 0x80808080;
+    fx->positionZOffsetBits = 0;
 }
 
 void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 index) {
@@ -2309,7 +2309,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
     fx->cameraRadius = base->cameraRadius;
     fx->scale = base->actorScale;
     fx->effectScale = base->actorScale;
-    fx->zOffset = base->zOffset;
+    fx->positionZOffset = base->zOffset;
     fx->unk58 = base->zOffset;
 }
 
@@ -3627,7 +3627,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     VU0_LOAD_VF(vf11, pos);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, pos);
-    pos[2] -= unit->zOffset;
+    pos[2] -= unit->positionZOffset;
     btlSetUnitPosition(args->unit, pos);
     btlUnitFaceTarget(unit, target);
     if (dist < 1.0f) {
@@ -4572,7 +4572,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
         } else {
             btlCopyUnitCurrentPosition((u8 *)actor, pos);
             pos[0] += scale;
-            pos[2] += task->unit->zOffset;
+            pos[2] += task->unit->positionZOffset;
         }
         effObjSetInnerPosition(task->unit->effectObject, (u128 *)pos);
         task->amplitude *= 0.85f;
@@ -4583,7 +4583,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         } else {
             btlCopyUnitCurrentPosition((u8 *)actor, pos);
-            pos[2] += task->unit->zOffset;
+            pos[2] += task->unit->positionZOffset;
         }
         effObjSetInnerPosition(task->unit->effectObject, (u128 *)pos);
         return 1;
@@ -4675,14 +4675,14 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         task->amount -= delta;
         if (task->amount <= 0.01f) {
             btlCopyUnitCurrentPosition((u8 *)task->unit, position);
-            position[2] += task->unit->zOffset;
+        position[2] += task->unit->positionZOffset;
             effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
     btlCopyUnitCurrentPosition((u8 *)task->unit, position);
     position[0] += offset;
-    position[2] += task->unit->zOffset;
+            position[2] += task->unit->positionZOffset;
     effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
     task->tick++;
     return 0;
@@ -5038,8 +5038,8 @@ BtlUnit *btlCreateUnit(void) {
     unit->gunResource = 0;
     unit->effectObject = 0;
     unit->ext = 0;
-    btlInitUnitFxDefaults((u8 *)unit);
-    btlInitFxLights((u8 *)unit);
+    btlInitUnitFxDefaults(unit);
+    btlInitFxLights(unit);
     btlResetUnitLinks(unit);
     work = (BtlActorWork *)btlGetRuntime();
     unit->previousActor = 0;
