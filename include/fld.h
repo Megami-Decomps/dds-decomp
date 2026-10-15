@@ -64,10 +64,22 @@ typedef struct FldActorEntry {
     s8 unk65;
     s8 unk66;
     s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
-    s8 unk68;
-    s8 unk69;
-    s8 unk6A;
-    s8 unk6B;
+    union {
+        s8 unk68;
+        s8 explorationColumn; /* 0x68: first bitmap column marked for exploration */
+    };
+    union {
+        s8 unk69;
+        s8 explorationRow; /* 0x69: first bitmap row marked for exploration */
+    };
+    union {
+        s8 unk6A;
+        s8 explorationColumnCount; /* 0x6A: number of bitmap columns to mark */
+    };
+    union {
+        s8 unk6B;
+        s8 explorationRowCount; /* 0x6B: number of bitmap rows to mark */
+    };
 #endif
 #ifdef VERSION_DDS2
     u8 motionName[0xC]; /* 0x18 */
@@ -89,12 +101,29 @@ typedef struct FldActorEntry {
     s8 unk65;
     s8 unk66;
     s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
-    s8 unk68;
-    s8 unk69;
-    s8 unk6A;
-    s8 unk6B;
+    union {
+        s8 unk68;
+        s8 explorationColumn; /* 0x68: first bitmap column marked for exploration */
+    };
+    union {
+        s8 unk69;
+        s8 explorationRow; /* 0x69: first bitmap row marked for exploration */
+    };
+    union {
+        s8 unk6A;
+        s8 explorationColumnCount; /* 0x6A: number of bitmap columns to mark */
+    };
+    union {
+        s8 unk6B;
+        s8 explorationRowCount; /* 0x6B: number of bitmap rows to mark */
+    };
 #endif
 } FldActorEntry;
+
+typedef char FldActorExplorationColumnOffset[((u32)&((FldActorEntry *)0)->explorationColumn == 0x68) ? 1 : -1];
+typedef char FldActorExplorationRowOffset[((u32)&((FldActorEntry *)0)->explorationRow == 0x69) ? 1 : -1];
+typedef char FldActorExplorationColumnCountOffset[((u32)&((FldActorEntry *)0)->explorationColumnCount == 0x6A) ? 1 : -1];
+typedef char FldActorExplorationRowCountOffset[((u32)&((FldActorEntry *)0)->explorationRowCount == 0x6B) ? 1 : -1];
 
 /* Collision faces are 0x24-byte wire records in the field resource.
  * The room-record builders retain the face and stop-table addresses. */
