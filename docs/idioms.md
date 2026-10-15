@@ -8648,8 +8648,8 @@ slot-emitter engine, despite sharing their translation units with file
 and menu functions. The native descriptor array establishes the update
 and scale callback pairs: its four words are update callback, scale
 callback, per-instance work bytes, and serialized parameter bytes.
-DDS1's array is at `D_0037E550` (the scaler-field label is
-`dds3IndexedCallbacks`); DDS2's equivalent is at `D_003E95C0`.
+`effEmitterTypeDescriptors` names the native array in both games; the
+existing `dds3IndexedCallbacks` label addresses its scaler-callback field.
 The initial descriptor is empty.
 
 | Type | Update callback | Paired parameter scaler | Observed trajectory |
@@ -13119,3 +13119,36 @@ including mixed byte/word views and unsized extern arrays, remain intact.
 Only canonical symbol mappings and references change; data bytes, storage
 extents, pointer arithmetic and the four claimed solar phase-update bodies
 remain untouched.
+
+## Terminal, configuration and movie-viewer data roles
+
+These external data names come from matched consumers and native table
+contents, without importing or redefining their storage:
+
+| Name | DDS1 address | DDS2 address | Observable role |
+| --- | --- | --- | --- |
+| `fileConfigSpritePlacements` | `0x0037E008` | `0x003E9028` | 27 four-halfword rows select a configuration resource set, frame and X/Y position. |
+| `fileScrollArrowState` | `0x0037D4C0` | `0x003E7FF8` | Save-slot preview drawing advances the angle and the two arrow opacities. |
+| `mnuTerminalPopupEntries` | `0x0036ACF8` | `0x003CE848` | 28-byte popup entries, including the base fallback and entry seven at offset `0xC4`. |
+| `mnuTerminalActionTable` | `0x0036AC80` | `0x003CE7D0` | Action selection indexed by exclusion flag, terminal mode and entry kind. |
+| `mnuMovieViewerDrawDescriptor` | `0x0037B938` | `0x003E56B8` | Debug movie-viewer descriptor passed with the selected movie path to the draw task. |
+| `fileNewCycleLabel` | `0x0037DB20` | `0x003E8658` | Native `"New Cycle"` text displayed when the save preview's new-cycle flag is set. |
+| `fileJobTypeCallbacks` | `0x0037E14C` | `0x003E916C` | Shifted, type-indexed job callback view with a `0x28` stride. |
+| `effEmitterTypeDescriptors` | `0x0037E550` | `0x003E95C0` | Emitter update/scaler pairs and instance/parameter byte counts, as described above. |
+| `fileConfigSpriteResourceNames` | Not paired | `0x003E9000` | Mode-specific configuration sprite filenames; DDS1 uses a local four-name initializer instead. |
+| `fileMenuFlowStateEntries` | Not paired | `0x003E7FC8` | Four `{state, mask}` entries select states 20--23 using condition bits 1, 2, 4 and 8. |
+| `mnuMantraCoordinateSpritePlacements` | `0x0036BC68` | Not paired | Coordinate-helper resource/sprite/X/Y bank, retaining the existing `u16[4]` view. |
+| `mnuMantraSceneSpritePlacements` | `0x0036C268` | Not paired | Separate scene-helper resource/sprite/X/Y bank with the existing `s16[4]` view. |
+| `mnuMantraSpritePlacements` | Not paired | `0x003CE9D0` | DDS2 ordinary, centered, scaled and rotated draw-helper bank with the existing `s32[4]` view. |
+
+The callback view starts four bytes after `fileJobTypeOperations`; keep
+that constructor-root symbol and the existing shifted private declaration.
+Likewise, retain `dds3IndexedCallbacks`, the emitter scaler-field alias.
+The legacy private callback/record type and field names are not a license
+to reinterpret these two tables or merge their distinct views.
+
+The Mantra banks have different contents and element widths, so this pass
+does not invent a cross-game identity between them. Preserve every existing
+declaration, bound, cast, index, fixed-point conversion and temporary
+sprite-state restoration. None of these names owns a source-level data
+import or changes a held body, its `INCLUDE_ASM` line, or its data reference.
