@@ -393,7 +393,87 @@ void mnuTitleResetSequenceTimers(void) {
 
 extern s32 mnuUpdateMovieMenuInputState(void);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", mnuUpdateMovieMenuInputState);
+/* Step the movie menu: fade in, wait, then poll the selection until it
+ * confirms (phase 3, returns 1 when done) or cancels or idles out (phase 4,
+ * returns 2). */
+s32 mnuUpdateMovieMenuInputState(void) {
+    s32 result;
+
+    switch (mnuMovieMenuState->phase) {
+    case 1:
+        if (mnuMovieMenuState->selectedPage < 23) {
+            mnuMovieMenuState->selectedPage++;
+        } else {
+            mnuMovieMenuState->selectedPage = 0;
+            mnuMovieMenuState->phase = 2;
+        }
+        if (mnuMovieMenuState->selectedPage >= 4) {
+            result = mnuHandleMovieMenuInput();
+            switch (result) {
+            case 0:
+            default:
+                mnuMovieMenuState->sequenceTimer = 0;
+                break;
+            case 2:
+                mnuMovieMenuState->phase = 4;
+                mnuMovieMenuState->selectedPage = 0;
+                break;
+            case 1:
+                mnuMovieMenuState->phase = 3;
+                mnuMovieMenuState->selectedPage = 0;
+                break;
+            }
+        }
+        break;
+    case 0:
+        if (mnuMovieMenuState->selectedPage < 14) {
+            mnuMovieMenuState->selectedPage++;
+        } else {
+            mnuMovieMenuState->selectedPage = 0;
+            mnuMovieMenuState->phase = 2;
+        }
+        break;
+    case 2:
+        result = mnuHandleMovieMenuInput();
+        switch (result) {
+        case 1:
+            mnuMovieMenuState->phase = 3;
+            mnuMovieMenuState->selectedPage = 0;
+            break;
+        case 2:
+            mnuMovieMenuState->phase = 4;
+            mnuMovieMenuState->selectedPage = 0;
+            break;
+        case 0:
+            if (mnuMovieMenuState->sequenceTimer < 450) {
+                mnuMovieMenuState->sequenceTimer++;
+            } else {
+                mnuMovieMenuState->phase = 4;
+                mnuMovieMenuState->sequenceTimer = 0;
+                mnuMovieMenuState->selectedPage = 0;
+            }
+            break;
+        default:
+            mnuMovieMenuState->sequenceTimer = 0;
+            break;
+        }
+        break;
+    case 3:
+        if (mnuMovieMenuState->selectedPage < 10) {
+            mnuMovieMenuState->selectedPage++;
+            break;
+        }
+        return 1;
+    case 4:
+        if (mnuMovieMenuState->selectedPage < 10) {
+            mnuMovieMenuState->selectedPage++;
+            break;
+        }
+        return 2;
+    }
+    return 0;
+}
+
 
 void mnuDrawTitleSceneForPhase(void) {
     switch (((MenuTitleState *)mnuMovieMenuState)->phase) {
