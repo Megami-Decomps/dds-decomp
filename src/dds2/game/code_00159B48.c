@@ -120,7 +120,7 @@ SdfTex *effGetBillResourceTexture(s32 index) {
     return ((BillObj *)effBillResourceOwners[index])->child->texture;
 }
 
-void effCopyVector(void *dst, void *src) {
+void effCopyVector(void *dst, const void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
