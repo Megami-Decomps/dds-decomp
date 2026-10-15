@@ -5152,11 +5152,11 @@ s32 btlIsActiveActor(s32 candidate) {
     return 0;
 }
 
-s32 btlFindUnitByModeClear(s32 arg0) {
+s32 btlFindUnitByModeClear(s32 unitId) {
     s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x228);
 
     while (node != 0) {
-        if (((*(u16 *)(node + 0x120) & 0x20) == 0) && (*(u16 *)(node + 0x124) == arg0)) {
+        if (((*(u16 *)(node + 0x120) & 0x20) == 0) && (*(u16 *)(node + 0x124) == unitId)) {
             return node;
         }
         node = *(s32 *)(node + 0x344);
@@ -5164,11 +5164,11 @@ s32 btlFindUnitByModeClear(s32 arg0) {
     return 0;
 }
 
-s32 btlFindUnitByModeFlagged(s32 arg0) {
+s32 btlFindUnitByModeFlagged(s32 unitId) {
     s32 node = *(s32 *)((u8 *)btlGetRuntime() + 0x228);
 
     while (node != 0) {
-        if (((*(u16 *)(node + 0x120) & 0x20) != 0) && (*(u16 *)(node + 0x124) == arg0)) {
+        if (((*(u16 *)(node + 0x120) & 0x20) != 0) && (*(u16 *)(node + 0x124) == unitId)) {
             return node;
         }
         node = *(s32 *)(node + 0x344);
