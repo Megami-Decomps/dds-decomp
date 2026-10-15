@@ -297,7 +297,7 @@ extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0037C9C8[];
-extern char D_0037C9E4[];
+extern char mnuCampAmmoPartySelectionPopupEntry[];
 extern char D_0037CA00[];
 extern char D_0037C990[];
 
@@ -328,7 +328,7 @@ s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
                 mnuSetPopupEntry(popup, (void *)D_0037C9C8);
                 break;
             case 1:
-                mnuSetPopupEntry(popup, (void *)D_0037C9E4);
+                mnuSetPopupEntry(popup, (void *)mnuCampAmmoPartySelectionPopupEntry);
                 break;
             default:
                 mnuSetPopupEntry(popup, (void *)D_0037CA00);
@@ -364,14 +364,14 @@ extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
-extern u8 D_0037C860[];
+extern u8 mnuCampItemCommandHelpTextBank[];
 extern s32 D_003BAA9C;
 
 s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(4);
-    mnuDrawCampGridAndLabelDefault(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
+    mnuDrawCampGridAndLabelDefault(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffDisplayContext *)context)->activeWindow, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffDisplayContext *)context)->group));
     return menuRunPanel((void *)context, 1, (void *)callback);
@@ -431,7 +431,7 @@ void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
 
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern char D_0037CA1C[];
-extern char D_0037C9AC[];
+extern char mnuCampItemCategoryPopupEntry[];
 
 /* Use an eligible staff item and update its selection window while messages are idle. */
 s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
@@ -474,7 +474,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry(popup, (void *)D_0037C9AC);
+            mnuSetPopupEntry(popup, (void *)mnuCampItemCategoryPopupEntry);
         }
         window = resources->windows[0];
         if (window != NULL) {

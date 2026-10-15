@@ -195,7 +195,7 @@ extern void mnuSelectPage(MenuPageWindow *, s32);
 
 extern void mnuDrawCampGridAndLabelDefault();
 
-extern char D_003E69B0[];
+extern char mnuCampCommandHelpTextBank[];
 
 
 
@@ -1342,7 +1342,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     if (menu->active != 0) {
-        mnuDrawCampGridAndLabelDefault(0, ((MenuContext *)context)->imageHandle->list->cursor->index, D_003E69B0, context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(0, ((MenuContext *)context)->imageHandle->list->cursor->index, mnuCampCommandHelpTextBank, context, 1, 0x53);
     }
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
@@ -2302,7 +2302,7 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *callback) {
     } else {
         mnuCreateStaffImageSprite(0xe);
     }
-    mnuDrawCampGridAndLabelDefault(0, ((MenuContext *)context)->imageHandle->list->cursor->index, D_003E69B0, context, 1, 0x53);
+    mnuDrawCampGridAndLabelDefault(0, ((MenuContext *)context)->imageHandle->list->cursor->index, mnuCampCommandHelpTextBank, context, 1, 0x53);
     /* Both arms are identical in retail; kept as written. */
     if (((MenuContext *)context)->imageHandle->list->cursor->index == 0) {
         mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);

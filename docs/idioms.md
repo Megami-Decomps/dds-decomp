@@ -13276,3 +13276,48 @@ Only identifiers and explanatory text change. No source-owned data import,
 owner, field, instruction or layout is introduced. Existing interior labels
 are retained; the unheld/released row-renderer ASM references are regenerated
 by resplit rather than edited by hand.
+
+## Camp command help and file-menu data roles
+
+`mnuCampCommandHelpTextBank` is the native MSG1 bank of camp-command
+instructions: using skills/items, setting skills, viewing Combos and choosing
+other camp actions. `mnuCampItemCommandHelpTextBank` contains the item
+submenu's instructions. Decoding the native `cmp_cmd_root_*` and
+`cmp_cmd_item_*` dialogs distinguishes help text from sprite placements or
+resource filenames. The command banks contain eight dialogs in DDS1 and
+sixteen in DDS2; the item banks contain three and five respectively. DDS2's
+extra entries include equipping/customizing Karma Rings. These per-game
+contents, lengths and existing unsized declarations are retained.
+
+The seven-word `mnuCampItemCategoryPopupEntry` registry dispatches the item
+categories. Category one selects `mnuCampAmmoPartySelectionPopupEntry`:
+confirmation captures the party cursor and enters
+`mnuCampAmmoEquipmentPopupEntry`, whose callbacks construct the bullet-item
+window and update equipped bullets/inventory counts.
+
+The ammo-equipment registry is DDS1 `0x0037CA38` paired with DDS2
+`0x003E74F8`, not `0x003E7530`. Its enter callbacks have different names:
+`mnuInitializeStaffValuePage` in DDS1 and `mnuInitializeSelectedStaffPage`
+in DDS2, but both call `mnuCreateStaffBulletItemWindow`. The identically named
+DDS2 `mnuInitializeStaffValuePage` instead constructs an owned-catalog window
+for the separate, still-unnamed `0x003E7530` registry. Trace the actual
+transition and constructor; a shared generic callback name does not prove
+that two data tables are twins.
+
+The file-menu glyph words distinguish two producers:
+`fileMenuConvertedTextGlyph` stores `itfCreateConvertedTextGlyph`'s result,
+whereas `fileMenuStringGlyph` stores `frFontBuildGlyphChain`'s result before
+spacing, positioning, coloring and drawing it. They are glyph pointers, not
+the shared font-rendering flags.
+
+`fileMenuContinuation` is the callback word installed by the detection/menu
+setup helpers and invoked by completion/cancel paths, with the existing
+minus-one sentinel. Preserve the `fileUpdateWait` quirk: it tests this word's
+sentinel but invokes the separate `fileWaitContinuation`.
+
+The completed `fileSaveIconRequest` publishes `fileSaveIconResourceHandle`,
+`fileSaveIconData` and `fileSaveIconDataSize` through the three request getters.
+The `base.ico` request supplies the data/size output addresses; teardown waits
+for an outstanding request and releases the retained resource-handle slot.
+Only identifiers and documentation change; all declarations, casts, callback
+words, data bytes, layouts and control flow are retained.

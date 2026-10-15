@@ -867,7 +867,7 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
     return 0;
 }
 
-extern u8 D_0037C3A8[];
+extern u8 mnuCampCommandHelpTextBank[];
 extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuDrawCampGridAndLabelDefault();
 
@@ -891,7 +891,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     if (menu->selectedList != 0) {
         s32 *slot = &((MenuWindowContainer *)work->panel)->list->cursor->index;
 
-        mnuDrawCampGridAndLabelDefault(1, *slot, D_0037C3A8, context, 1, 0x53, slot);
+        mnuDrawCampGridAndLabelDefault(1, *slot, mnuCampCommandHelpTextBank, context, 1, 0x53, slot);
     }
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
@@ -1839,7 +1839,7 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
     } else {
         mnuCreateStaffImageSprite(0xA);
     }
-    mnuDrawCampGridAndLabelDefault(1, ((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index, D_0037C3A8, context, 1, 0x53);
+    mnuDrawCampGridAndLabelDefault(1, ((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index, mnuCampCommandHelpTextBank, context, 1, 0x53);
     /* Both arms are identical in retail; kept as written. */
     if (((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index == 0) {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);

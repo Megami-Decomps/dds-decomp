@@ -34,10 +34,10 @@ extern s32 D_003BAA9C;
 extern void mnuSetStateValue(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 D_0037C860[];
-extern char D_0037CA38[];
-extern char D_0037C9AC[];
-extern char D_0037C9E4[];
+extern u8 mnuCampItemCommandHelpTextBank[];
+extern char mnuCampAmmoEquipmentPopupEntry[];
+extern char mnuCampItemCategoryPopupEntry[];
+extern char mnuCampAmmoPartySelectionPopupEntry[];
 
 /* The allocated staff resource record begins with three owned windows; the
  * display callbacks use the following selection and input-state words. */
@@ -129,7 +129,7 @@ s32 mnuStaffImageExitA(KwlnTask *task) {
             menu->pendingItem = 0;
             if (mnuIsStaffWindowReadyForItem((u16)item,
                                              (struct StaffDisplayContext *)context) == 0) {
-                mnuSetPopupEntry(&context->popupState, (void *)D_0037C9AC);
+                mnuSetPopupEntry(&context->popupState, (void *)mnuCampItemCategoryPopupEntry);
             }
         }
     }
@@ -164,11 +164,11 @@ s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
     mnuStepPartyPanelListFromInput(4, window);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         menu->currentSelection = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
-        mnuSetPopupEntryFlagged(popup, D_0037CA38);
+        mnuSetPopupEntryFlagged(popup, mnuCampAmmoEquipmentPopupEntry);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuClearListFlags(0, window);
-        mnuSetPopupEntryFlagged(popup, D_0037C9AC);
+        mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
     }
     mnuPlayInputSound(0, buttons, 0);
     return 0;
@@ -178,7 +178,7 @@ s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(7);
-    mnuDrawCampGridAndLabelDefault(1, ((StaffImageContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
+    mnuDrawCampGridAndLabelDefault(1, ((StaffImageContext *)context)->activeWindow->list->cursor->index, (s32)mnuCampItemCommandHelpTextBank, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffImageContext *)context)->activeWindow, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
     return menuRunPanel((void *)context, 1, (void *)task);
@@ -206,7 +206,7 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
         buttons = 0;
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntry(popup, (void *)D_0037C9AC);
+        mnuSetPopupEntry(popup, (void *)mnuCampItemCategoryPopupEntry);
     }
     window = menu->secondaryObject;
     if (window != NULL) {
@@ -290,7 +290,7 @@ s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
         menu->primaryObject->list->cursor->sortKeyPrimary = datGameState->inventory.counts[itemId];
         if (mnuIsStaffWindowReadyForItem((u16)itemId,
                                          (struct StaffDisplayContext *)staff) == 0) {
-            mnuSetPopupEntryFlagged(&staff->popupState, D_0037C9AC);
+            mnuSetPopupEntryFlagged(&staff->popupState, mnuCampItemCategoryPopupEntry);
             mnuClearListFlags(0, &staff->pageWindow);
         } else {
             itemCountIsZero = datGameState->inventory.counts[itemId] == 0;
@@ -522,13 +522,13 @@ s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
         }
         if (buttons & MNU_STAFF_INPUT_CANCEL) {
             menu->inputState = 1;
-            mnuSetPopupEntryFlagged(&context->popupState, (void *)D_0037C9E4);
+            mnuSetPopupEntryFlagged(&context->popupState, (void *)mnuCampAmmoPartySelectionPopupEntry);
         }
         mnuPlayInputSound(0, buttons, (u32 *)list->list);
     } else {
         if (mnuRefreshStaffBulletItemList(menu->itemToInsert, menu->inventoryItem, context) == 0) {
             mnuClearListFlags(0, &context->pageWindow);
-            mnuSetPopupEntryFlagged(&context->popupState, (void *)D_0037C9AC);
+            mnuSetPopupEntryFlagged(&context->popupState, (void *)mnuCampItemCategoryPopupEntry);
         } else {
             menu->listState = 0;
         }
