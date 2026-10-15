@@ -14,6 +14,7 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
+#include "sdf_tex_copy_image_data_api.h"
 #include "sdf_vu_transform_api.h"
 
 /* GS pixel-storage modes, using the same private names as sdfTex.c. */
@@ -1051,7 +1052,6 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
 }
 
 extern SdfTexResource *sdfTexAllocHead(s32, s32, s32);
-extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
 
 SdfTex *sdfTexClone(SdfTex *source) {
