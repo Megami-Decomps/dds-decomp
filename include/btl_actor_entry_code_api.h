@@ -3,6 +3,6 @@
 
 struct BtlUnit;
 
-s16 btlGetActorEntryCode(struct BtlUnit *unit, s32 index);
+s16 btlGetActorEntryCode(const struct BtlUnit *unit, s32 index);
 
 #endif
