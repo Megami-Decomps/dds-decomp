@@ -1613,9 +1613,9 @@ void btlInitializeBossCallbacks(s32 mode) {
         } else {
             battle->commandRestrictFlags = commandFlags | 0x804;
         }
-        BTL_INSTALL_CALLBACK(battle->unk6F0, 0x0, btlPrepareUnitMotionWithSavedOverride);
+        BTL_INSTALL_CALLBACK(battle->prepareMotionHook, 0x0, btlPrepareUnitMotionWithSavedOverride);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapEnemyMotionForHealthAndForm);
-        BTL_INSTALL_CALLBACK(battle->unk6FC, 0x0, btlOverrideSpecialModeCheckResult);
+        BTL_INSTALL_CALLBACK(battle->motionModeOverride, 0x0, btlOverrideSpecialModeCheckResult);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetBossModeScriptReturnCode);
         BTL_INSTALL_CALLBACK(battle->pad634, 0x0, btlClearClaimedCommandUnit);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlClaimCommandSlot);
@@ -1632,7 +1632,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = battle->commandRestrictFlags;
         battle->commandRestrictFlags = commandFlags | 0x100800;
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlPromoteSerphToFrontline);
-        BTL_INSTALL_CALLBACK(battle->unk6FC, 0x0, btlOverrideActionResultForEnemyMode);
+        BTL_INSTALL_CALLBACK(battle->motionModeOverride, 0x0, btlOverrideActionResultForEnemyMode);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlIsUnitListReady);
         break;
     }
@@ -1645,8 +1645,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlFlagAbadonHpMpTrigger);
         BTL_INSTALL_CALLBACK(battle->actionStateSelectionHook, 0x0, btlCheckActionRecordUnit);
         BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlStartActionRecordTasks);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetSpecialEnemySubtaskGuardResponse);
-        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsSpecialEnemyActionCode);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetSpecialEnemySubtaskGuardResponse);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsSpecialEnemyActionCode);
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlSelectSoleEligibleActor);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlRaiseUnitForCommandSlot);
         BTL_INSTALL_CALLBACK(battle->pad674, 0x0, btlSpawnLinkedActionEffect);
@@ -1679,9 +1679,9 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlStartLinkedActionMotionPrimary);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSetupHariActionCameraPair);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceTimedActionState);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetSpecialEnemyActionStatus);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetSpecialEnemyActionStatus);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapCommandKind);
-        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsGateCoreAction19Request);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsGateCoreAction19Request);
         allocation = sdfAllocateBlockBySizeThreshold(0x10);
         battle->effect = allocation;
         memset(allocation, 0, 0x10);
@@ -1713,9 +1713,9 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->hitChanceScale, 0x0, btlGetBossPresenceActionScale);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlResetSpecialActionActorPresentation);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRefreshVritraPresentationAfterUnitUpdate);
-        BTL_INSTALL_CALLBACK(battle->unk6F0, 0x0, func_0021A978);
-        BTL_INSTALL_CALLBACK(battle->unk6F4, 0x0, btlSetUnitResourceFloatByMode);
-        BTL_INSTALL_CALLBACK(battle->unk6F8, 0x0, btlSetUnitResourceHalvesByMode);
+        BTL_INSTALL_CALLBACK(battle->prepareMotionHook, 0x0, func_0021A978);
+        BTL_INSTALL_CALLBACK(battle->refreshMotionHook, 0x0, btlSetUnitResourceFloatByMode);
+        BTL_INSTALL_CALLBACK(battle->setMotionRangeHook, 0x0, btlSetUnitResourceHalvesByMode);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlResolveBoundActionCode);
         BTL_INSTALL_CALLBACK(battle->unk670, 0x0, btlInitializeEffectVectors);
         BTL_INSTALL_CALLBACK(battle->pad634, 0x0, func_0021B828);
@@ -1756,7 +1756,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRestoreMarkedUnitMotionOnStateChange);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlToggleActionByteForFlaggedActor);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlGetMarkedUnitActionResponse);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetMarkedUnitActionStatus);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetMarkedUnitActionStatus);
         BTL_INSTALL_CALLBACK(battle->actionResourceNameHook, 0x0, btlFormatSpecialMotionDisplayCode);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlCenterMarkedFormationAroundLead);
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlStartOtherMarkedUnitTasks);
@@ -1779,9 +1779,9 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = commandFlags | 0x100000;
         battle->commandRestrictFlags = commandFlags | 0x200000;
         BTL_INSTALL_CALLBACK(battle->hitResultOverride, 0x0, btlSetBattleActionFlag);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetHealthyAllyActionStatus);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetHealthyAllyActionStatus);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlOffsetSpecialEnemyForCommand);
-        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsSupportedActorAction);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsSupportedActorAction);
         allocation = sdfAllocateBlockBySizeThreshold(0x3);
         battle->effect = allocation;
         memset(allocation, 0, 0x3);
@@ -1813,8 +1813,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlClearActionPhaseOnNegativeState);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlActivateMarkedActionFromCommand);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapKartikeyaMotionForLinkedState);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetKartikeyaLinkedMotionStatus);
-        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlAcceptLinkedActorCommand);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetKartikeyaLinkedMotionStatus);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlAcceptLinkedActorCommand);
         BTL_INSTALL_CALLBACK(battle->hitChanceScale, 0x0, btlGetActionScaleFactor);
         BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlQueryLinkedGroupResponse);
         allocation = sdfAllocateBlockBySizeThreshold(0x4);
@@ -1856,8 +1856,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlBoostEternalZeroActorEntries);
         BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, btlQueueMarkedSpecialActorSceneGroup);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlReplacePendingBossUnitAndQueueTasks);
-        BTL_INSTALL_CALLBACK(battle->unk6F0, 0x0, btlPrepareLinkedSpecialActionMotion);
-        BTL_INSTALL_CALLBACK(battle->unk6F4, 0x0, btlApplySpecialActionRenderGroup);
+        BTL_INSTALL_CALLBACK(battle->prepareMotionHook, 0x0, btlPrepareLinkedSpecialActionMotion);
+        BTL_INSTALL_CALLBACK(battle->refreshMotionHook, 0x0, btlApplySpecialActionRenderGroup);
         BTL_INSTALL_CALLBACK(battle->unk684, 0x0, btlActionResourceTypeToMotionId);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRefreshSpecialActionUnits);
         BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlOffsetSpecialActionValue);
@@ -1950,8 +1950,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         commandFlags = commandFlags | 0x100001;
         battle->commandRestrictFlags = commandFlags | 0x200000;
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterRestrictedCommand);
-        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsCommandCodeF);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlSelectDisabledCommand);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsCommandCodeF);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlSelectDisabledCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlTrackSpecialEnemyCommandRestrictionByTurn);
         BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, btlClearUnitRestrictionFlag);
         BTL_INSTALL_CALLBACK(battle->commandTurnEndHook, 0x0, btlMode311TurnEndCallback);
@@ -1970,8 +1970,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         battle->commandRestrictFlags = commandFlags | 0x200000;
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetEffectState);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlChooseLinkedPairMotion);
-        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsEffectPhaseInRange);
-        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetLinkedEffectPhase);
+        BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsEffectPhaseInRange);
+        BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetLinkedEffectPhase);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlApplyRahuOperandEffects);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlCheckActiveEffectForSpecialTarget);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlUpdateLinkedEffectUnitTransforms);
