@@ -1789,8 +1789,8 @@ s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
     return 0;
 }
 
-u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1) {
-    if (arg1 == 0 && btlCheckSpecialAbility(&arg0->partyRecord, 0x254) != 0) {
+u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *unit, s64 argumentValue) {
+    if (argumentValue == 0 && btlCheckSpecialAbility(&unit->partyRecord, 0x254) != 0) {
         return 1;
     }
     return 0;
