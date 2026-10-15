@@ -512,7 +512,7 @@ float sdfCounterGetScaledValue(void) {
 }
 
 /* Draw the counter's three label plates and submit the frame gradient. */
-void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 z, SdfCounterRuntime *rt, s32 arg4) {
+void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 z, SdfCounterRuntime *rt, s32 drawContext) {
     SdfCounterChannel *channelCursor;
     f32 fade;
     s32 plateIndex;
@@ -529,7 +529,7 @@ void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 z, SdfCounterRuntime *rt, s32
     drawY = y - 11;
     drawX = x - 240;
     for (plateIndex = 2; plateIndex != -1; plateIndex--) {
-        rt->state.draw(drawX, drawY, z, rt, channelCursor, arg4);
+        rt->state.draw(drawX, drawY, z, rt, channelCursor, drawContext);
         drawX += 160;
         if (channelCursor->next != NULL) {
             channelCursor = channelCursor->next;
