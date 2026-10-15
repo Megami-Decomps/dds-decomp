@@ -13,7 +13,7 @@ extern void fldDrawCameraColorLayerPass(void);
 extern void effRequestResourceByMode(const char *, const char *, u32, u32 *);
 
 extern char D_003BC5D8[];
-extern char D_00379E50[];
+extern char mnuMovieMenuSpriteResourceNames[];
 
 extern void mnuAdvanceMovieMenuIdleAnimation();
 
@@ -62,18 +62,18 @@ typedef struct {
 } MovieMenuSpriteWork;
 
 /* Sprite rows: graphic slot, draw parameter, x offset, y offset. */
-extern s16 D_00379E80[][4];
+extern s16 mnuMovieMenuSpritePlacements[][4];
 
 void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                    s32 spriteIndex, s32 drawContext) {
-    effDrawSpriteWithCornerFade((x + D_00379E80[spriteIndex][2]) << 4,
-                  (y + D_00379E80[spriteIndex][3]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMovieMenuSpritePlacements[spriteIndex][2]) << 4,
+                  (y + mnuMovieMenuSpritePlacements[spriteIndex][3]) << 3,
                   depth,
                   (u32)((f32)alpha * 256.0f * 0.0078125f),
                   drawMode,
                   ((MovieMenuSpriteWork *)mnuMovieMenuState)
-                      ->graphics[D_00379E80[spriteIndex][0]],
-                  D_00379E80[spriteIndex][1],
+                      ->graphics[mnuMovieMenuSpritePlacements[spriteIndex][0]],
+                  mnuMovieMenuSpritePlacements[spriteIndex][1],
                   drawContext);
 }
 
@@ -124,10 +124,10 @@ s32 mnuIsAnyMenuInputPressed(void) {
 void mnuLoadMovieMenuResourceSlots(void) {
     if (((MenuState *)mnuMovieMenuState)->firstResource == 0) {
         ((MenuState *)mnuMovieMenuState)->firstResource =
-            (u32)effLoadIndexedResource(D_003BC5D8, D_00379E50, 0);
+            (u32)effLoadIndexedResource(D_003BC5D8, mnuMovieMenuSpriteResourceNames, 0);
     }
     if (((MenuState *)mnuMovieMenuState)->secondResource == 0) {
-        const char *name = D_00379E50;
+        const char *name = mnuMovieMenuSpriteResourceNames;
         name += 0x20;
         ((MenuState *)mnuMovieMenuState)->secondResource =
             (u32)effLoadIndexedResource(D_003BC5D8, name, 0);
@@ -157,12 +157,12 @@ void mnuEnsureMovieMenuSpriteHandle(s32 mode) {
 
     if (*handle == 0) {
         if (mode != 0) {
-            const char *name = D_00379E50;
+            const char *name = mnuMovieMenuSpriteResourceNames;
             name += 0x10;
             ((MenuState *)mnuMovieMenuState)->spriteHandle =
                 (u32)effLoadIndexedResource(D_003BC5D8, name, 0);
         } else {
-            const char *name = D_00379E50;
+            const char *name = mnuMovieMenuSpriteResourceNames;
             name += 0x10;
             effRequestResourceByMode(D_003BC5D8, name, 0,
                                      handle);

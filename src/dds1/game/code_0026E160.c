@@ -210,33 +210,33 @@ void mnuInitializeMovieRollEntry(void) {
     s32 n = 0;
 
     for (i = 0; i < 1; i++) {
-        D_003DC1E0[n].column = 1;
-        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        mnuMovieRollEntries[n].column = 1;
+        mnuMovieRollEntries[n].timer = effMiscRandMod(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 1; i++) {
-        D_003DC1E0[n].column = 2;
-        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        mnuMovieRollEntries[n].column = 2;
+        mnuMovieRollEntries[n].timer = effMiscRandMod(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 4; i++) {
-        D_003DC1E0[n].column = 3;
-        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        mnuMovieRollEntries[n].column = 3;
+        mnuMovieRollEntries[n].timer = effMiscRandMod(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 5; i++) {
-        D_003DC1E0[n].column = 4;
-        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        mnuMovieRollEntries[n].column = 4;
+        mnuMovieRollEntries[n].timer = effMiscRandMod(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 9; i++) {
-        D_003DC1E0[n].column = 5;
-        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        mnuMovieRollEntries[n].column = 5;
+        mnuMovieRollEntries[n].timer = effMiscRandMod(0, 1000) + 600;
         n++;
     }
     for (i = 0; i < 12; i++) {
-        D_003DC1E0[n].column = 6;
-        D_003DC1E0[n].timer = effMiscRandMod(0, 1000) + 600;
+        mnuMovieRollEntries[n].column = 6;
+        mnuMovieRollEntries[n].timer = effMiscRandMod(0, 1000) + 600;
         n++;
     }
 }

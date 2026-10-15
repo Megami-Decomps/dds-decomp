@@ -142,16 +142,16 @@ extern struct SdfPoolNode *D_00380788[13][4];
 
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 
-extern char D_003E7790[];
+extern char mnuSkillMenuDetailPopupEntry[];
 
-extern char D_003E7720[];
+extern char mnuCampFieldSkillPopupEntry[];
 
-extern char D_003E7774[];
+extern char mnuSkillMenuFieldUsePopupEntry[];
 
-extern char D_003E773C[];
+extern char mnuSkillMenuEquippedSlotsPopupEntry[];
 
 
-extern char D_003E7758[];
+extern char mnuSkillMenuPagePopupEntry[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
 
@@ -161,9 +161,9 @@ extern u32 D_003E7828[];
 
 extern const CampEffectRows D_003E7858;
 
-extern char *D_003E7818[];
+extern char *mnuCampBackdropSpriteResourceNames[];
 
-extern char *D_003E7820[];
+extern char *mnuCampBackdropAnimationResourceNames[];
 
 
 
@@ -2269,12 +2269,12 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
                     ptySkillMenuBuildEquippedSlots(1, callback);
                     mnuSeekFirstAvailableStaffListNode(callback);
                 }
-                mnuSetPopupEntry(popup, D_003E7758);
+                mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
             } else {
                 inputFlags = 0x8000;
             }
         } else {
-            mnuSetPopupEntry(popup, D_003E7790);
+            mnuSetPopupEntry(popup, mnuSkillMenuDetailPopupEntry);
         }
     }
 
@@ -2282,9 +2282,9 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
         mnuClearActionFlags(0, &context->partyWindow);
         /* Both category paths select the same cancel entry in retail. */
         if (context->imageHandle->list->cursor->index == 0) {
-            mnuSetPopupEntryFlagged(popup, D_003E7720);
+            mnuSetPopupEntryFlagged(popup, mnuCampFieldSkillPopupEntry);
         } else {
-            mnuSetPopupEntryFlagged(popup, D_003E7720);
+            mnuSetPopupEntryFlagged(popup, mnuCampFieldSkillPopupEntry);
         }
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
                                   (struct EffectSlotSet *)(u32)context->displayHandle, 0, 1);
@@ -2419,13 +2419,13 @@ void mnuCampMenuHandleInput(KwlnTask *callback) {
         s32 sortKey = selectedNode->sortKeyPrimary;
 
         if (!(selectedNode->flags48 & MNU_STAFF_NODE_UNAVAILABLE) && sortKey != 0) {
-            mnuSetPopupEntry(((MenuContext *)context)->popupState, D_003E7774);
+            mnuSetPopupEntry(((MenuContext *)context)->popupState, mnuSkillMenuFieldUsePopupEntry);
         } else {
             inputFlags = MNU_STAFF_INPUT_REJECTED;
         }
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntryFlagged(((MenuContext *)context)->popupState, D_003E773C);
+        mnuSetPopupEntryFlagged(((MenuContext *)context)->popupState, mnuSkillMenuEquippedSlotsPopupEntry);
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
@@ -2479,12 +2479,12 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
         window = mnuSeekSelectedWindowCursor(0, callback);
         mnuInitPartyPanelSlots(&context->partyPanel);
         mnuRefreshPartyPanelBars(&context->partyWindow);
-        mnuSetPopupEntryFlagged(context->popupState, D_003E7790);
+        mnuSetPopupEntryFlagged(context->popupState, mnuSkillMenuDetailPopupEntry);
         mnuRefreshSkillWindowOwnershipFlags(context);
         window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntryFlagged(context->popupState, D_003E7790);
+        mnuSetPopupEntryFlagged(context->popupState, mnuSkillMenuDetailPopupEntry);
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
@@ -2535,7 +2535,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
     if (inputFlags & MNU_STAFF_REORDER_CANCEL_MASK) {
         inputFlags = MNU_STAFF_INPUT_CANCEL;
         if (mnuHasSelectedListNodeId(callback) == 0) {
-            mnuSetPopupEntryFlagged(((MenuContext *)context)->popupState, D_003E7790);
+            mnuSetPopupEntryFlagged(((MenuContext *)context)->popupState, mnuSkillMenuDetailPopupEntry);
         }
         mnuClearSelectedListNodeId(callback);
     }
@@ -2723,7 +2723,7 @@ s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
         mnuFlagMatchingEntries(context);
     }
     if (buttons & 2) {
-        mnuSetPopupEntry(popup, D_003E7758);
+        mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
         mnuClearActionFlags(1, window);
     }
     mnuPlayInputSound(0, buttons, 0);
@@ -2874,18 +2874,18 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *callback) {
         MenuListNode *node = window->list->cursor;
 
         if (node->sortKeyPrimary != 0xFFFF && !(node->flags48 & 1)) {
-            mnuSetPopupEntry(popup, D_003E7758);
+            mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
         } else {
             input = 0x8000;
         }
     }
     if (input & 4) {
         menu[12] = 1;
-        mnuSetPopupEntry(popup, D_003E7758);
+        mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
         input = 1;
     }
     if (input & 2) {
-        mnuSetPopupEntryFlagged(popup, D_003E773C);
+        mnuSetPopupEntryFlagged(popup, mnuSkillMenuEquippedSlotsPopupEntry);
     }
     mnuPlayInputSound(0, input, &window->list->stateFlags);
     return 0;
@@ -3076,7 +3076,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
     mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)list[8 + menu[11]]);
     mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
     if (buttons & 2) {
-        mnuSetPopupEntryFlagged(popup, D_003E7720);
+        mnuSetPopupEntryFlagged(popup, mnuCampFieldSkillPopupEntry);
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
                                   (struct EffectSlotSet *)(u32)((MenuContext *)context)->displayHandle, 0, 1);
     }
@@ -3259,17 +3259,17 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 void mnuLoadEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
-    resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
-    resources->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
+    resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], 0);
+    resources->animationHandle = effLoadMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0]);
     mnuBindCampEffectAnimation(resources);
 }
 
 void mnuRequestEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
-    effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0,
+    effRequestResourceByMode("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], 0,
                              (u32 *)&resources->packet.sheets[0]);
-    effRequestMappedResource("/camp/mot/", D_003E7820[0], (u32 *)&resources->animationHandle);
+    effRequestMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0], (u32 *)&resources->animationHandle);
 }
 
 u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *resources) {

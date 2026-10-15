@@ -1149,17 +1149,17 @@ extern s32 mnuUpdateStaffRoll(KwlnTask *);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", mnuUpdateStaffRoll);
 
-extern MnuStaffImageRecord D_003E4A80[19];
+extern MnuStaffImageRecord mnuStaffRollImageRecords[19];
 extern s32 D_00437AB4;
 extern s32 mnuCheckMovieDecoderStatus(void);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 void mnuAdvanceStaffImageSequence(void) {
-    s32 x = D_003E4A80[D_00437AB4].x;
-    s32 y = D_003E4A80[D_00437AB4].y;
-    s32 width = D_003E4A80[D_00437AB4].width;
-    s32 height = D_003E4A80[D_00437AB4].height;
+    s32 x = mnuStaffRollImageRecords[D_00437AB4].x;
+    s32 y = mnuStaffRollImageRecords[D_00437AB4].y;
+    s32 width = mnuStaffRollImageRecords[D_00437AB4].width;
+    s32 height = mnuStaffRollImageRecords[D_00437AB4].height;
     s32 alpha = 128;
     s32 i;
 
@@ -1211,7 +1211,7 @@ void mnuAdvanceStaffImageSequence(void) {
         }
         break;
     case 4:
-        if (mnuMovieWork->frame < D_003E4A80[D_00437AB4].startFrame) {
+        if (mnuMovieWork->frame < mnuStaffRollImageRecords[D_00437AB4].startFrame) {
             break;
         }
         if (mnuMovieWork->frame / 60 > D_003E3970[272].offsetY / 60 - 4) {
@@ -1221,17 +1221,17 @@ void mnuAdvanceStaffImageSequence(void) {
             break;
         }
         for (i = 18; i >= D_00437AB4; i--) {
-            if (mnuMovieWork->frame >= D_003E4A80[i].startFrame) {
+            if (mnuMovieWork->frame >= mnuStaffRollImageRecords[i].startFrame) {
                 if (mnuCheckMovieDecoderStatus() != 0 || D_00437AB4 == 0) {
-                    sdfSetGridScaledDrawBounds(D_003E4A80[D_00437AB4].x,
-                        D_003E4A80[D_00437AB4].y,
-                        D_003E4A80[D_00437AB4].width,
-                        D_003E4A80[D_00437AB4].height, 0);
+                    sdfSetGridScaledDrawBounds(mnuStaffRollImageRecords[D_00437AB4].x,
+                        mnuStaffRollImageRecords[D_00437AB4].y,
+                        mnuStaffRollImageRecords[D_00437AB4].width,
+                        mnuStaffRollImageRecords[D_00437AB4].height, 0);
                     if (D_00437AB4 == 0) {
-                        mnuRequestIndexedMovieResource(D_003E4A80[0].movieIndex);
+                        mnuRequestIndexedMovieResource(mnuStaffRollImageRecords[0].movieIndex);
                         D_00437AB4 = 0;
                     } else {
-                        mnuRequestIndexedMovieResource(D_003E4A80[i].movieIndex);
+                        mnuRequestIndexedMovieResource(mnuStaffRollImageRecords[i].movieIndex);
                         D_00437AB4 = i;
                     }
                     D_00437AB8 = 1;

@@ -47,7 +47,7 @@ extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
-extern char D_0037CC20[];
+extern char mnuCampFieldSkillPopupEntry[];
 
 
 
@@ -94,8 +94,8 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
     mnuResetListNodeFadeCounters(((MenuWindowContainer *)window)->list);
 }
 
-extern char D_0037CC58[];
-extern char D_0037CC3C[];
+extern char mnuSkillMenuPagePopupEntry[];
+extern char mnuSkillMenuEquippedSlotsPopupEntry[];
 extern s32 ptySkillMenuHandlePageSwitch(KwlnTask *);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
@@ -167,7 +167,7 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *task) {
         if (buttons & 1) {
             node = window->list->cursor;
             if (node->camp.value != 0xFFFF && (node->flags48 & 1) == 0) {
-                mnuSetPopupEntry(popup, D_0037CC58);
+                mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
             } else {
                 buttons = 0x8000;
             }
@@ -175,10 +175,10 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *task) {
         if (buttons & 4) {
             menu->selectionFlags = 1;
             buttons = 1;
-            mnuSetPopupEntry(popup, D_0037CC58);
+            mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
         }
         if (buttons & 2) {
-            mnuSetPopupEntryFlagged(popup, D_0037CC3C);
+            mnuSetPopupEntryFlagged(popup, mnuSkillMenuEquippedSlotsPopupEntry);
         }
         mnuPlayInputSound(0, buttons, &window->list->stateFlags);
         return 0;
@@ -364,7 +364,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
         mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)list[8 + menu[11]]);
         mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
         if (buttons & 2) {
-            mnuSetPopupEntryFlagged(popup, D_0037CC20);
+            mnuSetPopupEntryFlagged(popup, mnuCampFieldSkillPopupEntry);
             mnuActivatePanelAndConfigureGridResources(
                 (MenuScrollPanel *)*(u32 *)(context + 0x138),
                 (struct EffectSlotSet *)(u32)*(s32 *)(context + 0x6C), 0, 1);
@@ -470,20 +470,20 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
 
 extern char D_003B2330[];
 extern char D_003B2348[];
-extern u32 D_0037CD18[];
-extern u32 D_0037CD20[];
+extern u32 mnuCampBackdropSpriteResourceNames[];
+extern u32 mnuCampBackdropAnimationResourceNames[];
 
 /* Load the base sprite banks synchronously, bind the payloads, and reset the fifth bank's saved corner colors. */
 void mnuLoadBackdropAssetsAndTintSlots(MenuAssets *assets) {
     s32 i;
     s32 j;
 
-    assets->sprites[0] = effLoadIndexedResource(D_003B2330, (const char *)D_0037CD18[1], 0);
+    assets->sprites[0] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[1], 0);
     assets->sprites[1] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
     assets->sprites[2] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
     assets->sprites[3] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
-    assets->sprites[4] = effLoadIndexedResource(D_003B2330, (const char *)D_0037CD18[0], 0);
-    assets->material = effLoadMappedResource(D_003B2348, (const char *)D_0037CD20[0]);
+    assets->sprites[4] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[0], 0);
+    assets->material = effLoadMappedResource(D_003B2348, (const char *)mnuCampBackdropAnimationResourceNames[0]);
     mnuBindAssetEffectPayloads(assets);
     for (i = 0; i < 5; i++) {
         for (j = 0; j < 4; j++) {
@@ -496,16 +496,16 @@ extern char D_003B2330[];
 
 extern char D_003B2348[];
 
-extern u32 D_0037CD18[];
+extern u32 mnuCampBackdropSpriteResourceNames[];
 
-extern u32 D_0037CD20[];
+extern u32 mnuCampBackdropAnimationResourceNames[];
 
 void mnuRequestBaseAssets(MenuAssets *assets) {
-    effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0,
+    effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[1], 0,
                              (u32 *)&assets->sprites[0]);
-    effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0,
+    effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[0], 0,
                              (u32 *)&assets->sprites[4]);
-    effRequestMappedResource(D_003B2348, D_0037CD20[0], (u32 *)&assets->material);
+    effRequestMappedResource(D_003B2348, mnuCampBackdropAnimationResourceNames[0], (u32 *)&assets->material);
 }
 
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
