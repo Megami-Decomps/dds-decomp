@@ -918,14 +918,14 @@ extern s8 mnuTerminalTaskState;
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
  * Native final work-field reads remain after allocation release and outside the NULL guard. */
-void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
-    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(arg);
+void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task) {
+    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(task);
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
         mnuReleaseResourceHandles((u32 *)work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
-        mnuDrainPanelTransitions(&work->transitionWork, arg);
+        mnuDrainPanelTransitions(&work->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfReleaseResourceAllocation(work->allocation);
