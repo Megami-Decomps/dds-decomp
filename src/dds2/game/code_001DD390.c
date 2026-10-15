@@ -88,7 +88,7 @@ typedef struct FxTask {
     BtlUnit *unit;
 } FxTask;
 
-extern s128 D_003B6B80;
+extern s128 btlDefaultUnitBodyOffset;
 
 typedef struct BtlCameraTaskArgs {
     u32 kind;
@@ -2341,24 +2341,24 @@ void btlDumpTaskQueue(void) {
 }
 
 void btlInitUnitFxDefaults(BtlUnit *unit) {
-    PCP_COPY_VECTOR(unit->bodyOffset, &D_003B6B80);
+    PCP_COPY_VECTOR(unit->bodyOffset, &btlDefaultUnitBodyOffset);
     unit->height = 220.0f;
     unit->reach = 80.0f;
     unit->unkC0 = 75.0f;
 }
 
-extern s128 D_003B6B90;
+extern s128 btlDefaultUnitPosition;
 
-extern s128 D_003B6BA0;
+extern s128 btlDefaultUnitRotation;
 
 void btlInitFxLights(BtlUnit *unit) {
-    PCP_COPY_VECTOR(unit->position, &D_003B6B90);
-    PCP_COPY_VECTOR(unit->rotation, &D_003B6BA0);
+    PCP_COPY_VECTOR(unit->position, &btlDefaultUnitPosition);
+    PCP_COPY_VECTOR(unit->rotation, &btlDefaultUnitRotation);
     unit->unk58 = 0.0f;
     unit->actorScale = 1.0f;
     unit->baseColor = 0x80808080;
-    PCP_COPY_VECTOR(unit->currentPosition, &D_003B6B90);
-    PCP_COPY_VECTOR(unit->orientation, &D_003B6BA0);
+    PCP_COPY_VECTOR(unit->currentPosition, &btlDefaultUnitPosition);
+    PCP_COPY_VECTOR(unit->orientation, &btlDefaultUnitRotation);
     unit->scale = 1.0f;
     unit->overlayColor = 0x80808080;
     unit->positionZOffset = 0.0f;

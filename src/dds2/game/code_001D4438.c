@@ -310,7 +310,7 @@ typedef struct SoundEntry {
 
 extern SoundEntry D_003BDE18[];
 
-extern s128 D_003B6B80;
+extern s128 btlDefaultUnitBodyOffset;
 
 extern u8 D_003BD7D0[];
 

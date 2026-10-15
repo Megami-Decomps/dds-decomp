@@ -89,11 +89,11 @@ extern s32 D_00435DE4;
 extern s32 D_00435DF8;
 extern s8 D_0037F530[];
 
-extern u8 D_003B4DC0[];
+extern u8 btlSharedActorTransformParameters[];
 
 extern s32 D_00435E00;
 
-extern void *D_003B4E88[];
+extern void *btlPartyUnitGunTypeNames[];
 
 extern EncBgRow *D_00435E14;
 
@@ -143,7 +143,7 @@ extern void btlBossDebugPrintf(const char *, ...);
 
 extern s8 effSharedRandomState[];
 
-extern void *D_003B4E40[];
+extern void *btlCommandAttributeNames[];
 
 extern f32 D_003B4E28[];
 
@@ -1777,7 +1777,7 @@ s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
 
 BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {
     if (side == 0) {
-        return (BtlActorTransformParameters *)D_003B4DC0;
+        return (BtlActorTransformParameters *)btlSharedActorTransformParameters;
     }
     return (BtlActorTransformParameters *)(D_00435E00 + index * 24);
 }
@@ -2089,7 +2089,7 @@ next_actor:
 
 #include "btl_roster_pair.h"
 
-extern u8 D_003B4DD8[];
+extern u8 btlLinkageParticipantOrders[];
 extern DatSkillList *D_00435E28;
 
 /* Build distinct LINKAGE skill/partner rows for actor; return the roster count. */
@@ -2154,7 +2154,7 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
         for (order = 0; order < 6; order++) {
             matched = 0;
             for (participant = 0; participant < 3; participant++) {
-                requirement = record->requirements[D_003B4DD8[participant + order * 3]];
+                requirement = record->requirements[btlLinkageParticipantOrders[participant + order * 3]];
                 if ((battle->battleFlags & 0x1000000) == 0) {
                     if (requirement == -1) {
                         allRequired = 0;
@@ -2822,17 +2822,17 @@ typedef struct EntryPair {
     s16 countdown;
 } EntryPair;
 
-extern EntryPair D_003B4DF0[];
+extern EntryPair btlActorEntryCodeDefaults[];
 
 s32 btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
     s16 value = unit->entrySlots[index].code;
-    if (D_003B4DF0[index].first != 0) {
-        if (D_003B4DF0[index].first == value) {
+    if (btlActorEntryCodeDefaults[index].first != 0) {
+        if (btlActorEntryCodeDefaults[index].first == value) {
             return 1;
         }
     }
-    if (D_003B4DF0[index].second != 0) {
-        if (D_003B4DF0[index].second == value) {
+    if (btlActorEntryCodeDefaults[index].second != 0) {
+        if (btlActorEntryCodeDefaults[index].second == value) {
             return 2;
         }
     }
@@ -2844,15 +2844,15 @@ void btlAdjustActorEntryCode(BtlUnit *unit, s32 index, s16 delta) {
     s16 code = unit->entrySlots[index].code;
     code += delta;
 
-    if (code > D_003B4DF0[index].first) {
-        code = D_003B4DF0[index].first;
+    if (code > btlActorEntryCodeDefaults[index].first) {
+        code = btlActorEntryCodeDefaults[index].first;
     }
-    if (code < D_003B4DF0[index].second) {
-        code = D_003B4DF0[index].second;
+    if (code < btlActorEntryCodeDefaults[index].second) {
+        code = btlActorEntryCodeDefaults[index].second;
     }
     if (code != 0) {
-        unit->entrySlots[index].unk02 = D_003B4DF0[index].initialValue;
-        unit->entrySlots[index].countdown = D_003B4DF0[index].countdown;
+        unit->entrySlots[index].unk02 = btlActorEntryCodeDefaults[index].initialValue;
+        unit->entrySlots[index].countdown = btlActorEntryCodeDefaults[index].countdown;
     }
     unit->entrySlots[index].code = code;
 }
@@ -3295,12 +3295,12 @@ s32 sndGetResourceForIndex(s32 index) {
     if (resource < 0) {
         return 0;
     }
-    return (s32)D_003B4E40[resource];
+    return (s32)btlCommandAttributeNames[resource];
 }
 
 /* The label resource index is the copied party record's unit ID. */
 void *btlGetIndexedUiResource(BtlUnit *unit) {
-    return D_003B4E88[unit->partyRecord.unitId];
+    return btlPartyUnitGunTypeNames[unit->partyRecord.unitId];
 }
 
 typedef struct BattleSavedActorState {
@@ -3314,7 +3314,7 @@ typedef struct BattleSavedActorState {
 
 typedef char BattleSavedActorStateSize[(sizeof(BattleSavedActorState) == 0x38) ? 1 : -1];
 
-extern BattleSavedActorState D_00452EA0[3];
+extern BattleSavedActorState btlSavedPartyUnitStates[3];
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_004152F8);
 
@@ -3327,15 +3327,15 @@ void btlPushSavedPartyUnitStates(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
 
-    memset(D_00452EA0, 0, sizeof(D_00452EA0));
+    memset(btlSavedPartyUnitStates, 0, sizeof(btlSavedPartyUnitStates));
     for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
-                D_00452EA0[count].flags = unit->status.flags;
-                D_00452EA0[count].unitId = unit->partyRecord.unitId;
-                memcpy(D_00452EA0[count].entrySlots, unit->entrySlots,
-                       sizeof(D_00452EA0[count].entrySlots));
-                D_00452EA0[count].status = unit->partyRecord.status & 0xCFF9;
+                btlSavedPartyUnitStates[count].flags = unit->status.flags;
+                btlSavedPartyUnitStates[count].unitId = unit->partyRecord.unitId;
+                memcpy(btlSavedPartyUnitStates[count].entrySlots, unit->entrySlots,
+                       sizeof(btlSavedPartyUnitStates[count].entrySlots));
+                btlSavedPartyUnitStates[count].status = unit->partyRecord.status & 0xCFF9;
                 count++;
                 sdfDebugPrintf("btl:state push[%d:%X]\n", count,
                               unit->partyRecord.unitId);
@@ -3353,23 +3353,23 @@ void btlRestorePartySlotSnapshots(void) {
     BtlUnit *unit;
 
     for (index = 0; index < 3; index++) {
-        if (D_00452EA0[index].unitId == 0) {
+        if (btlSavedPartyUnitStates[index].unitId == 0) {
             continue;
         }
         for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
             if (unit->status.flags & 1) {
                 if (unit->status.flags & 0x200) {
-                    if (unit->partyRecord.unitId == D_00452EA0[index].unitId) {
-                        if (D_00452EA0[index].flags & 0x1000) {
+                    if (unit->partyRecord.unitId == btlSavedPartyUnitStates[index].unitId) {
+                        if (btlSavedPartyUnitStates[index].flags & 0x1000) {
                             unit->status.flags |= 0x1000;
                             unit->partyRecord.flags |= 0x1000;
                         } else {
                             unit->status.flags &= ~0x1000;
                             unit->partyRecord.flags &= ~0x1000;
                         }
-                        memcpy(unit->entrySlots, D_00452EA0[index].entrySlots,
+                        memcpy(unit->entrySlots, btlSavedPartyUnitStates[index].entrySlots,
                                sizeof(unit->entrySlots));
-                        unit->partyRecord.status = D_00452EA0[index].status;
+                        unit->partyRecord.status = btlSavedPartyUnitStates[index].status;
                         if ((unit->partyRecord.status & 0x7FFF) == 0x4000) {
                             unit->partyRecord.hp = 0;
                             unit->status.flags |= 0x20;
@@ -3689,7 +3689,7 @@ u8 btlGetActorDisplayByteWithDefault(BtlUnit *object, s32 index) {
 
 extern s32 datActionAnimationRecords;
 
-extern s32 D_003B4EF0[];
+extern s32 btlActionAnimationModeRows[];
 
 /* Delay before an action: 9 for a 0x200-group unit in mode 6 with stat bit 0x10 clear on a
  * kind-5 or empty command, 1 for no command, else the animation's delay-table row. */
@@ -3706,7 +3706,7 @@ s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId) {
     if (actionId == 0) {
         return 1;
     }
-    delayTable = D_003B4EF0;
+    delayTable = btlActionAnimationModeRows;
     delayTable++;
     delay = delayTable + ((BtlActionAnimationRecord *)datActionAnimationRecords)[actionId].delayIndex * 2;
     btlBossDebugPrintf("btl:delay=%d\n", *delay);
@@ -3751,7 +3751,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
         mode = unit->partyRecord.unitId == 6 ? 2 : 0;
     } else {
         u32 delayIndex = ((BtlActionAnimationRecord *)datActionAnimationRecords)[actionId].delayIndex;
-        mode = ((BtlAnimationModeRow *)D_003B4EF0)[delayIndex].mode;
+        mode = ((BtlAnimationModeRow *)btlActionAnimationModeRows)[delayIndex].mode;
     }
     switch (mode) {
     case 0:

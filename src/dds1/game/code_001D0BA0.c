@@ -2260,27 +2260,27 @@ void btlDumpTaskQueue(void) {
     btlBossDebugPrintf("btl:packet tail[%p]\n", *(void **)(context + 0x230));
 }
 
-extern u128 D_00359CC0;
+extern u128 btlDefaultUnitBodyOffset;
 
 void btlInitUnitFxDefaults(BtlUnit *fx) {
-    PCP_COPY_VECTOR(fx->bodyOffset, &D_00359CC0);
+    PCP_COPY_VECTOR(fx->bodyOffset, &btlDefaultUnitBodyOffset);
     fx->height = 220.0f;
     fx->reach = 80.0f;
     fx->cameraRadius = 75.0f;
 }
 
-extern u128 D_00359CD0;
+extern u128 btlDefaultUnitPosition;
 
-extern u128 D_00359CE0;
+extern u128 btlDefaultUnitRotation;
 
 void btlInitFxLights(BtlUnit *fx) {
-    PCP_COPY_VECTOR(fx->position, &D_00359CD0);
-    PCP_COPY_VECTOR(fx->rotation, &D_00359CE0);
+    PCP_COPY_VECTOR(fx->position, &btlDefaultUnitPosition);
+    PCP_COPY_VECTOR(fx->rotation, &btlDefaultUnitRotation);
     fx->unk58Bits = 0;
     fx->actorScale = 1.0f;
     fx->baseColor = 0x80808080;
-    PCP_COPY_VECTOR(fx->currentPosition, &D_00359CD0);
-    PCP_COPY_VECTOR(fx->orientation, &D_00359CE0);
+    PCP_COPY_VECTOR(fx->currentPosition, &btlDefaultUnitPosition);
+    PCP_COPY_VECTOR(fx->orientation, &btlDefaultUnitRotation);
     fx->scale = 1.0f;
     fx->overlayColor = 0x80808080;
     fx->positionZOffsetBits = 0;
