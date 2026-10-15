@@ -13883,3 +13883,17 @@ and rotates around Y. Inside the distance-below-1200 path it caps the absolute
 horizontal offset at 50 before adding it to camera distance. Keep the ordered
 `50.0f < horizontalSpan` comparison: NaN does not select the cap. These six
 extra native operations account for DDS2's 912 bytes versus DDS1's 888.
+
+### Projected actor-pair bounds
+
+`btlBuildProjectedActorPairBoundsVU` returns the projected pair's radius and
+leaves its center in VF10. Its seven scalar accumulators share a zero seed;
+the chained initialization retains the native copy graph without adding a
+temporary or an artificial consumer. The per-actor half-height is consumed
+by subtracting projected Y, then supplies both vertical extrema. Keep the
+native maximum-radius recurrence even though the final extent calculation
+does not consume it.
+
+DDS2 prints the three half-extents between constructing the center and
+selecting its radius. Preserve all three debug calls and the ordinary double
+promotions of their variadic arguments, together with the format strings.

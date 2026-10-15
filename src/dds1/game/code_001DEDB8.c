@@ -4049,7 +4049,7 @@ extern f32 func_001EDB20(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 
 
 extern f32 func_001EE160(s32, BtlUnit *, BtlUnit *, s8, f32 *, f32 *, const f32 *, const f32 *, s8);
 
-extern f32 func_001EE658(s32, BtlUnit *, BtlUnit *, s8, s8, f32 *, f32 *, const f32 *, const f32 *);
+extern f32 btlBuildProjectedActorPairBoundsVU(s32, BtlUnit *, BtlUnit *, s8, s8, f32 *, f32 *, const f32 *, const f32 *);
 
 extern f32 D_0035F590[4];
 
@@ -4218,7 +4218,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
             VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
         } else {
-            func_001EE658(0x200, action->task->unit, action->linkedA,
+            btlBuildProjectedActorPairBoundsVU(0x200, action->task->unit, action->linkedA,
                           (s8)p->focusPolicy.mode, (s8)p->focusPolicy.mode,
                           NULL, NULL, NULL, NULL);
             VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
@@ -4581,7 +4581,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             if (eye[0] < focus[0]) worldAxis[0] = p->eyePolicy.side;
             else worldAxis[0] = -p->eyePolicy.side;
         }
-        span = func_001EE658(0x600, unit, action->task->unit,
+        span = btlBuildProjectedActorPairBoundsVU(0x600, unit, action->task->unit,
                             (s8)p->focusPolicy.mode, (s8)p->eyePolicy.mode,
                             0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
@@ -4636,7 +4636,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         }
         if (focus[0] > eye[0]) worldAxis[0] = p->eyePolicy.side;
         else worldAxis[0] = -p->eyePolicy.side;
-        span = func_001EE658(0x600, unit, otherUnit,
+        span = btlBuildProjectedActorPairBoundsVU(0x600, unit, otherUnit,
                             (s8)p->focusPolicy.mode, (s8)p->eyePolicy.mode,
                             0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
@@ -4851,7 +4851,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
                 worldAxis[0] *= 0.6f;
             VU0_LOAD_VF(vf10, worldAxis);
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-            span = func_001EE658(0x200, action->task->unit, action->linkedA,
+            span = btlBuildProjectedActorPairBoundsVU(0x200, action->task->unit, action->linkedA,
                                 (s8)p->eyePolicy.mode, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
             measuredDistance = span / tanf(halfFov);
             VU0_STORE_VF_UNCLOBBERED(vf10, eye);
@@ -5129,7 +5129,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         eye[1] = p->eyePolicy.height; /* absolute assignment, 001E9258 */
         otherUnit = btlGetIndexListEntry(action->targetList, 0);
-        span = func_001EE658(0x600, action->task->unit, otherUnit,
+        span = btlBuildProjectedActorPairBoundsVU(0x600, action->task->unit, otherUnit,
                             (s8)p->eyePolicy.mode, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, destination);
         measuredDistance = span / tanf(halfFov);
@@ -5764,7 +5764,187 @@ INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EDB20);
 
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EE160);
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EE658);
+f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second, s8 firstMode, s8 secondMode,
+                  f32 *maxY, f32 *minY, const f32 *lineStart, const f32 *lineEnd) {
+    union {
+        u128 quadword;
+        f32 component[4];
+    } vectors[4];
+    f32 lineLength;
+    f32 largestActorRadius;
+    f32 minX;
+    f32 maxX;
+    f32 minZ;
+    f32 maxZ;
+    f32 highestOffset;
+    f32 lowestOffset;
+    f32 radius;
+    s32 found;
+    s32 i;
+
+    memset(&vectors[1], 0, sizeof(vectors[1]));
+    btlGetRuntime();
+    if (lineStart == 0 || lineEnd == 0) {
+        VU0_LOAD_VF(vf10, &vectors[1]);
+        VU0_STORE_VF(vf10, &vectors[2]);
+    } else {
+        VU0_LOAD_VF(vf10, lineEnd);
+        VU0_LOAD_VF(vf11, lineStart);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(lineLength);
+        VU0_NORMALIZE_VF10();
+        /* VU-only direction scratch, immediately reloaded with no scalar read. */
+        VU0_STORE_VF_UNCLOBBERED(vf10, &vectors[3]);
+        VU0_LOAD_VF(vf10, &vectors[3]);
+        VU0_SCALAR_OP_CLOBBER(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_LOAD_VF(vf11, &vectors[1]);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, &vectors[2]);
+    }
+
+    minZ = maxZ = minX = maxX = lowestOffset =
+        largestActorRadius = highestOffset = 0.0f;
+    found = 1;
+    for (i = 0; i < 2; i++) {
+        BtlUnit *unit;
+        s32 mode;
+        f32 halfHeight;
+        f32 lowerX;
+        f32 upperX;
+        f32 lowerZ;
+        f32 upperZ;
+        f32 projection;
+        u32 flags;
+
+        if (i == 0) {
+            if (first == 0) {
+                continue;
+            }
+            mode = firstMode;
+            unit = first;
+        } else {
+            if (second == 0) {
+                continue;
+            }
+            mode = secondMode;
+            unit = second;
+        }
+        flags = unit->status.flags;
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0xC0) != 0) {
+            continue;
+        }
+        if ((flags & mask) == 0) {
+            continue;
+        }
+
+        if (mode == 1) {
+            btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
+            radius = unit->cameraRadius * unit->scale;
+            halfHeight = radius * 0.5f;
+        } else {
+            btlUnitGetMuzzlePosVU(unit);
+            radius = unit->reach * unit->scale;
+            halfHeight = unit->height * unit->scale * 0.5f;
+        }
+
+        VU0_STORE_VF(vf10, &vectors[0]);
+        projection = btlProjectOnPlaneVU((f32 *)&vectors[1], (f32 *)&vectors[2], (f32 *)&vectors[0]);
+        VU0_STORE_VF(vf10, &vectors[0]);
+        upperX = (vectors[0].component[0] + projection) + radius;
+        lowerX = (vectors[0].component[0] - projection) - radius;
+        upperZ = (vectors[0].component[2] + projection) + radius;
+        lowerZ = (vectors[0].component[2] - projection) - radius;
+        halfHeight -= vectors[0].component[1];
+
+        if (found != 0) {
+            largestActorRadius = radius;
+            if (lowerX < upperX) {
+                maxX = upperX;
+                minX = lowerX;
+            } else {
+                maxX = lowerX;
+                minX = upperX;
+            }
+            if (lowerZ < upperZ) {
+                maxZ = upperZ;
+                minZ = lowerZ;
+            } else {
+                maxZ = lowerZ;
+                minZ = upperZ;
+            }
+            lowestOffset = halfHeight;
+            highestOffset = lowestOffset;
+            found = 0;
+        } else {
+            if (largestActorRadius < radius) {
+                largestActorRadius = radius;
+            }
+            if (maxX < upperX) {
+                maxX = upperX;
+            }
+            if (upperX < minX) {
+                minX = upperX;
+            }
+            if (maxX < lowerX) {
+                maxX = lowerX;
+            }
+            if (lowerX < minX) {
+                minX = lowerX;
+            }
+            if (maxZ < upperZ) {
+                maxZ = upperZ;
+            }
+            if (upperZ < minZ) {
+                minZ = upperZ;
+            }
+            if (maxZ < lowerZ) {
+                maxZ = lowerZ;
+            }
+            if (lowerZ < minZ) {
+                minZ = lowerZ;
+            }
+            if (highestOffset < halfHeight) {
+                highestOffset = halfHeight;
+            }
+            if (halfHeight < lowestOffset) {
+                lowestOffset = halfHeight;
+            }
+        }
+    }
+
+    vectors[0].component[0] = (maxX + minX) * 0.5f;
+    vectors[0].component[1] = -highestOffset * 0.5f;
+    vectors[0].component[2] = (maxZ + minZ) * 0.5f;
+    vectors[0].component[3] = 0.0f;
+    {
+        f32 halfWidth = (maxX - minX) * 0.5f;
+        f32 halfDepth = (maxZ - minZ) * 0.5f;
+        f32 halfHeight = highestOffset * 0.5f;
+
+        if (halfDepth < halfWidth) {
+            radius = halfHeight;
+            if (radius < halfWidth) {
+                radius = halfWidth;
+            }
+        } else {
+            radius = halfDepth;
+            if (!(halfHeight < radius)) {
+                radius = halfHeight;
+            }
+        }
+    }
+    VU0_LOAD_VF(vf10, &vectors[0]);
+    if (maxY != 0) {
+        *maxY = highestOffset;
+    }
+    if (minY != 0) {
+        *minY = lowestOffset;
+    }
+    return radius;
+}
 
 u32 btlCountUnitsByFlags(u32 mask) {
     s32 context = (s32)(u32)btlGetRuntime();

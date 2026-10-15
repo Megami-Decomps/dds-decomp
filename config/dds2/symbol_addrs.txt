@@ -23,6 +23,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+btlBuildProjectedActorPairBoundsVU = 0x001FF0F8; // type:func
 btlBuildMaskedGroupFramingCameraPose = 0x001EFA30; // type:func
 evtViewerStoreMenuValueInPendingKey = 0x0024C650; // type:func
 evtViewerApplyCommandSelection = 0x0024B268; // type:func
@@ -9915,7 +9916,6 @@ btlBuildUnitTargetSphereVU = 0x001FDF18; // type:func
 func_001FE068 = 0x001FE068; // type:func
 func_001FE5C0 = 0x001FE5C0; // type:func
 func_001FEC00 = 0x001FEC00; // type:func
-func_001FF0F8 = 0x001FF0F8; // type:func
 btlInitializeCameraCursorForActorId = 0x001FF5D8; // type:func
 btlAdvanceTimedCameraOrApproach = 0x001FFAD8; // type:func
 btlBeginSceneLightColorTransition = 0x00200930; // type:func
