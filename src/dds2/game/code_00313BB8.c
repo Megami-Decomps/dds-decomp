@@ -1,4 +1,5 @@
 #include "prf_requirement.h"
+#include "prf_requirement_fallback.h"
 #include "sdf_packet_list.h"
 #include "dsp_name.h"
 #include "common.h"

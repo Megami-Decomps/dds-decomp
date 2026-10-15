@@ -1652,7 +1652,7 @@ INCLUDE_SDATA(const s32, "game/code_002E9708", sdfGsMemoryTypeFormat);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD614);
 
-INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD618);
+INCLUDE_SDATA(const s32, "game/code_002E9708", sdfMoviePacRingSemaphore);
 
 INCLUDE_SDATA(const s32, "game/code_002E9708", D_003BD61C);
 

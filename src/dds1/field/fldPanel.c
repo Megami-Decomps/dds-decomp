@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_title_banner_menu.h"
 #include "sdf_chip.h"
 
 #include "kwln.h"
@@ -29,19 +30,19 @@ void fldDestroyPanelTaskIfPresent(void) {
 }
 
 void *fldSetTitleBannerPending(s32 pending) {
-    u16 *panelState;
+    FldTitleBannerMenu *menu;
 
-    panelState = (u16 *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
-    panelState[2] = pending;
-    return panelState;
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
+    menu->pending = pending;
+    return menu;
 }
 
 void *fldSetTitleBannerChoice(s32 choice) {
-    u16 *panelState;
+    FldTitleBannerMenu *menu;
 
-    panelState = (u16 *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
-    panelState[1] = choice;
-    return panelState;
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
+    menu->choice = choice;
+    return menu;
 }
 
 INCLUDE_SDATA(const s32, "field/fldPanel", fldInputPanelTaskHandle);

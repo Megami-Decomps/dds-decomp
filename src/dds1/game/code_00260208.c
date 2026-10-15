@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "brs_primary_panel_update_api.h"
 #include "eff_random.h"
@@ -928,13 +929,13 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
 }
 
 
-void brsStaffTaskDestroy(KwlnTask *arg0) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(arg0);
+void brsStaffTaskDestroy(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
 
     if (context->teardownResource != NULL) {
         effDestroyResourceSlotSet(context->teardownResource);
     }
-    mnuDrainPanelTransitions(&context->transition.data, arg0);
+    mnuDrainPanelTransitions(&context->transition.data, task);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }
@@ -1105,7 +1106,6 @@ extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 reso
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
 extern void sndQueueSoundId(u32 sequence);
-extern void sndStartTrackDefault(s32 track);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
     if (selectLevelUp == 0) {

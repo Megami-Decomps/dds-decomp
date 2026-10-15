@@ -21,11 +21,11 @@ typedef struct EffPCPGroupHead {
     f32 endPosition; /* 0x6C: interpolated position at final frame */
     f32 startJitter; /* 0x70: fractional random variation */
     f32 endJitter; /* 0x74: fractional random variation */
-    f32 unk78;
+    f32 angularStep;
     f32 angularDamping;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
+    f32 angularStepJitter;
+    f32 startRadialBlend;
+    f32 endRadialBlend;
     u8 activeGroups[4];
     EffThunderFragmentParams spawnParams;
     u8 padE4[0x80];
@@ -38,7 +38,7 @@ typedef struct EffPCPGroupEntry {
     f32 position; /* 0x08: initial interpolated position */
     f32 positionStep; /* 0x0C: change per frame */
     f32 angle; /* 0x10: evenly spaced angle in radians */
-    f32 unk14;
+    f32 angularStep;
 } EffPCPGroupEntry;
 
 /* The general allocation contains this 0x180-byte prefix followed by
@@ -58,6 +58,14 @@ typedef char EffPCPGroupHead_size_must_be_0x164[
     (sizeof(EffPCPGroupHead) == 0x164) ? 1 : -1];
 typedef char EffPCPGroupHead_count_offset_must_be_0x58[
     ((u32)&((EffPCPGroupHead *)0)->count == 0x58) ? 1 : -1];
+typedef char EffPCPGroupHead_angularStep_offset_must_be_0x78[
+    ((u32)&((EffPCPGroupHead *)0)->angularStep == 0x78) ? 1 : -1];
+typedef char EffPCPGroupHead_angularStepJitter_offset_must_be_0x80[
+    ((u32)&((EffPCPGroupHead *)0)->angularStepJitter == 0x80) ? 1 : -1];
+typedef char EffPCPGroupHead_startRadialBlend_offset_must_be_0x84[
+    ((u32)&((EffPCPGroupHead *)0)->startRadialBlend == 0x84) ? 1 : -1];
+typedef char EffPCPGroupHead_endRadialBlend_offset_must_be_0x88[
+    ((u32)&((EffPCPGroupHead *)0)->endRadialBlend == 0x88) ? 1 : -1];
 typedef char EffPCPGroupHead_activeGroups_offset_must_be_0x8C[
     ((u32)&((EffPCPGroupHead *)0)->activeGroups == 0x8C) ? 1 : -1];
 typedef char EffPCPGroupHead_spawnParams_offset_must_be_0x90[
@@ -72,6 +80,8 @@ typedef char EffPCPGroupEntry_positionStep_offset_must_be_C[
     ((u32)&((EffPCPGroupEntry *)0)->positionStep == 0xC) ? 1 : -1];
 typedef char EffPCPGroupEntry_angle_offset_must_be_10[
     ((u32)&((EffPCPGroupEntry *)0)->angle == 0x10) ? 1 : -1];
+typedef char EffPCPGroupEntry_angularStep_offset_must_be_14[
+    ((u32)&((EffPCPGroupEntry *)0)->angularStep == 0x14) ? 1 : -1];
 typedef char EffPCPGroupSet_size_must_be_0x180[
     (sizeof(EffPCPGroupSet) == 0x180) ? 1 : -1];
 typedef char EffPCPGroupSet_entries_offset_must_be_0x164[

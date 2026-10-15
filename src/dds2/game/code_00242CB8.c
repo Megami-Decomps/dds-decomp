@@ -37,8 +37,6 @@ extern char D_00422050[];
 
 
 
-void evtBeginSolarOverlayFadeIn(s32 arg0);
-
 extern s32 fileMenuTaskExists(void);
 extern u32 fldIsUpdateInhibited(void);
 void sdfDebugPrintf(const char *fmt, ...);

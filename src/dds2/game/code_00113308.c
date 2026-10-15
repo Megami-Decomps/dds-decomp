@@ -3,6 +3,7 @@
 #include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_model.h"
+#include "sdf_chunk.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_dependency.h"
@@ -335,7 +336,6 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
 
 extern void effObjApplyTransformParameters(void *, EffWorldNode *);
 extern void func_00120B88(EffWorldNode *);
-extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern u8 D_00380788[];
 

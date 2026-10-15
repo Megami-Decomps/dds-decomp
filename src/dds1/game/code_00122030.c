@@ -1791,7 +1791,6 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 extern void mnuCreateCampTasks(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
 
 extern void evtSetSolarOverlayFullyTransparent(void);
 

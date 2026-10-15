@@ -24,7 +24,7 @@ typedef struct ConsBuf {
     u8 *writeCursor; /* 0x00: next glyph-data write */
     u8 *packetStart; /* 0x04: beginning of the DMA range */
     u8 *currentTag; /* 0x08: reserved, not-yet-finalized GIF tag */
-    void *dmaChannel; /* 0x0C */
+    u32 *dmaChannel; /* 0x0C: DMA channel registers; CHCR is the first word. */
     u8 *bufferAddresses[2]; /* 0x10: start of each alternating packet buffer */
     s32 bufferBytes; /* 0x18: byte capacity of each buffer */
     u16 activeBufferIndex; /* 0x1C */
@@ -45,6 +45,7 @@ typedef char DevConsState_screenOriginY_at_0x0A[
     ((u32)&((DevConsState *)0)->screenOriginY == 0x0A) ? 1 : -1];
 typedef char DevConsState_cells_at_0x1C[((u32)&((DevConsState *)0)->cells == 0x1C) ? 1 : -1];
 typedef char ConsBuf_size_must_be_0x20[(sizeof(ConsBuf) == 0x20) ? 1 : -1];
+typedef char ConsBuf_dmaChannel_at_0x0C[((u32)&((ConsBuf *)0)->dmaChannel == 0x0C) ? 1 : -1];
 typedef char ConsBuf_bufferAddresses_at_0x10[((u32)&((ConsBuf *)0)->bufferAddresses == 0x10) ? 1 : -1];
 typedef char ConsBuf_activeBufferIndex_at_0x1C[((u32)&((ConsBuf *)0)->activeBufferIndex == 0x1C) ? 1 : -1];
 

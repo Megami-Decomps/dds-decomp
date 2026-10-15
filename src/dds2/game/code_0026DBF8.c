@@ -4437,11 +4437,107 @@ void mnuReleaseMantraPanelSpriteView(u32 obj) {
     mnuFreeMantraSparkleEmitter(((MantraPanelAnimation *)obj)->spriteHandle);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraPanelBaseLayer);
+s32 mnuDrawMantraPanelBaseLayer(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+                              MantraPanelAnimation *panel, u32 packet) {
+    s8 markerOffsets[6][2] = {
+        {49, 22}, {69, 32}, {69, 62}, {49, 72}, {29, 62}, {29, 32}
+    };
+    MnuStatusResource *resource = (MnuStatusResource *)pool->unk2DB4;
+    f32 orbitPhase;
+    f32 pulse;
+    f32 angle;
+    f32 orbitRadius;
+    s32 drawX;
+    s32 drawY;
+    s32 drawAlpha;
+    MantraNodePos **neighbor;
+    s16 mask;
+    s32 i;
 
-extern s32 mnuDrawMantraPanelBaseLayer(s32, s32, s32, s32, MantraPanelPool *, MantraPanelAnimation *, s32);
+    panel->stateA++;
+    if (panel->stateA >= 131) {
+        panel->stateA = 0;
+    }
+    panel->stateB++;
+    if (panel->stateB >= 251) {
+        panel->stateB = 0;
+    }
+    orbitPhase = panel->stateB / 250.0f;
+    if (panel->stateA < 30) {
+        pulse = 0.0f;
+    } else if (panel->stateA < 90) {
+        pulse = (panel->stateA - 30) / 60.0f * 0.5f;
+    } else {
+        pulse = (panel->stateA - 90) / 40.0f * 0.5f + 0.5f;
+    }
+    pulse = (sdfSinPoly(pulse * -(3.14159265f * 2.0f)) + 1.0f) * 0.5f;
+    mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, z, (s32)(alpha * 0.8f), 0x8B, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect(((u32)x - 0x80) << 4, ((u32)y - 0x80) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0x8E, 0x20, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    for (i = 0; i < 3; i++) {
+        orbitRadius = 14.0f;
+        angle = orbitPhase * -(3.14159265f * 2.0f) + i * (3.14159265f * 2.0f / 3.0f);
+        drawX = (f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * orbitRadius;
+        drawY = (f32)y + -sdfSinPoly(angle) * orbitRadius;
+        sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
+        drawAlpha = alpha * 0.7f;
+        mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, drawAlpha, 1.2f, 0x8D, 0x40, packet);
+        sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
+        mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, drawAlpha, 1.2f, 0x8D, 0x40, packet);
+    }
+    mask = 0;
+    mnuDrawMantraSprite(x, y, 0, (s32)(alpha * (pulse * 0.5f + 0.3f)), 0x8C, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect(((u32)x - 0x80) << 4, ((u32)y - 0x80) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, 128, 0x90, 0x60, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    mnuUpdateAndDrawMantraSparkleEmitter(x, y, z, alpha, panel->spriteHandle, packet);
+    mnuDrawMantraScaledCenteredSprite(x + 49, y + 47, 0, (s32)(alpha * 0.2f), 1.0f, 0x92, 0, packet);
+    if ((panel->flags >> 28) & 1) {
+        neighbor = mnuGetMantraPanelPositionRecord(panel->id)->neighbors;
+    } else {
+        neighbor = mnuGetMantraNodePositionRecord(panel->id)->neighbors;
+    }
+    for (i = 0; i < 6; neighbor++) {
+        s16 nodeIndex = (*neighbor)->panelIndex;
+        if ((panel->flags >> 28) & 1) {
+            if (mnuFindPanelPositionRecordByScriptId(((u8 *)resource)[0xBF3] & 0xF, (u16)nodeIndex)->flags & 1) {
+                mask |= 3 << i;
+                i++;
+            } else {
+                i++;
+            }
+        } else {
+            u32 value = mnuGetPanelValueAt(resource, nodeIndex);
+            if ((value >> 8) & 1) {
+                mask |= 3 << i;
+            }
+            i++;
+        }
+    }
+    if (mask & 0x40) {
+        mask |= 1;
+    }
+    for (i = 0; i < 6; i++) {
+        if ((mask >> i) & 1) {
+            mnuDrawMantraScaledCenteredSprite(x + markerOffsets[i][0], y + markerOffsets[i][1],
+                0, (s32)(alpha * (pulse * 0.2f + 0.3f)), pulse * 0.3f + 1.0f, 0x92, 0, packet);
+        }
+    }
+    return 0;
+}
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425B68);
+
+extern s32 mnuDrawMantraPanelBaseLayer(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
+
+
 
 s32 mnuDrawMantraPanelNodeReveal(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
                  MantraPanelAnimation *panel, u32 packet) {
@@ -6272,6 +6368,13 @@ MantraSparkle *mnuSpawnMantraSparkle(MantraSparkleEmitter *emitter) {
     return 0;
 }
 
+/* Bit 0 marks a live slot; bits 1-2 hold the spawn side. The burst drawer
+ * clears bit 0 through an enum-typed view of the flag word: its distinct
+ * alias set lets the pool count load schedule ahead of the store. */
+typedef enum MantraBurstState {
+    MANTRA_BURST_ACTIVE = 1
+} MantraBurstState;
+
 /* Both burst allocators create this 16-byte pool header followed by 100 slots. */
 typedef struct MantraBurstSlot {
     f32 x;
@@ -6310,7 +6413,88 @@ void mnuReleaseMantraPanelBurstPool(MantraBurstPool *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraPanelBurstParticles);
+extern MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side);
+
+/* Spawn a burst wave every other frame, then advance each live slot along
+ * its heading with an eased speed and draw it with a rise/hold/fall fade. */
+void mnuDrawMantraPanelBurstParticles(s32 x, s32 y, u32 z, s32 alpha, MantraBurstPool *pool,
+                                      s32 wide, u32 packet) {
+    MantraBurstSlot *slot;
+    s32 angleOffset;
+    s32 direction;
+    s32 i;
+    f32 speed;
+    f32 t;
+    s32 drawX;
+    s32 drawY;
+    s16 age;
+    s32 drawAlpha;
+
+    if (wide) {
+        angleOffset = -90;
+        direction = -1;
+    } else {
+        angleOffset = 90;
+        direction = 1;
+    }
+    pool->tick++;
+    if ((s16)pool->tick >= 2) {
+        if (wide) {
+            mnuSpawnBurstSlotSmall(pool, wide, 0);
+            mnuSpawnBurstSlotSmall(pool, wide, 0);
+            mnuSpawnBurstSlotSmall(pool, wide, 1);
+        } else {
+            mnuSpawnBurstSlotSmall(pool, 0, 0);
+            mnuSpawnBurstSlotSmall(pool, 0, 0);
+            mnuSpawnBurstSlotSmall(pool, 0, 0);
+            mnuSpawnBurstSlotSmall(pool, 0, 1);
+            mnuSpawnBurstSlotSmall(pool, 0, 1);
+        }
+        pool->tick = 0;
+    }
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->w.flags & 1) == 0) {
+            continue;
+        }
+        slot->age++;
+        t = 0.0f;
+        if ((s16)slot->age >= 4) {
+            t = (f32)((s16)slot->age - 4) / 10.0f;
+        }
+        speed = sdfSinPoly(t * 1.5707963f) * 15.0f + 1.0f;
+        if (slot->w.flags & 6) {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        } else {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        }
+        drawX = slot->x + (f32)x;
+        drawY = slot->y + (f32)y;
+        age = slot->age;
+        if (age < 6) {
+            t = (f32)age / 6.0f;
+        } else if (age < 8) {
+            t = 1.0f;
+        } else {
+            t = (f32)(14 - age) / 6.0f;
+        }
+        drawAlpha = (f32)alpha * sdfSinPoly(t * 1.5707963f);
+        if (slot->w.flags & 6) {
+            mnuDrawMantraRotatedSprite(drawX, drawY, 0, drawAlpha,
+                                       (f32)(slot->w.polar.angleDegrees + angleOffset), 0xBD, 0, packet);
+        } else {
+            mnuDrawMantraRotatedSprite(drawX, drawY, 0, drawAlpha,
+                                       (f32)(slot->w.polar.angleDegrees + angleOffset), 0xBE, 0, packet);
+        }
+        if ((s16)slot->age >= slot->life) {
+            *(MantraBurstState *)&slot->w.flags &= ~MANTRA_BURST_ACTIVE;
+        }
+    }
+}
 
 
 MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side) {
@@ -6361,7 +6545,89 @@ void mnuReleaseMantraBackgroundBurstPool(MantraBurstPool *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuUpdateAndDrawMantraBackgroundBursts);
+extern MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side);
+
+/* Background variant of the panel bursts: spawn a wave every seventh frame,
+ * then advance each live slot with a doubled eased speed and draw it as a
+ * scaled sprite with a rise/hold/fall fade. */
+s32 mnuUpdateAndDrawMantraBackgroundBursts(s32 x, s32 y, u32 z, s32 alpha, MantraBurstPool *pool,
+                                           s32 wide, u32 packet) {
+    MantraBurstSlot *slot;
+    s32 angleOffset;
+    s32 direction;
+    s32 i;
+    f32 speed;
+    f32 t;
+    s32 drawX;
+    s32 drawY;
+    s16 age;
+    s32 drawAlpha;
+
+    if (wide) {
+        angleOffset = -90;
+        direction = -1;
+    } else {
+        angleOffset = 180;
+        direction = 1;
+    }
+    pool->tick++;
+    if ((s16)pool->tick >= 7) {
+        if (wide) {
+            mnuSpawnBurstSlot(pool, wide, 0);
+            mnuSpawnBurstSlot(pool, wide, 0);
+            mnuSpawnBurstSlot(pool, wide, 1);
+        } else {
+            mnuSpawnBurstSlot(pool, 0, 0);
+            mnuSpawnBurstSlot(pool, 0, 0);
+            mnuSpawnBurstSlot(pool, 0, 1);
+        }
+        pool->tick = 0;
+    }
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->w.flags & 1) == 0) {
+            continue;
+        }
+        slot->age++;
+        t = 0.0f;
+        if ((s16)slot->age >= 10) {
+            t = (f32)((s16)slot->age - 10) / 20.0f;
+        }
+        speed = sdfSinPoly(t * 1.5707963f) * 2.0f + 1.0f;
+        if (slot->w.flags & 6) {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        } else {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        }
+        drawX = slot->x + (f32)x;
+        drawY = slot->y + (f32)y;
+        age = slot->age;
+        if (age < 15) {
+            t = (f32)age / 15.0f;
+        } else if (age < 16) {
+            t = 1.0f;
+        } else {
+            t = (f32)(30 - age) / 14.0f;
+        }
+        drawAlpha = (f32)alpha * sdfSinPoly(t * 1.5707963f);
+        if (slot->w.flags & 6) {
+            mnuDrawMantraScaledRotatedCenteredSprite(drawX, drawY, 0, (f32)drawAlpha * 0.1f, 0x5F, 0,
+                                                     packet, 4.0f,
+                                                     (f32)(slot->w.polar.angleDegrees + angleOffset));
+        } else {
+            mnuDrawMantraScaledRotatedCenteredSprite(drawX, drawY, 0, (f32)drawAlpha * 0.15f, 0x5F, 0,
+                                                     packet, 4.0f,
+                                                     (f32)(slot->w.polar.angleDegrees + angleOffset));
+        }
+        if ((s16)slot->age >= slot->life) {
+            *(MantraBurstState *)&slot->w.flags &= ~MANTRA_BURST_ACTIVE;
+        }
+    }
+}
 
 MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
     s32 base = 0x7A;

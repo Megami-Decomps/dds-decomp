@@ -24,11 +24,13 @@ typedef struct ObjBase {
     u32 unk44;
     s32 resourceSlotCount;
     s32 resourceSlots[DDS3_OBJECT_RESOURCE_SLOT_COUNT];
-    u32 unkAC;
+    u32 resourceSlotFamily;
     s32 currentSlot;
 } ObjBase;
 
 typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
+typedef char ObjBase_resourceSlotFamily_offset_must_be_0xAC[
+    ((u32)&((ObjBase *)0)->resourceSlotFamily == 0xAC) ? 1 : -1];
 
 ObjBase *dds3CreateSlotResourceState(void *owner);
 void dds3EnsureSlotData(void *object);

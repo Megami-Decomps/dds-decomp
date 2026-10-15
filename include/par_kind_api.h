@@ -5,6 +5,14 @@
 
 struct ParKindState;
 
+/* Halfword tag at ParKindState +0 selects one of its +8/+0x10/+0x14 views. */
+enum ParKindStateKind {
+    PAR_KIND_STATE_HISTORY = 1,
+    PAR_KIND_STATE_BILLBOARD_CROSS_STRIP = 2,
+    PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE = 3,
+    PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES = 4
+};
+
 /* Resource-backed objects clone their billboard when instantiated. */
 enum { PAR_BILLBOARD_CLONE_FROM_RESOURCE = -1 };
 

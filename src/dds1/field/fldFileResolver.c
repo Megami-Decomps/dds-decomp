@@ -485,7 +485,7 @@ extern s8 D_0032C9A0[];
 extern void fldReleaseSkyResources(void);
 extern void fldCreatePlayerObject(void);
 extern u8 *fldSelectCurrentActorOnNextFloor(void);
-extern void fldSpawnPlacementObjectsFromBatches(u32, u32, s32);
+extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batches, u32 batchCount, s32 appended);
 
 extern s32 D_003BAE68;
 
@@ -698,11 +698,10 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 appended) {
+void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 appended) {
     f32 position[4];
     f32 rotation[4];
     f32 *transform;
-    FldSpawnBatch *batch = (FldSpawnBatch *)batchAddress;
     FldFileResource *resource;
     u32 count;
     u32 i;
@@ -711,6 +710,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
     FldSpawnEvent *event;
     u32 *parameters;
     FldSpecialPoint *point;
+    FldPendingSoundParams *pendingSound;
     EffWorldNode *object;
     s32 room;
     u32 id;
@@ -778,7 +778,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                 fldCopySpawnTransform(position, rotation, transform);
                 switch (((FldPlacementData *)resource->data)->kind) {
                 case 8:
-                    point = ((FldPlacementData *)resource->data)->parameters;
+                    point = ((FldPlacementData *)resource->data)->payload.specialPoint;
                     switch (point->kind) {
                     case 1:
                         func_00148FF0(0, point->id, rotation, position[0], position[1], position[2]);
@@ -808,7 +808,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                     if (D_0032E4B4[0] != 0) {
                         break;
                     }
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    parameters = ((FldPlacementData *)resource->data)->payload.words;
                     id = parameters[0];
                     room = fldParseRoomNumberFromName(resource->name);
                     if (appended != 0) {
@@ -822,16 +822,16 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                     }
                     break;
                 case 3:
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    parameters = ((FldPlacementData *)resource->data)->payload.words;
                     func_001486D0(parameters[0], rotation, position[0], position[1], position[2]);
                     if (appended == 0) {
                         D_003BAC10++;
                     }
                     break;
                 case 7:
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
-                    fldAppendClearEntry(parameters[1], *(f32 *)parameters,
-                                         position[0], position[1], position[2]);
+                    pendingSound = ((FldPlacementData *)resource->data)->payload.pendingSound;
+                    fldAppendClearEntry(pendingSound->value, pendingSound->scalar,
+                                        position[0], position[1], position[2]);
                     break;
                 }
             }
@@ -1098,12 +1098,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 0);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 1);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 1);
 }
 
 s32 fldGetTransferChunkPayload(s32 record) {

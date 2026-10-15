@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "mnu_title_stream.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_lifecycle.h"
@@ -543,9 +544,123 @@ u32 func_00317AC8(void) {
     return 0;
 }
 
+typedef struct ShootingVector {
+    f32 v[4];
+} ShootingVector;
+
+extern const ShootingVector D_0042D7A0;
+extern struct EffWorldNode *dds3AppendWorldNode(void);
+extern void mnuCreateShootingSceneCamera(void);
+extern s32 kwlnSetLightColorTarget(s32, s32, void *);
+extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
+extern s32 kwlnSetBackgroundColorTarget(s32, void *);
+extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern struct WideSlotPool *itfCreateSpriteWorkPool(u32 count);
+extern struct CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count);
+extern void dds3InitSoundSlotPool(void);
+extern void mnuRegisterWorkEntryPool(u32 entries, u32 count);
+extern void mnuInitializeRuntimeHitTargetList(MenuRuntimeRecord *records, s32 capacity);
+extern void mnuInitializeRuntimeAnimationList(MenuRuntimeRecord *records, s32 capacity);
+extern void mnuResetProgressLimitAndStep(u8 cadenceLimit, u8 progressStep);
+extern void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback);
+extern void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback);
+extern void mnuInitializeHighScoreState(MnuShootingWork *work);
+extern u32 D_0043894C;
+extern MenuProgressParameters D_0040AC40;
+extern s32 D_004390B4;
+
+/* Build the shooting scene: world node, camera and area actor, the three
+ * lights and background, sprite/hit pools, the work-entry pool and the two
+ * runtime record lists, then the progress parameters and callbacks. */
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingScene);
+void mnuInitializeShootingScene(MnuShootingWork *handle) {
+    MnuSectionObjectList *lists[2];
+    f32 direction[4] = { 0 };
+    ShootingVector color;
+    struct SdfMemBlock *block;
+    struct EffWorldNode *node;
+
+    direction[3] = 1.0f;
+    color = D_0042D7A0;
+    D_00435CBC = 0x80000000;
+    node = dds3AppendWorldNode();
+    dds3SetWorldSecondaryObject(node);
+    dds3SetWorldObject(node);
+    mnuCreateShootingSceneCamera();
+    evtSpawnActionObj2(0, (s32)"shooting_Area");
+    color.v[0] = 1.0f;
+    color.v[1] = 1.0f;
+    color.v[2] = 1.0f;
+    kwlnSetLightColorTarget(0, 0, color.v);
+    color.v[0] = 0.0f;
+    color.v[1] = 0.0f;
+    color.v[2] = 0.0f;
+    kwlnSetLightColorTarget(0, 1, color.v);
+    color.v[0] = 0.0f;
+    color.v[1] = 0.0f;
+    color.v[2] = 0.0f;
+    kwlnSetLightColorTarget(0, 2, color.v);
+    direction[0] = 1.0f;
+    direction[1] = 1.0f;
+    direction[2] = 1.0f;
+    kwlnSetLightDirectionTarget(0, 0, direction);
+    direction[0] = 0.0f;
+    direction[1] = 0.0f;
+    direction[2] = 0.0f;
+    kwlnSetLightDirectionTarget(0, 1, direction);
+    direction[0] = 0.0f;
+    direction[1] = 0.0f;
+    direction[2] = 0.0f;
+    kwlnSetLightDirectionTarget(0, 2, direction);
+    color.v[0] = 0.4f;
+    color.v[1] = 0.4f;
+    color.v[2] = 0.4f;
+    kwlnSetBackgroundColorTarget(0, color.v);
+    evtSetDrawVectorTarget(0, 255.0f, 255.0f, 3000.0f, 20000.0f);
+    handle->spriteWork = itfCreateSpriteWorkPool(100);
+    handle->tintWork = itfCreateSpriteHitEffectWorkPool(100);
+    dds3InitSoundSlotPool();
+    D_00438948 = sdfAllocGeneralBlock(0x1C20);
+    D_0043894C = sdfMemoryGetBlockAddress(D_00438948);
+    memset((void *)D_0043894C, 0, 0x1C20);
+    mnuRegisterWorkEntryPool(D_0043894C, 100);
+    block = sdfAllocGeneralBlock(0x1C30);
+    lists[0] = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
+    memset(lists[0], 0, 0x1C30);
+    lists[0]->allocation = block;
+    lists[0]->objects = (u8 *)(lists[0] + 1);
+    lists[0]->count = 200;
+    block = sdfAllocGeneralBlock(0xE20);
+    lists[1] = (MnuSectionObjectList *)sdfMemoryGetBlockAddress(block);
+    memset(lists[1], 0, 0xE20);
+    lists[1]->count = 100;
+    lists[1]->objects = (u8 *)(lists[1] + 1);
+    lists[1]->allocation = block;
+    mnuInitializeRuntimeHitTargetList((MenuRuntimeRecord *)lists[0]->objects, lists[0]->count);
+    mnuInitializeRuntimeAnimationList((MenuRuntimeRecord *)lists[1]->objects, lists[1]->count);
+    handle->progressWork = lists[0];
+    handle->alternateProgressWork = lists[1];
+    memset(&D_0040AC40, 0, sizeof(D_0040AC40));
+    D_0040AC40.width = 0x140;
+    D_0040AC40.height = 0x1C0;
+    D_0040AC40.x = 0x62;
+    D_0040AC40.y = 0;
+    mnuCopyResourceProgressParameters(&D_0040AC40);
+    mnuResetProgressLimitAndStep(1, 1);
+    mnuSetWorkEntryStartCallback(mnuCreateShootingEntryObject);
+    mnuSetWorkEntryFinishOrDeactivateCallback(func_00319388);
+    mnuSetActiveWorkVisitor(func_00319A58);
+    mnuSetRuntimeRecordInitializationCallback(mnuApplyPlayerRuntimeRecordFeedback);
+    mnuSetRuntimeWorkHitCallback(mnuApplyShootingRuntimeRecordEvent);
+    mnuSetRuntimeRecordPairCallback(mnuAdvanceShootingProgressFromRecord);
+    mnuInitializeHighScoreState(handle);
+    handle->initialize = D_0040ABE0[0];
+    handle->update = D_0040ABF0[0];
+    D_004390B4 = 0;
+    handle->initialized = 0;
+    handle->unkB0 = 2;
+}
 
 /* Release the shooting task's owned lists, queues, slots and world object. */
 void mnuDestroyShootingWork(MnuShootingWork *work) {
@@ -632,7 +747,147 @@ u32 mnuRunShootingUpdateCallback(MnuShootingWork *work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", mnuInitializeShootingWorkResources);
+extern void mnuResetResourceProgressCounters(void);
+extern void mnuResetWorkEntryPool(void);
+extern void mnuInitializeActiveEffectWorkEntry(MenuWorkEntry *entry);
+extern s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *entry, u32 mode);
+extern MenuRuntimeList *mnuGetRuntimeHitTargetList(void);
+extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
+extern void mnuClearRuntimeRecordStorage(MenuRuntimeList *);
+extern void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
+extern void mnuBindMovementRecordTable(MenuMovementRecord18 *records, u32 count);
+extern void mnuBindResourceRecordTable(MenuResourceRecord *, s32);
+extern void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
+extern MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts);
+extern void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w);
+extern void mnuPopulateModelNodeList(MnuNodeList *list, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z);
+extern void mnuDeactivateAllModelNodes(MnuNodeList *list);
+extern MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts);
+extern void mnuClearNodeRecords(s32 *listAddress);
+extern void mnuAssignEffectRecordQueues(MnuEffectList *list, s32 resourceIndex, FileQueue **sources);
+extern void mnuClearAllNodeBroadcastFlags(s32 *listAddress);
+extern void itfInstallIndexedImageResourceBanks(u32 *source, s32 count);
+extern ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts);
+extern void itfClearModelInstances(ModelInstanceList *list);
+extern void itfSetModelInstanceParameterBits(ModelInstanceList *list, u32 parameter);
+extern void itfDeactivateModelInstances(ModelInstanceList *list);
+extern void itfApplyWorkTintAndClearBuffers(u8 *work);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void mnuResetTitleStreamLocked(void);
+extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
+extern void mnuResetTitleStreamAfterFileIdle(void);
+extern MnuModelNode *D_00438928;
+
+/* Initialize a shooting section: reset the entry pools, bind the loaded
+ * object tables, then build the section models, effect lists and model
+ * instances (or reuse the instances), and reset the round state. */
+s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
+    MenuRegistryParameters *records;
+    s32 *counts;
+    MnuNodeList *groups;
+    MnuEffectList *effects;
+    ModelInstanceList *instances;
+    s32 i;
+
+    mnuResetResourceProgressCounters();
+    mnuResetWorkEntryPool();
+    mnuInitializeActiveEffectWorkEntry(&D_0040ABF8);
+    if (work->unk94 != 0) {
+        mnuRebuildMenuWorkEntryCallbackRecords(&D_0040ABF8, work->unk94);
+    }
+    D_0040ABF8.currentX = 256.0f;
+    D_0040ABF8.currentY = 320.0f;
+    mnuClearRuntimeRecordStorage(mnuGetRuntimeHitTargetList());
+    mnuClearRuntimeRecordStorage(mnuGetRuntimeAnimationList());
+    mnuBindMenuRecordRegistry((MenuRegistry *)work->objects->objects, work->objects->count);
+    mnuBindMovementRecordTable((MenuMovementRecord18 *)work->playerObjects->objects, work->playerObjects->count);
+    mnuBindResourceRecordTable((MenuResourceRecord *)work->mapObjects->objects, work->mapObjects->count);
+    mnuBindMenuRegistryParameters((MenuRegistryParameters *)work->drawObjects->objects, work->drawObjects->count);
+    counts = sdfAllocSizeClassBlock(work->drawObjects->count * 4);
+    records = (MenuRegistryParameters *)work->drawObjects->objects;
+    for (i = 0; i < work->drawObjects->count; i++) {
+        if (records[i].kind == 3) {
+            counts[i] = records[i].unk06;
+        } else {
+            counts[i] = 0;
+        }
+    }
+    work->modelWork = mnuCreateSectionModelWork(work->drawObjects->count, counts);
+    sdfReleaseChipBlock(counts);
+    D_00438928 = NULL;
+    groups = work->modelWork->groups;
+    records = (MenuRegistryParameters *)work->drawObjects->objects;
+    for (i = 0; i < work->modelWork->count; i++) {
+        mnuInitializeNodeTransforms((u32 *)&groups[i], 1.0f, 1.0f, 1.0f, 1.0f);
+        if (i == 8) {
+            mnuPopulateModelNodeList(&groups[i], records[i].unk08, records[i].unk0A, 0, 1.0f, 1.0f, 3.0f);
+        } else {
+            mnuPopulateModelNodeList(&groups[i], 5, records[i].unk0A, 0, 1.0f, 1.0f, 1.0f);
+        }
+        mnuDeactivateAllModelNodes(&groups[i]);
+        evtPrintDeveloperConsoleMessage("Major:0x%x Minor:0x%x Num:%d\n", records[i].unk08, records[i].unk0A, records[i].unk06);
+    }
+    if (work->effectWork == NULL) {
+        counts = sdfAllocSizeClassBlock(12);
+        counts[1] = 2;
+        counts[2] = 2;
+        counts[0] = 30;
+        work->effectWork = mnuCreateEffectWork(3, counts);
+        sdfReleaseChipBlock(counts);
+        effects = work->effectWork->lists;
+        for (i = 0; i < work->effectWork->count; i++) {
+            MnuEffectList *list = &effects[i];
+
+            mnuClearNodeRecords((s32 *)list);
+            mnuAssignEffectRecordQueues(list, i, work->queueCopies);
+            mnuClearAllNodeBroadcastFlags((s32 *)list);
+            evtPrintDeveloperConsoleMessage("Effect Load!!\n");
+        }
+    }
+    if (work->work24 == NULL) {
+        itfInstallIndexedImageResourceBanks(work->resourceSlots, 7);
+        counts = sdfAllocSizeClassBlock(work->drawObjects->count * 4);
+        records = (MenuRegistryParameters *)work->drawObjects->objects;
+        for (i = 0; i < work->drawObjects->count; i++) {
+            if (records[i].kind == 1) {
+                counts[i] = records[i].unk06;
+            } else {
+                counts[i] = 0;
+            }
+        }
+        work->work24 = itfCreateModelInstanceWork(work->drawObjects->count, counts);
+        sdfReleaseChipBlock(counts);
+        instances = work->work24->lists;
+        for (i = 0; i < work->work24->count; i++) {
+            itfClearModelInstances(&instances[i]);
+            itfSetModelInstanceParameterBits(&instances[i], i);
+        }
+    } else {
+        instances = work->work24->lists;
+        for (i = 0; i < work->work24->count; i++) {
+            itfDeactivateModelInstances(&instances[i]);
+        }
+    }
+    itfApplyWorkTintAndClearBuffers((u8 *)work);
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
+    mnuQueueTitleSoundStreamEntry(0x16);
+    mnuResetTitleStreamAfterFileIdle();
+    work->state = 2;
+    work->update = D_0040ABF0[1];
+    work->unk90 = 0;
+    work->targets = 0;
+    work->unkA4 = 0;
+    D_00438934 = 0;
+    work->flags = ((work->flags & ~4) | 0x10) & ~0x20;
+    work->phase = 0;
+    work->result = 0;
+    work->phaseTicks = 0;
+    work->unkA8 = 0;
+    evtPrintDeveloperConsoleMessage("stgInit_Section\n");
+    return 1;
+}
+
 
 void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
     s32 i;

@@ -30,8 +30,8 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
 /* The selected position provider leaves its vector in vf10. */
-void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *param, u128 *out) {
-    D_003AF208[param->kind](owner, param);
+void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *request, u128 *out) {
+    D_003AF208[request->kind](owner, request);
     VU0_STORE_VF(vf10, out);
 }
 
@@ -42,44 +42,44 @@ extern f32 btlMeasureEffectTargetGroupBounds(u32 mask, s32 a, s32 b);
 extern f32 btlGetMaxUnitTop(u32 mask);
 extern f32 btlGetExtremeUnitY(u32 mask);
 
-void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
-    effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), arg);
+void effBattleMiscCallByOwnerA(u32 unused, void *request) {
+    effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), request);
 }
 
-void effBattleMiscCallByFinalSelector(u32 unused, void *arg) {
-    effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), arg);
+void effBattleMiscCallByFinalSelector(u32 unused, void *request) {
+    effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), request);
 }
 
-void effBattleMiscQueryOverrideAttachment(u32 unused, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetOverrideSelector(), param->count);
+void effBattleMiscQueryOverrideAttachment(u32 unused, EffectVectorRequest *request) {
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetOverrideSelector(), request->count);
 }
 
-void effBattleMiscQueryFinalAttachment(u32 unused, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetFinalSelector(), param->count);
+void effBattleMiscQueryFinalAttachment(u32 unused, EffectVectorRequest *request) {
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetFinalSelector(), request->count);
 }
 
 /* Query a unit-relative target position; camera-facing kinds use the view basis. */
-void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
+void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request) {
     f32 out[4];
     f32 dir[4];
     f32 pos[4];
     f32 length;
     f32 halfHeight;
     f32 height;
-    u32 kind = param->count;
-    u32 sub = param->size;
+    u32 anchorKind = request->count;
+    u32 directionMode = request->directionMode;
 
     if (effFieldColorFlags & 4) {
         if (unit->status.flags & 0x400) {
-            if (kind == 5) {
-                kind = 0;
+            if (anchorKind == 5) {
+                anchorKind = 0;
             }
         }
     }
-    if (param->unk04 == 0) {
+    if (request->extentOverride == 0) {
         length = unit->reach * unit->scale;
     } else {
-        length = (f32)param->unk04;
+        length = (f32)request->extentOverride;
     }
     halfHeight = unit->height * unit->scale * 0.5f;
     if (unit->status.stateFlags & 0x8000) {
@@ -88,24 +88,24 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
         btlUnitGetMuzzlePosVU(unit);
     }
     VU0_STORE_VF(vf10, pos);
-    if (kind == 5) {
-        if (sub == 8 || sub == 10) {
+    if (anchorKind == 5) {
+        if (directionMode == 8 || directionMode == 10) {
             height = -1.0f;
-            if (param->unk04 != 0) {
+            if (request->extentOverride != 0) {
                 height = -length;
             }
         } else {
             height = -1.0f;
         }
     } else {
-        height = pos[1] - D_003AF1C0[kind] * halfHeight;
-        if (sub == 8 || sub == 10) {
-            if (param->unk04 != 0) {
+        height = pos[1] - D_003AF1C0[anchorKind] * halfHeight;
+        if (directionMode == 8 || directionMode == 10) {
+            if (request->extentOverride != 0) {
                 height -= length;
             }
         }
     }
-    if (sub == 9 || kind == 4) {
+    if (directionMode == 9 || anchorKind == 4) {
         dir[2] = halfHeight < length ? -length : -halfHeight;
         dir[0] = dir[1] = 0.0f;
         pos[1] = height;
@@ -117,7 +117,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
         VU0_LOAD_VF(vf11, pos);
         VU0_ADD(vf10, vf10, vf11);
     } else {
-        if (sub == 8 || sub == 10) {
+        if (directionMode == 8 || directionMode == 10) {
             out[0] = pos[0];
             out[1] = height;
             out[2] = pos[2];
@@ -127,7 +127,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
             dir[1] = 0;
             VU0_LOAD_VF(vf10, unit->orientation);
             effMiscQuaternionToMatrixVU();
-            sdfVuLoadSecondaryRotationMatrixY(D_003AF1D8[sub]);
+            sdfVuLoadSecondaryRotationMatrixY(D_003AF1D8[directionMode]);
             sdfComposeVuMatrixFromRegisters();
             VU0_LOAD_VF(vf10, dir);
             VU0_ROTATE_VEC(vf10, vf10);
@@ -140,30 +140,30 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
     }
 }
 
-void effBattleMiscQueryMaskedTargetPosition(u32 flags, EffectVectorRequest *param) {
+void effBattleMiscQueryMaskedTargetPosition(u32 actorFlagsMask, EffectVectorRequest *request) {
     f32 out[4];
     f32 dir[4];
     f32 pos[4];
     f32 vertical;
     f32 length;
     f32 extremeY;
-    u32 kind = param->count;
-    u32 sub = param->size;
+    u32 anchorKind = request->count;
+    u32 directionMode = request->directionMode;
 
-    btlMeasureEffectTargetGroupBounds(flags, 0, 0);
+    btlMeasureEffectTargetGroupBounds(actorFlagsMask, 0, 0);
     VU0_STORE_VF(vf10, pos);
     length = 500.0f;
-    vertical = -btlGetMaxUnitTop(flags);
-    extremeY = btlGetExtremeUnitY(flags);
-    if (param->unk04 != 0) {
-        length = (f32)param->unk04;
+    vertical = -btlGetMaxUnitTop(actorFlagsMask);
+    extremeY = btlGetExtremeUnitY(actorFlagsMask);
+    if (request->extentOverride != 0) {
+        length = (f32)request->extentOverride;
     }
 
-    switch (kind) {
+    switch (anchorKind) {
     case 5:
-        if (sub == 8 || sub == 10) {
+        if (directionMode == 8 || directionMode == 10) {
             vertical = -1.0f;
-            if (param->unk04 != 0) {
+            if (request->extentOverride != 0) {
                 vertical = -length;
             }
         } else {
@@ -188,23 +188,23 @@ void effBattleMiscQueryMaskedTargetPosition(u32 flags, EffectVectorRequest *para
         break;
     }
 
-    if (sub == 8) {
+    if (directionMode == 8) {
         out[0] = pos[0];
         out[1] = vertical;
         out[2] = extremeY;
-    } else if (sub == 10) {
+    } else if (directionMode == 10) {
         out[0] = pos[0];
         out[1] = vertical;
         out[2] = pos[2];
     } else {
         dir[0] = 0.0f;
         dir[1] = 0.0f;
-        if (flags & 0x200) {
+        if (actorFlagsMask & 0x200) {
             dir[2] = 1.0f;
         } else {
             dir[2] = -1.0f;
         }
-        sdfVuLoadRotationMatrixY(D_003AF1D8[sub]);
+        sdfVuLoadRotationMatrixY(D_003AF1D8[directionMode]);
         VU0_LOAD_VF(vf10, dir);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, dir);
@@ -215,36 +215,36 @@ void effBattleMiscQueryMaskedTargetPosition(u32 flags, EffectVectorRequest *para
     VU0_LOAD_VF(vf10, out);
 }
 
-void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *request) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
 
     (void)unused;
-    effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, request);
 }
 
-void effBattleMiscQueryVariantTargetPosition(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryVariantTargetPosition(u32 unused, EffectVectorRequest *request) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetVariantSelector();
 
     (void)unused;
-    effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, request);
 }
 
 
 /* Target offset for a unit part; the vector is returned in vf10. */
-void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *param) {
+void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *request) {
     f32 length = 750.0f;
     f32 height;
     f32 out[4];
     f32 dir[4];
     struct EffWorldNode *camera;
-    s32 lengthParam = param->unk04;
-    u32 sub = param->size;
-    u32 kind = param->count;
+    s32 extentOverride = request->extentOverride;
+    u32 directionMode = request->directionMode;
+    u32 anchorKind = request->count;
 
-    if (lengthParam != 0) {
-        length = (f32)lengthParam;
+    if (extentOverride != 0) {
+        length = (f32)extentOverride;
     }
-    if (sub == 9 || kind == 4) {
+    if (directionMode == 9 || anchorKind == 4) {
         camera = dds3GetWorldCameraObject(dds3GetWorldObject());
         dir[0] = dir[1] = dir[2] = 750.0f;
         dds3LoadCameraVectorVU(camera);
@@ -256,19 +256,19 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
         VU0_MUL(vf10, vf10, vf11);
         return;
     }
-    if (kind == 5) {
-        if (sub == 8 || sub == 10) {
+    if (anchorKind == 5) {
+        if (directionMode == 8 || directionMode == 10) {
             height = -1.0f;
-            if (lengthParam != 0) {
+            if (extentOverride != 0) {
                 height = -length;
             }
         } else {
             height = -1.0f;
         }
     } else {
-        height = D_003AF1C0[kind] * 250.0f;
+        height = D_003AF1C0[anchorKind] * 250.0f;
     }
-    if (sub == 8 || sub == 10) {
+    if (directionMode == 8 || directionMode == 10) {
         out[0] = 0;
         out[1] = height;
         out[2] = 0;
@@ -276,7 +276,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
         dir[0] = 0;
         dir[1] = 0;
         dir[2] = (unit->status.flags & 0x200) ? 1.0f : -1.0f;
-        sdfVuLoadRotationMatrixY(D_003AF1D8[sub]);
+        sdfVuLoadRotationMatrixY(D_003AF1D8[directionMode]);
         VU0_LOAD_VF(vf10, dir);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, dir);
@@ -287,15 +287,15 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
     VU0_LOAD_VF(vf10, out);
 }
 
-void effBattleMiscApplyParamByte(u32 owner, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)owner, param->count);
+void effBattleMiscApplyParamByte(u32 owner, EffectVectorRequest *request) {
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)owner, request->count);
 }
 
-f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *param) {
+f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *request) {
     BtlUnit *other;
     f32 result = 0;
 
-    switch (param->kind) {
+    switch (request->kind) {
     case 0:
         result = unit->reach * unit->scale;
         break;
@@ -323,10 +323,10 @@ f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *param) {
 }
 
 /* Unit vector from the queried position to the unit's effect or muzzle position. */
-void effBattleMiscDirectionTo(BtlUnit *unit, EffectVectorRequest *param, f32 *out) {
+void effBattleMiscDirectionTo(BtlUnit *unit, EffectVectorRequest *request, f32 *out) {
     f32 origin[4];
 
-    effBattleMiscQueryPosition(unit, param, (u128 *)origin);
+    effBattleMiscQueryPosition(unit, request, (u128 *)origin);
     if (unit->status.stateFlags & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
@@ -340,21 +340,21 @@ void effBattleMiscDirectionTo(BtlUnit *unit, EffectVectorRequest *param, f32 *ou
 
 
 
-/* Build a 4x4 basis matrix into `out`: look-at for kinds 4 / sub 9, else a table-driven rotation. */
-void effBattleMiscBuildBasis(EffectVectorRequest *param, u128 *out) {
+/* Build a 4x4 basis matrix into `out`: look-at for anchor kind 4 / direction mode 9, else a table-driven rotation. */
+void effBattleMiscBuildBasis(EffectVectorRequest *request, u128 *out) {
     f32 angle = 0;
     f32 tilt = 0;
 
-    if (param->count == 4 || param->size == 9) {
+    if (request->count == 4 || request->directionMode == 9) {
         sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
         VU0_MOVE_VF(vf31, vf0);
     } else {
-        if (param->count == 5 || param->count == 3 || param->size == 8 || param->size == 10) {
+        if (request->count == 5 || request->count == 3 || request->directionMode == 8 || request->directionMode == 10) {
             tilt = 3.14159265f / 2.0f;
         }
-        if (param->size < 9) {
-            angle = D_003AF1D8[param->size];
+        if (request->directionMode < 9) {
+            angle = D_003AF1D8[request->directionMode];
         }
         sdfVuLoadRotationMatrixX(tilt);
         sdfVuLoadSecondaryRotationMatrixY(angle);

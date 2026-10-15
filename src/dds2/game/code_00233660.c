@@ -132,9 +132,9 @@ typedef struct MdlViewState {
     s16 effectListScroll; /* 0x44: first record displayed by the effect list */
     s16 markFieldCursor; /* 0x46: selected row in the mark parameter editor */
     s16 unk48;
-    s16 unk4A;
-    s16 unk4C;
-    s16 unk4E;
+    s16 captureScale; /* 0x4A: model capture scale setting */
+    s16 captureDivX;  /* 0x4C: model capture horizontal division setting */
+    s16 captureDivY;  /* 0x4E: model capture vertical division setting */
     s16 unk50;
     s16 unk52;
     f32 viewerScale; /* 0x54: viewer zoom, in hundredths */
@@ -1905,7 +1905,7 @@ void mdlUpdateViewerWorkspaceSetup(void) {
     switch (mdlViewerState.unk48) {
     case 0:
         if (D_0040B7D9[0] < 0) {
-            f32 scale = mdlViewerState.unk4A;
+            f32 scale = mdlViewerState.captureScale;
 
             mdlViewerState.yawStepMode = initialPhase;
             mdlViewerState.unk50 = 0;
@@ -1919,9 +1919,9 @@ void mdlUpdateViewerWorkspaceSetup(void) {
         }
         break;
     case 1:
-        D_00438A5C = mdlViewerState.unk4C * 0x100 -
+        D_00438A5C = mdlViewerState.captureDivX * 0x100 -
                    mdlViewerState.unk50 * 0x200 - 0x100;
-        D_00438A60 = mdlViewerState.unk4E * 0x70 -
+        D_00438A60 = mdlViewerState.captureDivY * 0x70 -
                    mdlViewerState.unk52 * 0xE0 - 0x70;
         mdlViewerState.unk48 = 2;
         break;
@@ -2176,21 +2176,21 @@ void mdlUpdateViewerSettingsInput(void) {
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            fldAdjustIntegerUsingMainPad(&mdlViewerState.unk4A, 2, 1, 8, 1, 1);
+            fldAdjustIntegerUsingMainPad(&mdlViewerState.captureScale, 2, 1, 8, 1, 1);
         }
         break;
     case 3:
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            fldAdjustIntegerUsingMainPad(&mdlViewerState.unk4C, 2, 1, 8, 1, 1);
+            fldAdjustIntegerUsingMainPad(&mdlViewerState.captureDivX, 2, 1, 8, 1, 1);
         }
         break;
     case 4:
         if (sdfPadButtonStates[1] < 0 || sdfPadButtonStates[3] < 0) {
             mdlViewerState.unk3E = 0;
         } else {
-            fldAdjustIntegerUsingMainPad(&mdlViewerState.unk4E, 2, 1, 8, 1, 1);
+            fldAdjustIntegerUsingMainPad(&mdlViewerState.captureDivY, 2, 1, 8, 1, 1);
         }
         break;
     }
@@ -2250,9 +2250,9 @@ void mdlDrawViewerSettings(void) {
         /* Retail002378B8 clears the selected channel value before the switch. */
         value = 0;
         switch (i) {
-        case 0: value = mdlViewerState.unk4A; break;
-        case 1: value = mdlViewerState.unk4C; break;
-        case 2: value = mdlViewerState.unk4E; break;
+        case 0: value = mdlViewerState.captureScale; break;
+        case 1: value = mdlViewerState.captureDivX; break;
+        case 2: value = mdlViewerState.captureDivY; break;
         }
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
             0x7300, 0x7D80 + i * 0x60, 0xFF0080, 0, D_003C8920[i], value));
@@ -2753,7 +2753,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlLoadViewerPresentationConfig();
     mdlViewerState.viewerScale = 1.0f;
     mdlViewerState.unk0F = mdlViewerState.unk0B = mdlViewerState.taskPhase = 1;
-    mdlViewerState.unk4E = mdlViewerState.unk4C = mdlViewerState.unk4A = mdlViewerState.unk1C = mdlViewerState.resourceGroup = 2;
+    mdlViewerState.captureDivY = mdlViewerState.captureDivX = mdlViewerState.captureScale = mdlViewerState.unk1C = mdlViewerState.resourceGroup = 2;
     mdlViewerState.resourceId = 0;
     mdlViewerState.unk1E = 0;
     mdlViewerState.unk08 = 0;

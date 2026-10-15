@@ -12,11 +12,13 @@
 #include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
+#include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
+#include "eff_event_work_api.h"
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "eff_event_bill.h"
@@ -358,13 +360,13 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     scene->append(scene, (SdfListHead *)list);
 }
 
-/* Submit the native command at biased screen coordinates; payload args stay opaque. */
-void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
+/* Submit a formatted native command at biased screen coordinates. */
+void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 commandIndex, s32 format) {
     SdfListHead *task = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     SdfPoolNode *scene;
 
     sdfInitPacketList(task);
-    sdfAppendPacket(task, (u32)(sdfCreateFormattedSifCommand((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, (const char *)arg3)));
+    sdfAppendPacket(task, (u32)(sdfCreateFormattedSifCommand((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
     scene = &kwlnPositionedTextSurface;
     scene->append(scene, (SdfListHead *)task);
 }

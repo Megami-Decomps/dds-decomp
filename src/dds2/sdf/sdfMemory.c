@@ -27,11 +27,11 @@ extern void EIntr(void);
 /* Derive the byte count from adjacent addresses while preserving the interrupt state. */
 s32 sdfMemoryGetBlockSize(SdfMemBlock *block) {
     s32 blockBytes;
-    s32 restoreInterrupts;
+    s32 interruptsWereEnabled;
 
-    restoreInterrupts = DIntr();
+    interruptsWereEnabled = DIntr();
     blockBytes = block->next->address - block->address;
-    if (restoreInterrupts) {
+    if (interruptsWereEnabled) {
         EIntr();
     }
     return blockBytes;
@@ -49,14 +49,14 @@ extern void (*D_004389CC)(s32);
 SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
-    s32 restoreInterrupts;
+    s32 interruptsWereEnabled;
     SdfMemBlock *block;
 
-    restoreInterrupts = DIntr();
+    interruptsWereEnabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {
-                if (restoreInterrupts != 0) {
+                if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
                 if (D_004389CC != NULL) {
@@ -79,7 +79,7 @@ SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
                     block->next = splitBlock;
                 }
                 block->state = SDF_HEAP_BLOCK_USED;
-                if (restoreInterrupts != 0) {
+                if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
                 return block;
@@ -93,14 +93,14 @@ SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
 SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
-    s32 restoreInterrupts;
+    s32 interruptsWereEnabled;
     SdfMemBlock *block;
 
-    restoreInterrupts = DIntr();
+    interruptsWereEnabled = DIntr();
     for (block = heap->tail.prev;; block = block->prev) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {
-                if (restoreInterrupts != 0) {
+                if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
             }
@@ -122,7 +122,7 @@ SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
                     block = splitBlock;
                 }
                 block->state = SDF_HEAP_BLOCK_USED;
-                if (restoreInterrupts != 0) {
+                if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
                 return block;
@@ -136,14 +136,14 @@ SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
 SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfGeneralHeap;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
-    s32 restoreInterrupts;
+    s32 interruptsWereEnabled;
     SdfMemBlock *block;
 
-    restoreInterrupts = DIntr();
+    interruptsWereEnabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {
-                if (restoreInterrupts != 0) {
+                if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
                 return NULL;
@@ -164,7 +164,7 @@ SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes) {
                     block->next = splitBlock;
                 }
                 block->state = SDF_HEAP_BLOCK_USED;
-                if (restoreInterrupts != 0) {
+                if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
                 return block;

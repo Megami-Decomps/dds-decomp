@@ -34,7 +34,7 @@ extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *strrchr(const char *text, s32 delimiter);
 extern s32 strcasecmp(const char *text, const char *suffix);
-extern s32 D_00438D08;
+extern s32 sdfMoviePacRingSemaphore;
 extern s32 D_0043921C;
 extern u8 D_00438D28[];
 
@@ -86,8 +86,8 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         return;
     }
 
-    if (D_00438D08 < 0) {
-        D_00438D08 = sdfCreateSemaphore(1, 1, 0);
+    if (sdfMoviePacRingSemaphore < 0) {
+        sdfMoviePacRingSemaphore = sdfCreateSemaphore(1, 1, 0);
     }
     D_0043921C = -1;
     pacWork = sdfAllocAndClearQuadwords(0x78);

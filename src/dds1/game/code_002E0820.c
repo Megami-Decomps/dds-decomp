@@ -213,12 +213,6 @@ u32 sdfConsGetTextureDrawPacketSize(SdfTex *texture) {
     return SDF_TEXTURE_DRAW_PACKET_BYTES;
 }
 
-/* Texture draw packet: three resource-derived values alternate with their
- * GS register addresses after the GIF tag and payload header. */
-extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
-
-extern u64 sdfTexGetPrimaryClampState(SdfTex *);
-
 /* Fill TEX1, TEX0 and CLAMP A+D writes; contextOffset 0/1 selects GS context. */
 SdfTextureDrawPacket *sdfConsInitTextureDrawPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
     drawPacket->header.quadwords = 4;

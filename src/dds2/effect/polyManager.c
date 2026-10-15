@@ -12,6 +12,7 @@
 #include "eff.h"
 #include "poly_ring_head.h"
 #include "poly_ring_records.h"
+#include "poly_node.h"
 
 struct SdfMemBlock;
 
@@ -20,29 +21,6 @@ enum {
     POLY_RESET_ENTRY_AGE = 0xFFFFFF0,
     POLY_RESET_DURATION = 0xFFFFFFF
 };
-
-/* Basic node: +0xDC is a cell-system pointer, not the band's float step. */
-typedef struct {
-    f32 origin[4];
-    u16 entryCount;                /* 0x10 */
-    u8 pad12[2];
-    s32 duration;                  /* 0x14 */
-    u8 pad18[8];
-    f32 matrix[16];                /* 0x20: radial-vector transform */
-    u8 pad60[0x52];
-    u16 active;                    /* 0xB2: cleared when every entry finishes */
-    u8 padB4[0xC];
-    u8 loop;                       /* 0xC0: restart finished entries */
-    u8 padC1[3];
-    s32 spawnDelayStep;            /* 0xC4: stagger inactive entry ages */
-    u16 segments;
-    u8 padCA[2];
-    f32 radius;
-    f32 pairDisplacement;
-    u8 padD4[8];
-    ParSystem *strip;
-    s32 *ages;
-} PolyNode;
 
 typedef struct {
     PolyRingHead head;

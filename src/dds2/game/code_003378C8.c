@@ -90,8 +90,6 @@ typedef struct VuGeomRef {
 
 extern VuGeomRef D_00468210[];
 
-extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
-
 extern void sdfVuEmitSelectedNodePacket(s32 workAddress);
 
 void sdfVuBlendNodeXY(VuBlendNode *node);

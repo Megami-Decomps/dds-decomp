@@ -375,12 +375,14 @@ void dds3AttachResourceHandleToWorldObject(EffWorldNode *object, u32 resourceId)
     data->indexedHandle = handle;
 }
 
-void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4, const SdfTextureOffsetListHeader *textureOffsets, u32 arg6) {
+void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 area, u32 room,
+                                    u32 resource0Data, u32 resource1Data,
+                                    const SdfTextureOffsetListHeader *textureOffsets, u32 arg6) {
     EvtWorldTable *data;
     u32 handle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = fldLoadAreaRoomResourcesFromRequest(arg1, arg2, arg3, arg4, textureOffsets, arg6);
+    handle = fldLoadAreaRoomResourcesFromRequest(area, room, resource0Data, resource1Data,
+                                                 textureOffsets, arg6);
     data->indexedHandle = handle;
 }

@@ -173,12 +173,9 @@ typedef struct SdfModel {
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
     struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
-    /* Float scalar (DDS2 0x232074 / Nocturne 0x2B07D4), forwarded
-     * as raw packet bits by DDS1 0x2D9530. */
-    union {
-        u32 word;
-        f32 scalar;
-    } unk94;
+    /* Model scale: read as f32 by sdfVuSetGlobalScale's caller and copied
+     * unchanged into the three-scalar VIF payload (DDS1 0x2D9530). */
+    f32 unk94;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
     u8 pad99[3];
 } SdfModel;
@@ -215,9 +212,19 @@ typedef char MotionEntry_header_extent[(sizeof(((MotionEntry *)0)->packedHeader)
 typedef char MotionEntry_size_must_be_8[(sizeof(MotionEntry) == 8) ? 1 : -1];
 
 typedef struct SdfMotionCommand {
-    u32 command;
-    u32 argument;
+    union {
+        u32 packedCommand;
+        struct {
+            /* Runtime dispatch shifts the command word right by 16. */
+            u16 selector;
+            u16 family;
+        } binding;
+    };
+    u32 targetIndex;
 } SdfMotionCommand;
+
+typedef char SdfMotionCommand_size_must_be_8[
+    (sizeof(SdfMotionCommand) == 8) ? 1 : -1];
 
 /* Resource header followed by the binding commands used to construct a motion. */
 typedef struct MotionTable {

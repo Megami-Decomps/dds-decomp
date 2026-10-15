@@ -7,6 +7,7 @@
 #include "eff.h"
 #include "eff_blur.h"
 #include "eff_event_draw.h"
+#include "eff_event_work_api.h"
 #include "kwln_task_lifecycle.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
@@ -279,8 +280,6 @@ extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void mnuSampleCampPanelVisualTrack(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
 extern void mnuSampleCampDisplayTrack(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
 extern void mnuSampleCampListLayoutTrack(EvtRuntime *, EvtRuntimeGroup *, EvtBlendKey *);
-extern EffBlurScaleWork *effGetCh76Work(void);
-extern EffResourceRectWork *effGetCh75Work(void);
 extern KwlnDrawVectorParams kwlnDrawVector;
 
 /* Capture kind-specific defaults before adding a new key to its track. */

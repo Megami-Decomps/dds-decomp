@@ -491,7 +491,7 @@ extern u32 D_003899C0[];
 
 extern void fldCreatePlayerObject(void);
 
-extern void fldSpawnPlacementObjectsFromBatches(u32, u32, s32);
+extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batches, u32 batchCount, s32 appended);
 
 extern u32 D_00436064;
 
@@ -764,11 +764,10 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 appended) {
+void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 appended) {
     f32 position[4];
     f32 rotation[4];
     f32 *transform;
-    FldSpawnBatch *batch = (FldSpawnBatch *)batchAddress;
     FldFileResource *resource;
     u32 count;
     u32 i;
@@ -777,6 +776,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
     FldSpawnEvent *event;
     u32 *parameters;
     FldSpecialPoint *point;
+    FldPendingSoundParams *pendingSound;
     EffWorldNode *object;
     s32 room;
     u32 id;
@@ -845,7 +845,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                 fldCopySpawnTransform(position, rotation, transform);
                 switch (((FldPlacementData *)resource->data)->kind) {
                 case 8:
-                    point = ((FldPlacementData *)resource->data)->parameters;
+                    point = ((FldPlacementData *)resource->data)->payload.specialPoint;
                     switch (point->kind) {
                     case 1:
                         func_0014D380(0, point->id, rotation, position[0], position[1], position[2]);
@@ -875,7 +875,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                     if (D_00389874[0] != 0) {
                         break;
                     }
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    parameters = ((FldPlacementData *)resource->data)->payload.words;
                     id = parameters[0];
                     room = fldParseRoomNumberFromName((char *)resource->name);
                     if (appended != 0) {
@@ -889,16 +889,16 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                     }
                     break;
                 case 3:
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    parameters = ((FldPlacementData *)resource->data)->payload.words;
                     func_0014C9B0(parameters[0], rotation, position[0], position[1], position[2]);
                     if (appended == 0) {
                         D_00435FA0++;
                     }
                     break;
                 case 7:
-                    parameters = ((FldPlacementData *)resource->data)->parameters;
-                    fldAppendPendingSoundForScene(parameters[1], *(f32 *)parameters,
-                                         position[0], position[1], position[2]);
+                    pendingSound = ((FldPlacementData *)resource->data)->payload.pendingSound;
+                    fldAppendPendingSoundForScene(pendingSound->value, pendingSound->scalar,
+                                                  position[0], position[1], position[2]);
                     break;
                 }
             }
@@ -1170,12 +1170,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 0);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 1);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 1);
 }
 
 s32 fldGetTransferChunkPayload(s32 record) {
@@ -4397,8 +4397,9 @@ s32 fldUpdateFieldPlayerMovement(void) {
         180.0f, 157.5f, 135.0f, 112.5f, 90.0f, 67.5f, 45.0f, 22.5f
     };
     f32 current[3];
-    f32 guideX;
-    f32 guideZ;
+    /* The guide query writes one float through each output pointer. */
+    f32 guideX[1];
+    f32 guideZ[1];
     f32 heading;
     f32 difference;
     f32 step;
@@ -4577,10 +4578,10 @@ s32 fldUpdateFieldPlayerMovement(void) {
             motion = 1;
         }
         if (fldIsCurrentGridGuideMarkerActive() != 0) {
-            fldGetFieldFloatPair(&guideX, &guideZ);
+            fldGetFieldFloatPair(guideX, guideZ);
             motion = 16;
-            fldAreaState.x -= (fldAreaState.x - guideX) * 0.25f;
-            fldAreaState.z -= (fldAreaState.z - guideZ) * 0.25f;
+            fldAreaState.x -= (fldAreaState.x - guideX[0]) * 0.25f;
+            fldAreaState.z -= (fldAreaState.z - guideZ[0]) * 0.25f;
             position[0] = fldAreaState.x;
             position[1] = fldAreaState.y;
             position[2] = fldAreaState.z;
@@ -4612,10 +4613,10 @@ s32 fldUpdateFieldPlayerMovement(void) {
         }
     } else {
         if (fldIsCurrentGridGuideMarkerActive() != 0) {
-            fldGetFieldFloatPair(&guideX, &guideZ);
+            fldGetFieldFloatPair(guideX, guideZ);
             motion = 16;
-            fldAreaState.x -= (fldAreaState.x - guideX) * 0.25f;
-            fldAreaState.z -= (fldAreaState.z - guideZ) * 0.25f;
+            fldAreaState.x -= (fldAreaState.x - guideX[0]) * 0.25f;
+            fldAreaState.z -= (fldAreaState.z - guideZ[0]) * 0.25f;
             if (fldAreaState.movementSoundActive == 0) {
                 sndSetSequenceVolumePan(0x690062, 0x7F, 0x3F);
             }
