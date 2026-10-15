@@ -669,7 +669,7 @@ void mnuSpawnSpark(MenuCampEffect *fx);
 
 void mnuRetireCampSpark(MenuCampEffect *, s32 index);
 
-void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg);
+void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 surface);
 
 
 
@@ -696,11 +696,11 @@ extern MenuBadgeLayout D_0042AED0;
     } \
 }
 
-void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg);
+void mnuDrawBadgeFade(MenuCampEffect *set, s32 surface);
 
 extern MenuBadgeLayout D_0042AEE8;
 
-void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg);
+void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface);
 
 void mnuEnableCampBadgeFade(u32 *flags);
 
