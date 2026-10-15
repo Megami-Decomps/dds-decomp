@@ -431,7 +431,98 @@ void btlUpdateLinkedActorGroundHeight(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002279F0);
+extern BtlUnit *btlFindActorForOwner(u64);
+extern void fldAppendSceneGroupHandle(ActionStateLink *);
+extern void btlBeginEffectActorFadeOut(void);
+
+/* Rahu turn hook. While linked (active 1), a lone surviving head gets the 0x11
+ * phase. Otherwise a downed twin head fades the effect actor out; a downed
+ * owner or main head queues 0x170, and a standing pair answers the current
+ * command with 0x171 once per command. */
+void func_002279F0(void) {
+    BtlUnit *twin = NULL;
+    BtlUnit *mainUnit;
+    s32 ownerDown = 1;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleLinkedEffectState *effect = &battle->effect->linked;
+    BtlUnit *unit;
+    ActionStateLink *task;
+
+    mainUnit = NULL;
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        s32 flags = unit->status.flags;
+
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (unit->partyRecord.unitId) {
+                case 0x12F:
+                    twin = unit;
+                    break;
+                case 0x12E:
+                    mainUnit = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (effect->active == 1) {
+        unit = NULL;
+        if (twin->status.flags & 0xE0) {
+            if (!(mainUnit->status.flags & 0xE0)) {
+                unit = mainUnit;
+            }
+        }
+        if (mainUnit->status.flags & 0xE0) {
+            if (!(twin->status.flags & 0xE0)) {
+                unit = twin;
+            }
+        }
+        if (unit != NULL) {
+            task = btlFindUnitByActor(unit);
+            fldAppendSceneGroupHandle(task);
+            task->indexWork.phase = 0x11;
+            btlAppendIndexListEntry(task->indexWork.indices, task->unit);
+        }
+    } else if (effect->active == 0) {
+        if (effect->actor != NULL) {
+            unit = btlFindActorForOwner(effect->actor->owner);
+            if (unit != NULL) {
+                ownerDown = (unit->status.flags & 0xE0) != 0;
+            }
+        }
+        if (twin->status.flags & 0xE0) {
+            btlBeginEffectActorFadeOut();
+            return;
+        }
+        if (mainUnit->status.flags & 0xE0) {
+            ownerDown = 1;
+        }
+        task = btlFindUnitByActor(twin);
+        if (task->indexWork.skillId != -1) {
+            return;
+        }
+        if (!ownerDown) {
+            if (battle->currentTask == NULL || !(task->pendingFlags & 8)) {
+                return;
+            }
+            if (effect->phase == 0 && (battle->currentTask->unit->status.flags & 0x200) && battle->mode == 1) {
+                fldAppendSceneGroupHandle(task);
+                task->indexWork.phase = 2;
+                task->indexWork.skillId = 0x171;
+                btlAppendIndexListEntry(task->indexWork.indices, effect->actor);
+                effect->phase = 1;
+                return;
+            }
+            effect->phase = 0;
+        } else if (effect->actor != NULL) {
+            fldAppendSceneGroupHandle(task);
+            task->indexWork.phase = 2;
+            task->indexWork.skillId = 0x170;
+            btlAppendIndexListEntry(task->indexWork.indices, task->unit);
+            effect->value = 0;
+        }
+    }
+}
 
 s32 btlGetEffectTaskActorMatchCode(ActionStateLink *task) {
     BattleEffectPayload *effect;

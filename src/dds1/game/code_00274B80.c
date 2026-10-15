@@ -261,7 +261,41 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", mnuDrawPartySelectionListEntry);
+extern char D_003BC6E0[];
+
+/* Party-selection row: members draw a grid cell (slot 5 under the cursor, else 4) plus their
+ * "%2d" level; the closing row draws slot 7 or 8. */
+void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, struct MenuListNode *node) {
+    CampMenuContext *context = list->context;
+    u32 level = node->sortKeySecondary;
+    char text[0x10];
+    FrFontGlyph *glyph;
+    s32 posX;
+
+    switch (mnuIsFinalItemIndex(node->index, (s32)list)) {
+    case 0:
+        posX = x + 0x640;
+        y += 0x30;
+        if (list->cursor == node) {
+            itfDrawGridWithResolvedSlot(posX, y, 0, 0, (EffectSlotSet *)context->panelResource, 5, 0x53);
+        } else {
+            itfDrawGridWithResolvedSlot(posX, y, 0, 0, (EffectSlotSet *)context->panelResource, 4, 0x53);
+        }
+        posX = x + 0x7D0;
+        sprintf(text, D_003BC6E0, level);
+        glyph = itfCreateFont2TextGlyph(posX, y, 0, 0xA09DC380, text, NULL);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        break;
+    case 1:
+        if (list->cursor == node) {
+            itfDrawGridWithResolvedSlot(x + 0x130, y, 0, 0, (EffectSlotSet *)context->panelResource, 7, 0x53);
+        } else {
+            itfDrawGridWithResolvedSlot(x + 0x130, y, 0, 0, (EffectSlotSet *)context->panelResource, 8, 0x53);
+        }
+        break;
+    }
+}
 
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuDrawPartySelectionListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *);
