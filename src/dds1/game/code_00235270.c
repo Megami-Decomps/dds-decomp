@@ -4256,32 +4256,32 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     return 1;
 }
 
-u16 evtGetRowValue(PolyMovieWork *work, s32 row) {
+u16 evtGetRowValue(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].value;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].value;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].value;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].value;
 }
 
-s16 evtGetRowVariant(PolyMovieWork *work, s32 row) {
+s16 evtGetRowVariant(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].variant;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].variant;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].variant;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].variant;
 }
 
-u16 evtGetRowParameter(PolyMovieWork *work, s32 row) {
+u16 evtGetRowParameter(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].parameter;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].parameter;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].parameter;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].parameter;
 }
 
-u16 evtGetRowFlags(PolyMovieWork *work, s32 row) {
+u16 evtGetRowFlags(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
-        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].flags;
+        return ((const EvtCompactRow *)work->subEntry4Kind4Data)[row].flags;
     }
-    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].flags;
+    return ((const EvtExtendedRow *)work->subEntry4OtherData)[row].flags;
 }
 
 u8 * evtGetRowPayloadAddress(PolyMovieWork *work, s32 row) {
