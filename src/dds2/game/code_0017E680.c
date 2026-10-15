@@ -28,17 +28,17 @@ typedef struct EffBillboardParams {
     s32 mode; /* 0x00: billboard mode for the new set */
 } EffBillboardParams;
 
-extern EffResourceRenderState D_00452080;
+extern EffResourceRenderState effResourceDrawParams;
 
 void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
-extern f32 D_003B1540[][4];
-extern u32 D_003B1600[];
+extern f32 effResourceDefaultTrianglePoints[][4];
+extern u32 effResourceDefaultTriangleColors[];
 
-extern SdfPoolNode *D_003B1630[];
+extern SdfPoolNode *effResourceDrawSurfaces[];
 
 /* Create an effect resource work with index entries, its entry list inline at +0x74. */
 EffResourceWork *effCreateResourceEntryWork(s32 index) {
@@ -71,8 +71,8 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
             entries++;
         } while (i < index);
     }
-    memset(&D_00452080, 0, sizeof(D_00452080));
-    D_00452080.primitive = 0x4000;
+    memset(&effResourceDrawParams, 0, sizeof(effResourceDrawParams));
+    effResourceDrawParams.primitive = 0x4000;
     return work;
 }
 
@@ -102,7 +102,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(matrix);
-    D_00452080.parameters = NULL;
+    effResourceDrawParams.parameters = NULL;
     entry = work->entries;
     for (i = 0; i < work->entryCount; i++, entry++) {
         triangleSize = 3;
@@ -113,37 +113,37 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         sdfConsAppendVuPacket(packet, 0);
         if (work->streamAllocation == NULL) {
             remaining = 12;
-            D_00452080.colors = D_003B1600;
-            D_00452080.positions = D_003B1540;
-            D_00452080.normals = NULL;
+            effResourceDrawParams.colors = effResourceDefaultTriangleColors;
+            effResourceDrawParams.positions = effResourceDefaultTrianglePoints;
+            effResourceDrawParams.normals = NULL;
         } else {
-            D_00452080.positions = work->positions;
-            D_00452080.colors = work->colors;
-            D_00452080.normals = work->normals;
+            effResourceDrawParams.positions = work->positions;
+            effResourceDrawParams.colors = work->colors;
+            effResourceDrawParams.normals = work->normals;
             remaining = work->vertexCount;
         }
-        D_00452080.color = entry->value;
-        D_00452080.parameterCount = 16;
-        D_00452080.vertexCount = 48;
+        effResourceDrawParams.color = entry->value;
+        effResourceDrawParams.parameterCount = 16;
+        effResourceDrawParams.vertexCount = 48;
         while (remaining >= 48) {
-            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&D_00452080));
+            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effResourceDrawParams));
             if (work->streamAllocation == NULL) {
-                D_00452080.colors += 48;
-                D_00452080.positions += 48;
+                effResourceDrawParams.colors += 48;
+                effResourceDrawParams.positions += 48;
             } else {
-                D_00452080.colors += 48;
-                D_00452080.positions += 48;
-                D_00452080.normals += 48;
+                effResourceDrawParams.colors += 48;
+                effResourceDrawParams.positions += 48;
+                effResourceDrawParams.normals += 48;
             }
             remaining -= 48;
         }
         if (remaining >= 3) {
-            D_00452080.parameterCount = remaining / triangleSize;
-            D_00452080.vertexCount = remaining;
-            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&D_00452080));
+            effResourceDrawParams.parameterCount = remaining / triangleSize;
+            effResourceDrawParams.vertexCount = remaining;
+            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effResourceDrawParams));
         }
     }
-    D_003B1630[work->mode]->append(D_003B1630[work->mode], packet);
+    effResourceDrawSurfaces[work->mode]->append(effResourceDrawSurfaces[work->mode], packet);
 }
 
 

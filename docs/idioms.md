@@ -13585,3 +13585,33 @@ operation heading. DDS1 additionally draws the separate middle fragment
 controller fragment: its card string ends at `(8MB)`, not after a combined
 card/controller warning. Keep the two-game line counts and draw positions;
 these are plain NUL-terminated strings, not MSG1 packs or new C literals.
+
+
+## Resource fallbacks and parameter-work defaults
+
+`effResourceDrawParams` is the descriptor filled by instanced triangle
+drawing. When no private streams exist, it uses twelve vertices from
+`effResourceDefaultTrianglePoints` and the twelve packed entries in
+`effResourceDefaultTriangleColors`, then submits through the mode-indexed
+`effResourceDrawSurfaces` bank. Keep the existing array views, shared descriptor
+reset and native color triplets; do not invent a new shape or normalize alpha.
+
+`effModelDefaultPosition`, `effModelDefaultQuaternion` and
+`effModelDefaultScale` feed the primary-vector, quaternion-to-basis and
+tertiary-vector providers in `effParamInitWork`. Matched transform updates use
+the primary and tertiary providers for position and scale. The first two
+native records are both four zero floats, at distinct addresses; the scale
+record is `(1,1,1,0)`. In particular, do not replace the native zero quaternion
+with a mathematical identity quaternion or change either W value.
+
+`effParameterPresetBanks` is the kind-then-table-index fallback used by
+dispatched-work creation and cloning only when the kind lacks a duplicate
+callback. The full native bank is 0x70 bytes: twenty-eight pointer cells, eight
+non-null and twenty null. Retain its unsized `void **[]` declaration, its
+separate pointee banks and the alternate raw-source path for duplicate kinds.
+
+`effBattleTransitionDurations` is the getter-backed four-choice table used
+for start/end transition windows by the matched unit color commands. Both
+games contain `(0,5,15,30)`. This caller evidence supplies a narrower role than
+the getter name alone; the getter interface and its unchecked lookup remain
+unchanged. Numeric fallback bytes agree across titles; pointer-bank bytes do not.

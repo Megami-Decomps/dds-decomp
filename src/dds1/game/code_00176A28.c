@@ -29,14 +29,14 @@ typedef struct EffBillboardParams {
 } EffBillboardParams;
 
 
-extern EffResourceRenderState D_003D65E0;
+extern EffResourceRenderState effResourceDrawParams;
 extern void *memset(void *, s32, u32);
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
-extern f32 D_00354C10[][4];
-extern u32 D_00354CD0[];
+extern f32 effResourceDefaultTrianglePoints[][4];
+extern u32 effResourceDefaultTriangleColors[];
 
-extern SdfPoolNode *D_00354D00[];
+extern SdfPoolNode *effResourceDrawSurfaces[];
 
 void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
@@ -65,8 +65,8 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     for (i = 0; i < count; i++, entry++) {
         entry->value = 0x80808080;
     }
-    memset(&D_003D65E0, 0, sizeof(D_003D65E0));
-    D_003D65E0.primitive = 0x4000;
+    memset(&effResourceDrawParams, 0, sizeof(effResourceDrawParams));
+    effResourceDrawParams.primitive = 0x4000;
     return work;
 }
 
@@ -96,7 +96,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
     VU0_LOAD_MATRIX_B(work->matrix);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(matrix);
-    D_003D65E0.parameters = NULL;
+    effResourceDrawParams.parameters = NULL;
     entry = work->entries;
     for (i = 0; i < work->entryCount; i++, entry++) {
         triangleSize = 3;
@@ -107,37 +107,37 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         sdfConsAppendVuPacket(packet, 0);
         if (work->streamAllocation == NULL) {
             remaining = 12;
-            D_003D65E0.colors = D_00354CD0;
-            D_003D65E0.positions = D_00354C10;
-            D_003D65E0.normals = NULL;
+            effResourceDrawParams.colors = effResourceDefaultTriangleColors;
+            effResourceDrawParams.positions = effResourceDefaultTrianglePoints;
+            effResourceDrawParams.normals = NULL;
         } else {
-            D_003D65E0.positions = work->positions;
-            D_003D65E0.colors = work->colors;
-            D_003D65E0.normals = work->normals;
+            effResourceDrawParams.positions = work->positions;
+            effResourceDrawParams.colors = work->colors;
+            effResourceDrawParams.normals = work->normals;
             remaining = work->vertexCount;
         }
-        D_003D65E0.color = entry->value;
-        D_003D65E0.parameterCount = 16;
-        D_003D65E0.vertexCount = 48;
+        effResourceDrawParams.color = entry->value;
+        effResourceDrawParams.parameterCount = 16;
+        effResourceDrawParams.vertexCount = 48;
         while (remaining >= 48) {
-            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&D_003D65E0));
+            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effResourceDrawParams));
             if (work->streamAllocation == NULL) {
-                D_003D65E0.colors += 48;
-                D_003D65E0.positions += 48;
+                effResourceDrawParams.colors += 48;
+                effResourceDrawParams.positions += 48;
             } else {
-                D_003D65E0.colors += 48;
-                D_003D65E0.positions += 48;
-                D_003D65E0.normals += 48;
+                effResourceDrawParams.colors += 48;
+                effResourceDrawParams.positions += 48;
+                effResourceDrawParams.normals += 48;
             }
             remaining -= 48;
         }
         if (remaining >= 3) {
-            D_003D65E0.parameterCount = remaining / triangleSize;
-            D_003D65E0.vertexCount = remaining;
-            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&D_003D65E0));
+            effResourceDrawParams.parameterCount = remaining / triangleSize;
+            effResourceDrawParams.vertexCount = remaining;
+            sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effResourceDrawParams));
         }
     }
-    D_00354D00[work->mode]->append(D_00354D00[work->mode], packet);
+    effResourceDrawSurfaces[work->mode]->append(effResourceDrawSurfaces[work->mode], packet);
 }
 
 
