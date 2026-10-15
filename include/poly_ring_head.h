@@ -15,7 +15,7 @@ typedef struct PolyRingHead {
     u32 color;
     u8 loop;
     u8 pad65;
-    u16 unk66;
+    u16 drawBucket; /* 0x66: selected particle draw bucket. */
     u32 startColorRampFrames;
     u32 endColorRampFrames;
     f32 matrixCopy[16]; /* Initialized from matrix when the owner is created. */
@@ -29,6 +29,7 @@ typedef char PolyRingHead_entryCount_offset[((u32)&((PolyRingHead *)0)->entryCou
 typedef char PolyRingHead_matrix_offset[((u32)&((PolyRingHead *)0)->matrix == 0x20) ? 1 : -1];
 typedef char PolyRingHead_color_offset[((u32)&((PolyRingHead *)0)->color == 0x60) ? 1 : -1];
 typedef char PolyRingHead_matrixCopy_offset[((u32)&((PolyRingHead *)0)->matrixCopy == 0x70) ? 1 : -1];
+typedef char PolyRingHead_drawBucket_offset[((u32)&((PolyRingHead *)0)->drawBucket == 0x66) ? 1 : -1];
 typedef char PolyRingHead_active_offset[((u32)&((PolyRingHead *)0)->active == 0xB2) ? 1 : -1];
 
 #endif

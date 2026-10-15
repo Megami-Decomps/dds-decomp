@@ -335,7 +335,7 @@ PolyBand *polyCreateExpandingRingBands(PolyRingHead *templateHead) {
     polyInitializeBandRecordAges(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
-    parSetCellDrawBucket(band->strip, band->head.unk66);
+    parSetCellDrawBucket(band->strip, band->head.drawBucket);
     return band;
 }
 
@@ -586,7 +586,7 @@ PolyArc *polyCreateArcRingNode(PolyArc *source) {
     polyInitializeArcRecordAges(clone);
     VU0_LOAD_MATRIX(clone->head.matrix);
     VU0_STORE_MATRIX(clone->head.matrixCopy);
-    parSetCellDrawBucket(clone->strip, clone->head.unk66);
+    parSetCellDrawBucket(clone->strip, clone->head.drawBucket);
     return clone;
 }
 
@@ -777,7 +777,7 @@ PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
     polyInitializeRotatingBandRecordAges(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
-    parSetCellDrawBucket(band->strip, band->head.unk66);
+    parSetCellDrawBucket(band->strip, band->head.drawBucket);
     return band;
 }
 
