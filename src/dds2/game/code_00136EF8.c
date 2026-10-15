@@ -1851,7 +1851,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
         fldRoomRecords[roomIndex].roomId = -1;
         fldRoomRecords[roomIndex].unk134 = -1;
         fldRoomRecords[roomIndex].mode = 0;
-        fldRoomRecords[roomIndex].unk138 = -1;
+        fldRoomRecords[roomIndex].entryIndex = -1;
         fldRoomRecords[roomIndex].unk120 = -1;
         fldRoomRecords[roomIndex].axisMode = 0;
         fldRoomRecords[roomIndex].shapeKind = 0;
@@ -2254,7 +2254,7 @@ s32 fldCheckEntryActive(s32 value) {
     if (index == -1) {
         return 0;
     }
-    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].unk138 == value) {
+    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].entryIndex == value) {
         return 1;
     }
     return 0;
