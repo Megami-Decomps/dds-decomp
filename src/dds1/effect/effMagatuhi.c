@@ -141,7 +141,7 @@ extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 
-void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vectorArg) {
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]) {
     f32 (*newSlot)[4];
     f32 (*replayPosition)[4];
     f32 (*historyPosition)[4];
@@ -168,7 +168,7 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, vo
     linearIndex = rowBase + writeIndex;
     newSlot = work->positions + linearIndex;
     scalarOutput = work->unk1C + linearIndex;
-    PCP_COPY_VECTOR(newSlot, vectorArg);
+    PCP_COPY_VECTOR(newSlot, vector);
     angleRow = work->angleRows[index];
 
     angleRow[2] += 0.21816613f;
@@ -200,7 +200,7 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, vo
         VU0_LOAD_VF(vf11, sdfViewEyeVector);
         VU0_SUB(vf10, vf10, vf11);
         VU0_MOVE_VF(vf12, vf10);
-        VU0_LOAD_VF(vf10, vectorArg);
+        VU0_LOAD_VF(vf10, vector);
         VU0_LOAD_VF(vf11, historyPosition);
         VU0_SUB(vf10, vf10, vf11);
         VU0_MOVE_VF(vf11, vf12);
@@ -213,7 +213,7 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, vo
         (*replayPosition)[2] += viewDirection[2] * radial;
     }
 
-    VU0_LOAD_VF(vf11, vectorArg);
+    VU0_LOAD_VF(vf11, vector);
     VU0_LOAD_VF(vf10, historyPosition);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(radial);
