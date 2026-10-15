@@ -90,12 +90,12 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
 EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
 void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vector);
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #else
 EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C);
 void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *owner);
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index);
-void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vector);
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]);
 #endif
 
 struct MdlCtx;
