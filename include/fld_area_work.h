@@ -32,12 +32,12 @@ typedef struct FldAreaWork {
     s32 reuseAreaResources;    /* 0x20: preserves same-area resources across transitions */
     s32 titleFade;
     s32 sequenceCode;            /* 0x28: retained scene/sequence index */
-    u8 pad2C[4];
+    s32 unk2C;
     f32 focusPos[3];
     u8 pad3C[4];
     char requestedSceneName[0x10];
     s32 mode;                    /* 0x50: includes the focus modes */
-    u8 pad54[4];
+    s32 unk54;
     s32 rowIdx;
     f32 unk5C;
     f32 unk60;
@@ -61,7 +61,7 @@ typedef struct FldAreaWork {
     s32 overrideSupportRecordIndex; /* -1 selects the default support record. */
     s32 unkAC;
     s32 cameraTiltActive;        /* 0xB0 */
-    u8 padB4[4];
+    f32 unkB4;
     f32 cameraTilt;              /* 0xB8 */
     s32 flagNumber;
     s32 unkC0;
@@ -70,7 +70,7 @@ typedef struct FldAreaWork {
     s32 overlayMode;
     s32 overlayCounter;
     s32 unkD4;
-    u8 padD8[4];
+    s32 unkD8;
     s32 defaultEncounterId;      /* 0xDC: selected room encounter; D_0038984C in DDS2. */
     s32 unkE0;
     s32 encounterMode;
