@@ -413,20 +413,20 @@ void mnuClearCampResourceFlagEntries(void) {
 }
 
 
-extern const CampMapArguments D_00424DE0;
-extern const CampEffectRows D_00424E10;
-extern const char D_00424E30[];
+extern const CampMapArguments mnuCampEffectMapArguments;
+extern const CampEffectRows mnuCampEffectInitialRows;
+extern const char mnuCampBackgroundMotionPath[];
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 
 void mnuLoadCampEffectMapResources(struct EffectSlotSet *object, MenuEffectResources *resources) {
-    CampMapArguments mapArguments = D_00424DE0;
-    CampEffectRows rows = D_00424E10;
+    CampMapArguments mapArguments = mnuCampEffectMapArguments;
+    CampEffectRows rows = mnuCampEffectInitialRows;
     u32 dataAddress;
     struct SdfMemBlock *allocation;
     struct EffMappedResource *mappedResource;
 
-    allocation = sdfReadNamedResource(D_00424E30, &dataAddress, 0);
+    allocation = sdfReadNamedResource(mnuCampBackgroundMotionPath, &dataAddress, 0);
     mappedResource = effCreateMappedResource((const u8 *)dataAddress);
     sdfReleaseResourceAllocation(allocation);
     mnuInitializeMapPacket(1, mapArguments.values, 11, &resources->packet);
@@ -434,22 +434,22 @@ void mnuLoadCampEffectMapResources(struct EffectSlotSet *object, MenuEffectResou
     mnuCopyCampEffectRowData(&rows, resources);
 }
 
-const char D_00424D50[] __attribute__((aligned(8))) = "s_k_r_bg.spr";
-const char D_00424D60[] __attribute__((aligned(8))) = "karma_bg.spr";
-const char D_00424D70[] __attribute__((aligned(8))) = "karma_01.spr";
-const char D_00424D80[] __attribute__((aligned(8))) = "sun_k_bg.spr";
-const char D_00424D90[] __attribute__((aligned(8))) = "sun_krm1.spr";
-const char D_00424DA0[] __attribute__((aligned(8))) = "bg_seraf.spr";
-const char D_00424DB0[] __attribute__((aligned(8))) = "bg_geil.spr";
-const char D_00424DC0[] __attribute__((aligned(8))) = "bg_sera.spr";
-const char D_00424DD0[] __attribute__((aligned(8))) = "bg_sarf.spr";
+const char mnuTerminalCampEffectSpriteName[] __attribute__((aligned(8))) = "s_k_r_bg.spr";
+const char mnuTerminalKarmaBackgroundSpriteName[] __attribute__((aligned(8))) = "karma_bg.spr";
+const char mnuTerminalKarma01SpriteName[] __attribute__((aligned(8))) = "karma_01.spr";
+const char mnuTerminalSunBackgroundSpriteName[] __attribute__((aligned(8))) = "sun_k_bg.spr";
+const char mnuTerminalSunKarmaSpriteName[] __attribute__((aligned(8))) = "sun_krm1.spr";
+const char mnuTerminalBgSerafSpriteName[] __attribute__((aligned(8))) = "bg_seraf.spr";
+const char mnuTerminalBgGeilSpriteName[] __attribute__((aligned(8))) = "bg_geil.spr";
+const char mnuTerminalBgSeraSpriteName[] __attribute__((aligned(8))) = "bg_sera.spr";
+const char mnuTerminalBgSarfSpriteName[] __attribute__((aligned(8))) = "bg_sarf.spr";
 
-const CampMapArguments D_00424DE0 __attribute__((aligned(8))) = {
+const CampMapArguments mnuCampEffectMapArguments __attribute__((aligned(8))) = {
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
 };
-const CampEffectRows D_00424E10 __attribute__((aligned(8))) = {
+const CampEffectRows mnuCampEffectInitialRows __attribute__((aligned(8))) = {
     { { 0, 0, 0x200, 0 }, { 0x1000, 0, 0x200, 0 } }
 };
-const char D_00424E30[] __attribute__((aligned(8))) = "/camp/mot/bg.mot";
-const char D_00424E48[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
+const char mnuCampBackgroundMotionPath[] __attribute__((aligned(8))) = "/camp/mot/bg.mot";
+const char mnuTerminalSpriteDirectory[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
 

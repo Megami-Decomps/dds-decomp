@@ -13892,3 +13892,22 @@ pointers and two zero tail cells. Full batches use twelve vertices and
 advance by eight, preserving the overlap and the eight-vertex tail path.
 Numeric preset/index bytes agree between games; surface pointer words do
 not. Naming changes no owner, layout, storage, bound, import or instruction.
+
+## Terminal resource names and pointer-bank roles
+
+`mnuTerminalPrimarySpriteNames` identifies the native `karma_01.spr` /
+`karma_bg.spr` bank in both games: two entries in DDS1, with `s_k_r_bg.spr`
+and a null tail added in DDS2. DDS2's separate
+`mnuTerminalReducedModeSpriteNames` contains `sun_krm1.spr` / `sun_k_bg.spr`;
+address adjacency is not evidence that this reduced bank is the DDS1 twin.
+
+`mnuTerminalCharacterBackgroundSpriteNames` preserves DDS2's `bg_sarf.spr`,
+`bg_sera.spr`, `bg_geil.spr`, `bg_seraf.spr` order and its existing unchecked
+selector. These filenames alone do not establish character identities.
+`mnuCampEffectMapArguments44B` and `mnuCampEffectInitialRows32B` name the
+eleven-word argument block and two four-word initial rows by their loader
+uses, without claiming a new owner layout. The motion path remains
+`/camp/mot/bg.mot`, and the terminal directory remains `/facility/spr/terminal/`.
+Keep all literal bytes, terminators, declarations, casts, bounds, alignments,
+pointer ordering and copy operations unchanged. Existing Harbor Maple/Luna
+reconstruction credit is retained; these are identifier-only data names.

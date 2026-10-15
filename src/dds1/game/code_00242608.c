@@ -3331,8 +3331,8 @@ void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
     }
 }
 
-extern const char D_003AF590[];
-extern s32 D_0036AC78[];
+extern const char mnuTerminalSpriteDirectory[];
+extern s32 mnuTerminalPrimarySpriteNames[];
 
 /* Keep the two loaded handles and their derived slot set in the menu work array. */
 void mnuLoadResourceHandles(u32 *menuWork) {
@@ -3340,7 +3340,7 @@ void mnuLoadResourceHandles(u32 *menuWork) {
 
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
         struct EffectSlotSet *resourceHandle = effLoadIndexedResource(
-            D_003AF590, (const char *)D_0036AC78[resourceIndex], 1);
+            mnuTerminalSpriteDirectory, (const char *)mnuTerminalPrimarySpriteNames[resourceIndex], 1);
 
         menuWork[0x19 + resourceIndex] = (u32)resourceHandle;
         effResolveAndReleaseResource(resourceHandle);
@@ -3364,9 +3364,9 @@ void mnuReleaseResourceHandles(u32 *menuWork) {
     }
 }
 
-const char D_003AF570[] __attribute__((aligned(8))) = "karma_bg.spr";
-const char D_003AF580[] __attribute__((aligned(8))) = "karma_01.spr";
-const char D_003AF590[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
+const char mnuTerminalKarmaBackgroundSpriteName[] __attribute__((aligned(8))) = "karma_bg.spr";
+const char mnuTerminalKarma01SpriteName[] __attribute__((aligned(8))) = "karma_01.spr";
+const char mnuTerminalSpriteDirectory[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3D0);
 

@@ -11188,3 +11188,7 @@ scrBinaryLeftOperandType = 0x003BD784;
 scrBinaryRightOperandType = 0x003BD788;
 scrOpcodeHandlers = 0x00329930;
 scrSceneLightDirectionZeroWarning = 0x0039F508;
+mnuTerminalKarmaBackgroundSpriteName = 0x003AF570;
+mnuTerminalKarma01SpriteName = 0x003AF580;
+mnuTerminalSpriteDirectory = 0x003AF590;
+mnuTerminalPrimarySpriteNames = 0x0036AC78;

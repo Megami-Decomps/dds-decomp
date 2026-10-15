@@ -733,7 +733,7 @@ s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context
 }
 
 extern s32 D_003BC3E4;
-extern char D_003AF590[];
+extern char mnuTerminalSpriteDirectory[];
 extern char D_003AF620[];
 extern s32 evtIsActiveFlagSet(s32);
 
@@ -751,7 +751,7 @@ s32 mnuAdvanceTerminalTransition(s8 closing) {
             }
         } else if (D_003BC3E1 == 0) {
             if (work->effectHandle == 0) {
-                work->effectHandle = (u32)mnuRequestEffectResource(D_003AF590, D_003AF620);
+                work->effectHandle = (u32)mnuRequestEffectResource(mnuTerminalSpriteDirectory, D_003AF620);
             } else if (mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle) != 0) {
                 kwlnFadeOutStart(0, 0, 0, 15);
                 D_003BC3E1 = 1;
@@ -2433,7 +2433,7 @@ s32 evtBDispatchSyncB(KwlnTask *request) {
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-extern char D_003AF590[];
+extern char mnuTerminalSpriteDirectory[];
 extern char D_003AF620[];
 
 u32 evtBEndDispatchAndReloadEffectResource(KwlnTask *task) {
@@ -2443,7 +2443,7 @@ u32 evtBEndDispatchAndReloadEffectResource(KwlnTask *task) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 0);
     if (context->mode != 0) {
-        context->effectHandle = (u32)mnuRequestEffectResource(D_003AF590, D_003AF620);
+        context->effectHandle = (u32)mnuRequestEffectResource(mnuTerminalSpriteDirectory, D_003AF620);
     }
     return 1;
 }
