@@ -120,9 +120,9 @@ extern SdfPoolNode *effScatterDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffScatterDrawRequest *);
 struct SdfAsset;
-extern f32 *effGetScatterWideBlock(PcpScatterDraw *, s32);
-extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *, s32);
-extern u32 effGetScatterEntry(PcpScatterDraw *, s32);
+extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 particleIndex);
+extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 particleIndex);
+extern u32 effGetScatterEntry(PcpScatterDraw *object, s32 particleIndex);
 
 void effScatterDrawObject(PcpScatterDraw *object) {
     f32 matrix[16] __attribute__((aligned(16)));
@@ -130,7 +130,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     EffScatterDrawRequest *draw;
     s32 count;
     s32 remaining;
-    s32 index;
+    s32 particleIndex;
     SdfPoolNode *surface;
 
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -150,13 +150,13 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;
     effScatterDrawParams.parameters = effScatterTriangleIndices;
-    for (index = 0; index < count; index++) {
+    for (particleIndex = 0; particleIndex < count; particleIndex++) {
         draw = &effScatterDrawParams;
         remaining = object->vectorsPerParticle;
-        draw->points = effGetScatterWideBlock(object, index);
-        draw->uv = effGetScatterNarrowBlock(object, index);
+        draw->points = effGetScatterWideBlock(object, particleIndex);
+        draw->uv = effGetScatterNarrowBlock(object, particleIndex);
         draw->colors = object->vertexColors;
-        draw->color = effGetScatterEntry(object, index);
+        draw->color = effGetScatterEntry(object, particleIndex);
         draw->primitiveCount = 16;
         draw->vertexCount = 18;
         if ((draw->color & 0xFF000000) != 0) {
@@ -196,17 +196,17 @@ void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source) {
 }
 
 /* Compute the address of a 16-byte-wide block within the stride. */
-f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index) {
-    return object->points + index * object->vectorsPerParticle * 4;
+f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 particleIndex) {
+    return object->points + particleIndex * object->vectorsPerParticle * 4;
 }
 
 /* Compute the address of an 8-byte-wide block within the stride. */
-f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index) {
-    return object->uv + index * object->vectorsPerParticle * 2;
+f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 particleIndex) {
+    return object->uv + particleIndex * object->vectorsPerParticle * 2;
 }
 
-u32 effGetScatterEntry(PcpScatterDraw *object, s32 index) {
-    return object->colors[index];
+u32 effGetScatterEntry(PcpScatterDraw *object, s32 particleIndex) {
+    return object->colors[particleIndex];
 }
 
 /* vu0 routine: copy a 4x4 matrix into the destination's second slot */
