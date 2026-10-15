@@ -49,6 +49,7 @@ extern SdfProjectionRecord D_0037F7B0;
 extern SdfProjectionRecord D_0037F980;
 #endif
 extern void sdfCameraBuildProjection(SdfCamera *);
+void sdfSetViewFieldOfView(f32 value);
 /* Project the point in VU0 vf10 through the active view/projection matrices.
  * The routine writes the screen-scaled point back to vf10 and returns no value. */
 void sdfProjectVuVectorToScreen(void);
