@@ -800,38 +800,38 @@ void effInitializeEmitterHead(void *effect) {
     }
     parInitColorRamp((struct ParColorRamp *)owner->fade, owner->lifetimeFrames);
     switch (owner->sub.kind) {
-    case 1:
-        owner->sub.value.table = parCreateHistorySlotTable(owner->particleCount,
+    case PAR_KIND_STATE_HISTORY:
+        owner->sub.payload.history.table = parCreateHistorySlotTable(owner->particleCount,
                                              owner->sub.templateEntryCount,
                                              &owner->billboard);
         break;
-    case 2:
-        owner->sub.primaryDrawSystem = parAllocateCellSystem(
+    case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
+        owner->sub.payload.crossStrip.drawSystem = parAllocateCellSystem(
             owner->particleCount, owner->sub.templateEntryCount,
             parGetEmitterCellGroupDivisor(owner->sub.templateEntryCount), 0);
-        parDispatchSub(owner->sub.primaryDrawSystem, 1,
-                       owner->sub.dispatchParameter, owner->sub.dispatchParameter);
-        parSetCellDrawBucket(owner->sub.primaryDrawSystem, (u16)owner->drawKind);
+        parDispatchSub(owner->sub.payload.crossStrip.drawSystem, 1,
+                       owner->sub.payload.crossStrip.dispatchParameter, owner->sub.payload.crossStrip.dispatchParameter);
+        parSetCellDrawBucket(owner->sub.payload.crossStrip.drawSystem, (u16)owner->drawKind);
         break;
-    case 3:
-        owner->sub.secondaryDraw.system = parAllocateCellSystem(
+    case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
+        owner->sub.payload.crossTriangle.drawSystem = parAllocateCellSystem(
             owner->particleCount, owner->sub.templateEntryCount,
             parGetEmitterCellGroupDivisor(owner->sub.templateEntryCount), 1);
-        parDispatchSub(owner->sub.secondaryDraw.system, 1,
-                       owner->sub.dispatchParameter, owner->sub.primaryDrawSystem);
-        parSetCellDrawBucket(owner->sub.secondaryDraw.system, (u16)owner->drawKind);
+        parDispatchSub(owner->sub.payload.crossTriangle.drawSystem, 1,
+                       owner->sub.payload.crossTriangle.dispatchParameter, owner->sub.payload.crossStrip.drawSystem);
+        parSetCellDrawBucket(owner->sub.payload.crossTriangle.drawSystem, (u16)owner->drawKind);
         break;
-    case 4:
+    case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
         /* These tracks receive endpoints directly; model sampling is unused. */
         params.sampleInterval = 1;
         params.historyLength = owner->sub.templateEntryCount;
         params.unk1C = 10;
         params.kind = (u16)owner->drawKind;
-        params.gradientColors[0] = owner->sub.firstGradientColor;
-        params.gradientColors[1] = owner->sub.firstGradientColor;
-        params.gradientColors[2] = owner->sub.secondGradientColor;
-        params.gradientColors[3] = owner->sub.secondGradientColor;
-        owner->sub.secondaryDraw.modelList =
+        params.gradientColors[0] = owner->sub.payload.trackPolygon.firstGradientColor;
+        params.gradientColors[1] = owner->sub.payload.trackPolygon.firstGradientColor;
+        params.gradientColors[2] = owner->sub.payload.trackPolygon.secondGradientColor;
+        params.gradientColors[3] = owner->sub.payload.trackPolygon.secondGradientColor;
+        owner->sub.payload.trackPolygon.modelList =
             effTrackPolyCreateModelWorkList(&params, owner->particleCount);
         break;
     }
@@ -850,17 +850,17 @@ void effDestroyResources(effect)
 {
     EffEmitterHead *owner = (EffEmitterHead *)effect;
     switch (owner->sub.kind) {
-    case 1:
-        parReleaseHistorySlotTable(owner->sub.value.table);
+    case PAR_KIND_STATE_HISTORY:
+        parReleaseHistorySlotTable(owner->sub.payload.history.table);
         break;
-    case 2:
-        parReleaseCellSystem(owner->sub.primaryDrawSystem);
+    case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
+        parReleaseCellSystem(owner->sub.payload.crossStrip.drawSystem);
         break;
-    case 3:
-        parReleaseCellSystem(owner->sub.secondaryDraw.system);
+    case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
+        parReleaseCellSystem(owner->sub.payload.crossTriangle.drawSystem);
         break;
-    case 4:
-        effTrackPolyDestroyModelWorkList(owner->sub.secondaryDraw.modelList);
+    case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
+        effTrackPolyDestroyModelWorkList(owner->sub.payload.trackPolygon.modelList);
         break;
     }
     billDispatchByKind(owner->billboard);
@@ -3251,16 +3251,16 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
         count = ((EffTemplatePacketList *)copy)->head.particleCount;
         /* All four supported resource kinds use the same subrecord count. */
         switch (((EffTemplatePacketList *)copy)->head.sub.kind) {
-        case 1:
+        case PAR_KIND_STATE_HISTORY:
             perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
-        case 2:
+        case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
             perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
-        case 3:
+        case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
             perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
-        case 4:
+        case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
             perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
         }

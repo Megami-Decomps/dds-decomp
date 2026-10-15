@@ -529,14 +529,14 @@ extern void (*D_0034E328[])(ParObj *, f32);
 void parScaleAndRestartKind(ParObj *obj, f32 factor) {
     D_0034E328[obj->dispatchIndex](obj, factor);
     switch (obj->kindState.kind) {
-    case 2:
-        obj->kindState.value.scale *= factor;
+    case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
+        obj->kindState.payload.crossStrip.scale *= factor;
         break;
-    case 3:
-        obj->kindState.value.scale *= factor;
+    case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
+        obj->kindState.payload.crossTriangle.scale *= factor;
         break;
-    case 4:
-        obj->kindState.value.scale *= factor;
+    case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
+        obj->kindState.payload.trackPolygon.scale *= factor;
         break;
     }
     parRestartKind(obj);
