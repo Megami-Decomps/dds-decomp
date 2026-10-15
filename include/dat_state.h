@@ -21,7 +21,7 @@ typedef struct DatStateHeader {
     s8 partyIds[8];
     s8 partyLevels[8];
     u32 savedMoney; /* 0x20: save-slot money copied to and from the live currency. */
-    u32 unk24;
+    u32 saveFlags; /* 0x24: packed mdlFlagTest bits persisted in save word 0. */
     u32 unk28;
     u32 unk2C;
     struct SdfMemBlock *backingAllocation;
@@ -33,6 +33,8 @@ typedef char DatStateHeaderSavedMoneyOffsetCheck[
     ((u32)&((DatStateHeader *)0)->savedMoney == 0x20) ? 1 : -1];
 typedef char DatStateHeaderStatusOffsetCheck[
     ((u32)&((DatStateHeader *)0)->status == 0x0C) ? 1 : -1];
+typedef char DatStateHeaderSaveFlagsOffsetCheck[
+    ((u32)&((DatStateHeader *)0)->saveFlags == 0x24) ? 1 : -1];
 
 /* Shared script storage begins at +0x40; +0x388 is integer register 210. */
 typedef struct DatScriptGlobals {
