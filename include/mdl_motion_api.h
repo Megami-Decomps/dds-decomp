@@ -13,7 +13,7 @@ s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId);
 /* Returns 0 for nonterminal, 1 for terminal, and 2 when the node is absent. */
 s32 mdlGetNodeMotionTerminalStatus(MdlCtx *ctx, s32 searchId);
 
-void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 value);
+void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 frameStep);
 void mdlSuspendAllContextMotions(MdlCtx *ctx);
 void mdlResumeAllContextMotions(MdlCtx *ctx);
 

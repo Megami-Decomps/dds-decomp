@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "evt_stage_test_api.h"
 #include "brs_primary_panel_update_api.h"
@@ -1032,7 +1033,6 @@ extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void sndQueueSoundId(u32 sequence);
-extern void sndStartTrackDefault(s32 track);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
     if (selectLevelUp == 0) {

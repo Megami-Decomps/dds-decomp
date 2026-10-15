@@ -5,9 +5,9 @@
 #include "sdf.h"
 
 typedef struct MapRequestNode {
-    u32 value;
-    u32 argument1;
-    u32 argument2;
+    s32 value;                     /* 0x00: queued map-world X coordinate */
+    s32 argument1;                  /* 0x04: queued map-world Y coordinate */
+    s32 argument2;                  /* 0x08: queued map-world Z coordinate */
     s32 active;
     struct MapRequestNode *next;
     struct MapRequestNode *prev;
@@ -41,7 +41,7 @@ typedef char MapRequestRing_nodes_offset_check[
     ((u32)&((MapRequestRing *)0)->nodes == 0x44) ? 1 : -1];
 
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg);
-void fldAdvanceMapRequest(MapRequestState *, u32, u32, u32);
+void fldAdvanceMapRequest(MapRequestState *, s32, s32, s32);
 void fldSetMapRequestInterval(MapRequestState *, u16);
 
 struct FileRequest;
