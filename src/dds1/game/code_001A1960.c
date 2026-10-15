@@ -1791,7 +1791,100 @@ void btlRestorePartySlotSnapshots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5958);
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
+
+s32 func_001A5958(BtlUnit *attacker, BtlUnit *target, u32 command) {
+    extern u32 btlRollAiBucket(void);
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 attribute;
+    u32 mask;
+    s32 ratioReason = -1;
+    s32 autoReason = -1;
+    s32 chance;
+    s32 fixedChance;
+    f32 multiplier;
+    s32 autoChance;
+    DatPartyRecord *record;
+
+    attribute = btlGetActorIndexedSignedValue(attacker, command);
+    mask = btlEncodeActorIndexAsSelectionMask(attribute);
+    if (mask & 0xE0001) {
+        return 1;
+    }
+    if (btlGetAdjustedSlotAffinity(target, command, attribute) & 0x80000000u) {
+        return 4;
+    }
+    if (!(mask & 0x10006)) {
+        return 1;
+    }
+    chance = 0;
+    fixedChance = 0;
+    multiplier = 1.0f;
+    autoChance = 0;
+    if (command == 0) {
+        record = &attacker->partyRecord;
+        if (btlCheckSpecialAbility(record, 0x206)) {
+            ratioReason = 0x206;
+            multiplier = datAbilityParameters[0x206 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility(record, 0x207)) {
+            autoReason = 0x207;
+            autoChance = (s32)(datAbilityParameters[0x207 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
+        }
+        if (btlCheckSpecialAbility(record, 0x208)) {
+            autoReason = 0x208;
+            autoChance = (s32)(datAbilityParameters[0x208 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
+        }
+    }
+    switch (target->partyRecord.status & 0x7FFF) {
+    case 8:
+        fixedChance = 60;
+        break;
+    case 2:
+    case 4:
+        fixedChance = 100;
+        break;
+    }
+    record = &target->partyRecord;
+    if (btlCheckSpecialAbility(record, 0x22F)) {
+        multiplier *= datAbilityParameters[0x22F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    if (datCommandRecords[command].stat34 == 100) {
+        chance = 100;
+        fixedChance = 100;
+    }
+    if (datCommandRecords[command].effectType == 0) {
+        if (battle->unk_1FC & 0x1000) {
+            return 2;
+        }
+        if (chance == 0) {
+            chance = evtRunContext(4, (s32)&attacker->partyRecord, (s32)record, command, 0);
+        }
+        chance = (s32)((f32)chance * multiplier);
+        if (chance >= 36) {
+            chance = 35;
+        }
+        btlBossDebugPrintf("btl:critical=%d%%[raito=%.3f,fix=%d,auto=%d]\n", chance, multiplier, fixedChance,
+                           autoChance);
+        if ((s32)btlRollAiBucket() < fixedChance) {
+            return 2;
+        }
+        if ((s32)btlRollAiBucket() < autoChance) {
+            if (autoReason != -1) {
+                attacker->unk2F4 = autoReason;
+            }
+            return 2;
+        }
+        if ((s32)btlRollAiBucket() < chance) {
+            if (ratioReason != -1) {
+                attacker->unk2F4 = ratioReason;
+            }
+            return 2;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5C40);
 
