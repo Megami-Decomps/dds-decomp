@@ -1,4 +1,5 @@
 #include "sdf_gs_register_submit_api.h"
+#include "dsp_message_window_api.h"
 #include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
@@ -345,8 +346,6 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 
-
-extern void dspRequestMessageWindowModeOne(void);
 
 
 extern void *memset(void *, s32, u32);

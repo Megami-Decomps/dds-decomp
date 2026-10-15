@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_message_window_api.h"
 #include "dsp_channel.h"
 #include "scr_integer_return_value_api.h"
 #include "dsp_active_api.h"
@@ -50,8 +51,6 @@ typedef struct SdfTex SdfTex;
 extern s32 dspWindowHandle;
 
 extern s8 dspWindowControlState;
-
-extern void dspRequestMessageWindowModeOne(void);
 
 extern s32 D_00437888;
 

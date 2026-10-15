@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "snd_sequence_volume_pan.h"
@@ -24,7 +25,6 @@
 #define MNU_STAFF_INPUT_NEXT_PAGE 0x200
 
 
-extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);

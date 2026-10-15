@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_message_window_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "common.h"
@@ -34,7 +35,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
-extern void dspRequestMessageWindowModeOne(void);
 extern void sndReleaseTrackHandle(u32);
 extern s32 fldReleaseLocalMapResources(void);
 extern s64 sdfDestroyActiveCounterRuntime(void);
