@@ -919,7 +919,7 @@ typedef struct MenuStaffContext {
     struct EffectSlotSet *partyTitles[9]; /* 0xCC..0xEC */
     struct EffectSlotSet *contextTitle; /* 0xF0 */
     struct MenuIconState *panelLayout; /* 0xF4: layout used by staff panel construction */
-    struct MenuIconState *unkF8; /* 0xF8: second panel layout */
+    struct MenuIconState *itemPanelLayout; /* 0xF8: item-list panel layout */
     struct MenuIconState *unkFC; /* 0xFC: third panel layout */
     struct EffMappedResource *motionResource; /* 0x100 */
     MenuWindowContainer *skillWindow; /* 0x104: field-skill window; 002AAEA0 reads list->last. */

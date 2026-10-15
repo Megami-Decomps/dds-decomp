@@ -93,9 +93,9 @@ EffRingWork *source;
     ring->vertices = block->vertices;
     ring->allocationHandle = handle;
     ring->color = EFF_NEUTRAL_COLOR;
-    ring->unk68 = ring->param38;
-    ring->unk70 = ring->param30;
-    ring->unk74 = ring->param34;
+    ring->orbitRadius = ring->param38;
+    ring->baseHalfWidth = ring->param30;
+    ring->tipHalfWidth = ring->param34;
     ring->updateCount = 0;
     ring->scale = 1.0f;
     if (ring->spread == 0) {
@@ -191,16 +191,16 @@ void effBuildOrbitingArcQuadPoints(EffRingWork *work, s32 index) {
     f32 sine;
     f32 basisFactor;
 
-    VEC3_SPLAT(axisOffset, work->unk6C);
-    VEC3_SPLAT(sideOffsetA, work->unk74);
-    VEC3_SPLAT(sideOffsetB, work->unk70);
+    VEC3_SPLAT(axisOffset, work->axisOffset);
+    VEC3_SPLAT(sideOffsetA, work->tipHalfWidth);
+    VEC3_SPLAT(sideOffsetB, work->baseHalfWidth);
     radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(part->angle);
     radialDirection[1] = 0;
     sine = sdfSinPoly(part->angle);
     radialDirection[2] = sine;
-    orbitOffset[0] = radialDirection[0] * work->unk68;
+    orbitOffset[0] = radialDirection[0] * work->orbitRadius;
     orbitOffset[1] = 0;
-    orbitOffset[2] = sine * work->unk68;
+    orbitOffset[2] = sine * work->orbitRadius;
     basisFactor = part->basisFactor;
     D_003B12B0[0] = radialDirection[0] * basisFactor;
     D_003B12B0[1] = basisFactor + -1.0f;
@@ -290,7 +290,7 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
     start = work->param38;
     radiusEnd = work->param3C;
     delta = radiusEnd - start;
-    work->unk68 = start + delta * progress;
+    work->orbitRadius = start + delta * progress;
     if (start > 0.0f) {
         factor = radiusEnd / start;
     } else {
@@ -303,11 +303,11 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
     start = work->param40;
     normalEnd = work->param44;
     delta = upEnd - upStart;
-    work->unk70 = upStart + delta * progress;
+    work->baseHalfWidth = upStart + delta * progress;
     delta = acrossEnd - acrossStart;
-    work->unk74 = acrossStart + delta * progress;
+    work->tipHalfWidth = acrossStart + delta * progress;
     delta = normalEnd - start;
-    work->unk6C = start + delta * progress;
+    work->axisOffset = start + delta * progress;
 
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
