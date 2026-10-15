@@ -50,8 +50,6 @@ extern u32 D_00438EC4;
 struct EffWorldNode;
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
-extern s32 fldGetRecordValueById(s32 id);
-extern void fldSetRecordValueById(s32 id, s32 value);
 extern s32 strcmp(const char *left, const char *right);
 
 struct EffWorldNode *fldCreateDummyMatter(void) {
@@ -88,10 +86,10 @@ EffWorldNode *fldResolveWorldObjectByResourceId(u32 id) {
                     }
                 }
             } else {
-                EffWorldNode *object = (EffWorldNode *)(u32)fldGetRecordValueById(resource->id);
+                EffWorldNode *object = fldGetRecordWorldNodeById(resource->id);
                 if (object == NULL) {
                     object = fldCreateDummyMatter();
-                    fldSetRecordValueById(resource->id, (s32)object);
+                    fldSetRecordWorldNodeById(resource->id, object);
                 }
                 return object;
             }
@@ -967,7 +965,6 @@ extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
 extern void dds3CreateObjectModelAndMotion(void *);
-extern void fldSetRecordValueById(s32, s32);
 extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
 void fldCreateResourceScriptObjects(void) {
@@ -1047,7 +1044,7 @@ void fldCreateResourceScriptObjects(void) {
                 k = 0;
                 for (; k < binding->names->count; k++, name++) {
                     if (strcmp(resource->name, name->name) == 0) {
-                        fldSetRecordValueById(binding->id, (s32)object);
+                        fldSetRecordWorldNodeById(binding->id, object);
                         break;
                     }
                 }
@@ -3447,7 +3444,7 @@ void fldProbeCameraSupportSurface(void) {
     if (fldValueRecords == 0) {
         return;
     }
-    node = (EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value;
+    node = ((FldValueRecord *)fldValueRecords)[index].worldNode;
     if (node != NULL) {
         offset[0] = node->inner->position[0];
         offset[1] = node->inner->position[1];
