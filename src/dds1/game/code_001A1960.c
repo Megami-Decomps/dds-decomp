@@ -368,22 +368,22 @@ s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
-s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1) {
-    u32 value = datCalculateCommandBaseValue(arg0, arg1);
+s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
+    u32 value = datCalculateCommandBaseValue(battler, command);
     f32 scale;
 
     if (value == 0) {
         return 0;
     }
     scale = 1.0f;
-    switch (datCommandRecords[arg1].costMode) {
+    switch (datCommandRecords[command].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
-        if (btlCheckSpecialAbility(arg0, 0x234)) {
+        if (btlCheckSpecialAbility(battler, 0x234)) {
             scale = datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
-        if (btlCheckSpecialAbility(arg0, 0x235)) {
+        if (btlCheckSpecialAbility(battler, 0x235)) {
             scale = datAbilityParameters[0x235 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
