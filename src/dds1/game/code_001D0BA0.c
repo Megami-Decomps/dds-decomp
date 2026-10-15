@@ -3541,8 +3541,8 @@ u8 *btlAllocateIndexedUnitEffectTask(u8 *owner, s32 index, s32 value, f32 scale)
     return task;
 }
 
-u32 btlApplyScaledUnitModelTask(u32 *arg0) {
-    btlApplyUnitModelScaledValue(*arg0);
+u32 btlApplyScaledUnitModelTask(u32 *taskArgs) {
+    btlApplyUnitModelScaledValue(*taskArgs);
     return 1;
 }
 
@@ -3827,9 +3827,9 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *owner, u32 index, u32 value,
     return task;
 }
 
-u32 btlReleaseUnitModelTask(u32 *arg0) {
-    btlClearUnitDefeatCandidate(*arg0);
-    btlReleaseActorModelResources((BtlUnit *)*arg0);
+u32 btlReleaseUnitModelTask(u32 *taskArgs) {
+    btlClearUnitDefeatCandidate(*taskArgs);
+    btlReleaseActorModelResources((BtlUnit *)*taskArgs);
     return 1;
 }
 
@@ -4708,10 +4708,10 @@ u8 *btlCreateActorPositionEffectTask(u8 *arg0) {
 }
 
 /* Apply the queued actor's stored orientation and complete immediately. */
-u32 btlApplyQueuedActorRotation(s32 *arg0) {
+u32 btlApplyQueuedActorRotation(s32 *taskArgs) {
     BtlUnit *temp_v0;
 
-    temp_v0 = (BtlUnit *)(u32)*arg0;
+    temp_v0 = (BtlUnit *)(u32)*taskArgs;
     temp_v0->status.flags = (u32)temp_v0->status.flags & 0xffffffef;
     btlSetUnitRotation(temp_v0, (u8 *)temp_v0 + 0x40);
     return 1;
@@ -4732,8 +4732,8 @@ void *btlScheduleActorUpdate(u8 *owner) {
     return task;
 }
 
-u32 btlRefreshUnitFxVectorTask(u32 *arg0) {
-    btlRefreshUnitFxVectors(*arg0);
+u32 btlRefreshUnitFxVectorTask(u32 *taskArgs) {
+    btlRefreshUnitFxVectors(*taskArgs);
     return 1;
 }
 
