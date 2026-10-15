@@ -84,20 +84,8 @@ extern u16 kwlnTexturedSquareFadeCounter;
 extern u16 kwlnTexturedSquareFadeDuration;
 extern u32 kwlnDistanceBlurErrorCount;
 extern u32 kwlnRippleBlurErrorCount;
-extern void effEnableColorRectangle(void);
 extern void effCopyRectangleBlurParameters(void *);
-extern void effEnableRectangleBlur(void);
-extern void effDisableColorRectangle(void);
-extern void effDisableTexturedSquare(void);
-extern void effDisableRectangleBlur(void);
-extern void effEnableTexturedBlur(void);
-extern void effEnableFilterBlur(void);
-extern void effDisableFilterBlur(void);
-extern void effDisableStaggeredBlur(void);
-extern void effEnableTexturedSquare(void);
-extern void effDisableTexturedBlur(void);
 extern u32 effGetCh76Work(void);
-extern void effEnableStaggeredBlur(void);
 extern void effMiscNormalizeVU(void);
 
 #define KWLN_DRAW_VECTOR_PARAM_BYTES 0x14

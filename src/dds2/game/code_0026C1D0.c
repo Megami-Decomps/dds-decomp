@@ -13,6 +13,7 @@
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"
 #include "eff_random.h"
+#include "eff_event_draw.h"
 
 typedef struct SdfTex SdfTex;
 
