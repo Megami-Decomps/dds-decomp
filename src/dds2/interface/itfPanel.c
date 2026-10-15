@@ -21,7 +21,7 @@ void itfPanelReleasePrimitiveResources(UiSprite *sprite) {
 
 
 /* The layout table accepts context alone or context plus four corners. */
-extern void (*D_003B43F8[])();
+extern void (*itfPanelLayoutCallbacks[])();
 
 /* Store rectangle corners and the caller's render value before notifying the
  * kind-specific handler with context only. No kind-range or context checks. */
@@ -31,8 +31,8 @@ void itfSetPanelLayoutAndNotify(UiSprite *panel, s32 left, s32 top, s32 right, s
     panel->top = top;
     panel->right = right;
     panel->bottom = bottom;
-    if (D_003B43F8[panel->kind] != 0) {
-        D_003B43F8[panel->kind](panel->payload);
+    if (itfPanelLayoutCallbacks[panel->kind] != 0) {
+        itfPanelLayoutCallbacks[panel->kind](panel->payload);
     }
 }
 
@@ -40,7 +40,7 @@ void itfSetPanelLayoutAndNotify(UiSprite *panel, s32 left, s32 top, s32 right, s
 /* Add independent corner/render-value deltas, then notify with the updated
  * corners as well as context. */
 void itfAdvancePanelLayoutAndNotify(UiSprite *panel, s32 leftDelta, s32 topDelta, s32 rightDelta, s32 bottomDelta, s32 renderValueDelta) {
-    void (*handler)() = D_003B43F8[panel->kind];
+    void (*handler)() = itfPanelLayoutCallbacks[panel->kind];
 
     panel->left += leftDelta;
     panel->top += topDelta;
@@ -52,7 +52,7 @@ void itfAdvancePanelLayoutAndNotify(UiSprite *panel, s32 leftDelta, s32 topDelta
     }
 }
 
-extern void (*D_003B4420[])();
+extern void (*itfPanelColorCallbacks[])();
 
 /* Store the RGBA words in packet order, then notify with context.
  * The panel renderers consume these channels directly. */
@@ -61,8 +61,8 @@ void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 firstValue, s32 secondVa
     panel->green = secondValue;
     panel->blue = thirdValue;
     panel->alpha = fourthValue;
-    if (D_003B4420[panel->kind] != 0) {
-        D_003B4420[panel->kind](panel->payload);
+    if (itfPanelColorCallbacks[panel->kind] != 0) {
+        itfPanelColorCallbacks[panel->kind](panel->payload);
     }
 }
 

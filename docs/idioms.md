@@ -13431,3 +13431,28 @@ select `fileFinishRequest`, but that continuation checks the hardcoded
 passes `&fileSaveIconRequest`; naming does not generalize or repair this
 native continuation behavior. `fileWriteContinuation` is invoked after
 successful write-close completion.
+
+## Picture geometry, panel notifications and event-pack paths
+
+`evtPictureQuadBounds`, `evtPictureQuadTexcoords` and `evtPictureQuadColor`
+are the three separate inputs to the picture textured-sprite packet. The
+matched provider consumes two XY corners, two UV endpoints and four RGBA
+channels. Native values agree between games: bounds `(0,0,8192,3584)`, UVs
+`(0,0,8192,7168)` and color `(128,128,128,127)`. The existing byte-array
+declarations and fixed-point values remain unchanged.
+
+`itfPanelLayoutCallbacks` is indexed after setting or advancing panel
+corners and render value; the advance path also forwards all four updated
+corners. `itfPanelColorCallbacks` is the separate bank notified after RGBA
+stores. Retain the existing unprototyped callback declarations and differing
+argument lists, rather than inventing one new shared signature.
+
+`evtStageResourcePathFormat` combines a field directory and area/room IDs.
+`evtFieldScriptTerminationFormat` reports the task immediately before the
+field-script shutdown scan destroys it; the state-list restart is unchanged.
+`evtMotionSeTaskNameFormat` supplies `mse_%d_%d` for the event-task/resource
+pair. The `.be` pack loader uses `evtPackScriptPathFormat` and its separate
+`evtPackScriptPathBuffer`, not the already named `.bf`
+`evtScriptResourcePathBuffer`. Both native pack buffers have a generated
+0x40-byte BSS span; their existing unsized declarations are retained. All
+record bounds, alignment, trailing zeros, imports and control flow stay put.
