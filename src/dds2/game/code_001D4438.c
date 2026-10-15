@@ -2001,7 +2001,7 @@ BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit,
         u32 target, u32 option);
 BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor,
         s32 itemId);
-s32 btlFormatActionEventFilename(s32 source, char *output);
+s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect,
         char *name);
 void sndFormatResourceNameFromIndex(s32 source, char *output);

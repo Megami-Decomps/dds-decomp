@@ -7384,11 +7384,11 @@ const char D_003A4CA8[16] __attribute__((aligned(8))) = "%s%03X.BED";
 
 const char D_003A4CB8[32] __attribute__((aligned(8))) = "/efftool/bed/BTL_TEST.BED";
 
-s32 btlFormatActionEventFilename(s32 index, char *output) {
+s32 btlFormatActionEventFilename(s32 skillIndex, char *output) {
     BtlState *state = (BtlState *)btlGetRuntime();
 
     if ((state->battleFlags & 0x10000000) == 0) {
-        u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[index].displayCode;
+        u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skillIndex].displayCode;
         if (assetId == 0) {
             return 0;
         }
