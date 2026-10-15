@@ -95,6 +95,56 @@ def function_dump(path, func):
     return text[start:end if end > 0 else None]
 
 
+ADVICE = {
+    'luid': 'source order decided: put the statement that retail issues first earlier in the source',
+    'priority': 'critical-path length decided: change the dependence chain (what each value feeds)',
+    'dependents': 'dependent count decided: change how many later insns use the value',
+    'reg_weight': 'register weight decided: change which values die here (REG_DEAD)',
+    'last_insn_class': 'relation to the last scheduled insn decided: change what precedes them',
+}
+
+
+def explain_order(swapped, mine_text, retail_text, uid_at, log_path, limit):
+    """For each order-only difference, find the scheduler comparison between the two insns."""
+    log = open(log_path, errors='ignore').read() if os.path.exists(log_path) else ''
+    passes = []
+    for m in re.finditer(r'^=== (sched\d) .*?===$', log, re.M):
+        passes.append((m.start(), m.group(1)))
+    def pass_at(pos):
+        name = '?'
+        for start, n in passes:
+            if start <= pos:
+                name = n
+        return name
+    done = set()
+    print('\norder-only differences (retail issues another nearby draft instruction here):')
+    for i in swapped:
+        b = retail_text[i]
+        js = [j for j in range(max(0, i - 8), min(len(mine_text), i + 9)) if mine_text[j] == b and j != i]
+        if not js:
+            continue
+        j = min(js, key=lambda j: abs(j - i))
+        ua, ub = uid_at[i], uid_at[j]
+        if ua is None or ub is None or (ua, ub) in done or (ub, ua) in done:
+            continue
+        done.add((ua, ub))
+        if len(done) > limit:
+            break
+        print(f'\n+0x{i * 4:03X} draft {mine_text[i]:30} (uid {ua}); retail issues {b} (draft +0x{j * 4:03X}, uid {ub}) here')
+        pat = re.compile(rf'^\s*rank A=uid({ua}|{ub})\s+B=uid({ua}|{ub})\s+(.*)$', re.M)
+        hits = [(pass_at(m.start()), m.group(0).strip()) for m in pat.finditer(log)
+                if {m.group(1), m.group(2)} == {str(ua), str(ub)}]
+        if not hits:
+            print('    no direct comparison: dependences or a different ready time ordered them;'
+                  ' look at what each depends on')
+            continue
+        for name, line in hits[-2:]:
+            tier = re.search(r'decided@(\w+)', line)
+            print(f'    {name}: {line[:170]}')
+            if tier and tier.group(1) in ADVICE:
+                print(f'      -> {ADVICE[tier.group(1)]}')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('unit')
@@ -102,6 +152,8 @@ def main():
     ap.add_argument('--func', required=True)
     ap.add_argument('--out', help='work directory (default: a new temporary directory)')
     ap.add_argument('--max', type=int, default=30, help='mismatches to report')
+    ap.add_argument('--order', action='store_true',
+                    help='also probe the schedulers and explain order-only differences')
     args = ap.parse_args()
     version = args.unit.split('/')[1]
     out = args.out or tempfile.mkdtemp(prefix='retail-regs-')
@@ -167,7 +219,8 @@ def main():
     probe = f'{out}/probe'
     penv = {**os.environ}
     penv.setdefault('TMPDIR', out)
-    subprocess.run(['tools/cc1probe.sh', source, '--alloc', '--func', args.func, '--as-unit', args.unit,
+    modes = ['--alloc', '--sched'] if args.order else ['--alloc']
+    subprocess.run(['tools/cc1probe.sh', source, *modes, '--func', args.func, '--as-unit', args.unit,
                     '--version', version, '--out', probe, '--quiet'], capture_output=True, cwd=ROOT, env=penv)
     lreg = function_dump(f'{probe}/rtl.19.lreg', args.func)
     greg = function_dump(f'{probe}/rtl.20.greg', args.func)
@@ -249,9 +302,11 @@ def main():
                     print(f'    no conflicting holder of {regname(hy)}: order, preference or reload decided')
         if reported > args.max:
             break
-    if swapped:
+    if swapped and not args.order:
         print('\norder-only differences (retail instruction present within 8 words): '
-              + ' '.join(f'+0x{i * 4:03X}' for i in swapped[:16]) + ' -- see cc1probe --sched')
+              + ' '.join(f'+0x{i * 4:03X}' for i in swapped[:16]) + ' -- rerun with --order')
+    if swapped and args.order:
+        explain_order(swapped, mine_text, retail_text, uid_at, f'{probe}/decisions.log', args.max)
     print(f'\n{min(reported, args.max)} register decisions differ from retail; probe and dumps in {out}')
 
 

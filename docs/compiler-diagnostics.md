@@ -425,8 +425,11 @@ register retail used. For a global blocker colored first, it gives the live
 length or reference count that would reverse the order. Local-allocation rows
 use pass-19 lifetimes, which are block-local. For those, compare the probe's
 `qty_compare` lines. Differences whose retail instruction appears within
-eight words of the draft are listed as order-only and belong to
-`cc1probe.sh --sched`.
+eight words of the draft are listed as order-only. With `--order` the tool also
+runs the scheduler probe. For each such pair it prints the sched1/sched2
+`rank` comparison between the two insns and the tier that decided it (luid,
+priority, dependents, register weight or last-insn class). If no comparison
+exists, dependences or ready times ordered them.
 
 The arithmetic is a target for a truthful source change, not a recipe. Two
 contests can interact through shared live lengths, so recheck the whole
