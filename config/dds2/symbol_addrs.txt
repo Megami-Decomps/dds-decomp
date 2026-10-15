@@ -23,6 +23,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+btlSelectSatanActorCategoryCamera = 0x00225BF8; // type:func
 parDrawPendingParticleRecords = 0x00163010; // type:func
 fldConfigureCameraMoveTracking = 0x001206D0; // type:func
 sdfLoadMapCounterCameraVectorsForMask = 0x0030B880; // type:func
@@ -10121,7 +10122,6 @@ btlChooseSatanGroupAwareCamera = 0x002251A0; // type:func
 btlUpdateSatanDefeatCamera = 0x00225778; // type:func
 btlSelectSatanLinkedActionCamera = 0x002259A0; // type:func
 btlUpdateSatanApproachCameraStep = 0x00225B48; // type:func
-func_00225BF8 = 0x00225BF8; // type:func
 btlFinishSatanActionCamera = 0x002261A8; // type:func
 btlGetSatanCommandAmountScale = 0x00226308; // type:func
 btlGetFutilityActionPoints = 0x00226540; // type:func
