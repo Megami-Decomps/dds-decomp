@@ -23,7 +23,7 @@ typedef struct EvtPad {
     u8 incHun; /* 0x2A */
     s8 coarseIncrease; /* 0x2B: coarse increase in the property editor. */
     s8 apply; /* 0x2C */
-    s8 unk2D;
+    s8 select; /* 0x2D: port 0 Select in input bank 1. */
     u8 pad2E[0x12]; /* Remaining two-bank, two-port input backing. */
 } EvtPad;
 

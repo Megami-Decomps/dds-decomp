@@ -201,7 +201,7 @@ MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32
         style = 0x2C;
         break;
     default:
-        window->unk10 = 0xA8;
+        window->capOffsetY = 0xA8;
         style = 0xE;
         break;
     }

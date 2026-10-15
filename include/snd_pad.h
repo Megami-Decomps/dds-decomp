@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+/* Named primary/secondary buttons are ports 0/1 of input bank 1. */
 typedef struct SndPad {
     u8 pad00[0x20];
     union {
@@ -10,20 +11,20 @@ typedef struct SndPad {
         struct {
             u8 pad20;
             s8 confirm;
-            s8 unk22;
+            s8 primaryTriangle;
             s8 unk23;
             s8 unk24;
             s8 unk25;
             s8 prev;
             s8 next;
             u8 pad28[9];
-            s8 unk31;
-            s8 unk32;
+            s8 secondaryCross;
+            s8 secondaryTriangle;
             s8 cancel;
             s8 coarseDown;
             s8 coarseUp;
-            s8 unk36;
-            s8 unk37;
+            s8 secondaryUp;
+            s8 secondaryDown;
             s8 fineDown;
             u8 pad39;
             s8 fineUp;

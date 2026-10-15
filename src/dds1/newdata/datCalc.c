@@ -1551,7 +1551,7 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         statValue = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->firstArgument)->unitId].alternateB;
     } else {
-        statValue = datCommandRecords[commandIndex].stat34;
+        statValue = datCommandRecords[commandIndex].criticalPercent;
     }
     scrSetIntegerReturnValue(statValue);
     return 1;

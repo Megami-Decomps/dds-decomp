@@ -1043,14 +1043,14 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
     switch (state) {
     case 0:
         rules = (PrfDds1RequirementSlot *)&D_00391230[requirementId].flags04;
-        if (D_00391230[requirementId].unknown00 & 8) {
+        if (D_00391230[requirementId].stateFlags & 8) {
             result = 0;
             expected = 1;
         }
         break;
     case 1:
         rules = D_00391230[requirementId].slots;
-        if (D_00391230[requirementId].unknown00 & 0x10) {
+        if (D_00391230[requirementId].stateFlags & 0x10) {
             result = 0;
             expected = 1;
         }
@@ -1123,7 +1123,7 @@ u32 prfIsRequirementExcluded(u16 requirementId) {
 
 /* Read the rule-state word for an unchecked requirement ID. */
 u32 prfReq54GetWord1230(u16 requirementId) {
-    return D_00391230[requirementId].unknown00;
+    return D_00391230[requirementId].stateFlags;
 }
 
 typedef struct PrfFallbackGroup {

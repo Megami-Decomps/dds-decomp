@@ -457,7 +457,7 @@ void mnuDrawWindowEntryDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer 
             }
         }
         if (entryValue == 0) {
-            effDrawSpriteWithCornerFade(x, y + window->unk10, depth, fadeScale, 1,
+            effDrawSpriteWithCornerFade(x, y + window->capOffsetY, depth, fadeScale, 1,
                 window->entryResources, window->entryOption + 1, drawArg);
         }
     }

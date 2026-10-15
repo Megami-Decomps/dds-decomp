@@ -10,7 +10,7 @@ struct SdfMemBlock;
 typedef struct EffPCPGroupHead {
     f32 origin[4];
     u8 pad10[0x40];
-    u8 unk50; /* 0x50 */
+    u8 repeat; /* 0x50: restart after the duration. */
     u8 pad51[3];
     s32 framesPerEntry; /* 0x54: interpolation duration */
     u32 count; /* 0x58: handles per group */
@@ -47,7 +47,7 @@ typedef struct EffPCPGroupSet {
     EffPCPGroupHead head;
     EffPCPGroupEntry *entries; /* 0x164: entries at the end of the main allocation */
     f32 scale; /* 0x168: multiplies start/end positions */
-    f32 unk16C;
+    f32 fragmentLength; /* Distance along the normalized fragment direction. */
     u32 color; /* 0x170 */
     EffParamWork **duplicates; /* 0x174: four groups of parameter work */
     struct SdfMemBlock *duplicateHandle; /* 0x178 */

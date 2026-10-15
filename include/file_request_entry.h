@@ -6,9 +6,9 @@
 /* Request-indexed memory-card state, one 0x64-byte entry per request. */
 typedef struct FileReqEntry {
     u32 unk0;      /* 0x00 */
-    u32 unk4;      /* 0x04 */
+    u32 cardType;  /* 0x04: card-info RPC type output. */
     u32 sizeKiB;   /* 0x08: fileReqGetSize converts this to bytes */
-    u32 unkC;      /* 0x0C */
+    u32 formatted; /* 0x0C: zero means unformatted. */
     u8 requestRetryCount; /* 0x10: reset on begin; retries request-mode 2 up to five times. */
     u8 status;     /* 0x11: inspected by memory-card request polling */
     u8 slotMetadataDirty; /* 0x12 */
