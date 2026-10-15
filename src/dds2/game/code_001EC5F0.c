@@ -892,8 +892,6 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     btlAdjustCameraDirectionForDefaultPlane(to);
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EDC38);
-
 /* Eight action-filtered preset rows; the final word is a category mask. */
 typedef struct BtlActionCameraPreset {
     f32 frontQuaternion[4];
@@ -904,9 +902,93 @@ typedef struct BtlActionCameraPreset {
     u32 actionMask;
 } BtlActionCameraPreset;
 
+extern const BtlActionCameraPreset D_00417F30[8];
+
+/* Frame the first listed target from an action-filtered pair preset: both
+ * cameras start at its muzzle, lowered by a quarter of its height, at a
+ * distance that fits the larger of its reach (at least 135, wider view) and
+ * half its height. */
+void func_001EDC38(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 quaternion[4];
+    f32 position[4];
+    BtlActionCameraPreset presets[8];
+    u16 candidates[8];
+    BtlUnit *unit;
+    f32 reach;
+    f32 height;
+    f32 fov;
+    f32 distance;
+    u32 i;
+    u32 selected;
+    u32 count;
+    u32 category;
+
+    memcpy(presets, D_00417F30, sizeof(presets));
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
+    reach = unit->reach * unit->scale;
+    height = unit->height * unit->scale;
+    if (reach < 135.0f) {
+        reach = 135.0f;
+    }
+    i = (u32)action->actionCode;
+    if (i - 1 < 0x21F) {
+        category = ((BtlActionAnimationRecord *)datActionAnimationRecords)[i].flags;
+        category &= 0x30;
+        count = 0;
+        for (i = 0; i < 8; i++) {
+            if (category == 0 || (presets[i].actionMask & category) != 0) {
+                candidates[count++] = i;
+            }
+        }
+        selected = candidates[effMiscRandMod(0, count) & 0xFFFF];
+    } else {
+        selected = effMiscRandMod(0, 8);
+    }
+    btlCopyUnitRotationQuaternion(unit, quaternion);
+    fov = action->camera.fov;
+    from->fov = fov;
+    to->fov = fov;
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    position[1] -= height * 0.25f;
+    VU0_LOAD_VF(vf10, position);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_STORE_VF(vf10, to->position);
+    fov *= 0.5f;
+    height *= 0.5f;
+    from->position[1] *= presets[selected].parameter;
+    if (height < reach) {
+        distance = reach / tanf(fov * 0x1.555554p+0f);
+    } else {
+        distance = height / tanf(fov);
+    }
+    from->distance = distance * presets[selected].frontDistanceScale;
+    to->distance = distance * presets[selected].backDistanceScale;
+
+    VU0_LOAD_VF(vf10, presets[selected].frontQuaternion);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+
+    VU0_LOAD_VF(vf10, presets[selected].backQuaternion);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+}
+
 extern const BtlActionCameraPreset D_004180C0[8];
 extern u8 D_004180B0[];
-extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Frame all selected actor groups using an action-filtered camera preset. */
 void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
