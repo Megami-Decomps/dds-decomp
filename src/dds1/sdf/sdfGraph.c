@@ -3,7 +3,7 @@
 #include "ee_mmi.h"
 #include "sdf_graph_display.h"
 
-extern s32 D_003BD9D8;
+extern s32 sdfGraphicsTransferThreadId;
 extern s32 iWakeupThread(s32 threadId);
 
 #define SDF_GRAPH_AUXILIARY_BUFFER 2
@@ -94,7 +94,7 @@ void sdfGraphResetDeviceForCurrentMode(void) {
 
 s32 sdfGraphWakeDisplayThread(s32 channel) {
     if (channel == 1) {
-        iWakeupThread(D_003BD9D8);
+        iWakeupThread(sdfGraphicsTransferThreadId);
     }
     EE_ENABLE_INTERRUPTS_SYNC();
     return 0;

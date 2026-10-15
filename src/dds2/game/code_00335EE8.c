@@ -11,9 +11,9 @@
 
 extern SdfMotionBindingDispatch D_0040B480;
 
-extern s32 (*D_0040B510[])(void *a0, s32 a1);
+extern s32 (*sdfMotionCommandHandlers[])(void *a0, s32 a1);
 
-extern SdfMotionBindingDispatch D_0040B518;
+extern SdfMotionBindingDispatch sdfMotionSlotPairDispatch;
 
 
 
@@ -23,7 +23,7 @@ void sdfMotionCaptureSecondaryTextNoOp(void) {
 }
 
 s32 sdfDispatchMotionCommand(void *object, s32 command) {
-    return D_0040B510[(u16)command](object, command);
+    return sdfMotionCommandHandlers[(u16)command](object, command);
 }
 
 /* Bind the selected pair of model slot indices and weights. */
@@ -38,7 +38,7 @@ SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
                                                            s32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfAllocSizeClassBlock(sizeof(SdfMotionSlotPairBinding));
 
-    sdfSelectMotionPointerEntry(entry, motion, &D_0040B518, entryIndex);
+    sdfSelectMotionPointerEntry(entry, motion, &sdfMotionSlotPairDispatch, entryIndex);
     return entry;
 }
 

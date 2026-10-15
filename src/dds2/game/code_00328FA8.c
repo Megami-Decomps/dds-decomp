@@ -114,7 +114,7 @@ void sdfGetChipHeapStats(SdfChipHeapStats *stats) {
 
 extern void *sdfAllocHeapMemory(u32 size);
 extern s32 D_004389CC;
-extern SdfPendingRequest D_00439128;
+extern SdfPendingRequest sdfGeneralReleaseRequest;
 
 /* Align the usable span to 128 bytes and link one free block between sentinels. */
 void sdfInitGeneralHeap(u32 heapSize) {
@@ -144,7 +144,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
     D_004389CC = 0;
-    sdfInitializeSynchronizedRequest(&D_00439128, sdfReleaseResourceAllocation);
+    sdfInitializeSynchronizedRequest(&sdfGeneralReleaseRequest, sdfReleaseResourceAllocation);
 }
 
 u16 sdfGetMemoryBlockState(SdfMemBlock *block) {

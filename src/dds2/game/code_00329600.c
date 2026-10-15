@@ -21,7 +21,7 @@ extern s32 DIntr(void);
 extern void EIntr(void);
 
 
-extern SdfPendingRequest D_00439128;
+extern SdfPendingRequest sdfGeneralReleaseRequest;
 
 
 extern void *memcpy(void *destination, const void *source, unsigned int bytes);
@@ -147,7 +147,7 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
 /* Zero is a sentinel and is never submitted to the pending queue. */
 void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *allocation) {
     if (allocation != NULL) {
-        sdfPendingQueuePush(&D_00439128, (u32)allocation);
+        sdfPendingQueuePush(&sdfGeneralReleaseRequest, (u32)allocation);
     }
 }
 
@@ -242,7 +242,7 @@ SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
 }
 
 extern s32 func_0034DE68(void *, s32, s32, void *, s32, void *, s32, s32, s32);
-extern SifRpcClientDataPrefix D_0045F120;
+extern SifRpcClientDataPrefix sdfNamedResourceRpcClient;
 
 /* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
 s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data, s32 *outSize) {
@@ -261,7 +261,7 @@ s32 sdfSendNamedResourceRequest(const char *name, s32 dataSize, const void *data
     }
     /* Align the two-word reply within the stack scratch buffer to 64 bytes. */
     replyWords = (u32 *)(((u32)replyScratch + SDF_RPC_REPLY_ALIGNMENT_MASK) & ~SDF_RPC_REPLY_ALIGNMENT_MASK);
-    result = func_0034DE68(&D_0045F120, 1, 0, requestWords, requestBytes, replyWords, 8, 0, 0);
+    result = func_0034DE68(&sdfNamedResourceRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, 0, 0);
     if (result >= 0) {
         if (outSize != NULL) {
             *outSize = replyWords[1];
@@ -288,8 +288,8 @@ void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *o
         func_0034D8E0(0);
     }
     while (1) {
-        sceSifMBindRpc(&D_0045F120, SDF_NAMED_RESOURCE_RPC_ID, 0);
-        if (D_0045F120.server != NULL) {
+        sceSifMBindRpc(&sdfNamedResourceRpcClient, SDF_NAMED_RESOURCE_RPC_ID, 0);
+        if (sdfNamedResourceRpcClient.server != NULL) {
             break;
         }
         retryStartTick = sdfReadTimerCount();
