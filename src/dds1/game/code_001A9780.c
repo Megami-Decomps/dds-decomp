@@ -1636,7 +1636,7 @@ u32 btlRequestAnalysisPanelClose(void) {
 typedef struct BtlGuidePanelWork {
     s8 state;
     u8 pad01[7];
-    u16 fadeLevel;             /* 0x08: clamped with signed-halfword tests */
+    s16 fadeLevel;             /* 0x08 */
     u8 pad0A[2];
     BattlePanelColors colors;  /* 0x0C: TL, TR, BR, BL */
     s32 unk1C;
@@ -2696,7 +2696,69 @@ u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delt
     return (word & ~0xFF) | delta;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B09A8);
+/* Fade the guide panel in and out, show its single message window once fully faded in,
+ * and draw the dimmed full-screen backdrop with its framed band; -1 after fade-out. */
+s32 func_001B09A8(KwlnTask *task) {
+    BtlGuidePanelWork *work = (BtlGuidePanelWork *)kwlnTaskGetUserValue(task);
+    s32 width;
+    u32 alpha;
+
+    switch (work->state) {
+    case 0:
+        work->fadeLevel += 12;
+        work->fadeLevel = work->fadeLevel <= 0 ? 0 : work->fadeLevel > 0x80 ? 0x80 : work->fadeLevel;
+        if (work->fadeLevel >= 0x80) {
+            work->state = 1;
+        }
+        break;
+    case 1:
+        break;
+    case 2:
+    default:
+        work->fadeLevel -= 12;
+        work->fadeLevel = work->fadeLevel <= 0 ? 0 : work->fadeLevel > 0x80 ? 0x80 : work->fadeLevel;
+        if (work->fadeLevel <= 0) {
+            return -1;
+        }
+        break;
+    }
+    switch (work->state) {
+    case 0:
+    case 1:
+    case 2:
+        if (work->state == 1) {
+            width = itfMesMeasureEntryItem(work->windowIndex, work->entryIndex, 0);
+            itfMesBlk24MoveTo(work->windowIndex, (256 - (width >> 5)) << 4, (work->y + 0x10) << 3);
+            itfMesStartEntry(work->windowIndex, work->entryIndex, 0);
+        }
+        alpha = ((work->fadeLevel >> 1) + 16) << 24;
+        work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
+            alpha | 0x080808;
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 1, 128, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(0);
+        evtSubmitDefaultDepthGradientRect(0, 0, 0x200, 0x1C0,
+            work->colors.values[0], work->colors.values[1], work->colors.values[2], work->colors.values[3]);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
+            alpha | 0xA0A0A0;
+        evtSubmitDefaultDepthGradientRect(0, work->y - 2, 0x200, 2,
+            work->colors.values[0], work->colors.values[1], work->colors.values[2], work->colors.values[3]);
+        work->colors.values[0] = alpha | 0x181818;
+        work->colors.values[1] = alpha | 0x101010;
+        work->colors.values[2] = alpha | 0x141414;
+        work->colors.values[3] = alpha | 0x0C0C0C;
+        evtSubmitDefaultDepthGradientRect(0, work->y, 0x200, 0xF0,
+            work->colors.values[0], work->colors.values[1], work->colors.values[2], work->colors.values[3]);
+        work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
+            alpha | 0xA0A0A0;
+        evtSubmitDefaultDepthGradientRect(0, work->y + 0xF0, 0x200, 2,
+            work->colors.values[0], work->colors.values[1], work->colors.values[2], work->colors.values[3]);
+        evtSubmitPrimaryAlphaBlendMode(0);
+        break;
+    }
+    return 0;
+}
 
 void btlReleaseMessageWindowTask(KwlnTask *task) {
     BtlGuidePanelWork *work = (BtlGuidePanelWork *)kwlnTaskGetUserValue(task);
