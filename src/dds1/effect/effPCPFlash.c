@@ -92,7 +92,7 @@ void effFlashTrianglePulseSetRenderScale(PcpFlashTrianglePulseWork *work, f32 va
     work->renderScale = value;
 }
 
-void effFlashTrianglePulseSetParticleColors(PcpFlashTrianglePulseWork *work, s32 index, s32 param)
+void effFlashTrianglePulseSetParticleColors(PcpFlashTrianglePulseWork *work, s32 index, s32 color)
 {
     PcpFlashColorSlot *slot;
     s32 rgb1;
@@ -101,9 +101,9 @@ void effFlashTrianglePulseSetParticleColors(PcpFlashTrianglePulseWork *work, s32
     slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->first = effMultiplyPackedColors(rgb2, param);
-    slot->second = effMultiplyPackedColors(rgb2, param);
-    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, color);
+    slot->second = effMultiplyPackedColors(rgb2, color);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
@@ -1569,7 +1569,7 @@ void effFlashRadialTriangleSetRenderScale(PcpFlashRadialTriangleWork *work, f32 
     work->renderScale = value;
 }
 
-void effFlashRadialTriangleSetParticleColors(PcpFlashRadialTriangleWork *work, s32 index, s32 param)
+void effFlashRadialTriangleSetParticleColors(PcpFlashRadialTriangleWork *work, s32 index, s32 color)
 {
     PcpFlashColorSlot *slot;
     s32 rgb1;
@@ -1578,9 +1578,9 @@ void effFlashRadialTriangleSetParticleColors(PcpFlashRadialTriangleWork *work, s
     slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->first = effMultiplyPackedColors(rgb2, param);
-    slot->second = effMultiplyPackedColors(rgb2, param);
-    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, color);
+    slot->second = effMultiplyPackedColors(rgb2, color);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
@@ -2271,7 +2271,7 @@ void effFlashOffsetRadialTriangleSetRenderScale(PcpFlashOffsetRadialWork *work, 
     work->renderScale = value;
 }
 
-void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashOffsetRadialWork *work, s32 index, s32 param)
+void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashOffsetRadialWork *work, s32 index, s32 color)
 {
     PcpFlashColorSlot *slot;
     s32 rgb1;
@@ -2280,9 +2280,9 @@ void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashOffsetRadialWork *wor
     slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
-    slot->first = effMultiplyPackedColors(rgb2, param);
-    slot->second = effMultiplyPackedColors(rgb2, param);
-    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, color);
+    slot->second = effMultiplyPackedColors(rgb2, color);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, color);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
