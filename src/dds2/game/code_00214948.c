@@ -579,7 +579,41 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_002152D8);
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlSelectLowestNonzeroHpTarget);
+/* Select the lowest nonzero current HP, preferring earlier entries on a tie. */
+s32 btlSelectLowestNonzeroHpTarget(s32 task, s32 action) {
+    u32 matching;
+    u32 count;
+    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &matching, &count);
+    u32 best;
+    u32 bestIndex;
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        bestIndex = i = 0;
+        best = 0x7FFF;
+        i = bestIndex;
+        if (count != 0) {
+            do {
+                BtlUnit *unit = btlGetIndexListEntry(list, i);
+                u16 current = btlReadCurrentUnitHp(&unit->partyRecord);
+                if (best >= current && current != 0) {
+                    best = current;
+                    bestIndex = i;
+                }
+                i++;
+            } while (i < count);
+        }
+        btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((ActionStateLink *)task)->indexWork.indices, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 /* Prefer the lowest nonzero HP among element-blocking units; otherwise use the list. */
 s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
