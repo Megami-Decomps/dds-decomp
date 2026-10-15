@@ -11,7 +11,7 @@
 #include "sdf_dev_state.h"
 
 extern s32 D_00437CC0;
-extern s32 D_00439000;
+extern s32 fileActiveCardDetectionRequestIndex;
 
 s32 func_0034F7B8(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 
@@ -34,7 +34,7 @@ s32 sceMcSync(s32 mode, void *command, s32 *result);
 s32 SignalSema(s32 sema);
 
 
-extern char D_00437CC8[];
+extern char fileManagerTaskName[];
 
 extern s32 (*fileIdleUpdateCallback)(void);
 
@@ -449,7 +449,7 @@ void fileManInit(void) {
     fileManagerWork.freeSlots = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
     fileManagerWork.buffer = (u8 *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
-    kwlnTaskCreate(D_00437CC8, 0x384, 1, 0, fileMan, 0, 0);
+    kwlnTaskCreate(fileManagerTaskName, 0x384, 1, 0, fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }
 
@@ -464,7 +464,7 @@ void fileReqInit(s32 request) {
 
 /* Select and reinitialize one file request, then clear its +0x10 byte. */
 void fileReqBegin(s32 request) {
-    D_00439000 = request;
+    fileActiveCardDetectionRequestIndex = request;
     fileReqInit(request);
     fileRequestEntries[request].requestRetryCount = 0;
 }
@@ -472,7 +472,7 @@ void fileReqBegin(s32 request) {
 /* Keep the zero-status tail distinct and the ready path after retry work;
  * see docs/idioms.md, "Trace-justified switch tails: fileReqPoll". */
 s32 fileReqPoll(void) {
-    FileReqEntry *entry = &fileRequestEntries[D_00439000];
+    FileReqEntry *entry = &fileRequestEntries[fileActiveCardDetectionRequestIndex];
     s32 info[2];
     s32 result = sceMcSync(1, info, &info[1]);
     s32 retries;
@@ -494,7 +494,7 @@ s32 fileReqPoll(void) {
                 retries = entry->requestRetryCount;
                 if (retries < 5) {
                     entry->requestRetryCount = retries + 1;
-                    fileReqInit(D_00439000);
+                    fileReqInit(fileActiveCardDetectionRequestIndex);
                     return 0;
                 }
                 entry->status = 2;
@@ -564,4 +564,4 @@ void fileReqStartCardDetection(u32 port) {
 
 s32 D_00437CC0 __attribute__((section(".sdata"))) = 0;
 
-char D_00437CC8[8] __attribute__((section(".sdata"))) = "fileMan";
+char fileManagerTaskName[8] __attribute__((section(".sdata"))) = "fileMan";

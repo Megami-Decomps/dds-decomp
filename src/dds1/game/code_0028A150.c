@@ -4822,7 +4822,7 @@ void fileJobCopyHeader(FileJob *dst, FileJob *src) {
     memcpy(dst, src, 0x90);
 }
 
-extern char D_0037E518[];
+extern char fileQueueImagePaddingBytes[];
 extern s32 sceWrite(s32 fd, void *data, s32 size);
 extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
@@ -4908,7 +4908,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
         padding = aligned - size;
         if (padding > 0) {
-            sceWrite(fd, D_0037E518, padding);
+            sceWrite(fd, fileQueueImagePaddingBytes, padding);
         }
     }
     sceClose(fd);
@@ -4923,7 +4923,7 @@ typedef struct FileQueueImageHeader {
     f32 unkC;
 } FileQueueImageHeader;
 
-extern char D_0037E528[];
+extern char fileQueueVersionedImagePaddingBytes[];
 
 /* Save a queue image: the queue header, one relocated record per job, then each
  * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
@@ -5013,7 +5013,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
         padding = aligned - size;
         if (padding > 0) {
-            sceWrite(fd, D_0037E528, padding);
+            sceWrite(fd, fileQueueVersionedImagePaddingBytes, padding);
         }
     }
     sceClose(fd);
@@ -6095,7 +6095,7 @@ typedef struct FileWaveMotion {
     f32 angleMultiplier;
 } FileWaveMotion;            /* 0x44, ordinary word alignment */
 
-extern f32 D_0037E540[4]; /* (0, -1, 0, 0), existing shared axis */
+extern f32 effWaveEmitterNegativeYAxis[4]; /* (0, -1, 0, 0), existing shared axis */
 
 /* vu0 routine: advances axial motion with a quaternion-oriented sine sway. */
 void effUpdateWaveEmitterSlots(FileSlotTable *record) {
@@ -6179,7 +6179,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->axis[1] = -1.0f;
                                 motion->axis[2] = 0.0f;
                             } else {
-                                VU0_LOAD_VF(vf10, D_0037E540);
+                                VU0_LOAD_VF(vf10, effWaveEmitterNegativeYAxis);
                                 VU0_ROTATE_VEC(vf10, vf10);
                                 VU0_STORE_VF(vf10, direction);
                                 motion->axis[0] = direction[0];

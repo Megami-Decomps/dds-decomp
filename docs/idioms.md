@@ -5167,7 +5167,7 @@ The getter `prfGetMantraDisplayParameter` returns its stored byte as a promoted 
 both callers explicitly narrow it to `u8`. Keep its definition and declarations
 coherent.
 
-`D_0036C490` contains 24-byte encoded label rows: pass the selected row address,
+`mnuMantraDisplayParameterLabels` contains 24-byte encoded label rows: pass the selected row address,
 not its first byte. The dim scale is the float bit pattern `0x3F199999`,
 represented by `0.599999964237213134765625f`; `0.6f` is the adjacent value.
 Both complete renderer bodies and their owning units match retail.
@@ -13662,3 +13662,44 @@ release/bind/sample/capture/blend callbacks and final opaque word are kept.
 Pointer words differ between titles, so this is common role/shape evidence,
 not byte identity. No callback prototype, declaration, bound, data, storage,
 ABI or control flow changes accompany these names.
+
+
+## File callback views, alignment banks and shop display data
+
+`fileQueueImagePaddingBytes` and `fileQueueVersionedImagePaddingBytes` are
+separate native 16-zero-byte banks. Their respective image writers consume
+only the 0–15 bytes needed for alignment; do not merge the banks.
+`effWaveEmitterNegativeYAxis` is the existing `(0,-1,0,0)` vector loaded into
+VF10 by the wave-emitter update, with its original VU0 operations retained.
+
+`fileManagerTaskName` is the C-owned eight-byte `fileMan` task-name object,
+not an imported small-data blob. Keep its existing `.sdata` placement and
+array bound. `fileActiveCardDetectionRequestIndex` selects the request entry
+used by the manager's card synchronization/type/format polling and retry;
+it is distinct from the file-menu request index.
+
+DDS2's `fileJobTypePositionCallbackView`, `fileJobTypeRotationCallbackView`,
+`fileJobTypeScaleCallbackView` and `fileJobTypeColorCallbackView` are interior
+views of `fileJobTypeCallbacks`, not four independent registries. Their
+callback words are at offsets 0x14/0x18/0x1C/0x20 in each 0x28-byte record;
+DDS1 accesses the corresponding named fields directly. Keep the existing
+per-view types, stride and overlapping storage.
+
+The DDS2 flag-driven transfer notices read `fileRareItemNoticeFlagRows`;
+only the tested flag is established, not an item-ID meaning for its other
+field. `ptyUnlockedUnitStatBonusRows` supplies the existing flag/unit/bonus
+selectors, while `ptyUnit7StatBonusFlagGroups` supplies the grouped flags
+for numeric unit 7. No character identity or new bonus layout is implied.
+The three `fileOriginalTitle*ClearedGameLabel`/`fileOriginalTitleUnusableSaveText`
+objects keep their original NUL strings. `fileMenuConfiguredTextGlyph` is
+the configured/drawn/queued glyph pointer, and `fileFourWayDialogCancelCallback`
+is the unchanged integer-carried callback consumed by the four-way dialog's
+cancel branch.
+
+`mnuShopProgressPriceScales` keeps the per-title private record types and
+native bytes: DDS1 also tests the score threshold, whereas DDS2's stage
+provider returns zero. Do not reinterpret later DDS2 integer words as an
+invented uniform float table. DDS1-only `mnuMantraDisplayParameterLabels`
+contains nine 24-byte rows with one through nine encoded 0x81CA glyphs;
+both consumers index with the display parameter minus one. DDS2 draws its
+parameter numerically instead, so no artificial counterpart is introduced.

@@ -1308,7 +1308,7 @@ typedef struct ShopProgressPriceScale {
     u32 threshold;
 } ShopProgressPriceScale;
 
-extern ShopProgressPriceScale D_0036A234[];
+extern ShopProgressPriceScale mnuShopProgressPriceScales[];
 
 s32 mnuCampGetProgressStage(void) {
     s32 result = 0;
@@ -1334,7 +1334,7 @@ s32 mnuCampGetShopPriceStage(void) {
     u32 stage = mnuCampGetProgressStage();
 
     if (stage < 5) {
-        if (datGameState->world.score >= D_0036A234[stage].threshold) {
+        if (datGameState->world.score >= mnuShopProgressPriceScales[stage].threshold) {
             stage++;
         } else {
             stage = 0;
@@ -1483,7 +1483,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
         price = itemPrice * pricePercent / 100;
         progressStage = mnuCampGetProgressStage();
         if (progressStage != 0) {
-            price = price * (s32)D_0036A234[progressStage].percent / 100;
+            price = price * (s32)mnuShopProgressPriceScales[progressStage].percent / 100;
         }
     } else {
         price = (u32)datItemSkillRecords[itemId].price >> 1;
@@ -1516,7 +1516,7 @@ s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
         price = itemPrice * pricePercent / 100;
         progressStage = mnuCampGetProgressStage();
         if (progressStage != 0) {
-            price = price * (s32)D_0036A234[progressStage].percent / 100;
+            price = price * (s32)mnuShopProgressPriceScales[progressStage].percent / 100;
         }
     } else {
         price = (u32)datItemSkillRecords[itemId].price >> 1;
