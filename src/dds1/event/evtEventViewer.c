@@ -3186,7 +3186,126 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
     return 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerStoreMenuValueInPendingKey);
+extern void mnuFxWorldScrollDelta();
+extern void mnuAdjustTimelineDurations(EvtRuntime *world, s32 threshold, s32 delta);
+
+/* Store the edited menu value: the option/frame commands commit directly, and
+ * otherwise the value goes into the pending key field chosen by the column's
+ * command category and the track kind. */
+s32 evtViewerStoreMenuValueInPendingKey(s32 unused, s32 command, EvtRuntime *viewer) {
+    s32 value = viewer->value;
+    f32 floatValue = viewer->floatValue;
+    EvtRuntimeChild *key;
+
+    if (viewer->commandResetId == 0) {
+        switch (viewer->inputA) {
+        case 5:
+            viewer->headerThird = value + 1;
+            evtViewerPopHistory(viewer);
+            return 0;
+        case 8:
+            mnuFxWorldScrollDelta(viewer, value, viewer->curFrame);
+            mnuAdjustTimelineDurations(viewer, viewer->curFrame, value);
+            evtViewerPopHistory(viewer);
+            return 0;
+        case 7:
+            viewer->commandStart = value;
+            viewer->flags |= 1;
+            viewer->curFrame = viewer->optionFrameBase;
+            evtViewerDispatchFlagMode(viewer);
+            viewer->actionMode = 0;
+            viewer->historyCount = 0;
+            viewer->commandResetId = 0;
+            D_003BBE94 = 0;
+            return 1;
+        }
+    } else if (viewer->commandResetId == 1 && command == 0xF) {
+        viewer->frameGroup->metadata.value = value;
+        evtViewerPopHistory(viewer);
+        return 0;
+    }
+    key = evtEventViewerGetPendingNode(viewer);
+    if (key == NULL) {
+        return 0;
+    }
+    switch (D_0036876A[viewer->frameColumn + viewer->frameGroup->type * 10]) {
+    case 1:
+        key->duration = value;
+        break;
+    case 2:
+        if (viewer->frameGroup->type == 7) {
+            key->p08.sh[0] = value;
+        }
+        break;
+    case 3:
+        switch (viewer->frameGroup->type) {
+        case 8:
+            key->p08.sh[0] = value;
+            break;
+        case 12:
+            key->p08.sh[1] = value;
+            break;
+        case 31:
+            key->p08.sh[1] = value;
+            break;
+        }
+        break;
+    case 4:
+        key->p08.sh[1] = value;
+        break;
+    case 7:
+        key->p08.sh[1] = value;
+        break;
+    case 6:
+        key->p08.f = floatValue * 0x1.1df46ap-6f;
+        break;
+    case 8:
+        switch (viewer->frameGroup->type) {
+        case 3:
+            key->p0C.sb[1] = value;
+            break;
+        case 26:
+            key->p0C.sb[1] = value;
+            break;
+        case 4:
+            key->p08.sh[0] = value;
+            break;
+        case 5:
+            key->p08.sh[0] = value;
+            break;
+        case 29:
+            key->p08.sh[0] = value;
+            break;
+        case 30:
+            key->p08.sh[0] = value;
+            break;
+        case 12:
+            key->p0C.i = value;
+            break;
+        case 18:
+            key->p0C.sb[0] = value;
+            break;
+        case 19:
+            key->p08.sh[1] = value;
+            break;
+        case 28:
+            key->p08.sh[1] = value;
+            break;
+        }
+        break;
+    case 19:
+        if (key->p08.sb[0] == 6) {
+            key->p0C.sb[0] = value;
+        }
+        break;
+    case 20:
+    case 21:
+        break;
+    }
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
 
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
 s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
