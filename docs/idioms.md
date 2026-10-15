@@ -2226,6 +2226,14 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     for each allocator unit and **78 match, 0 differ** for each packet unit.
     Do not drop an evidenced pointer result, or invent a wide wrapper result,
     merely because either declaration can reproduce the same bytes.
+    The 196-byte `mnuBeginTerminalSlotSelection` pair (DDS1 `0024B3A8`,
+    DDS2 `00269B80`) is another ignored-result case: both providers define
+    `evtSetBoundedDisplayValue` as `s32 (s32, s32)`, not `void`. With that
+    real declaration and direct owner-field assignments saving the list count,
+    selected slot and mode, the units check **117 match, 0 differ** and
+    **126 match, 0 differ**. A separate count-snapshot form still differs in
+    seven of 49 words despite the corrected declaration. Retail's delayed
+    count store therefore does not require an extra source-level snapshot.
 11. **`x / 5` always compiles with the zero check, and a source-order trap.**
     ee-gcc emits `addiu $2,$0,5; div; beql $2,$0,1f; break 7` even for a
     constant divisor, so the check is not evidence of a variable divisor

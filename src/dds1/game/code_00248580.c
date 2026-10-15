@@ -592,7 +592,7 @@ extern void evtCreateEventScriptProcess(s32);
 
 extern void evtClearActiveFlag(s32);
 
-extern void evtSetBoundedDisplayValue(s32, s32);
+extern s32 evtSetBoundedDisplayValue(s32, s32);
 
 /* Close via a black fade for modes one/two, otherwise request process 0x322.
  * All paths clear active flag zero and set display slot one. No sound call occurs here. */
@@ -1649,7 +1649,26 @@ extern void mnuDrawTerminalSelectedSlots(s32);
 
 
 
-INCLUDE_ASM(const s32, "game/code_00248580", mnuBeginTerminalSlotSelection);
+s32 mnuBeginTerminalSlotSelection(KwlnTask *task) {
+    MenuTerminalWork *work;
+
+    work = (MenuTerminalWork *)kwlnTaskGetUserValue(task);
+    if ((work->initFlags & 1) == 0) {
+        mnuConfigureTerminalSlotEffects(1, work);
+        mnuTerminalSelectSlot(1, 0, work);
+        mnuAnimateTerminalSelection(1, work);
+        evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, work);
+        work->initFlags |= 1;
+    }
+    work->transitionStage = work->owner->count;
+    work->selectedSlot = work->initState;
+    work->reduced = work->mode;
+    evtClearActiveFlag(0);
+    evtSetBoundedDisplayValue(0, 2);
+    mnuTerminalSelectResourceBank(work);
+    mnuApplyFadeTrackMode(0, work);
+    return 1;
+}
 
 u32 func_0024B470(void) {
     return 1;
