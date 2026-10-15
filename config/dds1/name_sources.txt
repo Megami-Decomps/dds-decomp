@@ -485,7 +485,7 @@
 0x00110A48	dds3FindWorldObjectNodeByKey	inferred	High: walks the requested kind's list comparing the node key, returning the matching node or null. [names_reviewed23.tsv]
 0x00110AB0	dds3CopyWorldListToValueChain	inferred	High: creates an indexed object and appends each node pointer from the requested world list as an indexed payload. [names_reviewed23.tsv]
 0x00110B48	dds3AttachResourceHandleToWorldObject	inferred	Resolves a resource identifier and attaches its handle to a world object. [names_reviewed10.tsv]
-0x00110B78	dds3AttachConstructedResourceToWorldObject	inferred	Constructs a resource handle from parameters and stores it in the world object. [names_reviewed10.tsv]
+0x00110B78	dds3AttachConstructedResourceToWorldObject	inferred	Forwards area, room, resource0Data, resource1Data, textureOffsets, and the opaque final loader value to fldLoadAreaRoomResourcesFromRequest, then stores its returned handle in the world object. [names_reviewed10.tsv]
 0x00110BB8	dds3ClearSceneObjectState	inferred	Reads scene object at offset 0x18 and clears its word at offset 0x14 after func_00128890.
 0x00110BE0	evtLoadSceneResourceFrom	inferred	loads another scene's resource into this scene object (dds1/basic/dds3SceneBasic.c) [names_L16_Units.tsv]
 0x00110C58	evtRetainSceneResource	inferred	retains name and stores its address on the scene object (dds1/basic/dds3SceneBasic.c) [names_L16_Units.tsv]
