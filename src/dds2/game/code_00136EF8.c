@@ -2836,7 +2836,7 @@ void func_00141898(void) {
         }
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            stage = entry->unk65 != 0 ? entry->unk65 : fldAreaState.area;
+            stage = entry->explorationArea != 0 ? entry->explorationArea : fldAreaState.area;
             room = floorFlags >> 2;
             if (room == 0) {
                 room = fldAreaState.floor + 1;
@@ -2845,7 +2845,7 @@ void func_00141898(void) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->explorationColumn, entry->explorationRow,
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor, entry->explorationColumn, entry->explorationRow,
                                                 entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
@@ -2981,7 +2981,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
-            stage = entry->unk65 != 0 ? entry->unk65 : fldAreaState.area;
+            stage = entry->explorationArea != 0 ? entry->explorationArea : fldAreaState.area;
             room = floorFlags >> 2;
             if (room == 0) {
                 room = fldAreaState.floor + 1;
@@ -2990,7 +2990,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->explorationColumn, entry->explorationRow,
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor, entry->explorationColumn, entry->explorationRow,
                                                 entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
