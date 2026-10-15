@@ -6880,7 +6880,7 @@ extern s32 fldStepSceneStateMachine(KwlnTask *);
 
 extern SceneAiWork *btlCreateAiWork(BtlTask *);
 
-void fldCreateSceneSpriteTask(s32 arg0) {
+void fldCreateSceneSpriteTask(s32 sourceTask) {
     BtlState *scene;
     s32 task;
     kwlnTaskGetTaskByName(D_003BB3A0);
@@ -6898,7 +6898,7 @@ void fldCreateSceneSpriteTask(s32 arg0) {
     }
     scene = (BtlState *)btlGetRuntime();
     task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, fldStepSceneStateMachine, fldReleaseSceneSprite,
-                          (u32)btlCreateAiWork((BtlTask *)arg0));
+                          (u32)btlCreateAiWork((BtlTask *)sourceTask));
     kwlnTaskAddChild(scene->scriptOwner, (KwlnTask *)task);
     scene->spriteObject = task;
 }
