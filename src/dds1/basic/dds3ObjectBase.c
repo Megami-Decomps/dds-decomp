@@ -364,7 +364,7 @@ s32 dds3RegisterObjectInHandlerIndex(void *object) {
 
 extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
 struct SdfPoolNode;
