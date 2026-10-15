@@ -3,7 +3,8 @@
 
 #include "eff.h"
 
-/* Copied input prefixes for the larger, title-local flash work records. */
+/* Copied input prefixes for the larger, title-local flash work records.
+ * centerColor/edgeColor supply RGB; draw code supplies per-vertex alpha. */
 typedef struct PcpFlashScalingOrbitParams {
     f32 origin[3];
     u8 pad0C[4];
@@ -13,8 +14,8 @@ typedef struct PcpFlashScalingOrbitParams {
     s32 lifetime;
     s32 scaleRampTime;
     u32 randomRange;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 orbitRadius;
@@ -34,8 +35,8 @@ typedef struct PcpFlashAccumulatingParams {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 spanBase;
     f32 unk34;
     f32 orbitRadius;
@@ -56,8 +57,8 @@ typedef struct PcpFlashOrbitArcParams {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpanStart;
     f32 acrossSpanStart;
     f32 orbitRadiusStart;
@@ -81,8 +82,8 @@ typedef struct PcpFlashFadingOrbitParams {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 orbitRadius;
@@ -104,8 +105,8 @@ typedef struct PcpFlashRotatingQuadParams {
     u8 pad24[4];
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 maxScale;
@@ -122,8 +123,8 @@ typedef struct PcpFlashRadialTriangleParams {
     s32 lifetime;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
@@ -140,8 +141,8 @@ typedef struct PcpFlashRadialStripParams {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 spanBase;
     f32 spanVariation;
     f32 maxThickness;
@@ -162,8 +163,8 @@ typedef struct PcpFlashOffsetRadialParams {
     s32 lifetime;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
@@ -182,8 +183,8 @@ typedef struct PcpFlashStreakParams {
     s32 lifetime;
     s32 scaleRampTime;
     u32 randomRange;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 maxScale;
@@ -215,8 +216,8 @@ struct PcpFlashStreakWork {
     s32 lifetime;
     s32 scaleRampTime;
     u32 randomRange;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 maxScale;
@@ -251,8 +252,8 @@ struct PcpFlashScalingOrbitWork {
     s32 lifetime;
     s32 scaleRampTime;
     u32 randomRange;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 orbitRadius;
@@ -292,8 +293,8 @@ struct PcpFlashAccumulatingWork {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 spanBase;
     f32 unk34;
     f32 orbitRadius;
@@ -337,8 +338,8 @@ struct PcpFlashOrbitArcWork {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpanStart;
     f32 acrossSpanStart;
     f32 orbitRadiusStart;
@@ -388,8 +389,8 @@ struct PcpFlashRotatingQuadWork {
     u8 pad24[0x04];
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 maxScale;
@@ -414,8 +415,8 @@ struct PcpFlashRadialTriangleWork {
     s32 lifetime;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
@@ -453,8 +454,8 @@ struct PcpFlashRadialStripWork {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 spanBase;
     f32 spanVariation;
     f32 maxThickness;
@@ -485,8 +486,8 @@ struct PcpFlashFadingOrbitWork {
     u32 randomRange;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 upSpan;
     f32 acrossSpan;
     f32 orbitRadius;
@@ -513,8 +514,8 @@ struct PcpFlashOffsetRadialWork {
     s32 lifetime;
     s32 fadeInTime;
     s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
+    u32 centerColor;
+    u32 edgeColor;
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
