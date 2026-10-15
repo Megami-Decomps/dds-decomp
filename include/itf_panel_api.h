@@ -2,8 +2,12 @@
 #define ITF_PANEL_API_H
 
 #include "common.h"
+#include "sdf_packet_list.h"
 
 struct UiSprite;
+
+void itfPanelDispatchHandler(struct UiSprite *panel, struct SdfListHead *list);
+void itfAppendGsPanelStatePacket(struct SdfListHead *list);
 
 void itfSetPanelLayoutAndNotify(struct UiSprite *panel, s32 left, s32 top,
     s32 right, s32 bottom, s32 renderValue);

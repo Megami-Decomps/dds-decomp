@@ -68,8 +68,6 @@ void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 firstValue, s32 secondVa
 
 
 #include "sdf_packet_alloc.h"
-extern void itfAppendGsPanelStatePacket(SdfListHead *);
-extern void itfPanelDispatchHandler(UiSprite *, SdfListHead *);
 
 /* Build the panel list and append it to the SDK draw-surface pool. */
 void itfBuildAndSubmitPanelPacket(UiSprite *panel, SdfPoolNode *packetOwner) {
