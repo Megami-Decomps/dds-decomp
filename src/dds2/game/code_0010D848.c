@@ -1,5 +1,6 @@
 #include "common.h"
 #include "scr_integer_return_value_api.h"
+#include "scr_command_timer_api.h"
 #include "scr.h"
 #include "mdl_flag_api.h"
 
