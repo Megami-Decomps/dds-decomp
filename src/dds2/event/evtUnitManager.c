@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_setup.h"
 #include "evt_scaled_value.h"
 #include "evt_unit_motion_slot.h"
 #include "evt_unit_color_transition.h"
@@ -777,9 +778,9 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     work->effObj = effObj;
     work->owner = owner;
     work->unkC0 = 10;
-    work->unkC8 = 10;
+    EVT_UNIT_MOTION_SETUP(work)->endFrame = 10;
     work->unkBE = 0;
-    work->unkC6 = 0;
+    EVT_UNIT_MOTION_SETUP(work)->startFrame = 0;
 
     VU0_LOAD_VF(vf10, defaultVector);
     VU0_STORE_VF_UNCLOBBERED(vf10, work->vec10);
@@ -885,16 +886,16 @@ void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s3
     }
 }
 
-void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
+void evtPrepareUnitMotionState(EvtUnit *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode) {
     unit->flags &= ~0x1;
     unit->flags &= ~0x20;
     unit->flags &= ~0x40;
     unit->flags &= ~0x400000;
     unit->flags &= ~0x800000;
     unit->motionState = EVT_UNIT_MOTION_STATE_MOTION;
-    unit->unkC4 = a;
-    unit->unkC6 = b;
-    unit->unkC8 = c;
+    EVT_UNIT_MOTION_SETUP(unit)->motionId = motionId;
+    EVT_UNIT_MOTION_SETUP(unit)->startFrame = startFrame;
+    EVT_UNIT_MOTION_SETUP(unit)->endFrame = endFrame;
     unit->flags |= 0x80;
     unit->motionTicks = 0;
     unit->motionCallback = 0;
