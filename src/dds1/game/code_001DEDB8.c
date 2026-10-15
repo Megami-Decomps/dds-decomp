@@ -7303,8 +7303,8 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     return task;
 }
 
-u32 btlTaskStartFadeIn(u32 *arg0) {
-    kwlnFadeStartIn(*arg0);
+u32 btlTaskStartFadeIn(u32 *taskArgs) {
+    kwlnFadeStartIn(*taskArgs);
     return 1;
 }
 
@@ -7319,8 +7319,8 @@ void *btlCreateFadeInTask(u32 sound) {
     return task;
 }
 
-u32 btlTaskStartCustomFadeIn(u8 *arg0) {
-    kwlnFadeInStart(*arg0, arg0[1], arg0[2], *(u32 *)(arg0 + 4));
+u32 btlTaskStartCustomFadeIn(u8 *taskArgs) {
+    kwlnFadeInStart(*taskArgs, taskArgs[1], taskArgs[2], *(u32 *)(taskArgs + 4));
     return 1;
 }
 
