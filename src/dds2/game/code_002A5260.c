@@ -497,14 +497,14 @@ void mnuDrawTitleSceneForPhase(void) {
     }
 }
 
-void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1) {
+void mnuArmTitleMovieDrawAndResetFrame(u32 movieIndex, s32 startTransparent) {
     MenuTitleState *work;
 
-    mnuRequestIndexedMovieResource(arg0);
+    mnuRequestIndexedMovieResource(movieIndex);
     work = mnuMovieMenuState;
     if (mnuMovieMenuState != 0) {
         ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 1;
-        if (arg1 == 0) {
+        if (startTransparent == 0) {
             work->drawAlpha = 0x80;
         }
         else {
