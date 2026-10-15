@@ -1483,9 +1483,9 @@ void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *owner, BtlOperandEntry *sp
     return task;
 }
 
-u32 btlClearQueuedActorEntrySelection(BtlUnit **arg0) {
-    btlClearActorSelectedEntryIndex(*arg0);
-    btlRefreshUnitMotionSelection(*arg0);
+u32 btlClearQueuedActorEntrySelection(BtlUnit **taskArgs) {
+    btlClearActorSelectedEntryIndex(*taskArgs);
+    btlRefreshUnitMotionSelection(*taskArgs);
     return 1;
 }
 
