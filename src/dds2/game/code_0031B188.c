@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_mat4.h"
 #include "snd_sequence_volume_pan.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
@@ -26,10 +27,6 @@ typedef struct SoundSlotPool {
 
 
 
-
-typedef struct SdfMat4 {
-    f32 m[16];
-} SdfMat4;
 
 extern f32 sdfViewTargetVector[4];
 extern void *memset(void *, s32, u32);
