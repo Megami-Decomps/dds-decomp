@@ -226,8 +226,8 @@ typedef struct DatGameState {
     u8 pad1299[3];
     s32 partyCount;                        /* 0x0129C */
     DatInventory inventory;               /* 0x012A0 */
-    f32 unk1360;
-    u16 unk1364; /* read with lhu by the battle test menu (btlUpdateDebugEncounterSelector) */
+    f32 conditionalEncounterStepRemainder; /* Residual step carried until it reaches 100.0. */
+    u16 conditionalEncounterGauge; /* Randomized progress compared with the selected interval. */
     u8 pad1366[0xA];
     DatFieldMapBank maps[40];              /* 0x01370 */
     u64 areaFlags[13][64];                 /* 0x13F70 */
@@ -247,8 +247,8 @@ typedef struct DatGameState {
     u8 pad1339[3];
     s32 partyCount;                        /* 0x0133C */
     DatInventory inventory;               /* 0x01340 */
-    f32 unk1440;
-    u16 unk1444;
+    f32 conditionalEncounterStepRemainder; /* Residual step carried until it reaches 100.0. */
+    u16 conditionalEncounterGauge; /* Randomized progress compared with the selected interval. */
     u8 pad1446[0xA];
     DatFieldMapBank maps[31];              /* 0x01450 */
     u64 areaFlags[10][64];                 /* 0x0FCD0 */

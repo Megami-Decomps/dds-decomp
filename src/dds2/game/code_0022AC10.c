@@ -3107,7 +3107,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         }
     } else {
         btlBossDebugPrintfN(D_003C05E0.x + 185, D_003C05E0.y + 4, 0,
-            D_00436F98, datGameState->unk1444, btlGetConditionalEncounterInterval(D_00436F64));
+            D_00436F98, datGameState->conditionalEncounterGauge, btlGetConditionalEncounterInterval(D_00436F64));
     }
     if (sdfPadButtonStates[1] < 0) {
         D_00436F5D = 1;
