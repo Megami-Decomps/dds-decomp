@@ -1045,7 +1045,7 @@ void effEventReleaseSoundMixerVoices(SoundMixer *mixer) {
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
 struct EffEventWork {
     EffEventInit init;
-    void *actor;          /* Linked model/event owner; concrete identity is unknown. */
+    struct EvtUnit *actor; /* Linked event unit supplies its model owner. */
     BattleEffect *effect;
 };
 extern void effBattleSetScale(BattleEffect *, f32);
@@ -1103,7 +1103,84 @@ void effEventSetState(EffEventWork *work, void *actor) {
     work->actor = actor;
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateEffectParameters);
+#include "evt_unit.h"
+#include "mdl.h"
+
+extern void effMiscQuatMultiplyVU(void);
+extern void effMiscQuaternionToMatrixVU(void);
+extern void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffAimParams *params);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
+extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
+extern const f32 D_00414A00[4];
+
+/* Callbacks consume the VU0 output buffers; see docs/idioms.md,
+ * "Event-effect SDK output frontiers". */
+void effEventUpdateEffectParameters(EffEventWork *work) {
+    BattleEffect *effect;
+    EffBattleEntryList *list;
+    EffBattleEntry *entry;
+    SdfModel *model;
+    f32 position[4];
+    f32 rotationMatrix[4][4];
+    f32 matrix[4][4];
+    f32 scale;
+    s32 i;
+    u32 frame;
+    u32 color;
+    u16 count;
+
+    effect = work->effect;
+    frame = effect->currentFrame;
+    list = effect->list;
+    VU0_LOAD_VF(vf10, work->init.orientation);
+    VU0_LOAD_VF(vf11, D_00414A00);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_STORE_MATRIX_NOCLOBBER(rotationMatrix);
+    count = list->count;
+    entry = list->entries;
+    color = work->init.color;
+    for (i = 0; i < count; i++, entry++) {
+        if (entry->zeroKindCount < frame && effect->parameterWorks[i] != NULL) {
+            if (entry->aimParams.scaleKind != 5 || work->actor == NULL) {
+                effEventLoadSelectedAimPositionVu(&work->init, &entry->aimParams);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                effParamWorkCallback0(effect->parameterWorks[i], position);
+                effParamWorkCallback2(effect->parameterWorks[i], rotationMatrix);
+            } else {
+                model = work->actor->owner->inner;
+                sdfLoadMapRecordPositionVector(model, entry->aimParams.aimMode);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                effParamWorkCallback0(effect->parameterWorks[i], position);
+                /* The callback can change the entry's scale kind. */
+                if (entry->aimParams.scaleKind == 5) {
+                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.aimMode);
+                    VU0_LOAD_MATRIX_B(rotationMatrix);
+                    sdfComposeVuMatrixFromRegisters();
+                    VU0_STORE_MATRIX_NOCLOBBER(matrix);
+                    effParamWorkCallback2(effect->parameterWorks[i], matrix);
+                } else {
+                    mdlLoadTertiaryVectorVU(work->actor->owner);
+                    VU0_GET_VF10_X(scale);
+                    sdfLoadMapRecordLookAtBasis(model, entry->aimParams.aimMode);
+                    if (scale != 0.0f) {
+                        VU0_SET_ONES_XYZ(vf10);
+                        VU0_SCALAR_OP(1.0f / scale, "vmulx.xyzw vf10, vf10, vf2x");
+                        VU0_SCALE_MATRIX_ROWS(vf10);
+                    }
+                    VU0_STORE_MATRIX_NOCLOBBER(matrix);
+                    effParamWorkCallback2(effect->parameterWorks[i], matrix);
+                }
+            }
+            effParamWorkCallback3(effect->parameterWorks[i], color);
+            effParamWorkInvokeCallback(effect->parameterWorks[i]);
+        }
+    }
+    if (effect->triggerFrame == frame && effect->triggerFrameCallback != NULL) {
+        effect->triggerFrameCallback(effect);
+    }
+    effect->currentFrame++;
+}
 
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */

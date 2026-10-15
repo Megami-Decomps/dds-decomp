@@ -12516,3 +12516,35 @@ trajectory was 772 versus 764 native code bytes, then exact extent with
 unit gates `26 match, 0 differ`, preserving all previous C and readonly data.
 The existing small-data label symbols remain in place. Exact trace paths and
 pass locations are recorded in the agent ledger.
+
+## Event-effect SDK output frontiers
+
+`effEventUpdateEffectParameters` (DDS1 `00190328`, DDS2 `00197F60`) has
+197 identical native instructions after relocation masking, a `0x110`
+frame, and five independently advanced parameter-array cursors. The current
+`BattleEffect`, battle-entry and `EvtUnit`/`MdlCtx` owners describe its accesses.
+Its VU0 position and matrix outputs are passed directly to callbacks or loaded
+back into VU0, not read through cached C scalar values.
+
+The existing `VU0_STORE_VF_UNCLOBBERED` and `VU0_STORE_MATRIX_NOCLOBBER`
+SDK forms retain the native compiler frontiers. The qualified trace shows
+standalone volatile `ASM_OPERANDS` at their CSE boundaries. The memory-clobber
+variants instead produce `PARALLEL(ASM_OPERANDS, memory-clobber)`: the measured
+control retains a slot address and the known-five equivalence across the
+position output, collapses induction cursors, and emits only 712 of 788 bytes.
+Using the existing SDK forms recovers all 788 bytes and all five cursors,
+leaving only nine stack-home words different. No new asm helper or clobber
+contract is introduced.
+
+The remaining reload trace spills the real loop index, captured frame and
+captured color. Retail stores them at `sp+0x90`, `sp+0x94`, `sp+0x98` in both
+games. One direct transcription of that local declaration order closes the
+nine home-access differences; no permutations or aggregate wrapper were tried.
+The callback can mutate the entry's scale kind, so its second test and the
+fallback matrix path are genuine. Parameter works and the actor are likewise
+reloaded at the native callback epochs.
+
+Both hooked compiler outputs equal their unhooked controls. Each complete unit
+gates `101 match, 0 differ`, including all earlier C and readonly data. The
+three-step trajectory, exact trace paths and deciding pass locations are in
+the agent ledger.
