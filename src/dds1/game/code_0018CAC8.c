@@ -140,19 +140,19 @@ void effSetSubSlot(EffWork *work, s32 slotValue) {
 
     switch (type) {
     case 0:
-        ((EffSub *)work->payload)->unk20 = slotByte;
+        ((EffSub *)work->payload)->type0SubSlot = slotByte;
         return;
     case 1:
-        ((EffSub *)work->payload)->unk40 = slotByte;
+        ((EffSub *)work->payload)->type1SubSlot = slotByte;
         return;
     case 2:
-        ((EffSub *)work->payload)->unk50 = slotByte;
+        ((EffSub *)work->payload)->type2To4SubSlot = slotByte;
         return;
     case 3:
-        ((EffSub *)work->payload)->unk50 = slotByte;
+        ((EffSub *)work->payload)->type2To4SubSlot = slotByte;
         return;
     case 4:
-        ((EffSub *)work->payload)->unk50 = slotByte;
+        ((EffSub *)work->payload)->type2To4SubSlot = slotByte;
         return;
     default:
         return;
@@ -167,15 +167,15 @@ u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
 
     switch (type) {
     case 0:
-        return ((EffSub *)work->payload)->unk20;
+        return ((EffSub *)work->payload)->type0SubSlot;
     case 1:
-        return ((EffSub *)work->payload)->unk40;
+        return ((EffSub *)work->payload)->type1SubSlot;
     case 2:
-        return ((EffSub *)work->payload)->unk50;
+        return ((EffSub *)work->payload)->type2To4SubSlot;
     case 3:
-        return ((EffSub *)work->payload)->unk50;
+        return ((EffSub *)work->payload)->type2To4SubSlot;
     case 4:
-        return ((EffSub *)work->payload)->unk50;
+        return ((EffSub *)work->payload)->type2To4SubSlot;
     default:
         break;
     }
