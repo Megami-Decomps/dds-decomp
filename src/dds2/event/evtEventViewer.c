@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_dma_tag.h"
 #include "evt_camera_color_track_api.h"
 #include "kwln_background_fade_api.h"
 #include "evt_scaled_value.h"
@@ -2360,7 +2361,84 @@ void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
     viewer->windowActive = 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateWindowShadeFade);
+/* One A+D register write (value, then the GS register id). */
+typedef struct EvtShadeRegister {
+    u64 value;
+    u64 registerId;
+} EvtShadeRegister;
+
+/* Per-draw-buffer window shade packet: setup registers, then a two-vertex
+ * sprite covering the message window. */
+typedef struct EvtWindowShadePacket {
+    SdfDmaTagHeader tag;
+    EvtShadeRegister regs[10];
+} EvtWindowShadePacket;
+
+extern EvtWindowShadePacket D_00453AF0[];
+extern u8 D_004372C8[4];
+extern SdfPoolNode D_00380448;
+
+/* Ramp the message-window shade toward its target and, while visible, queue
+ * the translucent shade sprite for the current draw buffer. */
+void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
+    u32 buffer;
+    s32 alpha;
+
+    if (viewer->windowActive == 0) {
+        if (viewer->windowShadeFade - 9 > 0) {
+            viewer->windowShadeFade -= 9;
+        } else {
+            viewer->windowShadeFade = 0;
+        }
+    } else {
+        if (viewer->windowShadeFade + 3 < 0x5E) {
+            viewer->windowShadeFade += 3;
+        } else {
+            viewer->windowShadeFade = 0x5E;
+        }
+    }
+    buffer = kwlnGetDrawBufferIndex();
+    alpha = 0x80 - viewer->windowShadeFade;
+    if (alpha < 0x80) {
+        u64 red;
+        u64 blueQ;
+        u64 color;
+        SdfListHead *list;
+
+        D_00453AF0[buffer].tag.quadwordCount = 10;
+        D_00453AF0[buffer].tag.reservedByte = 0;
+        D_00453AF0[buffer].tag.control = 0x70;
+        D_00453AF0[buffer].tag.address = 0;
+        D_00453AF0[buffer].tag.firstVifCode = 0;
+        D_00453AF0[buffer].tag.secondVifCode = 0x5000000A;
+        D_00453AF0[buffer].regs[0].value = 0x1000000000000004ULL;
+        D_00453AF0[buffer].regs[0].registerId = 0xE;
+        D_00453AF0[buffer].regs[1].registerId = 0x42;
+        D_00453AF0[buffer].regs[1].value = 1;
+        D_00453AF0[buffer].regs[2].registerId = 0x49;
+        D_00453AF0[buffer].regs[2].value = 0;
+        D_00453AF0[buffer].regs[3].registerId = 0x4A;
+        D_00453AF0[buffer].regs[3].value = 0;
+        D_00453AF0[buffer].regs[4].registerId = 0x47;
+        D_00453AF0[buffer].regs[4].value = 0x31003;
+        D_00453AF0[buffer].regs[5].value = 0x1023400000008004ULL;
+        D_00453AF0[buffer].regs[5].registerId = 0xE;
+        red = (alpha << 24) | D_004372C8[0];
+        blueQ = ((u64)D_004372C8[2] << 16) | 0x3F80000000000000ULL;
+        color = red | blueQ | ((u64)D_004372C8[1] << 8);
+        D_00453AF0[buffer].regs[6].registerId = 1;
+        D_00453AF0[buffer].regs[6].value = color;
+        D_00453AF0[buffer].regs[7].registerId = 5;
+        D_00453AF0[buffer].regs[7].value = 0x00FEFFFF79007000ULL;
+        D_00453AF0[buffer].regs[8].registerId = 1;
+        D_00453AF0[buffer].regs[8].value = color;
+        D_00453AF0[buffer].regs[9].registerId = 5;
+        D_00453AF0[buffer].regs[9].value = 0x00FEFFFF87009000ULL;
+        list = sdfCreateResetPacketList();
+        sdfAppendPacket(list, (u32)&D_00453AF0[buffer]);
+        D_00380448.append(&D_00380448, list);
+    }
+}
 
 s32 evtViewerTestIndexedCondition(u32 encodedId) {
     u32 idx;
