@@ -123,11 +123,13 @@ typedef struct BattleController {
     u32 rewardMacca; /* 0x2EC */
     s32 experienceEarned; /* 0x2F0 */
     s32 epEarned; /* 0x2F4 */
-    s32 rewardAp; /* 0x2F8 */
+    s32 totalAp; /* 0x2F8: defeat EP accumulated for the result screen. */
     u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
     u8 pad2FE[0x3DE];
     s32 (*commandRangeOverride)(BtlUnit *, s32);
 } BattleController;
+typedef char BattleControllerTotalApOffsetCheck[
+    ((u32)&((BattleController *)0)->totalAp == 0x2F8) ? 1 : -1];
 
 extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
 
@@ -1215,7 +1217,7 @@ s32 btlCaptureRewardSummary(BrsRewardSummary *rewards) {
     rewards->macca = mdlFlagTest(0x290) ? ((BattleController *)btlRuntime)->rewardMacca : 0;
     rewards->mitama = ((BattleController *)btlRuntime)->specialEnemyDefeats;
     rewards->totalExp = ((BattleController *)btlRuntime)->experienceEarned;
-    rewards->totalAp = ((BattleController *)btlRuntime)->rewardAp;
+    rewards->totalAp = ((BattleController *)btlRuntime)->totalAp;
     btlBossDebugPrintf("btl:----------------------\n");
     btlBossDebugPrintf("btl:money =%d\n", rewards->macca);
     btlBossDebugPrintf("btl:exp   =%d\n", rewards->totalExp);

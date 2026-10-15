@@ -264,7 +264,7 @@ typedef struct BtlState {
     s32 moneyTotal; /* 0x2C4: accumulated battle money. */
     s32 experienceEarned; /* 0x2C8: defeat experience accumulator */
     s32 epEarned; /* 0x2CC: distinct defeat EP accumulator */
-    s32 unk2D0; /* 0x2D0: accumulated battle EP. */
+    s32 totalAp; /* 0x2D0: defeat EP accumulated for the result screen. */
     BtlSceneSlot slots[8]; /* 0x2D4: fldClearSceneSlotsAndGroups resets all eight. */
     BtlTask *groupPrimary[20]; /* 0x2EC: scene-group lists in code_001C48A8 */
     BtlTask *groupSecondary[45]; /* 0x33C */
@@ -352,6 +352,7 @@ typedef char BtlSceneLightDds1Offset3[((unsigned int)&((BtlState *)0)->lightDire
 typedef char BtlSceneLightDds1Offset4[((unsigned int)&((BtlState *)0)->lightColor == 0x50) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->listener == 0x204) ? 1 : -1];
+typedef char BtlStateTotalApOffset[((unsigned int)&((BtlState *)0)->totalAp == 0x2D0) ? 1 : -1];
 typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
 typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];
 typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x298) ? 1 : -1];
@@ -494,7 +495,7 @@ typedef struct BtlState {
     s32 moneyTotal;
     s32 experienceEarned; /* 0x2F0 */
     s32 epEarned; /* 0x2F4 */
-    s32 unk2F8;
+    s32 unk2F8; /* 0x2F8: total AP (defeat EP) accumulated for the result screen. */
     u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103 */
     BtlSceneSlot slots[8]; /* 0x2FE */
     u8 pad316[2];

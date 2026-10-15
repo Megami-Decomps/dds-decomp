@@ -26,6 +26,15 @@
 #include "kwln_fade.h"
 #include "evt_solar.h"
 
+/* Result-screen AP overlays BtlState's 0x2F8 defeat-EP accumulator. */
+typedef struct BattleResultApView {
+    s32 totalAp;
+} BattleResultApView;
+typedef char BattleResultApViewSizeCheck[
+    sizeof(BattleResultApView) == 4 ? 1 : -1];
+typedef char BtlStateTotalApOffsetCheck[
+    ((u32)&((BtlState *)0)->unk2F8 == 0x2F8) ? 1 : -1];
+
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
 #define FLD_SCENE_GROUP_SECONDARY_ID 2
@@ -1042,8 +1051,8 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     }
     scene->moneyEarned = (s32)((f32)(u32)scene->moneyEarned * epRatio);
     btlBossDebugPrintf("btl:auto money=%d[ratio=%.2f]\n", scene->moneyEarned, epRatio);
-    scene->unk2F8 += scene->epEarned;
-    btlBossDebugPrintf("btl:epTotal = %d\n", scene->unk2F8);
+    ((BattleResultApView *)&scene->unk2F8)->totalAp += scene->epEarned;
+    btlBossDebugPrintf("btl:epTotal = %d\n", ((BattleResultApView *)&scene->unk2F8)->totalAp);
     scene->epEarned = 0;
     scene->moneyTotal += scene->moneyEarned;
     btlBossDebugPrintf("btl:moneyTotal = %d\n", scene->moneyTotal);
@@ -1081,7 +1090,8 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
         if (!(scene->commandRestrictFlags & 0x40)) {
             if (datGameState->party[i].flags & 2) {
                 if (scene->eventReady == 1) {
-                    if (datGameState->party[i].huntExp != 0 || scene->unk2F8 != 0) {
+                    if (datGameState->party[i].huntExp != 0 ||
+                        ((BattleResultApView *)&scene->unk2F8)->totalAp != 0) {
                         if (!(datGameState->party[i].status & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
                                 datAdjustCurrentHp(&datGameState->party[i], (s32)((f32)datGameState->party[i].maxHp * scale));
