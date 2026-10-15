@@ -1794,7 +1794,7 @@ void btlRestorePartySlotSnapshots(void) {
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-s32 func_001A5958(BtlUnit *attacker, BtlUnit *target, u32 command) {
+s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 command) {
     extern u32 btlRollAiBucket(void);
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 attribute;

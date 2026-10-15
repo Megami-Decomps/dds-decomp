@@ -545,7 +545,7 @@ extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
-extern s32 func_001A5958(BtlUnit *, BtlUnit *, s32);
+extern s32 btlDetermineActionPressResult(BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, s32, s32, s32);
 
@@ -864,7 +864,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 press = 1;
                 break;
             default:
-                press = func_001A5958(source, recipient, command);
+                press = btlDetermineActionPressResult(source, recipient, command);
                 if (action->options & 1) {
                     s32 adjustedPress = 2;
                     if (press == 4) {

@@ -1385,7 +1385,7 @@ BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId) {
 void func_0022CA40(void) {
 }
 
-void func_0022CA48(void) {
+void btlReleaseCachedModelReferences(void) {
     btlReleaseAllModelEntries();
 }
 
@@ -2464,14 +2464,14 @@ extern s16 D_00436D8E;
 extern BtlUnit *D_00436D90;
 extern u16 D_00436E58;
 extern char D_00436F00[];
-extern u8 D_00438F88;
-extern s32 D_00438F8C;
-extern u16 D_004530B0[7];
-extern DatPartyRecord D_004530C0;
-extern f32 D_00453290[4];
-extern BtlActorTransformParameters D_004532A0;
-extern BtlActorStatusRecord D_004532C0;
-extern BtlActorMotionSlot D_00453530;
+extern u8 btlDebugEditorStatusSelection;
+extern s32 btlDebugEditorSelectedEntryIndex;
+extern u16 btlDebugEditorEntryCodes[7];
+extern DatPartyRecord btlDebugEditorPartyRecord;
+extern f32 btlDebugEditorPosition[4];
+extern BtlActorTransformParameters btlDebugEditorTransformParameters;
+extern BtlActorStatusRecord btlDebugEditorActorStatus;
+extern BtlActorMotionSlot btlDebugEditorMotionSlot;
 
 /* Advance the battle model/debug editor. The selected state remains active
  * until its pending unit tasks have completed. */
@@ -2624,41 +2624,41 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         break;
     case 4:
         unit = battle->debug.selectedUnit;
-        memcpy(&D_004530C0, &unit->partyRecord, sizeof(DatPartyRecord));
-        D_004530B0[0] = unit->entrySlots[0].code;
-        D_004530B0[1] = unit->entrySlots[1].code;
-        D_004530B0[2] = unit->entrySlots[2].code;
-        D_004530B0[3] = unit->entrySlots[3].code;
-        D_004530B0[4] = unit->entrySlots[4].code;
-        D_004530B0[5] = unit->entrySlots[5].code;
-        D_004530B0[6] = unit->entrySlots[6].code;
-        D_00438F8C = unit->selectedEntryIndex;
+        memcpy(&btlDebugEditorPartyRecord, &unit->partyRecord, sizeof(DatPartyRecord));
+        btlDebugEditorEntryCodes[0] = unit->entrySlots[0].code;
+        btlDebugEditorEntryCodes[1] = unit->entrySlots[1].code;
+        btlDebugEditorEntryCodes[2] = unit->entrySlots[2].code;
+        btlDebugEditorEntryCodes[3] = unit->entrySlots[3].code;
+        btlDebugEditorEntryCodes[4] = unit->entrySlots[4].code;
+        btlDebugEditorEntryCodes[5] = unit->entrySlots[5].code;
+        btlDebugEditorEntryCodes[6] = unit->entrySlots[6].code;
+        btlDebugEditorSelectedEntryIndex = unit->selectedEntryIndex;
         btlReturnDebugMenuSetupWord((u32)&D_003BFE40);
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp((u32)&D_003BFE40);
         btlDebugMenuAfterRecordNoOp();
         btlDrawUnitAffinityDebug(unit, 256, 32);
         if (sdfPadButtonStates[0] & 2) {
-            health = D_004530C0.hp >> 1;
-            D_004530C0.hp = health;
+            health = btlDebugEditorPartyRecord.hp >> 1;
+            btlDebugEditorPartyRecord.hp = health;
             if (health == 0) {
-                D_004530C0.hp = 1;
+                btlDebugEditorPartyRecord.hp = 1;
             }
-            mana = D_004530C0.mp >> 1;
-            D_004530C0.mp = mana;
+            mana = btlDebugEditorPartyRecord.mp >> 1;
+            btlDebugEditorPartyRecord.mp = mana;
             if (mana == 0) {
-                D_004530C0.mp = 1;
+                btlDebugEditorPartyRecord.mp = 1;
             }
         }
-        if (D_00438F88 != 0) {
-            D_004530C0.status = 1 << (D_00438F88 - 1);
+        if (btlDebugEditorStatusSelection != 0) {
+            btlDebugEditorPartyRecord.status = 1 << (btlDebugEditorStatusSelection - 1);
         } else {
-            D_004530C0.status = 0;
+            btlDebugEditorPartyRecord.status = 0;
         }
-        memcpy(&unit->partyRecord, &D_004530C0, sizeof(DatPartyRecord));
+        memcpy(&unit->partyRecord, &btlDebugEditorPartyRecord, sizeof(DatPartyRecord));
         btlRefreshUnitMotionSelection(unit);
         if (unit->status.flags & 0x200) {
-            memcpy(&datGameState->party[unit->partyIndex], &D_004530C0, sizeof(DatPartyRecord));
+            memcpy(&datGameState->party[unit->partyIndex], &btlDebugEditorPartyRecord, sizeof(DatPartyRecord));
         }
         if (sdfPadButtonStates[3] < 0) {
             battle->debug.phase = 2;
@@ -2722,18 +2722,18 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             battle->debug.phase = 2;
             break;
         }
-        PCP_COPY_VECTOR(D_00453290, unit->position);
+        PCP_COPY_VECTOR(btlDebugEditorPosition, unit->position);
         btlReturnDebugMenuSetupWord((u32)&D_003BFEC0);
         if (sdfPadButtonStates[2] < 0) {
-            D_00453290[0] = 0.0f;
-            D_00453290[1] = 0.0f;
-            D_00453290[2] = 0.0f;
-            D_00453290[3] = 0.0f;
+            btlDebugEditorPosition[0] = 0.0f;
+            btlDebugEditorPosition[1] = 0.0f;
+            btlDebugEditorPosition[2] = 0.0f;
+            btlDebugEditorPosition[3] = 0.0f;
         }
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp((u32)&D_003BFEC0);
         btlDebugMenuAfterRecordNoOp();
-        PCP_COPY_VECTOR(unit->position, D_00453290);
+        PCP_COPY_VECTOR(unit->position, btlDebugEditorPosition);
         btlSetUnitPosition(unit, unit->position);
         break;
     case 8:
@@ -2758,12 +2758,12 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             parameters->position[1] = record->position[1];
             parameters->position[2] = record->position[2];
         }
-        memcpy(&D_004532A0, parameters, sizeof(BtlActorTransformParameters));
+        memcpy(&btlDebugEditorTransformParameters, parameters, sizeof(BtlActorTransformParameters));
         btlReturnDebugMenuSetupWord((u32)&D_003BFF88);
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp((u32)&D_003BFF88);
         btlDebugMenuAfterRecordNoOp();
-        memcpy(parameters, &D_004532A0, sizeof(BtlActorTransformParameters));
+        memcpy(parameters, &btlDebugEditorTransformParameters, sizeof(BtlActorTransformParameters));
         savedScale = parameters->overrideEnabled;
         parameters->overrideEnabled = 1.0f;
         battle->battleFlags |= 0x400000;
@@ -2774,44 +2774,44 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         unit = battle->debug.selectedUnit;
         D_00436D90 = unit;
         record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
-        memcpy(&D_004532C0, record, sizeof(BtlActorStatusRecord));
-        memcpy(&D_00453530, &record->motions[D_00436E58], sizeof(BtlActorMotionSlot));
+        memcpy(&btlDebugEditorActorStatus, record, sizeof(BtlActorStatusRecord));
+        memcpy(&btlDebugEditorMotionSlot, &record->motions[D_00436E58], sizeof(BtlActorMotionSlot));
         btlReturnDebugMenuSetupWord((u32)&D_003C0260);
         btlDebugMenuBeforeRecordNoOp();
         btlDebugMenuRecordNoOp((u32)&D_003C0260);
         btlDebugMenuAfterRecordNoOp();
-        memcpy(record, &D_004532C0, sizeof(BtlActorStatusRecord));
+        memcpy(record, &btlDebugEditorActorStatus, sizeof(BtlActorStatusRecord));
         if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_00436E58) {
-            memcpy(&record->motions[D_00436E58], &D_00453530, sizeof(BtlActorMotionSlot));
+            memcpy(&record->motions[D_00436E58], &btlDebugEditorMotionSlot, sizeof(BtlActorMotionSlot));
         }
         mnuQueueColoredGlyphAtPosition(D_003BFE40.x, D_003BFE40.y + D_003BFE40.count * 10 + 4,
             D_003BFB70[D_00436E58]);
-        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk20) {
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.unk20) {
             battle->battleFlags |= 0x800000;
         } else {
             battle->battleFlags &= ~0x800000;
         }
-        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk24) {
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.unk24) {
             btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->unk24 * unit->scale);
         }
         selectedAddress = D_003BFFC0[D_003C0260.cursor].valueAddress;
-        if (((u32)selectedAddress >= (u32)&D_004532C0.position[0] &&
-             (u32)selectedAddress < (u32)&D_004532C0.scale) ||
-             selectedAddress == (u32)&D_004532C0.height || selectedAddress == (u32)&D_004532C0.reach) {
+        if (((u32)selectedAddress >= (u32)&btlDebugEditorActorStatus.position[0] &&
+             (u32)selectedAddress < (u32)&btlDebugEditorActorStatus.scale) ||
+             selectedAddress == (u32)&btlDebugEditorActorStatus.height || selectedAddress == (u32)&btlDebugEditorActorStatus.reach) {
             battle->unk220 |= 0x200;
         } else {
             battle->unk220 &= ~0x200;
         }
-        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_00453530.unk0C) {
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.unk0C) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, D_00453530.unk0C * D_004532C0.scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.unk0C * btlDebugEditorActorStatus.scale);
         }
         if (D_003C0260.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
-            if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_004532C0.model) {
+            if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&btlDebugEditorActorStatus.model) {
                 unit->status.flags &= 0x7FFFFFFF;
                 unit->status.flags &= ~0x2000;
                 motion = D_00436E58;
@@ -2823,7 +2823,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
                 btlApplyScaledUnitEffectParameter(unit, motion,
                     btlGetSlotRateKind((u8 *)unit, motion), 1.0f);
-                if (D_00453530.kind == 2) {
+                if (btlDebugEditorMotionSlot.kind == 2) {
                     btlSeekUnitModelFrameZero(unit);
                 }
             }
@@ -2847,7 +2847,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
 
 extern BtlUnit *D_00436D90;
 
-extern BtlActorStatusRecord D_004532C0;
+extern BtlActorStatusRecord btlDebugEditorActorStatus;
 
 extern const char *D_003BFBE8[12];
 
@@ -2910,23 +2910,23 @@ void btlWriteActorModelTableFile(void) {
     }
     cursor += sprintf(cursor, "ID:0x%X\n", unit->resourceIndex);
     cursor += sprintf(cursor, "%s: %.2f,%.2f,%.2f\n", D_003BFBE8[2],
-                            (double)D_004532C0.position[0], (double)D_004532C0.position[1],
-                            (double)D_004532C0.position[2]);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[3], (double)D_004532C0.scale);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[4], (double)D_004532C0.z);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[5], (double)D_004532C0.reach);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[6], (double)D_004532C0.height);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[7], (double)D_004532C0.unk20);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[8], (double)D_004532C0.unk24);
+                            (double)btlDebugEditorActorStatus.position[0], (double)btlDebugEditorActorStatus.position[1],
+                            (double)btlDebugEditorActorStatus.position[2]);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[3], (double)btlDebugEditorActorStatus.scale);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[4], (double)btlDebugEditorActorStatus.z);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[5], (double)btlDebugEditorActorStatus.reach);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[6], (double)btlDebugEditorActorStatus.height);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[7], (double)btlDebugEditorActorStatus.unk20);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[8], (double)btlDebugEditorActorStatus.unk24);
     cursor += sprintf(cursor, D_00436F10, D_003BFBE8[9]);
-    switch (D_004532C0.shadowKind) {
+    switch (btlDebugEditorActorStatus.shadowKind) {
     case 0: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_NON"); break;
     case 1: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_S"); break;
     case 2: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_M"); break;
     case 3: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_L"); break;
     case 4: cursor += sprintf(cursor, D_00436F08, "UV_SHADOW_LL"); break;
     }
-    cursor += sprintf(cursor, D_00436F18, D_003BFBE8[10], D_004532C0.model);
+    cursor += sprintf(cursor, D_00436F18, D_003BFBE8[10], btlDebugEditorActorStatus.model);
     cursor += sprintf(cursor, D_00436F20, D_003BFBE8[11]);
     rowCursor = (u8 *)record;
     for (i = 0; i < 29; i++) {
