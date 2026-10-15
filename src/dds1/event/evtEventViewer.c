@@ -3089,7 +3089,8 @@ u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EvtRuntime *v
     }
 }
 
-u32 func_00231CC0(void) {
+/* Registered viewer-command handler with no action; return 0. */
+u32 evtViewCmdNoOp(void) {
     return 0;
 }
 

@@ -151,7 +151,8 @@ void evtBeginSolarOverlayFadeOut(s32 fadeDuration) {
 void func_00245810(void) {
 }
 
-s32 func_00245818(KwlnTask *task) {
+/* Retail test-task update is idle from creation; return 0 each tick. */
+s32 evtUpdateIdleTestTask(KwlnTask *task) {
     return 0;
 }
 
@@ -162,7 +163,7 @@ void evtDestroyTestTaskScripts(KwlnTask *task) {
 
 void evtStartTestTask(void) {
     D_00435CBC = 0x80000000;
-    kwlnTaskCreate(D_004221D8, 0x2AF9, 1, 1, func_00245818, evtDestroyTestTaskScripts, 0);
+    kwlnTaskCreate(D_004221D8, 0x2AF9, 1, 1, evtUpdateIdleTestTask, evtDestroyTestTaskScripts, 0);
 }
 
 void evtStopTestTasks(void) {

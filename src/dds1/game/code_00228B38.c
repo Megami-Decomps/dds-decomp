@@ -452,7 +452,7 @@ void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
 /* Pulse the eight solar-point fans: the first pass scales each fan's alpha
  * by its timer's half-period sine plus a phase term, the second by its
  * third-period sine. */
-void func_00229ED8(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale, s32 phase,
+void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale, s32 phase,
                                        SolarOverlayWork *overlay, s32 object) {
     u32 colors[8];
     SolarPoint *points = overlay->state.points;
