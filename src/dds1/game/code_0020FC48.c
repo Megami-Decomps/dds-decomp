@@ -2215,7 +2215,7 @@ extern void fldCreateSceneSpriteTask(s32);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern u8 *btlCreateControlObject(void);
-extern void btlCopyUnitStats(s32, s32);
+extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
 extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
@@ -2316,7 +2316,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             if (unit->status.flags & 0x200) {
                 u32 index = state->debug.modelMenu.cursor;
                 u32 partyIndex = index < 16 ? index : index - 16;
-                btlCopyUnitStats((s32)unit, (s32)&D_003BAA04[partyIndex]);
+                btlCopyUnitStats(unit, &D_003BAA04[partyIndex]);
                 if (state->debug.modelMenu.cursor >= 16) {
                     unit->status.flags |= 0x1000;
                     unit->partyRecord.flags |= 0x1007;

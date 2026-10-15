@@ -256,7 +256,7 @@ BtlUnit *btlFindActiveActorByKind(s32 index) {
     return 0;
 }
 
-extern void btlCopyUnitStats(s32 actorAddress, s32 recordAddress);
+extern void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source);
 
 /* Insert a complete party record before actors with a larger priority. */
 void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
@@ -292,7 +292,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
         }
     }
     memcpy(&datGameState->party[i], &saved, sizeof(saved));
-    btlCopyUnitStats((s32)unit, (s32)&saved);
+    btlCopyUnitStats(unit, &saved);
     unit->partyRecord.flags |= 2;
     datGameState->party[i].flags |= 2;
     unit->partyIndex = i;
@@ -340,7 +340,7 @@ void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
         memcpy(&previous, &datGameState->party[actor->partyIndex], sizeof(previous));
         memcpy(&datGameState->party[actor->partyIndex], &datGameState->party[targetIndex], sizeof(previous));
         memcpy(&datGameState->party[targetIndex], &previous, sizeof(previous));
-        btlCopyUnitStats((s32)actor, (s32)&datGameState->party[actor->partyIndex]);
+        btlCopyUnitStats(actor, &datGameState->party[actor->partyIndex]);
         actor->partyRecord.flags |= 2;
         datGameState->party[actor->partyIndex].flags |= 2;
         datGameState->party[targetIndex].flags &= ~2;
