@@ -533,9 +533,6 @@ typedef struct FldTitleBannerMenu {
 
 extern SdfPoolNode *D_00380838[4];
 
-extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
-
-
 extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 s32 fldResolvePendingTitleBanner(void) {
