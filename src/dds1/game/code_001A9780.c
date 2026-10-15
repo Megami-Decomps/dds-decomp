@@ -3610,7 +3610,71 @@ void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *task) {
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B50);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B5970);
+extern const BattlePanelColors D_003A2B50;
+
+/* Advance the command-panel notice dialog: fade in, hold, look up the panel, fade out;
+ * return -1 after closing the channel once the phase leaves 0-6. */
+s32 func_001B5970(KwlnTask *task) {
+    BattlePanelColors colors = D_003A2B50;
+    BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
+
+    switch (work->phase) {
+    case 0:
+        work->alpha += 0x20;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 0x80 ? 0x80 : work->alpha;
+        if (work->alpha >= 0x80) {
+            work->counter = 0;
+            work->phase = 1;
+        }
+        break;
+    case 1:
+    case 3:
+    case 6:
+        work->counter++;
+        work->counter = work->counter <= 0 ? 0 : work->counter > 0x40 ? 0x40 : work->counter;
+        if (work->counter >= 0x30) {
+            work->counter = 0;
+        }
+        break;
+    case 2:
+        /* Trimmed from btlUpdateLinkageNoticeTask: both arms now set phase 6, but
+         * retail keeps the panel lookup's NULL test until the arms are merged. */
+        if (kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef) == NULL) {
+            work->phase = 6;
+            break;
+        }
+        work->phase = 6;
+        break;
+    case 5:
+        break;
+    case 4:
+    default:
+        work->alpha -= 0x20;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 0x80 ? 0x80 : work->alpha;
+        break;
+    }
+
+    if (work->phase < 7) {
+        if (work->phase >= 0) {
+            u32 color = work->alpha | 0x80808000;
+            colors.values[0] = color;
+            colors.values[1] = color;
+            colors.values[2] = color;
+            colors.values[3] = color;
+            if (evtGetMessageWindowControlState() != 1) {
+                work->phase++;
+                goto return_zero;
+            }
+            dspRequestMessageWindowModeOne();
+            return 0;
+        }
+    }
+    dspCloseChannel();
+    btlSetCommandPanelFadeMode(1, 8);
+    return -1;
+return_zero:
+    return 0;
+}
 
 s32 btlDestroyTaskD(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3D4);
