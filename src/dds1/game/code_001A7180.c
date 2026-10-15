@@ -104,7 +104,7 @@ s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
 s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
-u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1);
+u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *unit, s64 argumentValue);
 
 s8 btlGetLinkageSlotCost(s32 command);
 
