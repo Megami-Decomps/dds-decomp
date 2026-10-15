@@ -6449,7 +6449,89 @@ void mnuReleaseMantraBackgroundBurstPool(MantraBurstPool *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuUpdateAndDrawMantraBackgroundBursts);
+extern MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side);
+
+/* Background variant of the panel bursts: spawn a wave every seventh frame,
+ * then advance each live slot with a doubled eased speed and draw it as a
+ * scaled sprite with a rise/hold/fall fade. */
+s32 mnuUpdateAndDrawMantraBackgroundBursts(s32 x, s32 y, u32 z, s32 alpha, MantraBurstPool *pool,
+                                           s32 wide, u32 packet) {
+    MantraBurstSlot *slot;
+    s32 angleOffset;
+    s32 direction;
+    s32 i;
+    f32 speed;
+    f32 t;
+    s32 drawX;
+    s32 drawY;
+    s16 age;
+    s32 drawAlpha;
+
+    if (wide) {
+        angleOffset = -90;
+        direction = -1;
+    } else {
+        angleOffset = 180;
+        direction = 1;
+    }
+    pool->tick++;
+    if ((s16)pool->tick >= 7) {
+        if (wide) {
+            mnuSpawnBurstSlot(pool, wide, 0);
+            mnuSpawnBurstSlot(pool, wide, 0);
+            mnuSpawnBurstSlot(pool, wide, 1);
+        } else {
+            mnuSpawnBurstSlot(pool, 0, 0);
+            mnuSpawnBurstSlot(pool, 0, 0);
+            mnuSpawnBurstSlot(pool, 0, 1);
+        }
+        pool->tick = 0;
+    }
+    slot = pool->slots;
+    for (i = 0; i < pool->count; i++, slot++) {
+        if ((slot->w.flags & 1) == 0) {
+            continue;
+        }
+        slot->age++;
+        t = 0.0f;
+        if ((s16)slot->age >= 10) {
+            t = (f32)((s16)slot->age - 10) / 20.0f;
+        }
+        speed = sdfSinPoly(t * 1.5707963f) * 2.0f + 1.0f;
+        if (slot->w.flags & 6) {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        } else {
+            slot->x += speed * sdfEvaluateCosineViaSinePhaseShift(
+                                   (f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+            slot->y += speed * sdfSinPoly((f32)slot->w.polar.angleDegrees * 0.0174532924f) * (f32)direction;
+        }
+        drawX = slot->x + (f32)x;
+        drawY = slot->y + (f32)y;
+        age = slot->age;
+        if (age < 15) {
+            t = (f32)age / 15.0f;
+        } else if (age < 16) {
+            t = 1.0f;
+        } else {
+            t = (f32)(30 - age) / 14.0f;
+        }
+        drawAlpha = (f32)alpha * sdfSinPoly(t * 1.5707963f);
+        if (slot->w.flags & 6) {
+            mnuDrawMantraScaledRotatedCenteredSprite(drawX, drawY, 0, (f32)drawAlpha * 0.1f, 0x5F, 0,
+                                                     packet, 4.0f,
+                                                     (f32)(slot->w.polar.angleDegrees + angleOffset));
+        } else {
+            mnuDrawMantraScaledRotatedCenteredSprite(drawX, drawY, 0, (f32)drawAlpha * 0.15f, 0x5F, 0,
+                                                     packet, 4.0f,
+                                                     (f32)(slot->w.polar.angleDegrees + angleOffset));
+        }
+        if ((s16)slot->age >= slot->life) {
+            *(MantraBurstState *)&slot->w.flags &= ~MANTRA_BURST_ACTIVE;
+        }
+    }
+}
 
 MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
     s32 base = 0x7A;
