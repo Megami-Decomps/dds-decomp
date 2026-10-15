@@ -1775,7 +1775,7 @@ typedef struct ShopProgressPrice {
 
 extern ShopProgressPrice mnuShopProgressPriceScales[];
 
-s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
+s32 mnuCampGetSourceItemPrice(s32 entryIndex, s32 shopRow, s32 halfPrice) {
     u32 rowIndex;
     u32 itemId;
     u32 rowPercent;
@@ -1784,12 +1784,12 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     s32 price;
     s32 progressStage;
 
-    rowIndex = (u8)mnuCampResolveFlagRowValue(source);
-    itemId = mnuShopSourcePriceRows[rowIndex].entries[index].itemId;
+    rowIndex = (u8)mnuCampResolveFlagRowValue(shopRow);
+    itemId = mnuShopSourcePriceRows[rowIndex].entries[entryIndex].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = mnuShopSourcePriceRows[rowIndex].pricePercent;
-        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[index].pricePercent;
+        pricePercent = mnuShopSourcePriceRows[rowIndex].entries[entryIndex].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
@@ -1804,7 +1804,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
+s32 mnuCampGetRankedItemPrice(s32 entryIndex, s32 halfPrice) {
     u32 rowIndex;
     u32 itemId;
     u32 rowPercent;
@@ -1814,11 +1814,11 @@ s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
     s32 progressStage;
 
     rowIndex = (u8)mnuCampFindActiveSlot();
-    itemId = mnuShopRankPriceRows[rowIndex].entries[index].itemId;
+    itemId = mnuShopRankPriceRows[rowIndex].entries[entryIndex].itemId;
     if (halfPrice == 0) {
         itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = mnuShopRankPriceRows[rowIndex].pricePercent;
-        pricePercent = mnuShopRankPriceRows[rowIndex].entries[index].pricePercent;
+        pricePercent = mnuShopRankPriceRows[rowIndex].entries[entryIndex].pricePercent;
         if (pricePercent == 0) {
             pricePercent = rowPercent;
         }
