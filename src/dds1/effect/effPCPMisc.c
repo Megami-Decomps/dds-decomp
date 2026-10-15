@@ -148,10 +148,10 @@ extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
 
-extern u8 D_00355008[];
-extern u8 D_003550B8[];
-extern u8 D_00355108[];
-extern u8 D_00355158[];
+extern u8 effExpandingThunderFadeParams[];
+extern u8 effGrowingThunderFadeParams[];
+extern u8 effShortThunderFadeParams[];
+extern u8 effScalingThunderFadeParams[];
 extern u8 effMuzzleThunderRayParams[];
 extern u8 effCyanBlueRayPairParams[];
 extern u8 effWhiteYellowRayPairParams[];
@@ -1511,7 +1511,7 @@ typedef struct EffPCPFadeWork {
 void effPcpInitializeThunderHandleWork(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_00355008);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)effExpandingThunderFadeParams);
     work->frame = 0;
     work->handle = handle;
 }
@@ -1679,7 +1679,7 @@ void effPcpSetDenseConeColor(EffPCPThunderGroup *work, u32 val) {
 void effPcpInitGrowingThunderFadeWork(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_003550B8);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)effGrowingThunderFadeParams);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2488,7 +2488,7 @@ void effPcpSetChargeResourceColor(EffPCPCompactWork *work, u32 val) {
 void effPcpInitShortThunderFadeWork(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_00355108);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)effShortThunderFadeParams);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2565,7 +2565,7 @@ void effPcpSetScalingThunderFadeColor(EffPCPFadeWork *work, u32 val) {
 void effPcpInitScalingThunderFadeWork(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
 
-    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_00355158);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)effScalingThunderFadeParams);
     work->frame = 0;
     work->handle = handle;
 }
@@ -5145,7 +5145,7 @@ void effPcpRandomizeSlot(EffPCPPairedEventWork *work, s32 index) {
     }
 }
 
-extern const f32 D_003556A0[4] __attribute__((aligned(16)));
+extern const f32 effPairedDriftReferenceAxis[4] __attribute__((aligned(16)));
 
 /* vu0 routine: rotate a fragment around the view and place events at both ends. */
 void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
@@ -5205,13 +5205,13 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
 
                 fragment = effThunderGetFragmentParameters(entry->fragment);
                 sdfBuildVuRotationFromAxisAngle(entry->phase, (const struct RwV3d *)viewAxis);
-                VU0_LOAD_VF(vf10, D_003556A0);
+                VU0_LOAD_VF(vf10, effPairedDriftReferenceAxis);
                 VU0_LOAD_VF(vf11, viewAxis);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
                 VU0_NORMALIZE_VF10();
                 VU0_ROTATE_VEC(vf10, vf10);
                 VU0_STORE_VF(vf10, direction);
-                VU0_LOAD_VF(vf11, D_003556A0);
+                VU0_LOAD_VF(vf11, effPairedDriftReferenceAxis);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
                 VU0_NORMALIZE_VF10();
                 /* This SDK-produced axis is consumed only by the external builder. */

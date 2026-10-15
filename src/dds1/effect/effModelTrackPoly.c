@@ -178,8 +178,8 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
 }
-extern EffVertexDrawRequest D_003D6640;
-extern const u32 D_003556D0[];
+extern EffVertexDrawRequest effTrackPolyDrawParams;
+extern const u32 effTrackPolyTriangleIndices[];
 
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
@@ -200,9 +200,9 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
     data->colors = (u32 *)cursor;
     data->nodeHandle = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat((struct SdfAsset *)data->nodeHandle, 1.0f);
-    memset(&D_003D6640, 0, sizeof(D_003D6640));
-    D_003D6640.flags = 0x4000;
-    D_003D6640.indices = D_003556D0;
+    memset(&effTrackPolyDrawParams, 0, sizeof(effTrackPolyDrawParams));
+    effTrackPolyDrawParams.flags = 0x4000;
+    effTrackPolyDrawParams.indices = effTrackPolyTriangleIndices;
     return data;
 }
 
@@ -403,7 +403,7 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src) {
 
 
 
-extern SdfPoolNode *D_00355710[];
+extern SdfPoolNode *effTrackPolyDrawSurfaces[];
 extern SdfPoolNode D_00325248;
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffVertexDrawRequest *);
@@ -437,9 +437,9 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         runPointCount[0] = activePointCount;
         runPointCount[1] = 0;
     }
-    D_003D6640.colors = data->colors;
+    effTrackPolyDrawParams.colors = data->colors;
     for (runIndex = 0; runIndex < 2; runIndex++) {
-        draw = &D_003D6640;
+        draw = &effTrackPolyDrawParams;
         draw->positions = &data->points[runStart[runIndex]];
         draw->color = data->color;
         draw->width = 0x10;
@@ -447,9 +447,9 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
-            sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_003D6640));
-            D_003D6640.positions += 0x10;
-            D_003D6640.colors += 0x10;
+            sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&effTrackPolyDrawParams));
+            effTrackPolyDrawParams.positions += 0x10;
+            effTrackPolyDrawParams.colors += 0x10;
         }
         if (pointsRemaining >= 4) {
             draw->height = pointsRemaining;
@@ -459,7 +459,7 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         }
     }
     if (data->kind < 4) {
-        D_00355710[data->kind]->append(D_00355710[data->kind], list);
+        effTrackPolyDrawSurfaces[data->kind]->append(effTrackPolyDrawSurfaces[data->kind], list);
     } else {
         list2 = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list2);

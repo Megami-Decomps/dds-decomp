@@ -13957,3 +13957,27 @@ retains its repeated threshold rather than inventing a new award rule.
 The per-title primary, man/woman and character sprite-name banks keep their
 original counts and null cells. These are identifier-only names: preserve
 all pointer words, imported pointees, declarations, casts, storage and flow.
+
+
+## Thunder fade presets and tracked-polygon draw storage
+
+`effExpandingThunderFadeParams`, `effGrowingThunderFadeParams`,
+`effShortThunderFadeParams` and `effScalingThunderFadeParams` are the
+native alpha-system inputs of their matched initializers. These are
+0x4C-byte `EffThunderAlphaParams` records, not the distinct 0x54-byte
+fragment presets. The native cellCount values are 9, 9, 8 and 8. Preserve
+all source byte-array declarations, owner casts, alpha words and four- or
+twelve-byte zero alignment tails rather than merging equal fields.
+
+`effPairedDriftReferenceAxis` is `(0,1,0,0)`, the constant used in both
+cross products around the view axis in the paired drift update. Its
+existing const f32[4] declaration and sixteen-byte alignment remain.
+The separate imported staggered-pulse constant is deliberately excluded.
+
+`effTrackPolyDrawParams` is the native 0x30-byte BSS descriptor initialized
+by history allocation and consumed by strip drawing. Its triangle bank
+has sixteen packed words spanning eighteen input vertices; full strips
+advance sixteen vertices and retain the overlap. The four-entry surface
+bank retains its duplicated first two pointers and the kind>=4 fallback.
+No type, bound, clear length, primitive, index bytes, callbacks, imports,
+control flow or existing VU macros change.
