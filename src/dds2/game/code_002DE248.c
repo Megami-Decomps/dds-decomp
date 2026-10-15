@@ -14727,11 +14727,11 @@ void itfDrawRotatedTexturedRect(u32 a, u32 b, u32 c, u32 d, u32 e,
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
-void effSelectPresetAndDispatch(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
-    effSelectPresetByKind(arg6, arg7);
-    uiDrawGradientColorRect(arg0, arg1, arg2, arg3, arg4, (const u32 *)arg5, arg7);
-    sdfSubmitGsAlphaOneRegisterPacket(0x44, arg7);
+void effSelectPresetAndDispatch(u32 x, u32 y, u32 z, u32 width,
+                                    u32 height, u32 vertexColors, u32 presetMode, u32 presetValue) {
+    effSelectPresetByKind(presetMode, presetValue);
+    uiDrawGradientColorRect(x, y, z, width, height, (const u32 *)vertexColors, presetValue);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, presetValue);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D170);
