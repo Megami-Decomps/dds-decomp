@@ -1051,10 +1051,10 @@ void frFontSetContextCursorSpacing(u32 spacing) {
 
 /* Count the y-band rows of the glyph chain. DDS1 scans the band but advances
  * only one next node, as frFontGetGlyphPositionAtIndex does. */
-s32 frFontCountGlyphChainNodes(FrFontGlyph *glyph) {
+s32 frFontCountGlyphChainNodes(const FrFontGlyph *glyph) {
     s32 count = 0;
-    FrFontGlyph *currentNode;
-    FrFontGlyph *scanNode;
+    const FrFontGlyph *currentNode;
+    const FrFontGlyph *scanNode;
     s32 bandLimit;
     s32 currentY;
 
