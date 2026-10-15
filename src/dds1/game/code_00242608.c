@@ -2029,7 +2029,7 @@ extern void mnuSetValueListTransition(struct MenuList *, u32);
 extern s32 mnuDrawShopPanelTransition(ShopScene *);
 extern void mnuDrawShopRowTextAndValue();
 extern void evtClearActiveFlag(s32);
-extern s32 evtSetBoundedDisplayValue(s32, s32);
+extern s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value);
 extern void sndReleaseTrackHandle(s32);
 
 extern s32 mnuDrawShopCommandPanel(ShopScene *context);

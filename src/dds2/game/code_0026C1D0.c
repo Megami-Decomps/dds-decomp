@@ -465,19 +465,19 @@ s32 evtIsActiveFlagSet(s32 flagIndex) {
 }
 
 /* Reject only indices at/above the upper bound; negative indices are not checked. */
-s32 evtSetBoundedDisplayValue(s32 index, s32 value) {
-    if (index < EVT_DISPLAY_VALUE_COUNT) {
+s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 value) {
+    if (displayValueIndex < EVT_DISPLAY_VALUE_COUNT) {
     } else {
         return 0;
     }
-    evtDisplayValues[index] = value;
+    evtDisplayValues[displayValueIndex] = value;
     return 1;
 }
 
 /* Clamp only the upper side to the last display slot; negative indices pass through. */
-u32 evtGetBoundedDisplayValue(s32 index) {
-    index = (index < EVT_DISPLAY_VALUE_COUNT) ? index : EVT_LAST_DISPLAY_VALUE;
-    return evtDisplayValues[index];
+u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
+    displayValueIndex = (displayValueIndex < EVT_DISPLAY_VALUE_COUNT) ? displayValueIndex : EVT_LAST_DISPLAY_VALUE;
+    return evtDisplayValues[displayValueIndex];
 }
 
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
