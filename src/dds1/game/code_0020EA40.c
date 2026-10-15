@@ -484,8 +484,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, func_0020A860);
         BTL_INSTALL_CALLBACK(battle->pad670, 0x0, func_0020AB08);
         BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlFadeOtherEnemyUnitsWhenSpecialModeActive);
-        BTL_INSTALL_CALLBACK(battle->pad670, 0x4, btlMapSkillToCode);
-        BTL_INSTALL_CALLBACK(battle->pad670, 0x8, btlMapSkillRange);
+        BTL_INSTALL_CALLBACK(battle->summonEffectId, 0x0, btlMapSkillToCode);
+        BTL_INSTALL_CALLBACK(battle->summonEffectDelay, 0x0, btlMapSkillRange);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlRestoreHaritiFormation);
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlMapSpeciesToActionVariant);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlHaritiUpdateCallback);
@@ -531,8 +531,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         break;
     case 0x140:
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlRecenterUnitsOnLead);
-        BTL_INSTALL_CALLBACK(battle->pad670, 0x8, btlMapActionToCode);
-        BTL_INSTALL_CALLBACK(battle->pad634, 0x4, btlMode140IsActionNotD3);
+        BTL_INSTALL_CALLBACK(battle->summonEffectDelay, 0x0, btlMapActionToCode);
+        BTL_INSTALL_CALLBACK(battle->summonFadePredicate, 0x0, btlMode140IsActionNotD3);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
         BTL_INSTALL_CALLBACK(battle->pad5E4, 0x0, btlIsSceneUnitModeListed);
         break;

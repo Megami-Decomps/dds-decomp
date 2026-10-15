@@ -320,7 +320,8 @@ typedef struct BtlState {
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x628 */
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x630: linked-list flags 0x200 / 0x400. */
-    u8 pad634[8];
+    u8 pad634[4];
+    u8 (*summonFadePredicate)(s32); /* 0x638: SUMMON fade option for the command. */
     s32 (*actionHitOverride)(BtlUnit *, BtlUnit *, s32, u32); /* 0x63C */
     s32 (*reflectedHitOverride)(BtlUnit *, BtlUnit *, s32); /* 0x640 */
     u8 pad644[4];
@@ -333,7 +334,9 @@ typedef struct BtlState {
     s32 (*cameraModeInitializePredicate)(BtlLinkedCommand *); /* 0x664: permits the mode initializer in 001DB048. */
     s32 (*cameraUpdatePredicate)(BtlLinkedCommand *); /* 0x668: gates the active camera handler. */
     s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
-    u8 pad670[0xC];
+    u8 pad670[4];
+    s32 (*summonEffectId)(s32); /* 0x674: -1 retains the default summon effect. */
+    s32 (*summonEffectDelay)(u32); /* 0x678: delay for the selected summon species. */
     s32 (*actionPointsOverride)(u32, u32, s32); /* 0x67C */
     u8 pad680[0xC];
     s32 (*commandAvailabilityOverride)(BtlUnit *, s32); /* 0x68C: DDS1 001A6EDC..001A6EF4 gates command availability. */
