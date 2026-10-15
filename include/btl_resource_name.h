@@ -26,8 +26,8 @@ typedef char BtlResourceNameRecordNameOffsetCheck[
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension);
 void btlSetResourceNamePosition(struct BtlResourceNameRecord *record, s32 x, s32 y);
 void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *name);
-void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output);
-void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output);
+void btlFormatResourceNameWithExtension(const struct BtlResourceNameRecord *record, char *output);
+void btlFormatResourceNameWithoutExtension(const struct BtlResourceNameRecord *record, char *output);
 
 /* Poll the overwrite prompt; an absent file also permits the write immediately. */
 u32 btlPollResourceNameOverwrite(struct BtlResourceNameRecord *record,
