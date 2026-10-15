@@ -5962,22 +5962,22 @@ extern void btlDrawRetreatCommandLabel(s32);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
-void fldDispatchSceneKindHandler(s32 arg0) {
-    switch (btlGetActorCommandClass((BattleSceneObject *)arg0, btlCommandPanelWork->classIndex)) {
+void fldDispatchSceneKindHandler(s32 sceneContext) {
+    switch (btlGetActorCommandClass((BattleSceneObject *)sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
-        func_001BDF60(arg0, 0, 2, 3);
+        func_001BDF60(sceneContext, 0, 2, 3);
         return;
     case 4:
-        func_001BEB58(arg0);
+        func_001BEB58(sceneContext);
         return;
     case 2:
-        btlDrawItemCommandRows((BattleSceneObject *)arg0);
+        btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
         return;
     case 3:
-        func_001BE590(arg0);
+        func_001BE590(sceneContext);
         return;
     case 6:
-        btlDrawRetreatCommandLabel(arg0);
+        btlDrawRetreatCommandLabel(sceneContext);
     }
 }
 
