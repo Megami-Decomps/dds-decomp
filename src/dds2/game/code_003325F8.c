@@ -91,10 +91,6 @@ extern s32 sdfLiveAssetCount;
 void sdfAssetRelease(SdfAsset *);
 
 
-extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
-
-extern u64 sdfTexGetPrimaryClampState(SdfTex *);
-
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 
 void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);

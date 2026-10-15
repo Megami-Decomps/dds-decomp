@@ -482,8 +482,6 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A4B0);
 
-extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
-extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern void sdfBuildTexturedQuadVifPacket(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
