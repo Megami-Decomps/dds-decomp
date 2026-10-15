@@ -17,6 +17,7 @@
 #include "evt_reset_unit_vector_slots_api.h"
 #include "kwln.h"
 #include "kwln_fade.h"
+#include "kwln_fade_timing.h"
 #include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_draw.h"

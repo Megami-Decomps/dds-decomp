@@ -19,6 +19,7 @@
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_fade.h"
+#include "kwln_fade_timing.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"

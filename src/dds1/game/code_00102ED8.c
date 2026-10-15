@@ -17,6 +17,7 @@
 #include "kwln_named_slot.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
+#include "kwln_fade_timing.h"
 #include "sdf.h"
 #include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
