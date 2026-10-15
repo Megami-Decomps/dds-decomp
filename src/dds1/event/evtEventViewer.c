@@ -75,7 +75,7 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
-void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 void sdfSetViewFieldOfView(f32 arg0);
@@ -1048,7 +1048,7 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
-void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 void sdfSetViewFieldOfView(f32 arg0);
@@ -2195,17 +2195,17 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, EvtRuntime *viewer) {
-    s32 count = viewer->historyCount + 1;
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer) {
+    s32 historyIndex = viewer->historyCount + 1;
 
-    viewer->actionMode = mode;
-    viewer->historyCount = count;
-    viewer->history[count].id = mode;
-    viewer->history[count].a = first;
-    viewer->history[count].b = second;
-    if (mode > 0) {
-        if (mode >= 3) {
-            if (mode == 3) {
+    viewer->actionMode = actionMode;
+    viewer->historyCount = historyIndex;
+    viewer->history[historyIndex].id = actionMode;
+    viewer->history[historyIndex].a = first;
+    viewer->history[historyIndex].b = second;
+    if (actionMode > 0) {
+        if (actionMode >= 3) {
+            if (actionMode == 3) {
                 viewer->charCol = 0;
                 viewer->charRow = 0;
                 viewer->nameStorage[0] = 0;
