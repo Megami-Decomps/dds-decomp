@@ -544,8 +544,6 @@ u32 func_00317AC8(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
-
 typedef struct ShootingVector {
     f32 v[4];
 } ShootingVector;
@@ -574,6 +572,8 @@ extern s32 D_004390B4;
 /* Build the shooting scene: world node, camera and area actor, the three
  * lights and background, sprite/hit pools, the work-entry pool and the two
  * runtime record lists, then the progress parameters and callbacks. */
+INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
+
 void mnuInitializeShootingScene(MnuShootingWork *handle) {
     MnuSectionObjectList *lists[2];
     f32 direction[4] = { 0 };

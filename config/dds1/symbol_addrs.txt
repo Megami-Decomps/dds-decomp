@@ -7521,6 +7521,7 @@ fldMarkStageExplorationBitmapRegion = 0x00121DE0; // type:func
 sdfDevDiscRequestWorkerThread = 0x002E6538; // type:func
 btlSelectSerialEncounter = 0x001A9780; // type:func
 sndDispatchIopAudioCommand = 0x002F5990; // type:func
+sceSifGetSreg = 0x0030C970; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -10638,7 +10639,6 @@ func_0030C8A8 = 0x0030C8A8; // type:func
 func_0030C8E0 = 0x0030C8E0; // type:func
 func_0030C940 = 0x0030C940; // type:func
 func_0030C960 = 0x0030C960; // type:func
-func_0030C970 = 0x0030C970; // type:func
 sceSifSetSreg = 0x0030C988; // type:func
 func_0030C9A8 = 0x0030C9A8; // type:func
 func_0030C9B8 = 0x0030C9B8; // type:func
