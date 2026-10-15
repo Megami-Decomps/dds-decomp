@@ -2,11 +2,11 @@
 #include "snd_command_packet.h"
 #include "snd_sequence_volume_pan.h"
 
-u32 sndSendCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
-u32 sndQueueCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, u32 payloadBytes);
 
-void sndEnsureMidiBankResident(s32 arg0);
+void sndEnsureMidiBankResident(s32 packedTrackId);
 
 
 void sndQueueNoPayloadCommand1A0(void) {
