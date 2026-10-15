@@ -8008,26 +8008,26 @@ s32 sndHasFlaggedActiveNode(void) {
     return 0;
 }
 
-s32 sndPlaySkillSeTask(u32 *arg0) {
-    u8 *task = (u8 *)arg0;
+s32 sndPlaySkillSeTask(u32 *taskArgs) {
+    u8 *taskData = (u8 *)taskArgs;
     s32 context = (s32)(u32)btlGetRuntime();
     u32 value;
 
-    if (*(u16 *)(task + 4) == 2 && *(u32 *)(context + 0x268) < 6) {
+    if (*(u16 *)(taskData + 4) == 2 && *(u32 *)(context + 0x268) < 6) {
         btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", *(u32 *)(context + 0x268));
         return 1;
     }
     *(u32 *)(context + 0x268) = 0;
-    if (sndFindPackedTrackLoadStatus(*(u32 *)task) != 0) {
-        switch (*(u16 *)(task + 4)) {
+    if (sndFindPackedTrackLoadStatus(*(u32 *)taskData) != 0) {
+        switch (*(u16 *)(taskData + 4)) {
         case 1:
-            value = *(u32 *)task;
+            value = *(u32 *)taskData;
             break;
         case 2:
-            value = *(u32 *)task | 1;
+            value = *(u32 *)taskData | 1;
             break;
         case 3:
-            value = *(u32 *)task | 1;
+            value = *(u32 *)taskData | 1;
             break;
         default:
             value = 0;
@@ -8037,7 +8037,7 @@ s32 sndPlaySkillSeTask(u32 *arg0) {
         btlBossDebugPrintf("btl:sound skillSE play[%X-%X]\n", value >> 16, value & 0xFFFF);
         return 1;
     }
-    btlBossDebugPrintf("btl:sound load wait[%X]\n", *(u16 *)(task + 2));
+    btlBossDebugPrintf("btl:sound load wait[%X]\n", *(u16 *)(taskData + 2));
     return 0;
 }
 
