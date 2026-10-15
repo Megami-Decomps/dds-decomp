@@ -1206,7 +1206,7 @@ u32 fldCmdGetRowValue(void) {
     return 1;
 }
 
-u32 func_0014EFE8(void) {
+u32 fldCmdApplySceneRoomSelection(void) {
     s32 value;
 
     value = scrReadIntParameter(0);
