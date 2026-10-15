@@ -145,7 +145,7 @@ extern s8 effSharedRandomState[];
 
 extern void *btlCommandAttributeNames[];
 
-extern f32 D_003B4E28[];
+extern f32 btlActiveGroupCountMultipliers[];
 
 
 
@@ -3287,10 +3287,10 @@ f32 btlGetClampedBattleTableValue(BtlUnit *source) {
     if (index > 4) {
         index = 4;
     }
-    return D_003B4E28[index];
+    return btlActiveGroupCountMultipliers[index];
 }
 
-s32 sndGetResourceForIndex(s32 index) {
+s32 btlGetCommandAttributeName(s32 index) {
     s8 resource = datCommandSelectors[index].stat;
     if (resource < 0) {
         return 0;
