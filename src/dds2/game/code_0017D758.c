@@ -43,7 +43,7 @@ void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) 
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
-extern EffScatterDrawRequest D_00452050;
+extern EffScatterDrawRequest effScatterDrawParams;
 extern void *memset(void *, s32, u32);
 
 /* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
@@ -100,8 +100,8 @@ PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
             right -= 2;
         }
     }
-    memset(&D_00452050, 0, sizeof(EffScatterDrawRequest));
-    D_00452050.flags = 0x4000;
+    memset(&effScatterDrawParams, 0, sizeof(EffScatterDrawRequest));
+    effScatterDrawParams.flags = 0x4000;
     return object;
 }
 
@@ -115,8 +115,8 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
     sdfReleaseChipBlock(object);
 }
 
-extern u8 D_003B14C0[];
-extern SdfPoolNode *D_003B1520[];
+extern u8 effScatterTriangleIndices[];
+extern SdfPoolNode *effScatterDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffScatterDrawRequest *);
 struct SdfAsset;
@@ -149,9 +149,9 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     }
     sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;
-    D_00452050.parameters = D_003B14C0;
+    effScatterDrawParams.parameters = effScatterTriangleIndices;
     for (index = 0; index < count; index++) {
-        draw = &D_00452050;
+        draw = &effScatterDrawParams;
         remaining = object->vectorsPerParticle;
         draw->points = effGetScatterWideBlock(object, index);
         draw->uv = effGetScatterNarrowBlock(object, index);
@@ -162,10 +162,10 @@ void effScatterDrawObject(PcpScatterDraw *object) {
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
-                sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&D_00452050));
-                D_00452050.points += 64;
-                D_00452050.colors += 16;
-                D_00452050.uv += 32;
+                sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(&effScatterDrawParams));
+                effScatterDrawParams.points += 64;
+                effScatterDrawParams.colors += 16;
+                effScatterDrawParams.uv += 32;
             }
             if (remaining >= 4) {
                 draw->primitiveCount = remaining - 2;
@@ -174,7 +174,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
             }
         }
     }
-    surface = D_003B1520[object->packetQueueIndex];
+    surface = effScatterDrawSurfaces[object->packetQueueIndex];
     surface->append(surface, packet);
 }
 

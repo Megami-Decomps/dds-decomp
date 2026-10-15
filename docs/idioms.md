@@ -13536,3 +13536,31 @@ These are existing plain NUL-terminated strings, not MSG1 containers or
 new C literals. Only identifiers and symbol metadata change; preserve
 the native string bytes, terminators, spacing, separate addresses and
 all original declarations, casts, draw coordinates and state tests.
+
+
+## Record-pool and scatter packet banks
+
+`effRecordPoolDrawParams` is shared by the fan, triangle and quad pool paths;
+retain its existing array declaration and each native 0x2C reset. The fan
+and quad renderers choose `effFanPoolTriangleIndices` and
+`effQuadPoolTriangleIndices`, respectively. Both full banks hold eighteen
+packed triangle words: six five-point fans or nine quads, rather than just
+the fifteen or sixteen triangles consumed by one full draw batch.
+
+The direct-submission banks remain distinct: `effScaledFanDrawSurfaces`,
+`effTrianglePoolDrawSurfaces`, `effQuadPoolDrawSurfaces` and
+`effTransformedFanDrawSurfaces`. Preserve the two null tail cells in the
+triangle and transformed-fan banks and the existing separate state/drawing
+lists for non-direct fan modes. Do not rename their shared pool-node pointees.
+
+`effRingBasisScratchVector` is mutable global scratch, initially `(0,-1,0,0)`.
+The ring builder writes XYZ before the quadword load and normalization; its
+untouched W is not a reason to replace the record with a local or constant.
+
+The scatter object has separate `effScatterDrawParams`,
+`effScatterTriangleIndices` and `effScatterDrawSurfaces`. Its full index bank
+contains twenty-four triangles over thirteen vertex pairs, though one full
+batch submits only sixteen triangles over eighteen vertices. Retain the
+byte-array view, all remaining index words and the four surface pointers.
+Numeric index/scratch bytes agree between games; surface-pointer bytes do
+not. No owner layout, bound, clear size, argument list or import changes.
