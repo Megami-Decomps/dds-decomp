@@ -449,7 +449,59 @@ void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00228B38", func_00229ED8);
+/* Pulse the eight solar-point fans: the first pass scales each fan's alpha
+ * by its timer's half-period sine plus a phase term, the second by its
+ * third-period sine. */
+void func_00229ED8(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale, s32 phase,
+                                       SolarOverlayWork *overlay, s32 object) {
+    u32 colors[8];
+    SolarPoint *points = overlay->state.points;
+    f32 base;
+    f32 pulse;
+    f32 t;
+    s32 i;
+    s32 j;
+
+    evtUpdateSolarPointTimers(overlay);
+    base = (f32)phase * 0.3f * 0.125f + 0.1f;
+    sdfSubmitGsAlphaOneRegisterPacket(0x48, object);
+    for (i = 0; i < 8; i++) {
+        if (points[i].duration == 0) {
+            break;
+        }
+        t = (f32)(s16)points[i].age / ((f32)points[i].duration * 0.5f);
+        pulse = sdfSinPoly(t * 3.14159265f);
+
+        if (pulse < 0.0f) {
+            pulse = -pulse;
+        }
+        pulse = base + pulse * 0.4f;
+        for (j = 0; j < D_00368310[i].pointCount; j++) {
+            colors[j] = (D_00368310[i].pointColors[j] & 0xFFFFFF) |
+                ((s32)((f32)(s32)((D_00368310[i].pointColors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
+        }
+        sdfDrawColoredTriangleFan((s32)D_00368310[i].pointPositions, alpha, (s32 *)colors, D_00368310[i].pointCount, 0, object);
+    }
+    sdfSubmitGsAlphaOneRegisterPacket(0x48, object);
+    for (i = 0; i < 8; i++) {
+        if (points[i].duration == 0) {
+            break;
+        }
+        t = (f32)(s16)points[i].age / ((f32)points[i].duration / 3.0f);
+        pulse = sdfSinPoly(t * 3.14159265f);
+
+        if (pulse < 0.0f) {
+            pulse = -pulse;
+        }
+        pulse = pulse * 0.4f;
+        for (j = 0; j < D_00368310[i].count; j++) {
+            colors[j] = (D_00368310[i].colors[j] & 0xFFFFFF) |
+                ((s32)((f32)(s32)((D_00368310[i].colors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
+        }
+        sdfDrawColoredTriangleFan((s32)D_00368310[i].positions, alpha, (s32 *)colors, D_00368310[i].count, 0, object);
+    }
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00228B38", D_003ACC68);
 
