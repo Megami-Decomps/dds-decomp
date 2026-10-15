@@ -6346,12 +6346,12 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4AF0);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B08);
 
-void btlCreateRainEffect(u32 kind, u32 arg) {
+void btlCreateRainEffect(u32 majorId, u32 minorId) {
     BtlState *work = (BtlState *)btlGetRuntime();
 
-    switch (kind) {
+    switch (majorId) {
     case 0xDF:
-        switch (arg) {
+        switch (minorId) {
         case 0:
             break;
         case 1:
@@ -6362,19 +6362,19 @@ void btlCreateRainEffect(u32 kind, u32 arg) {
         }
         break;
     case 0xE0:
-        if (arg == 5) {
+        if (minorId == 5) {
             work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_0035F5F8);
         }
         break;
     case 0xE1:
-        if (arg == 5) {
+        if (minorId == 5) {
             work->soundTransitionTask = effCreateSelectionFlagListFromWork(&D_0035F5F8);
         }
         break;
     }
     if (work->soundTransitionTask != 0) {
         btlBossDebugPrintf("btl:rain create[f%03X_%03X]
-", kind, arg);
+", majorId, minorId);
     }
 }
 
