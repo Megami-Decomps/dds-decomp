@@ -14962,29 +14962,29 @@ u32 effConfigureWithDefaultSetting(EffectSlotSet *effect, u32 slot,
     return 1;
 }
 
-u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
+u32 effResetRecordRun(u8 *work, u32 first, u32 unused) {
     u32 i = 0;
     u32 index;
 
     do {
         effSlotTransitionClearTarget((EffTimedState *)((first + i) * 0xA0 +
-                                    (s32)((EffectSlotSet *)table)->workEntries + 0x28), arg);
+                                    (s32)((EffectSlotSet *)work)->workEntries + 0x28), unused);
         i++;
         index = first + i;
-    } while (index < ((EffectSlotSet *)table)->count && (((EffectSlotSet *)table)->descriptions[index].flags & EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION));
+    } while (index < ((EffectSlotSet *)work)->count && (((EffectSlotSet *)work)->descriptions[index].flags & EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION));
     return 1;
 }
 
-void effSelectPresetByKind(u32 kind, u32 arg) {
-    switch (kind) {
+void effSelectPresetByKind(u32 mode, u32 value) {
+    switch (mode) {
     case 0:
-        sdfSubmitGsAlphaOneRegisterPacket(0x44, arg);
+        sdfSubmitGsAlphaOneRegisterPacket(0x44, value);
         return;
     case 1:
-        sdfSubmitGsAlphaOneRegisterPacket(0x48, arg);
+        sdfSubmitGsAlphaOneRegisterPacket(0x48, value);
         return;
     case 2:
-        sdfSubmitGsAlphaOneRegisterPacket(0x42, arg);
+        sdfSubmitGsAlphaOneRegisterPacket(0x42, value);
         break;
     }
 }
