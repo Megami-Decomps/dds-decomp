@@ -536,9 +536,9 @@ extern void effObjSetInnerFloat(s32 object, f32 value);
 
 
 
-extern u8 D_003DC1C0[];
+extern u8 mnuTitleCameraPosition[];
 
-extern u8 D_003DC1D0[];
+extern u8 mnuTitleCameraRotation[];
 
 extern void *mnuTitleCameraObject;
 
@@ -546,14 +546,14 @@ extern char D_003AFD48[]; /* "---------- AT3 --------\n", followed by 8 zero byt
 
 extern TitleAudioStreamState mnuTitleSoundBufferState;
 
-extern u32 D_003DA1C0[];
+extern u32 mnuTitleAudioSilenceBuffer[];
 
 
 extern TitleAudioStreamState mnuTitleStreamStatus;
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern u32 D_003BD8D4;
+extern u32 mnuTitleStreamFileRequest;
 
 extern u32 D_003BC5BC;
 

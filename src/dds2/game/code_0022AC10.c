@@ -2658,7 +2658,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         memcpy(&unit->partyRecord, &D_004530C0, sizeof(DatPartyRecord));
         btlRefreshUnitMotionSelection(unit);
         if (unit->status.flags & 0x200) {
-            memcpy(&datGameState->party[unit->unk2E4], &D_004530C0, sizeof(DatPartyRecord));
+            memcpy(&datGameState->party[unit->partyIndex], &D_004530C0, sizeof(DatPartyRecord));
         }
         if (sdfPadButtonStates[3] < 0) {
             battle->debug.unk00 = 2;
@@ -2673,11 +2673,11 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             battle->debug.unk00 = 2;
         }
         if (sdfPadButtonStates[0] < 0) {
-            battle->unk_E0E = (s8)battle->unk4C4 * 3;
+            battle->unk_E0E = (s8)battle->timingRate * 3;
         }
         if (battle->unk_E0E > 0) {
             battle->unk_E0E--;
-            sprintf(text, D_00436F00, battle->unk_E0E / (s8)battle->unk4C4 + 1);
+            sprintf(text, D_00436F00, battle->unk_E0E / (s8)battle->timingRate + 1);
             btlDebugDrawText(32, 400, 6, text);
         }
         if (battle->unk_E0E == 0) {

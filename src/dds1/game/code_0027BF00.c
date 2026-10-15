@@ -1404,7 +1404,7 @@ draw:
 void mnuCreatePartyPageResources(MenuPageWindow *menu, s32 x, s32 y, s32 style, s32 color) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        s32 entry = menu->records->slots[i].unk8;
+        s32 entry = menu->records->slots[i].unitIndex;
         if (entry >= 0) {
             menu->slots[i].resources = mnuCreatePartyPageSpriteBundle(x, y, style, 0, color, entry);
         }
@@ -1414,7 +1414,7 @@ void mnuCreatePartyPageResources(MenuPageWindow *menu, s32 x, s32 y, s32 style, 
 void mnuReleaseSlotResources(MenuPageWindow *context) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        s32 node = context->records->slots[i].unk8;
+        s32 node = context->records->slots[i].unitIndex;
         if (node >= 0 && context->slots[i].resources != 0) {
             mnuDestroyResources(context->slots[i].resources);
             context->slots[i].resources = 0;
@@ -1511,7 +1511,7 @@ MenuSprites *mnuCreatePageSpriteSet(s32 value, EffectSlotSet *mainResource,
     MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(0x50);
 
     memset(page, 0, 0x50);
-    page->unkC = value;
+    page->profileLabelOverride = value;
     page->firstSprite = effCreateResourceSlotSet(secondaryResource, 6, 1);
     itfSetGridEntryQuantizedAndRefresh(page->firstSprite, 0, 0xE60, 0x430, 0, 0);
     page->sprites[0] = effCreateResourceSlotSet(secondaryResource, 8, 1);
@@ -1808,7 +1808,7 @@ void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 index, s32 kind) {
         effDestroyResourceSlotSet(slot->frame[3]);
     }
 
-    resourceIndex = window->records->slots[index].unk8;
+    resourceIndex = window->records->slots[index].unitIndex;
     if (resourceIndex >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[resourceIndex]) == 0) {
             effResolveAndReleaseResource(window->handlesA[resourceIndex]);
@@ -1848,8 +1848,8 @@ void mnuUpdateHandleStates(MenuPageWindow *obj) {
     for (i = 0; i < 5U; i++) {
         PartyPanelEntry *entry = &obj->records->slots[i];
 
-        if (entry->unk8 >= 0) {
-            if (i < obj->records->unk0) {
+        if (entry->unitIndex >= 0) {
+            if (i < obj->records->frontlineCount) {
                 mnuRebuildPartySlotResources(obj, i, 1);
             } else {
                 mnuRebuildPartySlotResources(obj, i, 2);
@@ -1873,7 +1873,7 @@ void mnuUpdatePartyPanelPercentDisplays(MenuPageWindow *page) {
 
     party = page->records;
     row = 0;
-    if (party->unk0 + party->unk4 <= 0) {
+    if (party->frontlineCount + party->reserveCount <= 0) {
         return;
     }
 
@@ -1889,7 +1889,7 @@ void mnuUpdatePartyPanelPercentDisplays(MenuPageWindow *page) {
         mnuUpdatePairedEffectBounds(&page->slots[row].bars[1]);
         party = page->records;
         row++;
-    } while (row < party->unk0 + party->unk4);
+    } while (row < party->frontlineCount + party->reserveCount);
 }
 
 extern char D_003BC728[];
@@ -1899,7 +1899,7 @@ void mnuFillPanelLists(MenuPageWindow *window, PartyPanel *records) {
 
     window->lists[0] = mnuCreateListState(0, 1, 1);
     window->lists[1] = mnuCreateListState(0, 1, 1);
-    for (i = 0; i < records->unk0 + records->unk4; i++) {
+    for (i = 0; i < records->frontlineCount + records->reserveCount; i++) {
         mnuListAppendNode(window->lists[0], D_003BC728);
         mnuListAppendNode(window->lists[1], D_003BC728);
     }
@@ -2008,7 +2008,7 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
 
     for (i = 0; i < 5; i++) {
         if (i != selected) {
-            s32 id = window->records->slots[i].unk8;
+            s32 id = window->records->slots[i].unitIndex;
 
             if (id >= 0) {
                 if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
@@ -2028,7 +2028,7 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
 
     for (i = 0; i < 5; i++) {
         record = &window->records->slots[i];
-        id = record->unk8;
+        id = record->unitIndex;
         if (id >= 0) {
             if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
                 effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
@@ -2037,7 +2037,7 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
         }
     }
     record = &window->records->slots[selected];
-    id = record->unk8;
+    id = record->unitIndex;
     if (id >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
             effResolveAndReleaseResource((EffectSlotSet *)window->handlesA[id]);
@@ -2395,7 +2395,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
         }
         /* This profile fade is independent of the sprite slide's drawAlpha. */
         mnuDrawSelectedPartyProfileLabel(x, y, depth,
-            slot->windowSprites->profileFade, slot->windowSprites->unkC, slot,
+            slot->windowSprites->profileFade, slot->windowSprites->profileLabelOverride, slot,
             partyIndex, surface);
         if (slot->windowSprites->fadeOut == 0) {
             if (slot->windowSprites->profileFade > 0) {
@@ -2482,7 +2482,7 @@ void mnuDrawPartyPanelSlotWithBlend(s32 x, s32 y, s32 depth, MenuPageWindow *win
     } else {
         resource = pair[0];
     }
-    effDrawSpriteWithCornerFade(window->records->slots[index].unk8 != 5 ? x : x - 0xA0, y, depth,
+    effDrawSpriteWithCornerFade(window->records->slots[index].unitIndex != 5 ? x : x - 0xA0, y, depth,
                   flag == 0 ? alpha : 0x100, 1, resource, 0, surface);
 }
 

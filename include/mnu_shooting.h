@@ -161,8 +161,8 @@ typedef struct MnuShootingWork {
     s32 (*initialize)(u8 *work);
     s32 (*update)(u8 *work);
     struct FileRequest *packageRequest; /* 0x64 */
-    u32 unk68;
-    u32 unk6C;
+    u32 packageLoadState;
+    u32 packageEntryIndex;
     /* The pause bitfield and round transitions share this complete flag word. */
     union {
         u32 flags;
@@ -180,16 +180,16 @@ typedef struct MnuShootingWork {
     s16 completed;
     s16 countdown;
     s32 updateCount;
-    s32 unk90;                     /* integer input tilt; arithmetic uses floats */
-    s16 unk94;                     /* selected mode copied from menu work flags */
+    s32 horizontalTilt;            /* integer input tilt; arithmetic uses floats */
+    s16 savedPlayerMode;           /* player mode restored after loading a round */
     s16 round;                      /* 0x96 */
     s16 phase;
     s16 result;
     s32 phaseTicks;
     s32 targets; /* 0xA0: remaining shooting targets (func_00319388 decrements per hit); cleared by mnuInitializeShootingWorkResources. */
     s32 unkA4; /* 0xA4: cleared by the section initializer (mnuInitializeShootingWorkResources). */
-    s32 unkA8; /* 0xA8: mnuAdvanceShootingPlayerEntryReset switch state. */
-    s32 unkAC; /* 0xAC: mnuAdvanceShootingPlayerEntryReset per-state tick. */
+    s32 playerResetState; /* 0xA8: mnuAdvanceShootingPlayerEntryReset switch state. */
+    s32 playerResetTicks; /* 0xAC: mnuAdvanceShootingPlayerEntryReset per-state tick. */
     s32 unkB0;
     FadeEntry strip;
     FadeNumber lowerNumber;
@@ -217,13 +217,13 @@ typedef char ShootingPackageOffsetsAssert[
 
 typedef char ShootingInputOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->flags == 0x70 &&
-     (unsigned long)&((MnuShootingWork *)0)->unk90 == 0x90 &&
-     (unsigned long)&((MnuShootingWork *)0)->unk94 == 0x94) ? 1 : -1];
+     (unsigned long)&((MnuShootingWork *)0)->horizontalTilt == 0x90 &&
+     (unsigned long)&((MnuShootingWork *)0)->savedPlayerMode == 0x94) ? 1 : -1];
 typedef char ShootingCallbackOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->targets == 0xA0 &&
      (unsigned long)&((MnuShootingWork *)0)->unkA4 == 0xA4 &&
-     (unsigned long)&((MnuShootingWork *)0)->unkA8 == 0xA8 &&
-     (unsigned long)&((MnuShootingWork *)0)->unkAC == 0xAC) ? 1 : -1];
+     (unsigned long)&((MnuShootingWork *)0)->playerResetState == 0xA8 &&
+     (unsigned long)&((MnuShootingWork *)0)->playerResetTicks == 0xAC) ? 1 : -1];
 
 typedef char ShootingPoolOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->spriteWork == 0x28 &&

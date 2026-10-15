@@ -22,8 +22,8 @@ void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003C90DC[];
-extern s32 D_003C8C90[][3];
-extern SolarOverlayShape D_003C90C0[];
+extern s32 evtSolarNoiseLayerPlacements[][3];
+extern SolarOverlayShape evtSolarOverlayShapes[];
 extern void sdfDrawColoredTriangleFan(s32 *, u32, u32 *, s32, s32, s32);
 extern void evtPrepareSolarOverlayTestState(s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
@@ -73,14 +73,14 @@ void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32
     {
         SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
         s32 spriteOffset = layer * sizeof(SolarSpriteLayer);
-        s32 scalePercent = D_003C8C90[layer][2];
+        s32 scalePercent = evtSolarNoiseLayerPlacements[layer][2];
         SolarSpriteLayer *sprite =
             (SolarSpriteLayer *)(spriteOffset + (s32)context->layers);
 
         sprite->drawWidth = (s32)((f32)(sprite->width * scalePercent) / 100.0f) << 4;
-        sprite->drawHeight = (s32)((f32)(sprite->height * D_003C8C90[layer][2]) / 100.0f) << 3;
-        effDrawTextureSlotWithBlendedCornerColors((x + D_003C8C90[layer][0]) << 4,
-                      (y + D_003C8C90[layer][1]) << 3, z,
+        sprite->drawHeight = (s32)((f32)(sprite->height * evtSolarNoiseLayerPlacements[layer][2]) / 100.0f) << 3;
+        effDrawTextureSlotWithBlendedCornerColors((x + evtSolarNoiseLayerPlacements[layer][0]) << 4,
+                      (y + evtSolarNoiseLayerPlacements[layer][1]) << 3, z,
                       (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
     }
 
@@ -101,16 +101,16 @@ void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 l
     {
         SolarSpriteContext *context = *(SolarSpriteContext **)contextHandle;
         s32 spriteOffset = layer * sizeof(SolarSpriteLayer);
-        s32 scalePercent = D_003C8C90[layer][2];
+        s32 scalePercent = evtSolarNoiseLayerPlacements[layer][2];
         SolarSpriteLayer *sprite =
             (SolarSpriteLayer *)(spriteOffset + (s32)context->layers);
 
         sprite->drawWidth =
             (s32)((scale * (f32)sprite->width * (f32)scalePercent) / 100.0f) << 4;
         sprite->drawHeight =
-            (s32)((scale * (f32)sprite->height * (f32)D_003C8C90[layer][2]) / 100.0f) << 3;
-        effDrawTextureSlotWithBlendedCornerColors(((x + D_003C8C90[layer][0]) << 4) - (sprite->drawWidth / 2),
-                      ((y + D_003C8C90[layer][1]) << 3) - (sprite->drawHeight / 2), z,
+            (s32)((scale * (f32)sprite->height * (f32)evtSolarNoiseLayerPlacements[layer][2]) / 100.0f) << 3;
+        effDrawTextureSlotWithBlendedCornerColors(((x + evtSolarNoiseLayerPlacements[layer][0]) << 4) - (sprite->drawWidth / 2),
+                      ((y + evtSolarNoiseLayerPlacements[layer][1]) << 3) - (sprite->drawHeight / 2), z,
                       (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
     }
 
@@ -156,13 +156,13 @@ void evtDrawSolarOverlayShapeWithScaledAlpha(s32 unused0, s32 unused1, s32 alpha
 
     sdfSubmitGsAlphaOneRegisterPacket(0x48, object);
     tableIndex = entryIndex - 1;
-    for (i = 0; i < D_003C90C0[tableIndex].count; i++) {
-        color = D_003C90C0[tableIndex].colors[i];
+    for (i = 0; i < evtSolarOverlayShapes[tableIndex].count; i++) {
+        color = evtSolarOverlayShapes[tableIndex].colors[i];
         colors[i] = (color & 0xFFFFFF) |
             ((s32)((f32)((s32)((color & 0xFF000000) >> 24) * alphaScale) * 0.0078125f) << 24);
     }
-    sdfDrawColoredTriangleFan(D_003C90C0[tableIndex].positions, alpha, colors,
-                  D_003C90C0[tableIndex].count, 0, object);
+    sdfDrawColoredTriangleFan(evtSolarOverlayShapes[tableIndex].positions, alpha, colors,
+                  evtSolarOverlayShapes[tableIndex].count, 0, object);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
 }
 
@@ -490,11 +490,11 @@ void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 
             pulse = -pulse;
         }
         pulse = base + pulse * 0.4f;
-        for (j = 0; j < D_003C90C0[i].pointCount; j++) {
-            colors[j] = (D_003C90C0[i].pointColors[j] & 0xFFFFFF) |
-                ((s32)((f32)(s32)((D_003C90C0[i].pointColors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
+        for (j = 0; j < evtSolarOverlayShapes[i].pointCount; j++) {
+            colors[j] = (evtSolarOverlayShapes[i].pointColors[j] & 0xFFFFFF) |
+                ((s32)((f32)(s32)((evtSolarOverlayShapes[i].pointColors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
         }
-        sdfDrawColoredTriangleFan(D_003C90C0[i].pointPositions, alpha, colors, D_003C90C0[i].pointCount, 0, object);
+        sdfDrawColoredTriangleFan(evtSolarOverlayShapes[i].pointPositions, alpha, colors, evtSolarOverlayShapes[i].pointCount, 0, object);
     }
     sdfSubmitGsAlphaOneRegisterPacket(0x48, object);
     for (i = 0; i < 8; i++) {
@@ -508,11 +508,11 @@ void evtDrawSolarPointTransitionShapes(s32 unused0, s32 unused1, s32 alpha, s32 
             pulse = -pulse;
         }
         pulse = pulse * 0.4f;
-        for (j = 0; j < D_003C90C0[i].count; j++) {
-            colors[j] = (D_003C90C0[i].colors[j] & 0xFFFFFF) |
-                ((s32)((f32)(s32)((D_003C90C0[i].colors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
+        for (j = 0; j < evtSolarOverlayShapes[i].count; j++) {
+            colors[j] = (evtSolarOverlayShapes[i].colors[j] & 0xFFFFFF) |
+                ((s32)((f32)(s32)((evtSolarOverlayShapes[i].colors[j] & 0xFF000000) >> 24) * pulse * (f32)alphaScale * 0.0078125f) << 24);
         }
-        sdfDrawColoredTriangleFan(D_003C90C0[i].positions, alpha, colors, D_003C90C0[i].count, 0, object);
+        sdfDrawColoredTriangleFan(evtSolarOverlayShapes[i].positions, alpha, colors, evtSolarOverlayShapes[i].count, 0, object);
     }
     sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
 }

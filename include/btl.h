@@ -126,7 +126,7 @@ typedef struct BtlUnit {
     f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
     s32 resourceKind; /* 0xC4: selects the actor resource table, as in DDS2 */
     u32 species; /* 0xC8 */
-    u8 unkCC;
+    u8 modelBorrowed; /* Nonzero shares another unit's model state. */
     u8 padCD[3];
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
@@ -138,8 +138,8 @@ typedef struct BtlUnit {
     s32 unkEC;
     s32 effectState; /* 0xF0 */
     f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
-    s16 effectTimerA; /* 0xF8 */
-    s16 effectTimerB; /* 0xFA */
+    s16 motionStartFrame; /* 0xF8: retained motion-range start frame. */
+    s16 motionEndFrame; /* 0xFA: retained motion-range end frame. */
     s32 effectArgA; /* 0xFC */
     s32 effectArgB; /* 0x100 */
     f32 effectValue; /* 0x104 */
@@ -149,11 +149,11 @@ typedef struct BtlUnit {
     u8 lookupId; /* 0x11C: retail lookup consumers use unsigned byte loads. */
     u8 pad11D[3];
     DatPartyRecord partyRecord; /* 0x120: complete copied actor record (0x1A4). */
-    u8 unk2C4; /* 0x2C4: saved party-entry index, read with lbu. */
+    u8 partyIndex; /* 0x2C4: saved party-entry index, read with lbu. */
     u8 pad2C5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2C6 */
     s32 selectedEntryIndex; /* 0x2F0: -1 denotes no selected entry. */
-    u32 unk2F4;
+    u32 pendingAbilityId; /* 0x2F4: queued ability effect; -1 means none. */
     struct SoundResourceNode *resourceNode; /* 0x2F8: owned system-effect resource. */
     struct SoundResourceLink *resourceLink; /* 0x2FC: linked model-resource task. */
     struct SoundLink *link; /* 0x300: per-unit command effect. */
@@ -168,15 +168,15 @@ typedef struct BtlUnit {
     struct EvtUnit *ext; /* 0x320: the event manager's complete 0x170-byte work. */
     struct SdfModel *transparencyModel; /* 0x324: alternate SDF model retained during transparency. */
     struct BtlUnit *mirror; /* 0x328: unit drawn from this unit's transparency packet buffer */
-    s32 unk32C;
-    s32 unk330;
+    s32 transparencyBuffer; /* 0x32C: mirror pass's 512x224 transfer image. */
+    s32 transparencyBufferAllocation; /* 0x330: general allocation released with the image. */
     u8 pad334[8];
     u32 handle; /* 0x33C */
     struct BtlUnit *previousActor; /* 0x340 */
     struct BtlUnit *next; /* 0x344: actor-list link, not a task-chain link */
 } BtlUnit;
 typedef char BtlUnitRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
-typedef char BtlUnitRecordEndCheck[((u32)&((BtlUnit *)0)->unk2C4 == 0x2C4) ? 1 : -1];
+typedef char BtlUnitRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2C4) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x348) ? 1 : -1];
@@ -212,7 +212,7 @@ typedef struct BtlUnit {
     f32 unkC0;
     s32 resourceKind; /* 0xC4 */
     s32 resourceIndex; /* 0xC8 */
-    u8 unkCC;
+    u8 modelBorrowed; /* Nonzero shares another unit's model state. */
     u8 padCD[3];
     s32 modelId; /* 0xD0: model passed to btlCreateModelChangeTask by the gun-change command */
     s32 modelVariant; /* 0xD4: its variant argument */
@@ -223,9 +223,9 @@ typedef struct BtlUnit {
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
     s32 unkEC;
     s32 effectState; /* 0xF0: same actor effect state as DDS1 */
-    f32 fF4;
-    s16 unkF8;
-    s16 unkFA;
+    f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
+    s16 motionStartFrame; /* 0xF8: retained motion-range start frame. */
+    s16 motionEndFrame; /* 0xFA: retained motion-range end frame. */
     s32 effectIndex; /* 0xFC */
     s32 effectParameter; /* 0x100 */
     f32 effectScale; /* 0x104 */
@@ -235,15 +235,15 @@ typedef struct BtlUnit {
     u8 lookupId;
     u8 pad11D[3];
     DatPartyRecord partyRecord; /* 0x120: complete copied roster record (0x1C4). */
-    u8 unk2E4;
+    u8 partyIndex; /* 0x2E4: saved party-entry index, read with lbu. */
     u8 pad2E5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2E6: btlClearActorEntrySlot clears each signed record. */
     s32 selectedEntryIndex; /* 0x310: -1 denotes no selected entry. */
-    s32 unk314;
+    s32 pendingAbilityId; /* 0x314: queued ability effect; -1 means none. */
     struct SoundResourceNode *node318;
-    struct SoundResourceLink *link31C;
-    struct SoundLink *link320;
-    struct ActiveSoundNode *node324;
+    struct SoundResourceLink *resourceLink; /* 0x31C: linked model-resource task. */
+    struct SoundLink *link; /* 0x320: per-unit command effect. */
+    struct ActiveSoundNode *listNode; /* 0x324: independently loaded sound node. */
     struct SoundSlotOwner *unk328; /* Owner of the actor model's file slots and allocation handles. */
     void *gunResource;
     BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
@@ -252,17 +252,17 @@ typedef struct BtlUnit {
     u8 pad33A[2];
     struct EffWorldNode *effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
-    struct SdfModel *unk344; /* Alternate SDF model used by the transparency path. */
+    struct SdfModel *transparencyModel; /* Alternate SDF model used by the transparency path. */
     struct BtlUnit *mirror; /* 0x348: created and destroyed by the model-change task. */
-    s32 unk34C;
-    s32 unk350;
+    s32 transparencyBuffer; /* 0x34C: mirror pass's 512x224 transfer image. */
+    s32 transparencyBufferAllocation; /* 0x350: general allocation released with the image. */
     u8 pad354[8];
-    u32 handle35C;
+    u32 handle; /* 0x35C: allocation that owns this unit. */
     struct BtlUnit *previousActor; /* 0x360 */
     struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;
 typedef char BtlUnitPartyRecordOffsetCheck[((u32)&((BtlUnit *)0)->partyRecord == 0x120) ? 1 : -1];
-typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->unk2E4 == 0x2E4) ? 1 : -1];
+typedef char BtlUnitPartyRecordEndCheck[((u32)&((BtlUnit *)0)->partyIndex == 0x2E4) ? 1 : -1];
 typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 1 : -1];
 typedef char BtlUnitPositionZOffsetOffsetCheck[
     ((u32)&((BtlUnit *)0)->positionZOffset == 0x88) ? 1 : -1];

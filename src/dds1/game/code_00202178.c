@@ -1374,7 +1374,7 @@ typedef struct BattleLinkedEffectState {
     u32 value;
     u16 timer;
     u8 active;
-    u8 phase;
+    s8 phase; /* The Rahu turn hook tests it as a signed byte. */
     union {
         u32 effect;
         f32 height;
@@ -2004,7 +2004,98 @@ void btlUpdateRahuEffectActorHeights(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00206608);
+extern BtlUnit *btlFindActorForOwner(s64);
+extern void fldAppendSceneGroupHandle(void *);
+
+/* Rahu turn hook. While linked (active 1), a lone surviving head gets the 0x11
+ * phase. Otherwise a downed twin head fades the effect actor out; a downed
+ * owner or main head queues 0x170, and a standing pair answers the current
+ * command with 0x171 once per command. */
+void func_00206608(void) {
+    BtlUnit *twin = NULL;
+    BtlUnit *mainUnit;
+    s32 ownerDown = 1;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleLinkedEffectState *effect = (BattleLinkedEffectState *)battle->effect;
+    BtlUnit *unit;
+    BtlTask *task;
+
+    mainUnit = NULL;
+
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
+        s32 flags = unit->status.flags;
+
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (unit->partyRecord.unitId) {
+                case 0x107:
+                    twin = unit;
+                    break;
+                case 0x108:
+                    mainUnit = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (effect->active == 1) {
+        unit = NULL;
+        if (twin->status.flags & 0xE0) {
+            if (!(mainUnit->status.flags & 0xE0)) {
+                unit = mainUnit;
+            }
+        }
+        if (mainUnit->status.flags & 0xE0) {
+            if (!(twin->status.flags & 0xE0)) {
+                unit = twin;
+            }
+        }
+        if (unit != NULL) {
+            task = btlFindUnitByActor(unit);
+            fldAppendSceneGroupHandle(task);
+            task->indexWork.phase = 0x11;
+            btlAppendIndexListEntry(task->indexWork.indices, task->unit);
+        }
+    } else if (effect->active == 0) {
+        if (effect->actor != NULL) {
+            unit = btlFindActorForOwner(effect->actor->identity);
+            if (unit != NULL) {
+                ownerDown = (unit->status.flags & 0xE0) != 0;
+            }
+        }
+        if (twin->status.flags & 0xE0) {
+            btlBeginEffectActorFadeOut();
+            return;
+        }
+        if (mainUnit->status.flags & 0xE0) {
+            ownerDown = 1;
+        }
+        task = btlFindUnitByActor(twin);
+        if (task->indexWork.skillId != -1) {
+            return;
+        }
+        if (!ownerDown) {
+            if (battle->currentTask == NULL || !(task->flags & 8)) {
+                return;
+            }
+            if (effect->phase == 0 && (battle->currentTask->unit->status.flags & 0x200) && battle->mode == 1) {
+                fldAppendSceneGroupHandle(task);
+                task->indexWork.phase = 2;
+                task->indexWork.skillId = 0x171;
+                btlAppendIndexListEntry(task->indexWork.indices, effect->actor);
+                effect->phase = 1;
+                return;
+            }
+            effect->phase = 0;
+        } else if (effect->actor != NULL) {
+            fldAppendSceneGroupHandle(task);
+            task->indexWork.phase = 2;
+            task->indexWork.skillId = 0x170;
+            btlAppendIndexListEntry(task->indexWork.indices, task->unit);
+            effect->value = 0;
+        }
+    }
+}
 
 s32 btlGetEffectTaskActorMatchCode(u8 *task) {
     BtlEffectHeader *effect;
@@ -3925,7 +4016,6 @@ void btlArmEventResourceTrigger(void) {
     ((BtlEventTriggers *)data)->pending = 0;
 }
 
-extern void fldAppendSceneGroupHandle(void *);
 
 typedef struct BtlMarkState {
     u8 marked;  /* 0 */
@@ -4249,7 +4339,112 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
     }
     return arg1;
 }
-INCLUDE_ASM(const s32, "game/code_00202178", func_0020A860);
+/* HARI2 turn hook: mode 2 rerolls agility for units 0x13D..0x142; mode 1 queues 0xD2
+ * for a random 0x2000-status party task; otherwise unit 0x11B queues 0xD5 into a free slot. */
+s32 func_0020A860(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlTask *candidates[16];
+    BtlTask *task;
+    BtlUnit *unit;
+    BtlUnit *leader;
+    u32 count;
+    s32 summon;
+
+    if (state->mode == 2) {
+        for (unit = state->units; unit != 0; unit = unit->next) {
+            u32 flags = unit->status.flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    s32 species = unit->partyRecord.unitId;
+
+                    if (species < 0x143) {
+                        if (species >= 0x13D) {
+                            /* Agility from record 0x13D - 6 + [0, 6); the sum stays int before narrowing. */
+                            s32 value = datEnemyRecords[0x13D].baseStats[3] - 6 + effMiscRandMod(0, 6);
+                            s8 agility = value;
+
+                            unit->partyRecord.baseStats[3] = agility;
+                            btlBossDebugPrintf("btl:HARI2 %X = agi[%d]\n", unit->partyRecord.unitId, agility);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (state->mode == 1) {
+        count = 0;
+        for (task = state->tasks; task != 0; task = task->next) {
+            if (task->flags & 8) {
+                unit = task->unit;
+                if (unit->status.flags & 1) {
+                    if (unit->status.flags & 0x200) {
+                        if ((unit->partyRecord.status & 0x7FFF) == 0x2000) {
+                            candidates[count++] = task;
+                        }
+                    }
+                }
+            }
+        }
+        if (count == 0) {
+            return -1;
+        }
+        task = candidates[effMiscRandMod(0, count)];
+        unit = task->unit;
+        fldAppendSceneGroupHandle(task);
+        task->indexWork.phase = 2;
+        task->indexWork.skillId = 0xD2;
+        btlAppendIndexListEntry(task->indexWork.indices, unit);
+    } else {
+        BtlUnit *units = state->units;
+        BtlUnit *slot;
+
+        leader = 0;
+        count = 0;
+        for (unit = units; unit != 0; unit = unit->next) {
+            u32 flags = unit->status.flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    if (!(flags & 0xE0)) {
+                        count++;
+                    }
+                    if (unit->partyRecord.unitId == 0x11B) {
+                        leader = unit;
+                    }
+                }
+            }
+        }
+        if (leader == 0) {
+            return -1;
+        }
+        if (leader->status.flags & 0xE0) {
+            return -1;
+        }
+        if (count >= 7) {
+            return -1;
+        }
+        for (slot = units; slot != 0; slot = slot->next) {
+            if (slot->status.flags & 0x400) {
+                if (!(btlUnitStatusPair(slot) & 3)) {
+                    break;
+                }
+            }
+        }
+        if (slot == 0) {
+            return -1;
+        }
+        summon = btlSelectMissingHariSummon();
+        if (summon <= 0) {
+            return -1;
+        }
+        task = btlFindUnitByActor(leader);
+        fldAppendSceneGroupHandle(task);
+        task->indexWork.phase = 2;
+        task->indexWork.skillId = 0xD5;
+        task->indexWork.unk18 = summon;
+        btlAppendIndexListEntry(task->indexWork.indices, slot);
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00202178", func_0020AB08);
 

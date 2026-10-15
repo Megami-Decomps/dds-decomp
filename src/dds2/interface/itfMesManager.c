@@ -365,9 +365,9 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
     mes->flags = 0;
-    mes->unk10 = 0x53;
+    mes->drawSurfaceIndex = 0x53;
     mes->renderValue = 0xFFFFF0;
-    mes->unk12 = 0;
+    mes->panelMode = 0;
     mes->callbackAddress = 0;
     itfResetCursorPositionAndState(&mes->blk14, 1);
     itfMesResetCursorState(&mes->entryBlock, 1);
@@ -552,10 +552,10 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     optionBlock->glyphChain = (FrFontGlyph *)itfMesBuildNodeRows(&table->items[1], table->bitCount, optionBlock->panelValue, optionBlock->x, firstRowY, mes->renderValue);
     optionBlock->rowCount = visibleRowCount;
     mes->flags = (mes->flags & ~ITF_MES_OPTION_STATE_MASK) | ITF_MES_OPTION_LIST_READY;
-    if (mes->unk12 == 3) {
+    if (mes->panelMode == 3) {
         itfMesBuildOptionFrame(mes);
     }
-    optionBlock->unk10 = 1;
+    optionBlock->selectionState = 1;
 }
 
 /* Release option glyphs, clear option selection/state and invalidate its rank.
@@ -568,7 +568,7 @@ void itfMesResetWindow(s32 window) {
         optionBlock->glyphChain = NULL;
     }
     optionBlock->panelValue = 0;
-    optionBlock->unk10 = 0;
+    optionBlock->selectionState = 0;
     optionBlock->rowCount = 0;
     optionBlock->selectedIndex = -1;
     mes->flags &= ~ITF_MES_OPTION_STATE_MASK;
@@ -870,8 +870,8 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 panelMode, s32 fadeLimit) {
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
-        if (mes->unk12 != panelMode || panelBlock->fadeLimit != fadeLimit) {
-            mes->unk12 = panelMode;
+        if (mes->panelMode != panelMode || panelBlock->fadeLimit != fadeLimit) {
+            mes->panelMode = panelMode;
             itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, panelMode, fadeLimit);
             if (panelBlock->sprite != NULL) {
                 itfPanelReleasePrimitiveResources(panelBlock->sprite);
@@ -1219,7 +1219,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     }
     glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
                           (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
-    if (mes->unk12 == 3) {
+    if (mes->panelMode == 3) {
         if (frFontCountGlyphBands(glyph) == 1) {
             frFontCenterGlyphChainAt(0x1000, 0xC60, glyph);
         } else {
@@ -1249,7 +1249,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         evtLipsExecFunction(lipsValue, itfGetTextLipsMotionId());
     }
     itfMesSetNodeChainRenderValue(glyph, mes->renderValue);
-    entryBlock->unk16 = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
+    entryBlock->lineCount = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
     entryBlock->glyphChain = glyph;
 }
 
@@ -1623,7 +1623,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     top = pos->y + place->bounds[1];
     itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->bounds[0], top, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->renderValue);
     place->sprite->screenY = top;
-    itfPanelUpdateValuesAndNotify(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
+    itfPanelUpdateValuesAndNotify(place->sprite, place->red, place->green, place->blue, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
@@ -1660,7 +1660,7 @@ void itfMesResetCursorState(ItfMesEntryBlock *cur, s32 resetPos) {
     cur->glyphChain = NULL;
     cur->textState = 0;
     cur->unk11 = 0;
-    cur->unk16 = 0;
+    cur->lineCount = 0;
     cur->itemIndex = 0;
     cur->tableCount = 0;
     cur->color[0] = 0;
@@ -1675,7 +1675,7 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->y = 0xC88;
     cursor->glyphChain = NULL;
     cursor->panelValue = 0;
-    cursor->unk10 = 0;
+    cursor->selectionState = 0;
     cursor->selectedIndex = -1;
     cursor->savedIndex = -1;
     cursor->rowCount = 0;
@@ -1782,9 +1782,9 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 va
         block->bounds[1] = -0x80;
         block->bounds[2] = 0x1A30;
         block->bounds[3] = 0x288;
-        block->unk1C = 0x80;
-        block->unk20 = 0x80;
-        block->unk24 = 0x80;
+        block->red = 0x80;
+        block->green = 0x80;
+        block->blue = 0x80;
         block->fadeLimit = value > 0 ? value : 0x80;
         break;
     case 1:
@@ -1792,9 +1792,9 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 va
         block->bounds[1] = -0x80;
         block->bounds[2] = 0x1A30;
         block->bounds[3] = 0x288;
-        block->unk1C = 0x80;
-        block->unk20 = 0x80;
-        block->unk24 = 0x80;
+        block->red = 0x80;
+        block->green = 0x80;
+        block->blue = 0x80;
         block->fadeLimit = value > 0 ? value : 0x80;
         break;
     case 2:
@@ -1802,9 +1802,9 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 va
         block->bounds[1] = -0x80;
         block->bounds[2] = 0x1CB0;
         block->bounds[3] = 0x288;
-        block->unk1C = 0x80;
-        block->unk20 = 0x80;
-        block->unk24 = 0x80;
+        block->red = 0x80;
+        block->green = 0x80;
+        block->blue = 0x80;
         block->fadeLimit = value > 0 ? value : 0x80;
         break;
     }
@@ -1832,16 +1832,16 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     transition = panel->flags & 0x300;
     switch (transition) {
     case 0x100:
-        sprite->unk38 += 24;
-        if (sprite->unk38 >= place->fadeLimit || panel->unk12 == 3) {
-            sprite->unk38 = place->fadeLimit;
+        sprite->alpha += 24;
+        if (sprite->alpha >= place->fadeLimit || panel->panelMode == 3) {
+            sprite->alpha = place->fadeLimit;
             panel->flags = (panel->flags & ~0x307) | 0x203;
         }
         break;
     case 0x300:
-        sprite->unk38 -= 8;
-        if (sprite->unk38 <= 0 || panel->unk12 == 3) {
-            sprite->unk38 = 0;
+        sprite->alpha -= 8;
+        if (sprite->alpha <= 0 || panel->panelMode == 3) {
+            sprite->alpha = 0;
             panel->flags &= ~0x300;
         }
         break;
@@ -1851,16 +1851,16 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     transition = panel->flags & 0x3000;
     switch (transition) {
     case 0x1000:
-        sprite->unk38 += 32;
-        if (sprite->unk38 >= 200) {
-            sprite->unk38 = 200;
+        sprite->alpha += 32;
+        if (sprite->alpha >= 200) {
+            sprite->alpha = 200;
             panel->flags = (panel->flags & ~0x3000) | 0x2000;
         }
         break;
     case 0x3000:
-        sprite->unk38 -= 32;
-        if (sprite->unk38 <= 0) {
-            sprite->unk38 = 0;
+        sprite->alpha -= 32;
+        if (sprite->alpha <= 0) {
+            sprite->alpha = 0;
             panel->flags &= ~0x3000;
             itfPanelReleasePrimitiveResources(sprite);
             place->frame = NULL;
@@ -1872,16 +1872,16 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
     transition = panel->flags & 0xC00;
     switch (transition) {
     case 0x400:
-        sprite->unk38 += 24;
-        if (sprite->unk38 >= place->fadeLimit) {
-            sprite->unk38 = place->fadeLimit;
+        sprite->alpha += 24;
+        if (sprite->alpha >= place->fadeLimit) {
+            sprite->alpha = place->fadeLimit;
             panel->flags = (panel->flags & ~0xC07) | 0x803;
         }
         break;
     case 0xC00:
-        sprite->unk38 -= 8;
-        if (sprite->unk38 <= 0) {
-            sprite->unk38 = 0;
+        sprite->alpha -= 8;
+        if (sprite->alpha <= 0) {
+            sprite->alpha = 0;
             panel->flags &= ~0xC00;
             itfPanelReleasePrimitiveResources(sprite);
             place->overlay = NULL;
@@ -1908,15 +1908,15 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     s32 bottom;
     s32 entryY;
 
-    switch (selection->unk10) {
+    switch (selection->selectionState) {
     case 1:
-        if (panel->unk12 == 3) {
-            selection->unk10 = 2;
+        if (panel->panelMode == 3) {
+            selection->selectionState = 2;
             panel->flags = (flags & ~0x38) | 0x18;
             break;
         }
         entryY = entry->y;
-        bottom = entryY + entry->unk16 * (25 << 3);
+        bottom = entryY + entry->lineCount * (25 << 3);
         top = selection->y - ((selection->rowCount * 25 - 25) << 3);
         if (entryY == 0xAF8 && panel->blkA4.sprite != NULL) {
             panel->blkA4.sprite->scrollSpan = ((bottom - top) / 64) * 64 + 64;
@@ -1929,7 +1929,7 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
             if (entry->glyphChain != NULL) {
                 itfMesSetChildChainFlags(entry->glyphChain, 3);
             }
-            selection->unk10 = 2;
+            selection->selectionState = 2;
             panel->flags = (panel->flags & ~0x38) | 0x18;
         }
         break;
@@ -1945,14 +1945,14 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
             btlSetFadePhaseAlphaTimer(&panel->fade, 1, 0x7F, 0);
             panel->flags = (panel->flags & ~0x38) | 0x28;
             selection->glyphColorIntensity = 0x80;
-            selection->unk10 = 3;
+            selection->selectionState = 3;
         }
         break;
     case 3:
         selection->glyphColorIntensity -= 16;
         if (selection->glyphColorIntensity <= 0) {
             selection->glyphColorIntensity = 0;
-            selection->unk10 = 4;
+            selection->selectionState = 4;
             itfResetBattleFadeState(&panel->fade, 0);
         }
         itfMesRecolorNodeChildren(selection->glyphChain, selection->glyphColorIntensity);
@@ -1962,7 +1962,7 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
             itfMesShiftPanelVertically(panel, 64);
             return;
         }
-        selection->unk10 = -1;
+        selection->selectionState = -1;
         break;
     }
 }
@@ -2145,7 +2145,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
         itfDrawSoundSelectorFadeLayers(panel);
     }
     if (panel->fade.kind & 2) {
-        if (panel->unk12 == 3) {
+        if (panel->panelMode == 3) {
             itfDrawSoundSelectorOptionPanel(panel);
         } else {
             itfDrawSelectedSoundRow(panel);
@@ -2160,12 +2160,12 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
     }
     place = &panel->blkA4;
     if ((panel->flags & 0x300) >= 0x100) {
-        if (panel->unk12 != 3) {
-            itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->unk10]);
+        if (panel->panelMode != 3) {
+            itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
         }
         itfMesWork.flags |= 2;
         if (place->overlay != 0) {
-            itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->unk10]);
+            itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->drawSurfaceIndex]);
         }
     }
     if (D_003B4778[0] != 0 && D_003B4778[0]->owner == panel && place != 0) {
@@ -2248,7 +2248,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
         itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
         itfSendTablePacket(list, 0, 0);
     }
-    surface = &kwlnDrawSurfaces[panel->unk10];
+    surface = &kwlnDrawSurfaces[panel->drawSurfaceIndex];
     surface->append(surface, list);
 }
 
@@ -2292,7 +2292,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
                                       itfMesWork.windowTexture, 0, packet);
         itfSendTablePacket(packet, 0, 0);
     }
-    surface = &kwlnDrawSurfaces[object->unk10];
+    surface = &kwlnDrawSurfaces[object->drawSurfaceIndex];
     surface->append(surface, packet);
 }
 
@@ -2424,7 +2424,7 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
 
         stepper->index = index;
         if (stepper->target != NULL) {
-            stepper->target->unk38 = index;
+            stepper->target->alpha = index;
         }
     }
 }

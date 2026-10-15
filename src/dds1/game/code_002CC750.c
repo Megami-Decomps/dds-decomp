@@ -617,13 +617,14 @@ u32 func_002CD7F0(u32 arg0, u32 arg1) {
     return arg1;
 }
 
-u32 func_002CD7F8(u32 itemId) {
+/* Retail mode-1 item predicate: never blocks an entry; itemId is unused. */
+u32 mnuShopIsMode1PurchaseBlocked(u32 itemId) {
     (void)itemId;
     return 0;
 }
 
-/* Retail stub retains the caller's unused item-ID word. */
-u32 func_002CD800(u32 itemId) {
+/* Retail mode-1 purchase hook: unused itemId, no mutation, ignored return one. */
+u32 mnuShopCommitMode1PurchaseNoOp(u32 itemId) {
     (void)itemId;
     return 1;
 }

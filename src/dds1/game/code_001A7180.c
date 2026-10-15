@@ -417,8 +417,8 @@ s32 btlResolveBattleTerminalOutcome(void) {
 
     state = btlGetRuntime();
     state->eventReady = 0;
-    if (state->unk5B4 != NULL) {
-        s32 result = state->unk5B4();
+    if (state->battleOutcomeOverride != NULL) {
+        s32 result = state->battleOutcomeOverride();
         if (result != -1) {
             state->eventReady = result;
             return 1;

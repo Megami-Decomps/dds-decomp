@@ -207,33 +207,33 @@ enum {
     MNU_SCENE_SPRITE_Y_OFFSET,
 };
 
-extern MnuSpritePlacement D_0036C268[];
+extern MnuSpritePlacement mnuMantraSceneSpritePlacements[];
 extern MnuSceneSpriteEntry D_0036BE38[];
 extern s32 D_0036C6CC[];
 
 void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 flags, s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036C268[placementIndex][2]) << 4,
-                  (y + D_0036C268[placementIndex][3]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraSceneSpritePlacements[placementIndex][2]) << 4,
+                  (y + mnuMantraSceneSpritePlacements[placementIndex][3]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[D_0036C268[placementIndex][0]],
-                  D_0036C268[placementIndex][1],
+                  (s32)D_0036C698[mnuMantraSceneSpritePlacements[placementIndex][0]],
+                  mnuMantraSceneSpritePlacements[placementIndex][1],
                   context);
 }
 
 void mnuDrawSceneEntrySpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 placementIndex, s32 flags, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] +
-                   D_0036C268[placementIndex][2]) << 4,
+                   mnuMantraSceneSpritePlacements[placementIndex][2]) << 4,
                   (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] +
-                   D_0036C268[placementIndex][3]) << 3,
+                   mnuMantraSceneSpritePlacements[placementIndex][3]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[D_0036C268[placementIndex][0]],
-                  D_0036C268[placementIndex][1],
+                  (s32)D_0036C698[mnuMantraSceneSpritePlacements[placementIndex][0]],
+                  mnuMantraSceneSpritePlacements[placementIndex][1],
                   context);
 }
 

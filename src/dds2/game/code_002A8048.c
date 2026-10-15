@@ -31,7 +31,7 @@ extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
 
 extern s8 sdfPadButtonStates[32];
 extern s8 D_0037F510[64];
-extern SdfMovieDescriptor D_003E56B8;
+extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
 extern u16 D_00438A90[4];
 extern u16 D_00438FF0;
 extern SdfPoolNode D_003805A8;
@@ -198,16 +198,16 @@ s32 mnuMovieViewer(void) {
     }
 
     if (D_0037F510[0x28] < 0) {
-        D_003E56B8.unk00 = 0x7000;
-        D_003E56B8.unk02 = 0x7900;
-        D_003E56B8.unk08 = 0x2000;
-        D_003E56B8.unk0A = 0x0E00;
+        mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
+        mnuMovieViewerDrawDescriptor.unk02 = 0x7900;
+        mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
+        mnuMovieViewerDrawDescriptor.unk0A = 0x0E00;
     }
     if (D_0037F510[0x2A] < 0) {
-        D_003E56B8.unk00 = 0x7000;
-        D_003E56B8.unk02 = 0x7B00;
-        D_003E56B8.unk08 = 0x2000;
-        D_003E56B8.unk0A = 0x0A00;
+        mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
+        mnuMovieViewerDrawDescriptor.unk02 = 0x7B00;
+        mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
+        mnuMovieViewerDrawDescriptor.unk0A = 0x0A00;
     }
 
     if (mnuMovieList.playing != 0) {
@@ -223,7 +223,7 @@ s32 mnuMovieViewer(void) {
         node = mnuGetMovieListNodeAtOffset();
         if (node != NULL) {
             mnuStopMovieDrawTask();
-            mnuStartMovieDrawTaskForResource(node->path, &D_003E56B8);
+            mnuStartMovieDrawTaskForResource(node->path, &mnuMovieViewerDrawDescriptor);
             mnuMovieList.playing = 1;
         } else {
             mnuStopMovieDrawTask();

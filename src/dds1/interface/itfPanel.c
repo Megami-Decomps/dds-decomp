@@ -27,7 +27,7 @@ extern void (*D_00357A28[])();
 /* Store rectangle corners and the caller's render value before notifying the
  * kind-specific handler with context only. No kind-range or context checks. */
 void itfSetPanelLayoutAndNotify(UiSprite *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue) {
-    panel->unk0C = renderValue;
+    panel->renderValue = renderValue;
     panel->left = left;
     panel->top = top;
     panel->right = right;
@@ -46,19 +46,19 @@ void itfAdvancePanelLayoutAndNotify(UiSprite *panel, s32 leftDelta, s32 topDelta
     panel->top += topDelta;
     panel->right += rightDelta;
     panel->bottom += bottomDelta;
-    panel->unk0C += renderValueDelta;
+    panel->renderValue += renderValueDelta;
     if (handler != 0) {
         handler(panel->payload, panel->left, panel->top, panel->right, panel->bottom);
     }
 }
 
-/* Store the four opaque secondary values in order, then notify with context.
- * Keep write-only fields unnamed rather than assuming these are RGBA channels. */
+/* Store the RGBA words in packet order, then notify with context.
+ * The panel renderers consume these channels directly. */
 void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 firstValue, s32 secondValue, s32 thirdValue, s32 fourthValue) {
-    panel->unk2C = firstValue;
-    panel->unk30 = secondValue;
-    panel->unk34 = thirdValue;
-    panel->unk38 = fourthValue;
+    panel->red = firstValue;
+    panel->green = secondValue;
+    panel->blue = thirdValue;
+    panel->alpha = fourthValue;
     if (D_00357A28[panel->kind] != 0) {
         D_00357A28[panel->kind](panel->payload);
     }

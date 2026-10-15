@@ -845,7 +845,7 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
 void btlResetCommandIndexWork(BtlTask *task) {
     btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
-    task->unit->unk2F4 = -1;
+    task->unit->pendingAbilityId = -1;
 }
 
 void btlCommandStartSoundTasks(u8 *task) {
@@ -1037,10 +1037,10 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    if (action->unit->unk2F4 == -1)
+    if (action->unit->pendingAbilityId == -1)
         task = btlCreateEffObjD(action->unit, action->indexWork.skillId);
     else
-        task = btlCreateEffObjD(action->unit, action->unit->unk2F4);
+        task = btlCreateEffObjD(action->unit, action->unit->pendingAbilityId);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     task->ownerId = btlAdvanceRuntimeSequenceCounter();
@@ -2962,7 +2962,7 @@ void btlUnitTurnEndCommit(s32 task) {
     }
     btlAdvanceHistoryCounter(task);
     btlResetIndexWork(&command->indexWork);
-    owner->unk2F4 = -1;
+    owner->pendingAbilityId = -1;
     command->options &= ~1;
     command->unk14 += 1;
     owner->status.flags &= ~0x4000;
@@ -3066,7 +3066,7 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
-        actor->unk2F4 = -1;
+        actor->pendingAbilityId = -1;
         btlClearAllActorEntrySlots(actor);
         fldUpdateSceneGroupTask(task);
         btlRemoveTaskFromSceneGroup(task);

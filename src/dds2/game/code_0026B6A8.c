@@ -23,7 +23,7 @@ extern void mnuDrawTerminalBackdrop(s32);
 
 
 
-extern char D_003CE848[];
+extern char mnuTerminalPopupEntries[];
 
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
@@ -86,7 +86,8 @@ s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0026B930(void) {
+/* Registered terminal panel leave hook: no side effects; returns one. */
+u32 mnuTerminalPanelLeaveNoOp(void) {
     return 1;
 }
 
@@ -100,7 +101,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
     if (*panel == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (dspStartFlagEvent(state) == 0) {
-                mnuSetPopupEntryFlagged(panel, D_003CE848);
+                mnuSetPopupEntryFlagged(panel, mnuTerminalPopupEntries);
             }
         }
     }
@@ -160,14 +161,16 @@ s32 mnuUpdateTerminalPanelPopupWhenIdle(KwlnTask *request) {
     return result;
 }
 
-s32 func_0026BB78(KwlnTask *request) {
+/* Draw the backdrop and dispatch phase one of the terminal fade popup. */
+s32 mnuDispatchTerminalFadePanel(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
 
     mnuDrawTerminalBackdrop(state);
     return menuSetHandler((void *)state, 1, (void *)request);
 }
 
-s32 func_0026BBC8(KwlnTask *request) {
+/* Dispatch phase two of the fade popup without changing message-window mode. */
+s32 mnuDispatchTerminalFadePanelExit(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
 
     return menuSetHandler((void *)state, 2, (void *)request);
@@ -189,15 +192,18 @@ s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0026BC68(void) {
+/* Registered terminal rebuild start hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildStartNoOp(void) {
     return 0;
 }
 
-u32 func_0026BC70(void) {
+/* Registered terminal rebuild update hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildUpdateNoOp(void) {
     return 0;
 }
 
-u32 func_0026BC78(void) {
+/* Registered terminal rebuild finish hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildFinishNoOp(void) {
     return 0;
 }
 
@@ -280,8 +286,8 @@ void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negat
 }
 
 void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused) {
-    state->unk14 = vertical;
-    state->unk18 = horizontal;
+    state->overlayX = vertical;
+    state->overlayY = horizontal;
 }
 
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
@@ -317,7 +323,7 @@ void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrol
             effDrawTextureSlotWithBlendedCornerColors(0, y, z, opacity / 4, 0x60, resource, frameIndex + 1, surfaceIndex);
         } else {
             offsets = verticalOffsets.values[state->layout][1];
-            effDrawTextureSlotWithBlendedCornerColors(state->unk14, state->unk18, z, opacity / 10, 0x60,
+            effDrawTextureSlotWithBlendedCornerColors(state->overlayX, state->overlayY, z, opacity / 10, 0x60,
                 resource, frameIndex + 2, surfaceIndex);
         }
         stripX = x + (strip->horizontalOffset & ~0xF);

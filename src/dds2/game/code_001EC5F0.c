@@ -2815,9 +2815,9 @@ typedef struct BtlSpeciesCameraFactors {
 } BtlSpeciesCameraFactors;
 extern BtlSpeciesCameraFactors D_003B6DD0[10];
 
+/* vu0 routine: frame the first target with one of two paired quaternion poses. */
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418338);
 
-/* vu0 routine: frame the first target with one of two paired quaternion poses. */
 void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4] __attribute__((aligned(16)));
     f32 position[4] __attribute__((aligned(16)));

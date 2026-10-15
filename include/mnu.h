@@ -149,7 +149,7 @@ typedef char StaffSlots_size_must_be_0x78[(sizeof(StaffSlots) == 0x78) ? 1 : -1]
 typedef struct PartyPanelEntry {
     s32 unk0;
     s32 index;
-    s32 unk8;
+    s32 unitIndex;
     s32 level;
     s32 hp;
     s32 mp;
@@ -159,8 +159,8 @@ typedef struct PartyPanelEntry {
 } PartyPanelEntry;
 
 typedef struct PartyPanel {
-    s32 unk0;
-    s32 unk4;
+    s32 frontlineCount;
+    s32 reserveCount;
     PartyPanelEntry slots[5];
 } PartyPanel;
 
@@ -181,7 +181,7 @@ typedef char BrsProgressRow_size_must_be_0x2C[(sizeof(BrsProgressRow) == 0x2C) ?
 typedef struct MenuSprites {
     u32 flags;
     u8 pad04[8];
-    s32 unkC;
+    s32 profileLabelOverride;
 #ifdef VERSION_DDS2
     void *icon[5];
     void *item[11];
@@ -199,8 +199,8 @@ typedef struct MenuSprites {
     s32 slideOffset;
     s32 slideSpeed;
 #ifdef VERSION_DDS2
-    s8 unk74;
-    s8 unk75;
+    s8 menuValueStyleOverride;
+    s8 currentValueStyle;
 #endif
 } MenuSprites;
 
@@ -711,8 +711,8 @@ typedef struct DspScrollingStripState {
     s32 unk8;
     struct EffectSlotSet *resource;
     s32 layer;
-    s32 unk14;
-    s32 unk18;
+    s32 overlayX;
+    s32 overlayY;
     DspScrollingStrip strips[6];
 } DspScrollingStripState;
 
@@ -919,7 +919,7 @@ typedef struct MenuStaffContext {
     struct EffectSlotSet *partyTitles[9]; /* 0xCC..0xEC */
     struct EffectSlotSet *contextTitle; /* 0xF0 */
     struct MenuIconState *panelLayout; /* 0xF4: layout used by staff panel construction */
-    struct MenuIconState *unkF8; /* 0xF8: second panel layout */
+    struct MenuIconState *itemPanelLayout; /* 0xF8: item-list panel layout */
     struct MenuIconState *unkFC; /* 0xFC: third panel layout */
     struct EffMappedResource *motionResource; /* 0x100 */
     MenuWindowContainer *skillWindow; /* 0x104: field-skill window; 002AAEA0 reads list->last. */

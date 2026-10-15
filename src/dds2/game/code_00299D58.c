@@ -99,11 +99,13 @@ s32 mnuStaffRunPanel2(KwlnTask *input) {
     }
 }
 
-u32 func_00299EF0(void) {
+/* Registered result message enter hook: no side effects; returns one. */
+u32 mnuResultMessageEnterNoOp(void) {
     return 1;
 }
 
-u32 func_00299EF8(void) {
+/* Registered result message leave hook: no side effects; returns one. */
+u32 mnuResultMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -124,11 +126,13 @@ s32 mnuAdvanceResultPanel(KwlnTask *input) {
     return menuSetHandler((void *)context, 2, (void *)input);
 }
 
-u32 func_00299FD8(void) {
+/* Registered result selection enter hook: no side effects; returns one. */
+u32 mnuResultSelectionEnterNoOp(void) {
     return 1;
 }
 
-u32 func_00299FE0(void) {
+/* Registered result selection leave hook: no side effects; returns one. */
+u32 mnuResultSelectionLeaveNoOp(void) {
     return 1;
 }
 
@@ -195,7 +199,8 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     }
 }
 
-u32 func_0029A1E0(BrsSkillPackageWork *scene) {
+/* Extra profile-selection wait hook: retail never defers the follow-up work. */
+u32 mnuShouldDeferProfileSelection(BrsSkillPackageWork *scene) {
     return 0;
 }
 
@@ -285,7 +290,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
                 prfCapPresentMessages(scene);
                 return 0;
             }
-            if (func_0029A1E0(scene) != 0) {
+            if (mnuShouldDeferProfileSelection(scene) != 0) {
                 return 0;
             }
             if (mnuRequestContextLatchedSceneDsp(scene) != 0) {
@@ -337,7 +342,8 @@ s32 mnuResetItemSelectionMarkers(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0029A650(void) {
+/* Registered primary-reward panel leave hook: no side effects; returns one. */
+u32 mnuPrimaryRewardPanelLeaveNoOp(void) {
     return 1;
 }
 

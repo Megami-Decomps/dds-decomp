@@ -883,9 +883,9 @@ typedef struct BattleInitState {
     u32 unk2B0;
     u8 unk2B4;
     u8 pad2B5[0x20F];
-    u8 unk4C4;
+    u8 timingRate;
     u8 pad4C5[3];
-    f32 unk4C8;
+    f32 modelFrameScale;
     s32 messageWindows[3];
     u8 pad4D8[0xE0];
     u8 unk5B8;
@@ -941,11 +941,11 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
     mnuMovieTaskState = 2;
-    ((BattleInitState *)btlRuntime)->unk4C4 = 0x1E;
+    ((BattleInitState *)btlRuntime)->timingRate = 0x1E;
     {
         BattleInitState *state = (BattleInitState *)btlRuntime;
         state->endCode = 0;
-        state->unk4C8 = 1.0f;
+        state->modelFrameScale = 1.0f;
     }
     ((BattleInitState *)btlRuntime)->unk5B8 = 0;
     ((BattleInitState *)btlRuntime)->unk5BC = 0x80808080;
@@ -1393,7 +1393,7 @@ DatPartyRecord *btlGetActorEntryData(BtlUnit *actor) {
     DatPartyRecord *entry;
 
     if ((actor->status.flags & 0x400) == 0) {
-        entry = btlGetIndexedPartyEntryRecord(actor->unk2E4);
+        entry = btlGetIndexedPartyEntryRecord(actor->partyIndex);
         return entry;
     }
     return &actor->partyRecord;
@@ -1414,7 +1414,7 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_004150B0);
 
 void btlSyncPlayerWork(BtlUnit *actor) {
     DatPartyRecord *src = &actor->partyRecord;
-    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->unk2E4);
+    DatPartyRecord *dst = btlGetIndexedPartyEntryRecord(actor->partyIndex);
     s32 maxHp;
     s32 maxMp;
     if (src->flags & 0x1000) {
@@ -1456,7 +1456,7 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                if (kind == unit->unk2E4) {
+                if (kind == unit->partyIndex) {
                     return unit;
                 }
             }
@@ -1492,14 +1492,14 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     for (i = sourceIndex; i < 4; i++) {
         memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(saved));
         if (datGameState->party[i + 1].flags & 2) {
-            btlFindActiveActorByKind(i + 1)->unk2E4 = i;
+            btlFindActiveActorByKind(i + 1)->partyIndex = i;
         }
     }
 
     for (i = 4; i > insertion; i--) {
         memcpy(&datGameState->party[i], &datGameState->party[i - 1], sizeof(saved));
         if (datGameState->party[i - 1].flags & 2) {
-            btlFindActiveActorByKind(i - 1)->unk2E4 = i;
+            btlFindActiveActorByKind(i - 1)->partyIndex = i;
         }
     }
 
@@ -1507,7 +1507,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     btlCopyUnitStats(unit, &saved);
     unit->partyRecord.flags |= 2;
     datGameState->party[i].flags |= 2;
-    unit->unk2E4 = i;
+    unit->partyIndex = i;
     btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
 }
@@ -1518,14 +1518,14 @@ void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     s32 originalIndex;
     s32 index;
 
-    originalIndex = unit->unk2E4;
+    originalIndex = unit->partyIndex;
     memcpy(&saved, &datGameState->party[originalIndex], sizeof(saved));
     index = originalIndex;
     if (index < 4 && (u16)(scanState->party[index + 1].flags & 1)) {
         do {
             memcpy(&datGameState->party[index], &datGameState->party[index + 1], sizeof(saved));
             if (datGameState->party[index + 1].flags & 2) {
-                btlFindActiveActorByKind(index + 1)->unk2E4 = index;
+                btlFindActiveActorByKind(index + 1)->partyIndex = index;
             }
             index++;
             if (index >= 4) {
@@ -1538,7 +1538,7 @@ void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     memcpy(&datGameState->party[index], &saved, sizeof(saved));
     unit->partyRecord.flags &= ~2;
     datGameState->party[index].flags &= ~2;
-    unit->unk2E4 = 6;
+    unit->partyIndex = 6;
     btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index, saved.unitId);
 }
@@ -1549,18 +1549,18 @@ extern const char D_00415130[];
 void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
     DatPartyRecord previous;
 
-    if (actor->unk2E4 != targetIndex) {
-        memcpy(&previous, &datGameState->party[actor->unk2E4], sizeof(previous));
-        memcpy(&datGameState->party[actor->unk2E4], &datGameState->party[targetIndex], sizeof(previous));
+    if (actor->partyIndex != targetIndex) {
+        memcpy(&previous, &datGameState->party[actor->partyIndex], sizeof(previous));
+        memcpy(&datGameState->party[actor->partyIndex], &datGameState->party[targetIndex], sizeof(previous));
         memcpy(&datGameState->party[targetIndex], &previous, sizeof(previous));
 
-        btlCopyUnitStats(actor, &datGameState->party[actor->unk2E4]);
+        btlCopyUnitStats(actor, &datGameState->party[actor->partyIndex]);
         actor->partyRecord.flags |= 2;
-        datGameState->party[actor->unk2E4].flags |= 2;
+        datGameState->party[actor->partyIndex].flags |= 2;
         datGameState->party[targetIndex].flags &= ~2;
         btlOnPartyRosterChange();
         btlBossDebugPrintf(D_00415130,
-                           actor->unk2E4, targetIndex, previous.unitId,
+                           actor->partyIndex, targetIndex, previous.unitId,
                            actor->partyRecord.unitId);
     }
 }
@@ -1803,7 +1803,122 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
 
-INCLUDE_ASM(const s32, "game/code_001A8748", btlBuildUnitIndexList);
+extern const char D_00415178[];
+
+s32 btlBuildUnitIndexList(void *actionArg, BtlIndexList *targets,
+                  s32 area, s32 rule, s32 excludedStatus) {
+    ActionStateLink *action = (ActionStateLink *)actionArg;
+    BtlUnit *collected[16];
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 alliedArea;
+    s32 opposingArea;
+    s32 areaMask;
+    BtlUnit *unit;
+    s32 count;
+    s32 selected;
+    s32 i;
+
+    if ((action->unit->status.flags & 0x200) != 0) {
+        alliedArea = 0x200;
+        opposingArea = 0x400;
+    } else {
+        alliedArea = 0x400;
+        opposingArea = 0x200;
+    }
+    areaMask = 0;
+    if ((area & 1) != 0) {
+        areaMask = alliedArea;
+    }
+    if ((area & 2) != 0) {
+        areaMask |= opposingArea;
+    }
+    btlClearIndexList(targets);
+    if ((rule & 1) != 0) {
+        btlAppendIndexListEntry(targets, action->unit);
+        return 1;
+    }
+    unit = battle->units;
+    count = 0;
+    selected = -1;
+    while (unit != NULL) {
+        s32 flags = unit->status.flags;
+
+        if ((flags & 0x100) == 0) {
+            goto nextUnit;
+        }
+        if ((flags & 0xE0) != 0) {
+            if (excludedStatus == 0) {
+                goto nextUnit;
+            }
+            if ((excludedStatus & 0x4000) != 0 && excludedStatus != -1) {
+                goto nextUnit;
+            }
+        }
+        if ((flags & areaMask) == 0) {
+            goto nextUnit;
+        }
+        if ((rule & 2) != 0 && (unit->status.flags & 1) != 0) {
+            if (action->unit == unit) {
+                goto nextUnit;
+            }
+            collected[count++] = unit;
+        } else if ((rule & 8) != 0) {
+            if ((unit->status.flags & 1) != 0) {
+                goto nextUnit;
+            }
+            collected[count] = unit;
+            selected = count++;
+        } else {
+            if ((rule & 4) == 0) {
+                if ((unit->status.flags & 1) == 0) {
+                    goto nextUnit;
+                }
+            } else {
+                if ((unit->status.flags & 1) == 0) {
+                    selected = count;
+                }
+            }
+            if ((unit->status.flags & 1) != 0) {
+                if (excludedStatus == 0) {
+                    goto appendUnit;
+                }
+                if (excludedStatus == -1) {
+                    goto appendUnit;
+                }
+                if (unit->partyRecord.status == 0) {
+                    goto nextUnit;
+                }
+                if ((excludedStatus & unit->partyRecord.status) != 0) {
+                    goto nextUnit;
+                }
+            }
+appendUnit:
+            collected[count++] = unit;
+        }
+nextUnit:
+        unit = unit->nextActor;
+    }
+    if (count > 0) {
+        if (selected < 0) {
+            selected = count - 1;
+        }
+        for (i = 0; i < count; i++) {
+            s32 index = selected - i;
+
+            if (index < 0) {
+                index += count;
+            } else {
+                index %= count;
+            }
+            btlAppendIndexListEntry(targets, collected[index]);
+        }
+    }
+    btlBossDebugPrintf(D_00415178, count, area, rule, excludedStatus);
+    return count != 0;
+}
+
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415178);
+
 
 extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
@@ -1822,7 +1937,7 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
         if ((btlUnitStatusPair(actor) & 0x1400) || (actor->partyRecord.flags & 0x10)) {
             if (btlCheckSpecialAbility(&actor->partyRecord, 0x23E) != 0) {
                 category = 1;
-                task->unit->unk314 = 0x23E;
+                task->unit->pendingAbilityId = 0x23E;
             } else {
                 category = 0;
             }
@@ -2929,7 +3044,7 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 3) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2942,10 +3057,10 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 1) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
             if (unit->partyRecord.unitId == 2) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2958,10 +3073,10 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 6) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
             if (unit->partyRecord.unitId == 7) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2974,7 +3089,7 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 5) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -2987,7 +3102,7 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
         }
         if (scale == 1.0f && (unit->status.flags & 0x200)) {
             if (unit->partyRecord.unitId == 4) {
-                scale *= datBattleParameters->unkBFC;
+                scale *= datBattleParameters->defaultElementAbilityScale;
             }
         }
         break;
@@ -3377,13 +3492,13 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
         }
         if (btlRollAiBucket() < automatic) {
             if (automaticAbility != -1) {
-                attacker->unk314 = automaticAbility;
+                attacker->pendingAbilityId = automaticAbility;
             }
             return 2;
         }
         if (btlRollAiBucket() < critical) {
             if (criticalAbility != -1) {
-                attacker->unk314 = criticalAbility;
+                attacker->pendingAbilityId = criticalAbility;
             }
             return 2;
         }

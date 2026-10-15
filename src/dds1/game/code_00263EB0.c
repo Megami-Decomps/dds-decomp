@@ -154,7 +154,8 @@ u32 mnuBeginPanelEntryAndCaptureSoundMode(KwlnTask *task) {
     return 1;
 }
 
-u32 func_002642C8(void) {
+/* Registered stat-assignment message leave hook: no side effects; returns one. */
+u32 mnuStatAssignmentMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -230,7 +231,8 @@ u32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00264608(void) {
+/* Registered level-change message leave hook: no side effects; returns one. */
+u32 mnuLevelChangeMessageLeaveNoOp(void) {
     return 1;
 }
 

@@ -158,7 +158,7 @@ extern void btlDestroyActiveMemberSlot(void);
 extern void btlDestroySpecialUnitSlot(void);
 extern s32 btlDisableNonBossUnits(void);
 extern s32 btlDisableUnitsIfSpeciesFlagged(void);
-extern s32 btlDispatchActionAnimationB(BtlLinkedCommand *command);
+extern s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command);
 extern s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry);
 extern void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 action);
 extern s32 btlEffectTaskStartFinale(BtlTask *task);
@@ -324,7 +324,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0xc, btlClearSpecialEnemyRestrictionAfterAction);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlResetUnitPlacement);
         if (mode == 0x106) {
-            BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlDisableNonBossUnits);
+            BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlDisableNonBossUnits);
         }
         allocation = sdfAllocateBlockBySizeThreshold(4);
         battle->effect = allocation;
@@ -334,7 +334,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     case 0x105:
         battle->commandRestrictFlags = (battle->commandRestrictFlags | 1) & ~2;
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlCenterUsasEnemyFormation);
-        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlDisableUnitsIfSpeciesFlagged);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlDisableUnitsIfSpeciesFlagged);
         break;
     case 0x107:
     case 0x117:
@@ -343,7 +343,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->bossCleanup, 0x0, btlRestoreSlotEntriesFromEffect);
         BTL_INSTALL_CALLBACK(battle->pad5C0, 0x0, btlInitializeUnitDisplaySpeciesAndFlags);
         BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlNormalizeDefaultPlayerDisplaySpecies);
-        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlSetFirstCriticalHpUnitSideFlag);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlSetFirstCriticalHpUnitSideFlag);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlInitializeResources);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlInitResourcesWrap);
         if (mode == 0x107) {
@@ -374,7 +374,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x10, btlEffectTaskStartFinale);
         BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlQueueLinkedPairModelSwapTasks);
         BTL_INSTALL_CALLBACK(battle->pad650, 0x0, btlIsEffectActor);
-        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlGetSoleTargetKind);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetKind);
         BTL_INSTALL_CALLBACK(battle->pad65C, 0x0, btlHasDifferentActiveTarget);
         BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlSetLinkFlagOff);
         BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlSetLinkFlagOn);
@@ -438,7 +438,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->reflectedHitOverride, 0x0, btlSelectResponseCodeForEnemyFlag);
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlSwapRandomBossSelection);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x0, btlFindSubsequentTurnScript);
-        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlCheckSelectedBossUnitFlag);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlCheckSelectedBossUnitFlag);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlRefreshRavanaUnitModelsAndPose);
         battle->cameraModeInitializePredicate = btlDispatchEligibleBossEvent;
         BTL_INSTALL_CALLBACK(battle->cameraUpdatePredicate, 0x0, btlCheckAttachedMember);
@@ -483,7 +483,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlMapLinkedCommandResult);
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, func_0020A860);
         BTL_INSTALL_CALLBACK(battle->pad670, 0x0, func_0020AB08);
-        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlFadeOtherEnemyUnitsWhenSpecialModeActive);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlFadeOtherEnemyUnitsWhenSpecialModeActive);
         BTL_INSTALL_CALLBACK(battle->summonEffectId, 0x0, btlMapSkillToCode);
         BTL_INSTALL_CALLBACK(battle->summonEffectDelay, 0x0, btlMapSkillRange);
         BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlRestoreHaritiFormation);
@@ -498,7 +498,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectSpecialDefeatCameraPose);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlChooseDefeatCameraByActionAndTargets);
         BTL_INSTALL_CALLBACK(battle->commandSoundDelay, 0x0, btlGetMillenniaCurseSoundDelay);
-        BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlDispatchActionAnimationB);
+        BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlSetupDefeatCameraFromAnimationFlags);
         BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlInitializeBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->postTargetHook, 0x0, btlStartPairedActorCommandEffect);
@@ -526,7 +526,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         break;
     case 0x138:
         battle->commandRestrictFlags |= 0x400;
-        BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlDeactivateOthersOnSpecialUnitDefeat);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlDeactivateOthersOnSpecialUnitDefeat);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlNormalizeActionForSkill);
         break;
     case 0x140:

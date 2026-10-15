@@ -458,7 +458,8 @@ u32 mnuEnterSelectedResourceLabel(KwlnTask *task) {
     return 1;
 }
 
-u32 func_002B06A0(void) {
+/* Registered party-slot assignment leave hook: no side effects; returns one. */
+u32 mnuPartySlotAssignmentLeaveNoOp(void) {
     return 1;
 }
 
@@ -588,7 +589,8 @@ u32 mnuEnterSlotLabel(KwlnTask *task) {
     return 1;
 }
 
-u32 func_002B0B88(void) {
+/* Registered party-slot clearing leave hook: no side effects; returns one. */
+u32 mnuPartySlotClearLeaveNoOp(void) {
     return 1;
 }
 
@@ -628,7 +630,8 @@ s32 mnuFinishPartyClearPopup(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_002B0D48(void) {
+/* Always allow entry to the registered party-selection return popup. */
+u32 mnuAllowPartySelectionReturn(void) {
     return 1;
 }
 
@@ -742,8 +745,8 @@ extern void *memcpy(void *, const void *, u32);
 extern void mnuPopulatePartyPanelSlot(u8 *, s32, u32, PartyPanel *);
 void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
-    s32 activeCount = context->partyPanel.unk0;
-    s32 lastSlot = context->partyPanel.unk4;
+    s32 activeCount = context->partyPanel.frontlineCount;
+    s32 lastSlot = context->partyPanel.reserveCount;
     s32 i;
 
     memcpy(&menuWork->backup[menuWork->selection], &menuWork->current[entryIndex],
@@ -761,18 +764,18 @@ void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, Menu
                       &context->partyPanel);
     }
     context->partyPanel.slots[menuWork->selection].index = entryIndex;
-    context->partyPanel.unk0 = activeCount;
-    context->partyPanel.unk4 = lastSlot;
+    context->partyPanel.frontlineCount = activeCount;
+    context->partyPanel.reserveCount = lastSlot;
     if (skipRefresh == 0) {
         mnuRefreshWindowSlots(&context->partyWindow,
                               MNU_WINDOW_SLOT_REFRESH_PRESERVE_HANDLES);
     }
-    for (i = context->partyPanel.unk0; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
+    for (i = context->partyPanel.frontlineCount; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
         context->partyWindow.slots[i].flags |= 0x40;
     }
     mnuRefreshPartyPanelBars(&context->partyWindow);
-    context->partyPanel.unk0++;
-    context->partyPanel.unk4--;
+    context->partyPanel.frontlineCount++;
+    context->partyPanel.reserveCount--;
     menuWork->selection++;
 }
 
@@ -833,8 +836,8 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     mnuCopyPartyEntries();
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
-    ((MenuContext *)context)->partyPanel.unk0 = 1;
-    ((MenuContext *)context)->partyPanel.unk4 = mnuCountActiveSlots() - 1;
+    ((MenuContext *)context)->partyPanel.frontlineCount = 1;
+    ((MenuContext *)context)->partyPanel.reserveCount = mnuCountActiveSlots() - 1;
     mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
         ((MenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x40;
@@ -1691,7 +1694,8 @@ s32 mnuStaffIdlePartyUpdate(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_002B3A58(void) {
+/* Always allow entry to the registered skill-menu return popup. */
+u32 mnuAllowSkillMenuReturn(void) {
     return 1;
 }
 
@@ -3134,7 +3138,9 @@ void mnuDrawSkillMenuFrameIcons(MenuContext *context) {
     } while (i < 4);
 }
 
-void func_002B7588(s32 context) {
+/* DDS2 retains the iteration but the frame drawing is compiled out.
+ * DDS1 mnuDrawListFrames draws the frames at the same call site. */
+void mnuDrawListFrames(s32 context) {
     s32 index;
 
     for (index = **(s32 **)(context + 0x28c); index < 3; index = index + 1) {
@@ -3146,7 +3152,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
     u8 *menu = (u8 *)((MenuContext *)context)->party;
     u32 label;
     mnuDrawCampScreenDefault(callback);
-    func_002B7588(context);
+    mnuDrawListFrames(context);
     mnuCreateStaffImageSprite(0x14);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     label = ((MenuWindowContainer *)*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4))->list->cursor->sortKeyPrimary;

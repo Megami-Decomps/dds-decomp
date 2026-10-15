@@ -1676,7 +1676,7 @@ extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
 extern u32 D_00369FA0[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
-extern u32 func_002CD7F8(u32 itemId);
+extern u32 mnuShopIsMode1PurchaseBlocked(u32 itemId);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
 
 s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
@@ -1727,7 +1727,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
             params->id = id;
             params->price = price;
             params->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(id) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -1793,7 +1793,7 @@ s32 mnuCampRebuildItemStockWindow(ShopScene *scene) {
             params->id = id;
             params->price = price;
             params->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(id) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -1811,7 +1811,7 @@ extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
 extern u32 D_00369FA0[];
 extern void mnuSelectFirstListNode(struct MenuList *list);
-extern u32 func_002CD7F8(u32 itemId);
+extern u32 mnuShopIsMode1PurchaseBlocked(u32 itemId);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *window);
 
 s32 mnuBuildShopCatalogList(ShopScene *scene) {
@@ -1857,7 +1857,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
             parameters->id = itemId;
             parameters->price = price;
             parameters->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(itemId) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(itemId) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -1919,7 +1919,7 @@ s32 mnuCampRebuildFilteredStockWindow(ShopScene *scene) {
             params->id = id;
             params->price = price;
             params->mode = mode;
-            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+            if (mnuShopGetTransactionLimit(scene) == 0 || mnuShopIsMode1PurchaseBlocked(id) != 0) {
                 node->flags48 = mode;
             }
         }
@@ -2804,7 +2804,7 @@ void evtAccumulateStateScore(s32 stateAddress) {
 }
 
 extern void datAddCurrencyClamped(s32);
-extern u32 func_002CD800(u32);
+extern u32 mnuShopCommitMode1PurchaseNoOp(u32);
 
 /* Apply the selected buy/sell operation, then restore the row's displayed price. */
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
@@ -2832,7 +2832,7 @@ s32 mnuApplyShopSelectionTransaction(KwlnTask *task) {
         case 2:
             datAddCurrencyClamped(-values->value * scene->counter);
             if (values->mode == 1) {
-                func_002CD800((u32)itemId & 0xFFFF);
+                mnuShopCommitMode1PurchaseNoOp((u32)itemId & 0xFFFF);
             } else {
                 datGameState->inventory.counts[itemId] += scene->counter;
             }
@@ -3048,7 +3048,8 @@ u32 evtStartScriptFadeAndResetDisplayFlags(void) {
     return 1;
 }
 
-u32 func_00247D50(void) {
+/* Registered shop-message leave hook: no side effects; returns one. */
+u32 mnuShopMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -3260,23 +3261,28 @@ s32 evtDispatchSync(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-u32 func_002482B0(void) {
+/* Registered popup enter hook: no side effects; returns one. */
+u32 mnuPopupEnterNoOp(void) {
     return 1;
 }
 
-u32 func_002482B8(void) {
+/* Registered popup leave hook: no side effects; returns one. */
+u32 mnuPopupLeaveNoOp(void) {
     return 1;
 }
 
-u32 func_002482C0(void) {
+/* Registered popup start hook: no side effects; returns zero. */
+u32 mnuPopupStartNoOp(void) {
     return 0;
 }
 
-u32 func_002482C8(void) {
+/* Registered popup update hook: no side effects; returns zero. */
+u32 mnuPopupUpdateNoOp(void) {
     return 0;
 }
 
-u32 func_002482D0(void) {
+/* Registered popup finish hook: no side effects; returns zero. */
+u32 mnuPopupFinishNoOp(void) {
     return 0;
 }
 

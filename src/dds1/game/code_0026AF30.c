@@ -4,9 +4,9 @@
 #include "dds3obj.h"
 #include "eff_transform.h"
 
-extern f32 D_003DC1C0[4];
+extern f32 mnuTitleCameraPosition[4];
 
-extern f32 D_003DC1D0[4];
+extern f32 mnuTitleCameraRotation[4];
 
 
 
@@ -30,8 +30,8 @@ extern void sdfEnableFlagListViewTargetRelativeMode(void);
 extern void fldApplyLightSetIndex(s32);
 
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
-    effObjSetInnerPosition(mnuTitleCameraObject, (u128 *)D_003DC1C0);
-    effObjSetInnerRotation(mnuTitleCameraObject, (u128 *)D_003DC1D0);
+    effObjSetInnerPosition(mnuTitleCameraObject, (u128 *)mnuTitleCameraPosition);
+    effObjSetInnerRotation(mnuTitleCameraObject, (u128 *)mnuTitleCameraRotation);
     return mnuTitleCameraObject->ops->update(mnuTitleCameraObject);
 }
 
@@ -42,14 +42,14 @@ void mnuInitializeTitleCameraScene(void) {
     dds3SetWorldObject(dds3GetWorldSecondaryObject());
 
     D_003BA8EC = 0x80000000;
-    D_003DC1C0[0] = 0.0f;
-    D_003DC1C0[1] = -4000.0f;
-    D_003DC1C0[2] = -4000.0f;
-    D_003DC1C0[3] = 1.0f;
-    D_003DC1D0[0] = -0.32f;
-    D_003DC1D0[1] = 0.0f;
-    D_003DC1D0[2] = 0.0f;
-    D_003DC1D0[3] = -0.94f;
+    mnuTitleCameraPosition[0] = 0.0f;
+    mnuTitleCameraPosition[1] = -4000.0f;
+    mnuTitleCameraPosition[2] = -4000.0f;
+    mnuTitleCameraPosition[3] = 1.0f;
+    mnuTitleCameraRotation[0] = -0.32f;
+    mnuTitleCameraRotation[1] = 0.0f;
+    mnuTitleCameraRotation[2] = 0.0f;
+    mnuTitleCameraRotation[3] = -0.94f;
 
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();
