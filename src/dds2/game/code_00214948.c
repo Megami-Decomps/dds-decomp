@@ -215,7 +215,7 @@ extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
-extern s32 btlElementToBitIndex(s32, s32);
+extern s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
 extern s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *, u32);
 
