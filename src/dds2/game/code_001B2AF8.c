@@ -4384,12 +4384,12 @@ s32 btlIsLinkageTutorialEligible(void) {
 
 
 /* Clear working notice flags, then test for an unmarked eligible LINKAGE skill. */
-s32 btlHasUnmarkedLinkageSkill(s32 arg0) {
+s32 btlHasUnmarkedLinkageSkill(s32 unit) {
     s32 count;
     s32 i;
 
     btlClearPendingLinkageSkillFlags();
-    count = btlBuildActorLinkageSkillList(arg0, &D_003B5D10);
+    count = btlBuildActorLinkageSkillList(unit, &D_003B5D10);
     if (count != 0) {
         for (i = 0; i < count; i++) {
             if (btlAccessRecordedLinkageSkillFlag(D_003B5D10.entries[i].skill, 2) == 0) {
