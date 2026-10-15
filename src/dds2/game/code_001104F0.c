@@ -18,7 +18,50 @@ extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
 
 extern EffWorldNode *dds3ActiveWorld;
 
-INCLUDE_ASM(const s32, "game/code_001104F0", dds3GrowWorldValueChain);
+u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count) {
+    WorldInfo *world;
+    s16 firstIndex;
+    s16 lastIndex;
+    s32 i;
+
+    if (count == 0) {
+        return 1;
+    }
+    if (dds3ActiveWorld == NULL) {
+        return 0;
+    }
+    world = dds3ActiveWorld->data;
+    if (world->freeEntryCount < count || count < 0) {
+        return 0;
+    }
+    if (object == NULL) {
+        return 0;
+    }
+    firstIndex = world->freeHeadIndex;
+    for (i = 0; i < count - 1; i++) {
+        world->freeHeadIndex = world->entries[world->freeHeadIndex].nextIndex;
+    }
+    lastIndex = world->freeHeadIndex;
+    world->freeHeadIndex = world->entries[lastIndex].nextIndex;
+    if (world->freeHeadIndex == -1) {
+        world->freeTailIndex = -1;
+    } else {
+        world->entries[lastIndex].nextIndex = -1;
+        world->entries[world->freeHeadIndex].previousIndex = -1;
+    }
+    world->freeEntryCount -= count;
+    if (object->tailIndex < 0) {
+        object->tailIndex = lastIndex;
+        object->headIndex = firstIndex;
+    } else {
+        world->entries[object->tailIndex].nextIndex = firstIndex;
+        world->entries[firstIndex].previousIndex = object->tailIndex;
+        object->tailIndex = lastIndex;
+    }
+    object->cursorIndex = firstIndex;
+    object->entryCount += count;
+    return 1;
+}
 
 u16 dds3GetWorldValueCount(WorldValueIndices *object) {
     u16 value;
