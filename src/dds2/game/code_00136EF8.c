@@ -2766,8 +2766,8 @@ u8 fldIsSceneStateEight(void) {
 }
 
 void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
-    if (actorEntry->unk53 != 0) {
-        fldAreaState.unk88 = actorEntry->unk53 - 1;
+    if (actorEntry->selectedRoom != 0) {
+        fldAreaState.unk88 = actorEntry->selectedRoom - 1;
     }
     fldAreaState.rowIdx = actorEntry->unk45;
 }
@@ -2843,8 +2843,8 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
             if (fldAreaState.sequenceCode != entry->unk52 && entry->unk52 != 0) {
                 fldAreaState.sequenceCode = entry->unk52;
             }
-            if (entry->unk53 != 0) {
-                fldAreaState.unk88 = entry->unk53 - 1;
+            if (entry->selectedRoom != 0) {
+                fldAreaState.unk88 = entry->selectedRoom - 1;
             }
         }
         return;
