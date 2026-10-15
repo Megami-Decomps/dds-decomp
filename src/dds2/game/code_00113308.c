@@ -371,7 +371,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     }
     config = (MdlCtx *)dds3GetEffectObjectModelHolder(obj)->resourceHandle;
     if (dds3TestObjectFlags(obj, 0x4000)) {
-        level = target->unkD3;
+        level = target->shadowLevel;
     } else {
         level = config->inner->color >> 24;
     }

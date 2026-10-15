@@ -154,7 +154,7 @@ typedef struct EvtUnit {
     s8 firstSlot;                  /* 0xD0: consumed by stored-slot activation */
     s8 secondSlot;                 /* 0xD1 */
     u8 padD2;
-    u8 unkD3;                     /* 0xD3: byte parameter written by timeline keys */
+    u8 shadowLevel;                /* 0xD3: timeline-key value passed to fldDrawShadowDisc. */
     f32 shadowY;                    /* 0xD4: float parameter written by timeline keys */
     u32 referenceAngleCacheFlags;   /* 0xD8: bit 0 marks a valid cached angle. */
     f32 cachedReferenceAngleDegrees; /* 0xDC: cached reference angle in degrees. */
@@ -227,6 +227,9 @@ typedef struct EvtUnit {
     u8 pad1C6[10];
 #endif
 } EvtUnit;
+
+typedef char EvtUnitShadowLevelOffsetCheck[
+    ((u32)&((EvtUnit *)0)->shadowLevel == 0xD3) ? 1 : -1];
 
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, struct MdlCtx *owner);
 s32 evtReleaseUnitTransitionWork(EvtUnit *work);
