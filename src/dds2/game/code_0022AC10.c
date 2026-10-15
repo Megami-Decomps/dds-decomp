@@ -856,9 +856,9 @@ u32 btlCommandGetGroupSlotAuxValue(void) {
 
 /* Add one item under the retail signed upper-bound check, then complete the command. */
 u32 btlCommandAddOneItem(void) {
-    s32 index = scrReadIntParameter(0);
-    if (index < 0x100) {
-        ptyAdjustItemQuantity(index, 1);
+    s32 itemId = scrReadIntParameter(0);
+    if (itemId < 0x100) {
+        ptyAdjustItemQuantity(itemId, 1);
     }
     return 1;
 }
