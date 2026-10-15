@@ -67,7 +67,7 @@ extern SndPad D_00324510;
 
 extern s8 D_00324530[];
 
-extern u32 D_00359A78[];
+extern u32 btlPendingLinkageSkillFlags[];
 
 
 extern DatEnemyRecord *datEnemyRecords;
@@ -95,7 +95,7 @@ extern BtlCommandHintWork *D_003BB3DC;
 
 extern SceneKindTable *D_003BD834;
 
-extern u32 D_003BD838;
+extern u32 btlCommandOptionAnimationWork;
 
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
@@ -1364,7 +1364,7 @@ void btlClearPendingLinkageSkillFlags(void) {
     s32 *flagWord;
     s32 counter;
 
-    flagWord = D_00359A78;
+    flagWord = btlPendingLinkageSkillFlags;
     flagWord += 2;
     counter = 2;
     do {
@@ -1393,13 +1393,13 @@ s32 btlAccessPendingLinkageSkillFlag(s32 id, s32 operation) {
     }
     switch (selector) {
     case 0:
-        D_00359A78[word] |= 1 << bit;
+        btlPendingLinkageSkillFlags[word] |= 1 << bit;
         break;
     case 1:
-        D_00359A78[word] &= ~(1 << bit);
+        btlPendingLinkageSkillFlags[word] &= ~(1 << bit);
         break;
     default:
-        return ((D_00359A78[word] & (1 << bit)) != 0);
+        return ((btlPendingLinkageSkillFlags[word] & (1 << bit)) != 0);
     }
     return 1;
 }
@@ -3136,7 +3136,7 @@ INCLUDE_ASM(const s32, "game/code_001A9780", func_001B2AC8);
 
 void btlReleaseBattleScratchBlocks(void) {
     sdfReleaseChipBlock(D_003BD834);
-    sdfReleaseChipBlock((void *)D_003BD838);
+    sdfReleaseChipBlock((void *)btlCommandOptionAnimationWork);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A29F0);

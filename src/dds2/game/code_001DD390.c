@@ -78,7 +78,7 @@ extern void dds3ClearObjectFlags(void *, u32);
 
 extern struct SdfPoolNode *D_00380788[13][4];
 
-extern SdfPoolNode *D_003B6BD0[];
+extern SdfPoolNode *btlUnitTransparencySurfaces[];
 
 typedef struct BtlUnit BtlUnit;
 
@@ -3420,7 +3420,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             } else if (unit->transparencyModel == 0) {
                 btlCreateUnitTransparency(unit);
             } else {
-                btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, D_003B6BD0, color);
+                btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, btlUnitTransparencySurfaces, color);
             }
         }
     }
@@ -3428,9 +3428,9 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
 
 extern SdfGraphObj D_0040B290;
 
-extern SdfPoolNode *D_003B6BE0[];
+extern SdfPoolNode *btlMirrorSourceTransparencySurfaces[];
 
-extern SdfPoolNode *D_003B6BF0[];
+extern SdfPoolNode *btlMirrorTargetTransparencySurfaces[];
 
 
 /* Emit the mirror model's transparency packets using its overlay color. */
@@ -3448,14 +3448,14 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     list = sdfAllocatePacketList(0);
     sdfCreateResourcePacket(list, D_0040B290.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0, 0, 0);
-    D_003B6BE0[0]->append(D_003B6BE0[0], list);
+    btlMirrorSourceTransparencySurfaces[0]->append(btlMirrorSourceTransparencySurfaces[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
         unit->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
         dds3SetObjectFlags(unit->effectObject, 1);
         return;
     }
-    btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, D_003B6BE0, unit->overlayColor);
+    btlDrawUnitTransparencyPasses(unit, info, unit->transparencyModel, btlMirrorSourceTransparencySurfaces, unit->overlayColor);
     info = unit->mirror->ext->owner;
     if (unit->mirror->transparencyModel == 0) {
         unit->mirror->transparencyModel = sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -3465,8 +3465,8 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     list = sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(list, D_0040B290.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0);
-    D_003B6BF0[0]->append(D_003B6BF0[0], list);
-    btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, D_003B6BF0, unit->mirror->overlayColor);
+    btlMirrorTargetTransparencySurfaces[0]->append(btlMirrorTargetTransparencySurfaces[0], list);
+    btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, btlMirrorTargetTransparencySurfaces, unit->mirror->overlayColor);
 }
 
 extern char D_00436A28[];

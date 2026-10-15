@@ -89,7 +89,7 @@ extern const char *D_004367C4;
 
 extern SceneKindTable *D_00438F4C;
 
-extern u32 D_00438F50;
+extern u32 btlCommandOptionAnimationWork;
 
 
 
@@ -97,7 +97,7 @@ extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern s32 btlGetTrackedTaskHandle(s32);
 
-extern u32 D_003B6928[];
+extern u32 btlPendingLinkageSkillFlags[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -2306,7 +2306,7 @@ s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation) {
 void btlClearPendingLinkageSkillFlags(void) {
     s32 i;
     for (i = 3; i >= 0; i--) {
-        D_003B6928[i] = 0;
+        btlPendingLinkageSkillFlags[i] = 0;
     }
 }
 
@@ -2329,13 +2329,13 @@ s32 btlAccessPendingLinkageSkillFlag(s32 id, s32 operation) {
     }
     switch (selector) {
     case 0:
-        D_003B6928[word] |= 1 << bit;
+        btlPendingLinkageSkillFlags[word] |= 1 << bit;
         break;
     case 1:
-        D_003B6928[word] &= ~(1 << bit);
+        btlPendingLinkageSkillFlags[word] &= ~(1 << bit);
         break;
     default:
-        return ((D_003B6928[word] & (1 << bit)) != 0);
+        return ((btlPendingLinkageSkillFlags[word] & (1 << bit)) != 0);
     }
     return 1;
 }
@@ -4041,7 +4041,7 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BD6E8);
 
 void btlReleaseBattleScratchBlocks(void) {
     sdfReleaseChipBlock(D_00438F4C);
-    sdfReleaseChipBlock((void *)D_00438F50);
+    sdfReleaseChipBlock((void *)btlCommandOptionAnimationWork);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416520);
@@ -5259,7 +5259,7 @@ void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
     }
 }
 
-void func_001C2A98(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+void btlAdvanceReservePanelPresentation(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
     switch (work->reserveEntries[slot].presentation.presentationState) {
@@ -5460,7 +5460,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
                 btlUpdateActorVitalPulseTrail(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
             }
 
-            func_001C2A98(unit, work, i);
+            btlAdvanceReservePanelPresentation(unit, work, i);
             btlDrawReservePanelPulse(unit, work, i);
 
             if ((unit->partyRecord.flags & 0x1010) == 0) {
