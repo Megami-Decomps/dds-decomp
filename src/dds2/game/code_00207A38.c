@@ -3373,8 +3373,9 @@ s32 btlTrimResourceName(BtlResourceDescriptor *descriptor, char *output) {
 }
 
 /* Return the selected entry's category-specific metadata word unchanged. */
-u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
-    return resource->selectedEntry->value;
+u32 btlGetResourcePathVariant(const BtlResourceDescriptor *resource) {
+    const BtlResourceEntry *entry = resource->selectedEntry;
+    return entry->value;
 }
 
 /* Replace an owned old texture, acquire the named resource's texture,

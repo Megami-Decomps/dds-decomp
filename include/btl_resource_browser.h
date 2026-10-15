@@ -89,7 +89,7 @@ s32 btlFormatSelectedResourceName(struct BtlResourceDescriptor *descriptor,
                                   char *output);
 s32 btlTrimResourceName(struct BtlResourceDescriptor *descriptor,
                         char *output);
-u32 btlGetResourcePathVariant(struct BtlResourceDescriptor *descriptor);
+u32 btlGetResourcePathVariant(const struct BtlResourceDescriptor *descriptor);
 void btlDrawResourcePreview(struct BtlResourceDescriptor *descriptor);
 
 void btlSetResourceBrowserPosition(struct BtlResourceDescriptor *descriptor, s32 x, s32 y);
