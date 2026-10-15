@@ -13946,7 +13946,54 @@ u32 effDestroyOwnerRecordList(u32 buckets) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", effConvertParamValue);
+/* Convert a 4-byte effect parameter between its int and float kinds. Kind 0
+ * converts (float to int, or int to float when toFloat is set); kind 2 copies
+ * a float through. Returns the converted size, or 0 for other kinds. */
+u32 effConvertParamValue(u32 *kind, void *out, void *in, void *toFloat) {
+    s32 intValue;
+    f32 floatValue;
+
+    if (toFloat == NULL) {
+        switch (*kind) {
+        case 0:
+            if (in != NULL) {
+                intValue = *(f32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &intValue, 4);
+            }
+            return 4;
+        case 2:
+            if (in != NULL) {
+                floatValue = *(f32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &floatValue, 4);
+            }
+            return 4;
+        }
+    } else {
+        switch (*kind) {
+        case 0:
+            if (in != NULL) {
+                floatValue = *(s32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &floatValue, 4);
+            }
+            return 4;
+        case 2:
+            if (in != NULL) {
+                floatValue = *(f32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &floatValue, 4);
+            }
+            return 4;
+        }
+    }
+    return 0;
+}
 
 
 /* Sum the status-storage byte requirements for the selected record category. */
