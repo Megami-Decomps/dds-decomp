@@ -731,16 +731,16 @@ void evtSetUnitStatusFlags(EvtUnit *unit) {
     unit->flags = unit->flags | EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
 }
 
-void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
-    if (arg == 0) {
+void evtConfigureUnitTransition(EvtUnit *unit, s32 duration) {
+    if (duration == 0) {
         unit->flags &= ~0x700;
         unit->flags &= ~0x5000;
         unit->flags &= ~0x2800;
     } else {
-        evtInitializeUnitColorTransition(unit, arg, 0, 0);
+        evtInitializeUnitColorTransition(unit, duration, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
         VU0_MOVE_VF(vf10, vf0);
-        evtSetUnitNormalizedDirection(unit, arg);
+        evtSetUnitNormalizedDirection(unit, duration);
         unit->flags = (unit->flags & ~0x2000) | 0x4000;
     }
 }
