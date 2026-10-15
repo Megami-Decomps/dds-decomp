@@ -27,14 +27,14 @@ extern s32 D_004391D0;
 extern void func_003666D8(void *a0, void *a1);
 
 /* Converts world coordinates to the sound engine's one-tenth scale. */
-void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
+void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 worldX, f32 worldY, f32 worldZ) {
     u32 packet[8];
 
     packet[0] = trackId;
     packet[1] = parameter;
-    packet[2] = (s32)(x * 0.1f);
-    packet[3] = (s32)(y * 0.1f);
-    packet[4] = (s32)(z * 0.1f);
+    packet[2] = (s32)(worldX * 0.1f);
+    packet[3] = (s32)(worldY * 0.1f);
+    packet[4] = (s32)(worldZ * 0.1f);
     sndSendCommandPacket(0x170, 0, packet, 0x20);
 }
 

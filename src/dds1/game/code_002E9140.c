@@ -35,14 +35,14 @@ u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 void sndEnsureMidiBankResident(s32 trackId);
 
 /* Converts world coordinates to the sound engine's one-tenth scale. */
-void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
+void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 worldX, f32 worldY, f32 worldZ) {
     u32 packet[8];
 
     packet[0] = trackId;
     packet[1] = parameter;
-    packet[2] = (s32)(x * 0.1f);
-    packet[3] = (s32)(y * 0.1f);
-    packet[4] = (s32)(z * 0.1f);
+    packet[2] = (s32)(worldX * 0.1f);
+    packet[3] = (s32)(worldY * 0.1f);
+    packet[4] = (s32)(worldZ * 0.1f);
     sndSendCommandPacket(0x170, 0, packet, 0x20);
 }
 
