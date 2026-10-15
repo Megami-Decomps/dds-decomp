@@ -121,7 +121,7 @@ extern char D_00411380[];
 
 extern s32 D_00389780[];
 
-extern void fldStartLmapTask(s32 arg0);
+extern void fldStartLmapTask(s32 mode);
 
 
 extern u32 scrNamedProcessCount;
