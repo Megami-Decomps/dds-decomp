@@ -6261,7 +6261,7 @@
 0x002C5C70	sdfCounterTickPositionTransition	inferred	src/dds1/game/code_002C3868.c func_002C5C70: Decrements three-frame timer and interpolates position, snapping to target at zero. [names_reviewed24.tsv]
 0x002C5D30	sdfUpdateCounterSelectionFade	inferred	Computes selected counter timer growth and shrinkage from fade value. [names_reviewed22.tsv]
 0x002C5D38	sdfCounterDrawSelectedTimerFade	inferred	Draws the selected counter timer image with fading alpha and scale. [names_reviewed9.tsv]
-0x002C5FB8	sdfCounterMeasureLabelWidth	inferred	readability/matching review (QP16)
+0x002C5FB8	sdfCounterMeasureLabelWidth	inferred	Measures the supplied counter label text with frFontMeasureTextAdvance; callers pass SdfCounterDisplay.info or .word before drawing/centering the same label. [DDS1 caller/provider review, 2026-10-14]
 0x002C5FD8	fldCountMaskBitsBeforeOrdinal	inferred	Counts set bits before the one-based ordinal position in the lower 31 mask bits.
 0x002C6010	sdfCounterSelectChannelByIndex	inferred	Walks to a target counter channel while updating selection and scroll. [names_reviewed8.tsv]
 0x002C6098	fldSetMapSelectedCount	inferred	Byte-identical dds2 twin 0x0030D8A0; Updates the map selection count when nonzero and not above the selection's maximum. [names_conflicts.tsv]
