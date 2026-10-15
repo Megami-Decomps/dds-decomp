@@ -439,7 +439,58 @@ void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
+#include "eff_packet_params.h"
+#include "sdf_asset_create.h"
+#include "sdf_asset_state.h"
+
+extern SdfAsset *D_003BB068;
+extern f32 D_003BB06C;
+extern f32 D_003D6760[4][4];
+extern u32 D_00355870[4];
+extern SdfPoolNode D_00325028;
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
+
+void func_0018ED80(f32 *position) {
+    SdfAsset *asset = D_003BB068;
+    SdfListHead *list;
+    EffPacketParams packet;
+
+    if (asset == NULL) {
+        asset = sdfCreateAssetWithDrawEntries();
+        D_003BB068 = asset;
+        sdfSetPrimaryStateFloat(asset, 1.0f);
+    }
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfVuLoadRotationMatrixZ(D_003BB06C);
+    D_003BB06C += 0.10471974313259125f;
+    VU0_LOAD_VF(vf10, position);
+    VU0_ADD_XYZ(vf31, vf31, vf10);
+    sdfConsAppendVuPacket(list, NULL);
+    memset(&packet, 0, 0x2C);
+    packet.primitive = 0x4000;
+    D_003D6760[2][2] = 0.0f;
+    packet.colors = D_00355870;
+    packet.color = 0x80808080;
+
+    D_003D6760[0][0] = 0.0f;
+    D_003D6760[0][1] = 0.0f;
+    D_003D6760[0][2] = 0.0f;
+    D_003D6760[1][0] = 15.0f;
+    D_003D6760[1][1] = -30.0f;
+    D_003D6760[1][2] = 0.0f;
+    D_003D6760[2][0] = -15.0f;
+    D_003D6760[2][1] = -30.0f;
+
+    packet.parameterCount = 1;
+    packet.vertexCount = 3;
+    packet.positions = (u128 *)D_003D6760;
+    packet.texcoords = NULL;
+    sdfConsAppendAssetPacket(list, D_003BB068, NULL);
+    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&packet));
+    D_00325028.append(&D_00325028, list);
+}
 
 extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
