@@ -69,15 +69,16 @@ s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 row) {
 }
 INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuDrawPartyStatusValuePanel);
 
-s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *window, s32 arg4) {
-    s32 result = mnuGetPanelWindowTransitionState(window, arg4);
+s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth,
+                                            u32 *windowFlags, s32 panelIndex) {
+    s32 result = mnuGetPanelWindowTransitionState(windowFlags, panelIndex);
 
     switch (result) {
     case 1:
-        *window &= ~2;
+        *windowFlags &= ~2;
         return 1;
     case 2:
-        *window &= ~2;
+        *windowFlags &= ~2;
         return 1;
     default:
         return 0;
