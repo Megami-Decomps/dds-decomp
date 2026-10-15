@@ -544,7 +544,126 @@ s32 btlRunTimedCameraFinishHook(s32 actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", btlBuildBattleUnitFramingCameraPose);
+extern f32 fabsf(f32);
+extern f32 btlUnitGetBottomY(BtlUnit *);
+extern void btlFlagAllUnitsDefeatCandidate(void);
+
+extern f32 tanf(f32);
+extern void sdfVuLoadRotationMatrixZ(f32);
+
+void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *action, BtlCamState *out, f32 tiltDegrees) {
+    BtlState *state;
+    BtlUnit *unit;
+    u32 count;
+    s32 firstEnemy;
+    u32 flags;
+    f32 fov;
+    f32 maxAllyTop;
+    f32 minEnemyTop;
+    f32 measure;
+    f32 reachTotal;
+    f32 reach;
+    f32 sample;
+    f32 horizontalSpan;
+    f32 cameraDistance;
+    f32 centers[3][4] __attribute__((aligned(16)));
+
+    state = (BtlState *)btlGetRuntime();
+    btlFlagAllUnitsDefeatCandidate();
+
+    count = 0;
+    maxAllyTop = 0.0f;
+    measure = 0.0f;
+    fov = action->camera.fov;
+    minEnemyTop = 0.0f;
+    reachTotal = 0.0f;
+    unit = state->units;
+    firstEnemy = 1;
+    out->fov = fov;
+    while (unit != NULL) {
+        flags = unit->status.flags;
+        if (flags & 1) {
+            if (!(unit->status.flags & 0xC0)) {
+                reach = unit->reach * unit->scale;
+                sample = btlUnitGetTopY(unit);
+                flags = unit->status.flags;
+                if ((flags & 0x200) != 0) {
+                    if (maxAllyTop < sample) {
+                        maxAllyTop = sample;
+                    }
+                } else if ((flags & 0x400) != 0) {
+                    if (firstEnemy || sample < minEnemyTop) {
+                        minEnemyTop = sample;
+                        measure = btlUnitGetBottomY(unit);
+                        firstEnemy = 0;
+                    }
+                }
+                reachTotal += reach;
+                count++;
+            }
+        }
+        unit = unit->next;
+    }
+
+    if (count == 0) {
+        return;
+    }
+
+    if (minEnemyTop > 600.0f) {
+        minEnemyTop = (minEnemyTop - measure) * 0x1.666666p-2f + measure;
+    } else if (minEnemyTop > 150.0f) {
+        minEnemyTop = (minEnemyTop - measure) * 0.5f + measure;
+    } else {
+        minEnemyTop = (minEnemyTop - measure) * 0.25f + measure;
+    }
+
+    measure = reachTotal / (f32)count;
+    btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
+    VU0_STORE_VF(vf10, centers[1]);
+    btlMeasureMaskedUnitBounds(0x400, NULL, NULL);
+    VU0_STORE_VF(vf10, centers[2]);
+    centers[2][0] = centers[1][0];
+    centers[2][1] = -minEnemyTop;
+    centers[1][1] = -maxAllyTop;
+    horizontalSpan = btlMeasureMaskedUnitBounds(0x600, NULL, NULL);
+    cameraDistance = horizontalSpan;
+    if (measure > 100.0f) {
+        cameraDistance += measure;
+    } else {
+        cameraDistance += 100.0f;
+    }
+    VU0_STORE_VF(vf10, centers[0]);
+    if (cameraDistance < 1200.0f) {
+        cameraDistance += ffabsf(centers[0][0] - centers[1][0]);
+    }
+
+    sample = maxAllyTop - minEnemyTop;
+    {
+        f32 separation = ffabsf(centers[2][2] - centers[1][2]);
+        f32 offset = ffabsf(centers[2][2] - centers[0][2]);
+        centers[0][0] = centers[1][0];
+        if (separation > 0.0f) {
+            centers[0][1] = -(sample * offset / separation) - minEnemyTop;
+        }
+    }
+    VU0_LOAD_VF(vf10, centers[0]);
+    VU0_STORE_VF(vf10, out->position);
+
+    if (action->camera.direction[0] > 0.0f) {
+        sdfVuLoadRotationMatrixZ(tiltDegrees * 0x1.1df46ap-6f);
+    } else {
+        sdfVuLoadRotationMatrixZ(-tiltDegrees * 0x1.1df46ap-6f);
+    }
+    VU0_LOAD_VF(vf10, centers[2]);
+    VU0_LOAD_VF(vf11, centers[1]);
+    __asm__ volatile("vsub.xyzw vf10, vf10, vf11");
+    VU0_NORMALIZE_VF10();
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, out->direction);
+
+    out->distance = cameraDistance / tanf(fov * 0x1.555554p-1f);
+    btlAdjustCameraDirectionForDefaultPlane(out);
+}
 
 void btlSetDefaultActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 27.5f);

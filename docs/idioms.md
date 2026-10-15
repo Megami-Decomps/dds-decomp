@@ -13865,3 +13865,21 @@ memory effects, retaining fresh endpoint-X reads across loop iterations.
 writing or retaining the pointer. No read bypasses initialization, and
 scalar XYZ updates preserve W. Other stores retain their memory effects;
 reaudit any changed lifetimes, providers, macros or compiler.
+
+
+### Battle-unit framing loop setup and the DDS2 horizontal cap
+
+`btlBuildBattleUnitFramingCameraPose` keeps one consumed workspace for the
+minimum enemy top and the later adjusted focus. The actual camera FOV read
+separates its zero seed from the ally maximum; the bottom-height seed retains
+its own native initialization phase. Initialize the `firstEnemy` flag with
+the loop setup, after loading the unit head, before publishing FOV and entering
+the loop. It is set before every use and no provider receives its address.
+This ordinary source order closes the final sum-copy versus FOV-store scheduler
+difference without adding an operation or lifetime.
+
+DDS2 follows `nextActor`, measures groups through its filtered-bounds provider,
+and rotates around Y. Inside the distance-below-1200 path it caps the absolute
+horizontal offset at 50 before adding it to camera distance. Keep the ordered
+`50.0f < horizontalSpan` comparison: NaN does not select the cap. These six
+extra native operations account for DDS2's 912 bytes versus DDS1's 888.
