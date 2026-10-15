@@ -1615,7 +1615,7 @@ void fldCmdResetAfterEvent(void) {
     fldResetAfterEvent();
 }
 
-s32 func_00156BE8(void) {
+s32 fldCmdDispatchInteractionAction(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
