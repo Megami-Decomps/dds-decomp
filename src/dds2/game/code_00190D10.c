@@ -76,7 +76,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     resource->unk10 = param;
     resource->positions = (f32 (*)[4])positions;
     resource->colorTable = (u32 *)colorTable;
-    resource->unk1C = (f32 *)historyScalars;
+    resource->historyScalars = (f32 *)historyScalars;
     resource->slotColors = (u32 *)values;
     resource->writeIndices = (u16 *)writeIndices;
     resource->validCounts = (u16 *)validCounts;

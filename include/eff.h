@@ -52,7 +52,7 @@ typedef struct EffMagatuhiValueWork {
     u32 unk10;
     f32 (*positions)[4];
     u32 *colorTable;
-    f32 *unk1C;
+    f32 *historyScalars;
     u32 *slotColors;
     u16 *writeIndices;
     u16 *validCounts;
@@ -78,6 +78,7 @@ typedef struct EffMagatuhiOwner {
 } EffMagatuhiOwner;
 
 typedef char EffMagatuhiValueWork_size_must_be_0x38[(sizeof(EffMagatuhiValueWork) == 0x38) ? 1 : -1];
+typedef char EffMagatuhiValueWork_historyScalars_offset[((u32)&((EffMagatuhiValueWork *)0)->historyScalars == 0x1C) ? 1 : -1];
 typedef char EffMagatuhiHistoryParams_size_must_be_0x1C[(sizeof(EffMagatuhiHistoryParams) == 0x1C) ? 1 : -1];
 typedef char EffMagatuhiOwner_size_must_be_0x20[(sizeof(EffMagatuhiOwner) == 0x20) ? 1 : -1];
 
