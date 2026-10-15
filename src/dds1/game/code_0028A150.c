@@ -2032,7 +2032,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].mapGroup = datGameState->header.mapGroup;
     fileSavePreviewRecords[slot].mapIndex = datGameState->header.mapIndex;
     fileSavePreviewRecords[slot].playTicks = datGameState->header.playTicks;
-    fileSavePreviewRecords[slot].status = datGameState->header.unk0C;
+    fileSavePreviewRecords[slot].status = datGameState->header.status;
     fileSavePreviewRecords[slot].newCycle = datGameState->header.transition;
     memcpy(fileSavePreviewRecords[slot].party, datGameState->header.partyIds, 8);
     memcpy(fileSavePreviewRecords[slot].levels, datGameState->header.partyLevels, 8);
