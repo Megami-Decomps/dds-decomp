@@ -6,6 +6,7 @@
 #include "kwln_sprite.h"
 #include "dds3Admin.h"
 #include "sdf_linked_packet.h"
+#include "sdf_dev_start_load_api.h"
 #include "kwln.h"
 #include "kwln_task_flags.h"
 #include "sdf.h"
@@ -61,7 +62,6 @@ extern void sceFsReset(void);
 extern void func_002F3CB8(s32);
 extern void func_002F4190(u32);
 extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern void sdfDevStartLoad(const char *, const char *);
 extern void sdfLoadIopModulePair(const char *, s32);
 extern void sdfInitializeRuntimeServices(u32, u32, u32);
 extern void sdfPadRequestMode(s32, u8);
