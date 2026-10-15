@@ -284,7 +284,7 @@ void sdfSaveResetSnapshot(void) {
         D_00435DC4 = 1;
     }
     memcpy(D_0043E5B0, datGameState->battleFlags, sizeof(datGameState->battleFlags));
-    D_00435DB8 = datGameState->header.unk0C;
+    D_00435DB8 = datGameState->header.status;
     D_00435DBC = datGameState->header.secondTick;
     D_00435DC0 = datGameState->header.savedMoney;
     D_00385218.words[0] = datGameState->header.unk24;
@@ -328,7 +328,7 @@ void sdfRestoreResetSnapshot(void) {
     if (D_00435DB6) mdlFlagSet(0xBA0);
     if (D_00435DB5) mdlFlagSet(0xB8F);
     if (D_00435DC4) mdlFlagSet(0xC0E);
-    datGameState->header.unk0C = D_00435DB8;
+    datGameState->header.status = D_00435DB8;
     memcpy(datGameState->battleFlags, D_0043E5B0, sizeof(datGameState->battleFlags));
     datGameState->header.secondTick = D_00435DBC;
     datGameState->header.savedMoney = D_00435DC0;

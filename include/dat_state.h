@@ -16,7 +16,7 @@ typedef struct DatStateHeader {
     s8 mapIndex;
     u8 pad06[2];
     s32 playTicks;
-    s16 unk0C;
+    s16 status; /* 0x0C: copied to the memory-card preview status field. */
     s16 transition;
     s8 partyIds[8];
     s8 partyLevels[8];
@@ -31,6 +31,8 @@ typedef struct DatStateHeader {
 } DatStateHeader;
 typedef char DatStateHeaderSavedMoneyOffsetCheck[
     ((u32)&((DatStateHeader *)0)->savedMoney == 0x20) ? 1 : -1];
+typedef char DatStateHeaderStatusOffsetCheck[
+    ((u32)&((DatStateHeader *)0)->status == 0x0C) ? 1 : -1];
 
 /* Shared script storage begins at +0x40; +0x388 is integer register 210. */
 typedef struct DatScriptGlobals {
