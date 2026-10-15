@@ -15,6 +15,7 @@
 #include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
 #include "eff.h"
+#include "eff_resource_rect_api.h"
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
@@ -118,10 +119,8 @@ extern u8 D_00355970[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
 
-extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 extern void effDrawSolidRectangle(EffSolidRectParams *arg);
-extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {
