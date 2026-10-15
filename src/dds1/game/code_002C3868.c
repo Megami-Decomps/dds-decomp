@@ -575,15 +575,15 @@ void sdfCounterSetMode(s32 mode) {
 
     timer = sdfActiveCounterRuntime->state.timer;
     timer->mode = mode;
-    timer->countdown = 8;
+    timer->selectionPulseFramesRemaining = 8;
 }
 
 void sdfCounterTickCountdown(void) {
     SdfCounterTimer *timer;
 
     timer = sdfActiveCounterRuntime->state.timer;
-    if (0 < timer->countdown) {
-        timer->countdown = timer->countdown - 1;
+    if (0 < timer->selectionPulseFramesRemaining) {
+        timer->selectionPulseFramesRemaining = timer->selectionPulseFramesRemaining - 1;
     }
 }
 
