@@ -43,7 +43,7 @@
 
 extern void effReleaseRingRecordPool(EffRecordPool *pool);
 
-extern u32 effMultiplyPackedColors(u32 color, u32 param);
+extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
 extern f32 effRingBasisScratchVector[];
