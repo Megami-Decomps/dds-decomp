@@ -169,13 +169,13 @@ extern u32 fileSaveIconData;
 
 extern u32 fileSaveIconDataSize;
 
-extern u32 *D_003BD928;
+extern u32 *fileWriteDataAddressSlot;
 
-extern u32 *D_003BD92C;
+extern u32 *fileWriteDataSizeSlot;
 
-extern void *D_003BD930;
+extern void *fileWriteContinuation;
 
-extern u32 *D_003BD934;
+extern u32 *fileWritePendingRequestSlot;
 
 extern u32 D_003BC824;
 
@@ -215,8 +215,8 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
-extern u32 D_003BD8F4;
-extern u32 D_003BD8F8;
+extern u32 fileMainSaveBlobAddress;
+extern u32 fileMainSaveBlobSize;
 
 extern LoadMirror fileSlotFlagMirror;
 
@@ -2040,12 +2040,12 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].saveWords.words[0] = datGameState->header.unk24;
     fileSavePreviewRecords[slot].saveWords.words[1] = datGameState->header.unk28;
     fileSavePreviewRecords[slot].saveWords.words[2] = datGameState->header.unk2C;
-    D_003BD8F4 = (u32)datGameState;
-    D_003BD8F8 = 0x33600;
+    fileMainSaveBlobAddress = (u32)datGameState;
+    fileMainSaveBlobSize = 0x33600;
     if (D_003BC820 == 0 || D_003BC820 == 2) {
-        return fileBeginRequest(filename, &D_003BD8F4, &D_003BD8F8, fileRequestBaseIcon, NULL);
+        return fileBeginRequest(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize, fileRequestBaseIcon, NULL);
     }
-    return fileBeginRequest(filename, &D_003BD8F4, &D_003BD8F8, fileBeginLabeledSlotWrite, NULL);
+    return fileBeginRequest(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize, fileBeginLabeledSlotWrite, NULL);
 }
 
 s32 mcChooseLoadPath(void) {
@@ -2060,10 +2060,10 @@ s32 mcChooseLoadPath(void) {
 }
 
 s32 fileBeginRequest(const char *name, u32 *first, u32 *second, void *callback, u32 *status) {
-    D_003BD928 = first;
-    D_003BD92C = second;
-    D_003BD930 = callback;
-    D_003BD934 = status;
+    fileWriteDataAddressSlot = first;
+    fileWriteDataSizeSlot = second;
+    fileWriteContinuation = callback;
+    fileWritePendingRequestSlot = status;
     mcOpenFilePath(fileMemoryCardRequestIndex, name, 0x203);
     return (s32)fileWriteWaitOpen;
 }
@@ -2078,10 +2078,10 @@ s32 fileWriteWaitOpen(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        if (D_003BD934 != NULL && *D_003BD934 != 0) {
+        if (fileWritePendingRequestSlot != NULL && *fileWritePendingRequestSlot != 0) {
             return (s32)fileFinishRequest;
         }
-        mcBeginWrite(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
+        mcBeginWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
         return (s32)mcHandleLoadResult;
     }
     if (status == MC_POLL_ERROR) {
@@ -2116,7 +2116,7 @@ s32 mcDispatchReadCallback(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        return ((s32 (*)())D_003BD930)();
+        return ((s32 (*)())fileWriteContinuation)();
     }
     if (status == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
@@ -2130,7 +2130,7 @@ s32 fileFinishRequest(void) {
     if (fileSaveIconRequest != 0) {
         return 0;
     }
-    mcBeginWrite(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
+    mcBeginWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
     return (s32)mcHandleLoadResult;
 }
 

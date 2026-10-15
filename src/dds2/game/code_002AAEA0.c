@@ -11,7 +11,7 @@
 
 extern s64 fileConsumeConfigTaskReady(void);
 
-extern u8 D_003E7034[];
+extern u8 mnuCampCommandReturnPopupEntry[];
 
 
 extern u8 D_003E7200[];
@@ -156,7 +156,7 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     s32 state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, dispatchEntry, 0, (void *)callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
-            mnuSetPopupEntryFlagged(dispatchEntry, D_003E7034);
+            mnuSetPopupEntryFlagged(dispatchEntry, mnuCampCommandReturnPopupEntry);
         }
         return 0;
     }
@@ -201,7 +201,7 @@ s32 mnuPollCampFieldSkillAndPopup(KwlnTask *callback) {
         return state;
     }
     mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 1);
-    mnuSetPopupEntry(&((MenuStaffContext *)context)->popupState, D_003E7034);
+    mnuSetPopupEntry(&((MenuStaffContext *)context)->popupState, mnuCampCommandReturnPopupEntry);
     return 0;
 }
 

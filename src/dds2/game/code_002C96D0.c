@@ -1822,8 +1822,8 @@ s32 fileRequestBaseIcon(void) {
     return fileBeginRequest("base.ico", &fileSaveIconData, &fileSaveIconDataSize, fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
-extern DatGameState *D_00439010;
-extern u32 D_00439014;
+extern DatGameState *fileMainSaveBlobAddress;
+extern u32 fileMainSaveBlobSize;
 
 s32 fileBuildMainBlobAndWrite(void) {
     char filename[0x50];
@@ -1871,13 +1871,13 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].saveWords.words[0] = header->saveWords.words[0];
     fileSavePreviewRecords[slot].saveWords.words[1] = header->saveWords.words[1];
     fileSavePreviewRecords[slot].saveWords.words[2] = header->saveWords.words[2];
-    D_00439010 = datGameState;
-    D_00439014 = sizeof(DatGameState);
+    fileMainSaveBlobAddress = datGameState;
+    fileMainSaveBlobSize = sizeof(DatGameState);
     if (D_00437D08 == 0 || D_00437D08 == 2) {
-        return fileBeginRequest(filename, &D_00439010, &D_00439014,
+        return fileBeginRequest(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
                                        fileRequestBaseIcon, NULL);
     }
-    return fileBeginRequest(filename, &D_00439010, &D_00439014,
+    return fileBeginRequest(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
                                    fileBeginLabeledSlotWrite, NULL);
 }
 
@@ -1893,17 +1893,17 @@ s32 mcChooseLoadPath(void) {
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
-extern u32 *D_00439048;
-extern u32 *D_0043904C;
-extern u32 D_00439050;
-extern u32 D_00439054;
+extern u32 *fileWriteDataAddressSlot;
+extern u32 *fileWriteDataSizeSlot;
+extern u32 fileWriteContinuation;
+extern u32 fileWritePendingRequestSlot;
 extern s32 fileWriteWaitOpen(void);
 
 s32 fileBeginRequest(char *name, void *a1, void *a2, void *a3, void *a4) {
-    D_00439048 = (u32 *)a1;
-    D_0043904C = (u32 *)a2;
-    D_00439050 = (u32)a3;
-    D_00439054 = (u32)a4;
+    fileWriteDataAddressSlot = (u32 *)a1;
+    fileWriteDataSizeSlot = (u32 *)a2;
+    fileWriteContinuation = (u32)a3;
+    fileWritePendingRequestSlot = (u32)a4;
     mcOpenFilePath(fileMemoryCardRequestIndex, name, 0x203);
     return (s32)fileWriteWaitOpen;
 }
@@ -1919,10 +1919,10 @@ s32 fileWriteWaitOpen(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        if (D_00439054 != 0 && *(u32 *)D_00439054 != 0) {
+        if (fileWritePendingRequestSlot != 0 && *(u32 *)fileWritePendingRequestSlot != 0) {
             return (s32)fileFinishRequest;
         }
-        mcBeginWrite(fileSaveFileDescriptor, *D_00439048, *D_0043904C);
+        mcBeginWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
         return (s32)mcHandleLoadResult;
     }
     if (status == MC_POLL_ERROR) {
@@ -1954,7 +1954,7 @@ s32 mcHandleLoadResult(void) {
     return 0;
 }
 
-extern u32 D_00439050;
+extern u32 fileWriteContinuation;
 s32 mcDispatchReadCallback(void) {
     McPollResult status = mcPollZeroCommandResult();
 
@@ -1962,7 +1962,7 @@ s32 mcDispatchReadCallback(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        return ((s32 (*)())D_00439050)();
+        return ((s32 (*)())fileWriteContinuation)();
     }
     if (status == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
@@ -1976,7 +1976,7 @@ s32 fileFinishRequest(void) {
     if (fileSaveIconRequest != 0) {
         return 0;
     }
-    mcBeginWrite(fileSaveFileDescriptor, *D_00439048, *D_0043904C);
+    mcBeginWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
     return (s32)mcHandleLoadResult;
 }
 

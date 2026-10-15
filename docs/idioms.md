@@ -13387,3 +13387,47 @@ follows initialization and the non-null check. The last literal still says
 `evtGetPolygonMovieWorkData3:3` even though this is the work-data-2 loader:
 retain that native diagnostic text. All array bounds, bytes, imports, casts,
 declaration order and control flow remain unchanged.
+
+## Camp return descriptors, stage-test vectors and file-write slots
+
+The following non-imported data twins are named from matched consumers and
+the native callback/vector contents. Only identifiers and the existing
+private depth-field comment change; declaration types, bounds and layout
+remain as they were.
+
+| Data name | DDS1 | DDS2 |
+| --- | --- | --- |
+| `mnuCampCommandReturnPopupEntry` | `0x0037C844` | `0x003E7034` |
+| `evtStageTestViewEyeVector` | `0x0037CE60` | `0x003E7940` |
+| `evtStageTestViewTargetVector` | `0x0037CE70` | `0x003E7950` |
+| `evtStageTestViewUpVector` | `0x0037CE80` | `0x003E7960` |
+| `fileMainSaveBlobAddress` | `0x003BD8F4` | `0x00439010` |
+| `fileMainSaveBlobSize` | `0x003BD8F8` | `0x00439014` |
+| `fileWriteDataAddressSlot` | `0x003BD928` | `0x00439048` |
+| `fileWriteDataSizeSlot` | `0x003BD92C` | `0x0043904C` |
+| `fileWriteContinuation` | `0x003BD930` | `0x00439050` |
+| `fileWritePendingRequestSlot` | `0x003BD934` | `0x00439054` |
+
+`mnuCampCommandReturnPopupEntry` is a distinct seven-word descriptor, not
+a tenth row of `mnuCampCommandDispatchEntries`. The idle staff/config
+dispatcher installs it after config completion; DDS2 also installs it after
+field-skill completion. Its final return-guard word is zero.
+
+The native stage-test eye, target and up vectors initially contain
+`(0,0,0,0)`, `(0,0,-400,0)` and `(0,1,0,1)`. Reset/update copy the complete
+vectors to the view state. The working eye/target reset writes only XYZ:
+retain every fourth word, including the up vector's native `1`.
+
+`fileMainSaveBlobAddress` and `fileMainSaveBlobSize` are the source words
+passed by address to `fileBeginRequest`. Its write-data slots point to those
+address/size words (or the icon equivalents); the write paths dereference
+the slots before `mcBeginWrite`. Preserve DDS1's integer address carrier
+versus DDS2's typed pointer, and all existing callback casts.
+
+`fileWritePendingRequestSlot` stores the optional dependency-request
+pointer. `fileWriteWaitOpen` checks that pointer and its pointed word to
+select `fileFinishRequest`, but that continuation checks the hardcoded
+`fileSaveIconRequest`, not the stored pointer. The observed non-null caller
+passes `&fileSaveIconRequest`; naming does not generalize or repair this
+native continuation behavior. `fileWriteContinuation` is invoked after
+successful write-close completion.

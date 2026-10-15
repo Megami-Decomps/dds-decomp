@@ -23,7 +23,7 @@ extern char D_003BC6D8[];
 
 extern s64 fileConsumeConfigTaskReady(void);
 
-extern u8 D_0037C844[];
+extern u8 mnuCampCommandReturnPopupEntry[];
 
 extern void mnuDrawBackdrop(s32, s32);
 
@@ -139,7 +139,7 @@ s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
-            mnuSetPopupEntryFlagged(dispatchEntry, D_0037C844);
+            mnuSetPopupEntryFlagged(dispatchEntry, mnuCampCommandReturnPopupEntry);
         }
         return 0;
     }
