@@ -15,10 +15,10 @@ void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *object, EffWorldNode *nod
 }
 
 /* Select one of the kind-2 owner's two world index nodes. */
-WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index) {
+WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 slotIndex) {
     WorldIndexNode **slot = object->data;
 
-    slot += index;
+    slot += slotIndex;
     return *slot;
 }
 #include "dds3_world_secondary.h"
