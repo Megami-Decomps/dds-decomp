@@ -2418,8 +2418,8 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
     unit->motionId = -1;
     unit->motionEndFrame = 0;
     btlRefreshUnitMotionSelection(unit);
-    if (unit->effectArgA != 0xB) {
-        btlApplyScaledUnitEffectParameter((u8 *)unit, unit->effectArgA, 1, 1.0f);
+    if (unit->effectIndex != 0xB) {
+        btlApplyScaledUnitEffectParameter((u8 *)unit, unit->effectIndex, 1, 1.0f);
     } else {
         btlApplyScaledUnitEffectParameter((u8 *)unit, 0xB, 2, 1.0f);
     }
@@ -2577,7 +2577,7 @@ u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3AD0);
 
 void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
-    u8 *context;
+    BtlState *context;
     BtlEffectResource *table;
     u8 *task;
     MdlCtx *model;
@@ -2609,7 +2609,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         }
         return;
     }
-    context = (u8 *)btlGetRuntime();
+    context = btlGetRuntime();
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, color);
@@ -2623,7 +2623,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     if (table->nodes[index].rateKind == 2) {
         unit->updateFlags |= 6;
     }
-    chooseMotion = *(s32 (**)(BtlUnit *, s32, s32))(context + 0x5A0);
+    chooseMotion = context->chooseMotion;
     if (chooseMotion != 0) {
         selected = chooseMotion(unit, index, 0);
         if (selected == -1) {
@@ -2678,7 +2678,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
             break;
         }
     }
-    keepRange = *(s32 (**)(BtlUnit *, s32))(context + 0x5A8);
+    keepRange = context->preserveMotionRange;
     if (keepRange != 0 && keepRange(unit, index) != 0) {
         start = unit->motionStartFrame;
         end = unit->motionEndFrame;
@@ -2690,8 +2690,8 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     unit->motionRate = rate;
     unit->motionId = index;
     unit->effectState = mode;
-    rate = rate * (30.0f / ((BtlState *)context)->timingRate);
-    rate *= *(f32 *)(context + 0x494);
+    rate = rate * (30.0f / context->timingRate);
+    rate *= context->modelFrameScale;
     evtPrepareUnitMotionState(unit->ext, index, start, end, mode);
     model = unit->ext->owner;
     model->first->frameStep = rate;
@@ -2707,12 +2707,12 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     }
     evtStoreUnitMotionShortParameters(unit->ext, 0, (s16)frameCount);
     unit->motionStartFrame = 0;
-    unit->motionEndFrame = table->nodes[unit->effectArgA].frameCount;
+    unit->motionEndFrame = table->nodes[unit->effectIndex].frameCount;
 }
 
 void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     s32 entryFlags;
-    u8 *context;
+    BtlState *context;
     s32 index;
     s32 selected;
     s32 mode;
@@ -2727,7 +2727,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         return;
     }
     entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
-    context = (u8 *)btlGetRuntime();
+    context = btlGetRuntime();
     if (unit->updateFlags & 2) {
         color = (unit->overlayColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitRgbTransition(unit->ext, 0, color);
@@ -2760,7 +2760,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->status.flags = (u32)unit->status.flags & (0x7FFFFFFF);
         unit->status.flags = (u32)unit->status.flags & (~0x2000);
     }
-    chooseStatus = *(s32 (**)(BtlUnit *))(context + 0x5A4);
+    chooseStatus = context->statusMotionOverride;
     if (chooseStatus != 0) {
         selected = chooseStatus(unit);
         if (selected >= 0) {
@@ -2778,7 +2778,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     rates = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)((u8 *)unit + 0xC4),
                                                   *(s32 *)((u8 *)unit + 0xC8)) + 0x14;
     rate = *(f32 *)(rates + index * 20 + 0x20);
-    chooseMotion = ((BtlState *)context)->chooseMotion;
+    chooseMotion = context->chooseMotion;
     if (chooseMotion != 0) {
         selected = chooseMotion(unit, index, 1);
         if (selected == -1) {
@@ -2790,8 +2790,8 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         }
     }
     *(f32 *)((u8 *)unit + 0x104) = rate;
-    speed = rate * (30.0f / ((BtlState *)context)->timingRate);
-    speed *= *(f32 *)(context + 0x494);
+    speed = rate * (30.0f / context->timingRate);
+    speed *= context->modelFrameScale;
     *(s32 *)((u8 *)unit + 0xFC) = index;
     evtUnitSetStoredParameter(unit->ext, index);
     evtSetTransitionMotionScale(unit->ext, speed);
@@ -2813,7 +2813,7 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
         return 0;
     }
     {
-        s32 (*callback)(BtlUnit *) = *(s32 (**)(BtlUnit *))((u8 *)btlGetRuntime() + 0x5A4);
+        s32 (*callback)(BtlUnit *) = ((BtlState *)btlGetRuntime())->statusMotionOverride;
         if (callback != 0 && callback(0) == *(s32 *)((u8 *)object + 0xEC)) {
             return 1;
         }

@@ -291,7 +291,8 @@ typedef struct BtlState {
     u8 pad598[4];
     s32 (*hitResultOverride)(BtlUnit *, BtlUnit *, s32); /* 0x59C: source, target and command. */
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5A0 */
-    u8 pad5A4[8];
+    s32 (*statusMotionOverride)(BtlUnit *); /* 0x5A4: nonnegative result replaces status motion. */
+    s32 (*preserveMotionRange)(BtlUnit *, s32); /* 0x5A8: keep the stored motion start/end. */
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
     u8 pad5B0[4];
     s32 (*battleOutcomeOverride)(void); /* 0x5B4: -1 falls through to the unit scan; any other value is stored in eventReady (func_001A8188). */
@@ -346,6 +347,8 @@ typedef struct BtlState {
     s16 debugMotionCountdown; /* Frames until preview motion; -1 when idle. */
 } BtlState;
 typedef char BtlEscapeAttemptCountDds1Offset[((unsigned int)&((BtlState *)0)->escapeAttemptCount == 0x254) ? 1 : -1];
+typedef char BtlStatusMotionOverrideDds1Offset[((unsigned int)&((BtlState *)0)->statusMotionOverride == 0x5A4) ? 1 : -1];
+typedef char BtlPreserveMotionRangeDds1Offset[((unsigned int)&((BtlState *)0)->preserveMotionRange == 0x5A8) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset2[((unsigned int)&((BtlState *)0)->baselineAmbientColor == 0x30) ? 1 : -1];
