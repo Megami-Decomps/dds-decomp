@@ -534,7 +534,7 @@ u8 btlAreModelChangeTasksFinished(void) {
 s32 btlCommandStartSlotMotion(void) {
     s32 choice = scrReadIntParameter(0);
     s32 unitIndex = scrReadIntParameter(1);
-    s32 index = scrReadIntParameter(2);
+    s32 motionIndex = scrReadIntParameter(2);
     BtlUnit *unit;
 
     if (choice == 0) {
@@ -548,8 +548,8 @@ s32 btlCommandStartSlotMotion(void) {
     if ((unit->status.flags & 2) == 0) {
         return 1;
     }
-    if (index >= 0) {
-        btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
+    if (motionIndex >= 0) {
+        btlApplyScaledUnitEffectParameter(unit, motionIndex, btlGetSlotRateKind(unit, motionIndex), 1.0f);
     }
     return 1;
 }
