@@ -485,7 +485,7 @@ extern s8 D_0032C9A0[];
 extern void fldReleaseSkyResources(void);
 extern void fldCreatePlayerObject(void);
 extern u8 *fldSelectCurrentActorOnNextFloor(void);
-extern void fldSpawnPlacementObjectsFromBatches(u32, u32, s32);
+extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batches, u32 batchCount, s32 appended);
 
 extern s32 D_003BAE68;
 
@@ -698,11 +698,10 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 appended) {
+void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *batch, u32 batchCount, s32 appended) {
     f32 position[4];
     f32 rotation[4];
     f32 *transform;
-    FldSpawnBatch *batch = (FldSpawnBatch *)batchAddress;
     FldFileResource *resource;
     u32 count;
     u32 i;
@@ -1099,12 +1098,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 0);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 1);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 1);
 }
 
 s32 fldGetTransferChunkPayload(s32 record) {
