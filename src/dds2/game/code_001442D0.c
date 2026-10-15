@@ -264,7 +264,7 @@ extern void fldPlayCurrentBgmSound(void);
 
 extern void fldReleaseCurrentBgm(void);
 
-extern void fldPlayMenuSound(s32 param);
+extern void fldPlayMenuSound(s32 soundId);
 
 extern void fldPlayFieldSe(s32 soundId);
 
@@ -846,19 +846,19 @@ void fldPlayCurrentBgmSound(void) {
     fldCurrentBgmId[0] = 0;
 }
 
-void fldPlayMenuSound(s32 id) {
+void fldPlayMenuSound(s32 soundId) {
     if (fldAreaState.area < 0x32) {
-        if (id >= 0x10) {
-            if (id == 0x80) {
+        if (soundId >= 0x10) {
+            if (soundId == 0x80) {
                 sndSetSequenceVolumePan(0x6d0060, 0x7f, 0x3f);
-            } else if (id == 0x81) {
+            } else if (soundId == 0x81) {
                 sndSetSequenceVolumePan(0x6d0061, 0x7f, 0x3f);
-            } else if (id == 0x82) {
+            } else if (soundId == 0x82) {
                 sndSetSequenceVolumePan(0x6d0064, 0x7f, 0x3f);
-            } else if (id >= 0x200) {
-                sndSetSequenceVolumePan(0x68fe00 + id, 0x7f, 0x3f);
+            } else if (soundId >= 0x200) {
+                sndSetSequenceVolumePan(0x68fe00 + soundId, 0x7f, 0x3f);
             } else {
-                sndSetSequenceVolumePan(fldSceneSoundBase + id, 0x7f, 0x3f);
+                sndSetSequenceVolumePan(fldSceneSoundBase + soundId, 0x7f, 0x3f);
             }
         }
     }

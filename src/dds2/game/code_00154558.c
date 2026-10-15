@@ -169,7 +169,7 @@ extern void fldPlayCurrentBgmSound(void);
 
 extern void fldReleaseCurrentBgm(void);
 
-extern void fldPlayMenuSound(s32 param);
+extern void fldPlayMenuSound(s32 soundId);
 
 extern void fldPlayFieldSe(s32 soundId);
 
