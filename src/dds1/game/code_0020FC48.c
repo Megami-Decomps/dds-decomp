@@ -27,6 +27,7 @@
 #include "btl_scene_initializer.h"
 #include "btl_action.h"
 #include "btl_sound.h"
+#include "btl_sound_release_task.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
 #include "evt_task.h"

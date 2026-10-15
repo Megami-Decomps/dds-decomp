@@ -28,6 +28,7 @@
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
 #include "btl_sound.h"
+#include "btl_sound_release_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"

@@ -22,6 +22,7 @@
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_sound_release_task.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
@@ -1421,7 +1422,6 @@ void btlEnterLinkageActionState(void) {
 }
 
 extern char D_003A36A8[];
-extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);

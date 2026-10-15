@@ -40,6 +40,7 @@
 #include "file_pac.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
+#include "btl_sound_release_task.h"
 #include "actor_effect_task.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"

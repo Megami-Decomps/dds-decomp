@@ -10,6 +10,7 @@
 #include "btl_special_ability.h"
 #include "kwln_fade.h"
 #include "btl_sound.h"
+#include "btl_sound_release_task.h"
 #include "btl_task_condition.h"
 #include "btl.h"
 #include "btl_state.h"
