@@ -22,6 +22,7 @@
 #include "file.h"
 #include "eff_update_flags.h"
 #include "sdf.h"
+#include "btl_boss_debug_api.h"
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
 #include "dds3obj.h"
@@ -53,8 +54,6 @@ extern BtlAt3Entry D_003E0F60[];
 
 extern u32 D_00436AD4;
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
@@ -1271,7 +1270,7 @@ typedef struct BtlFormationTaskArgs {
     BtlUnit *first;
     BtlUnit *second;
     u32 commandId;
-    u32 unknown10;
+    u32 flags;
 } BtlFormationTaskArgs;
 
 typedef char BtlFormationTaskArgs_size[(sizeof(BtlFormationTaskArgs) == 0x14) ? 1 : -1];
@@ -1348,7 +1347,7 @@ BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, u32 firstAc
     args->first = (BtlUnit *)firstActorAddress;
     args->second = (BtlUnit *)secondActorAddress;
     args->commandId = skillId;
-    args->unknown10 = flags;
+    args->flags = flags;
     return task;
 }
 

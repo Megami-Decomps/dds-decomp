@@ -180,7 +180,7 @@ extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
 extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
-extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
+extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
 extern const char *fldGetTaskRecordValue(u32 key);
 
@@ -1698,10 +1698,10 @@ s32 fldCmdPlayArchiveSound(void) {
 }
 
 s32 fldCommandStartTitle(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
+    s32 fieldId = scrReadIntParameter(0);
+    s32 titleArg = scrReadIntParameter(1);
 
-    fldStartTitle(param0, param1, 0x3c);
+    fldStartTitle(fieldId, titleArg, 0x3c);
     return 1;
 }
 

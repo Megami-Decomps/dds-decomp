@@ -43,13 +43,13 @@ const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %
 s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
     EvtPackLoadState *data;
     EvtPackEntry *entry;
-    s32 i;
+    s32 entryIndex;
     s32 entrySize;
     u8 *payload;
     s32 unitKey;
 
     data = evtGetEventPackLoadState(eventId);
-    i = 0;
+    entryIndex = 0;
     if (data->header->entryCount > 0) {
         entry = data->entries;
         do {
@@ -80,7 +80,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 }
             }
             entry++;
-        } while (++i < data->header->entryCount);
+        } while (++entryIndex < data->header->entryCount);
     }
     return -1;
 }

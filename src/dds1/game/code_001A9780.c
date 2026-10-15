@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dsp_channel.h"
 #include "mdl_flag_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_task_state6_api.h"
@@ -29,6 +30,7 @@
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_scene_initializer.h"
+#include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
 #include "kwln.h"
@@ -48,12 +50,9 @@ extern SceneSlotFadeWork *D_003BD83C;
 
 extern ActorSlotOrder *D_003BD840[2];
 
-extern void dspCloseChannel(void);
 
 
 extern void evtCreateMessageWindowIfMissing(void *text);
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 
 

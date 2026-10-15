@@ -11,7 +11,6 @@ extern EffRandState D_0040BAE8;
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 
 
-extern f32 sdfAtan2(f32 y, f32 x);
 
 extern f32 D_0040B530[4];
 

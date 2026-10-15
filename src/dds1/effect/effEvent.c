@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "sdf_sif_command.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -369,7 +370,6 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
 }
 
 extern void *sdfDrawCachedMatrixLinePairsVU(const f32 [][4], const u32 *, s32, u32);
-extern void sdfVuLoadRotationMatrixX(f32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
@@ -1153,8 +1153,6 @@ void effEventSetState(EffEventWork *work, void *actor) {
 #include "evt_unit.h"
 #include "mdl.h"
 
-extern void effMiscQuatMultiplyVU(void);
-extern void effMiscQuaternionToMatrixVU(void);
 extern void effEventLoadSelectedAimPositionVu(EffEventInit *source, EffAimParams *params);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
@@ -1298,7 +1296,6 @@ extern f32 D_003563A0[];
 extern f32 D_003563B8[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */

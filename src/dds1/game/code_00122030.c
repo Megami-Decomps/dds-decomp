@@ -8,6 +8,8 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "eff_inner_float_api.h"
+#include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
@@ -157,7 +159,7 @@ void fldClearSecondarySceneFlag(void);
 
 void fldClearPrimarySceneFlag(void);
 
-void fldClearSceneControlFlags(u32 arg0);
+void fldClearSceneControlFlags(u32 mask);
 
 extern u32 D_003BAB64;
 
@@ -169,7 +171,7 @@ extern void mdlLoadViewerPackage(s32, s32, s32, void *, s32);
 
 void fldLoadPlayerModel(void);
 
-u8 fldTestSceneControlFlags(u32 arg0);
+u8 fldTestSceneControlFlags(u32 mask);
 
 u32 *fldGetPlayerSceneStateAddress(void);
 
@@ -461,7 +463,6 @@ f32 fldSnapAngleToCardinalDirection(f32 angle) {
     return angle;
 }
 
-extern f32 sdfAtan2(f32 y, f32 x);
 
 /* Direction in degrees from two X/Z positions, preserving the field's 3.14 PI. */
 f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
@@ -1252,7 +1253,6 @@ extern char D_003BABB8[];
 
 extern void effMiscAxisAngleToQuaternionVU(f32);
 
-extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 
 extern void fldResetCameraModelHandles(void);
@@ -1354,7 +1354,6 @@ extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, Field
 
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 
-extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 
 /* Create the secondary camera at target origin with the stored eye/up vectors. */

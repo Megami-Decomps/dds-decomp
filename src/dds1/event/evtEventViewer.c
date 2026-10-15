@@ -17,6 +17,7 @@
 #include "evt_reset_unit_vector_slots_api.h"
 #include "kwln.h"
 #include "kwln_fade.h"
+#include "kwln_fade_timing.h"
 #include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -75,7 +76,7 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
-void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 void sdfSetViewFieldOfView(f32 arg0);
@@ -458,7 +459,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer)
     s32 i;
 
     if (viewer->windowContext != NULL) {
-        for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
+        for (i = 0; i < (s32)viewer->windowContext->mainEntry3Count; i++) {
             btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].type);
         }
     }
@@ -710,7 +711,7 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 
     while (node != NULL) {
         if (node->type == 24) {
-            if (node->unk28 == 1) {
+            if (node->usePendingKey == 1) {
                 u16 *key = (u16 *)evtEventViewerGetPendingNode(viewer);
                 evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
             } else {
@@ -744,18 +745,6 @@ extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
-extern void effEnableTexturedBlur(void);
-extern void effDisableTexturedBlur(void);
-extern void effEnableTexturedSquare(void);
-extern void effDisableTexturedSquare(void);
-extern void effEnableFilterBlur(void);
-extern void effDisableFilterBlur(void);
-extern void effEnableStaggeredBlur(void);
-extern void effDisableStaggeredBlur(void);
-extern void effEnableFramebufferQuad(void);
-extern void effDisableFramebufferQuad(void);
-extern void effEnableColorRectangle(void);
-extern void effDisableColorRectangle(void);
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
         effDrawBlurRectangle(&effGetLoadDescA()->source);
@@ -825,7 +814,6 @@ extern void evtTransitionBgm(s32, s32);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
 extern void sndQueueNoPayloadCommand1A0(void);
-extern void kwlnFadeSetupFrames(s32, s32);
 extern s32 itfMesSelectTableItemText(s32, s32, s32);
 extern void itfMesBuildOptionList(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
@@ -841,7 +829,6 @@ extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void fldSetTitleDrawMode(u32);
 extern void fldBeginTitleAnimation(void);
-extern void kwlnCancelConfiguredFadeFrames(void);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);
 
@@ -1048,7 +1035,7 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
-void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 void sdfSetViewFieldOfView(f32 arg0);
@@ -1327,7 +1314,6 @@ extern s32 evtViewerTestIndexedCondition(u32);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
-extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
 extern EvtRuntimeGroup *D_003BBE80;
 
@@ -2195,17 +2181,17 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, EvtRuntime *viewer) {
-    s32 count = viewer->historyCount + 1;
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer) {
+    s32 historyIndex = viewer->historyCount + 1;
 
-    viewer->actionMode = mode;
-    viewer->historyCount = count;
-    viewer->history[count].id = mode;
-    viewer->history[count].a = first;
-    viewer->history[count].b = second;
-    if (mode > 0) {
-        if (mode >= 3) {
-            if (mode == 3) {
+    viewer->actionMode = actionMode;
+    viewer->historyCount = historyIndex;
+    viewer->history[historyIndex].id = actionMode;
+    viewer->history[historyIndex].a = first;
+    viewer->history[historyIndex].b = second;
+    if (actionMode > 0) {
+        if (actionMode >= 3) {
+            if (actionMode == 3) {
                 viewer->charCol = 0;
                 viewer->charRow = 0;
                 viewer->nameStorage[0] = 0;
@@ -2883,7 +2869,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         break;
                     case 24:
                         viewer->editField = 0;
-                        viewer->frameGroup->unk28 = 1;
+                        viewer->frameGroup->usePendingKey = 1;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 25:
@@ -3512,7 +3498,6 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
 extern f32 D_00324590[];
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void fldSetTitleDrawMode();
-extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();

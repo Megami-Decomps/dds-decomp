@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "dsp_active_api.h"
 #include "kwln_task_add_child.h"
 #include "evt_message_window_api.h"
@@ -996,7 +997,6 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     return (u8 *)obj;
 }
 
-extern s32 dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);

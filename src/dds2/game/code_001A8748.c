@@ -1116,8 +1116,8 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
                 }
             }
         } else {
-            ((BtlState *)btlRuntime)->background.ids.major = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1C;
-            ((BtlState *)btlRuntime)->background.ids.minor = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1E;
+            ((BtlState *)btlRuntime)->background.ids.major = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMajorId;
+            ((BtlState *)btlRuntime)->background.ids.minor = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMinorId;
             if (((BtlState *)btlRuntime)->battleMode == 0x3A0 && mdlFlagTest(0x80D) != 0) {
                 ((BtlState *)btlRuntime)->background.ids.major = 0xDF;
                 ((BtlState *)btlRuntime)->background.ids.minor = 5;
@@ -1766,25 +1766,25 @@ s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 element) {
     return datGetEffectiveAffinity(record, element);
 }
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_00435DE0 + arg1 * 0x270;
+s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
+    if (side == 0) {
+        return D_00435DE0 + index * 0x270;
     }
-    return D_00435DF0 + arg1 * 0x270;
+    return D_00435DF0 + index * 0x270;
 }
 
-BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {
+    if (side == 0) {
         return (BtlActorTransformParameters *)D_003B4DC0;
     }
-    return (BtlActorTransformParameters *)(D_00435E00 + arg1 * 24);
+    return (BtlActorTransformParameters *)(D_00435E00 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_00435DE4 + arg1 * 0x74;
+s32 btlSelectSideIndexedActorParameterTable(s32 side, s32 index) {
+    if (side == 0) {
+        return D_00435DE4 + index * 0x74;
     }
-    return D_00435DF8 + arg1 * 0x74;
+    return D_00435DF8 + index * 0x74;
 }
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
@@ -1848,7 +1848,7 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
         }
         category = datCommandRecords[value].targetType;
         mode = datCommandRecords[value].options;
-        flags = datCommandRecords[value].unk_0A[0];
+        flags = datCommandRecords[value].targetFlags;
         mask = datCommandRecords[value].restriction;
         if ((datCommandRecords[value].attribute.bits & 0x400000FF) == 0x40000002 && mask == 0) {
             mask = -1;
@@ -3563,7 +3563,7 @@ u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
 u8 btlGetActorDisplayByteWithDefault(BtlUnit *object, s32 index) {
     if (index == 0) {
         if ((object->status.flags & 0x400) != 0) {
-            return datEnemyRecords[object->partyRecord.unitId].unk48;
+            return datEnemyRecords[object->partyRecord.unitId].attackSpacing;
         }
         return 12;
     }
@@ -3709,7 +3709,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
         if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
             return 1;
         }
-    } else if (datCommandRecords[command].unk_0A[1] == 1) {
+    } else if (datCommandRecords[command].unk_0B == 1) {
         return 1;
     }
     return 0;

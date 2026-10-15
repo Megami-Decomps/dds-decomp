@@ -1080,7 +1080,7 @@
 0x0013DB58	fldQuerySelectedActorMotionState	inferred	Reports a motion-dependent actor interval or tests its state flag. [names_reviewed11.tsv]
 0x0013DC08	fldApplyActorEntryTrigger	inferred	Dispatches the selected field actor entry trigger, including floor-gated sound and fade behavior. [names_reviewed14.tsv]
 0x0013DF18	fldIsSceneStateEight	inferred	Tests scene-state global against eight; caller resets task scene on true. [names_R_FuncNames6.tsv]
-0x0013DF28	fldApplySceneRoomSelection	inferred	Copies the scene's room selector and secondary scene value into field state. [names_reviewed5.tsv]
+0x0013DF28	fldApplySceneRoomSelection	inferred	Reads FldActorEntry.selectedRoom as an optional 1-based room selector, stores selectedRoom - 1 in fldAreaState.unk88 when nonzero, and copies rowIndex; fldInitializeActorLinkedSequence repeats the same room selection for matching linked-sequence rows. [names_reviewed5.tsv]
 0x0013EC10	fldSelectActorFromSceneIndexTables	inferred	Selects an indexed actor record from either scene table and records its index. [names_reviewed11.tsv]
 0x0013EF10	fldInitializeActorLinkedSequence	inferred	U1
 0x0013F4D8	fldGetActorStat0	inferred	switch over actor record (D_00337D00 0x6C stride) returning a stat or flag bit
@@ -3967,7 +3967,7 @@
 0x0021FE38	evtDestroySecondaryWorldNode	inferred	Obtains the secondary world object and destroys its node when it exists.
 0x0021FE70	evtDrainSecondaryWorldNodes	inferred	M141; sources=names_pending_main.tsv; twin=0x0023A9E0, input-family pairing. [names_qp10.tsv]
 0x0021FEC0	evtCreateWorldObjectForKey	inferred	Called by evtCommandHandleChangedSecondaryWorldKey after the packed secondary-world key changes; creates and loads the stage world object for that key.
-0x0021FFE8	evtCreateWorldObjectFromResource	inferred	Called by evtEventPack with a constructed-resource record; appends a world object and attaches a handle built from its six values.
+0x0021FFE8	evtCreateWorldObjectFromResource	inferred	Called by evtEventPack with a constructed-resource record; forwards the two opaque resource-data payload addresses, texture-offset list, and remaining values unchanged to the resource attachment helper.
 0x00220110	evtCreateEventScriptProcess	inferred	Formats event BF script path from event ID and creates a process task for it. [names_reviewed6.tsv]
 0x00220228	evtSetWorldSlotStatusFlag	inferred	Sets the 0x8 status bit on slot-one world data when available.
 0x00220260	evtClearWorldSlotStatusFlag	inferred	Clears the 0x8 status bit on slot-one world data when available.
@@ -6261,7 +6261,7 @@
 0x002C5C70	sdfCounterTickPositionTransition	inferred	src/dds1/game/code_002C3868.c func_002C5C70: Decrements three-frame timer and interpolates position, snapping to target at zero. [names_reviewed24.tsv]
 0x002C5D30	sdfUpdateCounterSelectionFade	inferred	Computes selected counter timer growth and shrinkage from fade value. [names_reviewed22.tsv]
 0x002C5D38	sdfCounterDrawSelectedTimerFade	inferred	Draws the selected counter timer image with fading alpha and scale. [names_reviewed9.tsv]
-0x002C5FB8	sdfCounterMeasureLabelWidth	inferred	readability/matching review (QP16)
+0x002C5FB8	sdfCounterMeasureLabelWidth	inferred	Measures the supplied counter label text with frFontMeasureTextAdvance; callers pass SdfCounterDisplay.info or .word before drawing/centering the same label. [DDS1 caller/provider review, 2026-10-14]
 0x002C5FD8	fldCountMaskBitsBeforeOrdinal	inferred	Counts set bits before the one-based ordinal position in the lower 31 mask bits.
 0x002C6010	sdfCounterSelectChannelByIndex	inferred	Walks to a target counter channel while updating selection and scroll. [names_reviewed8.tsv]
 0x002C6098	fldSetMapSelectedCount	inferred	Byte-identical dds2 twin 0x0030D8A0; Updates the map selection count when nonzero and not above the selection's maximum. [names_conflicts.tsv]
@@ -8205,7 +8205,7 @@
 0x00121870	fldFindSecondaryMapLabelIndexByCoordinate	inferred	confidence=high; matched-C; src/dds1/game/code_0011D3A0.c:991; Finds the one-based matching index in the second map-label coordinate table, returning zero on miss. twin=0x00123808 (DDS2). LiteG batch 4.
 0x00121A58	fldGetStageBitmapBitCoordinates	inferred	confidence=high; matched-C; src/dds1/game/code_0011D3A0.c:1089; Converts scene-relative offsets into bitmap byte, row and bit coordinates, returning whether they are in bounds. twin=0x00123A58 (DDS2). LiteG batch 4.
 0x00125E08	fldStartFieldSceneTasks	inferred	confidence=high; matched-C; src/dds1/game/code_00122030.c:1922; Copies the sequence record in zero mode, starts sequence and draw tasks, and enables scene work. twin=0x001283B8 (DDS2). LiteG batch 4.
-0x00135360	fldBuildCollisionRecordsFromGeometry	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:5673; Builds field collision/value records from geometry data and a translation vector. twin=0x00137F10 (DDS2). LiteG batch 4.
+0x00135360	fldBuildCollisionRecordsFromGeometry	inferred	Stores its ownerIndex argument in FldValueRecord.ownerIndex for each emitted face record; fldUpdatePositionZoneHits checks positive values as fldTestMapSlotAuxiliaryFlag bit selectors. Resource-spawn callers pass -1; wall-mesh callers pass id. twin=0x00137F10 (DDS2).
 0x00136A78	fldUpdatePositionZoneHits	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:6340; Evaluates current and previous position against active zone planes and updates zone-hit state. twin=0x00139628 (DDS2). LiteG batch 4.
 0x00138058	fldFindFieldSegmentIntersection	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:6498; Sweeps a segment against field value-plane records, returning the crossed record and hit point while processing stop entries. twin=0x0013AC40 (DDS2). LiteG batch 4.
 0x0013C600	fldResolveEventSetByNameKindAreaOne	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:7291; Resolves an event name for the current floor when the selected set has packed kind-area one. twin=0x0013F1E8 (DDS2). LiteG batch 4.

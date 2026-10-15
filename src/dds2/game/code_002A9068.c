@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_channel.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"

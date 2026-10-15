@@ -5,6 +5,7 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
+#include "dat_command.h"
 
 typedef s16 MenuIconPlacement[4];
 
@@ -190,7 +191,90 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawTerminalPanelValues);
+extern s32 evtGetIndexedEventRecordId(s32);
+extern s32 ptyCountBulletItem(s32);
+extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
+extern s32 sprintf(char *, const char *, ...);
+extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
+extern char D_00437968[];
+
+/* Draw the terminal value panel for the selected item: its frames, then by
+ * item kind its power (kind 1) or per-stat bonuses (kind 3), and the count. */
+void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object, s32 scale,
+                                s32 showFrame, s32 option) {
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    char text[16];
+    s32 count;
+    u32 color;
+    CampWindowParams *item;
+    struct FrFontGlyph *glyph;
+    s32 value;
+    s32 i;
+    s32 id;
+    s32 textX;
+    s32 row;
+
+    if (showFrame != 0) {
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[55][MENU_ICON_X] << 4, D_003D03F0[55][MENU_ICON_Y] << 3,
+                      0, scale, 0, texture, D_003D03F0[55][MENU_ICON_FRAME], option);
+    }
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[23][MENU_ICON_X] << 4, D_003D03F0[23][MENU_ICON_Y] << 3,
+                  0, scale, 0, texture, D_003D03F0[23][MENU_ICON_FRAME], option);
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[24][MENU_ICON_X] << 4, D_003D03F0[24][MENU_ICON_Y] << 3,
+                  0, scale, 0, texture, D_003D03F0[24][MENU_ICON_FRAME], option);
+    if (object->window->list->count == 0) {
+        return;
+    }
+    item = &object->window->list->cursor->camp;
+    id = item->id;
+    count = datGameState->inventory.counts[id];
+    color = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
+    switch (item->mode) {
+    case 1: {
+        s32 left;
+
+        effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[54][MENU_ICON_X] << 4, D_003D03F0[54][MENU_ICON_Y] << 3,
+                      0, scale, 0, texture, D_003D03F0[54][MENU_ICON_FRAME], option);
+        value = datCommandRecords[evtGetIndexedEventRecordId(id)].hpPower;
+        sprintf(text, D_00437968, value);
+        left = 0x990;
+        if (value / 100 == 0) {
+            left = 0x9D0;
+        }
+        glyph = itfCreateFont2TextGlyph(left, 0xB18, z, color, text, NULL);
+        frFontDrawGlyphChain(glyph, 1, option);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        break;
+    }
+    case 3:
+        for (i = 0, textX = 0x780; i < 5; i++, textX += 0x3F0) {
+            value = ptyGetCombinedRecordAndSlotValue(id, i);
+            if (value != 0) {
+                row = 44 + i * 2;
+                effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[row][MENU_ICON_X] << 4,
+                                                          D_003D03F0[row][MENU_ICON_Y] << 3, 0, scale, 0, texture,
+                                                          D_003D03F0[row][MENU_ICON_FRAME], option);
+                sprintf(text, D_00437968, value);
+                glyph = itfCreateFont2TextGlyph(textX, 0xB18, z, color, text, NULL);
+                frFontDrawGlyphChain(glyph, 1, option);
+                frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            } else {
+                row = 45 + i * 2;
+                effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[row][MENU_ICON_X] << 4,
+                                                          D_003D03F0[row][MENU_ICON_Y] << 3, 0, scale, 0, texture,
+                                                          D_003D03F0[row][MENU_ICON_FRAME], option);
+            }
+        }
+        break;
+    }
+    if (item->mode == 1) {
+        count = ptyCountBulletItem(id);
+    }
+    sprintf(text, D_00437968, count);
+    glyph = (struct FrFontGlyph *)itfCreateTightFont3TextGlyph(0x1700, 0xA58, z, color, text, 0);
+    frFontDrawGlyphChain(glyph, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawMenuItemListRow);
 
@@ -345,8 +429,6 @@ void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *obje
 
 struct FrFontGlyph;
 
-extern s32 sprintf(char *, const char *, ...);
-extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
 

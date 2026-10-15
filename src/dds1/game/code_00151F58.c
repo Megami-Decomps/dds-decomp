@@ -340,7 +340,6 @@ extern u8 sdfProjectionMatrix[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
 extern u8 D_0034E080[];
-extern f32 sdfAtan2(f32, f32);
 
 /* vu0 routine: project position and position + scaled offset; return the reverse XY heading. */
 f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {

@@ -99,13 +99,13 @@ u32 scrAdvanceTraceProgramCounter(ScrData *scr) {
 /* Yield without consuming operands until the command completes. */
 u32 bfOpWaitDispatch(ScrData *scr) {
     s32 pc = scr->pc;
-    s32 command = scr->instructions[pc].parts.sOperand;
+    s32 commandIndex = scr->instructions[pc].parts.sOperand;
 
     scrCurrentContext = scr;
-    if (D_00411408[command].func() == 0) {
+    if (D_00411408[commandIndex].func() == 0) {
         return 2;
     }
-    scr->sp -= D_00411408[command].paramCount;
+    scr->sp -= D_00411408[commandIndex].paramCount;
     if (pc == scr->pc) {
         scr->pc = pc + 1;
     }

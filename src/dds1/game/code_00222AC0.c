@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_unique_chunk_value_api.h"
 #include "kwln_task_add_child.h"
@@ -34,7 +35,6 @@
 extern EvtUnitVectorSlot D_003D7BD8[7];
 
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
@@ -991,7 +991,6 @@ f32 evtGetShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
 
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
-extern f32 sdfAtan2(f32 y, f32 x);
 
 u32 evtOpTurnUnitRelativeToWorldNode(void) {
     EvtUnit *unit;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_inner_float_api.h"
 #include "sdf_sif_command.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_vu_matrix.h"

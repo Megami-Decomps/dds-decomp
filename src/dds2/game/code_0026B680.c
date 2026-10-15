@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dsp_channel.h"
 
 /* Pass the object's +0x60 word to the second operation after setup. */
 void evtCloseDisplayChannelAndEnsureMessageWindow(s32 objectAddress) {

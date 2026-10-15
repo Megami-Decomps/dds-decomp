@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "sdf_quaternion.h"
 #include "rw_matrix.h"
 #include "pcp_vu0.h"
@@ -72,8 +73,6 @@ void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
     VU0_LOAD_MATRIX_B(&matrix);
 }
 
-extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */

@@ -40,6 +40,8 @@ void sdfGetChipHeapStats(SdfChipHeapStats *stats);
 
 u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
 s32 sdfMemoryGetBlockSize(struct SdfMemBlock *block);
+/* Advance one descriptor; return NULL when its successor is the end marker. */
+struct SdfMemBlock *sdfMemoryNextBlock(struct SdfMemBlock *block);
 
 /* Route payload addresses between the chip and general heaps. */
 void *sdfAllocateBlockBySizeThreshold(s32 size);

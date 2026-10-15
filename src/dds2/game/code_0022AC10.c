@@ -28,6 +28,7 @@
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
 #include "btl_sound.h"
+#include "btl_sound_release_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
@@ -2740,8 +2741,8 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         parameters = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->resourceIndex);
         if (sdfPadButtonStates[2] < 0) {
             record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
-            parameters->reach = record->unk18;
-            parameters->height = record->unk1C;
+            parameters->reach = record->reach;
+            parameters->height = record->height;
             parameters->position[0] = record->position[0];
             parameters->position[1] = record->position[1];
             parameters->position[2] = record->position[2];
@@ -2787,7 +2788,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         selectedAddress = D_003BFFC0[D_003C0260.cursor].valueAddress;
         if (((u32)selectedAddress >= (u32)&D_004532C0.position[0] &&
              (u32)selectedAddress < (u32)&D_004532C0.scale) ||
-             selectedAddress == (u32)&D_004532C0.unk1C || selectedAddress == (u32)&D_004532C0.unk18) {
+             selectedAddress == (u32)&D_004532C0.height || selectedAddress == (u32)&D_004532C0.reach) {
             battle->unk220 |= 0x200;
         } else {
             battle->unk220 &= ~0x200;
@@ -2902,8 +2903,8 @@ void btlWriteActorModelTableFile(void) {
                             (double)D_004532C0.position[2]);
     cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[3], (double)D_004532C0.scale);
     cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[4], (double)D_004532C0.z);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[5], (double)D_004532C0.unk18);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[6], (double)D_004532C0.unk1C);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[5], (double)D_004532C0.reach);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[6], (double)D_004532C0.height);
     cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[7], (double)D_004532C0.unk20);
     cursor += sprintf(cursor, "%s: %.2f\n", D_003BFBE8[8], (double)D_004532C0.unk24);
     cursor += sprintf(cursor, D_00436F10, D_003BFBE8[9]);
@@ -3126,10 +3127,10 @@ s32 btlUpdateDebugEncounterSelector(void) {
     }
     btlApplyDebugEncounterPartySelection();
     state->battleMode = D_00436F68;
-    if (datBattleSceneRecords[D_00436F68].unk1C != 0 &&
-        datBattleSceneRecords[D_00436F68].unk1E != 0) {
-        state->background.ids.major = datBattleSceneRecords[D_00436F68].unk1C;
-        state->background.ids.minor = datBattleSceneRecords[D_00436F68].unk1E;
+    if (datBattleSceneRecords[D_00436F68].backgroundMajorId != 0 &&
+        datBattleSceneRecords[D_00436F68].backgroundMinorId != 0) {
+        state->background.ids.major = datBattleSceneRecords[D_00436F68].backgroundMajorId;
+        state->background.ids.minor = datBattleSceneRecords[D_00436F68].backgroundMinorId;
     } else {
         state->background.ids.major = D_00436F6C;
         state->background.ids.minor = D_00436F6E;

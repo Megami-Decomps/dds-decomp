@@ -861,18 +861,18 @@ u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
-extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 panelMode, s32 fadeLimit);
 
 /* Refresh changed panel values only when both content-status pairs are clear.
- * The first value is stored as a halfword; release the old primitive afterward. */
-void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) {
+ * Release the old primitive after applying the panel mode and fade limit. */
+void itfMesSetWindowPageAndRefresh(s32 window, s32 panelMode, s32 fadeLimit) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
-        if (mes->unk12 != firstValue || panelBlock->fadeLimit != secondValue) {
-            mes->unk12 = firstValue;
-            itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, firstValue, secondValue);
+        if (mes->unk12 != panelMode || panelBlock->fadeLimit != fadeLimit) {
+            mes->unk12 = panelMode;
+            itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, panelMode, fadeLimit);
             if (panelBlock->sprite != NULL) {
                 itfPanelReleasePrimitiveResources(panelBlock->sprite);
                 panelBlock->sprite = NULL;
@@ -1681,7 +1681,7 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->rowCount = 0;
     cursor->unk18 = 0;
     cursor->unk1C = 0;
-    cursor->unk20 = 0;
+    cursor->glyphColorIntensity = 0;
     cursor->optionCount = 0;
 }
 
@@ -1944,18 +1944,18 @@ void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
             selection->optionCount = 0;
             btlSetFadePhaseAlphaTimer(&panel->fade, 1, 0x7F, 0);
             panel->flags = (panel->flags & ~0x38) | 0x28;
-            selection->unk20 = 0x80;
+            selection->glyphColorIntensity = 0x80;
             selection->unk10 = 3;
         }
         break;
     case 3:
-        selection->unk20 -= 16;
-        if (selection->unk20 <= 0) {
-            selection->unk20 = 0;
+        selection->glyphColorIntensity -= 16;
+        if (selection->glyphColorIntensity <= 0) {
+            selection->glyphColorIntensity = 0;
             selection->unk10 = 4;
             itfResetBattleFadeState(&panel->fade, 0);
         }
-        itfMesRecolorNodeChildren(selection->glyphChain, selection->unk20);
+        itfMesRecolorNodeChildren(selection->glyphChain, selection->glyphColorIntensity);
         return;
     case 4:
         if (entry->glyphChain != NULL && entry->y < 0xAF8) {

@@ -20,10 +20,12 @@
 #include "fld_transfer_chunk.h"
 #include "eff_class_work_api.h"
 #include "eff_random.h"
+#include "kwln_fade.h"
 #include "eff_point_set.h"
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "eff_resource_list_request.h"
 #include "eff_resource_bank_slot.h"
 #include "eff_matrix4.h"
@@ -68,11 +70,13 @@
 #include "eff_billboard_work.h"
 #include "eff_update_flags.h"
 #include "eff_resource_list.h"
+#include "sdf_gs_alpha_register_api.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "eff_record_bucket.h"
 #include "eff_owner_records.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "sdf_primitive.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
@@ -402,7 +406,6 @@ extern u32 effFlashTextureHandles;
 extern u32 effModelUpdateControlFlags;
 
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
 extern u128 D_004584B0[];
 
@@ -5880,8 +5883,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern void sdfVuLoadRotationMatrixX(f32);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 extern f32 atanf(f32);
 extern f32 func_00352DB0(f32);
 
@@ -13946,7 +13947,54 @@ u32 effDestroyOwnerRecordList(u32 buckets) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", effConvertParamValue);
+/* Convert a 4-byte effect parameter between its int and float kinds. Kind 0
+ * converts (float to int, or int to float when toFloat is set); kind 2 copies
+ * a float through. Returns the converted size, or 0 for other kinds. */
+u32 effConvertParamValue(u32 *kind, void *out, void *in, void *toFloat) {
+    s32 intValue;
+    f32 floatValue;
+
+    if (toFloat == NULL) {
+        switch (*kind) {
+        case 0:
+            if (in != NULL) {
+                intValue = *(f32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &intValue, 4);
+            }
+            return 4;
+        case 2:
+            if (in != NULL) {
+                floatValue = *(f32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &floatValue, 4);
+            }
+            return 4;
+        }
+    } else {
+        switch (*kind) {
+        case 0:
+            if (in != NULL) {
+                floatValue = *(s32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &floatValue, 4);
+            }
+            return 4;
+        case 2:
+            if (in != NULL) {
+                floatValue = *(f32 *)in;
+            }
+            if (out != NULL) {
+                memcpy(out, &floatValue, 4);
+            }
+            return 4;
+        }
+    }
+    return 0;
+}
 
 
 /* Sum the status-storage byte requirements for the selected record category. */
@@ -14533,8 +14581,6 @@ u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
     return 1;
 }
 
-extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
-
 void effSelectPresetByKind(u32 kind, u32 arg) {
     switch (kind) {
     case 0:
@@ -14573,8 +14619,6 @@ extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void effSelectPresetByKind(u32, u32);
-extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
-
 void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {

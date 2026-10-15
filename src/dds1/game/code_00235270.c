@@ -41,7 +41,6 @@ extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
 extern s32 sprintf(char *, char *, ...);
-extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
@@ -3120,7 +3119,7 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
 
 
     if (D_00324510.cancel < 0) {
-        runtime->frameGroup->unk28 = 0;
+        runtime->frameGroup->usePendingKey = 0;
         return 0;
     }
     return 1;
@@ -4300,7 +4299,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
     if (link->extra1 != 3) {
         link->extra2 = 0;
     } else {
-        for (i = 0; i < (s32)src->unk_F8; i++) {
+        for (i = 0; i < (s32)src->subEntry21Count; i++) {
             for (group = runtime->groups; group != NULL; group = group->next) {
                 if (strcmp(runtime->entryName[group->entryHeader], (char *)src->subEntry1Data + link->extra2 * 32) == 0) {
                     link->extra2 = group->entryHeader;
@@ -4343,7 +4342,7 @@ typedef char EvtViewerPackageRecord_size[(sizeof(EvtViewerPackageRecord) == 0x20
 typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x10) ? 1 : -1];
 
 
-extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0, s32 resource1,
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime);
 extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
@@ -4423,7 +4422,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         }
     }
     for (secondaryIndex = 2; secondaryIndex >= 0; secondaryIndex--) {
-        for (row = 0; row < (s32)work->unk_38; row++) {
+        for (row = 0; row < (s32)work->mainEntry3Count; row++) {
             if (((EvtViewerPackageRecord *)work->mainEntry3Data)[row].loadOrder == secondaryIndex) {
                 packageId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].packageId;
                 partId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].partId;
@@ -4970,7 +4969,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->sub->kind < 6) {
         rowCount = work->subEntry4Count;
     } else {
-        rowCount = work->unk_9C;
+        rowCount = work->extendedEntry4Count;
     }
     for (row = 0; row < rowCount; row++) {
         if (work->sub->kind < 6) {
@@ -4989,7 +4988,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->sub->kind < 6) {
         rowCount = work->subEntry4Count;
     } else {
-        rowCount = work->unk_9C;
+        rowCount = work->extendedEntry4Count;
     }
     for (row = 0; row < rowCount; row++) {
         if (work->sub->kind < 6) {
@@ -5135,7 +5134,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
 
     /* Continue with native .L002413F0: work->subEntry21Data link metadata. */
     if (work->subEntry21Data != NULL) {
-        for (row = 0; row < (s32)work->unk_F8; row++) {
+        for (row = 0; row < (s32)work->subEntry21Count; row++) {
             if (((EvtGroupMetadata *)work->subEntry21Data)[row].entry != -1) {
                 for (group = runtime->groups; group != NULL; group = group->next) {
                     if (strcmp(runtime->entryName[group->entryHeader],
@@ -5357,12 +5356,12 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
     return sound;
 }
 
-void evtFormatTaskName(s32 taskId, void *buffer) {
+void evtFormatTaskName(s32 taskId, char *buffer) {
     sprintf(buffer, D_003BC360, taskId);
 }
 
 KwlnTask *evtFindTaskById(u32 taskId) {
-    u8 taskName[32];
+    char taskName[32];
 
     evtFormatTaskName(taskId, taskName);
     return kwlnTaskGetTaskByName((const char *)taskName);

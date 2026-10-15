@@ -20,9 +20,9 @@ extern SdfGraphObj D_0040B290;
 
 
 
-void sdfGraphSetDisplayMode(s32 mode) {
-    D_004389D8 = (u8)mode;
-    sdfGraphApplyModeDefaults(&D_0040B290, mode, 0);
+void sdfGraphSetDisplayMode(s32 displayModeIndex) {
+    D_004389D8 = (u8)displayModeIndex;
+    sdfGraphApplyModeDefaults(&D_0040B290, displayModeIndex, 0);
     D_0043913C = 1;
 }
 

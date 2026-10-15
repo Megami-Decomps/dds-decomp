@@ -1,3 +1,4 @@
+#include "snd_command_packet.h"
 #include "evt_message_window_api.h"
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
@@ -117,7 +118,6 @@ u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
-extern void sndQueueNoPayloadCommand40(void);
 extern char D_0036D494[];
 extern char D_0036D408[];
 

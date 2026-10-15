@@ -1,5 +1,6 @@
 #include "eff_packet_params.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
@@ -56,8 +57,6 @@
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern u8 effDefaultRandomState[];
-extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);

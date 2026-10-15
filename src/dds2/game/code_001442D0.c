@@ -1,4 +1,5 @@
 #include "fld_label_rows.h"
+#include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fld_area_work.h"
@@ -163,7 +164,6 @@ extern s32 fldObjectSlotCount;
 
 extern s32 fldSceneSoundBase;
 
-extern f32 sdfAtan2(f32, f32);
 
 extern f32 fldLookAtFarPoint[];
 
@@ -273,7 +273,7 @@ extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
 extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
-extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
+extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
 extern void fldInitializeHuntSparkUnit(EvtUnit *unit);
 
@@ -3611,7 +3611,7 @@ void fldReleaseTitleTextures(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", fldTitleTaskName);
 
-void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
+void fldStartTitle(s32 field, s32 mode, s32 option) {
     char path[32];
     s32 resourceAddress;
     s32 handle;
@@ -3619,8 +3619,8 @@ void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
     D_00436350 = 0;
     D_00436354 = 0;
     D_00436358 = field;
-    D_0043635C = arg1;
-    D_00436360 = arg2;
+    D_0043635C = mode;
+    D_00436360 = option;
     D_00436364 = 0;
     if ((u32)(field - 8) < 2) {
         sprintf(path, "/fld/f/pnl/df%03d_a.tmx", field);
@@ -4789,7 +4789,7 @@ typedef struct FieldTargetGuideState {
     f32 targetDistance; /* 0x58 */
     f32 targetBearing;  /* 0x5C */
     f32 viewAngleError; /* 0x60 */
-    s32 unk64;
+    s32 guideMode;
     s16 previousGridX;
     s16 previousGridY;
     s32 unk6C;
@@ -4802,7 +4802,7 @@ void fldResetViewState(void) {
     fldTargetGuideState.unk6C = -1;
     fldTargetGuideState.unk54 = 0;
     fldTargetGuideState.updateFlags = 0;
-    fldTargetGuideState.unk64 = 0;
+    fldTargetGuideState.guideMode = 0;
     fldTargetGuideState.mode = 0;
     fldTargetGuideState.cycleIndex = 0;
     fldTargetGuideState.cycleRoute = NULL;
@@ -4910,8 +4910,9 @@ void fldMapGridToScreenPosition(s16 x, s16 y, f32 *outX, f32 *outY) {
 
 typedef struct FieldCoordinateRecord {
     u8 x, y, z, w;
-    u32 flags; /* 0x04 */
-    u8 pad08[8];
+    u32 flags;  /* 0x04 */
+    u32 offset; /* 0x08: route points, relative to the coordinate resource */
+    s32 count;  /* 0x0C: route point count */
 } FieldCoordinateRecord;
 
 typedef struct {
@@ -4966,7 +4967,115 @@ f32 fldApproachTargetAngleWithMinimumStep(f32 cur, f32 target, f32 speed, f32 mi
     return delta;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldSetTargetGuideMotionMode);
+extern FieldGridCoordPair D_00438EF8;
+
+/* Change the guide's update mode, flagging the change. */
+static inline void fldSetTargetGuideUpdateMode(s32 value) {
+    if (fldTargetGuideState.unk54 != value) {
+        fldTargetGuideState.unk54 = value;
+        fldTargetGuideState.updateFlags |= 2;
+    }
+}
+
+/* Route the target guide from one grid cell to another and start its point
+ * walk, or idle when no route record connects them. A macro because the
+ * target cell is re-read after the record lookup. */
+#define FLD_ROUTE_TARGET_GUIDE(state, fromX, fromY, toX, toY, step, timer)                \
+    {                                                                                     \
+        FieldCoordinateRecord *record = fldFindCoordinateRecord(fromX, fromY, toX, toY); \
+                                                                                          \
+        (state)->routeRecord = record;                                                    \
+        (state)->targetGridX = (toX);                                                     \
+        (state)->targetGridY = (toY);                                                     \
+        if (record != NULL) {                                                             \
+            FieldGuidePoint *route = (FieldGuidePoint *)(D_004363C8 + record->offset);    \
+                                                                                          \
+            (state)->routeIndex = 0;                                                      \
+            (state)->stepDistance = (step);                                               \
+            (state)->routeEnd = record->count - 1;                                        \
+            (state)->moveTimer = (timer);                                                 \
+            (state)->route = route;                                                       \
+            (state)->targetYaw = (f32)route->bearing;                                     \
+        } else {                                                                          \
+            (state)->stepDistance = 0.0f;                                                 \
+            (state)->route = NULL;                                                        \
+            (state)->routeIndex = 0;                                                      \
+            (state)->routeEnd = 0;                                                        \
+            (state)->targetYaw = 0.0f;                                                    \
+            (state)->moveTimer = 0x14;                                                    \
+        }                                                                                 \
+    }
+
+/* Hold the guide in place under a timed mode. */
+static inline void fldSetTargetGuideIdleMode(FieldTargetGuideState *state, s32 mode) {
+    state->mode = mode;
+    state->moveTimer = 0x1E;
+    state->updateFlags |= 2;
+    state->unk2A = 0;
+    state->stepDistance = 0.0f;
+    state->unk54 = 0;
+}
+
+/* Switch the field target guide's motion mode, routing it toward the player
+ * or along its cycle route as the mode requires. */
+void fldSetTargetGuideMotionMode(s32 mode) {
+    FieldTargetGuideState *state = &fldTargetGuideState;
+
+    state->age = 0;
+    state->unk28 = 0;
+    if (mode == 0) {
+        state->mode = 0;
+        state->unk2A = 0;
+        state->moveTimer = 0;
+        state->stepDistance = 0.0f;
+    } else if (mode == 1) {
+        fldSetTargetGuideIdleMode(state, mode);
+    } else if (mode == 3) {
+        state->mode = mode;
+        state->unk2A = 0;
+        fldFindNearestOccupiedMapGridCell(state->position[0], state->position[2], &state->gridX, &state->gridY);
+        FLD_ROUTE_TARGET_GUIDE(state, state->gridX, state->gridY, D_00438EF8.x, D_00438EF8.y, 20.0f, 0x14);
+        fldSetTargetGuideUpdateMode(0x11);
+    } else if (mode == 2) {
+        state->mode = mode;
+        state->unk2A = 1;
+        fldFindNearestOccupiedMapGridCell(state->position[0], state->position[2], &state->gridX, &state->gridY);
+        fldFindNearestOccupiedMapGridCell(fldAreaState.x, fldAreaState.z, &D_00438EF8.x, &D_00438EF8.y);
+        FLD_ROUTE_TARGET_GUIDE(state, state->gridX, state->gridY, D_00438EF8.x, D_00438EF8.y, 5.0f, 0x50);
+        fldSetTargetGuideUpdateMode(0x10);
+    } else {
+        if (mode == 4) {
+            state->moveTimer = 0x3C;
+            state->unk54 = 0x14;
+            state->updateFlags |= 2;
+            state->mode = mode;
+            state->unk2A = 0;
+            state->stepDistance = 0.0f;
+        }
+        if (mode == 5) {
+            s32 index = state->cycleIndex;
+            s32 next;
+
+            state->unk2A = 1;
+            next = index + 1;
+            if (state->cycleRoute[index + 1].x == -1) {
+                next = 0;
+            }
+            state->mode = mode;
+            fldFindNearestOccupiedMapGridCell(state->position[0], state->position[2], &state->gridX, &state->gridY);
+            fldFindNearestOccupiedMapGridCell(fldAreaState.x, fldAreaState.z, &D_00438EF8.x, &D_00438EF8.y);
+            FLD_ROUTE_TARGET_GUIDE(state, state->cycleRoute[index].x, state->cycleRoute[index].y,
+                                   state->cycleRoute[next].x, state->cycleRoute[next].y, 5.0f, 0x50);
+            fldSetTargetGuideUpdateMode(0x12);
+        } else if (mode == 6) {
+            fldSetTargetGuideIdleMode(state, mode);
+        } else if (mode == 7) {
+            fldSetTargetGuideIdleMode(state, mode);
+        } else if (mode == 8) {
+            fldSetTargetGuideIdleMode(state, mode);
+        }
+    }
+}
 
 void func_00151DD8(void) {
 }
@@ -4979,7 +5088,6 @@ void fldTickTargetGuideCounter(void) {
 }
 
 extern void fldSetTargetGuideMotionMode(s32);
-extern FieldGridCoordPair D_00438EF8;
 
 void fldUpdateTargetGuideFastRoute(void) {
     f32 distance, angle;
@@ -5409,7 +5517,7 @@ s32 fldReportCampVolumeError(void) {
 void fldUpdateTargetGuideController(void) {
     if (fldTargetGuideState.disabled != 1) {
         if (fldAreaState.targetGuideActive == 0 && fldTestSceneControlFlags(0x40) == 0) {
-            if (fldTargetGuideState.unk64 == 14) {
+            if (fldTargetGuideState.guideMode == 14) {
                 func_00153068();
                 return;
             }
@@ -5487,14 +5595,14 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
 
 void fldSetTargetGuideMode(s32 mode) {
-    s32 previousMode;
+    s32 previousGuideMode;
 
     if (fldCanUseTargetGuideInCurrentScene(fldAreaState.area, fldAreaState.floor + 1) == 0) {
         return;
     }
-    previousMode = fldTargetGuideState.unk64;
+    previousGuideMode = fldTargetGuideState.guideMode;
     fldTargetGuideState.updateFlags = 0x40;
-    fldTargetGuideState.unk64 = mode;
+    fldTargetGuideState.guideMode = mode;
 
     switch (mode) {
     case 0:
@@ -5588,7 +5696,7 @@ void fldSetTargetGuideMode(s32 mode) {
         sndQueueSoundId(0x690061);
         break;
     case 8:
-        if (previousMode == 7) {
+        if (previousGuideMode == 7) {
             fldTargetGuideState.gridX = D_003AA6D0[3].x;
             fldTargetGuideState.gridY = D_003AA6D0[3].y;
             fldTargetGuideState.targetYaw = 180.0f;
@@ -5626,7 +5734,7 @@ void fldSetTargetGuideMode(s32 mode) {
         sndQueueSoundId(0x690061);
         break;
     case 11:
-        if (previousMode == 10) {
+        if (previousGuideMode == 10) {
             fldTargetGuideState.gridX = D_003AA6F8[3].x;
             fldTargetGuideState.gridY = D_003AA6F8[3].y;
             fldTargetGuideState.yaw = 180.0f;

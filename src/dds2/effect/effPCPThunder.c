@@ -1833,8 +1833,8 @@ void effThunderGroupRelease(EffThunderGroup *group) {
 }
 
 /* Preserve the address word; the paired blur caller fills the leading point vectors. */
-u32 effGetPairedBlurResourceVectorRecordAddress(u32 arg0) {
-    return arg0;
+u32 effGetPairedBlurResourceVectorRecordAddress(u32 vectorRecordAddress) {
+    return vectorRecordAddress;
 }
 
 void effSetResourceBlendColor(s32 work, u32 value) {
@@ -2251,7 +2251,6 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
-extern f32 sdfAtan2(f32, f32);
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.

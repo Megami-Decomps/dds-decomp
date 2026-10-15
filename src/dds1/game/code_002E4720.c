@@ -7,6 +7,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf_draw.h"
+#include "sdf_packet_alloc.h"
 #include "sdf_sif_command.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_protocol.h"
@@ -222,10 +223,6 @@ extern void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *forma
 extern void sdfDevConsInit(void);
 
 extern s32 sdfVFormatString(char *destination, const char *format, void *args);
-
-extern s32 sdfGetPacketCursor(void);
-
-extern void sdfSetPacketCursorAligned(s32 cursorAddress);
 
 struct SdfTex;
 

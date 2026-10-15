@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
@@ -110,8 +111,6 @@ typedef union {
 void polyUpdateBasicRingCells(PolyNode *obj);
 void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
-extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);

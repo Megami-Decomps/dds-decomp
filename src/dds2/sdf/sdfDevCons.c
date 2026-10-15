@@ -16,7 +16,7 @@ extern void *memmove(void *dst, const void *src, u32 n);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-void sdfDevConsStoreCharacter(DevConsState *arg0, s32 arg1, s32 arg2);
+void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute);
 
 s32 sdfVFormatString(char *destination, const char *format, void *args);
 
@@ -312,8 +312,8 @@ void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 buffe
 }
 
 extern DevConsState *D_00438AB0;
-void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);
-void sdfDevConsDrawGlyphGrid(DevConsState *arg0, ConsBuf *arg1);
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes);
+void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers);
 
 /* Render every console in the global chain into a stack packet buffer and submit it. */
 void sdfDevConsRenderAll(void) {

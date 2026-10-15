@@ -107,7 +107,7 @@ typedef struct BattleGroupNode {
     struct SdfItemListRef *itemList;
     struct SdfMemBlock *requestAllocation;
     BattleGroupSlot slots[8];
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
     DevRequest *partList;
     f32 unk_AC;
@@ -121,7 +121,7 @@ typedef struct MdlLoadPayload {
     MotionTable *motionTable;
     struct SdfMemBlock *motionResource;
     void *partInfo; /* Borrowed relative-linked record-list transport. */
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     DevRequest *partList;
 } MdlLoadPayload;
 

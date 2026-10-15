@@ -55,7 +55,7 @@ typedef struct PolyMovieWork {
     u8 *mainEntry11Data;  /* 0x2C */
     u8 *mainEntry12Data;  /* 0x30 */
     u8 *mainEntry3Data;   /* 0x34 */
-    u32 unk_38;        /* 0x38 */
+    u32 mainEntry3Count; /* 0x38: rows in the main type-3 package table */
     u8 *mainEntry9Data;   /* 0x3C */
     u8 *mainEntry7Data;   /* 0x40 */
     u32 mainEntry7Count; /* 0x44: PMD type-7 resource row count */
@@ -76,7 +76,7 @@ typedef struct PolyMovieWork {
     PmdHeader *sub2;   /* 0x90 */
     PmdEntry *sub2Entries; /* 0x94 */
     u8 *secondEntry4Data; /* 0x98 */
-    u32 unk_9C;        /* 0x9C */
+    u32 extendedEntry4Count; /* 0x9C: rows in the extended type-4 table */
     u32 subEntry4Count; /* 0xA0 */
     u8 *subEntry5Data;    /* 0xA4 */
     u32 unk_A8;        /* 0xA8 */
@@ -99,7 +99,7 @@ typedef struct PolyMovieWork {
     u8 *subEntry24Data;   /* 0xEC */
     u32 unk_F0;        /* 0xF0 */
     u8 *subEntry21Data;   /* 0xF4 */
-    u32 unk_F8;        /* 0xF8 */
+    u32 subEntry21Count; /* 0xF8: rows in the sub type-21 group metadata table */
     u8 *subEntry25Data;   /* 0xFC */
     u32 unk_100;       /* 0x100 */
     s32 handle;        /* 0x104 */

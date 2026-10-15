@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_channel.h"
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
@@ -135,7 +136,6 @@ extern void mnuShopReleaseWindowAndEffectResources();
 
 extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
 
-extern s32 dspCloseChannel(void);
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
@@ -155,7 +155,6 @@ extern u8 mnuCampCompactEntries[];
 
 extern u8 D_003CD8DD[];
 
-extern void evtFormatTaskName(s32 taskId, void *name);
 
 
 extern void *memset(void *dst, s32 c, u32 n);
@@ -822,9 +821,9 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 
     track = scene->groups;
     if (track != 0) {
-        track->unk28 = 0;
+        track->usePendingKey = 0;
         while (track = track->next, track != 0) {
-            track->unk28 = 0;
+            track->usePendingKey = 0;
         }
     }
     scene->colorEditorActive = 0;

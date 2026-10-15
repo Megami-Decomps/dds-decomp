@@ -4,6 +4,23 @@
 #include "common.h"
 
 struct BtlUnit;
+struct BtlTask;
+
+/* Kind 0x27 command-sound tasks allocate this 0x14-byte camera-mode packet.
+ * The task builder fills actor/mode; targeted variants add category or units. */
+typedef struct BtlCommandSoundTaskArgs {
+    struct BtlTask *actor; /* 0x00: task owner passed to camera command mode. */
+    struct BtlUnit *unitA; /* 0x04: optional first linked camera unit. */
+    struct BtlUnit *unitB; /* 0x08: optional second linked camera unit. */
+    u32 mode; /* 0x0C: camera-command mode. */
+    s32 category; /* 0x10: targeted command category. */
+} BtlCommandSoundTaskArgs;
+typedef char BtlCommandSoundTaskArgsSizeCheck[
+    sizeof(BtlCommandSoundTaskArgs) == 0x14 ? 1 : -1];
+typedef char BtlCommandSoundTaskArgsModeOffsetCheck[
+    (u32)&((BtlCommandSoundTaskArgs *)0)->mode == 0x0C ? 1 : -1];
+typedef char BtlCommandSoundTaskArgsCategoryOffsetCheck[
+    (u32)&((BtlCommandSoundTaskArgs *)0)->category == 0x10 ? 1 : -1];
 
 /* The linked-number task allocates the full 0x34-byte variant; the counter
  * task uses the common prefix and its 0x2C-byte counter variant. */

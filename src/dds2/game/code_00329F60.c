@@ -40,12 +40,6 @@ enum {
 
 
 
-extern void sdfTexQueueImageUpload(SdfImageUploadRequest *);
-
-
-
-
-
 s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block);
 extern u8 D_004389E0;
 

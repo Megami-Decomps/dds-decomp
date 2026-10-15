@@ -1,3 +1,4 @@
+#include "sdf_gs_register_submit_api.h"
 #include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
@@ -10,6 +11,7 @@
 #include "kwln.h"
 #include "pty_skill_menu_api.h"
 #include "mnu.h"
+#include "brs_level_progress_api.h"
 #include "mnu_panel_state.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -27,8 +29,6 @@ struct StaffMenuRuntime;
 #include "sdf.h"
 #include "itf.h"
 #include "menu_fade_entry.h"
-
-extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
@@ -359,7 +359,6 @@ extern MenuListDefaults D_0042AF00;
 extern const MenuListDefaults D_0042AE18;
 extern u8 (*D_00435E64)[17];
 extern char D_00437C00[];
-extern u8 brsGetLevelStepForValue(s32);
 extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void ptySkillMenuDrawEquippedSkillEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
 

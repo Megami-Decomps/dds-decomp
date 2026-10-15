@@ -6,6 +6,7 @@
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_alloc.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -18,8 +19,6 @@
 #include "sdf_texture_file.h"
 
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
-
-extern s32 sdfGetPacketCursor(void);
 
 typedef struct VuBlendNode {
     u8 pad00[0x30];

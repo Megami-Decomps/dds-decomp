@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dsp_channel.h"
 #include "evt_stage_test_api.h"
 #include "brs_primary_panel_update_api.h"
 #include "eff_random.h"
@@ -893,7 +894,6 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
 
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
-extern s32 dspCloseChannel(void);
 
 /* Release the panel and task resources, then mark the result task finished. */
 void brsStaffTaskDestroy(KwlnTask *taskArg) {

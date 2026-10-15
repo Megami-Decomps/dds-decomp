@@ -6,6 +6,7 @@
 #include "ui_color.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "brs_level_progress_api.h"
 #include "mnu_result.h"
 #include "snd_sequence_volume_pan.h"
 #include "fr_font.h"
@@ -15,8 +16,6 @@
 extern void dspRequestMessageWindowModeOne(void);
 extern u8 *D_003BAA70;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern u8 brsGetLevelStepCrossedBy(s32, s32);
-extern u8 brsGetLevelStepForValue(s32);
 extern s32 sprintf(char *, const char *, ...);
 extern char D_003BC550[];
 extern char D_003BC558[];
@@ -623,25 +622,25 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
     }
 }
 
-void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
+void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 flags) {
     char text[32];
     FrFontGlyph *glyph;
 
     sprintf(text, D_003BC568, info->totalExp);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, color);
+    frFontDrawGlyphChain(glyph, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
-void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
+void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 flags) {
     char text[32];
     FrFontGlyph *glyph;
 
     sprintf(text, D_003BC568, info->macca);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, color);
+    frFontDrawGlyphChain(glyph, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 

@@ -9,7 +9,6 @@ void dds3DestroyObjectBase(ObjBase *object);
 void *memset(void *s, s32 c, u32 n);
 extern f32 (*D_00324770[4])[4];
 extern f32 kwlnDefaultColorVector[4];
-extern void sdfBuildLightingPacket(void *buffer, SdfLightSources sources, f32 *secondaryColor);
 
 
 /* Releases the light's buffer and resource before freeing the object itself. */

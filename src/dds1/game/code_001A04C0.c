@@ -559,8 +559,8 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
                 }
             }
         } else {
-            ((BtlState *)btlRuntime)->encounterParamA = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1C;
-            ((BtlState *)btlRuntime)->encounterParamB = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1E;
+            ((BtlState *)btlRuntime)->encounterParamA = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMajorId;
+            ((BtlState *)btlRuntime)->encounterParamB = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMinorId;
             if (((BtlState *)btlRuntime)->encounterParamA == 0 && ((BtlState *)btlRuntime)->encounterParamB == 0) {
                 if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
                     ((BtlState *)btlRuntime)->encounterParamA = req.code;

@@ -1,4 +1,6 @@
 #include "sdf_gs_header.h"
+#include "sdf_gs_alpha_register_api.h"
+#include "sdf_gs_register_submit_api.h"
 #include "common.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -558,7 +560,6 @@ extern u8 sdfViewUpVector[];
 
 extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
 void itfInitDoubleBufferedScenePackets(void) {

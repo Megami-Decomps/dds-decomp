@@ -141,7 +141,6 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *incomingLink = node->next;
 }
 
-extern void sdfPacUseHighAddressAllocator(void *);
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */

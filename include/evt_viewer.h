@@ -78,7 +78,7 @@ typedef struct EvtRuntimeGroup {
     EvtGroupMetadata metadata;
     u8 pad20[4];
     SdfTex *texture; /* Retained kind-0x18 texture; released with the group. */
-    s32 unk28;
+    s32 usePendingKey; /* 0x28: type-24 tracks apply the queued key when set. */
     f32 savedPosition[4];
     f32 savedRotation[4];
     s32 objectAttached;

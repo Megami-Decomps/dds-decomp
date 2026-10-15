@@ -140,7 +140,7 @@ typedef struct EvtUnit {
     s16 motionTicks;               /* 0xB2 */
     s16 motionParameter;           /* 0xB4: frames in setup; direction scale in updater */
     s16 directionOffset;           /* 0xB6: updater multiplies by 0.01 */
-    f32 unkB8;                     /* 0xB8: stored motion-scale parameter */
+    f32 transitionMotionScale;     /* 0xB8: set by evtSetTransitionMotionScale */
     s16 unkBC;                     /* 0xBC: stored script/motion parameter */
     s16 unkBE;                     /* 0xBE: first stored short parameter */
     s16 unkC0;                     /* 0xC0: second stored short parameter */

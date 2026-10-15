@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "eff_pcp_paired_event_row.h"
 #include "eff_pcp_spawn_range_event_row.h"
 #include "eff_pcp_drift_event_row.h"
@@ -139,7 +140,6 @@ extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 extern void sdfVuLoadRotationMatrixZ(f32 scale);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixX(f32 angle);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
@@ -1421,7 +1421,6 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 val) {
     work->unk18 = val;
 }
 
-extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 extern EffSpawnParams D_00354F60[];
 
@@ -2687,7 +2686,6 @@ void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
 
 extern f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern f32 sdfAtan2(f32 y, f32 x);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */

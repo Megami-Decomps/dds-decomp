@@ -2598,6 +2598,55 @@ dependency graph. Check the active mode, allocation and other field users
 before taking such a pointer; the union remains the owner of heterogeneous
 payloads.
 
+DDS2 `mnuHandleMantraSourceDialogResult` shows the same distinction for an
+existing scalar member:
+
+```c
+u16 *sourceBits = &source->bits;
+*sourceBits &= ~0x2000;
+dspStartEntry(messageEntries.entries[0][activeVariant]);
+```
+
+Take the member address after the null-source check. `source->bits` is the
+actual acquisition record's halfword union member; `messageEntries` is a
+separate 48-byte local snapshot of six dialogue pairs, copied before callbacks.
+No callback receives that snapshot's address. Direct union access gives the
+store alias set zero and adds a false dependency to the private `s32` table
+load. The real cc1 sched2 trace then ranks the mask at priority 6 against the
+address addition's 4, reversing the two native instructions. Access through the
+member pointer restores the halfword's alias set: priorities are 4/4, and the
+existing instruction order selects the address first. No layout, clobber,
+readonly annotation or extra operation is needed.
+
+The current flags snapshot also follows the callbacks: retain it when no
+dialogue is selected, and reload the caller-owned word after `dspStartEntry`
+when one is selected. Selecting a real dialogue entry before the shared call
+expresses those two paths directly and avoids extra flag copies and reloads.
+
+The adjacent `func_0028FD30` selector also needs the real input snapshot to
+exist before its independent local map initialization:
+
+```c
+MenuMantraRecord *record = resource->menu.records;
+u16 *rankUpWord = &record->flags;
+u16 rankUpFlags = *rankUpWord;
+s8 elementMap[9] = {0, 0, 1, 5, 2, 3, 4, 5, 1};
+```
+
+`rankUpFlags` is consumed by the record-zero fast path; the map contains the
+nine signed bytes actually copied and indexed by the normal scan. There is no
+callback between these reads. Capturing the word before the copy overlaps its
+live range with the table address: local allocation can no longer reuse V0 for
+both, and the actual block-move reloads become A0/A1, as native requires.
+A raw character-array `memcpy` still has alias set zero and keeps the halfword
+load before the copy. Access through the actual scalar member plus the initialized
+array removes that false anti-dependency; sched2 places the same load after the
+copy. Both snapshot timing and truthful access types matter. No extra read,
+operation, parameter conversion, qualifier or allocation is introduced. Later
+record reads remain after their diagnostic callback, preserving native epochs.
+The initializer owns its nine-byte literal; remove the duplicate assembly table
+include and check the complete unit's data and final image.
+
 DDS2 `game/code_001442D0::fldInitializeSceneGuideMarkers` provides a packed-record example.
 Each eight-byte preset contains a real `FieldGridCoordPair` of two signed
 halfwords, followed by a float phase. The terminal record encodes both
@@ -12629,3 +12678,33 @@ to the actual glyph preserves the block-copy scratch-clobber contract:
 LB transfers with the source in register 7, no hidden aggregate workspace.
 Both complete units then match, including `mdlSaveViewerPresentationConfig`
 and its RODATA. No literal template is duplicated or expected data changed.
+
+
+## Weighted VU broadcasts and later reload registers
+
+`evtBlendParamsC` in both games uses the same operand-driven scale primitive
+for both vector weights:
+
+```c
+VU0_SCALE_VF(vf10, 1.0f - t);
+VU0_MOVE_VF(vf11, vf10);
+/* Load the second input into vf10. */
+VU0_SCALE_VF(vf10, t);
+VU0_ADD(vf10, vf10, vf11);
+```
+
+The float operands are binary32 bit transfers, not numeric integer conversions.
+Real cc1 reload traces show the inverse weight choosing `$2` (spill index0),
+then the forward weight `$3` (index1). The first colour-unpack scale consequently
+chooses `$4` (index2), closing the two remaining words of each720-byte body.
+Manual fixed-register broadcasts for the two vector weights hide both earlier
+reloads from GCC and leave that colour operand in `$3`. Replacing only the final
+broadcast creates one earlier reload and still leaves the colour operand wrong.
+
+Read-only breakpoints at the pinned compiler's `reload1.c:814` reset and
+`set_reload_reg` writes confirm that `last_spill_reg` resets to−1 for each
+function, then advances at those actual reloads. Preceding translation-unit
+functions cannot supply the missing state. Ordinary and observed assembly and
+all RTL dumps agree. No register pinning, fake earlier operation, new primitive,
+clobber, flags or header change is needed. Preserve Halcyon Drift's shared W-set
+source-location mechanism and Evening Notes' paired SDK-carrier reconstruction.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_quaternion.h"
 #include "rw_matrix.h"
