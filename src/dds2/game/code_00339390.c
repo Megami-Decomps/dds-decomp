@@ -6,6 +6,7 @@
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_alloc.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -31,10 +32,6 @@ typedef struct VuBlendNode {
     u8 clipFlags;
     u8 pad52[0xE];
 } VuBlendNode;
-
-extern void sdfSetPacketCursorAligned(s32);
-
-extern s32 sdfGetPacketCursor(void);
 
 typedef struct {
     f32 matrix[4][4];      /* 0x00 */

@@ -16,6 +16,7 @@
 #include "sdf_pac_decoder.h"
 #include "sdf_pac_work.h"
 #include "sdf_key_pool.h"
+#include "sdf_packet_alloc.h"
 #include "sdf_stream_state.h"
 
 enum {
@@ -283,9 +284,6 @@ void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output) {
 }
 
 extern f32 D_0040B5F0[][4];
-extern s32 sdfGetPacketCursor(void);
-extern void sdfSetPacketCursorAligned(s32 cursorAddress);
-
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
 void *sdfDrawClippedLinePairs(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SdfPacket *packet;
@@ -699,8 +697,6 @@ void sdfRebalanceFloatKeyTreeAfterInsert(SdfKeyTreeNode **path, s32 depth, SdfKe
         *root = replacement;
     }
 }
-
-#include "sdf_packet_alloc.h"
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
 void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
