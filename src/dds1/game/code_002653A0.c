@@ -3,6 +3,7 @@
 #include "ui_color.h"
 #include "fr_font_context.h"
 #include "mnu.h"
+#include "brs_level_progress_api.h"
 #include "dat_state.h"
 #include "dat_party_growth.h"
 #include "mnu_result.h"
@@ -27,8 +28,8 @@ extern s32 ptyHasSkill(DatPartyRecord *, s32);
 
 
 extern struct { s32 v[6]; } D_0036D4B0;
-extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
-extern void brsDrawMaccaRewardTotal(s32, s32, s32, s32, const BrsRewardSummary *, s32);
+extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32 flags);
+extern void brsDrawMaccaRewardTotal(s32, s32, s32, s32, const BrsRewardSummary *, s32 flags);
 extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {

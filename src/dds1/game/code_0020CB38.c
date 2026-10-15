@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "evt_unit.h"
@@ -525,8 +526,6 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 }
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
-extern void sdfVuLoadRotationMatrixX(f32);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 extern f32 D_003BB8B0[];
 
 s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {

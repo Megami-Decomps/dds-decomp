@@ -1,3 +1,4 @@
+#include "dsp_name.h"
 #include "evt_message_window_api.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
@@ -108,17 +109,163 @@ extern MenuPanelEntryPool *mnuPanelSoundEntryPool;
 
 extern void mnuPrepareMantraPanelEntriesForTutorial(void);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FD30);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", mnuHandleMantraSourceDialogResult);
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
-/* The dialog copies all six fixed-width attribute names before selecting one. */
+/* Choose the pending mastery record, preferring queued kind-two entries. */
+MenuMantraRecord *func_0028FD30(MnuStatusResource *resource, s16 kind, s16 element) {
+    MenuMantraRecord *record = resource->menu.records;
+    /* Capture record zero separately from the private element-map snapshot. */
+    u16 *rankUpWord = &record->flags;
+    u16 rankUpFlags = *rankUpWord;
+    s8 elementMap[9] = {0, 0, 1, 5, 2, 3, 4, 5, 1};
+    MenuMantraRecord *selected;
+    s32 index;
+
+    if ((rankUpFlags & 0x2000) && (kind == 0xFF || kind == -1)) {
+        evtPrintDeveloperConsoleMessage("EventFlag DrawRankUp!!!\n");
+        return record;
+    }
+
+    record++;
+    selected = NULL;
+    for (index = 1; index < 112; index++, record++) {
+        if (record->mantraId != 0 && (record->flags & 0x6000) == 0x2000) {
+            evtPrintDeveloperConsoleMessage("EventFlag MantraID [%d] i[%d]\n",
+                                            record->mantraId, index);
+            if (selected != NULL) {
+                if (((record->flags >> 8) & 0xF) != kind && kind != -1) {
+                    continue;
+                }
+                if ((record->flags & 0xF00) != 0x200) {
+                    continue;
+                }
+                if (record->flags & 0x1000) {
+                    selected = record;
+                }
+            } else {
+                if (((record->flags >> 8) & 0xF) == kind || kind == -1) {
+                    if ((record->flags & 0xF00) == 0x300) {
+                        if (element == -1 || record->element == elementMap[element]) {
+                            selected = record;
+                        }
+                    } else {
+                        selected = record;
+                    }
+                    if ((record->flags & 0xF00) == 0x400) {
+                        return selected;
+                    }
+                }
+            }
+        }
+    }
+    return selected;
+}
+
+
 typedef struct MantraAttributeNameTable {
     char text[6][9];
 } MantraAttributeNameTable;
 
+typedef struct MantraAcquisitionDialogues {
+    s32 entries[6][2];
+} MantraAcquisitionDialogues;
+
+extern DspUnitName *D_00435E48;
+extern DspMantraName *D_00435E50;
+extern const MantraAttributeNameTable D_004275B0;
+extern const MantraAcquisitionDialogues D_004275E8;
+extern const char D_00437940[];
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void prfSummarizeNonzeroEntryAttributes(s32, s32 *);
+extern void *memset(void *, s32, u32);
+extern s32 sprintf(char *, const char *, ...);
+extern void ptyAdjustAllActiveRosterStats(s32, s32);
+
+s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *object) {
+    u16 *sourceBits;
+    s32 attributeSummary[2];
+    MantraAttributeNameTable attributeNames = D_004275B0;
+    char formatted[16];
+    MantraAcquisitionDialogues messageEntries = D_004275E8;
+    char *text = attributeNames.text[0];
+    s32 activeVariant;
+    s32 mode;
+    s32 messageEntry;
+    u32 currentFlags;
+    u32 publishedFlags;
+    DatPartyRecord *party;
+    MantraMenuWork *state;
+
+    if (source == NULL) {
+        return 0;
+    }
+
+    /* This is the existing u16 member, disjoint from the local dialog copy. */
+    sourceBits = &source->bits;
+    state = &object->menu;
+    party = object->list->cursor->partyRecord;
+    activeVariant = state->drawBits.unk15 != 0;
+    memset(attributeSummary, 0, sizeof(attributeSummary));
+    if (*sourceBits & 0x8000) {
+        evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(1, D_00435E50[source->fields.unitIndex].encodedText);
+        *sourceBits &= ~0x2000;
+        dspStartEntry(messageEntries.entries[0][activeVariant]);
+        return -1;
+    }
+
+    evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_00435E50[source->fields.unitIndex].encodedText);
+
+    currentFlags = *sourceBits;
+    mode = currentFlags & 0x0F00;
+    if (currentFlags & 0x1000) {
+        prfSummarizeNonzeroEntryAttributes(source->fields.unitIndex, attributeSummary);
+        evtCopyEntryStringToActiveWindow(2, text + attributeSummary[0] * 9);
+        text = formatted;
+        sprintf(text, D_00437940, attributeSummary[1]);
+        evtCopyEntryStringToActiveWindow(3, text);
+        currentFlags = *sourceBits;
+        mode = currentFlags & 0x0F00;
+    }
+    if (mode == 0x0200) {
+        if (currentFlags & 0x1000) {
+            if (attributeSummary[0] != 5) {
+                messageEntry = messageEntries.entries[1][activeVariant];
+            } else {
+                messageEntry = messageEntries.entries[2][activeVariant];
+            }
+        } else {
+            messageEntry = messageEntries.entries[3][activeVariant];
+        }
+    } else if (mode == 0x0300) {
+        messageEntry = messageEntries.entries[4][activeVariant];
+    } else if (mode == 0x0400) {
+        messageEntry = messageEntries.entries[5][activeVariant];
+    } else {
+        goto complete;
+    }
+    dspStartEntry(messageEntry);
+    /* The dialog callback can update the caller-owned acquisition record. */
+    currentFlags = *sourceBits;
+
+complete:
+    /* Without a dialog callback, the earlier flags snapshot is still current. */
+    publishedFlags = (currentFlags & ~0x2000) | 0x4000;
+    *sourceBits = publishedFlags;
+    if ((publishedFlags & 0x0F00) == 0x0300) {
+        *sourceBits = publishedFlags & ~0x4000;
+    }
+
+    if ((((state->drawFlags >> 15) & (*sourceBits >> 12)) & 1) != 0) {
+        ptyAdjustAllActiveRosterStats(attributeSummary[0], attributeSummary[1]);
+    }
+    return source->fields.unitIndex;
+}
+
+/* The dialog copies all six fixed-width attribute names before selecting one. */
 const MantraAttributeNameTable D_004275B0 __attribute__((aligned(8))) = {
     {"Strength", "Vitality", "Magic", "Agility", "Luck", "ALL"}
 };

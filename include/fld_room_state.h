@@ -23,7 +23,7 @@ typedef struct FldRoomState {
     s16 roomId;       /* 0x132: returned by fldFindRoomByTask */
     s16 unk134;
     s16 mode;
-    s16 unk138;
+    s16 entryIndex; /* 0x138: active entry index when mode is 1. */
     s16 axisMode;
     s32 shapeKind;    /* 0x13C: compared with FldTaskInfo.shape->kind */
 } FldRoomState;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "ee_mmi.h"
 #include "sdf_quaternion.h"
 #include "rw_matrix.h"
@@ -100,8 +101,6 @@ void sdfRotateVuMatrixAboutZ(f32 angle)
     VU0_ROTATE_BASIS_Z(c, s);
 }
 
-extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 
 /* Compose the three axis rotations of a per-axis angle vector into the VU0 matrix. */

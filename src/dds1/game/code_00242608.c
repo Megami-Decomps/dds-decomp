@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "dsp_active_api.h"
 #include "mnu_camp_display.h"
 #include "mnu_camp_font_api.h"
@@ -89,7 +90,6 @@ extern char D_003AF418[]; /* "camp_draw" */
 
 extern char D_003AF428[]; /* "camp_update" */
 
-extern void evtFormatTaskName(s32 taskId, void *name);
 extern void *memset(void *dst, s32 c, u32 n);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -750,9 +750,9 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 
     track = scene->groups;
     if (track != 0) {
-        track->unk28 = 0;
+        track->usePendingKey = 0;
         while (track = track->next, track != 0) {
-            track->unk28 = 0;
+            track->usePendingKey = 0;
         }
     }
     scene->colorEditorActive = 0;
@@ -1383,7 +1383,6 @@ ShopScene *mnuShopCreateScene(void) {
     return obj;
 }
 
-extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
 void mnuShopDestroyScene(KwlnTask *arg) {

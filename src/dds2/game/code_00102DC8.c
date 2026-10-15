@@ -17,6 +17,7 @@
 #include "kwln_named_slot.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
+#include "kwln_fade_timing.h"
 #include "sdf.h"
 #include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
@@ -1137,7 +1138,6 @@ extern u8 D_00384790[];
 extern SdfLightSources D_0037FB10;
 extern f32 D_0037FB20[4];
 extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
 void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {

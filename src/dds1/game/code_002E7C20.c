@@ -7,7 +7,6 @@
 #define EFF_QUAT_SLERP_DOT_LIMIT 0.99899996f
 
 extern EffRandState D_00398938;
-extern f32 sdfAtan2(f32 y, f32 x);
 extern f32 D_00398380[4];
 
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */

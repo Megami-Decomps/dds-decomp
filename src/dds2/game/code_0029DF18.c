@@ -1,3 +1,4 @@
+#include "snd_command_packet.h"
 #include "common.h"
 #include "scr_integer_return_value_api.h"
 #include "scr_string_parameter_api.h"

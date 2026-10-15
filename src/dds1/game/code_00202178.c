@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
@@ -206,7 +207,62 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", btlSelectFlaggedIndexListEntry);
+/* Pick a flagged entry starting from a random index and wrapping once. When
+ * none is flagged, fall back to units whose status pair has 0x21 == 1. */
+void *btlSelectFlaggedIndexListEntry(BtlIndexList *list, u16 *flags, u16 count) {
+    u16 fallback[12];
+    u32 start;
+    u32 i;
+    u32 pass;
+
+    start = (btlNextScaledRandom(0x2000) & 0xF) % count;
+    pass = 0;
+    i = start;
+    goto test;
+step:
+    if (i < count) {
+        i++;
+    } else {
+        i = 0;
+        pass++;
+    }
+    if (pass < 2) {
+        goto test;
+    }
+    for (i = 0; i < count; i++) {
+        fallback[i] = 0;
+        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+            fallback[i] = 1;
+        }
+    }
+    i = start;
+    pass = 0;
+    do {
+        if (fallback[i] != 0) {
+            break;
+        }
+        if (i < count) {
+            i++;
+        } else {
+            /* A one-pass loop: the scan then encloses a loop, so loop.c keeps
+             * the index unreduced (retail recomputes fallback + i * 2). */
+            do {
+                pass++;
+            } while (0);
+            i = 0;
+        }
+    } while (pass < 2);
+    if (i >= count) {
+        i = 0;
+    }
+    goto done;
+test:
+    if (flags[i] == 0) {
+        goto step;
+    }
+done:
+    return btlGetIndexListEntry(list, i);
+}
 
 BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 *listCount) {
     u32 result;
@@ -3089,7 +3145,7 @@ s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command) {
             eligible = 1;
         }
     } else {
-        eligible = datCommandRecords[command].unk_0A[1] == 1;
+        eligible = datCommandRecords[command].unk_0B == 1;
     }
     if (eligible) {
         s32 hitBudget = datCommandRecords[command].rangeMax;
@@ -4317,7 +4373,7 @@ s32 btlMapSpeciesToActionVariant(u8 *unit, s32 action) {
     if ((((BtlUnit *)unit)->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[action].kind == 0) {
+    if (datActionAnimationRecords[action].resourceType == 0) {
         return -1;
     }
     switch (((BtlUnit *)unit)->partyRecord.unitId) {
@@ -4407,9 +4463,7 @@ void btlSetLinkedCameraForCommandMode(BtlLinkedCommand *command, BtlUnit *target
 }
 
 
-extern void sdfVuLoadRotationMatrixX(f32);
 
-extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 
 
 s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {

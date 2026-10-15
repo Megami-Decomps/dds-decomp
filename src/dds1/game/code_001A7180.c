@@ -17,6 +17,7 @@
 #include "sdf.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -24,8 +25,6 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 typedef struct BattleController {
     u8 pad_000[0x1F4];

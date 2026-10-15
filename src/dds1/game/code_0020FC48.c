@@ -27,6 +27,7 @@
 #include "btl_scene_initializer.h"
 #include "btl_action.h"
 #include "btl_sound.h"
+#include "btl_sound_release_task.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
 #include "evt_task.h"
@@ -2473,8 +2474,8 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 transform = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
                 if (sdfPadButtonStates[2] < 0) {
                     record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
-                    transform->reach = record->unk18;
-                    transform->height = record->unk1C;
+                    transform->reach = record->reach;
+                    transform->height = record->height;
                     transform->position[0] = record->position[0];
                     transform->position[1] = record->position[1];
                     transform->position[2] = record->position[2];
@@ -2524,8 +2525,8 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if ((D_00361760[D_00361A00.selected].target >= (void *)D_003D77C0.position &&
              D_00361760[D_00361A00.selected].target < (void *)&D_003D77C0.scale) ||
-            D_00361760[D_00361A00.selected].target == &D_003D77C0.unk1C ||
-            D_00361760[D_00361A00.selected].target == &D_003D77C0.unk18) {
+            D_00361760[D_00361A00.selected].target == &D_003D77C0.height ||
+            D_00361760[D_00361A00.selected].target == &D_003D77C0.reach) {
             state->unk_1FC |= 0x200;
         } else {
             state->unk_1FC &= ~0x200;
@@ -2639,8 +2640,8 @@ void btlWriteActorModelTableFile(void) {
                             (double)D_003D77C0.position[2]);
     cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[3], (double)D_003D77C0.scale);
     cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[4], (double)D_003D77C0.z);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[5], (double)D_003D77C0.unk18);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[6], (double)D_003D77C0.unk1C);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[5], (double)D_003D77C0.reach);
+    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[6], (double)D_003D77C0.height);
     cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[7], (double)D_003D77C0.unk20);
     cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[8], (double)D_003D77C0.unk24);
     cursor += sprintf(cursor, D_003BBAC0, D_00361388[9]);
@@ -2843,10 +2844,10 @@ s32 btlUpdateDebugEncounterSelector(void) {
     }
     btlApplyDebugEncounterPartySelection();
     state->battleMode = D_003BBB18;
-    if (datBattleSceneRecords[D_003BBB18].unk1C != 0 &&
-        datBattleSceneRecords[D_003BBB18].unk1E != 0) {
-        state->encounterParamA = datBattleSceneRecords[D_003BBB18].unk1C;
-        state->encounterParamB = datBattleSceneRecords[D_003BBB18].unk1E;
+    if (datBattleSceneRecords[D_003BBB18].backgroundMajorId != 0 &&
+        datBattleSceneRecords[D_003BBB18].backgroundMinorId != 0) {
+        state->encounterParamA = datBattleSceneRecords[D_003BBB18].backgroundMajorId;
+        state->encounterParamB = datBattleSceneRecords[D_003BBB18].backgroundMinorId;
     } else {
         state->encounterParamA = D_003BBB1C;
         state->encounterParamB = D_003BBB1E;

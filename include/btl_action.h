@@ -63,7 +63,7 @@ typedef struct BtlActionAnimationRecord {
     u8 cameraKind; /* 0x00: values 6 and 7 select an aim pose. */
     u8 delayIndex; /* 0x01: row of the action delay table */
     u8 effectKind; /* 0x02: values 3 and 4 select target effect-flag behavior. */
-    u8 kind;
+    u8 resourceType; /* 0x03: aliases BtlActionTableEntry.resourceType. */
     u16 displayCode;
     u8 pad06[0x16];
     u16 flags;
@@ -71,7 +71,7 @@ typedef struct BtlActionAnimationRecord {
 } BtlActionAnimationRecord;
 
 /* Alternate table view used by action metadata and lighting readers. Its
- * kind and resourceType bytes alias cameraKind and kind in the animation view. */
+ * kind and resourceType bytes alias cameraKind and resourceType in the animation view. */
 typedef struct BtlActionTableEntry {
     u8 kind; /* 0x00 */
     u8 pad01[2];

@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "scr_integer_return_value_api.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
@@ -18,6 +19,7 @@
 #include "eff_random.h"
 #include "mdl_flag_api.h"
 #include "mnu_event_flag_entries.h"
+#include "eff_event_draw.h"
 
 struct SdfTex;
 struct MenuTerminalWork;

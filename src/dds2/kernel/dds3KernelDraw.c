@@ -59,10 +59,6 @@ extern u16 kwlnTexturedSquareFadeCounter;
 extern u16 kwlnTexturedSquareFadeDuration;
 
 
-extern void effEnableTexturedSquare(void);
-
-extern void effDisableTexturedSquare(void);
-
 extern u16 kwlnTexturedBlurStartAlpha;
 
 extern u16 kwlnTexturedBlurFadeCounter;
@@ -71,10 +67,6 @@ extern u16 kwlnTexturedBlurTargetAlpha;
 
 extern u16 kwlnTexturedBlurFadeDuration;
 
-
-extern void effEnableTexturedBlur(void);
-
-extern void effDisableTexturedBlur(void);
 
 extern u16 kwlnFilterBlurStartAlpha;
 
@@ -85,10 +77,6 @@ extern u16 kwlnFilterBlurTargetAlpha;
 extern u16 kwlnFilterBlurFadeDuration;
 
 
-extern void effEnableFilterBlur(void);
-
-extern void effDisableFilterBlur(void);
-
 extern u16 kwlnStaggeredBlurTargetAlpha;
 
 extern u16 kwlnStaggeredBlurStartAlpha;
@@ -96,11 +84,6 @@ extern u16 kwlnStaggeredBlurStartAlpha;
 extern u16 kwlnStaggeredBlurFadeCounter;
 
 extern u16 kwlnStaggeredBlurFadeDuration;
-
-extern void effDisableStaggeredBlur(void);
-
-
-extern void effEnableStaggeredBlur(void);
 
 extern void effMiscNormalizeVU(void);
 
@@ -115,10 +98,6 @@ extern u16 kwlnColorRectangleTargetAlpha;
 extern u16 kwlnColorRectangleFadeDuration;
 
 
-extern void effEnableColorRectangle(void);
-
-extern void effDisableColorRectangle(void);
-
 extern KwlnBlurRectParams kwlnRectangleBlurParameters;
 
 extern u16 kwlnRectangleBlurStartAlpha;
@@ -130,10 +109,6 @@ extern u16 kwlnRectangleBlurTargetAlpha;
 extern u16 kwlnRectangleBlurFadeDuration;
 
 extern void effCopyRectangleBlurParameters(void *);
-
-extern void effEnableRectangleBlur(void);
-
-extern void effDisableRectangleBlur(void);
 
 extern u128 kwlnDefaultColorVector;
 

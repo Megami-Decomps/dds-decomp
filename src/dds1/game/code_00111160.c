@@ -15,11 +15,11 @@ s32 dds3SelectOwnerWorldIndexSlot(u32 kind) {
     return result;
 }
 
-EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
+EffWorldNode *evtSpawnActionObj2(s32 key, s32 value) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_WORLD_INDEX_OWNER);
 
-    obj->key = firstValue;
-    obj->value = (const char *)secondValue;
+    obj->key = key;
+    obj->value = (const char *)value;
     return obj;
 }
 

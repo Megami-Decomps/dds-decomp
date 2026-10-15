@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "scr_integer_return_value_api.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
@@ -13,6 +14,7 @@
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"
 #include "eff_random.h"
+#include "eff_event_draw.h"
 
 typedef struct SdfTex SdfTex;
 

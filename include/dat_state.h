@@ -320,7 +320,7 @@ typedef struct DatEnemyRecord {
     u8 overrideChance;    /* 0x45: bucket threshold for the override action. */
     s8 unk46;            /* Signed indexed-value accessor. */
     u8 tickCount;         /* 0x47: enemy action tick count; zero is read as one. */
-    u8 unk48;            /* Enemy display-byte accessor. */
+    u8 attackSpacing;    /* Repeat-hit interval, scaled by the command's effect data. */
     u8 pad49[3];
 } DatEnemyRecord;
 
@@ -338,8 +338,8 @@ typedef struct DatBattleSceneRecord {
     u8 pad03;
     u16 serialScene;     /* 0x04: forced follow-up encounter, zero selects the weighted policy. */
     u16 unitModes[11];   /* 0x06: enemy unit modes; zero marks an empty slot */
-    u16 unk1C;           /* 0x1C: copied into the battle state with unk1E when both are set */
-    u16 unk1E;           /* 0x1E */
+    u16 backgroundMajorId; /* 0x1C: major scene-background ID, paired with the minor ID. */
+    u16 backgroundMinorId; /* 0x1E: minor scene-background ID, paired with the major ID. */
     u16 flags;           /* 0x20: 0x8000, 0x800 and 0x400 are tested */
     u8 maxActiveEnemies; /* 0x22: zero defaults to five; six or more blocks spawning. */
     u8 maxEnemySpawns; /* 0x23: zero removes the cumulative spawn limit. */

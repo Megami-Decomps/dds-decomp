@@ -65,7 +65,7 @@ typedef char SdfCounterRuntimeState_at_0x0C[
     ((u32)&((SdfCounterRuntime *)0)->state == 0x0C) ? 1 : -1
 ];
 
-s32 sdfCounterMeasureLabelWidth(u32 arg0);
+s32 sdfCounterMeasureLabelWidth(u32 labelText);
 
 s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     s32 bitIndex = 0;

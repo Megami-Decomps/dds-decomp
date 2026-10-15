@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "mnu_input.h"
@@ -908,7 +909,6 @@ u8 *mnuTerminalCreateScene(reduced, slot)
 }
 
 extern void mnuReleaseResourceHandles(u32 *work);
-extern void dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);

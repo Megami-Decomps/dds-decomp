@@ -23,8 +23,8 @@ typedef struct BtlActorStatusRecord {
     u8 pad0C[4];
     f32 scale;               /* 0x10: model scale */
     f32 z;
-    f32 unk18;
-    f32 unk1C;
+    f32 reach;               /* 0x18: copied into BtlActorTransformParameters. */
+    f32 height;              /* 0x1C: copied into BtlActorTransformParameters. */
     f32 unk20;
     f32 unk24;
     u16 shadowKind;

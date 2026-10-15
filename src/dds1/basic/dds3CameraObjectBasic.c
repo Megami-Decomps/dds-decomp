@@ -21,7 +21,6 @@ extern CameraVector D_0039F708;
 #include "dds3_world_secondary.h"
 extern u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
-extern void sdfSetViewFieldOfView(f32 value);
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewUpVector[4];

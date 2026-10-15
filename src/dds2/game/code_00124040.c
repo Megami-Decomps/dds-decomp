@@ -3,6 +3,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
@@ -184,7 +185,7 @@ extern u32 fldPlayerObject;
 
 extern u32 D_00389858[];
 
-void fldClearSceneControlFlags(u32 arg0);
+void fldClearSceneControlFlags(u32 mask);
 
 void fldClearSceneCommandFlag(void);
 
@@ -208,7 +209,7 @@ extern s32 D_00435F7C;
 
 extern u32 mnuAcknowledgeCampState(void);
 
-u8 fldTestSceneControlFlags(u32 arg0);
+u8 fldTestSceneControlFlags(u32 mask);
 
 extern s32 D_00435F80;
 
@@ -636,7 +637,6 @@ f32 fldSnapAngleToCardinalDirection(f32 angle) {
     return angle;
 }
 
-extern f32 sdfAtan2(f32 y, f32 x);
 
 /* Direction in degrees from two X/Z positions, preserving the field's 3.14 PI. */
 f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {

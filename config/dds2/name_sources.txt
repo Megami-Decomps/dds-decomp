@@ -3600,7 +3600,7 @@
 0x0023A9A8	evtDestroySecondaryWorldNode	inferred	Byte-identical dds1 twin 0x0021FE38; Obtains the secondary world object and destroys its node when it exists. [names_conflicts.tsv]
 0x0023A9E0	evtDrainSecondaryWorldNodes	inferred	M141; sources=names_pending_main.tsv; twin=0x0021FE70, input-family pairing. [names_qp10.tsv]
 0x0023AA30	evtCreateWorldObjectForKey	inferred	Called by evtCommandHandleChangedSecondaryWorldKey after the packed secondary-world key changes; creates and loads the stage world object for that key.
-0x0023AB58	evtCreateWorldObjectFromResource	inferred	Called by evtEventPack with a constructed-resource record; appends a world object and attaches a handle built from its six values.
+0x0023AB58	evtCreateWorldObjectFromResource	inferred	Called by evtEventPack with a constructed-resource record; forwards the two opaque resource-data payload addresses, texture-offset list, and remaining values unchanged to the resource attachment helper.
 0x0023AC80	evtCreateEventScriptProcess	inferred	Formats event BF script path from event ID and creates a process task for it. [names_reviewed6.tsv]
 0x0023AD98	evtSetWorldSlotStatusFlag	inferred	Byte-identical DDS1 counterpart: Sets the 0x8 status bit on slot-one world data when available.
 0x0023ADD0	evtClearWorldSlotStatusFlag	inferred	Byte-identical DDS1 counterpart: Clears the 0x8 status bit on slot-one world data when available.
@@ -7437,6 +7437,7 @@
 0x0012E958	fldDrawExpandedSpriteStrip	inferred	Inferred from the current C implementation in field/fldFileResolver.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0012F908	fldInterpolateCameraEndpoints	inferred	Inferred from the current C implementation in field/fldFileResolver.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00140238	fldStartSelectedActorTask	inferred	Inferred from the current C implementation in game/code_00136EF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00140B90	fldApplySceneRoomSelection	inferred	Reads FldActorEntry.selectedRoom as an optional 1-based room selector, stores selectedRoom - 1 in fldAreaState.unk88 when nonzero, and copies FldActorEntry.unk45 to the active row index; fldInitializeActorLinkedSequence repeats the room selection for matching linked-sequence rows.
 0x00141B20	fldInitializeActorLinkedSequence	inferred	Inferred from the current C implementation in game/code_00136EF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00143910	fldStepActorMotionByKey	inferred	Inferred from the current C implementation in game/code_00136EF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00148488	fldDrawScrollingLayerOverlay	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -7720,7 +7721,7 @@
 0x00123A58	fldGetStageBitmapBitCoordinates	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:1124; Converts scene-relative offsets into bitmap byte, row and bit coordinates, returning whether they are in bounds. twin=0x00121A58 (DDS1). LiteG batch 4.
 0x00123EE0	fldIsStageExplorationCellMarked	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:1195; Tests whether a world X/Z position maps to a marked stage-exploration cell. Used while drawing marked map-cell runs; paired with fldMarkStageExplorationCellsAroundPosition.
 0x001283B8	fldStartFieldSceneTasks	inferred	confidence=high; matched-C; src/dds2/game/code_00124040.c:2192; Copies the sequence record in zero mode, starts sequence and draw tasks, and enables scene work. twin=0x00125E08 (DDS1). LiteG batch 4.
-0x00137F10	fldBuildCollisionRecordsFromGeometry	inferred	confidence=high; matched-C; src/dds2/game/code_00136EF8.c:522; Builds field collision/value records from geometry data and a translation vector. twin=0x00135360 (DDS1). LiteG batch 4.
+0x00137F10	fldBuildCollisionRecordsFromGeometry	inferred	Stores its ownerIndex argument in FldValueRecord.ownerIndex for each emitted face record; fldUpdatePositionZoneHits checks positive values as fldTestMapSlotAuxiliaryFlag bit selectors. Resource-spawn callers pass -1; wall-mesh callers pass id. twin=0x00135360 (DDS1).
 0x00139628	fldUpdatePositionZoneHits	inferred	confidence=high; matched-C; src/dds2/game/code_00136EF8.c:1190; Evaluates current and previous position against active zone planes and updates zone-hit state. twin=0x00136A78 (DDS1). LiteG batch 4.
 0x0013AC40	fldFindFieldSegmentIntersection	inferred	confidence=high; matched-C; src/dds2/game/code_00136EF8.c:1351; Sweeps a segment against field value-plane records, returning the crossed record and hit point while processing stop entries. twin=0x00138058 (DDS1). LiteG batch 4.
 0x0013F1E8	fldResolveEventSetByNameKindAreaOne	inferred	confidence=high; matched-C; src/dds2/game/code_00136EF8.c:2060; Resolves an event name for the current floor when the selected set has packed kind-area one. twin=0x0013C600 (DDS1). LiteG batch 4.
@@ -9024,3 +9025,4 @@
 0x0012B2B8	fldDrawRoomModeAndObjectModeFlagGrid	inferred	Renders a 31-floor by 16-slot grid of room-mode flags (VIS) beside room-object-mode flags (ANM). Paired DDS1 body at 0x00128DA0.
 0x00291DD0	mnuSpawnMantraPanelSequence	inferred	Spawn the fixed endpoints and two eight-record mantra-panel sequences with three animated slots per record.
 0x0033C050	sdfBuildTwoTextureQuadVifPacketWithCornerColors	inferred	Builds a one-vertex VIF packet for a two-texture quad from eight corner color words, interleaved primary/secondary UV values, and eight quad coordinates; paired DDS1 body at 0x002E31A0. Distinct from sdfBuildTwoTextureQuadVifPacket, which takes two scalar colors.
+0x002467A0	evtEventViewerCreateTrackKeyAtFrame	inferred	DDS1 twin at 0x0022BE28; forwards the selected track group, current frame, and viewer to evtCreateViewerTimelineKey. The timeline processing loop calls it when inserting a key at the active frame.

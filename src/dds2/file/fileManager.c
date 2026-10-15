@@ -16,7 +16,6 @@ FileManWork fileManagerWork __attribute__((section(".bss")));
 
 extern s32 btlDestroyStageTask(void *);
 extern void sdfDebugPrintf(const char *fmt, ...);
-extern void sdfPacUseHighAddressAllocator(void *);
 #define FILE_REQUEST_KIND_CALLBACK 0
 #define FILE_REQUEST_KIND_PAC 1
 #define FILE_REQUEST_KIND_VALUE_PAIR 2

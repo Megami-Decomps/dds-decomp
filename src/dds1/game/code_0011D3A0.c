@@ -781,7 +781,52 @@ extern void fldClearCameraFacingPointRequest(void);
 
 extern void fldClearCameraHeadingRequest(void);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldInitializeAreaWork);
+/* Reset the per-area controller work: -1 selections, the attrition step and the
+ * adjacent request words, then clear the camera facing/heading requests. */
+void fldInitializeAreaWork(void) {
+    FldAreaWork *area = &fldAreaState;
+
+    area->unk2C = 0x10;
+    area->unk138 = 0;
+    area->consumedFlags = 0;
+    area->unk54 = 0;
+    area->unk8C = 0;
+    area->unk90 = -1;
+    area->unk94 = -1;
+    area->unk98 = -1;
+    area->unkA0 = -1;
+    area->unkA4 = -1;
+    area->overrideSupportRecordIndex = -1;
+    area->unkAC = -1;
+    area->overlayMode = 1;
+    area->overlayCounter = 0;
+    area->unkD8 = -1;
+    area->unk11C = 0;
+    area->unk184 = 0;
+    area->cameraTiltActive = 0;
+    area->nextArea = -1;
+    area->skipFade = 0;
+    area->attritionDistance = 100.0f;
+    area->colorEffectSuppressed = 0;
+    area->unkB4 = 0.0f;
+    area->cameraTilt = 0.0f;
+    area->frameTravelDistance = 0.0f;
+    area->nextFloor = -1;
+    area->unkD4 = 1;
+    D_0032E570[0] = 0;
+    D_0032E570[1] = 0;
+    D_0032E570[2] = 0;
+    D_0032E570[3] = 0;
+    D_0032E570[4] = 0;
+    D_0032E570[5] = 0;
+    D_0032E570[11] = 0;
+    D_0032E570[12] = 0;
+    D_0032E570[13] = 0;
+    D_0032E570[14] = 0;
+    D_0032E570[16] = 0;
+    fldClearCameraFacingPointRequest();
+    fldClearCameraHeadingRequest();
+}
 
 /* Map IDs select 1920-byte banks of 30-byte slots; flag banks are halfwords.
  * The guards check only the upper map-ID bound: negative IDs and slot/bit

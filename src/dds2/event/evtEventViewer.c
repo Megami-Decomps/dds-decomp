@@ -19,6 +19,7 @@
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_fade.h"
+#include "kwln_fade_timing.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
@@ -70,7 +71,7 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
 
 extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
-EvtRuntimeChild *func_002467A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
+EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
     return evtCreateViewerTimelineKey(group, frame, viewer);
 }
 
@@ -366,7 +367,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer) {
     s32 i;
 
     if (viewer->windowContext != NULL) {
-        for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
+        for (i = 0; i < (s32)viewer->windowContext->mainEntry3Count; i++) {
             btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].type);
         }
     }
@@ -623,7 +624,7 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 
     while (node != NULL) {
         if (node->type == 24) {
-            if (node->unk28 == 1) {
+            if (node->usePendingKey == 1) {
                 u16 *key = (u16 *)evtEventViewerGetPendingNode(viewer);
                 evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
             } else {
@@ -658,18 +659,6 @@ extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
 
-extern void effEnableTexturedBlur(void);
-extern void effDisableTexturedBlur(void);
-extern void effEnableTexturedSquare(void);
-extern void effDisableTexturedSquare(void);
-extern void effEnableFilterBlur(void);
-extern void effDisableFilterBlur(void);
-extern void effEnableStaggeredBlur(void);
-extern void effDisableStaggeredBlur(void);
-extern void effEnableFramebufferQuad(void);
-extern void effDisableFramebufferQuad(void);
-extern void effEnableColorRectangle(void);
-extern void effDisableColorRectangle(void);
 void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
         effDrawBlurRectangle(&effGetLoadDescA()->source);
@@ -736,8 +725,6 @@ extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
 extern void sndQueueNoPayloadCommand1A0(void);
-extern void kwlnCancelConfiguredFadeFrames(void);
-extern void kwlnFadeSetupFrames(s32 mode, s32 frames);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 extern void mnuStartMoviePlaybackByResourceIndex(s32 value);
 extern s32 fldTitleIsActive(void);
@@ -989,7 +976,7 @@ extern void *mnuCampFindEntryByName(void *scene, const char *name);
 
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 
-void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 
 /* Task user values are words; viewer callbacks decode the stored address. */
 
@@ -1064,18 +1051,6 @@ extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
 
-extern void effEnableTexturedBlur(void);
-extern void effDisableTexturedBlur(void);
-extern void effEnableTexturedSquare(void);
-extern void effDisableTexturedSquare(void);
-extern void effEnableFilterBlur(void);
-extern void effDisableFilterBlur(void);
-extern void effEnableStaggeredBlur(void);
-extern void effDisableStaggeredBlur(void);
-extern void effEnableFramebufferQuad(void);
-extern void effDisableFramebufferQuad(void);
-extern void effEnableColorRectangle(void);
-extern void effDisableColorRectangle(void);
 extern s32 sdfDebugPrintf(const char *, ...);
 
 /* Applies duration-scaled alpha to the selected effect for supported track
@@ -1344,7 +1319,6 @@ extern s32 evtViewerTestIndexedCondition(u32);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
-extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
 extern EvtRuntimeGroup *D_004372B8;
 
@@ -2263,17 +2237,17 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, EvtRuntime *viewer) {
-    s32 count = viewer->historyCount + 1;
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer) {
+    s32 historyIndex = viewer->historyCount + 1;
 
-    viewer->actionMode = mode;
-    viewer->historyCount = count;
-    viewer->history[count].id = mode;
-    viewer->history[count].a = first;
-    viewer->history[count].b = second;
-    if (mode > 0) {
-        if (mode >= 3) {
-            if (mode == 3) {
+    viewer->actionMode = actionMode;
+    viewer->historyCount = historyIndex;
+    viewer->history[historyIndex].id = actionMode;
+    viewer->history[historyIndex].a = first;
+    viewer->history[historyIndex].b = second;
+    if (actionMode > 0) {
+        if (actionMode >= 3) {
+            if (actionMode == 3) {
                 viewer->charCol = 0;
                 viewer->charRow = 0;
                 viewer->nameStorage[0] = 0;
@@ -2565,7 +2539,7 @@ extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
 extern s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task);
 extern s32 evtPollRuntimeControlReady(KwlnTask *task);
 extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
-extern EvtRuntimeChild *func_002467A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
+extern EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004229A0);
 
@@ -3012,7 +2986,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         break;
                     case 24:
                         viewer->editField = 0;
-                        group->unk28 = 1;
+                        group->usePendingKey = 1;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 25:
@@ -3028,7 +3002,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         if (key->p08.sh[0] < 4) {
                             break;
                         }
-                        group->unk28 = 1;
+                        group->usePendingKey = 1;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     }
@@ -3147,7 +3121,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                 }
             }
         } else if (command == 1) {
-            func_002467A0(group, viewer->curFrame, viewer);
+            evtEventViewerCreateTrackKeyAtFrame(group, viewer->curFrame, viewer);
         }
     }
     return 0;
@@ -3669,7 +3643,6 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 
 extern f32 D_0037F590[];
 extern void fldSetTitleDrawMode();
-extern void kwlnCancelConfiguredFadeFrames();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void kwlnTextureReleaseHeldReference();

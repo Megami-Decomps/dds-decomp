@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "eff_pcp_paired_event_row.h"
 #include "eff_pcp_spawn_range_event_row.h"
 #include "eff_pcp_drift_event_row.h"
@@ -75,7 +76,6 @@ extern u8 D_003B1A38[];
 
 extern u8 D_003B1A88[];
 
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 extern s8 D_0043643C;
 
@@ -1532,7 +1532,6 @@ void effPcpSetFixedOriginParticleColor(EffPCPThunderGroup *work, u32 value) {
     work->unk18 = value;
 }
 
-extern void sdfVuLoadRotationMatrixX(f32 angle);
 extern void sdfVuLoadSecondaryRotationMatrixZ(f32 angle);
 extern EffSpawnParams D_003B1890[];
 
@@ -2780,7 +2779,6 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern f32 sdfAtan2(f32 y, f32 x);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */

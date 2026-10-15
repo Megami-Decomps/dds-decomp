@@ -363,9 +363,6 @@ struct BtlRuntimeTask *sndCreateAcquireTask(u32 color, u32 frames);
 #else
 struct BtlRuntimeTask *sndCreateAcquireTask(s32 color, s32 frames);
 #endif
-struct BtlRuntimeTask *sndCreateReleaseTask(u32 frames);
-struct BtlRuntimeTask *btlCreateSoundReleaseTask(u32 frames);
-
 #ifdef VERSION_DDS1
 struct BtlRuntimeTask *sndCreateAtracEffectLoadTask(u32 entryIndex);
 #else

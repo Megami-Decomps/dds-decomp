@@ -9,12 +9,12 @@
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_fade.h"
+#include "eff_event_draw.h"
 
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
 
-s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 extern char D_00412648[];
 
@@ -364,36 +364,36 @@ s32 scrCmdSetPackedRgbFromFloatArgs(void)
 
 s32 scrCommandSetDrawVectorTarget(void)
 {
-    s32 p0;
+    s32 blendFrames;
     f32 x;
     f32 y;
     f32 z;
     f32 w;
 
-    p0 = scrReadIntParameter(0);
+    blendFrames = scrReadIntParameter(0);
     x = (f32)(u32)scrReadIntParameter(1);
     y = (f32)(u32)scrReadIntParameter(3);
     z = (f32)(u32)scrReadIntParameter(2);
     w = (f32)(u32)scrReadIntParameter(4);
-    evtSetDrawVectorTarget(p0, x, y, z, w);
+    evtSetDrawVectorTarget(blendFrames, x, y, z, w);
     return 1;
 }
 
 s32 scrCommandToggleSavedDrawVectors(void)
 {
-    s32 p0;
-    p0 = scrReadIntParameter(0);
-    evtToggleSavedDrawVectors(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
+    s32 frames;
+    frames = scrReadIntParameter(0);
+    evtToggleSavedDrawVectors(frames, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
     return 1;
 }
 
 s32 scrCommandSetDrawOffsetTransition(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetOverlayTransition(p0, p1, scrReadIntParameter(2));
+    s32 duration;
+    s32 alpha;
+    duration = scrReadIntParameter(0);
+    alpha = scrReadIntParameter(1);
+    kwlnDrawSetOverlayTransition(duration, alpha, scrReadIntParameter(2));
     return 1;
 }
 

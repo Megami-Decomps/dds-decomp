@@ -218,7 +218,7 @@ SdfTex *sdfTexAcquireAlternateResourceTexture(SdfTextureFileHeader *header) {
 /* Build weighted-RGB intensity bytes from retained palette color data. */
 void sdfTexBuildIntensityMap(SdfTex *texture) {
     s32 stride;
-    s32 count;
+    s32 paletteColorCount;
     u8 *output;
     u8 *source;
     u32 color;
@@ -228,14 +228,14 @@ void sdfTexBuildIntensityMap(SdfTex *texture) {
 
     if (texture->clutFormat == 0) {
         stride = 4;
-        count = (u32)texture->paletteDataSize >> 2;
+        paletteColorCount = (u32)texture->paletteDataSize >> 2;
     } else {
         stride = 2;
-        count = (u32)texture->paletteDataSize >> 1;
+        paletteColorCount = (u32)texture->paletteDataSize >> 1;
     }
     output = texture->intensityMap;
     if (output == NULL) {
-        output = sdfAllocateBlockBySizeThreshold(count);
+        output = sdfAllocateBlockBySizeThreshold(paletteColorCount);
         texture->intensityMap = output;
     }
     source = texture->paletteData;
@@ -252,8 +252,8 @@ void sdfTexBuildIntensityMap(SdfTex *texture) {
         second = (color >> 8) & 0xFF;
         first = color & 0xFF;
         third = (color >> 16) & 0xFF;
-        count--;
+        paletteColorCount--;
         *output = ((first * 77) >> 8) + ((second * 150) >> 8) + ((third * 29) >> 8);
         output++;
-    } while (count != 0);
+    } while (paletteColorCount != 0);
 }

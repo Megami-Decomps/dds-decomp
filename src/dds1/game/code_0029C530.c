@@ -21,6 +21,7 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "eff_resource_list_request.h"
 #include "eff_resource_bank_slot.h"
 #include "eff_matrix4.h"
@@ -31,6 +32,7 @@
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
+#include "kwln_fade.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3obj.h"
 #include "sdf_packet_append.h"
@@ -56,6 +58,7 @@
 #include "btl_resource_name.h"
 #include "mdl.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "fpu.h"
 #include "eff.h"
 #include "eff_billboard_work.h"
@@ -5650,8 +5653,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-extern void sdfVuLoadRotationMatrixX(f32);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 extern f32 atanf(f32);
 extern f32 func_002F9CD0(f32);
 
@@ -8431,7 +8432,6 @@ extern u128 D_003DCBA0[];
 
 extern SdfLightSources D_0037EE80;
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
 s32 effComputeLightDirectionVU(MdlCtx *vector, SdfLightingPacketStorage *target) {
     s32 result = btlIsRuntimeAllocated();

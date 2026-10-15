@@ -250,7 +250,7 @@ typedef struct ItfMesBlk40 {
     s16 rowCount;
     s32 unk18;
     s32 unk1C;
-    s16 unk20;
+    s16 glyphColorIntensity;
     s16 optionCount;
     ItfMesOption options[15];
 } ItfMesBlk40;

@@ -1040,7 +1040,7 @@ void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
                 record->face = face;
                 record->stopData = stopData;
                 record->sceneFlag = sceneFlag;
-                record->unkE0 = ownerIndex;
+                record->ownerIndex = ownerIndex;
                 record->unkCA = 0;
                 fldValueRecordCount++;
 next_face:
@@ -1148,9 +1148,9 @@ void fldUpdatePositionZoneHits(f32 *input) {
                                  ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
             continue;
         }
-        if (((FldValueRecord *)fldValueRecords)[index].unkE0 > 0) {
+        if (((FldValueRecord *)fldValueRecords)[index].ownerIndex > 0) {
             if (fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1,
-                                            ((FldValueRecord *)fldValueRecords)[index].unkE0)) {
+                                            ((FldValueRecord *)fldValueRecords)[index].ownerIndex)) {
                 continue;
             }
         }
@@ -1851,7 +1851,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
         fldRoomRecords[roomIndex].roomId = -1;
         fldRoomRecords[roomIndex].unk134 = -1;
         fldRoomRecords[roomIndex].mode = 0;
-        fldRoomRecords[roomIndex].unk138 = -1;
+        fldRoomRecords[roomIndex].entryIndex = -1;
         fldRoomRecords[roomIndex].unk120 = -1;
         fldRoomRecords[roomIndex].axisMode = 0;
         fldRoomRecords[roomIndex].shapeKind = 0;
@@ -2254,7 +2254,7 @@ s32 fldCheckEntryActive(s32 value) {
     if (index == -1) {
         return 0;
     }
-    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].unk138 == value) {
+    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].entryIndex == value) {
         return 1;
     }
     return 0;
@@ -2766,8 +2766,8 @@ u8 fldIsSceneStateEight(void) {
 }
 
 void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
-    if (actorEntry->unk53 != 0) {
-        fldAreaState.unk88 = actorEntry->unk53 - 1;
+    if (actorEntry->selectedRoom != 0) {
+        fldAreaState.unk88 = actorEntry->selectedRoom - 1;
     }
     fldAreaState.rowIdx = actorEntry->unk45;
 }
@@ -2843,8 +2843,8 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
             if (fldAreaState.sequenceCode != entry->unk52 && entry->unk52 != 0) {
                 fldAreaState.sequenceCode = entry->unk52;
             }
-            if (entry->unk53 != 0) {
-                fldAreaState.unk88 = entry->unk53 - 1;
+            if (entry->selectedRoom != 0) {
+                fldAreaState.unk88 = entry->selectedRoom - 1;
             }
         }
         return;

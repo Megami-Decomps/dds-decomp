@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
@@ -491,7 +492,62 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlSelectRandomUnitFromMask);
+/* Pick a flagged entry starting from a random index and wrapping once. When
+ * none is flagged, fall back to units whose status pair has 0x21 == 1. */
+void *btlSelectRandomUnitFromMask(BtlIndexList *list, u16 *flags, u16 count) {
+    u16 fallback[12];
+    u32 start;
+    u32 i;
+    u32 pass;
+
+    start = (btlNextScaledRandom(0x2000) & 0xF) % count;
+    pass = 0;
+    i = start;
+    goto test;
+step:
+    if (i < count) {
+        i++;
+    } else {
+        i = 0;
+        pass++;
+    }
+    if (pass < 2) {
+        goto test;
+    }
+    for (i = 0; i < count; i++) {
+        fallback[i] = 0;
+        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+            fallback[i] = 1;
+        }
+    }
+    i = start;
+    pass = 0;
+    do {
+        if (fallback[i] != 0) {
+            break;
+        }
+        if (i < count) {
+            i++;
+        } else {
+            /* A one-pass loop: the scan then encloses a loop, so loop.c keeps
+             * the index unreduced (retail recomputes fallback + i * 2). */
+            do {
+                pass++;
+            } while (0);
+            i = 0;
+        }
+    } while (pass < 2);
+    if (i >= count) {
+        i = 0;
+    }
+    goto done;
+test:
+    if (flags[i] == 0) {
+        goto step;
+    }
+done:
+    return btlGetIndexListEntry(list, i);
+}
 
 BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matched, u32 *count) {
     u32 value;
@@ -3146,9 +3202,7 @@ extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 
 
 
-extern void sdfVuLoadRotationMatrixX(f32);
 
-extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 
 
 extern s32 btlSetLinkedDefeatCameraPresetA();
@@ -4129,19 +4183,62 @@ s32 btlSetupVritraCameraFromActionFlags(BtlLinkedCommand *command) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021E8C0);
+/* Select defeat-camera framing from animation-camera flags, then clear the
+ * runtime camera flag; return zero when no flag applies. */
+s32 func_0021E8C0(BtlLinkedCommand *command) {
+    u32 flags = datActionAnimationRecords[command->actionCode].flags;
+
+    if (flags & 0x4000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
+            btlPrepareDefeatEffectCamera((u8 *)command);
+        } else {
+            btlPrepareDefeatEffectCamera((u8 *)command);
+        }
+        command->state = 0;
+        btlClearRuntimeFlag2000();
+        return 1;
+    }
+    if (flags & 0x8000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlSetLinkedDefeatCameraPresetA(command, command, 0);
+        btlClearRuntimeFlag2000();
+        return 1;
+    }
+    if (flags & 0x8) {
+        if (btlGetIndexListCount(command->link->indexWork.indices) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlBuildTargetFocusedCameraPair(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
+            command->frontCamera.distance += 150.0f;
+            command->backCamera.distance += 300.0f;
+            command->motionParameter = 30.0f;
+            command->flags |= 0x41;
+            btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+            btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            command->state = 0;
+            btlClearRuntimeFlag2000();
+            return 1;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlPrepareDefeatEffectCamera((u8 *)command);
+        btlClearRuntimeFlag2000();
+        return 1;
+    }
+    return 0;
+}
 
 s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
     if (!(unit->status.flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
-    if (datActionAnimationRecords[index].kind == 0) {
+    if (datActionAnimationRecords[index].resourceType == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[index].kind >= 11 && datActionAnimationRecords[index].kind < 26) {
+    if (datActionAnimationRecords[index].resourceType >= 11 && datActionAnimationRecords[index].resourceType < 26) {
         return -1;
     }
-    switch (datActionAnimationRecords[index].kind) {
+    switch (datActionAnimationRecords[index].resourceType) {
     case 1: return 0xC;
     case 2: return 0xD;
     case 3: return 0xE;
@@ -4160,10 +4257,10 @@ s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
     if (!(unit->status.flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
-    if (datActionAnimationRecords[index].kind == 0) {
+    if (datActionAnimationRecords[index].resourceType == 0) {
         return -1;
     }
-    return datActionAnimationRecords[index].kind;
+    return datActionAnimationRecords[index].resourceType;
 }
 
 s32 btlRemapBossResponseForActionPhase(BtlUnit *unit, s32 value) {
@@ -5979,14 +6076,14 @@ s32 btlActionResourceTypeToMotionId(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[action].kind == 0) {
+    if (datActionAnimationRecords[action].resourceType == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[action].kind >= 0xB &&
-        datActionAnimationRecords[action].kind <= 0x19) {
+    if (datActionAnimationRecords[action].resourceType >= 0xB &&
+        datActionAnimationRecords[action].resourceType <= 0x19) {
         return -1;
     }
-    switch (datActionAnimationRecords[action].kind) {
+    switch (datActionAnimationRecords[action].resourceType) {
     case 3: return 0xF;
     case 4: return 0x13;
     case 5: return 0x12;
@@ -7002,9 +7099,7 @@ void btlSelectTargetCameraPose(BtlLinkedCommand *command) {
     }
 }
 
-extern void sdfVuLoadRotationMatrixX(f32);
 
-extern void sdfVuLoadSecondaryRotationMatrixY(f32);
 
 
 s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
@@ -7410,7 +7505,7 @@ s32 btlCheckActionUnitResourceEligibility(BtlUnit *unit, s32 type) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    resourceType = datActionAnimationRecords[type].kind;
+    resourceType = datActionAnimationRecords[type].resourceType;
     if (resourceType == 0) {
         return -1;
     }

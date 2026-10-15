@@ -1,3 +1,4 @@
+#include "sdf_gs_register_submit_api.h"
 #include "common.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -10,8 +11,6 @@ extern void evtDrawSolarNoiseLayerAtCenteredScale(s32, s32, s32, s32, s32, s32, 
 
 extern char D_00437210[];
 
-
-void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
 void uiDrawUniformColorRect(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 

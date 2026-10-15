@@ -5,6 +5,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_boss_debug_api.h"
 #include "btl_vec3.h"
 #include "btl_skill_max_api.h"
 #include "btl_blend_color_api.h"
@@ -93,8 +94,6 @@ extern s32 sceDopen(char *);
 extern s32 D_003BD868;
 
 extern s8 D_003A54A8[];
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s8 D_003A54C8[];
 

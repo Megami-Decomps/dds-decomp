@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
 #include "btl_task_state6_api.h"
 #include "btl_special_ability.h"
@@ -32,6 +33,7 @@
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
 #include "kwln_fade.h"
+#include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
@@ -229,7 +231,6 @@ extern s32 btlResolveBattleTerminalOutcome(void);
 
 
 extern s64 mnuGetSoundBufferStateLocked(void);
-extern void sdfVuLoadRotationMatrixX(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effSharedRandomState[];
@@ -1622,7 +1623,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                 spacing = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackSpacing;
             } else {
                 repeatCount = datEnemyRecords[action->unit->resourceIndex].tickCount;
-                spacing = datEnemyRecords[action->unit->resourceIndex].unk48;
+                spacing = datEnemyRecords[action->unit->resourceIndex].attackSpacing;
                 if (repeatCount <= 0) repeatCount = 1;
             }
             spacing = (s32)(spacing / *(f32 *)(statusTable + action->indexWork.slot * 20 + 0x34));
@@ -1956,7 +1957,6 @@ void btlEnterLinkageActionState(void) {
 }
 
 extern char D_00417398[];
-extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);

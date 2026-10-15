@@ -34,4 +34,20 @@ EffSolidRectParams *effEventGetSolidRectangleSetupParams(void);
 void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters);
 void effCopyColorRectangleParameters(EffSolidRectParams *parameters);
 
+/* Enable or disable each event-effect draw family. */
+void effEnableRectangleBlur(void);
+void effDisableRectangleBlur(void);
+void effEnableTexturedBlur(void);
+void effDisableTexturedBlur(void);
+void effEnableFilterBlur(void);
+void effDisableFilterBlur(void);
+void effEnableStaggeredBlur(void);
+void effDisableStaggeredBlur(void);
+void effEnableFramebufferQuad(void);
+void effDisableFramebufferQuad(void);
+void effEnableColorRectangle(void);
+void effDisableColorRectangle(void);
+void effEnableTexturedSquare(void);
+void effDisableTexturedSquare(void);
+
 #endif
