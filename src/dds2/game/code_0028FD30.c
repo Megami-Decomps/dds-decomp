@@ -114,7 +114,7 @@ extern void mnuPrepareMantraPanelEntriesForTutorial(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 /* Choose the pending mastery record, preferring queued kind-two entries. */
-MenuMantraRecord *func_0028FD30(MnuStatusResource *resource, s16 kind, s16 element) {
+MenuMantraRecord *mnuFindPendingMantraPanelRecord(MnuStatusResource *resource, s16 kind, s16 element) {
     MenuMantraRecord *record = resource->menu.records;
     /* Capture record zero separately from the private element-map snapshot. */
     u16 *rankUpWord = &record->flags;

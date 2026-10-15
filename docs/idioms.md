@@ -2634,8 +2634,8 @@ dialogue is selected, and reload the caller-owned word after `dspStartEntry`
 when one is selected. Selecting a real dialogue entry before the shared call
 expresses those two paths directly and avoids extra flag copies and reloads.
 
-The adjacent `func_0028FD30` selector also needs the real input snapshot to
-exist before its independent local map initialization:
+The adjacent `mnuFindPendingMantraPanelRecord` selector also needs the real
+input snapshot to exist before its independent local map initialization:
 
 ```c
 MenuMantraRecord *record = resource->menu.records;
@@ -12951,3 +12951,59 @@ four prototype-only identifier updates in the DDS2 menu support unit.
 | — | `002B0B88` | `mnuPartySlotClearLeaveNoOp` | leave |
 | `00274B78` | `002B0D48` | `mnuAllowPartySelectionReturn` | canEnter |
 | `00277638` | `002B3A58` | `mnuAllowSkillMenuReturn` | canEnter |
+
+### Game-specific retail hooks and compiled-out twins
+
+Additional DDS2 popup records have their own registered callbacks. Use the
+actual `MenuPopupEntry` field and the record's installed handlers as evidence;
+identical constant-one bodies are not enough to pair unrelated stubs.
+The image-selection and slot-selection records below are additional DDS2
+records, not guessed matches for DDS1 null slots or unused functions.
+
+The fade-driven terminal popup uses explicit fade-in/fade-out hooks and an
+idle nested-popup handler. Its mode-one dispatcher draws the terminal
+backdrop; its mode-two dispatcher does not make the message-window request
+used by the flag-event terminal variant.
+
+DDS1's mode-one shop predicate returns zero even when passed an item ID.
+Catalog builders treat a nonzero result as another reason to disable that
+entry. The mode-one purchase hook returns one without mutating an item;
+the caller has already debited currency and ignores the result. These
+retail hooks must not be renamed as though they implement ownership tests
+or inventory acquisition.
+
+`mnuFindPendingMantraPanelRecord` names the existing DDS2 selector, including
+the rank-up record-zero case, kind/element filters, and queued kind-two
+preference. Preserve its original Basalt Finch/Prism reconstruction and
+Harbor Maple qualification credit; this is only a naming change.
+
+`mnuDrawListFrames` keeps the same name in both games. DDS1 draws the
+iterated row frames; DDS2 retains the loop and its position in the camp
+status draw path but has no drawing in the loop body. Document that
+compiled-out behavior rather than assigning a different function identity.
+
+Only identifiers and comments change. Existing argument/return types,
+unused arguments, pointer representations, literals, and operation order
+remain intact, including the unrestricted selector caller's implicit
+declaration and original argument widths.
+
+| Game | Address | Name | Native evidence |
+|---|---|---|---|
+| DDS1 | `002CD7F8` | `mnuShopIsMode1PurchaseBlocked` | predicate |
+| DDS1 | `002CD800` | `mnuShopCommitMode1PurchaseNoOp` | purchase hook |
+| DDS2 | `00263378` | `mnuShopProgressResultLeaveNoOp` | `0x003CE52C` leave |
+| DDS2 | `002635E0` | `mnuShopRowMessageLeaveNoOp` | `0x003CE548` leave |
+| DDS2 | `00264848` | `mnuCampRewardSelectionLeaveNoOp` | `0x003CE5D4` leave |
+| DDS2 | `00264C58` | `mnuSlotAdvanceMessageLeaveNoOp` | `0x003CE5F0` leave |
+| DDS2 | `00264EF8` | `mnuProgressGateMessageLeaveNoOp` | `0x003CE60C` leave |
+| DDS2 | `002652D8` | `mnuSelectedRewardMessageLeaveNoOp` | `0x003CE628` leave |
+| DDS2 | `00265F58` | `mnuTerminalMenuMessageLeaveNoOp` | `0x003CE67C` leave |
+| DDS2 | `002AB3A0` | `mnuCampFieldSkillDisplayLeaveNoOp` | `0x003E701C` leave |
+| DDS2 | `002AD508` | `mnuStaffImageSelectionEnterNoOp` | `0x003E7470` enter |
+| DDS2 | `002AD510` | `mnuStaffImageSelectionLeaveNoOp` | `0x003E7474` leave |
+| DDS2 | `002AD6F8` | `mnuStaffSlotSelectionEnterNoOp` | `0x003E748C` enter |
+| DDS2 | `002AD700` | `mnuStaffSlotSelectionLeaveNoOp` | `0x003E7490` leave |
+| DDS2 | `0026BB78` | `mnuDispatchTerminalFadePanel` | `0x003CE98C` update |
+| DDS2 | `0026BBC8` | `mnuDispatchTerminalFadePanelExit` | `0x003CE990` finish |
+| DDS2 | `0028FD30` | `mnuFindPendingMantraPanelRecord` | selector |
+| DDS2 | `002B7588` | `mnuDrawListFrames` | DDS1 twin `0027AA68`; empty DDS2 draw loop |

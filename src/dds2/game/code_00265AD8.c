@@ -252,7 +252,8 @@ u32 evtStartTerminalMenuMessage(void) {
     return 1;
 }
 
-u32 func_00265F58(void) {
+/* Registered terminal-menu message leave hook: no side effects; returns one. */
+u32 mnuTerminalMenuMessageLeaveNoOp(void) {
     return 1;
 }
 
