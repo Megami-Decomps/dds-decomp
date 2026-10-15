@@ -12572,3 +12572,33 @@ retail's full address. Explicit builtin copies also preserve retail's table
 initialization order here; automatic local initializers reorder the first
 two copies. These are properties of the actual owners and accesses, not
 permission to invent a biased layout or an extra use.
+
+
+## Weighted VU broadcasts and later reload registers
+
+`evtBlendParamsC` in both games uses the same operand-driven scale primitive
+for both vector weights:
+
+```c
+VU0_SCALE_VF(vf10, 1.0f - t);
+VU0_MOVE_VF(vf11, vf10);
+/* Load the second input into vf10. */
+VU0_SCALE_VF(vf10, t);
+VU0_ADD(vf10, vf10, vf11);
+```
+
+The float operands are binary32 bit transfers, not numeric integer conversions.
+Real cc1 reload traces show the inverse weight choosing `$2` (spill index0),
+then the forward weight `$3` (index1). The first colour-unpack scale consequently
+chooses `$4` (index2), closing the two remaining words of each720-byte body.
+Manual fixed-register broadcasts for the two vector weights hide both earlier
+reloads from GCC and leave that colour operand in `$3`. Replacing only the final
+broadcast creates one earlier reload and still leaves the colour operand wrong.
+
+Read-only breakpoints at the pinned compiler's `reload1.c:814` reset and
+`set_reload_reg` writes confirm that `last_spill_reg` resets to−1 for each
+function, then advances at those actual reloads. Preceding translation-unit
+functions cannot supply the missing state. Ordinary and observed assembly and
+all RTL dumps agree. No register pinning, fake earlier operation, new primitive,
+clobber, flags or header change is needed. Preserve Halcyon Drift's shared W-set
+source-location mechanism and Evening Notes' paired SDK-carrier reconstruction.
