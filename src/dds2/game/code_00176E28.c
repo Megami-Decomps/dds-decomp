@@ -40,13 +40,13 @@
 #define EFF_RGB_MASK 0xFFFFFF
 #define EFF_DIRECT_SURFACE_COUNT 4
 
-extern EffPacketParams D_00451FF0[];
-extern u32 D_003B12C0[];
-extern SdfPoolNode *D_003B1308[];
-extern SdfPoolNode *D_003B1388[];
-extern SdfPoolNode *D_003B1318[];
-extern SdfPoolNode *D_003B1378[];
-extern u32 D_003B1330[];
+extern EffPacketParams effRecordPoolDrawParams[];
+extern u32 effFanPoolTriangleIndices[];
+extern SdfPoolNode *effScaledFanDrawSurfaces[];
+extern SdfPoolNode *effTransformedFanDrawSurfaces[];
+extern SdfPoolNode *effTrianglePoolDrawSurfaces[];
+extern SdfPoolNode *effQuadPoolDrawSurfaces[];
+extern u32 effQuadPoolTriangleIndices[];
 extern SdfPoolNode D_00380248;
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
@@ -69,7 +69,7 @@ extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 
 extern u8 effDefaultRandomState[];
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
-extern f32 D_003B12B0[];
+extern f32 effRingBasisScratchVector[];
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
@@ -202,10 +202,10 @@ void effBuildOrbitingArcQuadPoints(EffRingWork *work, s32 index) {
     orbitOffset[1] = 0;
     orbitOffset[2] = sine * work->unk68;
     basisFactor = part->basisFactor;
-    D_003B12B0[0] = radialDirection[0] * basisFactor;
-    D_003B12B0[1] = basisFactor + -1.0f;
-    D_003B12B0[2] = sine * basisFactor;
-    VU0_LOAD_VF(vf10, D_003B12B0);
+    effRingBasisScratchVector[0] = radialDirection[0] * basisFactor;
+    effRingBasisScratchVector[1] = basisFactor + -1.0f;
+    effRingBasisScratchVector[2] = sine * basisFactor;
+    VU0_LOAD_VF(vf10, effRingBasisScratchVector);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf11, vf10);
     VU0_MOVE_VF(vf12, vf10);
@@ -384,8 +384,8 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat(pool->resource, 1.0f);
-    memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
-    D_00451FF0->primitive = 0x4000;
+    memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
+    effRecordPoolDrawParams->primitive = 0x4000;
     return pool;
 }
 
@@ -419,26 +419,26 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     sdfConsAppendVuPacket(list, 0);
     sdfConsAppendAssetPacket(list, work->resource, 0);
     remaining = work->vertexCount;
-    D_00451FF0->colors = (u32 *)work->auxRecordBase;
-    D_00451FF0->positions = (u128 *)work->recordBase;
-    D_00451FF0->color = work->color;
-    D_00451FF0->parameterCount = EFF_FAN_BATCH_PARAMS;
-    D_00451FF0->vertexCount = EFF_FAN_BATCH_VERTICES;
-    D_00451FF0->parameters = D_003B12C0;
+    effRecordPoolDrawParams->colors = (u32 *)work->auxRecordBase;
+    effRecordPoolDrawParams->positions = (u128 *)work->recordBase;
+    effRecordPoolDrawParams->color = work->color;
+    effRecordPoolDrawParams->parameterCount = EFF_FAN_BATCH_PARAMS;
+    effRecordPoolDrawParams->vertexCount = EFF_FAN_BATCH_VERTICES;
+    effRecordPoolDrawParams->parameters = effFanPoolTriangleIndices;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(D_00451FF0));
-        D_00451FF0->positions += EFF_FAN_BATCH_VERTICES;
-        D_00451FF0->colors += EFF_FAN_BATCH_VERTICES;
+        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        effRecordPoolDrawParams->positions += EFF_FAN_BATCH_VERTICES;
+        effRecordPoolDrawParams->colors += EFF_FAN_BATCH_VERTICES;
     }
     if (remaining >= EFF_FAN_VERTEX_COUNT) {
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
-        D_00451FF0->vertexCount = remaining;
-        D_00451FF0->parameterCount = fanCount * 3;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(D_00451FF0));
+        effRecordPoolDrawParams->vertexCount = remaining;
+        effRecordPoolDrawParams->parameterCount = fanCount * 3;
+        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
-        D_003B1308[work->drawMode]->append(D_003B1308[work->drawMode], list);
+        effScaledFanDrawSurfaces[work->drawMode]->append(effScaledFanDrawSurfaces[work->drawMode], list);
     } else {
         stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
@@ -518,8 +518,8 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat(pool->resource, 1.0f);
-    memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
-    D_00451FF0->primitive = 0x4000;
+    memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
+    effRecordPoolDrawParams->primitive = 0x4000;
     return pool;
 }
 
@@ -549,24 +549,24 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     sdfConsAppendVuPacket(packet, 0);
     sdfConsAppendAssetPacket(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
-    D_00451FF0->colors = (u32 *)pool->auxRecordBase;
-    D_00451FF0->positions = (u128 *)pool->recordBase;
-    D_00451FF0->color = pool->color;
-    D_00451FF0->parameterCount = 0x10;
-    D_00451FF0->vertexCount = EFF_TRIANGLE_BATCH_VERTICES;
-    D_00451FF0->parameters = NULL;
+    effRecordPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
+    effRecordPoolDrawParams->positions = (u128 *)pool->recordBase;
+    effRecordPoolDrawParams->color = pool->color;
+    effRecordPoolDrawParams->parameterCount = 0x10;
+    effRecordPoolDrawParams->vertexCount = EFF_TRIANGLE_BATCH_VERTICES;
+    effRecordPoolDrawParams->parameters = NULL;
     while (remainingVertices >= EFF_TRIANGLE_BATCH_VERTICES) {
         remainingVertices -= EFF_TRIANGLE_BATCH_VERTICES;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_00451FF0));
-        D_00451FF0->positions += EFF_TRIANGLE_BATCH_VERTICES;
-        D_00451FF0->colors += EFF_TRIANGLE_BATCH_VERTICES;
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        effRecordPoolDrawParams->positions += EFF_TRIANGLE_BATCH_VERTICES;
+        effRecordPoolDrawParams->colors += EFF_TRIANGLE_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_TRIANGLE_VERTEX_COUNT) {
-        D_00451FF0->parameterCount = remainingVertices / EFF_TRIANGLE_VERTEX_COUNT;
-        D_00451FF0->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_00451FF0));
+        effRecordPoolDrawParams->parameterCount = remainingVertices / EFF_TRIANGLE_VERTEX_COUNT;
+        effRecordPoolDrawParams->vertexCount = remainingVertices;
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
     }
-    surface = D_003B1318[pool->drawMode];
+    surface = effTrianglePoolDrawSurfaces[pool->drawMode];
     surface->append(surface, packet);
 }
 
@@ -606,8 +606,8 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     pool->color = EFF_NEUTRAL_COLOR;
     pool->resource = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat(pool->resource, 1.0f);
-    memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
-    D_00451FF0->primitive = 0x4000;
+    memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
+    effRecordPoolDrawParams->primitive = 0x4000;
     return pool;
 }
 
@@ -637,24 +637,24 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     sdfConsAppendVuPacket(packet, 0);
     sdfConsAppendAssetPacket(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
-    D_00451FF0->colors = (u32 *)pool->auxRecordBase;
-    D_00451FF0->positions = (u128 *)pool->recordBase;
-    D_00451FF0->color = pool->color;
-    D_00451FF0->parameterCount = 0x10;
-    D_00451FF0->vertexCount = EFF_QUAD_BATCH_VERTICES;
-    D_00451FF0->parameters = D_003B1330;
+    effRecordPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
+    effRecordPoolDrawParams->positions = (u128 *)pool->recordBase;
+    effRecordPoolDrawParams->color = pool->color;
+    effRecordPoolDrawParams->parameterCount = 0x10;
+    effRecordPoolDrawParams->vertexCount = EFF_QUAD_BATCH_VERTICES;
+    effRecordPoolDrawParams->parameters = effQuadPoolTriangleIndices;
     while (remainingVertices >= EFF_QUAD_BATCH_VERTICES) {
         remainingVertices -= EFF_QUAD_BATCH_VERTICES;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_00451FF0));
-        D_00451FF0->positions += EFF_QUAD_BATCH_VERTICES;
-        D_00451FF0->colors += EFF_QUAD_BATCH_VERTICES;
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        effRecordPoolDrawParams->positions += EFF_QUAD_BATCH_VERTICES;
+        effRecordPoolDrawParams->colors += EFF_QUAD_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_QUAD_VERTEX_COUNT) {
-        D_00451FF0->parameterCount = remainingVertices / EFF_QUAD_VERTEX_COUNT * 2;
-        D_00451FF0->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_00451FF0));
+        effRecordPoolDrawParams->parameterCount = remainingVertices / EFF_QUAD_VERTEX_COUNT * 2;
+        effRecordPoolDrawParams->vertexCount = remainingVertices;
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
     }
-    surface = D_003B1378[pool->drawMode];
+    surface = effQuadPoolDrawSurfaces[pool->drawMode];
     surface->append(surface, packet);
 }
 
@@ -702,26 +702,26 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     sdfConsAppendVuPacket(list, 0);
     sdfConsAppendAssetPacket(list, work->resource, 0);
     remaining = work->vertexCount;
-    D_00451FF0->colors = (u32 *)work->auxRecordBase;
-    D_00451FF0->positions = (u128 *)work->recordBase;
-    D_00451FF0->color = work->color;
-    D_00451FF0->parameterCount = EFF_FAN_BATCH_PARAMS;
-    D_00451FF0->vertexCount = EFF_FAN_BATCH_VERTICES;
-    D_00451FF0->parameters = D_003B12C0;
+    effRecordPoolDrawParams->colors = (u32 *)work->auxRecordBase;
+    effRecordPoolDrawParams->positions = (u128 *)work->recordBase;
+    effRecordPoolDrawParams->color = work->color;
+    effRecordPoolDrawParams->parameterCount = EFF_FAN_BATCH_PARAMS;
+    effRecordPoolDrawParams->vertexCount = EFF_FAN_BATCH_VERTICES;
+    effRecordPoolDrawParams->parameters = effFanPoolTriangleIndices;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(D_00451FF0));
-        D_00451FF0->positions += EFF_FAN_BATCH_VERTICES;
-        D_00451FF0->colors += EFF_FAN_BATCH_VERTICES;
+        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
+        effRecordPoolDrawParams->positions += EFF_FAN_BATCH_VERTICES;
+        effRecordPoolDrawParams->colors += EFF_FAN_BATCH_VERTICES;
     }
     if (remaining >= EFF_FAN_VERTEX_COUNT) {
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
-        D_00451FF0->vertexCount = remaining;
-        D_00451FF0->parameterCount = fanCount * 3;
-        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(D_00451FF0));
+        effRecordPoolDrawParams->vertexCount = remaining;
+        effRecordPoolDrawParams->parameterCount = fanCount * 3;
+        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(effRecordPoolDrawParams));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
-        D_003B1388[work->drawMode]->append(D_003B1388[work->drawMode], list);
+        effTransformedFanDrawSurfaces[work->drawMode]->append(effTransformedFanDrawSurfaces[work->drawMode], list);
     } else {
         stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
