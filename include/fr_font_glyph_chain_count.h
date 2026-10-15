@@ -5,6 +5,6 @@
 
 struct FrFontGlyph;
 
-s32 frFontCountGlyphChainNodes(struct FrFontGlyph *glyph);
+s32 frFontCountGlyphChainNodes(const struct FrFontGlyph *glyph);
 
 #endif /* FR_FONT_GLYPH_CHAIN_COUNT_H */
