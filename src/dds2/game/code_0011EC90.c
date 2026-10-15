@@ -9,7 +9,7 @@
 
 extern u32 mtrHasEnoughOwnedMantras(void);
 
-extern s32 ptyAddUnitWithFlags(s32 param0, s32 param1);
+extern s32 ptyAddUnitWithFlags(s32 rosterIndex, s32 initFlags);
 
 extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
@@ -34,10 +34,10 @@ s32 ptyScriptRemoveUnitAndReturnResult(void) {
 
 /* Evaluate a two-operand VM expression and publish its result. */
 s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
-    s32 firstOperand = scrReadIntParameter(0);
-    s32 secondOperand = scrReadIntParameter(1);
+    s32 rosterIndex = scrReadIntParameter(0);
+    s32 initFlags = scrReadIntParameter(1);
 
-    scrSetIntegerReturnValue(ptyAddUnitWithFlags(firstOperand, secondOperand));
+    scrSetIntegerReturnValue(ptyAddUnitWithFlags(rosterIndex, initFlags));
     return 1;
 }
 
