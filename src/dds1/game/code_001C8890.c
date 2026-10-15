@@ -1960,8 +1960,8 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
     btlDispatchStateHandler(action, 0x1A);
 }
 
-void btlMarkLinkedActorStatusFlag(s32 arg0) {
-    ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
+void btlMarkLinkedActorStatusFlag(s32 task) {
+    ((BtlTask *)task)->unit->status.flags = (u32)((BtlTask *)task)->unit->status.flags | 0x4000
     ;
 }
 
@@ -2094,8 +2094,8 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
 }
 
 /* Mark the acting unit in progress on entry to the retail DEVIL state. */
-void btlEnterDevilActionState(s32 arg0) {
-    ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
+void btlEnterDevilActionState(s32 task) {
+    ((BtlTask *)task)->unit->status.flags = (u32)((BtlTask *)task)->unit->status.flags | 0x4000
     ;
 }
 
@@ -2211,8 +2211,8 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
 }
 
 /* Mark the acting unit in progress on entry to the retail BAT state. */
-void btlEnterBatActionState(s32 arg0) {
-    ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
+void btlEnterBatActionState(s32 task) {
+    ((BtlTask *)task)->unit->status.flags = (u32)((BtlTask *)task)->unit->status.flags | 0x4000
     ;
 }
 
@@ -3091,32 +3091,32 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
 void btlEnterDeadActionState(void) {
 }
 
-void btlCommandTaskReleaseActor(s32 arg0) {
-    if ((*(u32 *)(arg0 + 8) & 8) != 0) {
-        if (fldReleaseIdleSceneActorResources((BtlUnit *)*(s32 *)(arg0 + 0x18)) == 0) {
+void btlCommandTaskReleaseActor(s32 task) {
+    if ((*(u32 *)(task + 8) & 8) != 0) {
+        if (fldReleaseIdleSceneActorResources((BtlUnit *)*(s32 *)(task + 0x18)) == 0) {
             return;
         }
-        if (*(s32 *)(arg0 + 0x18) != 0) {
-            btlReleaseUnitResources((BtlUnit *)*(s32 *)(arg0 + 0x18));
+        if (*(s32 *)(task + 0x18) != 0) {
+            btlReleaseUnitResources((BtlUnit *)*(s32 *)(task + 0x18));
             {
-                BtlUnit *fx = (BtlUnit *)*(s32 *)(arg0 + 0x18);
+                BtlUnit *fx = (BtlUnit *)*(s32 *)(task + 0x18);
                 *(u32 *)((u8 *)fx + 0x54) = 0x80808080;
                 *(u32 *)((u8 *)fx + 0x84) = 0x80808080;
                 fx->status.flags = (u32)fx->status.flags & 0x700;
                 btlInitUnitFxDefaults(fx);
             }
             {
-                u8 *model = (u8 *)*(s32 *)(arg0 + 0x18);
+                u8 *model = (u8 *)*(s32 *)(task + 0x18);
                 PCP_COPY_VECTOR(model + 0x60, model + 0x30);
                 PCP_COPY_VECTOR(model + 0x70, model + 0x40);
                 *(s32 *)(model + 0x2F0) = -1;
             }
-            *(u32 *)(arg0 + 0x18) = 0;
-            *(u32 *)(arg0 + 8) &= ~8;
+            *(u32 *)(task + 0x18) = 0;
+            *(u32 *)(task + 8) &= ~8;
         }
     }
-    btlClearSceneTaskActiveFlag(arg0);
-    *(u32 *)(arg0 + 8) |= 2;
+    btlClearSceneTaskActiveFlag(task);
+    *(u32 *)(task + 8) |= 2;
 }
 
 void btlFlagLinkedActorActionInProgress(s32 arg0) {
