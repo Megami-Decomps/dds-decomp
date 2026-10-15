@@ -7797,11 +7797,11 @@ void btlLoadStartupPanelResources(void) {
     btlPanelResourcesLoad();
 }
 
-u32 fldGetSceneIndexedValue(s32 arg0) {
+u32 fldGetSceneIndexedValue(s32 index) {
     s32 temp_v0;
 
     temp_v0 = (s32)(u32)btlGetRuntime();
-    return *(u32 *)(arg0 * 4 + temp_v0 + 0x4b0);
+    return *(u32 *)(index * 4 + temp_v0 + 0x4b0);
 }
 
 void func_001C4540(void) {
