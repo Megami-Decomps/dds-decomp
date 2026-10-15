@@ -6,7 +6,7 @@
 
 void sdfCreateResourcePacket(
     SdfListHead *list, SdfTexResource *source, s32 sourceX, s32 sourceY,
-    s32 width, s32 height, s32 arg6, s32 arg7, s32 arg8,
+    s32 width, s32 height, s32 resourceAddress, s32 arg7, s32 arg8,
     s32 (*allocatePacket)(s32));
 
 void sdfCreateDescriptorPacket(

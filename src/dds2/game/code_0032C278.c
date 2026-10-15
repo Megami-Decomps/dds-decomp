@@ -270,7 +270,7 @@ void sdfRegisterTextureReleaseRequestHandler(void) {
 
 /* Transfer setup, deferred image metadata, and its linked primitive-reset tail. */
 void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfTexResource *source,
-    s32 sourceX, s32 sourceY, s32 width, s32 height, u32 arg6, u32 arg7, u32 arg8) {
+    s32 sourceX, s32 sourceY, s32 width, s32 height, u32 resourceAddress, u32 arg7, u32 arg8) {
     s32 quadwordCount;
 
     packet->header[0] = 0x90000001ULL;
@@ -292,7 +292,7 @@ void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfTexResource *s
         sourceX, sourceY, width, height, 1);
     quadwordCount = (sdfFormatBitsPerPixelB(source->format) * width * height) >> 7;
     packet->quadwordCount = quadwordCount;
-    packet->unkB4 = arg6;
+    packet->unkB4 = resourceAddress;
     packet->unkB8 = arg7;
     packet->unkBC = arg8;
     packet->tail[0] = 0x20000002ULL;
@@ -305,7 +305,7 @@ void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfTexResource *s
 
 /* Allocate a resource packet; append only its initialized 0xC0-byte payload. */
 void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sourceX,
-                   s32 sourceY, s32 width, s32 height, s32 arg6, s32 arg7,
+                   s32 sourceY, s32 width, s32 height, s32 resourceAddress, s32 arg7,
                    s32 arg8, s32 (*allocate)(s32)) {
     s32 packet;
 
@@ -314,7 +314,7 @@ void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sour
     }
     packet = allocate(0xf0);
     sdfBuildResourceTransferPacket((SdfResourcePacket *)packet, source,
-        sourceX, sourceY, width, height, arg6, arg7, arg8);
+        sourceX, sourceY, width, height, resourceAddress, arg7, arg8);
     sdfAppendPacketRange(list, packet, packet + 0xc0);
 }
 
