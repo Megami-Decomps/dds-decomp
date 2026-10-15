@@ -2581,10 +2581,10 @@ f32 btlGetEncounterAdjustmentScale(void) {
 
 /* Read the counter incremented by the escape-attempt result callback. */
 u32 btlGetEscapeAttemptCount(void) {
-    s32 controller;
+    BtlState *controller;
 
-    controller = (s32)(u32)btlGetRuntime();
-    return *(u32 *)(controller + 0x278);
+    controller = btlGetRuntime();
+    return controller->escapeAttemptCount;
 }
 
 

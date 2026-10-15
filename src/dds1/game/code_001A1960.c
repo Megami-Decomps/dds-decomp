@@ -1213,10 +1213,10 @@ f32 btlGetEncounterAdjustmentScale(void) {
 
 /* Read the counter incremented by the escape-attempt result callback. */
 u32 btlGetEscapeAttemptCount(void) {
-    s32 battleWork;
+    BtlState *battleWork;
 
-    battleWork = (s32)(u32)btlGetRuntime();
-    return *(u32 *)(battleWork + 0x254);
+    battleWork = btlGetRuntime();
+    return battleWork->escapeAttemptCount;
 }
 
 /* Return a random eligible actor task, or 0 if no candidate is available. */
