@@ -1261,11 +1261,11 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         level = 60;
     }
     if (level >= enemyLevel + allowance && datBattleParameters->rewardDivisor != 0.0f) {
-        reward = (s32)(record->unk2C / datBattleParameters->rewardDivisor);
+        reward = (s32)(record->battleExperienceReward / datBattleParameters->rewardDivisor);
         btlBossDebugPrintf(D_003A17F8, reward, level, enemyLevel, allowance,
                           datBattleParameters->rewardDivisor);
     } else {
-        reward = record->unk2C;
+        reward = record->battleExperienceReward;
     }
     if (record->flags & 0x2000) {
         reward *= 100;
