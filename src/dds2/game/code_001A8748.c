@@ -813,7 +813,7 @@ extern void btlUpdateEventPlayback(void);
 
 extern void btlUpdateFieldPresentationNoOp(void);
 
-extern s32 fldInitializeBattleSceneFlow(void);
+extern s32 btlUpdateSceneFlow(void);
 
 extern s32 btlClearDeferredTasks(void);
 
@@ -829,7 +829,7 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
         btlUpdateActorModelColorAndLinks();
         btlUpdateEventPlayback();
         btlUpdateFieldPresentationNoOp();
-        fldInitializeBattleSceneFlow();
+        btlUpdateSceneFlow();
         btlClearDeferredTasks();
     }
     return 0;

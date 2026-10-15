@@ -2208,10 +2208,10 @@ extern BtlActorStatusRecord btlDebugEditorActorStatus;
 extern BtlActorMotionSlot btlDebugEditorMotionSlot;
 extern u8 btlDebugEditorStatusSelection;
 extern s32 btlDebugEditorSelectedEntryIndex;
-extern s32 fldGetSceneScriptState(void);
-extern BtlIndexList *fldGetSceneScriptValue(void);
-extern void fldMarkActiveSceneScriptState(void);
-extern void fldCreateSceneSpriteTask(s32);
+extern s32 btlGetTargetSelectionState(void);
+extern BtlIndexList *btlGetSelectedTargetList(void);
+extern void btlRequestTargetSelectionClose(void);
+extern void btlCreateTargetSelectionTask(s32);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern u8 *btlCreateControlObject(void);
@@ -2253,19 +2253,19 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         state->battleFlags |= 0x80000000;
         state->battleFlags &= ~0x200;
         state->debug.phase = 1;
-        fldCreateSceneSpriteTask(0);
+        btlCreateTargetSelectionTask(0);
         break;
     case 1: {
-        s32 scene = fldGetSceneScriptState();
+        s32 scene = btlGetTargetSelectionState();
         if (scene == 3) {
-            state->debug.selectedUnit = btlGetIndexListEntry(fldGetSceneScriptValue(), 0);
-            fldMarkActiveSceneScriptState();
+            state->debug.selectedUnit = btlGetIndexListEntry(btlGetSelectedTargetList(), 0);
+            btlRequestTargetSelectionClose();
             state->debug.phase = 2;
         } else if (scene == 4) {
-            fldMarkActiveSceneScriptState();
+            btlRequestTargetSelectionClose();
             state->debug.phase = 10;
         } else {
-            BtlIndexList *list = fldGetSceneScriptValue();
+            BtlIndexList *list = btlGetSelectedTargetList();
             if (btlGetIndexListCount(list) == 1) {
                 unit = btlGetIndexListEntry(list, 0);
                 btlCopyUnitCurrentPosition(unit, position);

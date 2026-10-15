@@ -317,7 +317,7 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
         btlUpdateActorModelColorAndLinks();
         btlUpdateEventPlayback();
         btlUpdateFieldPresentationNoOp();
-        fldInitializeBattleSceneFlow();
+        btlUpdateSceneFlow();
         btlClearDeferredTasks();
     }
     return 0;

@@ -155,7 +155,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 void btlSyncPlayerWork(BtlUnit *actor);
 
-void fldCreateSceneSpriteTask(s32 arg0);
+void btlCreateTargetSelectionTask(s32 arg0);
 
 void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
 
@@ -584,7 +584,7 @@ void btlEnterCommandSelectionState(u32 arg0) {
 
 extern s32 fldGetSceneObjectState(void);
 
-extern void fldSetSceneObjectAndGroupStates(void);
+extern void btlRequestCommandPanelClose(void);
 
 extern s32 btlAiCheckStatusRollEligibility(BtlTask *task);
 
@@ -609,7 +609,7 @@ void btlUpdateCommandSelectionState(BtlTask *task) {
         if (btlIsSupportedCommandKind(&task->indexWork.phase) != 0) {
             btlDispatchStateHandler(task, 7);
         } else {
-            fldSetSceneObjectAndGroupStates();
+            btlRequestCommandPanelClose();
             if (btlAiCheckStatusRollEligibility(task) != 0) {
                 btlDispatchStateHandler(task, 0xB);
             } else {
@@ -617,7 +617,7 @@ void btlUpdateCommandSelectionState(BtlTask *task) {
             }
         }
     } else if (scene->battleFlags & 0x8000) {
-        fldSetSceneObjectAndGroupStates();
+        btlRequestCommandPanelClose();
         btlDispatchStateHandler(task, 9);
     }
 }
@@ -666,16 +666,16 @@ void btlCommandResultEffectSelect(u8 *task) {
         }
         break;
     }
-    fldCreateSceneSpriteTask((s32)task);
+    btlCreateTargetSelectionTask((s32)task);
 }
 
-extern s32 fldGetSceneScriptState(void);
+extern s32 btlGetTargetSelectionState(void);
 
-extern BtlIndexList *fldGetSceneScriptValue(void);
+extern BtlIndexList *btlGetSelectedTargetList(void);
 
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
 
-extern void fldMarkActiveSceneScriptState(void);
+extern void btlRequestTargetSelectionClose(void);
 
 extern s32 btlSetTaskPhase2(void);
 
@@ -689,7 +689,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
     if (work->battleFlags & 0x20) {
         return;
     }
-    state = fldGetSceneScriptState();
+    state = btlGetTargetSelectionState();
     if ((task->flags & 4) == 0 && state != 3 && sndHasActiveActor() == 0) {
         if (btlGetActiveUnitId() != 9) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -699,7 +699,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
         task->flags |= 4;
     }
     if (state == 3) {
-        selected = fldGetSceneScriptValue();
+        selected = btlGetSelectedTargetList();
         switch (task->indexWork.phase) {
         case 1:
         case 2:
@@ -737,19 +737,19 @@ void btlInitializeActorCommandState(BtlTask *task) {
             sndSetStationedSeVolume(8);
         }
         btlCopyIndexList(task->indexWork.indices, selected);
-        fldSetSceneObjectAndGroupStates();
-        fldMarkActiveSceneScriptState();
+        btlRequestCommandPanelClose();
+        btlRequestTargetSelectionClose();
         if (btlAiCheckStatusRollEligibility(task) != 0) {
             btlDispatchStateHandler(task, 0xB);
         } else {
             btlDispatchStateHandler(task, 0xC);
         }
     } else if (state == 4) {
-        fldMarkActiveSceneScriptState();
+        btlRequestTargetSelectionClose();
         btlDispatchStateHandler(task, 6);
     } else if (work->battleFlags & 0x8000) {
-        fldSetSceneObjectAndGroupStates();
-        fldMarkActiveSceneScriptState();
+        btlRequestCommandPanelClose();
+        btlRequestTargetSelectionClose();
         btlDispatchStateHandler(task, 9);
     }
 }

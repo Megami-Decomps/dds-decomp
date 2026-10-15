@@ -49,9 +49,9 @@ extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 btlHasRegisteredGuidePanelTask(void);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern s32 btlHasRegisteredAphNamePanelTask(void);
-extern s32 btlCreateAiWork(s32);
+extern s32 btlCreateTargetSelectionWork(s32);
 extern void btlBossDebugPrintf(const char *, ...);
-extern u32 fldGetSceneScriptTaskUserData(void);
+extern u32 btlGetTargetSelectionWork(void);
 extern char *D_004367B8;
 
 
@@ -86,7 +86,7 @@ typedef struct SceneObject {
     s32 state;
 } SceneObject;
 
-extern SceneObject *fldGetSceneObjectTaskUserData(void);
+extern SceneObject *btlGetCommandPanelTaskWork(void);
 
 
 
@@ -585,7 +585,7 @@ extern s32 btlCreateUnitExitFadeTask(s32 owner, s32 option);
 
 extern void btlDebugPrintf(s32 tag, ...);
 
-extern void fldCreateSceneSpriteTask(s32 sourceTask);
+extern void btlCreateTargetSelectionTask(s32 sourceTask);
 
 extern void fldUpdateSceneGroupTask(ActionStateLink *task);
 
@@ -1071,7 +1071,7 @@ void btlEnterCommandSelectionState(ActionStateLink *task) {
 }
 
 extern s32 fldGetSceneObjectState(void);
-extern void fldSetSceneObjectAndGroupStates(void);
+extern void btlRequestCommandPanelClose(void);
 extern s32 btlIsSupportedCommandKind(s32 *);
 extern s32 btlAiCheckStatusRollEligibility(ActionStateLink *);
 
@@ -1095,7 +1095,7 @@ void btlUpdateCommandSelectionState(ActionStateLink *task) {
         if (btlIsSupportedCommandKind(&task->indexWork.phase) != 0) {
             btlDispatchStateHandler(task, 7);
         } else {
-            fldSetSceneObjectAndGroupStates();
+            btlRequestCommandPanelClose();
             if (btlAiCheckStatusRollEligibility(task) != 0) {
                 btlDispatchStateHandler(task, 0xB);
             } else {
@@ -1103,7 +1103,7 @@ void btlUpdateCommandSelectionState(ActionStateLink *task) {
             }
         }
     } else if (work->battleFlags & 0x8000) {
-        fldSetSceneObjectAndGroupStates();
+        btlRequestCommandPanelClose();
         btlDispatchStateHandler(task, 9);
     }
 }
@@ -1148,13 +1148,13 @@ void btlCommandResultEffectSelect(u8 *task) {
         }
         break;
     }
-    fldCreateSceneSpriteTask((s32)task);
+    btlCreateTargetSelectionTask((s32)task);
 }
 
-extern u32 fldGetSceneScriptState(void);
-extern u32 fldGetSceneScriptValue(void);
+extern u32 btlGetTargetSelectionState(void);
+extern u32 btlGetSelectedTargetList(void);
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
-extern void fldMarkActiveSceneScriptState(void);
+extern void btlRequestTargetSelectionClose(void);
 extern s32 btlSetTaskPhase2(void);
 
 /* Validate/copy the selected target list and initialize the actor's chosen command. */
@@ -1168,7 +1168,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
     if (work->battleFlags & 0x20) {
         return;
     }
-    state = fldGetSceneScriptState();
+    state = btlGetTargetSelectionState();
     if ((task->pendingFlags & 4) == 0 && state != 3 && sndHasActiveActor() == 0) {
         if (btlGetActiveUnitId() != 9) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -1179,7 +1179,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
     }
     if (state == 3) {
         /* Script values carry the selected-list pointer as an opaque word. */
-        selected = (BtlIndexList *)fldGetSceneScriptValue();
+        selected = (BtlIndexList *)btlGetSelectedTargetList();
         switch (task->indexWork.phase) {
         case 1:
         case 2:
@@ -1218,19 +1218,19 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
             sndSetStationedSeVolume(8);
         }
         btlCopyIndexList(task->indexWork.indices, selected);
-        fldSetSceneObjectAndGroupStates();
-        fldMarkActiveSceneScriptState();
+        btlRequestCommandPanelClose();
+        btlRequestTargetSelectionClose();
         if (btlAiCheckStatusRollEligibility(task) != 0) {
             btlDispatchStateHandler(task, 0xB);
         } else {
             btlDispatchStateHandler(task, 0xC);
         }
     } else if (state == 4) {
-        fldMarkActiveSceneScriptState();
+        btlRequestTargetSelectionClose();
         btlDispatchStateHandler(task, 6);
     } else if (work->battleFlags & 0x8000) {
-        fldSetSceneObjectAndGroupStates();
-        fldMarkActiveSceneScriptState();
+        btlRequestCommandPanelClose();
+        btlRequestTargetSelectionClose();
         btlDispatchStateHandler(task, 9);
     }
 }
