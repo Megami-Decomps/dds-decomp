@@ -481,14 +481,14 @@ void mnuDrawListFrames(s32 menu) {
     }
 }
 
-s32 mnuCampMenuDrawStatus(KwlnTask *param) {
-    s32 context = kwlnTaskGetUserValue(param);
+s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 menu = *(s32 *)(context + 0x90C);
     s32 slots;
     MenuList *list;
     s32 label;
 
-    mnuDrawCampScreenDefault(param);
+    mnuDrawCampScreenDefault(callback);
     mnuDrawListFrames(context);
     mnuCreateStaffImageSprite(0x10);
     slots = menu + 4;
@@ -504,7 +504,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
         }
     }
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContextSprites *)context)->sprite78));
-    return menuRunPanel((void *)context, 1, (void *)param);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 /* Run the camp-status panel's phase-two control and return its result. */
