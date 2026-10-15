@@ -5285,12 +5285,12 @@ void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     light->position[2] = D_0037F770[0][6];
 }
 
-s32 btlGetActionDefaultOrOverride(s32 index) {
+s32 btlGetActionDefaultOrOverride(s32 skillIndex) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (work->battleFlags & 0x30000000) {
         return work->unk724;
     }
-    return ((BtlActionTableEntry *)datActionAnimationRecords)[index].defaultValue;
+    return ((BtlActionTableEntry *)datActionAnimationRecords)[skillIndex].defaultValue;
 }
 
 u32 btlCameraVectorHasNaN(void) {

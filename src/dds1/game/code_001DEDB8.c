@@ -6153,12 +6153,12 @@ void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     light->position[2] = D_00324770[0][6];
 }
 
-s32 btlGetActionDefaultOrOverride(s32 index) {
+s32 btlGetActionDefaultOrOverride(s32 skillIndex) {
     s32 context = (s32)(u32)btlGetRuntime();
     if (*(u32 *)(context + 0x1F4) & 0x30000000) {
         return *(s32 *)(context + 0x6A0);
     }
-    return *(s32 *)(datActionAnimationRecords + index * 32 + 0x18);
+    return *(s32 *)(datActionAnimationRecords + skillIndex * 32 + 0x18);
 }
 
 u32 btlCameraVectorHasNaN(void) {

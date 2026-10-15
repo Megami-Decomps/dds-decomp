@@ -1454,7 +1454,7 @@ extern const char D_003A3670[];
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light);
 extern void *btlCreateEffectTaskWithSourceParams(u8 *, u32);
-s32 btlGetActionDefaultOrOverride(s32 index);
+s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 extern u8 *btlCreateLinkageFormationTask(u8 *, u32, u32, u32, u32);
 extern void *btlCreateCommandSoundWithArguments(s32, s32, u32, u32, u32);
 s32 sndLookupResourceType(s32 actor, s32 resourceIndex);
