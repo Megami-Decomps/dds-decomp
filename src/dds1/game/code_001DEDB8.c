@@ -358,7 +358,7 @@ extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlInitializeCameraCursorForActorMode(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001E2FF8(BtlLinkedCommand *);
+extern void btlFrameCommandTargetGroups(BtlLinkedCommand *);
 
 extern void btlSetupActionCameraPair(BtlLinkedCommand *);
 
@@ -958,7 +958,7 @@ extern const BtlActionCameraPreset D_003A4000[8];
  * cameras start at its muzzle, lowered by a quarter of its height, at a
  * distance that fits the larger of its reach (at least 135, wider view) and
  * half its height. */
-void func_001E0398(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4];
     f32 position[4];
     BtlActionCameraPreset presets[8];
@@ -1873,7 +1873,7 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
 
-void func_001E2FF8(BtlLinkedCommand *action) {
+void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
     BtlState *state;
     BtlUnit *unit;
     BtlUnit *actor;
@@ -3502,7 +3502,7 @@ INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E6668);
 /* Camera clearance for a unit: mode 1 is the scaled camera radius plus any
  * negative horizontal offset; mode 0 is the larger of the scaled reach plus the
  * offset and half the scaled height plus any negative vertical offset. */
-f32 func_001E6AC8(BtlUnit *unit, u8 mode, f32 horizontalOffset, f32 verticalOffset) {
+f32 btlGetUnitCameraClearance(BtlUnit *unit, u8 mode, f32 horizontalOffset, f32 verticalOffset) {
     f32 result = 0.0f;
     f32 verticalBias = 0.0f;
     f32 clearance = 0.0f;
@@ -3590,7 +3590,7 @@ extern BtlCameraSetupPolicy D_0035AA30[2];
 
 extern BtlCameraSetupPolicy D_0035AE50[1];
 
-extern f32 func_001E6AC8(BtlUnit *, u8, f32, f32);
+extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
 extern BtlUnit *btlFindActiveActorById(s32 id);
 
@@ -3682,7 +3682,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         }
         btlUnitGetPosVU(unit, p->focusPolicy.mode);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        span = func_001E6AC8(unit, p->focusPolicy.mode,
+        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode,
                             p->focusPolicy.distance, p->focusPolicy.height);
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(unit, quaternion);
@@ -3741,7 +3741,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             btlUnitGetPosVU(unit, p->focusPolicy.mode);
             VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         }
-        span = func_001E6AC8(unit, p->focusPolicy.mode,
+        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode,
                             p->focusPolicy.distance, p->focusPolicy.height);
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(unit, quaternion);
@@ -3790,7 +3790,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         /* Three fresh owner chains around callback-sensitive queries. */
         btlUnitGetPosVU(action->targetList->entries[0], p->focusPolicy.mode);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        span = func_001E6AC8(action->targetList->entries[0],
+        span = btlGetUnitCameraClearance(action->targetList->entries[0],
                             p->focusPolicy.mode, 0.0f, 0.0f);
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(action->targetList->entries[0], quaternion);
@@ -3924,7 +3924,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         btlUnitGetPosVU(unit, p->focusPolicy.mode);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        span = func_001E6AC8(unit, p->focusPolicy.mode,
+        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode,
                             p->focusPolicy.distance, p->focusPolicy.height);
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(unit, quaternion);
@@ -4067,7 +4067,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         btlUnitGetPosVU(unit, p->focusPolicy.mode);
         VU0_STORE_VF_UNCLOBBERED(vf10, focus);
         VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        span = func_001E6AC8(unit, p->focusPolicy.mode, 1.0f, 1.0f);
+        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode, 1.0f, 1.0f);
         framingDistance = span / tanf(halfFov);
         if (p->eyePolicy.kind == 0x32) {
             func_001EDB20(0x400, unit, 0, 0, 0, 0, 0, 0);
@@ -4603,7 +4603,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         unit = action->targetList->entries[0];
         btlUnitGetPosVU(unit, p->eyePolicy.mode);
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        actorExtent = func_001E6AC8(unit, p->eyePolicy.mode, 1.0f, 1.0f);
+        actorExtent = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 1.0f, 1.0f);
         framingDistance = actorExtent / tanf(halfFov);
         VU0_LOAD_VF(vf10, out->position);
         VU0_STORE_VF_UNCLOBBERED(vf10, destination);
@@ -7387,7 +7387,7 @@ void sndSetStationedSeHighVolume(u32 arg0) {
 
 
 
-extern s32 D_0035F998[];
+extern s32 btlSceneStreamCycleEntries[];
 
 extern u32 D_003BB6A8;
 
@@ -7410,7 +7410,7 @@ void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
         mnuResetTitleStreamLocked();
     }
     if (selection == 5) {
-        mnuQueueTitleSoundStreamEntry(D_0035F998[D_003BB6A8 % 5]);
+        mnuQueueTitleSoundStreamEntry(btlSceneStreamCycleEntries[D_003BB6A8 % 5]);
         D_003BB6A8++;
     } else {
         mnuQueueTitleSoundStreamEntry(selection - 1);

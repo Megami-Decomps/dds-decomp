@@ -5024,7 +5024,7 @@ extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
-extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomTargetCameraStates(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlSetLinkedCameraForCommandMode(BtlLinkedCommand *, BtlUnit *);
 extern char D_003A6338[];
@@ -5174,7 +5174,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
         if (count == 1 && selector == 1 && mode == 0) {
             if (variant == 0) {
             genericSingleTargetCamera:
-                func_001E0398(command, &command->frontCamera, &command->backCamera);
+                btlBuildRandomTargetCameraStates(command, &command->frontCamera, &command->backCamera);
                 command->motionParameter = 30.0f;
                 command->flags |= 0x41;
                 return 1;

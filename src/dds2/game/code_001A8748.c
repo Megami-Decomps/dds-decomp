@@ -971,7 +971,7 @@ void btlInitializeBattleRuntime(void) {
     btlResetFieldColorAndSweepFlags();
     btlRefreshSoundEntries();
     btlRetainButtonTexture();
-    func_001CFC40();
+    btlAllocatePanelTaskWork();
     btlInitializeRuntimeNoOp();
     btlClearModelFlagRange();
     mdlFlagClear(0x82B);

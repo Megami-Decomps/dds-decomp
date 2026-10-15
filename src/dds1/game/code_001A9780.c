@@ -131,7 +131,7 @@ extern s32 effMiscRandMod(s32, s32);
 
 extern s8 effSharedRandomState[];
 
-extern void func_001C45F0(void);
+extern void btlAllocatePanelTaskWork(void);
 
 extern void itfMesDestroyWindowIfPresent(s32);
 
@@ -1647,7 +1647,7 @@ typedef struct BtlGuidePanelWork {
 
 typedef char BtlGuidePanelWorkSizeCheck[sizeof(BtlGuidePanelWork) == 0x2C ? 1 : -1];
 
-extern s32 func_001B09A8(KwlnTask *);
+extern s32 btlUpdateGuidePanelTask(KwlnTask *);
 
 extern void btlReleaseMessageWindowTask(KwlnTask *);
 
@@ -1682,7 +1682,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     data->y = 0x60;
     data->windowIndex = windowIndex;
     data->entryIndex = entryIndex;
-    task = (s32)kwlnTaskCreate(D_003BB3C4, 0x2B0E, 1, 1, func_001B09A8,
+    task = (s32)kwlnTaskCreate(D_003BB3C4, 0x2B0E, 1, 1, btlUpdateGuidePanelTask,
                           btlReleaseMessageWindowTask, (u32)data);
     kwlnTaskAddChild(context->scriptOwner, (KwlnTask *)task);
     btlSetTrackedTaskHandle(9, task);
@@ -2698,7 +2698,7 @@ u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delt
 
 /* Fade the guide panel in and out, show its single message window once fully faded in,
  * and draw the dimmed full-screen backdrop with its framed band; -1 after fade-out. */
-s32 func_001B09A8(KwlnTask *task) {
+s32 btlUpdateGuidePanelTask(KwlnTask *task) {
     BtlGuidePanelWork *work = (BtlGuidePanelWork *)kwlnTaskGetUserValue(task);
     s32 width;
     u32 alpha;
@@ -3676,7 +3676,7 @@ extern const BattlePanelColors D_003A2B50;
  * return -1 after closing the channel once the phase leaves 0-6. */
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B50);
 
-s32 func_001B5970(KwlnTask *task) {
+s32 btlUpdateCommandNoticeTask(KwlnTask *task) {
     BattlePanelColors colors = D_003A2B50;
     BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
 
@@ -6163,7 +6163,7 @@ extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
 
 extern s32 btlUpdateBattleSceneCommands(KwlnTask *task);
 
-extern s32 func_001B5970(KwlnTask *task);
+extern s32 btlUpdateCommandNoticeTask(KwlnTask *task);
 
 extern s32 btlUpdateLinkageNoticeTask(KwlnTask *task);
 
@@ -6220,7 +6220,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 btlTrackedTaskHandles->status.bytes.blocked = 1;
                 scene->battleFlags &= ~0x100000;
                 handle = (u32)kwlnTaskCreate(D_003BB3D4, 0x2B0E, 1, 1,
-                                       func_001B5970, btlReleaseWindowTask,
+                                       btlUpdateCommandNoticeTask, btlReleaseWindowTask,
                                        (u32)sdfAllocAndClearQuadwords(0x18));
                 kwlnTaskAddChild(scene->scriptOwner, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xD, handle);
@@ -7829,7 +7829,7 @@ void fldCreateSceneCleanupTask(void) {
     fldBeginSceneTransition();
 }
 
-void func_001C45F0(void) {
+void btlAllocatePanelTaskWork(void) {
     /* A one-pass loop: its notes stop sched2 from hoisting the slot-order
      * address above this call, where retail keeps it after the call. */
     do {

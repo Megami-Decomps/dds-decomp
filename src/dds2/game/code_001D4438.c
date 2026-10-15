@@ -387,7 +387,7 @@ extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 extern s32 btlUpdateBattleModelDebugEditor(void);
 extern void mdlSetAmountOnAllContextResources(f32, s32);
 
-extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
+extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
 extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
 

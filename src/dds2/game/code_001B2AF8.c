@@ -2590,7 +2590,7 @@ typedef struct BtlGuidePanelWork {
 
 typedef char BtlGuidePanelWorkSizeCheck[sizeof(BtlGuidePanelWork) == 0x2C ? 1 : -1];
 
-extern s32 func_001BB5C0(KwlnTask *task);
+extern s32 btlUpdateGuidePanelTask(KwlnTask *task);
 
 extern void btlReleaseMessageWindowTask(KwlnTask *task);
 
@@ -2625,7 +2625,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     data->y = 0x60;
     data->windowIndex = windowIndex;
     data->entryIndex = entryIndex;
-    task = kwlnTaskCreate(D_004367E0, 0x2B0E, 1, 1, func_001BB5C0,
+    task = kwlnTaskCreate(D_004367E0, 0x2B0E, 1, 1, btlUpdateGuidePanelTask,
                           btlReleaseMessageWindowTask, (u32)data);
     kwlnTaskAddChild(context->scriptOwner, task);
     btlSetTrackedTaskHandle(9, (s32)task);
@@ -3596,7 +3596,7 @@ u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delt
 
 /* Fade the guide panel in and out, show its single message window once fully faded in,
  * and draw the dimmed full-screen backdrop with its framed band; -1 after fade-out. */
-s32 func_001BB5C0(KwlnTask *task) {
+s32 btlUpdateGuidePanelTask(KwlnTask *task) {
     BtlGuidePanelWork *work = (BtlGuidePanelWork *)kwlnTaskGetUserValue(task);
     s32 width;
     u32 alpha;
@@ -4591,7 +4591,7 @@ extern const BattlePanelColors D_00416680;
  * return -1 after closing the channel once the phase leaves 0-6. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
-s32 func_001C0630(KwlnTask *task) {
+s32 btlUpdateCommandNoticeTask(KwlnTask *task) {
     BattlePanelColors colors = D_00416680;
     BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
 
@@ -7694,7 +7694,7 @@ extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 sprintf(char *, const char *, ...);
 extern void *memset(void *, s32, u32);
-extern s32 func_001C0630(KwlnTask *);
+extern s32 btlUpdateCommandNoticeTask(KwlnTask *);
 extern s32 btlUpdateMajinTutorialTask(KwlnTask *);
 extern s32 btlUpdateLinkageNoticeTask(KwlnTask *);
 extern void btlReleaseDialogTaskAndMarkBattleState(KwlnTask *);
@@ -7731,7 +7731,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 mdlFlagClear(0x801);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
                 scene->battleFlags &= ~0x100000;
-                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
+                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
                 kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
@@ -7759,7 +7759,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 mdlFlagSet(0x81D);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x300;
                 scene->battleFlags &= ~0x100000;
-                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
+                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
                 kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
@@ -7773,7 +7773,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 mdlFlagSet(0x805);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
                 scene->battleFlags &= ~0x100000;
-                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
+                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
                 kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
@@ -7790,7 +7790,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 mdlFlagSet(0x806);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
                 scene->battleFlags &= ~0x100000;
-                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
+                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, btlUpdateCommandNoticeTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
                 kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
@@ -9255,7 +9255,7 @@ void fldCreateSceneCleanupTask(void) {
     fldBeginSceneTransition();
 }
 
-void func_001CFC40(void) {
+void btlAllocatePanelTaskWork(void) {
     BattleTrackedTaskWork *taskWork;
 
     /* A one-pass loop: its notes stop sched2 from hoisting the slot-order
