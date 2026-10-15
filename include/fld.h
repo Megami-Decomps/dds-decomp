@@ -61,7 +61,7 @@ typedef struct FldActorEntry {
     u8 flags64;
     s8 unk65;
     s8 unk66;
-    s8 value67;
+    s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
     s8 unk68;
     s8 unk69;
     s8 unk6A;
@@ -86,7 +86,7 @@ typedef struct FldActorEntry {
     u8 flags64;
     s8 unk65;
     s8 unk66;
-    s8 value67;
+    s8 floorFlagBit; /* 0x67: optional flag bit used by enabled placement rows */
     s8 unk68;
     s8 unk69;
     s8 unk6A;

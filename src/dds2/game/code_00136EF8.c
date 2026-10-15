@@ -2840,7 +2840,7 @@ void func_00141898(void) {
             if (room == 0) {
                 room = fldAreaState.floor + 1;
             }
-            fldSetFloorFlag(stage, room, entry->value67);
+            fldSetFloorFlag(stage, room, entry->floorFlagBit);
         }
         flags = entry->flags64;
         if (flags & 2) {
@@ -2984,7 +2984,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
             if (room == 0) {
                 room = fldAreaState.floor + 1;
             }
-            fldSetFloorFlag(stage, room, entry->value67);
+            fldSetFloorFlag(stage, room, entry->floorFlagBit);
         }
         flags = entry->flags64;
         if (flags & 2) {
@@ -3131,7 +3131,7 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     case 6:
         flags = actor->flags64;
         if (flags & 1) {
-            return actor->value67;
+            return actor->floorFlagBit;
         }
         return -1;
     }
