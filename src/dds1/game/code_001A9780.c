@@ -1928,7 +1928,7 @@ extern s32 btlDrawTimedDialogTask(KwlnTask *);
 
 extern void btlReleaseDialogTaskData(KwlnTask *);
 
-s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
+s32 btlReplaceDialogTasksAndQueueMessage(s32 window, s32 entryIndex) {
     s32 context = (s32)(u32)btlGetRuntime();
     s32 task = btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
@@ -1946,8 +1946,8 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(10), 0);
     }
-    data->id = arg0;
-    data->unk08 = arg1;
+    data->id = window;
+    data->unk08 = entryIndex;
     data->value = 0x2D;
     task = (s32)kwlnTaskCreate(D_003BB3A8, 0x2B0E, 1, 1, btlDrawTimedDialogTask, btlReleaseDialogTaskData, (u32)data);
     kwlnTaskAddChild((KwlnTask *)*(u32 *)(context + 0x29C), (KwlnTask *)task);
