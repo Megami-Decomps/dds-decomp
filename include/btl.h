@@ -221,7 +221,7 @@ typedef struct BtlUnit {
     u32 combatantKind; /* 0xE0: display/command kind before special-mode canonicalization */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
-    s32 unkEC;
+    s32 motionId; /* 0xEC: current primary model motion; -1 before selection. */
     s32 effectState; /* 0xF0: same actor effect state as DDS1 */
     f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
     s16 motionStartFrame; /* 0xF8: retained motion-range start frame. */
@@ -274,6 +274,7 @@ typedef char BtlUnitStatusSizeCheck[(sizeof(BtlUnitStatus) == 8) ? 1 : -1];
 typedef char BtlUnitStatusAlignmentCheck[(__alignof__(BtlUnitStatus) == 4) ? 1 : -1];
 typedef char BtlUnitAlignmentCheck[(__alignof__(BtlUnit) == 8) ? 1 : -1];
 typedef char BtlUnitStatusOffsetCheck[((u32)&((BtlUnit *)0)->status == 0x110) ? 1 : -1];
+typedef char BtlUnitMotionIdOffsetCheck[((u32)&((BtlUnit *)0)->motionId == 0xEC) ? 1 : -1];
 typedef char BtlUnitStatusFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.flags == 0x110) ? 1 : -1];
 typedef char BtlUnitStateFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.stateFlags == 0x114) ? 1 : -1];
 typedef char BtlUnitGunResourceFlagsOffsetCheck[((u32)&((BtlUnit *)0)->gunResourceFlags == 0x118) ? 1 : -1];

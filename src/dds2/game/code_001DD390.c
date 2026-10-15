@@ -2488,7 +2488,7 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
     btlSetUnitRotation(unit, (s128 *)unit->rotation);
     unit->updateFlags = 0;
     unit->motionStartFrame = 0;
-    unit->unkEC = -1;
+    unit->motionId = -1;
     unit->motionEndFrame = 0;
     btlRefreshUnitMotionSelection(unit);
     if (unit->effectIndex != 0xB) {
@@ -2509,7 +2509,7 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
         unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         unit->ext->flags &= ~0xA0;
         mdlAddEntryPlain(model, 0, 0xB);
-        unit->unkEC = 0xB;
+        unit->motionId = 0xB;
         sdfMotionSampleAtFrame(model->first, (f32)model->first->frameCount);
         unit->status.flags = unit->status.flags & 0x7FFFFFFF & 0xBFFFFFFF;
     } else if (btlTestActorStatusPredicate(unit)) {
@@ -2518,7 +2518,7 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
         unit->ext->flags &= ~0xA0;
         status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, index);
         mdlAddEntryPlain(model, 0, 1);
-        unit->unkEC = 1;
+        unit->motionId = 1;
         sdfMotionSampleAtFrame(model->first, (f32)status->model);
         btlResetUnitModelProgress(unit);
         unit->status.flags = (unit->status.flags | 0x2000) & 0x7FFFFFFF & 0xBFFFFFFF;
@@ -2699,7 +2699,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
             rate = scale * table->nodes[index].scale;
         }
     }
-    if (unit->unkEC == -1) {
+    if (unit->motionId == -1) {
         start = 0;
         end = 0;
     } else {
@@ -2753,7 +2753,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         mode = chooseMode(unit, index, mode);
     }
     unit->motionRate = rate;
-    unit->unkEC = index;
+    unit->motionId = index;
     unit->effectState = mode;
     rate = rate * (30.0f / work->timingRate);
     rate *= work->modelFrameScale;
@@ -2881,9 +2881,9 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         mode = chooseMode(unit, index, mode);
     }
     unit->effectParameter = mode;
-    if (unit->unkEC != 11 &&
+    if (unit->motionId != 11 &&
         (btlIsActorModeAcceptedByBattleHook(unit) != 0 || index == 11) &&
-        unit->unkEC != index) {
+        unit->motionId != index) {
         btlApplyUnitMotionSelection(unit, index, mode, rate);
     }
 }
@@ -2894,10 +2894,10 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
         return 0;
     }
     work = (BtlState *)btlGetRuntime();
-    if (work->statusMotionOverride != 0 && work->statusMotionOverride(0) == unit->unkEC) {
+    if (work->statusMotionOverride != 0 && work->statusMotionOverride(0) == unit->motionId) {
         return 1;
     }
-    switch (unit->unkEC) {
+    switch (unit->motionId) {
     case 0:
     case 2:
     case 9:
@@ -3576,7 +3576,7 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
         return;
     }
     work = (BtlState *)btlGetRuntime();
-    if (unit->unkEC != unit->effectIndex) {
+    if (unit->motionId != unit->effectIndex) {
         btlRefreshUnitMotionSelection(unit);
         unit->motionStartFrame = 0;
         unit->motionEndFrame = 0;
@@ -3684,7 +3684,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
         BtlEffectResource *table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
-        args->offset = table->nodes[unit->unkEC].reachOffset * unit->scale;
+        args->offset = table->nodes[unit->motionId].reachOffset * unit->scale;
     }
     reach = args->offset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
@@ -4035,13 +4035,13 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
                 btlApplyScaledUnitEffectParameter(unit, 0xB,
                     btlGetSlotRateKind((u8 *)unit, 0xB), 1.0f);
             } else if (args->transitionMode == 2) {
-                unit->unkEC = -1;
+                unit->motionId = -1;
                 btlApplyScaledUnitEffectParameter(unit, 0xE,
                     btlGetSlotRateKind((u8 *)unit, 0xE), 1.0f);
             } else if (args->transitionMode != 3 &&
                        ((unit->status.flags & 0x200) || (entryFlags & 0x200)) &&
                        args->resourceId != 0x1F) {
-                unit->unkEC = -1;
+                unit->motionId = -1;
                 if (unit->status.flags & 0x1000) {
                     btlApplyScaledUnitEffectParameter(unit, 0x10,
                         btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
@@ -4936,7 +4936,7 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
         if (unit->status.flags & 2) {
             args->previousModelValue = mdlGetNodeMotionIndex(unit->ext->owner, 0);
         } else {
-            args->previousModelValue = unit->unkEC;
+            args->previousModelValue = unit->motionId;
         }
         unit->motionStartFrame = 0;
         unit->motionEndFrame = 1;
@@ -5075,7 +5075,7 @@ void btlUpdateActiveActorModelState(void) {
             if (runtime->chooseMotion != NULL) {
                 parameter = runtime->chooseMotion(unit, 1, 0);
             }
-            if (unit->unkEC != parameter && parameter != -1) {
+            if (unit->motionId != parameter && parameter != -1) {
                 btlApplyScaledUnitEffectParameter(unit, parameter, 0, 1.0f);
             } else {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
@@ -5089,7 +5089,7 @@ void btlUpdateActiveActorModelState(void) {
         if (unit->updateFlags & 2) {
             if (unit->updateFlags & 4) {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
-                index = unit->unkEC;
+                index = unit->motionId;
                 if (index == mdlGetNodeMotionIndex(unit->ext->owner, 0)) {
                     if (frame >= status->motions[index].alphaStartFrame) {
                         evtSetUnitAlphaTransition(unit->ext,
@@ -5133,7 +5133,7 @@ void btlUpdateActorModelColorAndLinks(void) {
         if (unit->status.flags & 2) {
             MdlCtx *model = unit->ext->owner;
             if (!(unit->status.stateFlags & 0x20000)) {
-                unit->unkEC = mdlGetNodeMotionIndex(model, 0);
+                unit->motionId = mdlGetNodeMotionIndex(model, 0);
             }
             if (!(unit->status.flags & 0x40000)) {
                 if (unit->status.flags & 0x100000) {
