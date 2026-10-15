@@ -8995,6 +8995,7 @@ fileSlotScanIndex = 0x00437D10;   // dds1 0x003BC828
 fileSaveHighlightPhase = 0x00437D8C;   // dds1 0x003BC88C
 sdfDebugLogAppendMode = 0x00438908;   // dds1 0x003BD2B8
 sdfDebugLogPairFormat = 0x00438910;   // dds1 0x003BD2C0
+sdfHandlerNodeListHead = 0x004389BC;   // dds1 0x003BD2CC
 sdfTickCallback = 0x004389C4;   // dds1 0x003BD2D4
 sdfDoubleBufferAllocation = 0x00438A00;   // dds1 0x003BD310
 sdfDiscPathPrefix = 0x00438AE8;   // dds1 0x003BD3F8

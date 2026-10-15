@@ -7296,6 +7296,7 @@ sdfCounterSelectionCount = 0x003BD26C;
 sdfActiveCounterRuntime = 0x003BD274;
 sdfDebugLogAppendMode = 0x003BD2B8;
 sdfDebugLogPairFormat = 0x003BD2C0;
+sdfHandlerNodeListHead = 0x003BD2CC;
 sdfTickCallback = 0x003BD2D4;
 sdfThreadWakeTick = 0x003BD2D8;
 sdfCurrentBufferIndex = 0x003BD2EA;

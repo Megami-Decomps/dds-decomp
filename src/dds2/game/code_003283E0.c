@@ -3,7 +3,7 @@
 #include "sdf_chip.h"
 #include "sdf_handler_node.h"
 
-extern SdfHandlerNode *D_004389BC;
+extern SdfHandlerNode *sdfHandlerNodeListHead;
 
 extern s32 func_00366780(s32);
 extern s32 RemoveIntcHandler(s32, s32);
@@ -62,13 +62,13 @@ void sdfPanicHaltPrintf(const char *format, ...) {
 INCLUDE_ASM(const s32, "game/code_003283E0", sdfAddHandler);
 
 void sdfRemoveHandler(SdfHandlerNode *target) {
-    SdfHandlerNode **link = &D_004389BC;
+    SdfHandlerNode **link = &sdfHandlerNodeListHead;
     SdfHandlerNode *node = *link;
 
     while (node != NULL) {
         if (node == target) {
             *link = node->next;
-            switch (node->kind) {
+            switch (node->handlerKind) {
             case 0:
                 func_00366780(node->channel);
                 RemoveIntcHandler(node->channel, node->handlerId);
@@ -91,7 +91,7 @@ void sdfRemoveHandler(SdfHandlerNode *target) {
 
 void sdfDrainPendingHandlers(void) {
     SdfHandlerNode *current;
-    while ((current = D_004389BC) != 0) {
+    while ((current = sdfHandlerNodeListHead) != 0) {
         sdfRemoveHandler(current);
     }
 }

@@ -43,7 +43,7 @@ void func_00324F20(MnuCallbackList **list, u32 handle) {
 void func_00324F38(MnuCallbackList **list, u32 id) {
     mnuFindResourceNodeById(*list, id);
 }
-SdfHandlerNode *D_004389BC __attribute__((section(".sdata"))) = NULL;
+SdfHandlerNode *sdfHandlerNodeListHead __attribute__((section(".sdata"))) = NULL;
 
 /* Workspace bytes passed to the console DMA setup allocation. */
 s32 D_004389C0 __attribute__((section(".sdata"))) = 0x100000;
