@@ -4525,8 +4525,8 @@ void effPcpGroupSetInitEntry(EffPCPGroupSet *work, s32 index) {
     ratio = work->head.endJitter;
     entry->positionStep = (work->head.endPosition * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio)) * scale - entry->position) / (f32)work->head.framesPerEntry;
     entry->angle = 3.14159265f * 2.0f / (f32)work->head.count * (f32)index;
-    ratio = work->head.unk80;
-    entry->unk14 = work->head.unk78 * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio));
+    ratio = work->head.angularStepJitter;
+    entry->angularStep = work->head.angularStep * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio));
 }
 
 void effPcpUpdateRadialFragmentGroupSet(EffPCPGroupSet *work) {
@@ -4554,8 +4554,8 @@ void effPcpUpdateRadialFragmentGroupSet(EffPCPGroupSet *work) {
     fadeIn = work->head.fadeIn;
     fadeOut = work->head.fadeOut;
     angularDamping = work->head.angularDamping;
-    startRadialBlend = work->head.unk84;
-    endRadialBlend = work->head.unk88;
+    startRadialBlend = work->head.startRadialBlend;
+    endRadialBlend = work->head.endRadialBlend;
     entry = work->entries;
     color = work->color;
     length = work->unk16C;
@@ -4589,8 +4589,8 @@ void effPcpUpdateRadialFragmentGroupSet(EffPCPGroupSet *work) {
                 point[1] = origin[1];
                 point[2] = origin[2] + sine * radius;
                 entry->position += entry->positionStep;
-                entry->angle += entry->unk14;
-                entry->unk14 *= angularDamping;
+                entry->angle += entry->angularStep;
+                entry->angularStep *= angularDamping;
                 fragment = effThunderGetFragmentParameters(entry->handle);
                 blend = startRadialBlend + (endRadialBlend - startRadialBlend) * ((f32)frame / (f32)duration);
                 direction[0] = cosine * blend;
