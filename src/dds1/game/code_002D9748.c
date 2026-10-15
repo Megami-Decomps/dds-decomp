@@ -781,7 +781,7 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
 
 /* Build the 3x2 scalar-block transform from the sub-parameter's five floats
  * and rotation, or the identity layout when the block is absent. */
-void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubParam *param) {
+void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubParam *subParam) {
     f32 v0;
     f32 v1;
     f32 v2;
@@ -794,7 +794,7 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
     f32 m2;
     f32 m3;
 
-    if (param == NULL) {
+    if (subParam == NULL) {
         /* Identity {1,0}/{0,1}/{0,0}; the constant 24-byte block is written
          * through the packed view, the form that emits three 64-bit stores. */
         transform->words[0] = 0x000000003F800000;
@@ -803,13 +803,13 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
         return;
     }
 
-    angle = -param->transformInputs.rotationInput;
+    angle = -subParam->transformInputs.rotationInput;
     s = sdfSinPoly(angle);
     c = sdfEvaluateCosineViaSinePhaseShift(angle);
-    v0 = param->transformInputs.centerOffsetX;
-    v1 = param->transformInputs.centerOffsetY;
-    v2 = param->transformInputs.basisScaleX;
-    v3 = param->transformInputs.basisScaleY;
+    v0 = subParam->transformInputs.centerOffsetX;
+    v1 = subParam->transformInputs.centerOffsetY;
+    v2 = subParam->transformInputs.basisScaleX;
+    v3 = subParam->transformInputs.basisScaleY;
 
     m0 = c * v2;
     m1 = s * v3;
