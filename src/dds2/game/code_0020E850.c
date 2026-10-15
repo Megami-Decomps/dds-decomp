@@ -20,6 +20,7 @@
 #include "btl_model_record.h"
 #include "pcp_vu0.h"
 #include "dat_command.h"
+#include "btl_boss_debug_api.h"
 #include "eff.h"
 
 extern u32 btlRandomState;
@@ -267,8 +268,6 @@ s32 btlAiCheckStatusRollEligibility(ActionStateLink *task) {
 extern s32 btlSetActorEffectParameter(u8 *object, s32 index);
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 btlProjectForwardPositionToPackedScreen(s32 screen[4]);
-extern void btlBossDebugPrintf(const char *format, ...);
-
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
 
