@@ -4,7 +4,7 @@
 #include "snd_command_packet.h"
 #include "snd_midi_state_views.h"
 
-extern s32 sndFindPackedTrackLoadStatus(s32 id);
+extern s32 sndFindPackedTrackLoadStatus(s32 packedTrack);
 
 extern s32 sndRequestedMidiBankId;
 

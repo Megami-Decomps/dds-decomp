@@ -12,7 +12,7 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
 extern SndTrackSlot sndTrackBalanceEntries[];
 
-extern s32 sndFindPackedTrackLoadStatus(s32 id);
+extern s32 sndFindPackedTrackLoadStatus(s32 packedTrack);
 
 extern s32 sndRequestedMidiBankId;
 
