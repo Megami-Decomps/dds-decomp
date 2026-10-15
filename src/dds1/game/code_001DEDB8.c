@@ -5434,8 +5434,8 @@ void btlAdvanceWorldCounterAndSpawnActionObject(void) {
 
 s32 btlAreWorkBuffersReady(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    if (work->primaryBuffer != 0) {
-        if (work->secondaryBuffer != 0) {
+    if (work->frontFloorResource != 0) {
+        if (work->sideFloorResource != 0) {
             return 1;
         }
     }
@@ -5444,13 +5444,13 @@ s32 btlAreWorkBuffersReady(void) {
 
 void btlReleaseWorkBuffers(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    if (work->secondaryBuffer != 0) {
-        sdfReleaseChipOrRetainedResource(work->secondaryBuffer);
-        work->secondaryBuffer = 0;
+    if (work->sideFloorResource != 0) {
+        sdfReleaseChipOrRetainedResource(work->sideFloorResource);
+        work->sideFloorResource = 0;
     }
-    if (work->primaryBuffer != 0) {
-        sdfReleaseChipOrRetainedResource(work->primaryBuffer);
-        work->primaryBuffer = 0;
+    if (work->frontFloorResource != 0) {
+        sdfReleaseChipOrRetainedResource(work->frontFloorResource);
+        work->frontFloorResource = 0;
     }
 }
 
@@ -5931,7 +5931,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     } else {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->frontHandle) != 0) {
-                work->primaryBuffer =
+                work->frontFloorResource =
                     (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->frontHandle)));
                 filePollEntryCleanup((struct FileRequest *)(u32)args->frontHandle);
                 args->frontHandle = 0;
@@ -5942,7 +5942,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         }
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->sideHandle) != 0) {
-                work->secondaryBuffer =
+                work->sideFloorResource =
                     (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->sideHandle)));
                 filePollEntryCleanup((struct FileRequest *)(u32)args->sideHandle);
                 args->sideHandle = 0;
