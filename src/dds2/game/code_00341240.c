@@ -132,7 +132,7 @@ extern u8 D_00479A40[];
 extern void *_gp;
 extern s32 D_004391E8;
 extern s32 D_00438B94;
-extern s32 func_00367BF0(s32);
+extern s32 sceSifGetSreg(s32);
 extern s32 CreateThread(SdfKernelThreadParam *);
 extern s32 _StartThread(s32, s32);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
@@ -141,7 +141,7 @@ extern void sdfSoundStartRpcServer(void);
 s32 sndStartIopCommandAndRpcWorkers(void) {
     s32 threadId;
 
-    while (func_00367BF0(31) == 0) {
+    while (sceSifGetSreg(31) == 0) {
     }
 
     D_00477980.entry = sdfServiceUnblockedWorkerThread;

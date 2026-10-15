@@ -7179,6 +7179,7 @@ fldMarkStageExplorationBitmapRegion = 0x00123DE8; // type:func
 fldUpdateCameraHeadingTransition = 0x00133F08; // type:func
 sdfDevDiscRequestWorkerThread = 0x0033F3E0; // type:func
 btlSelectSerialEncounter = 0x001B3DD8; // type:func
+sceSifGetSreg = 0x00367BF0; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -11973,7 +11974,6 @@ func_00367B28 = 0x00367B28; // type:func
 func_00367B60 = 0x00367B60; // type:func
 func_00367BC0 = 0x00367BC0; // type:func
 func_00367BE0 = 0x00367BE0; // type:func
-func_00367BF0 = 0x00367BF0; // type:func
 sceSifSetSreg = 0x00367C08; // type:func
 func_00367C28 = 0x00367C28; // type:func
 func_00367C38 = 0x00367C38; // type:func
