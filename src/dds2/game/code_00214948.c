@@ -3649,7 +3649,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
 }
 
 extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -3780,7 +3780,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             }
             if (cameraMode == 0) {
                 btlBossDebugPrintf("VURI:TP-P ++++\n");
-                func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+                btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
 flag_defeat_candidates:
                 btlFlagAllUnitDefeatCandidatesTask();
                 return 1;
@@ -3849,7 +3849,7 @@ flag_defeat_candidates:
                     command->motionParameter = 30.0f;
                     command->flags |= 0x41;
                 } else {
-                    func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+                    btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
                 }
                 return 1;
             } else {
@@ -3868,7 +3868,7 @@ flag_defeat_candidates:
         if (count >= 2 && side == 1 && targetSide == 0) {
             if (cameraMode == 0) {
                 btlBossDebugPrintf("VURI:ITP-Def ++++\n");
-                func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+                btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
                 return 1;
             }
             btlFlagAllUnitDefeatCandidatesTask();
@@ -4100,7 +4100,7 @@ flag_defeat_candidates:
             if (count >= 2 && side == 1 && targetSide == 0) {
                 if (cameraMode == 0) {
                     btlBossDebugPrintf("VURI_AB:ITP-Def ++++\n");
-                    func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+                    btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
                     return 1;
                 }
                 btlFlagAllUnitDefeatCandidatesTask();

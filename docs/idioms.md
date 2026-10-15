@@ -12718,3 +12718,34 @@ functions cannot supply the missing state. Ordinary and observed assembly and
 all RTL dumps agree. No register pinning, fake earlier operation, new primitive,
 clobber, flags or header change is needed. Preserve Halcyon Drift's shared W-set
 source-location mechanism and Evening Notes' paired SDK-carrier reconstruction.
+
+
+### Action-filtered group camera pairs: keep projection paths complete
+
+`btlBuildFilteredGroupCameraPair` (DDS1 `001E0718`, DDS2 `001EDFB8`) copies
+eight 48-byte preset rows. These rows have a float parameter at `+0x28` and
+an integer category mask at `+0x2C`; they differ from the other camera preset
+layout whose last field is a float. Preserve the complete local snapshot
+before callbacks, selection before target traversal, and the unsigned actor
+count used for mean muzzle height and the field-of-view branch.
+
+One count workspace serves three completed phases: preset candidates,
+target-list entries and eligible actors. Independent eligibility guards
+preserve the separate native tests for active, excluded and selected flags.
+A combined condition lets the compiler replace them with a masked equality
+and introduces a saved constant that changes the remaining register homes.
+
+Keep the full projection in each count arm: compute its half-FOV argument,
+call `tanf`, then divide the bound. In the qualified compiler trace, the bound
+has five references over 29 live instructions (priority 3448), ahead of FOV
+at 3225 and accumulated Y at 2872. A source join before the call gives the
+bound four references over 31 instructions and different float registers.
+After allocation, `jump2` merges the common tangent-call and quotient tail,
+leaving the single native call. Destructive reuse of the bound for the final
+quotient fixes its incoming home but keeps the result in the wrong register.
+
+The wider FOV factor is the literal `0x1.555554p+0f` (bits `0x3FAAAAAA`),
+multiplied before `0.5f`; its native `.lit4` address is not a mutable global.
+Capture the selected parameter after both direction callbacks and before
+publishing the action flags and motion parameter. DDS2 additionally preserves
+its single-target fallback, disabled by animation flag `0x80`.

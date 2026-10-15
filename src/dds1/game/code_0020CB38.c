@@ -692,7 +692,7 @@ extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlApplyCombinedActorFlags(u8 *);
 extern void func_001E0398(u8 *, u8 *, u8 *);
-extern void func_001E0718(u8 *, u8 *, u8 *);
+extern void btlBuildFilteredGroupCameraPair(u8 *, u8 *, u8 *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern char D_003A6338[];
 extern char D_003A6358[];
@@ -789,7 +789,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
             return 0;
         }
         if (choice == 0) {
-            func_001E0718((u8 *)command, (u8 *)&command->frontCamera, (u8 *)&command->backCamera);
+            btlBuildFilteredGroupCameraPair((u8 *)command, (u8 *)&command->frontCamera, (u8 *)&command->backCamera);
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
