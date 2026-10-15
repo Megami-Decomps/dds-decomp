@@ -364,36 +364,36 @@ s32 scrCmdSetPackedRgbFromFloatArgs(void)
 
 s32 scrCommandSetDrawVectorTarget(void)
 {
-    s32 p0;
+    s32 blendFrames;
     f32 x;
     f32 y;
     f32 z;
     f32 w;
 
-    p0 = scrReadIntParameter(0);
+    blendFrames = scrReadIntParameter(0);
     x = (f32)(u32)scrReadIntParameter(1);
     y = (f32)(u32)scrReadIntParameter(3);
     z = (f32)(u32)scrReadIntParameter(2);
     w = (f32)(u32)scrReadIntParameter(4);
-    evtSetDrawVectorTarget(p0, x, y, z, w);
+    evtSetDrawVectorTarget(blendFrames, x, y, z, w);
     return 1;
 }
 
 s32 scrCommandToggleSavedDrawVectors(void)
 {
-    s32 p0;
-    p0 = scrReadIntParameter(0);
-    evtToggleSavedDrawVectors(p0, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
+    s32 frames;
+    frames = scrReadIntParameter(0);
+    evtToggleSavedDrawVectors(frames, bfWaitReadArgFloat(1), bfWaitReadArgFloat(2));
     return 1;
 }
 
 s32 scrCommandSetDrawOffsetTransition(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetOverlayTransition(p0, p1, scrReadIntParameter(2));
+    s32 duration;
+    s32 alpha;
+    duration = scrReadIntParameter(0);
+    alpha = scrReadIntParameter(1);
+    kwlnDrawSetOverlayTransition(duration, alpha, scrReadIntParameter(2));
     return 1;
 }
 
