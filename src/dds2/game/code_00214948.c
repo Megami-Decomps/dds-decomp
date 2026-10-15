@@ -4671,8 +4671,8 @@ s32 btlMapActorMotionId(u32 id) {
 }
 
 /* Calamity alone returns false; retain the native byte-sized predicate result. */
-u8 btlIsNonCalamityAction(s32 arg0) {
-    return arg0 != 0x196;
+u8 btlIsNonCalamityAction(s32 actionId) {
+    return actionId != 0x196;
 }
 
 s32 btlIsSpecialMotion(BtlUnit *actor) {
