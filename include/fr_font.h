@@ -39,7 +39,7 @@ typedef struct FntList {
     s32 cellHeight;      /* 0x0C */
     s32 pixelByteCount;  /* 0x10 */
     s32 capacity;        /* 0x14 */
-    s32 count;           /* 0x18 */
+    u32 count;           /* 0x18 */
     FntNode *head;       /* 0x1C */
 } FntList;
 

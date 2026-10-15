@@ -11,6 +11,7 @@
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 #include "sdf_linked_packet.h"
+#include "sdf_dev_start_load_api.h"
 
 struct EffWorldNode;
 extern struct EffWorldNode *dds3ActiveWorld;
@@ -61,7 +62,6 @@ extern void sceFsReset(void);
 extern void func_0034CB60(s32);
 extern void func_0034D038(u32);
 extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern void sdfDevStartLoad(const char *, const char *);
 extern void sdfLoadIopModulePair(const char *, s32);
 extern void sdfInitializeRuntimeServices(u32, u32, u32);
 extern void sdfPadRequestMode(s32, u8);

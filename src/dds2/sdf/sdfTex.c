@@ -10,6 +10,7 @@
 #include "sdf_tex_create.h"
 #include "sdf_tex_packet.h"
 #include "sdf_pending.h"
+#include "sdf_tex_copy_image_data_api.h"
 #include "ee_mmi.h"
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
@@ -45,7 +46,7 @@ void sdfTexAllocatePaletteData(SdfTex *texture) {
 }
 
 /* Copy retained palette bytes without changing the texture resource metadata. */
-void sdfTexCopyImageData(SdfTex *texture, void *source) {
+void sdfTexCopyImageData(SdfTex *texture, const void *source) {
     memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 

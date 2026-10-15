@@ -17,6 +17,7 @@
 #include "fr_font.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "sdf_primitive.h"
 #include "pcp_vu0.h"
@@ -111,7 +112,6 @@ extern void fldStartSequenceRecord(void);
 
 
 
-extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 
 extern char D_00435D20[];
 
@@ -121,7 +121,7 @@ extern char D_00411380[];
 
 extern s32 D_00389780[];
 
-extern void fldStartLmapTask(s32 arg0);
+extern void fldStartLmapTask(s32 mode);
 
 
 extern u32 scrNamedProcessCount;

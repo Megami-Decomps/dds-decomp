@@ -16,7 +16,7 @@ typedef struct DatStateHeader {
     s8 mapIndex;
     u8 pad06[2];
     s32 playTicks;
-    s16 unk0C;
+    s16 status; /* 0x0C: copied to the memory-card preview status field. */
     s16 transition;
     s8 partyIds[8];
     s8 partyLevels[8];
@@ -31,6 +31,8 @@ typedef struct DatStateHeader {
 } DatStateHeader;
 typedef char DatStateHeaderSavedMoneyOffsetCheck[
     ((u32)&((DatStateHeader *)0)->savedMoney == 0x20) ? 1 : -1];
+typedef char DatStateHeaderStatusOffsetCheck[
+    ((u32)&((DatStateHeader *)0)->status == 0x0C) ? 1 : -1];
 
 /* Shared script storage begins at +0x40; +0x388 is integer register 210. */
 typedef struct DatScriptGlobals {
@@ -333,8 +335,8 @@ typedef char DatEnemyOverrideChanceOffsetCheck[((u32)&((DatEnemyRecord *)0)->ove
 /* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
 typedef struct DatBattleSceneRecord {
     s8 unk00;            /* 0x00: tested for nonzero (scene color/mode selection) */
-    u8 unk01;            /* 0x01: id handed to the scene-entry loader, unk02 times */
-    u8 unk02;            /* 0x02 */
+    u8 itemDropId;       /* 0x01: item passed to btlAddItemDrop when nonzero */
+    u8 itemDropCount;    /* 0x02: number of scene-entry item drops */
     u8 pad03;
     u16 serialScene;     /* 0x04: forced follow-up encounter, zero selects the weighted policy. */
     u16 unitModes[11];   /* 0x06: enemy unit modes; zero marks an empty slot */
@@ -348,6 +350,19 @@ typedef struct DatBattleSceneRecord {
 } DatBattleSceneRecord;
 
 typedef char DatBattleSceneRecordSizeCheck[sizeof(DatBattleSceneRecord) == 0x28 ? 1 : -1];
+
+/* Local typed view for the scene-specific audio selection at record +0x24.
+ * The remaining bytes stay opaque; isolated use preserves unrelated unit codegen. */
+typedef struct DatBattleSceneAudioSelectionView {
+    u8 opaque00[0x24];
+    u16 audioStreamSelectionOverride;
+    u8 opaque26[2];
+} DatBattleSceneAudioSelectionView;
+
+typedef char DatBattleSceneAudioSelectionViewSizeCheck[
+    sizeof(DatBattleSceneAudioSelectionView) == 0x28 ? 1 : -1];
+typedef char DatBattleSceneStreamSelectionOffsetCheck[
+    ((u32)&((DatBattleSceneAudioSelectionView *)0)->audioStreamSelectionOverride == 0x24) ? 1 : -1];
 
 #ifdef VERSION_DDS1
 /* One 0x20C-byte encounter adjustment record. Sound selection shares the

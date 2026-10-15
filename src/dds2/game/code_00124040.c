@@ -29,6 +29,7 @@
 #include "dds3_world_value.h"
 #include "dds3_world_selection.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "dat_state.h"
@@ -85,7 +86,6 @@ extern void fldApplySkyLightSet(u32, s32);
 
 extern void fldResetSparkRewardProfileIndex(void);
 
-extern KwlnTask *kwlnTaskFindByPriority(u32);
 
 extern s32 fldCanUseTargetGuideInCurrentScene(s32, s32);
 

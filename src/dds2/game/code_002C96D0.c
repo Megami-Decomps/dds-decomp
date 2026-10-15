@@ -2714,8 +2714,8 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         mcdOriginalTitleFileMode = 0;
         D_00437D0C = 1;
         mdlFlagSet(0xBA0);
-        datGameState->header.unk0C =
-            (u16)datGameState->header.unk0C + 1;
+        datGameState->header.status =
+            (u16)datGameState->header.status + 1;
         datGameState->header.transition = 1;
         fileMenuStateHandler = (s32 (*)())fileLoadIconFileAndBeginSlotReset;
     } else {

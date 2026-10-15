@@ -12,6 +12,7 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 #include "evt_unit.h"
+#include "evt_script_model_api.h"
 
 extern void effMiscNormalizeVU(void);
 
@@ -286,20 +287,18 @@ void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 
     }
 }
 
-extern SdfModel *evtCreateModelFromObject(void *object);
-extern Motion *evtAttachScriptToObject(void *object, SdfModel *model);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 
 void dds3CreateObjectModelAndMotion(void *object) {
     ObjBase *base;
-    void *slot;
+    EffWorldNode *scriptModelObject;
     Motion *motion;
     SdfModel *model;
 
     base = dds3GetObjectOwnedHandle(object);
-    slot = dds3GetSlot(object, 3);
-    model = evtCreateModelFromObject(slot);
-    motion = evtAttachScriptToObject(slot, model);
+    scriptModelObject = dds3GetSlot(object, 3);
+    model = evtCreateModelFromObject(scriptModelObject);
+    motion = evtAttachScriptToObject(scriptModelObject, model);
     dds3LoadOrBuildObjectMatrix((EffWorldNode *)object);
     VU0_STORE_MATRIX(model->matrix);
     sdfModelUpdateRootTransforms(model, 0);

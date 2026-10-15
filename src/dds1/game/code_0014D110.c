@@ -1159,10 +1159,10 @@ u32 fldCmdSetCurrentTaskScene(void) {
 }
 
 u32 fldCmdDispatchSceneAction(void) {
-    s32 value;
+    s32 sceneAction;
 
-    value = scrReadIntParameter(0);
-    fldDispatchSceneAction(value);
+    sceneAction = scrReadIntParameter(0);
+    fldDispatchSceneAction(sceneAction);
     return 1;
 }
 

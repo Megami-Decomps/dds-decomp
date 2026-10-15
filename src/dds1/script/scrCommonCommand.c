@@ -11,8 +11,12 @@
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
-s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
-s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
+s32 kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, f32 angleStep,
+                          f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
+                          s32 blendControl);
+s32 kwlnDrawSetD30Clamped(s32 count, f32 phaseStep, f32 spacing,
+                          f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
+                          f32 angleStep, s32 blendControl);
 
 s32 evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget);
 s32 kwlnSetDrawColorTarget(s32 blendFrames, void *color);
@@ -21,8 +25,8 @@ s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
 s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
 void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
-s32 kwlnDrawSetDc8Second(s32 arg0);
-s32 kwlnDrawSetE08Fifth(s32 arg0);
+s32 kwlnDrawSetDc8Second(s32 blendControl);
+s32 kwlnDrawSetE08Fifth(s32 blendControl);
 void sdfSetViewFieldOfView(f32 fieldOfView);
 s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 s32 fptodp(void);
@@ -680,28 +684,28 @@ s32 scrCmdBeginRectangleBlurDeactivation(void)
 s32 scrCmdSetIndexedDrawMode(void)
 {
     s32 p0;
-    s32 mode;
+    s32 blendControl;
     p0 = scrReadIntParameter(0);
     switch (p0)
     {
     case 1:
-        mode = 0x48;
+        blendControl = 0x48;
         break;
     case 0:
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     case 2:
-        mode = 0x42;
+        blendControl = 0x42;
         break;
     case 3:
-        mode = 6;
+        blendControl = 6;
         break;
     default:
         evtPrintDeveloperConsoleMessage(D_0039F550);
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     }
-    kwlnDrawSetDc8Second(mode);
+    kwlnDrawSetDc8Second(blendControl);
     return 1;
 }
 
@@ -741,28 +745,28 @@ s32 scrCmdBeginColorRectangleDeactivation(void)
 s32 scrCmdSetTexturedSquareDrawMode(void)
 {
     s32 p0;
-    s32 mode;
+    s32 blendControl;
     p0 = scrReadIntParameter(0);
     switch (p0)
     {
     case 1:
-        mode = 0x48;
+        blendControl = 0x48;
         break;
     case 0:
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     case 2:
-        mode = 0x42;
+        blendControl = 0x42;
         break;
     case 3:
-        mode = 6;
+        blendControl = 6;
         break;
     default:
         evtPrintDeveloperConsoleMessage(D_0039F570);
-        mode = 0x44;
+        blendControl = 0x44;
         break;
     }
-    kwlnDrawSetE08Fifth(mode);
+    kwlnDrawSetE08Fifth(blendControl);
     return 1;
 }
 
