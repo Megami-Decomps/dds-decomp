@@ -615,7 +615,7 @@ extern f32 effGetActorScaleForParameterWork(struct BtlUnit *unit);
  * the optional unit-scale callback) and count it as active. */
 INCLUDE_RODATA(const s32, "game/code_0015F4D0", D_003A0D70);
 
-BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value) {
+BattleEffect *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, void *owner, s32 value) {
     EffBattleEntryList *bank;
     EffBattleEntryList *parameters;
     BattleEffect *effect;
