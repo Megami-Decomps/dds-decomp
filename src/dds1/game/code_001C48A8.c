@@ -510,9 +510,9 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         btlResetSceneSlotFades();
         *(u8 *)(arg0 + 0x258) = 0;
         btlSelectSerialEncounter();
-        if (datBattleSceneRecords[work->sceneId].unk01 != 0) {
-            for (i = 0; i < datBattleSceneRecords[work->sceneId].unk02; i++) {
-                btlAddItemDrop(datBattleSceneRecords[work->sceneId].unk01);
+        if (datBattleSceneRecords[work->sceneId].itemDropId != 0) {
+            for (i = 0; i < datBattleSceneRecords[work->sceneId].itemDropCount; i++) {
+                btlAddItemDrop(datBattleSceneRecords[work->sceneId].itemDropId);
             }
         }
         return 8;

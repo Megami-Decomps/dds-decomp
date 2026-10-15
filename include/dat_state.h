@@ -335,8 +335,8 @@ typedef char DatEnemyOverrideChanceOffsetCheck[((u32)&((DatEnemyRecord *)0)->ove
 /* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
 typedef struct DatBattleSceneRecord {
     s8 unk00;            /* 0x00: tested for nonzero (scene color/mode selection) */
-    u8 unk01;            /* 0x01: id handed to the scene-entry loader, unk02 times */
-    u8 unk02;            /* 0x02 */
+    u8 itemDropId;       /* 0x01: item passed to btlAddItemDrop when nonzero */
+    u8 itemDropCount;    /* 0x02: number of scene-entry item drops */
     u8 pad03;
     u16 serialScene;     /* 0x04: forced follow-up encounter, zero selects the weighted policy. */
     u16 unitModes[11];   /* 0x06: enemy unit modes; zero marks an empty slot */
