@@ -1143,14 +1143,17 @@ u32 evtIsAdminModeEightComplete(void) {
     return 1;
 }
 
-void func_0010A5B8(void) {
+/* Admin mode 9 entry intentionally performs no work. */
+void evtAdminModeNineEntryNoOp(void) {
 }
 
-u32 func_0010A5C0(void) {
+/* Admin mode 9 destroy: no work, zero transition result. */
+u32 evtAdminModeNineDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010A5C8(void) {
+/* Admin mode 9 cleanup: one immediately reports completion. */
+u32 evtIsAdminModeNineComplete(void) {
     return 1;
 }
 
@@ -1273,14 +1276,17 @@ u32 evtKeepEventViewerModePending(void) {
     return 0;
 }
 
-void func_0010A840(void) {
+/* Admin mode 18 entry intentionally performs no work. */
+void evtAdminModeEighteenEntryNoOp(void) {
 }
 
-u32 func_0010A848(void) {
+/* Admin mode 18 destroy: no work, zero transition result. */
+u32 evtAdminModeEighteenDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010A850(void) {
+/* Admin mode 18 cleanup: zero leaves the mode pending. */
+u32 evtKeepAdminModeEighteenPending(void) {
     return 0;
 }
 
@@ -1357,25 +1363,31 @@ u8 evtWaitStaffTaskDoneAlternate(void) {
     return taskResult == 0;
 }
 
-void func_0010AA10(void) {
+/* Admin mode 23 entry intentionally performs no work. */
+void evtAdminModeTwentyThreeEntryNoOp(void) {
 }
 
-u32 func_0010AA18(void) {
+/* Admin mode 23 destroy: no work, zero transition result. */
+u32 evtAdminModeTwentyThreeDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010AA20(void) {
+/* Admin mode 23 cleanup: zero leaves the mode pending. */
+u32 evtKeepAdminModeTwentyThreePending(void) {
     return 0;
 }
 
-void func_0010AA28(void) {
+/* Admin mode 24 entry intentionally performs no work. */
+void evtAdminModeTwentyFourEntryNoOp(void) {
 }
 
-u32 func_0010AA30(void) {
+/* Admin mode 24 destroy: no work, zero transition result. */
+u32 evtAdminModeTwentyFourDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010AA38(void) {
+/* Admin mode 24 cleanup: zero leaves the mode pending. */
+u32 evtKeepAdminModeTwentyFourPending(void) {
     return 0;
 }
 

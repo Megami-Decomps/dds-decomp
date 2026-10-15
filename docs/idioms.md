@@ -12824,3 +12824,30 @@ has no evidenced scene identity, so its names retain the native table index.
 | `0010A838` | `0010A978` | `evtKeepEventViewerModePending` | Mode 17 cleanup |
 | `0010AA58` | `0010AB98` | `evtDestroyFontTestModeNoOp` | Mode 25 destroy |
 | `0010AAC0` | `0010AC00` | `evtKeepMovieViewerModePending` | Mode 26 cleanup |
+
+### Remaining index-identified administrative callback triples
+
+The native registry also identifies complete callback triples for modes 9,
+18, 23, and 24 in both games. Their scene identities are not established;
+names therefore retain the table index rather than inventing a feature.
+
+All four entries are empty, and all four destroy callbacks return zero.
+Mode 9 cleanup returns one and immediately reports completion; modes 18,
+23, and 24 cleanup return zero and remain pending. These are distinct
+registered functions, not aliases to coalesce. Existing return types,
+empty parameter lists, constants, and definition order stay unchanged.
+
+| DDS1 | DDS2 | Name | Native registry role |
+|---|---|---|---|
+| `0010A5B8` | `0010A6F8` | `evtAdminModeNineEntryNoOp` | Mode 9 entry |
+| `0010A5C0` | `0010A700` | `evtAdminModeNineDestroyNoOp` | Mode 9 destroy |
+| `0010A5C8` | `0010A708` | `evtIsAdminModeNineComplete` | Mode 9 cleanup |
+| `0010A840` | `0010A980` | `evtAdminModeEighteenEntryNoOp` | Mode 18 entry |
+| `0010A848` | `0010A988` | `evtAdminModeEighteenDestroyNoOp` | Mode 18 destroy |
+| `0010A850` | `0010A990` | `evtKeepAdminModeEighteenPending` | Mode 18 cleanup |
+| `0010AA10` | `0010AB50` | `evtAdminModeTwentyThreeEntryNoOp` | Mode 23 entry |
+| `0010AA18` | `0010AB58` | `evtAdminModeTwentyThreeDestroyNoOp` | Mode 23 destroy |
+| `0010AA20` | `0010AB60` | `evtKeepAdminModeTwentyThreePending` | Mode 23 cleanup |
+| `0010AA28` | `0010AB68` | `evtAdminModeTwentyFourEntryNoOp` | Mode 24 entry |
+| `0010AA30` | `0010AB70` | `evtAdminModeTwentyFourDestroyNoOp` | Mode 24 destroy |
+| `0010AA38` | `0010AB78` | `evtKeepAdminModeTwentyFourPending` | Mode 24 cleanup |
