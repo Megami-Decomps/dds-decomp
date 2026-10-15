@@ -10833,3 +10833,15 @@ func_00323130 = 0x00323130; // type:func
 // END romwright
 effMathStepBezierSlotDirect = 0x0018E0C8; // type:func
 effReturnCallbackValue = 0x0018CE30; // type:func
+mnuTitleStreamDecoderState = 0x003D9168;
+mnuTitleSoundBufferDecoderState = 0x003DA1A8;
+mnuTitleStreamDecodedSamples = 0x003D8140;
+mnuTitleSoundBufferDecodedSamples = 0x003D9180;
+mnuTitleAudioSilenceBuffer = 0x003DA1C0;
+mnuTitleAudioMixBuffer = 0x00378E50;
+mnuTitleStreamFileRequest = 0x003BD8D4;
+mnuTitleStreamEntries = 0x00377350;
+evtSolarNoiseLayerPlacements = 0x00367EE0;
+evtSolarOverlayShapes = 0x00368310;
+mnuTitleCameraPosition = 0x003DC1C0;
+mnuTitleCameraRotation = 0x003DC1D0;

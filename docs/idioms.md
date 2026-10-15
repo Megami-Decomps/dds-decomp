@@ -13082,3 +13082,40 @@ return/argument disagreements, while making this identifier-only change.
 Likewise preserve the countdown hook's extra caller argument and the
 release hook's old-style declaration; this naming pass does not claim a
 prototype reconstruction.
+
+## Title-audio and solar-overlay data roles
+
+The paired title-audio owners (`code_00269C10` / `code_002A1820`)
+separate decoder state, decoded output, silent fallback, and mixed output.
+The following names follow those matched consumers; they do not introduce
+new storage, change any array bound, or reinterpret the raw SDK state.
+
+| DDS1 address | DDS2 address | Name | Evidence |
+| --- | --- | --- | --- |
+| `003D9168` | `00454D58` | `mnuTitleStreamDecoderState` | Primary stream's `decoder`; word 0 is compressed input and word 1 supplies decoded samples. |
+| `003DA1A8` | `00455D98` | `mnuTitleSoundBufferDecoderState` | Corresponding secondary sound-buffer decoder state. |
+| `003D8140` | `00453D30` | `mnuTitleStreamDecodedSamples` | Assigned to primary decoder word 1 at initialization. |
+| `003D9180` | `00454D70` | `mnuTitleSoundBufferDecodedSamples` | Assigned to secondary decoder word 1 at initialization. |
+| `003DA1C0` | `00455DB0` | `mnuTitleAudioSilenceBuffer` | Zeroed for 0x1000 bytes; inactive streams select this sample source. |
+| `00378E50` | `003E2760` | `mnuTitleAudioMixBuffer` | Receives copied or mixed active samples before IOP transfer. |
+| `003BD8D4` | `00438FEC` | `mnuTitleStreamFileRequest` | Queued request retained for ready, resource-handle, data, size and cleanup queries. |
+| `00377350` | `003E0B60` | `mnuTitleStreamEntries` | Filename, format and repeat-frame descriptors selected by `mnuQueueTitleSoundStreamEntry`. |
+| `00367EE0` | `003C8C90` | `evtSolarNoiseLayerPlacements` | Per-layer X offset, Y offset and scale percentage consumed by both solar-noise draw forms. |
+| `00368310` | `003C90C0` | `evtSolarOverlayShapes` | Shape/point positions, colors and counts consumed by the solar triangle-fan passes. |
+| `003DC1C0` | - | `mnuTitleCameraPosition` | Initialized by `mnuInitializeTitleCameraScene`, passed to camera creation and the inner-position setter. |
+| `003DC1D0` | - | `mnuTitleCameraRotation` | Initialized beside the position, passed to camera creation and the inner-rotation setter. |
+
+Keep the silent fallback separate from the mixed-output buffer: their
+roles are not interchangeable. Likewise the secondary sound-buffer entry
+table is a different object from `mnuTitleStreamEntries`. Decoder words
+other than the evidenced input/output/workspace accesses remain raw; no
+extra codec or mode meaning is inferred from their constants. The camera
+rotation keeps its existing four-float representation without asserting
+Euler versus quaternion semantics.
+
+These objects have no source-owned `INCLUDE_SDATA`/`INCLUDE_RODATA` and no
+active `INCLUDE_ASM` consumer at this naming pass. All existing declarations,
+including mixed byte/word views and unsized extern arrays, remain intact.
+Only canonical symbol mappings and references change; data bytes, storage
+extents, pointer arithmetic and the four claimed solar phase-update bodies
+remain untouched.

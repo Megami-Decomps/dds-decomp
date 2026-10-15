@@ -5,9 +5,9 @@
 #include "mnu.h"
 #include "mnu_sprite_resource.h"
 
-extern u8 D_003DC1C0[];
+extern u8 mnuTitleCameraPosition[];
 
-extern u8 D_003DC1D0[];
+extern u8 mnuTitleCameraRotation[];
 
 extern char D_003AFD80[]; /* "titleProc" */
 
@@ -37,7 +37,7 @@ void mnuReleaseMovieMenuState(void) {
 extern void mnuUpdateMovieMenuCameraOrbit(void *, void *);
 
 s32 mnuUpdateMovieMenuEffects(void) {
-    mnuUpdateMovieMenuCameraOrbit(D_003DC1C0, D_003DC1D0);
+    mnuUpdateMovieMenuCameraOrbit(mnuTitleCameraPosition, mnuTitleCameraRotation);
     return mnuApplyInnerEffectVectorsAndTickObject();
 }
 
