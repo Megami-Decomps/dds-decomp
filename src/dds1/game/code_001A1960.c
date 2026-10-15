@@ -1811,7 +1811,7 @@ s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
     return 0;
 }
 
-s32 sndGetResourceForIndex(s32 index) {
+s32 btlGetCommandAttributeName(s32 index) {
     s8 resource = datCommandSelectors[index].stat;
     if (resource < 0) {
         return 0;

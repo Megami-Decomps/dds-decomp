@@ -2833,7 +2833,7 @@
 0x001A53D8	btlHasMappedSpecialAbilityForSlot	inferred	Tests ability IDs selected by an actor attribute slot and wider slot categories. [names_reviewed14.tsv]
 0x001A5578	btlHasSpecialAbilityWhenArgumentUnset	inferred	Tests the actor special ability only when the secondary argument is zero. [names_reviewed16.tsv]
 0x001A55A8	btlHasEnabledSpecialAbilityForSlot	inferred	Tests the unit ability associated with selected slots; established semantic DDS2 name. [names_reviewed16.tsv]
-0x001A5640	sndGetResourceForIndex	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001A5640	btlGetCommandAttributeName	inferred	48B existing-C twin of DDS2 001AED48; native signed datCommandSelectors[index].stat returns NULL or btlCommandAttributeNames[stat], not a sound resource; original s32 ABI/cast/body unchanged; replaces incorrect sound-task attribution; identifier-only
 0x001A6570	btlSumOtherTargetHitAmounts	inferred	U0
 0x001A66B8	btlTestActorStatusPredicate	inferred	Checks an optional battle predicate, then tests actor status bits. [names_reviewed8.tsv]
 0x001A6708	btlComputeStatusPenaltyFifth	inferred	Returns a negative fifth of the actor metric for specified status categories. [names_reviewed10.tsv]
