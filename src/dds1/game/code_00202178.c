@@ -4446,7 +4446,37 @@ s32 func_0020A860(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_0020AB08);
+extern s32 *D_003BAA2C;
+
+/* Unit 0x11B command hook: when the command's mapped skill is a present enemy
+ * unit, return that command's entry from affinity row 0x175. */
+s32 func_0020AB08(DatPartyRecord *record, s32 command) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    s32 skill;
+
+    if (!(record->flags & 0x20)) {
+        return -1;
+    }
+    if (record->unitId != 0x11B) {
+        return -1;
+    }
+    skill = btlMapCommandToSkill(command);
+    if (skill >= 0) {
+        for (unit = battle->units; unit != NULL; unit = unit->next) {
+            u32 flags = unit->status.flags;
+
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    if (unit->partyRecord.unitId == skill) {
+                        return D_003BAA2C[0x175 * 19 + command];
+                    }
+                }
+            }
+        }
+    }
+    return -1;
+}
 
 s32 btlFadeOtherEnemyUnitsWhenSpecialModeActive(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
