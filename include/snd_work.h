@@ -22,7 +22,8 @@ typedef struct SndIopBuffer {
     u32 address;
 } SndIopBuffer;
 
-/* Prefix and arrays of the MIDI sound state; trailing words remain opaque. */
+/* Prefix and arrays of the MIDI sound state. The IOP image header identifies
+ * the EE-side work image and the byte count copied from its start. */
 typedef struct SndWork {
     s32 header;
     s32 bufferCount;
@@ -31,8 +32,8 @@ typedef struct SndWork {
     SndChannel channels[SND_WORK_CHANNEL_COUNT];
     SndIopBuffer buffers[SND_WORK_IOP_BUFFER_COUNT];
     SndTrackSlot slots[SND_WORK_TRACK_SLOT_COUNT];
-    u32 opaque1F8;
-    u32 opaque1FC;
+    void *eeWorkAddress;
+    u32 eeWorkByteCount;
     u32 opaque200;
     u32 opaque204;
 } SndWork;
@@ -51,7 +52,9 @@ typedef char SndWorkArrayOffsetsAssert[
     ((u32)&((SndWork *)0)->channels == 0x10 &&
      (u32)&((SndWork *)0)->buffers == 0x110 &&
      (u32)&((SndWork *)0)->slots == 0x190 &&
-     (u32)&((SndWork *)0)->opaque1F8 == 0x1F8) ? 1 : -1];
+     (u32)&((SndWork *)0)->eeWorkAddress == 0x1F8 &&
+     (u32)&((SndWork *)0)->eeWorkByteCount == 0x1FC &&
+     sizeof(void *) == 4 && sizeof(SndWork) == 0x208) ? 1 : -1];
 typedef char SifDmaTransferLayoutAssert[
     (sizeof(SifDmaTransfer) == 0x10 &&
      (u32)&((SifDmaTransfer *)0)->destination == 4 &&
