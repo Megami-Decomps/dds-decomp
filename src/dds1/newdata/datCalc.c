@@ -405,11 +405,11 @@ extern DatEnemyRecord *datEnemyRecords;
 extern s32 D_003BAAB8;
 extern DatPartyRecord *D_003BAA04;
 
-typedef struct Entry4 {
-    u16 unk0; /* 0x0 */
-    u8 unk2; /* 0x2 */
+typedef struct PtyItemQuantityUpdate {
+    u16 itemId;         /* 0x0 */
+    u8 quantityDelta;   /* 0x2 */
     u8 pad3; /* 0x3 */
-} Entry4;
+} PtyItemQuantityUpdate;
 
 
 
@@ -428,7 +428,7 @@ typedef struct EvtScriptContext {
 typedef char EvtScriptContextSizeCheck[sizeof(EvtScriptContext) == 0x18 ? 1 : -1];
 
 extern PtyRosterValueRecord D_0032AEA8[];
-extern Entry4 D_0032AEE8[];
+extern PtyItemQuantityUpdate D_0032AEE8[];
 
 extern ScrData *evtWorkScriptTask;
 
@@ -1187,16 +1187,16 @@ void evtUpdateFlaggedEntries(void) {
 
 /* Apply the two configured count/flag updates; a zero index disables its record. */
 void dds3ForEachEntry(void) {
-    Entry4 *updates = D_0032AEE8;
+    PtyItemQuantityUpdate *updates = D_0032AEE8;
     u32 updateIndex = 0;
 
     do {
-        u16 valueIndex = updates->unk0;
-        u8 delta = updates->unk2;
+        u16 itemId = updates->itemId;
+        u8 quantityDelta = updates->quantityDelta;
 
         updates++;
-        if (valueIndex != 0) {
-            ptyAdjustItemQuantity(valueIndex, delta);
+        if (itemId != 0) {
+            ptyAdjustItemQuantity(itemId, quantityDelta);
         }
         updateIndex++;
     } while (updateIndex < 2);
