@@ -236,7 +236,7 @@ extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effSharedRandomState[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
-extern void func_001EF030(void *, void *);
+extern void btlBuildTargetGroupFramingCameraPose(void *, void *);
 struct MdlCtx;
 struct SdfPoolNode;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
