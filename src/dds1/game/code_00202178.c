@@ -3089,7 +3089,7 @@ s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command) {
             eligible = 1;
         }
     } else {
-        eligible = datCommandRecords[command].unk_0A[1] == 1;
+        eligible = datCommandRecords[command].unk_0B == 1;
     }
     if (eligible) {
         s32 hitBudget = datCommandRecords[command].rangeMax;

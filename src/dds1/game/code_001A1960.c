@@ -615,7 +615,7 @@ u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 un
         }
         category = datCommandRecords[value].targetType;
         mode = datCommandRecords[value].options;
-        flags = datCommandRecords[value].unk_0A[0];
+        flags = datCommandRecords[value].targetFlags;
         mask = datCommandRecords[value].restriction;
         if ((datCommandRecords[value].attribute.bits & 0x400000FF) == 0x40000002 && mask == 0) {
             mask = -1;
@@ -2103,7 +2103,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
         if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
             return 1;
         }
-    } else if (datCommandRecords[command].unk_0A[1] == 1) {
+    } else if (datCommandRecords[command].unk_0B == 1) {
         return 1;
     }
     return 0;
