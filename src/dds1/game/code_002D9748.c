@@ -312,8 +312,8 @@ SdfMapPositionRecord *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
     return NULL;
 }
 
-s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id) {
-    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, id);
+s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, mapRecordId);
     if (resource != NULL) {
         sdfSetLookAtBasisFromRecord(model, resource);
         return 1;
@@ -321,8 +321,8 @@ s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id) {
     return 0;
 }
 
-s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id) {
-    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, id);
+s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, mapRecordId);
     if (resource != NULL) {
         sdfVuTransformMapRecordPosition(model, resource);
         return 1;
