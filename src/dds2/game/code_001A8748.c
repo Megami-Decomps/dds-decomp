@@ -2445,11 +2445,11 @@ s32 btlHasSkillInFirstEightSlots(DatSkillOwner *unit, s32 skill) {
     return 0;
 }
 
-s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *status, u32 value) {
-    if (status->flags & 0x20) {
+s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *partyRecord, u32 entryId) {
+    if (partyRecord->flags & 0x20) {
         return 0;
     }
-    return mnuGetPartyEntryCurrentId(status) == value;
+    return mnuGetPartyEntryCurrentId(partyRecord) == entryId;
 }
 
 s32 btlSelectActorAction(s32 state) {
