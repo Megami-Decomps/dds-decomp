@@ -113,8 +113,8 @@ extern char D_00436CA8[];
 extern s32 sprintf(char *, const char *, ...);
 extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
 extern s32 D_00435E64;
-extern u8 D_003BEB28[];
-extern u8 D_003BEB30[];
+extern u8 btlActionPassLabel[];
+extern u8 btlActionRetreatLabel[];
 extern s32 D_003BEB38[];
 extern s32 D_003BEB48[];
 extern s32 D_003BEB4C[];
@@ -474,7 +474,7 @@ s32 btlGetStatusActionEffectId(ActionStateLink *task) {
 
 
 
-extern BtlCommandEffect D_003BEB68[];
+extern BtlCommandEffect btlCommandEffectMappings[];
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
 
 s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
@@ -510,9 +510,9 @@ s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
     effect = -1;
     adjustSide = 0;
     for (i = 0; i < 77; i++) {
-        if (D_003BEB68[i].command == command) {
-            effect = D_003BEB68[i].effect;
-            adjustSide = D_003BEB68[i].adjustSide;
+        if (btlCommandEffectMappings[i].command == command) {
+            effect = btlCommandEffectMappings[i].effect;
+            adjustSide = btlCommandEffectMappings[i].adjustSide;
             break;
         }
     }
@@ -546,7 +546,7 @@ s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
 }
 
 /* Number display: initializes both anchor vectors, then adds the offset before projection. */
-extern f32 D_003BEAC8[12][2];
+extern f32 btlLinkedNumberScreenOffsets[12][2];
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
 s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
@@ -640,8 +640,8 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         VU0_LOAD_VF(vf11, args->anchorOffset);
         VU0_ADD(vf10, vf10, vf11);
         if (btlProjectForwardPositionToPackedScreen(screen) != 0) {
-            screen[0] += (s32)(D_003BEAC8[args->payload.linked.offsetIndex][0] * 40.0f) << 4;
-            screen[1] += ((s32)(D_003BEAC8[args->payload.linked.offsetIndex][1] * 40.0f) << 3) + 320;
+            screen[0] += (s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][0] * 40.0f) << 4;
+            screen[1] += ((s32)(btlLinkedNumberScreenOffsets[args->payload.linked.offsetIndex][1] * 40.0f) << 3) + 320;
             btlDrawCenteredUnsignedNumber(screen[0], screen[1] - rise, value, color, offsets);
         }
     }
@@ -806,7 +806,7 @@ s32 btlPollCategoryLabelTask(void *arguments) {
     if (link->elapsedTicks == 0) {
         switch (link->arg) {
         case 10:
-            btlCreateSkillNamePanel((s32)D_003BEB28);
+            btlCreateSkillNamePanel((s32)btlActionPassLabel);
             break;
         case 5: {
             u32 flags = owner->status.flags;
@@ -820,7 +820,7 @@ s32 btlPollCategoryLabelTask(void *arguments) {
             break;
         }
         case 6:
-            btlCreateSkillNamePanel((s32)D_003BEB30);
+            btlCreateSkillNamePanel((s32)btlActionRetreatLabel);
             break;
         case 9:
             btlCreateSkillNamePanel(D_003BEB4C[0]);

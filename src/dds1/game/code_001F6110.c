@@ -91,7 +91,7 @@ extern u8 sdfPfsDebugMode;
 
 extern s32 sceDopen(char *);
 
-extern s32 D_003BD868;
+extern s32 btlBuiltinResourceNameIndex;
 
 extern s8 D_003A54A8[];
 
@@ -708,7 +708,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
 }
 
 extern f32 atan2f(f32, f32);
-extern u128 D_0035F9E0;
+extern u128 btlHorizontalAimIdentityQuaternion;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
 s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
@@ -719,7 +719,7 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
         sdfConvertEulerAnglesToQuaternionVU(0.0f, atan2f(delta[0], delta[2]), 0.0f);
         return 1;
     }
-    VU0_LOAD_VF($vf10, &D_0035F9E0);
+    VU0_LOAD_VF($vf10, &btlHorizontalAimIdentityQuaternion);
     return 0;
 }
 
@@ -942,7 +942,7 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
     return accumulatedValue;
 }
 
-extern s32 D_0035F9F0[16];
+extern s32 btlIndexedIconUvOrigins[16];
 struct RefObj;
 extern SdfTex *func_0029C048(void *, struct RefObj *);
 #include "sdf_packet_alloc.h"
@@ -971,13 +971,13 @@ void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
     uvIndex = buttonIndex * 2;
     sdfQueueGouraudTexturedQuad(packet, 0x40,
         xFixed + 0x7000, yFixed + 0x7900,
-        D_0035F9F0[uvIndex] * 16, D_0035F9F0[uvIndex + 1] * 16, topLeftColor,
+        btlIndexedIconUvOrigins[uvIndex] * 16, btlIndexedIconUvOrigins[uvIndex + 1] * 16, topLeftColor,
         xFixed + 0x7400, yFixed + 0x7900,
-        D_0035F9F0[uvIndex] * 16 + 0x400, D_0035F9F0[uvIndex + 1] * 16, topRightColor,
+        btlIndexedIconUvOrigins[uvIndex] * 16 + 0x400, btlIndexedIconUvOrigins[uvIndex + 1] * 16, topRightColor,
         xFixed + 0x7000, yFixed + 0x7B00,
-        D_0035F9F0[uvIndex] * 16, D_0035F9F0[uvIndex + 1] * 16 + 0x400, bottomLeftColor,
+        btlIndexedIconUvOrigins[uvIndex] * 16, btlIndexedIconUvOrigins[uvIndex + 1] * 16 + 0x400, bottomLeftColor,
         xFixed + 0x7400, yFixed + 0x7B00,
-        D_0035F9F0[uvIndex] * 16 + 0x400, D_0035F9F0[uvIndex + 1] * 16 + 0x400, bottomRightColor,
+        btlIndexedIconUvOrigins[uvIndex] * 16 + 0x400, btlIndexedIconUvOrigins[uvIndex + 1] * 16 + 0x400, bottomRightColor,
         0xFF0000, 0);
     surface->append(surface, packet);
 }
@@ -2639,7 +2639,7 @@ s32 btlOpenPfsDebugDirectory(const char *directoryName) {
         sprintf(pathBuffer, "pfs0:/%s", directoryName);
         return sceDopen(pathBuffer);
     }
-    D_003BD868 = 0;
+    btlBuiltinResourceNameIndex = 0;
     return 0;
 }
 
@@ -2652,7 +2652,7 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
 }
 
 
-extern char *D_00360380[];
+extern char *btlBuiltinResourceNames[];
 
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
@@ -2660,12 +2660,12 @@ s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) 
     if (sdfPfsDebugMode != 0) {
         return sceDread(directoryHandle, reader);
     }
-    if ((u32)D_003BD868 >= BTL_BUILTIN_NAME_COUNT) {
+    if ((u32)btlBuiltinResourceNameIndex >= BTL_BUILTIN_NAME_COUNT) {
         return 0;
     }
-    strcpy(reader->name, D_00360380[D_003BD868]);
+    strcpy(reader->name, btlBuiltinResourceNames[btlBuiltinResourceNameIndex]);
     reader->stat.mode &= ~BTL_DIRECTORY_FLAG_CLEAR;
-    D_003BD868++;
+    btlBuiltinResourceNameIndex++;
     return strlen(reader->name);
 }
 
@@ -3172,7 +3172,7 @@ void btlDestroyResourceNameRecord(struct BtlResourceNameRecord *record) {
     sdfReleaseChipBlock(record);
 }
 
-extern u8 D_003603A0[];
+extern u8 btlResourceNameCharacters[];
 extern char D_003BB828[8];
 extern char D_003BB830[];
 extern char D_003BB838[];
@@ -3268,7 +3268,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
         if (deleteCharacter && record->nameLength > 0) {
             record->nameLength--;
         } else if ((u32)editCode < EDITOR_CHARACTER_COUNT) {
-            record->resourceName[record->nameLength] = D_003603A0[editCode];
+            record->resourceName[record->nameLength] = btlResourceNameCharacters[editCode];
             if (record->nameLength < (s32)record->maximumNameLength) {
                 record->nameLength++;
             }
@@ -3287,7 +3287,7 @@ void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
             for (column = EDITOR_KEY_COLS - 1; column >= 0; column--) {
                 if (index < EDITOR_CHARACTER_COUNT) {
                     s32 color = record->selection == index ? 4 : 0;
-                    D_003BB828[0] = D_003603A0[index];
+                    D_003BB828[0] = btlResourceNameCharacters[index];
                     btlDebugDrawText(x, y, color, D_003BB828);
                 }
                 x += 12;
