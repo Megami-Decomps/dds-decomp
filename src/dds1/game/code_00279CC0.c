@@ -308,7 +308,77 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBuildLinkageSkills);
+extern void ptyDrawLinkageSkillEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
+extern s32 ptyMatchAffinityPermutation(s32 *, s32);
+extern u16 mnuPickPairedTableValue(s32, s32);
+extern const u8 D_003BC708[];
+extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
+extern void mnuSortItems(MenuList *, s32, s32);
+extern void mnuSetWindowFadeScale(MenuWindowContainer *, u32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+
+/* Build the linkage-skill window: every recorded linkage skill with an
+ * available slot resource, flagged when the frontline party cannot form it,
+ * plus blank rows for unrecorded skills that have a resource. */
+void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
+    /* Both retail versions place the frontline array at stack +0x10, after
+     * the window workspace; only its first window is populated here. */
+    MenuWindowContainer *windows[2];
+    DatPartyRecord *party[3];
+    s32 context = kwlnTaskGetUserValue(task);
+    s32 menu = *(s32 *)(context + 0x90C);
+    s32 i;
+    s32 skill;
+    s32 last;
+    struct MenuListNode *node;
+    MenuWindowContainer **windowCursor;
+    MenuWindowContainer **selectedWindow;
+
+    mnuCollectFrontlinePartySlots(party, 3);
+    i = 0;
+    windowCursor = windows;
+    do {
+        *windowCursor = mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
+        mnuSetWindowFadeScale(*windowCursor, 0x100);
+        mnuForwardDupArg(*windowCursor, *(struct EffectSlotSet **)(context + 0x74), 0,
+                         *(struct EffectSlotSet **)(context + 0xE4), 0x17);
+        mnuSetWindowPanelBounds(*windowCursor, *(const void **)(context + 0x11C), 0x130, 0x630, -0x90, 0xC20);
+        mnuInitializeWindowEntryPlacement(0, *windowCursor, *(struct EffectSlotSet **)(context + 0x74), 0x14, 0x18);
+        (*windowCursor)->list->drawCallback = ptyDrawLinkageSkillEntry;
+        (*windowCursor)->list->context = (void *)context;
+        mnuAttachWindowTextureState(*windowCursor, -0xE0, 0x370, 0, *(u32 *)(context + 0xEC));
+        mnuConfigureWindowSpriteSlots((*windowCursor)->textures, *(struct EffMappedResource **)(context + 0x118));
+        windowCursor++;
+    } while (--i >= 0);
+    skill = mnuPickPairedTableValue(0x10, 0);
+    last = mnuPickPairedTableValue(0x10, 1);
+    if (skill < last) {
+        MenuWindowContainer **blankWindow = windows;
+        do {
+            if (btlAccessRecordedLinkageSkillFlag(skill & 0xFFFF, 2) != 0 && mnuHasAvailableSlotResource(skill) != 0) {
+                node = mnuAppendWindowListNode(windows[0], D_003BAA8C + skill * 17);
+                node->sortKeyPrimary = skill;
+                {
+                    s32 unavailable = ptyMatchAffinityPermutation((s32 *)party, skill);
+                    /* The matcher returns 0/1. The consumed local preserves
+                     * the inverted Boolean as XOR rather than a comparison. */
+                    unavailable ^= 1;
+                    if (unavailable != 0) {
+                        node->flags48 |= 1;
+                    }
+                }
+            } else if (mnuHasAvailableSlotResource(skill) != 0) {
+                node = mnuAppendWindowListNode(*blankWindow, D_003BC708);
+                node->sortKeyPrimary = 0xFFFF;
+            }
+            skill++;
+        } while (skill < last);
+    }
+    selectedWindow = (MenuWindowContainer **)(menu + 0x24);
+    mnuSortItems(windows[0]->list, 0, 1);
+    *selectedWindow = windows[0];
+}
 
 u32 mnuDestroySkillSelectionWindow(KwlnTask *task) {
     s32 window;
