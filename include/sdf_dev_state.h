@@ -41,7 +41,7 @@ typedef char DevState_callbackContext_offset_must_be_0x3C[
 /* Stable state APIs. Callback factories keep caller-specific callback types. */
 DevState *sdfDevCreateCommandState(const char *path);
 s32 sdfDevQueueRead(DevState *state, void *data, s32 byteCount);
-s32 sdfDevQueueWrite(DevState *state, void *data, s32 byteCount);
+s32 sdfDevQueueWrite(DevState *state, const void *data, s32 byteCount);
 s32 sdfDevQueueReleaseState(DevState *state);
 s32 sdfDevReactivate(DevState *state);
 void sdfDevQueueReadAndWait(DevState *state, void *buffer, s32 byteCount);
