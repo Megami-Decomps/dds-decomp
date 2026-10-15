@@ -5676,7 +5676,7 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     fade->startCondition.value.handle = light->handle;
     fade->ownerId = owner;
     btlStartTask(fade);
-    task = btlCreateUnitRotationInterpolationTask(effect->actor, D_003BF920, 1, 1.0f);
+    task = btlCreateUnitRotationInterpolationTask(effect->actor, D_003BF920, 1.0f, 1);
     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     task->startCondition.value.handle = fade->handle;
     task->ownerId = owner;

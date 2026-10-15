@@ -3119,7 +3119,272 @@ void btlStartLinkedActorEffectTask(ActionStateLink *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001DB5E0);
+extern void btlResetUnitLinks(BtlUnit *);
+extern void btlInsertPartyActorByPriority(BtlUnit *, u8, u8);
+extern void btlBindActorTaskAndSelectActionNumber(s32, s32);
+extern void btlSetSceneTaskActiveFlag(s32);
+extern void btlUnitGetBodyPosVU(BtlUnit *);
+extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
+extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *, u32, s16);
+
+void btlScheduleSummonActionTasks(ActionStateLink *action) {
+    f32 center[4] __attribute__((aligned(16)));
+    f32 bodyPosition[4] __attribute__((aligned(16)));
+    BtlState *battle;
+    BtlUnit *unit;
+    BtlUnit *source;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *load;
+    BtlRuntimeTask *controlTask;
+    BtlRuntimeTask *fadeTask;
+    BtlRuntimeTask *completionTask;
+    ActionStateLink *summonedAction;
+    DatPartyRecord *record;
+    s32 modelId;
+    s32 resourceKind;
+    s32 duration;
+    s32 effectId;
+    s32 effectDelay;
+    s32 fadeEnabled;
+    s32 repositioned;
+    u64 completionHandle;
+    f32 rate;
+    u32 summonedFlags;
+    u32 unitId;
+    u32 modelVariant;
+
+    if ((action->unit->status.flags & 0x400) && action->stateTime < 4) {
+        return;
+    }
+    controlTask = NULL;
+    battle = (BtlState *)btlGetRuntime();
+    btlGetIndexListCount(action->indexWork.indices);
+    unit = btlGetIndexListEntry(action->indexWork.indices, 0);
+    btlResetUnitLinks(unit);
+    if (action->unit->status.flags & 0x200) {
+        btlBossDebugPrintf("btl:summon[player=%X]\n", action->indexWork.unk18);
+        unit->status.flags |= 0x301;
+        btlInsertPartyActorByPriority(unit, (u8)action->indexWork.unk18, unit->lookupId);
+        if (unit->partyRecord.flags & 0x1000) {
+            unit->status.flags |= 0x1000;
+        }
+        if (unit->partyRecord.flags & 0x4000) {
+            unit->status.stateFlags |= 0x2000;
+        }
+        if (unit->partyRecord.status & 0x4000) {
+            unit->status.flags |= 0x20;
+        }
+        record = &unit->partyRecord;
+        if (btlDoesEnabledStatusMatchCurrentId(record, 0xE8)) {
+            btlApplyMaskedActorEntryAdjustments(unit, 0x100, 2);
+            btlApplyMaskedActorEntryAdjustments(unit, 0x10, 2);
+            btlApplyMaskedActorEntryAdjustments(unit, 2, 2);
+            btlApplyMaskedActorEntryAdjustments(unit, 8, 2);
+        }
+        if (btlDoesEnabledStatusMatchCurrentId(record, 0xE9)) {
+            btlApplyMaskedActorEntryAdjustments(unit, 1, 2);
+            btlApplyMaskedActorEntryAdjustments(unit, 0x80, 2);
+        }
+        unit->modelId = 0;
+        if (!(record->flags & 0x10)) {
+            unitId = unit->partyRecord.unitId;
+            modelVariant = unitId;
+        } else {
+            unitId = unit->partyRecord.unitId;
+            modelVariant = unitId + 0x20;
+        }
+        unit->modelVariant = modelVariant;
+        unit->unkDC = 0;
+        unit->combatantKind = unitId + 0x10;
+        if (unit->status.flags & 0x1000) {
+            modelId = unit->combatantKind;
+            resourceKind = 0;
+        } else {
+            resourceKind = unit->modelId;
+            modelId = unit->modelVariant;
+        }
+        repositioned = btlRepositionPartyAroundBattleCenter();
+        btlMarkInactiveActorCandidates();
+        if (repositioned != 0) {
+            btlStartTask(btlCreateCommandSoundUpdateTask());
+            btlStartTask(btlCreateCommandSoundTask((s32)action, 0xB));
+        }
+        btlStartTask(btlCreateEffObjA(action->unit, action->indexWork.phase));
+    } else {
+        s32 controlDelay = 0;
+        btlBossDebugPrintf("btl:summon[enemy=%X]\n", action->indexWork.unk18);
+        resourceKind = 1;
+        btlInitializePartyRecordFromEnemy(&unit->partyRecord, action->indexWork.unk18);
+        unit->status.flags |= 0x501;
+        unit->unkDC = resourceKind;
+        unit->partyRecord.flags |= 0x23;
+        modelId = action->indexWork.unk18;
+        unit->combatantKind = modelId;
+        btlInitializeEffectVectorsFromSourceRecords(unit, 1, modelId);
+        if (action->indexWork.skillId < 0x2A0 && action->indexWork.skillId != -1) {
+            if (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->indexWork.skillId].flags & 0x100) {
+                controlDelay = 2;
+            }
+        }
+        controlTask = btlCreateControlObject();
+        controlTask->startDelay = controlDelay;
+        controlTask->startCondition.kind = 10;
+        controlTask->startCondition.value.taskKind = 0x43;
+        btlStartTask(controlTask);
+        task = btlCreateTargetedCommandSoundTask((s32)action, 0xB, action->indexWork.skillId);
+        task->startCondition.kind = 10;
+        task->startCondition.value.taskKind = 0x43;
+        btlStartTask(task);
+    }
+
+    summonedAction = btlCreateActionSeq();
+    btlBindActorTaskAndSelectActionNumber((s32)summonedAction, (s32)unit);
+    fldAppendTaskToGroup(summonedAction);
+    btlDispatchStateHandler(summonedAction, 2);
+    btlSetSceneTaskActiveFlag((s32)summonedAction);
+    btlDispatchStateHandler(summonedAction, 0x1C);
+    /* Read both actor inputs after dispatch before committing the new flags. */
+    summonedFlags = summonedAction->pendingFlags;
+    source = action->unit;
+    summonedAction->pendingFlags = summonedFlags | 0x100;
+    duration = 0;
+    if (!(source->status.flags & 0x200)) {
+        duration = btlGetUnitMotionDurationFrames(source, action->indexWork.slot);
+        if (duration < 20) {
+            duration = 20;
+        }
+    }
+    if (!(unit->partyRecord.status & 0x1000)) {
+        load = btlCreateModelLoadPollTask(unit, resourceKind, modelId, 0);
+    } else {
+        load = btlCreateModelLoadPollTask(unit, 0, 0x1F, 0);
+    }
+    if (action->unit->status.flags & 0x200) {
+        load->startCondition.kind = 10;
+        load->startCondition.value.taskKind = 0x43;
+    } else {
+        load->startDelay = duration;
+    }
+    load->ownerId = action->unit->owner;
+    btlStartTask(load);
+    task = btlCreateUnitBaseLightTask(unit);
+    task->startCondition.kind = 4;
+    task->startCondition.value.handle = load->handle;
+    btlStartTask(task);
+    task = btlCreateGunLoadPollTask(unit);
+    task->startCondition.kind = 10;
+    task->startCondition.value.taskKind = 0x43;
+    task->ownerId = action->unit->owner;
+    btlStartTask(task);
+    if (action->unit->status.flags & 0x200) {
+        if (unit->lookupId != 1 && battle->unk268 == 3) {
+            unit->currentPosition[2] = unit->position[2] - 45.0f;
+        }
+        if (!(unit->status.flags & 0xE0)) {
+            /* Audited SDK VU pipeline, as in btlUnitFaceTarget: only the
+             * external aim routine consumes the two stored vectors. */
+            btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
+            VU0_STORE_VF_UNCLOBBERED(vf10, center);
+            btlUnitGetBodyPosVU(unit);
+            VU0_STORE_VF_UNCLOBBERED(vf10, bodyPosition);
+            if (btlAimHorizontalDirectionVU(bodyPosition, center) != 0) {
+                VU0_STORE_VF_UNCLOBBERED(vf10, unit->orientation);
+            }
+        }
+        rate = 1.0f;
+        task = btlCreateUnitPositionLerpTowardTargetTask(unit, unit->currentPosition, rate);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = load->handle;
+        btlStartTask(task);
+        task = btlCreateUnitRotationInterpolationTask(unit, unit->orientation, rate, 0);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = load->handle;
+        btlStartTask(task);
+    }
+    else if (battle->summonModelLoadHook != NULL && controlTask != NULL) {
+        battle->summonModelLoadHook(action, unit, controlTask->handle, load->handle);
+    }
+    fadeEnabled = 1;
+    if (!(action->unit->status.flags & 0x200) && battle->summonFadePredicate != 0) {
+        fadeEnabled = battle->summonFadePredicate(action->indexWork.skillId);
+    }
+    if (fadeEnabled != 0) {
+        fadeTask = btlCreateUnitDefeatFadeInTask(unit, 0x12);
+        fadeTask->startCondition.kind = 4;
+        fadeTask->startDelay = 2;
+        fadeTask->endDelay = 16;
+        fadeTask->startCondition.value.handle = load->handle;
+        fadeTask->ownerId = action->unit->owner;
+        btlStartTask(fadeTask);
+    } else {
+        fadeTask = btlCreateUnitDefeatFadeInTask(unit, -1);
+        fadeTask->startCondition.kind = 4;
+        fadeTask->startDelay = 2;
+        fadeTask->endDelay = 16;
+        fadeTask->startCondition.value.handle = load->handle;
+        fadeTask->ownerId = action->unit->owner;
+        btlStartTask(fadeTask);
+    }
+    if (action->unit->status.flags & 0x200) {
+        if (!btlCheckSpecialAbility(&action->unit->partyRecord, 0x280)) {
+            task = (BtlRuntimeTask *)fldCreateSceneGroupAction(action, 100, 1);
+        } else {
+            task = (BtlRuntimeTask *)fldCreateSceneGroupAction(action, 50, 1);
+        }
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+    } else {
+        effectId = 0xAC;
+        effectDelay = 0;
+        if (battle->summonEffectId != 0) {
+            s32 override = battle->summonEffectId(modelId);
+            if (override != -1) {
+                effectId = override;
+            }
+        }
+        if (battle->summonEffectDelay != 0) {
+            effectDelay = battle->summonEffectDelay(modelId);
+        }
+        task = (BtlRuntimeTask *)btlCreateEffObjB(unit, effectId);
+        task->startCondition.kind = 5;
+        task->startDelay = effectDelay;
+        task->startCondition.value.handle = fadeTask->handle;
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+        completionTask = btlCreateImmediateCompletionTask();
+        completionTask->startCondition.kind = 10;
+        completionTask->startCondition.value.taskKind = 0x2E;
+        completionTask->ownerId = action->unit->owner;
+        btlStartTask(completionTask);
+        completionHandle = completionTask->handle;
+        task = sndCreateReleaseTask(12);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = completionHandle;
+        btlStartTask(task);
+        task = btlCreateSceneLightingRestoreTask(12);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = completionHandle;
+        btlStartTask(task);
+        task = btlCreateWaitUnitListIdleTask(12);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = completionHandle;
+        btlStartTask(task);
+        task = btlCreateApplyToActiveActorsTask(12);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = completionHandle;
+        btlStartTask(task);
+        task = (BtlRuntimeTask *)btlCreateFadeStateResetTask();
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = completionHandle;
+        btlStartTask(task);
+    }
+    if (action->unit->partyRecord.status & 0x480) {
+        btlDispatchStateHandler(action, 0x19);
+    } else {
+        btlDispatchStateHandler(action, 0x1B);
+    }
+}
+
 
 void btlStartOwnerEffectTasks(s32 *arguments) {
     s32 owner = arguments[0x34 / 4];
@@ -3230,9 +3495,9 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     spawned->startCondition.value.handle = load->handle;
     btlStartTask(spawned);
     if (!(unit->status.flags & 0xE0)) {
-        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->orientation, 0, rate);
+        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->orientation, rate, 0);
     } else {
-        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->rotation, 0, rate);
+        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->rotation, rate, 0);
     }
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     spawned->startCondition.value.handle = load->handle;

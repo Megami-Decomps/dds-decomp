@@ -573,14 +573,27 @@ typedef struct BtlState {
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
     s32 (*unk66C)(BtlUnit *);
     s32 (*unk670)(struct BtlLinkedCommand *);
-    u8 pad674[8];
+    /* Legacy installers copy callback representations into these byte slots. */
+    union {
+        u8 pad674[8];
+        struct {
+            u8 pad674Prefix[4];
+            u8 (*summonFadePredicate)(s32); /* 0x678 */
+        };
+    };
     s32 (*actionHitOverride)(BtlUnit *, BtlUnit *, s32, s32); /* 0x67C */
     s32 (*reflectedHitOverride)(BtlUnit *, BtlUnit *, s32); /* 0x680 */
     s32 (*unk684)(s32, s32);
     s32 (*unk688)(s32, s32);
     void (*preActionHook)(struct ActionStateLink *, s32, u64, u64, u64);
     void (*postActionHook)(struct ActionStateLink *, s32, BtlUnit *, u64, u64, s32);
-    u8 pad694[8];
+    union {
+        u8 pad694[8];
+        struct {
+            void (*summonModelLoadHook)(struct ActionStateLink *, BtlUnit *, u64, u64); /* 0x694 */
+            u8 pad698[4];
+        };
+    };
     s32 (*unk69C)(BtlUnit *);
     s32 (*unk6A0)(BtlUnit *);
     s32 (*actorEligibilityOverride)(BtlUnit *); /* 0x6A4: optional actor eligibility check. */
@@ -590,7 +603,13 @@ typedef struct BtlState {
     s32 (*unitLiftPredicate)(BtlUnit *); /* 0x6B4 */
     u8 pad6B8[4];
     s32 (*actionEffectOverride)(struct ActionStateLink *, s32); /* 0x6BC */
-    u8 pad6C0[8];
+    union {
+        u8 pad6C0[8];
+        struct {
+            s32 (*summonEffectId)(s32); /* 0x6C0: -1 retains the default. */
+            s32 (*summonEffectDelay)(u32); /* 0x6C4 */
+        };
+    };
     s32 (*actionPointsOverride)(u32, u32, s32); /* 0x6C8 */
     u8 pad6CC[4];
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);

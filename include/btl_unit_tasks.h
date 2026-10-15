@@ -12,9 +12,11 @@ struct BtlRuntimeTask *btlCreateModelLoadPollTask(struct BtlUnit *unit, u32 inde
 struct BtlRuntimeTask *btlCreateUnitBaseLightTask(struct BtlUnit *unit);
 struct BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(struct BtlUnit *unit, f32 *target, f32 scale);
 struct BtlRuntimeTask *btlCreateActorModelBlendTask(struct BtlUnit *unit, struct BtlUnit *target, s32 index, s32 value, f32 scale);
+/* Keep the common unit/target/scale prefix; DDS2 adds an interpolation mode.
+ * EE EABI assigns scale to f12 and the extra mode to a2. */
 #ifdef VERSION_DDS2
 struct BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(struct BtlUnit *unit, s32 option);
-struct BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(struct BtlUnit *unit, f32 *target, s8 mode, f32 scale);
+struct BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(struct BtlUnit *unit, f32 *target, f32 scale, s8 mode);
 #else
 struct BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(struct BtlUnit *unit, f32 *target, f32 scale);
 #endif
