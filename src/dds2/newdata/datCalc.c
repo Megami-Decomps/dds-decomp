@@ -445,13 +445,13 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern PtyRosterValueRecord D_00386248[];
 
-typedef struct Entry4 {
-    u16 unk0; /* 0x0 */
-    u8 unk2; /* 0x2 */
+typedef struct PtyItemQuantityUpdate {
+    u16 itemId;         /* 0x0 */
+    u8 quantityDelta;   /* 0x2 */
     u8 pad3; /* 0x3 */
-} Entry4;
+} PtyItemQuantityUpdate;
 
-extern Entry4 D_003862C8[];
+extern PtyItemQuantityUpdate D_003862C8[];
 
 
 
@@ -1482,16 +1482,16 @@ void evtUpdateFlaggedEntries(void) {
 
 /* Apply the two configured count/flag updates; a zero index disables its record. */
 void dds3ForEachEntry(void) {
-    Entry4 *updates = D_003862C8;
+    PtyItemQuantityUpdate *updates = D_003862C8;
     u32 updateIndex = 0;
 
     do {
-        u16 valueIndex = updates->unk0;
-        u8 delta = updates->unk2;
+        u16 itemId = updates->itemId;
+        u8 quantityDelta = updates->quantityDelta;
 
         updates++;
-        if (valueIndex != 0) {
-            ptyAdjustItemQuantity(valueIndex, delta);
+        if (itemId != 0) {
+            ptyAdjustItemQuantity(itemId, quantityDelta);
         }
         updateIndex++;
     } while (updateIndex < 2);
