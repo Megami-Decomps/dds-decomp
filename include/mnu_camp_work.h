@@ -16,7 +16,7 @@ typedef struct StaffMenuWork {
     struct SdfMemBlock *resource;
     u8 pad04[4];
     MenuPopupState panel;
-    s32 value54;
+    s32 pendingPopupEntry;
     u8 pad58[4];
     struct EffectList *resourceQueue;
     StaffSlots staffSlots;
