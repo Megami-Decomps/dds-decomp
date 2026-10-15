@@ -13862,3 +13862,33 @@ clears the equipped item's five saved stat bonuses and five requirement
 counts before refreshing party state. Existing predicates, requirement-provider names, input branches,
 item consumption and return-to-catalog behavior remain unchanged. These are
 identifier-only data roles, not a cleanup of the surrounding control flow.
+
+
+## Charge history sampling, mutable cone presets and beam packet banks
+
+`effChargeSamplePeriods` supplies the modulo divisor for each captured and
+replayed model point; only seven entries are used. Keep the existing eight
+u16 values `(1,1,10,1,8,8,10,0)`, including the unused zero tail.
+`effChargePointScaleFactors` multiplies capped age growth and the work scale
+before both billboard scale components are set. Its eight native floats
+are `(1,1,0.25,0.75,0.5,0.5,0.25,0)` in both games.
+
+The narrow-cone, variable-height, wide-cone and cone-burst spawners mutate
+separate `effNarrowConeSpawnParams`, `effVariableHeightSpawnParams`,
+`effWideConeSpawnParams` and `effConeBurstSpawnParams` objects. Preserve their
+0x54-byte existing parameter views and all default words, even where two
+objects initially have identical bytes. `effFixedOriginSpawnParams` and
+`effSideBurstSpawnParams` each retain two records selected by a random bit.
+Do not merge records, make them const or change the per-particle writes.
+The unrelated radial template's existing interior-symbol view is untouched.
+
+`effBeamDrawParams` is the shared descriptor reset during beam creation and
+filled during geometry submission. Its native BSS label spans 0x30 bytes;
+the existing sizeof clear and packet fields are unchanged.
+`effBeamTriangleIndices` keeps all eighteen packed index words in its old
+byte-array declaration and existing u32-pointer conversion, not just the
+indices used by a single batch. `effBeamDrawSurfaces` retains four non-null
+pointers and two zero tail cells. Full batches use twelve vertices and
+advance by eight, preserving the overlap and the eight-vertex tail path.
+Numeric preset/index bytes agree between games; surface pointer words do
+not. Naming changes no owner, layout, storage, bound, import or instruction.
