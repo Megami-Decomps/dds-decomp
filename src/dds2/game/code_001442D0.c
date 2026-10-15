@@ -268,7 +268,7 @@ extern void fldPlayMenuSound(s32 param);
 
 extern void fldPlayFieldSe(s32 param);
 
-extern s32 fldPollArchiveLoad(s32 param);
+extern s32 fldPollArchiveLoad(s32 archiveId);
 
 extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
 
@@ -963,8 +963,8 @@ u32 fldGetArchiveLoadPending(void) {
     return fldArchiveLoadPending;
 }
 
-s32 fldPollArchiveLoad(s32 id) {
-    s32 name = 0x30000000 + (id << 16);
+s32 fldPollArchiveLoad(s32 archiveId) {
+    s32 name = 0x30000000 + (archiveId << 16);
     s32 result = sndFindPackedTrackLoadStatus(name);
     if (result == 0) {
         sndEnsureMidiBankResident(name);
