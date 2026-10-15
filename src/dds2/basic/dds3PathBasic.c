@@ -44,16 +44,16 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     }
 }
 
-void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *arg) {
+void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path) {
     u32 idx;
     f32 frac;
     Dds3PathKeyframes *data;
     PathQuaternionKey *base;
     PathQuaternionKey *p1;
     PathQuaternionKey *p2;
-    if (arg->flags & DDS3_PATH_ROTATION_CHANNEL) {
-        data = arg->rotationKeys;
-        dds3SamplePathKeyframeInterval(&idx, &frac, data, arg->time);
+    if (path->flags & DDS3_PATH_ROTATION_CHANNEL) {
+        data = path->rotationKeys;
+        dds3SamplePathKeyframeInterval(&idx, &frac, data, path->time);
         base = (PathQuaternionKey *)data->data;
         p1 = &base[idx];
         VU0_LOAD_VF_MEMORY(vf10, p1);
