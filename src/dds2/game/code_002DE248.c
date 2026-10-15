@@ -8641,7 +8641,6 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
 }
 
 
-extern void btlUnitGetEffectPosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
