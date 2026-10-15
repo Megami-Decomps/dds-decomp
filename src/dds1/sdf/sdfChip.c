@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
+#include "sdf_memory_api.h"
 
 SdfChipPage *sdfChipPages __attribute__((section(".sbss"), aligned(8)));
 SdfChipPage *sdfFreeChipPages __attribute__((section(".sbss")));
@@ -13,7 +14,6 @@ SdfPendingRequest sdfChipReleaseRequest __attribute__((section(".sbss"), aligned
 
 SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)));
 
-void *sdfClearQuadwords(void *destination, s32 quadwordCount);
 s32 DIntr(void);
 s32 EIntr(void);
 void sdfSelectNextChipPage(SdfChipClass *sizeClass);

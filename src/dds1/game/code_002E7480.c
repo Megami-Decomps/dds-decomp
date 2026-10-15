@@ -9,6 +9,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_protocol.h"
 #include "sdf_dev_state.h"
+#include "sdf_memory_api.h"
 
 #define SDF_BCD_DIGIT_BITS 4
 
