@@ -135,7 +135,7 @@ extern void func_001C45F0(void);
 
 extern void itfMesDestroyWindowIfPresent(s32);
 
-extern s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1);
+extern s32 btlFindEligibleTargetForMultiActorCommand(s32 actionTask, BtlIndexList *targets);
 
 extern s8 effSharedRandomState[];
 
