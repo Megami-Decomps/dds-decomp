@@ -14,7 +14,7 @@ extern EffRandState D_0040BAE8;
 void effMiscSeedRandom(EffRandState *state, u32 seed);
 s32 effMiscReadCachedClockTime(ClockTime *now);
 
-extern s8 D_004391E0;
+extern s8 sndSynchronousCommandMode;
 extern void *sceSifAllocIopHeap(s32);
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
@@ -93,26 +93,26 @@ u32 sndReserveIopWorkMemory(s32 size) {
     return (u32)sceSifAllocIopHeap(size);
 }
 
-extern SndRingPacket D_00477A00[32];
+extern SndRingPacket sndCommandRing[32];
 /* Shared with the producer and its worker-thread wakeups. */
-extern vu16 D_004391E2;
-extern vu16 D_004391E4;
+extern vu16 sndCommandReadIndex;
+extern vu16 sndCommandWriteIndex;
 extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
 
 /* Attempt one queued SIF packet: 0 means sent, 1 means empty or rejected. */
 s32 sndTryDispatchQueuedCommand(void) {
-    s32 readIndex = (s16)D_004391E2;
+    s32 readIndex = (s16)sndCommandReadIndex;
     SndRingPacket *packet;
 
-    if (readIndex == (s16)D_004391E4) {
+    if (readIndex == (s16)sndCommandWriteIndex) {
         return 1;
     }
-    packet = &D_00477A00[readIndex];
+    packet = &sndCommandRing[readIndex];
     if (sceSifSendCmd(0, packet, (packet->command >> 24) & 0xf0, 0, 0, 0) == 0) {
         return 1;
     }
     readIndex = (readIndex + 1) & 31;
-    D_004391E2 = readIndex;
+    sndCommandReadIndex = readIndex;
     return 0;
 }
 
@@ -120,17 +120,17 @@ void sdfServiceUnblockedWorkerThread(void) {
     for (;;) {
         do {
             SleepThread();
-        } while (D_004391E0 != 0);
+        } while (sndSynchronousCommandMode != 0);
         while (sndTryDispatchQueuedCommand() == 0) {
         }
     }
 }
 
-extern SdfKernelThreadParam D_00477980;
-extern u8 D_00478A00[];
-extern u8 D_00479A40[];
+extern SdfKernelThreadParam sndCommandThreadParameters;
+extern u8 sndCommandThreadStack[];
+extern u8 sndRpcServerThreadStack[];
 extern void *_gp;
-extern s32 D_004391E8;
+extern s32 sndCommandThreadId;
 extern s32 D_00438B94;
 extern s32 sceSifGetSreg(s32);
 extern s32 CreateThread(SdfKernelThreadParam *);
@@ -144,17 +144,17 @@ s32 sndStartIopCommandAndRpcWorkers(void) {
     while (sceSifGetSreg(31) == 0) {
     }
 
-    D_00477980.entry = sdfServiceUnblockedWorkerThread;
-    D_00477980.stack = D_00478A00;
-    D_00477980.stackSize = 0x1000;
-    D_00477980.priority = 0x42;
-    D_00477980.gp = &_gp;
-    D_004391E2 = 0;
-    D_004391E4 = 0;
-    threadId = CreateThread(&D_00477980);
-    D_004391E8 = threadId;
+    sndCommandThreadParameters.entry = sdfServiceUnblockedWorkerThread;
+    sndCommandThreadParameters.stack = sndCommandThreadStack;
+    sndCommandThreadParameters.stackSize = 0x1000;
+    sndCommandThreadParameters.priority = 0x42;
+    sndCommandThreadParameters.gp = &_gp;
+    sndCommandReadIndex = 0;
+    sndCommandWriteIndex = 0;
+    threadId = CreateThread(&sndCommandThreadParameters);
+    sndCommandThreadId = threadId;
     _StartThread(threadId, 0);
-    threadId = sdfCreateThread(sdfSoundStartRpcServer, D_00479A40, 0x1000, 0x43);
+    threadId = sdfCreateThread(sdfSoundStartRpcServer, sndRpcServerThreadStack, 0x1000, 0x43);
     D_00438B94 = threadId;
     return _StartThread(threadId, 0);
 }

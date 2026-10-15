@@ -29,18 +29,18 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 /* Sound command work block: header, 16 channels/buffers, 13 track slots. */
 extern SndWork sndMidiTrackState;
 extern u32 sndReserveIopWorkMemory(s32 size);
-extern s8 D_004391E0;
+extern s8 sndSynchronousCommandMode;
 extern s32 D_004391EC;
 extern s32 sceSifInitIopHeap(void);
 extern s32 sndStartIopCommandAndRpcWorkers(void);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
-extern SndRingPacket D_00477A00[SND_COMMAND_RING_ENTRY_COUNT];
+extern SndRingPacket sndCommandRing[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_00438B90;
 /* The worker consumes entries while this producer publishes and polls cursors. */
-extern vu16 D_004391E2;
-extern vu16 D_004391E4;
-extern s32 D_004391E8;
+extern vu16 sndCommandReadIndex;
+extern vu16 sndCommandWriteIndex;
+extern s32 sndCommandThreadId;
 extern s32 WakeupThread(s32 thread);
 extern s32 sndTryDispatchQueuedCommand(void);
 extern void *memcpy(void *, const void *, u32);
@@ -57,16 +57,16 @@ u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 payloadByt
     if (++D_00438B90 == 0) {
         D_00438B90 = 1;
     }
-    nextWriteIndex = ((s16)D_004391E4 + 1) & SND_COMMAND_RING_INDEX_MASK;
-    if (nextWriteIndex == (s16)D_004391E2) {
+    nextWriteIndex = ((s16)sndCommandWriteIndex + 1) & SND_COMMAND_RING_INDEX_MASK;
+    if (nextWriteIndex == (s16)sndCommandReadIndex) {
         for (wakeAttemptsRemaining = 8; wakeAttemptsRemaining != 0; wakeAttemptsRemaining--) {
             do {
-                WakeupThread(D_004391E8);
-            } while ((s16)D_004391E2 != nextWriteIndex);
+                WakeupThread(sndCommandThreadId);
+            } while ((s16)sndCommandReadIndex != nextWriteIndex);
         }
         return 0;
     }
-    entry = &D_00477A00[(s16)D_004391E4];
+    entry = &sndCommandRing[(s16)sndCommandWriteIndex];
     entry->sequence = D_00438B90;
     if (payloadBytes != 0) {
         memcpy(entry->payload, packet, payloadBytes);
@@ -77,12 +77,12 @@ u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 payloadByt
     entry->command = (command << SND_COMMAND_ID_SHIFT) |
                      (channel & SND_COMMAND_CHANNEL_MASK) |
                      (transferQuadwords << SND_COMMAND_LENGTH_SHIFT);
-    D_004391E4 = nextWriteIndex;
-    if (D_004391E0 != 0) {
+    sndCommandWriteIndex = nextWriteIndex;
+    if (sndSynchronousCommandMode != 0) {
         while (sndTryDispatchQueuedCommand() != 0) {
         }
     } else {
-        WakeupThread(D_004391E8);
+        WakeupThread(sndCommandThreadId);
     }
     return D_00438B90;
 }
@@ -99,17 +99,17 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
 }
 
 /* Descriptor consumed by sceSifSetDma: EE source, IOP destination, byte size, attributes. */
-extern SifDmaTransfer D_00479A00;
+extern SifDmaTransfer sndIopDmaTransfer;
 
 /* Transfer an EE buffer to IOP memory, retrying submission and waiting for completion. */
 void sndCopyToIopAndWait(s32 destination, void *source, s32 size) {
     s32 dmaId;
     s32 delay;
 
-    D_00479A00.source = (u32)source;
-    D_00479A00.destination = destination;
-    D_00479A00.size = size;
-    D_00479A00.attributes = 0;
+    sndIopDmaTransfer.source = (u32)source;
+    sndIopDmaTransfer.destination = destination;
+    sndIopDmaTransfer.size = size;
+    sndIopDmaTransfer.attributes = 0;
     FlushCache(0);
     goto submit;
 retry:
@@ -120,7 +120,7 @@ retry:
         __asm__ volatile ("nop");
     }
 submit:
-    dmaId = sceSifSetDma(&D_00479A00, 1);
+    dmaId = sceSifSetDma(&sndIopDmaTransfer, 1);
     if (dmaId == 0) {
         goto retry;
     }
@@ -211,7 +211,7 @@ void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
 }
 
 void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
-    D_004391E0 = 1;
+    sndSynchronousCommandMode = 1;
     sndLoadIopSoundModules();
     sceSifInitIopHeap();
     sndStartIopCommandAndRpcWorkers();
@@ -224,7 +224,7 @@ void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 b
     sndMidiTrackState.opaque1FC = 0x8D0;
     sndCopyToIopAndWait(D_004391EC, &sndMidiTrackState, 0x8D0);
     sndSendCommandPacket(0, 0, &D_004391EC, 4);
-    D_004391E0 = 0;
+    sndSynchronousCommandMode = 0;
 }
 
 /* Starts a track with the default 0x7f setting after preparing its identifier. */
