@@ -3016,7 +3016,74 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", ptySkillMenuBuildLinkageSkills);
+extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
+extern s32 ptyMatchAffinityPermutation(s32 *, s32);
+extern u16 mnuPickPairedTableValue(s32, s32);
+extern void ptySkillMenuDrawEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
+
+/* Construct the linkage-skill list, retaining blank rows for available commands
+ * that have not yet been recorded. Sort by the per-command catalog ordinal. */
+void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
+    /* Both retail versions leave 16 bytes before the frontline array; only
+     * the first window slot is used by this one-window builder. */
+    MenuWindowContainer *windows[2];
+    DatPartyRecord *frontline[3];
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(task);
+    SkillMenuRuntime *menu = (SkillMenuRuntime *)context->party;
+    s32 i;
+    s32 skill;
+    s32 last;
+    u16 *ordinal;
+    MenuListNode *node;
+    MenuWindowContainer **selectedWindow;
+
+    mnuCollectFrontlinePartySlots(frontline, 3);
+    for (i = 0; i < 1; i++) {
+        windows[i] = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
+        mnuSetWindowFadeScale(windows[i], 0x100);
+        mnuInitializeBasicWindowLayout(windows[i], (EffectSlotSet *)context->labelHandle, 0xB);
+        mnuSetWindowPanelBounds(windows[i], context->skillCategoryLayout, 0, 0, 0, 0);
+        mnuSetWindowEntryParameters(0, windows[i], context->resourceHandle, 0xD, 7);
+        windows[i]->list->drawCallback = ptySkillMenuDrawEntry;
+        windows[i]->list->context = context;
+        mnuCreateListWithDefaults(windows[i], 0, 0, 0, context->resourceHandle);
+    }
+    skill = mnuPickPairedTableValue(0x10, 0);
+    last = mnuPickPairedTableValue(0x10, 1);
+    if (skill < last) {
+        ordinal = context->skillSlots;
+        do {
+            if (btlAccessRecordedLinkageSkillFlag((u16)skill, 2) != 0 &&
+                mnuHasAvailableSlotResource(skill) != 0) {
+                node = mnuAppendWindowListNode(windows[0], D_00435E64[skill]);
+                {
+                    u32 sortRank = *ordinal;
+                    node->sortKeyPrimary = skill;
+                    node->sortKeySecondary = sortRank;
+                }
+                {
+                    s32 unavailable = ptyMatchAffinityPermutation((s32 *)frontline, skill);
+                    /* The permutation matcher returns only 0 or 1. A consumed
+                     * local keeps the inverted result as XOR, rather than a
+                     * comparison against a rematerialized loop constant. */
+                    unavailable ^= 1;
+                    if (unavailable != 0) {
+                        node->flags48 |= 1;
+                    }
+                }
+            } else if (mnuHasAvailableSlotResource(skill) != 0) {
+                node = mnuAppendWindowListNode(windows[0], D_00437C00);
+                node->sortKeyPrimary = 0xFFFF;
+                node->sortKeySecondary = -1;
+            }
+            ordinal++;
+            skill++;
+        } while (skill < last);
+    }
+    selectedWindow = &menu->selectedWindow;
+    mnuSortItems(windows[0]->list, 1, 1);
+    *selectedWindow = windows[0];
+}
 
 u32 mnuDestroySkillSelectionWindow(KwlnTask *callback) {
     s32 party;

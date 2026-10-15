@@ -104,7 +104,8 @@ void mnuUpdateMantraSceneScroll(MenuSceneWork *work) {
 }
 
 extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *vector);
-extern s32 D_003BC424;
+s32 D_003BC420 = 0;
+s32 D_003BC424 = 0;
 
 void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     SdfGrid *grid = work->gridHandle;
@@ -440,7 +441,90 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", mnuBuildMantraGridAndGetProfileCoordinates);
+extern MantraPrerequisiteRecord D_0036AE80[];
+extern void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 value);
+
+/* Rebuild the 88-entry mantra grid from the prerequisite coordinates (tenths, or required level / 5
+ * when the record's x is -1), report the selected profile's cell, then set the three
+ * requirement-group bits in boundsFlags. */
+void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 selectionAddress, s32 *outX, s32 *outY) {
+    MnuProfileProgress *selection = (MnuProfileProgress *)selectionAddress;
+    MnuMantraNodeState *nodes = (MnuMantraNodeState *)work->gridHandle->userData;
+    MnuMantraGridEntry *entry;
+    SdfGrid *grid;
+    u32 column;
+    u32 row;
+    s32 foundX = 0;
+    s32 foundY = 0;
+    u32 i;
+
+    memset(nodes, 0, 0x480);
+    for (i = 1; i < 0x59; i++) {
+        entry = mnuCreateMantraGridEntry((s32)work, i, selection);
+        if (entry == NULL) {
+            continue;
+        }
+        if (D_0036AE80[i].x == -1) {
+            column = entry->requiredLevel / 5;
+            nodes[i].xRemainder = 0;
+        } else {
+            column = D_0036AE80[i].x / 10;
+            nodes[i].xRemainder = D_0036AE80[i].x % 10;
+        }
+        row = D_0036AE80[i].y / 10;
+        grid = work->gridHandle;
+        if (column >= grid->width) {
+            column = grid->width - 1;
+        }
+        if (row >= grid->cellCount / grid->width) {
+            row = grid->cellCount / grid->width - 1;
+        }
+        nodes[i].yRemainder = D_0036AE80[i].y % 10;
+        nodes[i].state = entry->state;
+        nodes[i].y = row;
+        nodes[i].x = column;
+        sdfGridSetCellValue(grid, column, row, (u32)entry);
+        if (entry->sceneId == selection->profileId) {
+            foundX = column;
+            foundY = row;
+        }
+    }
+    if (outX != NULL) {
+        *outX = foundX;
+    }
+    if (outY != NULL) {
+        *outY = foundY;
+    }
+    {
+        u16 groupA[3] = {0x13, 0x2E, 0x48};
+        s8 groupB[4] = {'P', 'Q', 'R', 'S'};
+        s8 groupC[2] = {'N', 'O'};
+        s32 j;
+
+        work->boundsFlags = 0;
+        for (j = 0; j < 3; j++) {
+            if (prfReqCheckWithFallback(selection->partyRecord, groupA[j])) {
+                work->boundsFlags |= 1;
+            }
+        }
+        for (j = 0; j < 4; j++) {
+            if (prfReqCheckWithFallback(selection->partyRecord, groupB[j])) {
+                work->boundsFlags |= 2;
+            }
+        }
+        for (j = 0; j < 2; j++) {
+            if (prfReqCheckWithFallback(selection->partyRecord, groupC[j])) {
+                work->boundsFlags |= 4;
+                if (j == 0) {
+                    mdlFlagSet(0x908);
+                }
+            }
+        }
+        if (mdlFlagTest(0x908)) {
+            work->boundsFlags |= 4;
+        }
+    }
+}
 
 /* Recreate the scene's selection grid and copy its resulting coordinates. */
 void mnuReinitializeSceneGrid(s32 sceneAddress) {
@@ -712,14 +796,4 @@ void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
     mnuReleaseListNodes(
         &((MenuSceneWork *)(u32)sceneAddress)->costTransitionList);
 }
-
-INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC420);
-
-INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC424);
-
-INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC428);
-
-INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC430);
-
-INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC438);
 

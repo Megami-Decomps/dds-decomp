@@ -566,11 +566,125 @@ s32 btlGetActorBedAssetIdFromIndex(s32 arg0) {
     return datItemSkillRecords[arg0].commandIndex;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
+extern const char D_003A17A8[];
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlBuildEligibleTargetIndexList);
+s32 btlBuildEligibleTargetIndexList(void *actionArg, BtlIndexList *targets,
+                  s32 area, s32 rule, s32 excludedStatus) {
+    BtlTask *action = (BtlTask *)actionArg;
+    BtlUnit *collected[16];
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 alliedArea;
+    s32 opposingArea;
+    s32 areaMask;
+    BtlUnit *unit;
+    s32 count;
+    s32 selected;
+    s32 i;
+
+    if ((action->unit->status.flags & 0x200) != 0) {
+        alliedArea = 0x200;
+        opposingArea = 0x400;
+    } else {
+        alliedArea = 0x400;
+        opposingArea = 0x200;
+    }
+    areaMask = 0;
+    if ((area & 1) != 0) {
+        areaMask = alliedArea;
+    }
+    if ((area & 2) != 0) {
+        areaMask |= opposingArea;
+    }
+    btlClearIndexList(targets);
+    if ((rule & 1) != 0) {
+        btlAppendIndexListEntry(targets, action->unit);
+        return 1;
+    }
+    unit = battle->units;
+    count = 0;
+    selected = -1;
+    while (unit != NULL) {
+        s32 flags = unit->status.flags;
+
+        if ((flags & 0x100) == 0) {
+            goto nextUnit;
+        }
+        if ((flags & 0xE0) != 0) {
+            if (excludedStatus == 0) {
+                goto nextUnit;
+            }
+            if ((excludedStatus & 0x4000) != 0 && excludedStatus != -1) {
+                goto nextUnit;
+            }
+        }
+        if ((flags & areaMask) == 0) {
+            goto nextUnit;
+        }
+        if ((rule & 2) != 0 && (unit->status.flags & 1) != 0) {
+            if (action->unit == unit) {
+                goto nextUnit;
+            }
+            collected[count++] = unit;
+        } else if ((rule & 8) != 0) {
+            if ((unit->status.flags & 1) != 0) {
+                goto nextUnit;
+            }
+            collected[count] = unit;
+            selected = count++;
+        } else {
+            if ((rule & 4) == 0) {
+                if ((unit->status.flags & 1) == 0) {
+                    goto nextUnit;
+                }
+            } else {
+                if ((unit->status.flags & 1) == 0) {
+                    selected = count;
+                }
+            }
+            if ((unit->status.flags & 1) != 0) {
+                if (excludedStatus == 0) {
+                    goto appendUnit;
+                }
+                if (excludedStatus == -1) {
+                    goto appendUnit;
+                }
+                if (unit->partyRecord.status == 0) {
+                    goto nextUnit;
+                }
+                if ((excludedStatus & unit->partyRecord.status) != 0) {
+                    goto nextUnit;
+                }
+            }
+appendUnit:
+            collected[count++] = unit;
+        }
+nextUnit:
+        unit = unit->next;
+    }
+    if (count > 0) {
+        if (selected < 0) {
+            selected = count - 1;
+        }
+        for (i = 0; i < count; i++) {
+            s32 index = selected - i;
+
+            if (index < 0) {
+                index += count;
+            } else {
+                index %= count;
+            }
+            btlAppendIndexListEntry(targets, collected[index]);
+        }
+    }
+    btlBossDebugPrintf(D_003A17A8, count, area, rule, excludedStatus);
+    return count != 0;
+}
 
 extern s32 btlBuildEligibleTargetIndexList(void *, BtlIndexList *, s32, s32, s32);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A17A8);
 
 u32 btlSelectCommandTargetPolicy(void *action, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
