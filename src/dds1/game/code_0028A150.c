@@ -1769,54 +1769,54 @@ s32 fileBuildMainBlobAndWrite(void) {
     datGameState->header.savedMoney = datGameState->header.currency;
     if (D_003BC824 != 0) {
         if (mdlFlagTest(0x74) != 0) {
-            datGameState->header.unk24 |= 1;
+            datGameState->header.saveFlags |= 1;
         } else {
-            datGameState->header.unk24 &= ~1;
+            datGameState->header.saveFlags &= ~1;
         }
         if (mdlFlagTest(0x71) != 0) {
-            datGameState->header.unk24 |= 2;
+            datGameState->header.saveFlags |= 2;
         } else {
-            datGameState->header.unk24 &= ~2;
+            datGameState->header.saveFlags &= ~2;
         }
         if (mdlFlagTest(0x70) != 0) {
-            datGameState->header.unk24 |= 4;
+            datGameState->header.saveFlags |= 4;
         } else {
-            datGameState->header.unk24 &= ~4;
+            datGameState->header.saveFlags &= ~4;
         }
         if (mdlFlagTest(0x72) != 0) {
-            datGameState->header.unk24 |= 8;
+            datGameState->header.saveFlags |= 8;
         } else {
-            datGameState->header.unk24 &= ~8;
+            datGameState->header.saveFlags &= ~8;
         }
         if (mdlFlagTest(0x79) != 0) {
-            datGameState->header.unk24 |= 0x10;
+            datGameState->header.saveFlags |= 0x10;
         } else {
-            datGameState->header.unk24 &= ~0x10;
+            datGameState->header.saveFlags &= ~0x10;
         }
         if (mdlFlagTest(0x7B) != 0) {
-            datGameState->header.unk24 |= 0x20;
+            datGameState->header.saveFlags |= 0x20;
         } else {
-            datGameState->header.unk24 &= ~0x20;
+            datGameState->header.saveFlags &= ~0x20;
         }
         if (mdlFlagTest(0x7D) != 0) {
-            datGameState->header.unk24 |= 0x40;
+            datGameState->header.saveFlags |= 0x40;
         } else {
-            datGameState->header.unk24 &= ~0x40;
+            datGameState->header.saveFlags &= ~0x40;
         }
         if (mdlFlagTest(0x73) != 0) {
-            datGameState->header.unk24 |= 0x80;
+            datGameState->header.saveFlags |= 0x80;
         } else {
-            datGameState->header.unk24 &= ~0x80;
+            datGameState->header.saveFlags &= ~0x80;
         }
         if (mdlFlagTest(0x380) != 0) {
-            datGameState->header.unk24 |= 0x100;
+            datGameState->header.saveFlags |= 0x100;
         } else {
-            datGameState->header.unk24 &= ~0x100;
+            datGameState->header.saveFlags &= ~0x100;
         }
         if (mdlFlagTest(0x381) != 0) {
-            datGameState->header.unk24 |= 0x200;
+            datGameState->header.saveFlags |= 0x200;
         } else {
-            datGameState->header.unk24 &= ~0x200;
+            datGameState->header.saveFlags &= ~0x200;
         }
         if (mdlFlagTest(0x850) != 0) {
             datGameState->header.unk2C |= 0x2000;
@@ -1830,70 +1830,70 @@ s32 fileBuildMainBlobAndWrite(void) {
         }
     }
     if (mdlFlagTest(0x90B) != 0) {
-        datGameState->header.unk24 |= 0x400;
+        datGameState->header.saveFlags |= 0x400;
     }
     if (mdlFlagTest(0x90C) != 0) {
-        datGameState->header.unk24 |= 0x800;
+        datGameState->header.saveFlags |= 0x800;
     }
     if (mdlFlagTest(0x90D) != 0) {
-        datGameState->header.unk24 |= 0x1000;
+        datGameState->header.saveFlags |= 0x1000;
     }
     if (mdlFlagTest(0x90E) != 0) {
-        datGameState->header.unk24 |= 0x2000;
+        datGameState->header.saveFlags |= 0x2000;
     }
     if (mdlFlagTest(0x90F) != 0) {
-        datGameState->header.unk24 |= 0x4000;
+        datGameState->header.saveFlags |= 0x4000;
     }
     if (mdlFlagTest(0x970) != 0) {
-        datGameState->header.unk24 |= 0x8000;
+        datGameState->header.saveFlags |= 0x8000;
     }
     if (mdlFlagTest(0x971) != 0) {
-        datGameState->header.unk24 |= 0x10000;
+        datGameState->header.saveFlags |= 0x10000;
     }
     if (mdlFlagTest(0x972) != 0) {
-        datGameState->header.unk24 |= 0x20000;
+        datGameState->header.saveFlags |= 0x20000;
     }
     if (mdlFlagTest(0x973) != 0) {
-        datGameState->header.unk24 |= 0x40000;
+        datGameState->header.saveFlags |= 0x40000;
     }
     if (mdlFlagTest(0x974) != 0) {
-        datGameState->header.unk24 |= 0x80000;
+        datGameState->header.saveFlags |= 0x80000;
     }
     if (mdlFlagTest(0x97F) != 0) {
-        datGameState->header.unk24 |= 0x100000;
+        datGameState->header.saveFlags |= 0x100000;
     }
     if (mdlFlagTest(0xA00) != 0) {
-        datGameState->header.unk24 |= 0x200000;
+        datGameState->header.saveFlags |= 0x200000;
     }
     if (mdlFlagTest(0xA01) != 0) {
-        datGameState->header.unk24 |= 0x400000;
+        datGameState->header.saveFlags |= 0x400000;
     }
     if (mdlFlagTest(0xA02) != 0) {
-        datGameState->header.unk24 |= 0x800000;
+        datGameState->header.saveFlags |= 0x800000;
     }
     if (mdlFlagTest(0x6C4) != 0) {
-        datGameState->header.unk24 |= 0x01000000;
+        datGameState->header.saveFlags |= 0x01000000;
     }
     if (mdlFlagTest(0x6C6) != 0) {
-        datGameState->header.unk24 |= 0x02000000;
+        datGameState->header.saveFlags |= 0x02000000;
     }
     if (mdlFlagTest(0x6C8) != 0) {
-        datGameState->header.unk24 |= 0x04000000;
+        datGameState->header.saveFlags |= 0x04000000;
     }
     if (mdlFlagTest(0x6C9) != 0) {
-        datGameState->header.unk24 |= 0x08000000;
+        datGameState->header.saveFlags |= 0x08000000;
     }
     if (mdlFlagTest(0x6CA) != 0) {
-        datGameState->header.unk24 |= 0x10000000;
+        datGameState->header.saveFlags |= 0x10000000;
     }
     if (mdlFlagTest(0x820) != 0) {
-        datGameState->header.unk24 |= 0x20000000;
+        datGameState->header.saveFlags |= 0x20000000;
     }
     if (mdlFlagTest(0x821) != 0) {
-        datGameState->header.unk24 |= 0x40000000;
+        datGameState->header.saveFlags |= 0x40000000;
     }
     if (mdlFlagTest(0x822) != 0) {
-        datGameState->header.unk24 |= 0x80000000;
+        datGameState->header.saveFlags |= 0x80000000;
     }
     if (mdlFlagTest(0x823) != 0) {
         datGameState->header.unk28 |= 1;
@@ -2042,7 +2042,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     memcpy(fileSavePreviewRecords[slot].party, datGameState->header.partyIds, 8);
     memcpy(fileSavePreviewRecords[slot].levels, datGameState->header.partyLevels, 8);
     fileSavePreviewRecords[slot].money = datGameState->header.savedMoney;
-    fileSavePreviewRecords[slot].saveWords.words[0] = datGameState->header.unk24;
+    fileSavePreviewRecords[slot].saveWords.words[0] = datGameState->header.saveFlags;
     fileSavePreviewRecords[slot].saveWords.words[1] = datGameState->header.unk28;
     fileSavePreviewRecords[slot].saveWords.words[2] = datGameState->header.unk2C;
     fileMainSaveBlobAddress = (u32)datGameState;

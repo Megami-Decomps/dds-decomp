@@ -287,7 +287,7 @@ void sdfSaveResetSnapshot(void) {
     D_00435DB8 = datGameState->header.status;
     D_00435DBC = datGameState->header.secondTick;
     D_00435DC0 = datGameState->header.savedMoney;
-    D_00385218.words[0] = datGameState->header.unk24;
+    D_00385218.words[0] = datGameState->header.saveFlags;
     D_00385218.words[1] = datGameState->header.unk28;
     D_00385218.words[2] = datGameState->header.unk2C;
     D_00438E90 = mnuCreateFlagEntries();
@@ -333,7 +333,7 @@ void sdfRestoreResetSnapshot(void) {
     datGameState->header.secondTick = D_00435DBC;
     datGameState->header.savedMoney = D_00435DC0;
     datGameState->header.playTicks = datGameState->header.secondTick;
-    datGameState->header.unk24 = D_00385218.words[0];
+    datGameState->header.saveFlags = D_00385218.words[0];
     datGameState->header.unk28 = D_00385218.words[1];
     datGameState->header.unk2C = D_00385218.words[2];
     mnuApplyCampResourceFlagEntries(D_00438E90);

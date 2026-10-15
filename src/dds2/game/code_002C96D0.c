@@ -3490,7 +3490,7 @@ void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
     DatGameState *state = datGameState;
 
     state->header.savedMoney = source->money;
-    state->header.unk24 = source->saveWords.words[0];
+    state->header.saveFlags = source->saveWords.words[0];
     state->header.unk28 = source->saveWords.words[1];
     state->header.unk2C = source->saveWords.words[2];
 }
