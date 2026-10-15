@@ -161,20 +161,20 @@ void kwlnDrawSetDc8First(u32 rgba) {
 extern u16 kwlnColorRectangleTransitionCounter;
 extern u16 kwlnColorRectangleTransitionDuration;
 
-extern KwlnSolidRectParams D_0043E530;
+extern KwlnSolidRectParams kwlnColorRectangleTransitionStartParameters;
 /* Alias of kwlnColorRectangleParameters.bounds; the effect setter needs the preceding header. */
-extern KwlnRectBounds D_0043E550;
+extern KwlnRectBounds kwlnColorRectangleParameterBounds;
 
 /* Capture the live solid rectangle before applying or interpolating staged params.
  * Duration storage is 16-bit; the immediate test uses the full argument. */
 void kwlnDrawSnapshotSolidRect(s32 duration) {
-    D_0043E530 = *(KwlnSolidRectParams *)effGetCh74Params();
+    kwlnColorRectangleTransitionStartParameters = *(KwlnSolidRectParams *)effGetCh74Params();
     kwlnColorRectangleTransitionCounter = 0;
     kwlnColorRectangleTransitionDuration = duration;
     if (duration == 0) {
         kwlnDrawControlFlags &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
-        kwlnDrawInitRect(&D_0043E550);
-        effCopyColorRectangleParameters((EffSolidRectParams *)(void *)((u8 *)&D_0043E550 - 8));
+        kwlnDrawInitRect(&kwlnColorRectangleParameterBounds);
+        effCopyColorRectangleParameters((EffSolidRectParams *)(void *)((u8 *)&kwlnColorRectangleParameterBounds - 8));
     } else {
         kwlnDrawControlFlags |= KWLN_DRAW_COLOR_TRANSITION_BIT;
     }
@@ -233,13 +233,13 @@ void kwlnDrawSetE08Triple(u32 extent, u32 centerX, u32 centerY) {
     kwlnTexturedSquareParameters.centerY = centerY;
 }
 
-extern KwlnResourceRectParams D_0043E560;
+extern KwlnResourceRectParams kwlnTexturedSquareTransitionStartParameters;
 extern u16 kwlnTexturedSquareTransitionCounter;
 extern u16 kwlnTexturedSquareTransitionDuration;
 
 /* Save the live textured-square params; zero copies the staged body immediately. */
 void kwlnDrawSetupE08FromCh75(s32 duration) {
-    D_0043E560 = *(KwlnResourceRectParams *)effGetCh75Work();
+    kwlnTexturedSquareTransitionStartParameters = *(KwlnResourceRectParams *)effGetCh75Work();
     kwlnTexturedSquareTransitionCounter = 0;
     kwlnTexturedSquareTransitionDuration = duration;
     if (duration == 0) {
@@ -334,13 +334,13 @@ void kwlnDrawSetD88Pair(u32 centerX, u32 centerY) {
     kwlnRectangleBlurParameters.centerY = centerY;
 }
 
-extern KwlnBlurRectParams D_0043E4E0;
+extern KwlnBlurRectParams kwlnRectangleBlurTransitionStartParameters;
 extern u16 kwlnRectangleBlurTransitionCounter;
 extern u16 kwlnRectangleBlurTransitionDuration;
 
 /* Save live rectangle-blur params, then apply now or request interpolation. */
 void kwlnSetRectangleBlurParameterTransition(s32 duration) {
-    D_0043E4E0 = *(KwlnBlurRectParams *)effGetCh70Params();
+    kwlnRectangleBlurTransitionStartParameters = *(KwlnBlurRectParams *)effGetCh70Params();
     kwlnRectangleBlurTransitionCounter = 0;
     kwlnRectangleBlurTransitionDuration = duration;
     if (duration == 0) {
@@ -407,13 +407,13 @@ void kwlnDrawSetC70Triple(u32 extent, u32 centerX, u32 centerY) {
     kwlnTexturedBlurParameters.source.centerY = centerY;
 }
 
-extern KwlnPixelBlurParams D_0043E3C0;
+extern KwlnPixelBlurParams kwlnTexturedBlurTransitionStartParameters;
 extern u16 kwlnTexturedBlurTransitionCounter;
 extern u16 kwlnTexturedBlurTransitionDuration;
 
 /* Save live textured-blur params; zero copies the staged body immediately. */
 void kwlnDrawSetupC70FromCh71(s32 duration) {
-    D_0043E3C0 = *(KwlnPixelBlurParams *)&effGetCh71Work()->body;
+    kwlnTexturedBlurTransitionStartParameters = *(KwlnPixelBlurParams *)&effGetCh71Work()->body;
     kwlnTexturedBlurTransitionCounter = 0;
     kwlnTexturedBlurTransitionDuration = duration;
     if (duration == 0) {
@@ -503,13 +503,13 @@ void kwlnDrawSetCd0Triple(u32 positionSpread, u32 x, u32 y) {
     kwlnFilterBlurParameters.position[1] = y;
 }
 
-extern EffBlurScatterParams D_0043E420;
+extern EffBlurScatterParams kwlnFilterBlurTransitionStartParameters;
 extern u16 kwlnFilterBlurTransitionCounter;
 extern u16 kwlnFilterBlurTransitionDuration;
 
 /* Save live filter-blur params; zero copies the staged body immediately. */
 void kwlnSetFilterBlurParameterTransition(s32 duration) {
-    D_0043E420 = effGetCh72Work()->params;
+    kwlnFilterBlurTransitionStartParameters = effGetCh72Work()->params;
     kwlnFilterBlurTransitionCounter = 0;
     kwlnFilterBlurTransitionDuration = duration;
     if (duration == 0) {
@@ -587,13 +587,13 @@ void kwlnDrawSetD30Triple(u32 size, u32 x, u32 y) {
     kwlnStaggeredBlurParameters.position[1] = y;
 }
 
-extern KwlnScaleBlurParams D_0043E480;
+extern KwlnScaleBlurParams kwlnStaggeredBlurTransitionStartParameters;
 extern u16 kwlnStaggeredBlurTransitionCounter;
 extern u16 kwlnStaggeredBlurTransitionDuration;
 
 /* Save live staggered-blur params; zero copies the staged body immediately. */
 void kwlnSetStaggeredBlurParameterTransition(s32 duration) {
-    D_0043E480 = *(KwlnScaleBlurParams *)effGetCh76Work();
+    kwlnStaggeredBlurTransitionStartParameters = *(KwlnScaleBlurParams *)effGetCh76Work();
     kwlnStaggeredBlurTransitionCounter = 0;
     kwlnStaggeredBlurTransitionDuration = duration;
     if (duration == 0) {
@@ -646,12 +646,12 @@ void kwlnDrawEnableD30(s32 duration) {
  * polygon-movie blend helpers combine the block saved when the transition
  * started with the staged block into one of these, and the effCopy* call then
  * hands the result to the effect. */
-extern KwlnPixelBlurParams D_0043DC90;
-extern EffBlurScatterParams D_0043DCC0;
-extern KwlnScaleBlurParams D_0043DCF0;
-extern KwlnBlurRectParams D_0043DD20;
-extern KwlnSolidRectParams D_0043DD50;
-extern KwlnResourceRectParams D_0043DD70;
+extern KwlnPixelBlurParams kwlnTexturedBlurFrameParameters;
+extern EffBlurScatterParams kwlnFilterBlurFrameParameters;
+extern KwlnScaleBlurParams kwlnStaggeredBlurFrameParameters;
+extern KwlnBlurRectParams kwlnRectangleBlurFrameParameters;
+extern KwlnSolidRectParams kwlnColorRectangleFrameParameters;
+extern KwlnResourceRectParams kwlnTexturedSquareFrameParameters;
 
 /* The blend helpers replace the parameters, which are the leading fields the
  * staged block shares with their own parameter block. */
@@ -688,11 +688,11 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnRectangleBlurTransitionCounter < kwlnRectangleBlurTransitionDuration) {
             kwlnRectangleBlurTransitionCounter++;
         }
-        evtBlendParamsA(1, (f32)kwlnRectangleBlurTransitionCounter / (f32)kwlnRectangleBlurTransitionDuration, &D_0043E4E0,
-                        &kwlnRectangleBlurParameters, &D_0043DD20);
-        kwlnDrawInitRect(&D_0043DD20.bounds);
-        effCopyRectangleBlurParameters(&D_0043DD20);
-        if (D_0043DD20.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        evtBlendParamsA(1, (f32)kwlnRectangleBlurTransitionCounter / (f32)kwlnRectangleBlurTransitionDuration, &kwlnRectangleBlurTransitionStartParameters,
+                        &kwlnRectangleBlurParameters, &kwlnRectangleBlurFrameParameters);
+        kwlnDrawInitRect(&kwlnRectangleBlurFrameParameters.bounds);
+        effCopyRectangleBlurParameters(&kwlnRectangleBlurFrameParameters);
+        if (kwlnRectangleBlurFrameParameters.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             effEnableRectangleBlur();
         }
         else {
@@ -706,13 +706,13 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnRectangleBlurFadeCounter < kwlnRectangleBlurFadeDuration) {
             kwlnRectangleBlurFadeCounter++;
         }
-        D_0043DD20 = kwlnRectangleBlurParameters;
+        kwlnRectangleBlurFrameParameters = kwlnRectangleBlurParameters;
         alpha = kwlnRectangleBlurStartAlpha + kwlnRectangleBlurFadeCounter *
                 (kwlnRectangleBlurTargetAlpha - kwlnRectangleBlurStartAlpha) /
                 kwlnRectangleBlurFadeDuration;
-        D_0043DD20.color.rgba = (D_0043DD20.color.rgba & 0xFFFFFF) | (alpha << 24);
-        kwlnDrawInitRect(&D_0043DD20.bounds);
-        effCopyRectangleBlurParameters(&D_0043DD20);
+        kwlnRectangleBlurFrameParameters.color.rgba = (kwlnRectangleBlurFrameParameters.color.rgba & 0xFFFFFF) | (alpha << 24);
+        kwlnDrawInitRect(&kwlnRectangleBlurFrameParameters.bounds);
+        effCopyRectangleBlurParameters(&kwlnRectangleBlurFrameParameters);
         if (alpha == 0) {
             effDisableRectangleBlur();
         }
@@ -727,10 +727,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnTexturedBlurTransitionCounter < kwlnTexturedBlurTransitionDuration) {
             kwlnTexturedBlurTransitionCounter++;
         }
-        evtBlendParamsB(1, (f32)kwlnTexturedBlurTransitionCounter / (f32)kwlnTexturedBlurTransitionDuration, &D_0043E3C0,
-                        &kwlnTexturedBlurParameters, &D_0043DC90);
-        effCopyTexturedBlurParameters((EffBlurTemplateBody *)&D_0043DC90);
-        if (D_0043DC90.source.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        evtBlendParamsB(1, (f32)kwlnTexturedBlurTransitionCounter / (f32)kwlnTexturedBlurTransitionDuration, &kwlnTexturedBlurTransitionStartParameters,
+                        &kwlnTexturedBlurParameters, &kwlnTexturedBlurFrameParameters);
+        effCopyTexturedBlurParameters((EffBlurTemplateBody *)&kwlnTexturedBlurFrameParameters);
+        if (kwlnTexturedBlurFrameParameters.source.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             effEnableTexturedBlur();
         }
         else {
@@ -744,12 +744,12 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnTexturedBlurFadeCounter < kwlnTexturedBlurFadeDuration) {
             kwlnTexturedBlurFadeCounter++;
         }
-        D_0043DC90 = kwlnTexturedBlurParameters;
+        kwlnTexturedBlurFrameParameters = kwlnTexturedBlurParameters;
         alpha = kwlnTexturedBlurStartAlpha + kwlnTexturedBlurFadeCounter *
                 (kwlnTexturedBlurTargetAlpha - kwlnTexturedBlurStartAlpha) /
                 kwlnTexturedBlurFadeDuration;
-        D_0043DC90.source.color.rgba = (D_0043DC90.source.color.rgba & 0xFFFFFF) | (alpha << 24);
-        effCopyTexturedBlurParameters((EffBlurTemplateBody *)&D_0043DC90);
+        kwlnTexturedBlurFrameParameters.source.color.rgba = (kwlnTexturedBlurFrameParameters.source.color.rgba & 0xFFFFFF) | (alpha << 24);
+        effCopyTexturedBlurParameters((EffBlurTemplateBody *)&kwlnTexturedBlurFrameParameters);
         if (alpha == 0) {
             effDisableTexturedBlur();
         }
@@ -764,10 +764,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnFilterBlurTransitionCounter < kwlnFilterBlurTransitionDuration) {
             kwlnFilterBlurTransitionCounter++;
         }
-        evtBlendParamsE(1, (f32)kwlnFilterBlurTransitionCounter / (f32)kwlnFilterBlurTransitionDuration, &D_0043E420,
-                        &kwlnFilterBlurParameters, &D_0043DCC0);
-        effCopyFilterBlurParameters(&D_0043DCC0);
-        if (((u8 *)&D_0043DCC0.color)[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        evtBlendParamsE(1, (f32)kwlnFilterBlurTransitionCounter / (f32)kwlnFilterBlurTransitionDuration, &kwlnFilterBlurTransitionStartParameters,
+                        &kwlnFilterBlurParameters, &kwlnFilterBlurFrameParameters);
+        effCopyFilterBlurParameters(&kwlnFilterBlurFrameParameters);
+        if (((u8 *)&kwlnFilterBlurFrameParameters.color)[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             effEnableFilterBlur();
         }
         else {
@@ -781,12 +781,12 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnFilterBlurFadeCounter < kwlnFilterBlurFadeDuration) {
             kwlnFilterBlurFadeCounter++;
         }
-        D_0043DCC0 = kwlnFilterBlurParameters;
+        kwlnFilterBlurFrameParameters = kwlnFilterBlurParameters;
         alpha = kwlnFilterBlurStartAlpha + kwlnFilterBlurFadeCounter *
                 (kwlnFilterBlurTargetAlpha - kwlnFilterBlurStartAlpha) /
                 kwlnFilterBlurFadeDuration;
-        D_0043DCC0.color = (D_0043DCC0.color & 0xFFFFFF) | (alpha << 24);
-        effCopyFilterBlurParameters(&D_0043DCC0);
+        kwlnFilterBlurFrameParameters.color = (kwlnFilterBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
+        effCopyFilterBlurParameters(&kwlnFilterBlurFrameParameters);
         if (alpha == 0) {
             effDisableFilterBlur();
         }
@@ -801,10 +801,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnStaggeredBlurTransitionCounter < kwlnStaggeredBlurTransitionDuration) {
             kwlnStaggeredBlurTransitionCounter++;
         }
-        evtBlendParamsF(1, (f32)kwlnStaggeredBlurTransitionCounter / (f32)kwlnStaggeredBlurTransitionDuration, &D_0043E480,
-                        &kwlnStaggeredBlurParameters, &D_0043DCF0);
-        effCopyStaggeredBlurParameters((EffBlurScaleParams *)&D_0043DCF0);
-        if (D_0043DCF0.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        evtBlendParamsF(1, (f32)kwlnStaggeredBlurTransitionCounter / (f32)kwlnStaggeredBlurTransitionDuration, &kwlnStaggeredBlurTransitionStartParameters,
+                        &kwlnStaggeredBlurParameters, &kwlnStaggeredBlurFrameParameters);
+        effCopyStaggeredBlurParameters((EffBlurScaleParams *)&kwlnStaggeredBlurFrameParameters);
+        if (kwlnStaggeredBlurFrameParameters.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             effEnableStaggeredBlur();
         }
         else {
@@ -818,12 +818,12 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnStaggeredBlurFadeCounter < kwlnStaggeredBlurFadeDuration) {
             kwlnStaggeredBlurFadeCounter++;
         }
-        D_0043DCF0 = kwlnStaggeredBlurParameters;
+        kwlnStaggeredBlurFrameParameters = kwlnStaggeredBlurParameters;
         alpha = kwlnStaggeredBlurStartAlpha + kwlnStaggeredBlurFadeCounter *
                 (kwlnStaggeredBlurTargetAlpha - kwlnStaggeredBlurStartAlpha) /
                 kwlnStaggeredBlurFadeDuration;
-        D_0043DCF0.color.rgba = (D_0043DCF0.color.rgba & 0xFFFFFF) | (alpha << 24);
-        effCopyStaggeredBlurParameters((EffBlurScaleParams *)&D_0043DCF0);
+        kwlnStaggeredBlurFrameParameters.color.rgba = (kwlnStaggeredBlurFrameParameters.color.rgba & 0xFFFFFF) | (alpha << 24);
+        effCopyStaggeredBlurParameters((EffBlurScaleParams *)&kwlnStaggeredBlurFrameParameters);
         if (alpha == 0) {
             effDisableStaggeredBlur();
         }
@@ -838,11 +838,11 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnColorRectangleTransitionCounter < kwlnColorRectangleTransitionDuration) {
             kwlnColorRectangleTransitionCounter++;
         }
-        evtPolygonMovieBlendMatrixParam(1, (f32)kwlnColorRectangleTransitionCounter / (f32)kwlnColorRectangleTransitionDuration, &D_0043E530,
-                                        &kwlnColorRectangleParameters, &D_0043DD50);
-        kwlnDrawInitRect(&D_0043DD50.bounds);
-        effCopyColorRectangleParameters((EffSolidRectParams *)&D_0043DD50);
-        if (D_0043DD50.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        evtPolygonMovieBlendMatrixParam(1, (f32)kwlnColorRectangleTransitionCounter / (f32)kwlnColorRectangleTransitionDuration, &kwlnColorRectangleTransitionStartParameters,
+                                        &kwlnColorRectangleParameters, &kwlnColorRectangleFrameParameters);
+        kwlnDrawInitRect(&kwlnColorRectangleFrameParameters.bounds);
+        effCopyColorRectangleParameters((EffSolidRectParams *)&kwlnColorRectangleFrameParameters);
+        if (kwlnColorRectangleFrameParameters.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             effEnableColorRectangle();
         }
         else {
@@ -856,13 +856,13 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnColorRectangleFadeCounter < kwlnColorRectangleFadeDuration) {
             kwlnColorRectangleFadeCounter++;
         }
-        D_0043DD50 = kwlnColorRectangleParameters;
+        kwlnColorRectangleFrameParameters = kwlnColorRectangleParameters;
         alpha = kwlnColorRectangleStartAlpha + kwlnColorRectangleFadeCounter *
                 (kwlnColorRectangleTargetAlpha - kwlnColorRectangleStartAlpha) /
                 kwlnColorRectangleFadeDuration;
-        D_0043DD50.color.rgba = (D_0043DD50.color.rgba & 0xFFFFFF) | (alpha << 24);
-        kwlnDrawInitRect(&D_0043DD50.bounds);
-        effCopyColorRectangleParameters((EffSolidRectParams *)&D_0043DD50);
+        kwlnColorRectangleFrameParameters.color.rgba = (kwlnColorRectangleFrameParameters.color.rgba & 0xFFFFFF) | (alpha << 24);
+        kwlnDrawInitRect(&kwlnColorRectangleFrameParameters.bounds);
+        effCopyColorRectangleParameters((EffSolidRectParams *)&kwlnColorRectangleFrameParameters);
         if (alpha == 0) {
             effDisableColorRectangle();
         }
@@ -877,10 +877,10 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnTexturedSquareTransitionCounter < kwlnTexturedSquareTransitionDuration) {
             kwlnTexturedSquareTransitionCounter++;
         }
-        evtBlendParamsD(1, (f32)kwlnTexturedSquareTransitionCounter / (f32)kwlnTexturedSquareTransitionDuration, &D_0043E560,
-                        &kwlnTexturedSquareParameters, &D_0043DD70);
-        effCopyTexturedSquareParameters((EffResourceRectParams *)&D_0043DD70);
-        if (D_0043DD70.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        evtBlendParamsD(1, (f32)kwlnTexturedSquareTransitionCounter / (f32)kwlnTexturedSquareTransitionDuration, &kwlnTexturedSquareTransitionStartParameters,
+                        &kwlnTexturedSquareParameters, &kwlnTexturedSquareFrameParameters);
+        effCopyTexturedSquareParameters((EffResourceRectParams *)&kwlnTexturedSquareFrameParameters);
+        if (kwlnTexturedSquareFrameParameters.color.channels[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             effEnableTexturedSquare();
         }
         else {
@@ -894,12 +894,12 @@ void kwlnAdvanceDrawFadesAndTransitions(void) {
         if (kwlnTexturedSquareFadeCounter < kwlnTexturedSquareFadeDuration) {
             kwlnTexturedSquareFadeCounter++;
         }
-        D_0043DD70 = kwlnTexturedSquareParameters;
+        kwlnTexturedSquareFrameParameters = kwlnTexturedSquareParameters;
         alpha = kwlnTexturedSquareStartAlpha + kwlnTexturedSquareFadeCounter *
                 (kwlnTexturedSquareTargetAlpha - kwlnTexturedSquareStartAlpha) /
                 kwlnTexturedSquareFadeDuration;
-        D_0043DD70.color.rgba = (D_0043DD70.color.rgba & 0xFFFFFF) | (alpha << 24);
-        effCopyTexturedSquareParameters((EffResourceRectParams *)&D_0043DD70);
+        kwlnTexturedSquareFrameParameters.color.rgba = (kwlnTexturedSquareFrameParameters.color.rgba & 0xFFFFFF) | (alpha << 24);
+        effCopyTexturedSquareParameters((EffResourceRectParams *)&kwlnTexturedSquareFrameParameters);
         if (alpha == 0) {
             effDisableTexturedSquare();
         }
