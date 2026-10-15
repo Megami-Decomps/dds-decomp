@@ -24,12 +24,12 @@ extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 
 
 
-void mnuDrawStaffBulletItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    mnuDrawCampGridEntry(arg0, arg1, arg2, 0, arg3, arg4, arg5);
+void mnuDrawStaffBulletItemListEntry(s32 x, s32 y, s32 z, s32 list, s32 node, s32 drawArg) {
+    mnuDrawCampGridEntry(x, y, z, 0, list, node, drawArg);
 }
 
-void mnuDrawStaffItemListEntry(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    mnuDrawCampGridEntry(arg0, arg1, arg2, 0x200, arg3, arg4, arg5);
+void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, s32 list, s32 node, s32 drawArg) {
+    mnuDrawCampGridEntry(x, y, z, 0x200, list, node, drawArg);
 }
 
 extern char (*D_00435E5C)[25];
