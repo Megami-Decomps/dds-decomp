@@ -14010,3 +14010,33 @@ remain separate and keep their existing names.
 These identifier-only names retain the original data ownership and prior
 Harbor Maple/Luna/Halcyon reconstruction credit; no body, layout, cast,
 initializer, access order or generated assembly is changed.
+
+
+## Billboard facing vectors, pending heads and scatter-pool draw banks
+
+The child and paired billboard paths keep separate native reference-axis
+and mutable scale vectors. `billChildFacingReferenceAxis` and
+`billPairFacingReferenceAxis` are `(0,1,0,0)`; both scale vectors start as
+`(1,1,1,0)`. Each path writes only the scale's Y component to
+`1.0-fabs(dot)` before its existing matrix-row scaling. Preserve the
+floating expression, writable declarations and distinct objects.
+
+`billPendingChildList` links children with newly pending packets and is
+cleared by the flush and resource-dispatch lifecycle. Its existing pointer
+declaration in billManager and s32 zero-store carrier declaration in the
+initialization unit are retained. `billPendingRenderPairList` is the
+corresponding intrusive paired-stream head. No lifecycle or owner changes.
+
+`effScatterPoolDrawParams` is the native 0x30-byte shared draw descriptor.
+The index bank has twenty native packed triangle words: the full path uses
+sixteen for twenty-four vertices; the remaining four words stay present.
+The texture-coordinate bank retains all forty-eight words (192 bytes),
+selected only for the optional shared texture. The four-cell draw surface
+bank retains its duplicated first two pointers and unchecked poolMode
+index. Do not shrink banks to one batch or change tail-group arithmetic.
+
+These are identifier-only names. The billboard draw bank overlapping the
+next vector's zero first word is not selected or retyped. The Magatuhi UV
+cache is also excluded because the held history-trail ASM references it.
+No headers, types, bounds, flags, literals, data ownership, assembly,
+callbacks or game behavior change.

@@ -28,10 +28,10 @@ extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
 extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
-extern f32 D_0034E010[4];
-extern f32 D_0034E020[4];
+extern f32 billChildFacingReferenceAxis[4];
+extern f32 billChildFacingScale[4];
 extern f64 fabs(f64 value);
-extern BillChildPayload *D_003BD7F4;
+extern BillChildPayload *billPendingChildList;
 
 /* Keep each child's pending list synchronized with the instance's draw mode,
  * then append one quad to its fifteen-record streams. */
@@ -73,13 +73,13 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, D_0034E010);
+            VU0_LOAD_VF(vf11, billChildFacingReferenceAxis);
             VU0_DOT_XYZ(dot, vf10, vf11);
-            D_0034E020[1] = 1.0 - fabs(dot);
+            billChildFacingScale[1] = 1.0 - fabs(dot);
             VU0_STORE_VF(vf10, direction);
             VU0_MOVE_VF_EXTENDED(vf11, vf10);
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            VU0_LOAD_VF_MEMORY(vf10, D_0034E020);
+            VU0_LOAD_VF_MEMORY(vf10, billChildFacingScale);
             VU0_SCALE_MATRIX_ROWS(vf10);
             VU0_STORE_MATRIX(matrix);
         } else {
@@ -89,8 +89,8 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         sdfInitGeometryDmaPacket(geometry, matrix);
         sdfAppendPacket(child->pendingLists[selected], (u32)geometry);
         if (child->next == child) {
-            child->next = D_003BD7F4;
-            D_003BD7F4 = child;
+            child->next = billPendingChildList;
+            billPendingChildList = child;
         }
     }
     work = child->work;
@@ -143,13 +143,13 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
 
 
 
-extern BillChildPayload *D_003BD7F4;
+extern BillChildPayload *billPendingChildList;
 extern SdfPoolNode *D_0034E030[5];
 
 void billFlushPendingChildPackets(void) {
     BillChildPayload *node;
 
-    node = D_003BD7F4;
+    node = billPendingChildList;
     if (node != NULL) {
         do {
             BillPacketWork *work = node->work;
@@ -179,14 +179,14 @@ void billFlushPendingChildPackets(void) {
             }
         } while (node != NULL);
     }
-    D_003BD7F4 = NULL;
+    billPendingChildList = NULL;
 }
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(s32 source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
-extern f32 D_0034E040[4];
-extern f32 D_0034E050[4];
-extern BillRenderPair *D_003BD7F8;
+extern f32 billPairFacingReferenceAxis[4];
+extern f32 billPairFacingScale[4];
+extern BillRenderPair *billPendingRenderPairList;
 extern void billFlushPairedQuadStreams(BillRenderPair *node);
 
 /* Initialize the paired texture/state list, then append one quad to each
@@ -259,13 +259,13 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, D_0034E040);
+            VU0_LOAD_VF(vf11, billPairFacingReferenceAxis);
             VU0_DOT_XYZ(dot, vf10, vf11);
-            D_0034E050[1] = 1.0 - fabs(dot);
+            billPairFacingScale[1] = 1.0 - fabs(dot);
             VU0_STORE_VF(vf10, direction);
             VU0_MOVE_VF_EXTENDED(vf11, vf10);
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            VU0_LOAD_VF_MEMORY(vf10, D_0034E050);
+            VU0_LOAD_VF_MEMORY(vf10, billPairFacingScale);
             VU0_SCALE_MATRIX_ROWS(vf10);
             VU0_STORE_MATRIX(matrix);
         } else {
@@ -273,8 +273,8 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
         }
         sdfInitGeometryDmaPacket(geometry, matrix);
         sdfAppendPacket(node->packetList, (u32)geometry);
-        node->next = D_003BD7F8;
-        D_003BD7F8 = node;
+        node->next = billPendingRenderPairList;
+        billPendingRenderPairList = node;
     }
     child = node->children[1];
     work = child->work;
@@ -387,7 +387,7 @@ extern SdfPoolNode D_00325228;
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 void billFlushPendingRenderPairs(void) {
-    BillRenderPair *node = D_003BD7F8;
+    BillRenderPair *node = billPendingRenderPairList;
     SdfListHead *list;
     SdfDmaReferenceChainPacket *texture;
     BillStatePacket *packet;
@@ -419,7 +419,7 @@ void billFlushPendingRenderPairs(void) {
     packet->alphaRegister = 0x42;
     sdfAppendPacket(list, (u32)packet);
     D_00325228.append(&D_00325228, list);
-    D_003BD7F8 = NULL;
+    billPendingRenderPairList = NULL;
 }
 
 void billInitializeCommonDrawState(BillObj *billboard) {

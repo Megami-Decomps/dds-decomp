@@ -9,7 +9,7 @@
 #include "eff_bill_resource_init.h"
 
 #include "sdf.h"
-extern s32 D_003BD7F4;
+extern s32 billPendingChildList;
 extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
@@ -71,7 +71,7 @@ void effInitializeBillResourceOwners(void) {
     BillObj *billboard;
     BillChildPayload *payload;
 
-    D_003BD7F4 = 0;
+    billPendingChildList = 0;
     i = 0;
     do {
         billboard = billCreateFromResource(effBillResourceInitTable[i].billboardKind,
@@ -87,7 +87,7 @@ void effInitializeBillResourceOwners(void) {
 void effBillDispatchAll(void) {
     u32 i;
 
-    D_003BD7F4 = 0;
+    billPendingChildList = 0;
     for (i = 0; i < 15; i++) {
         billDispatchByKind(effBillResourceOwners[i]);
     }
