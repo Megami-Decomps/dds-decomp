@@ -4359,18 +4359,18 @@ s32 btlMapCommandToSkill(u32 command) {
 }
 
 /* Map linked-command responses; response 1 on these boss modes starts a one-tick shake task. */
-s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
+s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 commandResult) {
     BtlRuntimeTask *task;
 
     if (!(unit->status.flags & 0x400)) {
-        return arg1;
+        return commandResult;
     }
     switch (unit->partyRecord.unitId) {
     case 0x11B:
-        if (arg1 == 2) {
+        if (commandResult == 2) {
             return 0;
         }
-        if (arg1 == 0xD) {
+        if (commandResult == 0xD) {
             return -1;
         }
         break;
@@ -4380,7 +4380,7 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
     case 0x140:
     case 0x141:
     case 0x142:
-        switch (arg1) {
+        switch (commandResult) {
         case 2:
             return 0;
         case 3:
@@ -4403,7 +4403,7 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
         }
         break;
     }
-    return arg1;
+    return commandResult;
 }
 /* HARI2 turn hook: mode 2 rerolls agility for units 0x13D..0x142; mode 1 queues 0xD2
  * for a random 0x2000-status party task; otherwise unit 0x11B queues 0xD5 into a free slot. */
