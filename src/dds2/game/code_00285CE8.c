@@ -13,7 +13,7 @@ extern void evtPrintDeveloperConsoleMessage();
 
 extern void mnuClearCampResourceFlagEntries(void);
 
-extern void mnuSynchronizeMantraModelFlags(s32 arg);
+extern void mnuSynchronizeMantraModelFlags(s32 mode);
 
 extern void mtrRecomputeMantraFlagsForPartyUnit(void *record);
 
