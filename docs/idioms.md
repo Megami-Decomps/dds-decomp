@@ -12789,3 +12789,38 @@ multiplied before `0.5f`; its native `.lit4` address is not a mutable global.
 Capture the selected parameter after both direction callbacks and before
 publishing the action flags and motion parameter. DDS2 additionally preserves
 its single-target fallback, disabled by animation flag `0x80`.
+
+## Administrative mode callback stubs: pending is not complete
+
+`ddsAdminModeCallbacks` begins at DDS1 `0x003297D0` / DDS2
+`0x003847D0`. Each 12-byte row has `entry`, `destroy`, and `cleanup`
+callbacks, as declared in `include/dds3_admin_dispatch.h`. The native table
+rows, rather than nearby function order alone, establish each stub's role.
+
+`dds3AdminPollModeCompletion` sets completion flag 2 only when `cleanup()`
+returns nonzero. A zero-returning cleanup therefore keeps its mode pending;
+it does not finish the mode. The existing `evtKeepInterfaceModePending` is
+the same pattern. `dds3AdminPollModeDestruction` accepts destroy result zero
+and stores a one-frame transition delay. An empty entry has no side effects.
+
+The following names are shared by both games. Existing callback signatures,
+constant returns, and definition order are deliberately unchanged. Mode eight
+has no evidenced scene identity, so its names retain the native table index.
+
+| DDS1 | DDS2 | Name | Native registry role |
+|---|---|---|---|
+| `0010A210` | `0010A350` | `evtKeepSelectionModePending` | Mode 0 cleanup |
+| `0010A2D8` | `0010A418` | `evtKeepTitleMenuModePending` | Mode 2 cleanup |
+| `0010A390` | `0010A4D0` | `evtKeepStaffMovieModePending` | Mode 12 cleanup |
+| `0010A478` | `0010A5B8` | `evtKeepSelectedAreaModePending` | Mode 5 cleanup |
+| `0010A498` | `0010A5D8` | `evtDestroySelectionFadeOutNoOp` | Mode 11 destroy |
+| `0010A4A0` | `0010A5E0` | `evtKeepSelectionFadeOutPending` | Mode 11 cleanup |
+| `0010A540` | `0010A680` | `evtKeepSkyEventModePending` | Mode 6 cleanup |
+| `0010A5A0` | `0010A6E0` | `evtAdminModeEightEntryNoOp` | Mode 8 entry |
+| `0010A5A8` | `0010A6E8` | `evtAdminModeEightDestroyNoOp` | Mode 8 destroy |
+| `0010A5B0` | `0010A6F0` | `evtIsAdminModeEightComplete` | Mode 8 cleanup |
+| `0010A780` | `0010A8C0` | `evtKeepBattleStageTestModePending` | Mode 15 cleanup |
+| `0010A7E0` | `0010A920` | `evtKeepTestSkyModePending` | Mode 16 cleanup |
+| `0010A838` | `0010A978` | `evtKeepEventViewerModePending` | Mode 17 cleanup |
+| `0010AA58` | `0010AB98` | `evtDestroyFontTestModeNoOp` | Mode 25 destroy |
+| `0010AAC0` | `0010AC00` | `evtKeepMovieViewerModePending` | Mode 26 cleanup |
