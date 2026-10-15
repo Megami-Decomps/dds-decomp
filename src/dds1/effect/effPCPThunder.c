@@ -1834,8 +1834,8 @@ void effThunderGroupRelease(EffThunderGroup *group) {
 }
 
 /* Preserve the address word; the paired blur caller fills the leading point vectors. */
-u32 effGetPairedBlurResourceVectorRecordAddress(u32 arg0) {
-    return arg0;
+u32 effGetPairedBlurResourceVectorRecordAddress(u32 vectorRecordAddress) {
+    return vectorRecordAddress;
 }
 
 /* Sets the blend colour word of a resource handle (see the blur caller in
