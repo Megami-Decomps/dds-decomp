@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -66,7 +67,6 @@ extern void fldReleaseMapRequestQueues(void);
 extern void fldReleaseCameraColorEffect(void);
 extern void sdfDisableFlagListViewTargetRelativeMode(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
-extern s32 dspCloseChannel(void);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
 extern void sprintf(char *, char *, ...);

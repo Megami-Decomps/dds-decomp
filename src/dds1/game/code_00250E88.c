@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "dsp_name.h"
 #include "sdf_resource.h"
@@ -485,7 +486,6 @@ MnuMantraGridEntry *fldGetSceneMetadataNode(void) {
     return (MnuMantraGridEntry *)(u32)scene->gridHandle->cursor->value;
 }
 
-extern s32 dspCloseChannel(void);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern void *memcpy(void *, const void *, u32);

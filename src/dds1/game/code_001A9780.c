@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dsp_channel.h"
 #include "mdl_flag_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_task_state6_api.h"
@@ -48,7 +49,6 @@ extern SceneSlotFadeWork *D_003BD83C;
 
 extern ActorSlotOrder *D_003BD840[2];
 
-extern void dspCloseChannel(void);
 
 
 extern void evtCreateMessageWindowIfMissing(void *text);
