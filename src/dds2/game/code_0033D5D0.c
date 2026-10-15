@@ -1625,13 +1625,13 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
 }
 
 /* Queue a byte-counted write; return -1 without changing an inactive request. */
-s32 sdfDevQueueWrite(DevState *state, void *buffer, s32 byteCount) {
+s32 sdfDevQueueWrite(DevState *state, const void *buffer, s32 byteCount) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
     state->requestExtra = byteCount;
     state->operation = SDF_DEV_OPERATION_WRITE;
-    state->requestData = buffer;
+    state->requestData = (void *)buffer;
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
     return 0;
 }
