@@ -120,7 +120,7 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 u32 mnuTestListFlagTwo(u32 *flags);
 
 /* Return the stored row step times the visible row count, in native units. */
-s32 mnuGetListViewportHeight(MenuList *list) {
+s32 mnuGetListViewportHeight(const MenuList *list) {
     return list->rowStep * list->visibleCount;
 }
 

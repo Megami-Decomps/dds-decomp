@@ -79,7 +79,7 @@ void mnuResetNodeLinks(struct MenuList *list, s32 restoreCursor);
 /* Select the indexed node and report whether the index exists. */
 s32 mnuSeekListNode(s32 index, struct MenuList *list);
 /* Height in native units: row step multiplied by the visible row count. */
-s32 mnuGetListViewportHeight(struct MenuList *list);
+s32 mnuGetListViewportHeight(const struct MenuList *list);
 /* Clear the animation timer on every node in the list. */
 void mnuResetListNodeFadeCounters(struct MenuList *list);
 /* Reduce positive node fade timers by one step, clamping below zero. */
