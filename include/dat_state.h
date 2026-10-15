@@ -121,7 +121,7 @@ typedef struct DatPartyRecord {
     };
     u16 unk18C;
     u16 unk18E;
-    u16 unk190;
+    u16 actionSlot; /* 0x190: saved command-table slot; matches DDS2's actionSlot. */
     u8 pad192[2];
     s32 randomizedValue;
     s32 huntExp; /* 0x198: hunt EP accumulated this battle (shared by ability 0x24C) */

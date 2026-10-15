@@ -228,7 +228,7 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     dst->status = src->status & 0x7FFF;
     dst->unk18C = src->unk18C;
     dst->unk18E = src->unk18E;
-    dst->unk190 = src->unk190;
+    dst->actionSlot = src->actionSlot;
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
 
