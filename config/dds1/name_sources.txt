@@ -2969,22 +2969,22 @@
 0x001BD070	btlIsSceneActorLimitSatisfied	inferred	Accepts a flagged scene actor or tests the count against the requested limit. [names_reviewed14.tsv]
 0x001BD190	btlGetCommandOptionCount	inferred	U0
 0x001BD658	btlBuildEligibleActorList	inferred	Unless current battle entry disables selection, scans 192 actor slots and flags, writing pairs of slot index and actor identifier and returning their count.
-0x001BDE98	fldDispatchSceneKindHandler	inferred	twin 0x001C91D8: switch on btlGetActorCommandClass(kind) -> per-state handler
+0x001BDE98	btlDrawCommandClassRows	inferred	Existing matched dispatcher selects command row drawers via btlGetActorCommandClass and command-panel classIndex; case0/4/2/3/6 draw the corresponding command rows or retreat label; identifier only.
 0x001BE8A0	btlDrawItemCommandRows	inferred	LeverAudit
 0x001BEA80	btlDrawRetreatCommandLabel	inferred	Draws the literal Retreat command label in the battle menu. [names_reviewed12.tsv]
 0x001BF488	fldGetSceneObjectState	inferred	Returns active scene object state or zero without an active task. [names_reviewed5.tsv]
-0x001BF790	fldSetSceneObjectAndGroupStates	inferred	Sets a present scene object and the shared scene group to their next states. [names_reviewed17.tsv]
+0x001BF790	btlRequestCommandPanelClose	inferred	Existing matched helper requests command object state5 and visual-panel state3; native command callback returns -1 at state5, so this is a close request; identifier only.
 0x001BF7C8	fldGetSceneDirectionStepOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
 0x001C1188	btlDrawCenteredPanelSegments	inferred	Draws centered battle panel segments using width-derived positions. [names_reviewed12.tsv]
-0x001C1290	fldStepSceneStateMachine	inferred	DDS2 twin func_001CC8D0 has this name; DDS1 adds mode 0x10E branch (all linked entries idle -> mode 5) [names_reviewed2.tsv]
-0x001C1708	fldCreateSceneSpriteTask	inferred	twin 0x001CCC38: destroys sub tasks then creates the scene sprite task and attaches to taskParent
-0x001C1820	fldMarkActiveSceneScriptState	inferred	Writes the next scene-script state only when its task user value exists. [names_reviewed17.tsv]
+0x001C1290	btlUpdateTargetSelectionTask	inferred	Existing matched target-selection task updates selection input and target actor panels in state 2; state 6 returns -1; identifier only.
+0x001C1708	btlCreateTargetSelectionTask	inferred	Existing matched creator closes auxiliary battle panels, creates the target-selection input/draw task and records its handle; identifier only.
+0x001C1820	btlRequestTargetSelectionClose	inferred	Native 001C1838/001C183C and twin 001CCD68/001CCD6C store state 6; selector callback case 6 returns -1, so this requests closing rather than marking active; identifier only.
 0x001C4048	btlFindSceneSlotById	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001C4100	btlFadeStaleSceneSlots	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001C4418	fldSceneCleanupTask	inferred	task callback: calls func_001C4278 unless scene waits on D_003BB3D8
-0x001C4470	fldResetSceneStatus	inferred	Sets battle scene work sceneStatus to zero. [names_reviewed5.tsv]
-0x001C4490	fldBeginSceneTransition	inferred	btlSetCommandPanelFadeMode(1,8) and sets scene flag 0x200
-0x001C44D0	fldClearSceneTransition	inferred	Clears the transition mode by passing zero to scene transition setter. [names_reviewed5.tsv]
+0x001C4418	btlUpdateScenePanelTask	inferred	Existing matched scene-panel task gates updates on battle0x200 and presentation/blocking state, then calls native actor-slot presentation/render manager001C4278 or001CF800; not a cleanup routine; identifier only.
+0x001C4470	btlClearScenePanelTaskHandle	inferred	Existing matched destructor callback only clears the scene-panel task handle (D1cleanupTask/D2sceneStatus); no resource-release or owner-layout change; identifier only.
+0x001C4490	btlBeginScenePanelFadeIn	inferred	Existing matched wrapper requests mode1 eight-frame panel entrance and enables battle0x200 panel updates; mode1 restores command/actor/registered panel presentation; identifier only.
+0x001C44D0	btlBeginScenePanelFadeOut	inferred	Existing matched wrapper requests mode0 eight-frame panel exit; mode0 enters visual hiding states; preserve the native runtime call and all body operations; identifier only.
 0x001C4658	fldDestroySceneTasksAndBuffers	inferred	U2
 0x001C48B8	fldBattleSceneEnterInit	inferred	Established DDS2 counterpart and source-level behavior agree (0.72 match). [names_reviewed19.tsv]
 0x001C4968	btlLoadBankWhenTasksIdle	inferred	Loads the battle sound bank only once the checked stream and tasks are ready. [names_reviewed8.tsv]
@@ -3477,7 +3477,7 @@
 0x001FA698	btlScriptSetBattleCommand	inferred	Reads script parameter and dispatches to func_001FF030 with current command context. [names_R_FuncNames3.tsv]
 0x001FA6D8	btlResetCommandContextAndSetStateFlag	inferred	Resets command mode/value and sets an otherwise-untyped state byte; active-state identity is unproven. [names_reviewed12.tsv]
 0x001FA718	btlScriptClearSceneTransition	inferred	Battle script opcode clears field scene transition before returning command success. [names_reviewed18.tsv]
-0x001FA738	btlScriptBeginSceneTransition	inferred	Calls fldBeginSceneTransition. [names_R_FuncNames3.tsv]
+0x001FA738	btlScriptBeginSceneTransition	inferred	Calls btlBeginScenePanelFadeIn. [names_R_FuncNames3.tsv]
 0x001FA758	btlScriptFlagAllUnitsDefeatCandidates	inferred	Calls btlFlagAllUnitsDefeatCandidate. [names_R_FuncNames3.tsv]
 0x001FA778	btlScriptFlagPlayerDefeatCandidates	inferred	clears existing defeat candidates then flags units bearing the player-side bit [names_reviewed5.tsv]
 0x001FA7A0	btlScriptFlagEnemyDefeatCandidates	inferred	clears existing defeat candidates then flags units bearing the enemy-side bit [names_reviewed5.tsv]
@@ -7783,7 +7783,7 @@
 0x001BA660	btlUpdateActorPanelSecondaryPulse	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001BCB88	btlSetCommandPanelFadeMode	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001BF4C0	btlOpenBattleCommandPanel	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x001C13E8	btlCreateAiWork	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C13E8	btlCreateTargetSelectionWork	inferred	Existing matched SceneAiWork allocator builds candidate and selected-target index lists, chooses the initial selection and sets state 1; retain both games existing signatures; identifier only.
 0x001C3B28	btlDrawSceneSlotGlyphGrid	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001C7028	btlFinishScenePartyRecovery	inferred	Inferred from the current C implementation in game/code_001C48A8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001F4D50	btlExpandPartyFormationAroundCenter	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -9588,3 +9588,12 @@
 0x0036AA60	mnuShopPrimarySpriteNames	inferred	confidence=high; Matched shop resource loaders consume the first pointer as their primary sprite resource. DDS1 one s32 pointer names shop_spr.spr; DDS2 four const-char pointers hold mad_mat.spr,mad_bg.spr,s_mat_bg.spr,NULL and extra background selection. Common role, not identical shape or filename; imported pointees remain raw. [Namer1 readability b99; matched/native shop and terminal record evidence; names_reviewed]
 0x0036AB64	mnuShopReturnFadePopupEntry	inferred	confidence=high; DDS1 return-fade counterpart of DDS2 003CE690: installed after the20-tick idle progress delay; native enter restores display flags/releases the track, leave is evtStartFadeOut, and the poll waits for the main-task/active-flag barrier before selecting0036AB80. Keep its distinct poll mechanism and every pointer word. [Namer1 readability b99; matched/native shop and terminal record evidence; names_reviewed]
 0x0036AB80	mnuShopFadeCompletePopupEntry	inferred	confidence=high; DDS1 counterpart of DDS2 003CE6AC: the preceding return-fade poll selects this native seven-word marker with three zeros, three FFFFFFFF words and evtIsFadeDispatchIdle. Preserve the marker values without assigning meanings to the sentinels. [Namer1 readability b99; matched/native shop and terminal record evidence; names_reviewed]
+0x001C1620	btlReleaseTargetSelectionWork	inferred	Existing matched helper frees selected and candidate target index lists, then the target-selection work allocation; identifier only.
+0x001C1658	btlReleaseTargetSelectionTask	inferred	Existing matched target-selection task teardown releases its work and clears BtlState.spriteObject; identifier only.
+0x001C1688	btlGetTargetSelectionWork	inferred	Existing matched helper looks up the target-selection task by its unchanged runtime name and returns its user value or zero; identifier only.
+0x001C16C8	btlGetTargetSelectionState	inferred	Existing matched helper reads the target-selection phase consumed as confirmation/cancellation by btlInitializeActorCommandState; identifier only.
+0x001C16E8	btlGetSelectedTargetList	inferred	Existing matched getter returns selection listB at work+0x10; actor-command initialization copies this list into command target indices; retain existing pointer/u32 views; identifier only.
+0x001BCDC8	btlUpdateSceneFlow	inferred	Existing matched per-frame battle-presentation helper advances RNG, conditional scene/history reset, input/model flags and command-UI transition; called every active presentation frame, not a one-time initializer; identifier only.
+0x001BF3C8	btlReleaseCommandPanelTask	inferred	Existing matched command-panel task teardown frees BattleSceneObject, clears sceneObject handle and releases battle scratch blocks; identifier only.
+0x001BF448	btlGetCommandPanelTaskWork	inferred	Existing matched helper looks up btlCommandPanelTaskNameRef and returns command-panel task user work or zero; preserve both games existing pointer declarations; identifier only.
+0x001C40A8	btlFindSceneSlotRecord	inferred	Existing matched borrowed-record getter follows btlFindSceneSlotById, returning runtime slots[index] or zero; preserves D1typed pointer and D2integer-argument/u8-pointer signatures; identifier only.

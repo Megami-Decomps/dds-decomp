@@ -2505,7 +2505,7 @@
 0x001C3D70	btlAdvancePendingSceneSlotStates	inferred	Transitions all pending scene slot entries from their active to next state. [names_reviewed16.tsv]
 0x001C7BA8	btlDrawGouraudTexturedPanelQuad	inferred	U0
 0x001C7D48	btlGetNamedTaskPairStatusOrUnavailable	inferred	confidence=high; src/dds2/game/code_001C35F0.c:func_001C7D48; Returns -128 when the tracked tasks are absent, 0 once the tracked handle reports the ready flag, else that handle's status. [names_qp9.tsv]
-0x001C7FF8	fldInitializeBattleSceneFlow	inferred	Initializes scene phase 7 and selected unit display, updates model flags and scene flow.
+0x001C7FF8	btlUpdateSceneFlow	inferred	Existing matched per-frame battle-presentation helper advances RNG, conditional scene/history reset, input/model flags and command-UI transition; called every active presentation frame, not a one-time initializer; identifier only.
 0x001C8078	btlDebugPrintf	inferred	DDS1 twin 0x001BCE48 is btlDebugPrintf; callers pass debug strings ("AI_BUGBUGBUG", "::Item is already thro...") [quiet3 twin unification]
 0x001C80D0	fldSubmitSceneObjectAtCoordinates	inferred	Scales x by 16 and y by 8, configures then submits a scene object handle; precise object type not established.
 0x001C8158	btlDrawIndexedBattleEntryGlyphs	inferred	Fetches indexed battle text, draws its glyph and restores the text draw limit. [names_reviewed16.tsv]
@@ -2514,40 +2514,40 @@
 0x001C83D0	fldUpdateSceneKindCounter	inferred	confidence=high; matched-C; src/dds2/game/code_001C7FF8.c:334:func_001C83D0; Refreshes the per-kind scene counter according to the selected scene kind and clamps its returned value to four unless requested otherwise.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001C89A0	fldCollectAvailableRosterEntries	inferred	Scans 256 roster entries and eight-byte availability records, packing available nonzero entries into a two-byte output list.
 0x001C8A28	btlGetActorLinkageSkillList	inferred	confidence=high; matched-C; Correction: prior actor-name/name-buffer interpretation was incorrect. Caches the count from native 0x001AC750 and returns shared BattleRosterTable of LINKAGE skill IDs and participant pairs; DDS1 twin 0x001BD708 refreshes its list on each call. Namer1 batch 11.
-0x001C91D8	fldDispatchSceneKindHandler	inferred	switch on btlGetActorCommandClass(arg, control->kind) to per-kind handlers func_001C92A0/9EA0, btlDrawItemCommandRows, func_001C98E8/9DC8
+0x001C91D8	btlDrawCommandClassRows	inferred	Existing matched dispatcher selects command row drawers via btlGetActorCommandClass and command-panel classIndex; case0/4/2/3/6 draw the corresponding command rows or retreat label; identifier only.
 0x001C9DC8	btlDrawRetreatCommandLabel	inferred	Draws the literal Retreat command label in the battle menu. [names_reviewed12.tsv]
 0x001CA390	btlCheckScenePairResult	inferred	confidence=high; matched-C; src/dds2/game/code_001C7FF8.c:489:func_001CA390; Queries self and both optional scene objects; returns self result first, then first-object result, then second-object result.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001CA490	btlUpdateBattleSceneCommands	inferred	TaskPurist4
-0x001CA760	fldClearBattleSceneObject	inferred	Releases the scene object's task work, clears BattleSceneWork.sceneObject, then runs scene teardown.
+0x001CA760	btlReleaseCommandPanelTask	inferred	Existing matched command-panel task teardown frees BattleSceneObject, clears sceneObject handle and releases battle scratch blocks; identifier only.
 0x001CA790	fldInitializeSceneObject	inferred	Clears 0x30-byte scene object and initializes owner, owner+0x20 subregion, and active flag.
-0x001CA7E0	fldGetSceneObjectTaskUserData	inferred	Finds the scene object task by name and returns its user data. [names_reviewed13.tsv]
+0x001CA7E0	btlGetCommandPanelTaskWork	inferred	Existing matched helper looks up btlCommandPanelTaskNameRef and returns command-panel task user work or zero; preserve both games existing pointer declarations; identifier only.
 0x001CA820	fldGetSceneObjectState	inferred	Returns active scene object state or zero without an active task. [names_reviewed5.tsv]
 0x001CA858	btlHasSpecialActiveSceneActor	inferred	Scans linked scene actors for active flags 0x401 and kind 0x4C or 0x3C.
 0x001CA958	btlHasSelectedActiveSceneActor	inferred	Returns true when an active scene actor has selection flag bit zero set.
 0x001CA9C0	btlHaveActiveSceneActorEntriesCleared	inferred	Returns true when none of the active actors has enabled entry flags at offset 0x120.
 0x001CAA30	fldSelectSceneMode	inferred	priority chain of mdlFlagTest checks returning scene mode 0..6
-0x001CB158	fldSetSceneObjectAndGroupStates	inferred	Sets a present scene object and the shared scene group to their next states. [names_reviewed17.tsv]
+0x001CB158	btlRequestCommandPanelClose	inferred	Existing matched helper requests command object state5 and visual-panel state3; native command callback returns -1 at state5, so this is a close request; identifier only.
 0x001CB190	fldGetSceneDirectionStepOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
 0x001CC7C8	btlDrawCenteredPanelSegments	inferred	Draws centered battle panel segments using width-derived positions. [names_reviewed12.tsv]
-0x001CC8D0	fldStepSceneStateMachine	inferred	switch on state (1->2, 2 runs btlUpdateTargetSelectionInput/btlUpdateAndDrawTargetActorPanels, 6 -> -1)
-0x001CC9C0	btlCreateAiWork	inferred	confidence=high; matched-C; src/dds2/game/code_001C7FF8.c:797:func_001CC9C0; Allocates scene AI work and two target index lists, populates them from current scene state and selects initial target entry.; source=reviewed-prior-QP15 [names_qp15.tsv]
-0x001CCB50	fldReleaseSceneSpriteWork	inferred	Releases both sprite resources and frees the sprite work allocation.
-0x001CCB88	fldReleaseSceneSprite	inferred	Releases current sprite using scene handle, then clears the scene object's slot at +0x2d4.
-0x001CCBB8	fldGetSceneScriptTaskUserData	inferred	Finds the scene script task by name and returns its user data. [names_reviewed13.tsv]
-0x001CCBF8	fldGetSceneScriptState	inferred	Reads the state word at offset zero of the current scene script state.
-0x001CCC18	fldGetSceneScriptValue	inferred	Reads the value at offset 0x10 of the current scene script state.
-0x001CCC38	fldCreateSceneSpriteTask	inferred	destroys the 4 scene sub tasks then creates the sprite task (fldStepSceneStateMachine / fldReleaseSceneSprite) stored at scene+0x2D4
-0x001CCD50	fldMarkActiveSceneScriptState	inferred	Writes the next scene-script state only when its task user value exists. [names_reviewed17.tsv]
+0x001CC8D0	btlUpdateTargetSelectionTask	inferred	Existing matched target-selection task updates selection input and target actor panels in state 2; state 6 returns -1; identifier only.
+0x001CC9C0	btlCreateTargetSelectionWork	inferred	Existing matched SceneAiWork allocator builds candidate and selected-target index lists, chooses the initial selection and sets state 1; retain both games existing signatures; identifier only.
+0x001CCB50	btlReleaseTargetSelectionWork	inferred	Existing matched helper frees selected and candidate target index lists, then the target-selection work allocation; identifier only.
+0x001CCB88	btlReleaseTargetSelectionTask	inferred	Existing matched target-selection task teardown releases its work and clears BtlState.spriteObject; identifier only.
+0x001CCBB8	btlGetTargetSelectionWork	inferred	Existing matched helper looks up the target-selection task by its unchanged runtime name and returns its user value or zero; identifier only.
+0x001CCBF8	btlGetTargetSelectionState	inferred	Existing matched helper reads the target-selection phase consumed as confirmation/cancellation by btlInitializeActorCommandState; identifier only.
+0x001CCC18	btlGetSelectedTargetList	inferred	Existing matched getter returns selection listB at work+0x10; actor-command initialization copies this list into command target indices; retain existing pointer/u32 views; identifier only.
+0x001CCC38	btlCreateTargetSelectionTask	inferred	Existing matched creator closes auxiliary battle panels, creates the target-selection input/draw task and records its handle; identifier only.
+0x001CCD50	btlRequestTargetSelectionClose	inferred	Native 001C1838/001C183C and twin 001CCD68/001CCD6C store state 6; selector callback case 6 returns -1, so this requests closing rather than marking active; identifier only.
 0x001CE3E8	fldScaleSceneCoordinateRecord	inferred	Scales the selected scene record's X by sixteen and Y by eight into its displayed-coordinate fields.
 0x001CE548	fldSetSceneSlotRange	inferred	Extends active scene slot range, initializes new slot flags and records upper bound.
 0x001CF500	fldInitSceneFadeRecords	inferred	copies the active scene slots into the 8 fading records (alpha 0x80, target -1) and clears the rest [names_M91_D2Battle.tsv]
-0x001CF630	fldFindSceneSlotRecord	inferred	Returns pointer to three-byte scene slot record or null if battle-scene identifier is absent.
+0x001CF630	btlFindSceneSlotRecord	inferred	Existing matched borrowed-record getter follows btlFindSceneSlotById, returning runtime slots[index] or zero; preserves D1typed pointer and D2integer-argument/u8-pointer signatures; identifier only.
 0x001CF720	fldCountSceneFadeKinds	inferred	counts fading records by kind 1/2 (latched into global state once), returns active slot count, writes record count - 1 [names_M91_D2Battle.tsv]
-0x001CFA60	fldUpdateConditionalSceneCleanup	inferred	Calls scene cleanup when scene flag +0x218 bit 0x200 is set unless active resource is in exempt state.
-0x001CFAC0	fldResetSceneStatus	inferred	Sets battle scene work sceneStatus to zero. [names_reviewed5.tsv]
-0x001CFB20	fldClearSceneTransition	inferred	Clears the transition mode by passing zero to scene transition setter. [names_reviewed5.tsv]
+0x001CFA60	btlUpdateScenePanelTask	inferred	Existing matched scene-panel task gates updates on battle0x200 and presentation/blocking state, then calls native actor-slot presentation/render manager001C4278 or001CF800; not a cleanup routine; identifier only.
+0x001CFAC0	btlClearScenePanelTaskHandle	inferred	Existing matched destructor callback only clears the scene-panel task handle (D1cleanupTask/D2sceneStatus); no resource-release or owner-layout change; identifier only.
+0x001CFB20	btlBeginScenePanelFadeOut	inferred	Existing matched wrapper requests mode0 eight-frame panel exit; mode0 enters visual hiding states; preserve the native runtime call and all body operations; identifier only.
 0x001CFB60	fldGetSceneIndexedValue	inferred	Returns the indexed word of the battle scene's value array at offset 0x4E4.
-0x001CFB98	fldCreateSceneCleanupTask	inferred	creates the scene task (fldUpdateConditionalSceneCleanup/func_001CFAC0) under taskParent and stores its handle at scene+0x2D8
+0x001CFB98	fldCreateSceneCleanupTask	inferred	creates the scene task (btlUpdateScenePanelTask/func_001CFAC0) under taskParent and stores its handle at scene+0x2D8
 0x001CFF08	fldBattleSceneEnterInit	inferred	Battle scene enter: descriptor fade check, state byte 0x26E (0/2/3), cleanup calls, sqc2 vf0 store to scene [names_M47_D2Game.tsv]
 0x001CFFC8	btlLoadBankWhenTasksIdle	inferred	Loads the battle sound bank only once the checked stream and tasks are ready. [names_reviewed8.tsv]
 0x001D0020	fldMarkGridTiles	inferred	Updates both grid tiles at scene coordinates, setting 64-bit tile flag 0x8000000000000001 on first.
@@ -3123,7 +3123,7 @@
 0x0020C690	btlCmdRunWeightedAiSelection	inferred	confidence=high; matched-C; src/dds2/game/code_00207A38.c:2116:func_0020C690; confidence=high; matched-C; src/dds2/game/code_00207A38.c:2074:func_0020C690; Script command executes a species-AI row/weighted-slot action through the current command work and returns script continuation 1; the underlying routine selects a row, picks a weighted slot and runs its action.; twin=dds1:0x001FA670; source=names_R_Names36.tsv:3 [names_qp11.tsv]
 0x0020C6B8	btlScriptSetBattleCommand	inferred	Twin of dds1 0x001FA698; Reads script parameter and dispatches to func_001FF030 with current command context. [names_R_FuncNames3.tsv]
 0x0020C720	btlResetCommandContextAndSetStateFlag	inferred	Resets command mode/value and sets an otherwise-untyped state byte; active-state identity is unproven. [names_reviewed12.tsv]
-0x0020C780	btlScriptBeginSceneTransition	inferred	Twin of dds1 0x001FA738; Calls fldBeginSceneTransition. [names_R_FuncNames3.tsv]
+0x0020C780	btlScriptBeginSceneTransition	inferred	Twin of dds1 0x001FA738; Calls btlBeginScenePanelFadeIn. [names_R_FuncNames3.tsv]
 0x0020C7A0	btlScriptFlagAllUnitsDefeatCandidates	inferred	Twin of dds1 0x001FA758; Calls btlFlagAllUnitsDefeatCandidate. [names_R_FuncNames3.tsv]
 0x0020C7C0	btlScriptFlagPlayerDefeatCandidates	inferred	clears existing defeat candidates then flags units bearing the player-side bit [names_reviewed5.tsv]
 0x0020C7E8	btlScriptFlagEnemyDefeatCandidates	inferred	clears existing defeat candidates then flags units bearing the enemy-side bit [names_reviewed5.tsv]
@@ -9576,3 +9576,4 @@
 0x003CE150	mnuShopProgressSlotPricePercentView	inferred	confidence=high; Interior parent+8 view with existing12-byte CampRateRow stride and u16 percent. The zero quantity-selector path indexes current progressSlot. Native100/110/120/130/140/150/160/0 values retained; not an independent table. [Namer1 readability b99; matched/native shop and terminal record evidence; names_reviewed]
 0x003CE3E8	mnuShopQuantityPriceTiers	inferred	confidence=high; Eight native u8 limit/percent pairs consumed by the nonzero selector branch of mnuCampScalePriceByTier; actual caller passes current selected quantity, despite its local argument name level. All native limits0; percentages100/110/120/130/140/150/100/100. Do not claim active discounts or alter dormant behavior. [Namer1 readability b99; matched/native shop and terminal record evidence; names_reviewed]
 0x003CE408	mnuShopCurrencyAwardTiers	inferred	confidence=high; Three native threshold/award pairs(10000,10000),(1000000,12000),(1000000,20000). Provider compares savedCurrency and returns the value; mnuAwardCampProgressCurrency adds that returned currency. No lottery/item identity inferred. [Namer1 readability b99; matched/native shop and terminal record evidence; names_reviewed]
+0x001CFAE0	btlBeginScenePanelFadeIn	inferred	Existing matched wrapper requests mode1 eight-frame panel entrance and enables battle0x200 panel updates; mode1 restores command/actor/registered panel presentation; identifier only.

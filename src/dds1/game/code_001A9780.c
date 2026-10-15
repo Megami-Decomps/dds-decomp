@@ -72,7 +72,7 @@ extern u32 btlPendingLinkageSkillFlags[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern SceneAiWork *fldGetSceneScriptTaskUserData(void);
+extern SceneAiWork *btlGetTargetSelectionWork(void);
 
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 
@@ -5660,7 +5660,7 @@ s32 btlUpdateCommandUiTransition(void) {
     return 0;
 }
 
-void fldInitializeBattleSceneFlow(void) {
+void btlUpdateSceneFlow(void) {
     s32 context = (s32)(u32)btlGetRuntime();
     btlNextScaledRandom(7);
     if ((*(u32 *)(context + 0x1F4) & 0x400) != 0) {
@@ -5962,7 +5962,7 @@ extern void btlDrawRetreatCommandLabel(s32);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
-void fldDispatchSceneKindHandler(s32 arg0) {
+void btlDrawCommandClassRows(s32 arg0) {
     switch (btlGetActorCommandClass((BattleSceneObject *)arg0, btlCommandPanelWork->classIndex)) {
     case 0:
         func_001BDF60(arg0, 0, 2, 3);
@@ -6064,7 +6064,7 @@ extern s32 btlHasHighPriorityState(void);
 extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 
 static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
-    fldDispatchSceneKindHandler((s32)object);
+    btlDrawCommandClassRows((s32)object);
     func_001B2D80(object, btlGetActorCommandClass(object, btlCommandPanelWork->classIndex));
 }
 
@@ -6148,7 +6148,7 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
     return 0;
 }
 
-void fldClearBattleSceneObject(KwlnTask *arg0) {
+void btlReleaseCommandPanelTask(KwlnTask *arg0) {
     u32 temp_v0;
     BtlState *battle;
 
@@ -6159,7 +6159,7 @@ void fldClearBattleSceneObject(KwlnTask *arg0) {
     btlReleaseBattleScratchBlocks();
 }
 
-extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
+extern BattleSceneObject *btlGetCommandPanelTaskWork(void);
 
 extern s32 btlUpdateBattleSceneCommands(KwlnTask *task);
 
@@ -6178,7 +6178,7 @@ void fldInitializeSceneObject(BattleSceneObject *object, BtlTask *owner) {
     object->owner = owner;
 }
 
-BattleSceneObject *fldGetSceneObjectTaskUserData(void) {
+BattleSceneObject *btlGetCommandPanelTaskWork(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     if (task == NULL) {
         return NULL;
@@ -6193,7 +6193,7 @@ s32 fldGetSceneObjectState(void) {
     if (temp_v0 == 0) {
         return 0;
     }
-    return fldGetSceneObjectTaskUserData()->state;
+    return btlGetCommandPanelTaskWork()->state;
 }
 
 void btlOpenBattleCommandPanel(BtlTask *task) {
@@ -6206,7 +6206,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
         object = sdfAllocAndClearQuadwords(sizeof(*object));
         fldInitializeSceneObject(object, task);
         handle = (u32)kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
-                               btlUpdateBattleSceneCommands, fldClearBattleSceneObject, (u32)object);
+                               btlUpdateBattleSceneCommands, btlReleaseCommandPanelTask, (u32)object);
         kwlnTaskAddChild(scene->scriptOwner, (KwlnTask *)handle);
         scene->sceneObject = handle;
         btlSetActionActorPanelPresentation(task, 0, 0);
@@ -6243,7 +6243,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
             }
         }
     }
-    object = fldGetSceneObjectTaskUserData();
+    object = btlGetCommandPanelTaskWork();
     if (object->state == 3) {
         btlCommandPanelWork->state = 2;
         object->state = 1;
@@ -6258,8 +6258,8 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
         btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
 }
 
-void fldSetSceneObjectAndGroupStates(void) {
-    BattleSceneObject *object = fldGetSceneObjectTaskUserData();
+void btlRequestCommandPanelClose(void) {
+    BattleSceneObject *object = btlGetCommandPanelTaskWork();
     if (object != 0) {
         BattleCmdPanel *panel = btlCommandPanelWork;
         object->state = 5;
@@ -6718,7 +6718,7 @@ void btlDrawCenteredPanelSegments(s32 width) {
                   btlResourceBlock->resC, 0x15, 0x53);
 }
 
-s32 fldStepSceneStateMachine(KwlnTask *handle) {
+s32 btlUpdateTargetSelectionTask(KwlnTask *handle) {
     BtlState *work = (BtlState *)btlGetRuntime();
     SceneAiWork *state;
     s32 mode;
@@ -6773,7 +6773,7 @@ extern u32 btlSelectCommandTargetPolicy(void *source, BtlIndexList *list, s32);
 
 extern s32 btlStepTargetGridSelection(s32, SceneAiWork *);
 
-SceneAiWork *btlCreateAiWork(BtlTask *source) {
+SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     SceneAiWork *work;
     BattleSceneObject *object;
     BattleActorPanelWork *other;
@@ -6844,23 +6844,23 @@ selectTarget:
     return work;
 }
 
-void fldReleaseSceneSpriteWork(SceneAiWork *work) {
+void btlReleaseTargetSelectionWork(SceneAiWork *work) {
     btlFreeIndexList(work->listB);
     btlFreeIndexList(work->listA);
     sdfReleaseChipBlock(work);
 }
 
-void fldReleaseSceneSprite(KwlnTask *arg0) {
+void btlReleaseTargetSelectionTask(KwlnTask *arg0) {
     SceneAiWork *temp_v0;
     s32 temp_v1;
 
     temp_v0 = (SceneAiWork *)kwlnTaskGetUserValue(arg0);
-    fldReleaseSceneSpriteWork(temp_v0);
+    btlReleaseTargetSelectionWork(temp_v0);
     temp_v1 = (s32)(u32)btlGetRuntime();
     *(u32 *)(temp_v1 + 0x2ac) = 0;
 }
 
-SceneAiWork *fldGetSceneScriptTaskUserData(void) {
+SceneAiWork *btlGetTargetSelectionWork(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(D_003BB3A0);
     if (task == 0) {
         return 0;
@@ -6868,19 +6868,19 @@ SceneAiWork *fldGetSceneScriptTaskUserData(void) {
     return (SceneAiWork *)kwlnTaskGetUserValue(task);
 }
 
-s32 fldGetSceneScriptState(void) {
-    return fldGetSceneScriptTaskUserData()->state;
+s32 btlGetTargetSelectionState(void) {
+    return btlGetTargetSelectionWork()->state;
 }
 
-BtlIndexList *fldGetSceneScriptValue(void) {
-    return fldGetSceneScriptTaskUserData()->listB;
+BtlIndexList *btlGetSelectedTargetList(void) {
+    return btlGetTargetSelectionWork()->listB;
 }
 
-extern s32 fldStepSceneStateMachine(KwlnTask *);
+extern s32 btlUpdateTargetSelectionTask(KwlnTask *);
 
-extern SceneAiWork *btlCreateAiWork(BtlTask *);
+extern SceneAiWork *btlCreateTargetSelectionWork(BtlTask *);
 
-void fldCreateSceneSpriteTask(s32 arg0) {
+void btlCreateTargetSelectionTask(s32 arg0) {
     BtlState *scene;
     s32 task;
     kwlnTaskGetTaskByName(D_003BB3A0);
@@ -6897,16 +6897,16 @@ void fldCreateSceneSpriteTask(s32 arg0) {
         kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
     scene = (BtlState *)btlGetRuntime();
-    task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, fldStepSceneStateMachine, fldReleaseSceneSprite,
-                          (u32)btlCreateAiWork((BtlTask *)arg0));
+    task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, btlUpdateTargetSelectionTask, btlReleaseTargetSelectionTask,
+                          (u32)btlCreateTargetSelectionWork((BtlTask *)arg0));
     kwlnTaskAddChild(scene->scriptOwner, (KwlnTask *)task);
     scene->spriteObject = task;
 }
 
-void fldMarkActiveSceneScriptState(void) {
+void btlRequestTargetSelectionClose(void) {
     SceneAiWork *work;
 
-    work = fldGetSceneScriptTaskUserData();
+    work = btlGetTargetSelectionWork();
     if (work != 0) {
         work->state = 6;
     }
@@ -7696,7 +7696,7 @@ s32 btlFindSceneSlotById(BtlSceneSlot *entry) {
     return -1;
 }
 
-BtlSceneSlot *fldFindSceneSlotRecord(BtlSceneSlot *entry) {
+BtlSceneSlot *btlFindSceneSlotRecord(BtlSceneSlot *entry) {
     BtlState *context = (BtlState *)btlGetRuntime();
     s32 index = btlFindSceneSlotById(entry);
     BtlSceneSlot *record = 0;
@@ -7714,7 +7714,7 @@ s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
     u32 i;
     s32 changed = 0;
     for (i = 0; i < 8; i++, slot++, scene++) {
-        if (scene->slot.id != slot->id && fldFindSceneSlotRecord(&scene->slot) == 0) {
+        if (scene->slot.id != slot->id && btlFindSceneSlotRecord(&scene->slot) == 0) {
             if (scene->alpha != 0) {
                 scene->alpha -= 8;
                 changed = 1;
@@ -7763,7 +7763,7 @@ s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001C4278);
 
-s32 fldSceneCleanupTask(KwlnTask *task) {
+s32 btlUpdateScenePanelTask(KwlnTask *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     if ((scene->battleFlags & 0x200) == 0) {
         return 0;
@@ -7775,20 +7775,20 @@ s32 fldSceneCleanupTask(KwlnTask *task) {
     return 0;
 }
 
-void fldResetSceneStatus(KwlnTask *task) {
+void btlClearScenePanelTaskHandle(KwlnTask *task) {
     BtlState *scene;
 
     scene = (BtlState *)btlGetRuntime();
     scene->cleanupTask = 0;
 }
 
-void fldBeginSceneTransition(void) {
+void btlBeginScenePanelFadeIn(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     btlSetCommandPanelFadeMode(1, 8);
     scene->battleFlags |= 0x200;
 }
 
-void fldClearSceneTransition(void) {
+void btlBeginScenePanelFadeOut(void) {
     btlGetRuntime();
     btlSetCommandPanelFadeMode(0, 8);
 }
@@ -7809,7 +7809,7 @@ void func_001C4540(void) {
 
 extern const char *D_003BB488;
 
-extern s32 fldSceneCleanupTask(KwlnTask *);
+extern s32 btlUpdateScenePanelTask(KwlnTask *);
 
 void fldCreateSceneCleanupTask(void) {
     KwlnTask *oldTask = kwlnTaskGetTaskByName(D_003BB488);
@@ -7819,14 +7819,14 @@ void fldCreateSceneCleanupTask(void) {
         btlGetRuntime();
     }
     context = (BtlState *)btlGetRuntime();
-    task = (u32)kwlnTaskCreate(D_003BB488, 0x2B0E, 1, 1, fldSceneCleanupTask, fldResetSceneStatus, 0);
+    task = (u32)kwlnTaskCreate(D_003BB488, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
     kwlnTaskAddChild(context->scriptOwner, (KwlnTask *)task);
     context->cleanupTask = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
     btlInitializeStaffActorPanels();
     func_001B6498(1);
-    fldBeginSceneTransition();
+    btlBeginScenePanelFadeIn();
 }
 
 void btlAllocatePanelTaskWork(void) {

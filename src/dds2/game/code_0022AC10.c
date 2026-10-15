@@ -2430,10 +2430,10 @@ typedef struct BtlDebugValueMenu {
 
 typedef char BtlDebugValueEntryStride[(sizeof(BtlDebugValueEntry) == 0x18) ? 1 : -1];
 
-extern BtlIndexList *fldGetSceneScriptValue(void);
-extern s32 fldGetSceneScriptState(void);
-extern void fldCreateSceneSpriteTask(s32);
-extern void fldMarkActiveSceneScriptState(void);
+extern BtlIndexList *btlGetSelectedTargetList(void);
+extern s32 btlGetTargetSelectionState(void);
+extern void btlCreateTargetSelectionTask(s32);
+extern void btlRequestTargetSelectionClose(void);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateControlObject(void);
@@ -2506,19 +2506,19 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     case 0:
         battle->battleFlags = (battle->battleFlags | 0x80000000) & ~0x200;
         battle->debug.phase = 1;
-        fldCreateSceneSpriteTask(0);
+        btlCreateTargetSelectionTask(0);
         break;
     case 1:
-        sceneState = fldGetSceneScriptState();
+        sceneState = btlGetTargetSelectionState();
         if (sceneState == 3) {
-            battle->debug.selectedUnit = btlGetIndexListEntry(fldGetSceneScriptValue(), 0);
-            fldMarkActiveSceneScriptState();
+            battle->debug.selectedUnit = btlGetIndexListEntry(btlGetSelectedTargetList(), 0);
+            btlRequestTargetSelectionClose();
             battle->debug.phase = 2;
         } else if (sceneState == 4) {
-            fldMarkActiveSceneScriptState();
+            btlRequestTargetSelectionClose();
             battle->debug.phase = 10;
         } else {
-            units = fldGetSceneScriptValue();
+            units = btlGetSelectedTargetList();
             if (btlGetIndexListCount(units) == 1) {
                 unit = btlGetIndexListEntry(units, 0);
                 btlCopyUnitCurrentPosition(unit, position);

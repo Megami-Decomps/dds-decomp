@@ -2090,12 +2090,12 @@ u32 btlResetCommandContextAndSetStateFlag(void) {
 }
 
 u32 btlScriptClearSceneTransition(void) {
-    fldClearSceneTransition();
+    btlBeginScenePanelFadeOut();
     return 1;
 }
 
 u32 btlScriptBeginSceneTransition(void) {
-    fldBeginSceneTransition();
+    btlBeginScenePanelFadeIn();
     return 1;
 }
 
