@@ -99,11 +99,13 @@ s32 mnuStaffRunPanel2(KwlnTask *input) {
     }
 }
 
-u32 func_00299EF0(void) {
+/* Registered result message enter hook: no side effects; returns one. */
+u32 mnuResultMessageEnterNoOp(void) {
     return 1;
 }
 
-u32 func_00299EF8(void) {
+/* Registered result message leave hook: no side effects; returns one. */
+u32 mnuResultMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -124,11 +126,13 @@ s32 mnuAdvanceResultPanel(KwlnTask *input) {
     return menuSetHandler((void *)context, 2, (void *)input);
 }
 
-u32 func_00299FD8(void) {
+/* Registered result selection enter hook: no side effects; returns one. */
+u32 mnuResultSelectionEnterNoOp(void) {
     return 1;
 }
 
-u32 func_00299FE0(void) {
+/* Registered result selection leave hook: no side effects; returns one. */
+u32 mnuResultSelectionLeaveNoOp(void) {
     return 1;
 }
 

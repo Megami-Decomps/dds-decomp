@@ -161,7 +161,8 @@ s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0024D260(void) {
+/* Registered terminal panel leave hook: no side effects; returns one. */
+u32 mnuTerminalPanelLeaveNoOp(void) {
     return 1;
 }
 
@@ -288,15 +289,18 @@ s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0024D5F0(void) {
+/* Registered terminal rebuild start hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildStartNoOp(void) {
     return 0;
 }
 
-u32 func_0024D5F8(void) {
+/* Registered terminal rebuild update hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildUpdateNoOp(void) {
     return 0;
 }
 
-u32 func_0024D600(void) {
+/* Registered terminal rebuild finish hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildFinishNoOp(void) {
     return 0;
 }
 
