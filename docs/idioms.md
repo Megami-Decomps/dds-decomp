@@ -12708,3 +12708,32 @@ functions cannot supply the missing state. Ordinary and observed assembly and
 all RTL dumps agree. No register pinning, fake earlier operation, new primitive,
 clobber, flags or header change is needed. Preserve Halcyon Drift's shared W-set
 source-location mechanism and Evening Notes' paired SDK-carrier reconstruction.
+
+## Panel item base-value accumulation
+
+DDS1 `mnuDrawPanelItemDetail` (0x00284C48, 624 bytes) scales the panel's
+base value plus option into a sprite descriptor's horizontal extent.
+Initialize the actual accumulated value before adding the option:
+
+```c
+value = item->value18;
+value += item->option;
+```
+
+The same-TU matched `mnuDrawPanelItemValue` already uses this idiom.
+In the one-expression control, qualified CSE traces create separate
+field temporaries, registers 98 and 99, then set the live sum in register 94.
+Local allocation cannot coalesce either source into the cross-block sum:
+register 98 gets `$3`, while global allocation assigns register 94 to `$8`.
+This leaves exactly two different words: the initial load at +0x40 and its
+addition at +0x50.
+
+The two real accumulator statements instead load the field directly into
+register 94 before CSE and preserve it as the addition's destination.
+Global allocation still chooses `$8`, now for both operations, as in retail.
+Both traces have hooked/unhooked parity. The deciding property is a real
+value's shared initial-load and sum identity, not declaration ordering,
+register pinning, an artificial use or a type change. All 156 functions and
+the unit's readonly data remain exact. The sequel's semantic counterpart,
+`func_002C2AE8`, has additional auxiliary bars and phase animation; it is not
+a byte-identical donor.

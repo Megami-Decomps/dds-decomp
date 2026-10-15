@@ -1007,7 +1007,69 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
 
 extern void mnuDrawPanelItemDetail(s32, s32, s32, u32, s32, MenuPanelItem *, s32);
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPanelItemDetail);
+extern char D_003BC798[];
+
+void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, u32 opacity, s32 mode,
+                            MenuPanelItem *item, s32 layer) {
+    char text[16];
+    struct FrFontGlyph *glyph;
+    EffectSlotSet *set;
+    s32 index;
+    s32 value;
+    s32 width;
+    s32 offset = 0;
+    u32 color;
+
+    /* See docs/idioms.md, "Panel item base-value accumulation". */
+    value = item->value18;
+    value += item->option;
+    set = item->groupGridSlots[3].set;
+    index = item->groupGridSlots[3].index;
+    if (value != 0) {
+        width = item->value10;
+        offset = width * value / item->value14;
+        set->descriptions[index].rect[2] = offset;
+        effDrawSpriteWithCornerFade(x + (offset << 4), y, depth, opacity, 0,
+                                    set, index, layer);
+    }
+    if (item->selection != 0) {
+        set = item->gridSlots[1].set;
+        index = item->gridSlots[1].index;
+        effDrawSpriteWithCornerFade(x + (offset << 4), y, depth, opacity, 0,
+                                    set, index, layer);
+        if (item->selection != 0 && item->option != 0) {
+            set = item->gridSlots[2].set;
+            index = item->gridSlots[2].index;
+            if (item->selectionRamp != 0) {
+                effDrawSpriteWithCornerFade(x + (offset << 4), y, depth,
+                                            item->selectionRamp, 0, set, index, layer);
+                if (item->selectionRamp > 0) {
+                    item->selectionRamp -= 16;
+                }
+                if (item->selectionRamp < 0) {
+                    item->selectionRamp = 0;
+                }
+            }
+        } else {
+            effDrawSpriteWithCornerFade(x + (offset << 4), y, depth,
+                                        item->selectionRamp, 0, set, index, layer);
+            item->selectionRamp += 8;
+            if (item->selectionRamp > 512) {
+                item->selectionRamp -= 512;
+            }
+        }
+        if (item->selection != 0) {
+            effDrawSpriteWithCornerFade(x + (offset << 4), y, depth, opacity, 0,
+                                        item->gridSlots[3].set, item->gridSlots[3].index, layer);
+            color = uiBlendColors(0xC0907080, 0xC0907000, opacity);
+            sprintf(text, D_003BC798, item->selection);
+            glyph = itfCreateFont2TextGlyph(x + ((offset + 0x6C) << 4), y + 0x50,
+                                            depth, color, text, 0);
+            frFontDrawGlyphChain(glyph, 1, layer);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        }
+    }
+}
 
 void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer) {
     char buffer[16];
