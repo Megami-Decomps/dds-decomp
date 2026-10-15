@@ -3563,7 +3563,7 @@ u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
 u8 btlGetActorDisplayByteWithDefault(BtlUnit *object, s32 index) {
     if (index == 0) {
         if ((object->status.flags & 0x400) != 0) {
-            return datEnemyRecords[object->partyRecord.unitId].unk48;
+            return datEnemyRecords[object->partyRecord.unitId].attackSpacing;
         }
         return 12;
     }
