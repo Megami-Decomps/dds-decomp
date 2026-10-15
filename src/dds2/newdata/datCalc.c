@@ -2423,24 +2423,24 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
     if (interval == 0) {
         return interval;
     }
-    counter = datGameState->unk1440 + step;
-    datGameState->unk1440 = counter;
+    counter = datGameState->conditionalEncounterStepRemainder + step;
+    datGameState->conditionalEncounterStepRemainder = counter;
     if (counter < 100.0f) {
         return 0;
     }
     count = (s32)(counter / 100.0f);
-    datGameState->unk1440 = counter - (f32)count * 100.0f;
+    datGameState->conditionalEncounterStepRemainder = counter - (f32)count * 100.0f;
     for (i = 0; i < count; i++) {
         if (datGameState->world.fieldFlags & 2) {
-            datGameState->unk1444 = datGameState->unk1444 + effMiscRandMod(0, 7) + 6;
+            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + effMiscRandMod(0, 7) + 6;
         } else {
-            datGameState->unk1444 = datGameState->unk1444 + effMiscRandMod(0, 3) + 2;
+            datGameState->conditionalEncounterGauge = datGameState->conditionalEncounterGauge + effMiscRandMod(0, 3) + 2;
         }
     }
-    if (datGameState->unk1444 > 0xFDE8) {
-        datGameState->unk1444 = -0x218;
+    if (datGameState->conditionalEncounterGauge > 0xFDE8) {
+        datGameState->conditionalEncounterGauge = -0x218;
     }
-    if (datGameState->unk1444 < interval) {
+    if (datGameState->conditionalEncounterGauge < interval) {
         return 0;
     }
     total = 0;
@@ -2474,8 +2474,8 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
 void dds3WorkClear(void) {
     DatGameState *state = datGameState;
 
-    state->unk1440 = 0;
-    state->unk1444 = 0;
+    state->conditionalEncounterStepRemainder = 0;
+    state->conditionalEncounterGauge = 0;
     D_00435E8C = 0;
 }
 
