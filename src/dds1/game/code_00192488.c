@@ -620,7 +620,67 @@ s32 effGetFontListCount(void) {
     return frFontResourceList.count;
 }
 
-INCLUDE_ASM(const s32, "game/code_00192488", frFontInitializeGlyphAtlas);
+extern s8 D_003BB150;
+extern s32 fmGslReleaseActiveResourceBuffers(void);
+
+/* Build the glyph atlas once: COLUMNS x ROWS cells in a circular node list, each with its
+ * UV rectangle in 1/16-texel units and an optional RECORDBYTES-sized per-cell record. */
+s32 frFontInitializeGlyphAtlas(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 cellHeight,
+                               s32 recordBytes) {
+    u8 *records = NULL;
+    FntNode *node;
+    s32 count;
+    s32 i;
+    s32 row;
+    s32 column;
+
+    if (frFontResourceList.head != NULL && D_003BB150 != 0) {
+        return 0;
+    }
+    count = columns * rows;
+    frFontResourceList.cellWidth = cellWidth;
+    frFontResourceList.cellHeight = cellHeight;
+    frFontResourceList.count = count;
+    frFontResourceList.capacity = count;
+    frFontResourceList.pixelByteCount = cellWidth * cellHeight / 2;
+    frFontResourceList.nodeAllocation = sdfAllocGeneralBlock(count * sizeof(FntNode));
+    frFontResourceList.head = (FntNode *)sdfResourceRetainAddress(frFontResourceList.nodeAllocation);
+    if (recordBytes != 0) {
+        frFontResourceList.recordStorageAllocation = sdfAllocGeneralBlock(recordBytes * frFontResourceList.count);
+        records = (u8 *)sdfResourceRetainAddress(frFontResourceList.recordStorageAllocation);
+    }
+    for (i = 0; i < frFontResourceList.count - 1; i++) {
+        frFontResourceList.head[i].next = &frFontResourceList.head[i + 1];
+    }
+    frFontResourceList.head[i].next = frFontResourceList.head;
+    for (i = frFontResourceList.count - 1; i > 0; i--) {
+        frFontResourceList.head[i].prev = &frFontResourceList.head[i - 1];
+    }
+    frFontResourceList.head[0].prev = &frFontResourceList.head[frFontResourceList.count - 1];
+    i = 0;
+    for (row = 0; row < rows; row++) {
+        for (column = 0; column < columns; column++) {
+            node = &frFontResourceList.head[i];
+            if (node == NULL) {
+                fmGslReleaseActiveResourceBuffers();
+                return 0;
+            }
+            node->nodeIndex = i;
+            node->uv.u0 = (column * cellWidth) << 4;
+            node->uv.u1 = ((column * cellWidth) << 4) + (cellWidth << 4);
+            if (records != NULL) {
+                node->item = (FrFontRecord *)(records + i * recordBytes);
+            } else {
+                node->item = NULL;
+            }
+            node->uv.v0 = (row * cellHeight) << 4;
+            node->uv.v1 = ((row * cellHeight) << 4) + (cellHeight << 4);
+            i++;
+        }
+    }
+    D_003BB150 = 1;
+    return 1;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00192488", D_003BB150);
 
