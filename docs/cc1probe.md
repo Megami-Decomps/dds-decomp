@@ -40,7 +40,7 @@ tools/cc1probe.sh /tmp/candidate.c --as-unit src/dds1/game/code_001411F0.c \
 | --- | --- |
 | `--func NAME` | log only that function (always give it; a whole unit is 100k+ lines) |
 | `--sched` | sched1/sched2: every `rank_for_schedule` comparison, the tier that decided it (priority, register weight, cost, luid), each issue (`PICK`), the ready list around SCE's `mips_sched_reorder` |
-| `--alloc` | local-alloc quantity comparisons and `find_free_reg` choices; global-alloc `allocno_compare` and `find_reg` (conflicts, preferences, chosen register) |
+| `--alloc` | local-alloc quantity comparisons, actual sort-order vectors and `find_free_reg` choices; global-alloc `allocno_compare` and `find_reg` (conflicts, preferences, chosen register) |
 | `--cse` | `cse_insn` per insn (`REWRITTEN` marks an insn CSE changed) and every `preferrable` cost comparison |
 | `--reload` | `choose_reload_regs` per insn, the spill-register ring and `last_spill_reg`, the chosen reload registers, and `alter_reg` stack-slot assignment |
 | `--rcse` | post-reload CSE: which insns `reload_cse_simplify_set` rewrote |
@@ -69,11 +69,35 @@ Sample lines (fldTitle):
 
 ```text
   rank A=uid66   B=uid68   prio 5/5 regw 1/1 cost 1/1  => +1 decided@luid luid A=11 B=12 (original order) -> A first
-  qty_compare_1 q1{reg101 refs=4 life=[4,28]=24 ...} vs q2{reg226 refs=2 life=[8,54]=46 ...}  pri=3333/434 => -2899 decided@priority -> q1 allocated first
+  qty_compare_1 q1{reg101 refs=4 life=[4,28]=24 ...} vs q2{reg226 refs=2 life=[8,54]=46 ...}  pri=3333/434 => -2899 decided@priority -> q1 sorts before q2
   allocno_compare a0{reg84 refs=9 live=12 ...} vs a1{reg85 refs=57 live=113 ...}  pri=22500/25221 => +2721 decided@priority -> a1 colored first
   fill_slots_from_thread@reorg.c:2367(insn=uid26 thread=uid66 ... likely=1 thread_if_true=1 ...)
       cse_insn uid480 REWRITTEN: insn (set (reg:SI 153) (ashift:SI (reg:SI 150) 7))
 ```
+
+### Read the actual local-allocation order
+
+`qty_order` reports the allocator's order vector before and after its suggestion
+and priority sorts. With exactly three quantities, it also shows the intermediate
+swaps. This pinned compiler compares fixed quantity numbers `0/1`, `1/2`, `0/1`
+while swapping entries in the order vector. It does not compare the quantities
+currently stored in those entries. Four or more quantities use `qsort` instead.
+
+For example, the selected-camera provider `func_001E0398` has quantities with
+priorities `[2500, 8000, 3333]`. The actual priority order evolves as follows:
+
+```text
+  qty_order before priorities n=3 order=[0, 1, 2]
+  qty_order after priorities compare(0,1) n=3 order=[1, 0, 2]
+  qty_order after priorities compare(1,2) n=3 order=[1, 0, 2]
+  qty_order after priorities n=3 order=[0, 1, 2]
+```
+
+The highest-priority quantity is therefore not first. A comparator verdict says
+how that pair compares; use the order vector and actual `find_free_reg` calls to
+establish allocation order. The suggestion pass may already have assigned a
+quantity before the priority pass. Do not add a dummy quantity to change sorting;
+source changes still need a genuine program value and supported dataflow.
 
 ## It does not change the build, and says so itself
 
