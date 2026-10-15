@@ -706,7 +706,7 @@ void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *action, BtlCamStat
         from->position[1] *= poses[pose].fromHeightScale;
         halfFov = fov * 0.5f;
         tangent = tanf(halfFov);
-        distance = unit->unkC0 * unit->scale / tangent;
+        distance = unit->cameraRadius * unit->scale / tangent;
         from->distance = distance * poses[pose].fromDistanceScale;
         to->distance = distance * poses[pose].toDistanceScale;
 
@@ -776,7 +776,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         half = fov * 0.5f;
         dist = span / tanf(half);
         from->distance = dist;
-        dist = unit->unkC0 * unit->scale / tanf(half);
+        dist = unit->cameraRadius * unit->scale / tanf(half);
         to->distance = dist * poses[pose][8];
         VU0_LOAD_VF(vf10, poses[pose]);
         VU0_LOAD_VF(vf11, quat);
@@ -854,7 +854,7 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
         }
         VU0_STORE_VF(vf10, to->position);
         to->position[1] *= poses[pose].heightScale;
-        distance = unit->unkC0 * unit->scale / tanf(fov * 0.5f);
+        distance = unit->cameraRadius * unit->scale / tanf(fov * 0.5f);
         to->distance = distance * poses[pose].distanceScale;
         VU0_LOAD_VF(vf10, poses[pose].quat);
         VU0_LOAD_VF(vf11, quat);
@@ -917,7 +917,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, to->direction);
             halfFov = to->fov * 0.5f;
-            minimumDistance = unit->unkC0 * unit->scale / tanf(halfFov);
+            minimumDistance = unit->cameraRadius * unit->scale / tanf(halfFov);
             to->distance *= 0.5f;
             if (to->distance < minimumDistance) {
                 to->distance = minimumDistance;
@@ -1002,7 +1002,7 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
         btlUnitGetMuzzlePosVU(unit);
     }
     VU0_STORE_VF(vf10, from->position);
-    from->distance = unit->unkC0 * unit->scale / tanf(fov * 0.5f);
+        from->distance = unit->cameraRadius * unit->scale / tanf(fov * 0.5f);
     VU0_LOAD_VF(vf10, quat);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9130);
@@ -3003,7 +3003,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
     VU0_LOAD_VF(vf11, out);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(distance);
-    distance += (actor->unkC0 * actor->scale * 2.0f) /
+    distance += (actor->cameraRadius * actor->scale * 2.0f) /
                 tanf(out->fov * 0.5f);
     if (out->distance < distance) {
         out->distance = distance;
@@ -3066,14 +3066,14 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
     VU0_LENGTH_VF10(length);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, from->direction);
-    from->distance = length + selected->unkC0 * selected->scale * 3.5f /
+    from->distance = length + selected->cameraRadius * selected->scale * 3.5f /
                               tanf(fov * 0.5f);
     btlCopyMotionTransform(to, from);
     sdfVuLoadRotationMatrixY(-(45.0f * 0.017453293f));
     VU0_LOAD_VF(vf10, to->direction);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
-    to->distance = length + selected->unkC0 * selected->scale * 3.0f /
+    to->distance = length + selected->cameraRadius * selected->scale * 3.0f /
                             tanf(fov * 0.5f);
     btlAdjustCameraDirectionForDefaultPlane(from);
     btlAdjustCameraDirectionForDefaultPlane(to);
@@ -3650,7 +3650,7 @@ void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *action, BtlCamState *fr
         VU0_STORE_VF(vf10, from->position);
         VU0_STORE_VF(vf10, to->position);
         from->position[1] *= presets.poses[pose].fromHeightScale;
-        dist = unit->unkC0 * unit->scale / tanf(fov * 0.5f);
+        dist = unit->cameraRadius * unit->scale / tanf(fov * 0.5f);
         from->distance = dist * presets.poses[pose].fromDistanceScale;
         to->distance = dist * presets.poses[pose].toDistanceScale;
         VU0_LOAD_VF(vf10, presets.poses[pose].fromQuaternion);
@@ -4436,7 +4436,7 @@ f32 func_001F5780(BtlUnit *unit, u8 mode, f32 horizontalOffset, f32 verticalOffs
             /* The return sits in a one-pass loop, which retail's register
              * choice for the compare needs. */
             do {
-                return unit->unkC0 * unit->scale + clearance;
+                return unit->cameraRadius * unit->scale + clearance;
             } while (0);
         }
     } else {

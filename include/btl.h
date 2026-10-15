@@ -209,7 +209,7 @@ typedef struct BtlUnit {
     f32 reach;      /* 0xB4 */
     f32 unkB8; /* 0xB8: formation setup copies height here. */
     f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
-    f32 unkC0;
+    f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
     s32 resourceKind; /* 0xC4 */
     s32 resourceIndex; /* 0xC8 */
     u8 modelBorrowed; /* Nonzero shares another unit's model state. */
@@ -275,6 +275,7 @@ typedef char BtlUnitStatusAlignmentCheck[(__alignof__(BtlUnitStatus) == 4) ? 1 :
 typedef char BtlUnitAlignmentCheck[(__alignof__(BtlUnit) == 8) ? 1 : -1];
 typedef char BtlUnitStatusOffsetCheck[((u32)&((BtlUnit *)0)->status == 0x110) ? 1 : -1];
 typedef char BtlUnitMotionIdOffsetCheck[((u32)&((BtlUnit *)0)->motionId == 0xEC) ? 1 : -1];
+typedef char BtlUnitCameraRadiusOffsetCheck[((u32)&((BtlUnit *)0)->cameraRadius == 0xC0) ? 1 : -1];
 typedef char BtlUnitModelResourceKindOffsetCheck[((u32)&((BtlUnit *)0)->modelResourceKind == 0xDC) ? 1 : -1];
 typedef char BtlUnitStatusFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.flags == 0x110) ? 1 : -1];
 typedef char BtlUnitStateFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.stateFlags == 0x114) ? 1 : -1];
