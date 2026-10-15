@@ -1031,7 +1031,7 @@ extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused,
                                  u32 retainScale);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void sndQueueSoundId(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
