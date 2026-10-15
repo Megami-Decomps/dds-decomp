@@ -4422,7 +4422,7 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupM
     if (link->extra1 != 3) {
         link->extra2 = 0;
     } else {
-        for (i = 0; i < (s32)src->unk_F8; i++) {
+        for (i = 0; i < (s32)src->subEntry21Count; i++) {
             for (group = runtime->groups; group != NULL; group = group->next) {
                 if (strcmp(runtime->entryName[group->entryHeader], (char *)src->subEntry1Data + link->extra2 * 32) == 0) {
                     link->extra2 = group->entryHeader;
@@ -4534,7 +4534,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         }
     }
     for (index = 2; index >= 0; index--) {
-        for (row = 0; row < (s32)work->unk_38; row++) {
+        for (row = 0; row < (s32)work->mainEntry3Count; row++) {
             if (((EvtPmdModelResource *)work->mainEntry3Data)[row].loadOrder != index) {
                 continue;
             }
@@ -4957,7 +4957,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->sub->kind < 6) {
         count = work->subEntry4Count;
     } else {
-        count = work->unk_9C;
+        count = work->extendedEntry4Count;
     }
     for (row = 0; row < count; row++) {
         if (work->sub->kind < 6) {
@@ -4978,7 +4978,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if (work->sub->kind < 6) {
         count = work->subEntry4Count;
     } else {
-        count = work->unk_9C;
+        count = work->extendedEntry4Count;
     }
     for (row = 0; row < count; row++) {
         if (work->sub->kind < 6) {
@@ -5110,7 +5110,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         }
     }
     if (work->subEntry21Data != NULL) {
-        for (row = 0; row < (s32)work->unk_F8; row++) {
+        for (row = 0; row < (s32)work->subEntry21Count; row++) {
             if (((EvtGroupMetadata *)work->subEntry21Data)[row].entry != -1) {
                 for (group = runtime->groups; group != NULL; group = group->next) {
                     if (strcmp(runtime->entryName[group->entryHeader], (char *)work->subEntry1Data +
