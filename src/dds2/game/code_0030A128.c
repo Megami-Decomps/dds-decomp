@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
+#include "evt_solar.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3_world_selection.h"
@@ -85,7 +86,6 @@ extern s32 sdfLoadMapCounterCameraVectorsForMask(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern void fldCreateMapRequestQueues(void);
 extern void evtCreateMessageWindowIfMissing(s32);
-extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void sdfEnableFlagListViewTargetRelativeMode(void);

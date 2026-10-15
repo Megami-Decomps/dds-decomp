@@ -69,7 +69,6 @@ extern s32 D_004363C4;
 
 extern u32 fldPlayerObject;
 
-extern void evtSetSolarOverlayFullyVisible(void);
 
 extern s32 fldRoomEffectEntryCount;
 
