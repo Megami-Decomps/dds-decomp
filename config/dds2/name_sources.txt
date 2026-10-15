@@ -9034,3 +9034,4 @@
 0x00367BF0	sceSifGetSreg	inferred	Reads the indexed SIF system register from D_004843C0; adjacent sceSifSetSreg writes the same array. DDS1 twin 0x0030C970; sound worker polls register 31.
 0x001F0C80	btlBuildActorGroupProjectionCameraPose	inferred	Frames an actor against projected group bounds, with side-specific offsets
 0x002BF238	mnuDrawQueuedCommandLineEffect	inferred	Draw kind-one queued random lines and their cropped panel.
+0x001F2758	btlFrameEarliestAnimatedUnitCameraPair	inferred	frames earliest marked kind-11 animation with paired camera presets

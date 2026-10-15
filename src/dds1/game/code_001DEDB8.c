@@ -467,11 +467,11 @@ void btlAdvanceCommandCursorTask(BtlLinkedCommand *action) {
     btlAdvanceCommandCursor(action, &action->camera);
 }
 
-extern void func_001E4AC0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Initialize front/back framing for the native marked-unit selection path. */
 void btlInitializeMarkedUnitCameraPair(BtlLinkedCommand *action) {
-    func_001E4AC0(action, &action->frontCamera, &action->backCamera);
+    btlFrameEarliestAnimatedUnitCameraPair(action, &action->frontCamera, &action->backCamera);
 }
 
 extern void btlStepUnitHeightFramedCamera(BtlLinkedCommand *);
@@ -2536,7 +2536,113 @@ void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
     btlBuildBattleUnitFramingCameraPose(command, pose, 0.0f);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E4AC0);
+/* Front and back camera rotations of one animated-unit framing preset. */
+typedef struct BtlCameraQuaternionPair {
+    f32 front[4];
+    f32 back[4];
+} BtlCameraQuaternionPair;
+
+extern const BtlCameraQuaternionPair D_003A4408[3];
+
+/* vu0 routine: frame the marked kind-11 unit that is earliest in its
+ * animation; the back camera sits between the front camera and the group. */
+void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 position[4];
+    BtlCameraQuaternionPair presets[3];
+    BtlState *work;
+    BtlUnit *unit;
+    BtlUnit *selected;
+    f32 frame;
+    f32 earliest;
+    f32 halfFov;
+    f32 extent;
+    s32 pose;
+    u32 flags;
+
+    memcpy(presets, D_003A4408, sizeof(presets));
+    /* Initialize before the runtime lookup: sched2 ties this zero with the
+     * selected-unit zero and issues the earlier initializer first. */
+    earliest = 0.0f;
+    work = (BtlState *)btlGetRuntime();
+    selected = NULL;
+    for (unit = work->units; unit != NULL; unit = unit->next) {
+        flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                if ((flags & 0xE0) && unit->unkEC == 11) {
+                    frame = btlGetUnitModelCurrentFrame(unit);
+                    if (selected == NULL) {
+                        earliest = frame;
+                        selected = unit;
+                    } else if (frame < earliest) {
+                        earliest = frame;
+                        selected = unit;
+                    }
+                }
+            }
+        }
+    }
+    if (selected == NULL) {
+        btlSetDefaultActionCameraPose(action, &action->camera);
+        return;
+    }
+    btlFlagAllUnitsDefeatCandidate();
+    action->selectedUnit = selected;
+    switch (work->cameraPresetMode) {
+    case 0:
+    case 1:
+        pose = 1;
+        break;
+    case 2:
+        pose = selected->lookupId ? 2 : 0;
+        break;
+    default:
+        pose = selected->lookupId;
+        break;
+    }
+    halfFov = action->camera.fov;
+    from->fov = halfFov;
+    to->fov = halfFov;
+    halfFov *= 0.5f;
+    btlUnitGetMuzzlePosVU(selected);
+    VU0_STORE_VF(vf10, position);
+    if (btlSampleActorModelPositionVU(selected, 1) == 0) {
+        VU0_LOAD_VF(vf10, position);
+    }
+    VU0_STORE_VF(vf10, from->position);
+    earliest = selected->reach * selected->scale;
+    from->distance = (earliest + earliest) / tanf(halfFov * 1.3333333f);
+    VU0_LOAD_VF(vf10, presets[pose].front);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    if (selected->status.flags & 0x400) {
+        VU0_NEGATE_XYZ(vf10);
+    }
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+    extent = btlMeasureMaskedUnitBounds(0x200, NULL, NULL);
+    VU0_LOAD_VF(vf11, from->position);
+    VU0_LERP_VF10(0.7f);
+    VU0_STORE_VF(vf10, to->position);
+    VU0_LOAD_VF(vf10, presets[pose].back);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    if (selected->status.flags & 0x400) {
+        VU0_NEGATE_XYZ(vf10);
+    }
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    extent *= 0.8f;
+    if (extent < 200.0f) {
+        extent = 200.0f;
+    }
+    to->distance = extent / tanf(halfFov);
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+    action->motionParameter = 100.0f;
+    action->flags = (action->flags | 0x41) & ~0x4000;
+}
+
 
 /* vu0 routine: follow the tracked unit until its animation tail, then frame both groups. */
 void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
