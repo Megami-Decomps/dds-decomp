@@ -716,7 +716,7 @@ u8 btlAreModelChangeTasksFinished(void) {
 s32 btlCommandPlayUnitMotion(void) {
     s32 choice = scrReadIntParameter(0);
     s32 unitIndex = scrReadIntParameter(1);
-    s32 index = scrReadIntParameter(2);
+    s32 motionIndex = scrReadIntParameter(2);
     BtlUnit *unit;
 
     if (choice == 0) {
@@ -730,11 +730,12 @@ s32 btlCommandPlayUnitMotion(void) {
     if ((unit->status.flags & 2) == 0) {
         return 1;
     }
-    if (index >= 0) {
-        if (index < 0x1D) {
-            btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind((u8 *)unit, index), 1.0f);
+    if (motionIndex >= 0) {
+        if (motionIndex < 0x1D) {
+            btlApplyScaledUnitEffectParameter(unit, motionIndex,
+                btlGetSlotRateKind((u8 *)unit, motionIndex), 1.0f);
         } else {
-            mdlAddEntryPlainEx(unit->ext->owner, 0, index, 0.0f, 0.0f);
+            mdlAddEntryPlainEx(unit->ext->owner, 0, motionIndex, 0.0f, 0.0f);
         }
     }
     return 1;
