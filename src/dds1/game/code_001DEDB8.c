@@ -1711,7 +1711,123 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E2FF8);
+extern u8 D_003A43E0[];
+extern u8 D_003A43F0[];
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4190);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4310);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4320);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
+
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
+
+/* vu0 routine: frame the action's target groups from the actor's side, widening
+ * for several targets, then keep the actor clear of the near camera plane. */
+void func_001E2FF8(BtlLinkedCommand *action) {
+    BtlState *state;
+    BtlUnit *unit;
+    BtlUnit *actor;
+    f32 *cameraPosition;
+    f32 heightPosition[4];
+    f32 focus[4];
+    f32 position[4];
+    f32 height;
+    f32 span;
+    f32 fov;
+    f32 framing;
+    f32 zero = 0.0f;
+    u32 count;
+    s32 groups;
+    u32 i;
+
+    state = (BtlState *)btlGetRuntime();
+    unit = action->task->unit;
+    if (unit == 0) {
+        return;
+    }
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF(vf10, focus);
+    cameraPosition = action->camera.position;
+
+    count = btlGetIndexListCount(action->targetList);
+    groups = 0;
+    for (i = 0; i < count; i++) {
+        BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(action->targetList, i);
+        groups |= target->status.flags & 0x600;
+    }
+
+    height = 0.0f;
+    count = 0;
+    actor = state->units;
+    while (actor != 0) {
+        s32 flags = actor->status.flags;
+        if (flags & 1) {
+            if (!(flags & 0xC0)) {
+                if (flags & groups) {
+                    btlUnitGetMuzzlePosVU(actor);
+                    VU0_STORE_VF(vf10, heightPosition);
+                    height += heightPosition[1];
+                    count++;
+                }
+            }
+        }
+        actor = actor->next;
+    }
+
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(groups);
+    fov = action->camera.fov;
+    span = btlMeasureMaskedUnitBounds(groups, NULL, NULL);
+    VU0_STORE_VF(vf10, cameraPosition);
+    height /= (f32)count;
+    action->camera.position[1] = height;
+
+    span = (f32)((double)span * 1.3);
+    if (span < 500.0f) {
+        span = 500.0f;
+    }
+    if (count >= 2) {
+        framing = 1.3333333f;
+        framing = fov * framing;
+        framing *= 0.5f;
+    } else {
+        framing = 0.5f;
+        framing = fov * framing;
+    }
+    framing = span / tanf(framing);
+    action->camera.distance = framing;
+
+    if (focus[0] > zero) {
+        VU0_LOAD_VF(vf10, D_003A43E0);
+    } else {
+        VU0_LOAD_VF(vf10, D_003A43F0);
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E110);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, action->camera.direction);
+    btlAdjustCameraDirectionForDefaultPlane(&action->camera);
+
+    {
+        u8 *statusTable = (u8 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+        f32 clearance = *(f32 *)(statusTable + unit->unkEC * 0x14 + 0x38) * unit->scale;
+        btlCopyUnitCurrentPosition(unit, position);
+        if (position[2] - clearance < -100.0f) {
+            position[2] += -100.0f - (position[2] - clearance);
+            if (position[2] > 2000.0f - unit->reach * unit->scale) {
+                position[2] = 2000.0f - unit->reach * unit->scale;
+            }
+            btlSetUnitPosition(unit, position);
+        }
+    }
+}
 
 extern BtlUnit *btlFindFarthestUnit(u32, f32 *);
 
@@ -2526,22 +2642,6 @@ typedef struct BattlePairCameraFramePreset {
 /* Frame the first listed target from one of two randomized pair presets: both
  * cameras start at its muzzle, lowered by the preset height scale, at a distance
  * that fits the larger of its reach (wider view) and half its height. */
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4190);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4310);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4320);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
-
-INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
-
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
 
 void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
