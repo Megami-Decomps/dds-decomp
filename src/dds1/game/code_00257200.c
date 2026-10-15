@@ -107,9 +107,9 @@ extern TaskWork *mnuSceneResourceContext;
 
 /* Draw the mantra pulse band and both entry passes at unit scale, placing the
  * selected entry with its offsets from the display table. */
-void mnuDrawMantraPulseGridAtUnitScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+void mnuDrawMantraPulseGridAtUnitScale(s32 x, s32 y, s32 z, s32 alpha,
                    MnuProfileProgress *selection, SdfGrid *grid,
-                   s32 arg6) {
+                   s32 surface) {
     MenuSceneWork *display;
     SdfGridCell *cell;
     s32 row;
@@ -117,14 +117,14 @@ void mnuDrawMantraPulseGridAtUnitScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
 
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
-        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, 1.0f, 1.0f, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row + 0x1F, 0x20, 1.0f, 1.0f, surface);
     }
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
             if (cell->value != 0) {
-                mnuDrawMantraGridEntry(arg0, arg1, arg2, arg3, selection, grid, cell, arg6);
+                mnuDrawMantraGridEntry(x, y, z, alpha, selection, grid, cell, surface);
             }
             cell++;
             n--;
@@ -134,18 +134,18 @@ void mnuDrawMantraPulseGridAtUnitScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
             ? 0x1E
             : 0x1A;
     for (row = 0; row <= n; row++) {
-        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row, 0x20, 1.0f, 1.0f, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row, 0x20, 1.0f, 1.0f, surface);
     }
-    mnuDrawMantraCursorTrail(0, 0, arg2, arg3, display, arg6);
-    mnuDrawMantraGridFeedback(arg0 + mnuMantraVariantSpritePlacements[selection->profileId][2],
-                  arg1 + mnuMantraVariantSpritePlacements[selection->profileId][3],
-                  arg2, arg3, &display->gridFeedback, arg6);
+    mnuDrawMantraCursorTrail(0, 0, z, alpha, display, surface);
+    mnuDrawMantraGridFeedback(x + mnuMantraVariantSpritePlacements[selection->profileId][2],
+                  y + mnuMantraVariantSpritePlacements[selection->profileId][3],
+                  z, alpha, &display->gridFeedback, surface);
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
             if (cell->value != 0) {
-                mnuDrawMantraGridEntryIndicators(arg0, arg1, arg2, arg3, selection, grid, 1.0f, 1.0f, cell, arg6);
+                mnuDrawMantraGridEntryIndicators(x, y, z, alpha, selection, grid, 1.0f, 1.0f, cell, surface);
             }
             cell++;
             n--;
