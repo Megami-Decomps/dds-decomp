@@ -3,6 +3,7 @@
 #include "gs_packet.h"
 #include "pcp_vu0.h"
 #include "eff_blur.h"
+#include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
 #include "eff.h"
 #include "kwln_draw_params.h"
@@ -84,7 +85,6 @@ extern u16 kwlnTexturedSquareFadeCounter;
 extern u16 kwlnTexturedSquareFadeDuration;
 extern u32 kwlnDistanceBlurErrorCount;
 extern u32 kwlnRippleBlurErrorCount;
-extern void effCopyRectangleBlurParameters(void *);
 extern u32 effGetCh76Work(void);
 extern void effMiscNormalizeVU(void);
 

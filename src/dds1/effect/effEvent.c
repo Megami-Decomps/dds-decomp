@@ -12,6 +12,7 @@
 #include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
+#include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
 #include "eff.h"
 #include "eff_math.h"
