@@ -14694,7 +14694,7 @@ void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *owner) {
     effReleaseSlotTextureReferencesAndResetWork(owner, 0);
 }
 
-u8 effHasFirstTextureHandle(EffectSlotSet *owner) {
+u8 effHasFirstTextureHandle(const EffectSlotSet *owner) {
     return owner->textureReferences[0] != NULL;
 }
 

@@ -686,7 +686,7 @@ void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *set) {
     effInitializeAllSlotWork(set);
 }
 
-u8 effHasFirstTextureHandle(EffectSlotSet *set) {
+u8 effHasFirstTextureHandle(const EffectSlotSet *set) {
     return set->textureReferences[0] != NULL;
 }
 
