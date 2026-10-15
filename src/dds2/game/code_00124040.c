@@ -185,7 +185,7 @@ extern u32 fldPlayerObject;
 
 extern u32 D_00389858[];
 
-void fldClearSceneControlFlags(u32 arg0);
+void fldClearSceneControlFlags(u32 mask);
 
 void fldClearSceneCommandFlag(void);
 
@@ -209,7 +209,7 @@ extern s32 D_00435F7C;
 
 extern u32 mnuAcknowledgeCampState(void);
 
-u8 fldTestSceneControlFlags(u32 arg0);
+u8 fldTestSceneControlFlags(u32 mask);
 
 extern s32 D_00435F80;
 
