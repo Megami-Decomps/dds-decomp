@@ -4,6 +4,6 @@
 
 extern s32 frFontMeasureTextAdvance(void *, s32, s32);
 
-s32 sdfCounterMeasureLabelWidth(u32 arg0) {
-    return frFontMeasureTextAdvance((void *)arg0, 1, 3);
+s32 sdfCounterMeasureLabelWidth(u32 labelText) {
+    return frFontMeasureTextAdvance((void *)labelText, 1, 3);
 }
