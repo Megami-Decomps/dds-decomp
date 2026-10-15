@@ -901,9 +901,9 @@ u32 evtOpSetUnitTableEntry(void) {
         return 1;
     }
     {
-        s32 index = scrReadIntParameter(1);
+        s32 tableValueIndex = scrReadIntParameter(1);
         s32 value = scrReadIntParameter(2);
-        unit->tableValues[index] = value;
+        unit->tableValues[tableValueIndex] = value;
     }
     return 1;
 }

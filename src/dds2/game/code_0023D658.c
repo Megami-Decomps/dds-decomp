@@ -939,12 +939,12 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
         return 1;
     }
     {
-        s32 index = scrReadIntParameter(1);
+        s32 tableValueIndex = scrReadIntParameter(1);
         s32 value = scrReadIntParameter(2);
-        unit->tableValues[index] = value;
-        unit->unk108[index] = 0;
-        unit->unk120[index] = 0;
-        unit->unk138[index] = 1.0f;
+        unit->tableValues[tableValueIndex] = value;
+        unit->unk108[tableValueIndex] = 0;
+        unit->unk120[tableValueIndex] = 0;
+        unit->unk138[tableValueIndex] = 1.0f;
     }
     return 1;
 }
