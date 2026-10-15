@@ -1199,38 +1199,38 @@ typedef struct KwlnTextureBank {
     u8 pad[0x1F40 - 0x260 - sizeof(SdfLightingPacketStorage)];
 } KwlnTextureBank;
 
-extern KwlnTextureBank D_003822A0[2];
-extern SdfGraphObj D_00384730;
+extern KwlnTextureBank kwlnHeldTexturePacketBanks[2];
+extern SdfGraphObj kwlnHeldTextureDrawTarget;
 extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern u32 D_00435CD0;
 extern u32 D_0040B2A0[];
 extern SdfLightSources D_0037F940;
 extern f32 D_0037F950[4];
-extern u8 D_00384750[0x40];
+extern u8 kwlnHeldTextureViewMatrix[0x40];
 
 /* Rebuild the held-texture render target's view and both frame banks. */
 void kwlnInitHeldTextureScenePackets(void) {
     s32 i;
 
-    D_00384730.width = D_00435CCC;
-    D_00384730.unk2 = D_00435CCE;
-    D_00384730.height = D_00435CCE;
-    D_00384730.bufferFormat = 0;
-    D_00384730.auxiliaryFormat = 0x30;
-    D_00384730.buffers[0] = D_00435CC4;
-    D_00384730.buffers[1] = 0;
-    D_00384730.buffers[2] = (SdfTexResource *)D_0040B2A0[0];
+    kwlnHeldTextureDrawTarget.width = D_00435CCC;
+    kwlnHeldTextureDrawTarget.unk2 = D_00435CCE;
+    kwlnHeldTextureDrawTarget.height = D_00435CCE;
+    kwlnHeldTextureDrawTarget.bufferFormat = 0;
+    kwlnHeldTextureDrawTarget.auxiliaryFormat = 0x30;
+    kwlnHeldTextureDrawTarget.buffers[0] = D_00435CC4;
+    kwlnHeldTextureDrawTarget.buffers[1] = 0;
+    kwlnHeldTextureDrawTarget.buffers[2] = (SdfTexResource *)D_0040B2A0[0];
     sdfCameraBuildProjection(&D_0037F7B0.camera);
     for (i = 0; i != 2; i++) {
-        sdfInitPacketList(&D_003822A0[i].list);
-        sdfBuildTextureScenePacket(&D_003822A0[i].scene, &D_00384730, 0);
-        *(u32 *)&D_003822A0[i].scene.centeredBounds.rgbaq.value = D_00435CD0;
-        sdfAppendPacket(&D_003822A0[i].list, (u32)&D_003822A0[i].scene);
-        sdfConsBuildMatrixPacket(&D_003822A0[i].matrix, &D_0037F7B0, D_00384750);
-        sdfAppendPacket(&D_003822A0[i].list, (u32)&D_003822A0[i].matrix);
-        sdfBuildLightingPacket(&D_003822A0[i].lighting, D_0037F940, D_0037F950);
-        sdfAppendPacket(&D_003822A0[i].list, (u32)&D_003822A0[i].lighting);
+        sdfInitPacketList(&kwlnHeldTexturePacketBanks[i].list);
+        sdfBuildTextureScenePacket(&kwlnHeldTexturePacketBanks[i].scene, &kwlnHeldTextureDrawTarget, 0);
+        *(u32 *)&kwlnHeldTexturePacketBanks[i].scene.centeredBounds.rgbaq.value = D_00435CD0;
+        sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].scene);
+        sdfConsBuildMatrixPacket(&kwlnHeldTexturePacketBanks[i].matrix, &D_0037F7B0, kwlnHeldTextureViewMatrix);
+        sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].matrix);
+        sdfBuildLightingPacket(&kwlnHeldTexturePacketBanks[i].lighting, D_0037F940, D_0037F950);
+        sdfAppendPacket(&kwlnHeldTexturePacketBanks[i].list, (u32)&kwlnHeldTexturePacketBanks[i].lighting);
     }
 }
 

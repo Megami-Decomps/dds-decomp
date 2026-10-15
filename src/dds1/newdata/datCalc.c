@@ -396,7 +396,7 @@ enum {
     BTL_ENEMY_LEVEL_OFFSET = 5
 };
 
-extern u8 D_0032AF70[];
+extern u8 ptyAffinityPermutationOrders[];
 extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *, s32, u8);
 
 
@@ -427,8 +427,8 @@ typedef struct EvtScriptContext {
 } EvtScriptContext;
 typedef char EvtScriptContextSizeCheck[sizeof(EvtScriptContext) == 0x18 ? 1 : -1];
 
-extern PtyRosterValueRecord D_0032AEA8[];
-extern PtyItemQuantityUpdate D_0032AEE8[];
+extern PtyRosterValueRecord ptyRosterMenuValues[];
+extern PtyItemQuantityUpdate ptyItemQuantityUpdates[];
 
 extern ScrData *evtWorkScriptTask;
 
@@ -1149,7 +1149,7 @@ s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
     }
     for (orderIndex = 0, orderOffset = 0; orderIndex < 6; orderIndex++, orderOffset += 3) {
         matchedCount = 0;
-        for (i = 0, orderCursor = D_0032AF70 + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
+        for (i = 0, orderCursor = ptyAffinityPermutationOrders + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
             actorValue = *actorCursor++;
             if (actorValue != 0 && ptyUnitMatchesAffinityRequirement(actorValue, affinity, *orderCursor) != 0) {
                 matchedCount++;
@@ -1163,7 +1163,7 @@ s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
 }
 
 void evtCopyRosterTableValue(DatPartyRecord *entry) {
-    entry->menuValue = D_0032AEA8[entry->unitId].value;
+    entry->menuValue = ptyRosterMenuValues[entry->unitId].value;
 }
 
 /* Copy table values only for occupied slots whose roster identifier is below 16. */
@@ -1187,7 +1187,7 @@ void evtUpdateFlaggedEntries(void) {
 
 /* Apply the two configured count/flag updates; a zero index disables its record. */
 void dds3ForEachEntry(void) {
-    PtyItemQuantityUpdate *updates = D_0032AEE8;
+    PtyItemQuantityUpdate *updates = ptyItemQuantityUpdates;
     u32 updateIndex = 0;
 
     do {
@@ -1202,7 +1202,7 @@ void dds3ForEachEntry(void) {
     } while (updateIndex < 2);
 }
 
-extern u16 D_0032AEF0[16][4];
+extern u16 ptyRosterDefaultSkillIds[16][4];
 extern void scrClearFlags(DatPartyRecord *unit);
 extern s32 scrSetFlag(DatPartyRecord *unit, u16 skill);
 extern void scrSetSecondaryScriptFlag(DatPartyRecord *unit, u16 skill);
@@ -1222,7 +1222,7 @@ void ptyMergeStockSkills(DatPartyRecord *unit) {
     }
     scrClearFlags(unit);
     for (i = 0; i < 4; i++) {
-        u32 value = D_0032AEF0[unitId][i];
+        u32 value = ptyRosterDefaultSkillIds[unitId][i];
         skill = value;
         if (value != 0) {
             scrSetFlag(unit, skill);
