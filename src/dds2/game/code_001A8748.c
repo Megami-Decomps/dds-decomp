@@ -3826,7 +3826,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
         if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
             return 1;
         }
-    } else if (datCommandRecords[command].unk_0B == 1) {
+    } else if (datCommandRecords[command].distributeRandomTargetHits == 1) {
         return 1;
     }
     return 0;
