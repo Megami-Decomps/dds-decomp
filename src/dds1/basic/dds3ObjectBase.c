@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3_object_flags.h"
 #include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
 #include "evt_gradient_rect.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -23,7 +24,6 @@ void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);
-void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *slot, EffWorldNode *owner);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
@@ -60,7 +60,7 @@ void dds3DestroyObjectBase(ObjBase *base) {
     }
     dds3ReleaseObjectBaseResources(owner);
     if (base->devSlot != 0) {
-        sdfReleaseDevSlot(base->devSlot, 1, 1);
+        sdfReleaseDevSlot((SdfModel *)base->devSlot, 1, 1);
     }
     dds3DestroyWorldIndexNode(base->worldIndexNode);
     sdfReleaseChipBlock(base);
@@ -156,7 +156,7 @@ void dds3ReleaseObjectBaseResources(EffWorldNode *object) {
                 }
             }
         } else {
-            sdfReleaseDevSlot((s32)base->resourceHandle, 1, 1);
+            sdfReleaseDevSlot((SdfModel *)base->resourceHandle, 1, 1);
             sdfDestroyMotion(base->motion);
         }
         base->resourceHandle = 0;
