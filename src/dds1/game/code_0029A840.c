@@ -756,11 +756,11 @@ EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {
     return obj;
 }
 
-void effSampleAnimSet(EffExpandedList *set, u32 frame, EffAnimSample *out) {
+void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out) {
     u32 count = set->count;
     u32 local = 0;
     s32 segment = -1;
-    EffExpandedEntry *seg;
+    const EffExpandedEntry *seg;
     u32 acc;
     u32 i;
 

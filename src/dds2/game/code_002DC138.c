@@ -823,11 +823,11 @@ EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {
 
 /* One animation track: segments contribute their length plus a boundary frame;
  * the loop flag wraps the frame by the total track length. */
-void effSampleAnimSet(EffExpandedList *set, u32 frame, EffAnimSample *out) {
+void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out) {
     u32 count = set->count;
     u32 local = 0;
     s32 segment = -1;
-    EffExpandedEntry *seg;
+    const EffExpandedEntry *seg;
     u32 acc;
     u32 i;
 
