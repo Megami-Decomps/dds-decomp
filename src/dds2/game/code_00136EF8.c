@@ -2790,7 +2790,100 @@ void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141898);
+extern s32 D_004361E8;
+extern void fldInitializeFieldSequenceRecord(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
+
+/* Run the actor transition selected by fldSelectActorFromSceneIndexTables:
+ * find the first enabled kind-7 actor for the pending field, motion and
+ * index, mark its floor and exploration bits, then submit its sequence and
+ * clear the pending selection. */
+void func_00141898(void) {
+    FieldSequenceRecord record;
+    s32 stage;
+    s32 room;
+    s32 extra;
+    s32 motion;
+    s32 index;
+    u32 floorFlags;
+    u32 flags;
+    s32 i;
+    FldActorEntry *entry;
+
+    if (D_004361E4 == 0) {
+        return;
+    }
+    extra = D_004361E8;
+    motion = D_004361EC;
+    index = D_004361F0;
+    fldLoadActorWaypointTable(D_004361E4);
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldActorEntries[i];
+        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
+            continue;
+        }
+        if (entry->kind != 7) {
+            continue;
+        }
+        if ((u32)(motion - 3) >= 2 && extra != entry->floor) {
+            continue;
+        }
+        if (motion != entry->motion || entry->variantMode != 0) {
+            continue;
+        }
+        if (motion != 5 && index != entry->secondaryMotion) {
+            continue;
+        }
+        floorFlags = entry->flags64;
+        if (floorFlags & 1) {
+            stage = entry->unk65 != 0 ? entry->unk65 : fldAreaState.area;
+            room = floorFlags >> 2;
+            if (room == 0) {
+                room = fldAreaState.floor + 1;
+            }
+            fldSetFloorFlag(stage, room, entry->value67);
+        }
+        flags = entry->flags64;
+        if (flags & 2) {
+            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+        }
+        if (entry->variant == 1) {
+            fldReleaseCurrentBgm();
+            stage = fldAreaState.area;
+            dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0);
+            return;
+        }
+        if (entry->variant == 0) {
+            stage = D_004361E4;
+        } else {
+            stage = entry->variant;
+        }
+        room = entry->warpEntry;
+        if (room == 0) {
+            room = D_004361E8;
+        }
+        if (fldAreaState.area != stage) {
+            fldReleaseCurrentBgm();
+        }
+        fldApplySceneRoomSelection(entry);
+        if (entry->flags54 != 0) {
+            D_00435F24 = entry->flags54;
+            strcpy((char *)D_00387D60, entry->taskName);
+            D_00435F28 = i + 1;
+        }
+        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->unk52, entry->linkKind, entry->linkName);
+        if ((u32)(motion - 3) < 2) {
+            record.mode = 5;
+        } else {
+            record.mode = 4;
+        }
+        D_004361E4 = 0;
+        D_004361E8 = 0;
+        D_004361EC = 0;
+        D_004361F0 = 0;
+        dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
+        return;
+    }
+}
 
 extern void fldInitializeLinkedSequence(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
 
