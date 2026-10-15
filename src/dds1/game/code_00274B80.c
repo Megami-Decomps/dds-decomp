@@ -222,8 +222,8 @@ extern void mnuClearWindowListSelectionFlags(s32);
 extern void mnuPlayInputSound(s32, u32, s32);
 extern u8 mnuSkillMenuFieldUsePopupEntry[];
 extern u8 mnuSkillMenuEquippedSlotsPopupEntry[];
-extern u8 D_0037CAB0[];
-extern u8 D_0037CA78[];
+extern u8 mnuStaffPartyBrowsePopupEntry[];
+extern u8 mnuStaffFieldSkillDisplayPopupEntry[];
 extern void evtStageTestInit(s32);
 
 extern s32 evtStageTestPollModelRequest(void);
@@ -886,11 +886,11 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
         mnuStepPartyPanelListFromInput(4, panelWork);
         if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
             *(s32 *)(menuWork + 0x18) = ((CampMenuContext *)context)->partyWindow.lists[0]->cursor->index;
-            mnuSetPopupEntry(popupState, D_0037CAB0);
+            mnuSetPopupEntry(popupState, mnuStaffPartyBrowsePopupEntry);
             *(s32 *)(menuWork + 0x24) = 1;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            mnuSetPopupEntryFlagged(popupState, D_0037CA78);
+            mnuSetPopupEntryFlagged(popupState, mnuStaffFieldSkillDisplayPopupEntry);
             mnuActivatePanelAndConfigureGridResources(
                 (MenuScrollPanel *)(u32)((CampMenuContext *)context)->display,
                 (struct EffectSlotSet *)(u32)((CampMenuContext *)context)->displayVariant, 0, 1);
@@ -1101,7 +1101,7 @@ s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
 }
 
 extern s32 mnuIsStaffMenuInputBlocked();
-extern u8 D_0037CA94[];
+extern u8 mnuStaffCampPagePopupEntry[];
 
 /* Update popup state before page navigation, view toggles, and exit requests.
  * stateWord holds the update result first, then the stored popup state. */
@@ -1146,7 +1146,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
                 btlStopStage();
                 menuWork->staffExit = 1;
                 menuWork->selectedList = 1;
-                mnuSetPopupEntryFlagged(popupState, D_0037CA94);
+                mnuSetPopupEntryFlagged(popupState, mnuStaffCampPagePopupEntry);
             } else {
                 inputFlags = MNU_STAFF_INPUT_REJECTED;
             }

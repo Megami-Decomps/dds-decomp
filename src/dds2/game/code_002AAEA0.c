@@ -14,7 +14,7 @@ extern s64 fileConsumeConfigTaskReady(void);
 extern u8 mnuCampCommandReturnPopupEntry[];
 
 
-extern u8 D_003E7200[];
+extern u8 mnuRingCustomizationItemRows[];
 
 extern u8 D_003E73F8[];
 
@@ -249,7 +249,7 @@ s32 mtrMantraIdIsValid(s32 mantraId) {
 
 extern u16 D_00437B6E;
 extern u8 D_00437B88;
-extern u16 D_003E6730[];
+extern u16 mnuRingItemDisplayOrder[];
 
 s32 mtrHasEnoughOwnedMantras(void) {
     s32 owned = 0;
@@ -263,7 +263,7 @@ s32 mtrHasEnoughOwnedMantras(void) {
         required--;
     }
     for (i = 0; i < D_00437B6E; i++) {
-        s32 mantraId = D_003E6730[i];
+        s32 mantraId = mnuRingItemDisplayOrder[i];
         if (datGameState->inventory.counts[mantraId] != 0) {
             if (mtrMantraIdIsValid(mantraId) == 0) {
                 owned++;
@@ -280,7 +280,7 @@ s32 mtrMantraFindIndex(s32 mantraId) {
     u32 i;
 
     for (i = 0; i < 0x12; i++) {
-        if (mantraId == *(u16 *)(D_003E7200 + i * 0x1C)) {
+        if (mantraId == *(u16 *)(mnuRingCustomizationItemRows + i * 0x1C)) {
             return i + 1;
         }
     }

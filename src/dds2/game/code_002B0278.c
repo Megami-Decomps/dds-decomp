@@ -109,7 +109,7 @@ extern s32 evtStageTestAdvanceResourceWork(void);
 
 extern s32 mnuIsStaffMenuInputBlocked();
 
-extern char D_003E75C4[];
+extern char mnuStaffCampPagePopupEntry[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, s32, s32);
 
@@ -181,7 +181,7 @@ extern s32 mnuApplyRandomStatItemEffect();
 
 extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord *, s32, s32);
 
-extern char D_003E7530[];
+extern char mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
@@ -209,8 +209,8 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern char D_003E75E0[];
-extern char D_003E75A8[];
+extern char mnuStaffPartyBrowsePopupEntry[];
+extern char mnuStaffFieldSkillDisplayPopupEntry[];
 typedef struct MenuPanelDrawEntry {
     s32 slotIndex;
     s32 x;
@@ -463,8 +463,8 @@ u32 mnuPartySlotAssignmentLeaveNoOp(void) {
     return 1;
 }
 
-extern char D_003E7202[];
-extern char D_003E7207[20];
+extern char mnuRingCustomizationStatEligibility[];
+extern char mnuRingCustomizationBonusWeights[20];
 s32 mnuApplyRandomStatItemEffect(u8 *menu, DatPartyRecord *entry, s32 itemId) {
     MenuStaffChoices *choices;
     MenuListNode *node;
@@ -484,7 +484,7 @@ s32 mnuApplyRandomStatItemEffect(u8 *menu, DatPartyRecord *entry, s32 itemId) {
     choices = (MenuStaffChoices *)menu;
     node = choices->windows[4]->list->cursor;
     rowIndex = node->sortKeyTertiary;
-    eligibleTable = D_003E7202 + rowIndex * 0x1C;
+    eligibleTable = mnuRingCustomizationStatEligibility + rowIndex * 0x1C;
     eligibleCount = 0;
     for (i = 0; i < 5; i++, eligibleTable++) {
         if (*eligibleTable != 0) {
@@ -501,7 +501,7 @@ s32 mnuApplyRandomStatItemEffect(u8 *menu, DatPartyRecord *entry, s32 itemId) {
     choices->thirdListIndex = statIndex;
     roll = effMiscRand(NULL) % 100;
     choices->thirdListValue = 0;
-    weightTable = D_003E7207 + rowIndex * 0x1C;
+    weightTable = mnuRingCustomizationBonusWeights + rowIndex * 0x1C;
     i = 0;
     do {
         weight = *weightTable++;
@@ -545,7 +545,7 @@ s32 mnuUpdatePartySlotAssignmentPopup(KwlnTask *callback) {
         mnuRefreshPartyPanelBars(&((MenuContext *)context)->partyWindow);
         *(s32 *)(menu + 0x40) = label;
     }
-    mnuSetPopupEntryFlagged(popup, D_003E7530);
+    mnuSetPopupEntryFlagged(popup, mnuCampRingCustomizationPopupEntry);
     return 0;
 }
 
@@ -614,7 +614,7 @@ s32 mnuPartySlotConfirmClearUpdate(KwlnTask *callback) {
         mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         mnuRefreshPartyPanelBars(&((MenuContext *)context)->partyWindow);
     }
-    mnuSetPopupEntryFlagged(popup, D_003E7530);
+    mnuSetPopupEntryFlagged(popup, mnuCampRingCustomizationPopupEntry);
     return 0;
 }
 
@@ -1312,11 +1312,11 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
         mnuStepPartyPanelListFromInput(4, panelWork);
         if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
             menuWork->staffSelection = ((MenuContext *)context)->partyWindow.lists[0]->cursor->index;
-            mnuSetPopupEntry(popupState, D_003E75E0);
+            mnuSetPopupEntry(popupState, mnuStaffPartyBrowsePopupEntry);
             menuWork->active = 1;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            mnuSetPopupEntryFlagged(popupState, D_003E75A8);
+            mnuSetPopupEntryFlagged(popupState, mnuStaffFieldSkillDisplayPopupEntry);
             mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
                                       (struct EffectSlotSet *)(u32)((MenuContext *)context)->displayHandle, 0, 1);
             mnuClearActionFlags(0, panelWork);
@@ -1564,7 +1564,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
                 evtStageTestStop();
                 menuWork->staffExit = 1;
                 menuWork->active = 1;
-                mnuSetPopupEntryFlagged(popupState, D_003E75C4);
+                mnuSetPopupEntryFlagged(popupState, mnuStaffCampPagePopupEntry);
             } else {
                 inputFlags = MNU_STAFF_INPUT_REJECTED;
             }

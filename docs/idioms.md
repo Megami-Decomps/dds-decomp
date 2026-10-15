@@ -13830,3 +13830,35 @@ so runtime and selected-actor pointers overlap and require an extra saved GPR.
 The actual typed output pair preserves native stack accesses and removes that
 false dependence. No callback or list-head snapshot moves. This preserves the
 already matched camera from `bbea2f42d`; it is not another new reconstruction.
+
+## Staff popup records and ring-customization data views
+
+The paired `mnuStaffFieldSkillDisplayPopupEntry`, `mnuStaffCampPagePopupEntry`
+and `mnuStaffPartyBrowsePopupEntry` name distinct seven-word dispatch records.
+The first belongs to the non-party-browse staff display path; it is not the
+already-named `mnuCampFieldSkillPopupEntry`. The camp-page entry is restored
+on browse cancellation, while the party-browse entry owns the party-panel
+scene callbacks. Preserve each title's enter/leave and draw implementations;
+similar names do not make these records interchangeable.
+
+DDS2 `mnuRingCustomizationItemRows` is the existing 18-row, 28-byte catalog
+for item IDs 109 through 126. `mnuRingCustomizationStatEligibility` and
+`mnuRingCustomizationBonusWeights` remain overlapping views at offsets two
+and seven: five eligibility bytes and twenty signed bonus-weight bytes per
+row. Naming does not complete a new struct, change a stride or retype the
+bytes. The neighboring equality-test data remain outside this change; the helper
+alone does not prove their gameplay purpose.
+
+`mnuRingCustomizationStatLabels` preserves the existing integer declaration
+and pointer casts for the St/Vi/Ma/Ag/Lu/null label bank. The 43-entry
+`mnuRingItemDisplayOrder` still builds the item-minus-0xC0 slot lookup with
+one-based display ordinals. Do not sort this bank or replace that ordinal
+with the item ID.
+
+The equipment/customization party-selection entries are separate from their
+catalog entries. Apply and reset confirmations have their own records:
+apply calls the existing random-stat item-effect provider, while reset
+clears the equipped item's five saved stat bonuses and five requirement
+counts before refreshing party state. Existing predicates, requirement-provider names, input branches,
+item consumption and return-to-catalog behavior remain unchanged. These are
+identifier-only data roles, not a cleanup of the surrounding control flow.
