@@ -81,7 +81,7 @@ void kwlnTaskAdvanceStartDelays(void)
     }
 }
 
-extern s8 D_0037F4D0[2][2][16];
+extern s8 kwlnPadButtonStates[2][2][16];
 extern u8 D_0037F510[2][2][16];
 extern u8 D_00435C30[2][2][2];
 extern s8 D_00435C38[2][2];
@@ -114,8 +114,8 @@ s32 kwlnTaskStep(KwlnTask *task) {
     } else {
         for (port = 0; port < 2; port++) {
             for (i = 0; i < 16; i++) {
-                D_0037F510[0][port][i] = D_0037F4D0[0][port][i];
-                D_0037F510[1][port][i] = D_0037F4D0[1][port][i];
+                D_0037F510[0][port][i] = kwlnPadButtonStates[0][port][i];
+                D_0037F510[1][port][i] = kwlnPadButtonStates[1][port][i];
             }
             for (i = 0; i < 2; i++) {
                 D_00435C40[port][i][0] = D_00435C30[port][i][0];

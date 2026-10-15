@@ -317,7 +317,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412658);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412668);
 
-const char D_00412688[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
+const char scrSceneLightDirectionZeroWarning[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
 extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
 
 s32 scrCommandSetSceneLightDirection(void) {
@@ -330,7 +330,7 @@ s32 scrCommandSetSceneLightDirection(void) {
     if (ffabsf(direction.x) <= 0.01f &&
         ffabsf(direction.y) <= 0.01f &&
         ffabsf(direction.z) <= 0.01f) {
-        evtPrintDeveloperConsoleMessage(D_00412688);
+        evtPrintDeveloperConsoleMessage(scrSceneLightDirectionZeroWarning);
         return 1;
     }
     kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction);

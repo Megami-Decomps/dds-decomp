@@ -165,18 +165,18 @@ void dds3ReleaseObjectBaseResources(EffWorldNode *object) {
     }
 }
 
-extern const char D_00329B08[5][10];
-extern const char D_00329B40[9][8];
-extern const char D_00329B88[17][20];
-extern const char D_00329CE0[18][20];
-extern const char D_00329E48[17][20];
-extern const char D_00329FA0[17][20];
+extern const char dds3BipedModelNames[5][10];
+extern const char dds3ExtendedBipedModelNames[9][8];
+extern const char dds3BipedChunkNames[17][20];
+extern const char dds3ExtendedBipedChunkNames[18][20];
+extern const char dds3PlayerChunkNames[17][20];
+extern const char dds3Pc013ChunkNames[17][20];
 extern const char D_003BA9C8[];
 extern const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId);
 extern s32 strcmp(const char *left, const char *right);
 extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
 
-const char D_0039F640[16] = "player_a";
+const char dds3PlayerModelName[16] = "player_a";
 
 void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
     const char *modelName;
@@ -190,10 +190,10 @@ void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
 
     modelName = sdfNamedChunkGetNameById(model->inner, 0);
     for (family = 0; family < 5; family++) {
-        if (strcmp(modelName, D_00329B08[family]) == 0) {
+        if (strcmp(modelName, dds3BipedModelNames[family]) == 0) {
             for (index = 0; index < 17; index++) {
                 inner = model->inner;
-                chunkId = sdfNamedChunkFindId(inner, D_00329B88[index]);
+                chunkId = sdfNamedChunkFindId(inner, dds3BipedChunkNames[index]);
                 if (chunkId > 0) {
                     base->resourceSlotCount = 17;
                     base->resourceSlots[index] = chunkId;
@@ -205,11 +205,11 @@ void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
     }
 
     for (family = 0; family < 9; family++) {
-        if (strcmp(modelName, D_00329B40[family]) == 0) {
+        if (strcmp(modelName, dds3ExtendedBipedModelNames[family]) == 0) {
             subtype = family + 0x1000;
             for (index = 0; index < 18; index++) {
                 inner = model->inner;
-                chunkId = sdfNamedChunkFindId(inner, D_00329CE0[index]);
+                chunkId = sdfNamedChunkFindId(inner, dds3ExtendedBipedChunkNames[index]);
                 if (chunkId > 0) {
                     base->resourceSlotCount = 18;
                     base->resourceSlots[index] = chunkId;
@@ -220,10 +220,10 @@ void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
         }
     }
 
-    if (strcmp(modelName, D_0039F640) == 0) {
+    if (strcmp(modelName, dds3PlayerModelName) == 0) {
         for (index = 0; index < 17; index++) {
             inner = model->inner;
-            chunkId = sdfNamedChunkFindId(inner, D_00329E48[index]);
+            chunkId = sdfNamedChunkFindId(inner, dds3PlayerChunkNames[index]);
             if (chunkId > 0) {
                 base->resourceSlotCount = 17;
                 base->resourceSlots[index] = chunkId;
@@ -234,10 +234,10 @@ void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
     }
 
     if (strcmp(modelName, D_003BA9C8) == 0) {
-        s32 count = ARRAY_COUNT(D_00329FA0);
+        s32 count = ARRAY_COUNT(dds3Pc013ChunkNames);
         s32 category = 0x3000;
         slot = base->resourceSlots;
-        boneNameRow = D_00329FA0;
+        boneNameRow = dds3Pc013ChunkNames;
         for (index = count - 1; index >= 0; index--, slot++, boneNameRow++) {
             inner = model->inner;
             chunkId = sdfNamedChunkFindId(inner, *boneNameRow);
