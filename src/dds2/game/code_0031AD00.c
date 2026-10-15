@@ -75,15 +75,15 @@ extern void mnuPauseEffectQueueFrameAdvance(void);
 extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
 void mnuToggleShootingPause(MnuShootingWork *object) {
-    object->unk70Bit0 ^= 1;
-    if (object->unk70Bit0) {
+    object->paused ^= 1;
+    if (object->paused) {
         mnuResetShootingPauseChoiceIndex(object);
         mnuPauseEffectQueueFrameAdvance();
         mnuSetShootingNodeModelDepthsToZero(object);
         itfSetFadeMode(&object->pauseFade.fade, 1, 8);
         return;
     }
-    if (!object->unk70Bit0) {
+    if (!object->paused) {
         mnuCleanupShootingPauseNoOp();
         mnuResumeEffectQueueFrameAdvance();
         mnuRestoreShootingNodeModelDepths(object);
@@ -148,7 +148,7 @@ void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *object) {
     FadeNumber *fade = &object->pauseFade;
 
     mnuSetPauseFadeChoice(fade, object->choiceIndex);
-    if (object->unk70Bit0) {
+    if (object->paused) {
         itfSetFadeMode(&fade->fade, 1, 8);
     } else {
         itfSetFadeMode(&fade->fade, 0, 8);

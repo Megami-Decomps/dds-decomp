@@ -649,7 +649,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
     work->subEntry24Data = NULL;
     work->unk_F0 = 0;
     work->subEntry25Data = NULL;
-    work->unk_100 = 0;
+    work->subEntry25Count = 0;
     if (sub == NULL) {
         return work;
     }
@@ -719,7 +719,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             break;
         case 25:
             work->subEntry25Data = (u8 *)sub + work->subEntries[i].offset;
-            work->unk_100 = work->subEntries[i].value;
+            work->subEntry25Count = work->subEntries[i].value;
             break;
         }
     }

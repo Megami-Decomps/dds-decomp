@@ -260,7 +260,7 @@ MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *state, MenuR
     record->angle = angle;
     record->speed = state->tag.index;
     flags = record->state.word & ~0x1Eu;
-    record->remaining = state->unk18;
+    record->remaining = state->lifetime;
     record->state.word = flags |
                          (state->flags.bits.direction << 1);
     state->value++;

@@ -516,7 +516,7 @@ void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
-    if (panel->unkC7 != 1) {
+    if (panel->quantityAtLimit != 1) {
         effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[30][MENU_ICON_X] << 4,
             (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
             0, 0x100, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);
@@ -533,7 +533,7 @@ void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, MenuTerminalContext *pane
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
 
-    if (panel->unkC7 != 1) {
+    if (panel->quantityAtLimit != 1) {
         effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[30][MENU_ICON_X] << 4,
             (D_003D03F0[30][MENU_ICON_Y] + row * 22) << 3,
             0, scale, 0, texture, D_003D03F0[30][MENU_ICON_FRAME], option);

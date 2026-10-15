@@ -3816,116 +3816,116 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
 
     for (i = 0; i < 26; i++) {
         entry.type = i;
-        entry.unk_04 = 0;
+        entry.elementSize = 0;
         entry.value = 0;
         entry.offset = 0;
         switch (i) {
         case 0:
             if (mode == 2) {
-                entry.unk_04 = 0x10;
+                entry.elementSize = 0x10;
                 entry.value = 1;
             }
             break;
         case 2:
             if (mode == 1) {
-                entry.unk_04 = 0x10;
+                entry.elementSize = 0x10;
                 entry.value = id0Count;
             }
             break;
         case 3:
             if (mode == 1) {
-                entry.unk_04 = 0x20;
+                entry.elementSize = 0x20;
                 entry.value = id1Count;
             }
             break;
         case 4:
             if (mode == 2 || mode == 3) {
-                entry.unk_04 = 0x2C;
+                entry.elementSize = 0x2C;
                 entry.value = nodeCount;
             }
             break;
         case 1:
             if (mode != 3) {
-                entry.unk_04 = 0x20;
+                entry.elementSize = 0x20;
                 entry.value = nameCount;
             }
             break;
         case 5:
             if (mode == 2) {
-                entry.unk_04 = 0x10;
+                entry.elementSize = 0x10;
                 entry.value = id2Count;
             }
             break;
         case 13:
             if (mode == 2) {
-                entry.unk_04 = 0x30;
+                entry.elementSize = 0x30;
                 entry.value = typeACount;
             }
             break;
         case 14:
             if (mode == 2) {
-                entry.unk_04 = 0x20;
+                entry.elementSize = 0x20;
                 entry.value = typeBCount;
             }
             break;
         case 15:
             if (mode == 2) {
-                entry.unk_04 = 0x28;
+                entry.elementSize = 0x28;
                 entry.value = typeDCount;
             }
             break;
         case 16:
             if (mode == 2) {
-                entry.unk_04 = 0x2C;
+                entry.elementSize = 0x2C;
                 entry.value = typeECount;
             }
             break;
         case 17:
             if (mode == 2) {
-                entry.unk_04 = 0x2C;
+                entry.elementSize = 0x2C;
                 entry.value = typeFCount;
             }
             break;
         case 20:
             if (mode == 2) {
-                entry.unk_04 = 0x2C;
+                entry.elementSize = 0x2C;
                 entry.value = type23Count;
             }
             break;
         case 24:
             if (mode == 2) {
-                entry.unk_04 = 0x28;
+                entry.elementSize = 0x28;
                 entry.value = type27Count;
             }
             break;
         case 18:
             if (mode == 2) {
-                entry.unk_04 = 0x18;
+                entry.elementSize = 0x18;
                 entry.value = type16Count;
             }
             break;
         case 19:
             if (mode == 2) {
-                entry.unk_04 = 0x24;
+                entry.elementSize = 0x24;
                 entry.value = type17Count;
             }
             break;
         case 21:
             if (mode == 2) {
-                entry.unk_04 = 8;
+                entry.elementSize = 8;
                 entry.value = groupCount;
             }
             break;
         case 25:
             if (mode == 2) {
-                entry.unk_04 = 0x40;
+                entry.elementSize = 0x40;
                 entry.value = type25Count;
             }
             break;
         }
-        if (entry.unk_04 != 0 || entry.value != 0) {
+        if (entry.elementSize != 0 || entry.value != 0) {
             entry.offset = payloadOffset;
-            payloadOffset += (s32)entry.unk_04 * (s32)entry.value;
+            payloadOffset += (s32)entry.elementSize * (s32)entry.value;
             evtWriteSerializedBytes(output, &entry, sizeof(entry));
         }
     }
@@ -5071,7 +5071,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
             key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
-            if (work->unk_100 != 0 && work->subEntry25Data != NULL) {
+            if (work->subEntry25Count != 0 && work->subEntry25Data != NULL) {
                 *(EvtRowPayload40 *)key->payload =
                     *(EvtRowPayload40 *)(work->subEntry25Data + key->p08.sh[1] * 0x40);
             }
