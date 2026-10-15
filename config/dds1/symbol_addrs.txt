@@ -11224,3 +11224,13 @@ mnuTerminalReturnToMenuPopupEntry = 0x0036ADD8;
 mnuShopPrimarySpriteNames = 0x0036AA60;
 mnuShopReturnFadePopupEntry = 0x0036AB64;
 mnuShopFadeCompletePopupEntry = 0x0036AB80;
+
+
+effExpandingThunderFadeParams = 0x00355008;
+effGrowingThunderFadeParams = 0x003550B8;
+effShortThunderFadeParams = 0x00355108;
+effScalingThunderFadeParams = 0x00355158;
+effPairedDriftReferenceAxis = 0x003556A0;
+effTrackPolyDrawParams = 0x003D6640;
+effTrackPolyTriangleIndices = 0x003556D0;
+effTrackPolyDrawSurfaces = 0x00355710;

@@ -12601,3 +12601,13 @@ mnuShopProgressCompletionFlagView = 0x003CE14C;
 mnuShopProgressSlotPricePercentView = 0x003CE150;
 mnuShopQuantityPriceTiers = 0x003CE3E8;
 mnuShopCurrencyAwardTiers = 0x003CE408;
+
+
+effExpandingThunderFadeParams = 0x003B1938;
+effGrowingThunderFadeParams = 0x003B19E8;
+effShortThunderFadeParams = 0x003B1A38;
+effScalingThunderFadeParams = 0x003B1A88;
+effPairedDriftReferenceAxis = 0x003B1FD0;
+effTrackPolyDrawParams = 0x004520E0;
+effTrackPolyTriangleIndices = 0x003B2000;
+effTrackPolyDrawSurfaces = 0x003B2040;
