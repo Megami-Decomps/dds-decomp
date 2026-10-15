@@ -3653,7 +3653,7 @@ extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, B
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
 extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern s32 btlCanUseActorCategoryFlag2(s32);
+extern s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlApplyCombinedActorFlags(u8 *);
@@ -3772,7 +3772,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             }
             if (btlCanUseLinkedActor(command)) {
                 cameraMode = 0;
-                if (!btlCanUseActorCategoryFlag2((s32)command)) {
+                if (!btlCanUseActorCategoryFlag2(command)) {
                     cameraMode = effMiscRandMod(0, 2);
                 }
             } else {
@@ -3801,7 +3801,7 @@ flag_defeat_candidates:
     }
     if (btlCanUseLinkedActor(command)) {
         cameraMode = 0;
-        if (!btlCanUseActorCategoryFlag2((s32)command)) {
+        if (!btlCanUseActorCategoryFlag2(command)) {
             cameraMode = effMiscRandMod(0, 2);
         }
     } else {
@@ -7331,7 +7331,130 @@ s32 btlUpdateSatanApproachCameraStep(BtlLinkedCommand *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00225BF8);
+/* Satan's action camera: pick a linked-pair, filtered-group, exchange or keyed camera
+ * from the actor's facing, the target count and the two modes; otherwise fall back
+ * to the fixed action camera. */
+s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
+    s8 modeA = argModeA;
+    s8 modeB = argModeB;
+    ActionStateLink *link;
+    u32 count;
+    u32 cameraMode;
+
+    if (btlIsActorCategoryMarked(command)) {
+        return 0;
+    }
+    link = command->link;
+    btlGetRuntime();
+    if (link->unit->status.flags & 0x200) {
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (modeA == 1 && modeB == 0) {
+            return 0;
+        }
+        if (count == 1 && modeA == 0 && modeB == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            if (btlCanUseActorCategoryFlag4(command)) {
+                return 0;
+            }
+            if (btlCanUseLinkedActor(command) != 0) {
+                cameraMode = 0;
+                if (btlCanUseActorCategoryFlag2(command) == 0) {
+                    cameraMode = effMiscRandMod(0, 2);
+                }
+            } else {
+                cameraMode = 1;
+            }
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("SATAN:T-Def ++++\n");
+                func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                return 1;
+            }
+            btlBossDebugPrintf("SATAN:IT-Def ++++\n");
+            btlSetupSatanExchangeCameraPair(command);
+            return 1;
+        } else {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlSetSatanFixedActionCamera((u32)command);
+            return 1;
+        }
+    } else {
+        if (btlCanUseLinkedActor(command) != 0) {
+            cameraMode = 0;
+            if (btlCanUseActorCategoryFlag2(command) == 0) {
+                cameraMode = effMiscRandMod(0, 2);
+            }
+        } else {
+            cameraMode = 1;
+        }
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (count == 1 && modeA == 1 && modeB == 0) {
+            if (command->actionCode == 0x106) {
+                goto satan_attack;
+            }
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("SATAN:T-Def ++++\n");
+                if (btlHasSingleLinkedResource(command)) {
+                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    command->motionParameter = 30.0f;
+                    command->flags |= 0x41;
+                } else {
+                    btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
+                }
+                return 1;
+            }
+            btlBossDebugPrintf("SATAN:IT-Def ++++\n");
+            btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
+                                            0.8f, 1.25f, 0.35f, 0, 0);
+            command->frontCamera.distance += 600.0f;
+            command->backCamera.distance += 600.0f;
+            command->motionParameter = 30.0f;
+            command->flags |= 0x41;
+            btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+            btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            return 1;
+        } else if (count >= 2 && modeA == 1 && modeB == 0) {
+            if (command->actionCode == 0x106) {
+satan_attack:
+                btlChooseSatanAttackCamera((s32)command);
+                return 1;
+            }
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("SATAN:TP-Def ++++\n");
+                btlBuildFilteredGroupCameraPair(command, &command->frontCamera, &command->backCamera);
+                return 1;
+            }
+            btlFlagAllUnitDefeatCandidatesTask();
+            switch (effMiscRandMod(0, 3)) {
+            case 0:
+                btlBossDebugPrintf("SATAN:ITP-0 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    -519.7f, -1.2f, -1100.0f, -0.216f, -0.178f, 0.026f, 0.951f, -663.0f,
+                    -54.9f, -1530.8f, -0.096f, -0.165f, 0.003f, 0.973f, 40.0f, 15.0f);
+                return 1;
+            case 1:
+                btlBossDebugPrintf("SATAN:ITP-2 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    -798.5f, -43.1f, -1386.8f, -0.097f, -0.22f, 0.009f, 0.961f, 473.9f,
+                    -48.1f, -1526.9f, -0.094f, 0.152f, -0.028f, 0.975f, 40.0f, 20.0f);
+                return 1;
+            case 2:
+                btlBossDebugPrintf("SATAN:ITP-3 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    -5.8f, 6.6f, -985.4f, -0.215f, 0.004f, -0.01f, 0.967f, -5.8f,
+                    -16.9f, -1574.8f, -0.119f, 0.004f, -0.009f, 0.984f, 40.0f, 10.0f);
+                return 1;
+            }
+        } else {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlSetSatanFixedActionCamera((u32)command);
+            return 1;
+        }
+    }
+    return 0;
+}
+
 
 s32 btlDispatchActionByResourceFlags(BtlLinkedCommand *unit) {
     u16 flags = datActionAnimationRecords[unit->actionCode].flags;

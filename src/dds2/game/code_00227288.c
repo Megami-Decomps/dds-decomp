@@ -1553,7 +1553,7 @@ extern void btlSetSpecialEnemyGeometry(void);
 extern s32 func_00223350(BtlLinkedCommand *, s32, s32);
 extern s32 func_002247D0(BtlLinkedCommand *, s32, s32);
 extern s32 btlUpdateSatanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
-extern s32 func_00225BF8(BtlLinkedCommand *, s32, s32);
+extern s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *, s32, s32);
 extern s32 btlGetLinkedEffectPhase(BtlUnit *);
 extern void func_002279F0(void);
 extern void btlQueueLinkedPairModelSwapTasks(ActionStateLink *, s32, u64, u64, u64);
@@ -1922,7 +1922,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftUnitForLinkedTarget);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectSatanLinkedActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUpdateSatanApproachCameraStep);
-        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_00225BF8);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectSatanActorCategoryCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlDispatchActionByResourceFlags);
         BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlFinishSatanActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlFlagBattleForSpecialAction);
