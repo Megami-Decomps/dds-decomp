@@ -6971,11 +6971,11 @@ EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
     return node;
 }
 
-void effReplaceFileResourceRef(EffectStripNode *obj, u32 id, void *arg) {
-    if (obj->active != 0) {
-        fileReleaseGridRecordHandle(obj->active);
+void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, void *resource) {
+    if (node->active != 0) {
+        fileReleaseGridRecordHandle(node->active);
     }
-    obj->active = fileAllocateGridRecordSlots((u16)id, obj->percent, arg);
+    node->active = fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
 }
 
 void effClearStripRecordReferences(EffectStripNode *node) {
