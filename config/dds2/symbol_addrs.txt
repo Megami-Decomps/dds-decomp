@@ -6984,6 +6984,7 @@ sdfSoundCommandBusy = 0x00438B88;
 sdfSoundCommandStatus = 0x00438B8C;
 fileIdleUpdateCallback = 0x00438B98;
 sdfGsMemoryTypeFormat = 0x00438D00;
+sdfMoviePacRingSemaphore = 0x00438D08; // type:s32 size:0x4
 kwlnPadMotorLevels = 0x00438D90;
 kwlnFadeCounter = 0x00438DC0;
 kwlnFadeDuration = 0x00438DC2;
