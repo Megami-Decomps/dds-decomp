@@ -4249,7 +4249,112 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
     }
     return arg1;
 }
-INCLUDE_ASM(const s32, "game/code_00202178", func_0020A860);
+/* HARI2 turn hook: mode 2 rerolls agility for units 0x13D..0x142; mode 1 queues 0xD2
+ * for a random 0x2000-status party task; otherwise unit 0x11B queues 0xD5 into a free slot. */
+s32 func_0020A860(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlTask *candidates[16];
+    BtlTask *task;
+    BtlUnit *unit;
+    BtlUnit *leader;
+    u32 count;
+    s32 summon;
+
+    if (state->mode == 2) {
+        for (unit = state->units; unit != 0; unit = unit->next) {
+            u32 flags = unit->status.flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    s32 species = unit->partyRecord.unitId;
+
+                    if (species < 0x143) {
+                        if (species >= 0x13D) {
+                            /* Agility from record 0x13D - 6 + [0, 6); the sum stays int before narrowing. */
+                            s32 value = datEnemyRecords[0x13D].baseStats[3] - 6 + effMiscRandMod(0, 6);
+                            s8 agility = value;
+
+                            unit->partyRecord.baseStats[3] = agility;
+                            btlBossDebugPrintf("btl:HARI2 %X = agi[%d]\n", unit->partyRecord.unitId, agility);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (state->mode == 1) {
+        count = 0;
+        for (task = state->tasks; task != 0; task = task->next) {
+            if (task->flags & 8) {
+                unit = task->unit;
+                if (unit->status.flags & 1) {
+                    if (unit->status.flags & 0x200) {
+                        if ((unit->partyRecord.status & 0x7FFF) == 0x2000) {
+                            candidates[count++] = task;
+                        }
+                    }
+                }
+            }
+        }
+        if (count == 0) {
+            return -1;
+        }
+        task = candidates[effMiscRandMod(0, count)];
+        unit = task->unit;
+        fldAppendSceneGroupHandle(task);
+        task->indexWork.phase = 2;
+        task->indexWork.skillId = 0xD2;
+        btlAppendIndexListEntry(task->indexWork.indices, unit);
+    } else {
+        BtlUnit *units = state->units;
+        BtlUnit *slot;
+
+        leader = 0;
+        count = 0;
+        for (unit = units; unit != 0; unit = unit->next) {
+            u32 flags = unit->status.flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    if (!(flags & 0xE0)) {
+                        count++;
+                    }
+                    if (unit->partyRecord.unitId == 0x11B) {
+                        leader = unit;
+                    }
+                }
+            }
+        }
+        if (leader == 0) {
+            return -1;
+        }
+        if (leader->status.flags & 0xE0) {
+            return -1;
+        }
+        if (count >= 7) {
+            return -1;
+        }
+        for (slot = units; slot != 0; slot = slot->next) {
+            if (slot->status.flags & 0x400) {
+                if (!(btlUnitStatusPair(slot) & 3)) {
+                    break;
+                }
+            }
+        }
+        if (slot == 0) {
+            return -1;
+        }
+        summon = btlSelectMissingHariSummon();
+        if (summon <= 0) {
+            return -1;
+        }
+        task = btlFindUnitByActor(leader);
+        fldAppendSceneGroupHandle(task);
+        task->indexWork.phase = 2;
+        task->indexWork.skillId = 0xD5;
+        task->indexWork.unk18 = summon;
+        btlAppendIndexListEntry(task->indexWork.indices, slot);
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00202178", func_0020AB08);
 
