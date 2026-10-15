@@ -432,7 +432,7 @@ enum {
     PTY_TEMPLATE_USE_PARTY_MAX_LEVEL = 4
 };
 
-extern u8 D_00386350[];
+extern u8 ptyAffinityPermutationOrders[];
 extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *, s32, u8);
 
 
@@ -443,7 +443,7 @@ extern ScrData *evtWorkScriptTask;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern PtyRosterValueRecord D_00386248[];
+extern PtyRosterValueRecord ptyRosterMenuValues[];
 
 typedef struct PtyItemQuantityUpdate {
     u16 itemId;         /* 0x0 */
@@ -451,7 +451,7 @@ typedef struct PtyItemQuantityUpdate {
     u8 pad3; /* 0x3 */
 } PtyItemQuantityUpdate;
 
-extern PtyItemQuantityUpdate D_003862C8[];
+extern PtyItemQuantityUpdate ptyItemQuantityUpdates[];
 
 
 
@@ -1446,7 +1446,7 @@ s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
     }
     for (orderIndex = 0, orderOffset = 0; orderIndex < 6; orderIndex++, orderOffset += 3) {
         matchedCount = 0;
-        for (i = 0, orderCursor = D_00386350 + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
+        for (i = 0, orderCursor = ptyAffinityPermutationOrders + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
             actorValue = *actorCursor++;
             if (actorValue != 0 && ptyUnitMatchesAffinityRequirement(actorValue, affinity, *orderCursor) != 0) {
                 matchedCount++;
@@ -1460,7 +1460,7 @@ s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
 }
 
 void evtCopyRosterTableValue(DatPartyRecord *entry) {
-    entry->menuValue = D_00386248[entry->unitId].value;
+    entry->menuValue = ptyRosterMenuValues[entry->unitId].value;
 }
 
 /* Copy table values only for occupied slots whose roster identifier is below 16. */
@@ -1482,7 +1482,7 @@ void evtUpdateFlaggedEntries(void) {
 
 /* Apply the two configured count/flag updates; a zero index disables its record. */
 void dds3ForEachEntry(void) {
-    PtyItemQuantityUpdate *updates = D_003862C8;
+    PtyItemQuantityUpdate *updates = ptyItemQuantityUpdates;
     u32 updateIndex = 0;
 
     do {
@@ -1501,7 +1501,7 @@ extern void mtrRefreshMantraStateForUnit1(void);
 extern void mtrRefreshMantraStateForUnit7(void);
 extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
 extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
-extern u16 D_003862D0[16][4];
+extern u16 ptyRosterDefaultSkillIds[16][4];
 
 /* Restore special-character banks, occupied stock skills and four presets. */
 void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry) {
@@ -1541,7 +1541,7 @@ void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry) {
         }
     }
     scrClearAllSecondaryScriptFlags(entry);
-    preset = D_003862D0[unitId];
+    preset = ptyRosterDefaultSkillIds[unitId];
     i = 0;
     do {
         u32 value = *preset++;

@@ -192,8 +192,8 @@ struct ConsFrustumPacket;
 extern u32 kwlnTextureReferenceFlag;
 extern u32 D_00435CD0;
 extern u32 D_00435CBC;
-extern u8 D_00382500[];
-extern u8 D_00382430[];
+extern u8 kwlnHeldTextureLightingPackets[];
+extern u8 kwlnHeldTextureMatrixPackets[];
 extern u8 D_003826D0[];
 extern u8 D_00382600[];
 extern u8 D_003820F0[];
@@ -206,7 +206,7 @@ extern f32 kwlnDefaultColorVector[4];
 extern f32 D_0037F850[4], D_0037F860[4], D_0037F870[4];
 extern f32 D_0037FA20[4], D_0037FA30[4], D_0037FA40[4];
 extern KwlnDrawVectorParams D_0037F960, D_0037FB30, kwlnDrawVector;
-extern u8 D_00384750[0x40];
+extern u8 kwlnHeldTextureViewMatrix[0x40];
 extern u8 D_00384790[];
 extern u8 sdfViewEyeVector[], sdfViewTargetVector[], sdfViewUpVector[];
 extern u8 D_0037F590[];
@@ -237,21 +237,21 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     evtCheckSelectionState();
     kwlnUpdateDrawParameterTransitions();
     if (kwlnTextureReferenceFlag != 0) {
-        sdfBuildLightingPacket((SdfLightingPacketStorage *)(D_00382500 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+        sdfBuildLightingPacket((SdfLightingPacketStorage *)(kwlnHeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             D_0037F940, D_0037F950);
-        *(u32 *)(D_00382500 - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CD0;
+        *(u32 *)(kwlnHeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CD0;
         if (kwlnTextureReferenceFlag != 0) {
             SdfPoolNode *sceneNode;
             SdfListHead *sceneList;
             u64 *sceneFrustum;
             sdfCameraBuildProjection(&D_0037F7B0.camera);
             sdfVuBuildLookAtBasis(D_0037F850, D_0037F860, D_0037F870);
-            VU0_STORE_MATRIX_UNCLOBBERED(D_00384750);
-            sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_00382430 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-                &D_0037F7B0, D_00384750);
+            VU0_STORE_MATRIX_UNCLOBBERED(kwlnHeldTextureViewMatrix);
+            sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+                &D_0037F7B0, kwlnHeldTextureViewMatrix);
             sceneNode = &kwlnDrawSurfaces[1];
             sceneNode->append(sceneNode,
-                (SdfListHead *)(D_00382430 - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+                (SdfListHead *)(kwlnHeldTextureMatrixPackets - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
             sceneList = sdfCreateResetPacketList();
             sceneFrustum = (u64 *)sdfAllocPacketAligned(0x50);
             sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)sceneFrustum, &D_0037F960);
