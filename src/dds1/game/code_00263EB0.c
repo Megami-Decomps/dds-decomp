@@ -622,25 +622,25 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
     }
 }
 
-void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
+void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 flags) {
     char text[32];
     FrFontGlyph *glyph;
 
     sprintf(text, D_003BC568, info->totalExp);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, color);
+    frFontDrawGlyphChain(glyph, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
-void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
+void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 flags) {
     char text[32];
     FrFontGlyph *glyph;
 
     sprintf(text, D_003BC568, info->macca);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, color);
+    frFontDrawGlyphChain(glyph, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 

@@ -30,9 +30,9 @@ void itfUpdateFadeColor(BrsSkillPackageWork *work);
 
 extern struct { s32 v[6]; } D_003D6500;
 
-extern void mnuCampDrawMenuIconLayer(s32, s32, s32, u32, const BrsRewardSummary *, s32, BrsSkillPackageWork *);
+extern void mnuCampDrawMenuIconLayer(s32, s32, s32, u32, const BrsRewardSummary *, s32 flags, BrsSkillPackageWork *);
 
-extern void brsDrawMaccaRewardTotal(s32, s32, s32, u32, const BrsRewardSummary *, s32, BrsSkillPackageWork *);
+extern void brsDrawMaccaRewardTotal(s32, s32, s32, u32, const BrsRewardSummary *, s32 flags, BrsSkillPackageWork *);
 
 extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, s32, BrsSkillPackageWork *);
 
