@@ -951,7 +951,7 @@ s32 btlCompleteEffectTaskImmediately(void *unused) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
+BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlEffLink *link;
 
@@ -963,7 +963,7 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
     task->callback = btlCompleteEffectTaskImmediately;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    *(u16 *)&link->arg = arg;
+    *(u16 *)&link->arg = messageId;
     link->elapsedTicks = 0;
     return task;
 }

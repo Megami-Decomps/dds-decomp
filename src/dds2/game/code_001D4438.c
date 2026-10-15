@@ -1461,7 +1461,7 @@ extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *owner, s32 messageId);
 extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex);
 extern BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind);
-extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg);
+extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId);
 extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind);
