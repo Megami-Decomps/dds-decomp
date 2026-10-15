@@ -3317,11 +3317,11 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
     record->nameLength = strlen(name);
 }
 
-void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithExtension(const struct BtlResourceNameRecord *record, char *output) {
     sprintf(output, D_003BB818, record->resourceName, record->extension);
 }
 
-void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithoutExtension(const struct BtlResourceNameRecord *record, char *output) {
     sprintf(output, D_003BB820, record->resourceName);
 }
 
