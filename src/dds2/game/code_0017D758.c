@@ -210,7 +210,7 @@ u32 effGetScatterEntry(PcpScatterDraw *object, s32 index) {
 }
 
 /* vu0 routine: copy a 4x4 matrix into the destination's second slot */
-void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
+void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, const void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(object->matrix);
 }
