@@ -100,7 +100,7 @@ extern void mnuClearListFlagsOneAndTwo();
 extern s32 evtStageTestAdvanceResourceWork(void);
 
 
-extern char D_003E75C4[];
+extern char mnuStaffCampPagePopupEntry[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, MenuWindowContainer *, s32);
 
@@ -170,7 +170,7 @@ extern s32 mnuApplyRandomStatItemEffect();
 
 extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord *, s32, s32);
 
-extern char D_003E7530[];
+extern char mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
@@ -200,8 +200,8 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern char D_003E75E0[];
-extern char D_003E75A8[];
+extern char mnuStaffPartyBrowsePopupEntry[];
+extern char mnuStaffFieldSkillDisplayPopupEntry[];
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */

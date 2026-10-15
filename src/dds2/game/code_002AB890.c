@@ -46,7 +46,7 @@ typedef struct MenuCatalogItem {
     u8 pad02[0x1A];
 } MenuCatalogItem;
 
-extern const MenuCatalogItem D_003E7200[18];
+extern const MenuCatalogItem mnuRingCustomizationItemRows[18];
 extern char D_00437BC8[];
 
 void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
@@ -80,7 +80,7 @@ void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
         }
     }
 
-    catalog = D_003E7200;
+    catalog = mnuRingCustomizationItemRows;
     for (itemId = 0; (u32)itemId < 0x12; itemId++, catalog++) {
         catalogItemId = catalog->itemId;
         if (datGameState->inventory.counts[catalogItemId] != 0) {
@@ -489,8 +489,8 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     node->sortKeyPrimary = 0;
     node->sortKeySecondary = 0;
     node->sortKeyTertiary = 0;
-    catalog = D_003E7200;
-    for (; ordinal < ARRAY_COUNT(D_003E7200); ordinal++) {
+    catalog = mnuRingCustomizationItemRows;
+    for (; ordinal < ARRAY_COUNT(mnuRingCustomizationItemRows); ordinal++) {
         itemId = catalog->itemId;
         catalog++;
         if (datGameState->inventory.counts[itemId] != 0) {
@@ -561,8 +561,8 @@ extern void mnuClearWindowListSelectionFlags(s32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char mnuCampItemUseListPopupEntry[];
 extern char mnuCampAmmoPartySelectionPopupEntry[];
-extern char D_003E7488[];
-extern char D_003E74A4[];
+extern char mnuCampRingEquipmentPartyPopupEntry[];
+extern char mnuCampRingCustomizationPartyPopupEntry[];
 extern char mnuCampSpecialItemListPopupEntry[];
 extern char mnuCampCommandSelectionPopupEntry[];
 extern void mnuSetStateValue(u32 *, u32);
@@ -599,10 +599,10 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
                 mnuSetPopupEntry(popup, mnuCampAmmoPartySelectionPopupEntry);
                 break;
             case 2:
-                mnuSetPopupEntry(popup, D_003E7488);
+                mnuSetPopupEntry(popup, mnuCampRingEquipmentPartyPopupEntry);
                 break;
             case 3:
-                mnuSetPopupEntry(popup, D_003E74A4);
+                mnuSetPopupEntry(popup, mnuCampRingCustomizationPartyPopupEntry);
                 break;
             default:
                 mnuSetPopupEntry(popup, mnuCampSpecialItemListPopupEntry);

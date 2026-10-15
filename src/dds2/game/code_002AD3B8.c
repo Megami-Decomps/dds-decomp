@@ -29,8 +29,8 @@ extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 mnuCampItemCommandHelpTextBank[];
-extern char D_003E7207[20];
-extern char D_003E7202[];
+extern char mnuRingCustomizationBonusWeights[20];
+extern char mnuRingCustomizationStatEligibility[];
 extern void mnuDestroyStaffBulletItemWindow(s32);
 extern void mnuDestroyOrderedStaffItemWindow(s32);
 extern void mnuDestroyOwnedCatalogItemWindow(s32);
@@ -41,7 +41,7 @@ extern void mnuSetStateValue(u32 *, u32);
 extern void mnuSetPanelItemAuxiliaryValue(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
-extern s32 D_003E7400[];
+extern s32 mnuRingCustomizationStatLabels[];
 extern s32 sprintf(char *, const char *, ...);
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
@@ -56,10 +56,10 @@ extern void ptyAdjustItemQuantity();
 extern void mnuRefreshStaffWindowDescription();
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 extern char mnuCampAmmoEquipmentPopupEntry[];
-extern char D_003E7514[];
-extern char D_003E7530[];
+extern char mnuCampRingEquipmentPopupEntry[];
+extern char mnuCampRingCustomizationPopupEntry[];
 extern char mnuCampItemCategoryPopupEntry[];
-extern char D_003E7488[];
+extern char mnuCampRingEquipmentPartyPopupEntry[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
@@ -188,7 +188,7 @@ s32 mnuPollStaffSlotSelectionConfirmation(KwlnTask *task) {
     mnuStepPartyPanelListFromInput(4, &((MenuStaffContext *)context)->partyWindow);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         menu->currentSelection = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
-        mnuSetPopupEntryFlagged(popup, D_003E7514);
+        mnuSetPopupEntryFlagged(popup, mnuCampRingEquipmentPopupEntry);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
@@ -241,7 +241,7 @@ s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
     mnuStepPartyPanelListFromInput(4, &((MenuStaffContext *)context)->partyWindow);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         menu->currentSelection = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
-        mnuSetPopupEntryFlagged(popup, D_003E7530);
+        mnuSetPopupEntryFlagged(popup, mnuCampRingCustomizationPopupEntry);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
         mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
@@ -886,7 +886,7 @@ s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
 
             if (buttons & MNU_STAFF_INPUT_CANCEL) {
                 menu->thirdListEnabled = 1;
-                mnuSetPopupEntryFlagged(&context->popupState, D_003E7488);
+                mnuSetPopupEntryFlagged(&context->popupState, mnuCampRingEquipmentPartyPopupEntry);
             }
             mnuPlayInputSound(0, buttons, &window->list->stateFlags);
         }
@@ -1090,7 +1090,7 @@ void mnuPrepareStaffValueChangeDialog(MenuStaffContext *context,
     mnuSetStateValue(&context->unkAA50, 1);
     current = mnuGetPartyEntryCurrentId(entry);
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
-    evtCopyEntryStringToActiveWindow(1, (const void *)(D_003E7400[menu->thirdListIndex]));
+    evtCopyEntryStringToActiveWindow(1, (const void *)(mnuRingCustomizationStatLabels[menu->thirdListIndex]));
     sprintf(valueText, D_00437BD8, menu->thirdListValue);
     evtCopyEntryStringToActiveWindow(2, valueText);
     base = mnuGetItemRequirementCount(current);
@@ -1172,9 +1172,9 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
 }
 
 extern s32 mnuRefreshOwnedCatalogItemList(s32, MenuStaffContext *);
-extern char D_003E74A4[];
-extern char D_003E754C[];
-extern char D_003E7568[];
+extern char mnuCampRingCustomizationPartyPopupEntry[];
+extern char mnuRingCustomizationApplyPopupEntry[];
+extern char mnuRingCustomizationResetPopupEntry[];
 
 s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
@@ -1227,7 +1227,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
             if (current != 0) {
                 if (menu->windows[4]->list->cursor->index == 0) {
                     if (mnuGetItemRequirementCount(current) != 0) {
-                        mnuSetPopupEntry(&context->popupState, D_003E7568);
+                        mnuSetPopupEntry(&context->popupState, mnuRingCustomizationResetPopupEntry);
                     } else {
                         mnuSetStateValue(&context->unkAA50, 1);
                         evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + current * 0x19));
@@ -1235,7 +1235,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
                     }
                 } else if (menu->windows[4]->list->count != 0) {
                     if (mnuIsStaffRequirementUnmet(current) != 0) {
-                        mnuSetPopupEntry(&context->popupState, D_003E754C);
+                        mnuSetPopupEntry(&context->popupState, mnuRingCustomizationApplyPopupEntry);
                     } else {
                         mnuSetStateValue(&context->unkAA50, 1);
                         dspStartEntry(7);
@@ -1252,7 +1252,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
         }
         if (input & 2) {
             menu->thirdListEnabled = 1;
-            mnuSetPopupEntryFlagged(&context->popupState, D_003E74A4);
+            mnuSetPopupEntryFlagged(&context->popupState, mnuCampRingCustomizationPartyPopupEntry);
         }
         mnuPlayInputSound(0, input, &window->list->stateFlags);
     } else {
@@ -1268,19 +1268,19 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
 }
 
 void mnuSetPanelItemsFromRow(MenuPanelGroup *config, s32 rowIndex) {
-    char *activeSlots = D_003E7207 + rowIndex * 0x1C;
+    char *activeSlots = mnuRingCustomizationBonusWeights + rowIndex * 0x1C;
     char *entryFlags;
     struct MenuPanelItem **configEntry;
     u32 lastActiveSlot = 0;
     s32 i;
 
-    for (i = 0; i < sizeof(D_003E7207); i++, activeSlots++) {
+    for (i = 0; i < sizeof(mnuRingCustomizationBonusWeights); i++, activeSlots++) {
         if (*activeSlots) {
             lastActiveSlot = i;
         }
     }
     configEntry = config->entries;
-    entryFlags = D_003E7202 + rowIndex * 0x1C;
+    entryFlags = mnuRingCustomizationStatEligibility + rowIndex * 0x1C;
     for (i = 4; i >= 0; i--, entryFlags++) {
         mnuSetPanelItemAuxiliaryValue(*configEntry++, *entryFlags ? lastActiveSlot : 0);
     }

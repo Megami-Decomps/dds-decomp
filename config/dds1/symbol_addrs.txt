@@ -11154,3 +11154,6 @@ btlStartVoiceRows = 0x003586A8;
 btlLinkageTutorialMessages = 0x00358828;
 btlAnalysisTextScratch = 0x00359978;
 btlTransparencySurfaceTestValues = 0x00359CF0;
+mnuStaffFieldSkillDisplayPopupEntry = 0x0037CA78;
+mnuStaffCampPagePopupEntry = 0x0037CA94;
+mnuStaffPartyBrowsePopupEntry = 0x0037CAB0;

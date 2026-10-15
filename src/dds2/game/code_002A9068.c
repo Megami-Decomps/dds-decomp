@@ -722,7 +722,7 @@ void mnuReleaseStaffSpriteAndResourceHandles(u8 *menuBytes) {
 
 extern u16 D_003E6500[];
 
-extern u16 D_003E6730[];
+extern u16 mnuRingItemDisplayOrder[];
 
 extern u16 D_003E6788[];
 
@@ -756,7 +756,7 @@ void mnuBuildListSlotTableB(ListSlotWork *work) {
         *slot = 0;
     }
     for (i = 0; i < 0x2B; i++) {
-        idx = D_003E6730[i] - 0xC0;
+        idx = mnuRingItemDisplayOrder[i] - 0xC0;
         work->slotOfB[idx] = i + 1;
     }
 }
