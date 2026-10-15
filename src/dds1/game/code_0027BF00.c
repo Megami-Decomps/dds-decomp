@@ -463,8 +463,8 @@ void mnuDrawWindowEntryDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer 
     }
 }
 
-void mnuDrawMenuEntryDecorationSprites(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
-    mnuDrawWindowEntryDecorations(x, y, depth, (MenuWindowContainer *)menu, param);
+void mnuDrawMenuEntryDecorationSprites(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
+    mnuDrawWindowEntryDecorations(x, y, depth, (MenuWindowContainer *)menu, drawArg);
 }
 
 void mnuDrawWindowFrameAndOverlay(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
