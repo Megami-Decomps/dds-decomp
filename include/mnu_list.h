@@ -43,7 +43,7 @@ struct MenuListNode {
     /* +0x70: terminal recovery panel at 267050; title at 2674C8.
      * Mantra lists retain a DatPartyRecord address in the same word. */
     union {
-        u32 unk70;
+        u32 userValue;
         void *childPanel;
         char *title;
         struct DatPartyRecord *partyRecord;

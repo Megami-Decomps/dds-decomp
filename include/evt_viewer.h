@@ -176,7 +176,7 @@ typedef struct EvtRuntime {
     s32 updateCount;
     s8 windowShadeFade; /* +0x23C4: signed viewer shade ramp, capped at 94. */
     s8 windowActive;
-    s16 unk23C6;
+    s16 windowResultVariableIndex; /* VM integer destination for the completed message-window result. */
     s32 tableColumn;
     s32 cameraColorActive;
     SdfTex *ch71;
@@ -215,7 +215,7 @@ typedef struct EvtRuntime {
     s32 registeredIds[10];
     s32 voicePending;
     s32 voiceMessage;
-    s32 unk2478;
+    s32 backgroundFadeStartAlpha; /* Initial background alpha, interpolated to 128 over 25 updates. */
     u8 pad247C[4];
     s32 voiceFrame;
     u8 pad2484[4];
@@ -225,7 +225,7 @@ typedef struct EvtRuntime {
     s32 registeredIds[20];
     s32 voicePending;
     s32 voiceMessage;
-    s32 unk24A0;
+    s32 backgroundFadeStartAlpha; /* Initial background alpha, interpolated to 128 over 25 updates. */
     u8 pad24A4[4];
     s32 voiceFrame;
     u8 pad24AC[4];

@@ -71,7 +71,7 @@ typedef struct PanelHold {
     s32 window;
     s16 unk4;
     s16 queuedCount;
-    s32 unk8;
+    s32 entryEndFrame; /* Script timer deadline of the active entry. */
     PanelHoldItem items[ITF_PANEL_HOLD_CAPACITY];
 } PanelHold;
 

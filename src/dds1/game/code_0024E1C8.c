@@ -692,7 +692,7 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
             MnuProfileProgress *progress = sdfAllocSizeClassBlock(sizeof(MnuProfileProgress));
             u16 partySlot = *orderCursor;
 
-            selectionNode->unk70 = (u32)progress;
+            selectionNode->userValue = (u32)progress;
             mnuInitializeProfileProgress(partySlot - 1, progress);
         }
         orderCursor++;
@@ -706,7 +706,7 @@ u32 mnuGetSelectedNodeValue(void) {
     MnuResourceTask *task;
 
     task = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
-    return task->menuList->cursor->unk70;
+    return task->menuList->cursor->userValue;
 }
 
 /* Clear the list's two animation flags and request its default retreat. */
@@ -743,7 +743,7 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
     MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     while (nodeCursor != NULL) {
-        sdfReleaseChipBlock((void *)(u32)nodeCursor->unk70);
+        sdfReleaseChipBlock((void *)(u32)nodeCursor->userValue);
         nodeCursor = nodeCursor->next;
     }
     sdfReleaseChipBlock(list->context);
@@ -946,7 +946,7 @@ u8 *mnuGetProfileRequirementIds(u16 profileId) {
 s32 mnuAreRequiredProfilesCapped(u16 profileId) {
     MnuResourceTask *task = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     MnuProfileProgress *progress =
-        (MnuProfileProgress *)task->menuList->cursor->unk70;
+        (MnuProfileProgress *)task->menuList->cursor->userValue;
     u8 *requiredProfiles = mnuGetProfileRequirementIds(profileId);
 
     if (requiredProfiles == NULL) {

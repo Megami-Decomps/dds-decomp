@@ -30,7 +30,7 @@ typedef struct EffPCPBeamParams {
     s32 vertexGrowthFrames;
     u8 pad20[4];
     s32 radiusGrowthFrames;
-    f32 unk28;
+    f32 startRadius;
     f32 endRadius;
     u32 segments;
     u32 drawKind;

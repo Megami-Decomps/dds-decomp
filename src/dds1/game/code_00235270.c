@@ -2552,9 +2552,9 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, EvtRuntime *runtime) {
                     D_003BD344 ^= 1;
                 }
             }
-        } else if (D_00324510.unk2B != 0) {
+        } else if (D_00324510.coarseIncrease != 0) {
             runtime->horizontalOffset += 8;
-        } else if (D_00324510.unk29 != 0) {
+        } else if (D_00324510.coarseDecrease != 0) {
             runtime->horizontalOffset -= 8;
         }
 
@@ -2792,7 +2792,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY += 0.1f;
             break;
         }
-    } else if (D_00324510.unk2B & 2) {
+    } else if (D_00324510.coarseIncrease & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode < lastMode) {
@@ -2824,7 +2824,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
             ctx->shadowY -= 0.1f;
             break;
         }
-    } else if (D_00324510.unk29 & 2) {
+    } else if (D_00324510.coarseDecrease & 2) {
         switch (ctx->groupCursor) {
         case 0:
             if (ctx->shadowMode == 0) {
@@ -3015,9 +3015,9 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
         step = -1;
     } else if ((D_00324510.incOne & 2) != 0) {
         step = 1;
-    } else if ((D_00324510.unk29 & 2) != 0) {
+    } else if ((D_00324510.coarseDecrease & 2) != 0) {
         step = -10;
-    } else if ((D_00324510.unk2B & 2) != 0) {
+    } else if ((D_00324510.coarseIncrease & 2) != 0) {
         step = 10;
     }
 
@@ -3270,9 +3270,9 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
         step = -1;
     } else if ((D_00324510.incOne & 2) != 0) {
         step = 1;
-    } else if ((D_00324510.unk29 & 2) != 0) {
+    } else if ((D_00324510.coarseDecrease & 2) != 0) {
         step = -10;
-    } else if ((D_00324510.unk2B & 2) != 0) {
+    } else if ((D_00324510.coarseIncrease & 2) != 0) {
         step = 10;
     }
 

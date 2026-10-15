@@ -125,7 +125,7 @@ void mnuSelectPreviousMantraUnit(MnuStatusResource *object) {
     mnuAdvanceMantraUnitPanelListState(object->menu.selectionController);
     mnuRetreatNodeCursorAndClearListFlags(object);
     value = mnuGetSelectedNodeValue(object);
-    work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
+    work->defaultSelector = mnuFindNodePosition(object->list->cursor->userValue);
     mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 1);
     mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
     mnuRefreshNodeTransitionIcons(object, work, value);
@@ -139,7 +139,7 @@ void mnuSelectNextMantraUnit(MnuStatusResource *object) {
     mnuQueueNextUnitPanelSelection(object->menu.selectionController);
     mnuAdvanceNodeCursorAndClearListFlags(object);
     value = mnuGetSelectedNodeValue(object);
-    work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
+    work->defaultSelector = mnuFindNodePosition(object->list->cursor->userValue);
     mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 1);
     mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
     mnuRefreshNodeTransitionIcons(object, work, value);
@@ -150,7 +150,7 @@ void mnuSelectMantraUnitByIndex(MnuStatusResource *object, s8 target) {
 
     if (mnuQueueUnitPanelSelection(object->menu.selectionController, target) != 0) {
         mnuMoveNodeCursorToTargetIndex(object, target);
-        work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
+        work->defaultSelector = mnuFindNodePosition(object->list->cursor->userValue);
         mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 0);
         mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 5, 1);
         mnuRefreshNodeTransitionIcons(object, work, mnuGetSelectedNodeValue(object));
@@ -275,7 +275,7 @@ void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
 
 void mnuUpdateSelectedMantraResourceId(s32 object) {
     MantraMenuWork *state = &((MnuStatusResource *)object)->menu;
-    s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)((MnuStatusResource *)object)->list->cursor->unk70);
+    s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)((MnuStatusResource *)object)->list->cursor->userValue);
     state->defaultSelector = mnuGetMantraNodePositionRecord(id);
     mnuSpawnMantraPanelsFromSelectedUnitFlags((MnuStatusResource *)object, 5, 0);
 }
@@ -365,7 +365,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     node = object->list->first;
     count = 0;
     while (node != 0) {
-        work->collectedValues[count++] = node->unk70;
+        work->collectedValues[count++] = node->userValue;
         node = node->next;
     }
     work->collectedCount = count;
@@ -454,7 +454,7 @@ s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *object) {
     struct MenuListNode *node = object->list->first;
     s32 index = 0;
     while (node != 0) {
-        if (mtrChkMantraCompleteMaster((DatPartyRecord *)node->unk70) != 0) {
+        if (mtrChkMantraCompleteMaster((DatPartyRecord *)node->userValue) != 0) {
             return index;
         }
         node = node->next;
@@ -832,7 +832,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
             mnuSpawnMantraSpecialNodeIcon(object->menu.selectionController);
             mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
-            mdlFlagSet(work->src->unk02);
+            mdlFlagSet(work->src->completionFlagId);
             work->alternateSelector = work->defaultSelector;
             work->defaultSelector = position;
         } else if ((work->src->bits & 0xF00) == 0x200) {
@@ -914,7 +914,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
     case 11:
         work->frame++;
         if (mnuAdvanceMantraSelectionCursor(object, 1) == 0) {
-            mdlFlagSet(work->src->unk02);
+            mdlFlagSet(work->src->completionFlagId);
             work->frame = 0;
             work->drawBits.hasSource = 0;
             work->src = NULL;
@@ -963,7 +963,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
     case 15:
         dspCloseChannel();
         evtCreateMessageWindowIfMissing(object->messageDefinition);
-        evtPrintDeveloperConsoleMessage(D_00426FB0, work->drawBits.unk15);
+        evtPrintDeveloperConsoleMessage(D_00426FB0, work->drawBits.sourceDialogVariant);
         dialogResult = mnuHandleMantraSourceDialogResult(work->src, object);
         if (dialogResult == 0) {
             dspCloseChannel();
@@ -985,18 +985,18 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         break;
     case 17:
         evtPrintDeveloperConsoleMessage(D_00427028);
-        if (work->drawBits.unk15 == 0) {
+        if (work->drawBits.sourceDialogVariant == 0) {
             work->sourceNextState = 8;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
             evtPrintDeveloperConsoleMessage(D_00427040);
-        } else if (work->drawBits.unk15 == 1) {
+        } else if (work->drawBits.sourceDialogVariant == 1) {
             work->sourceNextState = 10;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
             evtPrintDeveloperConsoleMessage(D_00427070);
         }
-        work->drawBits.unk15 ^= 1;
+        work->drawBits.sourceDialogVariant ^= 1;
         work->frame = 0;
         break;
     case 18:
@@ -1520,7 +1520,7 @@ void mnuRefreshMantraUnitNodeFlags(s32 object) {
     if (node != 0) {
         resourceSlot = ((MnuStatusResource *)object)->menu.slots;
         do {
-            DatPartyRecord *unit = (DatPartyRecord *)node->unk70;
+            DatPartyRecord *unit = (DatPartyRecord *)node->userValue;
             MantraNodePos *record =
                 (MantraNodePos *)mnuGetMantraNodePositionRecord(0);
             u16 *flag = ((MantraFlagResource *)*resourceSlot)->flags;

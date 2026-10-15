@@ -6687,7 +6687,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
     length = keys->length;
     flags = record->flags;
     slot = record->slots;
-    motion = (FileWaveMotion *)record->unk1C;
+    motion = (FileWaveMotion *)record->instanceWork;
     if (length != 0) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
@@ -6924,7 +6924,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
     length = keys->length;
     flags = record->flags;
     slot = record->slots;
-    motion = (FileSlotMotion *)record->unk1C;
+    motion = (FileSlotMotion *)record->instanceWork;
 
     if (length != 0) {
         duration = keys->emissionDuration;
@@ -7140,7 +7140,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
     length = keys->length;
     flags = record->flags;
     slot = record->slots;
-    motion = (FileCircularMotion *)record->unk1C;
+    motion = (FileCircularMotion *)record->instanceWork;
     if (length != 0) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
@@ -7384,7 +7384,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
     length = keys->length;
     flags = record->flags;
     slot = record->slots;
-    motion = (FileOrientedRingMotion *)record->unk1C;
+    motion = (FileOrientedRingMotion *)record->instanceWork;
     if (length != 0) {
         duration = keys->emissionDuration;
         prewarmLength = keys->length;
@@ -7597,7 +7597,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
     length = keys->length;
     flags = record->flags;
     slot = record->slots;
-    motion = (FileSlotMotion *)record->unk1C;
+    motion = (FileSlotMotion *)record->instanceWork;
 
     if (length != 0) {
         duration = keys->emissionDuration;
@@ -7811,7 +7811,7 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
     length = keys->length;
     flags = record->flags;
     slot = record->slots;
-    motion = (FileSlotMotion *)record->unk1C;
+    motion = (FileSlotMotion *)record->instanceWork;
 
     if (length != 0) {
         duration = keys->emissionDuration;
@@ -8092,7 +8092,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
     count = record->instances;
     length = keys->length;
     slot = record->slots;
-    motion = (FileCurveMotion *)record->unk1C;
+    motion = (FileCurveMotion *)record->instanceWork;
 
     if (length != 0) {
         duration = keys->emissionDuration;
@@ -8377,7 +8377,7 @@ FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *data
     body += dataBytes;
     rec->data1 = body;
     body += dataBytes;
-    rec->unk1C = body;
+    rec->instanceWork = body;
     rec->instances = count;
     rec->count = slotCount;
     rec->allocation = allocation;
