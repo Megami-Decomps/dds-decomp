@@ -1625,7 +1625,14 @@ void itfSendTablePacket(SdfListHead *list, s32 index, s32 flag) {
     sdfAppendPacket(list, packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A1590);
+/* Write CLAMP for the selected GS context. */
+void func_001A1590(SdfListHead *list, s32 flag, s32 wms, s32 wmt, s32 minu, s32 maxu, s32 minv, s32 maxv) {
+    s32 packet = sdfAllocPacketAligned(ITF_STATE_PACKET_BYTES);
+    TextPacketTail *command = (TextPacketTail *)sdfConsFinalizePacketHeader(packet, ITF_STATE_PACKET_BYTES);
+    command->value = ((u64)maxv << 34) | ((u64)minv << 24) | (maxu << 14) | (minu << 4) | (wmt << 2) | wms;
+    command->registerCode = flag != 0 ? SDF_GS_CLAMP_2 : SDF_GS_CLAMP_1;
+    sdfAppendPacket(list, packet);
+}
 
 extern u8 D_00436598[8];
 extern u8 D_004365A0[8];
