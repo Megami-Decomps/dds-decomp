@@ -8681,7 +8681,7 @@ void func_0013EC68(void) {
             if (room == 0) {
                 room = fldAreaState.floor + 1;
             }
-            fldSetFlagBit(stage, room, entry->value67);
+            fldSetFlagBit(stage, room, entry->floorFlagBit);
         }
         flags = entry->flags64;
         if (flags & 2) {
@@ -8908,7 +8908,7 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     case 6:
         flags = actor->flags64;
         if (flags & 1) {
-            return actor->value67;
+            return actor->floorFlagBit;
         }
         return -1;
     }
