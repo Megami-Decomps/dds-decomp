@@ -9,6 +9,7 @@
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf_packet_list.h"
@@ -80,7 +81,6 @@ extern u8 D_00368C40[];
 
 extern s8 D_003BC39C;
 
-extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 
 
 

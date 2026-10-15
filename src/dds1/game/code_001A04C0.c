@@ -7,6 +7,7 @@
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -51,7 +52,6 @@ extern void btlUpdateScene(void);
 extern void btlUpdateBattleCameraFrame(void);
 extern s32 btlRuntime;
 
-extern KwlnTask *kwlnTaskFindByPriority(u32);
 
 extern u64 D_003BB2E8;
 #include "sdf_packet_alloc.h"

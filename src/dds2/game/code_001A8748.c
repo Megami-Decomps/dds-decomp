@@ -24,6 +24,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -67,7 +68,6 @@ extern s32 dds3FindEntryIndex();
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
-extern KwlnTask *kwlnTaskFindByPriority(u32 priority);
 
 extern const char *D_003B4CF8[];
 
