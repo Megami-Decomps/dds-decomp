@@ -1672,7 +1672,123 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F0968);
+extern u8 D_00418310[];
+extern u8 D_00418320[];
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00417F30);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180B0);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180C0);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418240);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418250);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418310);
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418320);
+
+/* vu0 routine: frame the action's target groups from the actor's side, widening
+ * for several targets, then keep the actor clear of the near camera plane. */
+void func_001F0968(BtlLinkedCommand *action) {
+    BtlState *state;
+    BtlUnit *unit;
+    BtlUnit *actor;
+    f32 *cameraPosition;
+    f32 heightPosition[4];
+    f32 focus[4];
+    f32 position[4];
+    f32 height;
+    f32 span;
+    f32 fov;
+    f32 framing;
+    f32 zero = 0.0f;
+    u32 count;
+    s32 groups;
+    u32 i;
+
+    state = (BtlState *)btlGetRuntime();
+    unit = action->link->unit;
+    if (unit == 0) {
+        return;
+    }
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF(vf10, focus);
+    cameraPosition = action->camera.position;
+
+    count = btlGetIndexListCount(action->targetList);
+    groups = 0;
+    for (i = 0; i < count; i++) {
+        BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(action->targetList, i);
+        groups |= target->status.flags & 0x600;
+    }
+
+    height = 0.0f;
+    count = 0;
+    actor = state->units;
+    while (actor != 0) {
+        s32 flags = actor->status.flags;
+        if (flags & 1) {
+            if (!(flags & 0xC0)) {
+                if (flags & groups) {
+                    btlUnitGetMuzzlePosVU(actor);
+                    VU0_STORE_VF(vf10, heightPosition);
+                    height += heightPosition[1];
+                    count++;
+                }
+            }
+        }
+        actor = actor->nextActor;
+    }
+
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(groups);
+    fov = action->camera.fov;
+    span = btlMeasureFilteredUnitGroupBounds(groups, 0, 0);
+    VU0_STORE_VF(vf10, cameraPosition);
+    height /= (f32)count;
+    action->camera.position[1] = height;
+
+    span = (f32)((double)span * 1.3);
+    if (span < 500.0f) {
+        span = 500.0f;
+    }
+    if (count >= 2) {
+        framing = 1.3333333f;
+        framing = fov * framing;
+        framing *= 0.5f;
+    } else {
+        framing = 0.5f;
+        framing = fov * framing;
+    }
+    framing = span / tanf(framing);
+    action->camera.distance = framing;
+
+    if (focus[0] > zero) {
+        VU0_LOAD_VF(vf10, D_00418310);
+    } else {
+        VU0_LOAD_VF(vf10, D_00418320);
+    }
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, action->camera.direction);
+    btlAdjustCameraDirectionForDefaultPlane(&action->camera);
+
+    {
+        u8 *statusTable = (u8 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        f32 clearance = *(f32 *)(statusTable + unit->unkEC * 0x14 + 0x38) * unit->scale;
+        btlCopyUnitCurrentPosition(unit, position);
+        if (position[2] - clearance < -100.0f) {
+            position[2] += -100.0f - (position[2] - clearance);
+            if (position[2] > 2000.0f - unit->reach * unit->scale) {
+                position[2] = 2000.0f - unit->reach * unit->scale;
+            }
+            btlSetUnitPosition(unit, position);
+        }
+    }
+}
 
 extern BtlUnit *btlFindFarthestUnit(u32, f32 *);
 
@@ -2367,10 +2483,10 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
 void func_001F2308(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
     f32 point[4];
     f32 center[4];
-    f32 width;
     f32 height;
     f32 fov;
     f32 minX;
+    f32 width;
     f32 length;
     f32 extent;
     f32 distance;
@@ -3271,22 +3387,6 @@ void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00417F30);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180B0);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180C0);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418240);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418250);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418310);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418320);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418330);
 
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418338);
 
