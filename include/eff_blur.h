@@ -143,7 +143,7 @@ void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 EffBlurTemplate *effGetCh71Work(void);
 /* Borrow the live scatter-blur owner; callers do not acquire or release it. */
 EffBlurScatterWork *effGetCh72Work(void);
-EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *body);
+EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *body);
 void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters);
 void effCopyFilterBlurParameters(EffBlurScatterParams *parameters);
 void effCopyStaggeredBlurParameters(EffBlurScaleParams *parameters);

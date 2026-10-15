@@ -441,7 +441,7 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
 
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {
+EffBlurTemplate *effCloneBlurTemplate(const EffBlurTemplateBody *src) {
     EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
 
     dst->texture = effGetBillResourceTexture(2);
