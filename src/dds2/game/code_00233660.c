@@ -6,6 +6,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "eff_inner_float_api.h"
 #include "mdl_light_editor_state.h"
 #include "dds3_admin_control_api.h"
 #include "kwln_task_add_child.h"
@@ -181,7 +182,6 @@ extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 world, void *pos, void *rot);
 
 extern void dds3SetObjectFlags(s32 obj, u32 flags);
 
-extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 extern void dds3RebuildObjectModelContext(EffWorldNode *obj, s32 a, s32 b);
 #include "dds3_world_secondary.h"
