@@ -1116,8 +1116,8 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
                 }
             }
         } else {
-            ((BtlState *)btlRuntime)->background.ids.major = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1C;
-            ((BtlState *)btlRuntime)->background.ids.minor = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1E;
+            ((BtlState *)btlRuntime)->background.ids.major = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMajorId;
+            ((BtlState *)btlRuntime)->background.ids.minor = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMinorId;
             if (((BtlState *)btlRuntime)->battleMode == 0x3A0 && mdlFlagTest(0x80D) != 0) {
                 ((BtlState *)btlRuntime)->background.ids.major = 0xDF;
                 ((BtlState *)btlRuntime)->background.ids.minor = 5;

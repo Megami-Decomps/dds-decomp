@@ -3126,10 +3126,10 @@ s32 btlUpdateDebugEncounterSelector(void) {
     }
     btlApplyDebugEncounterPartySelection();
     state->battleMode = D_00436F68;
-    if (datBattleSceneRecords[D_00436F68].unk1C != 0 &&
-        datBattleSceneRecords[D_00436F68].unk1E != 0) {
-        state->background.ids.major = datBattleSceneRecords[D_00436F68].unk1C;
-        state->background.ids.minor = datBattleSceneRecords[D_00436F68].unk1E;
+    if (datBattleSceneRecords[D_00436F68].backgroundMajorId != 0 &&
+        datBattleSceneRecords[D_00436F68].backgroundMinorId != 0) {
+        state->background.ids.major = datBattleSceneRecords[D_00436F68].backgroundMajorId;
+        state->background.ids.minor = datBattleSceneRecords[D_00436F68].backgroundMinorId;
     } else {
         state->background.ids.major = D_00436F6C;
         state->background.ids.minor = D_00436F6E;
