@@ -8317,8 +8317,8 @@ void fldReleaseSceneSpriteWork(SceneAiWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void fldReleaseSceneSprite(KwlnTask *arg) {
-    fldReleaseSceneSpriteWork((SceneAiWork *)kwlnTaskGetUserValue(arg));
+void fldReleaseSceneSprite(KwlnTask *task) {
+    fldReleaseSceneSpriteWork((SceneAiWork *)kwlnTaskGetUserValue(task));
     ((BtlState *)btlGetRuntime())->spriteObject = 0;
 }
 
