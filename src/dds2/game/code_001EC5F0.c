@@ -2362,7 +2362,96 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
     btlAdjustCameraDirectionForDefaultPlane(to);
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F2308);
+/* vu0 routine: frame the leftmost marked unit from the group centre, raised
+ * by a share of the group size, at a distance that also fits the group. */
+void func_001F2308(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
+    f32 point[4];
+    f32 center[4];
+    f32 width;
+    f32 height;
+    f32 fov;
+    f32 minX;
+    f32 length;
+    f32 extent;
+    f32 distance;
+    f32 top;
+    BtlState *work;
+    BtlUnit *unit;
+    BtlUnit *selected;
+    s32 first;
+    u32 flags;
+
+    work = (BtlState *)btlGetRuntime();
+    fov = source->fov;
+    from->fov = fov;
+    to->fov = fov;
+    extent = btlMeasureFilteredUnitGroupBounds(0x400, &width, &height);
+    VU0_STORE_VF(vf10, center);
+    if (width < 620.0f) {
+        if (width - height < 250.0f) {
+            if (100.0f < height) {
+                center[1] = -height * 0.55f;
+            } else {
+                center[1] = -height * 0.45f;
+            }
+        } else {
+            center[1] = -height * 0.75f;
+        }
+    } else {
+        center[1] = -width * 0.6f;
+    }
+    width = 0.0f;
+    first = 1;
+    selected = NULL;
+    minX = width;
+    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+        flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                btlUnitGetMuzzlePosVU(unit);
+                VU0_STORE_VF(vf10, point);
+                if (first) {
+                    selected = unit;
+                    first = 0;
+                    minX = point[0];
+                } else if (point[0] < minX) {
+                    minX = point[0];
+                    selected = unit;
+                }
+                top = btlUnitGetTopY(unit);
+                if (width < top) {
+                    width = top;
+                }
+            }
+        }
+    }
+    btlUnitGetMuzzlePosVU(selected);
+    VU0_STORE_VF(vf10, point);
+    point[1] = -width;
+    point[0] += selected->reach * selected->scale * 0.25f;
+    VU0_LOAD_VF(vf10, center);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_LOAD_VF(vf11, point);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, from->direction);
+    length += selected->reach * selected->scale * 2.85f / tanf(fov * 0.5f);
+    distance = extent / tanf(fov * 0.5f);
+    if (distance < length) {
+        from->distance = length;
+    } else {
+        from->distance = distance;
+    }
+    to->distance = from->distance;
+    btlCopyMotionTransform(to, from);
+    sdfVuLoadRotationMatrixY(-(45.0f * 0.017453293f));
+    VU0_LOAD_VF(vf10, to->direction);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+}
 
 /* vu0 routine: frame the two unit groups using their bounding extents. */
 void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
