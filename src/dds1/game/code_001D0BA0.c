@@ -6089,17 +6089,17 @@ extern char D_003A3E08[];
 
 extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
 
-void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
+void btlDebugPrintWorldTransform(s32 x, s32 y) {
     EffWorldNode *object;
 
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
         object = dds3GetWorldCameraObject(dds3GetWorldObject());
         if (object != 0) {
-            btlBossDebugPrintfN(arg0, (s32)arg1, 0, (s32)D_003A3DF0,
+            btlBossDebugPrintfN(x, y, 0, (s32)D_003A3DF0,
                                 (double)object->inner->position[0],
                                 (double)object->inner->position[1],
                                 (double)object->inner->position[2]);
-            btlBossDebugPrintfN(arg0, (s32)(arg1 + 0xC), 0, (s32)D_003A3E08,
+            btlBossDebugPrintfN(x, y + 12, 0, (s32)D_003A3E08,
                                 (double)object->inner->rotation[0],
                                 (double)object->inner->rotation[1],
                                 (double)object->inner->rotation[2],
