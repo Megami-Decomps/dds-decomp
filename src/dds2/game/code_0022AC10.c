@@ -2804,10 +2804,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         } else {
             battle->unk220 &= ~0x200;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.unk0C) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.unk0C * btlDebugEditorActorStatus.scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
         if (btlDebugActorStatusEditor.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
@@ -2946,7 +2946,7 @@ void btlWriteActorModelTableFile(void) {
         }
         rowCursor += sizeof(BtlActorMotionSlot);
         cursor += sprintf(cursor, D_00436F40, (double)motion->alphaFrameScale);
-        cursor += sprintf(cursor, D_00436F48, (double)motion->unk0C);
+        cursor += sprintf(cursor, D_00436F48, (double)motion->muzzleGuideScale);
         cursor += sprintf(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
         cursor += sprintf(cursor, D_00436F50);
     }

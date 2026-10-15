@@ -10,7 +10,7 @@ typedef struct BtlActorMotionSlot {
     s16 kind;                /* 0x04: UV_END mode */
     s16 alphaStartFrame;
     f32 alphaFrameScale;
-    f32 unk0C;
+    f32 muzzleGuideScale; /* 0x0C: scales the muzzle-position debug guide. */
     s16 alphaDuration;
     s16 unk12;
 } BtlActorMotionSlot;
@@ -33,6 +33,8 @@ typedef struct BtlActorStatusRecord {
 } BtlActorStatusRecord;
 
 typedef char BtlActorMotionSlotSizeCheck[sizeof(BtlActorMotionSlot) == 0x14 ? 1 : -1];
+typedef char BtlActorMotionSlot_muzzleGuideScale_offset_must_be_0x0C[
+    ((u32)&((BtlActorMotionSlot *)0)->muzzleGuideScale == 0x0C) ? 1 : -1];
 typedef char BtlActorStatusRecordSizeCheck[sizeof(BtlActorStatusRecord) == 0x270 ? 1 : -1];
 
 #endif
