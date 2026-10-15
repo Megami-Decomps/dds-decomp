@@ -155,51 +155,53 @@ void evtDrawSolarOverlayShapeWithScaledAlpha(s32 unused0, s32 unused1, s32 alpha
 }
 
 /* Indexed solar-table pass, then the shared layer setup with the 0xA rate. */
-void evtDrawIndexedSolarOverlayLayers(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
+void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
+    s32 contextHandle, s32 renderHandle, s32 unused7) {
     s32 n;
     s32 tmp;
     s32 *p;
-    if (t0 == 0) {
+    if (entryCount == 0) {
         return;
     }
-    n = t0;
-    evtInitializeSolarOverlay(t2);
+    n = entryCount;
+    evtInitializeSolarOverlay(renderHandle);
     tmp = 0;
     if (n < 8) {
-        p = (s32 *)D_0036832C + t0 * 8;
+        p = (s32 *)D_0036832C + entryCount * 8;
         while (n < 8) {
-            sdfDrawColoredTriangleFan(p[-1], 0xFF, &tmp, p[0], 1, t2);
+            sdfDrawColoredTriangleFan(p[-1], 0xFF, &tmp, p[0], 1, renderHandle);
             n++;
             p += 8;
         }
     }
-    evtFinalizeSolarOverlay(t2);
-    evtDrawSolarNoiseLayerAtConfiguredScale(a0, a1, 0, a3, 0xA, 0x20, t1, t2);
-    evtPrepareSolarOverlayTestState(t2);
+    evtFinalizeSolarOverlay(renderHandle);
+    evtDrawSolarNoiseLayerAtConfiguredScale(x, y, 0, alpha, 0xA, 0x20, contextHandle, renderHandle);
+    evtPrepareSolarOverlayTestState(renderHandle);
 }
 
 /* Indexed solar-table pass, then the shared layer setup with the 0x10 rate. */
-void evtDrawPartialSolarOverlay(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
+void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryCount,
+    s32 contextHandle, s32 renderHandle, s32 unused7) {
     s32 n;
     s32 tmp;
     s32 *p;
-    if (t0 == 0) {
+    if (entryCount == 0) {
         return;
     }
-    n = t0;
-    evtInitializeSolarOverlay(t2);
+    n = entryCount;
+    evtInitializeSolarOverlay(renderHandle);
     tmp = 0;
     if (n < 8) {
-        p = (s32 *)D_0036832C + t0 * 8;
+        p = (s32 *)D_0036832C + entryCount * 8;
         while (n < 8) {
-            sdfDrawColoredTriangleFan(p[-1], 0xFF, &tmp, p[0], 1, t2);
+            sdfDrawColoredTriangleFan(p[-1], 0xFF, &tmp, p[0], 1, renderHandle);
             n++;
             p += 8;
         }
     }
-    evtFinalizeSolarOverlay(t2);
-    evtDrawSolarNoiseLayerAtConfiguredScale(a0, a1, 0, a3, 0x10, 0x20, t1, t2);
-    evtPrepareSolarOverlayTestState(t2);
+    evtFinalizeSolarOverlay(renderHandle);
+    evtDrawSolarNoiseLayerAtConfiguredScale(x, y, 0, alpha, 0x10, 0x20, contextHandle, renderHandle);
+    evtPrepareSolarOverlayTestState(renderHandle);
 }
 
 /* Draw the selected solar-noise layer; intermediate layers also receive layer 9. */
