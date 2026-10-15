@@ -430,11 +430,11 @@ void btlUpdateLinkedHeightCamera(BtlLinkedCommand *action) {
     btlStepUnitHeightFramedCamera(action);
 }
 
-extern void func_001F2E30(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlAppendLinkedUnitToActorIndices(BtlLinkedCommand *action) {
     btlAppendIndexListEntry(action->targetList, action->link->unit);
-    func_001F2E30(action, &action->frontCamera, &action->backCamera);
+    btlBuildSpeciesFramedCameraPair(action, &action->frontCamera, &action->backCamera);
 }
 
 void btlUpdateDevilizeCameraNoOp(void) {
@@ -1676,6 +1676,8 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
 extern u8 D_00418310[];
 extern u8 D_00418320[];
 
+/* vu0 routine: frame the action's target groups from the actor's side, widening
+ * for several targets, then keep the actor clear of the near camera plane. */
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00417F30);
 
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_004180B0);
@@ -1690,8 +1692,6 @@ INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418310);
 
 INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418320);
 
-/* vu0 routine: frame the action's target groups from the actor's side, widening
- * for several targets, then keep the actor clear of the near camera plane. */
 void func_001F0968(BtlLinkedCommand *action) {
     BtlState *state;
     BtlUnit *unit;
@@ -2807,7 +2807,115 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F2E30);
+/* Each unit species has front/back framing scales and a muzzle-height scale. */
+typedef struct BtlSpeciesCameraFactors {
+    f32 fromDistanceScale;
+    f32 toDistanceScale;
+    f32 heightScale;
+} BtlSpeciesCameraFactors;
+extern BtlSpeciesCameraFactors D_003B6DD0[10];
+
+INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418338);
+
+/* vu0 routine: frame the first target with one of two paired quaternion poses. */
+void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 quaternion[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    BtlCameraQuaternionPair presets[2] = {
+        {{-0x1.47ae14p-4f, -0x1.d1eb84p-1f, 0x1.47ae14p-3f, 0x1.5c28f4p-2f},
+         {-0x1.999998p-5f, -0x1.eb851ep-1f, -0x1.47ae14p-3f, -0x1.1eb850p-3f}},
+        {{0x1.47ae14p-5f, -0x1.dc28f4p-1f, 0x1.eb851ep-4f, -0x1.3d70a2p-2f},
+         {0x1.47ae14p-7f, -0x1.f0a3d6p-1f, -0x1.47ae14p-3f, 0x1.eb851ep-5f}}
+    };
+    BtlUnit *unit;
+    BtlEffectResource *resource;
+    u32 species;
+    s32 resourceKind;
+    s32 resourceIndex;
+    s32 pose;
+    f32 width;
+    f32 height;
+    f32 initialHalfHeight;
+    f32 fov;
+    f32 distance;
+    f32 tangent;
+
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    species = unit->partyRecord.unitId;
+    if (species >= 10) return;
+    btlClearAllUnitDefeatCandidates();
+    btlFlagUnitDefeatCandidate(unit);
+    if (unit->resourceIndex == unit->modelVariant) {
+        resourceKind = unit->unkDC;
+        resourceIndex = unit->combatantKind;
+    } else {
+        resourceKind = unit->modelId;
+        resourceIndex = unit->modelVariant;
+    }
+    width = unit->reach * unit->scale;
+    height = unit->height * unit->scale;
+    pose = effMiscRandMod(NULL, 2);
+    btlCopyUnitRotationQuaternion(unit, quaternion);
+    fov = action->camera.fov;
+    from->fov = fov;
+    to->fov = fov;
+    btlUnitGetMuzzlePosVU(unit);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_LOAD_VF(vf10, position);
+    VU0_STORE_VF(vf10, from->position);
+    VU0_STORE_VF(vf10, to->position);
+    from->position[1] = -height * D_003B6DD0[species].heightScale;
+    initialHalfHeight = height * 0.5f;
+    fov *= 0.5f;
+    if (initialHalfHeight < width) {
+        distance = width / tanf(fov * 0x1.555554p+0f);
+    } else {
+        distance = initialHalfHeight / tanf(fov);
+    }
+    from->distance = distance * D_003B6DD0[species].fromDistanceScale;
+    VU0_LOAD_VF(vf10, presets[pose].front);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, from->direction);
+    VU0_LOAD_VF(vf10, presets[pose].back);
+    VU0_LOAD_VF(vf11, quaternion);
+    effMiscQuatMultiplyVU();
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, to->direction);
+    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(resourceKind, resourceIndex);
+    btlGetUnitWorldPos(unit, position);
+    position[2] += resource->zOffset;
+    VU0_LOAD_VF(vf10, unit->orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, &resource->baseOffset);
+    VU0_SCALE_VF(vf10, unit->scale);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, to->position);
+    to->position[1] -= resource->height * 0x1.333332p-3f;
+    {
+        f32 halfHeight = resource->height * 0.5f;
+        if (halfHeight < resource->reach) {
+            width = resource->reach;
+        } else {
+            width = halfHeight;
+        }
+    }
+    tangent = tanf(to->fov * 0.5f);
+    distance = (width * resource->actorScale) / tangent;
+    to->distance = distance * D_003B6DD0[species].toDistanceScale;
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
+    action->motionParameter = 65.0f;
+    action->motionProgress = 0;
+    action->flags |= 0x41;
+}
 
 /* cameraKind 7 participant preparation; the camera argument is unused. */
 void btlPrepareCameraMode7Participants(BtlLinkedCommand *action, BtlCamState *camera) {
@@ -3574,10 +3682,6 @@ void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418338);
-
-INCLUDE_RODATA(const s32, "game/code_001EC5F0", D_00418398);
 
 const BattlePairCameraPresetSet D_004183D8 = {
     {

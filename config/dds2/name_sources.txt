@@ -9036,3 +9036,4 @@
 0x002BF238	mnuDrawQueuedCommandLineEffect	inferred	Draw kind-one queued random lines and their cropped panel.
 0x001F2758	btlFrameEarliestAnimatedUnitCameraPair	inferred	frames earliest marked kind-11 animation with paired camera presets
 0x001F3888	btlInitializeActorClearanceCameraPair	inferred	sets the action camera pair from linked actor size after its opening motion
+0x001F2E30	btlBuildSpeciesFramedCameraPair	inferred	frames the first target with species-specific front/back distance and height factors
