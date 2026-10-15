@@ -886,7 +886,9 @@ typedef struct MovieMenuState {
     s32 cursor;          /* 0x14 */
     s32 mode;            /* 0x18 */
     s32 unk1C;           /* 0x1C */
-    u8 pad20[0x0C];
+    u8 pad20[4];
+    s32 orbitFrame;      /* 0x24: camera orbit frame, wraps after 3600 */
+    u8 pad28[4];
     struct MenuList *selectionList; /* 0x2C: created by the movie selection-list builder */
     struct MnuSpriteResourceGroup *resources; /* 0x30 */
     s32 unk34;           /* 0x34 */

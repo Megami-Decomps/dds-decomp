@@ -403,7 +403,54 @@ void mnuSwapStateWords(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", mnuUpdateMovieMenuCameraOrbit);
+typedef struct MovieOrbitVec {
+    f32 v[4];
+} MovieOrbitVec;
+
+typedef struct MovieOrbitPath {
+    MovieOrbitVec points[3];
+} MovieOrbitPath;
+
+extern const MovieOrbitVec D_003AFE40;
+extern const MovieOrbitPath D_003AFE50;
+extern const MovieOrbitVec D_003AFE80;
+
+/* Advance the movie-menu camera along its orbit: the frame counter wraps after
+ * 3600 frames, the current path point is rotated about the orbit center by the
+ * elapsed fraction, and the fixed rotation is normalized into `rotation`. */
+void mnuUpdateMovieMenuCameraOrbit(f32 *position, f32 *rotation) {
+    MovieOrbitVec rot = D_003AFE40;
+    MovieOrbitPath path = D_003AFE50;
+    MovieOrbitVec center;
+    s32 segment;
+    s32 elapsed;
+    s32 i;
+    f32 baseLength;
+    f32 pointLength;
+
+    segment = 0;
+    if (mnuMovieMenuState->orbitFrame < 3600) {
+        mnuMovieMenuState->orbitFrame++;
+    } else {
+        mnuMovieMenuState->orbitFrame = 0;
+    }
+    for (i = 0; i < 1; i++) {
+        if (mnuMovieMenuState->orbitFrame <= (i + 1) * 3600) {
+            segment = i;
+            break;
+        }
+    }
+    elapsed = mnuMovieMenuState->orbitFrame - segment * 3600;
+    center = D_003AFE80;
+    baseLength = fldVectorLength(path.points[0].v);
+    pointLength = fldVectorLength(path.points[segment].v);
+    *(MovieOrbitVec *)position = *(MovieOrbitVec *)path.points[segment].v;
+    sdfVec3SubtractInPlace(position, center.v);
+    fldRotateVectorAroundY(position, (f32)elapsed / 3600.0f * -6.2831850051879883f * baseLength / pointLength);
+    sdfVec3AddInPlace(position, center.v);
+    *(MovieOrbitVec *)rotation = rot;
+    sdfQuaternionNormalize(rotation);
+}
 
 void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
     f32 delta[4];
