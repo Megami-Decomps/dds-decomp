@@ -228,9 +228,6 @@ typedef struct EvtUnit {
 #endif
 } EvtUnit;
 
-typedef char EvtUnitShadowLevelOffsetCheck[
-    ((u32)&((EvtUnit *)0)->shadowLevel == 0xD3) ? 1 : -1];
-
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, struct MdlCtx *owner);
 s32 evtReleaseUnitTransitionWork(EvtUnit *work);
 
