@@ -366,11 +366,11 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
-/* Submit the native command at biased screen coordinates; payload args stay opaque. */
-void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
+/* Submit a formatted native command at biased screen coordinates. */
+void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 commandIndex, s32 format) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EFF_EVENT_DRAW_LIST_BYTES);
     sdfInitPacketList(list);
-    sdfAppendPacket(list, (u32)(sdfCreateFormattedSifCommand(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, (const char *)arg3)));
+    sdfAppendPacket(list, (u32)(sdfCreateFormattedSifCommand(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
 }
 
