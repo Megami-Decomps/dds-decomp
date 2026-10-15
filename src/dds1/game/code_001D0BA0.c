@@ -2491,23 +2491,23 @@ void btlReleaseActorModelResources(BtlUnit *object) {
     *(u32 *)((u8 *)object + 0x118) = state;
 }
 
-void btlRequestModelAssetByMode(u32 arg0, u32 arg1, u32 arg2) {
-    s64 temp_v0;
+void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
+    s64 available;
 
-    temp_v0 = mdlFlagTest(0xc0f);
-    if (temp_v0 != 0) {
-        btlEnsureModelAndSoundReady(arg1, arg2);
+    available = mdlFlagTest(0xc0f);
+    if (available != 0) {
+        btlEnsureModelAndSoundReady(effect, model);
         return;
     }
-    mdlRequestAsset(arg1, arg2, 0);
+    mdlRequestAsset(effect, model, 0);
 }
 
-void btlReleaseModelAssetByMode(u32 arg0, u32 arg1, u32 arg2) {
-    s64 temp_v0;
+void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
+    s64 available;
 
-    temp_v0 = mdlFlagTest(0xc0f);
-    if (temp_v0 != 0) {
-        btlReleaseFoundModelEntry(arg1, arg2);
+    available = mdlFlagTest(0xc0f);
+    if (available != 0) {
+        btlReleaseFoundModelEntry(effect, model);
         return;
     }
 }
