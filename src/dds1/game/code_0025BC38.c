@@ -49,8 +49,8 @@ void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *resources) {
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern struct EffectSlotSet *mnuMantraSpriteSlots[];
 
-void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
-    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)mnuMantraSpriteSlots[0], 0x25, param);
+void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 surface) {
+    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)mnuMantraSpriteSlots[0], 0x25, surface);
 }
 
 struct MovieCueNode {
