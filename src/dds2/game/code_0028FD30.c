@@ -1,3 +1,4 @@
+#include "dsp_name.h"
 #include "evt_message_window_api.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
@@ -112,13 +113,108 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FD30);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", mnuHandleMantraSourceDialogResult);
-
-/* The dialog copies all six fixed-width attribute names before selecting one. */
 typedef struct MantraAttributeNameTable {
     char text[6][9];
 } MantraAttributeNameTable;
 
+typedef struct MantraAcquisitionDialogues {
+    s32 entries[6][2];
+} MantraAcquisitionDialogues;
+
+extern DspUnitName *D_00435E48;
+extern DspMantraName *D_00435E50;
+extern const MantraAttributeNameTable D_004275B0;
+extern const MantraAcquisitionDialogues D_004275E8;
+extern const char D_00437940[];
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void prfSummarizeNonzeroEntryAttributes(s32, s32 *);
+extern void *memset(void *, s32, u32);
+extern s32 sprintf(char *, const char *, ...);
+extern void ptyAdjustAllActiveRosterStats(s32, s32);
+
+s32 mnuHandleMantraSourceDialogResult(MantraMenuSrc *source, MnuStatusResource *object) {
+    u16 *sourceBits;
+    s32 attributeSummary[2];
+    MantraAttributeNameTable attributeNames = D_004275B0;
+    char formatted[16];
+    MantraAcquisitionDialogues messageEntries = D_004275E8;
+    char *text = attributeNames.text[0];
+    s32 activeVariant;
+    s32 mode;
+    s32 messageEntry;
+    u32 currentFlags;
+    u32 publishedFlags;
+    DatPartyRecord *party;
+    MantraMenuWork *state;
+
+    if (source == NULL) {
+        return 0;
+    }
+
+    /* This is the existing u16 member, disjoint from the local dialog copy. */
+    sourceBits = &source->bits;
+    state = &object->menu;
+    party = object->list->cursor->partyRecord;
+    activeVariant = state->drawBits.unk15 != 0;
+    memset(attributeSummary, 0, sizeof(attributeSummary));
+    if (*sourceBits & 0x8000) {
+        evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(1, D_00435E50[source->fields.unitIndex].encodedText);
+        *sourceBits &= ~0x2000;
+        dspStartEntry(messageEntries.entries[0][activeVariant]);
+        return -1;
+    }
+
+    evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_00435E50[source->fields.unitIndex].encodedText);
+
+    currentFlags = *sourceBits;
+    mode = currentFlags & 0x0F00;
+    if (currentFlags & 0x1000) {
+        prfSummarizeNonzeroEntryAttributes(source->fields.unitIndex, attributeSummary);
+        evtCopyEntryStringToActiveWindow(2, text + attributeSummary[0] * 9);
+        text = formatted;
+        sprintf(text, D_00437940, attributeSummary[1]);
+        evtCopyEntryStringToActiveWindow(3, text);
+        currentFlags = *sourceBits;
+        mode = currentFlags & 0x0F00;
+    }
+    if (mode == 0x0200) {
+        if (currentFlags & 0x1000) {
+            if (attributeSummary[0] != 5) {
+                messageEntry = messageEntries.entries[1][activeVariant];
+            } else {
+                messageEntry = messageEntries.entries[2][activeVariant];
+            }
+        } else {
+            messageEntry = messageEntries.entries[3][activeVariant];
+        }
+    } else if (mode == 0x0300) {
+        messageEntry = messageEntries.entries[4][activeVariant];
+    } else if (mode == 0x0400) {
+        messageEntry = messageEntries.entries[5][activeVariant];
+    } else {
+        goto complete;
+    }
+    dspStartEntry(messageEntry);
+    /* The dialog callback can update the caller-owned acquisition record. */
+    currentFlags = *sourceBits;
+
+complete:
+    /* Without a dialog callback, the earlier flags snapshot is still current. */
+    publishedFlags = (currentFlags & ~0x2000) | 0x4000;
+    *sourceBits = publishedFlags;
+    if ((publishedFlags & 0x0F00) == 0x0300) {
+        *sourceBits = publishedFlags & ~0x4000;
+    }
+
+    if ((((state->drawFlags >> 15) & (*sourceBits >> 12)) & 1) != 0) {
+        ptyAdjustAllActiveRosterStats(attributeSummary[0], attributeSummary[1]);
+    }
+    return source->fields.unitIndex;
+}
+
+/* The dialog copies all six fixed-width attribute names before selecting one. */
 const MantraAttributeNameTable D_004275B0 __attribute__((aligned(8))) = {
     {"Strength", "Vitality", "Magic", "Agility", "Luck", "ALL"}
 };
