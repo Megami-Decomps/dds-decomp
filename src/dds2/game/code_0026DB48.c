@@ -52,7 +52,8 @@ s32 scrTestEntryFlagAtZeroBit0(DatPartyRecord *context) {
     return scrTestEntryFlag(context, 0, 0);
 }
 
-void func_0026DBB0(void) {
+/* Retail hook called by mantra-equip release after the selected panel updates. */
+void mtrMantraEquipReleaseHookNoOp(void) {
 }
 
 /* The consumed context is cleared under the post-call cleanup exception.

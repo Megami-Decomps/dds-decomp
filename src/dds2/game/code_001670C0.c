@@ -142,7 +142,7 @@ u8 billGetCurrentValue(EffectDispatchState *effect) {
     return effect->value64;
 }
 
-void func_00167300(EffectDispatchState *effect, u32 value) {
+void billSetDispatchedObjectValue1C(EffectDispatchState *effect, u32 value) {
     effect->value1C = value;
 }
 

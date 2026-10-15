@@ -693,7 +693,8 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeC
     }
 }
 
-u32 func_0025E7B0(void) {
+/* Retail never blocks the event viewer's end countdown through this hook. */
+u32 mnuShouldBlockViewerEndCountdown(void) {
     return 0;
 }
 
@@ -1593,7 +1594,8 @@ u32 __attribute__((const)) mnuCampGetProgressStage(void) {
     return 0;
 }
 
-u32 func_00260460(void) {
+/* Seed or refresh the terminal message option; retail always selects zero. */
+u32 mnuGetTerminalMessageOption(void) {
     return 0;
 }
 
@@ -1663,7 +1665,7 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);
     mnuInitializeShopStatusBatches(obj);
-    obj->options = func_00260460();
+    obj->options = mnuGetTerminalMessageOption();
     obj->availableCount = mnuCountActivePartyEntries();
     obj->delayFrames = 0xF;
     mnuSetCurrentTerminalContext(obj);

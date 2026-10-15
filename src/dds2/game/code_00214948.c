@@ -4185,7 +4185,7 @@ s32 btlSetupVritraCameraFromActionFlags(BtlLinkedCommand *command) {
 
 /* Select defeat-camera framing from animation-camera flags, then clear the
  * runtime camera flag; return zero when no flag applies. */
-s32 func_0021E8C0(BtlLinkedCommand *command) {
+s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command) {
     u32 flags = datActionAnimationRecords[command->actionCode].flags;
 
     if (flags & 0x4000) {

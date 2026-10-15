@@ -139,7 +139,7 @@ u8 billGetCurrentValue(BillWork *work) {
     return work->currentValue;
 }
 
-void func_0015F710(BillEntryOwner *owner, u32 value) {
+void billSetDispatchedObjectValue1C(BillEntryOwner *owner, u32 value) {
     owner->value1C = value;
 }
 

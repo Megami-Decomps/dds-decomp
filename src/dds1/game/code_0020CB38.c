@@ -65,7 +65,7 @@ extern void btlClearRuntimeFlag2000(void);
 
 /* Dispatch linked-camera animation metadata; +0x110 resets command state, not
  * unit flags. Returns 1 when a camera path is handled, otherwise 0. */
-s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
+s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command) {
     u16 flags = ((BtlActionTableEntry *)datActionAnimationRecords)[command->actionCode].flags;
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
