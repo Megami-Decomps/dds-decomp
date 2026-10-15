@@ -2703,12 +2703,12 @@ void effThunderSetCurveGroupTint(s32 work, u32 value) {
     *(u32 *)(work + 0x54) = value;
 }
 
-extern EffThunderDrawParams D_003D64F0;
-extern EffThunderDrawParams D_003D6520;
+extern EffThunderDrawParams effThunderHistoryDrawParams;
+extern EffThunderDrawParams effThunderEndCapDrawParams;
 
-extern const f32 D_00354860[8][4];
-extern const u32 D_003547D0[28];
-extern const u32 D_00354840[8];
+extern const f32 effThunderEndCapPoints[8][4];
+extern const u32 effThunderHistoryIndices[28];
+extern const u32 effThunderEndCapIndices[8];
 extern void *memcpy(void *, const void *, u32);
 
 /* Lay out history vertices/colors, eight cap vertices/colors, then the owner.
@@ -2737,18 +2737,18 @@ EffPcpThunderFragmentResources *effCreateFragmentResources(s32 historyLength, s3
     history->color = 0x80808080;
     history->allocation = allocation;
     history->activePointCount = 0;
-    memcpy(history->endPoints, D_00354860, sizeof(D_00354860));
+    memcpy(history->endPoints, effThunderEndCapPoints, sizeof(effThunderEndCapPoints));
     asset = sdfCreateAssetWithDrawEntries();
     history->resourceHandle = asset;
     sdfSetPrimaryStateFloat(asset, 1.0f);
-    memset(&D_003D64F0, 0, 0x2C);
-    D_003D64F0.flags = 0x4000;
-    D_003D64F0.primitiveIndices = D_003547D0;
-    memset(&D_003D6520, 0, 0x2C);
-    D_003D6520.flags = 0x4000;
-    D_003D6520.primitiveIndices = D_00354840;
-    D_003D6520.primitiveCount = 6;
-    D_003D6520.pointCount = 8;
+    memset(&effThunderHistoryDrawParams, 0, 0x2C);
+    effThunderHistoryDrawParams.flags = 0x4000;
+    effThunderHistoryDrawParams.primitiveIndices = effThunderHistoryIndices;
+    memset(&effThunderEndCapDrawParams, 0, 0x2C);
+    effThunderEndCapDrawParams.flags = 0x4000;
+    effThunderEndCapDrawParams.primitiveIndices = effThunderEndCapIndices;
+    effThunderEndCapDrawParams.primitiveCount = 6;
+    effThunderEndCapDrawParams.pointCount = 8;
     return history;
 }
 
@@ -2819,7 +2819,7 @@ void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u12
 
 
 
-extern SdfPoolNode *D_003548E0[];
+extern SdfPoolNode *effThunderHistorySurfaces[];
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffThunderDrawParams *);
 
@@ -2857,19 +2857,19 @@ void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *history) {
         length[0] = recent;
         length[1] = 0;
     }
-    D_003D64F0.colors = history->colors;
-    D_003D64F0.color = history->color;
+    effThunderHistoryDrawParams.colors = history->colors;
+    effThunderHistoryDrawParams.color = history->color;
     for (i = 0; i < 2; i++) {
-        draw = &D_003D64F0;
+        draw = &effThunderHistoryDrawParams;
         remaining = length[i];
         draw->primitiveCount = 16;
         draw->points = history->points + start[i];
         draw->pointCount = 15;
         while (remaining >= 15) {
             remaining -= 12;
-            sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_003D64F0));
-            D_003D64F0.points += 12;
-            D_003D64F0.colors += 12;
+            sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&effThunderHistoryDrawParams));
+            effThunderHistoryDrawParams.points += 12;
+            effThunderHistoryDrawParams.colors += 12;
         }
         if (remaining >= 6) {
             draw->primitiveCount = (remaining / 3) * 4 - 4;
@@ -2879,16 +2879,16 @@ void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *history) {
         }
     }
     colors = history->endColors;
-    edgeColor = D_003D64F0.colors[-3];
-    centerColor = D_003D64F0.colors[-2];
+    edgeColor = effThunderHistoryDrawParams.colors[-3];
+    centerColor = effThunderHistoryDrawParams.colors[-2];
     colors[0] = centerColor;
     colors[7] = colors[6] = colors[5] = colors[4] =
         colors[3] = colors[2] = colors[1] = edgeColor;
-    D_003D6520.colors = colors;
-    D_003D6520.points = history->endPoints;
-    D_003D6520.color = history->color;
-    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_003D6520));
-    surface = D_003548E0[history->surfaceIndex];
+    effThunderEndCapDrawParams.colors = colors;
+    effThunderEndCapDrawParams.points = history->endPoints;
+    effThunderEndCapDrawParams.color = history->color;
+    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&effThunderEndCapDrawParams));
+    surface = effThunderHistorySurfaces[history->surfaceIndex];
     surface->append(surface, list);
 }
 
