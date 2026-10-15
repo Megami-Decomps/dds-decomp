@@ -1676,14 +1676,14 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     return obj;
 }
 
-void mnuTerminalReleaseContextAndResources(KwlnTask *arg) {
-    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(arg);
+void mnuTerminalReleaseContextAndResources(KwlnTask *task) {
+    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
 
     if (scene != 0) {
         mnuShopReleaseWindowSprites(0, scene);
         mnuShopReleaseWindowAndEffectResources(scene);
         mnuShopReleaseSceneObjects(scene);
-        mnuDrainPanelTransitions(&scene->transitionWork, arg);
+        mnuDrainPanelTransitions(&scene->transitionWork, task);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&scene->messageResources);
         sdfReleaseResourceAllocation(scene->resourceHandle);
