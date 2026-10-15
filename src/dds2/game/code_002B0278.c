@@ -4214,11 +4214,11 @@ typedef struct MenuPosTable3 {
 
 extern MenuPosTable3 D_0042AF48;
 
-void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 arg);
+void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 surface);
 
 extern MenuPosTable D_0042AF60;
 
-void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg);
+void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 surface);
 
 typedef struct MenuOffsets {
     s32 x0;
@@ -4229,7 +4229,7 @@ typedef struct MenuOffsets {
 
 extern MenuOffsets D_0042AF90;
 
-void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg);
+void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 surface);
 
 extern void mnuDrawIconPanelFade();
 
