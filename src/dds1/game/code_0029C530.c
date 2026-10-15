@@ -31,6 +31,7 @@
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
+#include "kwln_fade.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3obj.h"
 #include "sdf_packet_append.h"

@@ -9,6 +9,7 @@
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_fade.h"
 #include "eff_event_draw.h"
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
@@ -22,8 +23,6 @@ s32 kwlnSetLightDirectionTarget(s32 arg0, s32 arg1, void *arg2);
 void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 s32 kwlnDrawSetDc8Second(s32 arg0);
 s32 kwlnDrawSetE08Fifth(s32 arg0);
-s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 kwlnFadeInStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void sdfSetViewFieldOfView(f32 arg0);
 s32 evtSetDrawVectorTarget(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 s32 fptodp(void);

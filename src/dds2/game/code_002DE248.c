@@ -20,6 +20,7 @@
 #include "fld_transfer_chunk.h"
 #include "eff_class_work_api.h"
 #include "eff_random.h"
+#include "kwln_fade.h"
 #include "eff_point_set.h"
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"

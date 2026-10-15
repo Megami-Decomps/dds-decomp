@@ -813,7 +813,6 @@ extern void evtTransitionBgm(s32, s32);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
 extern void sndQueueNoPayloadCommand1A0(void);
-extern void kwlnFadeSetupFrames(s32, s32);
 extern s32 itfMesSelectTableItemText(s32, s32, s32);
 extern void itfMesBuildOptionList(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
@@ -829,7 +828,6 @@ extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void fldSetTitleDrawMode(u32);
 extern void fldBeginTitleAnimation(void);
-extern void kwlnCancelConfiguredFadeFrames(void);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);
 
@@ -1315,7 +1313,6 @@ extern s32 evtViewerTestIndexedCondition(u32);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
-extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
 extern EvtRuntimeGroup *D_003BBE80;
 
@@ -3500,7 +3497,6 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
 extern f32 D_00324590[];
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void fldSetTitleDrawMode();
-extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
