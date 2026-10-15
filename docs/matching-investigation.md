@@ -392,9 +392,11 @@ with independent Luna Event review and Peregrine Forge integration.
    separate from a confirmed idiom; do not turn one success into a universal
    source rule.
 
-No scripted or enumerated search over statement, declaration or operand
-orders is part of this method. Neither are arbitrary symbol spellings, fake
-views, invented dependencies, register pinning or `volatile` for scheduling.
+A search (`tools/perm_unit.py`, see CONTRIBUTING) can find which source change
+supplies a missing property. Its raw output is not a result. Reduce the hit to
+the ordinary change behind it, then find out why it works, so the lever can be
+reused across a family. Arbitrary symbol spellings, fake views, invented
+dependencies, register pinning and `volatile` for scheduling stay out.
 If a real dependency remains unknown, investigate its producer rather than
 manufacturing one.
 
