@@ -70,7 +70,7 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
 
 extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
-EvtRuntimeChild *func_002467A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
+EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
     return evtCreateViewerTimelineKey(group, frame, viewer);
 }
 
@@ -2565,7 +2565,7 @@ extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
 extern s32 evtEventViewerEditDrawVectorTargetTask(KwlnTask *task);
 extern s32 evtPollRuntimeControlReady(KwlnTask *task);
 extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
-extern EvtRuntimeChild *func_002467A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
+extern EvtRuntimeChild *evtEventViewerCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004229A0);
 
@@ -3147,7 +3147,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                 }
             }
         } else if (command == 1) {
-            func_002467A0(group, viewer->curFrame, viewer);
+            evtEventViewerCreateTrackKeyAtFrame(group, viewer->curFrame, viewer);
         }
     }
     return 0;
