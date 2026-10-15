@@ -868,8 +868,8 @@ SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture) {
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
  * contribute to its 16-byte block count. */
-s32 sdfTexGetPrimaryBufferSize(SdfTex *texture) {
-    SdfTexBuf *buffer = texture->primaryBuffer;
+s32 sdfTexGetPrimaryBufferSize(const SdfTex *texture) {
+    const SdfTexBuf *buffer = texture->primaryBuffer;
 
     if (buffer == NULL) {
         return 0;
@@ -889,8 +889,8 @@ SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
-s32 sdfTexGetSecondaryBufferSize(SdfTex *texture) {
-    SdfTexBuf *buffer = texture->secondaryBuffer;
+s32 sdfTexGetSecondaryBufferSize(const SdfTex *texture) {
+    const SdfTexBuf *buffer = texture->secondaryBuffer;
 
     if (buffer == NULL) {
         return 0;
