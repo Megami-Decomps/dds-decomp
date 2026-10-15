@@ -95,7 +95,7 @@ void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 
 void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
 
-void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 arg, f32 value);
+void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *texture, s32 tint, f32 amount);
 
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
@@ -449,7 +449,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
 }
 
 /* Apply the palette update only to textures with a nonempty color lookup table. */
-void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
+void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount) {
     s32 itemIndex;
     s32 itemCount;
 
@@ -461,7 +461,7 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
         SdfTex *texture = ((SdfTex **)list->buffer)[itemIndex];
 
         if (texture->paletteCount != 0) {
-            sdfTexBlendPaletteToTintedIntensityVU(texture, arg, value);
+            sdfTexBlendPaletteToTintedIntensityVU(texture, tint, amount);
         }
     }
 }
