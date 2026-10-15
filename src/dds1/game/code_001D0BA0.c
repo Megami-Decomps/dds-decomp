@@ -4035,16 +4035,16 @@ u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u
     return task;
 }
 
-void btlApplyLinkedUnitStatusWhenActorActive(s32 arg0) {
-    if (((u32)((BtlUnit *)*(u32 *)(arg0 + 0xc))->status.flags & 2) != 0) {
-        evtSetUnitStatusFlags(((BtlUnit *)*(u32 *)(arg0 + 0xc))->ext);
+void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
+    if (((u32)((BtlUnit *)*(u32 *)(taskArgs + 0xc))->status.flags & 2) != 0) {
+        evtSetUnitStatusFlags(((BtlUnit *)*(u32 *)(taskArgs + 0xc))->ext);
         return;
     }
 }
 
-u32 btlApplyUnitFxWhenLoaded(u32 *arg0) {
-    if ((btlUnitStatusPair(((BtlUnit *)arg0[3])) & 0x1000000002) == 0x1000000002) {
-        evtInitializeUnitColorTransition(((BtlUnit *)arg0[3])->ext, arg0[2], *arg0, arg0[1]);
+u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
+    if ((btlUnitStatusPair(((BtlUnit *)taskArgs[3])) & 0x1000000002) == 0x1000000002) {
+        evtInitializeUnitColorTransition(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
     }
     return 1;
 }
@@ -4066,9 +4066,9 @@ u8 *btlCreateUnitTask0F(u8 *unit, s32 arg1, s32 arg2, s32 arg3) {
     return task;
 }
 
-void btlPrepareUnitStatusFxOnStart(s32 arg0) {
-    if (((u32)((BtlUnit *)*(u32 *)(arg0 + 0x14))->status.flags & 2) != 0) {
-        evtSetUnitStatusFlags(((BtlUnit *)*(u32 *)(arg0 + 0x14))->ext);
+void btlPrepareUnitStatusFxOnStart(s32 taskArgs) {
+    if (((u32)((BtlUnit *)*(u32 *)(taskArgs + 0x14))->status.flags & 2) != 0) {
+        evtSetUnitStatusFlags(((BtlUnit *)*(u32 *)(taskArgs + 0x14))->ext);
         return;
     }
 }
