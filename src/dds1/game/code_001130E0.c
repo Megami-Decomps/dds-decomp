@@ -83,7 +83,6 @@ f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
 
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
-extern f32 sdfAtan2(f32, f32);
 
 /* The first conversion follows the original 180 / 3.14 approximation; the
  * quaternion helper uses the more precise radians-to-degrees factor. */

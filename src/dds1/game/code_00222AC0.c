@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_unique_chunk_value_api.h"
 #include "kwln_task_add_child.h"
@@ -990,7 +991,6 @@ f32 evtGetShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
 
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
-extern f32 sdfAtan2(f32 y, f32 x);
 
 u32 evtOpTurnUnitRelativeToWorldNode(void) {
     EvtUnit *unit;

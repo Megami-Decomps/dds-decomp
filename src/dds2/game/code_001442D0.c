@@ -163,7 +163,6 @@ extern s32 fldObjectSlotCount;
 
 extern s32 fldSceneSoundBase;
 
-extern f32 sdfAtan2(f32, f32);
 
 extern f32 fldLookAtFarPoint[];
 

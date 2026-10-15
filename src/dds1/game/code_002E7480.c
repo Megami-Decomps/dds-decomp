@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "ee_mmi.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
