@@ -3270,6 +3270,11 @@ s32 mdlFlagTest(s32 flag) {
     return (((s32)datGameState->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
 }
 
+extern s32 D_003BBD80, D_003BBD84, D_003BBD88;
+extern char D_003BBD90[], D_003BBD98[], D_003BBDA0[];
+extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32,
+    s32 *, s32 *, s32 *, s32 *);
+
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF78);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF88);
@@ -3278,7 +3283,79 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF98);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
+s32 func_0021F630(void) {
+    char glyph[2];
+    SdfListHead *packets;
+    s32 column, row, style, result;
+    s32 cellWidth = 0xC0, cellHeight = 0x60;
+
+    /* Native 0021F664..74 copies this space/NUL template as one block;
+     * see docs/idioms.md, "Bit-editor glyph template block copy". */
+    memcpy(glyph, D_003BBD90, sizeof(glyph));
+    packets = (SdfListHead *)sdfAllocPacketAligned(sizeof(*packets));
+    sdfInitPacketList(packets);
+    kwlnDrawSpriteCell(packets, 50, 50, 23, 20);
+    sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+        0x7320, 0x7A90, 0xFF0000, 0, "BitEditor"));
+    if (mdlFlagTest((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84)) {
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+            0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = ON",
+            (D_003BBD80 + D_003BBD88) * 16 + D_003BBD84));
+    } else {
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+            0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = OFF",
+            (D_003BBD80 + D_003BBD88) * 16 + D_003BBD84));
+    }
+    for (column = 0; column < 16; column++) {
+        style = D_003BBD84 == column ? 14 : 7;
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+            0x7320 + (column + 6) * cellWidth, 0x7A90 + cellHeight * 2,
+            0xFF0000, style, D_003BBD98, column));
+    }
+    for (row = 0; row < 16; row++) {
+        style = D_003BBD88 == row ? 14 : 7;
+        sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+            0x73E0, 0x7A90 + (row + 3) * cellHeight, 0xFF0000,
+            style, D_003BBDA0, (D_003BBD80 + row) * 16));
+        for (column = 0; column < 16; column++) {
+            if (mdlFlagTest((D_003BBD80 + row) * 16 + column)) {
+                glyph[0] = 'O';
+                style = D_003BBD84 == column || D_003BBD88 == row ? 6 : 0;
+            } else {
+                glyph[0] = '+';
+                style = D_003BBD84 == column || D_003BBD88 == row ? 14 : 8;
+            }
+            if (D_003BBD84 == column && D_003BBD88 == row) {
+                style = 4;
+            }
+            sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(
+                0x7320 + (column + 6) * cellWidth,
+                0x7A90 + (row + 3) * cellHeight, 0xFF0000, style, glyph));
+        }
+    }
+    D_00325708.append(&D_00325708, packets);
+    if ((sdfPadButtonStates[24] & 2) && D_003BBD80 > 0) {
+        D_003BBD80 -= 16;
+        if (D_003BBD80 < 0) D_003BBD80 = 0;
+    }
+    if (sdfPadButtonStates[26] & 2) {
+        if (D_003BBD80 + 16 < 256) {
+            if (D_003BBD80 + 32 > 256) D_003BBD80 = 240;
+            else D_003BBD80 += 16;
+        }
+    }
+    result = kwlnStepTwoListCursors(1, 16, 256, 16, 16, NULL,
+        &D_003BBD80, &D_003BBD84, &D_003BBD88);
+    if (result == -1) return -1;
+    if (result == 1) {
+        if (mdlFlagTest((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84)) {
+            mdlFlagClear((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84);
+        } else {
+            mdlFlagSet((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84);
+        }
+    }
+    return 0;
+}
 
 
 extern EffWorldNode *dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
