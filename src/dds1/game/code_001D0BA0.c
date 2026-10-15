@@ -5901,8 +5901,8 @@ u32 btlGetActiveUnitId(void) {
     return *(u32 *)(temp_v0 + 0x174);
 }
 
-f32 btlGetPoseBlendProgress(s32 arg0) {
-    return *(f32 *)(arg0 + 0x128);
+f32 btlGetPoseBlendProgress(s32 unit) {
+    return *(f32 *)(unit + 0x128);
 }
 
 s32 btlIsUnitInActiveList(void *unit) {
