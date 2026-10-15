@@ -227,7 +227,7 @@ void btlUpdateEventPlayback(void) {
         if (battle->eventData != NULL) {
             effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
         }
-        battle->eventData = func_00160958((SoundMixer *)battle->eventRequest, 1,
+        battle->eventData = effCreateBattleVoiceOwner((SoundMixer *)battle->eventRequest, 1,
                                           battle->eventUnit, 0);
         battle->eventActive = 3;
         btlStartTask(sndCreateReleaseTask(0xC));

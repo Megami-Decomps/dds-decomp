@@ -4385,7 +4385,7 @@ u32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
             handle = work->sourceHandle;
             unit->status.flags |= 0x80;
             arguments->mixer = sndMixerClone(handle);
-            arguments->effect = func_00160958(arguments->mixer, 2, unit, 0);
+            arguments->effect = effCreateBattleVoiceOwner(arguments->mixer, 2, unit, 0);
             arguments->duration = 0xE;
             arguments->effect->flags &= 0xFFF9;
             effBattleUpdateSelectedValue(arguments->effect, 0xE);
