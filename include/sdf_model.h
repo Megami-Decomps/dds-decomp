@@ -75,6 +75,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef);
 void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector,
                                 s32 listIndex);
+void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 /* The draw node owns the lazily allocated workspace; callers receive a borrowed
  * pointer to it, and must not release it independently. */

@@ -956,9 +956,6 @@ void fldResetSceneResourceTables(void) {
 
 extern SdfPoolNode *D_00325838[];
 
-extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
-
-
 extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
