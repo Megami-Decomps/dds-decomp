@@ -52,7 +52,7 @@ extern EffResourceRectParams evtMovieDefaultResourceRect;
 extern EffBlurScatterParams evtMovieDefaultBlurScatter;
 extern EffBlurScaleParams evtMovieDefaultBlurScale;
 extern EffBlurQuad D_003686A0;
-extern s32 itfMesCreateWindow(u8 *arg);
+extern s32 itfMesCreateWindow(u8 *messageSubData);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern s32 mnuQueryTitleSoundBusy(void);
