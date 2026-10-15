@@ -100,17 +100,6 @@ extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
 
-/* Kind 0x27: camera-mode task's complete 20-byte argument packet. */
-typedef struct BtlCameraModeArgs {
-    BtlTask *actor;
-    BtlUnit *unitA;
-    BtlUnit *unitB;
-    u32 mode;
-    s32 category;
-} BtlCameraModeArgs;
-
-typedef char BtlCameraModeArgsSize[(sizeof(BtlCameraModeArgs) == 20) ? 1 : -1];
-
 /* Generic scheduler header; task-specific arguments follow at byte 0x70.
  * next/prev link registration order, independently of the deferred queue. */
 typedef struct SoundTask {
@@ -131,7 +120,7 @@ typedef struct SoundTask {
         void (*update)(void);
         s32 (*playSound)(u32 *);
         u32 (*process)(void);
-        u32 (*commandSound)(BtlCameraModeArgs *);
+        u32 (*commandSound)(BtlCommandSoundTaskArgs *);
         u32 (*playCustomSound)(u8 *);
         s32 (*releaseSound)(u16 *);
         s32 (*acquireSound)(u32 *);
@@ -5573,14 +5562,14 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
     return changed;
 }
 
-u32 btlExecuteCommandSoundTask(BtlCameraModeArgs *arguments) {
+u32 btlExecuteCommandSoundTask(BtlCommandSoundTaskArgs *arguments) {
     btlSetCameraCommandMode(arguments->mode, arguments->actor, arguments->unitA, arguments->unitB, arguments->category);
     return 1;
 }
 
 void *btlCreateCommandSoundTask(s32 owner, s32 variant) {
     SoundTask *task = (SoundTask *)btlAllocTask(20);
-    BtlCameraModeArgs *arguments;
+    BtlCommandSoundTaskArgs *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x27;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -5600,14 +5589,14 @@ void *btlCreateCommandSoundTask(s32 owner, s32 variant) {
 
 void *btlCreateTargetedCommandSoundTask(s32 owner, s32 variant, u32 target) {
     void *task = btlCreateCommandSoundTask(owner, variant);
-    BtlCameraModeArgs *arguments = btlGetTaskArguments(task);
+    BtlCommandSoundTaskArgs *arguments = btlGetTaskArguments(task);
     arguments->category = target;
     return task;
 }
 
 void *btlCreateCommandSoundWithArguments(s32 owner, s32 variant, u32 first, u32 second, u32 third) {
     void *task = btlCreateCommandSoundTask(owner, second);
-    BtlCameraModeArgs *arguments = btlGetTaskArguments(task);
+    BtlCommandSoundTaskArgs *arguments = btlGetTaskArguments(task);
     arguments->category = third;
     arguments->unitA = (BtlUnit *)variant;
     arguments->unitB = (BtlUnit *)first;
