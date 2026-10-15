@@ -284,8 +284,8 @@ void sdfSaveResetSnapshot(void) {
     D_003BA9F0 = datGameState->header.secondTick;
     D_003BA9F4 = datGameState->header.savedMoney;
     D_0032A200.words[0] = datGameState->header.saveFlags;
-    D_0032A200.words[1] = datGameState->header.unk28;
-    D_0032A200.words[2] = datGameState->header.unk2C;
+    D_0032A200.words[1] = datGameState->header.saveFlags1;
+    D_0032A200.words[2] = datGameState->header.saveFlags2;
     D_003BD790 = mnuCreateFlagEntries();
     D_003BD794 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
     copy = (void *)sdfMemoryGetBlockAddress(D_003BD794);
@@ -336,8 +336,8 @@ void sdfRestoreResetSnapshot(void) {
     datGameState->header.savedMoney = D_003BA9F4;
     datGameState->header.playTicks = datGameState->header.secondTick;
     datGameState->header.saveFlags = D_0032A200.words[0];
-    datGameState->header.unk28 = D_0032A200.words[1];
-    datGameState->header.unk2C = D_0032A200.words[2];
+    datGameState->header.saveFlags1 = D_0032A200.words[1];
+    datGameState->header.saveFlags2 = D_0032A200.words[2];
     mnuApplyFlagEntries(D_003BD790);
     sdfReleaseResourceAllocation((SdfMemBlock *)D_003BD790);
 
