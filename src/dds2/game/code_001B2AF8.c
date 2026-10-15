@@ -707,12 +707,12 @@ s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {
     return 1;
 }
 
-void btlAverageFilteredMaximumForMask(u32 arg0) {
-    btlAverageMaximumValueForMask(arg0, 1);
+void btlAverageFilteredMaximumForMask(u32 partyRecordFlagsMask) {
+    btlAverageMaximumValueForMask(partyRecordFlagsMask, 1);
 }
 
-s32 btlAverageAllMaximumForMask(u32 arg0) {
-    return btlAverageMaximumValueForMask(arg0, 0);
+s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask) {
+    return btlAverageMaximumValueForMask(partyRecordFlagsMask, 0);
 }
 
 s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
@@ -737,13 +737,13 @@ s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
     return 1;
 }
 
-void btlAverageFilteredCurrentForMask(u32 arg0) {
-    btlAverageCurrentValueForMask(arg0, 1);
+void btlAverageFilteredCurrentForMask(u32 partyRecordFlagsMask) {
+    btlAverageCurrentValueForMask(partyRecordFlagsMask, 1);
 }
 
 /* Return mean current HP for the mask, including bit-0x20 actors. */
-s32 btlAverageAllCurrentForMask(u32 arg0) {
-    return btlAverageCurrentValueForMask(arg0, 0);
+s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask) {
+    return btlAverageCurrentValueForMask(partyRecordFlagsMask, 0);
 }
 
 s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
@@ -799,8 +799,8 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
     return sum;
 }
 
-void btlAverageFilteredActorAttribute(u32 arg0, u32 arg1) {
-    btlSumOrAverageActorAttribute(arg0, arg1, 1);
+void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, u32 statIndex) {
+    btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 1);
 }
 
 /* Keep this name: evtPushAvailableChoiceRatio in newdata/datCalc.c lowers its u64 division to __udivdi3. */
