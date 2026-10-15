@@ -44,7 +44,7 @@ void *dds3ExchangeSlot(EffWorldNode *object, void *slotData, s32 slotIndex);
 void *dds3GetSlot(EffWorldNode *object, s32 slotIndex);
 void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value);
 EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kind);
-EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
+EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 slotIndex, const u8 *name);
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 /* Allocate and initialize the inner transform object for a world node. */
