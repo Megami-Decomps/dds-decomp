@@ -166,7 +166,7 @@ void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 motionSubmode, s
     }
 }
 
-void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 mode, s32 dirFlag, s32 sideMode) {
+void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 pathFollowMode, s32 dirFlag, s32 sideMode) {
     EffWorldNode *pathSource;
     Dds3PathCurveWork *path;
 
@@ -188,7 +188,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         sdfSetFloatCounterDirection((s32)path, 1);
         work->pathSpeed = -work->pathSpeed;
     }
-    switch (mode) {
+    switch (pathFollowMode) {
     case 0:
         work->motionSubmode = 0;
         work->flags &= ~2;
@@ -885,10 +885,10 @@ u32 evtOpStartUnitPathFollow(void) {
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(5);
         s32 valueB6 = scrReadIntParameter(6);
-        s32 mode = scrReadIntParameter(2);
+        s32 pathFollowMode = scrReadIntParameter(2);
         s32 dirFlag = scrReadIntParameter(4);
         s32 sideMode = scrReadIntParameter(3);
-        evtSetUnitPathFollow(unit, objectId, frames, valueB6, mode, dirFlag, sideMode);
+        evtSetUnitPathFollow(unit, objectId, frames, valueB6, pathFollowMode, dirFlag, sideMode);
     }
     return 1;
 }
