@@ -2794,13 +2794,13 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
 }
 
 /* Store the confirmed command-selection tuple on the owning actor. */
-void btlSetActorCommandSelection(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
+void btlSetActorCommandSelection(s32 object, s16 first, s16 second, s16 slot) {
     s32 temp_v0;
 
-    temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0x2c) + 0x18);
-    *(s16 *)(temp_v0 + 0x2ac) = arg1;
-    *(s16 *)(temp_v0 + 0x2ae) = arg2;
-    *(s16 *)(temp_v0 + 0x2b0) = arg3;
+    temp_v0 = *(s32 *)(*(s32 *)(object + 0x2c) + 0x18);
+    *(s16 *)(temp_v0 + 0x2ac) = first;
+    *(s16 *)(temp_v0 + 0x2ae) = second;
+    *(s16 *)(temp_v0 + 0x2b0) = slot;
 }
 
 s32 btlCountEligibleLinkedActors(BtlState *battle) {
