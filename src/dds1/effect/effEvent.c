@@ -18,6 +18,7 @@
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
+#include "eff_event_work_api.h"
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "eff_event_bill.h"

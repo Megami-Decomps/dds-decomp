@@ -5,6 +5,7 @@
 #include "eff_blur.h"
 #include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
+#include "eff_event_work_api.h"
 #include "eff.h"
 #include "kwln_draw_params.h"
 
@@ -235,7 +236,6 @@ void kwlnDrawSetE08Triple(u32 extent, u32 centerX, u32 centerY) {
 extern KwlnResourceRectParams D_0043E560;
 extern u16 D_00438E5C;
 extern u16 D_00438E5E;
-extern u32 effGetCh75Work(void);
 
 /* Save the live textured-square params; zero copies the staged body immediately. */
 void kwlnDrawSetupE08FromCh75(s32 duration) {
@@ -588,7 +588,6 @@ void kwlnDrawSetD30Triple(u32 size, u32 x, u32 y) {
 }
 
 extern KwlnScaleBlurParams D_0043E480;
-extern u32 effGetCh76Work(void);
 extern u16 D_00438E38;
 extern u16 D_00438E3A;
 
