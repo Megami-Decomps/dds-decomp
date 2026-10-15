@@ -842,8 +842,8 @@ void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 motio
                 resourceItem->payload.object.owner = owner;
                 resourceItem->payload.object.minimumTime = entryRecord->minimumTime;
                 attributes[1] = 1;
-                attributes[2] = entryRecord->flagA;
-                attributes[3] = entryRecord->flagB;
+                attributes[2] = entryRecord->loopMode;
+                attributes[3] = entryRecord->playbackCadenceStep;
             }
         }
     }
