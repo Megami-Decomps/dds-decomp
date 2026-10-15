@@ -969,11 +969,11 @@ f32 mdlGetNodeFrameStep(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Replace the stored float only when the searched node exists. */
-void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 value) {
+void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 frameStep) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
 
     if (matchedNode != NULL) {
-        matchedNode->frameStep = value;
+        matchedNode->frameStep = frameStep;
     }
 }
 
