@@ -308,18 +308,18 @@ void parUpdateSharedScaleAndDelta(ParKindState *obj) {
 
     switch (obj->kind) {
     case 0:
-    case 1:
+    case PAR_KIND_STATE_HISTORY:
         return;
-    case 2:
-        scale = obj->value.scale;
+    case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
+        scale = obj->payload.crossStrip.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
-    case 3:
-        scale = obj->value.scale;
+    case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
+        scale = obj->payload.crossTriangle.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
-    case 4:
-        scale = obj->value.scale;
+    case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
+        scale = obj->payload.trackPolygon.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
     default:
@@ -334,16 +334,16 @@ void parUpdateSharedScaleAndDelta(ParKindState *obj) {
 void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
     switch ((u16)work->kind) {
     case 1:
-        parPrependHistorySample(work->value.table, index, color, speed);
+        parPrependHistorySample(work->payload.history.table, index, color, speed);
         return;
     case 2:
-        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem, index, color);
+        parUpdateBillboardCrossStrip((s32)work->payload.crossStrip.drawSystem, index, color);
         return;
     case 3:
-        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system, index, color);
+        parUpdateBillboardCrossTriangle((s32)work->payload.crossTriangle.drawSystem, index, color);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes(work->secondaryDraw.modelList, index, color);
+        parUpdateTrackPolygonCrossAxes(work->payload.trackPolygon.modelList, index, color);
         break;
     }
 }
@@ -351,16 +351,16 @@ void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) 
 void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearHistorySlotPoints((s32)work->value.table);
+        parClearHistorySlotPoints((s32)work->payload.history.table);
         return;
     case 2:
-        parCellInit(work->primaryDrawSystem, index);
+        parCellInit(work->payload.crossStrip.drawSystem, index);
         return;
     case 3:
-        parCellInit(work->secondaryDraw.system, index);
+        parCellInit(work->payload.crossTriangle.drawSystem, index);
         return;
     case 4:
-        effTrackPolyResetIndexedWork(work->secondaryDraw.modelList, index);
+        effTrackPolyResetIndexedWork(work->payload.trackPolygon.modelList, index);
         break;
     }
 }

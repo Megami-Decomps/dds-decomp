@@ -479,37 +479,63 @@ struct ParTable;
 struct ParSystem;
 struct EffTrackPolyList;
 
-/* Kind 1 uses a point-history table; kinds 2..4 use the same word as a
- * floating-point scale. Only those scaled kinds reach the scale accessor. */
+/* The kind tag selects one complete view of the 16-byte payload at +8. */
+typedef struct {
+    struct ParTable *table; /* +8: kind 1 history source */
+    u8 opaque0C[0xC];       /* No other kind-1 payload words are read here. */
+} ParKindHistoryPayload; /* 0x10 */
+
+typedef struct {
+    f32 scale;                      /* +8: shared by kinds 2..4 */
+    void *dispatchParameter;        /* +0xC: kinds 2 and 3 */
+    struct ParSystem *drawSystem;   /* +0x10: kind 2 */
+    u8 opaque14[4];                 /* Kind 2's final word is unobserved. */
+} ParKindCrossStripPayload; /* 0x10 */
+
+typedef struct {
+    f32 scale;                      /* +8: shared by kinds 2..4 */
+    void *dispatchParameter;        /* +0xC: kinds 2 and 3 */
+    u8 opaque10[4];                 /* Kind 3's first system word is unobserved. */
+    struct ParSystem *drawSystem;   /* +0x14: kind 3 */
+} ParKindCrossTrianglePayload; /* 0x10 */
+
+typedef struct {
+    f32 scale;                          /* +8: shared by kinds 2..4 */
+    u32 firstGradientColor;             /* +0xC: kind 4 */
+    u32 secondGradientColor;            /* +0x10: kind 4 */
+    struct EffTrackPolyList *modelList; /* +0x14: kind 4 */
+} ParKindTrackPolygonPayload; /* 0x10 */
+
+typedef union {
+    ParKindHistoryPayload history;
+    ParKindCrossStripPayload crossStrip;
+    ParKindCrossTrianglePayload crossTriangle;
+    ParKindTrackPolygonPayload trackPolygon;
+    u8 opaque[0x10];
+} ParKindPayload;
+
+typedef char ParKindPayload_size_must_be_0x10[
+    (sizeof(ParKindPayload) == 0x10) ? 1 : -1];
+
 typedef struct ParKindState {
-    u16 kind;
+    u16 kind; /* +0: halfword tag; see ParKindStateKind values in par_kind_api.h */
     u8 pad02[2];
     /* Preserve the native int-alias edges; see docs/idioms.md,
      * "Trace-justified alias sets: emitter subrecord count". */
     u32 templateEntryCount : 16; /* 0x04: subrecords per particle in template clones */
     u32 : 16;
-    union {
-        struct ParTable *table;
-        f32 scale;
-    } value;
-    /* 15B330 +DC/+128 use dispatchParameter in kinds 2/3;
-     * +F0/+16C use firstGradientColor in kind 4. */
-    union {
-        void *dispatchParameter;
-        u32 firstGradientColor;
-    };
-    /* 15B330 +E0 stores the kind-2 system; +14C reads kind-4 color. */
-    union {
-        struct ParSystem *primaryDrawSystem;
-        u32 secondGradientColor;
-    };
-    union {
-        struct ParSystem *system;       /* kind 3 */
-        struct EffTrackPolyList *modelList; /* kind 4 */
-    } secondaryDraw;
+    ParKindPayload payload; /* +8: tag-specific pointer/scalar view */
 } ParKindState; /* 0x18 */
 
 typedef char ParKindState_size_must_be_0x18[(sizeof(ParKindState) == 0x18) ? 1 : -1];
+typedef char ParKindState_payload_offset_must_be_0x08[
+    ((u32)&((ParKindState *)0)->payload == 0x08) ? 1 : -1];
+typedef char ParKindCrossStripPayload_system_offset_must_be_0x10[
+    ((u32)&((ParKindState *)0)->payload.crossStrip.drawSystem == 0x10) ? 1 : -1];
+typedef char ParKindCrossTrianglePayload_system_offset_must_be_0x14[
+    ((u32)&((ParKindState *)0)->payload.crossTriangle.drawSystem == 0x14) ? 1 : -1];
+typedef char ParKindTrackPolygonPayload_modelList_offset_must_be_0x14[
+    ((u32)&((ParKindState *)0)->payload.trackPolygon.modelList == 0x14) ? 1 : -1];
 
 /* Each particle kind has constructor, per-frame update and release callbacks. */
 struct ParObj;
