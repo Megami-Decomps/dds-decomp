@@ -19,7 +19,7 @@ s32 kwlnSetDrawColorTarget(s32 blendFrames, void *color);
 void kwlnDrawSetC70FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 s32 kwlnSetBackgroundColorTarget(s32 blendFrames, void *color);
-s32 kwlnSetLightDirectionTarget(s32 arg0, s32 arg1, void *arg2);
+s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
 void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 s32 kwlnDrawSetDc8Second(s32 arg0);
 s32 kwlnDrawSetE08Fifth(s32 arg0);

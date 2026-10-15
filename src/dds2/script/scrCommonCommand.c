@@ -314,7 +314,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412658);
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412668);
 
 const char D_00412688[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
-extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);
 
 s32 scrCommandSetSceneLightDirection(void) {
     ScrVecW direction;
