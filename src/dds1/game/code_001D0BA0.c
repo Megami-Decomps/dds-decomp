@@ -1355,16 +1355,16 @@ void *btlCreateDeferredActorStatsTask(BtlUnit *owner, BtlOperandEntry *spec) {
     return task;
 }
 
-u32 btlApplyDeferredUnitStatus(void *argument) {
-    u32 *args = (u32 *)argument;
+u32 btlApplyDeferredUnitStatus(void *taskArgs) {
+    u32 *taskData = (u32 *)taskArgs;
     s32 context = (s32)(u32)btlGetRuntime();
-    BtlUnit *owner = (BtlUnit *)args[0];
+    BtlUnit *unit = (BtlUnit *)taskData[0];
     if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
         return 1;
     }
-    btlRaisePartyRecordStatusValue(&owner->partyRecord, args[1]);
-    btlRefreshUnitMotionSelection(owner);
-    btlIsUnitDefeatTriggeredByValueDelta(owner, 0);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord, taskData[1]);
+    btlRefreshUnitMotionSelection(unit);
+    btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
 }
 
