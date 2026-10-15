@@ -2647,7 +2647,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         memcpy(&unit->partyRecord, &D_004530C0, sizeof(DatPartyRecord));
         btlRefreshUnitMotionSelection(unit);
         if (unit->status.flags & 0x200) {
-            memcpy(&datGameState->party[unit->unk2E4], &D_004530C0, sizeof(DatPartyRecord));
+            memcpy(&datGameState->party[unit->partyIndex], &D_004530C0, sizeof(DatPartyRecord));
         }
         if (sdfPadButtonStates[3] < 0) {
             battle->debug.unk00 = 2;

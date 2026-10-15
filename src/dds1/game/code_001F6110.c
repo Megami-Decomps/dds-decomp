@@ -654,8 +654,8 @@ void btlUpdateUnitActors(void) {
         if ((btlIsActorModeAcceptedByBattleHook(unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
             btlRefreshUnitMotionSelection(unit);
-            unit->effectTimerA = 0;
-            unit->effectTimerB = 0;
+            unit->motionStartFrame = 0;
+            unit->motionEndFrame = 0;
             btlApplyUnitMotionSelection(unit, unit->effectArgA, unit->effectArgB,
                           unit->effectValue);
         }

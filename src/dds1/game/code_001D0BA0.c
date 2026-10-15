@@ -1526,7 +1526,7 @@ u32 btlAwardHuntExperience(s32 address) {
     }
     if (btlCheckSpecialAbility(&args->actor->partyRecord, 0x24C)) {
         count = 0;
-        record = btlGetIndexedPartyEntryRecord(args->actor->unk2C4);
+        record = btlGetIndexedPartyEntryRecord(args->actor->partyIndex);
         record->huntExp += args->amount;
         head = battle->units;
         for (unit = head; unit != NULL; unit = unit->next) {
@@ -1556,7 +1556,7 @@ u32 btlAwardHuntExperience(s32 address) {
             if (flags & 0x200) {
                 if (flags & 1) {
                     if (args->actor != unit && !(flags & 0x20) && !(unit->partyRecord.status & 0x40)) {
-                        record = btlGetIndexedPartyEntryRecord(unit->unk2C4);
+                        record = btlGetIndexedPartyEntryRecord(unit->partyIndex);
                         record->huntExp += share;
                     }
                 }
@@ -1572,7 +1572,7 @@ u32 btlAwardHuntExperience(s32 address) {
         }
         btlBossDebugPrintf("btl:AUTO ep=%d[%d],count=%d\n", share, args->amount, count);
     } else {
-        record = btlGetIndexedPartyEntryRecord(args->actor->unk2C4);
+        record = btlGetIndexedPartyEntryRecord(args->actor->partyIndex);
         record->huntExp += args->amount;
         btlBossDebugPrintf("btl:hunt ep=%d[%p]\n", args->amount, record);
     }
@@ -2336,7 +2336,7 @@ void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
     dst->transparencyModel = src->transparencyModel;
     dst->effectObject = src->effectObject;
     dst->ext = src->ext;
-    dst->unkCC = 1;
+    dst->modelBorrowed = 1;
     dst->status.flags |= 2;
 }
 
@@ -2375,7 +2375,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
 
     unit->resourceKind = kind;
     unit->species = id;
-    unit->unkCC = 0;
+    unit->modelBorrowed = 0;
     btlInitializeEffectVectorsFromSourceRecords(unit, kind, id);
     if (battle->findReusableUnit) {
         reused = battle->findReusableUnit(kind, id);
@@ -2414,9 +2414,9 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
     btlSetUnitPosition(unit, unit->position);
     btlSetUnitRotation(unit, unit->rotation);
     unit->updateFlags = 0;
-    unit->effectTimerA = 0;
+    unit->motionStartFrame = 0;
     unit->unkEC = -1;
-    unit->effectTimerB = 0;
+    unit->motionEndFrame = 0;
     btlRefreshUnitMotionSelection(unit);
     if (unit->effectArgA != 0xB) {
         btlApplyScaledUnitEffectParameter((u8 *)unit, unit->effectArgA, 1, 1.0f);
@@ -2647,8 +2647,8 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         case 11:
             mode = 2;
         case 0: case 2: case 9: case 10:
-            start = unit->effectTimerA;
-            end = unit->effectTimerB;
+            start = unit->motionStartFrame;
+            end = unit->motionEndFrame;
             break;
         case 1: case 18:
             start = 0;
@@ -2680,8 +2680,8 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     }
     keepRange = *(s32 (**)(BtlUnit *, s32))(context + 0x5A8);
     if (keepRange != 0 && keepRange(unit, index) != 0) {
-        start = unit->effectTimerA;
-        end = unit->effectTimerB;
+        start = unit->motionStartFrame;
+        end = unit->motionEndFrame;
     }
     if (mode & 0x100) {
         end = 8;
@@ -2699,15 +2699,15 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         mdlAddEntryFlagged(model, 0, index);
         sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
     }
-    unit->effectTimerA = 0;
+    unit->motionStartFrame = 0;
     frameCount = table->nodes[index].frameCount;
-    unit->effectTimerB = frameCount;
+    unit->motionEndFrame = frameCount;
     if (mode != 0 && mode != 3) {
         return;
     }
     evtStoreUnitMotionShortParameters(unit->ext, 0, (s16)frameCount);
-    unit->effectTimerA = 0;
-    unit->effectTimerB = table->nodes[unit->effectArgA].frameCount;
+    unit->motionStartFrame = 0;
+    unit->motionEndFrame = table->nodes[unit->effectArgA].frameCount;
 }
 
 void btlRefreshUnitMotionSelection(BtlUnit *unit) {
@@ -3293,7 +3293,7 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     if (unit->transparencyModel != 0) {
         return;
     }
-    if (unit->unkCC != 0) {
+    if (unit->modelBorrowed != 0) {
         return;
     }
     shape = unit->ext->owner->sub;
@@ -3313,7 +3313,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
     u32 alpha;
 
     if (flags & 2) {
-        if (unit->unkCC == 0) {
+        if (unit->modelBorrowed == 0) {
             color = unit->overlayColor;
             info = unit->ext->owner;
             alpha = color >> 24;
@@ -3359,13 +3359,13 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     if ((unit->status.flags & 2) == 0) {
         return;
     }
-    if (unit->unkCC != 0) {
+    if (unit->modelBorrowed != 0) {
         return;
     }
-    unit->mirror->unk32C = sdfAllocPacketAligned(0x70000);
+    unit->mirror->transparencyBuffer = sdfAllocPacketAligned(0x70000);
     list = sdfAllocatePacketList(0);
     sdfCreateResourcePacket(list, D_003980E0.buffers[2],
-                            0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
+                            0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0, 0, 0);
     D_00359D20[0]->append(D_00359D20[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
@@ -3382,7 +3382,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     }
     list = sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(list, D_003980E0.buffers[2],
-                              0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
+                              0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0);
     D_00359D30[0]->append(D_00359D30[0], list);
     btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
@@ -3892,9 +3892,9 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             unit->mirror = btlCreateUnit();
             unit->mirror->status.flags |= 0x40000;
             btlInheritActorModelState(unit->mirror, unit);
-            if (unit->unkCC == 0) {
-                unit->mirror->unkCC = 0;
-                unit->unkCC = 1;
+            if (unit->modelBorrowed == 0) {
+                unit->mirror->modelBorrowed = 0;
+                unit->modelBorrowed = 1;
             }
             btlSetUnitPosition(unit->mirror, unit->currentPosition);
             btlSetUnitRotation(unit->mirror, unit->orientation);
@@ -3998,10 +3998,10 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         if (unit->mirror != NULL) {
             btlDestroyUnit((u8 *)unit->mirror);
             unit->mirror = NULL;
-            if (unit->unk330 != 0) {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk330);
-                unit->unk330 = 0;
-                unit->unk32C = 0;
+            if (unit->transparencyBufferAllocation != 0) {
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->transparencyBufferAllocation);
+                unit->transparencyBufferAllocation = 0;
+                unit->transparencyBuffer = 0;
             }
         }
         btlBossDebugPrintf("btl:model change end[%X,%X]\n", resourceKind, resourceId);
@@ -4869,8 +4869,8 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
         } else {
             args->previousModelValue = unit->unkEC;
         }
-        unit->effectTimerA = 0;
-        unit->effectTimerB = 1;
+        unit->motionStartFrame = 0;
+        unit->motionEndFrame = 1;
         btlApplyScaledUnitEffectParameter(unit, args->index, args->value, args->scale);
     } else {
         if (unit != target) {
@@ -5011,7 +5011,7 @@ void btlUpdateActorModelColorAndLinks(void) {
 
 void btlResetUnitLinks(BtlUnit *actor) {
     actor->selectedEntryIndex = -1;
-    actor->unk2F4 = -1;
+    actor->pendingAbilityId = -1;
     actor->status.flags = 0;
     actor->status.stateFlags = 0;
     actor->gunResourceFlags = 0;
@@ -5031,7 +5031,7 @@ BtlUnit *btlCreateUnit(void) {
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
     unit->lookupId = unit->selectedEntryIndex = -1;
-    unit->unk2C4 = 6;
+    unit->partyIndex = 6;
     unit->gunResourceFlags = 0;
     unit->effectLink.referenceCount = 0;
     unit->resourceNode = 0;
@@ -5079,10 +5079,10 @@ void btlReleaseUnitResources(BtlUnit *unit) {
         unit->listNode = 0;
     }
     btlReleaseActorModelResources(unit);
-    if (unit->unk330 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk330);
-        unit->unk330 = 0;
-        unit->unk32C = 0;
+    if (unit->transparencyBufferAllocation != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->transparencyBufferAllocation);
+        unit->transparencyBufferAllocation = 0;
+        unit->transparencyBuffer = 0;
     }
 }
 
