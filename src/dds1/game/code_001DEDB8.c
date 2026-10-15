@@ -1423,9 +1423,152 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E20C0);
+extern f32 tanf(f32);
 
-extern void func_001E20C0(BtlLinkedCommand *, BtlCamState *, s32, f32 *, f32, f32);
+void btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState *camera, s32 mask,
+                   f32 *direction, f32 distance, f32 xOffset) {
+    BtlUnit *unit;
+    BtlUnit *leftActor = 0;
+    BtlUnit *rightActor = 0;
+    BtlState *state = (BtlState *)btlGetRuntime();
+    f32 point[4] __attribute__((aligned(16)));
+    f32 leftPoint[4] __attribute__((aligned(16)));
+    f32 rightPoint[4] __attribute__((aligned(16)));
+    f32 planePoint[4] __attribute__((aligned(16)));
+    f32 height;
+    f32 halfFov;
+    f32 projected;
+    f32 tangent;
+    f32 lowerDistance;
+    f32 upperDistance;
+    f32 y;
+    f32 pointDistance;
+
+    for (unit = state->units; unit != 0; unit = unit->next) {
+        u32 flags = (u32)unit->status.flags;
+        if (flags & 1) {
+            if ((flags & 0xC0) == 0) {
+                if (flags & (u32)mask) {
+                    btlUnitGetMuzzlePosVU(unit);
+                    VU0_STORE_VF_TO_MEMORY(vf10, *(PcpVectorCopyF32 *)point);
+                    if (!leftActor) {
+                        leftActor = unit;
+                        VU0_STORE_VF_UNCLOBBERED(vf10, leftPoint);
+                        rightActor = unit;
+                        VU0_STORE_VF(vf10, rightPoint);
+                    } else {
+                        f32 pointX = point[0];
+                        if ((u32)unit->status.flags & 0x200) {
+                            if (pointX < leftPoint[0]) {
+                                leftActor = unit;
+                                PCP_COPY_VECTOR_F32(leftPoint, point);
+                            }
+                            if (rightPoint[0] < pointX) {
+                                rightActor = unit;
+                                PCP_COPY_VECTOR_F32(rightPoint, point);
+                            }
+                        } else {
+                            if (leftPoint[0] < pointX) {
+                                leftActor = unit;
+                                PCP_COPY_VECTOR_F32(leftPoint, point);
+                            }
+                            if (pointX < rightPoint[0]) {
+                                rightActor = unit;
+                                PCP_COPY_VECTOR_F32(rightPoint, point);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    rightPoint[1] = 0.0f;
+    leftPoint[1] = 0.0f;
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(mask);
+    halfFov = command->camera.fov;
+    camera->fov = halfFov;
+    halfFov *= 0.5f;
+    projected = btlMeasureMaskedUnitBounds(mask, &height, 0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, camera->position);
+    camera->position[2] *= 0.75f;
+    camera->position[1] = -(height * 0.5f);
+
+    if (mask & 0x200) {
+        if (direction[0] < 0.0f) {
+            camera->position[0] += projected * xOffset;
+        } else {
+            camera->position[0] -= projected * xOffset;
+        }
+        if (projected < 350.0f) {
+            rightPoint[0] = 350.0f - rightActor->reach * rightActor->scale;
+            leftPoint[0] = -(350.0f - leftActor->reach * leftActor->scale);
+        }
+    } else {
+        if (direction[0] > 0.0f) {
+            camera->position[0] += projected * xOffset;
+        } else {
+            camera->position[0] -= projected * xOffset;
+        }
+        if (projected < 350.0f) {
+            rightPoint[0] = -(350.0f - rightActor->reach * rightActor->scale);
+            leftPoint[0] = 350.0f - leftActor->reach * leftActor->scale;
+        }
+    }
+
+    y = -camera->position[1];
+    if (y < distance) {
+        camera->position[1] = -distance;
+    } else {
+        distance = y;
+    }
+
+    VU0_LOAD_VF(vf10, camera->position);
+    VU0_LOAD_VF(vf11, direction);
+    VU0_STORE_VF(vf11, camera->direction);
+    VU0_SCALE_VF(vf11, -500.0f);
+    VU0_ADD(vf11, vf11, vf10);
+    VU0_STORE_VF(vf11, planePoint);
+
+    if (((mask & 0x200) && planePoint[0] > 0.0f) ||
+        ((mask & 0x400) && planePoint[0] < 0.0f)) {
+        unit = leftActor;
+        leftActor = rightActor;
+        rightActor = unit;
+        VU0_LOAD_VF(vf10, leftPoint);
+        VU0_LOAD_VF(vf11, rightPoint);
+        VU0_STORE_VF(vf11, leftPoint);
+        VU0_STORE_VF(vf10, rightPoint);
+    }
+
+    projected = btlProjectOnPlaneVU(camera->position, planePoint, leftPoint);
+    VU0_STORE_VF(vf10, camera->position);
+    projected += leftActor->reach * leftActor->scale * 1.5f;
+    tangent = tanf(halfFov * 0x1.555554p+0f);
+    projected /= tangent;
+    upperDistance = distance / tanf(halfFov);
+    lowerDistance = upperDistance < projected ? projected : upperDistance;
+
+    projected = btlProjectOnPlaneVU(camera->position, planePoint, rightPoint);
+    projected += rightActor->reach * rightActor->scale * 1.5f;
+    VU0_LOAD_VF(vf11, camera->position);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(pointDistance);
+    xOffset = -pointDistance;
+    tangent = tanf(halfFov * 0x1.555554p+0f);
+    projected /= tangent;
+    upperDistance = distance / tanf(halfFov);
+    xOffset += upperDistance < projected ? projected : upperDistance;
+    if (lowerDistance < xOffset) {
+        camera->distance = xOffset;
+    } else {
+        camera->distance = lowerDistance;
+    }
+    btlAdjustCameraDirectionForDefaultPlane(camera);
+}
+
+extern void btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32 *, f32, f32);
 
 extern f32 D_003A4310[4];
 
@@ -1482,7 +1625,7 @@ void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamStat
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, direction);
     distance = scale * poses[pose].fromDistance;
-    func_001E20C0(action, from, groups, direction, distance, 0.0f);
+    btlBuildMaskedGroupFramingCameraPose(action, from, groups, direction, distance, 0.0f);
     VU0_LOAD_VF(vf10, poses[pose].toQuat);
     if (groups & 0x400) {
         VU0_LOAD_VF(vf11, D_003A4310);
@@ -1494,9 +1637,9 @@ void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamStat
     VU0_STORE_VF(vf10, direction);
     distance = scale * poses[pose].toDistance;
     if (animationFlags & 0x200) {
-        func_001E20C0(action, to, groups, direction, distance, 0.0f);
+        btlBuildMaskedGroupFramingCameraPose(action, to, groups, direction, distance, 0.0f);
     } else {
-        func_001E20C0(action, to, groups, direction, distance, -0x1.333332p-3f);
+        btlBuildMaskedGroupFramingCameraPose(action, to, groups, direction, distance, -0x1.333332p-3f);
     }
     action->flags |= 0x41;
     action->motionParameter = poses[pose].parameter;
