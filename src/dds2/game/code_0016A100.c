@@ -24,11 +24,11 @@
 #define EFF_VIEWER_RESOURCE_GROUP 7
 #define EFF_VIEWER_LOAD_FLAGS 0x101
 
-extern u8 D_003B0180[];
+extern u8 effModelDefaultPosition[];
 
-extern u8 D_003B0190[];
+extern u8 effModelDefaultQuaternion[];
 
-extern u8 D_003B01A0[];
+extern u8 effModelDefaultScale[];
 
 
 
@@ -320,11 +320,11 @@ void effParamDispatchFloat(void *payload, f32 value) {
 /* Load the default primary/rotation/tertiary vectors and packed broadcast value.
  * Reset the first motion node's float to 1.0f, then clear flag bit zero. */
 void effParamInitWork(MdlCtx *work) {
-    VU0_LOAD_VF(vf10, &D_003B0180);
+    VU0_LOAD_VF(vf10, &effModelDefaultPosition);
     mdlStorePrimaryVectorVU(work);
-    VU0_LOAD_VF(vf10, &D_003B0190);
+    VU0_LOAD_VF(vf10, &effModelDefaultQuaternion);
     mdlUpdateContextRotationBasisFromQuaternion(work);
-    VU0_LOAD_VF(vf10, &D_003B01A0);
+    VU0_LOAD_VF(vf10, &effModelDefaultScale);
     mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);
     if (work->first != NULL) {
@@ -411,7 +411,7 @@ void effParamSetModelColor(void *work, u32 color) {
     mdlBroadcastMasked(work, color);
 }
 
-extern void **D_003AFFD0[];
+extern void **effParameterPresetBanks[];
 extern u32 effParamDescriptorGetKind(const u32 *descriptor);
 extern u32 effParamDescriptorGetTableIndex(const u32 *descriptor);
 
@@ -424,7 +424,7 @@ EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     work->kind = effParamDescriptorGetKind(source);
     work->tableIndex = effParamDescriptorGetTableIndex(source);
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {
-        work->payload = effParameterWorkOperations[work->kind].create(D_003AFFD0[work->kind][work->tableIndex]);
+        work->payload = effParameterWorkOperations[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
     } else {
         work->payload = effParameterWorkOperations[work->kind].create(source);
     }
@@ -450,7 +450,7 @@ EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *source) {
     work->kind = source->kind;
     work->tableIndex = source->tableIndex;
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {
-        work->payload = effParameterWorkOperations[work->kind].create(D_003AFFD0[work->kind][work->tableIndex]);
+        work->payload = effParameterWorkOperations[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
     } else {
         work->payload = effParameterWorkOperations[work->kind].duplicate(source->payload);
     }

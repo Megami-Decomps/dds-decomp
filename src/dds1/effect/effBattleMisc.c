@@ -16,7 +16,7 @@ extern s32 effBTLFieldColorGetVariantSelector(void);
 extern s32 effBTLFieldColorGetOriginalSelector(void);
 
 
-extern u32 D_0034E720[];
+extern u32 effBattleTransitionDurations[];
 
 extern void (*effBattlePositionCallbacks[])();
 
@@ -361,5 +361,5 @@ void effBattleMiscBuildBasis(EffectVectorRequest *request, u128 *out) {
 }
 
 u32 effBattleMiscGetTableEntry(s32 index) {
-    return D_0034E720[index];
+    return effBattleTransitionDurations[index];
 }
