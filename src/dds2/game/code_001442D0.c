@@ -1,4 +1,5 @@
 #include "fld_label_rows.h"
+#include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fld_area_work.h"

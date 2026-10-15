@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_channel.h"
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
@@ -135,7 +136,6 @@ extern void mnuShopReleaseWindowAndEffectResources();
 
 extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
 
-extern s32 dspCloseChannel(void);
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 

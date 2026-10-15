@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
 #include "fld_mix_lb.h"
@@ -156,7 +157,6 @@ extern struct FileRequest *D_003BAFE8;
 extern u32 D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
-extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void *effObjCreateEventNode(void *, f32 *, f32 *);
 extern void effObjClearFlags(void *, s32);

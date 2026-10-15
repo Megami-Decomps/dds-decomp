@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "dsp_active_api.h"
 #include "mnu_camp_display.h"
 #include "mnu_camp_font_api.h"
@@ -1382,7 +1383,6 @@ ShopScene *mnuShopCreateScene(void) {
     return obj;
 }
 
-extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
 
 void mnuShopDestroyScene(KwlnTask *arg) {

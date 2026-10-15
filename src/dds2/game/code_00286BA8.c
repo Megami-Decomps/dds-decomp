@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "mnu_mantra.h"
 #include "snd_sequence_volume_pan.h"
@@ -75,7 +76,6 @@ extern void mnuCloseCurrentProfilePanel(MenuProgressHost *);
 
 extern void mnuReleaseMantraMenuDrawResources(MnuStatusResource *);
 
-extern s32 dspCloseChannel(void);
 extern SdfTaskItemDesc D_003CFCD4;
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
