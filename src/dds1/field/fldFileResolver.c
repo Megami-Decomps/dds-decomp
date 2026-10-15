@@ -579,7 +579,7 @@ extern s32 btlUpdateRuntimeFadeState(void);
 extern void btlClearRuntimeState(void);
 extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
                                                       f32 *targetPositionOut);
-extern f32 sdfAtan2(f32 arg0, f32 arg1);
+extern f32 sdfAtan2(f32 y, f32 x);
 extern struct FileRequest *fldAreaLoadRequest;
 extern u8 D_003BACE0[];
 extern u8 D_003BACE8[];
