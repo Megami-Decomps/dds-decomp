@@ -175,9 +175,9 @@ extern void fldPlayFieldSe(s32 soundId);
 
 extern s32 fldPollArchiveLoad(s32 archiveId);
 
-extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
+extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
-extern void fldPlayArchiveSound(s32 param0, s32 param1);
+extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
@@ -1681,18 +1681,18 @@ u8 fldCommandLoadArchive(void) {
 }
 
 s32 fldCmdSetArchiveSoundVolumePan(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
+    s32 sequenceGroup = scrReadIntParameter(0);
+    s32 sequenceIndex = scrReadIntParameter(1);
 
-    fldSetArchiveSoundVolumePan(param0, param1);
+    fldSetArchiveSoundVolumePan(sequenceGroup, sequenceIndex);
     return 1;
 }
 
 s32 fldCmdPlayArchiveSound(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
+    s32 sequenceGroup = scrReadIntParameter(0);
+    s32 sequenceIndex = scrReadIntParameter(1);
 
-    fldPlayArchiveSound(param0, param1);
+    fldPlayArchiveSound(sequenceGroup, sequenceIndex);
     return 1;
 }
 

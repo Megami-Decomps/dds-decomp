@@ -270,9 +270,9 @@ extern void fldPlayFieldSe(s32 soundId);
 
 extern s32 fldPollArchiveLoad(s32 archiveId);
 
-extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
+extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
-extern void fldPlayArchiveSound(s32 param0, s32 param1);
+extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 

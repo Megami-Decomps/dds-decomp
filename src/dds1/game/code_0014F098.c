@@ -29,15 +29,15 @@ extern void fldReleaseCurrentBgm(void);
 
 extern void fldPlayCurrentBgmSound(void);
 
-extern void fldPlayFieldSeVolumePan(s32 param);
+extern void fldPlayFieldSeVolumePan(s32 soundId);
 
 extern void fldPlayFieldSe(s32 soundId);
 
 extern s32 fldPollArchiveLoad(s32 archiveId);
 
-extern void fldSetArchiveSoundVolumePan(s32 param0, s32 param1);
+extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
-extern void fldPlayArchiveSound(s32 param0, s32 param1);
+extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
 
 extern void fldInitializeHuntSparkUnit(struct EvtUnit *unit);
 
