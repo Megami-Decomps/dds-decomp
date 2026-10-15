@@ -167,7 +167,7 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, co
 
     linearIndex = rowBase + writeIndex;
     newSlot = work->positions + linearIndex;
-    scalarOutput = work->unk1C + linearIndex;
+    scalarOutput = work->historyScalars + linearIndex;
     PCP_COPY_VECTOR(newSlot, vector);
     angleRow = work->angleRows[index];
 
