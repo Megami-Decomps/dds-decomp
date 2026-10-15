@@ -2747,7 +2747,7 @@ s32 btlIsSpecialActionKind(BtlLinkedCommand *command) {
     }
 }
 
-u32 btlGetEffectActive(void) {
+u8 btlGetEffectActive(void) {
     s32 battle;
     s32 effect;
 

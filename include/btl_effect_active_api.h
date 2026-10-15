@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-u32 btlGetEffectActive(void);
+u8 btlGetEffectActive(void);
 
 #endif

@@ -1174,7 +1174,7 @@ s32 btlAdvanceMarkedLinkedActionCamera(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 btlGetEffectActive(void) {
+u8 btlGetEffectActive(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 battleId = battle->battleMode;
     BattleEffectPayload *state;
