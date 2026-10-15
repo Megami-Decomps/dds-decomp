@@ -350,7 +350,7 @@ s32 btlRunAiAction(BtlTask *task, s32 id, u32 packed) {
     func_001FFE30(task, id & 0xffff, &lookup.slot, &lookup.result);
     task->indexWork.phase = lookup.result;
     task->indexWork.skillId = lookup.slot;
-    task->unit->partyRecord.unk190 = lookup.slot;
+    task->unit->partyRecord.actionSlot = lookup.slot;
     btlAiActionHandlers[op](task, payload, lookup.result);
     return 1;
 }
@@ -1193,7 +1193,7 @@ s32 btlAnyEnemyActionMatchesSelector(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
-            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
+            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.actionSlot, 0) != 0) {
                 return 1;
             }
         }
@@ -1207,7 +1207,7 @@ s32 btlAnyPartyActionMatchesSelector(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if ((btlUnitStatusPair(unit) & 0x221) == 0x201) {
-            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.unk190, 0) != 0) {
+            if (btlActionMatchesStatMask(action, (s16)((BtlUnit *)unit)->partyRecord.actionSlot, 0) != 0) {
                 return 1;
             }
         }
