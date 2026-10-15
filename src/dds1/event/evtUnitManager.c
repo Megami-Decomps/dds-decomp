@@ -665,8 +665,8 @@ void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColo
 }
 
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from evtLoadUnitDirectionVectorVU to vec20 */
-void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
-    unit->directionMode = arg;
+void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 directionMode) {
+    unit->directionMode = directionMode;
     VU0_CLEAR_W(vf10);
     VU0_NORMALIZE_VF10();
         VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
