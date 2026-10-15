@@ -1695,7 +1695,6 @@ extern f32 D_003BAF18;
 extern f32 D_00329790[4][4];
 extern f32 sdfViewMatrix[4][4];
 extern void sdfInvertScaledVuTransform(void);
-extern void sdfConsCacheTransformedNode(SdfProjectionRecord *, void *);
 extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
 
 void fldDrawFieldBackdropFrame(void) {
