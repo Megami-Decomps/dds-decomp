@@ -2192,10 +2192,10 @@ typedef struct BtlParameterEditor {
 typedef char BtlParameterEditorRowSize[sizeof(BtlParameterEditorRow) == 0x18 ? 1 : -1];
 
 extern DatPartyRecord *D_003BAA04;
-extern s32 D_003612F0[];
-extern s32 D_00361310[];
-extern BtlParameterEditor D_003615E0, D_00361660, D_00361728, D_00361A00;
-extern BtlParameterEditorRow D_00361760[];
+extern s32 btlDebugModelEditorActionNames[];
+extern s32 btlDebugModelMotionNames[];
+extern BtlParameterEditor btlDebugPartyRecordEditor, btlDebugPositionEditor, btlDebugTransformEditor, btlDebugActorStatusEditor;
+extern BtlParameterEditorRow btlDebugActorStatusEditorRows[];
 extern s16 D_003BB93E;
 extern BtlUnit *D_003BB940;
 extern u16 D_003BBA08;
@@ -2299,7 +2299,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             state->debug.phase = 10;
         }
         mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)256, 100,
-            &state->debug.actionMenu, D_003612F0);
+            &state->debug.actionMenu, btlDebugModelEditorActionNames);
         break;
     case 3:
         unit = state->debug.selectedUnit;
@@ -2370,9 +2370,9 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         btlDebugEditorEntryCodes[5] = unit->entrySlots[5].code;
         btlDebugEditorEntryCodes[6] = unit->entrySlots[6].code;
         btlDebugEditorSelectedEntryIndex = unit->selectedEntryIndex;
-        btlDebugMenuSetupNoOp(&D_003615E0);
+        btlDebugMenuSetupNoOp(&btlDebugPartyRecordEditor);
         btlDebugMenuBeforeRecordNoOp();
-        btlDebugMenuRecordNoOp(&D_003615E0);
+        btlDebugMenuRecordNoOp(&btlDebugPartyRecordEditor);
         btlDebugMenuAfterRecordNoOp();
         btlDrawUnitAffinityDebug(unit, 256, 32);
         if (sdfPadButtonStates[0] & 2) {
@@ -2432,7 +2432,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 btlGetUnitModelFrameCount(unit));
             btlDebugDrawText(32, 400, 0, text);
         }
-        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, &state->debug.motionMenu, D_00361310);
+        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, &state->debug.motionMenu, btlDebugModelMotionNames);
         break;
     case 6:
         unit = state->debug.selectedUnit;
@@ -2455,9 +2455,9 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             state->debug.phase = 2;
         } else {
             PCP_COPY_VECTOR(btlDebugEditorPosition.value, unit->position);
-            btlDebugMenuSetupNoOp(&D_00361660);
+            btlDebugMenuSetupNoOp(&btlDebugPositionEditor);
             btlDebugMenuBeforeRecordNoOp();
-            btlDebugMenuRecordNoOp(&D_00361660);
+            btlDebugMenuRecordNoOp(&btlDebugPositionEditor);
             btlDebugMenuAfterRecordNoOp();
             PCP_COPY_VECTOR(unit->position, btlDebugEditorPosition.value);
             btlSetUnitPosition(unit, unit->position);
@@ -2481,9 +2481,9 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                     transform->position[2] = record->position[2];
                 }
                 memcpy(&btlDebugEditorTransformParameters, transform, sizeof(BtlActorTransformParameters));
-                btlDebugMenuSetupNoOp(&D_00361728);
+                btlDebugMenuSetupNoOp(&btlDebugTransformEditor);
                 btlDebugMenuBeforeRecordNoOp();
-                btlDebugMenuRecordNoOp(&D_00361728);
+                btlDebugMenuRecordNoOp(&btlDebugTransformEditor);
                 btlDebugMenuAfterRecordNoOp();
                 memcpy(transform, &btlDebugEditorTransformParameters, sizeof(btlDebugEditorTransformParameters));
                 state->battleFlags |= 0x400000;
@@ -2503,42 +2503,42 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
         memcpy(&btlDebugEditorActorStatus, record, sizeof(btlDebugEditorActorStatus));
         memcpy(&btlDebugEditorMotionSlot, &record->motions[D_003BBA08], sizeof(btlDebugEditorMotionSlot));
-        btlDebugMenuSetupNoOp(&D_00361A00);
+        btlDebugMenuSetupNoOp(&btlDebugActorStatusEditor);
         btlDebugMenuBeforeRecordNoOp();
-        btlDebugMenuRecordNoOp(&D_00361A00);
+        btlDebugMenuRecordNoOp(&btlDebugActorStatusEditor);
         btlDebugMenuAfterRecordNoOp();
         memcpy(record, &btlDebugEditorActorStatus, sizeof(btlDebugEditorActorStatus));
-        if (D_00361760[D_00361A00.selected].target != &D_003BBA08) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target != &D_003BBA08) {
             memcpy(&record->motions[D_003BBA08], &btlDebugEditorMotionSlot, sizeof(btlDebugEditorMotionSlot));
         }
-        mnuQueueColoredGlyphAtPosition(D_003615E0.x,
-            D_003615E0.y + D_003615E0.rowCount * 10 + 4, D_00361310[D_003BBA08]);
-        if (D_00361760[D_00361A00.selected].target == &btlDebugEditorActorStatus.unk20) {
+        mnuQueueColoredGlyphAtPosition(btlDebugPartyRecordEditor.x,
+            btlDebugPartyRecordEditor.y + btlDebugPartyRecordEditor.rowCount * 10 + 4, btlDebugModelMotionNames[D_003BBA08]);
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.unk20) {
             state->battleFlags |= 0x800000;
         } else {
             state->battleFlags &= ~0x800000;
         }
-        if (D_00361760[D_00361A00.selected].target == &btlDebugEditorActorStatus.unk24) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.unk24) {
             btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->unk24 * unit->scale);
         }
-        if ((D_00361760[D_00361A00.selected].target >= (void *)btlDebugEditorActorStatus.position &&
-             D_00361760[D_00361A00.selected].target < (void *)&btlDebugEditorActorStatus.scale) ||
-            D_00361760[D_00361A00.selected].target == &btlDebugEditorActorStatus.height ||
-            D_00361760[D_00361A00.selected].target == &btlDebugEditorActorStatus.reach) {
+        if ((btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target >= (void *)btlDebugEditorActorStatus.position &&
+             btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target < (void *)&btlDebugEditorActorStatus.scale) ||
+            btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.height ||
+            btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.reach) {
             state->unk_1FC |= 0x200;
         } else {
             state->unk_1FC &= ~0x200;
         }
-        if (D_00361760[D_00361A00.selected].target == &btlDebugEditorMotionSlot.unk0C) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorMotionSlot.unk0C) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.unk0C * btlDebugEditorActorStatus.scale);
         }
-        if (D_00361A00.flags & 8) {
+        if (btlDebugActorStatusEditor.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
-            if (D_00361760[D_00361A00.selected].target != &btlDebugEditorActorStatus.model) {
+            if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target != &btlDebugEditorActorStatus.model) {
                 unit->status.flags &= 0x7FFFFFFF;
                 unit->status.flags &= ~0x2000;
                 motion = D_003BBA08;
@@ -2575,7 +2575,7 @@ extern BtlUnit *D_003BB940;
 
 extern BtlActorStatusRecord btlDebugEditorActorStatus;
 
-extern const char *D_00361388[12];
+extern const char *btlDebugModelTableLabels[12];
 
 extern char D_003BBAB8[];
 
@@ -2630,21 +2630,21 @@ void btlWriteActorModelTableFile(void) {
     buffer = sdfAllocateBlockBySizeThreshold(10000);
     cursor = buffer;
     if (unit->status.flags & 0x200) {
-        cursor += sprintf(cursor, D_003BBAB8, D_00361388[0]);
+        cursor += sprintf(cursor, D_003BBAB8, btlDebugModelTableLabels[0]);
     } else {
-        cursor += sprintf(cursor, D_003BBAB8, D_00361388[1]);
+        cursor += sprintf(cursor, D_003BBAB8, btlDebugModelTableLabels[1]);
     }
     cursor += sprintf(cursor, "ID:0x%X\n", unit->species);
-    cursor += sprintf(cursor, "%s: %.2f,%.2f,%.2f\n", D_00361388[2],
+    cursor += sprintf(cursor, "%s: %.2f,%.2f,%.2f\n", btlDebugModelTableLabels[2],
                             (double)btlDebugEditorActorStatus.position[0], (double)btlDebugEditorActorStatus.position[1],
                             (double)btlDebugEditorActorStatus.position[2]);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[3], (double)btlDebugEditorActorStatus.scale);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[4], (double)btlDebugEditorActorStatus.z);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[5], (double)btlDebugEditorActorStatus.reach);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[6], (double)btlDebugEditorActorStatus.height);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[7], (double)btlDebugEditorActorStatus.unk20);
-    cursor += sprintf(cursor, "%s: %.2f\n", D_00361388[8], (double)btlDebugEditorActorStatus.unk24);
-    cursor += sprintf(cursor, D_003BBAC0, D_00361388[9]);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[3], (double)btlDebugEditorActorStatus.scale);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[4], (double)btlDebugEditorActorStatus.z);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[5], (double)btlDebugEditorActorStatus.reach);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[6], (double)btlDebugEditorActorStatus.height);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[7], (double)btlDebugEditorActorStatus.unk20);
+    cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[8], (double)btlDebugEditorActorStatus.unk24);
+    cursor += sprintf(cursor, D_003BBAC0, btlDebugModelTableLabels[9]);
     switch (btlDebugEditorActorStatus.shadowKind) {
     case 0: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_NON"); break;
     case 1: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_S"); break;
@@ -2652,8 +2652,8 @@ void btlWriteActorModelTableFile(void) {
     case 3: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_L"); break;
     case 4: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_LL"); break;
     }
-    cursor += sprintf(cursor, D_003BBAC8, D_00361388[10], btlDebugEditorActorStatus.model);
-    cursor += sprintf(cursor, D_003BBAD0, D_00361388[11]);
+    cursor += sprintf(cursor, D_003BBAC8, btlDebugModelTableLabels[10], btlDebugEditorActorStatus.model);
+    cursor += sprintf(cursor, D_003BBAD0, btlDebugModelTableLabels[11]);
     rowCursor = (u8 *)record;
     for (i = 0; i < 29; i++) {
         motion = (BtlActorMotionSlot *)(rowCursor + 0x2C);
