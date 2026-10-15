@@ -13,6 +13,7 @@ struct FileNode;
 struct FileQueue;
 struct FileRequest;
 struct FileCbNode;
+struct FilePacRequest;
 struct SdfMemBlock;
 
 /* File-job buffer offsets are relative to the job unless allocation is retained. */
@@ -187,7 +188,7 @@ typedef struct FileManWork {
     struct FileNode *head;    /* 0x08: queued requests, linked through +0x4 */
     struct FileNode *tail;    /* 0x0C */
     struct FileCbNode *done;  /* 0x10: completed callbacks */
-    void *unk14;              /* 0x14 */
+    struct FilePacRequest *pacCallbackHead; /* 0x14: queued PAC completion callbacks */
     u32 unk18;                /* 0x18 */
     u8 *buffer;               /* 0x1C: retained base of the four device-read slots */
     FileManSlot slots[4];     /* 0x20 */
