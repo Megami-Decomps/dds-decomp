@@ -1,4 +1,5 @@
 #include "evt_message_window_api.h"
+#include "dsp_message_window_api.h"
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "kwln.h"
@@ -19,8 +20,6 @@ extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
 extern void mnuApplyFadeTrackMode(s32, struct MenuSlotState *);
 #include "dds3_world_secondary.h"
 extern void mnuDrawTerminalBackdrop(s32);
-
-extern void dspRequestMessageWindowModeOne(void);
 
 
 
