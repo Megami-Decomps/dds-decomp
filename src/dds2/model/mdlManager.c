@@ -391,7 +391,7 @@ extern u8 D_0037F660[];
 
 
 
-extern Motion *mdlFindNodeById(MdlCtx *, s32);
+extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId);
 
 
 
@@ -924,10 +924,10 @@ void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLea
         ctx, searchId, motionIndex, MDL_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
-Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
+Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId) {
     Motion *node;
     for (node = ctx->inner->motionList; node != NULL; node = node->next) {
-        if (node->searchId == id) {
+        if (node->searchId == searchId) {
             return node;
         }
     }
