@@ -89,7 +89,6 @@ extern char D_003AF418[]; /* "camp_draw" */
 
 extern char D_003AF428[]; /* "camp_update" */
 
-extern void evtFormatTaskName(s32 taskId, void *name);
 extern void *memset(void *dst, s32 c, u32 n);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
