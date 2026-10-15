@@ -67,7 +67,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
     if (index != 0) {
         do {
             i++;
-            entries->value = 0x80808080;
+            entries->color = 0x80808080;
             entries++;
         } while (i < index);
     }
@@ -122,7 +122,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
             effResourceDrawParams.normals = work->normals;
             remaining = work->vertexCount;
         }
-        effResourceDrawParams.color = entry->value;
+        effResourceDrawParams.color = entry->color;
         effResourceDrawParams.parameterCount = 16;
         effResourceDrawParams.vertexCount = 48;
         while (remaining >= 48) {
@@ -242,7 +242,7 @@ void effGetResourceEntryPosition(EffResourceWork *effect, s32 index, f32 *vec) {
 }
 
 void effSetResourceEntryValue(EffResourceWork *effect, s32 index, u32 value) {
-    effect->entries[index].value = value;
+    effect->entries[index].color = value;
 }
 
 /* vu0 routine: copy a 0x40-byte matrix from src to dst through vf28-vf31 */

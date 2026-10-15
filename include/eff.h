@@ -639,7 +639,7 @@ void effReleaseBufferAllocation(EffectBufferTail *buffer);
 typedef struct EffResourceEntry {
     f32 position[3];
     u8 pad0C[4];
-    u32 value;
+    u32 color; /* 0x10: initialized to neutral grey and submitted as draw color. */
 } EffResourceEntry; /* 0x14 */
 
 typedef struct EffResourceWork {
@@ -841,6 +841,7 @@ typedef struct EffPCPNeedleWork {
 } EffPCPNeedleWork; /* 0x74, followed by count slots */
 
 typedef char EffResourceEntrySizeCheck[sizeof(EffResourceEntry) == 0x14 ? 1 : -1];
+typedef char EffResourceEntry_color_offset_check[((u32)&((EffResourceEntry *)0)->color == 0x10) ? 1 : -1];
 typedef char EffResourceWorkSizeCheck[sizeof(EffResourceWork) == 0x74 ? 1 : -1];
 typedef char EffPCPNeedleParamsSizeCheck[sizeof(EffPCPNeedleParams) == 0x5C ? 1 : -1];
 typedef char EffPCPNeedleSlotSizeCheck[sizeof(EffPCPNeedleSlot) == 0x2C ? 1 : -1];
