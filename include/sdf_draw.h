@@ -212,9 +212,19 @@ typedef char MotionEntry_header_extent[(sizeof(((MotionEntry *)0)->packedHeader)
 typedef char MotionEntry_size_must_be_8[(sizeof(MotionEntry) == 8) ? 1 : -1];
 
 typedef struct SdfMotionCommand {
-    u32 command;
-    u32 argument;
+    union {
+        u32 packedCommand;
+        struct {
+            /* Runtime dispatch shifts the command word right by 16. */
+            u16 selector;
+            u16 family;
+        } binding;
+    };
+    u32 targetIndex;
 } SdfMotionCommand;
+
+typedef char SdfMotionCommand_size_must_be_8[
+    (sizeof(SdfMotionCommand) == 8) ? 1 : -1];
 
 /* Resource header followed by the binding commands used to construct a motion. */
 typedef struct MotionTable {
