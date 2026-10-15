@@ -11,7 +11,7 @@ EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
 
     effect = sdfAllocSizeClassBlock(sizeof(*effect));
     memcpy(&effect->params, source, sizeof(effect->params));
-    effect->valueWork = effCreateMagatuhiValueWork(effect->params.count, effect->params.historyCount, effect->params.unk08, effect->params.unk14, effect->params.unk18);
+    effect->valueWork = effCreateMagatuhiValueWork(effect->params.count, effect->params.historyCount, effect->params.historyDistanceScale, effect->params.unk14, effect->params.historyAngleStep);
     effMagatuhiFillColorTable(effect->valueWork, effect->params.colorA, effect->params.colorB);
     return effect;
 }
@@ -71,8 +71,8 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
 
     resource->count = count;
     resource->historyCount = frames;
-    resource->unk0C = param0C;
-    resource->unk08 = param08;
+    resource->historyAngleStep = param0C;
+    resource->historyDistanceScale = param08;
     resource->unk10 = param;
     resource->positions = (f32 (*)[4])positions;
     resource->colorTable = (u32 *)colorTable;

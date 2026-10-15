@@ -90,7 +90,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void itfPanelSetStatus(s32, s32);
 extern void itfPanelSetPairFirst(s32, s32);
 extern void itfMesStartEntry(s32, s32, s32);
-extern char D_0036ACF8[];
+extern char mnuTerminalPopupEntries[];
 extern void itfMesDestroyWindowIfPresent(s32);
 extern s32 D_003BAA70;
 extern s32 D_003BAA74;
@@ -161,7 +161,8 @@ s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0024D260(void) {
+/* Registered terminal panel leave hook: no side effects; returns one. */
+u32 mnuTerminalPanelLeaveNoOp(void) {
     return 1;
 }
 
@@ -177,7 +178,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
     if (*popupSlot == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (dspStartFlagEvent(workAddress) == 0) {
-                mnuSetPopupEntryFlagged(popupSlot, D_0036ACF8);
+                mnuSetPopupEntryFlagged(popupSlot, mnuTerminalPopupEntries);
             }
         }
     }
@@ -288,15 +289,18 @@ s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0024D5F0(void) {
+/* Registered terminal rebuild start hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildStartNoOp(void) {
     return 0;
 }
 
-u32 func_0024D5F8(void) {
+/* Registered terminal rebuild update hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildUpdateNoOp(void) {
     return 0;
 }
 
-u32 func_0024D600(void) {
+/* Registered terminal rebuild finish hook: no side effects; returns zero. */
+u32 mnuTerminalRebuildFinishNoOp(void) {
     return 0;
 }
 

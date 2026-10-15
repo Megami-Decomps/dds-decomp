@@ -110,11 +110,13 @@ s32 mnuStaffImageExitA(KwlnTask *task) {
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-u32 func_002AD508(void) {
+/* Registered staff image-selection enter hook: no side effects; returns one. */
+u32 mnuStaffImageSelectionEnterNoOp(void) {
     return 1;
 }
 
-u32 func_002AD510(void) {
+/* Registered staff image-selection leave hook: no side effects; returns one. */
+u32 mnuStaffImageSelectionLeaveNoOp(void) {
     return 1;
 }
 
@@ -162,11 +164,13 @@ s32 mnuExitStaffImageAndSelectionLabel(KwlnTask *task) {
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-u32 func_002AD6F8(void) {
+/* Registered staff slot-selection enter hook: no side effects; returns one. */
+u32 mnuStaffSlotSelectionEnterNoOp(void) {
     return 1;
 }
 
-u32 func_002AD700(void) {
+/* Registered staff slot-selection leave hook: no side effects; returns one. */
+u32 mnuStaffSlotSelectionLeaveNoOp(void) {
     return 1;
 }
 
@@ -213,11 +217,13 @@ s32 mnuExitAlternateStaffImagePage(KwlnTask *task) {
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-u32 func_002AD8E8(void) {
+/* Registered staff value-selection enter hook: no side effects; returns one. */
+u32 mnuStaffValueSelectionEnterNoOp(void) {
     return 1;
 }
 
-u32 func_002AD8F0(void) {
+/* Registered staff value-selection leave hook: no side effects; returns one. */
+u32 mnuStaffValueSelectionLeaveNoOp(void) {
     return 1;
 }
 

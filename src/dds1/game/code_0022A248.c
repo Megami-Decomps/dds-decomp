@@ -152,7 +152,8 @@ void evtBeginSolarOverlayFadeOut(s32 fadeDuration) {
 void func_0022AB58(void) {
 }
 
-u32 func_0022AB60(void) {
+/* After launching a test script, keep the test task idle and return 0. */
+u32 evtUpdateIdleTestTask(void) {
     func_0022AB58();
     return 0;
 }
@@ -196,7 +197,7 @@ s32 evtUpdateScriptTestSelection(KwlnTask *task) {
         if (sdfPathExists(path) != 0) {
             D_003BA8EC = 0x80000000;
             scrCreateProcessTaskFromResource(0x3EB, path, 0);
-            return (s32)func_0022AB60;
+            return (s32)evtUpdateIdleTestTask;
         }
     }
     if ((s8)D_00324510[1][0][3] < 0) {

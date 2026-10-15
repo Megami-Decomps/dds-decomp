@@ -604,31 +604,31 @@ typedef struct MnuSpriteResource {
     MnuSpriteWork *sprites;
 } MnuSpriteResource;
 
-extern s32 D_003CE9D0[][4];
+extern s32 mnuMantraSpritePlacements[][4];
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, u32, s32, s32);
 
 void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context) {
     if (flags & 0x10000) {
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->textures[D_003CE9D0[placementIndex][1]].flags |= 1;
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->textures[mnuMantraSpritePlacements[placementIndex][1]].flags |= 1;
     }
     if (flags & 0x20000) {
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->textures[D_003CE9D0[placementIndex][1]].flags |= 2;
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->textures[mnuMantraSpritePlacements[placementIndex][1]].flags |= 2;
     }
-    effDrawTextureSlotWithBlendedCornerColors((x + D_003CE9D0[placementIndex][2]) << 4,
-                  (y + D_003CE9D0[placementIndex][3]) << 3,
+    effDrawTextureSlotWithBlendedCornerColors((x + mnuMantraSpritePlacements[placementIndex][2]) << 4,
+                  (y + mnuMantraSpritePlacements[placementIndex][3]) << 3,
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
-                  D_003CE9D0[placementIndex][1], context);
+                  mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]],
+                  mnuMantraSpritePlacements[placementIndex][1], context);
     if (flags & 0x10000) {
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->textures[D_003CE9D0[placementIndex][1]].flags &= ~1;
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->textures[mnuMantraSpritePlacements[placementIndex][1]].flags &= ~1;
     }
     if (flags & 0x20000) {
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->textures[D_003CE9D0[placementIndex][1]].flags &= ~2;
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->textures[mnuMantraSpritePlacements[placementIndex][1]].flags &= ~2;
     }
 }
 
@@ -638,72 +638,72 @@ void mnuDrawMantraScaledRotatedCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, s3
     s32 width;
     s32 height;
 
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
-    width = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].width =
-        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth) << 4;
-    height = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].height =
-        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
-    effDrawTextureSlotWithBlendedCornerColors(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
-                  ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].rotation = rotation;
+    width = ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].width =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeWidth) << 4;
+    height = ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].height =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeHeight) << 3;
+    effDrawTextureSlotWithBlendedCornerColors(((x + mnuMantraSpritePlacements[placementIndex][2]) << 4) - (width >> 1),
+                  ((y + mnuMantraSpritePlacements[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
-                  D_003CE9D0[placementIndex][1], context);
+                  mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]],
+                  mnuMantraSpritePlacements[placementIndex][1], context);
     /* Reload the slot after drawing before restoring its native dimensions. */
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].rotation = 0.0f;
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].width =
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth << 4;
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].height =
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].rotation = 0.0f;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].width =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeWidth << 4;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].height =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeHeight << 3;
 }
 
 void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, f32 scale, s32 placementIndex, s32 flags, s32 context) {
     s32 width;
     s32 height;
 
-    width = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].width =
-        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth) << 4;
-    height = ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].height =
-        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
-    effDrawTextureSlotWithBlendedCornerColors(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
-                  ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
+    width = ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].width =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeWidth) << 4;
+    height = ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].height =
+        (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeHeight) << 3;
+    effDrawTextureSlotWithBlendedCornerColors(((x + mnuMantraSpritePlacements[placementIndex][2]) << 4) - (width >> 1),
+                  ((y + mnuMantraSpritePlacements[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
-                  D_003CE9D0[placementIndex][1], context);
+                  mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]],
+                  mnuMantraSpritePlacements[placementIndex][1], context);
     /* Reload the slot after drawing before restoring its native dimensions. */
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].width =
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeWidth << 4;
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].height =
-        ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-            ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].width =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeWidth << 4;
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].height =
+        ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+            ->sprites[mnuMantraSpritePlacements[placementIndex][1]].nativeHeight << 3;
 }
 
 void mnuDrawMantraRotatedSprite(s32 x, s32 y, s32 z, s32 alpha, f32 rotation, s32 placementIndex, s32 flags, s32 context) {
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
-    effDrawTextureSlotWithBlendedCornerColors((x + D_003CE9D0[placementIndex][2]) << 4,
-                  (y + D_003CE9D0[placementIndex][3]) << 3,
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].rotation = rotation;
+    effDrawTextureSlotWithBlendedCornerColors((x + mnuMantraSpritePlacements[placementIndex][2]) << 4,
+                  (y + mnuMantraSpritePlacements[placementIndex][3]) << 3,
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-                  mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
-                  D_003CE9D0[placementIndex][1], context);
-    ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
-        ->sprites[D_003CE9D0[placementIndex][1]].rotation = 0.0f;
+                  mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]],
+                  mnuMantraSpritePlacements[placementIndex][1], context);
+    ((MnuSpriteResource *)mnuMantraSpriteSlots[mnuMantraSpritePlacements[placementIndex][0]])
+        ->sprites[mnuMantraSpritePlacements[placementIndex][1]].rotation = 0.0f;
 }
 
 s32 mnuDrawMantraSineFade(u32 x, u32 y, u32 depth, s32 frame, s32 amount, u32 drawArg) {

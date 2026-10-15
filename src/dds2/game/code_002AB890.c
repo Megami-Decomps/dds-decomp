@@ -59,7 +59,7 @@ void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
-    mnuSetWindowPanelBounds(window, owner->unkF8, 0, 0, 0, 0);
+    mnuSetWindowPanelBounds(window, owner->itemPanelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->resources.baseResources[1], 0xD, 7);
     window->list->context = owner;
     window->list->drawCallback = mnuDrawStaffItemListEntry;

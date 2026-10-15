@@ -76,7 +76,7 @@ extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
 extern s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *);
-extern u32 func_00260460(void);
+extern u32 mnuGetTerminalMessageOption(void);
 extern s32 mnuCampFindActiveSlot(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void mnuAwardCampProgressCurrency(void);
@@ -131,7 +131,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 case 2:
                     if (evtGetMessageWindowControlState() == 0) {
                         evtFinishMessageWindowAndNotify();
-                        state->options = func_00260460();
+                        state->options = mnuGetTerminalMessageOption();
                         state->phase = 3;
                         state->rewardCursor = 0;
                     }
@@ -252,7 +252,8 @@ u32 evtStartTerminalMenuMessage(void) {
     return 1;
 }
 
-u32 func_00265F58(void) {
+/* Registered terminal-menu message leave hook: no side effects; returns one. */
+u32 mnuTerminalMenuMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -330,23 +331,28 @@ s32 evtDispatchSync(KwlnTask *callback) {
     return evtMenuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_00266210(void) {
+/* Registered popup enter hook: no side effects; returns one. */
+u32 mnuPopupEnterNoOp(void) {
     return 1;
 }
 
-u32 func_00266218(void) {
+/* Registered popup leave hook: no side effects; returns one. */
+u32 mnuPopupLeaveNoOp(void) {
     return 1;
 }
 
-u32 func_00266220(void) {
+/* Registered popup start hook: no side effects; returns zero. */
+u32 mnuPopupStartNoOp(void) {
     return 0;
 }
 
-u32 func_00266228(void) {
+/* Registered popup update hook: no side effects; returns zero. */
+u32 mnuPopupUpdateNoOp(void) {
     return 0;
 }
 
-u32 func_00266230(void) {
+/* Registered popup finish hook: no side effects; returns zero. */
+u32 mnuPopupFinishNoOp(void) {
     return 0;
 }
 

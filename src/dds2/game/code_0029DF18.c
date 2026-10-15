@@ -562,7 +562,7 @@ extern KwlnTask *mnuTitleSoundTask;
 
 extern TitleAudioStreamState mnuTitleStreamStatus;
 
-extern u32 D_00438FEC;
+extern u32 mnuTitleStreamFileRequest;
 
 extern TitleAudioStreamState mnuTitleSoundBufferState;
 

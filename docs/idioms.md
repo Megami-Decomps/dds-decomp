@@ -2634,8 +2634,8 @@ dialogue is selected, and reload the caller-owned word after `dspStartEntry`
 when one is selected. Selecting a real dialogue entry before the shared call
 expresses those two paths directly and avoids extra flag copies and reloads.
 
-The adjacent `func_0028FD30` selector also needs the real input snapshot to
-exist before its independent local map initialization:
+The adjacent `mnuFindPendingMantraPanelRecord` selector also needs the real
+input snapshot to exist before its independent local map initialization:
 
 ```c
 MenuMantraRecord *record = resource->menu.records;
@@ -8648,8 +8648,8 @@ slot-emitter engine, despite sharing their translation units with file
 and menu functions. The native descriptor array establishes the update
 and scale callback pairs: its four words are update callback, scale
 callback, per-instance work bytes, and serialized parameter bytes.
-DDS1's array is at `D_0037E550` (the scaler-field label is
-`dds3IndexedCallbacks`); DDS2's equivalent is at `D_003E95C0`.
+`effEmitterTypeDescriptors` names the native array in both games; the
+existing `dds3IndexedCallbacks` label addresses its scaler-callback field.
 The initial descriptor is empty.
 
 | Type | Update callback | Paired parameter scaler | Observed trajectory |
@@ -12683,7 +12683,7 @@ native COP2 sequences, rather than replacing any ordinary C instructions.
 
 ## Bit-editor glyph template block copy
 
-`func_0021F630` / `func_0023A1A0` (DDS1 / DDS2, 1092 bytes each)
+`mdlUpdateFlagBitEditor` (DDS1 0021F630 / DDS2 0023A1A0, 1092 bytes each)
 initializes a real two-byte text buffer from native SDATA: space followed
 by NUL at DDS1 `D_003BBD90` / DDS2 `D_004371D0`. The retail loads hit those
 exact symbols at 0021F664..74 / 0023A1D4..E4. The first character later
@@ -12789,3 +12789,366 @@ multiplied before `0.5f`; its native `.lit4` address is not a mutable global.
 Capture the selected parameter after both direction callbacks and before
 publishing the action flags and motion parameter. DDS2 additionally preserves
 its single-target fallback, disabled by animation flag `0x80`.
+
+## Administrative mode callback stubs: pending is not complete
+
+`ddsAdminModeCallbacks` begins at DDS1 `0x003297D0` / DDS2
+`0x003847D0`. Each 12-byte row has `entry`, `destroy`, and `cleanup`
+callbacks, as declared in `include/dds3_admin_dispatch.h`. The native table
+rows, rather than nearby function order alone, establish each stub's role.
+
+`dds3AdminPollModeCompletion` sets completion flag 2 only when `cleanup()`
+returns nonzero. A zero-returning cleanup therefore keeps its mode pending;
+it does not finish the mode. The existing `evtKeepInterfaceModePending` is
+the same pattern. `dds3AdminPollModeDestruction` accepts destroy result zero
+and stores a one-frame transition delay. An empty entry has no side effects.
+
+The following names are shared by both games. Existing callback signatures,
+constant returns, and definition order are deliberately unchanged. Mode eight
+has no evidenced scene identity, so its names retain the native table index.
+
+| DDS1 | DDS2 | Name | Native registry role |
+|---|---|---|---|
+| `0010A210` | `0010A350` | `evtKeepSelectionModePending` | Mode 0 cleanup |
+| `0010A2D8` | `0010A418` | `evtKeepTitleMenuModePending` | Mode 2 cleanup |
+| `0010A390` | `0010A4D0` | `evtKeepStaffMovieModePending` | Mode 12 cleanup |
+| `0010A478` | `0010A5B8` | `evtKeepSelectedAreaModePending` | Mode 5 cleanup |
+| `0010A498` | `0010A5D8` | `evtDestroySelectionFadeOutNoOp` | Mode 11 destroy |
+| `0010A4A0` | `0010A5E0` | `evtKeepSelectionFadeOutPending` | Mode 11 cleanup |
+| `0010A540` | `0010A680` | `evtKeepSkyEventModePending` | Mode 6 cleanup |
+| `0010A5A0` | `0010A6E0` | `evtAdminModeEightEntryNoOp` | Mode 8 entry |
+| `0010A5A8` | `0010A6E8` | `evtAdminModeEightDestroyNoOp` | Mode 8 destroy |
+| `0010A5B0` | `0010A6F0` | `evtIsAdminModeEightComplete` | Mode 8 cleanup |
+| `0010A780` | `0010A8C0` | `evtKeepBattleStageTestModePending` | Mode 15 cleanup |
+| `0010A7E0` | `0010A920` | `evtKeepTestSkyModePending` | Mode 16 cleanup |
+| `0010A838` | `0010A978` | `evtKeepEventViewerModePending` | Mode 17 cleanup |
+| `0010AA58` | `0010AB98` | `evtDestroyFontTestModeNoOp` | Mode 25 destroy |
+| `0010AAC0` | `0010AC00` | `evtKeepMovieViewerModePending` | Mode 26 cleanup |
+
+### Remaining index-identified administrative callback triples
+
+The native registry also identifies complete callback triples for modes 9,
+18, 23, and 24 in both games. Their scene identities are not established;
+names therefore retain the table index rather than inventing a feature.
+
+All four entries are empty, and all four destroy callbacks return zero.
+Mode 9 cleanup returns one and immediately reports completion; modes 18,
+23, and 24 cleanup return zero and remain pending. These are distinct
+registered functions, not aliases to coalesce. Existing return types,
+empty parameter lists, constants, and definition order stay unchanged.
+
+| DDS1 | DDS2 | Name | Native registry role |
+|---|---|---|---|
+| `0010A5B8` | `0010A6F8` | `evtAdminModeNineEntryNoOp` | Mode 9 entry |
+| `0010A5C0` | `0010A700` | `evtAdminModeNineDestroyNoOp` | Mode 9 destroy |
+| `0010A5C8` | `0010A708` | `evtIsAdminModeNineComplete` | Mode 9 cleanup |
+| `0010A840` | `0010A980` | `evtAdminModeEighteenEntryNoOp` | Mode 18 entry |
+| `0010A848` | `0010A988` | `evtAdminModeEighteenDestroyNoOp` | Mode 18 destroy |
+| `0010A850` | `0010A990` | `evtKeepAdminModeEighteenPending` | Mode 18 cleanup |
+| `0010AA10` | `0010AB50` | `evtAdminModeTwentyThreeEntryNoOp` | Mode 23 entry |
+| `0010AA18` | `0010AB58` | `evtAdminModeTwentyThreeDestroyNoOp` | Mode 23 destroy |
+| `0010AA20` | `0010AB60` | `evtKeepAdminModeTwentyThreePending` | Mode 23 cleanup |
+| `0010AA28` | `0010AB68` | `evtAdminModeTwentyFourEntryNoOp` | Mode 24 entry |
+| `0010AA30` | `0010AB70` | `evtAdminModeTwentyFourDestroyNoOp` | Mode 24 destroy |
+| `0010AA38` | `0010AB78` | `evtKeepAdminModeTwentyFourPending` | Mode 24 cleanup |
+
+## Popup callback stubs: registry roles without invented scene identities
+
+`MenuPopupEntry` in `include/mnu_transition.h` is a seven-word record:
+`flags`, `enter`, `leave`, `start`, `update`, `finish`, and `canEnter`.
+The native popup dispatcher uses the same offsets. `mnuApplyPanelTransitionAction`
+calls `enter` when saving an entry and `leave` when popping it; the leave
+result is ignored. A leave hook that only returns one has no side effects.
+
+The shop-message and three terminal descriptors each register their own
+constant-one leave hook. Keep the functions distinct rather than coalescing
+their identical bodies. The terminal exit hooks retain a common role even
+though their neighboring resource-loading entry callbacks differ by game.
+
+The second seven-word record at DDS1 `0x0036AB9C` / DDS2 `0x003CE6C8`
+follows the fade-idle descriptor. Its five hooks have only evidenced registry
+roles: enter and leave return one; start, update, and finish return zero.
+The generic `mnuPopup*NoOp` names do not assert a scene identity or that the
+record is reached. No callback type, parameter list, constant, or body order
+is changed.
+
+| DDS1 | DDS2 | Name | Native role |
+|---|---|---|---|
+| `00247D50` | `00265980` | `mnuShopMessageLeaveNoOp` | leave |
+| `0024B470` | `00269C48` | `mnuTerminalSlotSelectionLeaveNoOp` | leave |
+| `0024C6F8` | `0026ADC0` | `mnuTerminalEntryMessageLeaveNoOp` | leave |
+| `0024CE20` | `0026B4A0` | `mnuTerminalExitPopupLeaveNoOp` | leave |
+| `002482B0` | `00266210` | `mnuPopupEnterNoOp` | enter |
+| `002482B8` | `00266218` | `mnuPopupLeaveNoOp` | leave |
+| `002482C0` | `00266220` | `mnuPopupStartNoOp` | start |
+| `002482C8` | `00266228` | `mnuPopupUpdateNoOp` | update |
+| `002482D0` | `00266230` | `mnuPopupFinishNoOp` | finish |
+
+### Terminal rebuild and result-panel callbacks
+
+The same native seven-word records identify the remaining terminal rebuild
+and result-panel hooks below. The terminal rebuild descriptor has a real
+`mnuClearTerminalPanelSelection` enter hook and a real
+`mnuRebuildTerminalMenuResources` leave hook; only its start, update, and
+finish hooks are zero-returning no-ops.
+
+The result message record dispatches the message/input panel with the
+`brsTaskIsFadeIdle` gate. Its follow-up record dispatches reward and skill
+selection processing. Separate records host the stat-assignment message and
+the level-change popup. Their registered constant-one hooks perform no work;
+the names describe the record role, not an effect of the constant return.
+
+DDS2 encodes the first result record as bytes within `D_003D6332`: words
+at `0x003D6424` and `0x003D6428` are callback addresses `0x00299EF0` and
+`0x00299EF8`. The absence of `.word` labels there does not remove the native
+registration. Signatures, return constants, definition order, and distinct
+function identities are preserved in both games.
+
+| DDS1 | DDS2 | Name | Native role |
+|---|---|---|---|
+| `0024D260` | `0026B930` | `mnuTerminalPanelLeaveNoOp` | leave |
+| `0024D5F0` | `0026BC68` | `mnuTerminalRebuildStartNoOp` | start |
+| `0024D5F8` | `0026BC70` | `mnuTerminalRebuildUpdateNoOp` | update |
+| `0024D600` | `0026BC78` | `mnuTerminalRebuildFinishNoOp` | finish |
+| `00263050` | `00299EF0` | `mnuResultMessageEnterNoOp` | enter |
+| `00263058` | `00299EF8` | `mnuResultMessageLeaveNoOp` | leave |
+| `00263138` | `00299FD8` | `mnuResultSelectionEnterNoOp` | enter |
+| `00263140` | `00299FE0` | `mnuResultSelectionLeaveNoOp` | leave |
+| `002642C8` | `0029B410` | `mnuStatAssignmentMessageLeaveNoOp` | leave |
+| `00264608` | `0029B778` | `mnuLevelChangeMessageLeaveNoOp` | leave |
+
+### Reward hooks and return-popup entry gates
+
+The primary-reward, stat-point, and staff value-selection records register
+constant-one enter or leave hooks with no side effects. In contrast, a
+`canEnter` hook returning one actively allows popup entry; its name must not
+suggest a wait, a completion test, or a disabled feature.
+
+The three always-true gates below belong to return records selected by the
+staff display, party-selection, and skill-shell/list cancellation paths.
+Their shared normal handlers do not establish three unknown feature names;
+the evidenced installer paths distinguish the return roles.
+
+DDS1 has item-use enter/leave no-ops where DDS2 has null slots in its
+`0x003E74DC` record. Do not manufacture function twins for null pointers.
+DDS2 separately registers constant-one leave hooks on its party-slot
+assignment and clearing confirmation records. Identical tiny code alone
+does not identify a DDS1 counterpart for those records.
+
+All existing signatures and return constants remain unchanged, including
+four prototype-only identifier updates in the DDS2 menu support unit.
+
+| DDS1 | DDS2 | Name | Native role |
+|---|---|---|---|
+| `00263638` | `0029A650` | `mnuPrimaryRewardPanelLeaveNoOp` | leave |
+| `00263E30` | `0029AF40` | `mnuStatPointPanelLeaveNoOp` | leave |
+| `00272BB8` | `002AB550` | `mnuAllowStaffDisplayReturn` | canEnter |
+| `00273C40` | `002AD8E8` | `mnuStaffValueSelectionEnterNoOp` | enter |
+| `00273C48` | `002AD8F0` | `mnuStaffValueSelectionLeaveNoOp` | leave |
+| `00274040` | — | `mnuStaffItemUseEnterNoOp` | enter |
+| `00274048` | — | `mnuStaffItemUseLeaveNoOp` | leave |
+| — | `002B06A0` | `mnuPartySlotAssignmentLeaveNoOp` | leave |
+| — | `002B0B88` | `mnuPartySlotClearLeaveNoOp` | leave |
+| `00274B78` | `002B0D48` | `mnuAllowPartySelectionReturn` | canEnter |
+| `00277638` | `002B3A58` | `mnuAllowSkillMenuReturn` | canEnter |
+
+### Game-specific retail hooks and compiled-out twins
+
+Additional DDS2 popup records have their own registered callbacks. Use the
+actual `MenuPopupEntry` field and the record's installed handlers as evidence;
+identical constant-one bodies are not enough to pair unrelated stubs.
+The image-selection and slot-selection records below are additional DDS2
+records, not guessed matches for DDS1 null slots or unused functions.
+
+The fade-driven terminal popup uses explicit fade-in/fade-out hooks and an
+idle nested-popup handler. Its mode-one dispatcher draws the terminal
+backdrop; its mode-two dispatcher does not make the message-window request
+used by the flag-event terminal variant.
+
+DDS1's mode-one shop predicate returns zero even when passed an item ID.
+Catalog builders treat a nonzero result as another reason to disable that
+entry. The mode-one purchase hook returns one without mutating an item;
+the caller has already debited currency and ignores the result. These
+retail hooks must not be renamed as though they implement ownership tests
+or inventory acquisition.
+
+`mnuFindPendingMantraPanelRecord` names the existing DDS2 selector, including
+the rank-up record-zero case, kind/element filters, and queued kind-two
+preference. Preserve its original Basalt Finch/Prism reconstruction and
+Harbor Maple qualification credit; this is only a naming change.
+
+`mnuDrawListFrames` keeps the same name in both games. DDS1 draws the
+iterated row frames; DDS2 retains the loop and its position in the camp
+status draw path but has no drawing in the loop body. Document that
+compiled-out behavior rather than assigning a different function identity.
+
+Only identifiers and comments change. Existing argument/return types,
+unused arguments, pointer representations, literals, and operation order
+remain intact, including the unrestricted selector caller's implicit
+declaration and original argument widths.
+
+| Game | Address | Name | Native evidence |
+|---|---|---|---|
+| DDS1 | `002CD7F8` | `mnuShopIsMode1PurchaseBlocked` | predicate |
+| DDS1 | `002CD800` | `mnuShopCommitMode1PurchaseNoOp` | purchase hook |
+| DDS2 | `00263378` | `mnuShopProgressResultLeaveNoOp` | `0x003CE52C` leave |
+| DDS2 | `002635E0` | `mnuShopRowMessageLeaveNoOp` | `0x003CE548` leave |
+| DDS2 | `00264848` | `mnuCampRewardSelectionLeaveNoOp` | `0x003CE5D4` leave |
+| DDS2 | `00264C58` | `mnuSlotAdvanceMessageLeaveNoOp` | `0x003CE5F0` leave |
+| DDS2 | `00264EF8` | `mnuProgressGateMessageLeaveNoOp` | `0x003CE60C` leave |
+| DDS2 | `002652D8` | `mnuSelectedRewardMessageLeaveNoOp` | `0x003CE628` leave |
+| DDS2 | `00265F58` | `mnuTerminalMenuMessageLeaveNoOp` | `0x003CE67C` leave |
+| DDS2 | `002AB3A0` | `mnuCampFieldSkillDisplayLeaveNoOp` | `0x003E701C` leave |
+| DDS2 | `002AD508` | `mnuStaffImageSelectionEnterNoOp` | `0x003E7470` enter |
+| DDS2 | `002AD510` | `mnuStaffImageSelectionLeaveNoOp` | `0x003E7474` leave |
+| DDS2 | `002AD6F8` | `mnuStaffSlotSelectionEnterNoOp` | `0x003E748C` enter |
+| DDS2 | `002AD700` | `mnuStaffSlotSelectionLeaveNoOp` | `0x003E7490` leave |
+| DDS2 | `0026BB78` | `mnuDispatchTerminalFadePanel` | `0x003CE98C` update |
+| DDS2 | `0026BBC8` | `mnuDispatchTerminalFadePanelExit` | `0x003CE990` finish |
+| DDS2 | `0028FD30` | `mnuFindPendingMantraPanelRecord` | selector |
+| DDS2 | `002B7588` | `mnuDrawListFrames` | DDS1 twin `0027AA68`; empty DDS2 draw loop |
+
+## Debug-editor identities and intentionally idle callbacks
+
+The model-flag editor identifies itself as `BitEditor`, draws a 16-by-16
+grid, pages through the flag bank, and toggles its selection with
+`mdlFlagTest`, `mdlFlagSet`, and `mdlFlagClear`. Both games use
+`mdlUpdateFlagBitEditor`; keep its native SDATA glyph-template block copy
+described above.
+
+The RGB editors install `evtNoOpRGBEditorRow` in the final row-callback
+argument of `evtDrawMenuFrame`. Native DDS1 0023A9B4..E8 and DDS2
+00255864..98 materialize the callback and store it at SP+8 before the call.
+The frame helper invokes rows with list, X, Y, row index, and context.
+These empty registered renderers are not unreferenced stubs, and are
+distinct from the neighboring XY-slot vector-editor row callbacks.
+Preserve the existing five-formal DDS1 definition and void-formal DDS2
+definition rather than changing their ABI during a naming pass.
+
+`evtUpdateIdleTestTask` is the zero-return test-task update in both games.
+DDS1's selection screen switches to it only after successfully launching
+the selected event script; its call to the existing empty helper stays.
+DDS2 registers its idle update when creating the task and has no such
+selection-screen update. Keep its unused task formal and do not invent a
+draw operation or a call to the neighboring, unreferenced empty function.
+
+`evtViewCmdNoOp` is a zero-return no-action handler in each native viewer
+command table, at DDS1 pointer slot 00368514 and DDS2 slot 003C92EC.
+Neighboring entries store values, select groups, and manipulate positions.
+This evidence establishes a command-table role, not a popup enter/leave
+role or an otherwise unknown command meaning.
+
+DDS1's solar-point drawer now shares the existing upstream DDS2 spelling
+`evtDrawSolarPointTransitionShapes`. Preserve Halcyon's paired
+reconstruction and the two sine-modulated triangle-fan passes unchanged.
+
+| DDS1 address | DDS2 address | Name |
+|---|---|---|
+| `0021F630` | `0023A1A0` | `mdlUpdateFlagBitEditor` |
+| `0023A798` | `00255648` | `evtNoOpRGBEditorRow` |
+| `00229ED8` | `00244B90` | `evtDrawSolarPointTransitionShapes` |
+| `0022AB60` | `00245818` | `evtUpdateIdleTestTask` |
+| `00231CC0` | `0024C9D0` | `evtViewCmdNoOp` |
+
+## Animation-camera flags and called retail menu hooks
+
+`btlSetupDefeatCameraFromAnimationFlags` identifies the same installed
+camera callback in DDS1 at `0020CB38` and DDS2 at `0021E8C0`.
+`btlInitializeBossCallbacks` installs it in each game. The input flags come
+from `datActionAnimationRecords`, not a species table: bits `4000`, `8000`,
+and `0008` select defeat-camera paths. Preserve the existing per-path
+returns, command-state writes, and runtime flag clearing; DDS2's repeated
+camera calls in separate arms are part of its matched reconstruction.
+This replaces our former letter-placeholder identity without changing
+either game's types or control flow.
+
+The following small DDS2 hooks have concrete consumers or native table
+entries. Their retail constant/empty bodies do not justify inventing an
+unseen implementation or naming neighboring unreferenced stubs.
+
+| Address | Name | Evidence |
+|---|---|---|
+| `00260460` | `mnuGetTerminalMessageOption` | Returns zero for `MenuTerminalContext.options` at creation and message-sequence refresh. |
+| `0025E7B0` | `mnuShouldBlockViewerEndCountdown` | The viewer returns before countdown setup when this hook returns one; retail always returns zero. |
+| `0029A1E0` | `mnuShouldDeferProfileSelection` | Nonzero defers the follow-up selection work in `mnuDispatchProfileSelectionScene`; retail returns zero. |
+| `00317AC8` | `mnuShootingState0UpdateNoOp` | Native update-table entry at pointer slot `0040ABF0`, installed for shooting state zero and restored after its initialization callback. |
+| `0026DBB0` | `mtrMantraEquipReleaseHookNoOp` | Empty hook called by `mtrMantraEquipRelease` after updating the selected panel. |
+| `0028FD10` | `mnuGetDefaultMantraPanelRecord` | Fallback source queried by `mnuBindMantraMenuSourceRecord` with both selector filters unrestricted. |
+
+The last query's native tail jump forwards the selector's V0 to its
+consumer: it is not evidence that the result is discarded. Preserve the
+existing definition and local caller declarations, including their legacy
+return/argument disagreements, while making this identifier-only change.
+Likewise preserve the countdown hook's extra caller argument and the
+release hook's old-style declaration; this naming pass does not claim a
+prototype reconstruction.
+
+## Title-audio and solar-overlay data roles
+
+The paired title-audio owners (`code_00269C10` / `code_002A1820`)
+separate decoder state, decoded output, silent fallback, and mixed output.
+The following names follow those matched consumers; they do not introduce
+new storage, change any array bound, or reinterpret the raw SDK state.
+
+| DDS1 address | DDS2 address | Name | Evidence |
+| --- | --- | --- | --- |
+| `003D9168` | `00454D58` | `mnuTitleStreamDecoderState` | Primary stream's `decoder`; word 0 is compressed input and word 1 supplies decoded samples. |
+| `003DA1A8` | `00455D98` | `mnuTitleSoundBufferDecoderState` | Corresponding secondary sound-buffer decoder state. |
+| `003D8140` | `00453D30` | `mnuTitleStreamDecodedSamples` | Assigned to primary decoder word 1 at initialization. |
+| `003D9180` | `00454D70` | `mnuTitleSoundBufferDecodedSamples` | Assigned to secondary decoder word 1 at initialization. |
+| `003DA1C0` | `00455DB0` | `mnuTitleAudioSilenceBuffer` | Zeroed for 0x1000 bytes; inactive streams select this sample source. |
+| `00378E50` | `003E2760` | `mnuTitleAudioMixBuffer` | Receives copied or mixed active samples before IOP transfer. |
+| `003BD8D4` | `00438FEC` | `mnuTitleStreamFileRequest` | Queued request retained for ready, resource-handle, data, size and cleanup queries. |
+| `00377350` | `003E0B60` | `mnuTitleStreamEntries` | Filename, format and repeat-frame descriptors selected by `mnuQueueTitleSoundStreamEntry`. |
+| `00367EE0` | `003C8C90` | `evtSolarNoiseLayerPlacements` | Per-layer X offset, Y offset and scale percentage consumed by both solar-noise draw forms. |
+| `00368310` | `003C90C0` | `evtSolarOverlayShapes` | Shape/point positions, colors and counts consumed by the solar triangle-fan passes. |
+| `003DC1C0` | - | `mnuTitleCameraPosition` | Initialized by `mnuInitializeTitleCameraScene`, passed to camera creation and the inner-position setter. |
+| `003DC1D0` | - | `mnuTitleCameraRotation` | Initialized beside the position, passed to camera creation and the inner-rotation setter. |
+
+Keep the silent fallback separate from the mixed-output buffer: their
+roles are not interchangeable. Likewise the secondary sound-buffer entry
+table is a different object from `mnuTitleStreamEntries`. Decoder words
+other than the evidenced input/output/workspace accesses remain raw; no
+extra codec or mode meaning is inferred from their constants. The camera
+rotation keeps its existing four-float representation without asserting
+Euler versus quaternion semantics.
+
+These objects have no source-owned `INCLUDE_SDATA`/`INCLUDE_RODATA` and no
+active `INCLUDE_ASM` consumer at this naming pass. All existing declarations,
+including mixed byte/word views and unsized extern arrays, remain intact.
+Only canonical symbol mappings and references change; data bytes, storage
+extents, pointer arithmetic and the four claimed solar phase-update bodies
+remain untouched.
+
+## Terminal, configuration and movie-viewer data roles
+
+These external data names come from matched consumers and native table
+contents, without importing or redefining their storage:
+
+| Name | DDS1 address | DDS2 address | Observable role |
+| --- | --- | --- | --- |
+| `fileConfigSpritePlacements` | `0x0037E008` | `0x003E9028` | 27 four-halfword rows select a configuration resource set, frame and X/Y position. |
+| `fileScrollArrowState` | `0x0037D4C0` | `0x003E7FF8` | Save-slot preview drawing advances the angle and the two arrow opacities. |
+| `mnuTerminalPopupEntries` | `0x0036ACF8` | `0x003CE848` | 28-byte popup entries, including the base fallback and entry seven at offset `0xC4`. |
+| `mnuTerminalActionTable` | `0x0036AC80` | `0x003CE7D0` | Action selection indexed by exclusion flag, terminal mode and entry kind. |
+| `mnuMovieViewerDrawDescriptor` | `0x0037B938` | `0x003E56B8` | Debug movie-viewer descriptor passed with the selected movie path to the draw task. |
+| `fileNewCycleLabel` | `0x0037DB20` | `0x003E8658` | Native `"New Cycle"` text displayed when the save preview's new-cycle flag is set. |
+| `fileJobTypeCallbacks` | `0x0037E14C` | `0x003E916C` | Shifted, type-indexed job callback view with a `0x28` stride. |
+| `effEmitterTypeDescriptors` | `0x0037E550` | `0x003E95C0` | Emitter update/scaler pairs and instance/parameter byte counts, as described above. |
+| `fileConfigSpriteResourceNames` | Not paired | `0x003E9000` | Mode-specific configuration sprite filenames; DDS1 uses a local four-name initializer instead. |
+| `fileMenuFlowStateEntries` | Not paired | `0x003E7FC8` | Four `{state, mask}` entries select states 20--23 using condition bits 1, 2, 4 and 8. |
+| `mnuMantraCoordinateSpritePlacements` | `0x0036BC68` | Not paired | Coordinate-helper resource/sprite/X/Y bank, retaining the existing `u16[4]` view. |
+| `mnuMantraSceneSpritePlacements` | `0x0036C268` | Not paired | Separate scene-helper resource/sprite/X/Y bank with the existing `s16[4]` view. |
+| `mnuMantraSpritePlacements` | Not paired | `0x003CE9D0` | DDS2 ordinary, centered, scaled and rotated draw-helper bank with the existing `s32[4]` view. |
+
+The callback view starts four bytes after `fileJobTypeOperations`; keep
+that constructor-root symbol and the existing shifted private declaration.
+Likewise, retain `dds3IndexedCallbacks`, the emitter scaler-field alias.
+The legacy private callback/record type and field names are not a license
+to reinterpret these two tables or merge their distinct views.
+
+The Mantra banks have different contents and element widths, so this pass
+does not invent a cross-game identity between them. Preserve every existing
+declaration, bound, cast, index, fixed-point conversion and temporary
+sprite-state restoration. None of these names owns a source-level data
+import or changes a held body, its `INCLUDE_ASM` line, or its data reference.

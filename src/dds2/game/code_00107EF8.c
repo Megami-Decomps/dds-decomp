@@ -926,7 +926,8 @@ u32 evtStartSelDestroy(void) {
     return 1;
 }
 
-u32 func_0010A350(void) {
+/* Admin mode 0 cleanup: zero leaves the mode pending. */
+u32 evtKeepSelectionModePending(void) {
     return 0;
 }
 
@@ -968,7 +969,8 @@ u32 evtCloseTitleMenu(void) {
     return 0;
 }
 
-u32 func_0010A418(void) {
+/* Admin mode 2 cleanup: zero leaves the mode pending. */
+u32 evtKeepTitleMenuModePending(void) {
     return 0;
 }
 
@@ -1002,7 +1004,8 @@ u32 evtStopStaffTasks(void) {
     return 0;
 }
 
-u32 func_0010A4D0(void) {
+/* Admin mode 12 cleanup: zero leaves the mode pending. */
+u32 evtKeepStaffMovieModePending(void) {
     return 0;
 }
 
@@ -1049,7 +1052,8 @@ u32 evtPollSelectedAreaReady(void) {
     return status;
 }
 
-u32 func_0010A5B8(void) {
+/* Admin mode 5 cleanup: zero leaves the mode pending. */
+u32 evtKeepSelectedAreaModePending(void) {
     return 0;
 }
 
@@ -1057,11 +1061,13 @@ void evtStartSelectionFadeOut(void) {
     kwlnFadeBackgroundStartOut(0);
 }
 
-u32 func_0010A5D8(void) {
+/* Admin mode 11 destroy callback: no work, zero transition result. */
+u32 evtDestroySelectionFadeOutNoOp(void) {
     return 0;
 }
 
-u32 func_0010A5E0(void) {
+/* Admin mode 11 cleanup: zero leaves the mode pending. */
+u32 evtKeepSelectionFadeOutPending(void) {
     return 0;
 }
 
@@ -1092,7 +1098,8 @@ u32 evtCloseSkyEventTask(void) {
     return 0;
 }
 
-u32 func_0010A680(void) {
+/* Admin mode 6 cleanup: zero leaves the mode pending. */
+u32 evtKeepSkyEventModePending(void) {
     return 0;
 }
 
@@ -1112,25 +1119,31 @@ u8 evtWaitCampStateAcknowledged(void) {
     return state == 0;
 }
 
-void func_0010A6E0(void) {
+/* Admin mode 8 entry intentionally performs no work. */
+void evtAdminModeEightEntryNoOp(void) {
 }
 
-u32 func_0010A6E8(void) {
+/* Admin mode 8 destroy callback: no work, zero transition result. */
+u32 evtAdminModeEightDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010A6F0(void) {
+/* Admin mode 8 cleanup: one immediately reports completion. */
+u32 evtIsAdminModeEightComplete(void) {
     return 1;
 }
 
-void func_0010A6F8(void) {
+/* Admin mode 9 entry intentionally performs no work. */
+void evtAdminModeNineEntryNoOp(void) {
 }
 
-u32 func_0010A700(void) {
+/* Admin mode 9 destroy: no work, zero transition result. */
+u32 evtAdminModeNineDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010A708(void) {
+/* Admin mode 9 cleanup: one immediately reports completion. */
+u32 evtIsAdminModeNineComplete(void) {
     return 1;
 }
 
@@ -1209,7 +1222,8 @@ u32 evtEndBattleStageTest(void) {
     return 0;
 }
 
-u32 func_0010A8C0(void) {
+/* Admin mode 15 cleanup: zero leaves the mode pending. */
+u32 evtKeepBattleStageTestModePending(void) {
     return 0;
 }
 
@@ -1228,7 +1242,8 @@ u32 evtInitializeSelectionScene(void) {
     return 1;
 }
 
-u32 func_0010A920(void) {
+/* Admin mode 16 cleanup: zero leaves the mode pending. */
+u32 evtKeepTestSkyModePending(void) {
     return 0;
 }
 
@@ -1245,18 +1260,22 @@ u32 evtInitializeSelectionScreen(void) {
     return 0;
 }
 
-u32 func_0010A978(void) {
+/* Admin mode 17 cleanup: zero leaves the mode pending. */
+u32 evtKeepEventViewerModePending(void) {
     return 0;
 }
 
-void func_0010A980(void) {
+/* Admin mode 18 entry intentionally performs no work. */
+void evtAdminModeEighteenEntryNoOp(void) {
 }
 
-u32 func_0010A988(void) {
+/* Admin mode 18 destroy: no work, zero transition result. */
+u32 evtAdminModeEighteenDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010A990(void) {
+/* Admin mode 18 cleanup: zero leaves the mode pending. */
+u32 evtKeepAdminModeEighteenPending(void) {
     return 0;
 }
 
@@ -1333,25 +1352,31 @@ u8 evtWaitStaffTaskDoneAlternate(void) {
     return done == 0;
 }
 
-void func_0010AB50(void) {
+/* Admin mode 23 entry intentionally performs no work. */
+void evtAdminModeTwentyThreeEntryNoOp(void) {
 }
 
-u32 func_0010AB58(void) {
+/* Admin mode 23 destroy: no work, zero transition result. */
+u32 evtAdminModeTwentyThreeDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010AB60(void) {
+/* Admin mode 23 cleanup: zero leaves the mode pending. */
+u32 evtKeepAdminModeTwentyThreePending(void) {
     return 0;
 }
 
-void func_0010AB68(void) {
+/* Admin mode 24 entry intentionally performs no work. */
+void evtAdminModeTwentyFourEntryNoOp(void) {
 }
 
-u32 func_0010AB70(void) {
+/* Admin mode 24 destroy: no work, zero transition result. */
+u32 evtAdminModeTwentyFourDestroyNoOp(void) {
     return 0;
 }
 
-u32 func_0010AB78(void) {
+/* Admin mode 24 cleanup: zero leaves the mode pending. */
+u32 evtKeepAdminModeTwentyFourPending(void) {
     return 0;
 }
 
@@ -1359,7 +1384,8 @@ void evtLaunchFontTestScene(void) {
     itfStartFontTestScene();
 }
 
-u32 func_0010AB98(void) {
+/* Admin mode 25 destroy callback: no work, zero transition result. */
+u32 evtDestroyFontTestModeNoOp(void) {
     return 0;
 }
 
@@ -1376,7 +1402,8 @@ u32 evtDestroyMovieViewerTask(void) {
     return 0;
 }
 
-u32 func_0010AC00(void) {
+/* Admin mode 26 cleanup: zero leaves the mode pending. */
+u32 evtKeepMovieViewerModePending(void) {
     return 0;
 }
 

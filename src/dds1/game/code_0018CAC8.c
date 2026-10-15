@@ -214,7 +214,7 @@ void effAllocSubWork(EffWork *work) {
 void effDispatchNodeScaleNoOp(void) {
 }
 
-void func_0018CDA8(void) {
+void effSubmitAdminModeRequestZero(void) {
     dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 

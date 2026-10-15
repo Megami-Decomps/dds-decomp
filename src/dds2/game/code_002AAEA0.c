@@ -181,7 +181,8 @@ s32 mnuFinishStaffImagePopup(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_002AB3A0(void) {
+/* Registered field-skill display leave hook: no side effects; returns one. */
+u32 mnuCampFieldSkillDisplayLeaveNoOp(void) {
     return 1;
 }
 
@@ -229,7 +230,8 @@ s32 mnuFinishFieldSkillPopup(KwlnTask *callback) {
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
 
-u32 func_002AB550(void) {
+/* Always allow entry to the registered staff-display return popup. */
+u32 mnuAllowStaffDisplayReturn(void) {
     return 1;
 }
 

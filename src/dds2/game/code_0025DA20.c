@@ -693,7 +693,8 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeC
     }
 }
 
-u32 func_0025E7B0(void) {
+/* Retail never blocks the event viewer's end countdown through this hook. */
+u32 mnuShouldBlockViewerEndCountdown(void) {
     return 0;
 }
 
@@ -1593,7 +1594,8 @@ u32 __attribute__((const)) mnuCampGetProgressStage(void) {
     return 0;
 }
 
-u32 func_00260460(void) {
+/* Seed or refresh the terminal message option; retail always selects zero. */
+u32 mnuGetTerminalMessageOption(void) {
     return 0;
 }
 
@@ -1663,7 +1665,7 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);
     mnuInitializeShopStatusBatches(obj);
-    obj->options = func_00260460();
+    obj->options = mnuGetTerminalMessageOption();
     obj->availableCount = mnuCountActivePartyEntries();
     obj->delayFrames = 0xF;
     mnuSetCurrentTerminalContext(obj);
@@ -3199,7 +3201,8 @@ s32 evtShowResultText(void) {
     return 1;
 }
 
-u32 func_00263378(void) {
+/* Registered shop progress-result leave hook: no side effects; returns one. */
+u32 mnuShopProgressResultLeaveNoOp(void) {
     return 1;
 }
 
@@ -3263,7 +3266,8 @@ s32 mnuStartShopRowMessage(KwlnTask *callbackContext) {
     return 1;
 }
 
-u32 func_002635E0(void) {
+/* Registered shop row-message leave hook: no side effects; returns one. */
+u32 mnuShopRowMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -3797,7 +3801,8 @@ s32 evtMenuPrepareCampRewardSelection(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00264848(void) {
+/* Registered camp reward-selection leave hook: no side effects; returns one. */
+u32 mnuCampRewardSelectionLeaveNoOp(void) {
     return 1;
 }
 
@@ -3921,7 +3926,8 @@ u32 evtUpdateSlotAdvanceCount(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00264C58(void) {
+/* Registered slot-advance message leave hook: no side effects; returns one. */
+u32 mnuSlotAdvanceMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -3986,7 +3992,8 @@ s32 evtShowSlotText(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00264EF8(void) {
+/* Registered progress-gate message leave hook: no side effects; returns one. */
+u32 mnuProgressGateMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -4141,7 +4148,8 @@ s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
     return 1;
 }
 
-u32 func_002652D8(void) {
+/* Registered selected-reward message leave hook: no side effects; returns one. */
+u32 mnuSelectedRewardMessageLeaveNoOp(void) {
     return 1;
 }
 
@@ -4328,7 +4336,8 @@ s32 evtStartFadeByState(KwlnTask *task) {
     return 1;
 }
 
-u32 func_00265980(void) {
+/* Registered shop-message leave hook: no side effects; returns one. */
+u32 mnuShopMessageLeaveNoOp(void) {
     return 1;
 }
 

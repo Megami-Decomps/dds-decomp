@@ -148,7 +148,7 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, vo
     f32 *angleRow;
     f32 *scalarOutput;
     f32 viewDirection[4];
-    f32 baseLimit = work->unk08;
+    f32 baseLimit = work->historyDistanceScale;
     f32 limit;
     f32 phaseScalar;
     f32 radial;
@@ -186,7 +186,7 @@ void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, vo
                            : writeIndex - (EFF_MAGATUHI_REPLAY_GROUP_STRIDE + EFF_MAGATUHI_CONTROL_POINT_COUNT);
         replayPosition = &work->positions[rowBase + historyIndex];
         angleRow = work->angleRows[index];
-        angleRow[0] += work->unk0C;
+        angleRow[0] += work->historyAngleStep;
         if (6.2831853f <= angleRow[0]) {
             angleRow[0] -= 6.2831853f;
             if (angleRow[1] < 1.0f) {

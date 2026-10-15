@@ -687,12 +687,12 @@ s32 fldCheckSceneResourcesIdle(BtlUnit *self) {
             actor->node318 = 0;
         }
     }
-    if (self->node324 != 0) {
-        if (sndHasResourceFlagsOneOrEight(self->node324) != 0) {
+    if (self->listNode != 0) {
+        if (sndHasResourceFlagsOneOrEight(self->listNode) != 0) {
             return 0;
         }
-        sndFreeListNode(self->node324);
-        self->node324 = 0;
+        sndFreeListNode(self->listNode);
+        self->listNode = 0;
     }
     for (actor = scene->units; actor != 0; actor = actor->nextActor) {
         if (actor->status.flags & 0x200) {
@@ -721,12 +721,12 @@ s32 fldReleaseIdleSceneActorResources(BtlUnit *actor) {
         sndFreeResourceNode(actor->node318);
         actor->node318 = 0;
     }
-    if (actor->node324 != 0) {
-        if (sndHasResourceFlagsOneOrEight(actor->node324) != 0) {
+    if (actor->listNode != 0) {
+        if (sndHasResourceFlagsOneOrEight(actor->listNode) != 0) {
             return 0;
         }
-        sndFreeListNode(actor->node324);
-        actor->node324 = 0;
+        sndFreeListNode(actor->listNode);
+        actor->listNode = 0;
     }
     if (actor->effectLink.referenceCount != 0) {
         return 0;
@@ -1360,7 +1360,7 @@ s32 btlCommandStateSelectC(ActionStateLink *task) {
 void btlResetCommandIndexWork(ActionStateLink *task) {
     btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
-    task->unit->unk314 = 0xffffffff;
+    task->unit->pendingAbilityId = 0xffffffff;
 }
 
 void btlCommandStartSoundTasks(u8 *task) {
@@ -1570,10 +1570,10 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    if (action->unit->unk314 == -1)
+    if (action->unit->pendingAbilityId == -1)
         task = btlCreateEffObjD(action->unit, action->indexWork.skillId);
     else
-        task = btlCreateEffObjD(action->unit, action->unit->unk314);
+        task = btlCreateEffObjD(action->unit, action->unit->pendingAbilityId);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     task->ownerId = btlAdvanceRuntimeSequenceCounter();
@@ -1585,7 +1585,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
             if ((action->unit->status.flags & indexedTarget->status.flags & 0x600) == 0 ||
                     (indexedTarget->status.flags & 0x200) != 0) {
                 task = btlAllocateApproachTargetTask(action->unit,
-                    (s32)indexedTarget, state->unk4C8);
+                    (s32)indexedTarget, state->modelFrameScale);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = moveHandle;
                 btlStartTask(task);
@@ -2198,8 +2198,8 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     task->ownerId = masterOwner;
     btlStartTask(task);
     sndFormatResourceNameFromIndex(skill, resourceName);
-    unit->node324 = sndAllocListNode();
-    task = sndCreateFileLoadTask((ActiveSoundNode *)unit->node324, skill, resourceName);
+    unit->listNode = sndAllocListNode();
+    task = sndCreateFileLoadTask((ActiveSoundNode *)unit->listNode, skill, resourceName);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = soundHandle;
     task->ownerId = masterOwner;
@@ -2259,7 +2259,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 groupTask->startDelay = groupDelay;
                 groupTask->ownerId = actionOwner;
                 btlStartTask(groupTask);
-                task = sndCreateSkillSeTask((s32 *)unit->node324, 2);
+                task = sndCreateSkillSeTask((s32 *)unit->listNode, 2);
                 task->startCondition.kind = 7;
                 task->startCondition.value.handle = masterOwner;
                 task->startDelay = groupDelay;
@@ -2498,7 +2498,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             groupTask->endCondition.value.handle = actionOwner;
             groupTask->ownerId = btlAdvanceRuntimeSequenceCounter();
             btlStartTask(groupTask);
-            task = sndCreateSkillSeTask((s32 *)unit->node324, 1);
+            task = sndCreateSkillSeTask((s32 *)unit->listNode, 1);
             task->startCondition.kind = 7;
             task->startCondition.value.handle = masterOwner;
             task->endCondition.kind = 7;
@@ -3031,7 +3031,7 @@ void btlCommandTaskReturnStart(ActionStateLink *task) {
         actor = task->unit;
     }
     if (actor->status.flags & 0x200) {
-        btlBossDebugPrintf("return:player=%X[%X]\n", actor->unk2E4, actor->partyRecord.unitId);
+        btlBossDebugPrintf("return:player=%X[%X]\n", actor->partyIndex, actor->partyRecord.unitId);
     } else {
         btlBossDebugPrintf("return:enemy=%X\n", actor->partyRecord.unitId);
     }
@@ -3466,7 +3466,7 @@ void btlUnitTurnEndCommit(ActionStateLink *unit) {
     }
     btlAdvanceHistoryCounter(unit);
     btlResetIndexWork(&unit->indexWork);
-    owner->unk314 = -1;
+    owner->pendingAbilityId = -1;
     unit->flags &= ~1;
     unit->completedTurns += 1;
     owner->status.flags &= ~0x4000;
@@ -3565,7 +3565,7 @@ void btlRemoveEligibleActorSceneTask(ActionStateLink *task) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
-        unit->unk314 = -1;
+        unit->pendingAbilityId = -1;
         btlClearAllActorEntrySlots(unit);
         fldUpdateSceneGroupTask(task);
         btlRemoveTaskFromSceneGroup(task);
