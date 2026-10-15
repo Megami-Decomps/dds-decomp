@@ -239,6 +239,7 @@ def cmd_import(a: argparse.Namespace) -> None:
     sys.path.insert(0, str(perm))
     spec.loader.exec_module(imp)
     base, _ = imp.prune_source(src, True, fn)
+    from src.ast_util import process_pragmas
     (out / "base.c").write_text(base)
 
     me = Path(__file__).resolve()
@@ -248,13 +249,18 @@ def cmd_import(a: argparse.Namespace) -> None:
 
     fast = prototypes_only(template, full[find_def(full, fn)[0]:find_def(full, fn)[1]])
     dumps = []
-    for name in ("fast", "full"):
-        if name == "fast":
-            (out / "template_fast.c").write_text(fast)
-        else:
-            (out / "template_fast.c").unlink()
-        subprocess.run([out / "compile.sh", out / "base.c", "-o", out / f"check_{name}.o"])
-        dumps.append(dump(out / f"check_{name}.o")[3:])
+    # base.c keeps parser-safe asm pragmas; validate the decoded source that
+    # the permuter actually sends to the compiler, not ignored GCC pragmas.
+    with tempfile.TemporaryDirectory(dir=out) as t:
+        check_source = Path(t) / "base.c"
+        check_source.write_text(process_pragmas(base))
+        for name in ("fast", "full"):
+            if name == "fast":
+                (out / "template_fast.c").write_text(fast)
+            else:
+                (out / "template_fast.c").unlink()
+            subprocess.run([out / "compile.sh", check_source, "-o", out / f"check_{name}.o"], check=True)
+            dumps.append(dump(out / f"check_{name}.o")[3:])
     if dumps[0] == dumps[1] and len(dumps[0]) > 3:
         (out / "template_fast.c").write_text(fast)
     print("prototype-only unit:", "same code, used" if dumps[0] == dumps[1] else "differs, full unit used")
