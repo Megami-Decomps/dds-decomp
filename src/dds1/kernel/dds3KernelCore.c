@@ -52,7 +52,7 @@ extern u8 D_003BA828[];
 
 extern u8 D_003BA830[];
 
-extern u8 D_003BDC48[];
+extern u8 kwlnTaskTreePrefix[];
 
 extern s8 kwlnPadButtonStates[2][2][16];
 
@@ -340,20 +340,20 @@ void kwlnPrintTaskQueueDiagnostics(void)
 
 void kwlnPrintTaskTreeRecursive(KwlnTask *task, s32 depth)
 {
-    sdfDebugPrintf(D_003BA830, D_003BDC48, task);
+    sdfDebugPrintf(D_003BA830, kwlnTaskTreePrefix, task);
     if (task->childList != NULL) {
         if (task->parent == NULL) {
-            D_003BDC48[0] = ' ';
+            kwlnTaskTreePrefix[0] = ' ';
         } else {
             if (task->next == NULL) {
-                D_003BDC48[depth * 4] = ' ';
+                kwlnTaskTreePrefix[depth * 4] = ' ';
             } else {
-                D_003BDC48[depth * 4] = '|';
+                kwlnTaskTreePrefix[depth * 4] = '|';
             }
         }
-        D_003BDC48[depth * 4 + 4] = 0;
+        kwlnTaskTreePrefix[depth * 4 + 4] = 0;
         kwlnPrintTaskTreeRecursive(task->childList, depth + 1);
-        D_003BDC48[depth * 4] = 0;
+        kwlnTaskTreePrefix[depth * 4] = 0;
     }
     if (task->next != NULL) {
         kwlnPrintTaskTreeRecursive(task->next, depth);
@@ -367,23 +367,23 @@ void kwlnVisitTaskForestRoots(void)
     s32 i;
 
     for (i = 0; i < 0x40; i++) {
-        D_003BDC48[i] = 0x20;
+        kwlnTaskTreePrefix[i] = 0x20;
     }
     for (task = kwlnDelayedStartTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
-            D_003BDC48[0] = 0;
+            kwlnTaskTreePrefix[0] = 0;
             kwlnPrintTaskTreeRecursive(task, 0);
         }
     }
     for (task = kwlnActiveTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
-            D_003BDC48[0] = 0;
+            kwlnTaskTreePrefix[0] = 0;
             kwlnPrintTaskTreeRecursive(task, 0);
         }
     }
     for (task = kwlnDelayedDestroyTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
-            D_003BDC48[0] = 0;
+            kwlnTaskTreePrefix[0] = 0;
             kwlnPrintTaskTreeRecursive(task, 0);
         }
     }

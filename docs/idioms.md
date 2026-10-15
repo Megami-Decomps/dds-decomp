@@ -712,9 +712,9 @@ functions use trampolines and are a different case.
 - A struct containing `u32 slot[25]` keeps `slot[i]`'s `sll 2` outside
   the loop; a bare pointer indexed by `i + 3` strength-reduces
   (`func_0030DAA0`).
-- A local `s32 *work = D_0043E5C0` reused for field offsets keeps
-  one `lui/addiu` base; direct `D_0043E5C0 + 0x14` biases the base
-  instead (`func_0011DB20`).
+- For the original array view of `evtWorkScriptContext` (`0x0043E5C0`),
+  a local `s32 *work` reused for field offsets keeps one `lui/addiu`
+  base; direct `base + 0x14` biases it instead (`func_0011DB20`).
 - An array-element store `D_003BA928[3] = 0x80` produces retail's
   `sb; jr; nop`; using a separate symbol for that byte lets the
   assembler fill the return slot (`func_00106240`).
