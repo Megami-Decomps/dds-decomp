@@ -116,26 +116,26 @@ void effBossInitializeModelGroups(EffBossWork *work)
 }
 
 /* Copy the trail head and create its model, cell system and per-map groups. */
-EffBossWork *effBossCreate(EffBossParams *src, void *param1) {
+EffBossWork *effBossCreate(EffBossParams *bossParams, void *effectParams) {
     EffBossWork *work;
 
     work = sdfAllocSizeClassBlock(sizeof(EffBossWork));
-    work->head = src->head;
+    work->head = bossParams->head;
     work->frame = 0;
     work->color = 0x80808080;
-    work->paramWork = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, param1);
+    work->paramWork = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, effectParams);
     effBossInitializeModelGroups(work);
     return work;
 }
 
 /* Apply the first two packed parameter blocks to the boss effect. */
 void effPCPBossApplyTwoBlocks(void *data) {
-    void *firstBlock;
-    void *secondBlock;
+    EffBossParams *bossParams;
+    void *effectParams;
 
-    firstBlock = effParamTableGetBlock(data, 0);
-    secondBlock = effParamTableGetBlock(data, 1);
-    effBossCreate(firstBlock, secondBlock);
+    bossParams = effParamTableGetBlock(data, 0);
+    effectParams = effParamTableGetBlock(data, 1);
+    effBossCreate(bossParams, effectParams);
 }
 
 /* Duplicate model parameters and rebuild groups with a fresh frame counter. */
@@ -450,26 +450,26 @@ void func_00185A48(void) {
 }
 
 /* Apply per-cell rotation onset and speed after creating the trail groups. */
-EffBossWork *effBossCreateWithGroups(EffBossParams *src, void *param1) {
+EffBossWork *effBossCreateWithGroups(EffBossParams *bossParams, void *effectParams) {
     EffBossWork *work;
     u32 i;
 
-    work = effBossCreate(src, param1);
+    work = effBossCreate(bossParams, effectParams);
     for (i = 0; i < work->groupCount; i++) {
-        work->groups[i].rotationStartAge = src->rotationStartAge;
+        work->groups[i].rotationStartAge = bossParams->rotationStartAge;
         work->groups[i].rotationAngle = 0.0f;
-        work->groups[i].angularSpeed = src->angularSpeed;
+        work->groups[i].angularSpeed = bossParams->angularSpeed;
     }
     return work;
 }
 
 void effBossCreateGroupsFromPackedParams(void *data) {
-    void *work0;
-    void *work1;
+    EffBossParams *bossParams;
+    void *effectParams;
 
-    work0 = effParamTableGetBlock(data, 0);
-    work1 = effParamTableGetBlock(data, 1);
-    effBossCreateWithGroups(work0, work1);
+    bossParams = effParamTableGetBlock(data, 0);
+    effectParams = effParamTableGetBlock(data, 1);
+    effBossCreateWithGroups(bossParams, effectParams);
 }
 
 /* Preserve rotation settings, but restart every group's accumulated angle. */
