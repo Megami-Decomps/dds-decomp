@@ -8369,7 +8369,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
     for (unit = battle->units; unit != 0; unit = unit->next) {
         s32 flags = unit->status.flags;
         if ((flags & filter) && (flags & 1)) {
-            f32 halfWidth = unit->unkBC * unit->scale;
+            f32 halfWidth = unit->bodyRadius * unit->scale;
             actors[count++] = unit;
             totalWidth += halfWidth + halfWidth;
         }
@@ -8412,7 +8412,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
     totalArcAngle = -spacingAngle;
     for (i = 0; i < count; i++) {
         unit = actors[i];
-        distance = unit->unkBC * unit->scale;
+        distance = unit->bodyRadius * unit->scale;
         halfAngle = func_002F9CD0(distance / radius);
         totalArcAngle += halfAngle + halfAngle;
         totalArcAngle += spacingAngle;
@@ -8431,7 +8431,7 @@ s32 btlArrangeFormationSlots(s32 filter) {
     }
     for (i = count - 1; i != (u32)-1; i--) {
         unit = actors[i];
-        halfAngle = func_002F9CD0(unit->unkBC * unit->scale / radius);
+        halfAngle = func_002F9CD0(unit->bodyRadius * unit->scale / radius);
         angle += halfAngle;
         position[0] = sdfSinPoly(angle) * radius;
         position[1] = 0.0f;
@@ -8535,7 +8535,7 @@ void btlPlaceTripleFormationAroundTarget(BtlTask *link, BtlUnit *first, BtlUnit 
         btlUnitGetMuzzlePosVU(target);
         VU0_STORE_VF(vf10, center);
         center[1] = 0.0f;
-        radius = target->unkBC * target->scale;
+        radius = target->bodyRadius * target->scale;
         radius += 100.0f;
         if (radius < 500.0f) {
             radius = 500.0f;
@@ -8595,7 +8595,7 @@ void btlPlaceTripleFormationAroundMiddleActor(BtlTask *link, BtlUnit *first, Btl
     VU0_MOVE_VF(vf11, vf10);
     VU0_NEGATE_XYZ(vf11);
     VU0_STORE_VF(vf11, dir);
-    radius = slot[1]->unkBC * slot[1]->scale;
+    radius = slot[1]->bodyRadius * slot[1]->scale;
     radius += 100.0f;
     VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF_UNCLOBBERED(vf10, center);
@@ -8605,7 +8605,7 @@ void btlPlaceTripleFormationAroundMiddleActor(BtlTask *link, BtlUnit *first, Btl
     VU0_STORE_VF_UNCLOBBERED(vf10, center);
     center[1] = 0.0f;
     for (i = 0; i < 3; i++) {
-        radius = slot[i]->unkBC * slot[i]->scale;
+        radius = slot[i]->bodyRadius * slot[i]->scale;
         radius += 100.0f;
         if (i != 1) {
             if (i == 0) {

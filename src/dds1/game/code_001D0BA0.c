@@ -2304,7 +2304,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
         fx->height = alt->height;
     }
     PCP_COPY_VECTOR(fx->muzzleOffset, base);
-    fx->unkBC = base->reach;
+    fx->bodyRadius = base->reach;
     fx->unkB8 = base->height;
     fx->cameraRadius = base->cameraRadius;
     fx->scale = base->actorScale;
@@ -3482,7 +3482,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         VU0_LOAD_VF(vf11, world);
         VU0_SUB(vf10, vf10, vf11);
         VU0_LENGTH_VF10(distance);
-        if (distance < 2.0f * (unit->unkBC * unit->scale)) {
+        if (distance < 2.0f * (unit->bodyRadius * unit->scale)) {
             effObjSetInnerPosition(unit->effectObject, (u128 *)world);
             unit->status.stateFlags |= 0x8000;
             btlBossDebugPrintf(D_003A3BB8, unit);
@@ -4651,7 +4651,7 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
             }
         }
     }
-    amplitude = unit->unkBC * unit->scale * 0.8f;
+    amplitude = unit->bodyRadius * unit->scale * 0.8f;
     if (amplitude > 100.0f) {
         amplitude = 100.0f;
     }

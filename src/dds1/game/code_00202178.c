@@ -3446,7 +3446,7 @@ void btlConfigureRavanaUnitDimensions(BtlUnit *unit) {
     unit->height = 100.0f;
     unit->reach = 25.0f;
     unit->unkB8 = 100.0f;
-    unit->unkBC = 25.0f;
+    unit->bodyRadius = 25.0f;
     if (((BtlBossEffectPayload *)battleData)->selectedId != unit->lookupId) {
         entry = btlFindUnitByActor(unit);
         if (entry != 0) {
@@ -3728,7 +3728,7 @@ void btlRefreshRavanaUnitModelsAndPose(void) {
                             unit->height = 100.0f;
                             unit->unkB8 = 100.0f;
                             unit->reach = 25.0f;
-                            unit->unkBC = 25.0f;
+                            unit->bodyRadius = 25.0f;
                             unit->bodyOffsetZ += 150.0f;
                         }
                     }
