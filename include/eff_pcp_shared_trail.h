@@ -13,7 +13,7 @@ typedef struct EffPCPSharedTrail {
     u32 frame;
     f32 sizeInput; /* 0x1C: converted to the rendered extent by the camera helper. */
     u32 limit;
-    u32 unk24;
+    u32 baseLimit; /* 0x24: original trail frame limit. */
     u32 colors[2];
     f32 scale;
     s32 minSize;
@@ -26,6 +26,8 @@ typedef char EffPCPSharedTrail_flags_offset_must_be_0x10[
     ((u32)&((EffPCPSharedTrail *)0)->flags == 0x10) ? 1 : -1];
 typedef char EffPCPSharedTrail_sizeInput_offset_must_be_0x1C[
     ((u32)&((EffPCPSharedTrail *)0)->sizeInput == 0x1C) ? 1 : -1];
+typedef char EffPCPSharedTrail_baseLimit_offset_must_be_0x24[
+    ((u32)&((EffPCPSharedTrail *)0)->baseLimit == 0x24) ? 1 : -1];
 typedef char EffPCPSharedTrail_colors_offset_must_be_0x28[
     ((u32)&((EffPCPSharedTrail *)0)->colors == 0x28) ? 1 : -1];
 typedef char EffPCPSharedTrail_obj_offset_must_be_0x38[
