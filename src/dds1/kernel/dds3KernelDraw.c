@@ -5,6 +5,7 @@
 #include "eff_blur.h"
 #include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
+#include "eff_event_work_api.h"
 #include "eff.h"
 #include "kwln_draw_params.h"
 
@@ -85,7 +86,6 @@ extern u16 kwlnTexturedSquareFadeCounter;
 extern u16 kwlnTexturedSquareFadeDuration;
 extern u32 kwlnDistanceBlurErrorCount;
 extern u32 kwlnRippleBlurErrorCount;
-extern u32 effGetCh76Work(void);
 extern void effMiscNormalizeVU(void);
 
 #define KWLN_DRAW_VECTOR_PARAM_BYTES 0x14
@@ -209,7 +209,6 @@ void kwlnDrawSetE08Triple(u32 extent, u32 centerX, u32 centerY) {
 extern KwlnResourceRectParams D_003C2DE0;
 extern u16 D_003BD75C;
 extern u16 D_003BD75E;
-extern u32 effGetCh75Work(void);
 
 /* Save the live textured-square params; zero copies the staged body immediately. */
 void kwlnDrawSetupE08FromCh75(s32 duration) {
