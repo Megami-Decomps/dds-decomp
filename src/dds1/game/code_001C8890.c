@@ -503,8 +503,8 @@ void btlProcessStatusRecoveryAction(BtlTask *link) {
 void btlEnterPreActionStatusState(void) {
 }
 
-void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
-    BtlUnit *ctx;
+void btlStartCommandSoundAndEffectTasks(u8 *battleTask) {
+    BtlUnit *unit;
     u8 *task;
     u64 value;
     s32 count;
@@ -515,64 +515,64 @@ void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
     if (btlCountTasksByKind(0x45) != 0) {
         return;
     }
-    ctx = *(BtlUnit **)(arg0 + 0x18);
+    unit = *(BtlUnit **)(battleTask + 0x18);
     value = btlAdvanceRuntimeSequenceCounter();
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());
-    if ((u32)ctx->status.flags & 0x200) {
-        btlStartTask(btlCreateCommandSoundTask(arg0, 9));
+    if ((u32)unit->status.flags & 0x200) {
+        btlStartTask(btlCreateCommandSoundTask(battleTask, 9));
     } else {
-        btlStartTask(btlCreateCommandSoundTask(arg0, 3));
+        btlStartTask(btlCreateCommandSoundTask(battleTask, 3));
     }
-    switch (*(u16 *)((u8 *)ctx + 0x12E) & 0x7FFF) {
+    switch (*(u16 *)((u8 *)unit + 0x12E) & 0x7FFF) {
     case 0x200:
-        func_001FF0C8(arg0, 0);
-        btlDispatchStateHandler(arg0, 0xC);
+        func_001FF0C8(battleTask, 0);
+        btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 0x2000:
-        func_001FF0C8(arg0, 1);
-        btlDispatchStateHandler(arg0, 0xC);
+        func_001FF0C8(battleTask, 1);
+        btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 0x20:
-        if ((u32)((BtlTask *)arg0)->unit->status.flags & 0x200) {
-            func_001FF0C8(arg0, 2);
+        if ((u32)((BtlTask *)battleTask)->unit->status.flags & 0x200) {
+            func_001FF0C8(battleTask, 2);
         } else {
-            func_001FF0C8(arg0, 3);
+            func_001FF0C8(battleTask, 3);
         }
-        btlDispatchStateHandler(arg0, 0xC);
+        btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 0x40:
-        func_001FF0C8(arg0, 4);
-        btlDispatchStateHandler(arg0, 0xC);
+        func_001FF0C8(battleTask, 4);
+        btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 1:
-        *(s32 *)(arg0 + 0x20) = 0xD;
-        btlDispatchStateHandler(arg0, 0xC);
+        *(s32 *)(battleTask + 0x20) = 0xD;
+        btlDispatchStateHandler(battleTask, 0xC);
         break;
     case 8:
-        task = fldCreateSceneGroupAction(arg0, 0x64, 1);
+        task = fldCreateSceneGroupAction(battleTask, 0x64, 1);
         *task = 7;
         *(u64 *)(task + 8) = value;
-        *(u64 *)(task + 0x40) = *(u64 *)((u8 *)ctx + 0x108);
+        *(u64 *)(task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
         btlStartTask(task);
-        btlDispatchStateHandler(arg0, 0x1A);
+        btlDispatchStateHandler(battleTask, 0x1A);
         break;
     case 0x800:
-        task = fldCreateSceneGroupAction(arg0, 0x64, 1);
+        task = fldCreateSceneGroupAction(battleTask, 0x64, 1);
         *task = 7;
         *(u64 *)(task + 8) = value;
-        *(u64 *)(task + 0x40) = *(u64 *)((u8 *)ctx + 0x108);
+        *(u64 *)(task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
         btlStartTask(task);
-        btlDispatchStateHandler(arg0, 0x1A);
+        btlDispatchStateHandler(battleTask, 0x1A);
         break;
     }
-    count = btlGetStatusActionEffectId(arg0);
+    count = btlGetStatusActionEffectId(battleTask);
     if (count > 0) {
-        task = (u8 *)btlCreateEffObjB(ctx, count);
+        task = (u8 *)btlCreateEffObjB(unit, count);
         *(u64 *)(task + 0x40) = value;
         btlStartTask(task);
     }
-    *(u32 *)(arg0 + 8) |= 0x200;
+    *(u32 *)(battleTask + 8) |= 0x200;
 }
 
 /* Enter COMMAND by clearing its one-shot audio flag and opening the command panel. */
