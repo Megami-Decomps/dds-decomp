@@ -7,13 +7,13 @@
 
 s32 dds3ExchangeAreaSlot(void *areaObject);
 
-const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
+const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 slotIndex, EffWorldNode *value) {
     EffWorldNode *node;
 
     if (object == NULL || value == 0) {
         return 0;
     }
-    node = ((EvtWorldTable *)object->data)->slots[index].head;
+    node = ((EvtWorldTable *)object->data)->slots[slotIndex].head;
     while (node != NULL) {
         if (node == value) {
             return 1;
