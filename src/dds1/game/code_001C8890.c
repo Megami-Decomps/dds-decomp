@@ -1452,7 +1452,7 @@ extern u8 *btlCreateActorPositionEffectTask(u8 *);
 extern const char D_003A3670[];
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
-void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light);
+void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
 extern void *btlCreateEffectTaskWithSourceParams(u8 *, u32);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 extern u8 *btlCreateLinkageFormationTask(u8 *, u32, u32, u32, u32);
