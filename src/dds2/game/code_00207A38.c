@@ -2644,7 +2644,7 @@ extern f32 D_00453010[2][4];
  * rotation into one of two slots (alternating), the other toggles a camera
  * command built from both saved slots with a 40-degree field of view. The
  * debug-menu descriptors mirror the command's active bit. */
-void func_0020CEF8(void) {
+void btlUpdateDebugCameraFromPad(void) {
     BtlState *state = btlGetRuntime();
     EffWorldNode *camera;
 

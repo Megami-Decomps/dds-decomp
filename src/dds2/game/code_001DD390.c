@@ -545,7 +545,7 @@ extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
-extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, u32);
+extern s32 btlDetermineActionPressResult(BtlUnit *, BtlUnit *, u32);
 
 extern u32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, u32, s32, s32);
 
@@ -885,7 +885,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 press = 1;
                 break;
             default:
-                press = func_001AF0B0(source, recipient, command);
+                press = btlDetermineActionPressResult(source, recipient, command);
                 if (action->flags & 1) {
                     if (press != 4) {
                         press = 2;
@@ -5868,7 +5868,7 @@ extern f32 D_003B6D30[4], D_003B6D40[4];
 /* Per-frame battle camera update: run the active camera mode's update hook,
  * advance the command's pose blend, optionally re-express the pose through
  * the command rotation, then push the pose into the world camera. */
-void func_001E9130(void) {
+void btlUpdateBattleCameraFrame(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u32 kind;
     EffWorldNode *camera;

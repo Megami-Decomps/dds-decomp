@@ -497,7 +497,6 @@ typedef char EffResourceOwner_entries_check[(u32)&((EffResourceOwner *)0)->entri
 typedef char EffResourceOwner_buffer_check[(u32)&((EffResourceOwner *)0)->buffer == 0xBC ? 1 : -1];
 typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model == 0xC0 ? 1 : -1];
 
-extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern void *effCreateResourceOwner(void *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);

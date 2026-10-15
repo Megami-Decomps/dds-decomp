@@ -30,7 +30,9 @@ typedef struct SolarSpriteContext {
 
 /* Indexed triangle-fan table view: position/color arrays and their count. */
 typedef struct SolarOverlayShape {
-    u8 opaque00[0x0C];
+    s32 *pointPositions; /* 0x00: fan pulsed by the solar point timers */
+    u32 *pointColors;
+    s32 pointCount;
     s32 *positions;
     u32 *colors;
     s32 count;

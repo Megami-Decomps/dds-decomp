@@ -48,6 +48,7 @@ extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern void btlUpdateScene(void);
+extern void btlUpdateBattleCameraFrame(void);
 extern s32 btlRuntime;
 
 extern KwlnTask *kwlnTaskFindByPriority(u32);
@@ -295,7 +296,7 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         btlUpdateActiveActorModelState();
         btlUpdateActiveFrameNoOp();
         btlSweepFinishedTasks();
-        func_001DBE68();
+        btlUpdateBattleCameraFrame();
         /* The callbacks above may replace the runtime; advance its current frame. */
         ++((BtlState *)btlRuntime)->frame;
     } else {

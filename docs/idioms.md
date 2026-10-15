@@ -12409,7 +12409,7 @@ usable final reconstruction.
 
 ## Battle debug-camera toggle counterpart
 
-DDS1 `func_001FAE78` (472 bytes) follows the exact DDS2 `func_0020CEF8` donor.
+DDS1 `btlUpdateDebugCameraFromPad` at `0x001FAE78` (472 bytes) follows the exact DDS2 twin at `0x0020CEF8`.
 The two saved position and rotation slots use the existing
 `PCP_COPY_VECTOR_UNCLOBBERED`: each full-vector LQ/SQ pair has pointer operands
 and a `$2` clobber, and the toggle byte loaded before the pair remains live
@@ -12548,3 +12548,27 @@ Both hooked compiler outputs equal their unhooked controls. Each complete unit
 gates `101 match, 0 differ`, including all earlier C and readonly data. The
 three-step trajectory, exact trace paths and deciding pass locations are in
 the agent ledger.
+
+## A field cursor over copied record banks
+
+DDS2 `mnuSpawnMantraPanelSequence` (00291DD0, 1668 bytes) snapshots one
+eight-byte table and two 32-byte tables before any callbacks. Each four-byte
+record has a signed halfword ID and a signed byte kind at offset2. Retail
+walks the kind field, loading the ID at−2 and the kind at0. A record-base
+iterator instead retains the copy destination across earlier calls through
+PRE, changing the cursor and register allocation.
+
+Derive the byte cursor from the complete actual array representation, recover
+the containing record for its ID, and read the real kind byte. Advance by the
+record size only when another row exists. This preserves defined access within
+the actual bank and gives retail's single cursor. Keep the second-bank snapshot
+used by its copy and traversal; the final kind read is the direct
+`secondRows[1].kind` member, while its ID comes from `initialRows[1]`.
+
+Keep the small external table's declaration unsized. Its native extent is
+still eight bytes and the local snapshot bounds the copy. A `[2]` external
+bound makes cc1 select a GP-small address; the unsized declaration gives
+retail's full address. Explicit builtin copies also preserve retail's table
+initialization order here; automatic local initializers reorder the first
+two copies. These are properties of the actual owners and accesses, not
+permission to invent a biased layout or an extra use.

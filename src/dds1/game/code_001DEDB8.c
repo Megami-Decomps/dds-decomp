@@ -480,12 +480,12 @@ void btlUpdateLinkedHeightCamera(BtlLinkedCommand *action) {
     btlStepUnitHeightFramedCamera(action);
 }
 
-extern void func_001E5198(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 void btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *action) {
     BtlTask *task = action->task;
     btlAppendIndexListEntry(action->targetList, task->unit);
-    func_001E5198(action, &action->frontCamera, &action->backCamera);
+    btlBuildRandomDefeatCandidateCameraPair(action, &action->frontCamera, &action->backCamera);
     btlClearAllUnitDefeatCandidates();
     task = action->task;
     btlFlagUnitDefeatCandidate(task->unit);
@@ -2198,7 +2198,7 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
 
-void func_001E5198(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4];
     f32 position[4];
     BattlePairCameraFramePreset poses[2] = {
@@ -5711,7 +5711,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     owner = args->option == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
     if (args->source->flags & 2) {
         if (args->effect == NULL) {
-            args->effect = func_00160958(args->source->resourceHandle, args->option, owner, 0);
+            args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, args->option, owner, 0);
             args->duration = sndSetEffectNodeParameter(args->source, args->option);
             if ((owner->effectLink.packed & 0xA) == 8) {
                 args->duration = 35;
@@ -5815,7 +5815,7 @@ s32 sndUpdateActorEffectTask(ActorEffectTaskArgs *args) {
         return 1;
     }
     if (args->effect == 0) {
-        args->effect = func_00160958(args->source->resourceHandle, 0, unit, 0);
+        args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, 0, unit, 0);
         effBattleUpdateSelectedValue((u8 *)args->effect, args->duration);
     }
     if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
@@ -6058,7 +6058,7 @@ s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
     owner = args->owner.unit;
 
     if (args->effect == NULL) {
-        args->effect = func_00160958(args->source->resourceHandle, 0, owner, 0);
+        args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, 0, owner, 0);
         args->effect->flags |= 1;
     }
     if (args->frameCount < 12) {
@@ -6459,7 +6459,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         if (link->effectHandle == 0) {
             link->effect = work->soundResourceSlots[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
             sndCreateSystemEffect(link->effect);
-            link->effectHandle = func_00160958(link->effect->resourceHandle, 2, actor, 0);
+            link->effectHandle = effCreateBattleVoiceOwner(link->effect->resourceHandle, 2, actor, 0);
             link->effect->referenceCount++;
             link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
         }

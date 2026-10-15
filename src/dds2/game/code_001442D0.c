@@ -49,6 +49,7 @@
 #include "dds3_world_counter.h"
 #include "kwln_fade.h"
 #include "fr_font.h"
+#include "itf.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
 
@@ -1344,7 +1345,6 @@ extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
-extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
 extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
 
