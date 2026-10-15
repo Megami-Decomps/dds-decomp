@@ -192,7 +192,7 @@ typedef struct WorldTransformData {
 } WorldTransformData;
 
 void dds3LoadWorldTransformSetup(EffWorldNode *object, WorldTransformSetup *setup);
-void dds3LoadWorldTransformParams(EffWorldNode *object, WorldTransformParams *params);
+void dds3LoadWorldTransformParams(EffWorldNode *object, const WorldTransformParams *params);
 
 typedef char WorldTransformData_offsets_must_match_paired_loaders[
     ((u32)&((WorldTransformData *)0)->position == 0x00 &&
