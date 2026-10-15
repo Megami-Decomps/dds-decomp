@@ -308,7 +308,7 @@ typedef struct DatEnemyRecord {
     u8 pad16[2];
     u16 skills[8];        /* 0x18 */
     s32 money;            /* 0x28 */
-    u16 unk2C;
+    u16 battleExperienceReward; /* 0x2C: base EXP awarded on enemy defeat. */
     u16 experience;       /* 0x2E */
     u16 huntExperience;   /* 0x30 */
     u8 pad32[4];
@@ -327,6 +327,8 @@ typedef struct DatEnemyRecord {
 } DatEnemyRecord;
 
 typedef char DatEnemyRecordSizeCheck[sizeof(DatEnemyRecord) == 0x4C ? 1 : -1];
+typedef char DatEnemyRecordBattleExperienceRewardOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->battleExperienceReward == 0x2C) ? 1 : -1];
 typedef char DatEnemyActionChancesOffsetCheck[((u32)&((DatEnemyRecord *)0)->actionChances == 0x40) ? 1 : -1];
 typedef char DatEnemyOverrideFlagOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideFlag == 0x42) ? 1 : -1];
 typedef char DatEnemyOverrideActionOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideAction == 0x44) ? 1 : -1];
