@@ -13615,3 +13615,22 @@ for start/end transition windows by the matched unit color commands. Both
 games contain `(0,5,15,30)`. This caller evidence supplies a narrower role than
 the getter name alone; the getter interface and its unchecked lookup remain
 unchanged. Numeric fallback bytes agree across titles; pointer-bank bytes do not.
+
+## DDS2 original-title save notices
+
+DDS2's matched file status renderer has message paths absent from DDS1:
+`fileOriginalTitleSaveMissingText` is status 7's transfer-mode alternative;
+status 8 starts with `fileNotClearedGameSaveText` and ends with the two
+`fileSelectClearedGameSaveMessageLine*` fragments. Its two intervening shared
+fragments remain unnamed because the separately held prompt renderer also
+references them. Status 9 draws `fileCorruptSaveDataMessageLine1` through
+`fileCorruptSaveDataMessageLine3`, retaining the native game title and font
+marker.
+
+The four `fileOriginalTitleSaveBenefitsMessageLine*` fragments form flow
+20's original-title save-data foreword. Flows 21 through 24 show the
+`fileRareItemAvailabilityMessageLine*`, `fileCharacterStatBonusMessageLine*`,
+`fileDifficultySelectionAvailableText` and `fileDataTransferCompleteText`
+notices. These latter names describe the text, not an exclusive caller or an
+implementation of the advertised reward/difficulty change. Do not merge the
+individual NUL strings, add C literals, or manufacture DDS1 counterparts.
