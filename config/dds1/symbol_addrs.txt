@@ -30,6 +30,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+btlBuildProjectedActorPairBoundsVU = 0x001EE658; // type:func
 btlBuildMaskedGroupFramingCameraPose = 0x001E20C0; // type:func
 evtViewerApplyCommandSelection = 0x00230660; // type:func
 parDrawPendingParticleRecords = 0x0015B420; // type:func
@@ -9071,7 +9072,6 @@ btlApplyScriptCameraTrack = 0x001ECCA8; // type:func
 func_001ED5C8 = 0x001ED5C8; // type:func
 func_001EDB20 = 0x001EDB20; // type:func
 func_001EE160 = 0x001EE160; // type:func
-func_001EE658 = 0x001EE658; // type:func
 btlInitializeCameraCursorForActorMode = 0x001EEAE0; // type:func
 btlAdvanceTimedCameraOrApproach = 0x001EEED8; // type:func
 btlBeginSceneLightColorTransition = 0x001EFD58; // type:func
