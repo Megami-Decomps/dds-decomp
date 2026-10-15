@@ -692,8 +692,8 @@ s32 brsPollResultCounterCompletion(void) {
     for (counterIndex = 0; counterIndex < BRS_RESULT_COUNTER_PAIR_COUNT; counterIndex++) {
         if (resultWork->levelCounters[counterIndex].phase >= 2) {
             if (resultWork->levelCounters[counterIndex].remaining != 0 ||
-                resultWork->levelCounters[counterIndex].pad4C[0] != 0 ||
-                resultWork->levelCounters[counterIndex].pad60[0] != 0) {
+                resultWork->levelCounters[counterIndex].progressIconState[0] != 0 ||
+                resultWork->levelCounters[counterIndex].completionIconState[0] != 0) {
                 return 0;
             }
         } else if (resultWork->levelCounters[counterIndex].remaining != 0) {

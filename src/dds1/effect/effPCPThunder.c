@@ -1570,7 +1570,7 @@ EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *parameters) {
     work->cells = (EffThunderCell *)(work + 1);
     work->allocationHandle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.cellCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_SIX_VECTOR);
-    parDecreaseStripCellAlpha(work->system, work->head.arg34, work->head.arg3C, work->head.arg44);
+    parDecreaseStripCellAlpha(work->system, work->head.centerColor, work->head.middleColor, work->head.edgeColor);
     parSetCellDrawBucket(work->system, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {
         effThunderRandomizeCell(work, i);

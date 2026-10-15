@@ -25,11 +25,11 @@ typedef struct EffThunderCellParams {
     u16 halfLife;
     u8 pad2E[2];
     f32 coreWidth;
-    u32 arg34;
+    u32 centerColor;
     f32 bandWidth;
-    u32 arg3C;
+    u32 middleColor;
     f32 edgeWidth;
-    u32 arg44;
+    u32 edgeColor;
 } EffThunderCellParams;
 
 /* Header followed by a variable-length EffThunderCell array in one allocation. */
