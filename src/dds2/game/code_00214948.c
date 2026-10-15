@@ -4233,13 +4233,13 @@ s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
     if (!(unit->status.flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
-    if (datActionAnimationRecords[index].kind == 0) {
+    if (datActionAnimationRecords[index].resourceType == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[index].kind >= 11 && datActionAnimationRecords[index].kind < 26) {
+    if (datActionAnimationRecords[index].resourceType >= 11 && datActionAnimationRecords[index].resourceType < 26) {
         return -1;
     }
-    switch (datActionAnimationRecords[index].kind) {
+    switch (datActionAnimationRecords[index].resourceType) {
     case 1: return 0xC;
     case 2: return 0xD;
     case 3: return 0xE;
@@ -4258,10 +4258,10 @@ s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
     if (!(unit->status.flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
-    if (datActionAnimationRecords[index].kind == 0) {
+    if (datActionAnimationRecords[index].resourceType == 0) {
         return -1;
     }
-    return datActionAnimationRecords[index].kind;
+    return datActionAnimationRecords[index].resourceType;
 }
 
 s32 btlRemapBossResponseForActionPhase(BtlUnit *unit, s32 value) {
@@ -6077,14 +6077,14 @@ s32 btlActionResourceTypeToMotionId(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[action].kind == 0) {
+    if (datActionAnimationRecords[action].resourceType == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[action].kind >= 0xB &&
-        datActionAnimationRecords[action].kind <= 0x19) {
+    if (datActionAnimationRecords[action].resourceType >= 0xB &&
+        datActionAnimationRecords[action].resourceType <= 0x19) {
         return -1;
     }
-    switch (datActionAnimationRecords[action].kind) {
+    switch (datActionAnimationRecords[action].resourceType) {
     case 3: return 0xF;
     case 4: return 0x13;
     case 5: return 0x12;
@@ -7508,7 +7508,7 @@ s32 btlCheckActionUnitResourceEligibility(BtlUnit *unit, s32 type) {
     if ((unit->status.flags & 0x400) == 0) {
         return -1;
     }
-    resourceType = datActionAnimationRecords[type].kind;
+    resourceType = datActionAnimationRecords[type].resourceType;
     if (resourceType == 0) {
         return -1;
     }

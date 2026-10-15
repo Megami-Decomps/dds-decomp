@@ -4372,7 +4372,7 @@ s32 btlMapSpeciesToActionVariant(u8 *unit, s32 action) {
     if ((((BtlUnit *)unit)->status.flags & 0x400) == 0) {
         return -1;
     }
-    if (datActionAnimationRecords[action].kind == 0) {
+    if (datActionAnimationRecords[action].resourceType == 0) {
         return -1;
     }
     switch (((BtlUnit *)unit)->partyRecord.unitId) {
