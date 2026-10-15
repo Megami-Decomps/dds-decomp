@@ -717,10 +717,10 @@ typedef struct EffRingWork {
     u32 updateCount;
     u32 color;
     f32 scale;
-    f32 orbitRadius;
-    f32 axisOffset;
-    f32 baseHalfWidth;
-    f32 tipHalfWidth;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
     SdfMemBlock *allocationHandle;
     EffRecordPool *recordPool;
 } EffRingWork;

@@ -137,12 +137,6 @@ u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
     return color[0];
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DE0);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DF0);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0E00);
-
 extern void sdfDebugPrintf(const char *, ...);
 typedef struct EffBattleUnitRgbCommand {
     u32 color; u32 startFrame; s32 startDurationIndex; u32 endFrame; s32 endDurationIndex;
@@ -169,6 +163,12 @@ extern void effParamWorkCallback3(EffParamWork *, u32); extern void effParamWork
 extern void effParamWorkCallback5(EffParamWork *, f32); extern void effParamWorkInvokeCallback(EffParamWork *);
 extern void fileSetRenderFlag(u32); extern void fileClearRenderFlag(u32);
 extern void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *, s32);
+INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DE0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DF0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0E00);
+
 void effBattleUpdate(BattleEffect *work) {
     BtlUnit *unit;
     EffBattleEntryList *list;

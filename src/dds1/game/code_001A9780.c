@@ -3670,12 +3670,12 @@ void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *task) {
     evtFinishMessageWindowAndNotify();
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B50);
-
 extern const BattlePanelColors D_003A2B50;
 
 /* Advance the command-panel notice dialog: fade in, hold, look up the panel, fade out;
  * return -1 after closing the channel once the phase leaves 0-6. */
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B50);
+
 s32 func_001B5970(KwlnTask *task) {
     BattlePanelColors colors = D_003A2B50;
     BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
