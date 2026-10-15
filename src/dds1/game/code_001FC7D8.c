@@ -687,7 +687,7 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
 
 extern s32 btlPollActorOrEntryLabelTask();
 
-BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
+BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -699,7 +699,7 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
     task->callback = btlPollActorOrEntryLabelTask;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    link->arg = arg;
+    link->arg = resourceIndex;
     link->elapsedTicks = 0;
     return task;
 }
