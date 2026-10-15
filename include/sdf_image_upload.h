@@ -33,4 +33,7 @@ typedef char SdfImageUploadRequest_layout[
      (u32)&((SdfImageUploadRequest *)0)->destination == 0x0C &&
      (u32)&((SdfImageUploadRequest *)0)->x == 0x10) ? 1 : -1];
 
+/* Queue a GS image upload with its pixel allocation and release mode. */
+void sdfTexQueueImageUpload(SdfImageUploadRequest *request);
+
 #endif

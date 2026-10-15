@@ -352,7 +352,6 @@ FrFontGlyph *frFontAppendClonedGlyph(FrFontRecord *source, FrFontGlyph *destinat
 
 
 extern FntNode *frFontDetachFirstResourceNode(void);
-extern void sdfTexQueueImageUpload(SdfImageUploadRequest *);
 
 /* Retain one atlas item and submit its pixel upload with the requested ownership
  * mode. Coordinates are converted from sixteenths; pool exhaustion is unchecked. */

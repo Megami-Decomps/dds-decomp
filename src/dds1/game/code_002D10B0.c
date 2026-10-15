@@ -37,12 +37,6 @@ enum {
 
 
 
-extern void sdfTexQueueImageUpload(SdfImageUploadRequest *);
-
-
-
-
-
 extern SdfTexResource *sdfTextureBlockListHead;
 extern SdfTexResource *sdfTextureListHead;
 extern s8 sdfBufferSlotIndices[2];
