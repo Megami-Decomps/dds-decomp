@@ -16,6 +16,7 @@
 #include "file.h"
 #include "prf_profile_cap.h"
 #include "prf_requirement.h"
+#include "prf_requirement_fallback.h"
 #include "mdl_flag_api.h"
 #include "script_flag_slot.h"
 
@@ -1133,7 +1134,7 @@ typedef struct PrfFallbackGroup {
 extern PrfFallbackGroup D_003931B0[];
 /* A zero evaluator return selects its result; otherwise test the fallback flags.
  * Missing fallback IDs succeed, as do entries with no nonzero flag requirements. */
-s32 prfReqCheckWithFallback(void *operand, u16 requirementId) {
+s32 prfReqCheckWithFallback(DatPartyRecord *operand, u16 requirementId) {
 
     u32 ruleResult;
     u32 groupIndex;

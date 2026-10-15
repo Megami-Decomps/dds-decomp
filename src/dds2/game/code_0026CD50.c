@@ -8,6 +8,7 @@
 #include "mnu_mantra_position_api.h"
 #include "file_request_api.h"
 #include "prf_profile_cap.h"
+#include "prf_requirement_fallback.h"
 
 #define EVT_PARTY_SLOT_COUNT 5
 
@@ -165,8 +166,6 @@ extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
-
-extern s32 prfReqCheckWithFallback(DatPartyRecord *, u16);
 
 extern s32 ptyTestSecondaryProfileFlag(DatPartyRecord *, u16);
 
