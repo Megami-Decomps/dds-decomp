@@ -86,20 +86,20 @@ typedef union {
     PolyRotatingBand rotating;
 } PolyRing;
 
-void polyUpdateBasicRingCells(PolyNode *obj);
+void polyUpdateBasicRingCells(PolyNode *node);
 void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
-void polyInitializeBandRecordAges(PolyBand *obj);
-void polyInitializeArcRecordAges(PolyArc *obj);
-void polyInitializeRotatingBandRecordAges(PolyRotatingBand *obj);
+void polyInitializeBandRecordAges(PolyBand *band);
+void polyInitializeArcRecordAges(PolyArc *arc);
+void polyInitializeRotatingBandRecordAges(PolyRotatingBand *rotatingBand);
 
 /* Release the cell system, then the basic node itself. */
-void effPolyDestroyWork(PolyNode *obj) {
-    parReleaseCellSystem(obj->strip);
-    sdfReleaseChipBlock(obj);
+void effPolyDestroyWork(PolyNode *node) {
+    parReleaseCellSystem(node->strip);
+    sdfReleaseChipBlock(node);
 }
 
 /* The cell initializer writes the same ages that the basic-ring update reads. */
@@ -131,13 +131,13 @@ void polyInitializeBasicRingCells(PolyNode *node) {
 }
 
 /* Scale the basic ring radius and its point-pair displacement. */
-void polyScaleTransformPair(f32 scale, PolyNode *obj) {
-    obj->radius = obj->radius * scale;
-    obj->pairDisplacement = obj->pairDisplacement * scale;
+void polyScaleTransformPair(f32 scale, PolyNode *node) {
+    node->radius = node->radius * scale;
+    node->pairDisplacement = node->pairDisplacement * scale;
 }
 
 /* Fade active basic-ring cells, update their geometry, and restart or finish ages. */
-void polyUpdateBasicRingCells(PolyNode *obj) {
+void polyUpdateBasicRingCells(PolyNode *node) {
     u16 index;
     u16 completed;
     u16 count;
@@ -147,23 +147,23 @@ void polyUpdateBasicRingCells(PolyNode *obj) {
     ParCell *entry;
     s32 *ages;
 
-    if (obj->active != 0) {
-        duration = obj->duration;
+    if (node->active != 0) {
+        duration = node->duration;
         completed = 0;
-        count = obj->entryCount;
-        entry = obj->strip->cells;
+        count = node->entryCount;
+        entry = node->strip->cells;
         alphaStep = 128.0f / (f32)duration;
-        ages = obj->ages;
-        loop = obj->loop;
+        ages = node->ages;
+        loop = node->loop;
         for (index = 0; index < count; index++) {
             s32 age = *ages;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                polyBuildBasicRadialFan(obj, index);
+                polyBuildBasicRadialFan(node, index);
                 *ages = 0;
             } else if (age >= 0) {
                 entry->color = ((u32)(alphaStep * (f32)(duration - age)) << 24) | 0x808080;
-                polyStripPushPairsApart(obj, index);
+                polyStripPushPairsApart(node, index);
             }
             if (age >= duration) {
                 entry->color = 0x808080;
@@ -173,7 +173,7 @@ void polyUpdateBasicRingCells(PolyNode *obj) {
                     completed++;
                     if (completed >= count) {
                         entry->color = 0;
-                        obj->active = 0;
+                        node->active = 0;
                     }
                 }
             } else {
@@ -186,9 +186,9 @@ void polyUpdateBasicRingCells(PolyNode *obj) {
 }
 
 /* Run the shared finish step, then enqueue this node's cell system. */
-void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
-    polyUpdateBasicRingCells(obj);
-    parPrependCellNode(obj->strip);
+void polyFinishAndReleaseNodeHandle(PolyNode *node) {
+    polyUpdateBasicRingCells(node);
+    parPrependCellNode(node->strip);
 }
 
 /* Build a closed radial fan: an origin point and rotated ring point per pair. */
@@ -318,16 +318,16 @@ PolyBand *polyCreateExpandingRingBands(PolyRingHead *templateHead) {
 }
 
 /* Release the band's cell system and backing allocation handle, not the node itself. */
-void polyReleaseBandNodeResources(PolyBand *obj) {
-    parReleaseCellSystem(obj->strip);
-    sdfReleaseResourceAllocation(obj->allocation);
+void polyReleaseBandNodeResources(PolyBand *band) {
+    parReleaseCellSystem(band->strip);
+    sdfReleaseResourceAllocation(band->allocation);
 }
 
 /* Seed band records with staggered inactive ages. */
-void polyInitializeBandRecordAges(PolyBand *obj) {
-    u32 count = obj->head.entryCount;
-    PolyBandRecord *record = obj->records;
-    u32 delayStep = obj->spawnDelayStep;
+void polyInitializeBandRecordAges(PolyBand *band) {
+    u32 count = band->head.entryCount;
+    PolyBandRecord *record = band->records;
+    u32 delayStep = band->spawnDelayStep;
     s32 age = POLY_INACTIVE_ENTRY_AGE;
     u32 index;
 
@@ -469,15 +469,15 @@ void polyStripBuildScaledRing(PolyBand *band, s32 index) {
 }
 
 /* Scale the band's row width, lift step, and initial/target radii in retail order. */
-void effPolyScaleFourComponents(f32 scale, PolyBand *obj) {
-    obj->radialWidth = obj->radialWidth * scale;
-    obj->liftStep = obj->liftStep * scale;
-    obj->initialRadius = obj->initialRadius * scale;
-    obj->targetRadius = obj->targetRadius * scale;
+void effPolyScaleFourComponents(f32 scale, PolyBand *band) {
+    band->radialWidth = band->radialWidth * scale;
+    band->liftStep = band->liftStep * scale;
+    band->initialRadius = band->initialRadius * scale;
+    band->targetRadius = band->targetRadius * scale;
 }
 
 /* Advance band ages, fades, geometry, and loop completion. */
-void polyUpdateBandCells(PolyBand *obj) {
+void polyUpdateBandCells(PolyBand *band) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -488,12 +488,12 @@ void polyUpdateBandCells(PolyBand *obj) {
     u32 color;
     ParCell *entry;
 
-    strip = obj->strip;
-    count = obj->head.entryCount;
-    record = obj->records;
-    duration = obj->head.duration;
-    loop = obj->head.loop;
-    color = obj->head.color;
+    strip = band->strip;
+    count = band->head.entryCount;
+    record = band->records;
+    duration = band->head.duration;
+    loop = band->head.loop;
+    color = band->head.color;
     entry = strip->cells;
 
     if (count > 0) {
@@ -501,21 +501,21 @@ void polyUpdateBandCells(PolyBand *obj) {
             s32 age = record->age;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                polyRingRandomizeRecord(obj, index);
+                polyRingRandomizeRecord(band, index);
                 age = record->age;
             }
             if (age < 0) {
                 age++;
             } else {
-                if ((u32)age < obj->head.startColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(age, obj->head.startColorRampFrames, color);
+                if ((u32)age < band->head.startColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(age, band->head.startColorRampFrames, color);
                 } else if (age <= duration &&
-                           (u32)age >= duration - obj->head.endColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(duration - age, obj->head.endColorRampFrames, color);
+                           (u32)age >= duration - band->head.endColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(duration - age, band->head.endColorRampFrames, color);
                 }
 
                 if (entry->color & 0xFF000000) {
-                    polyStripBuildScaledRing(obj, index);
+                    polyStripBuildScaledRing(band, index);
                     age++;
                 } else {
                     entry->vertexCount = 0;
@@ -529,7 +529,7 @@ void polyUpdateBandCells(PolyBand *obj) {
                 } else {
                     completed++;
                     if (completed >= (u32)count) {
-                        obj->head.active = 0;
+                        band->head.active = 0;
                     }
                 }
                 entry->vertexCount = 0;
@@ -541,7 +541,7 @@ void polyUpdateBandCells(PolyBand *obj) {
             record++;
         } while (index < count);
     }
-    parPrependCellNode(obj->strip);
+    parPrependCellNode(band->strip);
 }
 
 PolyArc *polyCreateArcRingNode(PolyArc *source) {
@@ -569,16 +569,16 @@ PolyArc *polyCreateArcRingNode(PolyArc *source) {
 }
 
 /* Release the arc's cell system and backing allocation handle, leaving the node alive. */
-void polyReleaseNodeCellSystemAndBuffer(PolyArc *obj) {
-    parReleaseCellSystem(obj->strip);
-    sdfReleaseResourceAllocation(obj->allocation);
+void polyReleaseNodeCellSystemAndBuffer(PolyArc *arc) {
+    parReleaseCellSystem(arc->strip);
+    sdfReleaseResourceAllocation(arc->allocation);
 }
 
 /* Seed arc records with staggered inactive ages. */
-void polyInitializeArcRecordAges(PolyArc *obj) {
-    u32 count = obj->head.entryCount;
-    PolyArcRecord *record = obj->records;
-    u32 delayStep = obj->spawnDelayStep;
+void polyInitializeArcRecordAges(PolyArc *arc) {
+    u32 count = arc->head.entryCount;
+    PolyArcRecord *record = arc->records;
+    u32 delayStep = arc->spawnDelayStep;
     s32 age = POLY_INACTIVE_ENTRY_AGE;
     u32 index;
 
@@ -594,13 +594,13 @@ void polyInitializeArcRecordAges(PolyArc *obj) {
 }
 
 /* Reset one arc record and choose its jittered radius. */
-void polyRandomizeArcRecord(PolyArc *obj, s32 index) {
-    PolyArcRecord *record = obj->records;
-    f32 spread = obj->radiusJitter;
+void polyRandomizeArcRecord(PolyArc *arc, s32 index) {
+    PolyArcRecord *record = arc->records;
+    f32 spread = arc->radiusJitter;
 
     record += index;
     record->age = 0;
-    record->radius = obj->radius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    record->radius = arc->radius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
 }
 
 
@@ -663,12 +663,12 @@ void polyUpdateArcRingStripPoints(PolyArc *arc, s32 index) {
 }
 
 /* Scale the arc's base radius, leaving its jitter fraction unchanged. */
-void polyScaleTransformFirstComponent(f32 scale, PolyArc *obj) {
-    obj->radius = obj->radius * scale;
+void polyScaleTransformFirstComponent(f32 scale, PolyArc *arc) {
+    arc->radius = arc->radius * scale;
 }
 
 /* Advance arc ages, fades and geometry; no-ramp windows retain the prior tint. */
-void polyUpdateArcCells(PolyArc *obj) {
+void polyUpdateArcCells(PolyArc *arc) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -679,12 +679,12 @@ void polyUpdateArcCells(PolyArc *obj) {
     u32 color;
     ParCell *entry;
 
-    strip = obj->strip;
-    count = obj->head.entryCount;
-    record = obj->records;
-    duration = obj->head.duration;
-    loop = obj->head.loop;
-    color = obj->head.color;
+    strip = arc->strip;
+    count = arc->head.entryCount;
+    record = arc->records;
+    duration = arc->head.duration;
+    loop = arc->head.loop;
+    color = arc->head.color;
     entry = strip->cells;
 
     if (count > 0) {
@@ -692,21 +692,21 @@ void polyUpdateArcCells(PolyArc *obj) {
             s32 age = record->age;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                polyRandomizeArcRecord(obj, index);
+                polyRandomizeArcRecord(arc, index);
                 age = record->age;
             }
             if (age < 0) {
                 age++;
             } else {
-                if ((u32)age < obj->head.startColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(age, obj->head.startColorRampFrames, color);
+                if ((u32)age < arc->head.startColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(age, arc->head.startColorRampFrames, color);
                 } else if (age <= duration &&
-                           (u32)age >= duration - obj->head.endColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(duration - age, obj->head.endColorRampFrames, color);
+                           (u32)age >= duration - arc->head.endColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(duration - age, arc->head.endColorRampFrames, color);
                 }
 
                 if (entry->color & 0xFF000000) {
-                    polyUpdateArcRingStripPoints(obj, index);
+                    polyUpdateArcRingStripPoints(arc, index);
                     age++;
                 } else {
                     entry->vertexCount = 0;
@@ -720,7 +720,7 @@ void polyUpdateArcCells(PolyArc *obj) {
                 } else {
                     completed++;
                     if (completed >= (u32)count) {
-                        obj->head.active = 0;
+                        arc->head.active = 0;
                     }
                 }
                 entry->vertexCount = 0;
@@ -732,7 +732,7 @@ void polyUpdateArcCells(PolyArc *obj) {
             record++;
         } while (index < count);
     }
-    parPrependCellNode(obj->strip);
+    parPrependCellNode(arc->strip);
 }
 
 /* Rotating-band counterpart of polyCreateExpandingRingBands: twenty-byte records follow the header. */
@@ -760,16 +760,16 @@ PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
 }
 
 /* Release the rotating band's cell system and backing allocation handle, not the node. */
-void polyReleaseCellBoundNodeResources(PolyRotatingBand *obj) {
-    parReleaseCellSystem(obj->strip);
-    sdfReleaseResourceAllocation(obj->allocation);
+void polyReleaseCellBoundNodeResources(PolyRotatingBand *rotatingBand) {
+    parReleaseCellSystem(rotatingBand->strip);
+    sdfReleaseResourceAllocation(rotatingBand->allocation);
 }
 
 /* Seed rotating-band records, advancing the age after each delay group. */
-void polyInitializeRotatingBandRecordAges(PolyRotatingBand *obj) {
-    u32 count = obj->head.entryCount;
-    PolyRotatingBandRecord *record = obj->records;
-    u32 delayStep = obj->spawnDelayStep;
+void polyInitializeRotatingBandRecordAges(PolyRotatingBand *rotatingBand) {
+    u32 count = rotatingBand->head.entryCount;
+    PolyRotatingBandRecord *record = rotatingBand->records;
+    u32 delayStep = rotatingBand->spawnDelayStep;
     s32 age = POLY_INACTIVE_ENTRY_AGE;
     u32 index;
 
@@ -778,7 +778,7 @@ void polyInitializeRotatingBandRecordAges(PolyRotatingBand *obj) {
         do {
             record->age = age;
             record++;
-            if ((index + 1) % obj->spawnDelayGroupSize == 0) {
+            if ((index + 1) % rotatingBand->spawnDelayGroupSize == 0) {
                 age -= delayStep;
             }
             index++;
@@ -804,10 +804,10 @@ void polyRotatingRandomizeRecord(PolyRotatingBand *spawner, u32 index) {
 
 
 /* Build the paired ring using current radius/rotation, then retain their next-step values. */
-void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
+void polyBandLayoutRingRotated(PolyRotatingBand *rotatingBand, s32 index)
 {
-    ParSystem *strip = obj->strip;
-    PolyRotatingBandRecord *rec = &obj->records[index];
+    ParSystem *strip = rotatingBand->strip;
+    PolyRotatingBandRecord *rec = &rotatingBand->records[index];
     ParCell *entry = &strip->cells[index];
     f32 dir[4];
     f32 baseRadiusVector[4];
@@ -825,16 +825,16 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
     sdfVuLoadRotationMatrixX(rec->rotationXRadians);
     sdfVuLoadSecondaryRotationMatrixY(rec->rotationYRadians);
     sdfMultiplyVuMatrixInPlace();
-    rec->rotationYRadians += obj->rotationStepDegrees * (3.14159265f / 180.0f);
+    rec->rotationYRadians += rotatingBand->rotationStepDegrees * (3.14159265f / 180.0f);
     value = rec->radius;
     rec->radius = value + rec->radiusStep;
-    step = 3.14159265f * 2.0f / (f32)obj->segments;
-    VU0_LOAD_MATRIX_B(obj->head.matrix);
+    step = 3.14159265f * 2.0f / (f32)rotatingBand->segments;
+    VU0_LOAD_MATRIX_B(rotatingBand->head.matrix);
     sdfMultiplyVuMatrixInPlace();
     VEC3_SPLAT(baseRadiusVector, value);
-    VEC3_SPLAT(offsetRadiusVector, value + obj->radialWidth);
+    VEC3_SPLAT(offsetRadiusVector, value + rotatingBand->radialWidth);
     value = 0.0f;
-    VU0_LOAD_VF(vf12, obj->head.origin);
+    VU0_LOAD_VF(vf12, rotatingBand->head.origin);
     for (i = 0; i < pairs - 1; i++) {
         dir[0] = sdfEvaluateCosineViaSinePhaseShift(value);
         dir[1] = 0;
@@ -859,13 +859,13 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
 /* Scale the rotating band's initial and target radii. */
-void polyScaleNodeFloatingParameters(f32 scale, PolyRotatingBand *obj) {
-    obj->initialRadius = obj->initialRadius * scale;
-    obj->targetRadius = obj->targetRadius * scale;
+void polyScaleNodeFloatingParameters(f32 scale, PolyRotatingBand *rotatingBand) {
+    rotatingBand->initialRadius = rotatingBand->initialRadius * scale;
+    rotatingBand->targetRadius = rotatingBand->targetRadius * scale;
 }
 
 /* Advance rotating-band cells; native completion requires a duration of at least two. */
-void polyUpdateRotatingBandCells(PolyRotatingBand *obj) {
+void polyUpdateRotatingBandCells(PolyRotatingBand *rotatingBand) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -876,12 +876,12 @@ void polyUpdateRotatingBandCells(PolyRotatingBand *obj) {
     u32 color;
     ParCell *entry;
 
-    strip = obj->strip;
-    count = obj->head.entryCount;
-    record = obj->records;
-    duration = obj->head.duration;
-    loop = obj->head.loop;
-    color = obj->head.color;
+    strip = rotatingBand->strip;
+    count = rotatingBand->head.entryCount;
+    record = rotatingBand->records;
+    duration = rotatingBand->head.duration;
+    loop = rotatingBand->head.loop;
+    color = rotatingBand->head.color;
     entry = strip->cells;
 
     if (count > 0) {
@@ -892,23 +892,23 @@ void polyUpdateRotatingBandCells(PolyRotatingBand *obj) {
             s32 age = record->age;
 
             if (age == inactiveAge) {
-                polyRotatingRandomizeRecord(obj, index);
+                polyRotatingRandomizeRecord(rotatingBand, index);
                 age = record->age;
             }
             if (age < 0) {
                 age++;
             } else {
-                if ((u32)age < obj->head.startColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(age, obj->head.startColorRampFrames, color);
+                if ((u32)age < rotatingBand->head.startColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(age, rotatingBand->head.startColorRampFrames, color);
                 } else if (age <= duration &&
-                           (u32)age >= duration - obj->head.endColorRampFrames) {
-                    entry->color = polyBlendTimedTintColor(duration - age, obj->head.endColorRampFrames, color);
+                           (u32)age >= duration - rotatingBand->head.endColorRampFrames) {
+                    entry->color = polyBlendTimedTintColor(duration - age, rotatingBand->head.endColorRampFrames, color);
                 } else {
                     entry->color = color;
                 }
 
                 if (entry->color & 0xFF000000) {
-                    polyBandLayoutRingRotated(obj, index);
+                    polyBandLayoutRingRotated(rotatingBand, index);
                 } else {
                     entry->vertexCount = 0;
                 }
@@ -921,7 +921,7 @@ void polyUpdateRotatingBandCells(PolyRotatingBand *obj) {
                 } else {
                     completed++;
                     if (completed >= (u32)count) {
-                        obj->head.active = 0;
+                        rotatingBand->head.active = 0;
                     }
                 }
                 entry->vertexCount = 0;
@@ -933,21 +933,21 @@ void polyUpdateRotatingBandCells(PolyRotatingBand *obj) {
             record++;
         } while (index < count);
     }
-    parPrependCellNode(obj->strip);
+    parPrependCellNode(rotatingBand->strip);
 }
 
 /* Reset active records but leave inactive sentinel entries untouched. */
-void polyResetEntries(PolyRotatingBand *obj) {
+void polyResetEntries(PolyRotatingBand *rotatingBand) {
     u32 count;
     PolyRotatingBandRecord *entry;
     u32 i;
 
-    count = obj->head.entryCount;
+    count = rotatingBand->head.entryCount;
     i = 0;
-    obj->head.duration = POLY_RESET_DURATION;
-    obj->head.endColorRampFrames = 0;
-    obj->head.startColorRampFrames = 0;
-    entry = obj->records;
+    rotatingBand->head.duration = POLY_RESET_DURATION;
+    rotatingBand->head.endColorRampFrames = 0;
+    rotatingBand->head.startColorRampFrames = 0;
+    entry = rotatingBand->records;
     if (count != 0) {
         do {
             if (entry->age != POLY_INACTIVE_ENTRY_AGE) {
