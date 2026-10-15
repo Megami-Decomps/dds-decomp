@@ -4129,7 +4129,50 @@ s32 btlSetupVritraCameraFromActionFlags(BtlLinkedCommand *command) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021E8C0);
+/* Select defeat-camera framing from animation-camera flags, then clear the
+ * runtime camera flag; return zero when no flag applies. */
+s32 func_0021E8C0(BtlLinkedCommand *command) {
+    u32 flags = datActionAnimationRecords[command->actionCode].flags;
+
+    if (flags & 0x4000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
+            btlPrepareDefeatEffectCamera((u8 *)command);
+        } else {
+            btlPrepareDefeatEffectCamera((u8 *)command);
+        }
+        command->state = 0;
+        btlClearRuntimeFlag2000();
+        return 1;
+    }
+    if (flags & 0x8000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlSetLinkedDefeatCameraPresetA(command, command, 0);
+        btlClearRuntimeFlag2000();
+        return 1;
+    }
+    if (flags & 0x8) {
+        if (btlGetIndexListCount(command->link->indexWork.indices) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlBuildTargetFocusedCameraPair(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
+            command->frontCamera.distance += 150.0f;
+            command->backCamera.distance += 300.0f;
+            command->motionParameter = 30.0f;
+            command->flags |= 0x41;
+            btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+            btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            command->state = 0;
+            btlClearRuntimeFlag2000();
+            return 1;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlPrepareDefeatEffectCamera((u8 *)command);
+        btlClearRuntimeFlag2000();
+        return 1;
+    }
+    return 0;
+}
 
 s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
     if (!(unit->status.flags & BTL_UNIT_BOSS_FLAG)) {
