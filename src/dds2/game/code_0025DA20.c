@@ -1773,7 +1773,7 @@ typedef struct ShopProgressPrice {
     u32 unk4;
 } ShopProgressPrice;
 
-extern ShopProgressPrice D_003CD0C4[];
+extern ShopProgressPrice mnuShopProgressPriceScales[];
 
 s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     u32 rowIndex;
@@ -1796,7 +1796,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
         price = itemPrice * pricePercent / 100;
         progressStage = mnuCampGetProgressStage();
         if (progressStage != 0) {
-            price = price * (s32)D_003CD0C4[progressStage].percent / 100;
+            price = price * (s32)mnuShopProgressPriceScales[progressStage].percent / 100;
         }
     } else {
         price = (u32)datItemSkillRecords[itemId].price >> 1;
@@ -1825,7 +1825,7 @@ s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
         price = itemPrice * pricePercent / 100;
         progressStage = mnuCampGetProgressStage();
         if (progressStage != 0) {
-            price = price * (s32)D_003CD0C4[progressStage].percent / 100;
+            price = price * (s32)mnuShopProgressPriceScales[progressStage].percent / 100;
         }
     } else {
         price = (u32)datItemSkillRecords[itemId].price >> 1;

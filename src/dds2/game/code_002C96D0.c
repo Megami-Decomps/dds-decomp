@@ -79,9 +79,9 @@ extern void fileCursorStepUp(void);
 extern void fileFadeStepDown(void);
 extern void fileLoadCtxSlideUpdate(void);
 
-extern u8 D_003E8B98[];
-extern u8 D_003E8BB0[];
-extern u8 D_003E8BD0[];
+extern u8 fileOriginalTitleClearedGameLabel[];
+extern u8 fileOriginalTitleNewCycleClearedGameLabel[];
+extern u8 fileOriginalTitleUnusableSaveText[];
 typedef struct EffectSurfaceNode {
     u32 capacity;
     u32 color;
@@ -113,8 +113,8 @@ typedef struct FileStatBonus {
     u8 bonusIndex;
     u8 pad07;
 } FileStatBonus;
-extern MdlFlagPair D_003E8CE8[];
-extern FileStatBonus D_003E8D10[24];
+extern MdlFlagPair fileRareItemNoticeFlagRows[];
+extern FileStatBonus ptyUnlockedUnitStatBonusRows[24];
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -169,7 +169,7 @@ extern u32 D_00437D3C;
 
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern struct FrFontGlyph *fileMenuConvertedTextGlyph;
-extern struct FrFontGlyph *D_00439008;
+extern struct FrFontGlyph *fileMenuConfiguredTextGlyph;
 
 extern struct FrFontGlyph *fileMenuStringGlyph;
 
@@ -324,13 +324,13 @@ typedef struct EffDispatchColor {
 } EffDispatchColor;
 
 
-extern EffDispatchExtra D_003E9180[];
+extern EffDispatchExtra fileJobTypePositionCallbackView[];
 
-extern EffDispatchExtra D_003E9184[];
+extern EffDispatchExtra fileJobTypeRotationCallbackView[];
 
-extern EffDispatchScale D_003E9188[];
+extern EffDispatchScale fileJobTypeScaleCallbackView[];
 
-extern EffDispatchColor D_003E918C[];
+extern EffDispatchColor fileJobTypeColorCallbackView[];
 
 extern s8 fileConfigTaskState;
 
@@ -580,10 +580,10 @@ void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     struct FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    D_00439008 = handle;
+    fileMenuConfiguredTextGlyph = handle;
     frFontSetChildChainFirstOption(handle, 3);
-    frFontDrawGlyphWithSharedFlags(D_00439008, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(D_00439008);
+    frFontDrawGlyphWithSharedFlags(fileMenuConfiguredTextGlyph, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(fileMenuConfiguredTextGlyph);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
@@ -2383,7 +2383,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         } else if (fileSavePreviewRecords[slot].status > 0) {
             evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D68));
         } else if (mcdOriginalTitleFileMode != 0 && fileSavePreviewRecords[slot].status == 0) {
-            mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, D_003E8BD0);
+            mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, fileOriginalTitleUnusableSaveText);
         }
         if (slot != 10) {
             fileDrawSlotIcon(slot + 1, 0x5A, y + 4, alpha);
@@ -2410,9 +2410,9 @@ s32 fileDrawSlotListAndPreview(s32 work) {
 
                 if (mcdOriginalTitleFileMode != 0) {
                     if (fileSavePreviewRecords[slot].newCycle != 0) {
-                        mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, D_003E8BB0);
+                        mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, fileOriginalTitleNewCycleClearedGameLabel);
                     } else if (fileSavePreviewRecords[slot].status != 0) {
-                        mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, D_003E8B98);
+                        mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, fileOriginalTitleClearedGameLabel);
                     }
                 } else if (fileSavePreviewRecords[slot].newCycle != 0) {
                     mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, fileNewCycleLabel);
@@ -3097,7 +3097,7 @@ s32 fileCreateDetectionAudioCallback(u32 callback) {
     return (s32)mcdFinishFileDetectionWithAudio;
 }
 
-extern u32 D_0043902C;
+extern u32 fileFourWayDialogCancelCallback;
 
 s32 fileFourWayDialogPoll(void) {
     if (fileIsLoadStepComplete() == 0) {
@@ -3120,9 +3120,9 @@ s32 fileFourWayDialogPoll(void) {
         }
         return ((s32 (*)())D_00439028)();
     } else if (D_0037F510[0x23] < 0) {
-        if (D_0043902C != 0) {
+        if (fileFourWayDialogCancelCallback != 0) {
             sndSetSequenceVolumePan(0xA, 0x7f, 0x3f);
-            return ((s32 (*)())D_0043902C)();
+            return ((s32 (*)())fileFourWayDialogCancelCallback)();
         }
     }
     return 0;
@@ -3130,13 +3130,13 @@ s32 fileFourWayDialogPoll(void) {
 
 extern u32 D_00439024;
 extern u32 D_00439028;
-extern u32 D_0043902C;
+extern u32 fileFourWayDialogCancelCallback;
 extern s32 fileFourWayDialogPoll(void);
 
 s32 fileBeginFourWayDialog(u32 ready, u32 completed, u32 cancelled, u32 state) {
     D_00439024 = ready;
     D_00439028 = completed;
-    D_0043902C = cancelled;
+    fileFourWayDialogCancelCallback = cancelled;
     D_00437D18 = state;
     D_00437D20 = 0;
     return (s32)fileFourWayDialogPoll;
@@ -3385,7 +3385,7 @@ typedef struct FileMultiFlagBonus {
     u8 pad11[3];
 } FileMultiFlagBonus;
 
-extern FileMultiFlagBonus D_003E8DD0[6];
+extern FileMultiFlagBonus ptyUnit7StatBonusFlagGroups[6];
 extern s8 (*D_00435E3C)[6];
 extern s32 dds3FindEntryIndex(s32);
 extern s32 sdfDebugPrintf(const char *, ...);
@@ -3414,9 +3414,9 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     party->flags |= 0x8000;
     if (unitId != 7) {
         for (row = 0; row < 24; row++) {
-            if (D_003E8D10[row].unitId == unitId) {
-                if (mdlFlagTest(D_003E8D10[row].flag)) {
-                    bonus = D_00435E3C[58 + D_003E8D10[row].bonusIndex];
+            if (ptyUnlockedUnitStatBonusRows[row].unitId == unitId) {
+                if (mdlFlagTest(ptyUnlockedUnitStatBonusRows[row].flag)) {
+                    bonus = D_00435E3C[58 + ptyUnlockedUnitStatBonusRows[row].bonusIndex];
                     for (index = 0; index < DAT_BASE_STAT_COUNT; index++) {
                         party->baseStats[index] += bonus[index];
                     }
@@ -3427,8 +3427,8 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     } else {
         for (row = 0; row < 6; row++) {
             for (index = 0; index < 4; index++) {
-                if (mdlFlagTest(D_003E8DD0[row].flags[index])) {
-                    bonus = D_00435E3C[58 + D_003E8DD0[row].bonusIndex];
+                if (mdlFlagTest(ptyUnit7StatBonusFlagGroups[row].flags[index])) {
+                    bonus = D_00435E3C[58 + ptyUnit7StatBonusFlagGroups[row].bonusIndex];
                     for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
                         party->baseStats[stat] += bonus[stat];
                     }
@@ -3467,13 +3467,13 @@ void fileApplyMenuFlagsToModel(MenuWork *work) {
         }
     }
     for (i = 0; i < 5; i++) {
-        if (mdlFlagTest(D_003E8CE8[i].flag)) {
+        if (mdlFlagTest(fileRareItemNoticeFlagRows[i].flag)) {
             work->flowConditionMask |= 2;
             break;
         }
     }
     for (i = 0; i < 0x18; i++) {
-        if (mdlFlagTest(D_003E8D10[i].flag)) {
+        if (mdlFlagTest(ptyUnlockedUnitStatBonusRows[i].flag)) {
             work->flowConditionMask |= 4;
             break;
         }
@@ -4557,32 +4557,32 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
 void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     u16 id = job->type;
 
-    if (D_003E9180[id].func != NULL) {
-        D_003E9180[id].func(job->data, position);
+    if (fileJobTypePositionCallbackView[id].func != NULL) {
+        fileJobTypePositionCallbackView[id].func(job->data, position);
     }
 }
 
 void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
     u16 id = job->type;
 
-    if (D_003E9184[id].func != NULL) {
-        D_003E9184[id].func(job->data, rotation);
+    if (fileJobTypeRotationCallbackView[id].func != NULL) {
+        fileJobTypeRotationCallbackView[id].func(job->data, rotation);
     }
 }
 
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale) {
     u16 id = job->type;
 
-    if (D_003E9188[id].func != NULL) {
-        D_003E9188[id].func(job->data, scale);
+    if (fileJobTypeScaleCallbackView[id].func != NULL) {
+        fileJobTypeScaleCallbackView[id].func(job->data, scale);
     }
 }
 
 void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color) {
     u16 id = job->type;
 
-    if (D_003E918C[id].func != NULL) {
-        D_003E918C[id].func(job->data, color);
+    if (fileJobTypeColorCallbackView[id].func != NULL) {
+        fileJobTypeColorCallbackView[id].func(job->data, color);
     }
 }
 
@@ -5253,7 +5253,7 @@ void fileJobCopyHeader(FileJob *dst, FileJob *src) {
     memcpy(dst, src, 0x90);
 }
 
-extern char D_003E9588[];
+extern char fileQueueImagePaddingBytes[];
 extern s32 sceWrite(s32 fd, void *data, s32 size);
 extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
@@ -5339,7 +5339,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
         padding = aligned - size;
         if (padding > 0) {
-            sceWrite(fd, D_003E9588, padding);
+            sceWrite(fd, fileQueueImagePaddingBytes, padding);
         }
     }
     sceClose(fd);
@@ -5354,7 +5354,7 @@ typedef struct FileQueueImageHeader {
     f32 unkC;
 } FileQueueImageHeader;
 
-extern char D_003E9598[];
+extern char fileQueueVersionedImagePaddingBytes[];
 
 /* Save a queue image: the queue header, one relocated record per job, then each
  * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
@@ -5444,7 +5444,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
         padding = aligned - size;
         if (padding > 0) {
-            sceWrite(fd, D_003E9598, padding);
+            sceWrite(fd, fileQueueVersionedImagePaddingBytes, padding);
         }
     }
     sceClose(fd);
@@ -6657,7 +6657,7 @@ typedef struct FileWaveMotion {
     f32 angleMultiplier;
 } FileWaveMotion;            /* 0x44, ordinary word alignment */
 
-extern f32 D_003E95B0[4]; /* (0, -1, 0, 0), existing shared axis */
+extern f32 effWaveEmitterNegativeYAxis[4]; /* (0, -1, 0, 0), existing shared axis */
 
 /* vu0 routine: advances axial motion with a quaternion-oriented sine sway. */
 void effUpdateWaveEmitterSlots(FileSlotTable *record) {
@@ -6741,7 +6741,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->axis[1] = -1.0f;
                                 motion->axis[2] = 0.0f;
                             } else {
-                                VU0_LOAD_VF(vf10, D_003E95B0);
+                                VU0_LOAD_VF(vf10, effWaveEmitterNegativeYAxis);
                                 VU0_ROTATE_VEC(vf10, vf10);
                                 VU0_STORE_VF(vf10, direction);
                                 motion->axis[0] = direction[0];
