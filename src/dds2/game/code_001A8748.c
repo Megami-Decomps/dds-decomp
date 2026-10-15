@@ -1799,10 +1799,6 @@ u16 btlGetActorBedAssetIdFromIndex(s32 arg0) {
     return datItemSkillRecords[arg0].commandIndex;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
-
 extern const char D_00415178[];
 
 s32 btlBuildUnitIndexList(void *actionArg, BtlIndexList *targets,
@@ -1917,12 +1913,16 @@ nextUnit:
     return count != 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415178);
-
 
 extern s32 btlBuildUnitIndexList(void *, BtlIndexList *, s32, s32, s32);
 
 extern s32 datRosterDetails;
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
+
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
+
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415178);
+
 u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
     BtlState *battle = (BtlState *)btlGetRuntime();

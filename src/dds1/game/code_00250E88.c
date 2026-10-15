@@ -441,7 +441,7 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
     return entry;
 }
 
-extern MantraPrerequisiteRecord D_0036AE80[];
+extern MantraPrerequisiteRecord mnuMantraPrerequisiteRecords[];
 extern void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 value);
 
 /* Rebuild the 88-entry mantra grid from the prerequisite coordinates (tenths, or required level / 5
@@ -464,14 +464,14 @@ void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 selecti
         if (entry == NULL) {
             continue;
         }
-        if (D_0036AE80[i].x == -1) {
+        if (mnuMantraPrerequisiteRecords[i].x == -1) {
             column = entry->requiredLevel / 5;
             nodes[i].xRemainder = 0;
         } else {
-            column = D_0036AE80[i].x / 10;
-            nodes[i].xRemainder = D_0036AE80[i].x % 10;
+            column = mnuMantraPrerequisiteRecords[i].x / 10;
+            nodes[i].xRemainder = mnuMantraPrerequisiteRecords[i].x % 10;
         }
-        row = D_0036AE80[i].y / 10;
+        row = mnuMantraPrerequisiteRecords[i].y / 10;
         grid = work->gridHandle;
         if (column >= grid->width) {
             column = grid->width - 1;
@@ -479,7 +479,7 @@ void mnuBuildMantraGridAndGetProfileCoordinates(MenuSceneWork *work, s32 selecti
         if (row >= grid->cellCount / grid->width) {
             row = grid->cellCount / grid->width - 1;
         }
-        nodes[i].yRemainder = D_0036AE80[i].y % 10;
+        nodes[i].yRemainder = mnuMantraPrerequisiteRecords[i].y % 10;
         nodes[i].state = entry->state;
         nodes[i].y = row;
         nodes[i].x = column;

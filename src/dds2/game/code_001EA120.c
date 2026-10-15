@@ -494,8 +494,8 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
     f32 height;
 
     work = (BtlState *)btlGetRuntime();
-    if (work->heightCameraSetupHook != NULL) {
-        if (work->heightCameraSetupHook(action)) {
+    if (work->unk670 != NULL) {
+        if (work->unk670(action)) {
             return;
         }
     }
@@ -570,7 +570,7 @@ extern void btlSetupActionCameraPair(BtlLinkedCommand *);
 
 /* Select the linked command's initial cursor step and prepare its camera. */
 void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->actionCursorSetupHook;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk648;
     ActionStateLink *link;
     u32 flags;
 
@@ -614,7 +614,7 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
 
 void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    if (work->actionCursorStepHook != 0 && work->actionCursorStepHook((BtlUnit *)action) != 0) {
+    if (work->unk64C != 0 && work->unk64C((BtlUnit *)action) != 0) {
         return;
     }
     switch (action->stepKind) {
@@ -1045,7 +1045,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         return;
     }
     work = (BtlState *)btlGetRuntime();
-    if (work->actionStageStepHook != 0 && work->actionStageStepHook((BtlUnit *)action) != 0) {
+    if (work->unk66C != 0 && work->unk66C((BtlUnit *)action) != 0) {
         return;
     }
     category = btlMapActorCategory(action);
