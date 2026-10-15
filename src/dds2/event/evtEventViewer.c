@@ -989,7 +989,7 @@ extern void *mnuCampFindEntryByName(void *scene, const char *name);
 
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 
-void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 
 /* Task user values are words; viewer callbacks decode the stored address. */
 
@@ -2263,17 +2263,17 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, EvtRuntime *viewer) {
-    s32 count = viewer->historyCount + 1;
+void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer) {
+    s32 historyIndex = viewer->historyCount + 1;
 
-    viewer->actionMode = mode;
-    viewer->historyCount = count;
-    viewer->history[count].id = mode;
-    viewer->history[count].a = first;
-    viewer->history[count].b = second;
-    if (mode > 0) {
-        if (mode >= 3) {
-            if (mode == 3) {
+    viewer->actionMode = actionMode;
+    viewer->historyCount = historyIndex;
+    viewer->history[historyIndex].id = actionMode;
+    viewer->history[historyIndex].a = first;
+    viewer->history[historyIndex].b = second;
+    if (actionMode > 0) {
+        if (actionMode >= 3) {
+            if (actionMode == 3) {
                 viewer->charCol = 0;
                 viewer->charRow = 0;
                 viewer->nameStorage[0] = 0;
