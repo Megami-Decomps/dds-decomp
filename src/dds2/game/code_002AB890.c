@@ -424,8 +424,8 @@ s32 mnuRefreshOwnedCatalogItemList(s32 itemId, MenuStaffContext *owner) {
     return resources->windows[4]->list->count != 0;
 }
 
-void mnuSelectStaffDisplayCategory(u32 arg0) {
-    mnuSwitchCampVisualCategory(2, arg0);
+void mnuSelectStaffDisplayCategory(u32 context) {
+    mnuSwitchCampVisualCategory(2, context);
 }
 
 void mnuNoOpStaffDisplayTeardown(s32 object) {
