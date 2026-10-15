@@ -2845,7 +2845,8 @@ void func_00141898(void) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->explorationColumn, entry->explorationRow,
+                                                entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
@@ -2989,7 +2990,8 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+            fldMarkStageExplorationBitmapRegion(entry->unk65, entry->unk66, entry->explorationColumn, entry->explorationRow,
+                                                entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
