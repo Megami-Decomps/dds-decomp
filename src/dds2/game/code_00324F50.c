@@ -14,7 +14,6 @@ extern f32 sdfVec3Normalize(f32 *);
 
 extern void *sdfAllocHeapMemory(u32);
 
-extern u64 sdfCloneOwnedSpriteRecordList(u64, u32);
 
 extern void (*sdfTickCallback)(void);
 
@@ -261,7 +260,93 @@ u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
     return owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324F50", sdfCloneOwnedSpriteRecordList);
+typedef struct SdfSpriteListRecord {
+    u8 unk00[0xB];
+    u8 itemCount;              /* 0x0B */
+    DdsNestedHeader *nested;   /* 0x0C */
+    u32 *items;                /* 0x10 */
+    SdfVec4 *vector;           /* 0x14 */
+    u8 unk18[4];
+} SdfSpriteListRecord;
+
+/* Deep-copy count sprite records, each into one owned buffer: the header, its
+ * item words, its vector and, when present, the nested groups with payloads. */
+u32 *sdfCloneOwnedSpriteRecordList(const SdfSpriteListRecord *source, s32 count) {
+    u32 *owner = mnuCreateCallbackPair();
+
+    while (count > 0) {
+        DdsNestedHeader *nested = source->nested;
+        SdfSpriteListRecord *copy;
+        DdsNestedGroup *group;
+        DdsNestedGroup *groupCopy;
+        DdsCountedPayload *entry;
+        DdsCountedPayload *entryCopy;
+        u8 *cursor;
+        s32 size;
+        s32 i;
+        s32 j;
+
+        size = sizeof(*copy) + source->itemCount * sizeof(*copy->items) + sizeof(*copy->vector);
+        if (nested != NULL) {
+            size += sizeof(*nested);
+            group = nested->groups;
+            for (i = 0; i < nested->groupCount; i++, group++) {
+                size += dds3MeasureMenuRecord(group);
+            }
+        }
+        cursor = sdfAllocateOwnedResourceBuffer(owner, size);
+        dds3AppendFirstResourceListValue(owner, (u32)cursor);
+        memset(cursor, 0, size);
+        copy = (SdfSpriteListRecord *)cursor;
+        memcpy(cursor, source, sizeof(*copy));
+        cursor += sizeof(*copy);
+        memcpy(cursor, source->items, source->itemCount * sizeof(*copy->items));
+        copy->items = (u32 *)cursor;
+        cursor += source->itemCount * sizeof(*copy->items);
+        memcpy(cursor, source->vector, sizeof(*copy->vector));
+        copy->vector = (SdfVec4 *)cursor;
+        cursor += sizeof(*copy->vector);
+        if (nested == NULL) {
+            count--;
+            source++;
+            continue;
+        }
+        memcpy(cursor, source->nested, sizeof(*nested));
+        copy->nested = (DdsNestedHeader *)cursor;
+        cursor += sizeof(*nested);
+        nested = source->nested;
+        memcpy(cursor, nested->groups, nested->groupCount * sizeof(*group));
+        copy->nested->groups = (DdsNestedGroup *)cursor;
+        cursor += nested->groupCount * sizeof(*group);
+        group = source->nested->groups;
+        groupCopy = copy->nested->groups;
+        for (i = 0; i < nested->groupCount; i++, group++, groupCopy++) {
+            memcpy(cursor, group->first, group->firstCount * sizeof(*entry));
+            groupCopy->first = (DdsCountedPayload *)cursor;
+            cursor += group->firstCount * sizeof(*entry);
+            entry = group->first;
+            entryCopy = groupCopy->first;
+            for (j = 0; j < group->firstCount; j++, entry++, entryCopy++) {
+                memcpy(cursor, entry->data, entry->count * 8);
+                entryCopy->data = cursor;
+                cursor += entry->count * 8;
+            }
+            memcpy(cursor, group->second, group->secondCount * sizeof(*entry));
+            groupCopy->second = (DdsCountedPayload *)cursor;
+            cursor += group->secondCount * sizeof(*entry);
+            entry = group->second;
+            entryCopy = groupCopy->second;
+            for (j = 0; j < group->secondCount; j++, entry++, entryCopy++) {
+                memcpy(cursor, entry->data, entry->count * 8);
+                entryCopy->data = cursor;
+                cursor += entry->count * 8;
+            }
+        }
+        count--;
+        source++;
+    }
+    return owner;
+}
 
 /* Deep-copy count basic sprite headers and their sixteen-byte vectors.
  * Return the resource-list owner; each copied header points to its own vector. */
