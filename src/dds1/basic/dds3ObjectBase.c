@@ -315,7 +315,7 @@ void dds3CreateObjectModelAndMotion(void *object) {
 
 /* Modes 0, 4 and 5 use weight 1; the other valid modes use 0.
  * Values outside 0..6 leave both the current mode and weight unchanged. */
-void dds3SetObjectModeAndDefaultWeight(void *object, u32 requestedMode) {
+void dds3SetObjectModeAndDefaultWeight(EffWorldNode *object, u32 requestedMode) {
     ObjBase *base = dds3GetObjectOwnedHandle(object);
 
     switch (requestedMode) {
