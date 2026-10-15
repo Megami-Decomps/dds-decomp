@@ -230,13 +230,13 @@ void btlReleaseAllEntities(void) {
     } while (groupIndex < BTL_GROUP_COUNT);
 }
 
-/* Create and attach the motion for the selected resource record. */
-Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
-    MotionTable *motionTable = owner->sub->slots[index].motionTable;
-    s16 motionSlotIndex = owner->sub->slots[index].motionSlotIndex;
+/* Create and attach the motion selected by the resource record's search ID. */
+Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 searchId) {
+    MotionTable *motionTable = owner->sub->slots[searchId].motionTable;
+    s16 motionSlotIndex = owner->sub->slots[searchId].motionSlotIndex;
     Motion *object = sdfCreateMotion(owner->inner, motionTable);
 
-    object->searchId = index;
+    object->searchId = searchId;
     owner->slots[motionSlotIndex] = object;
     object->slotIndex = motionSlotIndex;
     if (motionSlotIndex == 0) {
@@ -289,11 +289,11 @@ void mdlClearSlotAndRelease(MdlCtx *ctx, Motion *node) {
     sdfDestroyMotion(node);
 }
 
-void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
+void mdlReleaseFirstMatch(MdlCtx *ctx, s32 searchId) {
     Motion *node = ctx->inner->motionList;
 
     while (node != NULL) {
-        if (node->searchId == id) {
+        if (node->searchId == searchId) {
             mdlClearSlotAndRelease(ctx, node);
             break;
         }
@@ -303,40 +303,40 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
 
 
 
-/* Release slot `index`: destroy its motions in every context and free the attached resource. */
-void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
+/* Release the grouped resource record and matching motions for `searchId`. */
+void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 searchId) {
     MdlCtx *ctx;
 
     if (owner != NULL) {
-        if (owner->slots[index].motionTable == NULL) {
+        if (owner->slots[searchId].motionTable == NULL) {
             return;
         }
         for (ctx = owner->modelContext; ctx != NULL; ctx = ctx->next) {
-            mdlReleaseFirstMatch(ctx, index);
+            mdlReleaseFirstMatch(ctx, searchId);
         }
         if (owner->ownsResources != 0) {
-            if (owner->slots[index].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
+            if (owner->slots[searchId].resourceHandle != 0) {
+                sdfReleaseResourceAllocation(owner->slots[searchId].resourceHandle);
             }
         }
-        owner->slots[index].motionTable = NULL;
-        owner->slots[index].resourceHandle = 0;
+        owner->slots[searchId].motionTable = NULL;
+        owner->slots[searchId].resourceHandle = 0;
     }
 }
 
-void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 index) {
+void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 searchId) {
     BattleGroupNode *entity;
 
     entity = btlFindGroupedEntity(group, id);
-    mdlReleaseOwnerSlotResources(entity, index);
+    mdlReleaseOwnerSlotResources(entity, searchId);
 }
 
-void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, MotionTable *data, struct SdfMemBlock *resourceHandle) {
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 searchId, s32 slotIndex, MotionTable *data, struct SdfMemBlock *resourceHandle) {
     BattleGroupNode *owner = btlFindGroupedEntity(group, id);
     BattleGroupSlot *slot;
 
-    mdlReleaseOwnerSlotResources(owner, index);
-    slot = &owner->slots[index];
+    mdlReleaseOwnerSlotResources(owner, searchId);
+    slot = &owner->slots[searchId];
     slot->motionSlotIndex = slotIndex;
     slot->motionIndex = motionIndex;
     slot->motionTable = data;
@@ -634,7 +634,7 @@ void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
 }
 
 extern DevRequest *sdfResourceListClone(DevRequest *list);
-extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
+extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 searchId);
 
 /* Instantiate a model context from the group's resource list and item list, then
  * start every populated slot's motion owner. */
@@ -645,7 +645,7 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     SdfModel *inner;
     f32 modelScale;
     f32 scale[4];
-    s32 i;
+    s32 searchId;
 
     ctx->sub = node;
     head = node->modelContext;
@@ -665,12 +665,12 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     ctx->objectRadius = node->objectRadius;
     ctx->current.h.id = -1;
     ctx->current.h.motionIndex = -1;
-    for (i = 0; i != 8; i++) {
-        if (node->slots[i].motionTable != NULL && (node->slots[i].flags & 1)) {
-            motionOwnerCreateObjectForRecord(ctx, i);
-            if (i > 0) {
-                if (node->slots[i].motionIndex >= 0) {
-                    mdlAddEntryFlagged(ctx, i, node->slots[i].motionIndex);
+    for (searchId = 0; searchId != 8; searchId++) {
+        if (node->slots[searchId].motionTable != NULL && (node->slots[searchId].flags & 1)) {
+            motionOwnerCreateObjectForRecord(ctx, searchId);
+            if (searchId > 0) {
+                if (node->slots[searchId].motionIndex >= 0) {
+                    mdlAddEntryFlagged(ctx, searchId, node->slots[searchId].motionIndex);
                 }
             }
         }
@@ -845,7 +845,7 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
     }
 }
 
-extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
+extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 searchId);
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero
  * also becomes ctx->first; id and motionIndex narrow into the current pair. */
