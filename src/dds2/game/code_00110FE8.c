@@ -120,7 +120,7 @@ s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
     return 1;
 }
 
-s32 dds3ExchangeAreaSlot(void *arg);
+s32 dds3ExchangeAreaSlot(void *areaObject);
 
 
 

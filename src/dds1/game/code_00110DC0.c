@@ -5,7 +5,7 @@
 #include "evt_world.h"
 
 
-s32 dds3ExchangeAreaSlot(void *arg);
+s32 dds3ExchangeAreaSlot(void *areaObject);
 
 const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
     EffWorldNode *node;
