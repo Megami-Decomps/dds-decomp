@@ -2623,6 +2623,30 @@ dialogue is selected, and reload the caller-owned word after `dspStartEntry`
 when one is selected. Selecting a real dialogue entry before the shared call
 expresses those two paths directly and avoids extra flag copies and reloads.
 
+The adjacent `func_0028FD30` selector also needs the real input snapshot to
+exist before its independent local map initialization:
+
+```c
+MenuMantraRecord *record = resource->menu.records;
+u16 *rankUpWord = &record->flags;
+u16 rankUpFlags = *rankUpWord;
+s8 elementMap[9] = {0, 0, 1, 5, 2, 3, 4, 5, 1};
+```
+
+`rankUpFlags` is consumed by the record-zero fast path; the map contains the
+nine signed bytes actually copied and indexed by the normal scan. There is no
+callback between these reads. Capturing the word before the copy overlaps its
+live range with the table address: local allocation can no longer reuse V0 for
+both, and the actual block-move reloads become A0/A1, as native requires.
+A raw character-array `memcpy` still has alias set zero and keeps the halfword
+load before the copy. Access through the actual scalar member plus the initialized
+array removes that false anti-dependency; sched2 places the same load after the
+copy. Both snapshot timing and truthful access types matter. No extra read,
+operation, parameter conversion, qualifier or allocation is introduced. Later
+record reads remain after their diagnostic callback, preserving native epochs.
+The initializer owns its nine-byte literal; remove the duplicate assembly table
+include and check the complete unit's data and final image.
+
 DDS2 `game/code_001442D0::fldInitializeSceneGuideMarkers` provides a packed-record example.
 Each eight-byte preset contains a real `FieldGridCoordPair` of two signed
 halfwords, followed by a float phase. The terminal record encodes both

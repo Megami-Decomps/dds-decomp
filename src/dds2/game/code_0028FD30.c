@@ -109,9 +109,60 @@ extern MenuPanelEntryPool *mnuPanelSoundEntryPool;
 
 extern void mnuPrepareMantraPanelEntriesForTutorial(void);
 
-INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_0028FD30);
+
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+
+/* Choose the pending mastery record, preferring queued kind-two entries. */
+MenuMantraRecord *func_0028FD30(MnuStatusResource *resource, s16 kind, s16 element) {
+    MenuMantraRecord *record = resource->menu.records;
+    /* Capture record zero separately from the private element-map snapshot. */
+    u16 *rankUpWord = &record->flags;
+    u16 rankUpFlags = *rankUpWord;
+    s8 elementMap[9] = {0, 0, 1, 5, 2, 3, 4, 5, 1};
+    MenuMantraRecord *selected;
+    s32 index;
+
+    if ((rankUpFlags & 0x2000) && (kind == 0xFF || kind == -1)) {
+        evtPrintDeveloperConsoleMessage("EventFlag DrawRankUp!!!\n");
+        return record;
+    }
+
+    record++;
+    selected = NULL;
+    for (index = 1; index < 112; index++, record++) {
+        if (record->mantraId != 0 && (record->flags & 0x6000) == 0x2000) {
+            evtPrintDeveloperConsoleMessage("EventFlag MantraID [%d] i[%d]\n",
+                                            record->mantraId, index);
+            if (selected != NULL) {
+                if (((record->flags >> 8) & 0xF) != kind && kind != -1) {
+                    continue;
+                }
+                if ((record->flags & 0xF00) != 0x200) {
+                    continue;
+                }
+                if (record->flags & 0x1000) {
+                    selected = record;
+                }
+            } else {
+                if (((record->flags >> 8) & 0xF) == kind || kind == -1) {
+                    if ((record->flags & 0xF00) == 0x300) {
+                        if (element == -1 || record->element == elementMap[element]) {
+                            selected = record;
+                        }
+                    } else {
+                        selected = record;
+                    }
+                    if ((record->flags & 0xF00) == 0x400) {
+                        return selected;
+                    }
+                }
+            }
+        }
+    }
+    return selected;
+}
+
 
 typedef struct MantraAttributeNameTable {
     char text[6][9];
