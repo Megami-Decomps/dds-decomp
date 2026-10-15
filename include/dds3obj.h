@@ -111,7 +111,7 @@ s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
 WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 void dds3EnsureWorldNodeInSlot(EffWorldNode *indexOwner, EffWorldNode *node);
-WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index);
+WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 slotIndex);
 
 /* Eight-byte entries link both allocated and free world value chains. */
 typedef struct WorldValueEntry {
