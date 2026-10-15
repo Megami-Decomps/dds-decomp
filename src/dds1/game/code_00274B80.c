@@ -1299,7 +1299,8 @@ s32 mnuStaffIdlePartyUpdate(KwlnTask *callback) {
     return menuRunPanel((void *)context, 2, (void *)callback);
 }
 
-u32 func_00277638(void) {
+/* Always allow entry to the registered skill-menu return popup. */
+u32 mnuAllowSkillMenuReturn(void) {
     return 1;
 }
 

@@ -213,11 +213,13 @@ s32 mnuExitAlternateStaffImagePage(KwlnTask *task) {
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-u32 func_002AD8E8(void) {
+/* Registered staff value-selection enter hook: no side effects; returns one. */
+u32 mnuStaffValueSelectionEnterNoOp(void) {
     return 1;
 }
 
-u32 func_002AD8F0(void) {
+/* Registered staff value-selection leave hook: no side effects; returns one. */
+u32 mnuStaffValueSelectionLeaveNoOp(void) {
     return 1;
 }
 
