@@ -9255,7 +9255,21 @@ void fldCreateSceneCleanupTask(void) {
     fldBeginSceneTransition();
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CFC40);
+void func_001CFC40(void) {
+    BattleTrackedTaskWork *taskWork;
+
+    /* A one-pass loop: its notes stop sched2 from hoisting the slot-order
+     * address above this call, where retail keeps it after the call. */
+    do {
+        btlGetRuntime();
+    } while (0);
+    taskWork = sdfAllocAndClearQuadwords(sizeof(BattleTrackedTaskWork));
+    btlTrackedTaskHandles = (u8 *)taskWork;
+    memset(taskWork, 0, 0x38);
+    D_00438F54 = sdfAllocAndClearQuadwords(sizeof(SceneSlotFadeWork));
+    D_00438F58[0] = sdfAllocAndClearQuadwords(sizeof(ActorSlotOrder));
+    D_00438F58[1] = sdfAllocAndClearQuadwords(sizeof(ActorSlotOrder));
+}
 
 static inline void btlDestroyTrackedTaskIfPresent(s32 slot) {
     if (btlGetTrackedTaskHandle(slot) != 0) {

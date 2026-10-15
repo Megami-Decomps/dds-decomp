@@ -7829,7 +7829,18 @@ void fldCreateSceneCleanupTask(void) {
     fldBeginSceneTransition();
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001C45F0);
+void func_001C45F0(void) {
+    /* A one-pass loop: its notes stop sched2 from hoisting the slot-order
+     * address above this call, where retail keeps it after the call. */
+    do {
+        btlGetRuntime();
+    } while (0);
+    btlTrackedTaskHandles = sdfAllocAndClearQuadwords(0x58);
+    memset(btlTrackedTaskHandles, 0, 0x38);
+    D_003BD83C = sdfAllocAndClearQuadwords(0xD8);
+    D_003BD840[0] = sdfAllocAndClearQuadwords(0x274);
+    D_003BD840[1] = sdfAllocAndClearQuadwords(0x274);
+}
 
 static inline void btlDestroyTrackedTaskIfPresent(s32 slot) {
     if (btlGetTrackedTaskHandle(slot) != 0) {
