@@ -47,17 +47,6 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
-/* Kind 0x27: camera-mode task's complete 20-byte argument packet. */
-typedef struct BtlCameraModeArgs {
-    BtlTask *actor;
-    BtlUnit *unitA;
-    BtlUnit *unitB;
-    u32 mode;
-    s32 category;
-} BtlCameraModeArgs;
-
-typedef char BtlCameraModeArgsSize[(sizeof(BtlCameraModeArgs) == 20) ? 1 : -1];
-
 /* Generic scheduler header; task-specific arguments follow at byte 0x70.
  * next/prev link registration order, independently of the deferred queue. */
 typedef struct SoundTask {
@@ -78,7 +67,7 @@ typedef struct SoundTask {
         void (*update)(void);
         s32 (*playSound)(u32 *);
         u32 (*process)(void);
-        u32 (*commandSound)(BtlCameraModeArgs *);
+        u32 (*commandSound)(BtlCommandSoundTaskArgs *);
         u32 (*playCustomSound)(u8 *);
         s32 (*releaseSound)(u16 *);
         s32 (*acquireSound)(u32 *);
