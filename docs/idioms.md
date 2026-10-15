@@ -13830,3 +13830,38 @@ so runtime and selected-actor pointers overlap and require an extra saved GPR.
 The actual typed output pair preserves native stack accesses and removes that
 false dependence. No callback or list-head snapshot moves. This preserves the
 already matched camera from `bbea2f42d`; it is not another new reconstruction.
+
+
+### Actor-pair and target-group framing camera poses
+
+`btlBuildActorPairFramingCameraPose` selects the actor side with a normal
+`switch (reverse)`. The reverse arm selects the command actor as target,
+sets its consumed reach multiplier, and looks up the actor. In the DDS1
+sched1 trace the scale-constant setup has priority 2 instead of 1 and issues
+before the lookup/capture group, reproducing the retail ordering. This is
+an ordinary side-selection boundary; no dummy loop, attribute or lookup
+stub is needed. The real earlier definition also supplies the subsequent
+camera's same-unit call metadata.
+
+DDS2 retains its actual mode-3 callbacks: clear candidates, then reload the
+command's actor or target list after callbacks, snapshot the count after
+flagging the actor, and reload the list on each iteration. Its reverse
+multiplier is 3.25 rather than 4, and its rotation is around Y rather than Z.
+
+`btlBuildTargetGroupFramingCameraPose` compares each pair of input margins
+before assigning the distance. Initializing the distance from one input and
+then comparing through that output loses the native input-to-output moves.
+Its X-span absolute value uses the existing `ffabsf` FPU boundary: a builtin
+absolute value lets the scheduler move half-angle setup across the native
+subtract/absolute sequence. The fallback accumulates the first distance
+before mirroring it into the second, preserving native store order.
+
+The first selected endpoint's initialization and the two projection stores
+use the existing legacy SDK store macro, with finite qualification of these
+emitted bodies. Each writes all four aligned lanes before its VU load or
+CPU consumer. Traversal muzzle stores and later vector copies keep their
+memory effects, retaining fresh endpoint-X reads across loop iterations.
+`tanf` receives a scalar; the box predicate reads projection XYZ without
+writing or retaining the pointer. No read bypasses initialization, and
+scalar XYZ updates preserve W. Other stores retain their memory effects;
+reaudit any changed lifetimes, providers, macros or compiler.

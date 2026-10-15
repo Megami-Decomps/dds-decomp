@@ -3716,8 +3716,8 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
 
 extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
-extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
+extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
+extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
@@ -3813,7 +3813,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             }
             if (sub->guardHandled != 0) {
                 btlBossDebugPrintf("VURI:IT-0 ++++\n");
-                func_001EEB78(command, &command->frontCamera, 1);
+                btlBuildActorPairFramingCameraPose(command, &command->frontCamera, 1);
                 btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
                 command->backCamera.distance += 100.0f;
                 command->motionParameter = 35.0f;
@@ -3852,7 +3852,7 @@ flag_defeat_candidates:
                 return 1;
             } else {
                 btlBossDebugPrintf("VURI:ITP-P ++++\n");
-                func_001EF030(command, &command->frontCamera);
+                btlBuildTargetGroupFramingCameraPose(command, &command->frontCamera);
                 btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
                 command->backCamera.distance += 100.0f;
                 command->motionParameter = 30.0f;
