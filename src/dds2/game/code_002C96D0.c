@@ -704,13 +704,13 @@ extern char fileNoSaveDataMessageLine2[];
 extern char fileNoSaveDataMessageLine3[];
 extern char D_003E8990[];
 extern char D_003E89B8[];
-extern char D_003E8BF0[];
-extern char D_003E8C08[];
-extern char D_003E8C30[];
-extern char D_003E8C58[];
-extern char D_003E8C70[];
-extern char D_003E8C98[];
-extern char D_003E8CC0[];
+extern char fileOriginalTitleSaveMissingText[];
+extern char fileNotClearedGameSaveText[];
+extern char fileSelectClearedGameSaveMessageLine1[];
+extern char fileSelectClearedGameSaveMessageLine2[];
+extern char fileCorruptSaveDataMessageLine1[];
+extern char fileCorruptSaveDataMessageLine2[];
+extern char fileCorruptSaveDataMessageLine3[];
 
 void fileDrawMemoryCardFlowPrompt(void) {
     if (D_00437D3C == 0) {
@@ -780,7 +780,7 @@ void fileDrawMemoryCardFlowPrompt(void) {
                 mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)fileNoSaveDataMessageLine2);
                 mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)fileNoSaveDataMessageLine3);
             } else {
-                mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8BF0);
+                mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)fileOriginalTitleSaveMissingText);
             }
             fileDrawPulsingSaveHighlight();
             D_00437CF8 = 0;
@@ -788,19 +788,19 @@ void fileDrawMemoryCardFlowPrompt(void) {
     }
     if (D_00437D3C == 8) {
         if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
-            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C08);
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)fileNotClearedGameSaveText);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8990);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E89B8);
-            mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)D_003E8C30);
-            mcdCreateFontDrawHandle(86, 210, 0x89FEFF80U, (u32)D_003E8C58);
+            mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)fileSelectClearedGameSaveMessageLine1);
+            mcdCreateFontDrawHandle(86, 210, 0x89FEFF80U, (u32)fileSelectClearedGameSaveMessageLine2);
             fileDrawPulsingSaveHighlight();
         }
     }
     if (D_00437D3C == 9) {
         if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
-            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C70);
-            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8C98);
-            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8CC0);
+            mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)fileCorruptSaveDataMessageLine1);
+            mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)fileCorruptSaveDataMessageLine2);
+            mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)fileCorruptSaveDataMessageLine3);
             fileDrawPulsingSaveHighlight();
         }
     }
@@ -828,16 +828,16 @@ extern char fileCardBusyConsoleWarningText[];
 extern char fileLoadSuccessfulText[];
 extern char fileSaveSuccessfulText[];
 extern char fileFormatSuccessfulText[];
-extern char D_003E8A48[];
-extern char D_003E8A70[];
-extern char D_003E8A90[];
-extern char D_003E8AA8[];
-extern char D_003E8AB8[];
-extern char D_003E8AD0[];
-extern char D_003E8AE0[];
-extern char D_003E8B00[];
-extern char D_003E8B18[];
-extern char D_003E8B60[];
+extern char fileOriginalTitleSaveBenefitsMessageLine1[];
+extern char fileOriginalTitleSaveBenefitsMessageLine2[];
+extern char fileOriginalTitleSaveBenefitsMessageLine3[];
+extern char fileOriginalTitleSaveBenefitsMessageLine4[];
+extern char fileRareItemAvailabilityMessageLine1[];
+extern char fileRareItemAvailabilityMessageLine2[];
+extern char fileCharacterStatBonusMessageLine1[];
+extern char fileCharacterStatBonusMessageLine2[];
+extern char fileDifficultySelectionAvailableText[];
+extern char fileDataTransferCompleteText[];
 
 void fileDrawModeSpecificMemoryCardPrompt(void) {
     if (D_00437D38 == 0) {
@@ -900,28 +900,28 @@ void fileDrawModeSpecificMemoryCardPrompt(void) {
         if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             switch (D_00437D38) {
             case 20:
-                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8A48);
-                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8A70);
-                mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8A90);
-                mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)D_003E8AA8);
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)fileOriginalTitleSaveBenefitsMessageLine1);
+                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)fileOriginalTitleSaveBenefitsMessageLine2);
+                mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)fileOriginalTitleSaveBenefitsMessageLine3);
+                mcdCreateFontDrawHandle(86, 186, 0x89FEFF80U, (u32)fileOriginalTitleSaveBenefitsMessageLine4);
                 fileDrawPulsingSaveHighlight();
                 break;
             case 21:
-                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8AB8);
-                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8AD0);
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)fileRareItemAvailabilityMessageLine1);
+                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)fileRareItemAvailabilityMessageLine2);
                 fileDrawPulsingSaveHighlight();
                 break;
             case 22:
-                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8AE0);
-                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8B00);
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)fileCharacterStatBonusMessageLine1);
+                mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)fileCharacterStatBonusMessageLine2);
                 fileDrawPulsingSaveHighlight();
                 break;
             case 23:
-                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8B18);
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)fileDifficultySelectionAvailableText);
                 fileDrawPulsingSaveHighlight();
                 break;
             case 24:
-                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8B60);
+                mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)fileDataTransferCompleteText);
                 fileDrawPulsingSaveHighlight();
                 break;
             }
