@@ -159,7 +159,7 @@ void fldClearSecondarySceneFlag(void);
 
 void fldClearPrimarySceneFlag(void);
 
-void fldClearSceneControlFlags(u32 arg0);
+void fldClearSceneControlFlags(u32 mask);
 
 extern u32 D_003BAB64;
 
@@ -171,7 +171,7 @@ extern void mdlLoadViewerPackage(s32, s32, s32, void *, s32);
 
 void fldLoadPlayerModel(void);
 
-u8 fldTestSceneControlFlags(u32 arg0);
+u8 fldTestSceneControlFlags(u32 mask);
 
 u32 *fldGetPlayerSceneStateAddress(void);
 
