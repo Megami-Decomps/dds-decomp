@@ -539,9 +539,9 @@ void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
 }
 
 /* Store the primary texture address as raw bits and dirty both draw entries. */
-void sdfSetAssetPrimaryTextureAddress(SdfAsset *param, SdfTex *texture) {
-    param->texture = texture;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
+void sdfSetAssetPrimaryTextureAddress(SdfAsset *asset, SdfTex *texture) {
+    asset->texture = texture;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Initialize packed scalar values 0,0,1,1,0; the final opaque word is untouched. */
@@ -557,92 +557,92 @@ SdfSubParam *sdfSubParamCreate(void) {
 }
 
 /* Lazily create the primary scalar block; this does not itself dirty an entry. */
-SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfAsset *param) {
-    SdfSubParam *subParameter = param->primarySubParam;
+SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfAsset *asset) {
+    SdfSubParam *subParameter = asset->primarySubParam;
     if (subParameter == NULL) {
         subParameter = sdfSubParamCreate();
-        param->primarySubParam = subParameter;
+        asset->primarySubParam = subParameter;
     }
     return subParameter;
 }
 
 /* Store the five primary scalars in order and dirty both draw entries. */
-void sdfSetPrimaryTextScalars(SdfAsset *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
-    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
+void sdfSetPrimaryTextScalars(SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e) {
+    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = a;
     scalarValues[1] = b;
     scalarValues[2] = c;
     scalarValues[3] = d;
     scalarValues[4] = e;
-    param->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
 }
 
 /* Copy five scalar values, leaving the block's opaque final word unchanged. */
-void sdfCopyPrimaryTextScalars(SdfAsset *param, const f32 *sourceScalars) {
-    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
+void sdfCopyPrimaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
+    f32 *scalarValues = sdfEnsurePrimaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = sourceScalars[0];
     scalarValues[1] = sourceScalars[1];
     scalarValues[2] = sourceScalars[2];
     scalarValues[3] = sourceScalars[3];
     scalarValues[4] = sourceScalars[4];
-    param->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_PRIMARY_SCALARS_DIRTY;
 }
 
 /* Write the full packed secondary-color word and dirty both draw entries. */
-void sdfSetAssetSecondaryColor(SdfAsset *param, u32 packedColor) {
-    param->secondaryColor = packedColor;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
+void sdfSetAssetSecondaryColor(SdfAsset *asset, u32 packedColor) {
+    asset->secondaryColor = packedColor;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the mode used by the secondary packet's mode and palette lookup. */
-void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
-    param->secondaryMode = packetMode;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
+void sdfSetAssetSecondaryMode(SdfAsset *asset, u32 packetMode) {
+    asset->secondaryMode = packetMode;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the secondary texture address and dirty both draw entries. */
-void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, SdfTex *texture) {
-    param->secondaryTexture = texture;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
+void sdfSetAssetSecondaryTextureAddress(SdfAsset *asset, SdfTex *texture) {
+    asset->secondaryTexture = texture;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Lazily create the secondary scalar block; this does not itself dirty an entry. */
-SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfAsset *param) {
-    SdfSubParam *subParameter = param->secondarySubParam;
+SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfAsset *asset) {
+    SdfSubParam *subParameter = asset->secondarySubParam;
     if (subParameter == NULL) {
         subParameter = sdfSubParamCreate();
-        param->secondarySubParam = subParameter;
+        asset->secondarySubParam = subParameter;
     }
     return subParameter;
 }
 
 /* Store the five secondary scalars in order and dirty both draw entries. */
-void sdfSetSecondaryTextScalars(SdfAsset *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
-    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
+void sdfSetSecondaryTextScalars(SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e) {
+    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = a;
     scalarValues[1] = b;
     scalarValues[2] = c;
     scalarValues[3] = d;
     scalarValues[4] = e;
-    param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Copy five scalar values, leaving the block's opaque final word unchanged. */
-void sdfCopySecondaryTextScalars(SdfAsset *param, const f32 *sourceScalars) {
-    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
+void sdfCopySecondaryTextScalars(SdfAsset *asset, const f32 *sourceScalars) {
+    f32 *scalarValues = sdfEnsureSecondaryTextSubParam(asset)->scalar.values;
     scalarValues[0] = sourceScalars[0];
     scalarValues[1] = sourceScalars[1];
     scalarValues[2] = sourceScalars[2];
     scalarValues[3] = sourceScalars[3];
     scalarValues[4] = sourceScalars[4];
-    param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
+    asset->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the scalar pair and mark its corresponding group dirty for both entries. */
-void sdfSetTextScalarPair(SdfAsset *param, f32 first, f32 second) {
-    param->scalarPairFirst = first;
-    param->scalarPairSecond = second;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PAIR_STATE_DIRTY;
+void sdfSetTextScalarPair(SdfAsset *asset, f32 first, f32 second) {
+    asset->scalarPairFirst = first;
+    asset->scalarPairSecond = second;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PAIR_STATE_DIRTY;
 }
 
 /* Allocate both native draw-entry command blocks and mark every change group dirty. */
