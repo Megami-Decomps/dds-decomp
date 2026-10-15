@@ -24,16 +24,16 @@ typedef struct MdlEntryRec {
     u8 opaque00[8];
     s32 dataId;        /* 0x08: resource-key lookup */
     s32 minimumTime;   /* 0x0C: deferred initialization threshold */
-    u8 flagB;          /* 0x10 */
-    u8 flagA;          /* 0x11 */
+    u8 playbackCadenceStep; /* 0x10: SdfStreamParams byte 3 */
+    u8 loopMode;            /* 0x11: SdfStreamParams byte 2 */
     u16 index;         /* 0x12: part-slot index */
 } MdlEntryRec;
 
 typedef char MdlEntryRec_size[(sizeof(MdlEntryRec) == 0x14) ? 1 : -1];
 typedef char MdlEntryRec_data_id_offset[((u32)&((MdlEntryRec *)0)->dataId == 0x08) ? 1 : -1];
 typedef char MdlEntryRec_minimum_time_offset[((u32)&((MdlEntryRec *)0)->minimumTime == 0x0C) ? 1 : -1];
-typedef char MdlEntryRec_flag_b_offset[((u32)&((MdlEntryRec *)0)->flagB == 0x10) ? 1 : -1];
-typedef char MdlEntryRec_flag_a_offset[((u32)&((MdlEntryRec *)0)->flagA == 0x11) ? 1 : -1];
+typedef char MdlEntryRec_flag_b_offset[((u32)&((MdlEntryRec *)0)->playbackCadenceStep == 0x10) ? 1 : -1];
+typedef char MdlEntryRec_flag_a_offset[((u32)&((MdlEntryRec *)0)->loopMode == 0x11) ? 1 : -1];
 typedef char MdlEntryRec_index_offset[((u32)&((MdlEntryRec *)0)->index == 0x12) ? 1 : -1];
 
 #endif /* MDL_RESOURCE_ENTRY_RECORDS_H */
