@@ -4343,7 +4343,7 @@ typedef char EvtViewerPackageRecord_size[(sizeof(EvtViewerPackageRecord) == 0x20
 typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x10) ? 1 : -1];
 
 
-extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0, s32 resource1,
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime);
 extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
