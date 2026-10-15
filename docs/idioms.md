@@ -194,7 +194,10 @@ second time exactly as the build does, and reports `CONTEXT` when a C
 function's code differs there. Such a function doesn't match in the real
 build. Treat it like `DIFF`: try another natural formulation or park it.
 Editing a unit can make an existing function CONTEXT, so always check the
-whole unit.
+whole unit. With `-v`, check_unit lists the full-unit words that differ from
+retail. Tune against those words: the standalone compile already matches.
+DDS1 `func_0013EC68` was exact standalone but its full-unit argument loads
+were reordered. Declaring `stage` before `record` fixed the order.
 
 GCSE has a separate spelling-sensitive effect. Its expression table hashes a
 `SYMBOL_REF` by the symbol's name; table traversal can change PRE pseudo

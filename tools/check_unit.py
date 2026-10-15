@@ -739,6 +739,7 @@ def main():
         # text around a function can change its code: compare each C function
         # as the build compiles it, relocated fields masked.
         context = {}
+        context_words = {}  # full-unit words that differ from retail
         data_context = []
         owned_rodata = []
         owned_data_checked = False
@@ -776,6 +777,11 @@ def main():
                             as_built.add(name)
                         else:
                             context[name] = (fsize, size)
+                            if roff is not None:
+                                built = masked(ftext[foff:foff + fsize], foff, frel)
+                                want = masked(retail[roff:roff + fsize], foff, frel)
+                                context_words[name] = [(4 * i, x, y) for i, (x, y) in
+                                                       enumerate(zip(built, want)) if x != y]
             # The build links the full unit's .rodata at the retail start of the
             # unit's .rodata subsegment: its bytes (relocated words masked) must be
             # retail's, in retail order. Catches string literals and
@@ -926,6 +932,12 @@ def main():
             bad += 1
             print(f"CONTEXT {name}: compiles differently inside the full unit ({fsize} vs {size} bytes "
                   "alone); the build uses the full-unit code, so this function does not match there")
+            words = context_words.get(name, [])
+            if words:
+                print(f"       full unit vs retail: {len(words)} of {fsize // 4} words differ "
+                      "(relocated fields masked)")
+            for i, built, want in (words if args.verbose else words[:3]):
+                print(f"       +0x{i:03X} full {built:08X} retail {want:08X}")
     if ro_diff and not args.func:
         bad += 1
         print(f"RODATA the full unit's .rodata differs from retail at {ro_diff} (string literal "
