@@ -30,6 +30,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+evtViewerApplyCommandSelection = 0x00230660; // type:func
 parDrawPendingParticleRecords = 0x0015B420; // type:func
 fldConfigureCameraMoveTracking = 0x0011E810; // type:func
 sdfLoadMapCounterCameraVectorsForMask = 0x002C38B0; // type:func
