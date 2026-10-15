@@ -1672,13 +1672,13 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueGateComponentScriptAndSound);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlResetGateComponentTransforms);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSubtaskActorMotionClass);
-        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlPrepareGateDefeatCandidateSet);
-        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlPrepareGateDefeatCandidateClear);
-        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlTriggerLinkedActionMotionAlternate);
-        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlTriggerLinkedActionMotion);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlPrepareGateDefeatCandidateSet);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlPrepareGateDefeatCandidateClear);
+        BTL_INSTALL_CALLBACK(battle->actionCursorSetupHook, 0x0, btlTriggerLinkedActionMotionAlternate);
+        BTL_INSTALL_CALLBACK(battle->actionCursorStepHook, 0x0, btlTriggerLinkedActionMotion);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlStartLinkedActionMotionPrimary);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSetupHariActionCameraPair);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceTimedActionState);
+        BTL_INSTALL_CALLBACK(battle->actionStageStepHook, 0x0, btlAdvanceTimedActionState);
         BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetSpecialEnemyActionStatus);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapCommandKind);
         BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsGateCoreAction19Request);
@@ -1717,7 +1717,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->refreshMotionHook, 0x0, btlSetUnitResourceFloatByMode);
         BTL_INSTALL_CALLBACK(battle->setMotionRangeHook, 0x0, btlSetUnitResourceHalvesByMode);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlResolveBoundActionCode);
-        BTL_INSTALL_CALLBACK(battle->unk670, 0x0, btlInitializeEffectVectors);
+        BTL_INSTALL_CALLBACK(battle->heightCameraSetupHook, 0x0, btlInitializeEffectVectors);
         BTL_INSTALL_CALLBACK(battle->pad634, 0x0, func_0021B828);
         BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlQueueVritraTentacleActionTasks);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectVritraActionCamera);
@@ -1826,7 +1826,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     case 0x327: {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlInitializeMarkedActionTimer);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlStartMarkedActionRuntimeUpdate);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickAction6B);
+        BTL_INSTALL_CALLBACK(battle->actionStageStepHook, 0x0, btlTickAction6B);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
         BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
         break;
@@ -1834,7 +1834,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     case 0x317:
     case 0x326: {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetDelayedActionTimer);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickDelayedMarkedAction);
+        BTL_INSTALL_CALLBACK(battle->actionStageStepHook, 0x0, btlTickDelayedMarkedAction);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
         BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
         break;
@@ -1863,17 +1863,17 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlOffsetSpecialActionValue);
         BTL_INSTALL_CALLBACK(battle->beginBattleEntryTasks, 0x0, btlCreateLinkedActorTransformTasks);
         BTL_INSTALL_CALLBACK(battle->pad604, 0x0, btlDestroyActionActor);
-        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlAllowBrahmanDefeatCandidateSet);
-        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlAllowBrahmanDefeatCandidateClear);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlAllowBrahmanDefeatCandidateSet);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlAllowBrahmanDefeatCandidateClear);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetBrahmanPartyCameraPreset);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUpdateBrahmanDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->unk650, 0x0, btlApplySingleTargetCameraOffset);
-        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlAimAtLinkedTargetOrGroupCamera);
-        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftTowardLinkedTarget);
+        BTL_INSTALL_CALLBACK(battle->actionCursorSetupHook, 0x0, btlAimAtLinkedTargetOrGroupCamera);
+        BTL_INSTALL_CALLBACK(battle->actionCursorStepHook, 0x0, btlLiftTowardLinkedTarget);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectActionTransitionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlSetSpecialLinkedActionCamera);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_00223350);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceBrahmanTimedActionCamera);
+        BTL_INSTALL_CALLBACK(battle->actionStageStepHook, 0x0, btlAdvanceBrahmanTimedActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSelectActionCameraByTableFlags);
         BTL_INSTALL_CALLBACK(battle->unk658, 0x0, btlFinishBrahmanCameraByTableFlags);
         BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlGetMarkedActionMotionCode);
@@ -1897,8 +1897,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetLinkedDefeatCameraPresetB);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUnitWrapB);
         BTL_INSTALL_CALLBACK(battle->unk650, 0x0, btlRaiseSingleTargetCameraPoints);
-        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlAimLinkedTargetOrSetCameraTransform);
-        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftLinkedTargetAndUpdateMotion);
+        BTL_INSTALL_CALLBACK(battle->actionCursorSetupHook, 0x0, btlAimLinkedTargetOrSetCameraTransform);
+        BTL_INSTALL_CALLBACK(battle->actionCursorStepHook, 0x0, btlLiftLinkedTargetAndUpdateMotion);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectLinkedActionCameraPose);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUpdatePartyApproachCameraStep);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_002247D0);
@@ -1918,8 +1918,8 @@ void btlInitializeBossCallbacks(s32 mode) {
         battle->commandRestrictFlags = commandFlags;
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUpdateSatanDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->unk650, 0x0, btlTryTransitionSingleTargetAction);
-        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlHandleTargetDirectionOrAction);
-        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftUnitForLinkedTarget);
+        BTL_INSTALL_CALLBACK(battle->actionCursorSetupHook, 0x0, btlHandleTargetDirectionOrAction);
+        BTL_INSTALL_CALLBACK(battle->actionCursorStepHook, 0x0, btlLiftUnitForLinkedTarget);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectSatanLinkedActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUpdateSatanApproachCameraStep);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectSatanActorCategoryCamera);
@@ -1957,7 +1957,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->commandTurnEndHook, 0x0, btlMode311TurnEndCallback);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlResetUnitPlacement);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetSpiralEdgeMotionProgress);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlUpdateSpiralEdgeMarkedCamera);
+        BTL_INSTALL_CALLBACK(battle->actionStageStepHook, 0x0, btlUpdateSpiralEdgeMarkedCamera);
         allocation = sdfAllocateBlockBySizeThreshold(0x4);
         battle->effect = allocation;
         memset(allocation, 0, 0x4);
@@ -1987,14 +1987,14 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad694, 0x4, btlIsEffectActor);
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetKind);
         BTL_INSTALL_CALLBACK(battle->actorEligibilityOverride, 0x0, btlHasDifferentActiveTarget);
-        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlSetLinkFlagOff);
-        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlSetLinkFlagOn);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlSetLinkFlagOff);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlSetLinkFlagOn);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueLinkedActorModelStateTasks);
-        BTL_INSTALL_CALLBACK(battle->unk61C, 0x0, btlTryScheduleMarkedUnitTask);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatMotion, 0x0, btlTryScheduleMarkedUnitTask);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSetLinkedPairActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlIsSpecialActionKind);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceMarkedLinkedActionCamera);
+        BTL_INSTALL_CALLBACK(battle->actionStageStepHook, 0x0, btlAdvanceMarkedLinkedActionCamera);
         allocation = sdfAllocateBlockBySizeThreshold(0x18);
         battle->effect = allocation;
         memset(allocation, 0, 0x18);

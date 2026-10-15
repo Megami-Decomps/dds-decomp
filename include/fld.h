@@ -77,9 +77,9 @@ typedef struct FldActorEntry {
     s16 warpEntry2;
     char warpName[0xC]; /* 0x38 */
     s8 linkKind; /* 0x44 */
-    s8 unk45;
+    s8 rowIndex; /* 0x45: selected row, matching the DDS1 actor entry. */
     char linkName[0xC]; /* 0x46 */
-    s8 unk52;
+    s8 sequenceCode; /* 0x52: sequence selector, matching the DDS1 actor entry. */
     s8 selectedRoom; /* 0x53: optional one-based room */
     s8 flags54;
     char taskName[0xF]; /* 0x55 */

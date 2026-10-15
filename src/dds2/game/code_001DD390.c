@@ -2593,7 +2593,7 @@ s32 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
 }
 
 void btlFlagUnitDefeatCandidate(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk69C;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->allowDefeatCandidate;
     if (hook == 0 || hook(unit) != 0) {
         unit->status.flags |= 4;
         if (!(unit->status.flags & 0x8000000)) {
@@ -2606,7 +2606,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit) {
 }
 
 void btlClearUnitDefeatCandidate(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk6A0;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->allowDefeatCandidateClear;
     if (hook == 0 || hook(unit) != 0) {
         unit->status.flags &= ~4;
         unit->status.flags &= ~8;

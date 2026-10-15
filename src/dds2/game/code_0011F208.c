@@ -828,9 +828,9 @@ void fldInitializeAreaWork(void) {
     area->unk11C = 0;
     area->unk190 = 0;
     area->cameraTiltActive = 0;
-    area->unk13C = 0;
+    area->targetGuideEnabled = 0;
     area->targetGuideActive = 0;
-    area->unk144 = 0;
+    area->overlayFadeInFrames = 0;
     area->nextArea = -1;
     area->skipFade = 0;
     area->attritionDistance = 100.0f;

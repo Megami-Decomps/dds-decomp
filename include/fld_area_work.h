@@ -103,9 +103,9 @@ typedef struct FldAreaWork {
     s32 skipFade;
     s32 unk138;
 #ifdef VERSION_DDS2
-    s32 unk13C;
+    s32 targetGuideEnabled; /* Current scene permits target-guide interaction and updates. */
     s32 targetGuideActive;
-    s32 unk144;
+    s32 overlayFadeInFrames; /* Remaining frames of the 20-frame overlay fade-in. */
 #endif
     s32 playerModelVariant;      /* 0x13C in DDS1, 0x148 in DDS2 */
     f32 x;

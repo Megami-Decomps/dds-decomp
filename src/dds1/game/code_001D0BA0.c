@@ -2543,7 +2543,7 @@ void btlClearUnitDefeatCandidate(BtlUnit *object) {
     u32 flags;
     u32 masked;
 
-    callback = ((BtlState *)btlGetRuntime())->unk658;
+    callback = ((BtlState *)btlGetRuntime())->allowDefeatCandidateClear;
     if (callback != 0 && callback(object) == 0) {
         return;
     }
