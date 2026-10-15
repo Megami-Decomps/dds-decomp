@@ -745,8 +745,8 @@ extern void *memcpy(void *, const void *, u32);
 extern void mnuPopulatePartyPanelSlot(u8 *, s32, u32, PartyPanel *);
 void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
-    s32 activeCount = context->partyPanel.unk0;
-    s32 lastSlot = context->partyPanel.unk4;
+    s32 activeCount = context->partyPanel.frontlineCount;
+    s32 lastSlot = context->partyPanel.reserveCount;
     s32 i;
 
     memcpy(&menuWork->backup[menuWork->selection], &menuWork->current[entryIndex],
@@ -764,18 +764,18 @@ void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, Menu
                       &context->partyPanel);
     }
     context->partyPanel.slots[menuWork->selection].index = entryIndex;
-    context->partyPanel.unk0 = activeCount;
-    context->partyPanel.unk4 = lastSlot;
+    context->partyPanel.frontlineCount = activeCount;
+    context->partyPanel.reserveCount = lastSlot;
     if (skipRefresh == 0) {
         mnuRefreshWindowSlots(&context->partyWindow,
                               MNU_WINDOW_SLOT_REFRESH_PRESERVE_HANDLES);
     }
-    for (i = context->partyPanel.unk0; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
+    for (i = context->partyPanel.frontlineCount; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
         context->partyWindow.slots[i].flags |= 0x40;
     }
     mnuRefreshPartyPanelBars(&context->partyWindow);
-    context->partyPanel.unk0++;
-    context->partyPanel.unk4--;
+    context->partyPanel.frontlineCount++;
+    context->partyPanel.reserveCount--;
     menuWork->selection++;
 }
 
@@ -836,8 +836,8 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     mnuCopyPartyEntries();
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
-    ((MenuContext *)context)->partyPanel.unk0 = 1;
-    ((MenuContext *)context)->partyPanel.unk4 = mnuCountActiveSlots() - 1;
+    ((MenuContext *)context)->partyPanel.frontlineCount = 1;
+    ((MenuContext *)context)->partyPanel.reserveCount = mnuCountActiveSlots() - 1;
     mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
         ((MenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x40;

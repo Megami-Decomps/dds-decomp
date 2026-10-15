@@ -173,7 +173,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
         glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
         sprintf(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
         glyph = (struct FrFontGlyph *)(u32)itfCreateFont2TextGlyph(x + 0x1050, 0x360, depth, color, text, (s32)(u32)glyph);
-        if (page->unk74 != 0) {
+        if (page->menuValueStyleOverride != 0) {
             frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         }
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, param);
@@ -188,7 +188,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
             s8 style;
 
             glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x418, depth, color, D_00435E5C[value], 0);
-            style = page->unk75;
+            style = page->currentValueStyle;
             if (style == 1 || (style == 2 && mnuGetItemRequirementCount(value) == 0)) {
                 frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
             } else if (style == 2) {
@@ -304,7 +304,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
             mnuDrawIconRow(x, y, depth, 0, slot->windowSprites, surface);
         }
         mnuDrawSelectedPartyProfileLabel(x, y, depth,
-            slot->windowSprites->fade, slot->windowSprites->unkC, (s32)slot,
+            slot->windowSprites->fade, slot->windowSprites->profileLabelOverride, (s32)slot,
             partyIndex, surface);
         if (slot->windowSprites->fadeOut == 0) {
             if (slot->windowSprites->fade > 0) {

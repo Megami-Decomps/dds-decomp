@@ -347,8 +347,8 @@ extern void mnuUpdatePartyPanelPercentDisplays(s32);
 void mnuTransferPartyEntryToSelection(s32 partyIndex, s32 mode, s32 skipUpdate,
                    CampMenuContext *context) {
     PartyMenuData *menu = (PartyMenuData *)context->menu;
-    s32 previousPanelCount = context->partyPanel.unk0;
-    s32 previousPanelOther = context->partyPanel.unk4;
+    s32 previousPanelCount = context->partyPanel.frontlineCount;
+    s32 previousPanelOther = context->partyPanel.reserveCount;
     s32 panelIndex;
 
     menu->backup[menu->selection] = *(DatPartyRecord *)(partyIndex * (s32)sizeof(DatPartyRecord) + (s32)menu + PARTY_CURRENT_OFFSET);
@@ -366,18 +366,18 @@ void mnuTransferPartyEntryToSelection(s32 partyIndex, s32 mode, s32 skipUpdate,
     }
 
     context->partyPanel.slots[menu->selection].index = partyIndex;
-    context->partyPanel.unk0 = previousPanelCount;
-    context->partyPanel.unk4 = previousPanelOther;
+    context->partyPanel.frontlineCount = previousPanelCount;
+    context->partyPanel.reserveCount = previousPanelOther;
 
     if (skipUpdate == 0) {
         mnuUpdateHandleStates(&context->partyWindow);
     }
-    for (panelIndex = context->partyPanel.unk0; panelIndex < 5; panelIndex++) {
+    for (panelIndex = context->partyPanel.frontlineCount; panelIndex < 5; panelIndex++) {
         context->partyWindow.slots[panelIndex].flags |= 0x80;
     }
     mnuUpdatePartyPanelPercentDisplays((s32)&context->partyWindow);
-    context->partyPanel.unk0++;
-    context->partyPanel.unk4--;
+    context->partyPanel.frontlineCount++;
+    context->partyPanel.reserveCount--;
     menu->selection++;
 }
 
@@ -435,8 +435,8 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     mnuCopyPartyEntries();
     menuWork->selection = 0;
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
-    ((CampMenuContext *)context)->partyPanel.unk0 = 1;
-    ((CampMenuContext *)context)->partyPanel.unk4 = mnuCountActiveSlots() - 1;
+    ((CampMenuContext *)context)->partyPanel.frontlineCount = 1;
+    ((CampMenuContext *)context)->partyPanel.reserveCount = mnuCountActiveSlots() - 1;
     mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
         ((CampMenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x80;

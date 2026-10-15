@@ -616,7 +616,7 @@ const s32 D_0042B140[4] = {512, 56, 1088, 208};
 
 void mnuCalcListEntryOffset(s32 *out, MenuPageWindow *menu, s32 index) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
-    s32 count = menu->records->unk0;
+    s32 count = menu->records->frontlineCount;
     s32 mode;
 
     if (!(menu->slots[index].flags & 0x40)) {
@@ -661,7 +661,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     mnuCalcListEntryOffset(positionOffset, menu, 0);
     node = panel->windowSprites;
     if (node != NULL) {
-        node->unkC = overrideValue;
+        node->profileLabelOverride = overrideValue;
     }
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
@@ -673,7 +673,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
     node = panel->windowSprites;
     if (node != NULL) {
-        node->unkC = 0;
+        node->profileLabelOverride = 0;
     }
 }
 
@@ -684,8 +684,8 @@ void mnuDrawListPanels(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *m
     s32 panelCount;
     s32 panelIndex;
 
-    panelCount = layout->unk0;
-    panelCount += layout->unk4;
+    panelCount = layout->frontlineCount;
+    panelCount += layout->reserveCount;
     if (menu->selected >= 0) {
         mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
     } else {
@@ -1633,10 +1633,10 @@ void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, Par
     s32 i;
 
     if (entry->flags & 2)
-        panel->unk0++;
+        panel->frontlineCount++;
     else
-        panel->unk4++;
-    panel->slots[index].unk8 = entry->unitId - 1;
+        panel->reserveCount++;
+    panel->slots[index].unitIndex = entry->unitId - 1;
     panel->slots[index].level = entry->level;
     panel->slots[index].hp = entry->hp;
     panel->slots[index].mp = entry->mp;
@@ -1647,21 +1647,21 @@ void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, Par
     }
 }
 
-/* Populate occupied party slots; empty slots retain the native unknown-field sentinel. */
+/* Populate occupied party slots; empty slots retain a unit index of -1. */
 void mnuInitPartyPanelSlots(PartyPanel *panel) {
     u32 partyIndex;
     DatPartyRecord *partyEntry;
 
     memset(panel, 0, 0x10C);
-    panel->unk0 = 0;
-    panel->unk4 = 0;
+    panel->frontlineCount = 0;
+    panel->reserveCount = 0;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         partyEntry = &datGameState->party[partyIndex];
         if (partyEntry->flags & 1) {
             mnuPopulatePartyPanelSlot(partyEntry, 0, partyIndex, panel);
             panel->slots[partyIndex].index = partyIndex;
         } else {
-            panel->slots[partyIndex].unk8 = -1;
+            panel->slots[partyIndex].unitIndex = -1;
         }
     }
 }

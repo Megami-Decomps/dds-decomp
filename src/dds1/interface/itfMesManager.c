@@ -359,9 +359,9 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
     mes->flags = 0;
-    mes->unk10 = 0x53;
+    mes->drawSurfaceIndex = 0x53;
     mes->renderValue = 0xFFFFF0;
-    mes->unk12 = 0;
+    mes->panelMode = 0;
     mes->callbackAddress = 0;
     itfResetCursorPositionAndState(&mes->blk14, 1);
     itfMesResetCursorState(&mes->entryBlock, 1);
@@ -546,10 +546,10 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     optionBlock->glyphChain = itfMesBuildNodeRows(&table->items[1], table->bitCount, optionBlock->panelValue, optionBlock->x, firstRowY, mes->renderValue);
     optionBlock->rowCount = visibleRowCount;
     mes->flags = (mes->flags & ~ITF_MES_OPTION_STATE_MASK) | ITF_MES_OPTION_LIST_READY;
-    if (mes->unk12 == 3) {
+    if (mes->panelMode == 3) {
         itfMesBuildOptionFrame(mes);
     }
-    optionBlock->unk10 = 1;
+    optionBlock->selectionState = 1;
 }
 
 /* Release option glyphs, clear option selection/state and invalidate its rank.
@@ -563,7 +563,7 @@ void itfMesResetWindow(s32 window) {
         optionBlock->glyphChain = NULL;
     }
     optionBlock->panelValue = 0;
-    optionBlock->unk10 = 0;
+    optionBlock->selectionState = 0;
     optionBlock->rowCount = 0;
     optionBlock->selectedIndex = -1;
     mes->flags &= ~ITF_MES_OPTION_STATE_MASK;
@@ -876,8 +876,8 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 panelMode, s32 fadeLimit) {
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
-        if (mes->unk12 != panelMode || panelBlock->fadeLimit != fadeLimit) {
-            mes->unk12 = panelMode;
+        if (mes->panelMode != panelMode || panelBlock->fadeLimit != fadeLimit) {
+            mes->panelMode = panelMode;
             itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, panelMode, fadeLimit);
             if (panelBlock->sprite != NULL) {
                 itfPanelReleasePrimitiveResources(panelBlock->sprite);
@@ -1227,7 +1227,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     }
     glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
                           (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
-    if (mes->unk12 == 3) {
+    if (mes->panelMode == 3) {
         if (frFontCountGlyphChainNodes(glyph) == 1) {
             frFontCenterGlyphChainAt(0x1000, 0xC60, glyph);
         } else {
@@ -1257,7 +1257,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         evtLipsExecFunction(lipsValue, itfGetTextLipsMotionId());
     }
     itfMesSetNodeChainRenderValue(glyph, mes->renderValue);
-    entryBlock->unk16 = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
+    entryBlock->lineCount = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
     entryBlock->glyphChain = glyph;
 }
 

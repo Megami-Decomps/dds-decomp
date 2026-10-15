@@ -286,8 +286,8 @@ void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negat
 }
 
 void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused) {
-    state->unk14 = vertical;
-    state->unk18 = horizontal;
+    state->overlayX = vertical;
+    state->overlayY = horizontal;
 }
 
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
@@ -323,7 +323,7 @@ void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrol
             effDrawTextureSlotWithBlendedCornerColors(0, y, z, opacity / 4, 0x60, resource, frameIndex + 1, surfaceIndex);
         } else {
             offsets = verticalOffsets.values[state->layout][1];
-            effDrawTextureSlotWithBlendedCornerColors(state->unk14, state->unk18, z, opacity / 10, 0x60,
+            effDrawTextureSlotWithBlendedCornerColors(state->overlayX, state->overlayY, z, opacity / 10, 0x60,
                 resource, frameIndex + 2, surfaceIndex);
         }
         stripX = x + (strip->horizontalOffset & ~0xF);

@@ -341,9 +341,9 @@ void itfDrawIndexedPanelFlatQuads(UiSprite *panel, SdfListHead *command) {
     PktRec *colors = drawBuffer + 4;
     s32 quadIndex;
 
-    colors[1].alpha = panel->unk38;
+    colors[1].alpha = panel->alpha;
     for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
-        itfDrawQuadFlat4(drawBuffer, colors, &D_003B45C8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_003B45D8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->unk0C, command);
+        itfDrawQuadFlat4(drawBuffer, colors, &D_003B45C8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_003B45D8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->renderValue, command);
     }
 }
 
@@ -352,7 +352,7 @@ void itfDrawIndexedPanelFlatQuads(UiSprite *panel, SdfListHead *command) {
 void itfDrawSevenColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 21;
-    s32 alpha = panel->unk38;
+    s32 alpha = panel->alpha;
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_COLOR_COUNT; rowIndex++, colors++) {
@@ -360,10 +360,10 @@ void itfDrawSevenColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     }
     colors = drawBuffer + 20;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListWide(drawBuffer, colors, &D_003B45E8[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4600[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->unk0C, command);
+        itfEmitQuadListWide(drawBuffer, colors, &D_003B45E8[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4600[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365A8, &D_003B4618[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->unk0C, command);
+        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365A8, &D_003B4618[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
     }
 }
 
@@ -372,7 +372,7 @@ void itfDrawSevenColorPanelQuads(UiSprite *panel, SdfListHead *command) {
 void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 17;
-    s32 alpha = panel->unk38;
+    s32 alpha = panel->alpha;
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_COLOR_COUNT; rowIndex++, colors++) {
@@ -380,10 +380,10 @@ void itfDrawFiveColorPanelQuads(UiSprite *panel, SdfListHead *command) {
     }
     colors = drawBuffer + 16;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListWide(drawBuffer, colors, &D_003B4630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4648[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->unk0C, command);
+        itfEmitQuadListWide(drawBuffer, colors, &D_003B4630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_003B4648[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
-        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365B0, &D_003B4660[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->unk0C, command);
+        itfEmitQuadListA(drawBuffer + 8 + rowIndex * 2, colors, D_004365B0, &D_003B4660[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
     }
 }
 
@@ -409,9 +409,9 @@ void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
         out[3].y = input[3].y - yOffset;
     }
 
-    itfDrawQuadFlat4(buf, colors, D_004365B8, D_004365C0, panel->unk0C, command);
+    itfDrawQuadFlat4(buf, colors, D_004365B8, D_004365C0, panel->renderValue, command);
     for (i = 0; i < 3; i++) {
-        itfEmitQuadListA(vertices, colors, &D_003B4670[i * 5], &D_003B4680[i * 5], 5, panel->unk0C, command);
+        itfEmitQuadListA(vertices, colors, &D_003B4670[i * 5], &D_003B4680[i * 5], 5, panel->renderValue, command);
     }
 }
 
@@ -419,8 +419,8 @@ void itfDrawPanelWithThreeInsetQuads(UiSprite *panel, SdfListHead *command) {
 void itfDrawPanelQuadWithCommand(UiSprite *panel, SdfListHead *command) {
     PktRec *colors = (PktRec *)panel->payload + 2;
 
-    colors->alpha = panel->unk38;
-    itfDrawQuadFlat4(panel->payload, colors, D_004365C8, D_004365D0, panel->unk0C, command);
+    colors->alpha = panel->alpha;
+    itfDrawQuadFlat4(panel->payload, colors, D_004365C8, D_004365D0, panel->renderValue, command);
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
@@ -428,9 +428,9 @@ void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
     PktRec *drawBuffer = (PktRec *)panel->payload;
     PktRec *colors = drawBuffer + 3;
 
-    colors[1].alpha = panel->unk38;
+    colors[1].alpha = panel->alpha;
     itfSendTablePacket(command, 2, 0);
-    itfEmitQuadListWide(drawBuffer, colors, D_004365D8, D_004365E0, 6, panel->unk0C, command);
+    itfEmitQuadListWide(drawBuffer, colors, D_004365D8, D_004365E0, 6, panel->renderValue, command);
     itfSendTablePacket(command, 0, 0);
 }
 
@@ -445,64 +445,64 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 void itfDrawFramedPanelWithTextureStrips(UiSprite *panel, SdfListHead *command) {
     PanelRect rect;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
-    s32 *color = &panel->unk2C;
+    s32 *color = &panel->red;
     s32 alpha;
     s32 x;
 
-    alpha = panel->unk38 * 57 / 128;
+    alpha = panel->alpha * 57 / 128;
     D_003B4690[3] = alpha;
     rect.x0 = panel->left;
     rect.y0 = panel->top;
     rect.x1 = panel->right;
     rect.y1 = panel->bottom;
-    itfDrawThreePanelBorderBands(&rect, D_003B4690, panel->unk0C, 0x490, command);
-    alpha = panel->unk38 * 38 / 128;
+    itfDrawThreePanelBorderBands(&rect, D_003B4690, panel->renderValue, 0x490, command);
+    alpha = panel->alpha * 38 / 128;
     D_003B4690[7] = alpha;
     rect.x0 = panel->left + 0x720;
     rect.y0 = panel->top;
     rect.x1 = panel->left + 0x17E0;
     rect.y1 = panel->bottom;
-    itfDrawThreePanelBorderBands(&rect, &D_003B4690[4], panel->unk0C, 0x680, command);
+    itfDrawThreePanelBorderBands(&rect, &D_003B4690[4], panel->renderValue, 0x680, command);
     rect.x0 = panel->left - 0x140;
     rect.y0 = panel->top + 0x48;
     rect.x1 = panel->left + 0xB40;
     rect.y1 = panel->bottom;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4700, color, panel->unk0C, payload->texture, 0, command);
+    itfQueueTextureBoundQuadPacket(&rect, &D_003B4700, color, panel->renderValue, payload->texture, 0, command);
     if (panel->scrollSpan > 0 && panel->screenY != panel->top) {
         alpha = 0x80 - ((panel->screenY - panel->top) << 7) / panel->scrollSpan;
     } else {
-        alpha = panel->unk38;
+        alpha = panel->alpha;
     }
     D_003B4690[15] = alpha;
     rect.x0 = panel->right - 0xB40;
     rect.y0 = panel->top;
     rect.x1 = panel->right + 0x140;
     rect.y1 = panel->bottom - 0x48;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710, &D_003B4690[12], panel->unk0C, payload->texture, 0, command);
-    D_003B4690[11] = panel->unk38 * 70 / 128;
+    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710, &D_003B4690[12], panel->renderValue, payload->texture, 0, command);
+    D_003B4690[11] = panel->alpha * 70 / 128;
     rect.x0 = panel->left - 0x140;
     rect.y0 = panel->top - 0xB8;
     rect.x1 = panel->left + 0x1A40;
     rect.y1 = panel->top + 8;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 1, &D_003B4690[8], panel->unk0C, payload->texture, 0, command);
+    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 1, &D_003B4690[8], panel->renderValue, payload->texture, 0, command);
     rect.x0 = panel->left + 0x8B0;
     rect.y0 = panel->top - 0x10;
     rect.x1 = panel->left + 0xFC0;
     rect.y1 = panel->top;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 3, color, panel->unk0C, payload->texture, 0, command);
+    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 3, color, panel->renderValue, payload->texture, 0, command);
     x = rect.x1;
     rect.x0 = x;
     rect.x1 = x + 0x1040;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->unk0C, payload->texture, 0, command);
+    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
     rect.x0 = panel->left + 0x1020;
     rect.y0 = panel->bottom - 0x10;
     rect.x1 = panel->left + 0x1730;
     rect.y1 = panel->bottom;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 4, color, panel->unk0C, payload->texture, 0, command);
+    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 4, color, panel->renderValue, payload->texture, 0, command);
     x = rect.x0;
     rect.x1 = x;
     rect.x0 = x - 0x1220;
-    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->unk0C, payload->texture, 0, command);
+    itfQueueTextureBoundQuadPacket(&rect, &D_003B4710 - 2, color, panel->renderValue, payload->texture, 0, command);
 }
 /*END itfDrawFramedPanelWithTextureStrips*/
 
@@ -515,7 +515,7 @@ extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, Draw
  * cap. Insets are captured before the first submission; Y bounds are live. */
 void itfDrawThreePieceTexturedPanel(UiSprite *panel, SdfListHead *command) {
     DrawVertex rect[2];
-    DrawColorRec *color = (DrawColorRec *)&panel->unk2C;
+    DrawColorRec *color = (DrawColorRec *)&panel->red;
     UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
     s32 leftInset = panel->left + 0x3E0;
     s32 rightInset = panel->right - 0x3E0;
@@ -524,20 +524,20 @@ void itfDrawThreePieceTexturedPanel(UiSprite *panel, SdfListHead *command) {
     rect[0].y = panel->top;
     rect[1].x = leftInset;
     rect[1].y = panel->bottom;
-    itfQueueTextureBoundQuadPacket(rect, &D_003B4720, color, panel->unk0C,
+    itfQueueTextureBoundQuadPacket(rect, &D_003B4720, color, panel->renderValue,
                                   payload->texture, 0, command);
 
     rect[0].x = leftInset;
     rect[0].y = panel->top;
     rect[1].x = rightInset;
     rect[1].y = panel->bottom;
-    itfQueueColoredTexturedQuadPacket(rect, &D_003B4730, color, panel->unk0C, 0, command);
+    itfQueueColoredTexturedQuadPacket(rect, &D_003B4730, color, panel->renderValue, 0, command);
 
     rect[0].x = panel->right;
     rect[0].y = panel->top;
     rect[1].x = rightInset;
     rect[1].y = panel->bottom;
-    itfQueueColoredTexturedQuadPacket(rect, &D_003B4720, color, panel->unk0C, 0, command);
+    itfQueueColoredTexturedQuadPacket(rect, &D_003B4720, color, panel->renderValue, 0, command);
 }
 
 
@@ -559,35 +559,35 @@ void itfDrawThreeBandPanelTexture(UiSprite *panel, SdfListHead *command) {
     s32 top;
     s32 bottom;
 
-    colors[1].components[3] = (panel->unk38 * 0x20) >> 7;
+    colors[1].components[3] = (panel->alpha * 0x20) >> 7;
     for (i = 0; i < 3; i++) {
         itfDrawQuadFlat4(vertices, colors, &D_003B4740[i * 4],
-                        &D_003B4750[i * 4], panel->unk0C, command);
+                        &D_003B4750[i * 4], panel->renderValue, command);
     }
     bottom = panel->bottom;
     top = panel->top;
     if (bottom - top >= 0x569) {
         s32 topEnd = top + 0x2B4;
         s32 bottomStart = bottom - 0x2B4;
-        s32 *color = &panel->unk2C;
+        s32 *color = &panel->red;
 
         rect[0].x = panel->left;
         rect[0].y = top;
         rect[1].x = panel->right;
         rect[1].y = topEnd;
-        itfQueueTextureBoundQuadPacket(rect, &D_003B4470, color, panel->unk0C,
+        itfQueueTextureBoundQuadPacket(rect, &D_003B4470, color, panel->renderValue,
                                       payload->texture, 0, command);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfQueueTextureBoundQuadPacket(rect, &D_003B4480, color, panel->unk0C,
+        itfQueueTextureBoundQuadPacket(rect, &D_003B4480, color, panel->renderValue,
                                       payload->texture, 0, command);
         rect[0].y = bottomStart;
         rect[1].y = panel->bottom;
-        itfQueueTextureBoundQuadPacket(rect, &D_003B4490, color, panel->unk0C,
+        itfQueueTextureBoundQuadPacket(rect, &D_003B4490, color, panel->renderValue,
                                       payload->texture, 0, command);
     } else {
         itfQueueTextureBoundQuadPacket(&panel->left, &D_003B44A0,
-                                      &panel->unk2C, panel->unk0C,
+                                      &panel->red, panel->renderValue,
                                       payload->texture, 0, command);
     }
 }
@@ -597,12 +597,12 @@ void itfDrawThreeBandPanelTexture(UiSprite *panel, SdfListHead *command) {
 void itfDrawTintedPanelRect(UiSprite *panel, SdfListHead *command) {
     PanelRect rect;
 
-    D_003B4760[3] = panel->unk38 * ITF_PANEL_TINT_ALPHA_NUMERATOR / ITF_PANEL_TINT_ALPHA_DENOMINATOR;
+    D_003B4760[3] = panel->alpha * ITF_PANEL_TINT_ALPHA_NUMERATOR / ITF_PANEL_TINT_ALPHA_DENOMINATOR;
     rect.x0 = panel->left;
     rect.y0 = panel->top;
     rect.x1 = panel->right;
     rect.y1 = panel->bottom;
-    itfDrawThreePanelBorderBands(&rect, D_003B4760, panel->unk0C, ITF_PANEL_TINT_BORDER_WIDTH, command);
+    itfDrawThreePanelBorderBands(&rect, D_003B4760, panel->renderValue, ITF_PANEL_TINT_BORDER_WIDTH, command);
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
