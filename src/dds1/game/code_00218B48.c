@@ -7,6 +7,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "eff_inner_float_api.h"
 #include "mdl_light_editor_state.h"
 #include "kwln_task_add_child.h"
 #include "mdl_motion_api.h"
@@ -3283,7 +3284,6 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
 
 extern EffWorldNode *dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
-extern void effObjSetInnerFloat(EffWorldNode *object, f32 value);
 
 extern void dds3EnsureSlotData();
 #include "dds3_world_secondary.h"

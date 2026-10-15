@@ -8,6 +8,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "eff_inner_float_api.h"
 #include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
@@ -1252,7 +1253,6 @@ extern char D_003BABB8[];
 
 extern void effMiscAxisAngleToQuaternionVU(f32);
 
-extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 
 extern void fldResetCameraModelHandles(void);
@@ -1354,7 +1354,6 @@ extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, Field
 
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 
-extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 
 /* Create the secondary camera at target origin with the stored eye/up vectors. */
