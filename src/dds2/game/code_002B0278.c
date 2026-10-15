@@ -136,7 +136,7 @@ extern void mnuDrawSlotIcons();
 extern void frFontAddSharedGlyphFlags(s32);
 extern u8 frFontClearFlagBits(u8);
 
-extern char D_003E7588[];
+extern char mnuCampPartySelectionReturnPopupEntry[];
 
 extern struct SdfPoolNode *D_00380788[13][4];
 
@@ -910,7 +910,7 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     PartyMenuData *party = (PartyMenuData *)((MenuContext *)menu)->party;
 
     mnuRestorePartyEntriesAndRefresh();
-    mnuSetPopupEntryFlagged(((MenuContext *)menu)->popupState, D_003E7588);
+    mnuSetPopupEntryFlagged(((MenuContext *)menu)->popupState, mnuCampPartySelectionReturnPopupEntry);
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)menu)->panelHandle,
                               (struct EffectSlotSet *)(u32)((MenuContext *)menu)->displayHandle, 0, 1);
     mnuBeginWindowFadeTransition(((MenuContext *)menu)->imageHandle, &((MenuContext *)menu)->transition);
@@ -967,7 +967,7 @@ s32 mnuHandlePartySelectionInput(KwlnTask *callback) {
                 mnuClearPartySelectionAndActivateSlots((s32)context);
                 mnuRefreshPartyPanelBars(&context->partyWindow);
             } else {
-                mnuSetPopupEntryFlagged(popup, D_003E7588);
+                mnuSetPopupEntryFlagged(popup, mnuCampPartySelectionReturnPopupEntry);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
                                           (struct EffectSlotSet *)(u32)context->displayHandle, 0, 1);
                 mnuBeginWindowFadeTransition(context->imageHandle, &context->transition);

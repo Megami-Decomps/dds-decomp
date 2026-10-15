@@ -125,7 +125,7 @@ extern void frFontAddSharedGlyphFlags();
 
 extern void frFontClearFlagBits();
 
-extern char D_003E7588[];
+extern char mnuCampPartySelectionReturnPopupEntry[];
 
 extern struct SdfPoolNode *D_00380788[13][4];
 

@@ -159,13 +159,13 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
 extern u32 mnuStaffRollImageSpriteFrames[];
 
 
-extern u8 D_0037B950[];
+extern u8 mnuCampCommandLabels[];
 
-extern u8 D_0037B970[];
+extern u8 mnuCampItemCommandLabels[];
 
-extern u8 D_0037B980[];
+extern u8 mnuCampSetCommandLabels[];
 
-extern u8 D_0037C388[];
+extern u8 mnuCampCommandVisibilityFlagIds[];
 
 extern u32 mnuStaffRollImageMode32SpriteFrames[];
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);

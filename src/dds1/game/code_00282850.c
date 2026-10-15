@@ -194,7 +194,7 @@ extern void mnuDrawPartyMemberCommandPanel(s32, s32, s32, MenuPageWindow *, s32,
 extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
 
-extern s32 D_0037CD80[];
+extern s32 mnuReservePartyPanelRowParameters[];
 
 void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 param) {
     MenuPageSlot *panel = &menu->slots[panelIndex];
@@ -246,8 +246,8 @@ void mnuCalcListEntryOffset(s32 *position, MenuPageWindow *menu, s32 panelIndex)
     case 2: {
         s32 entryIndex = ((firstCount * 5 + totalCount) << 1) - 12;
         position[1] =
-            (D_0037CD80[entryIndex] +
-             (panelIndex - firstCount) * *(entryIndex + D_0037CD80 + 1))
+            (mnuReservePartyPanelRowParameters[entryIndex] +
+             (panelIndex - firstCount) * *(entryIndex + mnuReservePartyPanelRowParameters + 1))
             << 3;
         position[0] = 0x1060;
         break;
@@ -1577,14 +1577,14 @@ s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry) {
     return 0;
 }
 
-extern s8 D_0037CE40[];
-extern u16 D_0037CE18[];
-extern u16 D_0037CE1A[];
+extern s8 mnuSkillCategoryRangeMapRows[];
+extern u16 mnuSkillCategoryRangeBounds[];
+extern u16 mnuSkillCategoryRangeUpperBounds[];
 
 /* Match a half-open range, then return its signed mapping value; unmatched IDs return zero. */
 s32 mnuLookupRangeEntry(u16 rangeId) {
-    u16 *rangeBounds = D_0037CE18;
-    s8 *mappingRows = D_0037CE40;
+    u16 *rangeBounds = mnuSkillCategoryRangeBounds;
+    s8 *mappingRows = mnuSkillCategoryRangeMapRows;
     u32 rangeKey = rangeId & MNU_COMMAND_ID_MASK;
     u32 boundWordIndex;
     for (boundWordIndex = 0; boundWordIndex < 0x14; boundWordIndex += 2, rangeBounds += 2) {
@@ -1610,14 +1610,14 @@ s32 mnuLookupRangeEntry(u16 rangeId) {
 
 /* Read a bound word from the primary table or its one-word-shifted alternate view. */
 u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate) {
-    return (alternate == 0) ? D_0037CE18[boundWordIndex] : D_0037CE1A[boundWordIndex];
+    return (alternate == 0) ? mnuSkillCategoryRangeBounds[boundWordIndex] : mnuSkillCategoryRangeUpperBounds[boundWordIndex];
 }
 
 /* For nonnegative indices, select among nonzero signed mapping values in row order. */
 s32 mnuGetIndexedNonzeroEffect(s32 valueIndex) {
     s32 nonzeroCount = 0;
     s32 mappingIndex;
-    s8 *mappingCursor = D_0037CE40;
+    s8 *mappingCursor = mnuSkillCategoryRangeMapRows;
     for (mappingIndex = 0; mappingIndex < 6; mappingIndex++, mappingCursor += 3) {
         s32 mappingValue = *mappingCursor;
         if (mappingValue != 0) nonzeroCount++;
@@ -1626,7 +1626,7 @@ s32 mnuGetIndexedNonzeroEffect(s32 valueIndex) {
     return 0;
 }
 
-extern s8 D_0037CE42[];
+extern s8 mnuSkillCategoryRangeBoundWordIndices[];
 
 /* Accumulate selected mapping values, then read the requested adjacent range bound. */
 u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
@@ -1637,9 +1637,9 @@ u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
         mappingSum += mnuGetIndexedNonzeroEffect(valueIndex);
     }
     if (alternate == 0) {
-        return D_0037CE18[D_0037CE42[(baseIndex + mappingSum) * 3]];
+        return mnuSkillCategoryRangeBounds[mnuSkillCategoryRangeBoundWordIndices[(baseIndex + mappingSum) * 3]];
     }
-    return D_0037CE1A[D_0037CE42[(baseIndex + mappingSum) * 3]];
+    return mnuSkillCategoryRangeUpperBounds[mnuSkillCategoryRangeBoundWordIndices[(baseIndex + mappingSum) * 3]];
 }
 
 /* Return the attribute mask only for kind 2, which selects flag-mask semantics. */
