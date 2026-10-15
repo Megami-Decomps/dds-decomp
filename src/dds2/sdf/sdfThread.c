@@ -7,9 +7,9 @@ SdfThreadNode *sdfTrackedThreadHead __attribute__((section(".sbss")));
 
 s32 GetThreadId(void);
 
-void WaitSema(s32 arg0);
+void WaitSema(s32 semaphoreId);
 
-void SignalSema(s32 arg0);
+void SignalSema(s32 semaphoreId);
 
 /* A negative ID means the calling thread; search under the list semaphore. */
 SdfThreadNode *sdfFindThreadNode(s32 threadId) {
