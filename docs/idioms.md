@@ -13365,3 +13365,25 @@ and request paths copy these before binding the bg sprite and animation.
 DDS1 uses a different compositor: the nearby window-pair color bytes and
 party-bar row table are not twins of these DDS2 objects. Only identifiers
 change; no types, bounds, casts, data bytes, layouts or control flow change.
+
+## Polygon-movie fallback records and load-stage diagnostics
+
+`evtMovieDefaultBlurTemplate`, `evtMovieDefaultSolidRect`,
+`evtMovieDefaultResourceRect`, `evtMovieDefaultBlurScatter` and
+`evtMovieDefaultBlurScale` are the existing renderer parameter records selected
+when either input to the corresponding polygon-movie blend is null. Their
+names follow the already shared `EffBlurTemplateBody`, `EffSolidRectParams`,
+`EffResourceRectParams`, `EffBlurScatterParams` and `EffBlurScaleParams`
+owners. The paired native records agree byte-for-byte over their observed
+spans; naming does not change the declarations, storage or interior labels.
+
+The loader's five messages identify actual stages rather than new error
+conditions. `evtMovieBeforePrimaryLoadMessage` precedes the PM1 read, and
+`evtMoviePrimaryLoadedMessage` follows its nonzero-address check.
+`evtMovieTertiaryLoadedMessage` is printed only after reading an existing PM3
+file, not when synthesizing its header. `evtMovieResourcesReadyMessage`
+precedes work allocation and binding; `evtMovieWorkInitializedMessage`
+follows initialization and the non-null check. The last literal still says
+`evtGetPolygonMovieWorkData3:3` even though this is the work-data-2 loader:
+retain that native diagnostic text. All array bounds, bytes, imports, casts,
+declaration order and control flow remain unchanged.

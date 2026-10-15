@@ -46,11 +46,11 @@ extern f32 D_00368540[4];
 extern f32 D_00368550[4];
 extern f32 D_00368560[4];
 extern EffBlurQuad D_00368590;
-extern EffBlurTemplateBody D_003685C0;
-extern EffSolidRectParams D_003685F0;
-extern EffResourceRectParams D_00368610;
-extern EffBlurScatterParams D_00368640;
-extern EffBlurScaleParams D_00368670;
+extern EffBlurTemplateBody evtMovieDefaultBlurTemplate;
+extern EffSolidRectParams evtMovieDefaultSolidRect;
+extern EffResourceRectParams evtMovieDefaultResourceRect;
+extern EffBlurScatterParams evtMovieDefaultBlurScatter;
+extern EffBlurScaleParams evtMovieDefaultBlurScale;
 extern EffBlurQuad D_003686A0;
 extern s32 itfMesCreateWindow(u8 *arg);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
@@ -279,10 +279,10 @@ void evtBlendParamsB(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateB
         t = 0.0f;
     }
     if (a == NULL) {
-        a = &D_003685C0;
+        a = &evtMovieDefaultBlurTemplate;
     }
     if (b == NULL) {
-        b = &D_003685C0;
+        b = &evtMovieDefaultBlurTemplate;
     }
     out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
     out->source.color = evtPolygonMovieBlendColor(enable, t, a->source.color, b->source.color);
@@ -308,10 +308,10 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, E
         t = 0.0f;
     }
     if (a == NULL) {
-        a = &D_003685F0;
+        a = &evtMovieDefaultSolidRect;
     }
     if (b == NULL) {
-        b = &D_003685F0;
+        b = &evtMovieDefaultSolidRect;
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
@@ -330,10 +330,10 @@ void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRec
         t = 0.0f;
     }
     if (a == NULL) {
-        a = &D_00368610;
+        a = &evtMovieDefaultResourceRect;
     }
     if (b == NULL) {
-        b = &D_00368610;
+        b = &evtMovieDefaultResourceRect;
     }
     out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
     for (i = 0; i < 2; i++) {
@@ -351,10 +351,10 @@ void evtBlendParamsE(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterP
         t = 0.0f;
     }
     if (a == NULL) {
-        a = &D_00368640;
+        a = &evtMovieDefaultBlurScatter;
     }
     if (b == NULL) {
-        b = &D_00368640;
+        b = &evtMovieDefaultBlurScatter;
     }
     out->count = evtMovieInterpolateUintIfEnabled(enable, t, a->count, b->count);
     out->delaySpread = evtMovieInterpolateUintIfEnabled(enable, t, a->delaySpread, b->delaySpread);
@@ -378,10 +378,10 @@ void evtBlendParamsF(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParam
         t = 0.0f;
     }
     if (a == NULL) {
-        a = &D_00368670;
+        a = &evtMovieDefaultBlurScale;
     }
     if (b == NULL) {
-        b = &D_00368670;
+        b = &evtMovieDefaultBlurScale;
     }
     out->count = evtMovieInterpolateUintIfEnabled(enable, t, a->count, b->count);
     out->phaseStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->phaseStep, b->phaseStep);
@@ -864,11 +864,11 @@ s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char
 }
 
 extern s32 sdfPathExists(char *path);
-const char D_003ADD10[] = "evtGetPolygonMovieWorkData2:0\n";
-const char D_003ADD30[] = "evtGetPolygonMovieWorkData2:1\n";
-const char D_003ADD50[] = "eventedit: load pm3 file\n";
-const char D_003ADD70[] = "evtGetPolygonMovieWorkData2:2\n";
-const char D_003ADD90[] = "evtGetPolygonMovieWorkData3:3\n";
+const char evtMovieBeforePrimaryLoadMessage[] = "evtGetPolygonMovieWorkData2:0\n";
+const char evtMoviePrimaryLoadedMessage[] = "evtGetPolygonMovieWorkData2:1\n";
+const char evtMovieTertiaryLoadedMessage[] = "eventedit: load pm3 file\n";
+const char evtMovieResourcesReadyMessage[] = "evtGetPolygonMovieWorkData2:2\n";
+const char evtMovieWorkInitializedMessage[] = "evtGetPolygonMovieWorkData3:3\n";
 
 /* Load or synthesize the three PMD resources for an event scene and bind them to a new work object. */
 PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
@@ -884,12 +884,12 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     PolyMovieWork *work;
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
-    sdfDebugPrintf(D_003ADD10);
+    sdfDebugPrintf(evtMovieBeforePrimaryLoadMessage);
     handle1 = sdfReadNamedResource(path1, &address1, 0);
     if (address1 == 0) {
         return NULL;
     }
-    sdfDebugPrintf(D_003ADD30);
+    sdfDebugPrintf(evtMoviePrimaryLoadedMessage);
     if (mode == 0) {
         handle2 = sdfReadNamedResource(path2, &address2, 0);
     } else {
@@ -897,17 +897,17 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     }
     if (mode == 0 && sdfPathExists(path3) == 1) {
         handle3 = sdfReadNamedResource(path3, &address3, 0);
-        sdfDebugPrintf(D_003ADD50);
+        sdfDebugPrintf(evtMovieTertiaryLoadedMessage);
     } else {
         handle3 = (SdfMemBlock *)evtPolygonMovieSynthesizePmd3Header((u8 **)&address3);
     }
-    sdfDebugPrintf(D_003ADD70);
+    sdfDebugPrintf(evtMovieResourcesReadyMessage);
     work = evtPolygonMovieAllocWork();
     evtPolygonMovieInitWork(work, (PmdHeader *)address1, (PmdHeader *)address2, (PmdHeader *)address3);
     if (work == NULL) {
         return NULL;
     }
-    sdfDebugPrintf(D_003ADD90);
+    sdfDebugPrintf(evtMovieWorkInitializedMessage);
     work->mainResource.handle = handle1;
     work->secondaryResource.handle = handle2;
     work->tertiaryResource.handle = handle3;
