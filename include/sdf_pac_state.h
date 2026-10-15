@@ -86,6 +86,7 @@ void sdfPacSkipAllocationEntryBytes(PacState *state);
 void sdfQueueAndResetPacketWork(PacState *state,
                                 SdfPacStreamPacketHeader *packet);
 void sdfPacUsePacketPayloadMemory(PacState *state);
+void sdfPacUseHighAddressAllocator(PacState *state);
 void sdfPacReleasePacketQueueNodes(PacState *state);
 
 #endif /* SDF_PAC_STATE_H */
