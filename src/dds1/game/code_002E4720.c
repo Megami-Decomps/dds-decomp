@@ -93,7 +93,7 @@ extern u32 sdfDevControlReplyValue;
 
 extern s32 sdfDevReplySemaphore;
 
-extern s32 func_002E5158(u32, u8 *, u32);
+extern s32 sdfDevFindDiscFileRecordByPath(u32, u8 *, u32);
 
 extern void sdfDevSetFallbackDeviceWorker(s32 worker);
 
@@ -593,14 +593,14 @@ s32 sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flag
     return (s32)&D_003F9FC0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5158);
+INCLUDE_ASM(const s32, "game/code_002E4720", sdfDevFindDiscFileRecordByPath);
 
 s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 result;
     s32 request[4];
     s32 file;
 
-    file = func_002E5158((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
+    file = sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
         D_003BDA4C = *(s32 *)(file + 8);
@@ -695,14 +695,14 @@ void sdfServicePendingOperationUnderSemaphore(void) {
 s32 sdfPacketExists(u32 request) {
     u8 buffer[16];
 
-    return func_002E5158(request, buffer, 0) != 0;
+    return sdfDevFindDiscFileRecordByPath(request, buffer, 0) != 0;
 }
 
 s32 sdfPktQuery(u32 request) {
     u8 buffer[16];
     s32 packet;
 
-    packet = func_002E5158(request, buffer, 0);
+    packet = sdfDevFindDiscFileRecordByPath(request, buffer, 0);
     if (packet != 0) {
         return *(s32 *)(packet + 8);
     }
