@@ -41,7 +41,7 @@ extern char D_003AF780[];
 
 extern TaskWork *mnuSceneResourceContext;
 extern EffectSlotSet *D_0036C698[];
-extern u8 D_0036C648[];
+extern u8 mnuMantraResourceTaskDescriptor[];
 
 typedef s16 MnuSpritePlacement[4];
 
@@ -594,7 +594,7 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuResourceTaskWork *resourceWork)
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     MnuResourceTaskWork *resourceWork = mnuAllocateMantraResourceWork();
-    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_0036C648, mnuReleaseMantraResourceWork, resourceWork);
+    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)mnuMantraResourceTaskDescriptor, mnuReleaseMantraResourceWork, resourceWork);
 }
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
