@@ -356,7 +356,7 @@ extern u32 D_004379C8[];
 
 extern s32 sprintf();
 
-void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
+void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 flags, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
     struct FrFontGlyph *sprite;
@@ -366,7 +366,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     sprintf(name, D_004379C8, res->totalExp);
     sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
     frFontSetChildChainFirstOption(sprite, 3);
-    frFontDrawGlyphChain(sprite, 1, arg5);
+    frFontDrawGlyphChain(sprite, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
     color[0] = alpha;
     color[1] = alpha;
@@ -376,7 +376,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
 }
 
 
-void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
+void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 flags, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
     struct FrFontGlyph *sprite;
@@ -387,7 +387,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSumm
         sprintf(name, D_004379C8, res->macca);
         sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
         frFontSetChildChainFirstOption(sprite, 3);
-        frFontDrawGlyphChain(sprite, 1, arg5);
+        frFontDrawGlyphChain(sprite, 1, flags);
         frFontQueueGlyphForCurrentDrawBuffer(sprite);
         color[0] = alpha;
         color[1] = alpha;
