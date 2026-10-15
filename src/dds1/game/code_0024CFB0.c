@@ -90,7 +90,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void itfPanelSetStatus(s32, s32);
 extern void itfPanelSetPairFirst(s32, s32);
 extern void itfMesStartEntry(s32, s32, s32);
-extern char D_0036ACF8[];
+extern char mnuTerminalPopupEntries[];
 extern void itfMesDestroyWindowIfPresent(s32);
 extern s32 D_003BAA70;
 extern s32 D_003BAA74;
@@ -178,7 +178,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
     if (*popupSlot == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (dspStartFlagEvent(workAddress) == 0) {
-                mnuSetPopupEntryFlagged(popupSlot, D_0036ACF8);
+                mnuSetPopupEntryFlagged(popupSlot, mnuTerminalPopupEntries);
             }
         }
     }

@@ -1031,7 +1031,7 @@ s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     return evtGetMessageWindowControlState() == 0;
 }
 
-extern u8 D_0036ACF8[];
+extern u8 mnuTerminalPopupEntries[];
 
 s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     MenuTerminalWork *work = (MenuTerminalWork *)context;
@@ -1039,8 +1039,8 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     switch (action) {
     case 3:
         if (work->list->count == 0) {
-            work->dispatchTable = (u32)D_0036ACF8;
-            mnuSetPopupEntry(&work->popupState, D_0036ACF8 + 0xC4);
+            work->dispatchTable = (u32)mnuTerminalPopupEntries;
+            mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 0xC4);
             work->panelMode = 1;
             **(u32 **)&work->popupState |= 0x20000;
             return 1;
@@ -1048,8 +1048,8 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
         break;
     case 2:
         if (work->owner->count == 0) {
-            work->dispatchTable = (u32)D_0036ACF8;
-            mnuSetPopupEntry(&work->popupState, D_0036ACF8 + 0xC4);
+            work->dispatchTable = (u32)mnuTerminalPopupEntries;
+            mnuSetPopupEntry(&work->popupState, mnuTerminalPopupEntries + 0xC4);
             work->panelMode = 2;
             **(u32 **)&work->popupState |= 0x20000;
             return 1;
@@ -1678,8 +1678,8 @@ u32 mnuTerminalSlotSelectionLeaveNoOp(void) {
 extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
-extern s32 D_0036AC80[];
-extern u8 D_0036ACF8[];
+extern s32 mnuTerminalActionTable[];
+extern u8 mnuTerminalPopupEntries[];
 extern u8 D_0036AD30[];
 extern u8 D_0036AD68[];
 extern u8 D_0036ADA0[];
@@ -1709,7 +1709,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
     if (*state == 0) {
         if (buttons & 1) {
             node = context->listResource->cursor;
-            action = D_0036AC80[mnuShouldExcludeTerminalMenuEntry() * 5 + context->mode * 10 + kind];
+            action = mnuTerminalActionTable[mnuShouldExcludeTerminalMenuEntry() * 5 + context->mode * 10 + kind];
             if (!(node->flags48 & 1) || action == 3 || action == frames) {
                 if (mnuOpenTerminalPopupForAction(action, (s32)context) == 0) {
                     switch (action) {
@@ -1723,7 +1723,7 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
                     case 1:
                         kwlnFadeInStart(0, 0, 0, 0xF);
                     default:
-                        mnuSetPopupEntryFlagged(state, D_0036ACF8 + action * 28);
+                        mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries + action * 28);
                         break;
                     }
                 }
@@ -1819,7 +1819,7 @@ s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     if (work->popupState == 0 && fileMenuTaskExists() == 0 &&
         sdfCheckPendingWorkWithInterrupts() == 0) {
         *(s32 *)(context + 0x94) = 0;
-        mnuSetPopupEntryFlagged(dispatch, D_0036ACF8);
+        mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
     }
     return 0;
 }
@@ -1893,7 +1893,7 @@ s32 mnuUpdateTerminalSelectionInput(KwlnTask *input) {
         }
         if (buttons & 2) {
             context->transitionPending = 1;
-            mnuSetPopupEntryFlagged(state, D_0036ACF8);
+            mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries);
         }
         if (!(buttons & 0x300000)) {
             mnuClearListFlagsOneAndTwo(&context->owner->stateFlags);
@@ -1979,14 +1979,14 @@ s32 mnuHandleTerminalRecoverySelection(KwlnTask *request) {
                 datAddCurrencyClamped(-entry->requiredAmount);
                 mnuRefreshThresholdNodeFlags(host->list);
                 if ((host->list)->count == 0) {
-                    mnuSetPopupEntryFlagged(dispatch, D_0036ACF8);
+                    mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
                 }
             } else {
                 buttons = 0x8000;
             }
         }
         if (buttons & 2) {
-            mnuSetPopupEntryFlagged(dispatch, D_0036ACF8);
+            mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
         }
         if (!(buttons & 0x300000)) {
             mnuClearListFlagsOneAndTwo(&(host->list)->stateFlags);
@@ -2175,7 +2175,7 @@ s32 evtPollTerminalResourceTransition(KwlnTask *request) {
             if (mnuAdvanceTerminalTransition(1) != 0) {
                 mnuTerminalSelectResourceBank(work);
                 work->resourcePhase = 0;
-                mnuSetPopupEntryFlagged(&work->popupState, D_0036ACF8);
+                mnuSetPopupEntryFlagged(&work->popupState, mnuTerminalPopupEntries);
             }
         }
     }
@@ -2256,7 +2256,7 @@ s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
                     context->transitionPending = 1;
                     mnuSetPopupEntryFlagged(state, D_0036AD30);
                 } else {
-                    mnuSetPopupEntryFlagged(state, D_0036ACF8);
+                    mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries);
                 }
             }
         }
@@ -2403,7 +2403,7 @@ s32 mnuUpdateTerminalActionPopup(KwlnTask *input) {
         if (evtIsActiveFlagSet(0) != 0) {
             evtClearActiveFlag(0);
             evtSetBoundedDisplayValue(0, 2);
-            mnuSetPopupEntryFlagged(state, D_0036ACF8);
+            mnuSetPopupEntryFlagged(state, mnuTerminalPopupEntries);
         }
     }
     return 0;

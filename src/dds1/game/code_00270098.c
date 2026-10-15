@@ -201,7 +201,7 @@ void mnuDrawMovieProgressCounter(void) {
 }
 
 extern u8 D_00324510[2][2][16];
-extern SdfMovieDescriptor D_0037B938;
+extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
 extern u16 D_003BD3A0[4];
 extern u16 D_003BD8E4;
 extern SdfPoolNode D_003255A8;
@@ -218,16 +218,16 @@ s32 mnuMovieViewer(void) {
     }
 
     if ((s8)D_00324510[1][0][0x08] < 0) {
-        D_0037B938.unk00 = 0x7000;
-        D_0037B938.unk02 = 0x7900;
-        D_0037B938.unk08 = 0x2000;
-        D_0037B938.unk0A = 0x0E00;
+        mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
+        mnuMovieViewerDrawDescriptor.unk02 = 0x7900;
+        mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
+        mnuMovieViewerDrawDescriptor.unk0A = 0x0E00;
     }
     if ((s8)D_00324510[1][0][0x0A] < 0) {
-        D_0037B938.unk00 = 0x7000;
-        D_0037B938.unk02 = 0x7B00;
-        D_0037B938.unk08 = 0x2000;
-        D_0037B938.unk0A = 0x0A00;
+        mnuMovieViewerDrawDescriptor.unk00 = 0x7000;
+        mnuMovieViewerDrawDescriptor.unk02 = 0x7B00;
+        mnuMovieViewerDrawDescriptor.unk08 = 0x2000;
+        mnuMovieViewerDrawDescriptor.unk0A = 0x0A00;
     }
 
     if (mnuMovieList.playing != 0) {
@@ -243,7 +243,7 @@ s32 mnuMovieViewer(void) {
         node = mnuGetMovieListNodeAtOffset();
         if (node != NULL) {
             mnuStopMovieDrawTask();
-            mnuStartMovieDrawTaskForResource(node->path, &D_0037B938);
+            mnuStartMovieDrawTaskForResource(node->path, &mnuMovieViewerDrawDescriptor);
             mnuMovieList.playing = 1;
         } else {
             mnuStopMovieDrawTask();

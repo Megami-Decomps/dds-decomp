@@ -23,7 +23,7 @@ extern void mnuDrawTerminalBackdrop(s32);
 
 
 
-extern char D_003CE848[];
+extern char mnuTerminalPopupEntries[];
 
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
@@ -101,7 +101,7 @@ s32 dspUpdateFlagEvent(KwlnTask *request) {
     if (*panel == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (dspStartFlagEvent(state) == 0) {
-                mnuSetPopupEntryFlagged(panel, D_003CE848);
+                mnuSetPopupEntryFlagged(panel, mnuTerminalPopupEntries);
             }
         }
     }
