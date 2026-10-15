@@ -14,7 +14,7 @@ s32 SignalSema(s32 semaphore);
 void *memcpy(void *destination, const void *source, u32 size);
 s32 DIntr(void);
 s32 EIntr(void);
-extern s32 D_00438D08;
+extern s32 sdfMoviePacRingSemaphore;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
 void sdfMovieScheduleLinearStreamRead(MovObj *movie) {
@@ -189,7 +189,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
                     s32 ringLength;
                     s32 wrappedBytes;
 
-                    WaitSema(D_00438D08);
+                    WaitSema(sdfMoviePacRingSemaphore);
                     ringLength = stream->ringLength;
                     writeOffset = stream->ringOffset + ringLength;
                     writeOffset += (writeOffset > 0xFFFF) * -0x10000;
@@ -210,7 +210,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
                     } else {
                         stream->ringLength = wrappedBytes;
                     }
-                    SignalSema(D_00438D08);
+                    SignalSema(sdfMoviePacRingSemaphore);
                 } else {
                     s32 restoreInterrupts = DIntr();
 
