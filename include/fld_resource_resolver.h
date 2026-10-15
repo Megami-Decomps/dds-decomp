@@ -5,6 +5,10 @@
 
 struct EffWorldNode;
 
+/* Read or update the cached world object associated with a resource record ID. */
+struct EffWorldNode *fldGetRecordWorldNodeById(s32 id);
+void fldSetRecordWorldNodeById(s32 id, struct EffWorldNode *worldNode);
+
 /* Resolves a named world object or lazily creates/caches a dummy matter object. */
 struct EffWorldNode *fldResolveWorldObjectByResourceId(u32 resourceId);
 

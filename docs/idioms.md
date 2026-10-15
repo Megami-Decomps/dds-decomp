@@ -9069,7 +9069,7 @@ Canonical `cc1probe --all` traces of the current-owner pointer control and
 the exact indexed form have hooked/unhooked assembly and all-RTL parity.
 At entry to **cse1**, control instruction `uid97` is already
 `PLUS(base reg106, scaled-index reg105)`. Direct accesses such as
-`((FldValueRecord *)fldValueRecords)[index].value` instead enter cse1
+`((FldValueRecord *)fldValueRecords)[index].worldNode` instead enter cse1
 with `uid97 = PLUS(scaled-index reg105, base reg99)`. The field form
 retains the native operand order through the later passes. This evidence
 locates the distinction in address-expression lowering, before cse1;

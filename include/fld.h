@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct EffWorldNode;
+
 /* Field-work flag prefix (0xA5C, flags at +0xA58); DDS1/2 game/code_0011D3A0/0011F208.c. */
 typedef struct FldWorkFlags {
     u8 pad00[0xA58];
@@ -125,7 +127,7 @@ typedef struct FldValueRecord {
     u16 unkC8;
     u16 unkCA;
     s32 id;
-    s32 value; /* Record API word; some callers store an actor address. */
+    struct EffWorldNode *worldNode; /* Cached object for this record ID. */
     FldCollisionFace *face;
     void *stopData;
     s32 sceneFlag;
@@ -134,6 +136,8 @@ typedef struct FldValueRecord {
 
 typedef char FldCollisionFaceSizeCheck[(sizeof(FldCollisionFace) == 0x24) ? 1 : -1];
 typedef char FldValueRecordSizeCheck[(sizeof(FldValueRecord) == 0xE4) ? 1 : -1];
+typedef char FldValueRecord_worldNode_at_D0[
+    ((u32)&((FldValueRecord *)0)->worldNode == 0xD0) ? 1 : -1];
 
 /* fldFileResolver::fldSpawnSceneResourceBatches publishes file rows; fldSpawnPlacementObjectsFromBatches walks them
  * at stride 0x24. Both game resolvers walk counted names at stride 0x0C.
