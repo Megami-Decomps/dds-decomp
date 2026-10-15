@@ -30,6 +30,7 @@
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_scene_initializer.h"
+#include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
 #include "kwln.h"
@@ -52,8 +53,6 @@ extern ActorSlotOrder *D_003BD840[2];
 
 
 extern void evtCreateMessageWindowIfMissing(void *text);
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 
 

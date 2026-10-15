@@ -2,6 +2,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_boss_debug_api.h"
 #include "btl_vec3.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_marked_command_requested_state_api.h"
@@ -133,8 +134,6 @@ extern s32 D_00436AF0;
 
 extern s32 D_00438F6C;
 
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 extern void btlPickCommandElementCheckedTarget(s32, s32);
 extern void btlPickCommandTargetExcludingActor(s32, s32);

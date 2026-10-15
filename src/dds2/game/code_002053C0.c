@@ -22,6 +22,7 @@
 #include "file.h"
 #include "eff_update_flags.h"
 #include "sdf.h"
+#include "btl_boss_debug_api.h"
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
 #include "dds3obj.h"
@@ -53,8 +54,6 @@ extern BtlAt3Entry D_003E0F60[];
 
 extern u32 D_00436AD4;
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
-
-extern void btlBossDebugPrintf(const char *format, ...);
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
 
