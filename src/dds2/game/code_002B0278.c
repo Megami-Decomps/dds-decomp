@@ -1,3 +1,4 @@
+#include "sdf_gs_register_submit_api.h"
 #include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
 #include "dsp_entry_api.h"
@@ -28,8 +29,6 @@ struct StaffMenuRuntime;
 #include "sdf.h"
 #include "itf.h"
 #include "menu_fade_entry.h"
-
-extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
