@@ -533,25 +533,25 @@ s32 btlResolveUnitValueWithOverride(DatPartyRecord *record, s32 value) {
     return datGetEffectiveAffinity(record, value);
 }
 
-s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_003BAA10 + arg1 * 0x270;
+s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
+    if (side == 0) {
+        return D_003BAA10 + index * 0x270;
     }
-    return D_003BAA20 + arg1 * 0x270;
+    return D_003BAA20 + index * 0x270;
 }
 
-BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {
+    if (side == 0) {
         return (BtlActorTransformParameters *)btlSharedActorTransformParameters;
     }
-    return (BtlActorTransformParameters *)(D_003BAA30 + arg1 * 24);
+    return (BtlActorTransformParameters *)(D_003BAA30 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
-    if (arg0 == 0) {
-        return D_003BAA14 + arg1 * 0x74;
+s32 btlSelectSideIndexedActorParameterTable(s32 side, s32 index) {
+    if (side == 0) {
+        return D_003BAA14 + index * 0x74;
     }
-    return D_003BAA28 + arg1 * 0x74;
+    return D_003BAA28 + index * 0x74;
 }
 
 extern char D_003A1788[];
