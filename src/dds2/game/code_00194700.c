@@ -627,7 +627,7 @@ u32 effGetWorkLink(EffResourceDescriptor *work) {
 
 /* Format the prefix/name records through the native template and return the name record's first word.
    Buffer capacity and record pointers remain unchecked. */
-u32 effFormatMsgNames(EffResourceDescriptor *message, void *destination) {
+u32 effFormatMsgNames(EffResourceDescriptor *message, char *destination) {
     sprintf(destination, D_00436450, message->resourceList->directoryPath, message->selectedEntry->name);
     return message->selectedEntry->type;
 }
