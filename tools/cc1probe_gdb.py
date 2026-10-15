@@ -74,6 +74,7 @@ def cstr(a, limit=200):
 # ---- global addresses (symbols / STABS of this exact binary) -----------------------------
 A = dict(
     h_i_d=0x824E25C, reload_completed=0x82714A4, last_scheduled_insn=0x824E2E8,
+    next_qty=0x824954C,
     clock_var=0x824E3F4, qty=0x8249550, qty_phys_sugg=0x8249558, qty_phys_num_sugg=0x8249560,
     qty_phys_copy_sugg=0x8249554, qty_phys_num_copy_sugg=0x824955C,
     allocno=0x82495F4, reg_allocno=0x82495F0, reg_n_info=0x8269FB0, reg_renumber=0x826E6B4,
@@ -589,6 +590,21 @@ def hk_block_alloc():
     out("--- local-alloc block b=%d ---" % sarg(0))
 
 
+def hk_qty_order(stage, three_only=False):
+    """Read block_alloc's actual order vector, rather than infer its sort."""
+    def observe():
+        if not wanted():
+            return
+        n = s32(A["next_qty"])
+        if three_only and n != 3:
+            return
+        # This pinned block_alloc keeps qty_order at frame pointer - 8.
+        base = u32(reg("ebp") - 8)
+        order = [s32(base + 4 * i) for i in range(n)]
+        out("  qty_order %s n=%d order=%s" % (stage, n, order))
+    return observe
+
+
 def hk_qty_compare_1_entry():
     if not wanted():
         return
@@ -610,7 +626,7 @@ def hk_qty_compare_1_exit():
     how = "priority" if (pri1 is not None and pri2 != pri1) else "qty-number (priorities equal)"
     out("  qty_compare_1 %s vs %s  pri=%s/%s  => %+d decided@%s -> %s"
         % (qty_str(q1), qty_str(q2), pri1, pri2, rc, how,
-           "q%d allocated first" % (q1 if rc < 0 else q2) if rc else "tie"))
+           "q%d sorts before q%d" % ((q1, q2) if rc < 0 else (q2, q1)) if rc else "tie"))
     QC["pri1"] = QC["pri2"] = None
 
 
@@ -1647,6 +1663,14 @@ def install():
             Hook(r, hk_cr_exit)
         Hook(sym("local_alloc"), hk_local_alloc)
         Hook(sym("block_alloc"), hk_block_alloc)
+        Hook(0x813E470, hk_qty_order("before suggestions"))
+        Hook(0x813E4A4, hk_qty_order("after suggestions compare(0,1)", True))
+        Hook(0x813E4C3, hk_qty_order("after suggestions compare(1,2)", True))
+        Hook(0x813E4FB, hk_qty_order("after suggestions"))
+        Hook(0x813E58E, hk_qty_order("before priorities"))
+        Hook(0x813E5C2, hk_qty_order("after priorities compare(0,1)", True))
+        Hook(0x813E5E1, hk_qty_order("after priorities compare(1,2)", True))
+        Hook(0x813E619, hk_qty_order("after priorities"))
         Hook(0x813E96C, hk_qty_compare_1_entry)
         Hook(0x813EA3E, hk_qty_cmp_pri_1)
         Hook(0x813EA52, hk_qty_compare_1_exit)
