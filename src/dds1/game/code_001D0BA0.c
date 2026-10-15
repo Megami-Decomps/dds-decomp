@@ -4774,18 +4774,18 @@ typedef struct GunLoadArgs {
     s32 handle;
 } GunLoadArgs;
 
-u32 btlPollGunLoad(u32 *arg) {
-    GunLoadArgs *args = (GunLoadArgs *)arg;
-    BtlUnit *unit = args->unit;
-    if (args->handle == 0) {
+u32 btlPollGunLoad(u32 *taskArgs) {
+    GunLoadArgs *loadArgs = (GunLoadArgs *)taskArgs;
+    BtlUnit *unit = loadArgs->unit;
+    if (loadArgs->handle == 0) {
         return 1;
     }
-    if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->handle) == 0) {
+    if (fileIsRequestReadyInCurrentMode((struct FileRequest *)loadArgs->handle) == 0) {
         return 0;
     }
-    btlBossDebugPrintf("btl:gun & finish load end[%p]\n", args->handle);
-    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->handle)));
-    filePollEntryCleanup((struct FileRequest *)(u32)args->handle);
+    btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->handle);
+    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)loadArgs->handle)));
+    filePollEntryCleanup((struct FileRequest *)(u32)loadArgs->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }
