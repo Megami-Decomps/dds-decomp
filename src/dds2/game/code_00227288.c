@@ -1587,7 +1587,7 @@ extern s32 btlGetBossModeScriptReturnCode(void);
 extern s32 btlRemapEnemyMotionForHealthAndForm(BtlUnit *unit, s32 action);
 extern s32 btlSelectAction211CameraPair(BtlLinkedCommand *command);
 extern void btlPromoteSerphToFrontline(void);
-extern void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1);
+extern void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *operandData);
 extern void btlRefreshAbaddonPresentationAfterUnitUpdate(void);
 extern void btlQueueGateComponentScriptAndSound(ActionStateLink *record);
 extern void btlResetGateComponentTransforms(void);
