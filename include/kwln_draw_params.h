@@ -47,18 +47,18 @@ typedef struct KwlnPixelBlurParams {
     KwlnBlurRectParams source;
 } KwlnPixelBlurParams;
 
-/* Staggered (ripple) blur parameter body copied at eight-byte alignment. */
+/* Staggered blur reader view of EffBlurScaleParams. The packed color keeps
+ * its renderer byte view; the intervening values share the provider fields. */
 typedef struct KwlnScaleBlurParams {
     u32 count;
     f32 phaseStep;
     f32 spacing;
     KwlnColor color;
-    u32 unk10;
-    f32 unk14;
-    f32 unk18;
+    u32 blendControl;
+    f32 uvDisplacementAngleDegrees;
+    f32 uvDisplacementAmplitude;
     f32 angleStep;
-    u32 x;
-    u32 y;
+    u32 position[2];
     u32 size;
 } KwlnScaleBlurParams __attribute__((aligned(8)));
 

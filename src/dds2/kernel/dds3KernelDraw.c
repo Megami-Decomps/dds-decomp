@@ -38,7 +38,7 @@ typedef char KwlnScaleBlurParamsLayoutCheck[sizeof(KwlnScaleBlurParams) == sizeo
 typedef char KwlnSolidRectParamsOffsetsCheck[((u32)&((KwlnSolidRectParams *)0)->bounds == (u32)&((EffSolidRectParams *)0)->corners) ? 1 : -1];
 typedef char KwlnResourceRectParamsOffsetsCheck[((u32)&((KwlnResourceRectParams *)0)->color == (u32)&((EffResourceRectParams *)0)->draw.color && (u32)&((KwlnResourceRectParams *)0)->bounds == (u32)&((EffResourceRectParams *)0)->draw.bounds) ? 1 : -1];
 typedef char KwlnPixelBlurParamsOffsetsCheck[((u32)&((KwlnPixelBlurParams *)0)->source.rotation == (u32)&((EffBlurTemplateBody *)0)->source.angle && (u32)&((KwlnPixelBlurParams *)0)->source.centerX == (u32)&((EffBlurTemplateBody *)0)->source.position) ? 1 : -1];
-typedef char KwlnScaleBlurParamsOffsetsCheck[((u32)&((KwlnScaleBlurParams *)0)->unk10 == (u32)&((EffBlurScaleParams *)0)->blendControl && (u32)&((KwlnScaleBlurParams *)0)->x == (u32)&((EffBlurScaleParams *)0)->position) ? 1 : -1];
+typedef char KwlnScaleBlurParamsOffsetsCheck[((u32)&((KwlnScaleBlurParams *)0)->blendControl == (u32)&((EffBlurScaleParams *)0)->blendControl && (u32)&((KwlnScaleBlurParams *)0)->uvDisplacementAngleDegrees == (u32)&((EffBlurScaleParams *)0)->uvDisplacementAngleDegrees && (u32)&((KwlnScaleBlurParams *)0)->uvDisplacementAmplitude == (u32)&((EffBlurScaleParams *)0)->uvDisplacementAmplitude && (u32)&((KwlnScaleBlurParams *)0)->position == (u32)&((EffBlurScaleParams *)0)->position) ? 1 : -1];
 
 extern KwlnResourceRectParams kwlnTexturedSquareParameters;
 
@@ -569,10 +569,10 @@ void kwlnDrawSetD30Clamped(s32 count, s32 unknownWord, f32 phaseStep, f32 spacin
     kwlnStaggeredBlurParameters.count = count;
     kwlnStaggeredBlurParameters.phaseStep = phaseStep;
     kwlnStaggeredBlurParameters.spacing = spacing;
-    kwlnStaggeredBlurParameters.unk14 = thirdFloat;
-    kwlnStaggeredBlurParameters.unk18 = fourthFloat;
+    kwlnStaggeredBlurParameters.uvDisplacementAngleDegrees = thirdFloat;
+    kwlnStaggeredBlurParameters.uvDisplacementAmplitude = fourthFloat;
     kwlnStaggeredBlurParameters.angleStep = angleStep;
-    kwlnStaggeredBlurParameters.unk10 = unknownWord;
+    kwlnStaggeredBlurParameters.blendControl = unknownWord;
 }
 
 /* Stage the staggered blur's packed RGBA color. */
@@ -583,8 +583,8 @@ void kwlnDrawSetD30Fourth(u32 rgba) {
 /* Stage staggered-blur size and coordinates. */
 void kwlnDrawSetD30Triple(u32 size, u32 x, u32 y) {
     kwlnStaggeredBlurParameters.size = size;
-    kwlnStaggeredBlurParameters.x = x;
-    kwlnStaggeredBlurParameters.y = y;
+    kwlnStaggeredBlurParameters.position[0] = x;
+    kwlnStaggeredBlurParameters.position[1] = y;
 }
 
 extern KwlnScaleBlurParams D_0043E480;
