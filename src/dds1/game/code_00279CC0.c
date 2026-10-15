@@ -222,7 +222,7 @@ void mnuDrawSelectionLabel(s32 selection) {
 extern s32 ptyGetAffinityKind(s32, s32);
 extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
 extern s32 mnuLookupRangeEntry(u16);
-extern const u8 *D_0037CCC8[16];
+extern const u8 *mnuComboGunRequirementTexts[16];
 extern const u8 *D_003BAA8C;
 
 /* Draw each affinity requirement, including range markers and optional text. */
@@ -259,7 +259,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s
             }
         } else {
             glyph = itfCreateConvertedTextGlyph(
-                0x420, y, 0, 0xA09DC380, D_0037CCC8[kind], 0);
+                0x420, y, 0, 0xA09DC380, mnuComboGunRequirementTexts[kind], 0);
         }
 
         if (glyph != 0) {

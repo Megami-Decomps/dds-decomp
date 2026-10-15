@@ -559,15 +559,15 @@ s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
 extern void mnuClearWindowListSelectionFlags(s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char D_003E7450[];
+extern char mnuCampItemUseListPopupEntry[];
 extern char mnuCampAmmoPartySelectionPopupEntry[];
 extern char D_003E7488[];
 extern char D_003E74A4[];
-extern char D_003E74C0[];
-extern char D_003E7418[];
+extern char mnuCampSpecialItemListPopupEntry[];
+extern char mnuCampCommandSelectionPopupEntry[];
 extern void mnuSetStateValue(u32 *, u32);
 extern char mnuCampItemCategoryPopupEntry[];
-extern char D_003E74DC[];
+extern char mnuCampItemTargetSelectionPopupEntry[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
 s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
@@ -593,7 +593,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
             switch (itemKind) {
             case 0:
                 resources->secondListState = 0;
-                mnuSetPopupEntry(popup, D_003E7450);
+                mnuSetPopupEntry(popup, mnuCampItemUseListPopupEntry);
                 break;
             case 1:
                 mnuSetPopupEntry(popup, mnuCampAmmoPartySelectionPopupEntry);
@@ -605,14 +605,14 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
                 mnuSetPopupEntry(popup, D_003E74A4);
                 break;
             default:
-                mnuSetPopupEntry(popup, D_003E74C0);
+                mnuSetPopupEntry(popup, mnuCampSpecialItemListPopupEntry);
                 break;
             }
             mnuSeekListNode(0, resources->windows[0]->list);
             mnuSeekListNode(0, resources->windows[1]->list);
         }
         if (input & 2) {
-            mnuSetPopupEntryFlagged(popup, D_003E7418);
+            mnuSetPopupEntryFlagged(popup, mnuCampCommandSelectionPopupEntry);
             mnuConfigurePanelResource(context->scrollPanel, context->resources.baseResources[0], 0, 1);
             mnuBeginWindowFadeTransition(context->skillWindow, &context->fade);
         }
@@ -741,7 +741,7 @@ s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
                     if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(itemId)) == 0) {
                         mnuApplyResourceSelection(itemId, context);
                     } else {
-                        mnuSetPopupEntry(popup, D_003E74DC);
+                        mnuSetPopupEntry(popup, mnuCampItemTargetSelectionPopupEntry);
                     }
                 } else {
                     input = 0x8000;

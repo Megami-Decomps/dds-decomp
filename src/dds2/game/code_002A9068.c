@@ -973,12 +973,12 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, st
     }
 }
 
-extern u8 *D_003E5710[];
+extern u8 *mnuCampSelectionPromptTexts[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
     FrFontGlyph *sprite = itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
-                                      D_003E5710[imageIndex], 0);
+                                      mnuCampSelectionPromptTexts[imageIndex], 0);
     frFontDrawGlyphChain(sprite, 1, 0x54);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }

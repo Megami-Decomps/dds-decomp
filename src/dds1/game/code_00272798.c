@@ -34,7 +34,7 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 D_0037C748[];
+extern u8 mnuCampCommandDispatchEntries[];
 
 
 
@@ -65,13 +65,13 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
             if ((entry->flags48 & 1) == 0) {
                 u32 index = entry->sortKeyPrimary + 1;
 
-                mnuSetPopupEntry(popup, (void *)(D_0037C748 + index * 0x1C));
+                mnuSetPopupEntry(popup, (void *)(mnuCampCommandDispatchEntries + index * 0x1C));
             } else {
                 input = 0x8000;
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry(popup, (void *)D_0037C748);
+            mnuSetPopupEntry(popup, (void *)mnuCampCommandDispatchEntries);
         }
     }
     if ((input & 0x300000) == 0) {

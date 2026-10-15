@@ -21,7 +21,7 @@ extern u8 D_003E73F8[];
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern u8 D_003E6F38[];
+extern u8 mnuCampCommandDispatchEntries[];
 
 
 
@@ -74,14 +74,14 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
             if ((entry->flags48 & 1) == 0) {
                 u32 index = entry->sortKeyPrimary + 1;
 
-                mnuSetPopupEntry(popup, (D_003E6F38 + index * 0x1C));
+                mnuSetPopupEntry(popup, (mnuCampCommandDispatchEntries + index * 0x1C));
                 context->titleFadingOut = 1;
             } else {
                 input = 0x8000;
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry(popup, D_003E6F38);
+            mnuSetPopupEntry(popup, mnuCampCommandDispatchEntries);
         }
     }
     if ((input & 0x300000) == 0) {

@@ -347,7 +347,7 @@ s32 mnuStaffImageExitD(KwlnTask *task) {
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-extern char D_003E7450[];
+extern char mnuCampItemUseListPopupEntry[];
 
 s32 mnuStaffUseSelectedItemTask(KwlnTask *task) {
     s32 item = 0;
@@ -386,7 +386,7 @@ s32 mnuStaffUseSelectedItemTask(KwlnTask *task) {
         }
     }
     if ((buttons & MNU_STAFF_INPUT_CANCEL) || itemExhausted) {
-        mnuSetPopupEntry(popup, D_003E7450);
+        mnuSetPopupEntry(popup, mnuCampItemUseListPopupEntry);
         mnuClearActionFlags(0, party);
     }
     mnuPlayInputSound(0, buttons, 0);

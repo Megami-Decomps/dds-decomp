@@ -13321,3 +13321,47 @@ The `base.ico` request supplies the data/size output addresses; teardown waits
 for an outstanding request and releases the retained resource-handle slot.
 Only identifiers and documentation change; all declarations, casts, callback
 words, data bytes, layouts and control flow are retained.
+
+
+## Camp selection prompts and command-dispatch data
+
+`mnuCampSelectionPromptTexts` is the pointer bank indexed by
+`mnuCreateStaffImageSprite`: despite that helper's older name, its native
+strings are text prompts such as "Select an option", "Who will use it",
+"Load which bullet", and "Set which skill". DDS1 has 21 non-null pointers;
+DDS2 has 25, adding the ring equip/customize prompts. The existing unchecked
+index, pointer declarations, duplicate strings and alignment are retained.
+
+`mnuComboGunRequirementTexts` supplies the 16 gun requirements drawn by
+`mnuDrawAffinityParticipantLabels` for nonnegative `ptyGetAffinityKind`
+values. Native text distinguishes `Gun(any)`, named characters, and reserved
+entries; DDS2 adds Roland and Seraph. Negative kinds still use the separate
+skill/range text paths, not this bank.
+
+`mnuCampCommandDispatchEntries` contains the exit/fade entry followed by eight
+camp-command transitions. Confirm uses `(sortKeyPrimary + 1) * 0x1C` and
+cancel uses the base entry. The nine-row bank is 0xFC bytes: the next native
+row at DDS1 0x0037C844 / DDS2 0x003E7034 is a separately referenced return
+registry, not a tenth array entry. Both byte-array views and the existing
+pointer arithmetic are intentionally unchanged.
+
+The separately referenced popup registries retain their seven native words:
+
+| Registry | Evidence from the matched transition and native callbacks |
+| --- | --- |
+| `mnuCampCommandSelectionPopupEntry` | Item-category cancel returns to the command-help screen and command input handler. |
+| `mnuCampItemUseListPopupEntry` | Category zero enters the item list; eligible targetless items are used immediately. |
+| `mnuCampSpecialItemListPopupEntry` | The final category is "View special items" and uses the secondary-object input/draw callbacks. |
+| `mnuCampItemTargetSelectionPopupEntry` | A selected item's nonzero target category enters party-target selection and item use. |
+
+`mnuCampSkillHeadingFrameIndices` maps the four skill-panel states to heading
+frames: DDS1 uses 0, 1, 4, 5; DDS2 uses 31, 32, 33, 34. The per-game panel
+slot layouts, declarations and existing address cast remain as written.
+
+DDS2's `mnuCampBackdropFrameMap` supplies eleven slot indices, 0 through 10,
+to the backdrop `MapPacket`. `mnuCampBackdropEffectRows` supplies its two
+four-word rows, `(0, 0, 0x200, 0)` and `(0x1000, 0, 0x200, 0)`. Both load
+and request paths copy these before binding the bg sprite and animation.
+DDS1 uses a different compositor: the nearby window-pair color bytes and
+party-bar row table are not twins of these DDS2 objects. Only identifiers
+change; no types, bounds, casts, data bytes, layouts or control flow change.
