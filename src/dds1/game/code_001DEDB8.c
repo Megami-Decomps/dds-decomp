@@ -8168,8 +8168,8 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *node) {
     return (temp_v0 & 8) > 0;
 }
 
-void sndFormatResourceNameFromIndex(s32 index, char *output) {
-    sprintf(output, D_003A5158, D_003BB6B0, (index + 0x200) & 0xffff);
+void sndFormatResourceNameFromIndex(s32 skillIndex, char *output) {
+    sprintf(output, D_003A5158, D_003BB6B0, (skillIndex + 0x200) & 0xffff);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A50D8);
