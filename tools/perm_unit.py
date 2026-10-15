@@ -2,7 +2,7 @@
 """Run decomp-permuter on a draft compiled inside its real unit.
 
     tools/perm_unit.py import src/dds1/game/code_00202178.c func_00203BA8 draft.c
-    ../decomp-permuter/permuter.py build/permuter/dds1_func_00203BA8 -j8 --best-only --stop-on-zero
+    ../decomp-permuter/permuter.py build/permuter/dds1_func_00203BA8 -j8 --best-only --stack-diffs --stop-on-zero
 
 `import` writes build/permuter/<version>_<func>/. Each candidate is spliced
 back into the unit in place of the function's INCLUDE_ASM (draft.c may carry
@@ -18,6 +18,9 @@ scores 0.
 Only passes that keep source ordinary are enabled (NEAT_WEIGHTS). A permuter
 hit is a hint, not landable code: reduce it to the smallest ordinary change
 and verify the full build (docs/CONTRIBUTING.md).
+Use --stack-diffs: the permuter otherwise ignores stack-offset differences,
+so a zero score can still hide different local layouts. Independently check
+the reduced source with tools/check_unit.py in the complete unit.
 
 Needs a decomp-permuter checkout (DECOMP_PERMUTER, default ../decomp-permuter
 next to the repository) and pycparser/toml for the Python running `import`.
