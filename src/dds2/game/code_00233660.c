@@ -507,7 +507,7 @@ u16 mdlGetRecordPartIndex(MdlRecord *record) {
 }
 
 /* Read the counted group record's number of following entity-slot packets. */
-u16 mdlGetRecordSlotCount(MdlRecord *record) {
+u16 mdlGetRecordSlotCount(const MdlRecord *record) {
     return record->tail.half.unk10;
 }
 

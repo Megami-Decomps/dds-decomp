@@ -219,7 +219,7 @@ u8 mdlHasNode(MdlCtx *ctx, s32 searchId);
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId);
 
 /* Count of following entity-slot packets in a grouped record. */
-u16 mdlGetRecordSlotCount(MdlRecord *record);
+u16 mdlGetRecordSlotCount(const MdlRecord *record);
 
 /* VU helpers transfer vectors through vf10 and basis rows through vf28-vf30. */
 void mdlLoadPrimaryVectorVU(MdlCtx *ctx);
