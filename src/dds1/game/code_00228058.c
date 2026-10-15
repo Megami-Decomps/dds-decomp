@@ -26,8 +26,6 @@ extern s32 scrGetCommandTimer(void);
 s32 evtPreloadBgm(s32 id);
 s32 evtIsBgmLoaded(s32 id);
 
-void evtBeginSolarOverlayFadeIn(s32 arg0);
-
 
 extern char D_003BBDC8[];
 

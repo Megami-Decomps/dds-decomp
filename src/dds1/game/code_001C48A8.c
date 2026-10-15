@@ -22,6 +22,7 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "sdf.h"
 #include "btl_scene_initializer.h"
 #include "fld_encounter_runtime_api.h"
+#include "evt_solar.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -675,7 +676,6 @@ extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);
 extern void btlStartSecondaryScriptTask(void);
 extern void btlStartSkillEventTask(s32);
-extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern u32 kwlnDrawControlFlags;
 
@@ -1023,7 +1023,6 @@ extern void itfMesClearFlags(s32);
 
 extern void brsTaskAllowUpdate(void);
 
-extern void evtBeginSolarOverlayFadeOut(s32);
 
 extern void btlClearPartyRecordStatusBits(DatPartyRecord *, s32);
 
