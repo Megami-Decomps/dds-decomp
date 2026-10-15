@@ -558,7 +558,6 @@ extern u8 sdfViewUpVector[];
 
 extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
 
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
 void itfInitDoubleBufferedScenePackets(void) {

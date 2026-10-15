@@ -217,7 +217,6 @@ extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
 extern void kwlnUpdateDrawParameterTransitions(void);
 extern void fldConfigureRenderCleanupMessage(void);
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 #include "sdf_packet_alloc.h"
 #include "sdf_message.h"
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, KwlnDrawVectorParams *);
@@ -239,7 +238,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
     evtCheckSelectionState();
     kwlnUpdateDrawParameterTransitions();
     if (kwlnTextureReferenceFlag != 0) {
-        sdfBuildLightingPacket(D_00327500 + bufferIndex * KWLN_FRAME_BUFFER_BYTES,
+        sdfBuildLightingPacket((SdfLightingPacketStorage *)(D_00327500 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             D_00324940, D_00324950);
         *(u32 *)(D_00327500 - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA900;
         if (kwlnTextureReferenceFlag != 0) {
@@ -265,7 +264,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         SdfPoolNode *overlayNode;
         SdfListHead *overlayList;
         u64 *overlayFrustum;
-        sdfBuildLightingPacket(D_003276D0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES,
+        sdfBuildLightingPacket((SdfLightingPacketStorage *)(D_003276D0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             D_00324B10, D_00324B20);
         sdfCameraBuildProjection(&D_00324980.camera);
         sdfVuBuildLookAtBasis(D_00324A20, D_00324A30, D_00324A40);
@@ -279,7 +278,7 @@ s32 kwlnBuildFrameScenePackets(KwlnTask *task) {
         sdfAppendPacket(overlayList, (u32)overlayFrustum);
         overlayNode->append(overlayNode, overlayList);
 
-        sdfBuildLightingPacket(D_00327600 - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES, D_00324770, kwlnDefaultColorVector);
+        sdfBuildLightingPacket((SdfLightingPacketStorage *)(D_00327600 - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_00324770, kwlnDefaultColorVector);
         *(u32 *)(D_00327600 - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA8EC;
     }
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);

@@ -564,7 +564,6 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
 
 
 extern void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit);
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Refresh endpoint render work after the value-change flag is cleared; defer
  * to the matching-slot selector when no target or color transition is active. */

@@ -1111,7 +1111,6 @@ extern u8 D_00329790[0x40];
 extern SdfLightSources D_00324B10;
 extern f32 D_00324B20[4];
 extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
-extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
 void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
