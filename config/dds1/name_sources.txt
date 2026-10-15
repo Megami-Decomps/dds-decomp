@@ -9122,3 +9122,4 @@
 0x0030C970	sceSifGetSreg	inferred	Reads the indexed SIF system register from the shared register array; adjacent sceSifSetSreg writes the same array. DDS2 twin 0x00367BF0.
 0x001E3310	btlBuildActorGroupProjectionCameraPose	inferred	Frames an actor against projected group bounds, with side-specific offsets
 0x001E4AC0	btlFrameEarliestAnimatedUnitCameraPair	inferred	frames earliest marked kind-11 animation with paired camera presets
+0x001CF050	btlScheduleSummonActionTasks	inferred	Schedules summon model loads, facing, fades, effects and completion followers.
