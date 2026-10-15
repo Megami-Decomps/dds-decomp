@@ -1622,7 +1622,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                 spacing = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackSpacing;
             } else {
                 repeatCount = datEnemyRecords[action->unit->resourceIndex].tickCount;
-                spacing = datEnemyRecords[action->unit->resourceIndex].unk48;
+                spacing = datEnemyRecords[action->unit->resourceIndex].attackSpacing;
                 if (repeatCount <= 0) repeatCount = 1;
             }
             spacing = (s32)(spacing / *(f32 *)(statusTable + action->indexWork.slot * 20 + 0x34));
