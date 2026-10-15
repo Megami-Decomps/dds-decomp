@@ -210,7 +210,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
                 if (chunkId > 0) {
                     base->resourceSlotCount = 17;
                     base->resourceSlots[index] = chunkId;
-                    base->unkAC = family;
+                    base->resourceSlotFamily = family;
                 }
             }
             return;
@@ -226,7 +226,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
                 if (chunkId > 0) {
                     base->resourceSlotCount = 18;
                     base->resourceSlots[index] = chunkId;
-                    base->unkAC = subtype;
+                    base->resourceSlotFamily = subtype;
                 }
             }
             return;
@@ -240,7 +240,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
             if (chunkId > 0) {
                 base->resourceSlotCount = 17;
                 base->resourceSlots[index] = chunkId;
-                base->unkAC = 0x2000;
+                base->resourceSlotFamily = 0x2000;
             }
         }
         return;
@@ -257,7 +257,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
             if (chunkId > 0) {
                 base->resourceSlotCount = count;
                 *slot = chunkId;
-                base->unkAC = category;
+                base->resourceSlotFamily = category;
             }
         }
     }
