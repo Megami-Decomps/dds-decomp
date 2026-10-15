@@ -5336,12 +5336,12 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
 
 extern char D_004377D0[];
 
-void evtFormatTaskName(s32 id, char *buffer) {
-    sprintf(buffer, D_004377D0, id);
+void evtFormatTaskName(s32 taskId, char *buffer) {
+    sprintf(buffer, D_004377D0, taskId);
 }
 
 KwlnTask *evtFindTaskById(u32 taskId) {
-    u8 taskName[32];
+    char taskName[32];
 
     evtFormatTaskName(taskId, taskName);
     return kwlnTaskGetTaskByName((const char *)taskName);

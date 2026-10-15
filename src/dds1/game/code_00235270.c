@@ -41,7 +41,6 @@ extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
 extern s32 sprintf(char *, char *, ...);
-extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
@@ -5357,12 +5356,12 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
     return sound;
 }
 
-void evtFormatTaskName(s32 taskId, void *buffer) {
+void evtFormatTaskName(s32 taskId, char *buffer) {
     sprintf(buffer, D_003BC360, taskId);
 }
 
 KwlnTask *evtFindTaskById(u32 taskId) {
-    u8 taskName[32];
+    char taskName[32];
 
     evtFormatTaskName(taskId, taskName);
     return kwlnTaskGetTaskByName((const char *)taskName);

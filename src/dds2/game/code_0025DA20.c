@@ -155,7 +155,6 @@ extern u8 mnuCampCompactEntries[];
 
 extern u8 D_003CD8DD[];
 
-extern void evtFormatTaskName(s32 taskId, void *name);
 
 
 extern void *memset(void *dst, s32 c, u32 n);
