@@ -640,7 +640,7 @@ extern u32 D_00436134;
 
 extern u32 D_003899B4[];
 
-extern void fldApplySkyLightSet(u32 value, s32 mode);
+extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 extern char D_00413388[];
 
 extern u32 D_00436128;
@@ -5583,7 +5583,7 @@ extern u32 D_0043615C;
 extern f32 D_00436160;
 extern u32 D_00436164;
 
-void fldApplySkyLightSet(u32 index, s32 mode) {
+void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -5594,21 +5594,21 @@ void fldApplySkyLightSet(u32 index, s32 mode) {
 
     if (fldAreaState.area < 200) {
         if (D_004360E8 == 0 && fldAreaState.area < 40) {
-            mode = 0;
+            durationMode = 0;
         }
         defaultDuration = 15;
         duration = 0;
-        if (mode != 0) {
+        if (durationMode != 0) {
             duration = defaultDuration;
         }
-        if (mode >= 2) {
-            duration = mode;
+        if (durationMode >= 2) {
+            duration = durationMode;
         }
-        D_00436128 = index;
-        D_00436158 = index;
+        D_00436128 = skyLightSetIndex;
+        D_00436158 = skyLightSetIndex;
         D_00436138 = 0;
         if (fldAreaState.sceneCommand == 0) {
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[skyLightSetIndex];
             area = light->fadeArea;
             D_00389988[13] = area;
             D_00389988[14] = light->displayStateSlot14;
