@@ -17,11 +17,11 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
-extern u32 D_0037C248[][2];
+extern u32 mnuCampMainResourceNamePairs[][2];
 
-extern u32 D_0037C2C8[][2];
+extern u32 mnuCampExtraResourceNamePairs[][2];
 
-extern u32 D_0037C2F0[][2];
+extern u32 mnuCampPairedResourceNamePairs[][2];
 
 extern char D_003B2020[];
 
@@ -48,13 +48,13 @@ void mnuAppendCampSpriteRequests(EffectList *resourceList, StaffSlots *resourceS
     mnuResolveStaffImageHandles((u32 *)resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_003B2020, D_0037C248[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_003B2020, mnuCampMainResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_003B2020, D_0037C2C8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->extraResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_003B2020, mnuCampExtraResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", D_0037C2F0[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->pairResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", mnuCampPairedResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->pairResources[resourceIndex]);
     }
 }
 

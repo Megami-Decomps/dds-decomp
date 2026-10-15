@@ -7,7 +7,7 @@
 #include "eff.h"
 
 extern s32 mnuGetSlidePathSegmentWeight(s32);
-extern s32 D_003E38A0[];
+extern s32 mnuMovieMenuSlidePathData[];
 
 extern s32 mnuMovieMenuState;
 
@@ -356,7 +356,7 @@ void mnuTitlePickRandomSlot(PickList *list) {
 
 extern void mnuDrawMovieMenuSpritePickList(PickList *, s32);
 
-extern s16 D_003E38F0[32][2];
+extern s16 mnuMovieMenuPickSpritePositions[32][2];
 extern u8 D_00437A50[];
 
 /* Draw the pick list sprites and advance each entry's fade step; drop entries that finished. */
@@ -368,8 +368,8 @@ void mnuDrawMovieMenuSpritePickList(PickList *work, s32 drawContext) {
     for (i = 0; i < work->count; i++) {
         s32 j;
 
-        mnuDrawSprite(D_003E38F0[work->entry[i].id][0],
-                      D_003E38F0[work->entry[i].id][1],
+        mnuDrawSprite(mnuMovieMenuPickSpritePositions[work->entry[i].id][0],
+                      mnuMovieMenuPickSpritePositions[work->entry[i].id][1],
                       0, work->control.pos / 4, 0,
                       palette[(s8)work->entry[i].paletteIndex], drawContext);
         if (work->entry[i].fadeDelay != 0) {
@@ -408,10 +408,10 @@ void mnuPairedSlideBarSetState(PickList *work, s32 state) {
 }
 
 s32 mnuGetSlidePathSegmentWeight(s32 segment) {
-    s32 x0 = D_003E38A0[segment + 8];
-    s32 x1 = D_003E38A0[segment + 9];
-    s32 y0 = D_003E38A0[segment + 12];
-    s32 y1 = D_003E38A0[segment + 13];
+    s32 x0 = mnuMovieMenuSlidePathData[segment + 8];
+    s32 x1 = mnuMovieMenuSlidePathData[segment + 9];
+    s32 y0 = mnuMovieMenuSlidePathData[segment + 12];
+    s32 y1 = mnuMovieMenuSlidePathData[segment + 13];
     s32 dx = x1 - x0;
     s32 dy = y1 - y0;
 
@@ -477,10 +477,10 @@ void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
     s32 end = mnuGetSlidePathSegmentEnd(segment);
     /* Consecutive table words give each segment's start/end X at +8/+9
        and start/end Y at +12/+13; the last X shares the first Y word. */
-    s32 x0 = D_003E38A0[segment + 8];
-    s32 y0 = D_003E38A0[segment + 12];
-    s32 dx = D_003E38A0[segment + 9] - x0;
-    s32 dy = D_003E38A0[segment + 13] - y0;
+    s32 x0 = mnuMovieMenuSlidePathData[segment + 8];
+    s32 y0 = mnuMovieMenuSlidePathData[segment + 12];
+    s32 dx = mnuMovieMenuSlidePathData[segment + 9] - x0;
+    s32 dy = mnuMovieMenuSlidePathData[segment + 13] - y0;
     s32 offset = position - start;
     s32 span = end - start;
 
@@ -507,7 +507,7 @@ void mnuStartRandomMovieMenuPulse(PickList *work) {
     }
 }
 
-extern s16 D_003E38E0[][2];
+extern s16 mnuMovieMenuPulseSpritePositions[][2];
 
 void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
     s32 i;
@@ -518,7 +518,7 @@ void mnuDrawMovieMenuPulses(PickList *menu, s32 drawContext) {
             if (pos > 0x100) {
                 pos = 0x200 - pos;
             }
-            mnuDrawSprite(D_003E38E0[i][0], D_003E38E0[i][1], 0, pos / 2, 0, 0x1E, drawContext);
+            mnuDrawSprite(mnuMovieMenuPulseSpritePositions[i][0], mnuMovieMenuPulseSpritePositions[i][1], 0, pos / 2, 0, 0x1E, drawContext);
             if (menu->effectSlots[i].counter == 0x200) {
                 menu->effectSlots[i].active = 0;
             } else {

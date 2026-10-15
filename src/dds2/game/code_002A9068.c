@@ -62,7 +62,7 @@ extern void mnuEnableCampBadgeFade(u8 *);
 
 extern void evtCreateMessageWindowIfMissing(s32);
 
-extern u8 D_003E5778[];
+extern u8 mnuCampMessagePack[];
 
 extern void mnuBuildCampTitleEffectResourceList(u8 *);
 
@@ -104,11 +104,11 @@ extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, s32);
 
 extern char D_00437B80[];
 
-extern u32 D_003E6858[][2];
+extern u32 mnuCampMainResourceNamePairs[][2];
 
-extern u32 D_003E68D8[][2];
+extern u32 mnuCampExtraResourceNamePairs[][2];
 
-extern u32 D_003E6900[][2];
+extern u32 mnuCampPairedResourceNamePairs[][2];
 
 void ptyResetPartyRecordsAndProfiles(void) {
     s32 partyIndex = 0;
@@ -137,7 +137,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
 
 extern struct EffectSlotSet *mnuCampResourceHandles[2];
 
-extern u32 D_003E6848[];
+extern u32 mnuCampBaseResourceNameRows[];
 
 extern const char D_0042A950[];
 
@@ -163,7 +163,7 @@ void mnuLoadCampResources(void) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(
-            (const char *)D_0042A950, (const char *)D_003E6848[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
+            (const char *)D_0042A950, (const char *)mnuCampBaseResourceNameRows[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
     }
 }
 
@@ -418,7 +418,7 @@ void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes) {
     ((MenuStaffContext *)menuBytes)->categoryKind = nextCategory;
 }
 
-extern u32 D_003E6970[];
+extern u32 mnuCampMotionResourceNames[];
 
 /* Load the mapped motion resource and initialize both status batches' words.
  * Batch categories and the initial 0xF word remain opaque. */
@@ -428,7 +428,7 @@ void movLoadTitleEffects(u8 *menuBytes) {
     EffMappedRecord *records;
     s32 *statusWords;
 
-    work->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
+    work->motionResource = effLoadMappedResource("/camp/mot/", mnuCampMotionResourceNames[0]);
     batch = effCreateStatusBatch(6);
     records = batch->records;
     work->motion[0] = batch;
@@ -480,13 +480,13 @@ void mnuAppendCampSpriteRequests(struct EffectList *resourceList, StaffSlots *re
     mnuSnapshotCampTextureHandles((u32 *)resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampMainResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->extraResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampExtraResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->pairResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", mnuCampPairedResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->pairResources[resourceIndex]);
     }
 }
 
@@ -801,7 +801,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);
     mnuEnableCampBadgeFade(effectBytes);
-    evtCreateMessageWindowIfMissing((s32)D_003E5778);
+    evtCreateMessageWindowIfMissing((s32)mnuCampMessagePack);
     movLoadTitleEffects(menuBytes);
     mnuBuildCampTitleEffectResourceList(menuBytes);
     mnuResetGradientFadeColor(menuBytes + 0xAA50, 0x60);

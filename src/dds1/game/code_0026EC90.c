@@ -23,7 +23,7 @@ extern char D_003B1140[]; /* "mnuStaffImageProc" */
 
 extern char D_003B1168[]; /* "staffProc" */
 
-extern MnuMovieResourceEntry D_0037B168[];
+extern MnuMovieResourceEntry mnuMovieResourceEntries[];
 
 extern KwlnTask *mnuMovieDrawTask;
 
@@ -519,7 +519,7 @@ void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *
 }
 
 void mnuRequestIndexedMovieResource(s32 index) {
-    MnuMovieResourceEntry *entry = &D_0037B168[index];
+    MnuMovieResourceEntry *entry = &mnuMovieResourceEntries[index];
 
     mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
