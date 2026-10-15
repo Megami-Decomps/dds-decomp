@@ -27,6 +27,7 @@
 #include "eff_blur.h"
 #include "eff_pcp_shared_trail.h"
 #include "eff.h"
+#include "eff_resource_rect_api.h"
 #include "eff_math.h"
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
@@ -2076,8 +2077,6 @@ void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
     effReleaseResourceTemplate(work->resource.rectangle);
     sdfReleaseChipBlock(work);
 }
-
-extern void effResourceRectDrawPixels(EffResourceRectWork *work);
 
 /* Both compact fade renderers interpolate their extent with integer truncation. */
 static inline s32 effPcpInterpolateCompactExtent(s32 from, s32 to,
