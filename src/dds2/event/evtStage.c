@@ -13,10 +13,6 @@
 #include "sdf_texture_offset_list.h"
 
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
-extern void sdfFreezeFloatCounter(struct EvtScaledValue *);
-extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *);
-
-
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
@@ -169,8 +165,6 @@ void evtClearWorldSlotStatusFlag(void *object) {
         return;
     }
 }
-
-extern void evtScaleValueByMultiplier(f32 multiplier, struct EvtScaledValue *slotData);
 
 /* Scale the object's retained path time within the clamped multiplier range. */
 void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
