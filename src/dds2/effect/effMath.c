@@ -11,8 +11,8 @@ void effMathReleaseWorkResource(EffArrHdr *work) {
 
 
 /* Evaluate the cubic Bezier at t into out[3], advance t, and report whether it is still below 1. */
-s32 effMathStepBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
-    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[index];
+s32 effMathStepBezierSlot(EffArrHdr *table, s32 slotIndex, f32 *out) {
+    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[slotIndex];
     f32 w[4];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -56,12 +56,12 @@ s32 effMathStepBezierSlotDirect(EffCubicBezierSlot *slot, f32 *out) {
     return 1;
 }
 
-void effMathResetBezierSlot(EffArrHdr *table, s32 index) {
-    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[index];
+void effMathResetBezierSlot(EffArrHdr *table, s32 slotIndex) {
+    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[slotIndex];
     slot->step = 0.05f;
     slot->t = 0;
 }
 
-EffCubicBezierSlot *effMathGetSlotAt(EffArrHdr *table, s32 index) {
-    return &((EffCubicBezierSlot *)table->slots)[index];
+EffCubicBezierSlot *effMathGetSlotAt(EffArrHdr *table, s32 slotIndex) {
+    return &((EffCubicBezierSlot *)table->slots)[slotIndex];
 }
