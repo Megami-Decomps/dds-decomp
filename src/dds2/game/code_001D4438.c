@@ -2216,7 +2216,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
         task->startCondition.kind = 7;
         task->startCondition.value.handle = masterOwner;
         task->flags |= 2;
-        if (state->unk65C != NULL) task->startDelay = state->unk65C(skill);
+        if (state->linkageStartDelayHook != NULL) task->startDelay = state->linkageStartDelayHook(skill);
         btlStartTask(task);
         if (state->preActionHook != NULL) state->preActionHook(action, skill, actionOwner, soundHandle, masterOwner);
         actionFrames = btlGetActionAnimationDelay(unit, skill);

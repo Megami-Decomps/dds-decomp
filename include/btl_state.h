@@ -143,11 +143,11 @@ typedef struct BtlDebugMenuCursor {
 } BtlDebugMenuCursor;
 typedef char BtlDebugMenuCursorExtent[(sizeof(BtlDebugMenuCursor) == 0x10) ? 1 : -1];
 
-/* Battle debug-menu work: a cleared word, the list cursors, the selected unit
- * and three row tables. DDS1 embeds it at 0x6A4 and DDS2 at 0x728; indexed
- * table accesses address the tables relative to this nested record. */
+/* Battle model-debug editor: phase, list cursors, selected unit and name tables.
+ * DDS1 embeds it at 0x6A4 and DDS2 at 0x728; indexed accesses address these
+ * string-address tables relative to this nested record. */
 typedef struct BtlDebugMenuWork {
-    s32 unk00;
+    s32 phase; /* Model-debug editor initialization, selection, submenus and exit wait. */
     BtlDebugMenuCursor actionMenu; /* 0x04: seven debug actions. */
     BtlDebugMenuCursor modelMenu; /* 0x14: enemy/party model selection. */
     u8 pad24[0x10];
@@ -156,14 +156,14 @@ typedef struct BtlDebugMenuWork {
     u8 pad54[0x10];
     BtlUnit *selectedUnit; /* 0x64 */
 #ifdef VERSION_DDS1
-    s32 table0[0x20]; /* 0x68 */
-    s32 table1[0x180]; /* 0xE8 */
-    s32 table2[0x20]; /* 0x6E8 */
+    s32 partyModelNames[0x20]; /* 0x68 */
+    s32 enemyModelNames[0x180]; /* 0xE8 */
+    s32 gunNames[0x20]; /* 0x6E8 */
 #endif
 #ifdef VERSION_DDS2
-    s32 table0[0x30]; /* 0x68 */
-    s32 table1[0x180]; /* 0x128 */
-    s32 table2[0x60]; /* 0x728 */
+    s32 partyModelNames[0x30]; /* 0x68 */
+    s32 enemyModelNames[0x180]; /* 0x128 */
+    s32 gunNames[0x60]; /* 0x728 */
 #endif
 } BtlDebugMenuWork;
 
@@ -341,9 +341,9 @@ typedef struct BtlState {
     BtlEffectHeader *effect; /* 0x694: mode-owned allocation begins with its generic header. */
     u8 pad698[0xC];
     BtlDebugMenuWork debug; /* 0x6A4 */
-    s8 unk_E0C;
+    s8 debugModelListKind; /* 0: enemy models; 1: party models. */
     u8 unk_E0D;
-    s16 unk_E0E;
+    s16 debugMotionCountdown; /* Frames until preview motion; -1 when idle. */
 } BtlState;
 typedef char BtlSceneLightDds1Offset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
@@ -563,7 +563,7 @@ typedef struct BtlState {
     s32 (*unk650)(BtlUnit *);
     s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x654: same action-camera setup override. */
     s32 (*unk658)(BtlUnit *);
-    s32 (*unk65C)(s32); /* 0x65C: LINKAGE skill-to-start-delay call-site contract. */
+    s32 (*linkageStartDelayHook)(s32); /* 0x65C: LINKAGE skill-to-start-delay call-site contract. */
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x660: same target-side pose override as DDS1 +0x628. */
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
@@ -612,9 +612,9 @@ typedef struct BtlState {
     u8 pad720[4];
     s32 unk724;
     BtlDebugMenuWork debug; /* 0x728 */
-    s8 unk_E0C; /* 0xFD0: legacy opaque name, not a DDS2 offset */
+    s8 debugModelListKind; /* 0xFD0: 0 for enemy models, 1 for party models. */
     u8 unk_E0D; /* 0xFD1 */
-    s16 unk_E0E; /* 0xFD2 */
+    s16 debugMotionCountdown; /* 0xFD2: frames until preview motion; -1 when idle. */
 } BtlState;
 typedef char BtlSceneLightOffset0[((unsigned int)&((BtlState *)0)->baselineLightDirection == 0x10) ? 1 : -1];
 typedef char BtlSceneLightOffset1[((unsigned int)&((BtlState *)0)->baselineLightColor == 0x20) ? 1 : -1];
@@ -622,7 +622,7 @@ typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbie
 typedef char BtlSceneLightOffset3[((unsigned int)&((BtlState *)0)->lightDirection == 0x40) ? 1 : -1];
 typedef char BtlSceneLightOffset4[((unsigned int)&((BtlState *)0)->lightColor == 0x50) ? 1 : -1];
 typedef char BtlSceneLightOffset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
-typedef char BtlLinkageDelayHookOffset[((unsigned int)&((BtlState *)0)->unk65C == 0x65C) ? 1 : -1];
+typedef char BtlLinkageDelayHookOffset[((unsigned int)&((BtlState *)0)->linkageStartDelayHook == 0x65C) ? 1 : -1];
 typedef char BtlLinkageNextHookOffset[((unsigned int)&((BtlState *)0)->cameraPoseBlendHook == 0x660) ? 1 : -1];
 typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x2B8) ? 1 : -1];
 typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x2BC) ? 1 : -1];

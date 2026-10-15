@@ -645,7 +645,7 @@ void btlConfigureBattleCameraAction(BtlLinkedCommand *action, BtlCamState *from,
         btlAdjustCameraDirectionForDefaultPlane(from);
         btlAdjustCameraDirectionForDefaultPlane(to);
         if (btlHasMarkedEntry10((u8 *)action)) {
-            action->durationFrames = btlGetUnitMotionDurationFrames(unit, unit->unkEC);
+            action->durationFrames = btlGetUnitMotionDurationFrames(unit, unit->motionId);
             action->flags |= 0x11;
         } else {
             action->flags |= 0x41;
@@ -783,7 +783,7 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
         btlAdjustCameraDirectionForDefaultPlane(to);
-        action->durationFrames = btlGetUnitMotionDurationFrames(unit, unit->unkEC);
+        action->durationFrames = btlGetUnitMotionDurationFrames(unit, unit->motionId);
         action->flags |= 0x815;
         action->motionProgress = 0;
     }
@@ -890,7 +890,7 @@ void btlBeginActionEndCameraPullback(BtlLinkedCommand *action, BtlCamState *pose
     if (action->motionProgress == 0 && (s32)btlGetIndexListCount(action->targetList) < 2) {
         user = action->task->unit;
         target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
-        frames = btlGetUnitMotionDurationFrames(user, user->unkEC);
+        frames = btlGetUnitMotionDurationFrames(user, user->motionId);
         frames = (s32)((f32)frames / btlGetActorEffectScale(action->task));
         if (action->state == frames && (target->status.flags & 0x200)) {
             idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
@@ -1558,7 +1558,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     user = action->task->unit;
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
-    span = btlGetUnitMotionDurationFrames(user, user->unkEC);
+    span = btlGetUnitMotionDurationFrames(user, user->motionId);
     span /= btlGetActorEffectScale(action->task);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {
@@ -1663,7 +1663,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     if (action->motionProgress != 0) {
         return;
     }
-    frames = btlGetUnitMotionDurationFrames(user, user->unkEC);
+    frames = btlGetUnitMotionDurationFrames(user, user->motionId);
     frames = (s32)((f32)frames / btlGetActorEffectScale(action->task));
     if (action->state == frames && (target->status.flags & 0x200)) {
         idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
@@ -1817,7 +1817,7 @@ void func_001E2FF8(BtlLinkedCommand *action) {
 
     {
         u8 *statusTable = (u8 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
-        f32 clearance = *(f32 *)(statusTable + unit->unkEC * 0x14 + 0x38) * unit->scale;
+        f32 clearance = *(f32 *)(statusTable + unit->motionId * 0x14 + 0x38) * unit->scale;
         btlCopyUnitCurrentPosition(unit, position);
         if (position[2] - clearance < -100.0f) {
             position[2] += -100.0f - (position[2] - clearance);
@@ -2569,7 +2569,7 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                if ((flags & 0xE0) && unit->unkEC == 11) {
+                if ((flags & 0xE0) && unit->motionId == 11) {
                     frame = btlGetUnitModelCurrentFrame(unit);
                     if (selected == NULL) {
                         earliest = frame;
@@ -2837,7 +2837,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     user = action->task->unit;
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
-    span = btlGetUnitMotionDurationFrames(user, user->unkEC);
+    span = btlGetUnitMotionDurationFrames(user, user->motionId);
     span /= btlGetActorEffectScale(action->task);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {

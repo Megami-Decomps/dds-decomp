@@ -248,7 +248,7 @@ void btlUpdateEventPlayback(void) {
                     MdlCtx *model = ext->owner;
                     ext->flags &= ~0xA0;
                     ext->motionState = 0;
-                    mdlAddEntryPlain(model, 0, unit->unkEC);
+                    mdlAddEntryPlain(model, 0, unit->motionId);
                     sdfMotionSampleAtFrame(model->first, 26.0f);
                     unit->status.flags &= 0x7FFFFFFF;
                     unit->status.flags &= ~0x40000000;
@@ -2150,23 +2150,23 @@ void btlInitializeBattleDebugMenu(void) {
     state->debug.motionMenu.rows = 0xF;
     state->debug.gunMenu.count = 0x20;
     state->debug.gunMenu.rows = 0xF;
-    if (state->unk_E0C == 0) {
+    if (state->debugModelListKind == 0) {
         state->debug.modelMenu.count = 0x180;
     } else {
         state->debug.modelMenu.count = 0x20;
     }
     for (i = 0; i < 0x20; i++) {
-        state->debug.table0[i] = D_003BAA70 + i * 0x11;
+        state->debug.partyModelNames[i] = D_003BAA70 + i * 0x11;
     }
     for (i = 0; i < 0x180; i++) {
         /* Debug row tables carry string addresses in EE words. */
-        state->debug.table1[i] = (s32)(D_003BAA74 + i * 0x11);
+        state->debug.enemyModelNames[i] = (s32)(D_003BAA74 + i * 0x11);
     }
     for (i = 0; i < 0x20; i++) {
-        state->debug.table2[i] = D_003BAA84 + 0xFA0 + i * 0x19;
+        state->debug.gunNames[i] = D_003BAA84 + 0xFA0 + i * 0x19;
     }
-    state->debug.unk00 = 0;
-    state->unk_E0E = -1;
+    state->debug.phase = 0;
+    state->debugMotionCountdown = -1;
 }
 
 typedef struct BtlDebugPosition {
@@ -2248,11 +2248,11 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     u32 motion;
     f32 savedOverride;
 
-    switch (state->debug.unk00) {
+    switch (state->debug.phase) {
     case 0:
         state->battleFlags |= 0x80000000;
         state->battleFlags &= ~0x200;
-        state->debug.unk00 = 1;
+        state->debug.phase = 1;
         fldCreateSceneSpriteTask(0);
         break;
     case 1: {
@@ -2260,10 +2260,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         if (scene == 3) {
             state->debug.selectedUnit = btlGetIndexListEntry(fldGetSceneScriptValue(), 0);
             fldMarkActiveSceneScriptState();
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         } else if (scene == 4) {
             fldMarkActiveSceneScriptState();
-            state->debug.unk00 = 10;
+            state->debug.phase = 10;
         } else {
             BtlIndexList *list = fldGetSceneScriptValue();
             if (btlGetIndexListCount(list) == 1) {
@@ -2287,16 +2287,16 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     case 2:
         if (mnuListMoveCursor(&state->debug.actionMenu)) {
             switch (state->debug.actionMenu.cursor) {
-            case 0: state->debug.unk00 = 3; break;
-            case 1: state->debug.unk00 = 4; break;
-            case 2: state->debug.unk00 = 5; break;
-            case 3: state->debug.unk00 = 6; break;
-            case 4: state->debug.unk00 = 7; break;
-            case 5: state->debug.unk00 = 8; break;
-            case 6: state->debug.unk00 = 9; break;
+            case 0: state->debug.phase = 3; break;
+            case 1: state->debug.phase = 4; break;
+            case 2: state->debug.phase = 5; break;
+            case 3: state->debug.phase = 6; break;
+            case 4: state->debug.phase = 7; break;
+            case 5: state->debug.phase = 8; break;
+            case 6: state->debug.phase = 9; break;
             }
         } else if (sdfPadButtonStates[3] < 0) {
-            state->debug.unk00 = 10;
+            state->debug.phase = 10;
         }
         mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)256, 100,
             &state->debug.actionMenu, D_003612F0);
@@ -2329,13 +2329,13 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 btlInitializePartyRecordFromEnemy(&unit->partyRecord, state->debug.modelMenu.cursor);
                 unit->partyRecord.flags |= 0x23;
             }
-            state->debug.unk00 = 10;
+            state->debug.phase = 10;
         } else if (sdfPadButtonStates[3] < 0) {
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         }
         if (unit->partyRecord.flags & 0x20) {
-            if (state->unk_E0C != 0) {
-                state->unk_E0C = 0;
+            if (state->debugModelListKind != 0) {
+                state->debugModelListKind = 0;
                 state->debug.modelMenu.count = 0x180;
                 state->debug.modelMenu.top = 0;
                 state->debug.modelMenu.cursor = 0;
@@ -2345,8 +2345,8 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 state->debug.modelMenu.cursor = 0;
             }
         } else {
-            if (state->unk_E0C != 1) {
-                state->unk_E0C = 1;
+            if (state->debugModelListKind != 1) {
+                state->debugModelListKind = 1;
                 state->debug.modelMenu.count = 0x20;
                 state->debug.modelMenu.top = 0;
                 state->debug.modelMenu.cursor = 0;
@@ -2357,7 +2357,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             }
         }
         mnuDrawSelectableMenuRows((u8 *)24, (u8 *)64, 164, &state->debug.modelMenu,
-            (unit->partyRecord.flags & 0x20) ? state->debug.table1 : state->debug.table0);
+            (unit->partyRecord.flags & 0x20) ? state->debug.enemyModelNames : state->debug.partyModelNames);
         break;
     case 4:
         unit = state->debug.selectedUnit;
@@ -2396,25 +2396,25 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             memcpy(&datGameState->party[unit->partyIndex], &D_003D75E0, sizeof(D_003D75E0));
         }
         if (sdfPadButtonStates[3] < 0) {
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         }
         break;
     case 5:
         unit = state->debug.selectedUnit;
         if (mnuListMoveCursor(&state->debug.motionMenu)) {
-            state->unk_E0E = 0;
+            state->debugMotionCountdown = 0;
         } else if (sdfPadButtonStates[3] < 0) {
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         }
         if (sdfPadButtonStates[0] < 0) {
-            state->unk_E0E = state->timingRate * 3;
+            state->debugMotionCountdown = state->timingRate * 3;
         }
-        if (state->unk_E0E > 0) {
-            state->unk_E0E--;
-            sprintf(text, D_003BBAB0, state->unk_E0E / state->timingRate + 1);
+        if (state->debugMotionCountdown > 0) {
+            state->debugMotionCountdown--;
+            sprintf(text, D_003BBAB0, state->debugMotionCountdown / state->timingRate + 1);
             btlDebugDrawText(32, 400, 6, text);
         }
-        if (state->unk_E0E == 0) {
+        if (state->debugMotionCountdown == 0) {
             motion = state->debug.motionMenu.cursor;
             if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
                 BtlRuntimeTask *task;
@@ -2424,10 +2424,10 @@ s32 btlUpdateBattleModelDebugEditor(void) {
                 dependent->startCondition.kind = 4;
                 dependent->startCondition.value.handle = task->handle;
                 btlStartTask(dependent);
-                state->unk_E0E = -1;
+                state->debugMotionCountdown = -1;
             }
         }
-        if (state->unk_E0E <= 0) {
+        if (state->debugMotionCountdown <= 0) {
             sprintf(text, "%3d/%3d\n", (s32)btlGetUnitModelCurrentFrame(unit),
                 btlGetUnitModelFrameCount(unit));
             btlDebugDrawText(32, 400, 0, text);
@@ -2440,19 +2440,19 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
                 unit->partyRecord.menuValue = state->debug.gunMenu.cursor + 0xA0;
                 btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
-                state->debug.unk00 = 2;
+                state->debug.phase = 2;
             }
         } else if (sdfPadButtonStates[3] < 0) {
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         }
-        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)32, 164, &state->debug.gunMenu, state->debug.table2);
+        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)32, 164, &state->debug.gunMenu, state->debug.gunNames);
         break;
     case 7:
         unit = state->debug.selectedUnit;
         if (sdfPadButtonStates[3] < 0) {
             state->battleFlags &= ~0x400000;
             btlRefreshUnitMotionSelection(unit);
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         } else {
             PCP_COPY_VECTOR(D_003D7790.value, unit->position);
             btlDebugMenuSetupNoOp(&D_00361660);
@@ -2469,7 +2469,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             if (sdfPadButtonStates[3] < 0) {
                 state->battleFlags &= ~0x400000;
                 btlRefreshUnitMotionSelection(unit);
-                state->debug.unk00 = 2;
+                state->debug.phase = 2;
             } else {
                 transform = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
                 if (sdfPadButtonStates[2] < 0) {
@@ -2494,7 +2494,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             }
         } else {
             btlRefreshUnitMotionSelection(unit);
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         }
         break;
     case 9:
@@ -2556,7 +2556,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         if (sdfPadButtonStates[3] < 0) {
             btlRefreshUnitMotionSelection(unit);
-            state->debug.unk00 = 2;
+            state->debug.phase = 2;
         }
         break;
     case 10:

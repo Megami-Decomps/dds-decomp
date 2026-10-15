@@ -2355,7 +2355,7 @@ void btlInitFxLights(BtlUnit *unit) {
     PCP_COPY_VECTOR(unit->position, &D_003B6B90);
     PCP_COPY_VECTOR(unit->rotation, &D_003B6BA0);
     unit->unk58 = 0.0f;
-    unit->unk50 = 1.0f;
+    unit->actorScale = 1.0f;
     unit->baseColor = 0x80808080;
     PCP_COPY_VECTOR(unit->currentPosition, &D_003B6B90);
     PCP_COPY_VECTOR(unit->orientation, &D_003B6BA0);
@@ -2385,7 +2385,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *unit, s32 kind, s32 in
     unit->unkB8 = base->height;
     unit->unkC0 = base->cameraRadius;
     unit->scale = base->actorScale;
-    unit->unk50 = base->actorScale;
+    unit->actorScale = base->actorScale;
     unit->positionZOffset = base->zOffset;
     unit->unk58 = base->zOffset;
 }
@@ -2471,13 +2471,13 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
         model = unit->ext->owner;
         unit->ext->flags |= 0x200000;
         VU0_SET_ONES_XYZ(vf10);
-        VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
         inner = unit->effectObject->inner;
         inner->flags = (inner->flags | 1) & ~2;
         VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(model);
-        if (unit->unk50 != 1.0f) {
-            mdlSetAmountOnAllContextResources(model, unit->unk50);
+        if (unit->actorScale != 1.0f) {
+            mdlSetAmountOnAllContextResources(model, unit->actorScale);
         }
         dds3ClearObjectFlags(unit->effectObject, 0x400);
         unit->status.flags |= 8;
@@ -5407,13 +5407,13 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
     if (unit->status.flags & 2) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->resourceIndex);
         VU0_SET_ONES_XYZ(vf10);
-        VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
         inner = unit->effectObject->inner;
         inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
         inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(unit->ext->owner);
-        mdlSetAmountOnAllContextResources(unit->ext->owner, unit->unk50);
+        mdlSetAmountOnAllContextResources(unit->ext->owner, unit->actorScale);
         btlSetUnitPosition(unit, unit->currentPosition);
     }
 }

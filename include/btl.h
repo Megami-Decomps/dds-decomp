@@ -90,7 +90,7 @@ typedef struct BtlUnit {
     f32 colorEnd[4]; /* 0x20: second source color used by the effect blend callback. */
     f32 position[4]; /* 0x30: world position */
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
-    f32 effectScale; /* 0x50: scales the SDK-provided actor effect vectors. */
+    f32 actorScale; /* 0x50: base actor scale applied to model resources and effect vectors. */
     u32 baseColor; /* 0x54: RGB restored after temporary battle effects */
     union {
         f32 unk58;
@@ -135,7 +135,7 @@ typedef struct BtlUnit {
     u32 displaySpecies; /* 0xE0 */
     u8 padE4[4];
     u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
-    s32 unkEC;
+    s32 motionId; /* 0xEC: current primary model motion; -1 before selection. */
     s32 effectState; /* 0xF0 */
     f32 motionRate; /* 0xF4: stored rate applied to the owner's primary SDK motion. */
     s16 motionStartFrame; /* 0xF8: retained motion-range start frame. */
@@ -193,7 +193,7 @@ typedef struct BtlUnit {
     f32 colorEnd[4]; /* 0x20: second source color used by the effect blend callback. */
     f32 position[4]; /* 0x30: world position */
     f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
-    f32 unk50;
+    f32 actorScale; /* 0x50: base actor scale applied to model resources and effect vectors. */
     u32 baseColor;
     f32 unk58;
     u8 pad5C[4];

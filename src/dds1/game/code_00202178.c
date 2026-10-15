@@ -841,7 +841,7 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     user = btlGetTargetUnitForLink(command);
     target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
     extent = user->reach * user->scale;
-    span = btlGetUnitMotionDurationFrames(user, user->unkEC);
+    span = btlGetUnitMotionDurationFrames(user, user->motionId);
     span /= btlGetActorEffectScale(command->task);
     ratio = (f32)command->state / span;
     if (ratio > 1.0f) {
@@ -1719,10 +1719,10 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
                 return code;
             }
             if (code == 1) {
-                if (unit == second && first->unkEC == 0x11) {
+                if (unit == second && first->motionId == 0x11) {
                     return code;
                 }
-                if (unit == first && second->unkEC == 0x10) {
+                if (unit == first && second->motionId == 0x10) {
                     return code;
                 }
                 if (unit->partyRecord.unitId == 0x107) {
@@ -1816,14 +1816,14 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
         if (second == NULL) {
             goto unavailable_pair;
         }
-        if (first->unkEC < 0x14) {
-            if (first->unkEC >= 0x12) {
-                return first->unkEC;
+        if (first->motionId < 0x14) {
+            if (first->motionId >= 0x12) {
+                return first->motionId;
             }
         }
-        if (second->unkEC < 0x14) {
-            if (second->unkEC >= 0x12) {
-                return second->unkEC;
+        if (second->motionId < 0x14) {
+            if (second->motionId >= 0x12) {
+                return second->motionId;
             }
         }
 /* Share pair rejections so early conversion does not hoist the return
@@ -2902,7 +2902,7 @@ s32 btlChooseCerberusPartMotion(BtlUnit *unit, s32 animation) {
         }
     }
     if (animation == 13) {
-        currentAnimation = unit->unkEC;
+        currentAnimation = unit->motionId;
         switch (currentAnimation) {
         case 1:
         case 11:
@@ -3325,7 +3325,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
         return;
     }
 
-    selected->effectScale = transition->targetScale;
+    selected->actorScale = transition->targetScale;
     selected->scale = transition->targetScale;
     scaleDelta = transition->targetScale - currentScale;
     if (__builtin_fabsf(scaleDelta) > 0.01f) {

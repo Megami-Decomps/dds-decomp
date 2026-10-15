@@ -2277,7 +2277,7 @@ void btlInitFxLights(BtlUnit *fx) {
     PCP_COPY_VECTOR(fx->position, &D_00359CD0);
     PCP_COPY_VECTOR(fx->rotation, &D_00359CE0);
     fx->unk58Bits = 0;
-    fx->effectScale = 1.0f;
+    fx->actorScale = 1.0f;
     fx->baseColor = 0x80808080;
     PCP_COPY_VECTOR(fx->currentPosition, &D_00359CD0);
     PCP_COPY_VECTOR(fx->orientation, &D_00359CE0);
@@ -2308,7 +2308,7 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
     fx->unkB8 = base->height;
     fx->cameraRadius = base->cameraRadius;
     fx->scale = base->actorScale;
-    fx->effectScale = base->actorScale;
+    fx->actorScale = base->actorScale;
     fx->positionZOffset = base->zOffset;
     fx->unk58 = base->zOffset;
 }
@@ -2398,13 +2398,13 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
         model = unit->ext->owner;
         unit->ext->flags |= 0x200000;
         VU0_SET_ONES_XYZ(vf10);
-        VU0_SCALAR_OP(unit->effectScale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
         unit->effectObject->inner->flags = (unit->effectObject->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
             ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, unit->effectObject->inner->scale);
         mdlStoreTertiaryVectorVU(model);
-        if (unit->effectScale != 1.0f) {
-            mdlSetAmountOnAllContextResources(model, unit->effectScale);
+        if (unit->actorScale != 1.0f) {
+            mdlSetAmountOnAllContextResources(model, unit->actorScale);
         }
         dds3ClearObjectFlags(unit->effectObject, 0x400);
         unit->status.flags |= 8;
@@ -2415,7 +2415,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
     btlSetUnitRotation(unit, unit->rotation);
     unit->updateFlags = 0;
     unit->motionStartFrame = 0;
-    unit->unkEC = -1;
+    unit->motionId = -1;
     unit->motionEndFrame = 0;
     btlRefreshUnitMotionSelection(unit);
     if (unit->effectArgA != 0xB) {
@@ -2432,7 +2432,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
         unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         unit->ext->flags &= ~0xA0;
         mdlAddEntryPlain(model, 0, 0xB);
-        unit->unkEC = 0xB;
+        unit->motionId = 0xB;
         sdfMotionSampleAtFrame(model->first, model->first->frameCount);
         unit->status.flags = unit->status.flags & 0x7FFFFFFF & 0xBFFFFFFF;
     } else if (btlTestActorStatusPredicate(unit)) {
@@ -2441,7 +2441,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
         unit->ext->flags &= ~0xA0;
         status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, id);
         mdlAddEntryPlain(model, 0, 1);
-        unit->unkEC = 1;
+        unit->motionId = 1;
         sdfMotionSampleAtFrame(model->first, status->model);
         btlResetUnitModelProgress(unit);
         unit->status.flags = (unit->status.flags | 0x2000) & 0x7FFFFFFF & 0xBFFFFFFF;
@@ -2639,7 +2639,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
             rate = scale * table->nodes[index].scale;
         }
     }
-    if (unit->unkEC == -1) {
+    if (unit->motionId == -1) {
         start = 0;
         end = 0;
     } else {
@@ -2688,7 +2688,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         mode &= ~0x100;
     }
     unit->motionRate = rate;
-    unit->unkEC = index;
+    unit->motionId = index;
     unit->effectState = mode;
     rate = rate * (30.0f / ((BtlState *)context)->timingRate);
     rate *= *(f32 *)(context + 0x494);
@@ -3597,7 +3597,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
         BtlEffectResource *table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
-        args->offset = table->nodes[unit->unkEC].reachOffset * unit->scale;
+        args->offset = table->nodes[unit->motionId].reachOffset * unit->scale;
     }
     reach = args->offset + target->reach * target->scale;
     btlUnitGetMuzzlePosVU(unit);
@@ -3944,14 +3944,14 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
                 btlApplyScaledUnitEffectParameter((u8 *)unit, 0xB,
                     btlGetSlotRateKind((u8 *)unit, 0xB), 1.0f);
             } else if (args->transitionMode == 2) {
-                unit->unkEC = -1;
+                unit->motionId = -1;
                 btlApplyScaledUnitEffectParameter((u8 *)unit, 0xE,
                     btlGetSlotRateKind((u8 *)unit, 0xE), 1.0f);
             } else if (args->transitionMode != 3 &&
                        ((unit->status.flags & 0x200) || (entryFlags & 0x200)) &&
                        args->resourceId != 0x1F &&
                        !(unit->partyRecord.status & 0x2000)) {
-                unit->unkEC = -1;
+                unit->motionId = -1;
                 if (unit->status.flags & 0x1000) {
                     btlApplyScaledUnitEffectParameter((u8 *)unit, 0x10,
                         btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
@@ -4867,7 +4867,7 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
         if (unit->status.flags & 2) {
             args->previousModelValue = mdlGetNodeMotionIndex(unit->ext->owner, 0);
         } else {
-            args->previousModelValue = unit->unkEC;
+            args->previousModelValue = unit->motionId;
         }
         unit->motionStartFrame = 0;
         unit->motionEndFrame = 1;
@@ -4931,7 +4931,7 @@ void btlUpdateActiveActorModelState(void) {
             if (runtime->chooseMotion != NULL) {
                 parameter = runtime->chooseMotion(unit, 1, 0);
             }
-            if (unit->unkEC != parameter && parameter != -1) {
+            if (unit->motionId != parameter && parameter != -1) {
                 btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
             } else {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
@@ -4945,7 +4945,7 @@ void btlUpdateActiveActorModelState(void) {
         if (unit->updateFlags & 2) {
             if (unit->updateFlags & 4) {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
-                index = unit->unkEC;
+                index = unit->motionId;
                 if (index == mdlGetNodeMotionIndex(unit->ext->owner, 0)) {
                     if (frame >= status->motions[index].alphaStartFrame) {
                         evtSetUnitAlphaTransition(unit->ext,
@@ -4977,7 +4977,7 @@ void btlUpdateActorModelColorAndLinks(void) {
 
     for (; unit != 0; unit = unit->next) {
         if (unit->status.flags & 2) {
-            unit->unkEC = mdlGetNodeMotionIndex(unit->ext->owner, 0);
+            unit->motionId = mdlGetNodeMotionIndex(unit->ext->owner, 0);
             if (!(unit->status.flags & 0x40000)) {
                 if (unit->status.flags & 0x100000) {
                     color = mdlGetBroadcastValue(unit->ext->owner);
@@ -5259,13 +5259,13 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
     if (unit->status.flags & 2) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->species);
         VU0_SET_ONES_XYZ(vf10);
-        VU0_SCALAR_OP(unit->effectScale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
         inner = unit->effectObject->inner;
         inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
         inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(unit->ext->owner);
-        mdlSetAmountOnAllContextResources(unit->ext->owner, unit->effectScale);
+        mdlSetAmountOnAllContextResources(unit->ext->owner, unit->actorScale);
         btlSetUnitPosition(unit, (u8 *)unit->currentPosition);
     }
 }
