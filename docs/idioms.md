@@ -12572,3 +12572,25 @@ retail's full address. Explicit builtin copies also preserve retail's table
 initialization order here; automatic local initializers reorder the first
 two copies. These are properties of the actual owners and accesses, not
 permission to invent a biased layout or an extra use.
+
+## Detaching a world-value free-list prefix
+
+`dds3GrowWorldValueChain` (DDS1 001102C8 / DDS2 001104F0, 312 bytes each)
+uses the existing `WorldInfo`, `WorldValueEntry` and `WorldValueIndices`
+owners without alternate views. The entry links and retained first/last
+indices are signed halfwords; the available and attached counts are unsigned
+halfwords, while the requested count and traversal counter are signed words.
+Zero requested entries succeeds before checking either pointer.
+
+The traversal updates `freeHeadIndex` on every step, then retains that last
+detached index before advancing the free head once more. Only a nonempty
+remaining free chain needs its boundary links cleared; exhausting the pool
+clears the free tail. Appending to an existing object reloads its tail for
+the new first entry's backward link after writing the old tail's forward
+link. Keep those accesses through the primary members rather than caching
+another index or introducing a second record view.
+
+This direct native reconstruction matches both complete units on its first
+form. It needs no SDK instruction helper, header/prototype change, staged
+constant, declaration-order adjustment or special compiler flags.
+
