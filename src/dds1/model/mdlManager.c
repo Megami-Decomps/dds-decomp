@@ -158,7 +158,7 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevR
     groupNode->partInfo = NULL;
     groupNode->partList = NULL;
     groupNode->unk_AC = 1.0f;
-    groupNode->unk_B0 = 100.0f;
+    groupNode->objectRadius = 100.0f;
 }
 
 
@@ -662,7 +662,7 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     scale[2] = modelScale;
     scale[3] = 1.0f;
     PCP_COPY_VECTOR(inner->scaleVector, scale);
-    ctx->unk34 = node->unk_B0;
+    ctx->objectRadius = node->objectRadius;
     ctx->current.h.id = -1;
     ctx->current.h.motionIndex = -1;
     for (i = 0; i != 8; i++) {
