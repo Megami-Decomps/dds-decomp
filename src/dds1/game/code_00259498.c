@@ -27,7 +27,7 @@ extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
 
 typedef s16 MnuVariantSpritePlacement[6];
 
-extern MnuVariantSpritePlacement D_0036B7F0[];
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 extern TaskWork *mnuSceneResourceContext;
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
@@ -66,8 +66,8 @@ void mnuDrawMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
         progress = 0.0f;
     }
     progress = sdfSinPoly(progress * 3.1415926f) * 0.3f;
-    drawX = x + D_0036B7F0[scene->sceneId][2];
-    drawY = y + D_0036B7F0[scene->sceneId][3];
+    drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
+    drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
     flags = mnuGetMantraDisplayFlags(scene, profileOwner);
     if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
         mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
@@ -145,8 +145,8 @@ void mnuDrawScaledMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
             scene->frame = 0;
         }
         pulse = sdfSinPoly(pulse);
-        drawX = x + D_0036B7F0[scene->sceneId][2];
-        drawY = y + D_0036B7F0[scene->sceneId][3];
+        drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
+        drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
         flags = mnuGetMantraDisplayFlags(scene, profileOwner);
 
         if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
@@ -214,7 +214,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     states = (MnuMantraNodeState *)(u32)grid->userData;
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
-    record = &D_0036AE80[scene->sceneId];
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
     alpha = display->displayAlpha;
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
     if (record->kind == 0) {
@@ -383,8 +383,8 @@ void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 p
     }
 }
 
-extern MnuSpritePlacement D_0036B510[];
-extern struct EffectSlotSet *D_0036C698[];
+extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
+extern struct EffectSlotSet *mnuMantraSpriteSlots[];
 extern char D_003BC4C8[];
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 sprintf(char *, const char *, ...);
@@ -397,18 +397,18 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
     u32 color = alpha | 0xA09DC300;
     struct EffectSlotSet *resource;
 
-    resource = D_0036C698[D_0036B510[19].resourceIndex];
-    effDrawSpriteWithCornerFade((x + D_0036B510[19].x) << 4,
-                  (y + D_0036B510[19].y) << 3, depth,
+    resource = mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[19].resourceIndex];
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[19].x) << 4,
+                  (y + mnuMantraCommonSpritePlacements[19].y) << 3, depth,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   (s32)resource,
-                  D_0036B510[19].spriteIndex, context);
-    resource = D_0036C698[D_0036B510[34].resourceIndex];
-    effDrawSpriteWithCornerFade((x + D_0036B510[34].x) << 4,
-                  (y + D_0036B510[34].y) << 3, depth,
+                  mnuMantraCommonSpritePlacements[19].spriteIndex, context);
+    resource = mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[34].resourceIndex];
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[34].x) << 4,
+                  (y + mnuMantraCommonSpritePlacements[34].y) << 3, depth,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   (s32)resource,
-                  D_0036B510[34].spriteIndex, context);
+                  mnuMantraCommonSpritePlacements[34].spriteIndex, context);
     if (datGameState->header.currency != scene->displayedCurrency) {
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         scene->currencyFrame++;
@@ -441,12 +441,12 @@ void mnuDrawScaledMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCel
     if (scene == NULL) {
         return;
     }
-    x = (s32)((f32)x + (f32)D_0036B7F0[scene->sceneId][2] / 10.0f);
-    y = (s32)((f32)y + (f32)D_0036B7F0[scene->sceneId][3] / 10.0f);
+    x = (s32)((f32)x + (f32)mnuMantraVariantSpritePlacements[scene->sceneId][2] / 10.0f);
+    y = (s32)((f32)y + (f32)mnuMantraVariantSpritePlacements[scene->sceneId][3] / 10.0f);
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     states = (MnuMantraNodeState *)(u32)grid->userData;
     sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
-    record = &D_0036AE80[scene->sceneId];
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
     if (record->kind == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {

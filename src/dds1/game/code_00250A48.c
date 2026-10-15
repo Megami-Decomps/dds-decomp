@@ -4,7 +4,7 @@
 #include "mnu_mantra_grid.h"
 
 typedef s16 MnuVariantSpritePlacement[6];
-extern MnuVariantSpritePlacement D_0036B7F0[];
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 extern s8 D_00324510[64];
 extern SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid);
 extern SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid);
@@ -84,8 +84,8 @@ void mnuHandleMantraGridInput(MenuSceneWork *work) {
     if (D_00324510[0x21] < 0 && work->transitionBlendCounter == 0) {
         entry = (MnuMantraGridEntry *)work->gridHandle->cursor->value;
         if (entry != NULL &&
-            work->entryPosition.x == D_0036B7F0[entry->sceneId][2] &&
-            work->entryPosition.y == D_0036B7F0[entry->sceneId][3]) {
+            work->entryPosition.x == mnuMantraVariantSpritePlacements[entry->sceneId][2] &&
+            work->entryPosition.y == mnuMantraVariantSpritePlacements[entry->sceneId][3]) {
             if (entry->state == MNU_MANTRA_GRID_ENTRY_FIRST_PATH_REJECTED) {
                 feedback = 3;
             } else {

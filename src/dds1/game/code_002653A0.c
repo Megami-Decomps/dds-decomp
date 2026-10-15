@@ -27,7 +27,7 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 extern s32 ptyHasSkill(DatPartyRecord *, s32);
 
 
-extern struct { s32 v[6]; } D_0036D4B0;
+extern struct { s32 v[6]; } brsRewardSummaryPositions;
 extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32 flags);
 extern void brsDrawMaccaRewardTotal(s32, s32, s32, s32, const BrsRewardSummary *, s32 flags);
 extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
@@ -37,9 +37,9 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     s32 rowOffset = 0x80;
     u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - work->fadeProgress);
 
-    itfDrawCountText(D_0036D4B0.v[0], D_0036D4B0.v[1] + rowOffset, 0, color, res, 0x53);
-    brsDrawMaccaRewardTotal(D_0036D4B0.v[2], D_0036D4B0.v[3] + rowOffset, 0, color, res, 0x53);
-    brsDrawRewardEntryRows(D_0036D4B0.v[4], D_0036D4B0.v[5] + rowOffset, 0, color, res, 0x53, work);
+    itfDrawCountText(brsRewardSummaryPositions.v[0], brsRewardSummaryPositions.v[1] + rowOffset, 0, color, res, 0x53);
+    brsDrawMaccaRewardTotal(brsRewardSummaryPositions.v[2], brsRewardSummaryPositions.v[3] + rowOffset, 0, color, res, 0x53);
+    brsDrawRewardEntryRows(brsRewardSummaryPositions.v[4], brsRewardSummaryPositions.v[5] + rowOffset, 0, color, res, 0x53, work);
 }
 
 

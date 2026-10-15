@@ -40,7 +40,7 @@ extern char D_003AF758[];
 extern char D_003AF780[];
 
 extern TaskWork *mnuSceneResourceContext;
-extern EffectSlotSet *D_0036C698[];
+extern EffectSlotSet *mnuMantraSpriteSlots[];
 extern u8 mnuMantraResourceTaskDescriptor[];
 
 typedef s16 MnuSpritePlacement[4];
@@ -61,8 +61,8 @@ enum {
     MNU_SPRITE_Y_OFFSET,
 };
 
-extern MnuSpritePlacement D_0036B510[];
-extern MnuVariantSpritePlacement D_0036B7F0[];
+extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 extern u16 mnuMantraCoordinateSpritePlacements[][4];
 extern s32 D_0036C6AC[];
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
@@ -88,111 +88,111 @@ typedef struct MnuResourceTaskWork {
 
 void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
                   s32 flags, s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
-                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
                          flags,
                          sprite,
-                         D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                         mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                          context);
 }
 
 void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
-                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
                          0,
-                         (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
-                         D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                         (s32)mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                          context);
 }
 
 void mnuDrawPlacedSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
                   s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
-                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
                          0,
-                         (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         (s32)mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                          mode,
                          context);
 }
 
 void mnuDrawPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                   s32 context) {
-    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
-                         (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                         (y + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
                          flags,
-                         (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
-                         D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                         (s32)mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                          context);
 }
 
 void mnuDrawRotatedPlacedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                    s32 context, f32 rotation) {
-    (D_0036C698[
-        D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
-        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = rotation;
-    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
-                  (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+    (mnuMantraSpriteSlots[
+        mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
+        ->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = rotation;
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                  (y + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
-                  D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                  (s32)mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                   context);
-    (D_0036C698[
-        D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
-        ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = 0.0f;
+    (mnuMantraSpriteSlots[
+        mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
+        ->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = 0.0f;
 }
 
 void mnuDrawScaledPlacedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            D_0036C698[
-                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+            mnuMantraSpriteSlots[
+                mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             (s32)(scaleX *
                   (f32)resource
-                      ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                      ->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                       .sourceWidth)
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY *
                   (f32)resource
-                      ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+                      ->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                       .sourceHeight)
             << 3;
     }
-    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
-                  (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                  (y + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   0,
-                  (s32)D_0036C698[D_0036B510[placementIndex]
+                  (s32)mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
-                  D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                  mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                   context);
 
     {
         /* Reload the resource after drawing before restoring native size. */
         EffectSlotSet *resource =
-            D_0036C698[
-                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+            mnuMantraSpriteSlots[
+                mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
-            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+            resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceWidth
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
-            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+            resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceHeight
             << 3;
     }
@@ -202,49 +202,49 @@ void mnuDrawSpriteAtScaledPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            D_0036C698[
-                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+            mnuMantraSpriteSlots[
+                mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
             (s32)(scaleX *
-                  (f32)resource->workEntries[D_0036B510[placementIndex]
+                  (f32)resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex]
                                             [MNU_SPRITE_INDEX]]
                       .sourceWidth)
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY *
-                  (f32)resource->workEntries[D_0036B510[placementIndex]
+                  (f32)resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex]
                                             [MNU_SPRITE_INDEX]]
                       .sourceHeight)
             << 3;
     }
-    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B510[placementIndex]
+    effDrawSpriteWithCornerFade((s32)((f32)(x + mnuMantraCommonSpritePlacements[placementIndex]
                                            [MNU_SPRITE_X_OFFSET]) *
                         scaleX)
                       << 4,
-                  (s32)((f32)(y + D_0036B510[placementIndex]
+                  (s32)((f32)(y + mnuMantraCommonSpritePlacements[placementIndex]
                                            [MNU_SPRITE_Y_OFFSET]) *
                         scaleY)
                       << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[D_0036B510[placementIndex]
+                  (s32)mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
-                  D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                  mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                   context);
 
     {
         EffectSlotSet *resource =
-            D_0036C698[
-                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+            mnuMantraSpriteSlots[
+                mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
-            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+            resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceWidth
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
-            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+            resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceHeight
             << 3;
     }
@@ -254,45 +254,45 @@ void mnuDrawScaledPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flag
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            D_0036C698[
-                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+            mnuMantraSpriteSlots[
+                mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
             .geometry.bounds[2] = (s32)(scaleX *
-                           (f32)resource->workEntries[D_0036B510[placementIndex]
+                           (f32)resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex]
                                                       [MNU_SPRITE_INDEX]]
                                .sourceWidth)
                     << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
             .geometry.bounds[3] = (s32)(scaleY *
-                            (f32)resource->workEntries[D_0036B510[placementIndex]
+                            (f32)resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex]
                                                        [MNU_SPRITE_INDEX]]
                                 .sourceHeight)
                      << 3;
     }
-    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
-                  (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
+    effDrawSpriteWithCornerFade((x + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+                  (y + mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[D_0036B510[placementIndex]
+                  (s32)mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
-                  D_0036B510[placementIndex][MNU_SPRITE_INDEX],
+                  mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                   context);
 
     {
         EffectSlotSet *resource =
-            D_0036C698[
-                D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+            mnuMantraSpriteSlots[
+                mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
             .geometry.bounds[2] =
-            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+            resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceWidth
             << 4;
-        resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+        resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
             .geometry.bounds[3] =
-            resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
+            resource->workEntries[mnuMantraCommonSpritePlacements[placementIndex][MNU_SPRITE_INDEX]]
                 .sourceHeight
             << 3;
     }
@@ -301,60 +301,60 @@ void mnuDrawScaledPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flag
 void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
-        EffectSlotSet *resource = D_0036C698[
-            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+        EffectSlotSet *resource = mnuMantraSpriteSlots[
+            mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
-            (s32)(scaleX * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
-            (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+            (s32)(scaleX * (f32)resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+            (s32)(scaleY * (f32)resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
     }
-    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
-                  (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
+    effDrawSpriteWithCornerFade((s32)((f32)(x + mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
-                  D_0036B7F0[placementIndex][MNU_SPRITE_INDEX],
+                  (s32)mnuMantraSpriteSlots[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                   context);
     {
-        EffectSlotSet *resource = D_0036C698[
-            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+        EffectSlotSet *resource = mnuMantraSpriteSlots[
+            mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
-            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
-            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+            resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+            resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
     }
 }
 
 void mnuDrawScaledScenePlacementSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
-        EffectSlotSet *resource = D_0036C698[
-            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+        EffectSlotSet *resource = mnuMantraSpriteSlots[
+            mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
-            (s32)(scaleX * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
-            (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+            (s32)(scaleX * (f32)resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceWidth) << 4;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+            (s32)(scaleY * (f32)resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
     }
-    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
-                  (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
+    effDrawSpriteWithCornerFade((s32)((f32)(x + mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
-                  D_0036B7F0[placementIndex][MNU_SPRITE_INDEX],
+                  (s32)mnuMantraSpriteSlots[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                   context);
     {
-        EffectSlotSet *resource = D_0036C698[
-            D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
+        EffectSlotSet *resource = mnuMantraSpriteSlots[
+            mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
-            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
-        resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
-            resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
+            resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceWidth << 4;
+        resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
+            resource->workEntries[mnuMantraVariantSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].sourceHeight << 3;
     }
 }
 
@@ -362,7 +362,7 @@ void mnuDrawScaledSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s3
                    s32 flags, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            D_0036C698[
+            mnuMantraSpriteSlots[
                 mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -389,7 +389,7 @@ void mnuDrawScaledSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s3
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  (s32)D_0036C698[mnuMantraCoordinateSpritePlacements[placementIndex]
+                  (s32)mnuMantraSpriteSlots[mnuMantraCoordinateSpritePlacements[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
                   mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_INDEX],
                   context);
@@ -397,7 +397,7 @@ void mnuDrawScaledSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s3
     {
         /* Reload the resource after drawing before restoring native size. */
         EffectSlotSet *resource =
-            D_0036C698[
+            mnuMantraSpriteSlots[
                 mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -414,7 +414,7 @@ void mnuDrawScaledSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s3
 void mnuDrawScaledFixedSpritePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scaleX, f32 scaleY) {
     {
-        EffectSlotSet *resource = D_0036C698[
+        EffectSlotSet *resource = mnuMantraSpriteSlots[
             mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[6].geometry.bounds[2] =
@@ -428,11 +428,11 @@ void mnuDrawScaledFixedSpritePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 place
         (s32)((f32)(y + mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_Y_OFFSET]) *
               scaleY) << 3,
         z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-        (s32)D_0036C698[mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+        (s32)mnuMantraSpriteSlots[mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
         6, context);
     {
         /* Reload the resource after drawing before restoring native size. */
-        EffectSlotSet *resource = D_0036C698[
+        EffectSlotSet *resource = mnuMantraSpriteSlots[
             mnuMantraCoordinateSpritePlacements[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[6].geometry.bounds[2] =
@@ -448,14 +448,14 @@ void mnuDrawVariantSpriteBySelector(s32 x, s32 y, s32 z, s32 alpha, s32 placemen
     s8 spriteMap[15] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 17, 18 };
     s32 sprite;
 
-    sprite = spriteMap[(D_0036B7F0[placementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
+    sprite = spriteMap[(mnuMantraVariantSpritePlacements[placementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
                         (selector * 4)) & 0xF];
     if (sprite == -1) {
         return;
     }
-    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[placementIndex]
+    effDrawSpriteWithCornerFade((s32)((f32)(x + mnuMantraVariantSpritePlacements[placementIndex]
                                            [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
-                  (s32)((f32)(y + D_0036B7F0[placementIndex]
+                  (s32)((f32)(y + mnuMantraVariantSpritePlacements[placementIndex]
                                            [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -470,14 +470,14 @@ void mnuDrawVariantSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s
     s32 sprite;
 
     selector += 2;
-    sprite = spriteMap[(D_0036B7F0[groupPlacementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
+    sprite = spriteMap[(mnuMantraVariantSpritePlacements[groupPlacementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
                         (selector * 4)) & 0xF];
     if (sprite == -1) {
         return;
     }
-    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[coordinatePlacementIndex]
+    effDrawSpriteWithCornerFade((s32)((f32)(x + mnuMantraVariantSpritePlacements[coordinatePlacementIndex]
                                               [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
-                  (s32)((f32)(y + D_0036B7F0[coordinatePlacementIndex]
+                  (s32)((f32)(y + mnuMantraVariantSpritePlacements[coordinatePlacementIndex]
                                               [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -492,7 +492,7 @@ void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 place
                    f32 scaleY) {
     {
         EffectSlotSet *resource =
-            D_0036C698[D_0036B7F0[placementIndex][0]];
+            mnuMantraSpriteSlots[mnuMantraVariantSpritePlacements[placementIndex][0]];
 
         resource->workEntries[spriteIndex].geometry.bounds[2] =
             (s32)(scaleX * (f32)resource->workEntries[spriteIndex].sourceWidth) << 4;
@@ -500,13 +500,13 @@ void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 place
             (s32)(scaleY * (f32)resource->workEntries[spriteIndex].sourceHeight) << 3;
     }
     effDrawSpriteWithCornerFade(
-        (s32)((f32)(x + D_0036B7F0[placementIndex][MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
-        (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+        (s32)((f32)(x + mnuMantraVariantSpritePlacements[placementIndex][MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+        (s32)((f32)(y + mnuMantraVariantSpritePlacements[placementIndex][MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
         z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-        (s32)D_0036C698[5], spriteIndex, context);
+        (s32)mnuMantraSpriteSlots[5], spriteIndex, context);
     {
         EffectSlotSet *resource =
-            D_0036C698[D_0036B7F0[placementIndex][0]];
+            mnuMantraSpriteSlots[mnuMantraVariantSpritePlacements[placementIndex][0]];
 
         resource->workEntries[spriteIndex].geometry.bounds[2] =
             resource->workEntries[spriteIndex].sourceWidth << 4;
@@ -515,15 +515,15 @@ void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 place
     }
 }
 
-extern u8 D_0036C568[];
+extern u8 mnuMantraSpriteResourceNames[];
 extern void effRequestResourceByMode(char *, void *, s32, void *);
 
 void mnuRequestMantraResources(MnuResourceTaskWork *work) {
     s32 i;
 
     for (i = 0; i < 14; i++) {
-        if (D_0036C698[i] == 0) {
-            effRequestResourceByMode("/facility/spr/mantra/", &D_0036C568[i * 0x10], 0, (u32 *)&D_0036C698[i]);
+        if (mnuMantraSpriteSlots[i] == 0) {
+            effRequestResourceByMode("/facility/spr/mantra/", &mnuMantraSpriteResourceNames[i * 0x10], 0, (u32 *)&mnuMantraSpriteSlots[i]);
         }
     }
 }
@@ -532,7 +532,7 @@ void mnuRequestMantraResources(MnuResourceTaskWork *work) {
 s32 mnuAreResourceSlotsOccupied(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_MANTRA_RESOURCE_SLOT_COUNT; ++slotIndex) {
-        if (D_0036C698[slotIndex] == 0) {
+        if (mnuMantraSpriteSlots[slotIndex] == 0) {
             return 0;
         }
     }
@@ -543,9 +543,9 @@ s32 mnuAreResourceSlotsOccupied(void) {
 void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_MANTRA_RESOURCE_SLOT_COUNT; ++slotIndex) {
-        if (D_0036C698[slotIndex] != 0) {
-            effDestroyResourceSlotSet(D_0036C698[slotIndex]);
-            D_0036C698[slotIndex] = 0;
+        if (mnuMantraSpriteSlots[slotIndex] != 0) {
+            effDestroyResourceSlotSet(mnuMantraSpriteSlots[slotIndex]);
+            mnuMantraSpriteSlots[slotIndex] = 0;
         }
     }
 }
@@ -565,7 +565,7 @@ MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
     mnuResetTitleStreamLocked();
     mnuQueueTitleSoundStreamEntry(0x10);
     mnuTitleStreamUpdateAndLogBgm();
-    memset(D_0036C698, 0, sizeof(D_0036C698[0]) * MNU_MANTRA_RESOURCE_SLOT_COUNT);
+    memset(mnuMantraSpriteSlots, 0, sizeof(mnuMantraSpriteSlots[0]) * MNU_MANTRA_RESOURCE_SLOT_COUNT);
     mnuRequestMantraResources(resourceWork);
     resourceWork->drawPool = mnuCreateSpriteResource(0x3C, 8, 0);
     if (resourceWork->staffMenuContext == NULL) {

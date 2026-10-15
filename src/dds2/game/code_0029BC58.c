@@ -121,7 +121,7 @@ extern s32 frFontDrawGlyphChain();
 
 
 extern void evtStageTestUpdateCamera(void);
-extern char D_003D6458[];
+extern char brsPrimaryRewardPopupEntry[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
 s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
@@ -140,7 +140,7 @@ s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
                 mnuTitleApplySequenceState(panel);
                 panel->rewardMode = 0;
             } else {
-                mnuSetPopupEntryFlagged(&panel->transition.state, D_003D6458);
+                mnuSetPopupEntryFlagged(&panel->transition.state, brsPrimaryRewardPopupEntry);
             }
         }
     }

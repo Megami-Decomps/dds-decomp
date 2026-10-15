@@ -15,7 +15,7 @@ extern u32 D_003E274C[];
 INCLUDE_ASM(const s32, "game/code_00258258", mnuDrawMantraPrerequisiteLink);
 
 u32 mnuGetMantraPrerequisiteFlags(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
-    MantraPrerequisiteRecord *record = &D_0036AE80[scene->sceneId];
+    MantraPrerequisiteRecord *record = &mnuMantraPrerequisiteRecords[scene->sceneId];
     u32 flags = 0x100;
     if (prfGetCapValue(scene->sceneId) == ptyGetProfileRecordValue(target->partyRecord, scene->sceneId)) {
         flags = 0x101;
@@ -67,7 +67,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     states = (MnuMantraNodeState *)(u32)grid->userData;
     sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
-    record = &D_0036AE80[scene->sceneId];
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
     if (record->kind == 0) {
         cellWidth = grid->cellWidth;

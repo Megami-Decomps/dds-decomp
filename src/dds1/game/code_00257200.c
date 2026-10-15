@@ -17,7 +17,7 @@ void mnuDrawMantraPulseStripAndKind(MenuSceneWork *object, s32 scale, s32 contex
 
 INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraGridPulseEntry);
 
-extern s16 D_0036B7F0[][6];
+extern s16 mnuMantraVariantSpritePlacements[][6];
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void uiDrawActiveSurfaceRegion(s32);
@@ -47,8 +47,8 @@ void mnuDrawMantraPulseGridPasses(MenuSceneWork *work, s32 surface) {
         for (col = 0; col < 15; col++) {
             if (cell[col].value != 0) {
                 entry = (MnuMantraGridEntry *)(u32)cell[col].value;
-                grid->drawCell(x + D_0036B7F0[entry->sceneId][2],
-                               y + D_0036B7F0[entry->sceneId][3],
+                grid->drawCell(x + mnuMantraVariantSpritePlacements[entry->sceneId][2],
+                               y + mnuMantraVariantSpritePlacements[entry->sceneId][3],
                                0, grid, &cell[col], surface);
             }
         }
@@ -64,8 +64,8 @@ void mnuDrawMantraPulseGridPasses(MenuSceneWork *work, s32 surface) {
         for (col = 0; col < 15; col++) {
             if (cell[col].value != 0) {
                 entry = (MnuMantraGridEntry *)(u32)cell[col].value;
-                grid->drawCell(x + D_0036B7F0[entry->sceneId][2],
-                               y + D_0036B7F0[entry->sceneId][3],
+                grid->drawCell(x + mnuMantraVariantSpritePlacements[entry->sceneId][2],
+                               y + mnuMantraVariantSpritePlacements[entry->sceneId][3],
                                1, grid, &cell[col], surface);
             }
         }
@@ -137,8 +137,8 @@ void mnuDrawMantraPulseGridAtUnitScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
         mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row, 0x20, 1.0f, 1.0f, arg6);
     }
     mnuDrawMantraCursorTrail(0, 0, arg2, arg3, display, arg6);
-    mnuDrawMantraGridFeedback(arg0 + D_0036B7F0[selection->profileId][2],
-                  arg1 + D_0036B7F0[selection->profileId][3],
+    mnuDrawMantraGridFeedback(arg0 + mnuMantraVariantSpritePlacements[selection->profileId][2],
+                  arg1 + mnuMantraVariantSpritePlacements[selection->profileId][3],
                   arg2, arg3, &display->gridFeedback, arg6);
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;

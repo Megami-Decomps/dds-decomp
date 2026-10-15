@@ -27,7 +27,7 @@ extern s32 evtStageTestUpdateCamera(void);
 
 
 
-extern char D_003D64C8[];
+extern char brsRewardMessagePopupEntry[];
 extern void mnuClearItemSelectionSlots(BrsSkillPackageWork *);
 extern void mnuRefreshPartyUnitVitalsPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
@@ -56,7 +56,7 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
 }
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern char D_003D6490[];
+extern char brsStatConfirmationPopupEntry[];
 
 s32 mnuHandleStatPointAssignment(KwlnTask *request) {
     BrsSkillPackageWork *work;
@@ -86,7 +86,7 @@ s32 mnuHandleStatPointAssignment(KwlnTask *request) {
         dspStartEntry(0x17);
         evtSetMessageWindowOptionWhenOpen(0);
         evtStoreValueAndCaptureWindowPanelValue(0xA3);
-        mnuSetPopupEntryFlagged(&work->transition.state, D_003D6490);
+        mnuSetPopupEntryFlagged(&work->transition.state, brsStatConfirmationPopupEntry);
     } else {
         selection = mnuGetPanelGroupSelection(work->panelHandle);
         if ((inputFlags & 0x81) != 0) {
@@ -167,7 +167,7 @@ u32 mnuStatAssignmentMessageLeaveNoOp(void) {
 
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern char D_003D64AC[];
+extern char brsLevelChangePopupEntry[];
 
 s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     BrsSkillPackageWork *work;
@@ -189,7 +189,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
             btlAddBaseStats(stats, work->selectedRewardRow->unit);
             mnuClearItemSelectionSlots(work);
             mnuClearPanelGroupSelection(work->panelHandle);
-            mnuSetPopupEntryFlagged(&work->transition.state, D_003D64AC);
+            mnuSetPopupEntryFlagged(&work->transition.state, brsLevelChangePopupEntry);
             work->commitComplete = 1;
         } else {
             mnuClearItemSelectionSlots(work);
@@ -254,7 +254,7 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
     result = mnuDispatchPopupTransition(&context->transition, panelState, 0, request);
     if (result == 0) {
         if ((*panelState == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
-            mnuSetPopupEntryFlagged(panelState, D_003D64C8);
+            mnuSetPopupEntryFlagged(panelState, brsRewardMessagePopupEntry);
         }
         result = 0;
     }

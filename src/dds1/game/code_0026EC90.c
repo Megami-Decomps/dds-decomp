@@ -286,29 +286,29 @@ s32 mnuUpdateStaffRoll(KwlnTask *task) {
     case 2:
     case 3:
         for (i = 0; i < 0x100; i++) {
-            y = D_00379F70[i].offsetY - mnuMovieWork->scrollTicks + 0x1C0;
+            y = mnuStaffRollTextRows[i].offsetY - mnuMovieWork->scrollTicks + 0x1C0;
             if (i == 0xFF) {
                 y = y < 0xE0 ? 0xE0 : y;
             }
             if ((u32)(y + 0x1E) < 0x1DF) {
-                entry = &D_00379F70[i];
-                if (entry->leftText != 0 && D_00379F70[i].rightText == 0) {
+                entry = &mnuStaffRollTextRows[i];
+                if (entry->leftText != 0 && mnuStaffRollTextRows[i].rightText == 0) {
                     sprintf(text, D_003BC628, entry->leftText);
                     mnuDrawStaffRollText(20.0f, (f32)y, entry->leftFont, 0x80808080, text);
-                } else if (D_00379F70[i].rightText != 0) {
-                    sprintf(text, D_003BC628, D_00379F70[i].rightText);
-                    mnuDrawStaffRollText(30.0f, (f32)y, D_00379F70[i].rightFont, 0x80808080, text);
+                } else if (mnuStaffRollTextRows[i].rightText != 0) {
+                    sprintf(text, D_003BC628, mnuStaffRollTextRows[i].rightText);
+                    mnuDrawStaffRollText(30.0f, (f32)y, mnuStaffRollTextRows[i].rightFont, 0x80808080, text);
                 }
             }
         }
         mnuMovieWork->scrollTicks++;
-        if (mnuMovieWork->scrollTicks == (D_00379F70[0xFF].offsetY + 0xE0) / 60 * 60 + 0x12C) {
+        if (mnuMovieWork->scrollTicks == (mnuStaffRollTextRows[0xFF].offsetY + 0xE0) / 60 * 60 + 0x12C) {
             kwlnFadeInStart(0, 0, 0, 0x28);
         }
-        if (mnuMovieWork->scrollTicks / 60 > (D_00379F70[0xFF].offsetY + 0xE0) / 60 + 5) {
+        if (mnuMovieWork->scrollTicks / 60 > (mnuStaffRollTextRows[0xFF].offsetY + 0xE0) / 60 + 5) {
             mnuAdvanceTitleStateUnderSemaphore();
         }
-        if (mnuMovieWork->scrollTicks / 60 > (D_00379F70[0xFF].offsetY + 0xE0) / 60 + 6) {
+        if (mnuMovieWork->scrollTicks / 60 > (mnuStaffRollTextRows[0xFF].offsetY + 0xE0) / 60 + 6) {
             if (D_003BC618 != 4 && D_003BC618 != 5) {
                 return 0;
             }
@@ -390,7 +390,7 @@ void mnuAdvanceStaffImageSequence(void) {
     case 4:
         mnuMovieWork->imageAlpha = 0;
         if (mnuMovieWork->scrollTicks < D_0037AFC0[D_003BC614].startFrame ||
-            mnuMovieWork->scrollTicks / 60 > (D_00379F70[255].offsetY + 224) / 60 - 4) {
+            mnuMovieWork->scrollTicks / 60 > (mnuStaffRollTextRows[255].offsetY + 224) / 60 - 4) {
             break;
         }
         for (i = 14; i >= D_003BC614; i--) {

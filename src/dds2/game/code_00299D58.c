@@ -45,8 +45,8 @@ extern s16 fldGetSparkPickupCount(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
 extern s32 btlHasPendingRuntimeActivity(void);
-extern char D_003D64E4[];
-extern char D_003D6458[];
+extern char brsRewardFadeWaitPopupEntry[];
+extern char brsPrimaryRewardPopupEntry[];
 
 extern void brsNoOpMessageInputCallback(void *);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
@@ -304,14 +304,14 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
             }
             if (scene->primaryRewards.count == 0) {
                 kwlnFadeInStart(0, 0, 0, 0xF);
-                mnuSetPopupEntryFlagged(dispatchStatus, D_003D64E4);
+                mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
                 return 0;
             }
             if (btlHasPendingRuntimeActivity() != 0) {
                 return 0;
             }
             brsStartPartyPanelResourcesOnce((s32)scene);
-            mnuSetPopupEntryFlagged(dispatchStatus, D_003D6458);
+            mnuSetPopupEntryFlagged(dispatchStatus, brsPrimaryRewardPopupEntry);
             sndQueueNoPayloadCommand40();
         }
         result = 0;
@@ -429,8 +429,8 @@ extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void sndReleaseTrackHandle(u32);
-extern char D_003D6474[];
-extern char D_003D64AC[];
+extern char brsStatAssignmentPopupEntry[];
+extern char brsLevelChangePopupEntry[];
 
 /* Advance the selected party member, apply its gains, and choose the next popup. */
 s32 brsProcessNextPrimaryReward(KwlnTask *request) {
@@ -466,18 +466,18 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
             if (mnuKindIsSelectable(item->unitId) != 0) {
                 mnuResetSelectionWidthsFromConfig(request);
                 if (scene->extentExhausted == 0) {
-                    mnuSetPopupEntry(dispatchStatus, D_003D6474);
+                    mnuSetPopupEntry(dispatchStatus, brsStatAssignmentPopupEntry);
                     return 0;
                 }
             } else {
                 btlAddBaseStats(slots, item);
                 mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit, scene);
             }
-            mnuSetPopupEntry(dispatchStatus, D_003D64AC);
+            mnuSetPopupEntry(dispatchStatus, brsLevelChangePopupEntry);
         } else {
             sndReleaseTrackHandle(0x50001);
             kwlnFadeInStart(0, 0, 0, 0xF);
-            mnuSetPopupEntryFlagged(dispatchStatus, D_003D64E4);
+            mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
         }
     }
     return 0;

@@ -40,10 +40,10 @@ typedef struct {
     u32 unk8;
 } SceneEntry;
 
-extern SceneEntry D_0036BE38[];
+extern SceneEntry mnuMantraEntrySpritePlacements[];
 
 typedef s16 MnuVariantSpritePlacement[6];
-extern MnuVariantSpritePlacement D_0036B7F0[];
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 
 typedef struct ScrVmOperand ScrVmOperand;
 
@@ -52,8 +52,8 @@ typedef struct ScrVmOperand ScrVmOperand;
 void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index,
                    s32 maximumX, s32 maximumY) {
     s32 x = *xCoordinate;
-    s32 deltaX = D_0036B7F0[index][2] - x;
-    s32 deltaY = D_0036B7F0[index][3] - *yCoordinate;
+    s32 deltaX = mnuMantraVariantSpritePlacements[index][2] - x;
+    s32 deltaY = mnuMantraVariantSpritePlacements[index][3] - *yCoordinate;
 
     if (deltaX >= 0x13D) {
         *xCoordinate += deltaX - 0x13C;
@@ -126,8 +126,8 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
         work->cursorPosition.y = targetY;
         work->cursorPosition.x = targetX;
         entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
-        targetX = D_0036B7F0[entry->sceneId][2];
-        targetY = D_0036B7F0[entry->sceneId][3];
+        targetX = mnuMantraVariantSpritePlacements[entry->sceneId][2];
+        targetY = mnuMantraVariantSpritePlacements[entry->sceneId][3];
         work->entryPosition.x = targetX;
         work->entryPosition.y = targetY;
         return;
@@ -161,8 +161,8 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     }
 
     entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
-    targetX = D_0036B7F0[entry->sceneId][2];
-    targetY = D_0036B7F0[entry->sceneId][3];
+    targetX = mnuMantraVariantSpritePlacements[entry->sceneId][2];
+    targetY = mnuMantraVariantSpritePlacements[entry->sceneId][3];
     memset(vector, 0, sizeof(vector));
     vector[0] = (f32)(targetX - work->entryPosition.x);
     vector[1] = (f32)(targetY - work->entryPosition.y);
@@ -693,9 +693,9 @@ void fldUpdateSceneEntryMetadata(MenuSceneWork *scene) {
         (MnuMantraGridEntry *)(u32)scene->gridHandle->cursor->value;
     u16 entryIndex = selectedEntry->sceneId;
 
-    scene->entryPosition.x = D_0036BE38[entryIndex].entryX;
+    scene->entryPosition.x = mnuMantraEntrySpritePlacements[entryIndex].entryX;
     entryIndex = selectedEntry->sceneId;
-    scene->entryPosition.y = D_0036BE38[entryIndex].entryY;
+    scene->entryPosition.y = mnuMantraEntrySpritePlacements[entryIndex].entryY;
 }
 
 /* Refresh the active scene-work entry coordinates and return zero. */
