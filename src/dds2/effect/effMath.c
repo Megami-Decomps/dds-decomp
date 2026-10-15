@@ -56,12 +56,12 @@ s32 effMathStepBezierSlotDirect(EffCubicBezierSlot *slot, f32 *out) {
     return 1;
 }
 
-void effMathResetBezierSlot(EffArrHdr *list, s32 index) {
-    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)list->slots)[index];
+void effMathResetBezierSlot(EffArrHdr *table, s32 index) {
+    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[index];
     slot->step = 0.05f;
     slot->t = 0;
 }
 
-EffCubicBezierSlot *effMathGetSlotAt(EffArrHdr *list, s32 index) {
-    return &((EffCubicBezierSlot *)list->slots)[index];
+EffCubicBezierSlot *effMathGetSlotAt(EffArrHdr *table, s32 index) {
+    return &((EffCubicBezierSlot *)table->slots)[index];
 }
