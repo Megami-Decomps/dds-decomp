@@ -140,10 +140,10 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
                 return code;
             }
             if (code == 1) {
-                if (unit == second && first->unkEC == 0x11) {
+                if (unit == second && first->motionId == 0x11) {
                     return code;
                 }
-                if (unit == first && second->unkEC == 0x10) {
+                if (unit == first && second->motionId == 0x10) {
                     return code;
                 }
                 if (unit->partyRecord.unitId == 0x12E) {
@@ -237,14 +237,14 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
         if (second == NULL) {
             goto unavailable_pair;
         }
-        if (first->unkEC < 0x14) {
-            if (first->unkEC >= 0x12) {
-                return first->unkEC;
+        if (first->motionId < 0x14) {
+            if (first->motionId >= 0x12) {
+                return first->motionId;
             }
         }
-        if (second->unkEC < 0x14) {
-            if (second->unkEC >= 0x12) {
-                return second->unkEC;
+        if (second->motionId < 0x14) {
+            if (second->motionId >= 0x12) {
+                return second->motionId;
             }
         }
 /* Share pair rejections so early conversion does not hoist the return

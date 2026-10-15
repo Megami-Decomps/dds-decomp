@@ -2700,7 +2700,7 @@ s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit) {
             actor = actor->nextActor;
         }
         if (actor != NULL) {
-            return actor->unkEC == 0x13 ? 0x13 : -1;
+            return actor->motionId == 0x13 ? 0x13 : -1;
         }
         return -1;
     }
@@ -3172,7 +3172,7 @@ void btlResetSpecialActionActorPresentation(void) {
                 mode = unit->partyRecord.unitId;
                 if (mode < 0x113) {
                     if (mode >= 0x111) {
-                        switch (unit->unkEC) {
+                        switch (unit->motionId) {
                         case 0x10:
                             unit->motionStartFrame = 0;
                             unit->motionEndFrame = 0;
@@ -5206,7 +5206,7 @@ s32 btlGetHealthyAllyActionStatus(BtlUnit *unit) {
             actor = actor->nextActor;
         }
         if (actor != NULL) {
-            s32 status = actor->unkEC;
+            s32 status = actor->motionId;
 
             if (status != 0x10) {
                 if (status != 0x12) {
@@ -5522,7 +5522,7 @@ s32 btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit) {
         if (found == 0) {
             return -1;
         }
-        return found->unkEC == 0x10 ? 0x10 : -1;
+        return found->motionId == 0x10 ? 0x10 : -1;
     }
     if ((unit->status.flags & 0x400) == 0) {
         return -1;

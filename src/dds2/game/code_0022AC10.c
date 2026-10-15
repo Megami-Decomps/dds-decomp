@@ -415,7 +415,7 @@ void btlUpdateEventPlayback(void) {
                     MdlCtx *model = ext->owner;
                     ext->flags &= ~0xA0;
                     ext->motionState = 0;
-                    mdlAddEntryPlain(model, 0, unit->unkEC);
+                    mdlAddEntryPlain(model, 0, unit->motionId);
                     sdfMotionSampleAtFrame(model->first, 26.0f);
                     unit->status.flags &= 0x7FFFFFFF;
                     unit->status.flags &= ~0x40000000;
