@@ -5939,16 +5939,16 @@ extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16
 
 extern void func_001E6668(BtlLinkedCommand *, BtlCamState *, s32, s32);
 
-void btlInitLinkedUnitActionCursor(BtlTask *arg0) {
+void btlInitLinkedUnitActionCursor(BtlTask *task) {
     BtlLinkedCommand *command = &((BtlState *)btlGetRuntime())->cameraCommand;
-    command->task = arg0;
+    command->task = task;
     memset(CURSOR, 0, 0x130);
     CURSOR->scriptSetIndex = 0;
     CURSOR->unk_0E = 0;
-    btlRefreshUnitEffectMotionAndEntry(arg0->unit);
+    btlRefreshUnitEffectMotionAndEntry(task->unit);
     btlBuildPresetCameraPose(command, &command->camera, 6, 0);
     btlClearAllUnitDefeatCandidatesTask();
-    btlFlagUnitDefeatCandidate(arg0->unit);
+    btlFlagUnitDefeatCandidate(task->unit);
     CURSOR->scriptIndex = 0;
     func_001E6668(command, &command->camera, 0, 0);
 }
