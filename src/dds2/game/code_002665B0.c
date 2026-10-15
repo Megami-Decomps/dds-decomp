@@ -113,10 +113,10 @@ extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
 /* The directory and strings are owned by code_00265AD8. */
-extern const char D_00424E48[];
-extern const char *D_003CE7A8[4];
-extern const char *D_003CE7B8[]; /* Two entries in external .data, not small data. */
-extern const char *D_003CE7C0[4];
+extern const char mnuTerminalSpriteDirectory[];
+extern const char *mnuTerminalPrimarySpriteNames[4];
+extern const char *mnuTerminalReducedModeSpriteNames[]; /* Two entries in external .data, not small data. */
+extern const char *mnuTerminalCharacterBackgroundSpriteNames[4];
 
 
 extern void evtLoadResourcePair(u32, EvtResourcePair *);
@@ -229,12 +229,12 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
     if (scene->reducedMode == 0) {
         for (i = 0; i < 3; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(
-                (const char *)D_00424E48, D_003CE7A8[i], 1);
+                (const char *)mnuTerminalSpriteDirectory, mnuTerminalPrimarySpriteNames[i], 1);
             effResolveAndReleaseResource(scene->resourceBank[i]);
         }
         scene->resourceBank[3] = effLoadIndexedResource(
-            (const char *)D_00424E48,
-            D_003CE7C0[mnuFirstPresentMainCharacterIndex()], 1);
+            (const char *)mnuTerminalSpriteDirectory,
+            mnuTerminalCharacterBackgroundSpriteNames[mnuFirstPresentMainCharacterIndex()], 1);
         effResolveAndReleaseResource(scene->resourceBank[3]);
         mnuInitScrollingStripState(&scene->panels[0], 0,
             scene->resourceBank[0], 0x46, 0x43);
@@ -247,7 +247,7 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
     } else {
         for (i = 0; i < 2; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(
-                (const char *)D_00424E48, D_003CE7B8[i], 1);
+                (const char *)mnuTerminalSpriteDirectory, mnuTerminalReducedModeSpriteNames[i], 1);
             effResolveAndReleaseResource(scene->resourceBank[i]);
         }
         mnuInitScrollingStripState(&scene->panels[0], 1,
