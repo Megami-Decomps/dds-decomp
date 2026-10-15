@@ -277,13 +277,13 @@ typedef struct BtlState {
     f32 modelFrameScale; /* 0x494 */
     u8 pad498[0xC];
     struct EffectSlotSet *resA; /* 0x4A4: btlLoadResourceBlock stores resA at retail 0x001AC740. */
-    struct EffectSlotSet *resB; /* 0x4A8: resource slots used for battle-number glyphs */
+    struct EffectSlotSet *numberGlyphSlots; /* 0x4A8: resource slots used for battle-number glyphs. */
     struct EffectSlotSet *resC; /* 0x4AC: btlReleaseResourceBlock clears this at retail 0x001AC7B4. */
     u8 pad4B0[4];
     u32 buttonTextureHandle; /* 0x4B4 */
     struct SoundResourceNode *resources[0x31]; /* 0x4B8: SYSEFF resource slots, indexed like DDS2's */
-    void *primaryBuffer; /* 0x57C: retained front floor texture resource. */
-    void *secondaryBuffer; /* 0x580: retained side floor texture resource. */
+    void *frontFloorResource; /* 0x57C: retained front floor texture resource. */
+    void *sideFloorResource; /* 0x580: retained side floor texture resource. */
     u8 pad584[8];
     struct SdfFlagListWork *soundTransitionTask; /* 0x58C */
     u8 pad590[4];
@@ -360,10 +360,10 @@ typedef char BtlStateTotalApOffset[((unsigned int)&((BtlState *)0)->totalAp == 0
 typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
 typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];
 typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x298) ? 1 : -1];
-typedef char BtlPrimaryBufferOffset[
-    ((unsigned int)&((BtlState *)0)->primaryBuffer == 0x57C) ? 1 : -1];
-typedef char BtlSecondaryBufferOffset[
-    ((unsigned int)&((BtlState *)0)->secondaryBuffer == 0x580) ? 1 : -1];
+typedef char BtlFrontFloorResourceOffset[
+    ((unsigned int)&((BtlState *)0)->frontFloorResource == 0x57C) ? 1 : -1];
+typedef char BtlSideFloorResourceOffset[
+    ((unsigned int)&((BtlState *)0)->sideFloorResource == 0x580) ? 1 : -1];
 typedef char BtlMotionSeOwnersOffset[((unsigned int)&((BtlState *)0)->soundSlotOwners == 0x23C) ? 1 : -1];
 typedef char BtlMotionSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
 typedef char BtlSkillSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x268) ? 1 : -1];

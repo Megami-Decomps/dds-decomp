@@ -303,7 +303,7 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
         digitCount = 1;
     }
 
-    set = battle->resB;
+    set = battle->numberGlyphSlots;
     work = set->workEntries;
     width = work[4].geometry.bounds[2];
     height = work[4].geometry.bounds[3];
@@ -328,11 +328,11 @@ void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *off
                 s32 yOffset = offsets[offsetIndex];
                 if (yOffset >= 0) {
                     effDrawSpriteWithCornerColors(drawX, baseY + yOffset, -0x10, colors, 0,
-                                  battle->resB, digits[digitCount] + 4, 0x54);
+                                  battle->numberGlyphSlots, digits[digitCount] + 4, 0x54);
                 }
             } else {
                 effDrawSpriteWithCornerColors(drawX, y - (height >> 1), -0x10, colors, 0,
-                              battle->resB, digits[digitCount] + 4, 0x54);
+                              battle->numberGlyphSlots, digits[digitCount] + 4, 0x54);
             }
             drawX += width;
         } while (digitCount != 0);

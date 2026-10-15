@@ -1125,7 +1125,7 @@ void btlLoadResourceBlock(void) {
         btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
             (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
         work->resA = btlResourceBlock->resA;
-        work->resB = btlResourceBlock->resB;
+        work->numberGlyphSlots = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
     }
 }
@@ -1140,7 +1140,7 @@ void btlReleaseResourceBlock(void) {
         effDestroyResourceSlotSet(btlResourceBlock->resC);
         btlResourceBlock->resC = 0;
         work->resA = 0;
-        work->resB = 0;
+        work->numberGlyphSlots = 0;
         work->resC = 0;
         btlResourceBlockLoaded = 0;
     }
