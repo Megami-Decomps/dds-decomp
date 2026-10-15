@@ -47,7 +47,7 @@ void *dds3GetWorldObjectPayload(EffWorldNode *object) {
     return object->data;
 }
 
-void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, Dds3PathKeyframes *keys, f32 frame) {
+void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame) {
     u32 count = keys->count;
     u32 i;
     u32 *frames = keys->frames;

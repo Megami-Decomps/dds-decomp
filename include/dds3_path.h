@@ -79,7 +79,7 @@ typedef struct Dds3SlotResource {
 typedef char Dds3SlotResource_size_must_be_0x10[
     (sizeof(Dds3SlotResource) == 0x10) ? 1 : -1];
 
-void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, Dds3PathKeyframes *keys, f32 frame);
+void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame);
 Dds3PathCurveWork *dds3CreatePathCurveWork(struct EffWorldNode *object);
 void dds3FreePathObject(Dds3PathCurveWork *path);
 Dds3PathCurveWork *dds3GetObjectResourceHandle(struct EffWorldNode *object);
