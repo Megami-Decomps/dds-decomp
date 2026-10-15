@@ -12,8 +12,12 @@
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
 
-s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
-s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
+s32 kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, f32 angleStep,
+                          f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
+                          s32 blendControl);
+s32 kwlnDrawSetD30Clamped(s32 count, f32 phaseStep, f32 spacing,
+                          f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
+                          f32 angleStep, s32 blendControl);
 
 
 extern char D_00412648[];
