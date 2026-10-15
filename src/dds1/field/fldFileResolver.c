@@ -566,7 +566,7 @@ extern u8 D_00324660[];
 extern char D_003C9200[];
 extern u32 D_003C92E0[];
 extern s16 D_003C9518[];
-extern void fldFormatAreaResourceName(char *arg0);
+extern void fldFormatAreaResourceName(char *out);
 extern void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode);
 extern s32 strcmp(const char *a, const char *b);
 extern f32 D_003BAD20;
