@@ -96,7 +96,7 @@ EffPCPBlockSetWork *effPcpCloneBlockWithUnitMatrix(EffPCPBlockSetWork *source);
 EffPCPBlockSetWork *effCloneBlockWorkFromSource(EffPCPBlockSetWork *source);
 void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work);
 void effPcpCopyVector60(EffPCPBlockSetWork *work, void *source);
-void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *source);
+void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, const void *source);
 void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 color);
 
 #endif /* EFF_PCP_BLOCK_SET_H */
