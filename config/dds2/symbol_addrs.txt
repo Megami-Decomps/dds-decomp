@@ -23,6 +23,7 @@ sdfSetModelChildChainVisibility = 0x00146150; // type:func
 sdfVuLoadRotationMatrixY = 0x00336538; // type:func
 sdfVuLoadRotationMatrixZ = 0x003365B8; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+evtViewerApplyCommandSelection = 0x0024B268; // type:func
 btlSelectSatanActorCategoryCamera = 0x00225BF8; // type:func
 parDrawPendingParticleRecords = 0x00163010; // type:func
 fldConfigureCameraMoveTracking = 0x001206D0; // type:func
