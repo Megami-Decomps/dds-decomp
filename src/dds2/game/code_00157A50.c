@@ -74,7 +74,7 @@ typedef struct EffBillResourceArchive {
     EffBillResourceNode *nodes;
 } EffBillResourceArchive;
 
-extern s32 D_00438EFC;
+extern s32 billPendingChildList;
 extern BillObj *effBillResourceOwners[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
@@ -92,7 +92,7 @@ void effInitializeBillResourceOwners(void) {
     BillChildPayload *payload;
     u32 configOffset;
 
-    D_00438EFC = 0;
+    billPendingChildList = 0;
     archive = (EffBillResourceArchive *)fileQueuePlainDispatchRequest(D_004142B0);
     fileWaitForRequestReady((struct FileRequest *)archive);
     node = archive->nodes;
@@ -121,7 +121,7 @@ void effInitializeBillResourceOwners(void) {
 void effBillDispatchAll(void) {
     u32 i;
 
-    D_00438EFC = 0;
+    billPendingChildList = 0;
     for (i = 0; i < 15; i++) {
         billDispatchByKind(effBillResourceOwners[i]);
     }

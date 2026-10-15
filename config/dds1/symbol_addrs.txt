@@ -11251,3 +11251,15 @@ fileDirectoryEntryScratch = 0x003DC780;
 fileSavePreviewVersionByteView = 0x003DC803;
 fileSavePreviewPortraitTextures = 0x0037D488;
 fileSaveIconSysData = 0x0037D0C0;
+
+
+billChildFacingReferenceAxis = 0x0034E010;
+billChildFacingScale = 0x0034E020;
+billPairFacingReferenceAxis = 0x0034E040;
+billPairFacingScale = 0x0034E050;
+billPendingChildList = 0x003BD7F4;
+billPendingRenderPairList = 0x003BD7F8;
+effScatterPoolDrawParams = 0x003D6580;
+effScatterPoolTriangleIndices = 0x00354A70;
+effScatterPoolTexcoords = 0x00354AC0;
+effScatterPoolDrawSurfaces = 0x00354B80;

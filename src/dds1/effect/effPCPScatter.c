@@ -1016,10 +1016,10 @@ void func_00172C60(void)
 extern void *memset(void *dst, s32 value, u32 size);
 
 
-extern EffPacketParams D_003D6580[];
-extern u32 D_00354A70[];
-extern u32 D_00354AC0[];
-extern SdfPoolNode *D_00354B80[];
+extern EffPacketParams effScatterPoolDrawParams[];
+extern u32 effScatterPoolTriangleIndices[];
+extern u32 effScatterPoolTexcoords[];
+extern SdfPoolNode *effScatterPoolDrawSurfaces[];
 #include "sdf_packet_alloc.h"
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
@@ -1052,8 +1052,8 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->sharedResource = 0;
     pool->drawAsset = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat(pool->drawAsset, 1.0f);
-    memset(D_003D6580, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
-    D_003D6580->primitive = 0x4000;
+    memset(effScatterPoolDrawParams, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
+    effScatterPoolDrawParams->primitive = 0x4000;
     return pool;
 }
 
@@ -1083,30 +1083,30 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress(pool->drawAsset, pool->sharedResource->textureHandle);
-        D_003D6580->texcoords = D_00354AC0;
+        effScatterPoolDrawParams->texcoords = effScatterPoolTexcoords;
     } else {
-        D_003D6580->texcoords = NULL;
+        effScatterPoolDrawParams->texcoords = NULL;
     }
     sdfConsAppendAssetPacket(packet, pool->drawAsset, 0);
     remainingVertices = pool->secondWordCount;
-    D_003D6580->colors = (u32 *)pool->auxRecordBase;
-    D_003D6580->positions = (u128 *)pool->recordBase;
-    D_003D6580->color = pool->color;
-    D_003D6580->parameterCount = 0x10;
-    D_003D6580->vertexCount = 24;
-    D_003D6580->parameters = D_00354A70;
+    effScatterPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
+    effScatterPoolDrawParams->positions = (u128 *)pool->recordBase;
+    effScatterPoolDrawParams->color = pool->color;
+    effScatterPoolDrawParams->parameterCount = 0x10;
+    effScatterPoolDrawParams->vertexCount = 24;
+    effScatterPoolDrawParams->parameters = effScatterPoolTriangleIndices;
     while (remainingVertices >= 24) {
         remainingVertices -= 24;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_003D6580));
-        D_003D6580->positions += 24;
-        D_003D6580->colors += 24;
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effScatterPoolDrawParams));
+        effScatterPoolDrawParams->positions += 24;
+        effScatterPoolDrawParams->colors += 24;
     }
     if (remainingVertices >= 6) {
-        D_003D6580->parameterCount = remainingVertices / 6 * 4;
-        D_003D6580->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_003D6580));
+        effScatterPoolDrawParams->parameterCount = remainingVertices / 6 * 4;
+        effScatterPoolDrawParams->vertexCount = remainingVertices;
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(effScatterPoolDrawParams));
     }
-    surface = D_00354B80[pool->poolMode];
+    surface = effScatterPoolDrawSurfaces[pool->poolMode];
     surface->append(surface, packet);
 }
 
