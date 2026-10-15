@@ -11,9 +11,9 @@
 #include "sdf.h"
 extern s32 D_004390A4;
 
-extern u32 D_0045C7A0[];
+extern s32 D_0045C7A0[];
 
-extern u32 D_0045C7B0[];
+extern s32 D_0045C7B0[];
 
 
 
@@ -278,7 +278,7 @@ void fldReleaseMapRequestQueue(MapRequestState *state) {
     }
 }
 
-void fldAdvanceMapRequest(MapRequestState *queue, u32 first, u32 second, u32 third) {
+void fldAdvanceMapRequest(MapRequestState *queue, s32 first, s32 second, s32 third) {
     MapRequestNode *entry;
 
     entry = queue->next;
