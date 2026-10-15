@@ -255,7 +255,7 @@ void effBuildBlurUnitTextureQuad(const BlurSource *source, BlurPacketQuad *quad,
 }
 
 
-void effDrawBlurRectangle(EffBlurQuad *source)
+void effDrawBlurRectangle(const EffBlurQuad *source)
 {
     SdfListHead *list;
     void *tag;
