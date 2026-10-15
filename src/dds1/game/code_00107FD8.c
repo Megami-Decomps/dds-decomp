@@ -167,7 +167,7 @@ extern void evtSelStateDestroy(void);
 
 extern s32 D_0032E3C0[];
 
-extern void fldStartLmapTask(s32 arg0);
+extern void fldStartLmapTask(s32 mode);
 
 extern u32 scrNamedProcessCount;
 
