@@ -216,10 +216,10 @@ void sndStartTrackExtended(s32 trackId) {
     sndQueueCommandPacket(0x20, 0, &packet, 0x10);
 }
 
-void sndReleaseTrackHandle(u32 value) {
+void sndReleaseTrackHandle(u32 trackHandle) {
     u32 packet[4];
 
-    packet[0] = value;
+    packet[0] = trackHandle;
     sndQueueCommandPacket(0xd0, 0, packet, 0x10);
 }
 
