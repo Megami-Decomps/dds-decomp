@@ -74,7 +74,7 @@ extern void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color);
 extern void effBillSetEntryValue(s32, s32, u32);
 
 
-extern void parFadeTriangleCellAlpha(ParSystem *system, s32 index);
+extern void parFadeTriangleCellAlpha(ParSystem *system, s32 cellIndex);
 
 
 #include "sdf_packet_alloc.h"
@@ -556,8 +556,8 @@ void parReleaseCellSystem(ParSystem *system) {
     sdfReleaseResourceAllocation(system->allocation);
 }
 
-void parCellInit(ParSystem *system, s32 index) {
-    ParCell *cell = (ParCell *)(index * sizeof(ParCell) + (s32)system->cells);
+void parCellInit(ParSystem *system, s32 cellIndex) {
+    ParCell *cell = (ParCell *)(cellIndex * sizeof(ParCell) + (s32)system->cells);
 
     cell->color = 0x80808080;
     cell->historyAdvanceCountdown = 0;
@@ -569,8 +569,8 @@ void parPrependCellNode(ParSystem *node) {
     D_00436404 = node;
 }
 
-void parUpdateCellVertexPair(ParSystem *system, s32 index, const u128 *vertices) {
-    ParCell *cell = &system->cells[index];
+void parUpdateCellVertexPair(ParSystem *system, s32 cellIndex, const u128 *vertices) {
+    ParCell *cell = &system->cells[cellIndex];
     u128 *vertex;
     s32 shiftCount;
     s32 i;
@@ -594,8 +594,8 @@ void parUpdateCellVertexPair(ParSystem *system, s32 index, const u128 *vertices)
     PCP_COPY_VECTOR(vertex + 1, vertices + 1);
 }
 
-void parTranslateCellVertices(ParSystem *system, s32 index, const u128 *delta) {
-    ParCell *cell = system->cells + index;
+void parTranslateCellVertices(ParSystem *system, s32 cellIndex, const u128 *delta) {
+    ParCell *cell = system->cells + cellIndex;
     s32 count = system->vertexWordCount;
     u128 *vertex = cell->history;
     s32 i;
@@ -612,8 +612,8 @@ void parTranslateCellVertices(ParSystem *system, s32 index, const u128 *delta) {
     }
 }
 
-void parUpdateCellVertexTriangle(ParSystem *system, s32 index, const u128 *vertices) {
-    ParCell *cell = &system->cells[index];
+void parUpdateCellVertexTriangle(ParSystem *system, s32 cellIndex, const u128 *vertices) {
+    ParCell *cell = &system->cells[cellIndex];
     u128 *vertex;
     s32 shiftCount;
     s32 i;
@@ -638,8 +638,8 @@ void parUpdateCellVertexTriangle(ParSystem *system, s32 index, const u128 *verti
     PCP_COPY_VECTOR(vertex + 2, vertices + 2);
 }
 
-void parTranslateCellTriangleVertices(ParSystem *system, s32 index, const u128 *delta) {
-    ParCell *cell = system->cells + index;
+void parTranslateCellTriangleVertices(ParSystem *system, s32 cellIndex, const u128 *delta) {
+    ParCell *cell = system->cells + cellIndex;
     s32 count = cell->vertexCount / 3;
     u128 *vertex = cell->history;
     s32 i;
@@ -662,9 +662,9 @@ void parTranslateCellTriangleVertices(ParSystem *system, s32 index, const u128 *
     }
 }
 
-void parFadeAlphaCell(ParSystem *system, s32 index) {
-    u32 count = system->cells[index].vertexCount >> 1;
-    u32 *vertex = system->cells[index].colors;
+void parFadeAlphaCell(ParSystem *system, s32 cellIndex) {
+    u32 count = system->cells[cellIndex].vertexCount >> 1;
+    u32 *vertex = system->cells[cellIndex].colors;
     u32 word = vertex[0];
     u32 i;
     s32 alpha[4];
@@ -695,8 +695,8 @@ void parFadeAlphaCell(ParSystem *system, s32 index) {
 
 extern f32 D_003AAED0[4];
 /* Fade one triangle cell's middle and edge colors toward transparent along its history. */
-void parFadeTriangleCellAlpha(ParSystem *system, s32 index) {
-    u32 count = system->cells[index].vertexCount / 3;
+void parFadeTriangleCellAlpha(ParSystem *system, s32 cellIndex) {
+    u32 count = system->cells[cellIndex].vertexCount / 3;
     ParTriangleVertexColors *vertex;
     u32 middleWord;
     u32 edgeWord;
@@ -715,7 +715,7 @@ void parFadeTriangleCellAlpha(ParSystem *system, s32 index) {
     u32 packedEdge;
 
     if (count >= 2) {
-        vertex = (ParTriangleVertexColors *)system->cells[index].colors;
+        vertex = (ParTriangleVertexColors *)system->cells[cellIndex].colors;
         middleWord = vertex->middle;
         edgeWord = vertex->edge0;
         alpha0[0] = middleWord & 0xFF000000;
