@@ -206,7 +206,62 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", btlSelectFlaggedIndexListEntry);
+/* Pick a flagged entry starting from a random index and wrapping once. When
+ * none is flagged, fall back to units whose status pair has 0x21 == 1. */
+void *btlSelectFlaggedIndexListEntry(BtlIndexList *list, u16 *flags, u16 count) {
+    u16 fallback[12];
+    u32 start;
+    u32 i;
+    u32 pass;
+
+    start = (btlNextScaledRandom(0x2000) & 0xF) % count;
+    pass = 0;
+    i = start;
+    goto test;
+step:
+    if (i < count) {
+        i++;
+    } else {
+        i = 0;
+        pass++;
+    }
+    if (pass < 2) {
+        goto test;
+    }
+    for (i = 0; i < count; i++) {
+        fallback[i] = 0;
+        if ((btlUnitStatusPair(btlGetIndexListEntry(list, i)) & 0x21) == 1) {
+            fallback[i] = 1;
+        }
+    }
+    i = start;
+    pass = 0;
+    do {
+        if (fallback[i] != 0) {
+            break;
+        }
+        if (i < count) {
+            i++;
+        } else {
+            /* A one-pass loop: the scan then encloses a loop, so loop.c keeps
+             * the index unreduced (retail recomputes fallback + i * 2). */
+            do {
+                pass++;
+            } while (0);
+            i = 0;
+        }
+    } while (pass < 2);
+    if (i >= count) {
+        i = 0;
+    }
+    goto done;
+test:
+    if (flags[i] == 0) {
+        goto step;
+    }
+done:
+    return btlGetIndexListEntry(list, i);
+}
 
 BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 *listCount) {
     u32 result;
