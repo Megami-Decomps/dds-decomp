@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "dds3obj.h"
 #include "btl_effect_position.h"
 #include "pcp_vu0.h"
@@ -28,8 +29,6 @@ extern f32 D_003AF1D8[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuLoadRotationMatrixX(f32 value);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 value);
 /* The selected position provider leaves its vector in vf10. */
 void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *param, u128 *out) {
     D_003AF208[param->kind](owner, param);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_rotation_axes.h"
 #include "file_load_menu_state.h"
 #include "eff.h"
 #include "eff_generated_texture_descriptor.h"
@@ -6679,8 +6680,6 @@ typedef struct FileOrientedRingMotion {
     f32 angleMultiplier;
 } FileOrientedRingMotion;   /* 0x38, ordinary word alignment */
 
-extern void sdfVuLoadRotationMatrixX(f32 angle);
-extern void sdfVuLoadSecondaryRotationMatrixY(f32 angle);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
 void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
