@@ -40,9 +40,9 @@ extern void fldDispatchMapRequestCallbacks(MapRequestState *);
 extern f32 sdfCounterGetScaledValue(void);
 extern f32 D_0038FE30[][4];
 
-extern u32 D_003DFED0[];
+extern s32 D_003DFED0[];
 
-extern u32 D_003DFEE0[];
+extern s32 D_003DFEE0[];
 
 typedef struct SdfCounterRuntime {
     u32 stateFlags;                 /* 0x00: generic menu-list state bits */
@@ -559,7 +559,7 @@ void fldReleaseMapRequestQueue(MapRequestState *state) {
 }
 
 /* Dispatch one queued request per interval; inactive nodes are reused. */
-void fldAdvanceMapRequest(MapRequestState *state, u32 value, u32 argument1, u32 argument2) {
+void fldAdvanceMapRequest(MapRequestState *state, s32 value, s32 argument1, s32 argument2) {
     MapRequestNode *node;
 
     node = state->next;

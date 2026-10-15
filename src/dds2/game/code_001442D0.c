@@ -7,6 +7,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_ready_api.h"
 #include "fld_clear_menu_entries_api.h"

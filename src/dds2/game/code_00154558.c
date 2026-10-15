@@ -1623,10 +1623,10 @@ s32 fldCmdDispatchInteractionAction(void) {
 }
 
 s32 fldCmdGetActorSlotAttribute(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
+    s32 actorId = scrReadIntParameter(0);
+    s32 attribute = scrReadIntParameter(1);
 
-    scrSetIntegerReturnValue(fldGetActorSlotAttribute(param0, param1));
+    scrSetIntegerReturnValue(fldGetActorSlotAttribute(actorId, attribute));
     return 1;
 }
 

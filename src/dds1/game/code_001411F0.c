@@ -5,6 +5,7 @@
 #include "fld_mix_lb.h"
 #include "evt_world.h"
 #include "common.h"
+#include "snd_track_playback_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_clear_menu_entries_api.h"
 #include "fld_play_pending_sounds_api.h"
@@ -191,7 +192,6 @@ extern s32 D_003D62A8[];
 extern s32 fldCurrentBgmId[];
 
 extern void sndQueueSoundId();
-extern void sndStartTrackDefault(s32 arg0);
 
 
 
