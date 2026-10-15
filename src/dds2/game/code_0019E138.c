@@ -254,7 +254,7 @@ advanceLine:
     return 0;
 }
 
-extern s8 D_00436550;
+extern s8 frFontEncodedTextGlyphSpacing;
 
 FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
@@ -309,7 +309,7 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 }
             }
-            frFontSetSpacingAndMeasureGlyphs(stream->glyphChain, D_00436550);
+            frFontSetSpacingAndMeasureGlyphs(stream->glyphChain, frFontEncodedTextGlyphSpacing);
             frFontStoreShiftedRenderValue(stream->glyphChain, stream->z);
         }
         bytes = stream->encodedText;
@@ -343,15 +343,15 @@ FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32
     args.pendingPosition = 1;
     return itfBuildGlyphChainFromEncodedStream(&args);
 }
-extern s8 D_00436550;
+extern s8 frFontEncodedTextGlyphSpacing;
 
 
 FrFontGlyph *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *unusedSub) {
-    s8 saved = D_00436550;
+    s8 saved = frFontEncodedTextGlyphSpacing;
     FrFontGlyph *result;
-    D_00436550 = 0;
+    frFontEncodedTextGlyphSpacing = 0;
     result = itfDrawEncodedTextStream(x, y, depth, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, 0);
-    D_00436550 = saved;
+    frFontEncodedTextGlyphSpacing = saved;
     return result;
 }
 

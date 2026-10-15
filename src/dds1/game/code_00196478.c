@@ -230,7 +230,7 @@ advanceLine:
     return 0;
 }
 
-extern s8 D_003BB160;
+extern s8 frFontEncodedTextGlyphSpacing;
 
 FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
@@ -285,7 +285,7 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 }
             }
-            frFontSetSpacingAndMeasureGlyphs(stream->glyphChain, D_003BB160);
+            frFontSetSpacingAndMeasureGlyphs(stream->glyphChain, frFontEncodedTextGlyphSpacing);
             frFontStoreShiftedRenderValue(stream->glyphChain, stream->z);
         }
         bytes = stream->encodedText;

@@ -110,7 +110,7 @@ void frFontFreeAllEntries(void) {
     }
 }
 
-extern u8 D_003B2DA8[];
+extern u8 frFontImageBlockData[];
 /* This caller passes the full image-buffer word; the callee consumes its low half. */
 extern void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image);
 
@@ -122,7 +122,7 @@ void frFontUploadImageBlocks(void) {
     s32 sourceWordOffset = 0;
     FrFontSystem *work = &frFontWork;
     u32 *imageBuffer = work->imageBuffers;
-    u8 *sourceTable = D_003B2DA8;
+    u8 *sourceTable = frFontImageBlockData;
 
     do {
         u32 *outputWord = imageWords;
@@ -226,7 +226,7 @@ u32 frFontGetInitialGlyphY() {
 }
 
 extern u16 frFontGetSlotCellWidth(s32 index);
-extern s8 D_003B2DA0[];
+extern s8 frFontGlyphAdvanceBySlot[];
 
 /* Fill cell dimensions, advance and horizontal bearing for one glyph. */
 void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex) {
@@ -253,7 +253,7 @@ void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex) {
         work->cellWidth = frFontGetGlyphCellWidth(fontIndex);
     }
     work->cellHeight = frFontGetGlyphCellHeight(work->fontIndex);
-    work->advance = D_003B2DA0[work->fontIndex];
+    work->advance = frFontGlyphAdvanceBySlot[work->fontIndex];
 
     if (defaultSlot != 0) {
         scale = (f32)(work->cellWidth + 3) /
@@ -349,7 +349,7 @@ FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *desti
         previous->next = glyph;
     }
     glyph->sourceItem = source;
-    glyph->advance = D_003B2DA0[0];
+    glyph->advance = frFontGlyphAdvanceBySlot[0];
     glyph->cellDimensions.cellWidth = frFontGetGlyphCellWidth(0);
     glyph->cellDimensions.cellHeight = frFontGetGlyphCellHeight(0);
     glyph->previous = previous;
@@ -1224,7 +1224,7 @@ u8 *frFontGetEncodedTextData(s32 textId, FrFontTextBank *bank, s32 mode) {
 }
 
 
-extern s8 D_00436550;
+extern s8 frFontEncodedTextGlyphSpacing;
 
 void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
     char glyphText[3];
@@ -1269,7 +1269,7 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
         existingGlyph = frFontBuildGlyphChain(glyphText, mode, ctx->firstOption,
                                               ctx->secondOption, ctx->glyphChain);
         ctx->glyphChain = existingGlyph;
-        frFontSetSpacingAndMeasureGlyphs(existingGlyph, D_00436550);
+        frFontSetSpacingAndMeasureGlyphs(existingGlyph, frFontEncodedTextGlyphSpacing);
     }
 }
 
@@ -1321,7 +1321,7 @@ void frFontAdvanceContextCursor(FrFontCtx *ctx) {
     ctx->pendingPosition = 1;
 }
 
-s8 D_00436550 __attribute__((section(".sdata"))) = 1;
+s8 frFontEncodedTextGlyphSpacing __attribute__((section(".sdata"))) = 1;
 
 u32 frFontContextCursorSpacing __attribute__((section(".sdata"))) = 25;
 
