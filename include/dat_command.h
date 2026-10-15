@@ -6,7 +6,7 @@
 /* Inventory metadata maps item IDs to commands and base prices. */
 typedef struct DatItemSkillRecord {
     u8 flags;
-    u8 unk01;
+    u8 useFlags; /* 0x4: consume one item on use. */
     u16 commandIndex;
     s32 price;
 } DatItemSkillRecord;
@@ -62,11 +62,11 @@ typedef struct DatCommandRecord {
     u16 effectPercent;             /* 0x22 */
     DatCommandAttribute attribute; /* 0x24 */
     s32 requirementBits;           /* 0x28 */
-    u8 unk_2C;
+    u8 entryChange; /* Interpreted as a signed actor-entry delta. */
     u8 stat2D;
     u16 unk2E;
     u32 unk30;                    /* 0x30: unsigned selector; DDS2 001B14EC, DDS1 001D1004. */
-    s16 stat34;
+    s16 criticalPercent; /* 100 forces the critical result. */
     s16 stat36;
 } DatCommandRecord;
 

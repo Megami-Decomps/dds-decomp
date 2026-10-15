@@ -124,18 +124,18 @@ s32 itfEditOverlayColor(void) {
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
     D_003BD824 += D_003BD828;
     itfDrawPulsingTestOverlay(0x52);
-    if ((s8)D_00324510.unk32 < 0) {
+    if ((s8)D_00324510.secondaryTriangle < 0) {
         D_003BB2B4 ^= 1;
     }
     if (D_003D73E0.editing == 0) {
         previousSelection = D_003D73E0.selection;
-        if ((u8)D_00324510.unk36 & 2) {
+        if ((u8)D_00324510.secondaryUp & 2) {
             D_003D73E0.selection--;
             if (D_003D73E0.selection < 0) {
                 D_003D73E0.selection = 3;
             }
         }
-        if ((u8)D_00324510.unk37 & 2) {
+        if ((u8)D_00324510.secondaryDown & 2) {
             D_003D73E0.selection++;
             if (D_003D73E0.selection >= 4) {
                 D_003D73E0.selection = 0;
@@ -144,7 +144,7 @@ s32 itfEditOverlayColor(void) {
         if (previousSelection != D_003D73E0.selection) {
             D_003D73E0.blink = 0;
         }
-        if (D_00324510.unk31 < 0) {
+        if (D_00324510.secondaryCross < 0) {
             D_003D73E0.editing ^= 1;
             D_003D73E0.blink = 0;
         }

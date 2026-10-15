@@ -1850,7 +1850,7 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 comman
     if (btlCheckSpecialAbility(record, 0x22F)) {
         multiplier *= datAbilityParameters[0x22F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
-    if (datCommandRecords[command].stat34 == 100) {
+    if (datCommandRecords[command].criticalPercent == 100) {
         chance = 100;
         fixedChance = 100;
     }

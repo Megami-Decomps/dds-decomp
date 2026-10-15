@@ -125,7 +125,7 @@ typedef struct MenuWindowContainer {
     u32 flags;
     s32 width;
     s32 height;
-    u32 unk10; /* Set by staff-panel setup; meaning unknown. */
+    u32 capOffsetY; /* Y offset of the trailing entry decoration. */
     struct MenuList *list;
     s32 entryValue;
     struct EffectSlotSet *entryResources;

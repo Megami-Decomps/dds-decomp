@@ -5,12 +5,12 @@
 
 struct SdfKeyTreeItem;
 
-/* Pool release logic uses the next link, word at 0x4 and kind at 0xC;
+/* Pool release logic tests the packet head address and kind at 0xC;
  * bytes at 0x8 remain opaque. The float-key tree insertion helper reads the
  * same +0xC word through SdfKeyTreeItem. DDS1/2 game/code_002EEA18/003478C0.c. */
 typedef struct SdfKeyPoolNode {
     struct SdfKeyPoolNode *next; /* 0x00 */
-    s32 unk4;                    /* 0x04 */
+    s32 packetHeadAddress;       /* 0x04: first DMA packet address. */
     u8 unk8[4];                  /* 0x08 */
     s32 kind;                    /* 0x0C */
 } SdfKeyPoolNode;

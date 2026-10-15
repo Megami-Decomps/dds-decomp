@@ -974,7 +974,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
         }
         if (!(kind & 0x50006) && !group->reflected) {
             entryChangeMask = datCommandRecords[command].requirementBits;
-            entryChange = (u16)(s8)datCommandRecords[command].unk_2C;
+            entryChange = (u16)(s8)datCommandRecords[command].entryChange;
         } else {
             entryChangeMask = 0;
             entryChange = 0;
@@ -1661,7 +1661,7 @@ extern void btlSyncModelFlagFromEventThresholds(void);
 /* Consume a flagged item; DDS2 also synchronizes event flags for IDs 0x53/0x54. */
 s32 btlConsumeFlaggedCommandItem(BtlCommandItemWork *work) {
     s32 itemId = work->itemId;
-    if (datItemSkillRecords[itemId].unk01 & 4) {
+    if (datItemSkillRecords[itemId].useFlags & 4) {
         ptyAdjustItemQuantity(itemId, -1);
         switch (work->itemId) {
         case 0x53:

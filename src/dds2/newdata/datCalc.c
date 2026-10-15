@@ -1943,7 +1943,7 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
         u16 rosterIndex = ((DatPartyRecord *)D_0043E5C0.firstArgument)->unitId;
         statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateB;
     } else {
-        statValue = datCommandRecords[commandIndex].stat34;
+        statValue = datCommandRecords[commandIndex].criticalPercent;
     }
     scrSetIntegerReturnValue(statValue);
     return 1;

@@ -944,7 +944,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         }
         if (!(kind & 6)) {
             entryChangeMask = datCommandRecords[command].requirementBits;
-            entryChange = (u16)(s8)datCommandRecords[command].unk_2C;
+            entryChange = (u16)(s8)datCommandRecords[command].entryChange;
         } else {
             entryChangeMask = 0;
             entryChange = 0;
@@ -1599,7 +1599,7 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
 
 /* Consume one item when its table flag 4 is set, then signal task completion. */
 u32 btlConsumeFlaggedCommandItem(s32 argumentAddress) {
-    if ((datItemSkillRecords[*(s32 *)(argumentAddress + 4)].unk01 & 4) != 0) {
+    if ((datItemSkillRecords[*(s32 *)(argumentAddress + 4)].useFlags & 4) != 0) {
         ptyAdjustItemQuantity(*(s32 *)(argumentAddress + 4), 0xffffffffffffffff);
     }
     return 1;
@@ -1767,13 +1767,13 @@ void btlUpdateAutoMusic(void) {
         return;
     }
     if (flags & 0x8000) {
-        if (D_00324510.unk22 < 0 || D_00324510.unk23 < 0) {
+        if (D_00324510.primaryTriangle < 0 || D_00324510.unk23 < 0) {
             *(u32 *)(context + 0x1F4) = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_003A3A40);
         }
-    } else if (D_00324510.unk22 < 0) {
+    } else if (D_00324510.primaryTriangle < 0) {
         *(u32 *)(context + 0x1F4) = flags | 0x8000;
         sndSetSequenceVolumePan(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);

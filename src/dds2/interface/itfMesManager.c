@@ -1027,16 +1027,16 @@ s32 itfMesRunPanelLayoutInspector(void) {
         panel = &((ItfMesState *)debug->window->stateAddress)->blkA4;
         switch (debug->mode) {
         case 0:
-            if (D_0037F510.unk36 & 2) {
+            if (D_0037F510.secondaryUp & 2) {
                 if (--debug->selectedItem < 0) {
                     debug->selectedItem = 2;
                 }
-            } else if (D_0037F510.unk37 & 2) {
+            } else if (D_0037F510.secondaryDown & 2) {
                 if (++debug->selectedItem >= 5) {
                     debug->selectedItem = 0;
                 }
             }
-            if (D_0037F510.unk31 < 0) {
+            if (D_0037F510.secondaryCross < 0) {
                 ItfMesDebugState *confirmDebug = &D_003B4770;
 
                 switch (confirmDebug->selectedItem) {
@@ -2369,12 +2369,12 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
         } else {
             dx = ((u8)D_0037F510.coarseUp << 3) & 0x10;
         }
-        if (D_0037F510.unk36 & 2) {
+        if (D_0037F510.secondaryUp & 2) {
             dy = -8;
         } else {
-            dy = ((u8)D_0037F510.unk37 << 2) & 8;
+            dy = ((u8)D_0037F510.secondaryDown << 2) & 8;
         }
-        if (D_0037F510.unk31 != 0) {
+        if (D_0037F510.secondaryCross != 0) {
             dx *= 8;
             dy *= 8;
         }
@@ -2411,12 +2411,12 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     } else {
         step = (D_0037F510.coarseUp & 2) > 0;
     }
-    if (D_0037F510.unk36 & 2) {
+    if (D_0037F510.secondaryUp & 2) {
         step = -1;
-    } else if (D_0037F510.unk37 & 2) {
+    } else if (D_0037F510.secondaryDown & 2) {
         step = 1;
     }
-    if (D_0037F510.unk31 != 0) {
+    if (D_0037F510.secondaryCross != 0) {
         step *= 10;
     }
     if (step != 0) {

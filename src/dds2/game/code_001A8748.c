@@ -444,18 +444,18 @@ s32 kwlnUpdateBlurDebugMenu(void) {
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
-    if ((s8)D_0037F510.unk32 < 0) {
+    if ((s8)D_0037F510.secondaryTriangle < 0) {
         kwlnDrawOverlayEnabled ^= 1;
     }
     if (D_00452E80.editing == 0) {
         previous = D_00452E80.selection;
-        if ((u8)D_0037F510.unk36 & 2) {
+        if ((u8)D_0037F510.secondaryUp & 2) {
             D_00452E80.selection--;
             if (D_00452E80.selection < 0) {
                 D_00452E80.selection = 2;
             }
         }
-        if ((u8)D_0037F510.unk37 & 2) {
+        if ((u8)D_0037F510.secondaryDown & 2) {
             D_00452E80.selection++;
             if (D_00452E80.selection >= 3) {
                 D_00452E80.selection = 0;
@@ -464,7 +464,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         if (previous != D_00452E80.selection) {
             D_00452E80.blink = 0;
         }
-        if (D_0037F510.unk31 < 0) {
+        if (D_0037F510.secondaryCross < 0) {
             D_00452E80.editing ^= 1;
             D_00452E80.blink = 0;
         }
@@ -473,13 +473,13 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         }
     } else {
         if (D_00452E80.selection == 2) {
-            if (D_0037F510.unk36 != 0) {
+            if (D_0037F510.secondaryUp != 0) {
                 D_00435CE0[1] -= 16;
                 if (D_00435CE0[1] < -224) {
                     D_00435CE0[1] = -224;
                 }
             }
-            if (D_0037F510.unk37 != 0) {
+            if (D_0037F510.secondaryDown != 0) {
                 D_00435CE0[1] += 16;
                 if (D_00435CE0[1] > 224) {
                     D_00435CE0[1] = 224;
@@ -600,18 +600,18 @@ s32 itfEditOverlayColor(void) {
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
     D_00438F3C += D_00438F40;
     itfDrawPulsingTestOverlay(0x52);
-    if ((s8)D_0037F510.unk32 < 0) {
+    if ((s8)D_0037F510.secondaryTriangle < 0) {
         D_004366B4 ^= 1;
     }
     if (D_00452E90.editing == 0) {
         previousSelection = D_00452E90.selection;
-        if ((u8)D_0037F510.unk36 & 2) {
+        if ((u8)D_0037F510.secondaryUp & 2) {
             D_00452E90.selection--;
             if (D_00452E90.selection < 0) {
                 D_00452E90.selection = 3;
             }
         }
-        if ((u8)D_0037F510.unk37 & 2) {
+        if ((u8)D_0037F510.secondaryDown & 2) {
             D_00452E90.selection++;
             if (D_00452E90.selection >= 4) {
                 D_00452E90.selection = 0;
@@ -620,7 +620,7 @@ s32 itfEditOverlayColor(void) {
         if (previousSelection != D_00452E90.selection) {
             D_00452E90.blink = 0;
         }
-        if (D_0037F510.unk31 < 0) {
+        if (D_0037F510.secondaryCross < 0) {
             D_00452E90.editing ^= 1;
             D_00452E90.blink = 0;
         }
@@ -3347,7 +3347,7 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
     if (btlCheckSpecialAbility(&defender->partyRecord, 0x24F)) {
         scale *= datAbilityParameters[0x24F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
-    if (datCommandRecords[command].stat34 == 100) {
+    if (datCommandRecords[command].criticalPercent == 100) {
         critical = 100;
         fixed = 100;
     }

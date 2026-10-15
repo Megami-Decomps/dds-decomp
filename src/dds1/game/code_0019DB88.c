@@ -819,12 +819,12 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
         } else {
             dx = ((u8)D_00324510.coarseUp << 3) & 0x10;
         }
-        if (D_00324510.unk36 & 2) {
+        if (D_00324510.secondaryUp & 2) {
             dy = -8;
         } else {
-            dy = ((u8)D_00324510.unk37 << 2) & 8;
+            dy = ((u8)D_00324510.secondaryDown << 2) & 8;
         }
-        if (D_00324510.unk31 != 0) {
+        if (D_00324510.secondaryCross != 0) {
             dx *= 8;
             dy *= 8;
         }
@@ -861,12 +861,12 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
     } else {
         step = (D_00324510.coarseUp & 2) > 0;
     }
-    if (D_00324510.unk36 & 2) {
+    if (D_00324510.secondaryUp & 2) {
         step = -1;
-    } else if (D_00324510.unk37 & 2) {
+    } else if (D_00324510.secondaryDown & 2) {
         step = 1;
     }
-    if (D_00324510.unk31 != 0) {
+    if (D_00324510.secondaryCross != 0) {
         step *= 10;
     }
     if (step != 0) {
@@ -1166,18 +1166,18 @@ s32 kwlnUpdateBlurDebugMenu(void) {
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
-    if ((s8)D_00324510.unk32 < 0) {
+    if ((s8)D_00324510.secondaryTriangle < 0) {
         kwlnDrawOverlayEnabled ^= 1;
     }
     if (D_003D73D0.editing == 0) {
         previous = D_003D73D0.selection;
-        if ((u8)D_00324510.unk36 & 2) {
+        if ((u8)D_00324510.secondaryUp & 2) {
             D_003D73D0.selection--;
             if (D_003D73D0.selection < 0) {
                 D_003D73D0.selection = 2;
             }
         }
-        if ((u8)D_00324510.unk37 & 2) {
+        if ((u8)D_00324510.secondaryDown & 2) {
             D_003D73D0.selection++;
             if (D_003D73D0.selection >= 3) {
                 D_003D73D0.selection = 0;
@@ -1186,7 +1186,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         if (previous != D_003D73D0.selection) {
             D_003D73D0.blink = 0;
         }
-        if (D_00324510.unk31 < 0) {
+        if (D_00324510.secondaryCross < 0) {
             D_003D73D0.editing ^= 1;
             D_003D73D0.blink = 0;
         }
@@ -1195,13 +1195,13 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         }
     } else {
         if (D_003D73D0.selection == 2) {
-            if (D_00324510.unk36 != 0) {
+            if (D_00324510.secondaryUp != 0) {
                 D_003BA910[1] -= 16;
                 if (D_003BA910[1] < -224) {
                     D_003BA910[1] = -224;
                 }
             }
-            if (D_00324510.unk37 != 0) {
+            if (D_00324510.secondaryDown != 0) {
                 D_003BA910[1] += 16;
                 if (D_003BA910[1] > 224) {
                     D_003BA910[1] = 224;

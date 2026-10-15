@@ -455,7 +455,7 @@ void fileManInit(void) {
 
 void fileReqInit(s32 request) {
     FileReqEntry *entry = &fileRequestEntries[request];
-    func_0034F7B8(request, 0, &entry->unk4, &entry->sizeKiB, &entry->unkC);
+    func_0034F7B8(request, 0, &entry->cardType, &entry->sizeKiB, &entry->formatted);
     /* cc1probe: reset survives 01.sibling, disappears at 13.life, and
      * retains the retail JAL/epilogue; see the post-call exception in
      * docs/CONTRIBUTING.md. The other game has the same 76-byte wrapper. */
@@ -483,14 +483,14 @@ s32 fileReqPoll(void) {
             entry->slotMetadataDirty = result;
             entry->selectedSlot = 0;
         }
-        switch (entry->unk4) {
+        switch (entry->cardType) {
         case 0:
             entry->slotMetadataDirty = result;
             entry->status = 0;
             entry->selectedSlot = 0;
             break;
         case 2:
-            if (entry->unkC == 0) {
+            if (entry->formatted == 0) {
                 retries = entry->requestRetryCount;
                 if (retries < 5) {
                     entry->requestRetryCount = retries + 1;

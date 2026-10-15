@@ -1400,7 +1400,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (D_00324510.syncKey < 0) {
         result = -2;
     }
-    if (D_00324510.unk2D < 0) {
+    if (D_00324510.select < 0) {
         result = -3;
     }
     return result;

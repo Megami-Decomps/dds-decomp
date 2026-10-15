@@ -5,7 +5,7 @@ struct DatPartyRecord;
 
 #ifdef VERSION_DDS1
 /* DDS1's 0x54-byte requirement row is distinct from the DDS2 rule record.
- * Word 0 is read as a value by the provider, but its broader role is unknown. */
+ * Bits 0x8/0x10 select state 0/1 rule aggregation; other bits remain unknown. */
 typedef struct PrfDds1RequirementSlot {
     s32 status;
     u8 unknown04[4];
@@ -14,7 +14,7 @@ typedef struct PrfDds1RequirementSlot {
 } PrfDds1RequirementSlot;
 
 typedef struct PrfDds1RequirementRecord {
-    u32 unknown00;
+    u32 stateFlags;
     u32 flags04;
     u8 pad08[0x10];
     u32 flags18;

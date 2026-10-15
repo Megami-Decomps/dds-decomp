@@ -735,7 +735,7 @@ void sdfInsertFloatKeyTreeItem(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
 }
 
 void sdfReleasePoolNode(SdfPool *pool, SdfKeyPoolNode *node) {
-    if (node->unk4 != 0) {
+    if (node->packetHeadAddress != 0) {
         if (node->kind == SDF_POOL_FREE_KIND) {
             node->next = pool->freeHead;
             pool->freeHead = node;
@@ -801,7 +801,7 @@ void sdfUpdatePoolFreeListByMode(SdfPool *pool, s32 mode, SdfKeyPoolNode *node) 
         sdfRebuildPoolChain(pool);
         break;
     case SDF_POOL_PUSH_FREE:
-        if (node->unk4 != 0) {
+        if (node->packetHeadAddress != 0) {
             node->next = pool->freeHead;
             pool->freeHead = node;
         }

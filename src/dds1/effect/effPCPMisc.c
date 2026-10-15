@@ -4323,7 +4323,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
     groupSet->scale = 1.0f;
     groupSet->color = 0x80808080;
     groupSet->workHandle = workResource;
-    groupSet->unk16C = header->spawnParams.start[1];
+    groupSet->fragmentLength = header->spawnParams.start[1];
     groupEntryCursor = (EffPCPGroupEntry *)(groupSet + 1);
     groupSet->entries = groupEntryCursor;
     groupSet->duplicates = 0;
@@ -4497,7 +4497,7 @@ void effPcpUpdateRadialFragmentGroupSet(EffPCPGroupSet *work) {
     s32 frame;
 
     count = work->head.count;
-    repeat = work->head.unk50;
+    repeat = work->head.repeat;
     duration = work->head.framesPerEntry;
     fadeIn = work->head.fadeIn;
     fadeOut = work->head.fadeOut;
@@ -4506,7 +4506,7 @@ void effPcpUpdateRadialFragmentGroupSet(EffPCPGroupSet *work) {
     endRadialBlend = work->head.endRadialBlend;
     entry = work->entries;
     color = work->color;
-    length = work->unk16C;
+    length = work->fragmentLength;
     PCP_COPY_VECTOR(origin, work->head.origin);
     if (duration == 0) {
         return;
