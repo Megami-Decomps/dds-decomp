@@ -9026,7 +9026,73 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013F100);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013F340);
+void func_0013F340(const char *name) {
+    FldActorEntry *entry;
+    s32 area;
+    s32 room;
+    s32 i;
+
+    if (name == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldActorWaypointRows.actors[i];
+        if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind == 1 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->sequenceKind;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 2 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->sequenceKind;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 3 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->sequenceKind;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 4 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->sequenceKind;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        } else if (entry->kind == 5 && entry->variantMode == 0) {
+            if (entry->floor == fldAreaState.floor + 1 && strcmp(name, entry->name) == 0) {
+                area = entry->variant ? entry->variant : fldAreaState.area;
+                room = entry->sequenceKind;
+                if (room == 0) {
+                    room = fldAreaState.floor + 1;
+                }
+                fldRequestAreaResource(area, room);
+                return;
+            }
+        }
+    }
+}
 
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
