@@ -334,7 +334,7 @@ typedef struct DatEnemyRecord {
     u16 overrideFlag;     /* 0x42: model flag gating the override action. */
     u8 overrideAction;    /* 0x44: action selected before the ordinary slots. */
     u8 overrideChance;    /* 0x45: bucket threshold for the override action. */
-    s8 unk46;            /* Signed indexed-value accessor. */
+    s8 indexedValueOverride; /* 0x46: signed value used for enemy selector index zero. */
     u8 tickCount;         /* 0x47: enemy action tick count; zero is read as one. */
     u8 attackSpacing;    /* Repeat-hit interval, scaled by the command's effect data. */
     u8 pad49[3];
@@ -347,6 +347,8 @@ typedef char DatEnemyActionChancesOffsetCheck[((u32)&((DatEnemyRecord *)0)->acti
 typedef char DatEnemyOverrideFlagOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideFlag == 0x42) ? 1 : -1];
 typedef char DatEnemyOverrideActionOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideAction == 0x44) ? 1 : -1];
 typedef char DatEnemyOverrideChanceOffsetCheck[((u32)&((DatEnemyRecord *)0)->overrideChance == 0x45) ? 1 : -1];
+typedef char DatEnemyIndexedValueOverrideOffsetCheck[
+    ((u32)&((DatEnemyRecord *)0)->indexedValueOverride == 0x46) ? 1 : -1];
 typedef char DatEnemyRecordAdditionalDropItemIdsOffsetCheck[
     ((u32)&((DatEnemyRecord *)0)->additionalDropItemIds == 0x3E) ? 1 : -1];
 

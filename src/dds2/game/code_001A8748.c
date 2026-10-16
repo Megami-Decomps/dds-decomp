@@ -1746,7 +1746,7 @@ s32 btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, BtlUnit *second,
 
 s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
     if (index == 0 && (object->status.flags & 0x400) != 0) {
-        return datEnemyRecords[object->partyRecord.unitId].unk46;
+        return datEnemyRecords[object->partyRecord.unitId].indexedValueOverride;
     }
     return datCommandSelectors[index].stat;
 }
