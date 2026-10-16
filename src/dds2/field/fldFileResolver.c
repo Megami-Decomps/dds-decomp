@@ -3532,7 +3532,7 @@ void fldInterpolateCameraEndpoints(void) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012FA58);
 
 extern void dds3SetCameraVector(EffWorldNode *camera, u128 *worldEye);
-extern f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by);
+extern f32 fldGetNormalizedComplementaryAngle(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 

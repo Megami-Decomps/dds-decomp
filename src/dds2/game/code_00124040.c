@@ -250,7 +250,7 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 struct EffWorldNode;
 
 
-extern f32 fldGetDirectionAngleBetweenXZPositions(f32, f32, f32, f32);
+extern f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 
 extern u8 D_0037F530[];
 
@@ -664,8 +664,8 @@ f32 fldGetDirectionAngleBetweenXZPositions(f32 fromX, f32 fromZ, f32 toX, f32 to
     return result;
 }
 
-f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
-    s32 angle = (s32)(360.0f - fldGetDirectionAngleBetweenXZPositions(ax, ay, bx, by) + 90.0f);
+f32 fldGetNormalizedComplementaryAngle(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
+    s32 angle = (s32)(360.0f - fldGetDirectionAngleBetweenXZPositions(fromX, fromZ, toX, toZ) + 90.0f);
     return (f32)(angle % 360);
 }
 
