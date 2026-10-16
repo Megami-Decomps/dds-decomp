@@ -6957,7 +6957,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     u16 effectId;
 
     if (actor->selectedEntryIndex > 0) {
-        effectId = datCommandRecords[actor->selectedEntryIndex].unk2E;
+        effectId = datCommandRecords[actor->selectedEntryIndex].commandEffectId;
     } else {
         effectId = 0;
     }
