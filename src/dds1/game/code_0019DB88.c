@@ -1046,7 +1046,7 @@ typedef struct ItfFovPanelWork {
 } ItfFovPanelWork;
 
 extern ItfFovPanelWork D_003D73C0;
-extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
 s32 btlEditCameraFieldOfView(void) {
@@ -1056,7 +1056,7 @@ s32 btlEditCameraFieldOfView(void) {
 
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list,
-                    sdfCreateBorderedRectanglePacket(0x8500, 0x79C0, 0xFEFFFF,
+                    (u32)sdfCreateBorderedRectanglePacket(0x8500, 0x79C0, 0xFEFFFF,
                                   0xA80, 0x120, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
     sdfAppendPacket(list,
@@ -1172,7 +1172,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
 
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list,
-        sdfCreateBorderedRectanglePacket(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
+        (u32)sdfCreateBorderedRectanglePacket(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
     sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet,
         "BLUR:        %s", kwlnDrawOverlayEnabled ? D_003BB260 : D_003BB268));
@@ -1212,7 +1212,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         y += 0x60;
     }
     sdfAppendPacket(list,
-        sdfCreateBorderedRectanglePacket((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
+        (u32)sdfCreateBorderedRectanglePacket((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
