@@ -539,8 +539,8 @@ void mnuUnloadStaffFonts(void) {
 }
 
 /* DDS2 uses the larger 0xA10-entry glyph table; 0xFFFF is missing. */
-u32 itfDecodeGlyph(u32 value) {
-    s32 adjusted = (value & 0xffff) + 0xffff7f80;
+u32 itfDecodeGlyph(u32 glyphCode) {
+    s32 adjusted = (glyphCode & 0xffff) + 0xffff7f80;
     s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
 
     if ((u32)index < 0xA10) {
