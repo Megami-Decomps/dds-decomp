@@ -140,7 +140,7 @@ extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 extern s32 scrGetWindow(void);
 
 
-extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
+extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot);
 
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
@@ -804,9 +804,9 @@ u32 evtOpBeginWindowCallback(void) {
         return 1;
     }
     {
-        s32 scriptParam1 = scrReadIntParameter(1);
-        s32 scriptParam2 = scrReadIntParameter(2);
-        evtStoreUnitMotionSlotSelection(unit, scriptParam1, scriptParam2);
+        s32 firstSlot = scrReadIntParameter(1);
+        s32 secondSlot = scrReadIntParameter(2);
+        evtStoreUnitMotionSlotSelection(unit, firstSlot, secondSlot);
         evtWindowMotionUnit = (u32)unit;
     }
     {
@@ -827,9 +827,9 @@ u32 evtOpActivateUnitMotionOnWindowEvent(void) {
         return 1;
     }
     {
-        s32 scriptParam1 = scrReadIntParameter(1);
-        s32 scriptParam2 = scrReadIntParameter(2);
-        evtStoreUnitMotionSlotSelection(unit, scriptParam1, scriptParam2);
+        s32 firstSlot = scrReadIntParameter(1);
+        s32 secondSlot = scrReadIntParameter(2);
+        evtStoreUnitMotionSlotSelection(unit, firstSlot, secondSlot);
         evtActivateStoredUnitMotionSlot((u32)unit);
         evtWindowMotionUnit = (u32)unit;
     }
