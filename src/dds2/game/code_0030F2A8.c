@@ -104,13 +104,13 @@ void fldRotateVectorAroundAxis(float *vector, float *axis, float angle) {
     vector[2] = scratch.x * rotationMatrix[2] + scratch.y * rotationMatrix[5] + scratch.z * rotationMatrix[8];
 }
 
-void sdfVec3AddInPlace(float *vector, float *delta) {
+void sdfVec3AddInPlace(float *vector, const float *delta) {
     *vector = *vector + *delta;
     vector[1] = vector[1] + delta[1];
     vector[2] = vector[2] + delta[2];
 }
 
-void sdfVec3SubtractInPlace(float *vector, float *delta) {
+void sdfVec3SubtractInPlace(float *vector, const float *delta) {
     *vector = *vector - *delta;
     vector[1] = vector[1] - delta[1];
     vector[2] = vector[2] - delta[2];
