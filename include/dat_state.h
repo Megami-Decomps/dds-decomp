@@ -391,7 +391,7 @@ typedef struct BattleAdjustmentEntry {
     u16 sceneIndex;
     u16 weight;
     s8 value;
-    u8 unk05;
+    u8 serialEncounterChanceAdjustment; /* 0x05: input percentage before world-flag scaling and clamp. */
 } BattleAdjustmentEntry;
 
 typedef struct BattleAdjustmentGroup {
@@ -410,6 +410,8 @@ typedef struct BattleAdjustmentRecord {
 } BattleAdjustmentRecord;
 
 typedef char BattleAdjustmentEntrySizeCheck[sizeof(BattleAdjustmentEntry) == 6 ? 1 : -1];
+typedef char BattleAdjustmentEntrySerialChanceAdjustmentOffsetCheck[
+    ((u32)&((BattleAdjustmentEntry *)0)->serialEncounterChanceAdjustment == 5) ? 1 : -1];
 typedef char BattleAdjustmentGroupSizeCheck[sizeof(BattleAdjustmentGroup) == 0x7C ? 1 : -1];
 typedef char BattleAdjustmentRecordSizeCheck[sizeof(BattleAdjustmentRecord) == 0x20C ? 1 : -1];
 typedef char BattleAdjustmentStreamOffsetCheck[(u32)&((BattleAdjustmentRecord *)0)->streamSelection == 4 ? 1 : -1];
@@ -423,7 +425,7 @@ typedef struct BattleAdjustmentEntry {
     u16 sceneIndex;
     u16 weight;
     s8 value;
-    u8 opaque05;
+    u8 serialEncounterChanceAdjustment; /* 0x05: input percentage before world-flag scaling and clamp. */
 } BattleAdjustmentEntry;
 
 typedef struct BattleAdjustmentGroup {
@@ -441,6 +443,8 @@ typedef struct BattleAdjustmentRecord {
 } BattleAdjustmentRecord;
 
 typedef char BattleAdjustmentEntrySizeCheck[(sizeof(BattleAdjustmentEntry) == 6) ? 1 : -1];
+typedef char BattleAdjustmentEntrySerialChanceAdjustmentOffsetCheck[
+    ((u32)&((BattleAdjustmentEntry *)0)->serialEncounterChanceAdjustment == 5) ? 1 : -1];
 typedef char BattleAdjustmentGroupSizeCheck[(sizeof(BattleAdjustmentGroup) == 0x7C) ? 1 : -1];
 typedef char BattleAdjustmentRecordSizeCheck[(sizeof(BattleAdjustmentRecord) == 0x190) ? 1 : -1];
 typedef char BattleAdjustmentConditionsOffsetCheck[((u32)&((BattleAdjustmentRecord *)0)->conditions == 0x08) ? 1 : -1];
