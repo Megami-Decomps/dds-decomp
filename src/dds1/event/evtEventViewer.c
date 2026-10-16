@@ -3902,6 +3902,8 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
     }
 }
 
+INCLUDE_RODATA(const s32, "event/evtEventViewer", evtViewerTaskName);
+
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBE78);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBE7A);
@@ -3971,6 +3973,4 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBF60);
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBF70);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", evtViewerTaskName);
 

@@ -6617,7 +6617,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", fldYukEffectPositioned);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363A0);
 
-INCLUDE_SDATA(const struct SdfMemBlock *, "game/code_001442D0", D_004363A4);
+INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363A4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363A8);
 
