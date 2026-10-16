@@ -9869,7 +9869,72 @@ s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
     return slotCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CF800);
+void func_001CF800(void) {
+    BtlState *scene = (BtlState *)btlGetRuntime();
+    BtlSceneFadingRecord *records;
+    BtlSceneFadingRecord *fade;
+    BtlSceneFadingRecord *record;
+    BattleActorPanelWork *panel;
+    ActorSlotOrder *order;
+    s32 lastIndex = 0;
+    s32 i;
+    s32 count;
+    s32 fading;
+    u32 state;
+
+    fldCountSceneFadeKinds(scene, &lastIndex);
+    fading = btlFadeStaleSceneSlots(lastIndex);
+    if (fading == 0) {
+        fade = scene->fading;
+        fldInitSceneFadeRecords();
+        lastIndex = 0;
+        if (fade[0].slot.group != 0) {
+            do {
+                lastIndex++;
+            } while ((u32)lastIndex < 8 && fade[lastIndex].slot.group != 0);
+        }
+        lastIndex--;
+        if (scene->currentScene == 7) {
+            D_00438F58[D_00438F54->bank]->flags |= 0x1000;
+            panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(
+                kwlnTaskGetTaskByName(D_004367CC));
+            btlClearClosingActorRowPulses(panel, 0);
+            btlAdvancePendingSceneSlotStates((u8 *)panel);
+            btlUpdateActorSlotStates((u8 *)panel, 0);
+        } else {
+            D_00438F58[D_00438F54->bank]->flags &= 0xFFF;
+        }
+    }
+    records = scene->fading;
+    fldSetSceneSlotRange(lastIndex + 1);
+    btlUpdateBankedSlotFadeSequence();
+    btlDrawSceneSlotFades();
+    btlDrawSceneSlotFadeTiles();
+    D_00438F58[D_00438F54->bank]->flags &= 0xF000;
+    count = lastIndex;
+    for (i = 0; i <= count; i++) {
+        record = &records[count - i];
+        state = record->alpha;
+        if (state == 128) {
+            if (record->slot.remaining != 100) {
+                u16 flags;
+                s8 slotState;
+                order = D_00438F58[D_00438F54->bank];
+                flags = order->flags;
+                if ((flags & 0x1000) && ((slotState = order->state[i]) == 1)) {
+                    order->flags = flags | (slotState << i);
+                } else {
+                    btlRequestActorSlotOrderTransition(i, 0);
+                }
+            }
+        }
+        if (record->alpha < 64) {
+            btlRequestActorSlotOrderTransition(i, 1);
+        }
+    }
+    btlUpdateActorSlotOrderAnimation();
+    btlDrawActorSlotOrder();
+}
 
 s32 btlUpdateScenePanelTask(KwlnTask *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
