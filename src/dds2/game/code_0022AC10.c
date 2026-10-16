@@ -1573,7 +1573,46 @@ void btlInitLightParams(void) {
     kwlnOverlayAmbientColor.b = 1.15f;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022D040);
+extern u8 effSharedRandomState[];
+extern f32 cosf(f32);
+void func_0022D040(void) {
+    s32 row;
+    s32 column;
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 value;
+
+    btlRuntimeState.unk20 = cosf(3.1415926f / 6.0f) * 15.0f;
+    btlRuntimeState.unk24 = 0xB;
+    btlRuntimeState.particlesPerRow = 0x200 / (btlRuntimeState.unk20 * 2) + 1;
+    btlRuntimeState.particleRowCount = 0x1C0 / (btlRuntimeState.unk24 << 1) + 1;
+    btlRuntimeState.ownedData = sdfAllocateBlockBySizeThreshold(
+        btlRuntimeState.particlesPerRow * btlRuntimeState.particleRowCount * sizeof(BtlFadeParticle));
+    btlRuntimeState.unk28 = 0;
+    btlRuntimeState.unk2C = 128.0f;
+    btlRuntimeState.unk30 = -128.0f;
+    btlRuntimeState.unk34 = 128.0f;
+
+    for (row = 0; row < btlRuntimeState.particleRowCount; row++) {
+        for (column = 0; column < btlRuntimeState.particlesPerRow; column++) {
+            direction[0] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+            direction[1] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+            direction[2] = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
+            VU0_NORMALIZE_PACKED_VECTOR(direction);
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[0] = direction[0];
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[1] = direction[1];
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2] = direction[2];
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle = 0;
+            value = effMiscRandUnitFloat(effSharedRandomState);
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed = (value * 0.5f + 0.5f) * 0.31415925f;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement = 0;
+            value = effMiscRandUnitFloat(effSharedRandomState);
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacementSpeed = (value * 0.5f + 0.5f) * 9.999998093f;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha = 0x80;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age = 0;
+            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay = effMiscRandMod(0, 8);
+        }
+    }
+}
 
 void btlReleaseOwnedData(void) {
     void *data = btlRuntimeState.ownedData;
