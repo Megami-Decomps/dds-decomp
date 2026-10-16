@@ -96,7 +96,7 @@ extern char D_0040BAF8[];
 
 extern s32 sdfSoundRpcSemaphore;
 
-extern s32 sdfCreateSemaphore(s32, s32, s32);
+extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
 extern s32 GetThreadId(void);
 
