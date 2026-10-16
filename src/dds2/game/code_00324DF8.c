@@ -7,33 +7,33 @@
 extern void (*sdfTickCallback)(void);
 
 /* Append a value to the first resource list in a two-list owner. */
-void dds3AppendFirstResourceListValue(u32 *lists, u32 option) {
-    dds3AppendIndexedListNode((MnuCallbackList *)*lists, 0, option);
+void dds3AppendFirstResourceListValue(MnuCallbackListPair *lists, u32 option) {
+    dds3AppendIndexedListNode(lists->first, 0, option);
 }
 
-u32 mnuInsertResourceHandleAfterMatchingId(u32 *pair, u32 key, u32 value) {
-    SdfListNode *node = mnuFindResourceNodeById((MnuCallbackList *)pair[0], key);
+u32 mnuInsertResourceHandleAfterMatchingId(MnuCallbackListPair *pair, u32 key, u32 value) {
+    SdfListNode *node = mnuFindResourceNodeById(pair->first, key);
     if (node) {
-        return (u32)dds3InsertIndexedListNodeAfter((MnuCallbackList *)pair[0], node, 0, value);
+        return (u32)dds3InsertIndexedListNodeAfter(pair->first, node, 0, value);
     }
     return 0;
 }
 
-void mnuRemoveMatchedNodesFromLinkedResourceLists(u32 *pair, u32 key) {
-    SdfListNode *node = mnuFindResourceNodeById((MnuCallbackList *)pair[0], key);
+void mnuRemoveMatchedNodesFromLinkedResourceLists(MnuCallbackListPair *pair, u32 key) {
+    SdfListNode *node = mnuFindResourceNodeById(pair->first, key);
     if (node == 0) {
         return;
     }
-    dds3RemoveListNodeAndNotify((MnuCallbackList *)pair[1],
-                                mnuFindResourceNodeByHandle((MnuCallbackList *)pair[1], (u32)node->value));
-    dds3RemoveListNodeAndNotify((MnuCallbackList *)pair[0], node);
+    dds3RemoveListNodeAndNotify(pair->second,
+                                mnuFindResourceNodeByHandle(pair->second, (u32)node->value));
+    dds3RemoveListNodeAndNotify(pair->first, node);
 }
 
 extern s32 mnuClearResourceList(MnuCallbackList *);
 
-s64 mnuClearOwnedResourceListPair(u32 *pair) {
-    mnuClearResourceList((MnuCallbackList *)pair[0]);
-    return mnuClearResourceList((MnuCallbackList *)pair[1]);
+s64 mnuClearOwnedResourceListPair(MnuCallbackListPair *pair) {
+    mnuClearResourceList(pair->first);
+    return mnuClearResourceList(pair->second);
 }
 
 void func_00324F20(MnuCallbackList **list, u32 handle) {

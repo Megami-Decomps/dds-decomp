@@ -46,29 +46,27 @@ typedef struct SdfResourceVectorRecord30 {
     SdfVec4 *vector;
 } SdfResourceVectorRecord30;
 
-extern u32 *mnuCreateCallbackPair(void);
-
 extern void *memcpy(void *, const void *, u32);
 
-/* Append a value to the first resource list in a two-list owner. */ void dds3AppendFirstResourceListValue(u32 *lists, u32 option);
+/* Append a value to the first resource list in a two-list owner. */ void dds3AppendFirstResourceListValue(MnuCallbackListPair *lists, u32 option);
 
-/* Allocate bytes, track the handle in owner[1], and return the owned buffer. */
-void *sdfAllocateOwnedResourceBuffer(u32 *owner, u32 bytes) {
+/* Allocate bytes, track the handle in the second owner list, and return it. */
+void *sdfAllocateOwnedResourceBuffer(MnuCallbackListPair *owner, u32 bytes) {
     void *handle;
 
     handle = sdfAllocHeapMemory(bytes);
-    dds3AppendIndexedListNode((MnuCallbackList *)owner[1], 0, (u32)handle);
+    dds3AppendIndexedListNode(owner->second, 0, (u32)handle);
     return handle;
 }
 
 /* Unlink the owner list node that carries the handle and notify its callbacks. */
-void mnuRemoveLinkedResourceByHandle(u32 *owner, u32 handle) {
-    SdfListNode *node = mnuFindResourceNodeByHandle((MnuCallbackList *)owner[1], handle);
+void mnuRemoveLinkedResourceByHandle(MnuCallbackListPair *owner, u32 handle) {
+    SdfListNode *node = mnuFindResourceNodeByHandle(owner->second, handle);
 
-    dds3RemoveListNodeAndNotify((MnuCallbackList *)owner[1], node);
+    dds3RemoveListNodeAndNotify(owner->second, node);
 }
 
-DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list) {
+DdsNestedHeader *sdfCloneNestedResourceRecord(MnuCallbackListPair *owner, MnuCallbackList **list) {
     SdfListNode *node;
     DdsNestedHeader *buffer;
     DdsNestedGroup *group;
@@ -127,8 +125,8 @@ DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list
 
 /* Clone each nested group into its own owned buffer, relocating the payload
  * pointers of its two counted lists into the copy. Return the resource-list owner. */
-u32 *func_003251C0(const DdsNestedHeader *header) {
-    u32 *owner = mnuCreateCallbackPair();
+MnuCallbackListPair *func_003251C0(const DdsNestedHeader *header) {
+    MnuCallbackListPair *owner = mnuCreateCallbackPair();
     DdsNestedGroup *group = header->groups;
     s32 i;
 
@@ -167,7 +165,7 @@ u32 *func_003251C0(const DdsNestedHeader *header) {
 }
 
 /* Pack both callback lists into separate header and eight-byte payload regions. */
-DdsNestedGroup *sdfPackCountedPayloadLists(u32 *owner, MnuCallbackList **firstList,
+DdsNestedGroup *sdfPackCountedPayloadLists(MnuCallbackListPair *owner, MnuCallbackList **firstList,
                              MnuCallbackList **secondList) {
     u32 firstBytes = 0;
     u32 secondBytes;
@@ -253,7 +251,7 @@ typedef struct SdfFilteredRecords {
 
 /* Copy enabled eight-byte records into owner-managed contiguous storage.
  * Return a count/pointer header containing only nonzero-enabled records. */
-SdfFilteredRecords *sdfCloneEnabledFilterRecords(u32 *owner, SdfFilterRecord *records, u32 count) {
+SdfFilteredRecords *sdfCloneEnabledFilterRecords(MnuCallbackListPair *owner, SdfFilterRecord *records, u32 count) {
     u32 enabled = 0;
     u32 i;
     s32 size;
@@ -279,8 +277,8 @@ SdfFilteredRecords *sdfCloneEnabledFilterRecords(u32 *owner, SdfFilterRecord *re
     return result;
 }
 
-u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
-    u32 *owner = mnuCreateCallbackPair();
+MnuCallbackListPair *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
+    MnuCallbackListPair *owner = mnuCreateCallbackPair();
 
     if (count != 0) {
         do {
@@ -310,8 +308,8 @@ typedef struct SdfSpriteListRecord {
 
 /* Deep-copy count sprite records, each into one owned buffer: the header, its
  * item words, its vector and, when present, the nested groups with payloads. */
-u32 *sdfCloneOwnedSpriteRecordList(const SdfSpriteListRecord *source, s32 count) {
-    u32 *owner = mnuCreateCallbackPair();
+MnuCallbackListPair *sdfCloneOwnedSpriteRecordList(const SdfSpriteListRecord *source, s32 count) {
+    MnuCallbackListPair *owner = mnuCreateCallbackPair();
 
     while (count > 0) {
         DdsNestedHeader *nested = source->nested;
@@ -389,8 +387,8 @@ u32 *sdfCloneOwnedSpriteRecordList(const SdfSpriteListRecord *source, s32 count)
 
 /* Deep-copy count basic sprite headers and their sixteen-byte vectors.
  * Return the resource-list owner; each copied header points to its own vector. */
-u32 *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *source, s32 count) {
-    u32 *owner = mnuCreateCallbackPair();
+MnuCallbackListPair *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *source, s32 count) {
+    MnuCallbackListPair *owner = mnuCreateCallbackPair();
 
     while (count != 0) {
         SdfResourceVectorRecord1C *copy =
@@ -411,8 +409,8 @@ u32 *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *source, s32 count) {
 
 /* Deep-copy count extended sprite headers and their sixteen-byte vectors.
  * Return the resource-list owner with each copied vector stored after its header. */
-u32 *sdfCloneExtendedSpriteRecords(const SdfResourceVectorRecord30 *source, s32 count) {
-    u32 *owner = mnuCreateCallbackPair();
+MnuCallbackListPair *sdfCloneExtendedSpriteRecords(const SdfResourceVectorRecord30 *source, s32 count) {
+    MnuCallbackListPair *owner = mnuCreateCallbackPair();
 
     while (count != 0) {
         SdfResourceVectorRecord30 *copy =
@@ -450,7 +448,7 @@ extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
 
 extern void sdfFreeHeapMemory(void *);
 
-SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, MnuCallbackList **source,
+SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner, MnuCallbackList **source,
                                   MnuCallbackList **groups) {
     SdfRelocatedResource *result;
     SdfListNode *node;

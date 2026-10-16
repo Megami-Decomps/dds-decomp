@@ -25,6 +25,18 @@ typedef char MnuCallbackList_userData_offset_must_be_C[((u32)&((MnuCallbackList 
 typedef char MnuCallbackList_onRemove_offset_must_be_10[((u32)&((MnuCallbackList *)0)->onRemove == 0x10) ? 1 : -1];
 typedef char MnuCallbackList_onDestroy_offset_must_be_14[((u32)&((MnuCallbackList *)0)->onDestroy == 0x14) ? 1 : -1];
 
+/* Two callback lists jointly own buffers: first lists values, second releases them. */
+typedef struct MnuCallbackListPair {
+    MnuCallbackList *first;  /* 0x00 */
+    MnuCallbackList *second; /* 0x04 */
+} MnuCallbackListPair;
+
+typedef char MnuCallbackListPair_size_must_be_8[(sizeof(MnuCallbackListPair) == 8) ? 1 : -1];
+typedef char MnuCallbackListPair_first_offset_must_be_0[((u32)&((MnuCallbackListPair *)0)->first == 0x00) ? 1 : -1];
+typedef char MnuCallbackListPair_second_offset_must_be_4[((u32)&((MnuCallbackListPair *)0)->second == 0x04) ? 1 : -1];
+
+MnuCallbackListPair *mnuCreateCallbackPair(void);
+
 MnuCallbackList *mnuCreateCallbackNode(u32 userData);
 MnuCallbackList *mnuCreateReleaseCallbackNode(void);
 void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *list);
