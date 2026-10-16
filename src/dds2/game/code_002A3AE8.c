@@ -63,7 +63,7 @@ void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                   drawContext);
 }
 
-extern struct MenuList *mnuCreateListState(u32, u32, s32);
+extern struct MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing);
 
 
 
