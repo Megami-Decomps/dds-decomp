@@ -1158,7 +1158,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
     return matchedNode->motionTable->unk00;
 }
 
-extern void sdfUpdateActiveResourceListScalars(DevRequest *, s32, f32);
+extern void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount);
 
 /* Forward the packed scalar word and blend value to each active inner asset. */
 void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 tint, f32 amount) {

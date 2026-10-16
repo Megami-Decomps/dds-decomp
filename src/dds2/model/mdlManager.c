@@ -1190,7 +1190,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
     return matchedNode->motionTable->unk00;
 }
 
-extern void sdfUpdateActiveResourceListScalars(DevRequest *, s32, f32);
+extern void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount);
 
 /* Update the inner resource list with the packed model-color word and scalar. */
 void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 tint, f32 amount) {
