@@ -374,7 +374,7 @@ u32 itfGetTextLipsMotionId(void) {
     return itfTextLipsMotionId;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E918);
+INCLUDE_ASM(const s32, "game/code_0019E138", frFontSubmitAtlasSetupPackets);
 
 /* Skip one encoded-text control without executing it; returns 1 for the stop codes and 2 for the voice trigger. */
 s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {

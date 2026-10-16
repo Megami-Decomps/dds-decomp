@@ -30,6 +30,7 @@ kwlnDebugGraphTask = 0x003BD6A8;
 sdfSetModelChildChainVisibility = 0x00142C78; // type:func
 sdfVuLoadRotationMatrixY = 0x002DD708; // type:func
 // Names from tools/names.py (provenance: name_sources.txt)
+frFontSubmitAtlasSetupPackets = 0x00196BE8; // type:func
 evtViewCmdSetObjectTarget = 0x00232108; // type:func
 evtNextCameraSlotViewerKey = 0x003BC368; // type:s32
 btlBuildGroupSizeActionCameraPair = 0x001E0B68; // type:func
@@ -8725,7 +8726,6 @@ frFontGetEncodedTextData = 0x001961B0; // type:func
 itfSetIndexedTextSlot = 0x00196BC0; // type:func
 itfGetTextLipsUnitId = 0x00196BD8; // type:func
 itfGetTextLipsMotionId = 0x00196BE0; // type:func
-func_00196BE8 = 0x00196BE8; // type:func
 itfSkipEncodedTextOpcode = 0x00196ED0; // type:func
 itfScanEncodedTextControls = 0x00197068; // type:func
 itfCreateMeasuredTextGlyph = 0x00197748; // type:func
