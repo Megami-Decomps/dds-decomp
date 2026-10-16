@@ -11,9 +11,9 @@
 #include "sdf.h"
 extern s32 D_004390A4;
 
-extern s32 D_0045C7A0[];
+extern s32 fldMapTargetPos[];
 
-extern s32 D_0045C7B0[];
+extern s32 fldMapPrevTargetPos[];
 
 
 
@@ -24,9 +24,9 @@ extern void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, M
 extern void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node,
                                   f32 progress);
 
-extern MapRequestState *D_004390AC;
+extern MapRequestState *fldMapHaloRequest;
 
-extern MapRequestState *D_004390B0;
+extern MapRequestState *fldMapPulseRequest;
 
 extern s32 D_004390A8;
 
@@ -107,11 +107,11 @@ void func_0030E878(void) {
 void fldCreateMapRequestQueues(void) {
     MapRequestState *state;
     state = sdfCreateLinkedRequestRing(0x14, 0xC);
-    D_004390AC = state;
-    D_004390AC->callback = fldDrawMapRequestHalo;
+    fldMapHaloRequest = state;
+    fldMapHaloRequest->callback = fldDrawMapRequestHalo;
     fldSetMapRequestInterval(state, 0);
-    D_004390B0 = sdfCreateLinkedRequestRing(0x14, 0x18);
-    D_004390B0->callback = fldDrawMapRequestPulse;
+    fldMapPulseRequest = sdfCreateLinkedRequestRing(0x14, 0x18);
+    fldMapPulseRequest->callback = fldDrawMapRequestPulse;
     D_004390A8 = 5;
     D_004390A4 = 0;
 }
@@ -124,8 +124,8 @@ extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 void fldReleaseMapRequestQueue(MapRequestState *state);
 
 void fldReleaseMapRequestQueues(void) {
-    fldReleaseMapRequestQueue(D_004390AC);
-    fldReleaseMapRequestQueue(D_004390B0);
+    fldReleaseMapRequestQueue(fldMapHaloRequest);
+    fldReleaseMapRequestQueue(fldMapPulseRequest);
 }
 
 void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
@@ -169,9 +169,9 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequ
 }
 
 void sdfCommitPendingVectorAndMarkChanged(void) {
-    D_0045C7B0[0] = D_0045C7A0[0];
-    D_0045C7B0[1] = D_0045C7A0[1];
-    D_0045C7B0[2] = D_0045C7A0[2];
+    fldMapPrevTargetPos[0] = fldMapTargetPos[0];
+    fldMapPrevTargetPos[1] = fldMapTargetPos[1];
+    fldMapPrevTargetPos[2] = fldMapTargetPos[2];
     D_004390A4 = 1;
 }
 
@@ -186,32 +186,32 @@ void fldUpdateMapRequestQueues(s32 enabled) {
     if (D_004390A4 != 0 && enabled != 0) {
         D_004388D1 = 0;
         if (D_004390A4 == 1) {
-            fldAdvanceMapRequest(D_004390B0, D_0045C7B0[0], D_0045C7B0[1], D_0045C7B0[2]);
-            fldAdvanceMapRequest(D_004390B0, (s32)D_00400700[index][0],
+            fldAdvanceMapRequest(fldMapPulseRequest, fldMapPrevTargetPos[0], fldMapPrevTargetPos[1], fldMapPrevTargetPos[2]);
+            fldAdvanceMapRequest(fldMapPulseRequest, (s32)D_00400700[index][0],
                 (s32)D_00400700[index][1], (s32)D_00400700[index][2]);
         }
         D_004390A4++;
-        D_0045C7A0[0] = (s32)D_00400700[index][0];
-        D_0045C7A0[1] = (s32)D_00400700[index][1];
-        D_0045C7A0[2] = (s32)D_00400700[index][2];
+        fldMapTargetPos[0] = (s32)D_00400700[index][0];
+        fldMapTargetPos[1] = (s32)D_00400700[index][1];
+        fldMapTargetPos[2] = (s32)D_00400700[index][2];
         if (D_004390A4 >= 7) {
             D_004390A4 = 0;
         }
-        fldAdvanceMapRequest(D_004390AC, D_0045C7A0[0], D_0045C7A0[1], D_0045C7A0[2]);
+        fldAdvanceMapRequest(fldMapHaloRequest, fldMapTargetPos[0], fldMapTargetPos[1], fldMapTargetPos[2]);
     } else {
         if (++D_004388D1 == 0x1C) {
             if (enabled != 0) {
-                fldAdvanceMapRequest(D_004390B0, (s32)D_00400700[index][0],
+                fldAdvanceMapRequest(fldMapPulseRequest, (s32)D_00400700[index][0],
                     (s32)D_00400700[index][1], (s32)D_00400700[index][2]);
             }
             D_004388D1 = 0;
         }
-        D_0045C7A0[0] = (s32)D_00400700[index][0];
-        D_0045C7A0[1] = (s32)D_00400700[index][1];
-        D_0045C7A0[2] = (s32)D_00400700[index][2];
+        fldMapTargetPos[0] = (s32)D_00400700[index][0];
+        fldMapTargetPos[1] = (s32)D_00400700[index][1];
+        fldMapTargetPos[2] = (s32)D_00400700[index][2];
     }
-    fldAdvanceMapRequestAges(D_004390AC);
-    fldAdvanceMapRequestAges(D_004390B0);
+    fldAdvanceMapRequestAges(fldMapHaloRequest);
+    fldAdvanceMapRequestAges(fldMapPulseRequest);
 }
 
 extern f32 sdfCounterGetScaledValue(void);
@@ -235,7 +235,7 @@ void fldDrawSelectedMapMarker(void) {
     } else if (remaining > 0.0f) {
         alpha = remaining;
     }
-    fldDispatchMapRequestCallbacks(D_004390B0);
+    fldDispatchMapRequestCallbacks(fldMapPulseRequest);
     fldProjectPointToGridCell(&gridX, &gridY, D_00400700[index][0], D_00400700[index][1], D_00400700[index][2]);
     opacity = alpha * 32.0f;
     sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x20, 0, 0x54, 2.0f);

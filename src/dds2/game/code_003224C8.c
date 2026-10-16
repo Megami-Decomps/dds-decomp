@@ -38,9 +38,9 @@ extern u32 mnuMenuRecordRegistrySetupCount;
 
 extern void (*sdfTickCallback)(void);
 
-extern MenuRuntimeList D_0045C870;
+extern MenuRuntimeList mnuRuntimeHitTargetList;
 
-extern MenuRuntimeList D_0045C880;
+extern MenuRuntimeList mnuRuntimeAnimationList;
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 

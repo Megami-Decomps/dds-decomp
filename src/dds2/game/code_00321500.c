@@ -38,9 +38,9 @@ extern u32 mnuMenuRecordRegistrySetupCount;
 
 extern void (*sdfTickCallback)(void);
 
-extern MenuRuntimeList D_0045C870;
+extern MenuRuntimeList mnuRuntimeHitTargetList;
 
-extern MenuRuntimeList D_0045C880;
+extern MenuRuntimeList mnuRuntimeAnimationList;
 
 
 extern void mnuFreeOptionalBlock(u32);
@@ -294,23 +294,23 @@ MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *list, s32 x, s32 y, u
 
 
 void mnuInitializeRuntimeHitTargetList(MenuRuntimeRecord *records, s32 capacity) {
-    memset(&D_0045C870, 0, sizeof(D_0045C870));
-    D_0045C870.records = records;
-    D_0045C870.capacity = capacity;
+    memset(&mnuRuntimeHitTargetList, 0, sizeof(mnuRuntimeHitTargetList));
+    mnuRuntimeHitTargetList.records = records;
+    mnuRuntimeHitTargetList.capacity = capacity;
 }
 
 void mnuInitializeRuntimeAnimationList(MenuRuntimeRecord *records, s32 capacity) {
-    memset(&D_0045C880, 0, sizeof(D_0045C880));
-    D_0045C880.records = records;
-    D_0045C880.capacity = capacity;
+    memset(&mnuRuntimeAnimationList, 0, sizeof(mnuRuntimeAnimationList));
+    mnuRuntimeAnimationList.records = records;
+    mnuRuntimeAnimationList.capacity = capacity;
 }
 
 MenuRuntimeList *mnuGetRuntimeHitTargetList(void) {
-    return &D_0045C870;
+    return &mnuRuntimeHitTargetList;
 }
 
 MenuRuntimeList *mnuGetRuntimeAnimationList(void) {
-    return &D_0045C880;
+    return &mnuRuntimeAnimationList;
 }
 
 /* Clears only record storage; the list header and activeCount are unchanged. */
@@ -415,12 +415,12 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
 }
 
 void mnuAdvanceRuntimeHitTargets(void) {
-    mnuAdvanceMovingRuntimeRecords(&D_0045C870);
+    mnuAdvanceMovingRuntimeRecords(&mnuRuntimeHitTargetList);
 }
 
 
 void mnuAdvanceRuntimeAnimationRecords(void) {
-    mnuAdvanceMovingRuntimeRecords(&D_0045C880);
+    mnuAdvanceMovingRuntimeRecords(&mnuRuntimeAnimationList);
 }
 
 

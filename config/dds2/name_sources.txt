@@ -9735,3 +9735,9 @@
 0x003B4D50	itfOverlayColorEditorRows	inferred	battle overlay color/phase data renamed from D_003B4D50; referenced from the battle overlay unit code_001A04C0.c.
 0x0043655C	itfTextLipsUnitId	inferred	confidence=high; Unit id returned by itfGetTextLipsUnitId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x003BB16C. [PurD readability data; identifier-only]
 0x00436560	itfTextLipsMotionId	inferred	confidence=high; Motion id returned by itfGetTextLipsMotionId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x003BB170. [PurD readability data; identifier-only]
+0x0045C870	mnuRuntimeHitTargetList	inferred	confidence=high; zeroed MenuRuntimeList header bound to record storage; used by mnuGetRuntimeHitTargetList and mnuAdvanceRuntimeHitTargets. Pair: mnuRuntimeAnimationList in code_00321500.c.
+0x0045C880	mnuRuntimeAnimationList	inferred	confidence=high; zeroed MenuRuntimeList header bound to record storage; used by mnuGetRuntimeAnimationList and mnuAdvanceRuntimeAnimationRecords. Pair: mnuRuntimeHitTargetList in code_00321500.c.
+0x004390AC	fldMapHaloRequest	inferred	confidence=high; MapRequestState* given callback fldDrawMapRequestHalo; released by fldReleaseMapRequestQueues. Pair: fldMapPulseRequest in code_0030E390.c.
+0x004390B0	fldMapPulseRequest	inferred	confidence=high; MapRequestState* given callback fldDrawMapRequestPulse; released by fldReleaseMapRequestQueues. Pair: fldMapHaloRequest in code_0030E390.c.
+0x0045C7A0	fldMapTargetPos	inferred	confidence=medium; s32[3] recomputed from D_00400700 each step; copied to fldMapPrevTargetPos in sdfCommitPendingVectorAndMarkChanged. Pair in code_0030E390.c.
+0x0045C7B0	fldMapPrevTargetPos	inferred	confidence=medium; s32[3] copy of fldMapTargetPos taken before recompute; feeds the pulse request advance. Pair in code_0030E390.c.
