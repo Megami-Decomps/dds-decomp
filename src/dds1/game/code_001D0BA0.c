@@ -1183,7 +1183,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->companionA = 0;
     work->companionB = 0;
     work->linkedUnit = 0;
-    work->unk18 = -1;
+    work->summonId = -1;
     work->stageValue = 0;
     work->unk20 = 8;
     work->stage = 0;

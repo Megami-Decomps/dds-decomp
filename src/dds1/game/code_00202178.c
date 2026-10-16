@@ -4506,7 +4506,7 @@ s32 func_0020A860(void) {
         fldAppendSceneGroupHandle(task);
         task->indexWork.phase = 2;
         task->indexWork.skillId = 0xD5;
-        task->indexWork.unk18 = summon;
+        task->indexWork.summonId = summon;
         btlAppendIndexListEntry(task->indexWork.indices, slot);
     }
     return -1;

@@ -2438,9 +2438,9 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
     unit = btlGetIndexListEntry(action->indexWork.indices, 0);
     btlResetUnitLinks(unit);
     if (action->unit->status.flags & 0x200) {
-        btlBossDebugPrintf("summon:player=%X\n", action->indexWork.unk18);
+        btlBossDebugPrintf("summon:player=%X\n", action->indexWork.summonId);
         unit->status.flags |= 0x301;
-        btlInsertPartyActorByPriority(unit, (u8)action->indexWork.unk18, unit->lookupId);
+        btlInsertPartyActorByPriority(unit, (u8)action->indexWork.summonId, unit->lookupId);
         if (unit->partyRecord.flags & 0x1000) {
             unit->status.flags |= 0x1000;
         }
@@ -2472,13 +2472,13 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
         btlStartTask(btlCreateEffObjA(action->unit, action->indexWork.phase));
     } else {
         s32 controlDelay = 0;
-        btlBossDebugPrintf("summon:enemy=%X\n", action->indexWork.unk18);
+        btlBossDebugPrintf("summon:enemy=%X\n", action->indexWork.summonId);
         resourceKind = 1;
-        btlInitializePartyRecordFromEnemy(&unit->partyRecord, action->indexWork.unk18);
+        btlInitializePartyRecordFromEnemy(&unit->partyRecord, action->indexWork.summonId);
         unit->status.flags |= 0x501;
         unit->modelResourceKind = resourceKind;
         unit->partyRecord.flags |= 0x23;
-        modelId = action->indexWork.unk18;
+        modelId = action->indexWork.summonId;
         unit->displaySpecies = modelId;
         btlInitializeEffectVectorsFromSourceRecords(unit, 1, modelId);
         if (action->indexWork.skillId < 0x260 && action->indexWork.skillId != -1) {
@@ -2680,7 +2680,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     }
     btlReleaseUnitResources(unit);
     btlResetUnitLinks(unit);
-    btlSynchronizePartyActorRecords(unit, (u8)task->indexWork.unk18);
+    btlSynchronizePartyActorRecords(unit, (u8)task->indexWork.summonId);
     flags = unit->status.flags;
     unit->status.flags = flags | 0x301;
     if (record->flags & 0x1000) {
