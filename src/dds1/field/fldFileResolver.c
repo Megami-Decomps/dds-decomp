@@ -651,11 +651,6 @@ extern void fldSpawnSceneResourceBatches(FldSpawnBatch *, u32);
 
 #include "fld_placement_data.h"
 
-typedef struct FldSpecialPoint {
-    u32 kind;
-    u32 id;
-} FldSpecialPoint;
-
 /* A relocated batch consists of a kind, count, and complete resource rows. */
 
 extern FldFileResource *D_003BD7B8;
