@@ -1065,8 +1065,8 @@ void fldCreateResourceScriptObjects(void) {
 #include "dds3_path.h"
 #include "fld_resource_resolver.h"
 
-extern s32 fldTestMapSlotValueFlag(s32, u32, s32);
-extern s32 fldTestRoomModeFlag(s32, u32, s32);
+extern s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldFindSearchId(const char *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
