@@ -247,27 +247,27 @@ s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
 
 s32 evtCmdResetWorldResourceState(void)
 {
-    s32 id;
-    void *unit;
+    s32 effectId;
+    void *effectObject;
 
-    id = scrReadIntParameter(0);
-    unit = evtFindWorldObjectByIdAndKind(7, id);
-    if (unit == NULL) {
+    effectId = scrReadIntParameter(0);
+    effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
+    if (effectObject == NULL) {
         return 1;
     }
-    dds3ResetWorldResourceState(unit);
+    dds3ResetWorldResourceState(effectObject);
     return 1;
 }
 
 s32 evtCommandClearSelectedEffectNode(void)
 {
-    s32 id;
-    void *unit;
+    s32 effectId;
+    void *effectObject;
 
-    id = scrReadIntParameter(0);
-    unit = evtFindWorldObjectByIdAndKind(7, id);
-    if (unit != NULL) {
-        evtDispatchSupportedNodeOnClear(unit, 0);
+    effectId = scrReadIntParameter(0);
+    effectObject = evtFindWorldObjectByIdAndKind(7, effectId);
+    if (effectObject != NULL) {
+        evtDispatchSupportedNodeOnClear(effectObject, 0);
     }
     return 1;
 }
