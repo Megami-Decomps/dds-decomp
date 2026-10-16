@@ -676,7 +676,47 @@ void func_00120528(s32 x, s32 y, s32 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", fldConfigureCameraMoveTracking);
+void fldConfigureCameraMoveTracking(s32 start, s32 end) {
+    s32 first;
+    s32 endEntry;
+
+    first = fldFindTableEntry(start);
+    D_00435EF8 = 0;
+    D_00435EE4 = first;
+    if (first > 1000) {
+        D_00435EE0 = first % 1000;
+    } else {
+        D_00435EE0 = first;
+    }
+    if (first > 1000) {
+        D_00435EE8 = first;
+        D_00435EE4 = first % 1000;
+    } else {
+        D_00435EE8 = -999;
+    }
+
+    endEntry = fldFindTableEntry(end);
+    D_00435EEC = endEntry;
+    if (endEntry > 1000) {
+        D_00435EF0 = endEntry;
+        D_00435EEC = endEntry % 1000;
+    } else {
+        D_00435EF0 = -999;
+    }
+    if (start == end) {
+        D_00435EF4 = -999;
+    } else {
+        D_00435EF4 = 0;
+    }
+    if (D_00435EE0 != -999 && D_00435EF4 != -999) {
+        D_00435EF4++;
+        if (D_00435EE4 < D_00435EEC) {
+            fldSetCameraMoveMode(1);
+        } else {
+            fldSetCameraMoveMode(-1);
+        }
+    }
+}
 
 enum {
     FIELD_CAMERA_TRACKING_UNSET = -999
