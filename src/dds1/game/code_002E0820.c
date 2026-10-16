@@ -26,6 +26,7 @@
 #include "fpu.h"
 #include "sdf_texture_file.h"
 #include "sdf_lookup_texture.h"
+#include "sdf_compact_vertex_vif_packet.h"
 #include "sdf_dev_console_node.h"
 
 #define SDF_PAD_ENTRY_COUNT 2

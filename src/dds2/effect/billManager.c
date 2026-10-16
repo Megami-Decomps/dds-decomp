@@ -6,6 +6,7 @@
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
+#include "sdf_compact_vertex_vif_packet.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "sdf_texture_file.h"
@@ -30,7 +31,6 @@ extern BillDispatch D_003AA998[];
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
-extern u32 *sdfBuildCompactVertexVifPacket(const u128 *positions, const void *colors, const void *uv, const void *offsets, s32 count, void *(*allocatePacket)(s32));
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 billChildFacingReferenceAxis[4];
