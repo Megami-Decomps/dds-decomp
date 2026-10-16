@@ -23,8 +23,8 @@ EffWorldNode *evtSpawnActionObj2(s32 key, s32 objectName) {
     return obj;
 }
 
-void dds3EnsureWorldNodeInSlot(EffWorldNode *object, EffWorldNode *node) {
-    WorldIndexNode *slot = dds3GetWorldSlotValue(object, dds3SelectOwnerWorldIndexSlot(((u8 *)node)[0xF]));
+void dds3EnsureWorldNodeInSlot(EffWorldNode *ownerObject, EffWorldNode *node) {
+    WorldIndexNode *slot = dds3GetWorldSlotValue(ownerObject, dds3SelectOwnerWorldIndexSlot(((u8 *)node)[0xF]));
 
     dds3ResetObjectValueCursor((WorldValueIndices *)slot);
     if (dds3SeekWorldNode((WorldValueIndices *)slot, node) != 1) {
