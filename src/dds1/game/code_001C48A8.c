@@ -1941,7 +1941,7 @@ void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, BtlUnit *actorAddres
     ((BtlTask *)taskAddress)->unit = actorAddress;
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
         *(u16 *)((u8 *)actorAddress + 0x124) <= 0x17F) {
-        *(u16 *)(taskAddress + 4) = datEnemyRecords[*(u16 *)((u8 *)actorAddress + 0x124)].unk15;
+        *(u16 *)(taskAddress + 4) = datEnemyRecords[*(u16 *)((u8 *)actorAddress + 0x124)].actionNumber;
     }
     flags = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET);
     *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = flags | FLD_SCENE_TASK_BOUND_BIT;

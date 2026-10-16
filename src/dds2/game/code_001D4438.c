@@ -2942,7 +2942,7 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
     btlInitializePartyRecordFromEnemy(party, action->indexWork.summonId);
     party->flags = flags;
     if ((unit->status.flags & 0x400) && unit->partyRecord.unitId < 0x180) {
-        action->actionNumber = datEnemyRecords[unit->partyRecord.unitId].unk15;
+        action->actionNumber = datEnemyRecords[unit->partyRecord.unitId].actionNumber;
     }
     spawned = btlCreateControlObject();
     spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
