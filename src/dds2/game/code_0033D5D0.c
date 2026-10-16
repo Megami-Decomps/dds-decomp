@@ -1606,12 +1606,12 @@ s32 sdfDevQueueControlRequest(DevState *state) {
     return 0;
 }
 
-/* Queue a read using the supplied data pointer and extra word; reject inactive states with -1. */
-s32 sdfDevQueueRead(DevState *state, void *data, s32 extra) {
+/* Queue a byte-counted read; return -1 without changing an inactive request. */
+s32 sdfDevQueueRead(DevState *state, void *data, s32 byteCount) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    state->requestExtra = extra;
+    state->requestExtra = byteCount;
     state->operation = SDF_DEV_OPERATION_READ;
     state->requestData = data;
     SignalSema(sdfDeviceWorkerEntries[state->workerIndex].semaphore);
