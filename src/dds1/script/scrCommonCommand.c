@@ -660,9 +660,9 @@ s32 scrCmdSetRectangleBlurPackedColor(void)
 
 s32 scrCmdSetRectangleBlurIntegerPair(void)
 {
-    s32 p0;
-    p0 = scrReadIntParameter(0);
-    kwlnDrawSetD88Pair(p0, scrReadIntParameter(1));
+    s32 centerX;
+    centerX = scrReadIntParameter(0);
+    kwlnDrawSetD88Pair(centerX, scrReadIntParameter(1));
     return 1;
 }
 
