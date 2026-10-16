@@ -5,11 +5,12 @@
 
 struct SdfTex;
 struct SdfMemBlock;
+struct SdfTextureFileHeader;
 
 typedef struct MapResource {
     struct SdfTex *texture;            /* 0x00: retained texture returned by sdfTexAcquireResourceTexture */
     struct SdfMemBlock *allocation;    /* 0x04: named-resource allocation queued for release */
-    u32 resourceAddress;               /* 0x08: address word written by sdfReadNamedResource */
+    struct SdfTextureFileHeader *resourceData; /* 0x08: loaded texture-file data consumed by the texture loader */
     u32 unknown0C;                     /* 0x0C: untouched by the paired loader/release providers */
 } MapResource;
 
@@ -18,8 +19,8 @@ typedef char MapResource_texture_offset_must_be_0x00[
     ((u32)&((MapResource *)0)->texture == 0x00) ? 1 : -1];
 typedef char MapResource_allocation_offset_must_be_0x04[
     ((u32)&((MapResource *)0)->allocation == 0x04) ? 1 : -1];
-typedef char MapResource_resourceAddress_offset_must_be_0x08[
-    ((u32)&((MapResource *)0)->resourceAddress == 0x08) ? 1 : -1];
+typedef char MapResource_resourceData_offset_must_be_0x08[
+    ((u32)&((MapResource *)0)->resourceData == 0x08) ? 1 : -1];
 typedef char MapResource_unknown0C_offset_must_be_0x0C[
     ((u32)&((MapResource *)0)->unknown0C == 0x0C) ? 1 : -1];
 
