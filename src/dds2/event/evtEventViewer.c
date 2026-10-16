@@ -742,7 +742,7 @@ extern char D_004224A8[];
 /* Apply one timeline key to its effect, audio, message, or fade channel. */
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
 
-void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s32 unused,
+void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame, s32 unused,
                    EvtRuntime *viewer) {
     s32 nibbles[2];
 
@@ -777,9 +777,9 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
     case 26: {
         EffWorldNode *object;
 
-        if (position >= key->frame && key->p08.sb[0] < 0) {
+        if (currentFrame >= key->frame && key->p08.sb[0] < 0) {
             key->p08.sb[0] = evtViewerCreateObjectInFreeSlot(
-                position, track, key, viewer);
+                currentFrame, track, key, viewer);
         }
         if (key->p08.sb[0] < 0) {
             break;
@@ -799,7 +799,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         break;
     }
     case 18:
-        if (position == key->frame) {
+        if (currentFrame == key->frame) {
             evtEventViewerFreeBuffer(key);
             if (track->metadata.extra1 == 0) {
                 key->payload = evtEventViewerCreateOriginEffect((void *)track->resourceData,
@@ -853,7 +853,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (key->duration == 0 && key->p08.sh[0] == 0) {
             viewer->flags &= ~2;
             kwlnCancelConfiguredFadeFrames();
-        } else if (position == key->frame) {
+        } else if (currentFrame == key->frame) {
             viewer->flags |= 2;
             kwlnFadeSetupFrames(key->duration, key->p08.sh[0]);
         }
@@ -865,7 +865,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             break;
         }
         mnuUnpackNibbleFields(key, &nibbles[0], &nibbles[1]);
-        if (key->frame != position) {
+        if (key->frame != currentFrame) {
             break;
         }
         if (itfMesGetWindowEntryItems(viewer->windowContext->handle, nibbles[0]) == 0) {
@@ -893,12 +893,12 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         break;
     }
     case 28:
-        if (position == (s32)key->frame + track->metadata.value) {
+        if (currentFrame == (s32)key->frame + track->metadata.value) {
             kwlnPadStartMotor(key->p08.sh[0], key->p08.b[2], key->duration);
         }
         break;
     case 29:
-        if (evtViewerHasUpdateFlag(viewer) == 1 || position != key->frame) {
+        if (evtViewerHasUpdateFlag(viewer) == 1 || currentFrame != key->frame) {
             break;
         }
         mnuStartMoviePlaybackByResourceIndex(key->p08.sh[0]);
@@ -915,7 +915,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         viewer->timedActive = 1;
         break;
     case 30:
-        if (position == key->frame && fldTitleIsActive() == 1) {
+        if (currentFrame == key->frame && fldTitleIsActive() == 1) {
             if (key->p08.sh[1] != 0) {
                 fldSetTitleDrawMode(1);
             } else {
@@ -925,7 +925,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         break;
     case 32:
-        if (position == key->frame) {
+        if (currentFrame == key->frame) {
             if (key->p08.sh[0] == 0) {
                 kwlnFadeSetMode(1);
                 kwlnFadeBackgroundStartOut(key->duration);
@@ -1312,7 +1312,7 @@ extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
 extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
-extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position,
+extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame,
                                            s32, EvtRuntime *viewer);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
                                         s32 interval, EvtRuntime *viewer);

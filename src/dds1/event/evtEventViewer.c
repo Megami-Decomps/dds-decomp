@@ -831,7 +831,7 @@ extern void fldBeginTitleAnimation(void);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);
 
-void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 frame, s32 unused, EvtRuntime *viewer) {
+void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame, s32 unused, EvtRuntime *viewer) {
     s32 nibbles[2];
     struct EffectObj *object;
     s32 result;
@@ -846,8 +846,8 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
     case 0x14:
     case 0x15:
     case 0x1A:
-        if (frame >= key->frame && key->p08.sb[0] < 0) {
-            key->p08.sb[0] = evtViewerCreateObjectInFreeSlot(frame, track, key, viewer);
+        if (currentFrame >= key->frame && key->p08.sb[0] < 0) {
+            key->p08.sb[0] = evtViewerCreateObjectInFreeSlot(currentFrame, track, key, viewer);
         }
         if (key->p08.sb[0] < 0) {
             break;
@@ -864,7 +864,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         break;
     case 0x12:
-        if (frame != key->frame) {
+        if (currentFrame != key->frame) {
             break;
         }
         evtEventViewerFreeBuffer(key);
@@ -911,7 +911,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (key->duration == 0 && key->p08.sh[0] == 0) {
             viewer->flags &= ~2;
             kwlnCancelConfiguredFadeFrames();
-        } else if (frame == key->frame) {
+        } else if (currentFrame == key->frame) {
             viewer->flags |= 2;
             kwlnFadeSetupFrames(key->duration, key->p08.sh[0]);
         }
@@ -921,7 +921,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             break;
         }
         mnuUnpackNibbleFields(key, &nibbles[0], &nibbles[1]);
-        if (key->frame != frame) {
+        if (key->frame != currentFrame) {
             break;
         }
         if (itfMesGetWindowEntryItems(viewer->windowContext->handle, nibbles[0]) == 0) {
@@ -948,12 +948,12 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         break;
     case 0x1C:
-        if (frame == key->frame + track->metadata.value) {
+        if (currentFrame == key->frame + track->metadata.value) {
             kwlnPadStartMotor(key->p08.sh[0], key->p08.b[2], key->duration);
         }
         break;
     case 0x1D:
-        if (evtViewerHasUpdateFlag(viewer) == 1 || frame != key->frame) {
+        if (evtViewerHasUpdateFlag(viewer) == 1 || currentFrame != key->frame) {
             break;
         }
         if (viewer->timedActive != 0) {
@@ -969,7 +969,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         break;
     case 0x1E:
-        if (frame != key->frame || fldTitleIsActive() != 1) {
+        if (currentFrame != key->frame || fldTitleIsActive() != 1) {
             break;
         }
         if (key->p08.sh[1] != 0) {
@@ -980,7 +980,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         fldBeginTitleAnimation();
         break;
     case 0x20:
-        if (frame != key->frame) {
+        if (currentFrame != key->frame) {
             break;
         }
         if (key->p08.sh[0] == 0) {
@@ -1308,7 +1308,7 @@ extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
 extern s32 evtViewerTestIndexedCondition(u32 condition);
-extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 frame,
+extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame,
                                            s32, EvtRuntime *viewer);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
                                         s32 interval, EvtRuntime *viewer);
