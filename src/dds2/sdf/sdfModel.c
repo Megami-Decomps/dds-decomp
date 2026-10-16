@@ -529,7 +529,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
         for (variant = 0; variant != 4; variant++) {
             variantLists[variant] = NULL;
         }
-        sdfVuSetGlobalScale(model->unk94);
+        sdfVuSetGlobalScale(model->modelScale);
 
         negativeColor = 0;
         if (color < 0) {
@@ -559,7 +559,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, SdfModel *model) {
                 lightingPacket->lightingCommand = 0x6E01C002;
                 lightingPacket->color = color;
                 lightingPacket->command = 0x6003C003;
-                lightingPacket->modelScalar = (*(u32 *)&model->unk94);
+                lightingPacket->modelScalar = (*(u32 *)&model->modelScale);
                 lightingPacket->firstScalar = firstScalar;
                 lightingPacket->secondScalar = secondScalar;
                 lightingPacket->finalCommand = 0x04000004;

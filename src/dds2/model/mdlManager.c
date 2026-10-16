@@ -630,7 +630,7 @@ void mdlUpdateDevSlotTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
         slot->next = list->first;
         slot->model = model;
         slot->remaining = 1;
-        model->unk94 = 1000.0f;
+        model->modelScale = 1000.0f;
         list->first = slot;
     }
     eeUnpackRGBAWordFloat(original->color, 1.0f / 128.0f);
