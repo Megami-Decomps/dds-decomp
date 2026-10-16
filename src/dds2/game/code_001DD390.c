@@ -3891,7 +3891,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode) {
+BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 effectId, u32 modelId, s8 preserveDefeatCandidate) {
     BtlRuntimeTask *task = btlAllocTask(16);
     BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -3903,9 +3903,9 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, 
     task->callback = btlPollModelLoadCompletion;
     args = btlGetTaskArguments(task);
     args->actor = unit;
-    args->option = index;
-    args->unk_08 = value;
-    args->mode = mode;
+    args->option = effectId;
+    args->unk_08 = modelId;
+    args->mode = preserveDefeatCandidate;
     return task;
 }
 
