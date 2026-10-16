@@ -933,7 +933,7 @@ s32 ptyGetAverageLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
+extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit);
 extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 extern void ptyRebuildProfileSkills(s32, DatPartyRecord *);
