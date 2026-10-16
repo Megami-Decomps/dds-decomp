@@ -5841,7 +5841,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     } else {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
-                work->primaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->frontHandle)));
+                work->primaryBuffer = (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->frontHandle));
                 filePollEntryCleanup(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
@@ -5851,7 +5851,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         }
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
-                work->secondaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->sideHandle)));
+                work->secondaryBuffer = (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->sideHandle));
                 filePollEntryCleanup(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
@@ -6586,7 +6586,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
         return 0;
     }
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
-    resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+    resource = fileGetResourceHandle(args->request);
     effect->resourceHandle = sndMixerClone((void *)sdfResourceRetainAddress(resource));
     sdfReleaseResourceAllocation(resource);
     filePollEntryCleanup(args->request);
@@ -7512,7 +7512,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             s32 size;
             s32 data;
             btlBossDebugPrintf("btl:sound file load end[%s]\n", request->filename);
-            request->resourceAllocation = (struct SdfMemBlock *)fileGetResourceHandle(request->request);
+            request->resourceAllocation = fileGetResourceHandle(request->request);
             size = (s32)fileGetResourceSize(request->request);
             data = sdfResourceRetainAddress(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) == 0) {
@@ -7974,12 +7974,12 @@ void btlUpdateMotionSoundLoading(void) {
                 if (owner->work.fileRequests[slot] != 0) {
                     if (fileIsRequestReadyInCurrentMode(
                             owner->work.fileRequests[slot]) != 0) {
-                        u32 resource = fileGetResourceHandle(
+                        struct SdfMemBlock *resource = fileGetResourceHandle(
                             owner->work.fileRequests[slot]);
 
                         struct FileRequest *completedRequest = owner->work.fileRequests[slot];
 
-                        owner->work.resourceHandles[slot] = (struct SdfMemBlock *)resource;
+                        owner->work.resourceHandles[slot] = resource;
                         filePollEntryCleanup(completedRequest);
                         owner->work.fileRequests[slot] = 0;
                     } else {

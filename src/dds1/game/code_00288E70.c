@@ -134,7 +134,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
         job->totalBytes = byteCount;
         if (job->allocationMode == 0) {
             allocationHandle = sdfTryAllocGeneralBlock(byteCount);
-            job->allocationHandle = (s32)allocationHandle;
+            job->allocationHandle = allocationHandle;
             if (allocationHandle == NULL) {
                 job->retryCount = 10;
                 job->state = 7;
@@ -142,7 +142,7 @@ s32 fileHandleAllocatedResourceReadEvent(void *deviceRequest, s32 event, s32 unu
             }
         } else {
             allocationHandle = sdfAllocGeneralBlockHigh(byteCount);
-            job->allocationHandle = (s32)allocationHandle;
+            job->allocationHandle = allocationHandle;
         }
         {
             u32 address = sdfResourceRetainAddress(allocationHandle);
@@ -297,13 +297,13 @@ void fileStartOrResumeQueuedJob(void) {
             job->deviceRequest = sdfDevCreateCallbackState(job->name, fileHandleAllocatedResourceReadEvent, job);
             break;
         case 7:
-            job->allocationHandle = (s32)sdfTryAllocGeneralBlock(job->totalBytes);
-            if (job->allocationHandle == 0) {
+            job->allocationHandle = sdfTryAllocGeneralBlock(job->totalBytes);
+            if (job->allocationHandle == NULL) {
                 sdfPrintFormattedDevMessage("alloc retry for %s\n",
                                             ((DevState *)job->deviceRequest)->resolvedPath);
                 job->retryCount--;
             } else {
-                u32 address = sdfResourceRetainAddress((struct SdfMemBlock *)(u32)(job->allocationHandle));
+                u32 address = sdfResourceRetainAddress(job->allocationHandle);
 
                 job->transferAddress = address;
                 job->retainedAddress = address;

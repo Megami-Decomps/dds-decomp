@@ -2700,7 +2700,10 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     descriptor->append(descriptor, list);
 }
 
-void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
+void fldSubmitGsTriangle(s32 color0, s32 color1, s32 color2,
+                         f32 x0, f32 y0, f32 z0,
+                         f32 x1, f32 y1, f32 z1,
+                         f32 x2, f32 y2, f32 z2) {
     SdfPrimitiveRequest desc;
     f32 verts[12];
     s32 indices[3];
@@ -2717,18 +2720,18 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     desc.vertexCount = 3;
     desc.positions = verts;
     desc.vertexColors = indices;
-    verts[0] = f0;
-    verts[1] = f1;
-    verts[2] = f2;
-    verts[4] = f3;
-    verts[5] = f4;
-    verts[6] = f5;
-    verts[8] = f6;
-    verts[9] = f7;
-    verts[10] = f8;
-    indices[0] = a0;
-    indices[1] = a1;
-    indices[2] = a2;
+    verts[0] = x0;
+    verts[1] = y0;
+    verts[2] = z0;
+    verts[4] = x1;
+    verts[5] = y1;
+    verts[6] = z1;
+    verts[8] = x2;
+    verts[9] = y2;
+    verts[10] = z2;
+    indices[0] = color0;
+    indices[1] = color1;
+    indices[2] = color2;
     sdfAppendPacket(command, (u32)sdfBuildPrimitiveAttributeVifPacket(&desc));
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -5048,11 +5051,11 @@ void fldClearCameraHeadingRequest(void) {
     D_00389910[0] = 0;
 }
 
-void fldQueueCameraXYOverride(f32 first, f32 second) {
+void fldQueueCameraXYOverride(f32 targetX, f32 targetZ) {
     FldAreaWork *camera = &fldAreaState;
 
-    camera->facingPointX = first;
-    camera->facingPointZ = second;
+    camera->facingPointX = targetX;
+    camera->facingPointZ = targetZ;
     camera->pointState = 1;
 }
 
@@ -5558,7 +5561,7 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 }
 
 
-extern s32 kwlnSetDrawColorTarget(s32, void *);
+extern void kwlnSetDrawColorTarget(s32, f32 *);
 extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, void *color);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
 extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, void *direction);

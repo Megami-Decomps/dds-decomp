@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct FileNode;
+struct SdfMemBlock;
 
 /* Queue-entry fields written by fileManQueueNamedRequest; linkage is supplied
  * by its caller and follows the title-specific FileNode prefix. */
@@ -25,7 +26,7 @@ typedef struct FileWork {
     u32 size;
     struct FileNode *head;
     u8 unk1C[4];
-    u32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     u32 loadedDataAddress;
 } FileWork;
 

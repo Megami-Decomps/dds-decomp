@@ -1840,12 +1840,12 @@ void effThunderGroupRelease(EffThunderGroup *group) {
 }
 
 /* Preserve the address word; the paired blur caller fills the leading point vectors. */
-u32 effGetPairedBlurResourceVectorRecordAddress(u32 vectorRecordAddress) {
-    return vectorRecordAddress;
+void *effGetPairedBlurResourceVectorRecordAddress(void *vectorRecord) {
+    return vectorRecord;
 }
 
-void effSetResourceBlendColor(s32 work, u32 value) {
-    *(u32 *)(work + 0x120) = value;
+void effSetResourceBlendColor(void *resource, u32 color) {
+    *(u32 *)((u8 *)resource + 0x120) = color;
 }
 
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];

@@ -368,8 +368,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRe
     handle = fileGetLoadedDataAddress(resource);
     resourceList = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)handle);
     destination->payload.resourceList = resourceList;
-    handle = fileGetResourceHandle(resource);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+    sdfReleaseResourceAllocation(fileGetResourceHandle(resource));
     filePollEntryCleanup(resource);
 }
 
@@ -418,7 +417,7 @@ extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
 void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
-    request->payload.requestAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
+    request->payload.requestAllocation = fileGetResourceHandle(resource);
     request->payload.itemList = sdfRelocatePackedResourcePayload(
         (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
@@ -430,7 +429,7 @@ void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
 /* Retain the handle and relocated motion data, retire the file entry, then run
  * the group job. This callback completes the additional file request. */
 void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
-    request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
+    request->payload.motionResource = fileGetResourceHandle(resource);
     request->payload.motionTable = sdfRelocatePackedResourceWordsFromHeader(
         (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
@@ -1191,7 +1190,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
     return matchedNode->motionTable->unk00;
 }
 
-extern void sdfUpdateActiveResourceListScalars(DevRequest *, s32, f32);
+extern void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount);
 
 /* Update the inner resource list with the packed model-color word and scalar. */
 void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 tint, f32 amount) {
@@ -1264,7 +1263,7 @@ s32 mdlIsInnerSentinel(PacWork *packetWork) {
 
 
 
-extern PacWork *mdlApplyQueuedGroupPackets(PacWork *, s32, s32, s32);
+extern PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode);
 struct EffNodeDescriptor;
 extern u16 mdlGetRecordPartIndex(MdlRecord *record);
 extern DevRequest *mdlCreateBufferedPartRequest(u32 count);

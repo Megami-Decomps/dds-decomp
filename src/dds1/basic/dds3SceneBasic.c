@@ -38,7 +38,7 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
         return 0;
     }
     worldData->sceneResourceHandle = (u32)resourceHandle;
-    worldData->sceneResourceAddress = resourceAddress;
+    worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
     return 1;
 }
 
@@ -60,7 +60,7 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
     resourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)resourceHandle);
     if (resourceAddress != 0) {
         worldData->sceneResourceHandle = (u32)resourceHandle;
-        worldData->sceneResourceAddress = resourceAddress;
+        worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
         return 1;
     }
     return result;
@@ -75,14 +75,14 @@ void evtReleaseSceneResource(EffWorldNode *worldNode) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)worldData->sceneResourceHandle);
     }
     worldData->sceneResourceHandle = 0;
-    worldData->sceneResourceAddress = 0;
+    worldData->sceneScript = NULL;
 }
 
 /* Starts the named script task on the scene object's resource; stays asm:
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
 s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
-    void *resource = (void *)worldData->sceneResourceAddress;
+    struct BfFlw0Header *resource = worldData->sceneScript;
     s32 scriptIndex;
 
     if (resource == NULL) {

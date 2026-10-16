@@ -20,7 +20,7 @@
  * instance, not to the drawable used by the resource helpers below. */
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *);
 
-extern PcpScatterRes *effPcpScatterResCreate(u32);
+extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 extern void effPcpScatterResRelease(PcpScatterRes *);
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */

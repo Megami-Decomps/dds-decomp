@@ -2734,7 +2734,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421420);
 
 void mdlLoadViewerPresentationConfig(void) {
     s32 fileRequest;
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     char *fileData;
     s32 fileSize;
     s32 lineOffset;
@@ -2755,7 +2755,7 @@ void mdlLoadViewerPresentationConfig(void) {
     }
     fileRequest = (s32)fileQueueDefaultCallbackRequest(D_003C88A8);
     fileWaitReady((struct FileRequest *)(u32)fileRequest);
-    resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
+    resourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
     fileData = (char *)(u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
     fileSize = (s32)fileGetResourceSize((struct FileRequest *)(u32)fileRequest);
     filePollEntryCleanup((struct FileRequest *)(u32)fileRequest);
@@ -2799,7 +2799,7 @@ void mdlLoadViewerPresentationConfig(void) {
         }
         lineOffset = nextLineOffset;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resourceHandle));
+    sdfReleaseResourceAllocation(resourceHandle);
 }
 
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";

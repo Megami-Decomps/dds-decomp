@@ -2647,7 +2647,10 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
 }
 
 extern void *sdfBuildPrimitiveAttributeVifPacket(SdfPrimitiveRequest *);
-void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5, f32 f6, f32 f7, f32 f8) {
+void fldSubmitGsTriangle(s32 color0, s32 color1, s32 color2,
+                         f32 x0, f32 y0, f32 z0,
+                         f32 x1, f32 y1, f32 z1,
+                         f32 x2, f32 y2, f32 z2) {
     SdfPrimitiveRequest desc;
     f32 verts[12];
     s32 indices[3];
@@ -2664,18 +2667,18 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     desc.vertexCount = 3;
     desc.positions = verts;
     desc.vertexColors = indices;
-    verts[0] = f0;
-    verts[1] = f1;
-    verts[2] = f2;
-    verts[4] = f3;
-    verts[5] = f4;
-    verts[6] = f5;
-    verts[8] = f6;
-    verts[9] = f7;
-    verts[10] = f8;
-    indices[0] = a0;
-    indices[1] = a1;
-    indices[2] = a2;
+    verts[0] = x0;
+    verts[1] = y0;
+    verts[2] = z0;
+    verts[4] = x1;
+    verts[5] = y1;
+    verts[6] = z1;
+    verts[8] = x2;
+    verts[9] = y2;
+    verts[10] = z2;
+    indices[0] = color0;
+    indices[1] = color1;
+    indices[2] = color2;
     sdfAppendPacket(command, (u32)sdfBuildPrimitiveAttributeVifPacket(&desc));
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
@@ -3222,7 +3225,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     }
 }
 
-void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
+void fldSubmitAreaOverlayQuads(s32 alpha, s32 offset) {
     SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
@@ -3259,21 +3262,21 @@ void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
-    vertex->a = a1;
-    quarter = a2;
-    if (a2 < 0) {
-        quarter = a2 + 3;
+    vertex->a = alpha;
+    quarter = offset;
+    if (offset < 0) {
+        quarter = offset + 3;
     }
     quarter >>= 2;
     vertex->corner[0].u = 0;
     vertex->corner[0].v = 0;
-    vertex->corner[0].x = 0x6FF7 - a2;
+    vertex->corner[0].x = 0x6FF7 - offset;
     vertex->corner[0].y = 0x78FB - quarter;
     vertex->corner[0].mask = 0x3FFF;
     vertex->corner[0].flag = 0;
     vertex->corner[1].u = 0x2000;
     vertex->corner[1].v = 0xE00;
-    vertex->corner[1].x = a2 + quarter + 0x9009;
+    vertex->corner[1].x = offset + quarter + 0x9009;
     vertex->corner[1].y = quarter + 0x8705;
     vertex->corner[1].mask = 0x3FFF;
     vertex->corner[1].flag = 0;
@@ -8065,7 +8068,83 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013BF48);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013C138);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013C2B8);
+#include "fld_trigger_shape.h"
+typedef union FldActionTransform {
+    struct {
+        f32 position[4];
+        f32 rotation[4];
+        f32 scale[4];
+    };
+    f32 values[12];
+} FldActionTransform;
+/* Serialized sphere/task prefix, transform and paired resources. */
+typedef struct FldActionRow {
+    union {
+        struct { FldTriggerSphere shape; FldTaskInfo info; } task;
+        FldTriggerShape shape;
+    } prefix;
+    FldActionTransform transform;
+    FldFileResource childResource;
+    FldFileResource displayResource;
+} FldActionRow;
+extern FldActionRow D_003309B0[];
+extern char D_00330760[];
+extern char D_00330770[];
+extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
+extern char D_00330790[];
+extern char D_003307A0[];
+void func_0013C2B8(s32 kind, s32 roomValue,
+                   f32 x, f32 y, f32 z, f32 radius) {
+    s32 index = D_003BAE34;
+    FldActionTransform *transform;
+    s32 worldKey = dds3AdvanceWorldCounter();
+    EffWorldNode *object;
+    s32 taskIndex;
+
+    if (kind == 0) {
+        object = evtSpawnActionObjD(worldKey, D_003307A0, (s32)D_00330760);
+    } else {
+        object = evtSpawnActionObjD(worldKey, D_00330790, (s32)D_00330760);
+    }
+    D_003309B0[index].displayResource.id = worldKey;
+    taskIndex = fldPushDisplayValue(
+        (u32)&D_003309B0[index].displayResource, object);
+    D_003309B0[index].prefix.task.shape.radius = radius;
+    D_003309B0[index].prefix.task.shape.kind = 0;
+    D_003309B0[index].prefix.task.info.unk0 = 1;
+    D_003309B0[index].prefix.task.info.slot = taskIndex;
+    D_003309B0[index].prefix.task.info.unk08 = 1;
+    D_003309B0[index].prefix.task.info.shape = (FldTriggerShape *)&D_003309B0[index].prefix.task.shape;
+    D_003309B0[index].childResource.data = &D_003309B0[index].prefix.task.info;
+    transform = &D_003309B0[index].transform;
+    transform->position[3] = 1.0f;
+    transform->scale[0] = 1.0f;
+    transform->scale[1] = 1.0f;
+    transform->scale[2] = 1.0f;
+    transform->scale[3] = 1.0f;
+    transform->position[0] = x;
+    transform->position[1] = y;
+    transform->position[2] = z;
+    D_003309B0[index].childResource.transform = transform->position;
+    transform->rotation[1] = 0.0f;
+    transform->rotation[2] = 0.0f;
+    transform->rotation[3] = 0.0f;
+    transform->rotation[0] = 0.0f;
+    D_003309B0[index].childResource.id = dds3AdvanceWorldCounter();
+    D_003309B0[index].childResource.name = (const char *)D_00330760;
+    object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
+                                 (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
+                                 (s32)D_00330770);
+    taskIndex = func_00138ED0(&D_003309B0[index].childResource, object);
+    if (kind == 0) {
+        fldRoomRecords[taskIndex].mode = 3;
+        fldRoomRecords[taskIndex].unk120 = roomValue;
+    } else {
+        fldRoomRecords[taskIndex].mode = 4;
+    }
+    D_003BAE34++;
+    fldRoomRecords[taskIndex].entryIndex = -1;
+}
 
 s32 fldCheckEntryActive(s32 entry) {
     s32 entryIdx = D_003BAE1C;

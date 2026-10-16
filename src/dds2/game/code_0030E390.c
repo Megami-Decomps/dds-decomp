@@ -398,14 +398,13 @@ done:
 }
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
-    struct SdfMemBlock *allocation = sdfReadNamedResource(name, &record->resourceAddress, 0);
-    u32 resourceAddress = record->resourceAddress;
+    struct SdfMemBlock *allocation = sdfReadNamedResource(name, (u32 *)&record->resourceData, 0);
     record->allocation = allocation;
-    record->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
-    if (record->allocation != 0) {
+    record->texture = sdfTexAcquireResourceTexture(record->resourceData);
+    if (record->allocation != NULL) {
         sdfQueueGeneralAllocationRelease(record->allocation);
-        record->allocation = 0;
-        record->resourceAddress = 0;
+        record->allocation = NULL;
+        record->resourceData = NULL;
     }
     return 1;
 }

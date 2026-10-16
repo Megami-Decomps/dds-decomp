@@ -509,7 +509,10 @@ extern void fldSetGsAlphaBlendEquation(s32);
 
 extern void fldSelectDisplayBuffer(u32);
 
-extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void fldSubmitGsTriangle(s32 color0, s32 color1, s32 color2,
+                                f32 x0, f32 y0, f32 z0,
+                                f32 x1, f32 y1, f32 z1,
+                                f32 x2, f32 y2, f32 z2);
 
 /* Filled disc in the field; radius shrinks in the close-up areas. */
 void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
@@ -621,9 +624,88 @@ void fldTestDrawDestroy(void) {
     kwlnTaskDestroyWithHierarchyByName(D_0039FA00, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E6C0);
+extern void frFontSetSharedRenderFlags(u32);
+extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 first, const u8 *second);
+extern char *strcat(char *, const char *);
+extern char D_0032C840[13][4];
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldConfigureCameraMoveTracking);
+static inline char *fldNumberGlyphText(s32 index) {
+    char *table = (char *)D_0032C840;
+
+    return table + index * 4;
+}
+
+void func_0011E6C0(s32 x, s32 y, s32 value) {
+    char text[32];
+    s32 digit;
+
+    frFontSetSharedRenderFlags(0x54);
+    if (value > 1000) {
+        s32 halfY = y / 2;
+        fldDrawConvertedTextGlyph(x, halfY, 0xA09DC380, (const u8 *)fldNumberGlyphText(12));
+        return;
+    }
+    text[0] = 0;
+    if (value < 0) {
+        strcat(text, fldNumberGlyphText(10));
+        value = -value;
+    }
+    do {
+        digit = value / 10;
+    } while (0);
+    if (digit > 0 && digit < 10) {
+        strcat(text, fldNumberGlyphText(digit));
+    }
+    digit = value % 10;
+    if (digit < 10) {
+        strcat(text, fldNumberGlyphText(digit));
+    }
+    x += 0x10;
+    strcat(text, fldNumberGlyphText(11));
+    fldDrawConvertedTextGlyph(x, y / 2, 0xA09DC380, (const u8 *)text);
+}
+
+void fldConfigureCameraMoveTracking(s32 start, s32 end) {
+    s32 first;
+    s32 endEntry;
+
+    first = fldFindTableEntry(start);
+    D_003BAB20 = 0;
+    D_003BAB0C = first;
+    if (first > 1000) {
+        D_003BAB08 = first % 1000;
+    } else {
+        D_003BAB08 = first;
+    }
+    if (first > 1000) {
+        D_003BAB10 = first;
+        D_003BAB0C = first % 1000;
+    } else {
+        D_003BAB10 = -999;
+    }
+
+    endEntry = fldFindTableEntry(end);
+    D_003BAB14 = endEntry;
+    if (endEntry > 1000) {
+        D_003BAB18 = endEntry;
+        D_003BAB14 = endEntry % 1000;
+    } else {
+        D_003BAB18 = -999;
+    }
+    if (start == end) {
+        D_003BAB1C = -999;
+    } else {
+        D_003BAB1C = 0;
+    }
+    if (D_003BAB08 != -999 && D_003BAB1C != -999) {
+        D_003BAB1C++;
+        if (D_003BAB0C < D_003BAB14) {
+            fldSetCameraMoveMode(1);
+        } else {
+            fldSetCameraMoveMode(-1);
+        }
+    }
+}
 
 enum {
     FIELD_CAMERA_TRACKING_UNSET = -999
