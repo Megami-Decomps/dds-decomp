@@ -112,7 +112,7 @@ extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 extern void *mnuCreateDualPercentPanel(DatPartyRecord *, s32);
 
 
-extern s32 mnuPercentOrHundred(u16, u16);
+extern s32 mnuPercentOrHundred(s32 value, s32 total);
 
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
