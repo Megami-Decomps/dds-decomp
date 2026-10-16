@@ -920,8 +920,8 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
 }
 typedef struct FldActionSpawn {
     u32 unk0;
-    u32 secondValue;
-    u32 firstValue;
+    u32 objectName; /* 0x04: evtSpawnActionObj2's name/value argument. */
+    u32 key;         /* 0x08: evtSpawnActionObj2's world-node key. */
 } FldActionSpawn;
 
 void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
@@ -930,7 +930,7 @@ void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
 
     dds3GetWorldSecondaryObject();
     for (spawnIndex = 0; spawnIndex < spawnCount; spawnIndex++, spawnList++) {
-        spawnedObject = evtSpawnActionObj2(spawnList->firstValue, spawnList->secondValue);
+        spawnedObject = evtSpawnActionObj2(spawnList->key, spawnList->objectName);
         if (spawnIndex == 0) {
             fldAreaState.taskHandle = (s32)spawnedObject;
         }
