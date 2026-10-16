@@ -412,9 +412,7 @@ void btlFreeIndexList(BtlIndexList *list);
 
 u32 btlGetActiveUnitId(void);
 
-/* Return the number of live entries, not the allocated capacity. */ u32 btlGetIndexListCount(BtlIndexList *list);
 
-/* The caller supplies an in-range index. */ void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
 
 /* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(void *task);
 
