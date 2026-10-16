@@ -34,6 +34,7 @@
 #include "btl_ai_table.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "pty_roster_api.h"
 #include "mnu_result.h"
 #include "dat_command.h"
 #include "sdf_sif_command.h"
@@ -278,8 +279,6 @@ s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor) {
     }
     return (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 0x40) < 1;
 }
-
-extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
 
 s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second) {
     s32 statAddresses[3];

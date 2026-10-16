@@ -21,6 +21,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "pty_roster_api.h"
 #include "prf_skill_list_buffer.h"
 #include "eff_random.h"
 #include "fr_font.h"
@@ -3017,7 +3018,6 @@ s32 mnuHasAvailableSlotResource(s32 id) {
 }
 
 extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
-extern s32 ptyMatchAffinityPermutation(s32 *, s32);
 extern u16 mnuPickPairedTableValue(s32, s32);
 extern void ptySkillMenuDrawEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
@@ -3062,7 +3062,7 @@ void ptySkillMenuBuildLinkageSkills(KwlnTask *task) {
                     node->sortKeySecondary = sortRank;
                 }
                 {
-                    s32 unavailable = ptyMatchAffinityPermutation((s32 *)frontline, skill);
+                    s32 unavailable = ptyMatchAffinityPermutation((const s32 *)frontline, skill);
                     /* The permutation matcher returns only 0 or 1. A consumed
                      * local keeps the inverted result as XOR, rather than a
                      * comparison against a rematerialized loop constant. */

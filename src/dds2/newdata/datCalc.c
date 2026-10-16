@@ -1428,7 +1428,7 @@ s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 slo
 }
 
 /* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
-s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
+s32 ptyMatchAffinityPermutation(const s32 *actors, s32 affinity) {
     s32 *requirementCursor = datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND].requirements;
     u32 i;
     s32 requiredCount = 0;
