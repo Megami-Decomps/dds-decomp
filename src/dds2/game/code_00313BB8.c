@@ -1042,16 +1042,17 @@ s32 prfReqCheckGlobalCounter(PrfRequirementOperand *operand) {
 
 /* The word-sized ID API narrows only when calling the node-record lookup. */
 /* Check six neighboring mantra flags: mode0x40 requires all relevant neighbors, otherwise any. */
-s32 prfCheckAdjacentMantraRequirements(s32 id, DatPartyRecord *context, s32 mode) {
+s32 prfCheckAdjacentMantraRequirements(s32 requirementId, DatPartyRecord *context,
+                                      s32 requirementMode) {
     s32 result = 1;
-    MantraNodePos *record = mnuGetMantraNodePositionRecord(id);
+    MantraNodePos *record = mnuGetMantraNodePositionRecord(requirementId);
     MantraNodePos **adjacent;
     u32 i;
 
     if (record == NULL) {
         return 0;
     }
-    if (mode == 0x40) {
+    if (requirementMode == 0x40) {
         adjacent = record->neighbors;
         i = 0;
         do {
@@ -1081,8 +1082,8 @@ s32 prfCheckAdjacentMantraRequirements(s32 id, DatPartyRecord *context, s32 mode
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", mnuRebuildMantraCategoryAvailability);
 
-s32 mnuIsResourceCategoryAvailable(s32 id) {
-    MantraNodePos *info = mnuGetMantraNodePositionRecord(id);
+s32 mnuIsResourceCategoryAvailable(s32 requirementId) {
+    MantraNodePos *info = mnuGetMantraNodePositionRecord(requirementId);
     if (info == 0) {
         return 0;
     }
