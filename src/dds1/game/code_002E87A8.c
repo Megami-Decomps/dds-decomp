@@ -151,13 +151,12 @@ void sndLoadIopSoundModules(void) {
 
 void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     SndChannel *channel;
-    s32 channelIndex;
-    s32 trackSlotIndex;
+    s32 i;
 
     sndMidiTrackState.header = header;
     channel = sndMidiTrackState.channels;
-    for (channelIndex = 0; channelIndex < SND_CHANNEL_COUNT; channelIndex++) {
-        channel->index = channelIndex;
+    for (i = 0; i < SND_CHANNEL_COUNT; i++) {
+        channel->index = i;
         channel->unk1 = 0x20;
         channel->unk2 = 0;
         channel->iopWorkAddress = 0;
@@ -168,10 +167,10 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     sndMidiTrackState.channels[0].iopWorkAddress = sndReserveIopWorkMemory(0x21600);
     sndMidiTrackState.opaque200 = 0;
     sndMidiTrackState.opaque204 = 0;
-    for (trackSlotIndex = 0; trackSlotIndex < SND_TRACK_SLOT_COUNT; trackSlotIndex++) {
-        sndMidiTrackState.slots[trackSlotIndex].id = -1;
-        sndMidiTrackState.slots[trackSlotIndex].balanceFirstComponent = 0;
-        sndMidiTrackState.slots[trackSlotIndex].balanceSecondComponent = 0;
+    for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
+        sndMidiTrackState.slots[i].id = -1;
+        sndMidiTrackState.slots[i].balanceFirstComponent = 0;
+        sndMidiTrackState.slots[i].balanceSecondComponent = 0;
     }
 }
 

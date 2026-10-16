@@ -53,8 +53,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f3
     s32 angleValues;
     EffMagatuhiValueWork *resource;
     s16 *defaults;
-    u32 defaultSlotIndex;
-    u32 slotIndex;
+    u32 i;
 
     countFrames = count * historyCount;
     frameTerm = countFrames + historyCount;
@@ -86,9 +85,9 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f3
     resource->texture = effGetBillResourceTexture(0);
 
     defaults = D_003D6670;
-    defaultSlotIndex = 0;
+    i = 0;
     do {
-        defaultSlotIndex++;
+        i++;
         defaults[0] = 0;
         defaults[1] = 0;
         defaults[2] = 0x400;
@@ -98,14 +97,14 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 historyCount, f3
         defaults[6] = 0;
         defaults[7] = 0x400;
         defaults += 8;
-    } while (defaultSlotIndex < 0xF);
+    } while (i < 0xF);
 
     if (count != 0) {
-        slotIndex = 0;
+        i = 0;
         do {
-            effResetMagatuhiValueSlot(resource, slotIndex);
-            slotIndex++;
-        } while (slotIndex < count);
+            effResetMagatuhiValueSlot(resource, i);
+            i++;
+        } while (i < count);
     }
     return resource;
 }

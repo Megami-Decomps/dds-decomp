@@ -217,7 +217,7 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
     DatPartyRecord *record;
     s32 phase;
 
-    if (datBattleSceneRecords[battle->battleMode].voiceGroup != 0) {
+    if (datBattleSceneRecords[battle->battleMode].voice != 0) {
         return 0;
     }
     if (datBattleSceneRecords[battle->battleMode].flags & 0x20) {
@@ -263,7 +263,7 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
 
 s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
     s32 work = (s32)(u32)btlGetRuntime();
-    if (datBattleSceneRecords[*(s32 *)(work + 0x2A0)].voiceGroup != 0) {
+    if (datBattleSceneRecords[*(s32 *)(work + 0x2A0)].voice != 0) {
         return 0;
     }
     if (unit->partyRecord.status & 0x2A0F) {
@@ -1470,7 +1470,7 @@ s8 btlChooseStartVoice(void) {
     s8 voice;
 
     state = (BtlState *)btlGetRuntime();
-    if (datBattleSceneRecords[state->battleMode].voiceGroup != 0) {
+    if (datBattleSceneRecords[state->battleMode].voice != 0) {
         btlBossDebugPrintf(D_00415878);
         return -1;
     }
@@ -8067,7 +8067,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     struct FrFontGlyph *handle;
     BtlState *scene = (BtlState *)btlGetRuntime();
 
-    if (datBattleSceneRecords[scene->battleMode].voiceGroup != 0) {
+    if (datBattleSceneRecords[scene->battleMode].voice != 0) {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x504F6100;
     } else {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x89FEFF00;

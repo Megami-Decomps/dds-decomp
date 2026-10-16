@@ -363,7 +363,7 @@ typedef char DatEnemyRecordAdditionalDropItemIdsOffsetCheck[
 
 /* One 0x28-byte battle scene record; datBattleSceneRecords points at the 0x400-entry table. */
 typedef struct DatBattleSceneRecord {
-    s8 voiceGroup;       /* 0x00: signed ENCOUNT voice selector */
+    s8 voice;            /* 0x00: signed ENCOUNT voice selector */
     u8 itemDropId;       /* 0x01: item passed to btlAddItemDrop when nonzero */
     u8 itemDropCount;    /* 0x02: number of scene-entry item drops */
     u8 pad03;
