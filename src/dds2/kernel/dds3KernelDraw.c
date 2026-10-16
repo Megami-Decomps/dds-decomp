@@ -477,7 +477,8 @@ void kwlnDrawSetupC70B(s32 duration) {
 /* Stage filter-blur parameters, counting/clamping only counts above 100.
  * The secondary values are forwarded into the shared effect parameter body. */
 void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 blendControl,
-                           f32 angleStep, f32 secondFloat, f32 thirdFloat) {
+                           f32 angleStep, f32 uvDisplacementAngleDegrees,
+                           f32 uvDisplacementAmplitude) {
     if (count >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
         kwlnDistanceBlurErrorCount++;
         count = KWLN_DRAW_FILTER_MAX_COUNT;
@@ -486,8 +487,8 @@ void kwlnDrawSetCd0Clamped(s32 count, s32 size, s32 delaySpread, s32 blendContro
     kwlnFilterBlurParameters.size = size;
     kwlnFilterBlurParameters.delaySpread = delaySpread;
     kwlnFilterBlurParameters.angleStep = angleStep;
-    kwlnFilterBlurParameters.uvDisplacementAngleDegrees = secondFloat;
-    kwlnFilterBlurParameters.uvDisplacementAmplitude = thirdFloat;
+    kwlnFilterBlurParameters.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
+    kwlnFilterBlurParameters.uvDisplacementAmplitude = uvDisplacementAmplitude;
     kwlnFilterBlurParameters.blendControl = blendControl;
 }
 
@@ -559,9 +560,10 @@ void kwlnDrawEnableCd0(s32 duration) {
 }
 
 /* Stage staggered-blur parameters, counting/clamping only counts above 40.
- * The opaque word and two remaining float fields keep neutral argument names. */
+ * Blend and UV-displacement inputs map to the corresponding effect fields. */
 void kwlnDrawSetD30Clamped(s32 count, s32 blendControl, f32 phaseStep, f32 spacing,
-                           f32 thirdFloat, f32 fourthFloat, f32 angleStep) {
+                           f32 uvDisplacementAngleDegrees,
+                           f32 uvDisplacementAmplitude, f32 angleStep) {
     if (count >= KWLN_DRAW_STAGGERED_COUNT_LIMIT) {
         kwlnRippleBlurErrorCount++;
         count = KWLN_DRAW_STAGGERED_MAX_COUNT;
@@ -569,8 +571,8 @@ void kwlnDrawSetD30Clamped(s32 count, s32 blendControl, f32 phaseStep, f32 spaci
     kwlnStaggeredBlurParameters.count = count;
     kwlnStaggeredBlurParameters.phaseStep = phaseStep;
     kwlnStaggeredBlurParameters.spacing = spacing;
-    kwlnStaggeredBlurParameters.uvDisplacementAngleDegrees = thirdFloat;
-    kwlnStaggeredBlurParameters.uvDisplacementAmplitude = fourthFloat;
+    kwlnStaggeredBlurParameters.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
+    kwlnStaggeredBlurParameters.uvDisplacementAmplitude = uvDisplacementAmplitude;
     kwlnStaggeredBlurParameters.angleStep = angleStep;
     kwlnStaggeredBlurParameters.blendControl = blendControl;
 }
