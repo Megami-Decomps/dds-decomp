@@ -1175,23 +1175,23 @@ s32 evtCommandClearWorldSlotStatusFlag(void) {
 /* Apply the float state, then update a room flag when its parsed number is positive.
  * Values above 0.5 set that flag; the VM float parameter is deliberately re-read. */
 s32 evtCommandSetUnitRoomFloatState(void) {
-    EffWorldNode *unit;
+    EffWorldNode *worldNode;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        worldNode = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
-    if (unit == NULL) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
-        if (unit == NULL) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && worldNode == NULL);
+    if (worldNode == NULL) {
+        worldNode = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (worldNode == NULL) {
             return 1;
         }
     }
-    evtScaleSlotByClampedMultiplier(unit, bfWaitReadArgFloat(1));
-    roomName = (char *)unit->value;
+    evtScaleSlotByClampedMultiplier(worldNode, bfWaitReadArgFloat(1));
+    roomName = (char *)worldNode->value;
     if (roomName == 0) {
         return 1;
     }
@@ -1209,23 +1209,23 @@ s32 evtCommandSetUnitRoomFloatState(void) {
 /* Apply the integer state and update a positive parsed room number's flag.
  * Unlike the float command, an integer value of zero sets the room flag. */
 s32 evtCommandSetUnitRoomIntegerState(void) {
-    EffWorldNode *unit;
+    EffWorldNode *worldNode;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        worldNode = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
-    if (unit == NULL) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
-        if (unit == NULL) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && worldNode == NULL);
+    if (worldNode == NULL) {
+        worldNode = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (worldNode == NULL) {
             return 1;
         }
     }
-    evtSetWorldSlotValue(unit, scrReadIntParameter(1));
-    roomName = (char *)unit->value;
+    evtSetWorldSlotValue(worldNode, scrReadIntParameter(1));
+    roomName = (char *)worldNode->value;
     if (roomName == 0) {
         return 1;
     }
