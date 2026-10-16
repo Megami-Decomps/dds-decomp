@@ -63,7 +63,7 @@ extern s32 mdlCollectLowFlagBits(void);
 extern s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal);
 extern s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index);
 extern s32 sdfLoadMapCounterCameraVectorsForMask(s32);
-extern void sdfInitializeMapCounterSelection(s32 index, s32 count);
+extern void sdfInitializeMapCounterSelection(s32 selectedCounterIndex, s32 cameraVectorCount);
 extern s32 fldLoadLocalMapResources();
 extern void fldCreateMapRequestQueues(void);
 extern void fldApplyLightSetIndex(s32);

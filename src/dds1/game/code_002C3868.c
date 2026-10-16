@@ -146,25 +146,25 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     return count;
 }
 
-void sdfInitializeMapCounterSelection(s32 index, s32 count) {
-    fldLocalMapFirstCameraVector = D_003900E0[index];
-    fldLocalMapSecondCameraVector = D_00390180[index];
+void sdfInitializeMapCounterSelection(s32 selectedCounterIndex, s32 cameraVectorCount) {
+    fldLocalMapFirstCameraVector = D_003900E0[selectedCounterIndex];
+    fldLocalMapSecondCameraVector = D_00390180[selectedCounterIndex];
     D_003900C0 = fldLocalMapFirstCameraVector;
     D_003900D0 = fldLocalMapSecondCameraVector;
-    sdfCounterSelectionCount = count;
-    sdfSelectedCounterIndex = index;
+    sdfCounterSelectionCount = cameraVectorCount;
+    sdfSelectedCounterIndex = selectedCounterIndex;
     D_003BD270 = 0;
     D_003BD271 = fldGetLmapStage();
 
     /* DDS1 refreshes the live pose components after the stage query. */
-    fldLocalMapFirstCameraVector.v[0] = D_003900E0[index].v[0];
-    fldLocalMapFirstCameraVector.v[1] = D_003900E0[index].v[1];
-    fldLocalMapFirstCameraVector.v[2] = D_003900E0[index].v[2];
-    fldLocalMapFirstCameraVector.v[3] = D_003900E0[index].v[3];
-    fldLocalMapSecondCameraVector.v[0] = D_00390180[index].v[0];
-    fldLocalMapSecondCameraVector.v[1] = D_00390180[index].v[1];
-    fldLocalMapSecondCameraVector.v[2] = D_00390180[index].v[2];
-    fldLocalMapSecondCameraVector.v[3] = D_00390180[index].v[3];
+    fldLocalMapFirstCameraVector.v[0] = D_003900E0[selectedCounterIndex].v[0];
+    fldLocalMapFirstCameraVector.v[1] = D_003900E0[selectedCounterIndex].v[1];
+    fldLocalMapFirstCameraVector.v[2] = D_003900E0[selectedCounterIndex].v[2];
+    fldLocalMapFirstCameraVector.v[3] = D_003900E0[selectedCounterIndex].v[3];
+    fldLocalMapSecondCameraVector.v[0] = D_00390180[selectedCounterIndex].v[0];
+    fldLocalMapSecondCameraVector.v[1] = D_00390180[selectedCounterIndex].v[1];
+    fldLocalMapSecondCameraVector.v[2] = D_00390180[selectedCounterIndex].v[2];
+    fldLocalMapSecondCameraVector.v[3] = D_00390180[selectedCounterIndex].v[3];
 }
 
 

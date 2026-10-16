@@ -187,13 +187,13 @@ s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     return count;
 }
 
-void sdfInitializeMapCounterSelection(s32 index, s32 count) {
-    fldLocalMapFirstCameraVector = D_004009B0[index];
-    fldLocalMapSecondCameraVector = D_00400A50[index];
+void sdfInitializeMapCounterSelection(s32 selectedCounterIndex, s32 cameraVectorCount) {
+    fldLocalMapFirstCameraVector = D_004009B0[selectedCounterIndex];
+    fldLocalMapSecondCameraVector = D_00400A50[selectedCounterIndex];
     D_00400990 = fldLocalMapFirstCameraVector;
     D_004009A0 = fldLocalMapSecondCameraVector;
-    sdfCounterSelectionCount = count;
-    sdfSelectedCounterIndex = index;
+    sdfCounterSelectionCount = cameraVectorCount;
+    sdfSelectedCounterIndex = selectedCounterIndex;
     D_004388C0 = 0;
     D_004388C1 = sdfGetInitialMapCameraTransitionState();
 }
