@@ -1185,15 +1185,15 @@ void frFontGetGlyphPositionAtIndex(FrFontPosition *position, s32 requestedIndex,
 
 /* Translate the complete next-linked chain to place its origin at x/y.
  * NULL glyphChain is a no-op; a non-NULL chain requires a non-NULL origin. */
-void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *glyphChain) {
+void frFontMoveChainTo(s32 targetX, s32 targetY, FrFontGlyph *glyphChain) {
     FrFontGlyph *currentGlyph;
     s32 dx;
     s32 dy;
 
     if (glyphChain != NULL) {
         currentGlyph = glyphChain->chainHead;
-        dx = x - currentGlyph->x;
-        dy = y - currentGlyph->y;
+        dx = targetX - currentGlyph->x;
+        dy = targetY - currentGlyph->y;
         for (; currentGlyph != NULL; currentGlyph = currentGlyph->next) {
             currentGlyph->x += dx;
             currentGlyph->y += dy;
