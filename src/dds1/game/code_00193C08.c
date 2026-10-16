@@ -60,16 +60,16 @@ u32 frFontReverseWordBytes(u32 word) {
 }
 
 /* Return the zero-based highest set bit; both zero and one return zero. */
-s32 frFontHighestSetBitIndex(u32 value) {
+s32 frFontHighestSetBitIndex(u32 bitValue) {
     s32 shiftCount = 0;
 
-    if (value == 0) {
+    if (bitValue == 0) {
         return 0;
     }
     do {
-        value = value >> 1;
+        bitValue = bitValue >> 1;
         shiftCount += 1;
-    } while (value != 0);
+    } while (bitValue != 0);
     return (shiftCount + FR_FONT_BYTE_MASK) & FR_FONT_BYTE_MASK;
 }
 
