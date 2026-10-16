@@ -142,7 +142,7 @@ extern DevState *sdfDevCreateCallbackState(const char *path,
 
 extern s32 sdfDevResolvePathForWorker(const char *, void **);
 
-extern void sdfDevEnqueueStateAndWakeWorker(DevState *);
+extern void sdfDevEnqueueStateAndWakeWorker(DevState *state);
 
 extern DevState *sdfDevAllocState(void *, s32, s32,
                                 void (*)(DevState *, s32, s32, s32, s32), s32);
