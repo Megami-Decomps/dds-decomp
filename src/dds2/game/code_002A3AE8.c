@@ -47,7 +47,8 @@ s16 mnuSpriteDrawParam(u32 index) {
     return mnuMovieMenuSpriteDrawParameterColumn[index * 4];
 }
 
-extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                                       s32 textureSetHandle, s32 slotIndex, s32 layer);
 
 void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                    s32 spriteIndex, s32 drawContext) {
