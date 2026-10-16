@@ -55,7 +55,7 @@ PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
     struct SdfMemBlock *allocation;
     u8 *cursor;
     u32 quarter;
-    u32 i;
+    u32 rampIndex;
     u32 *left;
     u32 *right;
     f32 alpha;
@@ -89,7 +89,7 @@ PcpScatterDraw *effScatterCreateDrawObject(u32 count, u32 pairs) {
         right = left + vectors - 2;
         alpha = 0.0f;
         step = 1.0f / quarter;
-        for (i = 0; i < quarter; i++) {
+        for (rampIndex = 0; rampIndex < quarter; rampIndex++) {
             color = ((u32)(alpha * 128.0f) << 24) | 0x808080;
             alpha += step;
             left[0] = color;
@@ -225,7 +225,7 @@ extern u8 effDefaultRandomState[];
 EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(params->count * sizeof(EffPCPNeedleSlot) + sizeof(EffPCPNeedleWork));
     EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfResourceRetainAddress(allocation);
-    u32 i;
+    u32 slotIndex;
     EffResourceWork *resource;
     u32 count, delayRange;
     EffPCPNeedleSlot *slot;
@@ -251,11 +251,11 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     if (delayRange == 0) delayRange = 1;
     radiusBase = work->params.radiusBase;
     radiusJitter = work->params.radiusJitter;
-    for (i = 0; i < count; i++, slot++) {
+    for (slotIndex = 0; slotIndex < count; slotIndex++, slot++) {
         slot->angle = effMiscRandUnitFloat(effDefaultRandomState) * EFFECT_RING_FULL_TURN;
         slot->radius = radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * radiusJitter + (1.0f - radiusJitter));
         slot->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayRange);
-        effSetResourceEntryValue(work->resource, i, 0x808080);
+        effSetResourceEntryValue(work->resource, slotIndex, 0x808080);
     }
     return work;
 }
