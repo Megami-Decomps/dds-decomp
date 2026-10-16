@@ -5205,7 +5205,7 @@ extern void *D_004360F0;
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_004132E0);
 
 void fldLoadBattleSkyAndFilter(void) {
-    s32 i;
+    s32 cameraSettingIndex;
     DevState *command;
 
     if (fldSkyLightSetBuffer == 0) {
@@ -5220,8 +5220,8 @@ void fldLoadBattleSkyAndFilter(void) {
     if (fldCameraSettings == 0) {
         fldCameraSettings = (FldCameraSetting *)sdfResourceRetainAddress(sdfAllocGeneralBlock(
             sizeof(FldCameraSetting) * FIELD_CAMERA_SETTING_COUNT));
-        for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
-            fldCameraSettings[i] = D_0038BB70;
+        for (cameraSettingIndex = 0; cameraSettingIndex < FIELD_CAMERA_SETTING_COUNT; cameraSettingIndex++) {
+            fldCameraSettings[cameraSettingIndex] = D_0038BB70;
         }
         fldCameraColorParameters->color.segmentMode = SDF_COLOR_TRACK_MODE_ENDPOINTS;
         fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = 0x80808080;
