@@ -273,10 +273,10 @@ void mnuUpdateGroupResources(u8 *scene) {
 }
 
 /* Release each progress node's child panel, leaving the nodes/list intact. */
-void mnuDestroyThresholdNodePanels(s32 hostAddress) {
+void mnuDestroyThresholdNodePanels(MenuTerminalWork *host) {
     s32 entry;
 
-    for (entry = (s32)((MenuTerminalWork *)hostAddress)->list->first; entry != 0; entry = (s32)((struct MenuListNode *)entry)->next) {
+    for (entry = (s32)host->list->first; entry != 0; entry = (s32)((struct MenuListNode *)entry)->next) {
         mnuReleaseDualPercentPanel(((struct MenuListNode *)entry)->childPanel);
     }
 }
@@ -493,15 +493,15 @@ struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEn
 
 
 /* Mark the selected command-list node only for modes zero/one and an idle owner. */
-void mnuHighlightProgressNodeFromOwnerSelection(s32 hostAddress) {
-    s32 state = ((MenuTerminalWork *)hostAddress)->mode;
+void mnuHighlightProgressNodeFromOwnerSelection(MenuTerminalWork *host) {
+    s32 state = host->mode;
     if (state < 2) {
         if (state < 0) {
             return;
         }
-        if (((MenuTerminalWork *)hostAddress)->owner->count == 0) {
+        if (host->owner->count == 0) {
             struct MenuListNode *selected = mnuWalkNodeList(2 - mnuShouldExcludeTerminalMenuEntry(),
-                                                              ((MenuTerminalWork *)hostAddress)->listResource);
+                                                              host->listResource);
             ((struct MenuListNode *)selected)->flags48 |= 1;
         }
     }
@@ -509,8 +509,8 @@ void mnuHighlightProgressNodeFromOwnerSelection(s32 hostAddress) {
 
 
 /* Highlight the mode-zero or mode-two command node only while the progress list is idle. */
-void mnuHighlightProgressNodeByMode(s32 hostAddress) {
-    s32 state = ((MenuTerminalWork *)hostAddress)->mode;
+void mnuHighlightProgressNodeByMode(MenuTerminalWork *host) {
+    s32 state = host->mode;
     s32 selectedIndex;
     if (state != 0) {
         if (state != 2) {
@@ -520,9 +520,9 @@ void mnuHighlightProgressNodeByMode(s32 hostAddress) {
     } else {
         selectedIndex = 3 - mnuShouldExcludeTerminalMenuEntry();
     }
-    if (((MenuTerminalWork *)hostAddress)->list->count == 0) {
+    if (host->list->count == 0) {
         struct MenuListNode *node = mnuWalkNodeList(selectedIndex,
-                                                    ((MenuTerminalWork *)hostAddress)->listResource);
+                                                    host->listResource);
         ((struct MenuListNode *)node)->flags48 |= 1;
     }
 }
@@ -581,7 +581,7 @@ void mnuReleaseWorkResources(u8 *work) {
     for (i = 0; i < 1; i++) {
         mnuDestroyListState((struct MenuList *)*(u32 *)(work + 0x70 + i * 4));
     }
-    mnuDestroyThresholdNodePanels((s32)work);
+    mnuDestroyThresholdNodePanels((MenuTerminalWork *)work);
     mnuReleaseStaffImageHandles(((MenuTerminalWork *)work)->imageHandles);
     mnuReleaseProgressWorkList((s32)work);
     mnuDestroyListState(((MenuTerminalWork *)work)->owner);
@@ -1939,7 +1939,7 @@ u32 evtEnterThresholdSelectionList(KwlnTask *task) {
     return 1;
 }
 
-extern void mnuHighlightProgressNodeByMode(s32);
+extern void mnuHighlightProgressNodeByMode(MenuTerminalWork *);
 
 u32 evtBEnterStateA(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
@@ -1948,7 +1948,7 @@ u32 evtBEnterStateA(KwlnTask *task) {
     mnuApplyGridPanelHostSetting(4, (MenuTerminalWork *)context);
     mnuAnimateTerminalSelection(3, (MenuTerminalWork *)context);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuTerminalWork *)context);
-    mnuHighlightProgressNodeByMode(context);
+    mnuHighlightProgressNodeByMode((MenuTerminalWork *)context);
     return 1;
 }
 

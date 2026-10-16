@@ -2091,7 +2091,7 @@ u32 evtBEnterStateA(KwlnTask *task) {
     mnuApplyGridPanelHostSetting(4, (MenuSlotState *)context);
     mnuSetTerminalPanelMotionMode(3, (MenuSlotState *)context);
     evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)context);
-    mnuHighlightProgressNodeByMode(context);
+    mnuHighlightProgressNodeByMode((MenuSlotState *)context);
     return 1;
 }
 
