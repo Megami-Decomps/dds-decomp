@@ -985,7 +985,7 @@ u32 sdfMeasureAlignedRecordBufferBytes(s32 count) {
 }
 
 /* Build a quad packet from paired colors and per-corner UV sets; return its address. */
-u32 sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
+u32 *sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
     s32 bytes;
     u32 *packet;
     u32 *cursor;
@@ -1040,7 +1040,7 @@ u32 sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAtt
     while (((u32)cursor & 0xF) != 0) {
         *cursor++ = 0;
     }
-    return (u32)packet;
+    return packet;
 }
 
 /* Build a one-vertex textured-quad VIF packet with four corner colors: the

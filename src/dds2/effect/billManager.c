@@ -349,7 +349,7 @@ void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
     }
 }
 
-extern u32 sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes,
+extern u32 *sdfBuildPairedQuadVifPacket(u128 *positions, void *attributes, void *halfAttributes,
                    void *wordAttributes, s32 count, void *(*allocatePacket)(s32));
 
 /* Pair-mode streams flush after seven quads (see the entry renderer). */
@@ -384,7 +384,7 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
         uv[i][3][3] = data[1]->uv[i].components[7];
     }
     sdfAppendPacket(pair->packetList,
-        sdfBuildPairedQuadVifPacket((u128 *)data[1]->positions, colors, uv, data[1]->offsets, count, NULL));
+        (u32)sdfBuildPairedQuadVifPacket((u128 *)data[1]->positions, colors, uv, data[1]->offsets, count, NULL));
     data[0]->count = 0;
     data[1]->count = 0;
 }
