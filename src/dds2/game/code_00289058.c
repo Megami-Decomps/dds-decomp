@@ -72,22 +72,22 @@ u32 mnuAdvanceNodeCursorAndClearListFlags(MnuStatusResource *resource) {
 
 
 /* Steps the list cursor to `target` one entry at a time. */
-s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *object, s8 target) {
+s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *resource, s8 targetIndex) {
     s32 diff;
     s32 current;
 
-    current = object->list->cursor->index;
-    evtPrintDeveloperConsoleMessage("Jump!! %d to %d\n", current, target);
-    diff = current - target;
+    current = resource->list->cursor->index;
+    evtPrintDeveloperConsoleMessage("Jump!! %d to %d\n", current, targetIndex);
+    diff = current - targetIndex;
     while (diff != 0) {
         if (diff > 0) {
-            mnuRetreatListCursorDefault(object->list);
+            mnuRetreatListCursorDefault(resource->list);
             diff--;
-            mnuClearListFlagsOneAndTwo(object->list);
+            mnuClearListFlagsOneAndTwo(resource->list);
         } else {
-            mnuAdvanceListCursorDefault(object->list);
+            mnuAdvanceListCursorDefault(resource->list);
             diff++;
-            mnuClearListFlagsOneAndTwo(object->list);
+            mnuClearListFlagsOneAndTwo(resource->list);
         }
     }
     return 1;
