@@ -854,7 +854,8 @@ void fldResetFieldMapState(void) {
 }
 
 /* The reset includes the first word of the following render region. */
-typedef struct { s16 previewX, previewY; u8 pad04[4]; u32 words[15]; } FldVrResetView;
+#include "fld_vr_reset_view.h"
+
 extern u32 D_0032E570[];
 void fldResetFieldRuntimeState(s32 mode) {
     FldAreaWork *area = &fldAreaState;
