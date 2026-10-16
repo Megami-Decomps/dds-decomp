@@ -16,8 +16,8 @@ void sdfCreateDescriptorPacket(
 
 /* resourceAddress is copied as a packet metadata word, not dereferenced. */
 void sdfCreatePatchableResourcePacket(
-    SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
-    s32 arg4, s32 arg5, s32 resourceAddress, s32 arg7, s32 arg8,
+    SdfListHead *list, SdfLinkedPacketList *linkedList, s32 sourceX, s32 sourceY,
+    s32 width, s32 height, s32 resourceAddress, s32 arg7, s32 arg8,
     s32 (*allocatePacket)(s32));
 
 /* destination is the texture's native VRAM resource descriptor. */
