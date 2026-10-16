@@ -17,7 +17,7 @@
 
 #include "dds3_world_primary.h"
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 searchId);
-extern s32 evtSetBgmVolumePan(s32, s32);
+extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
 
 /* The selected script entry and the terminal value of the native load state. */
 enum {

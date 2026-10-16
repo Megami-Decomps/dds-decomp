@@ -717,11 +717,11 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 extern u16 D_004372B0;
 extern s32 evtViewerTestIndexedCondition(u32 encodedId);
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *, s32 *, s32 *);
-extern s32 evtSetBgmVolumePan(s32, s32);
-extern s32 evtPlayBgm(s32, s32);
-extern s32 evtFadeInBgm(s32, s32);
-extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
-extern void evtTransitionBgm(s32, s32);
+extern s32 evtSetBgmVolumePan(s32 id, s32 fade);
+extern s32 evtPlayBgm(s32 id, s32 fade);
+extern s32 evtFadeInBgm(s32 id, s32 fade);
+extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
+extern void evtTransitionBgm(s32 id, s32 fade);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
