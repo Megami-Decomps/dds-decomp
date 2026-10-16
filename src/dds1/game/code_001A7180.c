@@ -940,14 +940,14 @@ s32 btlChooseEligibleSkill(s32 object) {
     return choices[effMiscRandMod(0, count)];
 }
 
-f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 index) {
-    s32 category = datCommandRecords[index].hpType;
+f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 command) {
+    s32 category = datCommandRecords[command].hpType;
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
         }
     }
-    if (index == 0 && btlCheckSpecialAbility(&object->partyRecord, 0x21D) != 0) {
+    if (command == 0 && btlCheckSpecialAbility(&object->partyRecord, 0x21D) != 0) {
         return datAbilityParameters[0x21D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     return 0.0f;
