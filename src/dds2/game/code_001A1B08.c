@@ -249,13 +249,13 @@ void itfSetPanelInsetVertexColumns(UiSpriteBandPayload *base, s32 x0, s32 y0, s3
 
 /* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent.
    The existing vertex-typed view addresses the same color records as the quad consumer. */
-void itfPanelSetVertexPairs(PanelVertex *data, s32 red, s32 green, s32 blue, s32 alpha) {
-    PanelVertex *colorRow = &data[8];
+void itfPanelSetVertexPairs(PanelVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVertex *colorRow = &panelData[8];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
     colorRow[1].y = 0;
-    colorRow = &data[10];
+    colorRow = &panelData[10];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
@@ -293,8 +293,8 @@ void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha)
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path.
    Preserve the existing vertex-typed access and signed arguments. */
-void itfPanelSetRectSpan(PanelVertex *data, s32 red, s32 green, s32 blue, s32 alpha) {
-    PanelVertex *colorRow = &data[4];
+void itfPanelSetRectSpan(PanelVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVertex *colorRow = &panelData[4];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
@@ -303,13 +303,13 @@ void itfPanelSetRectSpan(PanelVertex *data, s32 red, s32 green, s32 blue, s32 al
 
 /* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent.
    The six-index quad path consumes its color rows from this same base offset. */
-void itfPanelInitRects30(PanelVertex *data, s32 red, s32 green, s32 blue, s32 alpha) {
-    PanelVertex *colorRow = &data[6];
+void itfPanelInitRects30(PanelVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
+    PanelVertex *colorRow = &panelData[6];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
     colorRow[1].y = 0;
-    colorRow = &data[8];
+    colorRow = &panelData[8];
     colorRow->x = red;
     colorRow->y = green;
     colorRow[1].x = blue;
