@@ -551,7 +551,146 @@ void mnuUpdateAndDrawPartyCommandQueue(s32 x, s32 y, s32 z, MenuQueuedCommand *c
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartyMemberCommandPanel);
+#include "fr_font_draw_glyph.h"
+extern const s32 D_0042B108[];
+extern const s32 D_0042B118[];
+extern const s32 D_00437C60[];
+extern char D_00437C68[];
+struct MenuPageSpriteSlot;
+extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
+extern void mnuDrawPartyCommandPage(s32, s32, s32, s32, MenuSprites *, s32);
+extern void mnuDrawPartyProfileAndExpOverlay(s32, s32, s32, MenuPageSlot *, s32, u32, s32);
+extern s32 mnuClearWindowPendingFlagAfterSelection();
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+extern s32 sprintf(char *, const char *, ...);
+extern struct FrFontGlyph *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+u32 mnuGetPanelRatioColor(s32, s32, s32);
+void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
+void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
+                                    s32 panelIndex, s32 surface) {
+    char text[16];
+    MenuQueuedRenderContext commandArgs;
+    s32 iconPositions[4];
+    s32 framePositions[6];
+    s32 barPosition[2];
+    MenuPageSlot *panel = &menu->slots[panelIndex];
+    s32 labelX;
+    s32 labelY;
+    s32 transition = menu->transitionValue;
+    s32 alpha;
+    s32 selection;
+    s32 level;
+    s32 iconX, iconY;
+
+    memcpy(iconPositions, D_0042B108, sizeof(iconPositions));
+    memcpy(framePositions, D_0042B118, sizeof(framePositions));
+    memcpy(barPosition, D_00437C60, sizeof(barPosition));
+
+    if (panel->flags & 1) {
+        return;
+    }
+    iconX = x + iconPositions[0];
+    iconY = y + iconPositions[1];
+    if (panel->panelResourceHandles[0] != NULL && (panel->flags & 0x40) != 0) {
+        effDrawTextureSlotWithBlendedCornerColors(iconX, iconY, z,
+                      0x40, 1, panel->icon[0], 0, surface);
+        mnuDrawMenuPageSpriteLayers(x, y, z, (struct MenuPageSpriteSlot *)panel,
+                      panelIndex, 0, surface);
+        return;
+    }
+
+    if (menu->flags & 0x280) {
+        if (panel->windowSprites != NULL) {
+            mnuDrawPartyCommandPage(x, y, z,
+                          menu->records->slots[panelIndex].index,
+                          panel->windowSprites, surface);
+        }
+        mnuDrawPartyProfileAndExpOverlay(x, y, z, panel,
+                      menu->records->slots[panelIndex].index,
+                      menu->flags, surface);
+    }
+
+    alpha = transition;
+    effDrawTextureSlotWithBlendedCornerColors(iconX, iconY, z,
+                  alpha, 1, panel->icon[0], 0, surface);
+    mnuDrawPanelWindowSurface(x + framePositions[4], y + framePositions[5], z,
+                  menu, panelIndex, panel->frame, menu->transitionValue, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    mnuDrawPanelWindowSurface(x + framePositions[4], y + framePositions[5], 0xFFFFFF,
+                  menu, panelIndex, panel->frame, 0x100, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+
+    commandArgs.panelIndex = panelIndex;
+    commandArgs.menu = menu;
+    commandArgs.origin.x = framePositions[4];
+    commandArgs.origin.y = framePositions[5];
+    commandArgs.extent.x = framePositions[2];
+    commandArgs.extent.y = framePositions[3];
+    mnuUpdateAndDrawPartyCommandQueue(x, y, z, panel->commands, &commandArgs, surface);
+    uiDrawSurfaceAtNearDepth(surface);
+    uiDrawActiveSurfaceRegion(surface);
+    mnuDrawPanelWindowSurface(x + framePositions[4], y + framePositions[5], 0xFFFFFF,
+                  menu, panelIndex, panel->frame, 0x100, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    mnuDrawPartyStatusValuePanel(x, y, z, menu, panelIndex, 0, menu->fade, surface);
+
+    level = menu->records->slots[panelIndex].level;
+    labelX = x + iconPositions[2];
+    labelY = y + iconPositions[3];
+    sprintf(text, D_00437C68, level);
+    if (panel->iconBundle != NULL) {
+        u32 bundleFade = panel->iconBundle->fade;
+        struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
+                          uiBlendColors(0xA09DC380, 0xA09DC300, bundleFade), text, NULL);
+        frFontSetChildChainFirstOption(glyph, 3);
+        frFontDrawGlyphChain(glyph, 1, surface);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        alpha = 0x100 - panel->iconBundle->fade;
+    } else {
+        alpha = transition;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(labelX, labelY, z, alpha,
+                  1, panel->icon[2], 0, surface);
+    {
+        struct FrFontGlyph *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
+                          uiBlendColors(0xA09DC380, 0xA09DC300, alpha), text, NULL);
+        frFontDrawGlyphChain(glyph, 1, surface);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    }
+
+    if (panel->frame[7] == NULL) {
+        effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1], z,
+                      transition, 1, panel->frame[6], 0, surface);
+    } else {
+        effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1], z,
+                      transition, 1, panel->frame[7], 0, surface);
+    }
+    selection = mnuClearWindowPendingFlagAfterSelection(
+        x + framePositions[2], y + framePositions[3], z,
+        &menu->flags, panelIndex, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + framePositions[2], y + framePositions[3], z,
+                  transition, 1, panel->frame[selection + 4], 0, surface);
+
+    if (panel->hp.textures[0] != NULL) {
+        s32 hp = menu->records->slots[panelIndex].hp;
+        s32 maxHp = (menu->flags & 0x200) != 0
+                  ? menu->records->slots[panelIndex].maxHp : -1;
+        u32 hpColor = mnuGetPanelRatioColor(
+            0, hp, menu->records->slots[panelIndex].maxHp);
+
+        mnuDrawAndAdvanceRatioPanel(x + barPosition[0], y + barPosition[1], z,
+                                    hpColor, hp, maxHp, &panel->hp, surface);
+        hp = menu->records->slots[panelIndex].mp;
+        maxHp = (menu->flags & 0x200) != 0
+                  ? menu->records->slots[panelIndex].maxMp : -1;
+        mnuDrawAndAdvanceRatioPanel(x + barPosition[0], y + barPosition[1] + 0x90,
+                                    z, 0xA09DC380, hp, maxHp,
+                                    &panel->mp, surface);
+    }
+}
+
+const s32 D_0042B108[4] = { 48, 296, 336, 208 };
 
 extern const s32 D_0042B130[4];
 extern const s32 D_0042B140[4];
