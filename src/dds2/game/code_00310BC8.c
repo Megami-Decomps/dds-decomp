@@ -729,15 +729,15 @@ void sdfDestroyTaskWorkerTasks(TaskWork *work) {
 }
 
 u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
-    u8 exists;
+    u8 registered;
     KwlnTask *task;
 
-    exists = 0;
+    registered = 0;
     if (work != NULL) {
         task = kwlnTaskGetTaskByName(work->primaryTaskName);
-        exists = task != 0;
+        registered = task != 0;
     }
-    return exists;
+    return registered;
 }
 
 s32 kwlnTaskExists(const char *name) {
