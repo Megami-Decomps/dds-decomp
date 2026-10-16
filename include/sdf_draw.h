@@ -242,7 +242,7 @@ typedef char SdfMotionCommand_size_must_be_8[
 
 /* Resource header followed by the binding commands used to construct a motion. */
 typedef struct MotionTable {
-    u16 unk00;
+    u16 entryCount; /* Motion-index upper bound returned by mdlGetNodeRefHalf. */
     u16 commandCount;
     MotionEntry **entries;
     SdfMotionCommand commands[1];

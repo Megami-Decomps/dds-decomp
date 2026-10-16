@@ -1148,7 +1148,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId) {
     if (matchedNode == NULL) {
         return 0;
     }
-    return matchedNode->motionTable->unk00;
+    return matchedNode->motionTable->entryCount;
 }
 
 extern void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 tint, f32 amount);
