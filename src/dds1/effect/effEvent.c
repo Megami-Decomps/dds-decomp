@@ -1163,7 +1163,7 @@ typedef struct {
 } __attribute__((packed)) FileRecordHeader;
 
 
-extern void effBattleSetScale(BattleEffect *, f32);
+extern void effBattleSetScale(BattleEffect *effect, f32 scale);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
