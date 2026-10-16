@@ -3528,8 +3528,8 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EvtRuntime *viewe
 s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     EvtRuntimeGroup *group;
     s32 selection;
-    s32 target;
-    s32 index;
+    s32 targetGroupIndex;
+    s32 groupIndex;
     s32 nameIndex;
 
     selection = viewer->groupFirst + viewer->groupCursor;
@@ -3541,17 +3541,17 @@ s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, EvtRuntime *vie
         viewer->frameGroup->metadata.extra1 = 2;
     } else {
         viewer->frameGroup->metadata.extra1 = 3;
-        target = viewer->groupFirst + viewer->groupCursor - 3;
-        index = 0;
+        targetGroupIndex = viewer->groupFirst + viewer->groupCursor - 3;
+        groupIndex = 0;
         group = viewer->groups;
         for (; group != NULL; group = group->next) {
             if (group->type == 1) {
-                if (index == target) {
+                if (groupIndex == targetGroupIndex) {
                     nameIndex = evtEventViewerAddName(group->info->value, viewer);
                     viewer->frameGroup->metadata.extra2 = nameIndex;
                     break;
                 }
-                index++;
+                groupIndex++;
             }
         }
     }
