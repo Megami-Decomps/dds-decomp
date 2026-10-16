@@ -4484,8 +4484,8 @@ extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *, s32, EvtRu
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 extern s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRuntime *, s32);
-extern s32 evtPreloadBgm(s32);
-extern s32 evtIsBgmLoaded(s32);
+extern s32 evtPreloadBgm(s32 eventId);
+extern s32 evtIsBgmLoaded(s32 eventId);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void kwlnFadeBackgroundStartIn(s32);
@@ -5250,91 +5250,91 @@ s32 evtEncodeBgmSoundCode(s32 eventId, s32 variation) {
     return ((sequenceId + 0x100) << 0x10) + variation;
 }
 
-s32 evtPreloadBgm(s32 id) {
-    s32 sound;
-    if ((u32)(id - 0x258) >= 0x100) {
+s32 evtPreloadBgm(s32 eventId) {
+    s32 packedTrackId;
+    if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    sound = evtEncodeBgmSoundCode(id, 0);
-    sndEnsureMidiBankResident(sound);
-    return sound;
+    packedTrackId = evtEncodeBgmSoundCode(eventId, 0);
+    sndEnsureMidiBankResident(packedTrackId);
+    return packedTrackId;
 }
 
-s32 evtIsBgmLoaded(s32 id) {
-    if ((u32)(id - 0x258) >= 0x100) {
+s32 evtIsBgmLoaded(s32 eventId) {
+    if ((u32)(eventId - 0x258) >= 0x100) {
         return 1;
     }
-    return sndFindPackedTrackLoadStatus(evtEncodeBgmSoundCode(id, 0)) == 1;
+    return sndFindPackedTrackLoadStatus(evtEncodeBgmSoundCode(eventId, 0)) == 1;
 }
 
-s32 evtPlayBgm(s32 id, s32 fade) {
-    s32 sound;
-    if ((u32)(id - 0x258) >= 0x100) {
+s32 evtPlayBgm(s32 eventId, s32 fade) {
+    s32 packedTrackId;
+    if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    sound = evtEncodeBgmSoundCode(id, fade);
-    sdfDebugPrintf("Event BGM play :%08X\n", sound);
-    sndStartTrackDefault(sound);
-    return sound;
+    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+    sdfDebugPrintf("Event BGM play :%08X\n", packedTrackId);
+    sndStartTrackDefault(packedTrackId);
+    return packedTrackId;
 }
 
 extern char D_004247F8[]; /* "Event BGM trans :%08X\n" */
 extern s32 evtEncodeBgmSoundCode();
 extern void sndTransitionBgm();
 
-void evtTransitionBgm(s32 id, s32 fade) {
-    s32 sound;
-    if ((u32)(id - 0x258) < 0x100U) {
-        sound = -1;
+void evtTransitionBgm(s32 eventId, s32 fade) {
+    s32 packedTrackId;
+    if ((u32)(eventId - 0x258) < 0x100U) {
+        packedTrackId = -1;
         if (fade >= 0) {
-            sound = evtEncodeBgmSoundCode(id, fade);
+            packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
         }
-        sdfDebugPrintf(D_004247F8, sound);
-        sndTransitionBgm(sound);
+        sdfDebugPrintf(D_004247F8, packedTrackId);
+        sndTransitionBgm(packedTrackId);
     }
 }
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_004247F8);
 
-s32 evtFadeInBgm(s32 id, s32 fade) {
-    s32 sound;
-    if ((u32)(id - 0x258) >= 0x100) {
+s32 evtFadeInBgm(s32 eventId, s32 fade) {
+    s32 packedTrackId;
+    if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    sound = evtEncodeBgmSoundCode(id, fade);
-    sdfDebugPrintf("Event BGM fade in play :%08X\n", sound);
-    sndStartTrackExtended(sound);
-    return sound;
+    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+    sdfDebugPrintf("Event BGM fade in play :%08X\n", packedTrackId);
+    sndStartTrackExtended(packedTrackId);
+    return packedTrackId;
 }
 
-s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade) {
-    s32 sound;
-    if ((u32)(id - 0x258) >= 0x100) {
+s32 evtQueueValidatedBgmSoundCode(s32 eventId, s32 fade) {
+    s32 packedTrackId;
+    if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    sound = evtEncodeBgmSoundCode(id, fade);
-    sndReleaseTrackHandle(sound);
-    return sound;
+    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+    sndReleaseTrackHandle(packedTrackId);
+    return packedTrackId;
 }
 
-s32 evtSetBgmVolumePan(s32 id, s32 fade) {
-    s32 sound;
-    if ((u32)(id - 0x258) >= 0x100) {
+s32 evtSetBgmVolumePan(s32 eventId, s32 fade) {
+    s32 packedTrackId;
+    if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    sound = evtEncodeBgmSoundCode(id, fade);
-    sndSetSequenceVolumePan(sound, 0x7F, 0x3F);
-    return sound;
+    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+    sndSetSequenceVolumePan(packedTrackId, 0x7F, 0x3F);
+    return packedTrackId;
 }
 
-s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
-    s32 sound;
-    if ((u32)(id - 0x258) >= 0x100) {
+s32 evtStartBgmBySoundIdAndFade(s32 eventId, s32 fade) {
+    s32 packedTrackId;
+    if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    sound = evtEncodeBgmSoundCode(id, fade);
-    sndQueueSoundId(sound);
-    return sound;
+    packedTrackId = evtEncodeBgmSoundCode(eventId, fade);
+    sndQueueSoundId(packedTrackId);
+    return packedTrackId;
 }
 
 extern char D_004377D0[];
