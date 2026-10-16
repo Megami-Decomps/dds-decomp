@@ -504,20 +504,20 @@ void sdfAppendAssetToResourceList(DevRequest *list, SdfAsset *asset) {
 }
 
 /* Store the first primary-state word and dirty both draw entries. */
-void sdfSetPrimaryStateWordFirst(SdfAsset *asset, u32 value) {
-    asset->primaryStateWordFirst = value;
+void sdfSetPrimaryStateWordFirst(SdfAsset *asset, u32 stateWord) {
+    asset->primaryStateWordFirst = stateWord;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the second primary-state word and dirty both draw entries. */
-void sdfSetPrimaryStateWordSecond(SdfAsset *asset, u32 value) {
-    asset->primaryStateWordSecond = value;
+void sdfSetPrimaryStateWordSecond(SdfAsset *asset, u32 stateWord) {
+    asset->primaryStateWordSecond = stateWord;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the third primary-state word and dirty both draw entries. */
-void sdfSetPrimaryStateWordThird(SdfAsset *asset, u32 value) {
-    asset->primaryStateWordThird = value;
+void sdfSetPrimaryStateWordThird(SdfAsset *asset, u32 stateWord) {
+    asset->primaryStateWordThird = stateWord;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
