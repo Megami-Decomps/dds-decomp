@@ -281,16 +281,16 @@ void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfTexResource *s
 
 void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sourceX,
                    s32 sourceY, s32 width, s32 height, s32 resourceAddress, s32 arg7,
-                   s32 arg8, s32 (*alloc)(s32)) {
-    s32 buffer;
+                   s32 arg8, s32 (*allocate)(s32)) {
+    s32 packetAddress;
 
-    if (alloc == NULL) {
-        alloc = sdfAllocPacketAligned;
+    if (allocate == NULL) {
+        allocate = sdfAllocPacketAligned;
     }
-    buffer = alloc(0xf0);
-    sdfBuildResourceTransferPacket((SdfResourcePacket *)buffer, source,
+    packetAddress = allocate(0xf0);
+    sdfBuildResourceTransferPacket((SdfResourcePacket *)packetAddress, source,
         sourceX, sourceY, width, height, resourceAddress, arg7, arg8);
-    sdfAppendPacketRange(list, buffer, buffer + 0xc0);
+    sdfAppendPacketRange(list, packetAddress, packetAddress + 0xc0);
 }
 
 void sdfPatchPacketResourceField(SdfPatchableResourcePacket *packet, s32 entryIndex) {
