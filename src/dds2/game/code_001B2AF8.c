@@ -7501,7 +7501,7 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern s32 btlCreateTargetSelectionWork(s32);
 
-extern u32 btlGetTargetSelectionWork(void);
+extern SceneAiWork *btlGetTargetSelectionWork(void);
 
 
 
@@ -7510,15 +7510,6 @@ extern u32 btlGetTargetSelectionWork(void);
 
 
 extern BattleSceneObject *btlGetCommandPanelTaskWork(void);
-
-
-
-
-typedef struct SceneScriptState {
-    u32 state;
-    u8 pad04[0xC];
-    u32 value10;
-} SceneScriptState;
 
 
 
@@ -8207,7 +8198,7 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
             panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
             BTL_COMMAND_PARTY_RECORD_INDEX(object->commandData) = panel->partyRecordIndex;
             object->state = 3;
-            ((SceneScriptState *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
+            ((SceneAiWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
             panel->activeEntries[slot].presentation.unkF0 = 0;
             panel->activeEntries[slot].presentation.pendingSceneState = 5;
@@ -9003,26 +8994,20 @@ void btlReleaseTargetSelectionTask(KwlnTask *task) {
     ((BtlState *)btlGetRuntime())->spriteObject = 0;
 }
 
-u32 btlGetTargetSelectionWork(void) {
+SceneAiWork *btlGetTargetSelectionWork(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(D_004367B8);
     if (task == NULL) {
         return 0;
     }
-    return kwlnTaskGetUserValue(task);
+    return (SceneAiWork *)kwlnTaskGetUserValue(task);
 }
 
 u32 btlGetTargetSelectionState(void) {
-    SceneScriptState *state;
-
-    state = (SceneScriptState *)btlGetTargetSelectionWork();
-    return state->state;
+    return btlGetTargetSelectionWork()->state;
 }
 
-u32 btlGetSelectedTargetList(void) {
-    SceneScriptState *state;
-
-    state = (SceneScriptState *)btlGetTargetSelectionWork();
-    return state->value10;
+BtlIndexList *btlGetSelectedTargetList(void) {
+    return btlGetTargetSelectionWork()->listB;
 }
 
 void btlCreateTargetSelectionTask(s32 sourceTask) {
@@ -9049,9 +9034,9 @@ void btlCreateTargetSelectionTask(s32 sourceTask) {
 }
 
 void btlRequestTargetSelectionClose(void) {
-    SceneScriptState *state;
+    SceneAiWork *state;
 
-    state = (SceneScriptState *)btlGetTargetSelectionWork();
+    state = btlGetTargetSelectionWork();
     if (state != 0) {
         state->state = 6;
     }

@@ -52,7 +52,7 @@ extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern s32 btlHasRegisteredAphNamePanelTask(void);
 extern s32 btlCreateTargetSelectionWork(s32);
 extern void btlBossDebugPrintf(const char *, ...);
-extern u32 btlGetTargetSelectionWork(void);
+extern SceneAiWork *btlGetTargetSelectionWork(void);
 extern char *D_004367B8;
 
 
@@ -1153,7 +1153,7 @@ void btlCommandResultEffectSelect(u8 *task) {
 }
 
 extern u32 btlGetTargetSelectionState(void);
-extern u32 btlGetSelectedTargetList(void);
+extern BtlIndexList *btlGetSelectedTargetList(void);
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
 extern void btlRequestTargetSelectionClose(void);
 extern s32 btlSetTaskPhase2(void);
@@ -1179,8 +1179,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
         task->pendingFlags |= 4;
     }
     if (state == 3) {
-        /* Script values carry the selected-list pointer as an opaque word. */
-        selected = (BtlIndexList *)btlGetSelectedTargetList();
+        selected = btlGetSelectedTargetList();
         switch (task->indexWork.phase) {
         case 1:
         case 2:
