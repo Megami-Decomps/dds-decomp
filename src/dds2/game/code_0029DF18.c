@@ -362,24 +362,24 @@ void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSki
 extern u32 D_004285D0[4];
 
 void brsDrawLevelProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *row, s32 depth, s32 index) {
+                   BrsProgressRow *row, s32 depth, s32 rowIndex) {
     u32 color[4];
     s32 packed;
 
     memcpy(color, D_004285D0, sizeof(color));
     if (work->teardownResource != NULL) {
-        if (work->levelAnimation[index].progressIconEnabled != 0) {
-            packed = work->levelAnimation[index].progressIconOpacity | 0x80808000;
+        if (work->levelAnimation[rowIndex].progressIconEnabled != 0) {
+            packed = work->levelAnimation[rowIndex].progressIconOpacity | 0x80808000;
             color[0] = packed;
             color[1] = packed;
             color[2] = packed;
             color[3] = packed;
-            effDrawSpriteWithCornerColors(x + (work->levelAnimation[index].progressIconPosition[0] << 4),
-                         y + (work->levelAnimation[index].progressIconPosition[1] << 3) + 0x40,
+            effDrawSpriteWithCornerColors(x + (work->levelAnimation[rowIndex].progressIconPosition[0] << 4),
+                         y + (work->levelAnimation[rowIndex].progressIconPosition[1] << 3) + 0x40,
                          z, color, 0, work->teardownResource, 0x12, depth);
         }
-        if (work->levelAnimation[index].iconState != 0) {
-            packed = work->levelAnimation[index].auxiliaryColor | 0x80808000;
+        if (work->levelAnimation[rowIndex].iconState != 0) {
+            packed = work->levelAnimation[rowIndex].auxiliaryColor | 0x80808000;
             color[0] = packed;
             color[1] = packed;
             color[2] = packed;
