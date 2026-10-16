@@ -349,13 +349,13 @@ u32 dds3RegisterPendingNamedReferences(u32 *object, SdkFileStream *stream) {
 extern const char D_00438968[];
 extern const char D_00438970[];
 
-s32 dds3WritePackedReferenceFile(u32 *object, s32 arg1, s32 arg2) {
+s32 dds3WritePackedReferenceFile(u32 *object, s32 directory, s32 name) {
     char buffer[0x100];
     u32 record[2];
     SdkFileStream *handle;
     u32 *pendingValues;
 
-    sprintf(buffer, D_00438968, arg1, arg2);
+    sprintf(buffer, D_00438968, directory, name);
     handle = sdfOpenFileStream(buffer, D_00438970);
     if (handle == 0) {
         return 0;
