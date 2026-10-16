@@ -296,13 +296,13 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 #include "sdf_bordered_rectangle_packet.h"
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
-void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 argument, s32 index, const char *command, s32 surfaceIndex) {
+void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, const char *command, s32 surfaceIndex) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfPoolNode *drawSurface;
     SifCommand packetHeader;
 
     sdfInitPacketList(packetList);
-    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, argument, index);
+    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, drawMode);
     sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(&packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
     drawSurface->append(drawSurface, packetList);

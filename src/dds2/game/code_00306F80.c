@@ -1527,7 +1527,8 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
     }
 }
 
-extern void fldLmapSubmitPositionedCommandPacket(s32, s32, s32, s32, const char *, s32);
+extern void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode,
+                                                 const char *command, s32 surfaceIndex);
 
 /* Draw visible local-map rows and invoke the selected row callback once. */
 void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
