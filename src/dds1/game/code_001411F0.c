@@ -268,7 +268,7 @@ typedef struct FldTitleBannerMenu {
     u16 reserved; /* 0x06 */
 } FldTitleBannerMenu;
 
-extern u32 fldInputPanelTaskHandle;
+extern KwlnTask *fldInputPanelTaskHandle;
 extern u32 D_0032E570[];
 extern s32 D_003BAE40;
 extern u8 fldGetCampSceneControlMode(void);
@@ -309,7 +309,7 @@ s32 fldResolvePendingTitleBanner(void) {
         return 0;
     }
 
-    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
     if (menu->pending == 0) {
         return -1;
     }
