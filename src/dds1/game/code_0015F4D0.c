@@ -18,7 +18,7 @@
 #include "eff_offset_triangle.h"
 
 extern void *sdfConsAllocateColumnPacket(s32);
-extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 extern SdfTex *kwlnTextureGetHeldReference(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00324B88;

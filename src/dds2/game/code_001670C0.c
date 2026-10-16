@@ -19,7 +19,7 @@
 #include "eff_packet_params.h"
 
 extern void *sdfConsAllocateColumnPacket(s32);
-extern s32 sdfConsMeasurePacketWithHeader(s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
 extern SdfTex *kwlnTextureGetHeldReference(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_0037FB88;
