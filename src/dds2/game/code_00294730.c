@@ -19,7 +19,7 @@ enum {
 extern MenuIconPlacement mnuCommonIconPlacements[];
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
                           struct EffectSlotSet *, s32, s32);
-extern void mnuDrawType2PanelEffects(MenuTerminalContext *, s32, s32);
+extern void mnuDrawType2PanelEffects(MenuTerminalContext *context, s32 blend, s32 layer);
 extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 
 extern void mnuDrawFadingValueListRow();
