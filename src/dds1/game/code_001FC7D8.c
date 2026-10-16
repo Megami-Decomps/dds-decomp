@@ -901,7 +901,7 @@ BtlRuntimeTask *btlCreateEffObjC(BtlUnit *owner, s32 messageId) {
 }
 
 /* Return completion on the first poll; this effect task has no per-frame work. */
-u32 btlCompleteEffectTaskImmediately(void) {
+s32 btlCompleteEffectTaskImmediately(void *unused) {
     return 1;
 }
 

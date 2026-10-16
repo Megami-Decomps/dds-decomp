@@ -59,7 +59,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state);
 
 
 
-void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
+void sdfRelocatePackedResourceWords(void *words, void *relocationBase, void *table, s32 tableBytes);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */

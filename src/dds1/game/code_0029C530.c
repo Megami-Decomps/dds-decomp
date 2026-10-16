@@ -178,7 +178,7 @@ extern u32 D_003BC990;
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
-extern u32 effFlashTextureHandles;
+extern struct SdfTextureFileHeader *effFlashTextureHandles;
 
 
 
@@ -3733,7 +3733,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     return set;
 }
 
-extern u32 D_003BC96C;
+extern struct SdfTextureFileHeader *D_003BC96C;
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC960);
 
@@ -3751,13 +3751,13 @@ EffTrackSet *effCreateTrackSetWithSharedReferences(u32 count, u32 kind, u32 shar
             switch (effect->kind) {
             case 3:
                 if (D_003BC970[0] == 0) {
-                    D_003BC978[0] = effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effFlashTextureHandles, 0x100);
+                    D_003BC978[0] = effCloneSharedReferenceWithValue(effFlashTextureHandles, 0x100);
                 }
                 D_003BC970[0]++;
                 break;
             case 4:
                 if (D_003BC970[1] == 0) {
-                    D_003BC978[1] = effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)D_003BC96C, 0x101);
+                    D_003BC978[1] = effCloneSharedReferenceWithValue(D_003BC96C, 0x101);
                 }
                 D_003BC970[1]++;
                 break;
@@ -3983,12 +3983,12 @@ setTexture:
 extern u32 D_003BC960[2];
 
 void effLoadFlashTextures(void) {
-    D_003BC960[0] = (u32)sdfReadNamedResource("/effect/flash00.tmx", &effFlashTextureHandles, 0);
-    D_003BC960[1] = (u32)sdfReadNamedResource("/effect/flash01.tmx", &effFlashTextureHandles + 1, 0);
+    D_003BC960[0] = (u32)sdfReadNamedResource("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
+    D_003BC960[1] = (u32)sdfReadNamedResource("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
 }
 
 u32 effGetFlashTextureHandle(s32 index) {
-    return (&effFlashTextureHandles)[index];
+    return (u32)(&effFlashTextureHandles)[index];
 }
 
 typedef struct EffCounterHeader {

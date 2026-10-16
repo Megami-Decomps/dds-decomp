@@ -61,7 +61,7 @@ extern s32 func_0036DD28(void);
 extern void sceSifLoadFileReset(void);
 extern void sceFsReset(void);
 extern void func_0034CB60(s32);
-extern void func_0034D038(u32);
+extern void func_0034D038(u32 discType);
 extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern void sdfLoadIopModulePair(const char *prefix, s32 moduleGroup);
 extern void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);

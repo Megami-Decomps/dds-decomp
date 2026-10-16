@@ -33,7 +33,7 @@ extern f32 effFlashTrianglePulseOrigin[];
 extern void *effGetGroupRecordByIndex(EffRecordPool *pool, s32 index);
 extern void *effGetRecordGroupElement(EffRecordPool *pool, s32 index);
 
-extern u32 effMultiplyPackedColors(u32 color, u32 param);
+extern u32 effMultiplyPackedColors(u32 color, u32 colorB);
 
 
 void effFlashTrianglePulseSpawnFromTable(void *table) {

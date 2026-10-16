@@ -46,7 +46,7 @@ extern u8 D_004389E0;
 
 extern u8 *D_004389E4;
 
-extern void (*D_004389E8)(void *);
+extern void (*D_004389E8)(u8 *);
 
 
 extern SdfPendingRequest sdfTextureUpdateQueue;
@@ -78,7 +78,7 @@ extern vu8 sdfCurrentBufferIndex;
 
 
 
-void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *)) {
+void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(u8 *)) {
     D_004389E4 = destination;
     D_004389E8 = onComplete;
     D_004389E0 = 1;

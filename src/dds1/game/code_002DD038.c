@@ -11,7 +11,7 @@
 
 extern SdfMotionBindingDispatch D_003982D0;
 
-extern s32 (*sdfMotionCommandHandlers[])(void *a0, s32 a1);
+extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command);
 extern SdfMotionBindingDispatch sdfMotionSlotPairDispatch;
 
 /* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */

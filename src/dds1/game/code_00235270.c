@@ -4164,7 +4164,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
 extern u8 sdfPfsDebugMode;
 extern s32 sceOpen(const char *path, s32 flags, ...);
 extern s32 sceClose(s32 descriptor);
-extern s32 sdfPfsSendPathRequest(const char *path, s32 mode);
+extern s32 sdfPfsSendPathRequest(const char *path, s32 rpcArgument);
 extern void *sdfDevGetPathBuffer(void);
 extern char D_003BC350[];
 extern char D_003BC358[];

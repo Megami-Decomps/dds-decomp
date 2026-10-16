@@ -95,7 +95,7 @@ EffThunderParameterHead *effThunderGetParameterHead(EffThunderVectorWork *work) 
 }
 
 /* The descriptor owns the allocation; retention returns its 32-bit address. */
-extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
+extern void parDispatchSub(void *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 

@@ -77,7 +77,7 @@ extern char D_003BB2C0[]; /* ">" */
 extern char D_003BB2C8[]; /* " %s" */
 extern char D_003BB2D0[]; /* "%3d" */
 extern char D_003BB2D8[]; /* "%4d" */
-extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 void itfDrawPulsingTestOverlay(s32 surfaceIndex);
 
 /* Draw the four color channels and handle selection and value editing. */
@@ -93,7 +93,7 @@ s32 itfEditOverlayColor(void) {
 
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list,
-        sdfCreateBorderedRectanglePacket(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
+        (u32)sdfCreateBorderedRectanglePacket(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB2B8));
     if (itfOverlayColorEditorWork.editing == 0) {
@@ -333,11 +333,11 @@ extern char D_003A1598[]; /* "battle_draw" */
 
 
 void btlCreateDrawTasks(void) {
-    s32 state = btlRuntime;
+    BtlState *battle = (BtlState *)btlRuntime;
     KwlnTask *mainTask;
     KwlnTask *drawTask;
     mainTask = kwlnTaskCreate(D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
-    *(u32 *)(state + 0x29C) = (u32)mainTask;
+    battle->scriptOwner = mainTask;
     drawTask = kwlnTaskCreate(D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
     kwlnTaskAddChild(mainTask, drawTask);
 }
@@ -347,7 +347,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 
     task = kwlnTaskFindByPriority(0x3f9);
     if (task != NULL) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)*(u32 *)(btlRuntime + 0x29c), 1);
+        kwlnTaskDestroyWithHierarchy(((BtlState *)btlRuntime)->scriptOwner, 1);
         return;
     }
 }

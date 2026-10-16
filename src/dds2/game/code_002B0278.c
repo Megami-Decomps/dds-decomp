@@ -132,7 +132,7 @@ extern s32 D_00435E48;
 
 extern void mnuDrawPanelItemValueMeter();
 
-extern void mnuDrawSlotIcons();
+extern void mnuDrawSlotIcons(s32 x, MenuPageWindow *page);
 
 extern void frFontAddSharedGlyphFlags(s32);
 extern u8 frFontClearFlagBits(u8);
@@ -1575,8 +1575,8 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
     return 0;
 }
 
-void mnuDrawSlotIcons(s32 x, s32 context) {
-    DatPartyRecord *slot = &datGameState->party[((MenuPageWindow *)context)->lists[0]->cursor->index];
+void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
+    DatPartyRecord *slot = &datGameState->party[page->lists[0]->cursor->index];
     s32 i;
     s32 y = 0xb40;
     FrFontGlyph *handle;
@@ -1610,12 +1610,12 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
     mnuApplyPackedGroupValues(packedGroup, entry->itemId);
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
     mnuDrawPanelItemValueMeter(0, 0, 0, entry, group, spriteFlags);
     mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, D_00435E48 + entry->unitId * 0x11 + 0x110, spriteFlags);
-    mnuDrawSlotIcons(0x14a, id);
+    mnuDrawSlotIcons(0x14a, page);
 }
 
 void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
@@ -1647,7 +1647,7 @@ s32 mnuDrawSelectedStaffPartyView(KwlnTask *callback) {
     }
 
     if (menuWork->staffMode == 0) {
-        mnuDrawPartySkillAndStatusPanel(partyEntry, (s32)&context->partyWindow,
+        mnuDrawPartySkillAndStatusPanel(partyEntry, &context->partyWindow,
                                         context->panelGroup, (s32)context->panelRequest,
                                         (s32)&context->displayHandle, 0x53);
         mnuDrawStaffGridLabelsForKind(5, (struct EffectSlotSet *)(u32)(context->displayHandle));

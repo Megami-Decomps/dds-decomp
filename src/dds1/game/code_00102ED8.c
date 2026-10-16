@@ -99,7 +99,7 @@ extern void evtEnsureDrawVectorState(void);
 extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
 #include "sdf_packet_alloc.h"
 extern void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y);
-extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 typedef s32 (*KwlnTaskUpdateCallback)();
 typedef void (*KwlnTaskDestroyCallback)();
@@ -348,7 +348,7 @@ s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32
 /* Append a cell rectangle; rowSpan also supplies the horizontal padding. */
 void kwlnDrawSpriteCell(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket(packetList, sdfCreateBorderedRectanglePacket(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
+    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
@@ -356,7 +356,7 @@ void kwlnDrawSpriteCell(SdfListHead *packetList, s32 column, s32 row, s32 column
 /* Append the same cell rectangle with caller-selected depth. */
 void kwlnDrawSpriteCellZ(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket(packetList, sdfCreateBorderedRectanglePacket(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
+    sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }
@@ -1058,7 +1058,7 @@ void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
     SdfTexResource *block = sdfGetTextureListHead();
 
     if (block != NULL) {
-        sdfAppendPacket(packetList, sdfCreateBorderedRectanglePacket(x - 0x20, y - 0x10,
+        sdfAppendPacket(packetList, (u32)sdfCreateBorderedRectanglePacket(x - 0x20, y - 0x10,
                                           0x0FFFFF7F, KWLN_MAP_BORDER_WIDTH, 0x820,
                                           0x80000000, 0x80806020));
         do {

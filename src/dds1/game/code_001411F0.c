@@ -2934,7 +2934,8 @@ typedef struct {
     f32 unk4, unk8, unkC;
     f32 unk10[4];
     s32 *object; /* 0x20: room effect object/record. */
-    u8 pad24[8];
+    s16 kind, kindId;
+    f32 size;
     s32 unk2C, unk30, unk34, unk38;
     s16 unk3C, unk3E;
     char name[0x10];

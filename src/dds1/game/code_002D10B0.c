@@ -49,7 +49,7 @@ extern SdfPendingRequest sdfTextureUpdateQueue;
 extern SdfTextureQueue sdfTextureQueueWork;
 extern u8 D_003BD2F0;
 extern u8 *D_003BD2F4;
-extern void (*D_003BD2F8)(void *);
+extern void (*D_003BD2F8)(u8 *);
 
 extern s32 DIntr(void);
 extern void EIntr(void);
@@ -59,7 +59,7 @@ struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
 
-void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *)) {
+void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(u8 *)) {
     D_003BD2F4 = destination;
     D_003BD2F8 = onComplete;
     D_003BD2F0 = 1;

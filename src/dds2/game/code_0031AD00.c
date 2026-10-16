@@ -6,7 +6,7 @@
 struct EffWorldNode;
 extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
-extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
+extern void effObjSetInnerFloat(s32 object, f32 value);
 #include "dds3_world_secondary.h"
 extern void sdfSetViewFieldOfView(f32 fieldOfView);
 extern u8 D_0040ABC0[];

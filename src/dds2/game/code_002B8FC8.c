@@ -119,7 +119,7 @@ extern s32 D_00435E48;
 
 
 
-extern void mnuDrawSlotIcons();
+extern void mnuDrawSlotIcons(s32 x, MenuPageWindow *page);
 
 extern void frFontAddSharedGlyphFlags();
 
@@ -449,13 +449,13 @@ s32 mnuStaffSwitchPartyPage(s32 requestArgument);
  * stateWord holds the update result first, then the stored popup state. */
 s32 mnuStaffBrowsePartyUpdate(s32 callback);
 
-void mnuDrawSlotIcons(s32 x, s32 context);
+void mnuDrawSlotIcons(s32 x, MenuPageWindow *page);
 
 void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags);
 
-void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags);
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags);
 
 void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
                                     MenuProfilePanel *resource,

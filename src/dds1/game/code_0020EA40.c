@@ -165,7 +165,7 @@ extern s32 btlEffectTaskStartFinale(BtlTask *task);
 extern u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle);
 extern s32 btlFadeOtherEnemyUnitsWhenSpecialModeActive(void);
 extern s32 btlFilterBossCommandBySelection(u8 *unit, s32 command);
-extern s32 btlFilterRestrictedCommand(s32 battler, s32 command);
+extern s32 btlFilterRestrictedCommand(BtlUnit *battler, s32 command);
 extern BtlUnit *btlFindActiveMember(u32 group, u32 type);
 extern u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species);
 extern s32 btlFindSubsequentTurnScript(void);

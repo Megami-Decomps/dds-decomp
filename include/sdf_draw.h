@@ -169,7 +169,7 @@ typedef struct SdfModel {
     f32 rotationQuaternion[4];
     f32 scaleVector[4];
     struct SdfDmaTagHeader *lighting; /* Borrowed first DMA reference prefix. */
-    struct SdfDmaTagHeader *unk84; /* Borrowed second DMA reference prefix. */
+    struct SdfDmaTagHeader *secondaryLighting; /* Borrowed second DMA reference prefix. */
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
     struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
@@ -185,6 +185,10 @@ typedef char SdfModel_drawFlags_at_1A[
     ((u32)&((SdfModel *)0)->drawFlags == 0x1A) ? 1 : -1];
 typedef char SdfModel_chunkTable_at_90[
     ((u32)&((SdfModel *)0)->chunkTable == 0x90) ? 1 : -1];
+typedef char SdfModel_secondaryLighting_at_84[
+    ((u32)&((SdfModel *)0)->secondaryLighting == 0x84) ? 1 : -1];
+typedef char SdfModel_unk94_at_94[
+    ((u32)&((SdfModel *)0)->unk94 == 0x94) ? 1 : -1];
 typedef char SdfModel_scalarOverrideFirst_at_88[
     ((u32)&((SdfModel *)0)->scalarOverrideFirst == 0x88) ? 1 : -1];
 typedef char SdfModel_scalarOverrideSecond_at_8C[

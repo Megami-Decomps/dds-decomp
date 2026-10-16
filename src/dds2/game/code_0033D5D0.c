@@ -152,7 +152,7 @@ extern u16 sdfDefaultDevRequestOptions;
 
 extern s32 sdfCreateSemaphore(s32 initial, s32 option, s32 maximum);
 
-extern void func_0034D038(u32 arg0);
+extern void func_0034D038(u32 discType);
 
 extern s32 sdfDevReplySemaphore;
 

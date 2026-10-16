@@ -8,6 +8,7 @@
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
+#include "sdf_texture_file.h"
 #include "eff.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -438,7 +439,7 @@ void billInitializeCommonDrawState(BillObj *billboard) {
     billboard->rotationAngle = zero;
 }
 
-BillObj *billAllocChild(void *resourceData) {
+BillObj *billAllocChild(SdfTextureFileHeader *resourceData) {
     BillObj *obj;
 
     obj = sdfAllocSizeClassBlock(0x34);
@@ -763,7 +764,8 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
     data->entries = (BillAnimationEntry *)(copiedBase + 8);
     data->children = (BillChildPayload **)(copiedBase + *(s32 *)copiedBase + 8);
     for (resourceIndex = 0; resourceIndex < childCount; resourceIndex++) {
-        data->children[resourceIndex] = billCreateChildPayloadFromTextureResource(sourceBytes + *childOffsetCursor++);
+        data->children[resourceIndex] = billCreateChildPayloadFromTextureResource(
+            (SdfTextureFileHeader *)(sourceBytes + *childOffsetCursor++));
     }
     data->entryCount = data->listRefCount = 1;
     entryCount = ((s32 *)data->base)[1];
