@@ -642,7 +642,7 @@ extern void mnuUpdateMantraDrawPool(struct MantraDrawPool *pool);
 extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                                 s32 flags, s32 context);
 extern s32 mnuDrawLoadedProgressPanels(DatPartyRecord *, MenuProgressHost *, s32);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16, u32);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);

@@ -729,7 +729,7 @@ extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
 extern s32 mnuDrawLoadedProgressPanels(void *, MenuProgressHost *, s32);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16, s32);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00325818[4];
