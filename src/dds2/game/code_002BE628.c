@@ -121,7 +121,7 @@ extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
 
-extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
+extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
