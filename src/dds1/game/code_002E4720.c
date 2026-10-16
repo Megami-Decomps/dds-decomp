@@ -98,7 +98,7 @@ extern s32 sdfDevFindDiscFileRecordByPath(u32, u8 *, u32);
 
 extern void sdfDevSetFallbackDeviceWorker(s32 worker);
 
-extern s32 sdfOpenDiscFileRecord;
+extern SdfDiscFileRecord *sdfOpenDiscFileRecord;
 
 extern u32 sdfDiscSemaphore;
 
@@ -592,12 +592,12 @@ INCLUDE_ASM(const s32, "game/code_002E4720", sdfDevFindDiscFileRecordByPath);
 s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 result;
     s32 request[4];
-    s32 file;
+    SdfDiscFileRecord *file;
 
-    file = sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
+    file = (SdfDiscFileRecord *)sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
-        D_003BDA4C = ((SdfDiscFileRecord *)file)->size;
+        D_003BDA4C = file->size;
         sdfOpenDiscFileRecord = file;
         sdfDevReadSectorBytesAvailable = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
@@ -605,7 +605,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
         } else {
             sdfDevSeekDiscRequest(request[0]);
         }
-        result = ((SdfDiscFileRecord *)file)->size;
+        result = file->size;
     }
     return result;
 }
@@ -707,7 +707,7 @@ s32 sdfDevGetFileSize(void) {
     if (sdfOpenDiscFileRecord == 0) {
         sdfPanicHaltPrintf("file didn't open.");
     }
-    return ((SdfDiscFileRecord *)sdfOpenDiscFileRecord)->size;
+    return sdfOpenDiscFileRecord->size;
 }
 
 extern s32 sceOpen();
