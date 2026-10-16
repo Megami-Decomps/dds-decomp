@@ -23,7 +23,7 @@
 #include "mdl_flag_api.h"
 
 extern s32 sprintf(char *, const char *, ...);
-extern s32 fldLocalMapCameraObject;
+extern EffWorldNode *fldLocalMapCameraObject;
 
 typedef struct {
     f32 v[4];
@@ -131,9 +131,9 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, u
 
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerPosition((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
-    effObjSetInnerRotation((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
-    ((EffWorldNode *)fldLocalMapCameraObject)->ops->update((EffWorldNode *)fldLocalMapCameraObject);
+    effObjSetInnerPosition(fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
+    effObjSetInnerRotation(fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
+    fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
 }
 
 #include "pcp_vu0.h"

@@ -56,7 +56,7 @@ extern s32 sdfCounterSelectionCount;
 
 extern void sdfLatchBaseVectorsForSelection(void);
 
-extern s32 fldLocalMapCameraObject;
+extern EffWorldNode *fldLocalMapCameraObject;
 
 typedef struct {
     f32 v[4];
@@ -89,9 +89,9 @@ extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
                                         const char *text);
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerPosition((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
-    effObjSetInnerRotation((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
-    ((EffWorldNode *)fldLocalMapCameraObject)->ops->update(fldLocalMapCameraObject);
+    effObjSetInnerPosition(fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
+    effObjSetInnerRotation(fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
+    fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
 }
 
 #include "pcp_vu0.h"

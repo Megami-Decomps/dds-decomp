@@ -5,7 +5,7 @@
 #include "sdf.h"
 #include "dds3_world_counter.h"
 
-extern s32 fldLocalMapCameraObject;
+extern EffWorldNode *fldLocalMapCameraObject;
 struct EffWorldNode;
 
 extern SdfQuad fldLocalMapFirstCameraVector;
@@ -15,16 +15,16 @@ extern SdfQuad fldLocalMapSecondCameraVector;
 
 
 
-extern void effObjSetInnerFloat(s32 object, f32 value);
+extern void effObjSetInnerFloat(EffWorldNode *object, f32 value);
 
 
-extern s32 dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
+extern EffWorldNode *dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
     fldLocalMapCameraObject = dds3CreateCameraObject(dds3AdvanceWorldCounter(), &fldLocalMapFirstCameraVector, &fldLocalMapSecondCameraVector);
-    dds3SetWorldNodeValue((struct EffWorldNode *)fldLocalMapCameraObject, (u32)"Lmap_Cam");
+    dds3SetWorldNodeValue(fldLocalMapCameraObject, (u32)"Lmap_Cam");
     effObjSetInnerFloat(fldLocalMapCameraObject, 2.0f);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (struct EffWorldNode *)fldLocalMapCameraObject);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), fldLocalMapCameraObject);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C3800", D_003B3D48);
