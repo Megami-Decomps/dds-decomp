@@ -57,7 +57,7 @@ extern TitleAudioStreamState mnuTitleStreamStatus;
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern u32 mnuTitleStreamFileRequest;
+extern struct FileRequest *mnuTitleStreamFileRequest;
 
 extern s32 D_003BC5C8;
 
@@ -330,7 +330,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamSt
 }
 
 void mnuStoreTaskResult(char *audioPath) {
-    mnuTitleStreamFileRequest = (u32)fileQueueDefaultCallbackRequest(audioPath);
+    mnuTitleStreamFileRequest = fileQueueDefaultCallbackRequest(audioPath);
     mnuTitleStreamStatus.loadState = 1;
 }
 
@@ -348,15 +348,15 @@ extern void func_002F7628(u32 *);
  * and frame counts. Keep those distinct accesses and the cleanup-before-copy
  * ordering; return 1 after a ready file is copied, otherwise its ready result. */
 s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
-    s32 ready = fileIsRequestReadyInCurrentMode((struct FileRequest *)mnuTitleStreamFileRequest);
+    s32 ready = fileIsRequestReadyInCurrentMode(mnuTitleStreamFileRequest);
 
     if (ready != 0) {
-        struct SdfMemBlock *resourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
-        u32 fileDataAddress = fileGetLoadedDataAddress((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
-        s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
+        struct SdfMemBlock *resourceHandle = fileGetResourceHandle(mnuTitleStreamFileRequest);
+        u32 fileDataAddress = fileGetLoadedDataAddress(mnuTitleStreamFileRequest);
+        s32 fileBytes = (s32)fileGetResourceSize(mnuTitleStreamFileRequest);
         struct SdfMemBlock *allocation;
 
-        filePollEntryCleanup((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
+        filePollEntryCleanup(mnuTitleStreamFileRequest);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
         mnuTitleStreamStatus.compressedData = (u8 *)sdfMemoryGetBlockAddress(allocation);
         mnuTitleStreamStatus.allocation = allocation;
