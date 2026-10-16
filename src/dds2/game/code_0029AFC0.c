@@ -276,11 +276,11 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
-extern u16 D_003D6332[][17];
+extern u16 mnuExtraLevelWeightedItemPairsView[][17];
 
 s32 mnuChooseWeightedItem(s32 index) {
     s32 random = (u8)effMiscRand(NULL);
-    u16 *entry = D_003D6332[index];
+    u16 *entry = mnuExtraLevelWeightedItemPairsView[index];
     u32 i;
 
     for (i = 0; i < 8; i++, entry += 2) {
@@ -307,7 +307,7 @@ typedef struct StaffItemRow {
 } StaffItemRow;
 
 
-extern StaffItemRow D_003D6330[7];
+extern StaffItemRow mnuExtraLevelItemRewardRows[7];
 
 /* Roll a staff reward: a chance-gated stat raise (mode 4) or an item grant (mode 5). */
 void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
@@ -346,8 +346,8 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
             }
             break;
         case 5:
-            for (i = 0; i < sizeof(D_003D6330) / sizeof(D_003D6330[0]); i++) {
-                if (D_003D6330[i].minLevel >= unit->level) {
+            for (i = 0; i < sizeof(mnuExtraLevelItemRewardRows) / sizeof(mnuExtraLevelItemRewardRows[0]); i++) {
+                if (mnuExtraLevelItemRewardRows[i].minLevel >= unit->level) {
                     work->earnedItem = mnuChooseWeightedItem(i);
                     ptyAdjustItemQuantity(work->earnedItem, 1);
                     break;

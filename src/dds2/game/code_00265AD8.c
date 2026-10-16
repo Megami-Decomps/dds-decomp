@@ -68,7 +68,7 @@ typedef struct EventDispatchState {
 } EventDispatchState;
 
 extern const char D_00424D08[];
-extern u8 D_003CE674[];
+extern u8 mnuTerminalMenuMessagePopupEntry[];
 extern u8 mnuShopCommandPopupEntries[];
 extern ShopRankPriceRow mnuShopRankPriceRows[];
 extern const u8 (*D_00435E5C)[25];
@@ -118,7 +118,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                     } else if (evtMenuSetTypeProgressFlagOnce(state) != 0) {
                         state->phase = 10;
                     } else if (mdlFlagTest(4) == 0) {
-                        mnuSetPopupEntryFlagged(dispatchSlot, D_003CE674);
+                        mnuSetPopupEntryFlagged(dispatchSlot, mnuTerminalMenuMessagePopupEntry);
                     } else if (state->options != 0) {
                         dspSetActive(1);
                         dspStartEntry(state->options + 0xF);

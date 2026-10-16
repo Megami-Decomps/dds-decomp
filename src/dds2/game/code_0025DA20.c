@@ -98,7 +98,7 @@ extern CampFlagRow mnuCampFlagRows[];
 
 
 
-extern u8 D_003CE658[];
+extern u8 mnuShopMessageSequencePopupEntry[];
 
 extern SdfTex *kwlnHeldTextureReference;
 
@@ -148,12 +148,12 @@ extern void mnuSetStateValue(u32 *, u32);
 extern u8 D_003CD8D0[];
 
 
-extern u8 D_003CDA8C[];
+extern u8 mnuCampWideRewardIdView[];
 
 extern u8 mnuCampCompactEntries[];
 
 
-extern u8 D_003CD8DD[];
+extern u8 mnuCampListedItemSolarWeightsView[];
 
 
 
@@ -165,7 +165,7 @@ extern s32 mnuIsHighRangeItemId(s32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 mnuIsSolarPricedItemId(s32);
 
-extern u8 D_003CDA88[];
+extern u8 mnuCampWideRewardEntries[];
 
 extern struct FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
@@ -1754,7 +1754,7 @@ static inline s32 campSetHandler(MenuTerminalContext *context, s32 mode, void *c
 
 s32 mnuPreparePopupAndDispatchSelection(KwlnTask *callback) {
     MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
-    mnuSetPopupEntry(&context->popupState, D_003CE658);
+    mnuSetPopupEntry(&context->popupState, mnuShopMessageSequencePopupEntry);
     return campSetHandler(context, 0, (void *)callback);
 }
 
@@ -1851,12 +1851,12 @@ typedef struct EffItemSlot44 {
     u8 pad_04[0x40];
 } EffItemSlot44;
 
-extern EffItemSlot44 D_003CD8F0[];
+extern EffItemSlot44 mnuCampCompactEntryClaimFlagView[];
 extern void mdlFlagSet(s32);
 
 s32 itmClaimFreeSlot(s32 row) {
     s32 first = row * 2;
-    EffItemSlot44 *slot = &D_003CD8F0[first];
+    EffItemSlot44 *slot = &mnuCampCompactEntryClaimFlagView[first];
     s32 i = 0;
 
     do {
@@ -1889,7 +1889,7 @@ s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 row) {
 
 u32 mnuCampChooseSolarWeightedOption(s32 row) {
     s32 chance = effMiscRand(0) & 0xFF;
-    u8 *item = D_003CD8DD + row * 8;
+    u8 *item = mnuCampListedItemSolarWeightsView + row * 8;
     s32 total = 0;
     u32 index = 0;
     do {
@@ -1924,7 +1924,7 @@ u8 mnuCampChooseWeightedTableValue(void) {
 }
 
 s32 mnuCampFindFreeWideEntryIndex(s32 row) {
-    s32 *entry = (s32 *)(D_003CDA8C + row * 0xC0);
+    s32 *entry = (s32 *)(mnuCampWideRewardIdView + row * 0xC0);
     s32 index = 0;
     do {
         s32 value = *entry;
@@ -1979,7 +1979,7 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
         s32 *output = indices;
         for (; column < count; column++) {
             CampWideRewardEntry *entry = (CampWideRewardEntry *)(
-                D_003CDA88 + column * sizeof(CampWideRewardEntry) + row * 0xC0);
+                mnuCampWideRewardEntries + column * sizeof(CampWideRewardEntry) + row * 0xC0);
             s32 id = entry->id;
             s32 allowed = 1;
 
@@ -2005,7 +2005,7 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
     roll = effMiscRand(NULL) % (totalWeight + 1);
     for (column = 0; column < eligibleCount; column++) {
         s32 selected = indices[column];
-        cumulative += D_003CDA88[selected * 0xC + row * 0xC0];
+        cumulative += mnuCampWideRewardEntries[selected * 0xC + row * 0xC0];
         if (cumulative >= roll) {
             return selected;
         }
@@ -2016,21 +2016,21 @@ s32 mnuCampChooseWideRewardEntry(s32 row) {
     return indices[eligibleCount - 1];
 }
 
-extern u8 D_003CDA89[];
+extern u8 mnuCampWideRewardKindByteView[];
 
 u8 mnuCampGetWideRewardKind(s32 row, s32 column) {
-    return D_003CDA89[column * 0xC + row * 0xC0];
+    return mnuCampWideRewardKindByteView[column * 0xC + row * 0xC0];
 }
 
-extern u8 D_003CD8F4[];
+extern u8 mnuCampCompactRewardKindByteView[];
 
 u8 mnuCampGetCompactRewardKind(s32 row, s32 column) {
-    return D_003CD8F4[column * 8 + row * 0x44];
+    return mnuCampCompactRewardKindByteView[column * 8 + row * 0x44];
 }
 
 s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
-    u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
-    s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
+    u8 *entry = mnuCampWideRewardEntries + column * 0xC + row * 0xC0;
+    s32 id = *(s32 *)(mnuCampWideRewardEntries + column * 0xC + row * 0xC0 + 4);
 
     if (entry[1] == 0 && mnuIsHighRangeItemId(id) != 0 && datGameState->inventory.counts[id] != 0) {
         id = *(u16 *)(entry + 8);
@@ -2197,7 +2197,7 @@ s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
 }
 
 extern u8 *D_00435E5C;
-extern u8 D_003C9BC4[];
+extern u8 mnuShopSourceEntryTypeView[];
 extern void mnuSelectFirstListNode();
 extern void mnuClearWindowListSelectionFlags();
 extern s32 mnuDrawCampItemListRow();
@@ -2261,7 +2261,7 @@ s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *scene) {
     row = mnuCampResolveFlagRowValue(scene->shopRow);
     scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
     /* Each packed stock row spans 0xC1 halfwords. */
-    entry = D_003C9BC4 + (row << 8) + (((row << 6) + row) << 1);
+    entry = mnuShopSourceEntryTypeView + (row << 8) + (((row << 6) + row) << 1);
     for (i = 0; i < 0x60; i++, entry += 4) {
         u32 id = *(u16 *)(entry - 2);
         u32 mode = entry[0];
@@ -2356,7 +2356,7 @@ s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *scene, s32 filterMode
     row = mnuCampResolveFlagRowValue(scene->shopRow);
     scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
     /* Each packed stock row spans 0xC1 halfwords. */
-    entry = D_003C9BC4 + (row << 8) + (((row << 6) + row) << 1);
+    entry = mnuShopSourceEntryTypeView + (row << 8) + (((row << 6) + row) << 1);
     for (i = 0; i < 0x60; i++, entry += 4) {
         u32 id = *(u16 *)(entry - 2);
         u32 mode = entry[0];
@@ -2395,7 +2395,7 @@ s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *scene, s32 filterMode
     return scene->window->list->count;
 }
 
-extern u32 D_003CD0D0[][16];
+extern u32 mnuShopSolarPhaseSalePrices[][16];
 
 s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
     CampWindowParams *params;
@@ -2429,7 +2429,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
                 params->price = price;
             } else if (mnuIsSolarPricedItemId(i) != 0) {
                 params = &mnuAppendWindowListNode(scene->window, D_00435E5C + i * 0x19)->camp;
-                value = D_003CD0D0[i - 0x60][evtGetSolarPhase()];
+                value = mnuShopSolarPhaseSalePrices[i - 0x60][evtGetSolarPhase()];
                 params->value = value;
                 price = mnuCampScalePriceByTier(0, value);
                 params->id = i;
@@ -2503,7 +2503,7 @@ extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern s32 mnuShopProgressCompletionFlagView[];
-extern u8 D_003CE620[];
+extern u8 mnuShopSelectedRewardPopupEntry[];
 extern u8 D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
 typedef struct EvtFlagGate {
@@ -2515,7 +2515,7 @@ typedef struct EvtFlagGate {
 
 
 extern s32 mnuIsSolarPricedItemId();
-extern u8 D_003CE604[];
+extern u8 mnuShopProgressGatePopupEntry[];
 extern u16 D_003CE3F8[];
 extern void mnuDrawSpriteMenuFadeOut();
 extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
@@ -2596,7 +2596,7 @@ s32 evtAdvancePhaseOne(KwlnTask *task) {
 }
 
 extern s32 mnuTickCommandPhase(MenuTerminalContext *);
-extern u8 D_003CE55C[];
+extern u8 mnuShopReturnDelayPopupEntry[];
 
 s32 mnuShopPollCommandSelection(KwlnTask *task) {
     MenuTerminalContext *state;
@@ -2633,7 +2633,7 @@ s32 mnuShopPollCommandSelection(KwlnTask *task) {
         return 0;
     }
     case 2:
-        mnuSetPopupEntryFlagged(&state->popupState, D_003CE55C);
+        mnuSetPopupEntryFlagged(&state->popupState, mnuShopReturnDelayPopupEntry);
         return 0;
     case 3:
         evtInstallStateTable((s32)state);
@@ -3361,7 +3361,7 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
 }
 
 extern s32 mnuTickCommandWaitPhase(MenuTerminalContext *);
-extern u8 D_003CE594[];
+extern u8 mnuShopTransactionPopupEntry[];
 
 /* Poll command phases, adjust the idle quantity selection, and play UI sounds. */
 s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
@@ -3392,7 +3392,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
         break;
     }
     case 12:
-        mnuSetPopupEntryFlagged(dispatchSlot, D_003CE594);
+        mnuSetPopupEntryFlagged(dispatchSlot, mnuShopTransactionPopupEntry);
         break;
     case 11:
     default:
@@ -3596,7 +3596,7 @@ s32 evtApplyShopQuantityTransaction(KwlnTask *task) {
 }
 
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern u8 D_003CE5CC[];
+extern u8 mnuShopPendingRewardPopupEntry[];
 extern u8 mnuShopSlotAdvancePopupEntry[];
 
 /* Complete an idle shop confirmation and queue its followup state. */
@@ -3625,7 +3625,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
                 break;
             }
             state->transactionConfirmed = 1;
-            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5CC);
+            mnuSetPopupEntryFlagged(dispatchSlot, mnuShopPendingRewardPopupEntry);
         } else {
             state->transactionConfirmed = 0;
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopSlotAdvancePopupEntry);
@@ -3938,7 +3938,7 @@ s32 evtOpenSlotAdvancePopupWhenIdle(KwlnTask *callbackContext) {
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
-                mnuSetPopupEntryFlagged(dispatchSlot, D_003CE604);
+                mnuSetPopupEntryFlagged(dispatchSlot, mnuShopProgressGatePopupEntry);
             }
         }
         return 0;
@@ -4005,7 +4005,7 @@ s32 evtTriggerProgressGateThenOpenPopup(KwlnTask *callbackContext) {
         if (*dispatchSlot == 0) {
             if (evtGetMessageWindowControlState() == 0) {
                 if (evtTriggerProgressFlagGate(stateAddress) == 0) {
-                    mnuSetPopupEntryFlagged(dispatchSlot, D_003CE620);
+                    mnuSetPopupEntryFlagged(dispatchSlot, mnuShopSelectedRewardPopupEntry);
                 }
             }
         }
@@ -4091,7 +4091,7 @@ extern void dspRequestMessageWindowModeOne(void);
 
 
 
-extern char D_003CE63C[];
+extern char mnuShopGrantedRewardPopupEntry[];
 extern char D_00437850[];
 extern s32 mnuSelectUnclaimedProgressRewardTier();
 extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);
@@ -4161,7 +4161,7 @@ s32 evtMenuPollWindow(KwlnTask *callback) {
     if (state == 0) {
         if (*window == 0) {
             if (evtGetMessageWindowControlState() == 0) {
-                mnuSetPopupEntryFlagged(window, D_003CE63C);
+                mnuSetPopupEntryFlagged(window, mnuShopGrantedRewardPopupEntry);
             }
         }
         return 0;

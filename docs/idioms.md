@@ -12898,7 +12898,7 @@ selection processing. Separate records host the stat-assignment message and
 the level-change popup. Their registered constant-one hooks perform no work;
 the names describe the record role, not an effect of the constant return.
 
-DDS2 encodes the first result record as bytes within `D_003D6332`: words
+DDS2's first result record follows `mnuExtraLevelItemRewardRows`: words
 at `0x003D6424` and `0x003D6428` are callback addresses `0x00299EF0` and
 `0x00299EF8`. The absence of `.word` labels there does not remove the native
 registration. Signatures, return constants, definition order, and distinct
@@ -14040,3 +14040,36 @@ next vector's zero first word is not selected or retyped. The Magatuhi UV
 cache is also excluded because the held history-trail ASM references it.
 No headers, types, bounds, flags, literals, data ownership, assembly,
 callbacks or game behavior change.
+
+## Shop and terminal records, reward columns and mantra rows
+
+The named popup objects retain their native 28-byte records and per-game
+callbacks. Names describe the matched callers that select each record:
+return delay, transaction, message sequence, terminal preparation, panel
+and follow-up fade. DDS2's additional reward/progress/message records are
+not forced onto differently wired DDS1 entries.
+
+`mnuShopSolarPhaseSalePrices` retains each game's 32 rows of sixteen
+prices for item IDs 0x60--0x7F. The matched consumers index the existing
+solar-phase column; DDS2's separate tier adjustment remains unchanged.
+The source-entry type view stays at `mnuShopSourcePriceRows + 4`.
+The listed-item solar-weight, compact claim-flag and compact reward-kind
+views keep their existing byte offsets, opaque element types and bounds.
+Compact records remain 68 bytes, with the existing payload view eight
+bytes beyond the claim-flag view. Wide rewards retain nine rows of sixteen
+12-byte entries; their kind-byte and ID views remain at offsets one and
+four. None of these aliases introduces a new owner or structure layout.
+
+DDS2's extra-level item bank has seven existing rows, each with eight
+item/cumulative-weight pairs. The first byte is tested as a level ceiling
+(10, 20, 30, 40, 50, 60 or 99); the existing `minLevel` member spelling and
+all comparison directions are deliberately retained. The weighted-pair
+view remains two bytes into each 34-byte row. DDS1 has no corresponding
+item-grant mode here, so no speculative twin bank is introduced.
+
+`mnuMantraPanelEntryRows` retains three rows of 37 four-byte ID/status
+records. Tutorial initialization resets their status to two, then enables
+group-one ID 0x4B and group-two ID 0x45; script-ID lookup still searches
+exactly one 148-byte row. Existing status helpers and held neighboring
+callbacks are untouched. All data bytes, declarations, casts, array bounds,
+control flow and original reconstruction credit remain unchanged.
