@@ -453,19 +453,19 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 
 /* Set up the level and profile progress bars for one party member. */
-void brsBuildUnitProgressRow(BrsProgressRow *state, DatPartyRecord *entry) {
+void brsBuildUnitProgressRow(BrsProgressRow *progressRow, DatPartyRecord *partyRecord) {
     s32 levelDelta;
     s32 profilePoints;
 
-    memset(state, 0, 0x2C);
-    state->unit = entry;
-    levelDelta = ptyCalcLevelUps(entry);
-    mnuTitleInitFourParameters(state->levelProgress, 0x6E0, 0x50,
-        entry->totalExp - ptyComputeTotalExp(entry, levelDelta),
-        ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
-    profilePoints = ptyAddProfileRecordValueClamped(entry, 0);
-    mnuTitleInitFourParameters(state->profileProgress, 0x3C0, 0x50, profilePoints,
-        ptyGetProfileRecordCap(ptyGetCurrentProfileId(entry) & 0xFFFF));
+    memset(progressRow, 0, 0x2C);
+    progressRow->unit = partyRecord;
+    levelDelta = ptyCalcLevelUps(partyRecord);
+    mnuTitleInitFourParameters(progressRow->levelProgress, 0x6E0, 0x50,
+        partyRecord->totalExp - ptyComputeTotalExp(partyRecord, levelDelta),
+        ptyComputeTotalExp(partyRecord, levelDelta + 1) - ptyComputeTotalExp(partyRecord, levelDelta));
+    profilePoints = ptyAddProfileRecordValueClamped(partyRecord, 0);
+    mnuTitleInitFourParameters(progressRow->profileProgress, 0x3C0, 0x50, profilePoints,
+        ptyGetProfileRecordCap(ptyGetCurrentProfileId(partyRecord) & 0xFFFF));
 }
 
 u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource, s32 context) {
