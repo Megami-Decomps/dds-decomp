@@ -656,17 +656,17 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
 
 /* Recover HP/MP in each occupied roster slot and preserve only status bit 15. */
 void ptyRecoverAllUnits(void) {
-    s32 index = 0;
+    s32 slotIndex = 0;
 
     do {
-        DatPartyRecord *entry = &datGameState->party[index];
+        DatPartyRecord *entry = &datGameState->party[slotIndex];
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             datAdjustCurrentHp(entry, PTY_RECOVERY_DELTA);
             datAdjustCurrentMp(entry, PTY_RECOVERY_DELTA);
             entry->status &= 0x8000;
         }
-        index++;
-    } while (index < PTY_ACTIVE_ROSTER_COUNT);
+        slotIndex++;
+    } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
 }
 
 /* Test occupied entries with nonzero HP; mode 1 additionally requires a frontline member. */
