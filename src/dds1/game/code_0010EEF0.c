@@ -13,7 +13,7 @@
 
 extern s8 ptyReadSignedRosterStatByte(s32);
 extern s32 scrReadIntParameter(s32);
-extern void ptyApplyEventPenalty(s32);
+extern void ptyApplyEventPenalty(s32 penaltyMode);
 
 extern void effMiscNormalizeVU(void);
 
@@ -23,10 +23,10 @@ void effObjInnerVecInit(ObjectTransform *node);
 
 
 u32 ptyScriptApplyEventPenalty(void) {
-    s32 mode;
+    s32 penaltyMode;
 
-    mode = scrReadIntParameter(0);
-    ptyApplyEventPenalty(mode);
+    penaltyMode = scrReadIntParameter(0);
+    ptyApplyEventPenalty(penaltyMode);
     return 1;
 }
 
