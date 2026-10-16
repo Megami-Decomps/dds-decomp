@@ -230,14 +230,14 @@ typedef struct MenuList MenuList;
 
 
 /* Give both complete commands in each page the same draw resource. */
-void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *value) {
+void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *resourceSet) {
     MenuPageSlot *panel = menu->slots;
     s32 i;
     s32 j;
 
     for (i = 0; i < 5; i++, panel++) {
         for (j = 0; j < 2; j++) {
-            panel->commands[j].resources = value;
+            panel->commands[j].resources = resourceSet;
         }
     }
 }
