@@ -48,8 +48,8 @@ extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
 
 extern void effObjInnerVecBackup(ObjectTransform *node);
-extern void effMagatuhiCopyFloatBlock(void *, const void *);
-extern void effMagatuhiSetControlPointParams(void *, const void *);
+extern void effMagatuhiCopyFloatBlock(void *work, const void *src);
+extern void effMagatuhiSetControlPointParams(void *work, const void *src);
 
 
 
