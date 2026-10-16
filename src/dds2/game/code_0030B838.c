@@ -452,7 +452,7 @@ extern s8 D_004388D0;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sdfCounterSetMode(s32);
-extern void sdfCounterStartTimerPositionTransition(s32, s32);
+extern void sdfCounterStartTimerPositionTransition(s32 x, s32 y);
 extern s32 sdfCounterGetSelectionBoundaryFlags(void);
 extern void mnuSetMapTimerFlags(s32);
 
