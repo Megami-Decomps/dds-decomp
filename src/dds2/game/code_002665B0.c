@@ -1712,7 +1712,6 @@ extern void mnuSelectFirstListNode(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
 
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 

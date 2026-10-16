@@ -443,7 +443,6 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 sprintf(char *, const char *, ...);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);
 extern void mnuShowMantraUnitPanel(struct MantraDrawPool *pool);
