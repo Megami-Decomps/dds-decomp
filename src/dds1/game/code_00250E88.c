@@ -492,7 +492,7 @@ MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfi
 }
 
 extern MantraPrerequisiteRecord mnuMantraPrerequisiteRecords[];
-extern void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 value);
+extern void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 cellValue);
 
 /* Rebuild the 88-entry mantra grid from the prerequisite coordinates (tenths, or required level / 5
  * when the record's x is -1), report the selected profile's cell, then set the three
