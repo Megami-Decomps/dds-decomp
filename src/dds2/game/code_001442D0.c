@@ -2840,7 +2840,87 @@ void fldClearAllAreaFloorFlags(void) {
     } while (blockIndex < 10);
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B0F8);
+extern f32 D_0043627C;
+extern void itfSetTextDrawLimit(s32 value);
+extern s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode);
+extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
+
+/* Both banner coordinates are interpolated, including the fixed zero Y endpoint. */
+static inline f32 fldBannerCoordinate(f32 progress, f32 hidden, f32 shown) {
+    return progress * shown + (1.0f - progress) * hidden;
+}
+
+void func_0014B0F8(void) {
+    f32 progress;
+    s32 x, y;
+    s32 labelIndex;
+    s32 width;
+    s32 labelX;
+    if (fldAreaState.unk118 == 1) return;
+    if (fldAreaState.area >= 200) return;
+    switch (fldAreaState.unkD4) {
+    case 0:
+        progress = 0.0f;
+        D_0043627C = progress;
+        break;
+    case 2:
+        progress = D_0043627C;
+        if (progress > 0.0f) {
+            progress -= 0.1f;
+            if (progress < 0.0f) {
+                progress = 0.0f;
+                goto storeClampedProgress;
+            }
+            D_0043627C = progress;
+        }
+        break;
+    case 3:
+        progress = D_0043627C;
+        if (!(progress < 1.0f)) {
+            break;
+        }
+        progress += 0.1f;
+        if (!(1.0f < progress)) {
+            D_0043627C = progress;
+            break;
+        }
+        /* A completed fade-in uses the fully visible state. */
+    case 1:
+        progress = 1.0f;
+        D_0043627C = progress;
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    default:
+        progress = D_0043627C;
+        break;
+    }
+    goto interpolate;
+storeClampedProgress:
+    D_0043627C = progress;
+interpolate:
+    x = (s32)fldBannerCoordinate(progress, 250.0f, 0.0f);
+    y = (s32)fldBannerCoordinate(progress, 0.0f, 0.0f);
+    itfSetTextDrawLimit(0x13);
+    if (fldAreaState.unkC8 != -1) {
+        if (D_0044FD48[fldAreaState.unkC8] < 2) return;
+        labelIndex = fldFindSecondaryMapLabelIndexByCoordinate(fldAreaState.area % 100, fldAreaState.unkC8);
+        width = frFontMeasureTextAdvance(D_0039E1A8[labelIndex].name, 1, 0);
+        fldDrawAnimatedFieldBanner(width, x, y);
+        if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;
+        fldDrawConvertedTextGlyph(x + labelX, (y + 0x12) / 2, 0xF0DC6480, D_0039E1A8[labelIndex].name);
+    } else if (fldAreaState.unkC4 != fldAreaState.unkC8) {
+        if (D_0044FC98[fldAreaState.unkC4] < 2) return;
+        labelIndex = fldFindMapLabelIndexByCoordinate(fldAreaState.area % 100, fldAreaState.unkC4);
+        width = frFontMeasureTextAdvance(D_0039A5A8[labelIndex].name, 1, 0);
+        fldDrawAnimatedFieldBanner(width, x, y);
+        if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;
+        fldDrawConvertedTextGlyph(x + labelX, (y + 0x12) / 2, 0xA09DC380, D_0039A5A8[labelIndex].name);
+    }
+    itfSetTextDrawLimit(-1);
+}
 
 extern s32 D_003A8E60[];
 
