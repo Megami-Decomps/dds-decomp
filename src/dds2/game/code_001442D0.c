@@ -2653,19 +2653,19 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     }
 }
 
-void fldSetPrimaryMapLabelSelection(s32 index) {
-    if (index >= 0x40) {
+void fldSetPrimaryMapLabelSelection(s32 labelIndex) {
+    if (labelIndex >= 0x40) {
         D_00389834[0] = -1;
     } else {
-        D_00389834[0] = index;
+        D_00389834[0] = labelIndex;
     }
 }
 
-void fldSetSecondaryMapLabelSelection(s32 index) {
-    if (index >= 0x40) {
+void fldSetSecondaryMapLabelSelection(s32 labelIndex) {
+    if (labelIndex >= 0x40) {
         D_00389838[0] = -1;
     } else {
-        D_00389838[0] = index;
+        D_00389838[0] = labelIndex;
     }
 }
 
