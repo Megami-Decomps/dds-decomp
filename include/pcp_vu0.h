@@ -525,6 +525,10 @@ typedef struct {
     "vmove.xyzw " #d ", vf0\n\tvaddw.x " #a ", " #a ", vf0w\n\tvmr32.xyzw " #b ", " #c "\n\t.set reorder")
 /* vf24-vf27 = vf28-vf31: the primary matrix becomes the second bank before the
  * point projection overwrites it. */
+/* vf23.x += vf2.z: the clipped triangle builders fold the plane z term into x. */
+#define VU0_ADD_VF2Z_TO_VF23X() __asm__ volatile ( \
+    ".set noreorder\n\tvaddz.x vf23, vf23, vf2z\n\t.set reorder")
+
 #define VU0_MOVE_MATRIX_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
     "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
