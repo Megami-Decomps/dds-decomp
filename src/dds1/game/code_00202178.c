@@ -641,7 +641,7 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     u32 count;
     u16 picked[12];
     u32 i;
-    s32 found;
+    s32 pickedCount;
 
     switch (((BtlTask *)actor)->unit->partyRecord.unitId) {
     case 3:
@@ -660,15 +660,15 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     }
     switch (mode) {
     case 0:
-        found = 0;
+        pickedCount = 0;
         memset(picked, 0, sizeof(picked));
         for (i = 0; i < count; i++) {
             if (((BtlUnit *)btlGetIndexListEntry(list, i))->identity != ((BtlTask *)actor)->unit->identity) {
-                picked[found] = 1;
-                found++;
+                picked[pickedCount] = 1;
+                pickedCount++;
             }
         }
-        if (found == 0) {
+        if (pickedCount == 0) {
             btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
             btlFreeIndexList(list);
             return 1;
