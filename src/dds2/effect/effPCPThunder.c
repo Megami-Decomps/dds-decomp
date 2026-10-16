@@ -291,8 +291,8 @@ void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *work, s32 i
 }
 
 
-extern void effThunderBuildVectorHistory(EffThunderVectorWork *, s32);
-extern void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *, s32);
+extern void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index);
+extern void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *work, s32 index);
 
 /* Delay -> active geometry -> alpha fade -> restart; tint each render cell.
    The unsigned wrap-add is not a saturating fade. Submit even for signed count <= 0. */
