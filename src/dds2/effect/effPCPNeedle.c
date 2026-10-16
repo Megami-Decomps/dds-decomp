@@ -20,7 +20,7 @@ extern f32 sdfViewTargetVector[4];
 extern f32 D_003B1530[4];
 
 
-extern void effCopyMatrixVU(void *, void *);
+extern void effCopyMatrixVU(void *dst, void *src);
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
     parReleaseCellSystem(work->system);
