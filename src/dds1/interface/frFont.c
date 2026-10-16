@@ -976,7 +976,7 @@ u32 frFontMeasureLines(FrFontGlyph *glyphChain) {
 
 u32 frFontGetGlyphCellWidth(u8 fontIndex);
 u32 frFontGetGlyphCellHeight(u8 fontIndex);
-extern void frFontFillGlyphMetrics(void *work, s32 code);
+extern void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex);
 
 s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;
