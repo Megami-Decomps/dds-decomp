@@ -1382,7 +1382,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 }
 
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
-extern void itfGridCopyEntryQuad(s32 resource, s32 index);
+extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
 
 /* Draw an equipped skill's range and cost, or the two empty-slot markers. */
 void ptySkillMenuDrawEquippedSkillEntry(s32 x, s32 y, s32 depth, struct MenuList *list,

@@ -168,13 +168,13 @@ void itfGridSetBounds(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width,
 }
 
 /* Copy four words from a render entry's +0x84 data to its +0x14 data. */
-void itfGridCopyEntryQuad(s32 object, s32 index) {
+void itfGridCopyEntryQuad(s32 resource, s32 entryIndex) {
     u32 *destination;
     s32 remaining;
 
     remaining = 3;
-    destination = (u32 *)(index * sizeof(BdWork)
-                         + (u32)((EffectSlotSet *)object)->workEntries) + 5;
+    destination = (u32 *)(entryIndex * sizeof(BdWork)
+                         + (u32)((EffectSlotSet *)resource)->workEntries) + 5;
     do {
         remaining = remaining - 1;
         *destination = destination[0x1C];
