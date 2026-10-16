@@ -638,7 +638,7 @@ s8 btlChooseStartVoice(void) {
     s8 voice;
 
     state = (BtlState *)btlGetRuntime();
-    if (datBattleSceneRecords[state->battleMode].unk00 != 0) {
+    if (datBattleSceneRecords[state->battleMode].voice != 0) {
         btlBossDebugPrintf(D_003A1DD8);
         return -1;
     }
@@ -6796,7 +6796,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
 
     memcpy(text, D_003BB450, sizeof(text));
     battle = (BtlState *)btlGetRuntime();
-    if (datBattleSceneRecords[battle->battleMode].unk00 != 0) {
+    if (datBattleSceneRecords[battle->battleMode].voice != 0) {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x504F6100;
     } else {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x89FEFF00;
