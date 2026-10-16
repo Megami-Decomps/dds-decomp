@@ -593,11 +593,11 @@ void polyInitializeArcRecordAges(PolyArc *arc) {
 }
 
 /* Reset one arc record and choose its jittered radius. */
-void polyRandomizeArcRecord(PolyArc *arc, s32 index) {
+void polyRandomizeArcRecord(PolyArc *arc, s32 recordIndex) {
     PolyArcRecord *record = arc->records;
     f32 spread = arc->radiusJitter;
 
-    record += index;
+    record += recordIndex;
     record->age = 0;
     record->radius = arc->radius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
 }
@@ -605,10 +605,10 @@ void polyRandomizeArcRecord(PolyArc *arc, s32 index) {
 
 /* Lay an arc ring's inner and outer point rows at the projected radius and
  * radial offset for this record's age. */
-void polyUpdateArcRingStripPoints(PolyArc *arc, s32 index) {
+void polyUpdateArcRingStripPoints(PolyArc *arc, s32 recordIndex) {
     ParSystem *strip = arc->strip;
-    PolyArcRecord *record = &arc->records[index];
-    ParCell *stripEntry = &strip->cells[index];
+    PolyArcRecord *record = &arc->records[recordIndex];
+    ParCell *stripEntry = &strip->cells[recordIndex];
     f32 innerPointVector[4];
     f32 outerPointVector[4];
     f32 recordRadius;
