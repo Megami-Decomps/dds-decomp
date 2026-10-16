@@ -240,8 +240,8 @@ void effCopyMatrixVU(Matrix4 *dst, const Matrix4 *src) {
 }
 
 /* Create the shared billboard set with its default colour and scale. */
-EffBillboardWork *effCreateBillboardResourceWork(EffBillboardParams *params) {
-    EffBillboardWork *billboard = (EffBillboardWork *)sdfAllocSizeClassBlock(0x20);
+EffBillboardSetWork *effCreateBillboardResourceWork(EffBillboardSetParams *params) {
+    EffBillboardSetWork *billboard = (EffBillboardSetWork *)sdfAllocSizeClassBlock(0x20);
 
     billboard->mode = params->mode;
     billboard->handle = effCreateBillboardSharingIndexedResource(2);
