@@ -547,11 +547,11 @@ BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 sid
     return (BtlActorTransformParameters *)(D_003BAA30 + index * 24);
 }
 
-s32 btlSelectSideIndexedActorParameterTable(s32 side, s32 index) {
-    if (side == 0) {
-        return D_003BAA14 + index * 0x74;
+s32 btlSelectSideIndexedActorParameterTable(s32 category, s32 actorId) {
+    if (category == 0) {
+        return D_003BAA14 + actorId * 0x74;
     }
-    return D_003BAA28 + index * 0x74;
+    return D_003BAA28 + actorId * 0x74;
 }
 
 extern char D_003A1788[];
