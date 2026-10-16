@@ -544,7 +544,7 @@ KwlnTask* kwlnTaskGetTaskByName(const char* name)
     return NULL;
 }
 
-KwlnTask* kwlnTaskFindByPriority(u32 value)
+KwlnTask* kwlnTaskFindByPriority(u32 priority)
 {
     s32 state;
     KwlnTask* node;
@@ -564,7 +564,7 @@ KwlnTask* kwlnTaskFindByPriority(u32 value)
             break;
         }
         while (node != 0) {
-            if (node->priority == value) {
+            if (node->priority == priority) {
                 return node;
             }
             node = node->listNext;
