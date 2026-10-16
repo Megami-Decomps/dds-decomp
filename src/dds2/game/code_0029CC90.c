@@ -78,13 +78,13 @@ u8 brsGetLevelStepForValue(s32 level) {
     return brsLevelStepThresholds[1];
 }
 
-u8 brsGetLevelStepCrossedBy(s32 position, s32 increment) {
+u8 brsGetLevelStepCrossedBy(s32 startingLevel, s32 levelGain) {
     u8 *table = brsLevelStepThresholds;
     s32 i = 2;
     u8 *limit = table + 4;
-    s32 nextPosition = position + increment;
+    s32 nextPosition = startingLevel + levelGain;
     do {
-        if (position < *limit && nextPosition >= *limit) {
+        if (startingLevel < *limit && nextPosition >= *limit) {
             return limit[1];
         }
         limit -= 2;
