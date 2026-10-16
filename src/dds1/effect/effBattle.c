@@ -6,6 +6,7 @@
 #include "eff_param.h"
 #include "btl.h"
 #include "eff.h"
+#include "eff_battle_color_keyframe.h"
 #include "mdl.h"
 #include "evt_unit.h"
 
@@ -138,13 +139,6 @@ u32 effBattleCalcFadeTint(u32 elapsed, u32 duration)
 }
 
 extern void sdfDebugPrintf(const char *, ...);
-typedef struct EffBattleUnitRgbCommand {
-    u32 color; u32 startFrame; s32 startDurationIndex; u32 endFrame; s32 endDurationIndex;
-} EffBattleUnitRgbCommand;
-typedef struct EffBattleUnitColorCommand {
-    EffectVectorRequest request; u32 firstColor; u32 secondColor; u32 startFrame;
-    s32 startDurationIndex; u32 endFrame; s32 endDurationIndex;
-} EffBattleUnitColorCommand;
 extern f32 D_003A0DE0[4]; extern f32 D_003A0DF0[4]; extern f32 D_003A0E00[4];
 extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
 extern u32 effFieldColorFlags;
