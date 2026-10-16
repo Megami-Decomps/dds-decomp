@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+
 #include "sdf_texture_file.h"
 #include "sdf.h"
 #include "sdf_texture_submit.h"
@@ -15,11 +16,15 @@
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
+
+
+
+
+SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
+
 extern SdfPendingRequest sdfTextureReleaseQueue;
 
-void *memcpy(void *destination, const void *source, u32 size);
-SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
-SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
+
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 __attribute__((const)) sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
     s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
@@ -45,7 +50,59 @@ void sdfTexCopyImageData(SdfTex *texture, const void *source) {
     memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexCreateWithAllocatedResources);
+SdfTex *sdfTexCreateWithAllocatedResources(s32 width, s32 height, u32 format,
+    u32 maxMipLevel, u32 paletteFormat, u32 paletteCount) {
+    s32 indexed = 0;
+    s32 bitsPerPixel;
+    SdfTexResource *secondary;
+    SdfTexResource *primary;
+    s32 mipWidth;
+    s32 mipHeight;
+    s32 words;
+    u32 mipLevel;
+
+    switch (format) {
+    case 0:
+    case 1:
+        bitsPerPixel = 32;
+        break;
+    case 2:
+        bitsPerPixel = 16;
+        break;
+    case 10:
+        bitsPerPixel = 16;
+        break;
+    case 19:
+        indexed = 1;
+        bitsPerPixel = 8;
+        break;
+    case 20:
+        indexed = 1;
+        bitsPerPixel = 4;
+        break;
+    default:
+        return NULL;
+    }
+    secondary = NULL;
+    if (indexed) {
+        secondary = sdfTexAllocHead(format, paletteFormat, paletteCount);
+    }
+    mipWidth = width;
+    mipHeight = height;
+    words = 0;
+    mipLevel = 0;
+    do {
+        words += (mipWidth * mipHeight * bitsPerPixel) >> 5;
+        mipWidth >>= 1;
+        mipHeight >>= 1;
+    } while (mipLevel++ != maxMipLevel);
+    primary = sdfTexAllocHeadHigh(words, 2);
+    primary->width = width;
+    primary->height = height;
+    primary->format = format;
+    return sdfTexCreateResourceWithReference(width, height, format, maxMipLevel,
+        primary, paletteFormat, paletteCount, secondary);
+}
 
 /* Release both GPU resources and unlink the texture from the active list. */
 void sdfTexRelease(SdfTex *texture) {

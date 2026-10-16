@@ -50,7 +50,59 @@ void sdfTexCopyImageData(SdfTex *texture, const void *source) {
     memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexCreateWithAllocatedResources);
+SdfTex *sdfTexCreateWithAllocatedResources(s32 width, s32 height, u32 format,
+    u32 maxMipLevel, u32 paletteFormat, u32 paletteCount) {
+    s32 indexed = 0;
+    s32 bitsPerPixel;
+    SdfTexResource *secondary;
+    SdfTexResource *primary;
+    s32 mipWidth;
+    s32 mipHeight;
+    s32 words;
+    u32 mipLevel;
+
+    switch (format) {
+    case 0:
+    case 1:
+        bitsPerPixel = 32;
+        break;
+    case 2:
+        bitsPerPixel = 16;
+        break;
+    case 10:
+        bitsPerPixel = 16;
+        break;
+    case 19:
+        indexed = 1;
+        bitsPerPixel = 8;
+        break;
+    case 20:
+        indexed = 1;
+        bitsPerPixel = 4;
+        break;
+    default:
+        return NULL;
+    }
+    secondary = NULL;
+    if (indexed) {
+        secondary = sdfTexAllocHead(format, paletteFormat, paletteCount);
+    }
+    mipWidth = width;
+    mipHeight = height;
+    words = 0;
+    mipLevel = 0;
+    do {
+        words += (mipWidth * mipHeight * bitsPerPixel) >> 5;
+        mipWidth >>= 1;
+        mipHeight >>= 1;
+    } while (mipLevel++ != maxMipLevel);
+    primary = sdfTexAllocHeadHigh(words, 2);
+    primary->width = width;
+    primary->height = height;
+    primary->format = format;
+    return sdfTexCreateResourceWithReference(width, height, format, maxMipLevel,
+        primary, paletteFormat, paletteCount, secondary);
+}
 
 /* Release both GPU resources and unlink the texture from the active list. */
 void sdfTexRelease(SdfTex *texture) {
