@@ -456,8 +456,8 @@ void parClearHistorySlotPoints(ParTable *table, s32 slotIndex) {
     table->slots[slotIndex].pointCount = 0;
 }
 
-extern f32 D_00451F30[];
-extern f32 D_00451F40[];
+extern f32 parSharedViewDelta[];
+extern f32 parSharedCrossScale[];
 extern void effBillSetEntryValue(ParSystem *system, s32 index, u32 color);
 
 /* Rebuild one slot's two-vertex strip cells from its point history: each cell is
@@ -496,10 +496,10 @@ void parBuildHistoryRibbonStrip(ParSystem *system, s32 index, const f32 *origin,
             VU0_LOAD_VF(vf12, point);
             VU0_MOVE_VF(vf11, vf12);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LOAD_VF(vf11, D_00451F30);
+            VU0_LOAD_VF(vf11, parSharedViewDelta);
             VU0_CROSS_XYZ(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, D_00451F40);
+            VU0_LOAD_VF(vf11, parSharedCrossScale);
             VU0_MUL(vf10, vf10, vf11);
             VU0_MOVE_VF(vf2, vf10);
             VU0_MOVE_VF(vf10, vf12);
@@ -553,10 +553,10 @@ void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *orig
             VU0_LOAD_VF(vf12, point);
             VU0_MOVE_VF(vf11, vf12);
             VU0_SUB(vf10, vf10, vf11);
-            VU0_LOAD_VF(vf11, D_00451F30);
+            VU0_LOAD_VF(vf11, parSharedViewDelta);
             VU0_CROSS_XYZ(vf10, vf10, vf11);
             VU0_NORMALIZE_VF10();
-            VU0_LOAD_VF(vf11, D_00451F40);
+            VU0_LOAD_VF(vf11, parSharedCrossScale);
             VU0_MUL(vf10, vf10, vf11);
             VU0_MOVE_VF(vf2, vf10);
             VU0_MOVE_VF(vf10, vf12);

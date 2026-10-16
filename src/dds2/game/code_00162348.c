@@ -34,9 +34,9 @@ typedef struct ParListNode {
 
 
 
-extern f32 D_00451F30[];
+extern f32 parSharedViewDelta[];
 
-extern f32 D_00451F40[];
+extern f32 parSharedCrossScale[];
 
 extern u8 sdfViewEyeVector[];
 
@@ -312,15 +312,15 @@ void parUpdateSharedScaleAndDelta(ParKindState *obj) {
         return;
     case PAR_KIND_STATE_BILLBOARD_CROSS_STRIP:
         scale = obj->payload.crossStrip.scale;
-        D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
+        parSharedCrossScale[0] = parSharedCrossScale[1] = parSharedCrossScale[2] = scale;
         break;
     case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
         scale = obj->payload.crossTriangle.scale;
-        D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
+        parSharedCrossScale[0] = parSharedCrossScale[1] = parSharedCrossScale[2] = scale;
         break;
     case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:
         scale = obj->payload.trackPolygon.scale;
-        D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
+        parSharedCrossScale[0] = parSharedCrossScale[1] = parSharedCrossScale[2] = scale;
         break;
     default:
         return;
@@ -328,7 +328,7 @@ void parUpdateSharedScaleAndDelta(ParKindState *obj) {
     VU0_LOAD_VF($vf10, sdfViewEyeVector);
     VU0_LOAD_VF($vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF($vf10, D_00451F30);
+    VU0_STORE_VF($vf10, parSharedViewDelta);
 }
 
 void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
@@ -369,11 +369,11 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_00451F30);
+    VU0_LOAD_VF(vf11, parSharedViewDelta);
 ;
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, D_00451F40);
+    VU0_LOAD_VF(vf11, parSharedCrossScale);
 ;
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf2, vf10);
@@ -396,11 +396,11 @@ void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     u128 axis[3];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_00451F30);
+    VU0_LOAD_VF(vf11, parSharedViewDelta);
 ;
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, D_00451F40);
+    VU0_LOAD_VF(vf11, parSharedCrossScale);
 ;
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf2, vf10);
@@ -425,11 +425,11 @@ void parUpdateTrackPolygonCrossAxes(EffTrackPolyList *list, s32 index, u32 color
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_00451F30);
+    VU0_LOAD_VF(vf11, parSharedViewDelta);
 ;
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
-    VU0_LOAD_VF(vf11, D_00451F40);
+    VU0_LOAD_VF(vf11, parSharedCrossScale);
 ;
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf2, vf10);
