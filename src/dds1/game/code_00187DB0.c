@@ -127,8 +127,8 @@ void effComputeBlurRectBounds(EffResourceRectWork *work) {
 typedef struct EffTrackPolyData EffTrackPolyData;
 
 
-extern EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 step);
-extern void effTrackPolyFillGradientColors(EffTrackPolyData *data, u32 *colors);
+extern EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps);
+extern void effTrackPolyFillGradientColors(EffTrackPolyData *data, u32 *gradientColors);
 extern void effTrackPolySetDrawKind(EffTrackPolyData *data, u32 kind);
 
 /* Clone a model track with independent history and gradient storage. */
