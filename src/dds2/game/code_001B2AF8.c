@@ -5505,7 +5505,7 @@ void btlInitializeStaffActorPanels(void) {
     btlSetTrackedTaskHandle(3, (s32)task);
 }
 
-s32 func_001C16B0(s8 mode) {
+s32 btlSetActorPanelYForMode(s8 mode) {
     KwlnTask *task = kwlnTaskGetTaskByName(D_004367CC);
     BtlState *battle;
     BattleActorPanelWork *work;
@@ -5592,7 +5592,7 @@ typedef struct BattleActorPanelPositions {
 
 extern const BattleActorPanelPositions D_00416798;
 
-extern s32 func_001C16B0(s8);
+extern s32 btlSetActorPanelYForMode(s8);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416780);
 
@@ -5611,7 +5611,7 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
     eligibleCount = btlCountEligibleLinkedActors(battle);
     actor = battle->units;
     task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-    func_001C16B0(0);
+    btlSetActorPanelYForMode(0);
     if (task == NULL) {
         ordinal = 0;
         while (actor != NULL && ordinal < eligibleCount) {
@@ -5669,7 +5669,7 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
                     work->activeEntries[slot].basePosition[0] = work->activeEntries[slot].basePosition[0] <= limit - 8 ? limit - 8 :
                         work->activeEntries[slot].basePosition[0] < limit ? work->activeEntries[slot].basePosition[0] : limit;
                     if (scene->state == 9) {
-                        func_001C16B0(1);
+                        btlSetActorPanelYForMode(1);
                     }
                     break;
                 case 11:
@@ -10004,7 +10004,7 @@ void fldCreateSceneCleanupTask(void) {
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
     btlInitializeStaffActorPanels();
-    func_001C16B0(1);
+    btlSetActorPanelYForMode(1);
     btlBeginScenePanelFadeIn();
 }
 

@@ -1,5 +1,6 @@
 // Hand-curated symbols (win over the generated block below)
 btlInitializeActorClearanceCameraPair = 0x001F3888; // type:func
+btlSetActorPanelYForMode = 0x001C16B0; // type:func
 _start = 0x00100008; // type:func
 // $gp-relative byte spimdisasm leaves unsymbolized (emits an absolute %lo that encodes wrong)
 D_00435CF3 = 0x00435CF3; // type:u8
@@ -9712,7 +9713,6 @@ btlUpdateMajinTutorialTask = 0x001C0828; // type:func
 func_001C0EF0 = 0x001C0EF0; // type:func
 func_001C1300 = 0x001C1300; // type:func
 btlInitializeStaffActorPanels = 0x001C1520; // type:func
-func_001C16B0 = 0x001C16B0; // type:func
 btlUpdateActorPanelPresentation = 0x001C1A68; // type:func
 func_001C1F10 = 0x001C1F10; // type:func
 btlCreateReserveActorPanelTask = 0x001C2450; // type:func
