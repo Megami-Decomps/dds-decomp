@@ -126,7 +126,7 @@ extern s32 fldHasKiretaLabelProcess(void);
 extern s32 fldHasHirakenaiLabelProcess(void);
 extern s32 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
+extern void fldDrawConvertedTextGlyph(s32 x, s32 y, u32 colors, const u8 *text);
 
 extern s16 D_00444C68[];
 
