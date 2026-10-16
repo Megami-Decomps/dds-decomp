@@ -419,7 +419,7 @@ typedef struct EffBillPointConfig {
     u32 colorC;
     f32 halfWidth;
     f32 edgeWidth;
-    f32 unk84;
+    f32 totalLength; /* 0x84: divided by layer count to size each mesh segment. */
 } EffBillPointConfig;
 
 typedef struct EffBillRangeConfig {
@@ -724,6 +724,8 @@ typedef char EffBillPointAlternatingAmplitudeOffsetCheck[
 typedef char EffBillPointAmplitudeOffsetCheck[
     ((u32)&((EffBillPointConfig *)0)->amplitude == 0x50) ? 1 : -1];
 typedef char EffBillPointFlagOffsetCheck[((u32)&((EffBillPointConfig *)0)->drawFlag == 0x5C) ? 1 : -1];
+typedef char EffBillPointTotalLengthOffsetCheck[
+    ((u32)&((EffBillPointConfig *)0)->totalLength == 0x84) ? 1 : -1];
 typedef char EffBillRangeConfigSizeCheck[(sizeof(EffBillRangeConfig) == 0xAC) ? 1 : -1];
 typedef char EffBillEmitterHeaderSizeCheck[(sizeof(EffBillEmitterHeader) == 0x90) ? 1 : -1];
 typedef char EffBillEmitterCommonSizeCheck[(sizeof(EffBillEmitterCommon) == 0xCC) ? 1 : -1];

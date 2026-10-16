@@ -5903,7 +5903,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
     speed = config->speed;
     speedJitter = config->speedJitter;
     layers = (f32)(u32)config->layers;
-    step = config->unk84 / layers;
+    step = config->totalLength / layers;
     waveStep = ((f32)config->periods * 3.14159265f) / layers;
     amplitude = config->amplitude;
     if (step <= 0.0f) {
@@ -6154,7 +6154,7 @@ EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config
     }
     memcpy(&copy, config, 0x84);
     copy.timed.count = 1;
-    copy.unk84 = config->unk84;
+    copy.totalLength = config->totalLength;
     step = 6.2831852f / (f32)count;
     position = step * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
     for (index = 0; index < count; index++) {
@@ -6400,7 +6400,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     count = config->point.timed.count;
     respawnDelay = config->point.respawnDelay;
     layers = (f32)(u32)config->point.layers;
-    step = config->point.unk84 / layers;
+    step = config->point.totalLength / layers;
     waveStep = ((f32)config->point.periods * 3.14159265f) / layers;
     amplitude = config->point.amplitude;
     acceleration = config->angularAcceleration;
