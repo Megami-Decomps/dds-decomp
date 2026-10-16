@@ -2456,7 +2456,7 @@ extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuAfterRecordNoOp(void);
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuRecordNoOp(u32);
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern s32 btlDebugModelEditorActionNames[], btlDebugModelMotionNames[];
 extern BtlDebugValueMenu btlDebugPartyRecordEditor, btlDebugPositionEditor, btlDebugTransformEditor, btlDebugActorStatusEditor;
 extern BtlDebugValueEntry btlDebugActorStatusEditorRows[];
@@ -2876,7 +2876,7 @@ extern char D_00436F58[];
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 extern char *sdfDevGetPathBuffer(void);
 
