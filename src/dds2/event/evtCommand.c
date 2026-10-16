@@ -796,7 +796,7 @@ s32 evtCommandAttachObjectPath(void) {
     void *unit;
     EffWorldNode *target;
     ObjBase *objectData;
-    EffWorldNode *slot;
+    EffWorldNode *slotNode;
     Dds3PathCurveWork *path;
     Dds3SlotResource *resource;
     s32 room;
@@ -815,17 +815,17 @@ s32 evtCommandAttachObjectPath(void) {
     if (target == NULL)
         return 1;
     objectData = effObjGetDataHandle(unit);
-    slot = objectData->slots[1];
-    if (slot == NULL) {
+    slotNode = objectData->slots[1];
+    if (slotNode == NULL) {
         dds3EnsureSlotData(unit);
-        slot = objectData->slots[1];
+        slotNode = objectData->slots[1];
     }
-    resource = slot->data;
+    resource = slotNode->data;
     if (resource->sourceObject == NULL) {
-        dds3SetSlotKey(slot, target);
-        dds3ReplaceObjectResource(slot);
+        dds3SetSlotKey(slotNode, target);
+        dds3ReplaceObjectResource(slotNode);
     }
-    path = dds3GetObjectResourceHandle(slot);
+    path = dds3GetObjectResourceHandle(slotNode);
     if (path == 0)
         return 1;
     switch (scrReadIntParameter(2)) {
@@ -855,7 +855,7 @@ s32 evtCommandReattachObjectPath(void) {
     void *unit;
     EffWorldNode *target;
     ObjBase *objectData;
-    EffWorldNode *slot;
+    EffWorldNode *slotNode;
     Dds3PathCurveWork *path;
     Dds3SlotResource *resource;
     s32 targetId;
@@ -877,22 +877,22 @@ s32 evtCommandReattachObjectPath(void) {
         return 1;
     }
     objectData = effObjGetDataHandle(unit);
-    slot = objectData->slots[1];
-    if (slot == NULL) {
+    slotNode = objectData->slots[1];
+    if (slotNode == NULL) {
         dds3EnsureSlotData(unit);
-        slot = objectData->slots[1];
+        slotNode = objectData->slots[1];
     }
-    resource = slot->data;
+    resource = slotNode->data;
     if (resource->sourceObject == NULL) {
-        dds3SetSlotKey(slot, target);
-        dds3ReplaceObjectResource(slot);
+        dds3SetSlotKey(slotNode, target);
+        dds3ReplaceObjectResource(slotNode);
     } else {
         dds3RefreshStoredVec3(unit);
-        dds3SetSlotKey(slot, target);
-        dds3ReplaceObjectResource(slot);
+        dds3SetSlotKey(slotNode, target);
+        dds3ReplaceObjectResource(slotNode);
         sdfDebugPrintf(D_00421E98);
     }
-    path = dds3GetObjectResourceHandle(slot);
+    path = dds3GetObjectResourceHandle(slotNode);
     if (path == 0) {
         return 1;
     }
