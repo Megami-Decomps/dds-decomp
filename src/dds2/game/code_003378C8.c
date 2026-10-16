@@ -337,31 +337,31 @@ void sdfVuUpdateSelectedNodeGeometry(u32 workAddress) {
     VuWork *work = (VuWork *)workAddress;
     SdfAssetEntry *asset;
     u32 mode;
-    u32 paramC;
-    u32 param8;
+    u32 secondaryColor;
+    u32 primaryStateWordSecond;
 
     func_00337718((void *)work->ringSrc, work->param1, work->secondCoordinates,
                   (u8 *)work->asset + 0x80);
     sdfVuBlendNodeXY(work->blend);
     asset = work->asset;
     mode = asset->secondaryMode;
-    paramC = asset->secondaryColor;
-    param8 = asset->unk08;
+    secondaryColor = asset->secondaryColor;
+    primaryStateWordSecond = asset->unk08;
     switch (mode) {
         case 0:
         case 1:
         case 2:
-            if (param8 != paramC) {
+            if (primaryStateWordSecond != secondaryColor) {
                 u128 parameters[3];
 
                 sdfVuBuildPackedColorTransform((SdfVuColorTransform *)parameters, D_00439188, work->packedColor,
-                              paramC, asset->unk04, asset->unk1C,
+                              secondaryColor, asset->unk04, asset->unk1C,
                               asset->x + work->offsetX, asset->y + work->offsetY);
                 func_00337830(work, parameters);
             }
             break;
         case 3:
-            sdfVuMultiplyNodeColors(work, paramC);
+            sdfVuMultiplyNodeColors(work, secondaryColor);
             break;
     }
     sdfBuildChunkedVuNodeTransfer(work, asset->secondaryTextureState.sampling,
