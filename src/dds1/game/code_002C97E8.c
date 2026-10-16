@@ -1061,12 +1061,12 @@ u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
     return grid->cells[cellIndex].value;
 }
 
-void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 value) {
+void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 cellValue) {
     u32 cellIndex;
 
     cellIndex = row * grid->width + column;
     if (cellIndex < grid->cellCount) {
-        grid->cells[cellIndex].value = value;
+        grid->cells[cellIndex].value = cellValue;
     }
 }
 
