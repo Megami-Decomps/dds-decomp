@@ -130,7 +130,7 @@ extern u8 D_00380860[];
 extern u8 D_00380870[];
 extern void sdfWaitAndSelectBuffer(void);
 extern void sdfInitPacketPoolNodeChain(SdfPoolNode *, s32);
-extern void kwlnInitializeFrameDrawPackets(s32);
+extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
 #define KWLN_FRAME_BUFFER_BYTES 0x1F40
