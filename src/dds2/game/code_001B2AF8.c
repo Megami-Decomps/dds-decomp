@@ -4356,7 +4356,155 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416610);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416620);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BFB58);
+/* btlCreateMessageWindow allocates0x40 bytes; native fade halfword+0x14, coordinates+0x38/+0x3C. */
+typedef struct BtlCommandHintWork {u8 pad00[0x10];s32 unk10;s16 fade;u8 pad16[2];u32 colors[4];u8 pad28[0x10];s32 x;s32 y;} BtlCommandHintWork;
+extern const BattlePanelColors D_00416620;
+extern s32 fldGetSceneObjectState(void);
+extern u32 btlGetActorCommandClass(s32,s8);
+extern u32 fldUpdateSceneKindCounter(s32,s8,s8);
+extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
+extern void fldCollectAvailableRosterEntries(s32,s16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(s32,u16 *);
+extern void btlReleaseRegisteredTaskBuffer(s32);
+extern void func_001BF978(s32,s32,u32,u32,u16,s16);
+extern u8 D_003B5B10[];
+s32 func_001BFB58(KwlnTask *task) {
+    BattlePanelColors colors = D_00416620;
+    BattleSceneObject *object = NULL;
+    KwlnTask *panelTask;
+    BtlState *battle;
+    s16 count;
+    s16 optionCount;
+    s16 cursor;
+    s16 row;
+    u32 state;
+    s32 kind;
+    s32 selector;
+    s32 draw;
+    s32 i;
+
+    if (btlGetTrackedTaskHandle(4) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+
+    panelTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    if (panelTask != NULL) {
+        object = (BattleSceneObject *)kwlnTaskGetUserValue(panelTask);
+    }
+    draw = 0;
+    state = fldGetSceneObjectState();
+    switch (state) {
+    case 1:
+    case 2:
+    case 3:
+    case 10:
+
+    {
+        BtlCommandHintWork *fadeWindow;
+    fadeWindow = (BtlCommandHintWork *)D_004367F8;
+    fadeWindow->fade += 0x20;
+    fadeWindow->fade = fadeWindow->fade <= 0 ? 0 :
+                   fadeWindow->fade > 0x80 ? 0x80 : fadeWindow->fade;
+
+    }
+    if (mdlFlagTest(0xC0E) == 0 && panelTask != NULL) {
+    kind = btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex);
+    optionCount = (s16)fldUpdateSceneKindCounter((s32)object,
+                                         btlCommandPanelWork->classIndex, 1);
+    row = object->selections[kind].entry;
+    cursor = object->selections[kind].cursor;
+
+    switch (kind) {
+    case 0:
+        if ((cursor == 0 && row == 0) || optionCount - 1 == row) {
+            BtlCommandHintWork *hintWindow;
+            if (row == 0) {
+                ActionStateLink *owner = object->owner;
+                selector = ((owner->unit->status.flags & 0x1000) != 0 || (owner->unit->partyRecord.flags & 0x10) != 0) ? 1 : 2;
+            } else {
+                selector = 3;
+            }
+            hintWindow = (BtlCommandHintWork *)D_004367F8;
+            func_001BF978(hintWindow->x + 0x13, hintWindow->y - 6, 0xFF0000,
+                          (s16)hintWindow->fade | 0x80808000, 0, selector);
+        } else {
+            BtlCommandHintWork *entryWindow;
+            u16 textId;
+            u16 *entries = btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
+            textId = entries[row - 1];
+            entryWindow = (BtlCommandHintWork *)D_004367F8;
+            func_001BF978(entryWindow->x + 0x13, entryWindow->y - 6, 0xFF0000,
+                          (s16)entryWindow->fade | 0x80808000, textId, 0);
+        }
+        draw = 1;
+        break;
+    case 4: {
+        BtlCommandHintWork *skillWindow;
+        u16 textId;
+        BattleRosterTable *entries = btlGetActorLinkageSkillList((s32)object, (u16 *)&count);
+        textId=entries->entries[row].skill;
+        skillWindow = (BtlCommandHintWork *)D_004367F8;
+        draw = 1;
+        func_001BF978(skillWindow->x + 0x13, skillWindow->y - 6, 0xFF0000,
+                      (s16)skillWindow->fade | 0x80808000, textId, 0);
+        break;
+    }
+    case 2: {
+        BtlCommandHintWork *drawWindow;
+        u16 textId;
+        fldCollectAvailableRosterEntries((s32)object,&count);
+        textId=D_003B5B10[row*2];
+        drawWindow=(BtlCommandHintWork *)D_004367F8;
+        draw=1;
+        func_001BF978(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,textId,9);
+        break;
+    }
+    case 3: {
+        BtlCommandHintWork *drawWindow;
+        s32 textKind;
+        if(row==0) {
+            textKind=((object->owner->unit->status.flags&0x1000)!=0 || (object->owner->unit->partyRecord.flags&0x10)!=0)?4:5;
+        } else {
+            textKind=row==1?6:7;
+        }
+        drawWindow=(BtlCommandHintWork *)D_004367F8;
+        draw=1;
+        func_001BF978(drawWindow->x+0x13,drawWindow->y-6,0xFF0000,(s16)drawWindow->fade|0x80808000,0,textKind);
+        break;
+    }
+    case 6: {
+        BtlCommandHintWork *backdropWindow = (BtlCommandHintWork *)D_004367F8;
+        draw = 1;
+        func_001BF978(backdropWindow->x + 0x13, backdropWindow->y - 6, 0xFF0000,
+                      (s16)backdropWindow->fade | 0x80808000, 0, 8);
+        break;
+    }
+    }
+
+    if (draw != 0) {
+        BtlCommandHintWork *spriteWindow;
+
+        for (i = 0; i < 4; i++) {
+            colors.values[i] = btlSetSlotLowByteClamped(
+                btlResourceBlock->resA, 0x2A, i,
+                (s16)((BtlCommandHintWork *)D_004367F8)->fade);
+        }
+        spriteWindow = (BtlCommandHintWork *)D_004367F8;
+        effDrawSpriteWithCornerColors(spriteWindow->x << 4, spriteWindow->y << 3, 0,
+                                      colors.values, 0, btlResourceBlock->resA, 0x2A, 0x53);
+    }
+    }
+    break;
+    case 5:
+        btlReleaseRegisteredTaskBuffer((s32)task);
+        return -1;
+    }
+    return 0;
+}
 
 void btlReleaseRegisteredTaskBuffer(s32 unused) {
     btlGetRuntime();
