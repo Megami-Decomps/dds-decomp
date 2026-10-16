@@ -98,7 +98,7 @@ typedef struct MdlViewState {
     s16 resourceCount;
     s16 resourceGroup; /* 0x18: group passed to the resource loader */
     s16 resourceId;    /* 0x1A: ID passed to the resource loader */
-    s16 unk1C;
+    s16 selectedResourceGroup; /* 0x1C: resource group under the selection cursor. */
     s16 selectedResourceId; /* 0x1E: resource ID under the selection cursor. */
     s16 selectionCursor; /* 0x20: selects one of five controls in the asset panel. */
     s16 activeEntryId;    /* 0x22: assigned from selectedEntryId when adding */
@@ -135,6 +135,9 @@ typedef struct MdlViewState {
 } MdlViewState;
 typedef char MdlViewState_selectedResourceId_offset_check[
     ((u32)&((MdlViewState *)0)->selectedResourceId == 0x1E) ? 1 : -1];
+typedef char MdlViewState_selectedResourceGroup_offset_check[
+    ((u32)&((MdlViewState *)0)->selectedResourceGroup == 0x1C) ? 1 : -1];
+typedef char MdlViewState_size_check[sizeof(MdlViewState) == 0xD0 ? 1 : -1];
 typedef char MdlViewState_selectionCursor_offset_check[
     ((u32)&((MdlViewState *)0)->selectionCursor == 0x20) ? 1 : -1];
 typedef struct MdlPadState {
@@ -1340,8 +1343,8 @@ void mdlHandleViewerAssetSelection(void) {
     }
     switch (mdlViewerState.selectionCursor) {
     case 0:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1C, mdlGetResourceTableCount(), 1) != 0) {
-            entryCount = mdlGetTableWord(mdlViewerState.unk1C);
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceGroup, mdlGetResourceTableCount(), 1) != 0) {
+            entryCount = mdlGetTableWord(mdlViewerState.selectedResourceGroup);
             if (mdlViewerState.selectedResourceId < entryCount) {
                 return;
             }
@@ -1350,7 +1353,7 @@ void mdlHandleViewerAssetSelection(void) {
         }
         break;
     case 1:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceId, mdlGetTableWord(mdlViewerState.unk1C), pageStep) != 0) {
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedResourceId, mdlGetTableWord(mdlViewerState.selectedResourceGroup), pageStep) != 0) {
             return;
         }
         break;
@@ -1382,7 +1385,7 @@ void mdlHandleViewerAssetSelection(void) {
         func_00218E20();
         if (mdlViewerState.resourceGroup == mdlGetResourceTableCount() - 1) {
             mdlViewerState.resourceId = 0;
-            mdlViewerState.unk1C = mdlViewerState.resourceGroup;
+            mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup;
             mdlViewerState.selectedResourceId = 0;
         }
         mdlLoadViewerResourceAndResetCursors();
@@ -1392,12 +1395,12 @@ void mdlHandleViewerAssetSelection(void) {
         if (sdfPadButtonStates[1] >= 0) {
             return;
         }
-        if (mdlViewerState.resourceGroup == mdlViewerState.unk1C && mdlViewerState.resourceId == mdlViewerState.selectedResourceId) {
+        if (mdlViewerState.resourceGroup == mdlViewerState.selectedResourceGroup && mdlViewerState.resourceId == mdlViewerState.selectedResourceId) {
             return;
         }
         mdlDestroyContext(mdlViewerState.resources[0]);
         mdlViewerState.resources[0] = NULL;
-        mdlViewerState.resourceGroup = mdlViewerState.unk1C;
+        mdlViewerState.resourceGroup = mdlViewerState.selectedResourceGroup;
         mdlViewerState.resourceId = mdlViewerState.selectedResourceId;
         mdlLoadViewerResourceAndResetCursors();
         return;
@@ -1440,7 +1443,7 @@ void mdlDrawViewerAssetSelection(void) {
     mdlAppendViewerRectToDrawList(0x8410, panelTop - 0x18, 0xFF0080, 0xAE0,
                                  panelHeight, 0);
 
-    mdlCopyResourceBasename(mdlViewerState.unk1C, mdlViewerState.selectedResourceId, basename, 0x20);
+    mdlCopyResourceBasename(mdlViewerState.selectedResourceGroup, mdlViewerState.selectedResourceId, basename, 0x20);
     basenameWidth = (s32)strlen(basename) * 3 << 6;
     mdlAppendViewerRectToDrawList(0x8E90 - basenameWidth,
                                  panelTop - 0xD8, 0xFF0080,
@@ -1452,7 +1455,7 @@ void mdlDrawViewerAssetSelection(void) {
 
     sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
                0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 0 ? 4 : 0);
-    formatted = sdfFormatSifPacket(&packet, D_003BBC30, mdlViewerState.unk1C + 0x30);
+    formatted = sdfFormatSifPacket(&packet, D_003BBC30, mdlViewerState.selectedResourceGroup + 0x30);
     sdfAppendPacket(mdlViewerState.packetList, (u32)formatted);
 
     sdfPktSetCmd(&packet, 0);
@@ -1967,7 +1970,7 @@ void mdlApplyViewerResourceMenuAction(void) {
         }
         break;
     }
-    mdlViewerState.unk1C = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
+    mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
     mdlViewerState.selectedResourceId = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
     i = mdlViewerState.resources[0]->current.h.motionIndex;
     if (i < 0) {
@@ -2712,7 +2715,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlLoadViewerPresentationConfig();
     mdlViewerState.viewerScale = 1.0f;
     mdlViewerState.unk0F = mdlViewerState.unk0B = mdlViewerState.taskPhase = 1;
-    mdlViewerState.captureDivY = mdlViewerState.captureDivX = mdlViewerState.captureScale = mdlViewerState.unk1C = mdlViewerState.resourceGroup = 2;
+    mdlViewerState.captureDivY = mdlViewerState.captureDivX = mdlViewerState.captureScale = mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = 2;
     mdlViewerState.resourceId = 0;
     mdlViewerState.selectedResourceId = 0;
     mdlViewerState.unk08 = 0;
