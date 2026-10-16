@@ -336,7 +336,7 @@ typedef struct ItfMesPoolNode {
     struct ItfMesPoolNode *next;
     s32 index;
     s32 stateAddress;
-    s32 resourceHandle;
+    SdfMemBlock *resourceHandle;
 } ItfMesPoolNode;
 
 typedef struct ItfMesPool {
@@ -357,6 +357,8 @@ typedef struct ItfMesGlobals {
 } ItfMesGlobals;
 
 typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(ItfMesPoolNode) == 0x14) ? 1 : -1];
+typedef char ItfMesPoolNode_resourceHandle_offset_must_be_0x10[
+    ((u32)&((ItfMesPoolNode *)0)->resourceHandle == 0x10) ? 1 : -1];
 typedef char ItfMesPool_size_must_be_0x10[(sizeof(ItfMesPool) == 0x10) ? 1 : -1];
 typedef char ItfMesGlobals_size_must_be_0x520[(sizeof(ItfMesGlobals) == 0x520) ? 1 : -1];
 
