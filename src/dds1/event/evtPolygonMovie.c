@@ -15,6 +15,7 @@
 #include "dds3obj.h"
 #include "itf.h"
 #include "evt_scaled_value.h"
+#include "evt_blend_vec_color.h"
 
 /* Polygon-movie event parameter blocks blended by the functions below.
  * Each field is named for how the blend functions use it:
@@ -170,11 +171,6 @@ void evtBlendVectorRows(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     VU0_SET_W_ONE(vf10);
     VU0_STORE_VF(vf10, out + 8);
 }
-
-typedef struct EvtBlendVecColor {
-    f32 vec[4];
-    u32 color;
-} EvtBlendVecColor;
 
 extern f32 D_00368570[4];
 extern u32 D_00368580[4];
