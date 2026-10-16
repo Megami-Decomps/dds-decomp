@@ -211,8 +211,8 @@ typedef struct BattleActorPanelPresentation {
     s8 mpState;
     u8 pad1B6[2];
     s32 offset[2];
-    s32 unk1C0;
-    s32 unk1C4;
+    s32 hpEffectTimer;
+    s32 mpEffectTimer;
     s16 hpHighlightLevel;
     s16 mpHighlightLevel;
     s32 hpTarget;
@@ -250,6 +250,10 @@ typedef struct BattleActorPanelWork {
 } BattleActorPanelWork;
 
 typedef char BattleActorPanelPresentationSizeCheck[sizeof(BattleActorPanelPresentation) == 0x280 ? 1 : -1];
+typedef char BattleActorPanelPresentationHpEffectTimerOffsetCheck[
+    ((u32)&((BattleActorPanelPresentation *)0)->hpEffectTimer == 0x1C0) ? 1 : -1];
+typedef char BattleActorPanelPresentationMpEffectTimerOffsetCheck[
+    ((u32)&((BattleActorPanelPresentation *)0)->mpEffectTimer == 0x1C4) ? 1 : -1];
 typedef char BattleActorPanelTriangleOffsetCheck[
     ((u32)&((BattleActorPanelPresentation *)0)->trianglePhase == 0xB4 &&
      (u32)&((BattleActorPanelPresentation *)0)->triangleAlpha == 0xD4 &&
