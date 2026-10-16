@@ -1090,7 +1090,7 @@ void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
 
     buttonIndex &= 0xFFFF;
     battle = (BtlState *)btlGetRuntime();
-    texture = func_0029C048(surface, (struct RefObj *)battle->buttonTextureHandle);
+    texture = func_0029C048(surface, battle->buttonTextureHandle);
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     sdfConsCreateDrawPacket(packet, texture, 0);
@@ -1162,7 +1162,7 @@ void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32
         case 0x4000: uv = D_0035FAA0; break;
         default: uv = 0; break;
         }
-        texture = func_0029C048(surface, (struct RefObj *)((BtlState *)btlGetRuntime())->buttonTextureHandle);
+        texture = func_0029C048(surface, ((BtlState *)btlGetRuntime())->buttonTextureHandle);
         packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(packet);
         sdfConsCreateDrawPacket(packet, texture, 0);
@@ -1186,10 +1186,10 @@ void btlOpenButtonIconResource(void) {
 /* Cache and later release the loaded battle resource in battle state. */
 void btlRetainButtonTexture(void) {
     BtlState *state;
-    u32 resource;
+    RefObj *resource;
 
     state = (BtlState *)btlGetRuntime();
-    resource = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)btlButtonIconTexture, 0x10000);
+    resource = effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)btlButtonIconTexture, 0x10000);
     state->buttonTextureHandle = resource;
 }
 
@@ -1197,7 +1197,7 @@ void btlReleaseButtonTexture(void) {
     BtlState *state;
 
     state = (BtlState *)btlGetRuntime();
-    effReleaseSharedReference((RefObj *)state->buttonTextureHandle);
+    effReleaseSharedReference(state->buttonTextureHandle);
     state->buttonTextureHandle = 0;
 }
 
