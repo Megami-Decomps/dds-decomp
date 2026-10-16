@@ -994,7 +994,7 @@ s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask) {
     return 0;
 }
 
-extern s32 btlUnitHasNegativeActionQueryResult(void *, s32);
+extern s32 btlUnitHasNegativeActionQueryResult(void *unit, s32 mask);
 
 s32 btlAnyEnemyHasNegativeActionResult(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
