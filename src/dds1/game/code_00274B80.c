@@ -1861,11 +1861,11 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
     return 0;
 }
 
-s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
-    s32 context = kwlnTaskGetUserValue(param);
+s32 mnuCampMenuDrawSlotLabel(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 *slot;
 
-    mnuDrawCampScreenDefault(param);
+    mnuDrawCampScreenDefault(callback);
     slot = &((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index;
     if (*slot == 0) {
         mnuCreateStaffImageSprite(1);
@@ -1880,7 +1880,7 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((CampMenuContext *)context)->actor));
-    return menuRunPanel((void *)context, 1, (void *)param);
+    return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
 s32 mnuStepSkillSlotControl(KwlnTask *callback) {
