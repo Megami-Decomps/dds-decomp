@@ -811,10 +811,10 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
 }
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
-    u8 *status = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].unk3E;
+    u8 *itemIds = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].additionalDropItemIds;
     u32 i;
     for (i = 0; i < 2; i++) {
-        if (*status++ != 0) {
+        if (*itemIds++ != 0) {
             return 1;
         }
     }
