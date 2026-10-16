@@ -593,7 +593,7 @@ extern void mnuCreateShootingSceneCamera(void);
 extern s32 kwlnSetLightColorTarget(s32, s32, void *);
 extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);
-extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern s32 evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern struct WideSlotPool *itfCreateSpriteWorkPool(u32 count);
 extern struct CompactSlotPool *itfCreateSpriteHitEffectWorkPool(u32 count);
 extern void dds3InitSoundSlotPool(void);
