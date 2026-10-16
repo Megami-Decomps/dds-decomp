@@ -1876,11 +1876,11 @@ s32 itmClaimFreeSlot(s32 row) {
 
 /* Convert a camp reward row and its three-way option to a flat index. */
 s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option) {
-    s32 index = 3;
+    s32 flatRewardIndex = 3;
 
-    index = row * index;
-    index += option;
-    return index;
+    flatRewardIndex = row * flatRewardIndex;
+    flatRewardIndex += option;
+    return flatRewardIndex;
 }
 
 s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 row) {
