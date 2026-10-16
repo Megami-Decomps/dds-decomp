@@ -818,7 +818,7 @@ s32 evtCommandSetEffectUnitQuaternionRotation(void) {
 
 
 extern void dds3ReplaceObjectResource(EffWorldNode *object);
-extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
+extern void sdfSetFloatCounterDirection(u32 *destination, u32 direction);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
 
 s32 evtCommandAttachObjectPath(void) {
