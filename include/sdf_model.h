@@ -69,9 +69,9 @@ typedef char SdfItemListRef_serializedAssetData_at_4[((u32)&((SdfItemListRef *)0
 typedef char SdfItemListRef_slotPairCount_at_8[((u32)&((SdfItemListRef *)0)->slotPairCount == 8) ? 1 : -1];
 typedef char SdfItemListRef_chunkTable_at_C[((u32)&((SdfItemListRef *)0)->chunkTable == 0xC) ? 1 : -1];
 
-SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef);
-SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef);
-SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef);
+SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef);
+SdfModel *sdfModelCreateWithItems(void *assetData, SdfItemListRef *listRef);
+SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *listRef);
 void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector,
                                 s32 listIndex);
