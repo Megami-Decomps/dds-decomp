@@ -234,7 +234,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     }
 }
 
-extern void prfCopyMantraNamePart(u32, s32, char *);
+extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
 void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
     FrFontGlyph *item;
