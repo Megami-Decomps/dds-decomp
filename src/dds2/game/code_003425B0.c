@@ -1481,16 +1481,16 @@ void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s3
 }
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, s32 source, s32 size, SdfTex *resource) {
-    SdfStreamParams local = *params;
+    SdfStreamParams streamParams = *params;
     switch (resource->pixelFormat) {
     case 0:
-        local.hasAudio = 0;
+        streamParams.hasAudio = 0;
         break;
     case 2:
-        local.hasAudio = 1;
+        streamParams.hasAudio = 1;
         break;
     }
-    sdfSoundInitAndAppendNode(node, &local, source, size, sdfTexGetPrimaryResourceWord(resource));
+    sdfSoundInitAndAppendNode(node, &streamParams, source, size, sdfTexGetPrimaryResourceWord(resource));
 }
 
 void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, MovObj *readContext, s32 resource) {
