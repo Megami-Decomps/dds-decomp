@@ -1067,9 +1067,9 @@ u32 btlSelectNoBossScriptArgumentDuplicate(void) {
     return 0xffffffff;
 }
 
-s32 btlFilterRestrictedCommand(s32 battler, s32 command) {
+s32 btlFilterRestrictedCommand(BtlUnit *battler, s32 command) {
     if (command == 1 || command == 0x12) {
-        if ((((BtlUnit *)battler)->partyRecord.flags & 0x2000) != 0) {
+        if ((battler->partyRecord.flags & 0x2000) != 0) {
             return -1;
         }
     }
