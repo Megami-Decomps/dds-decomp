@@ -8068,7 +8068,8 @@ void effSetCurveEmitterEndPosition(FileSlotTable *record, const f32 *value) {
 }
 
 /* cubic Bezier point at t through four control points; result is left in vf10 */
-void vu0CubicBezierPoint(f32 *p0, f32 *p1, f32 *p2, f32 *p3, f32 t) {
+void vu0CubicBezierPoint(f32 *controlPoint0, f32 *controlPoint1,
+                         f32 *controlPoint2, f32 *controlPoint3, f32 t) {
     f32 weight[4];
     f32 point[4];
     f32 t2 = t * t;
@@ -8080,9 +8081,9 @@ void vu0CubicBezierPoint(f32 *p0, f32 *p1, f32 *p2, f32 *p3, f32 t) {
     weight[1] = t * u2 * 3.0f;
     weight[2] = t2 * u * 3.0f;
     weight[3] = t3;
-    point[0] = p0[0] * weight[0] + p1[0] * weight[1] + p2[0] * weight[2] + p3[0] * weight[3];
-    point[1] = p0[1] * weight[0] + p1[1] * weight[1] + p2[1] * weight[2] + p3[1] * weight[3];
-    point[2] = p0[2] * weight[0] + p1[2] * weight[1] + p2[2] * weight[2] + p3[2] * weight[3];
+    point[0] = controlPoint0[0] * weight[0] + controlPoint1[0] * weight[1] + controlPoint2[0] * weight[2] + controlPoint3[0] * weight[3];
+    point[1] = controlPoint0[1] * weight[0] + controlPoint1[1] * weight[1] + controlPoint2[1] * weight[2] + controlPoint3[1] * weight[3];
+    point[2] = controlPoint0[2] * weight[0] + controlPoint1[2] * weight[1] + controlPoint2[2] * weight[2] + controlPoint3[2] * weight[3];
     VU0_LOAD_VF(vf10, point);
 }
 
