@@ -4439,7 +4439,81 @@ void fldDrawSparkStatusOverlay(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00150800);
+extern s16 D_00389874[];
+void func_00150800(void) {
+    FieldResourceRecord *record;
+    s32 duration;
+    s32 entryCount;
+    s32 recordIndex;
+    FldSparkController *control;
+
+    if (D_003899E0[0] != 0) {
+        return;
+    }
+    if (mdlFlagTest(0x13) && !mdlFlagTest(0x25)) {
+        evtCreateMessageWindowIfMissing(D_003A9EB0);
+        dspStartEntry(6);
+        D_00389874[0] = 1;
+        fldSparkControlState.dialogPhase = 12;
+        fldSparkControlState.phase = 0;
+        fldSparkControlState.dialogTimer = 0;
+        fldResetPlayerSceneObjectState();
+        return;
+    }
+    if (mdlFlagTest(0x802)) {
+        evtCreateMessageWindowIfMissing(D_003A9EB0);
+        dspStartEntry(5);
+        D_00389874[0] = 1;
+        fldSparkControlState.dialogPhase = 12;
+        fldSparkControlState.phase = 0;
+        fldSparkControlState.dialogTimer = 0;
+        fldResetPlayerSceneObjectState();
+        return;
+    }
+    evtCreateMessageWindowIfMissing(D_003A9EB0);
+    if (mdlFlagTest(0x803)) {
+        dspStartEntry(1);
+    } else {
+        dspStartEntry(0);
+    }
+    evtStoreValueAndCaptureWindowPanelValue(2);
+    evtSetMessageWindowOptionWhenOpen(0);
+    mdlFlagSet(0x803);
+    recordIndex = fldFindResourceRecordIndex(fldAreaState.area, fldAreaState.floor + 1);
+    control = &fldSparkControlState;
+    record = &D_00435E18[recordIndex];
+    fldAreaState.transitionMode = 1;
+    fldAreaState.collectedCount = 0;
+    entryCount = record->entryCount;
+    duration = record->duration;
+    control->dialogPhase = 1;
+    control->countdown = duration;
+    control->entryCount = entryCount;
+    do {
+    control->scheduledSounds = 0;
+    control->unk8 = recordIndex;
+    *(s32 *)fldAreaState.pad10C = 0;
+    do {
+    fldAreaState.score = 0;
+    } while (0);
+    } while (0);
+    control->entry = record;
+    do {
+    control->phase = 0;
+    control->terminated = 0;
+    control->mode = 0;
+    control->modeCountdown = 0;
+    control->pendingMode = 0;
+    control->pulse = 0;
+    control->dialogTimer = 0;
+    control->sequenceIndex = 0;
+    control->sequenceRemaining = 0;
+    } while (0);
+    control->cursor = 0;
+    control->pickupDelay = 0;
+    fldResetSparkTable();
+    fldResetPlayerSceneObjectState();
+}
 
 
 extern void fldTogglePlayerModel(void);
