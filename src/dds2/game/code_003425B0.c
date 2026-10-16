@@ -840,10 +840,10 @@ void *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, s32 *outPayload) {
+SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayload) {
     u32 info[4];
     SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
-    *outPayload = (s32)sdfRelocatePackedResourcePayload((SdfPackedRelocationHeader *)(u32)info[0]);
+    *outPayload = sdfRelocatePackedResourcePayload((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
 
@@ -857,10 +857,10 @@ void *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resour
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, s32 *outPayload) {
+SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayload) {
     u32 info[4];
     SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
-    *outPayload = (s32)sdfRelocatePackedResourceWordsFromHeader((SdfPackedRelocationHeader *)(u32)info[0]);
+    *outPayload = sdfRelocatePackedResourceWordsFromHeader((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
 
