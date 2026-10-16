@@ -4293,7 +4293,133 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00209EB8);
+/* Queue HARI's form-change actions, refreshes and camera sequence. */
+void func_00209EB8(BtlTask *action) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlEffectHeader *effect = state->effect;
+    u64 actionBarrier = btlAdvanceRuntimeSequenceCounter();
+    u64 refreshBarrier = btlAdvanceRuntimeSequenceCounter();
+    u64 cameraBarrier = btlAdvanceRuntimeSequenceCounter();
+    BtlUnit *unit;
+    BtlRuntimeTask *actionTask;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *timedTask;
+    BtlRuntimeTask *refreshTask;
+    BtlRuntimeTask *loadTask;
+    s32 soundDelay;
+    s32 updateSound;
+
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        u32 flags = unit->status.flags;
+        s32 unitId;
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0x400) == 0) {
+            continue;
+        }
+        unitId = unit->partyRecord.unitId;
+        if (unitId >= 0x11B) {
+            continue;
+        }
+        if (unitId < 0x119) {
+            continue;
+        }
+        if (unit->species == unitId) {
+            continue;
+        }
+        if (effect->formCount < 2) {
+            actionTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x50);
+            soundDelay = 0xBA;
+            actionTask->ownerId = actionBarrier;
+            btlStartTask(actionTask);
+            task = sndCreateStationedSeTask(state->sequenceHandle + 1);
+            task->ownerId = actionBarrier;
+            btlStartTask(task);
+        } else {
+            actionTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x51);
+            soundDelay = 0x66;
+            actionTask->ownerId = actionBarrier;
+            btlStartTask(actionTask);
+            task = sndCreateStationedSeTask(state->sequenceHandle + 2);
+            task->ownerId = actionBarrier;
+            btlStartTask(task);
+        }
+        timedTask = sndCreateCustomTask(0x80FFFFFF, 0x18);
+        timedTask->startCondition.kind = 5;
+        timedTask->endDelay = 0x18;
+        timedTask->startDelay = soundDelay;
+        timedTask->startCondition.value.handle = actionTask->handle;
+        timedTask->ownerId = actionBarrier;
+        btlStartTask(timedTask);
+
+        refreshTask = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)unit);
+        refreshTask->startCondition.kind = 4;
+        refreshTask->startCondition.value.handle = actionTask->handle;
+        refreshTask->ownerId = refreshBarrier;
+        btlStartTask(refreshTask);
+        loadTask = btlCreateModelLoadPollTask(unit, unit->resourceKind, unit->partyRecord.unitId, 1);
+        loadTask->startCondition.kind = 7;
+        loadTask->startCondition.value.owner = refreshBarrier;
+        loadTask->ownerId = cameraBarrier;
+        btlStartTask(loadTask);
+    }
+    timedTask = btlCreateFadeInTask(0x20);
+    updateSound = 0;
+    timedTask->startCondition.kind = 7;
+    timedTask->startCondition.value.owner = cameraBarrier;
+    timedTask->endDelay = 0x28;
+    timedTask->ownerId = action->unit->identity;
+    btlStartTask(timedTask);
+
+    switch (effect->formCount) {
+    case 1:
+        task = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+            47.0f, -33.8f, -119.3f, -0.035f, 0.101f, -0.014f, 0.985f, 47.0f,
+            -253.8f, -119.3f, -0.035f, 0.101f, -0.014f, 0.985f, 40.0f, 35.0f);
+        task->startCondition.kind = 7;
+        task->startCondition.value.owner = cameraBarrier;
+        task->ownerId = action->unit->identity;
+        btlStartTask(task);
+        timedTask = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+            -57.0f, -371.3f, -988.4f, -0.113f, 0.033f, 0.014f, -0.984f, 190.0f,
+            -362.6f, -968.3f, -0.114f, -0.118f, -0.004f, -0.977f, 40.0f, 50.0f);
+        timedTask->startCondition.kind = 7;
+        timedTask->startDelay = 0x55;
+        timedTask->endDelay = 0x2D;
+        timedTask->startCondition.value.owner = cameraBarrier;
+        btlStartTask(timedTask);
+        updateSound = 1;
+        break;
+    case 2:
+        timedTask = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+            118.6f, -176.9f, -129.4f, 0.14f, -0.171f, 0.034f, -0.965f, 146.4f,
+            -117.5f, -207.6f, 0.14f, -0.171f, 0.034f, -0.965f, 40.0f, 35.0f);
+        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.value.owner = cameraBarrier;
+        timedTask->endDelay = 0x28;
+        timedTask->ownerId = action->unit->identity;
+        btlStartTask(timedTask);
+        updateSound = 1;
+        break;
+    case 3:
+        timedTask = (BtlRuntimeTask *)btlCreateFloatTask29((u8 *)action,
+            219.6f, -134.0f, -142.0f, -0.106f, 0.247f, -0.03f, 0.952f, 67.6f,
+            -136.2f, -197.4f, -0.109f, 0.086f, -0.012f, 0.98f, 40.0f, 30.0f);
+        timedTask->startCondition.kind = 7;
+        timedTask->startCondition.value.owner = cameraBarrier;
+        timedTask->endDelay = 0x28;
+        timedTask->ownerId = action->unit->identity;
+        btlStartTask(timedTask);
+        break;
+    }
+    if (updateSound) {
+        task = btlCreateCommandSoundUpdateTask();
+        task->startCondition.kind = 7;
+        task->startCondition.value.owner = cameraBarrier;
+        btlStartTask(task);
+    }
+}
 
 u32 btlGetEventEffectValue(void) {
     s32 battle;
