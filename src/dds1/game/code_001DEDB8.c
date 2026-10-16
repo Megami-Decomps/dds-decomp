@@ -273,7 +273,7 @@ extern void btlRefreshSoundEntries(void);
 
 extern s8 effSharedRandomState[];
 
-extern void sndSetStationedSeVolume(u32);
+extern void sndSetStationedSeVolume(u32 sequence);
 
 extern void btlResetTitleStreamOnBattleFlag(void);
 
@@ -8191,8 +8191,8 @@ void sndDestroyFileQueueWrapper(u32 arg0) {
 void func_001F3230(void) {
 }
 
-void sndSetStationedSeVolume(u32 arg0) {
-    sndSetSequenceVolumePan(arg0, 0x58, 0x3f);
+void sndSetStationedSeVolume(u32 sequence) {
+    sndSetSequenceVolumePan(sequence, 0x58, 0x3f);
 }
 
 void sndSetStationedSeHighVolume(u32 arg0) {
