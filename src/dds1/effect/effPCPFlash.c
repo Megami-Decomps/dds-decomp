@@ -61,9 +61,9 @@ extern void effFlashFadingOrbitWriteCorners(PcpFlashFadingOrbitWork *, s32);
 
 extern void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *, s32, void *);
 
-void effFlashTrianglePulseSpawnFromTable(void *data)
+void effFlashTrianglePulseSpawnFromTable(void *table)
 {
-    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effParamTableGetBlock(data, 0));
+    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effParamTableGetBlock(table, 0));
 }
 
 /* Duplicate callback: return fresh work from the source parameter prefix. */
