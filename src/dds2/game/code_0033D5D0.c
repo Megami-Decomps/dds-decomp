@@ -140,7 +140,7 @@ extern s32 sceCdSearchFile(void *, s32);
 extern DevState *sdfDevCreateCallbackState(const char *path,
                                 void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext);
 
-extern s32 sdfDevResolvePathForWorker(const char *, void **);
+extern s32 sdfDevResolvePathForWorker(const char *path, void **outResolvedPath);
 
 extern void sdfDevEnqueueStateAndWakeWorker(DevState *state);
 
