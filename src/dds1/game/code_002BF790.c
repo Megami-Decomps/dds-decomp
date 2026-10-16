@@ -208,7 +208,7 @@ s32 itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimed
 }
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
-s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 squares[2];
     s32 deltas[2];
@@ -223,17 +223,17 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
     s32 fractionalMask;
     s32 i;
 
-    table = (GridAngleTable *)owner->source->status;
+    table = (GridAngleTable *)timedState->source->status;
     colorMask = -0x100;
     fractionalMask = 0xFFFF;
     deltas[0] = table->divisor << 4;
     deltas[1] = (((table->mirrored << 12) / 640) * rectangle->sourceHeight) / rectangle->sourceWidth;
     previous[0] = out->geometry.bounds[0];
     previous[1] = out->geometry.bounds[1];
-    scaledWidth = (s32)(fsqrtf((f32)deltas[0]) * (f32)owner->value * (1.0f / 65536.0f));
+    scaledWidth = (s32)(fsqrtf((f32)deltas[0]) * (f32)timedState->value * (1.0f / 65536.0f));
     squares[0] = scaledWidth * scaledWidth;
     widthAdjustment = -((deltas[0] - squares[0]) / 2);
-    scaledHeight = (s32)(fsqrtf((f32)deltas[1]) * (f32)owner->value * (1.0f / 65536.0f));
+    scaledHeight = (s32)(fsqrtf((f32)deltas[1]) * (f32)timedState->value * (1.0f / 65536.0f));
     squares[1] = scaledHeight * scaledHeight;
     heightAdjustment = -((deltas[1] - squares[1]) / 2);
 
@@ -249,7 +249,7 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
     for (; i >= 0; i--, sourceColor++, destColor++) {
         u32 color = *sourceColor;
         s32 alpha = *(u8 *)sourceColor;
-        s32 product = alpha * owner->value;
+        s32 product = alpha * timedState->value;
         s32 negative = 0;
 
         if (product < 0) {
