@@ -298,7 +298,7 @@ extern void fldResetPlayerSceneTransformState(void);
 
 extern u32 D_00435F78;
 
-extern void fldSetPendingAreaAndFloor(s32, s32);
+extern void fldSetPendingAreaAndFloor(s32 area, s32 floor);
 
 void fldUnloadPlayerModel(void);
 
