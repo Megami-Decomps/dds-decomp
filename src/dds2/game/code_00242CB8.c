@@ -301,7 +301,7 @@ void evtClearSolarOverlayControl(void) {
 
 /* Reset the field-transition expiry counter at world offset 0xA4C. */
 void evtResetFieldTransitionCounter(void) {
-    datGameState->world.unkA4C = 0;
+    datGameState->world.fieldTransitionCycleCount = 0;
 }
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
@@ -409,10 +409,10 @@ void evtAdvanceSolarClockAndExpireControls(f32 delta) {
                 fldConsumeSecondarySceneFlag();
             }
             if (datGameState->world.fieldFlags & 4) {
-                datGameState->world.unkA4C++;
-                if (datGameState->world.unkA4C >= 6U) {
+                datGameState->world.fieldTransitionCycleCount++;
+                if (datGameState->world.fieldTransitionCycleCount >= 6U) {
                     fldConsumeFieldTransitionFlag();
-                    datGameState->world.unkA4C = 0;
+                    datGameState->world.fieldTransitionCycleCount = 0;
                 }
             }
             if (datGameState->world.fieldFlags & 8) {
@@ -466,7 +466,7 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
     evtSetSolarPhase(0);
     datGameState->world.secondaryPhase = 0;
     datGameState->world.overlayFlag = 0;
-    datGameState->world.unkA4C = 0;
+    datGameState->world.fieldTransitionCycleCount = 0;
 }
 
 void evtStopSolarOverlay(void) {
