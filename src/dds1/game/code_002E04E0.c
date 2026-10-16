@@ -62,26 +62,24 @@ typedef struct {
     f32 depth;             /* 0xAC */
 } VuWork;
 
-/* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(u32 workAddress);
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void sdfVuUpdateSelectedNodeGeometry(VuWork *work);
 
 /* Split ring addressing at position 128; retain the native 96-byte stride. */ void sdfVuConfigureWorkRingDma(VuWork *work, s32 ringPosition);
 
 /* Select textured or colored emission; preserve the native no-argument calls. */ void sdfVuEmitSelectedNodePacket(VuWork *work);
 
 /* Emit selected geometry, then apply flag callbacks; the first may change flags. */
-void sdfVuApplySelectedWorkFlags(u32 workAddress) {
+void sdfVuApplySelectedWorkFlags(VuWork *work) {
     u32 selectedFlags;
-    s32 signedWorkAddress;
 
-    signedWorkAddress = (s32)workAddress;
-    sdfVuEmitSelectedNodePacket((VuWork *)signedWorkAddress);
-    selectedFlags = ((VuWork *)signedWorkAddress)->selectedFlags;
+    sdfVuEmitSelectedNodePacket(work);
+    selectedFlags = work->selectedFlags;
     if ((selectedFlags & 0x1000) != 0) {
-        sdfVuUpdateSelectedNodeGeometry(workAddress);
-        selectedFlags = ((VuWork *)signedWorkAddress)->selectedFlags;
+        sdfVuUpdateSelectedNodeGeometry(work);
+        selectedFlags = work->selectedFlags;
     }
     if ((selectedFlags & 1) != 0) {
-        func_002E03C0(workAddress);
+        func_002E03C0((u32)work);
         return;
     }
 }
@@ -107,17 +105,17 @@ void sdfVuBeginPacketFromWork(VuWork *work) {
         VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
         sdfVuBuildVisibleTriangleList(work);
-        sdfVuApplySelectedWorkFlags((u32)work);
+        sdfVuApplySelectedWorkFlags(work);
         sdfVuConfigureWorkRingDma(work, work->param1);
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
         func_002DE7D8(work->dmaBase, work->param1);
         func_002DF710(work);
-        sdfVuApplySelectedWorkFlags((u32)work);
+        sdfVuApplySelectedWorkFlags(work);
     } else {
         sdfVuBuildVisibleTriangleList(work);
-        sdfVuApplySelectedWorkFlags((u32)work);
+        sdfVuApplySelectedWorkFlags(work);
     }
 }
 
