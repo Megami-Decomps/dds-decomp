@@ -69,7 +69,7 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
 }
 
 extern s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
-extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset);
+extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex);
 extern f32 sdfViewTargetVector[4];
 
 void effUpdateConfiguredBillboard(EffWorldNode *object) {

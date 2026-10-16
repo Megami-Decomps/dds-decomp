@@ -937,20 +937,20 @@ s32 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     return 0;
 }
 
-/* Store a byte at valueOffset within the selected slot's values area. */
-void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset, s32 value) {
+/* Store a byte at valueIndex within the selected slot's values area. */
+void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex, s32 value) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        datGameState->maps[mapIndex].slots[slotIndex].values[valueOffset] = value;
+        datGameState->maps[mapIndex].slots[slotIndex].values[valueIndex] = value;
     }
 }
 
 /* Read a slot value, translating stored 0xff to -1; IDs >= the limit return zero. */
-s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset) {
+s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex) {
     u8 value = 0;
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        value = datGameState->maps[mapIndex].slots[slotIndex].values[valueOffset];
+        value = datGameState->maps[mapIndex].slots[slotIndex].values[valueIndex];
     }
     return value == FIELD_MAP_EMPTY_VALUE ? -1 : value;
 }
