@@ -9,6 +9,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
+#include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
@@ -1434,9 +1435,6 @@ extern void fldCopyInfoTable(FldInfTable *);
 struct FldNpcPalette;
 extern void fldSetNpcPalette(struct FldNpcPalette *source);
 
-struct FldSkyBuffer;
-extern void fldUploadSkyBuffer(struct FldSkyBuffer *source);
-
 extern void fldCopyActorWaypointTable(FldWaypointBlock *source);
 
 
@@ -1468,7 +1466,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
-                fldUploadSkyBuffer((struct FldSkyBuffer *)work->dataCursor);
+                fldUploadSkyBuffer((FldSkyBuffer *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
@@ -5095,15 +5093,6 @@ void fldApplyPendingCameraHeading(void) {
 
 /* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraHeadingTransition);
-
-typedef struct FldSkyBuffer {
-    u32 word[0x3800];
-} FldSkyBuffer;
-
-extern FldSkyBuffer *fldSkyLightSetBuffer;
-
-
-
 
 extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;

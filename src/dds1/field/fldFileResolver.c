@@ -9,6 +9,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
+#include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
 #include "kwln_frame_draw_buffer.h"
@@ -1391,7 +1392,6 @@ u8 fldHasAreaResourceNameChanged(void) {
 
 
 extern void fldSetNpcPalette(void *source);
-extern void fldUploadSkyBuffer(void *source);
 extern void fldCopyActorWaypointTable(const void *source);
 extern void fldCopyInfoTable(const void *);
 extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle);
@@ -1421,7 +1421,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
-                fldUploadSkyBuffer(work->dataCursor);
+                fldUploadSkyBuffer((FldSkyBuffer *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)work->resourceHandle);
                 break;
@@ -5009,7 +5009,6 @@ extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
 
 extern FldCameraSetting D_003306D0;
-extern void *fldSkyLightSetBuffer;
 extern void *D_003BAD60;
 extern FldSkyGradientRecord *D_003BAD74;
 extern s32 D_003BAD88, D_003BAD8C;
@@ -5092,7 +5091,7 @@ void fldReleaseSkyResources(void) {
     fldCameraColorEnabled = 0;
 }
 
-void fldUploadSkyBuffer(void *src) {
+void fldUploadSkyBuffer(FldSkyBuffer *src) {
     fldSkyDrawState = 0x80;
     memcpy(fldSkyLightSetBuffer, src, 0xE000);
     fldReleaseSkyResources();
