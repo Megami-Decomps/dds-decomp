@@ -1599,7 +1599,7 @@ extern void btlRefreshVritraPresentationAfterUnitUpdate(void);
 extern void btlQueueVritraTentacleActionTasks(ActionStateLink *handle, s32 unused, u64 completionOwner, u64 prerequisite);
 extern s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSide);
 extern s32 btlSetupVritraCameraFromActionFlags(BtlLinkedCommand *command);
-extern u8 btlIsNonCalamityAction(s32 arg0);
+extern u8 btlIsNonCalamityAction(s32 actionId);
 extern void btlApplyMarkedCommandStateMotion(void);
 extern void btlPromoteTrueHeatToFrontline(void);
 extern s32 btlRemapKartikeyaMotionForLinkedState(BtlUnit *unit, s32 command);
