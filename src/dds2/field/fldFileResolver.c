@@ -688,7 +688,7 @@ extern char fldEncounterTaskName[];
 extern void btlClearRuntimeState(void);
 
 
-extern void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames);
+extern void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames);
 
 extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
 
@@ -3882,7 +3882,7 @@ void fldSetCameraModelMotionRequest(u32 first, u32 second) {
     D_004360C8 = second;
 }
 
-void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
+void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames) {
     s32 currentMotion;
 
     if (D_00389888[0] == 1) {
@@ -3893,35 +3893,35 @@ void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
             mdlResumeAllContextMotions(fldPlayerModelContext);
         }
         currentMotion = D_004360CC;
-        switch (motion) {
+        switch (requestedMotionIndex) {
         case 1:
             break;
         case 2:
             if (D_004360C8 > 0) {
-                motion = 3;
+                requestedMotionIndex = 3;
             }
             break;
         case 3:
             if (currentMotion == 0x66) {
-                motion = 2;
+                requestedMotionIndex = 2;
                 currentMotion = 2;
             }
             break;
         default:
             if (currentMotion == 0x66) {
-                motion = 2;
+                requestedMotionIndex = 2;
                 currentMotion = 2;
             } else {
-                motion = 3;
+                requestedMotionIndex = 3;
             }
             break;
         }
         if (D_004360C4 == 1) {
             mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
-            mdlAddEntryFlaggedEx(fldPlayerModelContext, 1, motion, blendFrames, blendFrames);
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 1, requestedMotionIndex, blendFrames, blendFrames);
             D_004360C4 = -1;
-            if (motion == 2 && D_004360CC == 3) {
-                D_004360CC = motion;
+            if (requestedMotionIndex == 2 && D_004360CC == 3) {
+                D_004360CC = requestedMotionIndex;
                 fldPlayerModelContext->first->frameStep = 1.0f;
                 mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 2, blendFrames, blendFrames);
             }
@@ -3954,7 +3954,7 @@ void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
             fldPlayerModelContext->first->frameStep = 1.0f;
             mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 5, blendFrames, blendFrames);
         } else if (D_004360C4 == 6) {
-            if (motion == 1) {
+            if (requestedMotionIndex == 1) {
                 mdlSetNodeFrameStep(fldPlayerModelContext, 1, 2.0f);
                 mdlAddEntryPlain(fldPlayerModelContext, 1, 6);
                 D_004360C4 = -1;
@@ -3966,24 +3966,24 @@ void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
                 fldPlayerModelContext->first->frameStep = 1.0f;
                 mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 4, blendFrames, blendFrames);
             }
-        } else if (currentMotion != motion && D_004360CC != 5) {
-            D_004360CC = motion;
+        } else if (currentMotion != requestedMotionIndex && D_004360CC != 5) {
+            D_004360CC = requestedMotionIndex;
             fldPlayerModelContext->first->frameStep = 1.5f;
-            mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, motion, blendFrames, blendFrames);
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, requestedMotionIndex, blendFrames, blendFrames);
             if (D_004360C8 == 0) {
                 mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
-                mdlAddEntryFlaggedEx(fldPlayerModelContext, 1, motion, blendFrames, blendFrames);
+                mdlAddEntryFlaggedEx(fldPlayerModelContext, 1, requestedMotionIndex, blendFrames, blendFrames);
             }
         }
         if (D_004360C8 > 0) {
             D_004360C8--;
         }
-    } else if (modelMotion != motion) {
+    } else if (currentMotionIndex != requestedMotionIndex) {
         fldPlayerModelContext->first->frameStep = 1.0f;
-        mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, motion, blendFrames, blendFrames);
+        mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, requestedMotionIndex, blendFrames, blendFrames);
         if (fldSecondarySceneObject != 0) {
             fldSecondarySceneModelContext->first->frameStep = 1.0f;
-            mdlAddEntryFlaggedEx(fldSecondarySceneModelContext, 0, motion, blendFrames, blendFrames);
+            mdlAddEntryFlaggedEx(fldSecondarySceneModelContext, 0, requestedMotionIndex, blendFrames, blendFrames);
         }
     }
 }
