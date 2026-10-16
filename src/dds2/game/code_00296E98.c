@@ -119,7 +119,7 @@ void brsDrawResultIconPairWithAlpha(s32 unused, u32 alpha, s32 iconIndex, s32 op
                          mnuCommonIconPlacements[8][BRS_ICON_ID], option);
 }
 
-void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
+void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 progress256, s32 entryIndex, s32 drawArg) {
     f32 normalized;
     f32 companionPosition;
     struct EffectSlotSet *layer;
@@ -127,7 +127,7 @@ void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, 
     s32 selectedIndex;
 
     layer = D_00438FC8->effectSlots[0];
-    normalized = (f32)value * 0.00390625f;
+    normalized = (f32)progress256 * 0.00390625f;
     selectedIndex = entryIndex + 3;
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[selectedIndex][BRS_ICON_X] << 4,
                   mnuCommonIconPlacements[selectedIndex][BRS_ICON_Y] << 3, 0,
