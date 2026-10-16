@@ -396,6 +396,7 @@ s32 datHasEnoughCurrency(s32 requiredAmount) {
 
 #include "common.h"
 #include "scr.h"
+#include "scr_work_task_api.h"
 #include "sdf.h"
 #include "btl_action.h"
 #include "dat_state.h"
@@ -1708,8 +1709,8 @@ void dds3WorkInit(void *header) {
     memset(&evtWorkScriptContext, 0, sizeof(evtWorkScriptContext));
 }
 
-u32 scrGetWorkTaskHandle(void) {
-    return (u32)evtWorkScriptTask;
+ScrData *scrGetWorkTaskHandle(void) {
+    return evtWorkScriptTask;
 }
 
 void scrDestroyWorkTask(void) {

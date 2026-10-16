@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_work_task_api.h"
 #include "dat_save_words.h"
 #include "evt_scaled_value.h"
 #include "eff_random_mod.h"
@@ -20,7 +21,6 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
-extern u32 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
 extern void dds3WorkInit(void *header);
 
@@ -396,8 +396,8 @@ void sdfFirePendingCallback(void) {
     scrDestroyWorkTask();
 }
 
-u8 scrIsCurrentWorkTask(u32 expectedValue) {
-    u32 currentValue;
+u8 scrIsCurrentWorkTask(struct ScrData *expectedValue) {
+    struct ScrData *currentValue;
 
     currentValue = scrGetWorkTaskHandle();
     return currentValue == expectedValue;

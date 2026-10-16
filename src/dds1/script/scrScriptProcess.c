@@ -4,6 +4,7 @@
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "scr.h"
+#include "scr_work_task_api.h"
 #include "bf_flw0_header.h"
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
@@ -111,8 +112,6 @@ void scrProcDestroyTask(ScrData *process) {
 
 extern s32 strcmp(const char *a, const char *b);
 
-extern u8 scrIsCurrentWorkTask(u32);
-
 /* Walk the script-name table, releasing each node's task or process. */
 void scrDestroyAllNamedProcesses(void)
 {
@@ -125,7 +124,7 @@ void scrDestroyAllNamedProcesses(void)
     }
     while (1) {
         next = node->next;
-        if (scrIsCurrentWorkTask((u32)node) == 0) {
+        if (scrIsCurrentWorkTask(node) == 0) {
             if (node->task != NULL) {
                 kwlnTaskDestroyWithHierarchy(node->task, 0);
             } else {
