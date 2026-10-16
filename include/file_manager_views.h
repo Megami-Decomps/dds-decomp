@@ -48,7 +48,7 @@ typedef struct FileCleanup {
     u8 kind;
     u8 state;
     u8 pad02[6];
-    void *requestNameCopy;
+    char *requestNameCopy; /* 0x08: duplicated queued request name */
     u32 handle;
 } FileCleanup;
 
