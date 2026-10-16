@@ -1451,8 +1451,8 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, const char *reques
     completionJob->arg = jobArg;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
-    requestSlot = (FilePacRequest *)fileCreatePacLoadWork(requestPath, 0, 0,
-                                                         (s32)mdlCompleteGroupedJobAndNotify, (s32)completionJob);
+    requestSlot = fileCreatePacLoadWork(requestPath, 0, 0,
+                                        (s32)mdlCompleteGroupedJobAndNotify, (s32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
         fileWaitForRequestReady((struct FileRequest *)requestSlot);
