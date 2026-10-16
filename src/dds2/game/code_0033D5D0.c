@@ -516,7 +516,7 @@ typedef struct SdfDiscFileRecord {
 
 extern SdfDiscFileRecord D_00476940;
 extern s32 sceOpen();
-extern s32 sdfDevSeekFile(s32, s32, s32);
+extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
@@ -716,7 +716,7 @@ s32 sdfDevGetFileSize(void) {
 
 extern s32 sceOpen();
 
-extern s32 sdfDevSeekFile(s32, s32, s32);
+extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 
 extern s32 sdfAllocHeapMemory(s32);
 
