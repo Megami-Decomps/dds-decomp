@@ -71,7 +71,7 @@ typedef struct EvtLipsLink {
 } EvtLipsLink;
 
 extern s32 scrReadIntParameter(s32 idx);
-extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
+extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource);
 
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
@@ -405,14 +405,14 @@ u32 evtGetWorldObjectId(void) {
 }
 
 u32 evtOpCreateLinkedCameraViewer(void) {
-    s32 param0;
-    s32 param1;
-    s32 value;
+    s32 slotKind;
+    s32 resource;
+    s32 viewerObjectKey;
 
-    param0 = scrReadIntParameter(0);
-    param1 = scrReadIntParameter(1);
-    value = mdlSpawnLinkedCameraSlotViewerObject(param0, param1);
-    scrSetIntegerReturnValue(value);
+    slotKind = scrReadIntParameter(0);
+    resource = scrReadIntParameter(1);
+    viewerObjectKey = mdlSpawnLinkedCameraSlotViewerObject(slotKind, resource);
+    scrSetIntegerReturnValue(viewerObjectKey);
     return 1;
 }
 
