@@ -189,7 +189,7 @@ extern u8 sdfDevModuleLoaded;
 
 extern u8 D_003BD478;
 
-extern s32 func_00312618(const char *, s32, void *, s32 *);
+extern s32 func_00312618(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
 extern void sdfDebugPrintf(const char *);
 
