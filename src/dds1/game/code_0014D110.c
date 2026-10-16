@@ -718,7 +718,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     return 1;
 }
 
-extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
+extern void fldSetRoomObjectModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 
 s32 fldCmdApplyRoomObjectModeZero(void) {
@@ -814,7 +814,7 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
 
 extern s32 D_0032E3C4[];
 
-extern void fldSetRoomSceneFlag(s32, s32, s32, s32);
+extern void fldSetRoomSceneFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldCmdSetSceneBits(void) {
     s32 world;
@@ -925,7 +925,7 @@ s32 fldOpSetAlternateMapTargetFlag(void) {
     return 1;
 }
 
-extern void fldSetMapSlotByte(s32, s32, s32, s32);
+extern void fldSetMapSlotByte(s32 area, s32 slotIndex, s32 valueOffset, s32 value);
 
 s32 fldCmdSetMapSlotByte(void) {
     s32 world;
@@ -1038,7 +1038,7 @@ s32 fldOpSetRoomStateFlags(void) {
     return 1;
 }
 
-extern void fldSetMapSlotValueFlag(s32, s32, s32, s32);
+extern void fldSetMapSlotValueFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldCmdSetSceneBitsValue(void) {
     s32 world;
