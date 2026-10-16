@@ -173,7 +173,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
     void *cached[4];
     u32 cacheCount = sizeof(loaded);
     u32 batchIndex;
-    u32 count;
+    u32 resourceCount;
     u32 i;
     FldFileResource *resource;
     void *object;
@@ -185,17 +185,17 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
     D_00438EBC = 0;
     for (batchIndex = 0; batchIndex < batchCount; batchIndex++, batch++) {
         resource = batch->entries;
-        count = batch->count;
+        resourceCount = batch->count;
         switch (batch->kind) {
         case 0:
         case 1:
             break;
         case 2:
             D_00438EB8 = resource;
-            D_00438EBC = count;
+            D_00438EBC = resourceCount;
             break;
         case 11:
-            for (i = 0; i < count; i++, resource++) {
+            for (i = 0; i < resourceCount; i++, resource++) {
                 BillConfig *config;
                 u32 *resourceKeys;
                 u32 cacheByteOffset;
@@ -272,7 +272,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
             }
             break;
         case 12:
-            for (i = 0; i < count; i++, resource++) {
+            for (i = 0; i < resourceCount; i++, resource++) {
                 if (resource->transform != NULL) {
                     position[0] = resource->transform[0];
                     position[1] = resource->transform[1];
@@ -305,12 +305,12 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
             }
             break;
         case 9:
-            for (i = 0; i < count; i++, resource++) {
+            for (i = 0; i < resourceCount; i++, resource++) {
                 evtSpawnActionObj10(resource->id, resource->data, resource->name);
             }
             break;
         case 3:
-            for (i = 0, pathIndex = 1; i < count; i++, resource++, pathIndex++) {
+            for (i = 0, pathIndex = 1; i < resourceCount; i++, resource++, pathIndex++) {
                 resource->id |= 0x20000;
                 if (resource->transform != NULL) {
                     position[0] = resource->transform[0];
