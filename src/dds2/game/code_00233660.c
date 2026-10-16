@@ -2613,7 +2613,83 @@ void mdlRestartViewerPhaseTask(void) {
     kwlnTaskAddChild((KwlnTask *)mdlViewerState.unk00, (KwlnTask *)mdlViewerState.viewerTask);
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
+#include "sdf_gs_header.h"
+extern s8 D_0040B7E6[];
+extern s8 D_0037F532[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewUpVector[];
+extern u32 sdfGetLodChunkValue(SdfModel *);
+s32 mdlViewer(KwlnTask *task) {
+    SdfModel *model;
+    SdfGsPacketHeader *packet;
+    s32 lodCount;
+    s32 selection;
+
+    mdlViewerState.unk09 += 2;
+    if (mdlViewerState.unk09 == 30) mdlViewerState.unk09 = 0;
+    if (D_0040B7E6[0] < 0) {
+        model = mdlViewerState.resources[0]->inner;
+        lodCount = sdfGetLodChunkValue(model);
+        if (lodCount > 0) {
+            if (model->lodIndex == lodCount) model->lodIndex = 0;
+            else model->lodIndex++;
+        }
+    }
+    if (mdlViewerState.taskPhase == 0) {
+        selection = mdlViewerState.unk14;
+        if ((D_0037F510[0x27] & 2) && (u32)selection < 12) {
+            mdlViewerState.unk14 = selection + 1;
+        } else if (D_0037F510[0x27] < 0) {
+            if (selection == 12) mdlViewerState.unk14 = 0;
+            else { mdlViewerState.unk14 = selection + 1; }
+        } else if ((D_0037F510[0x26] & 2) && selection > 0) {
+            mdlViewerState.unk14 = selection - 1;
+        } else if (D_0037F510[0x26] < 0) {
+            if (selection == 0) mdlViewerState.unk14 = 12;
+            else { mdlViewerState.unk14 = selection - 1; }
+        } else if (D_0037F510[0x25] < 0 || D_0037F510[0x24] < 0) {
+            if ((u32)selection < 7) {
+                selection += 7;
+                if ((u32)selection < 13) mdlViewerState.unk14 = selection;
+            } else {
+                u16 pageStep = -7;
+
+                mdlViewerState.unk14 = selection + pageStep;
+            }
+        } else if (D_0037F510[0x21] < 0) {
+            mdlViewerState.unk09 = 0;
+            mdlViewerState.taskPhase = (u8)mdlViewerState.unk14 + 1;
+            mdlRestartViewerPhaseTask();
+        } else if (D_0037F510[0x22] < 0) {
+            mdlViewerState.taskPhase = mdlViewerState.unk0B;
+            mdlRestartViewerPhaseTask();
+        }
+    } else if (mdlViewerState.taskPhase >= 0 && D_0037F532[0] < 0) {
+        mdlViewerTaskDestroy();
+        mdlViewerState.unk0B = mdlViewerState.taskPhase;
+        mdlViewerState.taskPhase = 0;
+        mdlViewerState.unk14 = mdlViewerState.unk0B - 1;
+    }
+    PCP_COPY_VECTOR(sdfViewTargetVector, &D_00453620);
+    PCP_COPY_VECTOR(sdfViewEyeVector, &D_00453630);
+    PCP_COPY_VECTOR(sdfViewUpVector, &D_00453640);
+    mdlViewerState.packetList = sdfCreateResetPacketList();
+    packet = sdfAllocPacketAligned(0x40);
+    sdfInitializeDmaReferenceTag(packet, 2);
+    ((u64*)packet)[4] = 0x44;
+    ((u64*)packet)[5] = 0x42;
+    ((u64*)packet)[6] = 0x3000D;
+    ((u64*)packet)[7] = 0x47;
+    sdfAppendPacket(mdlViewerState.packetList, (u32)packet);
+    if (mdlViewerState.yawStepMode == 0) {
+        mdlDrawViewerModeLabel();
+        mdlDrawViewerModelAndMotionSummary();
+        mdlDrawViewerOptionLabels();
+        mdlSubmitViewerIntermediateDrawPacket();
+        mdlSubmitViewerResourceDrawPacket();
+    }
+    return 0;
+}
 
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
 void mdlDrawMapPositionRecords(MdlCtx *resource) {
