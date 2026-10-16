@@ -2285,7 +2285,7 @@ static inline void fldInitializeActionTransform(FldActionTransform *transform, f
     transform->rotation[3] = 0.0f;
 }
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
-void func_0013EB30(s32 roomValue, f32 x, f32 y, f32 z, f32 value) {
+void func_0013EB30(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     FldActionTransform *transform;
     EffWorldNode *object;
     EffWorldNode *child;
@@ -2300,7 +2300,7 @@ void func_0013EB30(s32 roomValue, f32 x, f32 y, f32 z, f32 value) {
     object = evtSpawnActionObjD(counter, D_0038BC20, (s32)D_0038BC00);
     D_0038BE50[index].displayResource.id = counter;
     slot = fldPushDisplayValue((u32)&D_0038BE50[index].displayResource, object);
-    D_0038BE50[index].prefix.task.shape.radius = value;
+    D_0038BE50[index].prefix.task.shape.radius = triggerRadius;
     D_0038BE50[index].prefix.shape.kind = 0;
     D_0038BE50[index].prefix.task.info.unk0 = 1;
     D_0038BE50[index].prefix.task.info.slot = slot;
@@ -2315,7 +2315,7 @@ void func_0013EB30(s32 roomValue, f32 x, f32 y, f32 z, f32 value) {
     child = evtSpawnActionObj11((s32)D_0038BE50[index].childResource.id, (EvtWorldSourceTransformPrefix *)D_0038BE50[index].childResource.transform, (s32)D_0038BC10);
     roomIndex = func_0013BAB8(&D_0038BE50[index].childResource, child);
     state = (FldRoomStateHeader *)&fldRoomRecords[roomIndex].unk130;
-    state->roomId = roomValue;
+    state->roomId = roomId;
     state->mode = 2;
     state->entryIndex = -1;
     D_004361C4++;
