@@ -89,7 +89,7 @@ extern u8 D_003BB818[];
 extern u8 sdfPfsDebugMode;
 
 
-extern s32 sceDopen(char *);
+extern s32 sceDopen(char *path);
 
 extern s32 btlBuiltinResourceNameIndex;
 

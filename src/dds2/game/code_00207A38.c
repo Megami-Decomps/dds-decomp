@@ -174,7 +174,7 @@ extern s32 D_003BE6E0[];
 
 extern u8 sdfPfsDebugMode;
 
-extern s32 sceDopen(char *);
+extern s32 sceDopen(char *path);
 
 extern s32 btlBuiltinResourceNameIndex;
 
