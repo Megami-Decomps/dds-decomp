@@ -41,6 +41,10 @@ void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 #define DDS3_OBJECT_OWNER_SLOT 0
 #define DDS3_OBJECT_HANDLER_SLOT 5
 #define DDS3_OBJECT_DATA_SLOT 1
+#define DDS3_OBJECT_RESOURCE_MODEL_CONTEXT 0
+#define DDS3_OBJECT_RESOURCE_DEV_MOTION 1
+#define DDS3_OBJECT_RESOURCE_RELEASED 3
+
 /* Process the owner's entry in the auxiliary handler index, destroy world nodes
  * in slots 1/2, release owned resources/devices, then free the index and base. */
 void dds3DestroyObjectBase(ObjBase *base) {
@@ -311,7 +315,7 @@ void dds3CreateObjectModelAndMotion(void *object) {
     VU0_STORE_MATRIX(model->matrix);
     sdfModelUpdateRootTransforms(model, 0);
     sdfModelUpdateRootTransforms(model, 1);
-    base->resourceState = DDS3_OBJECT_RESOURCE_DEV_MOTION;
+    base->resourceState = 1;
     base->resourceHandle = model;
     base->motion = motion;
     base->weight = 1.0f;
