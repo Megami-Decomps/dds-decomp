@@ -527,17 +527,17 @@ s32 evtCommandDispatchFieldBE(void)
 
 s32 evtCommandHandleChangedSecondaryWorldKey(void)
 {
-    s32 highPart;
-    s32 lowPart;
-    s32 targetKey;
+    s32 area;
+    s32 room;
+    s32 worldKey;
 
-    highPart = scrReadIntParameter(0);
-    lowPart = scrReadIntParameter(1);
-    targetKey = (highPart << 16) + lowPart;
-    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != targetKey) {
-        highPart = scrReadIntParameter(0);
-        lowPart = scrReadIntParameter(1);
-        evtCreateWorldObjectForKey(highPart, lowPart);
+    area = scrReadIntParameter(0);
+    room = scrReadIntParameter(1);
+    worldKey = (area << 16) + room;
+    if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != worldKey) {
+        area = scrReadIntParameter(0);
+        room = scrReadIntParameter(1);
+        evtCreateWorldObjectForKey(area, room);
     }
     return 1;
 }
