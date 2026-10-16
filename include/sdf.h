@@ -393,7 +393,7 @@ void sdfTexReleaseReference(SdfTex *texture);
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 /* Texture resource accessors and palette helpers shared by both title providers. */
-u8 sdfTexGetPaletteCount(SdfTex *texture);
+u8 sdfTexGetPaletteCount(const SdfTex *texture);
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 s32 sdfTexFormatSizeHint(s32 format);
