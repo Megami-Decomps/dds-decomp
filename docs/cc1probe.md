@@ -99,6 +99,17 @@ establish allocation order. The suggestion pass may already have assigned a
 quantity before the priority pass. Do not add a dummy quantity to change sorting;
 source changes still need a genuine program value and supported dataflow.
 
+A real example of the opposite fix is DDS1 `mnuDrawCampItemListRow`
+(`0x0025ECD0`). Its earlier source had three local quantities: constant `1`
+(priority 909), the list head (2500) and the node index (2000). The three-entry
+swap left the constant first, so it was colored `$v0`, the head `$v1` and the
+index `$a0`, and ten native words differed. The original reuses one ordinal
+local: `index = node->index; row = index - first;` and later
+`index = list->cursor->index; row = index - first;`. That makes both ordinal
+epochs one global quantity. Only the head and the constant stay local, the head
+is colored first, and both index loads use the native register
+(`sandbox_DeepE/camp_index_probe`, hooked==unhooked).
+
 ## It does not change the build, and says so itself
 
 `tools/cc1probe.sh` compiles through `tools/cc.sh`, so the compiler path, pinned
