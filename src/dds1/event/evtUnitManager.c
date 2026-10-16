@@ -847,11 +847,12 @@ void evtActivateStoredUnitMotionSlot(EvtUnit *work) {
     evtConfigureUnitMotionSlot(work, work->firstSlot, work->secondSlot, 0, 0, 2);
 }
 
-void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s32 mode) {
+void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 slotAValue, s32 slotBValue,
+                                s32 slotCValue, s32 mode) {
     unit->slotFlags[slot] = 3;
-    unit->slotA[slot] = a;
-    unit->slotB[slot] = b;
-    unit->slotC[slot] = c;
+    unit->slotA[slot] = slotAValue;
+    unit->slotB[slot] = slotBValue;
+    unit->slotC[slot] = slotCValue;
     switch (mode) {
     case 0:
         unit->slotFlags[slot] |= 0x4;
