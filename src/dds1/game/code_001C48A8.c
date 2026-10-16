@@ -78,7 +78,7 @@ typedef struct BattleSceneWork {
     BtlUnit *actors;
     u8 pad_22C[0x1C];
     u16 baseVariant;           /* 0x248 */
-    u8 statusMode;             /* 0x24A */
+    u8 encounterKind;          /* 0x24A: encounter mode used for scene effects. */
     u8 pad24B;
     u16 variant;
     u8 pad_24E[2];
@@ -118,8 +118,8 @@ typedef struct BattleSceneWork {
 } BattleSceneWork;
 typedef char BattleSceneWorkBaseVariantOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->baseVariant == 0x248) ? 1 : -1];
-typedef char BattleSceneWorkStatusModeOffsetCheck[
-    ((u32)&((BattleSceneWork *)0)->statusMode == 0x24A) ? 1 : -1];
+typedef char BattleSceneWorkEncounterKindOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->encounterKind == 0x24A) ? 1 : -1];
 typedef char BattleSceneWorkStreamAdjustmentIndexOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->streamAdjustmentIndex == 0x270) ? 1 : -1];
 typedef char BattleSceneWorkSceneIdOffsetCheck[
@@ -457,7 +457,7 @@ void btlQueueSceneActorModelEntry(s32 sceneAddress) {
         task->ownerId = 0x8000000000000003ULL;
         btlStartTask(task);
     }
-    switch (scene->unk24A) {
+    switch (((BattleSceneWork *)scene)->encounterKind) {
         case 1:
             task = btlCreateEffObjB(NULL, 0xD);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
