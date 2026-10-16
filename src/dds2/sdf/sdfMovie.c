@@ -129,7 +129,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
-s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
+s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *readBuffer, s32 bytesRead, MovObj *movie) {
     MovPacStream *stream;
 
     movie->deviceState = deviceState;
@@ -175,7 +175,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
         break;
     case SDF_MOVIE_STATE_DATA_READ: {
         if (operation == 5) {
-            u8 *source = data;
+            u8 *source = readBuffer;
             s32 blockBytes = stream->blockBytes;
             s32 blocksRemaining = bytesRead / blockBytes;
             do {
