@@ -209,10 +209,10 @@ s32 scrCommandSetCameraFov(void)
 
 s32 bfWaitCbCreateTask(void)
 {
-    s32 index;
+    s32 procedureIndex;
     ScrData *ctx;
 
-    index = scrReadIntParameter(0);
+    procedureIndex = scrReadIntParameter(0);
     ctx = scrGetCurrentContext();
     if (ctx == NULL)
     {
@@ -222,14 +222,14 @@ s32 bfWaitCbCreateTask(void)
     {
         return 1;
     }
-    if (index < 0 || index >= ctx->sections->count)
+    if (procedureIndex < 0 || procedureIndex >= ctx->sections->count)
     {
         return 1;
     }
     scrSetIntegerReturnValue((s32)scrCreateTaskFromContextParameters(
         ctx->task->priority + scrReadIntParameter(1), ctx->scriptHeader,
         ctx->sections, ctx->procedures, ctx->labels,
-        ctx->instructions, ctx->auxiliaryData, ctx->strings, index));
+        ctx->instructions, ctx->auxiliaryData, ctx->strings, procedureIndex));
     return 1;
 }
 
