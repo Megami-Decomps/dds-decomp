@@ -1,6 +1,7 @@
 #include "common.h"
 #include "file_load_menu_state.h"
 #include "eff.h"
+#include "cam_aim_record.h"
 #include "eff_generated_texture_descriptor.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
@@ -5795,13 +5796,6 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     }
     VU0_STORE_VF(vf10, dst);
 }
-
-typedef struct CamAim {
-    u8 pad00[0x50];
-    f32 quat[4];
-    u8 pad60[8];
-    u32 flags;
-} CamAim;
 
 /* dst = rotation facing unit(sdfViewTargetVector - sdfViewEyeVector) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
 void camAimRotation(CamAim *obj, void *dst)
