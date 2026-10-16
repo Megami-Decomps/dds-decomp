@@ -549,8 +549,6 @@ void mnuUpdateAndDrawPartyCommandQueue(s32 x, s32 y, s32 z, MenuQueuedCommand *c
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
-
 #include "fr_font_draw_glyph.h"
 extern const s32 D_0042B108[];
 extern const s32 D_0042B118[];
@@ -689,6 +687,8 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
                                     &panel->mp, surface);
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
 
 const s32 D_0042B108[4] = { 48, 296, 336, 208 };
 

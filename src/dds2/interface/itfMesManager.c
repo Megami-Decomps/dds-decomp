@@ -2521,10 +2521,6 @@ void itfQueueOffsetTexturedRect(s32 *bounds, s32 *region, s32 x, s32 y,
     itfQueueTextureBoundQuadPacket(positions, uv, &color, 0, texture, 0, command);
 }
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D50);
-
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D60);
-
 extern const s32 D_00414D60[12][4];
 extern s16 D_00438F34;
 extern s32 D_00438F30;
@@ -2642,6 +2638,10 @@ void itfMesDrawWindowBackground(s32 mode) {
 
 /* The function's own table: defined after it so its reads are not folded,
  * which keeps it after D_00414D60 in .rodata as in retail. */
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D50);
+
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414D60);
+
 const s32 D_00414E20[7][4] __attribute__((aligned(8))) = {
     { 0x75, 3, 8, 0x38 },
     { 0x56, 1, 0x16, 0x0E },

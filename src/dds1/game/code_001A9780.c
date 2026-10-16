@@ -903,6 +903,22 @@ extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 
 extern void sndSetStationedSeVolume(u32);
 
+/* Command panel steps defined below; the refresh calls them before their definitions. */
+void btlPopulateCommandPanelGrid(void);
+void btlUpdateCommandPanelRowFades(void);
+void btlUpdateCommandPanelFades(void);
+void btlDrawCommandPanelClassLabel(void);
+
+void btlPopulateCommandPanelGrid(void);
+void btlUpdateCommandPanelRowFades(void);
+void btlUpdateCommandPanelFades(void);
+void btlDrawCommandPanelClassLabel(void);
+
+static inline s32 btlRefreshCommandRow(BattleSceneObject *object) {
+    btlLinkedSelectionTaskBuffer->selectedRow =
+        btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
+    return btlLinkedSelectionTaskBuffer->selectedRow != 0;
+}
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DD8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DF8);
@@ -923,22 +939,6 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorIdsByClass);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", btlActorClassPairs);
 
-/* Command panel steps defined below; the refresh calls them before their definitions. */
-void btlPopulateCommandPanelGrid(void);
-void btlUpdateCommandPanelRowFades(void);
-void btlUpdateCommandPanelFades(void);
-void btlDrawCommandPanelClassLabel(void);
-
-void btlPopulateCommandPanelGrid(void);
-void btlUpdateCommandPanelRowFades(void);
-void btlUpdateCommandPanelFades(void);
-void btlDrawCommandPanelClassLabel(void);
-
-static inline s32 btlRefreshCommandRow(BattleSceneObject *object) {
-    btlLinkedSelectionTaskBuffer->selectedRow =
-        btlGetCommandOptionCount((s32)object, btlCommandPanelWork->classIndex, 0);
-    return btlLinkedSelectionTaskBuffer->selectedRow != 0;
-}
 void func_001AADF8(BattleSceneObject *object) {
     s32 changed = 0;
 

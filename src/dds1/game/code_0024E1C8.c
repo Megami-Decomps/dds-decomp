@@ -752,12 +752,6 @@ void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
     sdfReleaseResourceAllocation(task->allocation);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF758);
-
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF780);
-
-INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
-
 /* Snapshot is one native DatPartyRecord: 0x1A4 bytes with word alignment. */
 typedef struct ResourcePartySnapshot { u32 words[0x1A4/4]; } ResourcePartySnapshot;
 extern s8 D_00324510[];
@@ -768,6 +762,12 @@ extern void mnuCommitTitleStreamReadyState(void);
 static inline ResourcePartySnapshot *resourceTaskPartySnapshot(MenuSceneMetadata *metadata) {
     return (ResourcePartySnapshot *)((u8 *)metadata + 0x28);
 }
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF758);
+
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF780);
+
+INCLUDE_RODATA(const s32, "game/code_0024E1C8", mnuResourceTaskName);
+
 s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
     s32 action=0;
     struct MenuList *list=task->menuList;
