@@ -737,7 +737,7 @@ extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
 extern void func_0014D380(s32, u32, f32 *, f32, f32, f32);
 extern void func_0014C2B8(u32, f32 *, f32, f32, f32, s32, const char *, s32);
 extern void func_0014C9B0(u32, f32 *, f32, f32, f32);
-extern s32 fldSetSparkVectors(s32, const u128 *, const u128 *);
+extern s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation);
 extern void fldAppendPendingSoundForScene(s32 id, f32 radius, f32 x, f32 y, f32 z);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
 
