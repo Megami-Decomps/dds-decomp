@@ -92,7 +92,7 @@ extern u32 D_003B13A0[];
 extern u32 D_003B13F0[];
 extern SdfPoolNode *D_003B14B0[];
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
 
 

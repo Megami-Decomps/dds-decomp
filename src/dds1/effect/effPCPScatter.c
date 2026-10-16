@@ -1021,7 +1021,7 @@ extern u32 D_00354A70[];
 extern u32 D_00354AC0[];
 extern SdfPoolNode *D_00354B80[];
 #include "sdf_packet_alloc.h"
-extern void *effCreateVertexDrawPacket(EffPacketParams *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
 /* Return the trailing control block after zeroing two record arrays.
  * Signed group arithmetic and allocation sizes are deliberately not validated here. */
