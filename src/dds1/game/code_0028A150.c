@@ -4696,9 +4696,9 @@ void fileQueueDestroy(FileQueue *queue) {
 }
 
 
-FileQueue *fileQueueClone(FileQueue *source) {
+FileQueue *fileQueueClone(const FileQueue *source) {
     FileQueue *queue = fileQueueCreate();
-    FileJob *src;
+    const FileJob *src;
     s128 vec;
 
     PCP_COPY_VECTOR(queue, source);
@@ -4975,7 +4975,7 @@ void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job) {
     fileDestroyJob(job);
 }
 
-void fileJobCopyHeader(FileJob *dst, FileJob *src) {
+void fileJobCopyHeader(FileJob *dst, const FileJob *src) {
     memcpy(dst, src, 0x90);
 }
 

@@ -81,7 +81,7 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandP
 void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *commandPath, u16 selector);
 
 struct FileQueue *fileCloneQueueEntries(struct FileQueue *source);
-struct FileQueue *fileQueueClone(struct FileQueue *source);
+struct FileQueue *fileQueueClone(const struct FileQueue *source);
 void fileQueueDestroy(struct FileQueue *queue);
 void fileQueueSetPosition(struct FileQueue *queue, const f32 position[4]);
 void fileQueueSetRotation(struct FileQueue *queue, const f32 rotation[4]);
@@ -175,7 +175,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath);
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
 FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath);
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *source);
-void fileJobCopyHeader(FileJob *destination, FileJob *source);
+void fileJobCopyHeader(FileJob *destination, const FileJob *source);
 void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job);
 void fileQueueDetachSectorFollower(FileQueue *queue, FileJob *job);
 void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *leader);
