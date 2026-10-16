@@ -350,7 +350,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
     s32 ready = fileIsRequestReadyInCurrentMode((struct FileRequest *)mnuTitleStreamFileRequest);
 
     if (ready != 0) {
-        s32 resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
+        struct SdfMemBlock *resourceHandle = fileGetResourceHandle((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
         u32 fileDataAddress = fileGetLoadedDataAddress((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
         s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)mnuTitleStreamFileRequest);
         struct SdfMemBlock *allocation;
@@ -362,7 +362,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         memcpy(destinationState->compressedData, (void *)fileDataAddress, fileBytes);
         destinationState->frameCount = fileBytes / destinationState->frameBytes;
         destinationState->frameIndex = 0;
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceHandle);
+        sdfQueueGeneralAllocationRelease(resourceHandle);
         func_003504A8(mnuTitleStreamDecoderState);
         mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_COPIED;
         ready = 1;

@@ -1187,7 +1187,7 @@ s32 fileResolveAbortSlotFlow(void) {
     return fileBeginWait(&fileAbortSlotFlow);
 }
 
-extern u32 fileSaveIconResourceHandle;
+extern struct SdfMemBlock *fileSaveIconResourceHandle;
 extern u32 fileSaveIconRequest;
 extern char D_0042B6A8[];
 

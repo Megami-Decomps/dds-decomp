@@ -271,7 +271,7 @@ extern s8 fileSavePreviewVersionByteView[];
 
 extern u32 fileMenuContinuation;
 
-extern u32 fileSaveIconResourceHandle;
+extern struct SdfMemBlock *fileSaveIconResourceHandle;
 
 extern u32 fileSaveIconRequest;
 

@@ -192,8 +192,8 @@ struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
     return fileCreateCallbackRequest(requestName, 1, 0, 0);
 }
 
-/* Return the stored resource handle without changing ownership. work is required. */
-u32 fileGetResourceHandle(const struct FileRequest *request) {
+/* Return the stored allocation descriptor without changing ownership; work is required. */
+struct SdfMemBlock *fileGetResourceHandle(const struct FileRequest *request) {
     const FileWork *work = (const FileWork *)request;
     return work->resourceHandle;
 }

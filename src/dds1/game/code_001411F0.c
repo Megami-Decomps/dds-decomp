@@ -153,7 +153,7 @@ extern s8 D_00324530[];
 extern s32 D_0032E4C0[];
 extern s32 D_0032E4E8[];
 extern struct FileRequest *D_003BAFE8;
-extern u32 D_003BAFEC;
+extern struct SdfMemBlock *D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
@@ -4398,7 +4398,7 @@ void fldUpdateSparkMessageSequence(void) {
         if (++fldSparkControlState.dialogTimer > 10) {
             effObjClearFlags(fldSparkControlState.object, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
-            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAFEC);
+            sdfQueueGeneralAllocationRelease(D_003BAFEC);
             fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 7;
             mnuTitleStreamUpdateAndLogBgm();
@@ -4558,7 +4558,7 @@ void fldUpdateSparkEncounterScene(void) {
             node = fldSparkControlState.object;
             effObjClearFlags(node, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
-            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAFEC);
+            sdfQueueGeneralAllocationRelease(D_003BAFEC);
         }
         if (fldSparkControlState.frame >= 11) {
             D_0032E5C4[0] = 0;
@@ -4805,7 +4805,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectPositioned);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFE8);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFEC);
+INCLUDE_SDATA(const struct SdfMemBlock *, "game/code_001411F0", D_003BAFEC);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAFF0);
 

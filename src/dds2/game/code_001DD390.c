@@ -4857,7 +4857,7 @@ u32 btlPollGunLoad(s32 taskArgs) {
         return 0;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->handle);
-    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)loadArgs->handle)));
+    unit->gunResource = (void *)sdfResourceRetainAddress(fileGetResourceHandle((struct FileRequest *)loadArgs->handle));
     filePollEntryCleanup((struct FileRequest *)(u32)loadArgs->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;

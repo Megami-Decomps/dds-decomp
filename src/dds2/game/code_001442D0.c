@@ -4623,7 +4623,7 @@ void fldFinishEventFieldState(void) {
 
 struct EffectObj;
 extern struct FileRequest *D_004363A0;
-extern u32 D_004363A4;
+extern struct SdfMemBlock *D_004363A4;
 extern u32 D_004363A8;
 extern void dspRequestMessageWindowModeOne(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
@@ -4763,7 +4763,7 @@ void fldUpdateDevilizeEventSequence(void) {
         if (++fldSparkControlState.dialogTimer > 10) {
             effObjClearFlags(fldSparkControlState.object, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
-            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_004363A4);
+            sdfQueueGeneralAllocationRelease(D_004363A4);
             fldSparkControlState.dialogTimer = 0;
             fldSparkControlState.dialogPhase = 7;
             mnuResetTitleStreamAfterFileIdle();
@@ -4895,7 +4895,7 @@ void fldUpdateSparkEncounterScene(void) {
         if (fldSparkControlState.frame == 6) {
             effObjClearFlags(fldSparkControlState.object, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
-            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_004363A4);
+            sdfQueueGeneralAllocationRelease(D_004363A4);
         }
         if (fldSparkControlState.frame >= 11) {
             D_003899E0[0] = 0;
@@ -6617,7 +6617,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", fldYukEffectPositioned);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363A0);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363A4);
+INCLUDE_SDATA(const struct SdfMemBlock *, "game/code_001442D0", D_004363A4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363A8);
 
