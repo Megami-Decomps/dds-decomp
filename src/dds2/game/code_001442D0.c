@@ -3326,7 +3326,7 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
 extern void fldSelectDisplayBuffer(u32);
 extern void fldSetGsAlphaBlendEquation(s32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 ptyAnyUnitFlagMatch(s32, s32);
+extern s32 ptyAnyUnitFlagMatch(s32 statusMask, s32 flagMode);
 extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32,
                           u32, u32, u32, SdfTex *);
 extern f32 D_0043634C;
