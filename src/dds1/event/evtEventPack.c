@@ -42,13 +42,13 @@ extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
     EvtPackLoadState *packState;
     EvtPackEntry *entry;
-    s32 entryIndex;
+    s32 packEntryIndex;
     s32 entrySize;
     u8 *modelPayload;
     s32 viewerObjectKey;
 
     packState = evtGetEventPackLoadState(eventId);
-    entryIndex = 0;
+    packEntryIndex = 0;
     if (packState->header->entryCount > 0) {
         entry = packState->entries;
         do {
@@ -79,7 +79,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
                 }
             }
             entry++;
-        } while (++entryIndex < packState->header->entryCount);
+        } while (++packEntryIndex < packState->header->entryCount);
     }
     return -1;
 }
