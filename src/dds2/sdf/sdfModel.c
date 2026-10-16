@@ -254,7 +254,7 @@ DevRequest *sdfAssetListParse(DevRequest *lookup, u32 *data);
 
 /* Build the buffered model, parse its asset records and create one draw node per
  * item, linking each node under its parent item's node when it has one. */
-SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef) {
+SdfModel *sdfModelCreateFromAssetData(void *assetData, SdfItemListRef *listRef) {
     s32 i = 0;
     SdfModel *model = sdfCreateBufferedTransformSlot();
     SdfItemList *list;
@@ -263,8 +263,8 @@ SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef) {
     SdfDrawNode *node;
     SdfDrawNode *parent;
 
-    model->assetData = data;
-    model->resources = sdfAssetListParse(data, listRef->serializedAssetData);
+    model->assetData = assetData;
+    model->resources = sdfAssetListParse(assetData, listRef->serializedAssetData);
     model->chunkTable = listRef->chunkTable;
     sdfModelAllocateSlotPairs(model, listRef->slotPairCount);
     list = listRef->items;
@@ -289,9 +289,9 @@ SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef) {
 }
 
 /* Attach each 0x50-byte item to the corresponding model draw node. */
-SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
+SdfModel *sdfModelCreateWithItems(void *assetData, SdfItemListRef *listRef) {
     s32 i = 0;
-    SdfModel *model = sdfModelCreateFromAssetData(data, listRef);
+    SdfModel *model = sdfModelCreateFromAssetData(assetData, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
     SdfItem *item = list->firstItem;
@@ -307,9 +307,9 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
 }
 
 /* Attach each item using the alternate draw-node setup path. */
-SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) {
+SdfModel *sdfModelCreateWithAlternateItems(void *assetData, SdfItemListRef *listRef) {
     s32 i = 0;
-    SdfModel *model = sdfModelCreateFromAssetData(data, listRef);
+    SdfModel *model = sdfModelCreateFromAssetData(assetData, listRef);
     SdfItemList *list;
     s32 count;
     SdfItem *item;
