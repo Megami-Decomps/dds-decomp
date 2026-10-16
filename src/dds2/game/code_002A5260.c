@@ -1462,7 +1462,7 @@ void mnuShuffleTitlePaletteSpriteOrder(MnuTitlePaletteTransition *transition, s3
     s32 i;
     u32 first;
     u32 second;
-    s32 tmp;
+    s32 savedSpriteIndex;
 
     if (randomize == 0) {
         for (i = 0; i < 4U; i++) {
@@ -1475,9 +1475,9 @@ void mnuShuffleTitlePaletteSpriteOrder(MnuTitlePaletteTransition *transition, s3
         i--;
         first = effMiscRand(0) % count;
         second = effMiscRand(0) % count;
-        tmp = transition->spriteIndices[first + skip];
+        savedSpriteIndex = transition->spriteIndices[first + skip];
         transition->spriteIndices[first + skip] = transition->spriteIndices[second + skip];
-        transition->spriteIndices[second + skip] = tmp;
+        transition->spriteIndices[second + skip] = savedSpriteIndex;
     }
 }
 
