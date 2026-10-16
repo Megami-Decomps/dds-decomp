@@ -184,7 +184,8 @@ void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue
 
 extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
 extern struct EffectSlotSet *mnuMantraSpriteSlots[];
-extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
 
 void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
                               u16 unusedSceneId, s32 unusedContext) {
