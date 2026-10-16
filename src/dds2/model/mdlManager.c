@@ -53,8 +53,6 @@
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
 
-void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
-
 extern s32 sdfCreateSemaphore(s32, s32, s32);
 
 extern u32 mdlGroupJobSemaphore;
@@ -326,9 +324,6 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex,
 }
 
 
-extern void btlCreateGroupNode(s32, s32, s32, DevRequest *, struct SdfItemListRef *, struct SdfMemBlock *);
-
-
 void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
     BattleGroupNode *entity;
 
@@ -409,7 +404,6 @@ void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
 
-extern void btlDestroyGroupNode(BattleGroupNode *);
 extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 
 /* Retain the resource handle, relocate the loaded payload and retire the file

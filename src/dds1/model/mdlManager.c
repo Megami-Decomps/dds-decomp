@@ -53,8 +53,6 @@
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
 
-void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
-
 extern s32 sdfCreateSemaphore(s32, s32, s32);
 
 extern u32 mdlGroupJobSemaphore;
@@ -352,8 +350,6 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex,
 }
 
 
-extern void btlCreateGroupNode(s32 group, s32 id, s32 mode, DevRequest *resourceList, struct SdfItemListRef *itemList, struct SdfMemBlock *requestAllocation);
-
 void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
     BattleGroupNode *entity;
 
@@ -502,8 +498,6 @@ BattleGroupNode *mdlRequestAssetBlocking(u32 group, u32 id) {
     return (BattleGroupNode *)mdlRequestAsset(group, id, 1);
 }
 
-
-extern void btlDestroyGroupNode(BattleGroupNode *group);
 
 /* Unlink without clearing this context's own links. A resource-owning group is
  * destroyed when its last context leaves. */
