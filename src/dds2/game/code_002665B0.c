@@ -147,7 +147,7 @@ extern void mnuDrawTerminalBackdrop(s32);
 extern s8 mnuTerminalTaskState;
 
 
-extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
+extern void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option);
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 

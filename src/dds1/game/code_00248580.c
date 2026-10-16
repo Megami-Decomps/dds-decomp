@@ -62,7 +62,7 @@ extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
-extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
+extern void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option);
 extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 
 
