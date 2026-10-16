@@ -2006,8 +2006,6 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
     return best;
 }
 
-extern void sdfFreezeFloatCounter(struct EvtScaledValue *counter);
-extern void sdfUnfreezeFloatCounter(struct EvtScaledValue *counter);
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
 void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {

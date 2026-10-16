@@ -134,7 +134,7 @@ u32 sdfGetFloatCounterDirection(u32 *source) {
     return *source;
 }
 
-void evtScaleValueByMultiplier(float multiplier, EvtScaledValue *value) {
+void evtScaleValueByMultiplier(EvtScaledValue *value, float multiplier) {
     value->scaled = multiplier * value->base;
 }
 

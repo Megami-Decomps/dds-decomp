@@ -24,7 +24,6 @@ extern u8 kwlnDefaultColorVector[];
 
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 angle);
-extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
 
@@ -48,11 +47,11 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
     f32 segment;
 
     saved = evtGetValueScaleFactor((EvtScaledValue *)path);
-    evtScaleValueByMultiplier((s32)path, 0.0f);
+    evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
     dds3InterpolatePathVectorVU(path);
     do {
         VU0_MOVE_VF(vf11, vf10);
-        evtScaleValueByMultiplier((s32)path, t);
+        evtScaleValueByMultiplier((EvtScaledValue *)path, t);
         dds3InterpolatePathVectorVU(path);
         VU0_MOVE_VF(vf12, vf10);
         VU0_SUB(vf10, vf10, vf11);
@@ -61,7 +60,7 @@ f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
         VU0_MOVE_VF(vf10, vf12);
         t += step;
     } while (t <= 1.0f);
-    evtScaleValueByMultiplier((s32)path, saved);
+    evtScaleValueByMultiplier((EvtScaledValue *)path, saved);
     return length;
 }
 

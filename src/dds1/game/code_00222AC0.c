@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_scaled_value.h"
 #include "sdf_trig.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_unique_chunk_value_api.h"
@@ -77,7 +78,6 @@ extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource);
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 #include "dds3_world_secondary.h"
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
-extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
 
 extern void dds3SetObjectFlags(void *object, s32 flags);
@@ -181,10 +181,10 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 pathObjectKey, s32 frames, s32 valu
     work->pathHandle = (s32)path;
     work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
-        evtScaleValueByMultiplier((s32)path, 0.0f);
+        evtScaleValueByMultiplier((EvtScaledValue *)path, 0.0f);
         sdfSetFloatCounterDirection((s32)path, 0);
     } else {
-        evtScaleValueByMultiplier((s32)path, 1.0f);
+        evtScaleValueByMultiplier((EvtScaledValue *)path, 1.0f);
         sdfSetFloatCounterDirection((s32)path, 1);
         work->pathSpeed = -work->pathSpeed;
     }

@@ -18,8 +18,6 @@ extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
-void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
-void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
 extern const char evtFieldScriptTerminationFormat[0x28];
 extern void sdfDebugPrintf(const char *format, ...);
 
@@ -169,7 +167,6 @@ void evtClearWorldSlotStatusFlag(void *object)
     }
 }
 
-extern void evtScaleValueByMultiplier(f32 multiplier, struct EvtScaledValue *slotData);
 
 /* Scale the object's retained path time within the clamped multiplier range. */
 void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
@@ -183,7 +180,7 @@ void evtScaleSlotByClampedMultiplier(void *object, f32 multiplier) {
         if (multiplier > 1.0f) {
             multiplier = 1.0f;
         }
-        evtScaleValueByMultiplier(multiplier, (struct EvtScaledValue *)slotData);
+        evtScaleValueByMultiplier((EvtScaledValue *)slotData, multiplier);
     }
 }
 
