@@ -584,7 +584,7 @@ s32 fldCmdSetFieldParameterPair(void) {
     return 1;
 }
 
-extern void fldSetFadeTarget(s32, s32, s32);
+extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 
 extern void fldSetSwayMode(s32);
 
