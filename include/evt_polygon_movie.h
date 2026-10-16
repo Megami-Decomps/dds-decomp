@@ -139,6 +139,8 @@ typedef char PolyMovieObject_state_at_0x18[((u32)&((PolyMovieObject *)0)->state 
 
 PolyMovieWork *evtPolygonMovieAllocWork(void);
 PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *, PmdHeader *, PmdHeader *, PmdHeader *);
+SdfMemBlock *evtPolygonMovieCreateHeader(PmdHeader **out);
+SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out);
 void evtPolygonMovieSetFlagBits(struct KwlnTask *task, u32 bits);
 void evtPolygonMovieClearFlagBits(struct KwlnTask *task, u32 bits);
 void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);

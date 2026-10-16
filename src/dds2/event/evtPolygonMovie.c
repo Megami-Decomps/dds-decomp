@@ -775,7 +775,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work) {
 }
 
 /* Allocate a resource block holding a fresh "PMD2" header; returns the handle. */
-SdfMemBlock *evtPolygonMovieCreateHeader(void **out) {
+SdfMemBlock *evtPolygonMovieCreateHeader(PmdHeader **out) {
     s32 header[16] = {0, 0, 0x32444D50, 0, 1, 9, 0, 0, 0, 0x10, 1, 0x30, 0, 999, 1000, 0};
     s32 size;
     SdfMemBlock *handle;
@@ -810,7 +810,7 @@ extern char D_004373B8[];
 
 /* Build the 0x20-byte PMD3 resource header, copy it into a fresh allocation and
  * hand the retained address back through `out`. */
-SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(u8 **out) {
+SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out) {
     u8 buffer[0x20];
     s32 size = 0x20;
     SdfMemBlock *handle;
@@ -822,7 +822,7 @@ SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(u8 **out) {
     handle = sdfAllocGeneralBlock(size);
     address = (u8 *)sdfResourceRetainAddress(handle);
     memcpy(address, buffer, size);
-    *out = address;
+    *out = (PmdHeader *)address;
     return handle;
 }
 
@@ -849,9 +849,9 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     char path1[0x40];
     char path2[0x40];
     char path3[0x40];
-    u32 address1;
-    u32 address2;
-    u32 address3;
+    PmdHeader *address1;
+    PmdHeader *address2;
+    PmdHeader *address3;
     SdfMemBlock *handle1;
     SdfMemBlock *handle2;
     SdfMemBlock *handle3;
@@ -859,25 +859,25 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
     sdfDebugPrintf(evtMovieBeforePrimaryLoadMessage);
-    handle1 = sdfReadNamedResource(path1, &address1, 0);
+    handle1 = sdfReadNamedResource(path1, (u32 *)&address1, 0);
     if (address1 == 0) {
         return NULL;
     }
     sdfDebugPrintf(evtMoviePrimaryLoadedMessage);
     if (mode == 0) {
-        handle2 = sdfReadNamedResource(path2, &address2, 0);
+        handle2 = sdfReadNamedResource(path2, (u32 *)&address2, 0);
     } else {
-        handle2 = evtPolygonMovieCreateHeader((void **)&address2);
+        handle2 = evtPolygonMovieCreateHeader(&address2);
     }
     if (mode == 0 && sdfPathExists(path3) == 1) {
-        handle3 = sdfReadNamedResource(path3, &address3, 0);
+        handle3 = sdfReadNamedResource(path3, (u32 *)&address3, 0);
         sdfDebugPrintf(evtMovieTertiaryLoadedMessage);
     } else {
-        handle3 = (SdfMemBlock *)evtPolygonMovieSynthesizePmd3Header((u8 **)&address3);
+        handle3 = evtPolygonMovieSynthesizePmd3Header(&address3);
     }
     sdfDebugPrintf(evtMovieResourcesReadyMessage);
     work = evtPolygonMovieAllocWork();
-    evtPolygonMovieInitWork(work, (PmdHeader *)address1, (PmdHeader *)address2, (PmdHeader *)address3);
+    evtPolygonMovieInitWork(work, address1, address2, address3);
     if (work == NULL) {
         return NULL;
     }
