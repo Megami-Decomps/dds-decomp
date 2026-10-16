@@ -1759,7 +1759,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 }
 
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, MenuListNode *);
-extern void itfGridCopyEntryQuad(s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 index);
 
 /* Draw one equipped-skill row: the skill's range icon and cost, or an empty
  * placeholder bar. The row is highlighted under an unlocked cursor or when
@@ -1925,7 +1925,7 @@ void mnuNoOpItemSelectionTeardown(s32 context) {
 
 extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, MenuListNode *);
-extern void itfGridCopyEntryQuad(s32, s32);
+extern void itfGridCopyEntryQuad(s32 resource, s32 index);
 typedef struct MnuCategoryPositions {
     s32 entries[4][2];
 } MnuCategoryPositions;
