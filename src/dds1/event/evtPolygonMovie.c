@@ -14,6 +14,7 @@
 #include "mdl.h"
 #include "dds3obj.h"
 #include "itf.h"
+#include "evt_scaled_value.h"
 
 /* Polygon-movie event parameter blocks blended by the functions below.
  * Each field is named for how the blend functions use it:
@@ -36,9 +37,6 @@ u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
 extern EvtUnit *effObjGetTransitionWork(EffWorldNode *object);
 extern void dds3SetObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void dds3ClearObjectFlags(PolyMovieObject *obj, s32 flags);
-extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
-extern void sdfFreezeFloatCounter(PolyMovieClip *clip);
-extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
 
@@ -516,11 +514,11 @@ s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, 
         if (duration <= frame) {
             frame = duration;
         }
-        evtScaleValueByMultiplier(clip, (f32)frame / (f32)duration);
+        evtScaleValueByMultiplier((EvtScaledValue *)clip, (f32)frame / (f32)duration);
         if (undo == 0) {
-            sdfFreezeFloatCounter(clip);
+            sdfFreezeFloatCounter((EvtScaledValue *)clip);
         } else {
-            sdfUnfreezeFloatCounter(clip);
+            sdfUnfreezeFloatCounter((EvtScaledValue *)clip);
         }
     }
 }

@@ -14,6 +14,7 @@
 #include "mdl.h"
 #include "dds3obj.h"
 #include "itf.h"
+#include "evt_scaled_value.h"
 
 /* Polygon-movie event parameter blocks blended by the functions below. */
 
@@ -45,9 +46,6 @@ extern EffBlurQuad D_003C9470;
 /* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
  * offsets are relative to the start of the block. */
 
-extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
-extern void sdfFreezeFloatCounter(PolyMovieClip *clip);
-extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 itfMesCreateWindow(u8 *messageSubData);
@@ -496,11 +494,11 @@ s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, 
         if (duration <= frame) {
             frame = duration;
         }
-        evtScaleValueByMultiplier(clip, (f32)frame / (f32)duration);
+        evtScaleValueByMultiplier((EvtScaledValue *)clip, (f32)frame / (f32)duration);
         if (undo == 0) {
-            sdfFreezeFloatCounter(clip);
+            sdfFreezeFloatCounter((EvtScaledValue *)clip);
         } else {
-            sdfUnfreezeFloatCounter(clip);
+            sdfUnfreezeFloatCounter((EvtScaledValue *)clip);
         }
     }
 }
