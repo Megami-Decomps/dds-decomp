@@ -26,7 +26,7 @@ void dds3DestroyCameraData(EffWorldNode *camera) {
 u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
 extern void effObjInnerVecBackup(ObjectTransform *inner);
-extern void dds3RebuildCameraBasis(EffWorldNode *obj);
+extern void dds3RebuildCameraBasis(EffWorldNode *camera);
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewUpVector[4];
@@ -64,9 +64,9 @@ s32 dds3DrawCameraObject(EffWorldNode *camera) {
 
 /* Transform the local eye/up vectors through the inner node and rebuild the
  * world-space look-at basis. */
-void dds3RebuildCameraBasis(EffWorldNode *obj) {
-    CameraData *data = obj->data;
-    ObjectTransform *inner = obj->inner;
+void dds3RebuildCameraBasis(EffWorldNode *camera) {
+    CameraData *data = camera->data;
+    ObjectTransform *inner = camera->inner;
 
     VU0_LOAD_VF(vf10, &inner->rotation);
     effMiscQuaternionToMatrixVU();
@@ -93,7 +93,7 @@ ObjBase *dds3GetCameraHandle(EffWorldNode *camera) {
 
 
 extern void effObjInnerVecBackup(ObjectTransform *inner);
-extern void dds3RebuildCameraBasis(EffWorldNode *obj);
+extern void dds3RebuildCameraBasis(EffWorldNode *camera);
 extern CameraVector D_00412878;
 extern CameraVector D_00412888;
 
