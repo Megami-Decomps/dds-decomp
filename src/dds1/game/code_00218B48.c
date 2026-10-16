@@ -91,7 +91,7 @@ typedef struct MdlViewState {
     s8 unitStepMode;  /* 0x0C: toggled by the step button (D_003D24510[0x23]) */
     s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys at 0x24/0x25 */
     s8 unk0E;
-    s8 unk0F;
+    s8 assetDisplayMode; /* 0x0F: toggles asset labels and cursor paging. */
     s8 yawStepMode; /* 0x10: one yaw step per left/right button press */
     u8 pad11[3];
     s16 unk14;
@@ -140,6 +140,8 @@ typedef char MdlViewState_selectedResourceGroup_offset_check[
 typedef char MdlViewState_size_check[sizeof(MdlViewState) == 0xD0 ? 1 : -1];
 typedef char MdlViewState_workspaceSetupPhase_offset_check[
     ((u32)&((MdlViewState *)0)->workspaceSetupPhase == 0x48) ? 1 : -1];
+typedef char MdlViewState_assetDisplayMode_offset_check[
+    ((u32)&((MdlViewState *)0)->assetDisplayMode == 0x0F) ? 1 : -1];
 typedef char MdlViewState_selectionCursor_offset_check[
     ((u32)&((MdlViewState *)0)->selectionCursor == 0x20) ? 1 : -1];
 typedef struct MdlPadState {
@@ -164,7 +166,7 @@ typedef struct MdlCtrlState {
 extern MdlViewState mdlViewerState;
 
 static inline s8 mdlGetViewerDisplayMode(MdlViewState *state) {
-    return state->unk0F;
+    return state->assetDisplayMode;
 }
 
 extern MdlCtrlState mdlViewerControlState;
@@ -1232,7 +1234,7 @@ void mdlDrawViewerModelAndMotionSummary(void) {
     if (nodeCount == 0) {
         formatted = sdfFormatSifPacket(&packet, D_003BBC28);
     } else {
-        if (mdlViewerState.unk0F == 0) {
+        if (mdlViewerState.assetDisplayMode == 0) {
             format = D_003ABCC8;
         } else {
             format = D_003ABCD8;
@@ -1331,7 +1333,7 @@ void mdlHandleViewerAssetSelection(void) {
     if (mdlUpdateViewerCursor(&mdlViewerState.selectionCursor, 5) != 0) {
         return;
     }
-    pageStep = mdlViewerState.unk0F == 0 ? 10 : 16;
+    pageStep = mdlViewerState.assetDisplayMode == 0 ? 10 : 16;
     if (sdfPadButtonStates[0] < 0) {
         mdlViewerState.selectedNodeId++;
         if (mdlViewerState.selectedNodeId == 4) {
@@ -1466,7 +1468,7 @@ void mdlDrawViewerAssetSelection(void) {
 
     sdfPktSetCmd(&packet,
                  mdlViewerState.unk09 < 0x14 && mdlViewerState.selectionCursor == 1 ? 4 : 0);
-    if (mdlViewerState.unk0F == 0) {
+    if (mdlViewerState.assetDisplayMode == 0) {
         format = D_003BBC40;
     } else {
         format = D_003BBC48;
@@ -1496,7 +1498,7 @@ void mdlDrawViewerAssetSelection(void) {
                 formatted = sdfCreateFormattedSifCommand(
                     0x88C0, rowY, 0xFF0080, style, D_003BBC58);
             } else {
-                if (mdlViewerState.unk0F == 0) {
+                if (mdlViewerState.assetDisplayMode == 0) {
                     format = D_003BBC60;
                 } else {
                     format = D_003BBC68;
@@ -1515,7 +1517,7 @@ void mdlDrawViewerAssetSelection(void) {
 
                 referenceCount--;
                 motionIndex = mdlGetNodeMotionIndex(mdlViewerState.resources[0], index);
-                if (mdlViewerState.unk0F == 0) {
+                if (mdlViewerState.assetDisplayMode == 0) {
                     format = D_003ABCC8;
                 } else {
                     format = D_003ABCD8;
@@ -2140,7 +2142,7 @@ void mdlUpdateViewerSettingsInput(void) {
             kwlnDebugGraphSetEnabled(mdlIsDebugTimeGraph() == 0);
             break;
         case 2:
-            mdlViewerState.unk0F ^= 1;
+            mdlViewerState.assetDisplayMode ^= 1;
             break;
         case 3:
         case 4:
@@ -2224,7 +2226,7 @@ void mdlDrawViewerSettings(void) {
     enabled[0] = mdlViewerState.unk0E;
     packetList = mdlViewerState.packetList;
     enabled[1] = mdlIsDebugTimeGraph();
-    enabled[2] = mdlViewerState.unk0F;
+    enabled[2] = mdlViewerState.assetDisplayMode;
     for (i = 0, y = 0x7A80; i < 3; i++, y += 0x60) {
         sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(
             0x7300, y, 0xFF0080, 0, D_00367B60[i],
@@ -2716,7 +2718,7 @@ void mdlInitializeViewerTasksAndResources(void) {
 
     mdlLoadViewerPresentationConfig();
     mdlViewerState.viewerScale = 1.0f;
-    mdlViewerState.unk0F = mdlViewerState.unk0B = mdlViewerState.taskPhase = 1;
+    mdlViewerState.assetDisplayMode = mdlViewerState.unk0B = mdlViewerState.taskPhase = 1;
     mdlViewerState.captureDivY = mdlViewerState.captureDivX = mdlViewerState.captureScale = mdlViewerState.selectedResourceGroup = mdlViewerState.resourceGroup = 2;
     mdlViewerState.resourceId = 0;
     mdlViewerState.selectedResourceId = 0;
