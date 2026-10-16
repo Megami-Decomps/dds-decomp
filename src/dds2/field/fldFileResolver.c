@@ -3478,7 +3478,111 @@ void fldProbeCameraSupportSurface(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012F078);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern s32 fldFindFieldSegmentIntersection(f32 *, f32 *, f32 *);
+extern f32 D_004360A0, D_004360A4, D_004360A8;
+typedef union FldLookAtVector {
+    u128 q;
+    f32 f[4];
+} FldLookAtVector;
+void func_0012F078(void) {
+    FldAreaWork *area;
+    FldLookAtVector nearPoint;
+    FldLookAtVector referencePoint;
+    FldLookAtVector farPoint;
+    FldLookAtVector referenceCopy;
+    FldLookAtVector farCopy;
+    FldLookAtVector collisionPoint;
+    FldLookAtVector playerPosition;
+    EffWorldNode *node;
+    u32 *sceneSlot = fldGetPlayerSceneStateAddress();
+    f32 angle;
+    f32 phase;
+    f32 radiansPerHalfTurn;
+    f32 trigResult;
+    f32 rowDistance;
+    f32 heightOffset;
+    f32 positionZ;
+    f32 distance;
+    f32 ratio;
+    f32 scale;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    effObjFetchInnerRotationNormalized((EffWorldNode *)fldPlayerObject);
+    angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+    fldAreaState.angle = angle;
+    fldAreaState.targetAngle = angle;
+    effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &playerPosition);
+
+    radiansPerHalfTurn = 3.14f;
+    area = &fldAreaState;
+    area->x = playerPosition.f[0];
+    area->y = playerPosition.f[1];
+    area->z = playerPosition.f[2];
+    area->previousX = playerPosition.f[0];
+    area->previousY = playerPosition.f[1];
+    area->previousZ = playerPosition.f[2];
+    area->negatedAngle = -area->angle;
+    area->cameraTargetAngle = area->negatedAngle;
+    phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
+    trigResult = sdfSinPoly(phase);
+    nearPoint.f[0] = area->x - trigResult * 80.0f;
+    nearPoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;
+    phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
+    trigResult = sdfEvaluateCosineViaSinePhaseShift(phase);
+    nearPoint.f[2] = area->z - trigResult * 80.0f;
+    phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
+    trigResult = sdfSinPoly(phase);
+    farPoint.f[0] = area->x + trigResult * fldCameraFollowRows[area->rowIdx].dist;
+    farPoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].targetY;
+    phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
+    trigResult = sdfEvaluateCosineViaSinePhaseShift(phase);
+    rowDistance = fldCameraFollowRows[area->rowIdx].dist;
+    positionZ = area->z;
+    farPoint.f[2] = positionZ + trigResult * rowDistance;
+    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, &nearPoint);
+    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtFarPoint, &farPoint);
+
+    area->unk5C = 0.0f;
+    area->overrideSupportRecordIndex = -1;
+    area->unkA4 = -1;
+    area->unk60 = area->unk5C;
+    heightOffset = area->unk5C;
+    farPoint.f[1] += heightOffset;
+    referencePoint.f[0] = area->x;
+    referencePoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;
+    referencePoint.f[2] = positionZ;
+    PCP_COPY_VECTOR(&referenceCopy, &referencePoint);
+    PCP_COPY_VECTOR(&farCopy, &farPoint);
+
+    fldFindFieldSegmentIntersection(farCopy.f, referenceCopy.f, collisionPoint.f);
+
+    ratio = D_004360A0 / D_004360A8;
+    dx = collisionPoint.f[0] - referencePoint.f[0];
+    dy = collisionPoint.f[1] - referencePoint.f[1];
+    dz = collisionPoint.f[2] - referencePoint.f[2];
+    distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+    node = (EffWorldNode *)(u32)*sceneSlot;
+    scale = distance * ratio;
+    D_004360A4 = scale;
+
+    farPoint.f[0] = referencePoint.f[0] -
+        ((referencePoint.f[0] - collisionPoint.f[0]) / distance * scale);
+    farPoint.f[2] = referencePoint.f[2] -
+        ((referencePoint.f[2] - collisionPoint.f[2]) / distance * scale);
+    farPoint.f[1] = referencePoint.f[1] -
+        ((referencePoint.f[1] - collisionPoint.f[1]) / distance * scale) - heightOffset;
+
+    effObjSetInnerPosition(node, &farPoint.q);
+    PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
+    PCP_COPY_VECTOR(fldLookAtFarPoint, &farPoint);
+    node = (EffWorldNode *)(u32)*sceneSlot;
+    node->ops->update(node);
+    fldUpdateLookAtSegmentDistance();
+}
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012F400);
 
