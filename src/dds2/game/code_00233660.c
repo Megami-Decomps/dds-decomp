@@ -729,13 +729,13 @@ void mdlDestroyPartList(DevRequest *partList) {
 
             switch (partEntry->kind) {
             case MDL_PART_BILLBOARD:
-                billDispatchByKind((BillObj *)partEntry->object);
+                billDispatchByKind(mdlPartObjectFromStorage(partEntry->object).billboard);
                 break;
             case MDL_PART_EFFECT:
-                effDestroyNode((EffNode *)partEntry->object);
+                effDestroyNode(mdlPartObjectFromStorage(partEntry->object).effect);
                 break;
             case MDL_PART_OBJECT:
-                mdlObjDestroy((MdlObj *)partEntry->object);
+                mdlObjDestroy(mdlPartObjectFromStorage(partEntry->object).model);
                 break;
             }
         }
@@ -755,13 +755,13 @@ MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 motionSlotIn
 }
 
 void *mdlAdvanceBillboardPart(MdlPartEntry *entry) {
-    struct BillObj *clone = billCloneObjectRetainingSharedData((struct BillObj *)entry->object);
+    struct BillObj *clone = billCloneObjectRetainingSharedData(mdlPartObjectFromStorage(entry->object).billboard);
     entry->state = entry->state + 1;
     return clone;
 }
 
 void *mdlAdvanceEffectPart(MdlPartEntry *entry) {
-    EffNode *clone = effCloneSourceWithTypeHandler((EffNode *)entry->object);
+    EffNode *clone = effCloneSourceWithTypeHandler(mdlPartObjectFromStorage(entry->object).effect);
     entry->state = entry->state + 1;
     return clone;
 }
@@ -845,7 +845,7 @@ void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 motio
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
-        MdlObj *object = (MdlObj *)partSlot->object;
+        MdlObj *object = mdlPartObjectFromStorage(partSlot->object).model;
         if (object->inUse == 0) {
             SdfTex *texture = sdfFindTextureByResourceKey(entryRecord->dataId);
             if (texture != 0) {
