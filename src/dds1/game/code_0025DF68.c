@@ -135,11 +135,11 @@ void mnuDrawShopPanelWithPulsingIcon(s32 x, s32 y, s32 z, ShopScene *scene, s32 
 }
 
 
-void mnuDrawPulsingMenuIcon(ShopScene *object, s32 scale, s32 mode) {
+void mnuDrawPulsingMenuIcon(ShopScene *object, s32 amplitude, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
     s8 phase = object->pulseFrame;
     f32 angle = (f32)phase / 120.0f * 6.2831852f;
-    s32 offset = (s32)((f32)scale * sdfSinPoly(angle));
+    s32 offset = (s32)((f32)amplitude * sdfSinPoly(angle));
 
     effDrawSpriteWithCornerFade(mnuCommonIconPlacements[1][BRS_ICON_X] << 4,
                   mnuCommonIconPlacements[1][BRS_ICON_Y] << 3,
