@@ -13,12 +13,12 @@ typedef struct ActionSub {
 } ActionSub;
 
 
-EffWorldNode *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
+EffWorldNode *evtSpawnActionObjB(s32 objectKey, s32 b, s32 c, s32 objectName) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_B);
 
-    obj->value = (const char *)d;
+    obj->value = (const char *)objectName;
     ((ActionSub *)obj->data)->unk10 = 0;
-    obj->key = a;
+    obj->key = objectKey;
     return obj;
 }
 
