@@ -135,7 +135,124 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiDrawHistoryTrails);
+#include "sdf.h"
+#include "sdf_dma_packet_header.h"
+extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
+extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
+extern u32 sdfBuildCompactVertexVifPacket(const u128 *, const void *, const void *, const void *, s32, void *(*)(s32));
+extern s16 D_003D6670[15][8];
+extern SdfPoolNode *D_00355720[4];
+/* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
+static inline u32 packMagatuhiTrailColor(void) {
+    u32 rgba[4];
+    EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
+    return rgba[0];
+}
+void effMagatuhiDrawHistoryTrails(EffMagatuhiValueWork *work) {
+    f32 positions[15][4];
+    u32 colors[15];
+    f32 offsets[15][8];
+    f32 matrix[16];
+    f32 point[4];
+    SdfListHead *list;
+    u32 packet;
+    f32 (*historyPositions)[4];
+    f32 *widthFactors;
+    u32 *palette;
+    u32 *slotColors;
+    u16 *writeIndices;
+    u16 *validCounts;
+    u32 historyOffset;
+    u32 particleIndex;
+    u32 particleCount;
+    u32 slotColor;
+    u32 validCount;
+    u32 historyCount;
+    s32 pendingCount;
+    f32 baseSize;
+    u16 index, historyIndex;
+    f32 size, widthScale;
+    u32 packed;
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    packet = sdfAllocPacketAligned(0x20);
+    sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
+        (u32)sdfTexGetPrimaryBuffer(work->texture),
+        sdfTexGetPrimaryBufferSize((SdfTex *)work->texture));
+    sdfAppendReferencePacket(list, packet);
+    EE_MMI_UNIT_MATRIX(matrix);
+    historyOffset = 0;
+    packet = sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket((u8 *)packet, matrix);
+    sdfAppendPacket(list, packet);
+    pendingCount = 0;
+    particleCount = work->count;
+    historyCount = work->historyCount;
+    baseSize = work->historyDistanceScale;
+    palette = work->colorTable;
+    slotColors = work->slotColors;
+    writeIndices = work->writeIndices;
+    validCounts = work->validCounts;
+    for (particleIndex = 0; particleIndex < particleCount; particleIndex++) {
+        slotColor = *slotColors++;
+        historyPositions = work->positions + historyOffset;
+        widthFactors = work->historyScalars + historyOffset;
+        validCount = *validCounts++;
+        index = *writeIndices++;
+        historyOffset += historyCount;
+        if (slotColor & 0xFF000000) {
+            PCP_COPY_VECTOR(point, historyPositions[index]);
+            historyIndex = 0;
+            if (validCount != 0) {
+                widthScale = baseSize * 4.0f;
+                do {
+                    f32 factor = widthFactors[index];
+                    widthFactors[index] = factor * 0.75f + 0.25f;
+                    size = widthScale * factor;
+                    if (index == 0) {
+                        index = historyCount - 1;
+                    } else {
+                        index--;
+                    }
+                    VU0_LOAD_VF(vf10, point);
+                    VU0_STORE_VF(vf10, positions[pendingCount]);
+                    VU0_LOAD_VF(vf11, historyPositions[index]);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, point);
+                    eeUnpackRGBAWordFloat(slotColor, 0.0078125f);
+                    VU0_MOVE_VF(vf11, vf10);
+                    eeUnpackRGBAWordFloat(palette[historyIndex], 0.0078125f);
+                    VU0_MUL(vf10, vf10, vf11);
+                    packed = packMagatuhiTrailColor();
+                    colors[pendingCount] = packed;
+                    offsets[pendingCount][0] = -size;
+                    offsets[pendingCount][1] = -size;
+                    offsets[pendingCount][2] = size;
+                    offsets[pendingCount][3] = -size;
+                    offsets[pendingCount][4] = size;
+                    offsets[pendingCount][5] = size;
+                    offsets[pendingCount][6] = -size;
+                    offsets[pendingCount][7] = size;
+                    pendingCount++;
+                    if (pendingCount == 15) {
+                        packet = sdfBuildCompactVertexVifPacket((u128 *)positions,
+                            colors, D_003D6670, offsets, 15, 0);
+                        sdfAppendPacket(list, packet);
+                        pendingCount = 0;
+                    }
+                    historyIndex++;
+                } while (historyIndex < validCount);
+            }
+        }
+    }
+    if (pendingCount != 0) {
+        packet = sdfBuildCompactVertexVifPacket((u128 *)positions,
+            colors, D_003D6670, offsets, pendingCount, 0);
+        sdfAppendPacket(list, packet);
+    }
+    D_00355720[work->unk10]->append(D_00355720[work->unk10], list);
+}
 
 extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[4];
