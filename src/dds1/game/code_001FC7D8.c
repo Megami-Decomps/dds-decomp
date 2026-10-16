@@ -1202,9 +1202,9 @@ void btlPickCommandHighestMpTarget(s32 context) {
     func_00203BA8(context, 0);
 }
 
-/* Select by group element checks; value is the query input, not a status mask. */
-void btlPickCommandElementCheckedTarget(s32 context, s32 value) {
-    btlSelectTargetsPassingCheck(context, value);
+/* Select by group element checks; action is the query input, not a status mask. */
+void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action) {
+    btlSelectTargetsPassingCheck(commandContext, action);
 }
 
 /* Select by status-mask presence; retain the native zero-formal forwarding surface. */

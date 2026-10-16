@@ -1318,9 +1318,9 @@ void btlPickCommandHighestMpTarget(s32 context) {
 
 extern s32 btlSelectTargetsPassingCheck(s32, s32);
 
-/* Select by group element checks; value is the query input, not a status mask. */
-void btlPickCommandElementCheckedTarget(s32 context, s32 value) {
-    btlSelectTargetsPassingCheck(context, value);
+/* Select by group element checks; action is the query input, not a status mask. */
+void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action) {
+    btlSelectTargetsPassingCheck(commandContext, action);
 }
 
 extern void btlSelectTargetsByActionMask(s32, s32);
