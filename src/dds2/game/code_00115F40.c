@@ -28,7 +28,6 @@ struct EffectObj;
 struct BillObj;
 extern void effObjSetFlags(struct EffectObj *object, u32 flags);
 extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
-extern void billSetVariantValue(struct BillObj *billboard, s32 value);
 
 /* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
  * passes its resource data pointer directly to the billboard binder. */
