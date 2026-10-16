@@ -60,7 +60,7 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
 
 s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
 
-void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
+void sdfRelocatePackedResourceWords(int *words, int relocationBase, u8 *table, int tableBytes);
 
 
 
