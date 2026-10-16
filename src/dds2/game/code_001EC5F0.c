@@ -7080,11 +7080,11 @@ s32 sndPlaySkillSeTask(u32 *taskArgs) {
     BtlState *work = (BtlState *)btlGetRuntime();
     u32 value;
 
-    if (*(u16 *)(taskData + 4) == 2 && work->unk28C < 6) {
-        btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", work->unk28C);
+    if (*(u16 *)(taskData + 4) == 2 && work->skillSeLoadFrame < 6) {
+        btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", work->skillSeLoadFrame);
         return 1;
     }
-    work->unk28C = 0;
+    work->skillSeLoadFrame = 0;
     if (sndFindPackedTrackLoadStatus(*(u32 *)taskData) != 0) {
         switch (*(u16 *)(taskData + 4)) {
         case 1:
@@ -7568,7 +7568,7 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
 void btlResetMotionSoundFrameCounters(void) {
     s32 context = (s32)(u32)btlGetRuntime();
     ((BtlState *)context)->motionSeLoadFrame = -1;
-    ((BtlState *)context)->unk28C = -1;
+    ((BtlState *)context)->skillSeLoadFrame = -1;
 }
 
 extern char D_00419408[]; /* "btl:sound load BSE SMG\n" */
@@ -7626,8 +7626,8 @@ void btlUpdateMotionSoundLoading(void) {
     if ((s32)state->motionSeLoadFrame >= 0) {
         state->motionSeLoadFrame++;
     }
-    if ((s32)state->unk28C >= 0) {
-        state->unk28C++;
+    if ((s32)state->skillSeLoadFrame >= 0) {
+        state->skillSeLoadFrame++;
     }
 
     tracksReady = 1;

@@ -480,7 +480,7 @@ typedef struct BtlState {
     u16 earringPlaybackCount;
     u8 pad286[2];
     u32 motionSeLoadFrame; /* 0x288: -1 disables the motion-SE ATRAC3 buffer delay. */
-    u32 unk28C;
+    u32 skillSeLoadFrame; /* 0x28C: -1 disables the skill-SE frame gate. */
     u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
     u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
     s32 effectLayer; /* 0x294 */
@@ -650,6 +650,8 @@ typedef struct BtlState {
 typedef char BtlEscapeAttemptCountDds2Offset[((unsigned int)&((BtlState *)0)->escapeAttemptCount == 0x278) ? 1 : -1];
 typedef char BtlMotionSeLoadFrameDds2Offset[
     ((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x288) ? 1 : -1];
+typedef char BtlSkillSeLoadFrameDds2Offset[
+    ((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x28C) ? 1 : -1];
 typedef char BtlDefeatedLevelCountDds2Offset[
     ((unsigned int)&((BtlState *)0)->defeatedLevelCount == 0x290) ? 1 : -1];
 typedef char BtlDefeatedLevelTotalDds2Offset[
