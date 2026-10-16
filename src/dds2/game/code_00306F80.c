@@ -80,19 +80,19 @@ void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags,
 }
 
 /* Update the indexed slot's description countdown and carry its active state forward. */
-void itfUpdateGridSlotDescription(EffectSlotSet *owner, s32 index) {
-    BdWork *base = &owner->workEntries[index];
-    const u32 timedByteOffset = (index + base->slotOffset) * sizeof(BdWork);
-    BdWork *timed = (BdWork *)(timedByteOffset + (u32)owner->workEntries);
-    BdWork *previous = (BdWork *)effGetSlotWorkOrOverride(owner, index + base->slotOffset);
+void itfUpdateGridSlotDescription(EffectSlotSet *resource, s32 resourceIndex) {
+    BdWork *base = &resource->workEntries[resourceIndex];
+    const u32 timedByteOffset = (resourceIndex + base->slotOffset) * sizeof(BdWork);
+    BdWork *timed = (BdWork *)(timedByteOffset + (u32)resource->workEntries);
+    BdWork *previous = (BdWork *)effGetSlotWorkOrOverride(resource, resourceIndex + base->slotOffset);
     BdWork *next;
     u32 advance = 0;
 
     if (timed->remainingDescriptionUpdates == 0) {
         timed->remainingDescriptionUpdates =
-            owner->descriptions[index + base->slotOffset].descriptionUpdateDelay;
-        if ((u32)(index + timed->slotOffset + 1) < owner->count) {
-            const s32 nextFlags = owner->descriptions[index + base->slotOffset + 1].flags &
+            resource->descriptions[resourceIndex + base->slotOffset].descriptionUpdateDelay;
+        if ((u32)(resourceIndex + timed->slotOffset + 1) < resource->count) {
+            const s32 nextFlags = resource->descriptions[resourceIndex + base->slotOffset + 1].flags &
                                   EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION;
             const u32 shouldAdvance = nextFlags > 0;
             advance = shouldAdvance;
@@ -105,8 +105,8 @@ void itfUpdateGridSlotDescription(EffectSlotSet *owner, s32 index) {
             }
             base->slotOffset = 0;
         }
-        effInitializeSlotWorkFromDescription(owner, index + base->slotOffset, previous);
-        next = (BdWork *)effGetSlotWorkOrOverride(owner, index + base->slotOffset);
+        effInitializeSlotWorkFromDescription(resource, resourceIndex + base->slotOffset, previous);
+        next = (BdWork *)effGetSlotWorkOrOverride(resource, resourceIndex + base->slotOffset);
         next->states[0].flags = previous->states[0].flags;
         next->states[0].source = previous->states[0].source;
         next->states[0].value = previous->states[0].value;
