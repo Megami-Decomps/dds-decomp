@@ -44,7 +44,7 @@ typedef struct FuncTab {
     void (*w10)(void *a0, f32 t1, f32 t2);
 } FuncTab;
 
-void *sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
+void *sdfDispatchAssetCommandWord(void *motion, s32 packedCommand, s32 unusedTargetIndex);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *interval);
 extern s32 (*D_003981B8[])(void *object, s32 selector);
