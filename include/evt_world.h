@@ -89,8 +89,8 @@ typedef char EvtWorldTable_size_must_be_0x40[
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */
 void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled);
-void dds3SetWorldObjectValue(EffWorldNode *object, u32 areaRoomKey);
-s32 dds3GetWorldObjectValue(EffWorldNode *object);
+void dds3SetWorldObjectValue(EffWorldNode *worldNode, u32 areaRoomKey);
+s32 dds3GetWorldObjectValue(EffWorldNode *worldNode);
 
 /* Scene resource scripts are selected by name on a world node. The start
  * result is the task-handle word returned by the script task creator. */
