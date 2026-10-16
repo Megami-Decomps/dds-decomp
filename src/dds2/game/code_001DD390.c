@@ -2086,7 +2086,7 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178A8);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178B8);
 
-s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 value) {
+s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
     s32 result = 0;
     BtlRuntimeTask *task;
     switch (condition->kind) {
@@ -2096,7 +2096,7 @@ s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 value) {
         result = 1;
         break;
     case BTL_TASK_CONDITION_COUNT_REACHED:
-        if (!(value < condition->value.count)) {
+        if (!(currentCount < condition->value.count)) {
             result = 1;
         }
         break;
