@@ -1,4 +1,5 @@
 #include "btl_command.h"
+#include "btl_ui.h"
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
@@ -120,7 +121,7 @@ extern u32 btlButtonIconTexture;
 extern u16 scrReadIntParameter(u32);
 
 
-extern s32 btlTrackedTaskHandles;
+extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern u64 btlCreateCommandSoundUpdateTask(void);
 
@@ -2640,14 +2641,14 @@ s32 btlScriptSetBossStatSelector(void) {
 }
 
 u32 btlResetCommandContextAndSetStateFlag(void) {
-    s32 state;
+    BattleTrackedTaskWork *state;
     void *context;
 
     context = scrGetCurrentCommandWork();
     state = btlTrackedTaskHandles;
     ((BtlCommandCtx *)context)->commandMode = 0x10;
     ((BtlCommandCtx *)context)->commandValue = 0;
-    *(u8 *)(state + 0x54) = 1;
+    state->phaseGate = 1;
     return 1;
 }
 
