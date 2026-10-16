@@ -8632,7 +8632,7 @@ extern s32 D_003BAE58;
  * index, mark its floor and exploration bits, then submit its sequence and
  * clear the pending selection. DDS1 also publishes the command flag. */
 void func_0013EC68(void) {
-    s32 stage;
+    s32 stagePayload[1]; /* One-word payload for the field mode request. */
     FieldSequenceRecord record;
     s32 room;
     s32 extra;
@@ -8670,15 +8670,15 @@ void func_0013EC68(void) {
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
             if (entry->explorationArea == 0) {
-                stage = fldAreaState.area;
+                stagePayload[0] = fldAreaState.area;
             } else {
-                stage = entry->explorationArea;
+                stagePayload[0] = entry->explorationArea;
             }
             room = floorFlags >> 2;
             if (room == 0) {
                 room = fldAreaState.floor + 1;
             }
-            fldSetFlagBit(stage, room, entry->floorFlagBit);
+            fldSetFlagBit(stagePayload[0], room, entry->floorFlagBit);
         }
         flags = entry->flags64;
         if (flags & 2) {
@@ -8687,20 +8687,20 @@ void func_0013EC68(void) {
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
-            stage = fldAreaState.area;
-            dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0);
+            stagePayload[0] = fldAreaState.area;
+            dds3AdminSubmitModeRequest(0x1C, stagePayload, sizeof(stagePayload), 0);
             return;
         }
         if (entry->variant == 0) {
-            stage = D_003BAE54;
+            stagePayload[0] = D_003BAE54;
         } else {
-            stage = entry->variant;
+            stagePayload[0] = entry->variant;
         }
         room = entry->sequenceKind;
         if (room == 0) {
             room = D_003BAE58;
         }
-        if (fldAreaState.area != stage) {
+        if (fldAreaState.area != stagePayload[0]) {
             fldReleaseCurrentBgm();
         }
         fldApplySceneRoomSelection(entry);
@@ -8718,7 +8718,7 @@ void func_0013EC68(void) {
         } else {
             fldAreaState.commandEnabled = 0;
         }
-        fldInitializeFieldSequenceRecord(&record, stage, room, entry->sequenceName, entry->sequenceCode, entry->linkKind, entry->linkName);
+        fldInitializeFieldSequenceRecord(&record, stagePayload[0], room, entry->sequenceName, entry->sequenceCode, entry->linkKind, entry->linkName);
         if ((u32)(motion - 3) < 2) {
             record.mode = 5;
         } else {
