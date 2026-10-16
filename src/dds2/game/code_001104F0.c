@@ -63,7 +63,7 @@ u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count) {
     return 1;
 }
 
-u16 dds3GetWorldValueCount(WorldValueIndices *object) {
+u16 dds3GetWorldValueCount(const WorldValueIndices *object) {
     u16 value;
 
     value = 0;
