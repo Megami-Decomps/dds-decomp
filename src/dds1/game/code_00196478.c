@@ -869,8 +869,8 @@ u32 itfGetLastDecodedByteCount(void) {
     return D_003BD818;
 }
 
-u32 itfReturnPackedResourceBase(u32 value) {
-    return value;
+u32 itfReturnPackedResourceBase(u32 resourceBase) {
+    return resourceBase;
 }
 
 /* Resolve three signed, cumulative relative offsets without validating bounds. */
