@@ -476,14 +476,14 @@ void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 arg2, struct Menu
 
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
-struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 ownerAddress) {
+struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excludedEntryIndex, s32 ownerAddress) {
     struct MenuList *list = mnuCreateListState(0, count, 0x15, ownerAddress);
     s32 entryIndex;
     list->context = (void *)ownerAddress;
     list->drawCallback = mnuDrawThresholdNodeWithSelectedAccents;
     list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
-        if (entryIndex != excluded) {
+        if (entryIndex != excludedEntryIndex) {
             struct MenuListNode *node = mnuListAppendNode(list, D_003BC3F8);
             node->camp.value = items[entryIndex];
         }
@@ -537,7 +537,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     s32 table[15];
     s32 row;
     s32 count;
-    s32 excluded = -1;
+    s32 excludedEntryIndex = -1;
 
     memcpy(table, mnuTerminalMenuTemplate, 0x3C);
 
@@ -547,14 +547,14 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
         row = 0;
         count = 5;
         if (mnuShouldExcludeTerminalMenuEntry() != 0) {
-            excluded = 1;
+            excludedEntryIndex = 1;
         }
         break;
     case 1:
         row = 1;
         count = 4;
         if (mnuShouldExcludeTerminalMenuEntry() != 0) {
-            excluded = 1;
+            excludedEntryIndex = 1;
         }
         break;
     default:
@@ -562,7 +562,7 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
         count = 2;
         break;
     }
-    host->listResource = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excluded, (s32)host);
+    host->listResource = (struct MenuList *)mnuBuildThresholdNodeList(table + row * 5, count, excludedEntryIndex, (s32)host);
     mnuBuildTerminalNodeList(host);
     mnuResolveStaffImageHandles(host->imageHandles);
     mnuUpdateGroupResources((u8 *)host);
