@@ -1244,20 +1244,20 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
 s32 evtCommandSetUnitScaledValueFlag(void)
 {
     s32 objectKind;
-    void *unit;
+    void *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
-    if (unit == NULL) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
-        if (unit == NULL) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == NULL);
+    if (slotObject == NULL) {
+        slotObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (slotObject == NULL) {
             return 1;
         }
     }
-    evtToggleWorldSlotScaledValueFlag(unit, 1);
+    evtToggleWorldSlotScaledValueFlag(slotObject, 1);
     return 1;
 }
 
@@ -1265,20 +1265,20 @@ s32 evtCommandSetUnitScaledValueFlag(void)
 s32 evtCommandClearUnitScaledValueFlag(void)
 {
     s32 objectKind;
-    void *unit;
+    void *slotObject;
 
     objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
     do {
-        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        slotObject = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
-    if (unit == NULL) {
-        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
-        if (unit == NULL) {
+    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == NULL);
+    if (slotObject == NULL) {
+        slotObject = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (slotObject == NULL) {
             return 1;
         }
     }
-    evtToggleWorldSlotScaledValueFlag(unit, 0);
+    evtToggleWorldSlotScaledValueFlag(slotObject, 0);
     return 1;
 }
 
