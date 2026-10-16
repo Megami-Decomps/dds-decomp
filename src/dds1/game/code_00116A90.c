@@ -65,10 +65,10 @@ void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, const Dds3PathKey
     *weight = 1.0f;
 }
 
-EffWorldNode *evtSpawnActionObj10(s32 a, void *work, const char *name) {
+EffWorldNode *evtSpawnActionObj10(s32 key, void *work, const char *name) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_10);
 
-    obj->key = a;
+    obj->key = key;
     obj->value = name;
     obj->data = work;
     return obj;
