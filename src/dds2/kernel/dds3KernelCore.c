@@ -313,15 +313,15 @@ void kwlnTraverseDiagnosticTaskQueue(KwlnTask* task, void* unused)
 
 void kwlnPrintTaskQueueDiagnostics(void)
 {
-    u8* tmp;
+    u8* queueCountFormat;
 
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedStartTaskHead, D_00411008);
-    tmp = D_00411038;
-    sdfDebugPrintf(tmp, kwlnDelayedStartTaskCount);
+    queueCountFormat = D_00411038;
+    sdfDebugPrintf(queueCountFormat, kwlnDelayedStartTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnActiveTaskHead, D_00411048);
-    sdfDebugPrintf(tmp, kwlnActiveTaskCount);
+    sdfDebugPrintf(queueCountFormat, kwlnActiveTaskCount);
     kwlnTraverseDiagnosticTaskQueue(kwlnDelayedDestroyTaskHead, D_00411078);
-    sdfDebugPrintf(tmp, kwlnDelayedDestroyTaskCount);
+    sdfDebugPrintf(queueCountFormat, kwlnDelayedDestroyTaskCount);
     sdfDebugPrintf(D_00435BF8);
 }
 
