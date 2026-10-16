@@ -1302,9 +1302,9 @@ void btlReleaseObjectBuffers(BattleIndexWork *object) {
     }
 }
 
-extern s32 btlAdjustUnitHp(DatPartyRecord *, s32);
+extern s32 btlAdjustUnitHp(DatPartyRecord *, s32 delta);
 
-extern s32 btlAdjustUnitMp(DatPartyRecord *, s32);
+extern s32 btlAdjustUnitMp(DatPartyRecord *, s32 delta);
 
 extern void btlHighlightActorStatPanel(BtlUnit *, s8);
 

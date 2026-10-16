@@ -1302,12 +1302,12 @@ extern s32 datAdjustCurrentHp(DatPartyRecord *, s32);
 
 extern s32 datAdjustCurrentMp(DatPartyRecord *, s32);
 
-s32 btlAdjustUnitHp(DatPartyRecord *object, s32 value) {
-    return datAdjustCurrentHp(object, value);
+s32 btlAdjustUnitHp(DatPartyRecord *object, s32 delta) {
+    return datAdjustCurrentHp(object, delta);
 }
 
-s32 btlAdjustUnitMp(DatPartyRecord *object, s32 value) {
-    return datAdjustCurrentMp(object, value);
+s32 btlAdjustUnitMp(DatPartyRecord *object, s32 delta) {
+    return datAdjustCurrentMp(object, delta);
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
