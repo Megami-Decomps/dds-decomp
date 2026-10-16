@@ -434,7 +434,7 @@ enum {
 };
 
 extern u8 ptyAffinityPermutationOrders[];
-extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *, s32, u8);
+extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 slot);
 
 
 
