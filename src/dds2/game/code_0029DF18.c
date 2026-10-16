@@ -453,15 +453,15 @@ void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsS
 }
 
 void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
-                   BrsProgressRow *unused, s32 depth, s32 index) {
+                   BrsProgressRow *unused, s32 depth, s32 rowIndex) {
     u32 color[4];
     s32 packed;
 
     memcpy(color, D_004285E0, sizeof(color));
 
     if (work->teardownResource != NULL) {
-        if (work->profileAnimation[index].iconState >= 2) {
-            packed = work->profileAnimation[index].iconOpacity | 0x80808000;
+        if (work->profileAnimation[rowIndex].iconState >= 2) {
+            packed = work->profileAnimation[rowIndex].iconOpacity | 0x80808000;
             color[0] = packed;
             color[1] = packed;
             color[2] = packed;
