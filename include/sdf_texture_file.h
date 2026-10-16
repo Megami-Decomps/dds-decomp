@@ -2,6 +2,7 @@
 #define SDF_TEXTURE_FILE_H
 
 #include "common.h"
+#include "sdf_texture_clamp.h"
 
 /* Values used by the battle-model texture uploader; other values use its default path. */
 #define SDF_TEXTURE_BATTLE_SLOT_ONE 1
@@ -24,7 +25,7 @@ typedef struct SdfTextureFileHeader {
     u8 maxMipLevel;    /* 0x17 */
     u16 lodParameters; /* 0x18 */
     u8 unk1A;          /* 0x1A */
-    u8 clampMode;      /* 0x1B */
+    SdfTextureClampMode clampMode; /* 0x1B: serialized GS clamp mode */
     s32 resourceKey;   /* 0x1C */
     s32 battleTextureSlot; /* 0x20: selects one of two battle-model texture headers */
     u8 pad24[0x1C];    /* 0x24 */

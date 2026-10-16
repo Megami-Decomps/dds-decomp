@@ -4,6 +4,7 @@
 #include "common.h"
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
+#include "sdf_texture_clamp.h"
 #include "sdf_thread.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
@@ -374,7 +375,7 @@ typedef struct SdfTex {
     u8 maxMipLevel;
     u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
     u8 unk1E;
-    u8 clampMode;
+    SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
     s32 resourceKey;
     s32 battleTextureSlot;
     SdfTexBuf *primaryBuffer;
@@ -384,6 +385,11 @@ typedef struct SdfTex {
     s32 unk38;
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
+
+typedef char SdfTex_size_must_be_0x40[
+    (sizeof(SdfTex) == 0x40) ? 1 : -1];
+typedef char SdfTex_clampMode_offset_must_be_0x1F[
+    ((u32)&((SdfTex *)0)->clampMode == 0x1F) ? 1 : -1];
 
 /* Release one caller-owned texture reference. The direct form releases the
  * texture immediately when this is the last reference; the handler form queues
