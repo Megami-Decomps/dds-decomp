@@ -383,15 +383,15 @@ s32 itfGridApplyThresholdBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimed
     return 0x10000 / table->divisor;
 }
 
-s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *owner) {
-    GridAngleTable *table = (GridAngleTable *)owner->source->status;
+s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *timedState) {
+    GridAngleTable *table = (GridAngleTable *)timedState->source->status;
     s32 i = 3;
 
     do {
         if (table->mirrored == 0) {
-            out->geometry.angleDegrees = 360.0f - (f32)owner->value * 360.0f * (1.0f / 65536.0f);
+            out->geometry.angleDegrees = 360.0f - (f32)timedState->value * 360.0f * (1.0f / 65536.0f);
         } else {
-            out->geometry.angleDegrees = (f32)owner->value * 360.0f * (1.0f / 65536.0f);
+            out->geometry.angleDegrees = (f32)timedState->value * 360.0f * (1.0f / 65536.0f);
         }
     } while (--i >= 0);
     return 0x10000 / table->divisor;
