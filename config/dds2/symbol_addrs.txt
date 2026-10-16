@@ -12673,3 +12673,15 @@ kwlnHeldTextureEyeVector = 0x0037F860;
 kwlnHeldTextureUpVector = 0x0037F870;
 kwlnHeldTextureLightSources = 0x0037F940;
 kwlnHeldTextureAmbientColor = 0x0037F950;
+
+
+effFlashTrianglePulseOrigin = 0x003B1220;
+effFlashStreakOrigin = 0x003B1230;
+effFlashScalingOrbitNormalScratch = 0x003B1240;
+effFlashAccumulatingNormalScratch = 0x003B1250;
+effFlashOrbitArcNormalScratch = 0x003B1260;
+effFlashRotatingQuadOrigin = 0x003B1270;
+effFlashRadialTriangleOrigin = 0x003B1280;
+effFlashFadingOrbitNormalScratch = 0x003B1290;
+effFlashOffsetRadialOrigin = 0x003B12A0;
+effBossLookAtReferenceAxis = 0x003B1FF0;

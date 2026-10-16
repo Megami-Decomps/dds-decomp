@@ -14073,3 +14073,29 @@ group-one ID 0x4B and group-two ID 0x45; script-ID lookup still searches
 exactly one 148-byte row. Existing status helpers and held neighboring
 callbacks are untouched. All data bytes, declarations, casts, array bounds,
 control flow and original reconstruction credit remain unchanged.
+
+
+## Flash geometry origins and distinct normal-staging vectors
+
+The five flash origin objects used by triangle-pulse, streak, rotated-quad,
+radial-triangle and offset-radial writers each contain `(0,0,0,0)`. Keep
+separate native storage and existing mutable f32[] declarations: each writer
+copies its origin into a base vertex and adds it to generated offsets.
+
+The ScalingOrbit, Accumulating, OrbitArc and FadingOrbit normal scratch
+vectors each start `(0,-1,0,0)`. Their matched writers store XYZ from the
+current angle and tilt or step speed, then normalize the loaded VU value
+before crossing it with the horizontal unit direction. The global memory
+itself is not normalized and its W component remains untouched. Do not
+merge scratch vectors or substitute a local initialized to the same bits.
+
+`effBossLookAtReferenceAxis` is the separate native `(0,1,0,0)` reference
+passed to the existing look-at basis helper. Keep its existing u8[]
+declaration and provider contract rather than retyping it in a naming
+batch. PiM's held boss geometry body6187412763 stays ASM; none of these
+selected roots or interiors are referenced there.
+
+All twenty paired data names are inferred from current matched consumers
+and identical native sixteen-byte windows. No header, type, bound, data
+bytes, imports, provider, control flow or existing assembly changes; no
+new function or data-ownership credit.
