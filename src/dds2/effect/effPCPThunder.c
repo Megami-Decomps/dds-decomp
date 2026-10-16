@@ -556,8 +556,8 @@ void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 
 }
 
 
-extern void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *, s32);
-extern void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *, s32);
+extern void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index);
+extern void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 index);
 
 /* Indexed vector countdown/fade/restart with shared tint and native render-cell stride.
    Fade is unsigned wrap-add; submission is unconditional after the signed-count loop. */
