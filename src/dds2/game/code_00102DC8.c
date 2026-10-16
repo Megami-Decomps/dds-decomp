@@ -627,7 +627,7 @@ void kwlnPadStartMotor(u32 motor, u8 level, s32 duration) {
     }
 }
 
-extern void sdfDevConsSetEntryPair(s32, s32, s32);
+extern void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 /* Clear motor levels and countdowns, then send both zero strengths to pad 0. */
 void kwlnPadResetMotorLevelsAndOutput(void) {
@@ -1171,7 +1171,7 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     sdfAppendPacket(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].overlayLightPacket);
 }
 
-extern void sdfGraphSetDisplayMode(s32);
+extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
 extern void kwlnInitializeFrameDrawPackets(s32);
 extern void evtInitializeFrameStatePacketTemplates(void);
 extern u8 D_00435BC8;

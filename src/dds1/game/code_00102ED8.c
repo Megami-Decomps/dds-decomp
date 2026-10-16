@@ -96,7 +96,7 @@ extern void evtInitializeFrameStatePacketTemplates(void);
 
 extern void evtEnsureDrawVectorState(void);
 
-extern void sdfGraphSetDisplayMode(s32 arg0);
+extern void sdfGraphSetDisplayMode(s32 displayModeIndex);
 #include "sdf_packet_alloc.h"
 extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
 extern s32 sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, s32, s32);
@@ -117,7 +117,7 @@ extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 extern SdfPoolNode D_00325708;
 
 
-extern void sdfDevConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
+extern void sdfDevConsSetEntryPair(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 extern char dds3AdminTaskName[];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
