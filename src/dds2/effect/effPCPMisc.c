@@ -1023,9 +1023,9 @@ typedef struct EffSpawnParams {
     u8 pad30[0x08];
     s16 lifetime;    /* 0x38: randomised particle lifetime */
     u8 pad3A[0x0A];
-    f32 unk44;
+    f32 bandWidth;
     u8 pad48[0x04];
-    f32 unk4C;
+    f32 edgeWidth;
     u8 pad50[0x04];
 } EffSpawnParams;
 
@@ -1070,8 +1070,8 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
             angle += 60.0f * EFF_DEG2RAD;
         }
         spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
-        effSharedSpawnParams->unk44 = spread * 1.25f;
-        effSharedSpawnParams->unk4C = spread * 12.5f;
+        effSharedSpawnParams->bandWidth = spread * 1.25f;
+        effSharedSpawnParams->edgeWidth = spread * 12.5f;
         radius = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         effSharedSpawnParams->vel[1] = 0;
         effSharedSpawnParams->vel[0] = sinv * radius;
@@ -1201,8 +1201,8 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
             angle += 60.0f * EFF_DEG2RAD;
         }
         spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
-        effNarrowConeSpawnParams->unk44 = spread * 1.25f;
-        effNarrowConeSpawnParams->unk4C = spread * 12.5f;
+        effNarrowConeSpawnParams->bandWidth = spread * 1.25f;
+        effNarrowConeSpawnParams->edgeWidth = spread * 12.5f;
         radius = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
@@ -1297,8 +1297,8 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
             angle += 24.0f * EFF_DEG2RAD;
         }
         spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
-        effVariableHeightSpawnParams->unk44 = spread * 1.25f;
-        effVariableHeightSpawnParams->unk4C = spread * 12.5f;
+        effVariableHeightSpawnParams->bandWidth = spread * 1.25f;
+        effVariableHeightSpawnParams->edgeWidth = spread * 12.5f;
         effVariableHeightSpawnParams->vel[1] = 0;
         effVariableHeightSpawnParams->vel[0] = sinv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
         effVariableHeightSpawnParams->vel[2] = cosv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
@@ -1392,8 +1392,8 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
             angle += 60.0f * EFF_DEG2RAD;
         }
         spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
-        effWideConeSpawnParams->unk44 = spread * 1.25f;
-        effWideConeSpawnParams->unk4C = spread * 12.5f;
+        effWideConeSpawnParams->bandWidth = spread * 1.25f;
+        effWideConeSpawnParams->edgeWidth = spread * 12.5f;
         radius = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
@@ -1709,8 +1709,8 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
             angle += 24.0f * EFF_DEG2RAD;
         }
         spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
-        effConeBurstSpawnParams->unk44 = spread * 1.25f;
-        effConeBurstSpawnParams->unk4C = spread * 12.5f;
+        effConeBurstSpawnParams->bandWidth = spread * 1.25f;
+        effConeBurstSpawnParams->edgeWidth = spread * 12.5f;
         effConeBurstSpawnParams->vel[1] = 0;
         effConeBurstSpawnParams->vel[0] = sinv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
         effConeBurstSpawnParams->vel[2] = cosv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
