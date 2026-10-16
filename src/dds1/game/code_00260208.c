@@ -1035,7 +1035,7 @@ s32 brsTaskIsFadeIdle(void) {
     return evtStageTestPollModelRequest() != 1;
 }
 
-void mnuRefreshSelectedUnitPanels(DatPartyRecord *unused, BrsSkillPackageWork *menu) {
+void mnuRefreshSelectedUnitPanels(DatPartyRecord *unusedPartyRecord, BrsSkillPackageWork *menu) {
     mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuUpdateHandleStates(&menu->partyWindow);
     mnuUpdatePartyPanelPercentDisplays((s32)&menu->partyWindow);
