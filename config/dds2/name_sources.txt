@@ -9749,3 +9749,4 @@
 0x0024CE18	evtViewCmdSetObjectTarget	inferred	Stores selected world-object targets and resolved name indices in the pending event-viewer command entry; paired title implementation.
 0x00120528	fldDrawPercentValue	inferred	formats signed percentage values with glyphs 10, 11 and 12; calls fldDrawConvertedTextGlyph
 0x001A7C08	itfMesDrawWindowBackground	inferred	confidence=high; builds the mode-dependent message-window background from window texture rectangle tables, queues panel and border quads, and appends the packets to the interface display list.
+0x0024B078	evtViewerReturnZero	inferred	Unconditionally returns zero; paired with the same event-viewer helper in DDS1 at 0x00230470.

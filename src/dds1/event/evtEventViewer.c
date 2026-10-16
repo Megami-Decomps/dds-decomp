@@ -2364,7 +2364,7 @@ s32 evtViewerTestIndexedCondition(u32 encodedCondition) {
     return (datGameState->script.ints[199 + conditionIndex] ^ expectedValue) == 0;
 }
 
-u32 func_00230470(void) {
+u32 evtViewerReturnZero(void) {
     return 0;
 }
 
