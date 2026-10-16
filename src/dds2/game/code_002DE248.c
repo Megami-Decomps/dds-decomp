@@ -4999,7 +4999,7 @@ typedef struct EffectSlotNode54 {
     u32 kind;             // 0x0C
     EffSurfaceParams params; // 0x10
     u32 index;             // 0x2C
-    u32 handleBuffer;      // 0x30
+    struct SdfMemBlock *handleBuffer; // 0x30
     BillObj *billResource; // 0x34
     FileJobPayload **jobs;             // 0x38
     struct SdfMemBlock *jobAllocation;         // 0x3C
@@ -5009,6 +5009,8 @@ typedef struct EffectSlotNode54 {
     FileSlotTable *record; // 0x4C
     u16 active;            // 0x50
 } EffectSlotNode54;
+typedef char EffectSlotNode54_handleBuffer_offset_check[
+    ((u32)&((EffectSlotNode54 *)0)->handleBuffer == 0x30) ? 1 : -1];
 
 EffectSlotNode54 *effCreateSurfaceNode(u32 count) {
     EffectSlotNode54 *node = sdfAllocAndClearQuadwords(sizeof(EffectSlotNode54));
@@ -5124,7 +5126,7 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
         for (i = 0; i < node->count; i++) {
             effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
+        sdfReleaseResourceAllocation(node->handleBuffer);
     }
     if (node->resourceHolder != 0) {
         effReleaseReferenceHolder(node->resourceHolder);
@@ -5252,10 +5254,10 @@ void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
         for (i = 0; i < node->count; i++) {
             effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
+        sdfReleaseResourceAllocation(node->handleBuffer);
     }
-    node->handleBuffer = (u32)sdfAllocGeneralBlock(size);
-    node->index = sdfResourceRetainAddress((struct SdfMemBlock *)(node->handleBuffer));
+    node->handleBuffer = sdfAllocGeneralBlock(size);
+    node->index = sdfResourceRetainAddress(node->handleBuffer);
     for (i = 0; i < node->count; i++) {
         handle = effCreateSurfaceGridNode(params[0], params[1]);
         ((u32 *)node->index)[i] = (u32)handle;
