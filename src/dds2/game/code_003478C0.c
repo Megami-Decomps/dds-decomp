@@ -70,7 +70,7 @@ void sdfPacReadListAllocationCount(PacState *state) {
 
     if (state->inputAvailable != 0) {
         /* The aligned packet count is read with native lw semantics. */
-        count = *(u32 *)state->inputCursor;
+        count = *(const u32 *)state->inputCursor;
         sdfPacAdvanceInput(state, 4);
         allocation = state->slot.list;
         work = state->queueTail;
@@ -118,11 +118,11 @@ enum {
 };
 
 extern s32 D_00439220;
-extern u8 *D_0047BC80[16];
+extern const u8 *D_0047BC80[16];
 
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
-s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
+s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
     s32 count;
     s32 offset;
     u8 *output;

@@ -11,13 +11,13 @@ typedef struct SdfPacDecoder {
     u8 command;           /* 0x01 */
     u16 pendingBytes;     /* 0x02 */
     u8 *output;           /* 0x04 */
-    u8 *input;            /* 0x08 */
+    const u8 *input;      /* 0x08 */
     s32 inputBytes;       /* 0x0C */
     u8 backrefLow;        /* 0x10 */
     u8 pad11[3];          /* 0x11: opaque */
 } SdfPacDecoder;
 
-s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, u8 *input, s32 inputBytes);
+s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes);
 void sdfStoreWordAndSetState(SdfPacDecoder *decoder, u8 *output);
 
 typedef char SdfPacDecoder_size_must_be_0x14[
