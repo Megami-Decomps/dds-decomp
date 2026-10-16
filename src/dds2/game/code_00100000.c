@@ -105,8 +105,8 @@ void kwlnResumeTaskScheduler(void) {
     D_00435B94 = 0;
 }
 
-void kwlnSetTaskPauseCount(u32 value) {
-    D_00435B90 = value;
+void kwlnSetTaskPauseCount(u32 pauseCount) {
+    D_00435B90 = pauseCount;
     D_00435B8C = 1;
     D_00435B94 = 0;
 }
