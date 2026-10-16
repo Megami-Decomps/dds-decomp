@@ -420,14 +420,14 @@ s32 mnuSelectPreferredMantraNode(MnuStatusResource *object, MantraMenuSrc *state
  * If absent, retain the previous selection; the return value is always zero. */
 s32 mnuSelectMatchingNode(MnuStatusResource *object, MantraMenuSrc *state) {
     struct MenuListNode *current = object->list->first;
-    s32 index = 0;
+    s32 listIndex = 0;
     while (current != 0) {
         if (current->partyRecord->unitId == state->targetId) {
-            state->selectedIndex = index;
+            state->selectedIndex = listIndex;
             return 0;
         }
         current = current->next;
-        index++;
+        listIndex++;
     }
     return 0;
 }
