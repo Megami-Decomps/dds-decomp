@@ -1153,10 +1153,10 @@ s32 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
 }
 
 /* Store a byte at valueIndex within the selected slot's values area. */
-void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex, s32 value) {
+void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex, s32 byteValue) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        datGameState->maps[mapIndex].slots[slotIndex].values[valueIndex] = value;
+        datGameState->maps[mapIndex].slots[slotIndex].values[valueIndex] = byteValue;
     }
 }
 
