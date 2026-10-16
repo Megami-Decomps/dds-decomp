@@ -471,22 +471,22 @@ ObjBase *effObjGetDataHandle(const EffWorldNode *object) {
     return data->resourceState;
 }
 
-EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
+EffWorldNode *dds3SpawnInnerVecObj6(s32 key, f32 *offset, void *rotation) {
     f32 zero[4];
     EffWorldNode *obj;
 
     memset(zero, 0, 0x10);
     zero[3] = 1.0f;
     obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_EFFECT_TRANSFORM);
-    obj->key = (u32)a;
+    obj->key = (u32)key;
     dds3EnsureSlotData(obj);
-    effObjSetInnerRotation(obj, second);
+    effObjSetInnerRotation(obj, rotation);
     effObjSetInnerPosition(obj, (u128 *)zero);
     effObjInnerVecBackup(obj->inner);
-    ((EffectTransformData *)obj->data)->offset[0] = vec[0];
-    ((EffectTransformData *)obj->data)->offset[1] = vec[1];
-    ((EffectTransformData *)obj->data)->offset[2] = vec[2];
-    ((EffectTransformData *)obj->data)->offset[3] = vec[3];
+    ((EffectTransformData *)obj->data)->offset[0] = offset[0];
+    ((EffectTransformData *)obj->data)->offset[1] = offset[1];
+    ((EffectTransformData *)obj->data)->offset[2] = offset[2];
+    ((EffectTransformData *)obj->data)->offset[3] = offset[3];
     return obj;
 }
 
