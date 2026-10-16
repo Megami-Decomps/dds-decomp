@@ -429,7 +429,138 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
     return -position[1] - unit->height * unit->scale * 0.5f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureFilteredUnitGroupBounds);
+f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
+    f32 position[4];
+    BtlUnit *unit;
+    f32 scale;
+    f32 farZ;
+    f32 halfHeight;
+    f32 top;
+    f32 rightX;
+    f32 leftX;
+    f32 halfDepth;
+    f32 reach;
+    f32 nearZ;
+    f32 halfWidth;
+    f32 minZ;
+    f32 maxZ;
+    f32 minX;
+    f32 maxX;
+    f32 lowestTop;
+    f32 highestTop;
+    f32 maxReach;
+    s32 needsFirstSample;
+    u32 status;
+
+    needsFirstSample = 1;
+    highestTop = 0.0f;
+    unit = ((BtlState *)btlGetRuntime())->units;
+    maxReach = 0.0f;
+    lowestTop = 0.0f;
+    maxX = 0.0f;
+    minX = 0.0f;
+    maxZ = 0.0f;
+    minZ = 0.0f;
+    while (unit != NULL) {
+        status = unit->status.flags;
+        if (status & 1) {
+            if (!(status & 0xC0)) {
+                if (status & mask) {
+                    btlUnitGetMuzzlePosVU(unit);
+                    VU0_STORE_VF(vf10, position);
+                    scale = unit->scale;
+                    reach = unit->reach * scale;
+                    rightX = position[0] + reach;
+                    farZ = position[2] + reach;
+                    leftX = position[0] - reach;
+                    nearZ = position[2] - reach;
+                    top = (unit->height * scale * 0.5f) - position[1];
+                    if (needsFirstSample != 0) {
+                        maxReach = reach;
+                        if (leftX < rightX) {
+                            maxX = rightX;
+                            minX = leftX;
+                        } else {
+                            maxX = leftX;
+                            minX = rightX;
+                        }
+                        if (nearZ < farZ) {
+                            maxZ = farZ;
+                            minZ = nearZ;
+                        } else {
+                            maxZ = nearZ;
+                            minZ = farZ;
+                        }
+                        lowestTop = top;
+                        needsFirstSample = 0;
+                        highestTop = lowestTop;
+                    } else {
+                        if (maxReach < reach) {
+                            maxReach = reach;
+                        }
+                        if (maxX < rightX) {
+                            maxX = rightX;
+                        }
+                        if (rightX < minX) {
+                            minX = rightX;
+                        }
+                        if (maxX < leftX) {
+                            maxX = leftX;
+                        }
+                        if (leftX < minX) {
+                            minX = leftX;
+                        }
+                        if (maxZ < farZ) {
+                            maxZ = farZ;
+                        }
+                        if (farZ < minZ) {
+                            minZ = farZ;
+                        }
+                        if (maxZ < nearZ) {
+                            maxZ = nearZ;
+                        }
+                        if (nearZ < minZ) {
+                            minZ = nearZ;
+                        }
+                        if (highestTop < top) {
+                            highestTop = top;
+                        }
+                        if (top < lowestTop) {
+                            lowestTop = top;
+                        }
+                    }
+                }
+            }
+        }
+        unit = unit->nextActor;
+    }
+    position[0] = (maxX + minX) * 0.5f;
+    position[1] = -highestTop * 0.5f;
+    position[2] = (maxZ + minZ) * 0.5f;
+    halfWidth = (maxX - minX) * 0.5f;
+    halfDepth = (maxZ - minZ) * 0.5f;
+    position[3] = 0.0f;
+    halfHeight = highestTop * 0.5f;
+    if (halfDepth < halfWidth) {
+        reach = halfHeight;
+        if (reach < halfWidth) {
+            reach = halfWidth;
+        }
+    } else {
+        reach = halfDepth;
+        if (!(halfHeight < reach)) {
+            reach = halfHeight;
+        }
+    }
+    VU0_LOAD_VF(vf10, position);
+    if (outMaxTop != NULL) {
+        *outMaxTop = highestTop;
+    }
+    if (outMinTop != NULL) {
+        *outMinTop = lowestTop;
+    }
+    return reach;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", btlMeasureEffectTargetGroupBounds);
 
