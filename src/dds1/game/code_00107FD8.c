@@ -134,7 +134,7 @@ extern char D_0039E200[];
 
 extern s32 evtPendingEventSelection;
 
-extern void evtCreateEventScriptProcess(s32 arg0);
+extern void evtCreateEventScriptProcess(s32 eventId);
 
 extern void evtCreateSkyTask(void);
 
