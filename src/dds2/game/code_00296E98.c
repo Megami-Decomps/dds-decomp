@@ -189,8 +189,8 @@ void mnuSetQuantityListTransition(struct MenuList *list, u32 value) {
     }
 }
 
-void mnuSetCommandPhase(MenuTerminalContext *owner, u32 value) {
-    owner->phase = value;
+void mnuSetCommandPhase(MenuTerminalContext *owner, u32 phase) {
+    owner->phase = phase;
     owner->commandFrames = 0;
 }
 
