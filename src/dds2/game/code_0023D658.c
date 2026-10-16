@@ -857,13 +857,13 @@ u32 evtOpIsUnitMotionIdleOrTimed(void) {
 }
 
 u32 evtOpTestUnitMotionNodeFlag(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
     s32 motionNodeIndex;
     u32 ret = 1;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return ret;
     }
@@ -951,11 +951,11 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
 
 /* Store the script-supplied value for the selected event unit. */
 u32 evtCommandSetUnitValue(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return 1;
     }
@@ -965,11 +965,11 @@ u32 evtCommandSetUnitValue(void) {
 
 /* Store the two script-supplied world-unit state values. */
 u32 evtCmdSetWorldUnitStatePair(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return 1;
     }
@@ -979,11 +979,11 @@ u32 evtCmdSetWorldUnitStatePair(void) {
 }
 
 u32 evtCmdPrepareUnitMotionAndLogState(void) {
-    s32 id;
+    s32 worldObjectKey;
     EvtUnit *unit;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    worldObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(worldObjectKey);
     if (unit == NULL) {
         return 1;
     }
