@@ -521,7 +521,7 @@ extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *object, void *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
-void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
+void evtViewerBindNamedOwner(EffWorldNode *obj, s32 ownerNameIndex, s32 type, u32 word, EvtRuntime *viewer) {
     EffWorldNode *owner;
     struct PolyMovieObject *movie;
     s32 frame;
@@ -530,12 +530,12 @@ void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, E
         return;
     }
     frame = viewer->curFrame;
-    if (value < 0) {
+    if (ownerNameIndex < 0) {
         return;
     }
     owner = dds3FindObjectChainNodeByName(
         (EffWorldNode *)dds3GetWorldObject(),
-        (const u8 *)viewer->entryName[value]);
+        (const u8 *)viewer->entryName[ownerNameIndex]);
     if (owner == NULL) {
         return;
     }
