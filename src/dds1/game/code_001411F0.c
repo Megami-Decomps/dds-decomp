@@ -435,7 +435,111 @@ void fldPlayPendingSounds(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001415F8);
+extern f32 fldLookAtFarPoint[];
+extern void sndQueueSoundId(u32);
+extern s32 D_003BAE90;
+extern s32 D_003BAE94;
+extern f32 fldLookAtNearPoint[];
+typedef struct SoundPosition {
+    f32 v[4];
+} SoundPosition;
+extern const SoundPosition D_003A0470;
+extern void sndSendSpatialPosition(s32, s32, f32, f32, f32);
+extern void sndUpdateScaledListenerState(f32, f32, f32, f32, f32, f32);
+void func_001415F8(void) {
+    SoundPosition position = D_003A0470;
+    f32 listenerX, listenerY, listenerZ;
+    f32 extraRadius;
+    f32 dx, dy, dz, distance, vertical;
+    f32 sourceX, sourceY, sourceZ;
+    s32 tick;
+    s32 nearby;
+    s32 flags;
+    s32 stage;
+    s32 i;
+    FldClear18 *entry;
+
+    tick = D_003BAE94 + 1;
+    nearby = 0;
+    D_003BAE94 = tick;
+    if (fldAreaState.mode == 0) {
+        listenerX = fldLookAtFarPoint[0] - fldLookAtNearPoint[0];
+        extraRadius = 500.0f;
+        listenerY = fldLookAtNearPoint[1];
+        listenerZ = fldLookAtFarPoint[2] - fldLookAtNearPoint[2];
+        distance = fsqrtf(listenerX * listenerX + listenerZ * listenerZ);
+        if (distance > 200.0f) {
+            listenerX = fldLookAtNearPoint[0] + (listenerX / distance) * 200.0f;
+            listenerZ = fldLookAtNearPoint[2] + (listenerZ / distance) * 200.0f;
+        } else {
+            listenerX = fldLookAtFarPoint[0];
+            listenerZ = fldLookAtFarPoint[2];
+        }
+    } else {
+        extraRadius = 0.0f;
+        listenerX = fldAreaState.x;
+        listenerY = fldAreaState.y;
+        listenerZ = fldAreaState.z;
+    }
+    for (i = 0; i < fldPendingSoundCount; i++) {
+        dx = listenerX - fldPendingSounds[i].y;
+        dy = listenerY - fldPendingSounds[i].z;
+        dz = listenerZ - fldPendingSounds[i].w;
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+        if (distance < fldPendingSounds[i].x + extraRadius) {
+            distance = fsqrtf(dy * dy);
+            if (distance < 500.0f) {
+                nearby = 1;
+            }
+        }
+    }
+    if (nearby != 0 && (tick & 1)) {
+        if (fldAreaState.mode == 0) {
+            sndUpdateScaledListenerState(listenerX, listenerY, listenerZ,
+                fldLookAtNearPoint[0], fldLookAtNearPoint[1], fldLookAtNearPoint[2]);
+        } else {
+            sndUpdateScaledListenerState(fldLookAtFarPoint[0], fldLookAtFarPoint[1], fldLookAtFarPoint[2],
+                fldLookAtNearPoint[0], fldLookAtNearPoint[1], fldLookAtNearPoint[2]);
+        }
+    }
+    stage = fldAreaState.area;
+    if (stage == 11) {
+        stage = mdlFlagTest(0x28) != 0 ? 2 : stage;
+    }
+    for (i = 0; i < fldPendingSoundCount; i++) {
+        entry = &fldPendingSounds[i];
+        sourceX = fldPendingSounds[i].y;
+        sourceY = fldPendingSounds[i].z;
+        sourceZ = fldPendingSounds[i].w;
+        dx = listenerX - sourceX;
+        dy = listenerY - sourceY;
+        dz = listenerZ - sourceZ;
+        vertical = fsqrtf(dy * dy);
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+        if (vertical > 500.0f) {
+            distance = 99999.0f;
+        }
+        flags = entry->flags;
+        if (!(flags & 1)) {
+            if (distance < entry->x + extraRadius) {
+                position.v[0] = sourceX;
+                position.v[1] = sourceY;
+                position.v[2] = sourceZ;
+                entry->flags = flags | 1;
+                sndSendSpatialPosition(fldStageSoundBaseTable[stage] + entry->soundId,
+                    (s32)(entry->x / 100.0f), position.v[0], position.v[1], position.v[2]);
+            }
+        } else if (distance < entry->x + extraRadius) {
+            position.v[0] = sourceX;
+            position.v[1] = sourceY;
+            position.v[2] = sourceZ;
+        } else {
+            entry->flags = flags & ~1;
+            sndQueueSoundId(fldStageSoundBaseTable[stage] + entry->soundId);
+        }
+    }
+    D_003BAE90++;
+}
 
 extern s32 D_0033EB7C[];
 
