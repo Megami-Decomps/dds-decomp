@@ -40,7 +40,7 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
     if (resourceAddress == NULL) {
         return 0;
     }
-    worldData->sceneResourceHandle = (u32)resourceHandle;
+    worldData->sceneResourceHandle = resourceHandle;
     worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
     return 1;
 }
@@ -62,7 +62,7 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
     }
     resourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)resourceHandle);
     if (resourceAddress != 0) {
-        worldData->sceneResourceHandle = (u32)resourceHandle;
+        worldData->sceneResourceHandle = (struct SdfMemBlock *)resourceHandle;
         worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
         return 1;
     }
@@ -75,7 +75,7 @@ void evtReleaseSceneResource(EffWorldNode *worldNode) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (worldData->sceneResourceHandle != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)worldData->sceneResourceHandle);
+        sdfReleaseResourceAllocation(worldData->sceneResourceHandle);
     }
     worldData->sceneResourceHandle = 0;
     worldData->sceneScript = NULL;
