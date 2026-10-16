@@ -8905,8 +8905,9 @@ void func_0013EC68(void) {
         }
         flags = entry->flags64;
         if (flags & 2) {
-            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor, entry->unk68, entry->unk69,
-                                                entry->unk6A, entry->unk6B);
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor,
+                                                entry->explorationColumn, entry->explorationRow,
+                                                entry->explorationColumnCount, entry->explorationRowCount);
         }
         if (entry->variant == 1) {
             fldReleaseCurrentBgm();
