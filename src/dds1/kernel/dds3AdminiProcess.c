@@ -168,16 +168,16 @@ s32 dds3AdminPollModeDestruction(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     s32 mode = work->activeMode;
     s32 (*destroy)(void);
-    s32 result;
+    s32 destroyResult;
 
     if (mode >= 0) {
         destroy = ddsAdminModeCallbacks[mode].destroy;
         if (destroy != NULL) {
-            result = destroy();
-            if (result < 0) {
+            destroyResult = destroy();
+            if (destroyResult < 0) {
                 return 0;
             }
-            work->modeTransitionDelay = result + 1;
+            work->modeTransitionDelay = destroyResult + 1;
             work->activeMode = -1;
         }
     }
