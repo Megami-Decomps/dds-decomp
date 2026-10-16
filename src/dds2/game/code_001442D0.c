@@ -2594,11 +2594,11 @@ void fldCenterCameraOnEntry(void) {
 
 /* Stores the area, room and third location selection, and selects the area's
  * flag table. The third selection's interpretation is left unknown. */
-void fldSetSceneLocation(s32 stage, s32 room, s32 entrance) {
-    fldAreaState.area = stage;
-    fldAreaState.unk18 = entrance;
-    D_00436248 = fldAreaState.floor = room;
-    fldAreaFlagIndex = stage % 100;
+void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
+    fldAreaState.area = area;
+    fldAreaState.unk18 = stage;
+    D_00436248 = fldAreaState.floor = floor;
+    fldAreaFlagIndex = area % 100;
 }
 
 extern s32 D_00387CE0[];
