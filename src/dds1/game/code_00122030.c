@@ -1031,7 +1031,7 @@ extern char D_0039FC50[];
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern s32 D_0032E4C8[];
 extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
-extern void fldApplySceneLightSet(s32 index, s32 mode);
+extern void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode);
 extern s32 fldUpdateCameraObjectPose(void);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);

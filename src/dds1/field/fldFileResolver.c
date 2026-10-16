@@ -5702,7 +5702,7 @@ extern u32 D_003BADDC;
 extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
                           f32 redB, f32 greenB, f32 blueB, f32 x, f32 y, f32 z);
 
-void fldApplySceneLightSet(s32 index, s32 mode) {
+void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -5713,24 +5713,24 @@ void fldApplySceneLightSet(s32 index, s32 mode) {
 
     if (D_0032E3C0[0] < 200) {
         if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
-            mode = 0;
+            durationMode = 0;
         }
         defaultDuration = 15;
         duration = 0;
-        if (mode != 0) {
+        if (durationMode != 0) {
             duration = defaultDuration;
         }
-        if (mode >= 2) {
-            duration = mode;
+        if (durationMode >= 2) {
+            duration = durationMode;
         }
-        if (D_003BADD8 != index) {
-            if (index == 0) {
-                index = D_003BAD98;
+        if (D_003BADD8 != lightSetIndex) {
+            if (lightSetIndex == 0) {
+                lightSetIndex = D_003BAD98;
             }
-            light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[lightSetIndex];
             D_003BADDC = D_0032E570[11];
-            D_0032E570[11] = index;
-            D_003BADD8 = index;
+            D_0032E570[11] = lightSetIndex;
+            D_003BADD8 = lightSetIndex;
             area = light->fadeArea;
             D_0032E570[13] = area;
             D_0032E570[14] = light->displayStateSlot14;

@@ -944,7 +944,7 @@ extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceR
 extern void *dds3GetTransformSourceData(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void fldApplySceneLightSet(s32 index, s32 mode);
+extern void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode);
 extern void fldSpawnPlayerUnits(f32 *transform);
 extern void fldCreateChaseCameraObject(void);
 extern void fldPreparePlayerSceneCameraTarget(void);
