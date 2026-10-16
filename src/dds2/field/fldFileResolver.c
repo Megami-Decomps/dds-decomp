@@ -5523,16 +5523,16 @@ void fldSetSwayMode(u32 mode) {
     fldSwayOffset = 0;
 }
 
-void fldSetSkyDrawState(u32 value) {
-    fldSkyDrawState = value;
+void fldSetSkyDrawState(u32 drawState) {
+    fldSkyDrawState = drawState;
 }
 
 u32 fldGetSkyDrawState(void) {
     return fldSkyDrawState;
 }
 
-void fldSetSkyAlpha(u32 value) {
-    D_003899C0[0] = value;
+void fldSetSkyAlpha(u32 alpha) {
+    D_003899C0[0] = alpha;
 }
 
 u32 fldGetSkyAlpha(void) {
