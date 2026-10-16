@@ -278,9 +278,9 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
 
 extern u16 mnuExtraLevelWeightedItemPairsView[][17];
 
-s32 mnuChooseWeightedItem(s32 index) {
+s32 mnuChooseWeightedItem(s32 rewardRowIndex) {
     s32 random = (u8)effMiscRand(NULL);
-    u16 *entry = mnuExtraLevelWeightedItemPairsView[index];
+    u16 *entry = mnuExtraLevelWeightedItemPairsView[rewardRowIndex];
     u32 i;
 
     for (i = 0; i < 8; i++, entry += 2) {
