@@ -1290,7 +1290,7 @@ s32 fldOpSetAlternateMapTargetFlag(void) {
     return 1;
 }
 
-extern void fldSetMapSlotByte(s32 area, s32 slotIndex, s32 valueOffset, s32 value);
+extern void fldSetMapSlotByte(s32 area, s32 slotIndex, s32 valueIndex, s32 value);
 
 s32 fldCmdSetMapSlotByte(void) {
     s32 world;
