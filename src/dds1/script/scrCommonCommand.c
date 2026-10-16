@@ -586,11 +586,11 @@ s32 scrCmdSetStaggeredBlurPackedColor(void)
 
 s32 scrCmdSetStaggeredBlurIntegerParameters(void)
 {
-    s32 p0;
-    s32 p1;
-    p0 = scrReadIntParameter(0);
-    p1 = scrReadIntParameter(1);
-    kwlnDrawSetD30Triple(p0, p1, scrReadIntParameter(2));
+    s32 size;
+    s32 x;
+    size = scrReadIntParameter(0);
+    x = scrReadIntParameter(1);
+    kwlnDrawSetD30Triple(size, x, scrReadIntParameter(2));
     return 1;
 }
 
