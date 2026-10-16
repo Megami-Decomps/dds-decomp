@@ -213,7 +213,6 @@ extern s32 D_004361BC;
 
 
 
-extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 
 
 extern f32 fldDotVector(f32 *, f32 *);
