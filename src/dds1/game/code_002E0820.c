@@ -1579,10 +1579,10 @@ void sdfDevConsListRemove(ConsNode *node) {
     }
 }
 
-/* Unlink the console, release its cell-buffer handle, then free the node. */
+/* Unlink the console, release its cell-buffer allocation, then free the node. */
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->bufferHandle));
+    sdfReleaseResourceAllocation(node->bufferAllocation);
     sdfReleaseChipBlock(node);
 }
 
@@ -1603,7 +1603,7 @@ void sdfDevConsResetNode(ConsNode *node) {
  * values. Dimensions and the two opaque halfword inputs are not validated. */
 ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
     ConsNode *node;
-    u32 bufferHandle;
+    struct SdfMemBlock *bufferAllocation;
 
     sdfDevConsInit();
     node = sdfAllocSizeClassBlock(SDF_CONSOLE_NODE_BYTES);
@@ -1614,9 +1614,9 @@ ConsNode *sdfDevConsNodeCreate(u32 screenOriginX, u32 screenOriginY, s32 columns
     node->opaque17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
-    bufferHandle = (u32)sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
-    node->bufferHandle = bufferHandle;
-    node->cells = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(bufferHandle));
+    bufferAllocation = sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
+    node->bufferAllocation = bufferAllocation;
+    node->cells = (u8 *)sdfResourceRetainAddress(bufferAllocation);
     sdfDevConsNodeClear(node);
     sdfDevConsListInsert(node);
     return node;

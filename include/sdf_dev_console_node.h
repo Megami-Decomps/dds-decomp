@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SdfMemBlock;
+
 typedef struct ConsNode {
     struct ConsNode *next;
     struct ConsNode *prev;
@@ -16,7 +18,7 @@ typedef struct ConsNode {
     u8 opaque15;
     u8 textAttribute;
     u8 opaque17;
-    u32 bufferHandle;
+    struct SdfMemBlock *bufferAllocation; /* 0x18: owns the cell buffer. */
     u8 *cells;
 } ConsNode;
 
@@ -27,6 +29,8 @@ typedef char ConsNodeScreenOriginYOffsetCheck[
     (((unsigned int)&((ConsNode *)0)->screenOriginY) == 0x0A) ? 1 : -1];
 typedef char ConsNodeDimensionsOffsetCheck[
     (((unsigned int)&((ConsNode *)0)->columns) == 0x0C) ? 1 : -1];
+typedef char ConsNodeBufferAllocationOffsetCheck[
+    (((unsigned int)&((ConsNode *)0)->bufferAllocation) == 0x18) ? 1 : -1];
 typedef char ConsNodeCellsOffsetCheck[
     (((unsigned int)&((ConsNode *)0)->cells) == 0x1C) ? 1 : -1];
 
