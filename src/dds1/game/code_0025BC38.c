@@ -317,7 +317,8 @@ void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *animationContext, Me
     }
 }
 
-extern void mnuDrawSceneEntrySpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSceneEntrySpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+                                                s32 placementIndex, s32 flags, s32 context);
 
 /* Choose draw codes from profile-match, cap and entry-state flags; cap overlay is half-strength. */
 void mnuDrawMantraEntryStatusOverlays(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, MnuMantraGridEntry *entry, s32 drawArg) {
@@ -349,7 +350,8 @@ typedef struct MnuProfileIdList {
 extern const MnuProfileIdList D_003AFA00;
 extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
-extern void mnuDrawMantraSceneSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                                s32 flags, s32 context);
 
 /* Draw cap markers, with a second marker for the first four profiles. */
 void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,

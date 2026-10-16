@@ -73,7 +73,8 @@ typedef struct {
 extern DspEntrySpriteLookup D_003BC448[];
 extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
-extern void mnuDrawPlacedSpriteByIndex(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                       s32 mode, s32 context);
 extern void sprintf(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
