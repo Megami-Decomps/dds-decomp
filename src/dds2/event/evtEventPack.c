@@ -87,47 +87,47 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
-    EvtPackLoadState *data;
+    EvtPackLoadState *packState;
     EvtPackEntry *entry;
-    s32 count;
+    s32 entryCount;
     s32 remaining;
-    s32 *baseData;
-    s32 *type2Data;
-    s32 *type3Data;
-    const SdfTextureOffsetListHeader *type4Data;
+    s32 *areaRoomData;
+    s32 *resource0Data;
+    s32 *resource1Data;
+    const SdfTextureOffsetListHeader *textureOffsets;
 
-    data = evtGetEventPackLoadState(eventId);
-    baseData = NULL;
-    type3Data = NULL;
-    type2Data = NULL;
-    type4Data = NULL;
-    count = data->header->entryCount;
-    if (count > 0) {
-        entry = data->entries;
-        remaining = count;
+    packState = evtGetEventPackLoadState(eventId);
+    areaRoomData = NULL;
+    resource1Data = NULL;
+    resource0Data = NULL;
+    textureOffsets = NULL;
+    entryCount = packState->header->entryCount;
+    if (entryCount > 0) {
+        entry = packState->entries;
+        remaining = entryCount;
         do {
             if (entry->resourceId == resourceId) {
                 switch (entry->kind) {
                 case 2:
-                    type2Data = (s32 *)(data->data + entry->dataOffset);
+                    resource0Data = (s32 *)(packState->data + entry->dataOffset);
                     break;
                 case 3:
-                    type3Data = (s32 *)(data->data + entry->dataOffset);
+                    resource1Data = (s32 *)(packState->data + entry->dataOffset);
                     break;
                 case 4:
-                    type4Data = (const SdfTextureOffsetListHeader *)(data->data + entry->dataOffset);
+                    textureOffsets = (const SdfTextureOffsetListHeader *)(packState->data + entry->dataOffset);
                     break;
                 }
             }
             if (entry->secondaryResourceId == resourceId && entry->kind == 1) {
-                baseData = (s32 *)(data->data + entry->dataOffset);
+                areaRoomData = (s32 *)(packState->data + entry->dataOffset);
             }
             entry++;
         } while (--remaining != 0);
     }
 
-    if (baseData != NULL && type2Data != NULL && type3Data != NULL && type4Data != NULL) {
-        evtCreateWorldObjectFromResource(baseData[0], baseData[1], (s32)type2Data, (s32)type3Data, type4Data, 0);
+    if (areaRoomData != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
+        evtCreateWorldObjectFromResource(areaRoomData[0], areaRoomData[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
         fldSetRelocateOnRelease(1);
         kwlnDrawControlFlags |= 0x02000000;
         return 1;
