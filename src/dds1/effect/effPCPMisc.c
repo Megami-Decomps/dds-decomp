@@ -1387,15 +1387,15 @@ void *effPcpAllocateFixedOriginGroup(void) {
     return work;
 }
 
-void effPcpAngledBurstGroupRelease(EffPCPThunderGroup *work) {
+void effPcpAngledBurstGroupRelease(EffPCPThunderGroup *group) {
     s32 i;
     EffThunderFragmentWork **handle;
 
-    handle = work->handles;
+    handle = group->handles;
     for (i = 0; i < 12; i++) {
         effThunderReleaseFragmentWork(handle[i]);
     }
-    sdfReleaseChipBlock(work);
+    sdfReleaseChipBlock(group);
 }
 
 void *effPcpCreateFixedOriginParticles(void) {
