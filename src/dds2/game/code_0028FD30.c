@@ -297,24 +297,24 @@ s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *resource, s8 direct
 
 
 s32 mnuClassifyMantraNeighborStatus(MnuStatusResource *resource, MantraNodePos *node, s8 neighborIndex) {
-    u16 selected;
-    MantraNodePos *entry;
-    u16 value;
+    u16 selectedUnitIndex;
+    MantraNodePos *neighbor;
+    u16 neighborFlags;
     s32 result;
 
     if (node == NULL || neighborIndex == -1) {
         return -1;
     }
-    selected = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)resource);
-    entry = node->neighbors[neighborIndex];
+    selectedUnitIndex = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)resource);
+    neighbor = node->neighbors[neighborIndex];
     result = 0;
-    if (entry == NULL) {
+    if (neighbor == NULL) {
         result = 1;
     } else {
-        value = resource->menu.slots[selected]->flags[entry->selector.fields.index];
-        if ((value & 15) == 3) {
+        neighborFlags = resource->menu.slots[selectedUnitIndex]->flags[neighbor->selector.fields.index];
+        if ((neighborFlags & 15) == 3) {
             result = 2;
-        } else if ((entry->selector.packed & 0x100) != 0 && ((value >> 8) & 8) != 0) {
+        } else if ((neighbor->selector.packed & 0x100) != 0 && ((neighborFlags >> 8) & 8) != 0) {
             switch (neighborIndex) {
                 case 1:
                 case 4:
