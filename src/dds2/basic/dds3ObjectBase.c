@@ -145,9 +145,9 @@ WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object) {
     return base->worldIndexNode;
 }
 
-/* Return the primary resource-handle word, whose interpretation depends on state. */
-u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object) {
-    return (u32)dds3GetObjectOwnedHandle(object)->resourceHandle;
+/* Return the stored resource pointer; its type depends on resourceState. */
+void *dds3GetObjectBaseResourceHandle(EffWorldNode *object) {
+    return dds3GetObjectOwnedHandle(object)->resourceHandle;
 }
 
 /* A nonzero handle releases model/context state (0) or device/motion state (1),

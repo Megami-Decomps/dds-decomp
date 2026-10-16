@@ -3169,7 +3169,7 @@ void fldUpdateObjectSlotActivation(void) {
         switch (fldObjectSlots[i].activationState) {
         case 0:
             if (fldObjectSlots[i].activationRequested == 1) {
-                resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryPlain(resource, 0, 1);
                 fldObjectSlots[i].activationState = fldObjectSlots[i].activationRequested;
                 switch (fldObjectSlots[i].effectVariant) {
@@ -3192,14 +3192,14 @@ void fldUpdateObjectSlotActivation(void) {
                     break;
                 }
             } else {
-                resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                     mdlAddEntryPlain(resource, 0, 0);
                 }
             }
             break;
         case 1:
-            resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+            resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
             if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
@@ -3208,7 +3208,7 @@ void fldUpdateObjectSlotActivation(void) {
             break;
         case 2:
             if (fldTestSceneControlFlags(0x40)) {
-                resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryFlagged(resource, 0, 3);
                 fldObjectSlots[i].activationRequested = 3;
                 fldObjectSlots[i].activationState = 3;
