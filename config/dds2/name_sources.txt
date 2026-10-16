@@ -9467,3 +9467,4 @@
 0x001EEB78	btlBuildActorPairFramingCameraPose	inferred	Frames the actor and selected target, including the alternate-mode candidate filter.
 0x001EF030	btlBuildTargetGroupFramingCameraPose	inferred	Frames the actor against the extreme endpoints of the selected target side.
 0x001FF0F8	btlBuildProjectedActorPairBoundsVU	inferred	Projects the eligible actor pair onto the supplied line, returns its bounding radius and VF10 center, and optionally publishes vertical extrema.
+0x001EE458	btlBuildGroupSizeActionCameraPair	inferred	Builds both action cameras from active target-group count and acting-unit side, using the selected-preset pair for one eligible actor.

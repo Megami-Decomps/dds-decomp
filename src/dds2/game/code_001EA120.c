@@ -633,7 +633,7 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
 }
 
 extern void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action);
-extern void func_001EE458(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
@@ -684,7 +684,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
                     if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
-                        func_001EE458(action, &action->frontCamera, &action->backCamera);
+                        btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                     } else {
                         btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
                     }
@@ -758,7 +758,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
                         ((effMiscRand((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
-                func_001EE458(action, &action->frontCamera, &action->backCamera);
+                btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
@@ -1290,7 +1290,7 @@ void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *unit) {
 }
 
 extern s32 datActionAnimationRecords;
-extern void func_001EE458(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlSelectLinkageSkillCameraPreset();
 
 void btlSelectActionCameraPose(BtlLinkedCommand *action) {
@@ -1329,7 +1329,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
             return;
         }
         if ((action->link->unit->status.flags & 0x400) && hasFlag200 == 0 && hasFlag400 == 1) {
-            func_001EE458(action, &action->frontCamera, &action->backCamera);
+            btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
             action->flags |= 0x10000;
             return;
         }
