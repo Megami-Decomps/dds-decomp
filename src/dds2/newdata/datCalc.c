@@ -1041,7 +1041,7 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
+extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit);
 extern s32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 extern void evtCopyRosterTableValue(DatPartyRecord *);
