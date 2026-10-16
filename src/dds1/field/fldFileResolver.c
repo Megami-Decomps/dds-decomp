@@ -9212,9 +9212,9 @@ s32 fldGetRowValue(u32 kind) {
 
     switch (kind) {
     case 0:
-        return fldActorWaypointRows.headers[slot].count;
+        return fldActorWaypointRows.headers[slot].floorCount;
     case 1:
-        return fldActorWaypointRows.headers[slot].unk4;
+        return fldActorWaypointRows.headers[slot].sound;
     case 2:
         return fldActorWaypointRows.headers[slot].body.data[0];
     case 3:
@@ -9240,14 +9240,14 @@ s32 fldGetRowValue(u32 kind) {
     case 13:
         return fldActorWaypointRows.headers[slot].body.data[11];
     case 14:
-        return fldActorWaypointRows.headers[slot].count - D_003BAE50 - 1;
+        return fldActorWaypointRows.headers[slot].floorCount - D_003BAE50 - 1;
     }
     return 0;
 }
 
 s32 fldFindTableEntry(s32 index) {
     s32 slot = D_003BAE4C;
-    s32 count = fldActorWaypointRows.headers[slot].count;
+    s32 count = fldActorWaypointRows.headers[slot].floorCount;
 
     if (count - 1 < index) {
         return count - D_003BAE50 - 1;
