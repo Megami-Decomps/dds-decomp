@@ -72,11 +72,11 @@ void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData, u32 dataBy
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 
 /* Configure administrative state from three caller-supplied parameters. */
-void dds3AdminSubmitMarkedRequest(s32 value, void *data, u32 size)
+void dds3AdminSubmitMarkedRequest(s32 requestedMode, void *requestData, u32 dataBytes)
 {
     AdminWork* work;
 
-    dds3AdminSubmitModeRequest(value, data, size, 0);
+    dds3AdminSubmitModeRequest(requestedMode, requestData, dataBytes, 0);
     work = dds3GetAdminTaskWork();
     work->flags |= 8;
 }
