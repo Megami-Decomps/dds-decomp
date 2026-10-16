@@ -117,8 +117,8 @@ u32 sdfGetFlagListAlphaSurfaceIndex(SdfFlagListWork *entry) {
 }
 
 /* Replace the flag list's draw-surface index without validation. */
-void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *entry, u32 value) {
-    entry->params.alpha.surfaceIndex = value;
+void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *entry, u32 surfaceIndex) {
+    entry->params.alpha.surfaceIndex = surfaceIndex;
 }
 
 void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {

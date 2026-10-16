@@ -1497,8 +1497,8 @@ u32 sdfGetFlagListAlphaSurfaceIndex(SdfFlagListWork *work) {
     return work->params.alpha.surfaceIndex;
 }
 
-void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *work, u32 value) {
-    work->params.alpha.surfaceIndex = value;
+void sdfSetFlagListAlphaSurfaceIndex(SdfFlagListWork *work, u32 surfaceIndex) {
+    work->params.alpha.surfaceIndex = surfaceIndex;
 }
 
 void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
