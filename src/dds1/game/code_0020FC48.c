@@ -2089,10 +2089,10 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, BtlDebugMenuCursor *
 extern void btlDebugDrawTwoColorRectangle(u8 *, u8 *, s32, s32, u32, u32);
 
 /* Size the frame from the visible rows, then forward the row-draw result. */
-s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 frameWidth, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
     s32 frameHeight = selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
-    btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, frameHeight, 0x80806020, 0x30000000);
-    return btlDrawSelectableListRows(x, y, mode, selectionState, rowTexts);
+    btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, frameHeight, 0x80806020, 0x30000000);
+    return btlDrawSelectableListRows(x, y, frameWidth, selectionState, rowTexts);
 }
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
@@ -2103,7 +2103,7 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
-s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 frameWidth, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
     void *indexPackets;
     u32 firstIndex;
     u32 visibleRowCount;
@@ -2111,7 +2111,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *select
     u32 endIndex;
     u32 selectedIndex;
     s32 rowY;
-    btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
+    btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
     indexPackets = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(indexPackets);
     firstIndex = selectionState->top;
@@ -2131,7 +2131,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *select
         }
     }
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
-    return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, mode, selectionState, rowTexts);
+    return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
 extern s32 D_003BAA70;
