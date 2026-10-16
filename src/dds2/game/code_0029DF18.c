@@ -478,7 +478,7 @@ extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
 
-s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow, s32 rowIndex, s8 mode) {
+s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow, s32 rowIndex, s8 progressKind) {
     s32 result = 0;
     s32 levelDelta = work->levelAnimation[rowIndex].level - progressRow->unit->level;
     s32 nextLevelExp = ptyComputeTotalExp(progressRow->unit, levelDelta + 1);
@@ -489,7 +489,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
     if (range == 0) {
         range = ptyComputeTotalExp(progressRow->unit, levelDelta + 1);
     }
-    if (mode == 0) {
+    if (progressKind == 0) {
         if (work->levelAnimation[rowIndex].applied > 0) {
             if (work->levelAnimation[rowIndex].skipRamp == 0) {
                 work->levelAnimation[rowIndex].frames++;
