@@ -83,12 +83,12 @@ extern EffScreenDrawParams effBlurRectangleParameters;
 extern EffScreenDrawParams D_00355908;
 extern EffSolidRectParams effColorRectangleParameters;
 extern EffScreenDrawParams D_003559A0;
-extern EffBlurTemplateBody D_00355AF8;
-extern EffBlurScatterParams D_00355C70;
+extern EffBlurTemplateBody effTexturedBlurSetupParameters;
+extern EffBlurScatterParams effScatterBlurSetupParameters;
 extern EffScreenDrawParams D_00355E48;
 extern EffSolidRectParams D_00355F88;
-extern EffResourceRectParams D_00356088;
-extern EffBlurScaleParams D_003561C8;
+extern EffResourceRectParams effResourceRectangleSetupParameters;
+extern EffBlurScaleParams effStaggeredBlurSetupParameters;
 extern void *memcpy(void *, const void *, u32);
 
 extern EffResourceRectWork *effTexturedSquareWork;
@@ -826,7 +826,7 @@ void effDispatchActive(void) {
 }
 
 /* callbackResult must be valid whenever callback is present. */
-extern EffEventSetupRecord D_00355AB8;
+extern EffEventSetupRecord effRectangleBlurSetupRecord;
 extern s8 D_003BB0BD;
 extern s8 D_0039862B[];
 extern void effEventSetupBeforeRecordNoOp(void);
@@ -839,7 +839,7 @@ s32 effUpdateCh72Params(void) {
     u8 ready = D_003BB0BD;
 
     if (D_003BB0BD == 0) {
-        EffEventSetupRecord *state = &D_00355AB8;
+        EffEventSetupRecord *state = &effRectangleBlurSetupRecord;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(state->source);
@@ -853,9 +853,9 @@ s32 effUpdateCh72Params(void) {
         D_003BB0BD = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&D_00355AB8);
+        effReturnEventSetupWord((u32)&effRectangleBlurSetupRecord);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&D_00355AB8);
+        effEventSetupRecordNoOp(&effRectangleBlurSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0039862B[0] < 0) {
@@ -874,7 +874,7 @@ void effSetLoadDescA(void *parameters) {
     memcpy(&D_003559A0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord D_00355C30;
+extern EffEventSetupRecord effTexturedBlurSetupRecord;
 extern s8 D_003BB0CD;
 
 /* Prepare the blur-template callback from its explicit parameter block,
@@ -883,10 +883,10 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
     u8 ready = D_003BB0CD;
 
     if (D_003BB0CD == 0) {
-        EffEventSetupRecord *state = &D_00355C30;
+        EffEventSetupRecord *state = &effTexturedBlurSetupRecord;
 
         if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_00355AF8);
+            *state->callbackResult = state->callback(&effTexturedBlurSetupParameters);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -897,9 +897,9 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
         D_003BB0CD = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&D_00355C30);
+        effReturnEventSetupWord((u32)&effTexturedBlurSetupRecord);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&D_00355C30);
+        effEventSetupRecordNoOp(&effTexturedBlurSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0039862B[0] < 0) {
@@ -910,15 +910,15 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
 
 /* Expose the blur-template setup parameters by address. */
 EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void) {
-    return &D_00355AF8;
+    return &effTexturedBlurSetupParameters;
 }
 
 /* Replace the setup template; this does not modify the active blur work. */
 void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters) {
-    D_00355AF8 = *parameters;
+    effTexturedBlurSetupParameters = *parameters;
 }
 
-extern EffEventSetupRecord D_00355E08;
+extern EffEventSetupRecord effScatterBlurSetupRecord;
 extern s8 D_003BB0FF;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
@@ -926,10 +926,10 @@ s32 effEventAdvanceScatterBlurSetup(void) {
     u8 ready = D_003BB0FF;
 
     if (D_003BB0FF == 0) {
-        EffEventSetupRecord *state = &D_00355E08;
+        EffEventSetupRecord *state = &effScatterBlurSetupRecord;
 
         if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_00355C70);
+            *state->callbackResult = state->callback(&effScatterBlurSetupParameters);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -940,9 +940,9 @@ s32 effEventAdvanceScatterBlurSetup(void) {
         D_003BB0FF = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&D_00355E08);
+        effReturnEventSetupWord((u32)&effScatterBlurSetupRecord);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&D_00355E08);
+        effEventSetupRecordNoOp(&effScatterBlurSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0039862B[0] < 0) {
@@ -953,15 +953,15 @@ s32 effEventAdvanceScatterBlurSetup(void) {
 
 /* Expose the scatter-blur setup parameters by address. */
 EffBlurScatterParams *effEventGetScatterBlurSetupParams(void) {
-    return &D_00355C70;
+    return &effScatterBlurSetupParameters;
 }
 
 /* Replace setup parameters without replacing the active filter-blur work. */
 void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters) {
-    D_00355C70 = *parameters;
+    effScatterBlurSetupParameters = *parameters;
 }
 
-extern EffEventSetupRecord D_00355F48;
+extern EffEventSetupRecord effFramebufferQuadSetupRecord;
 extern s8 D_003BB114;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
@@ -969,7 +969,7 @@ s32 effEventAdvanceScreenDrawSetup(void) {
     u8 ready = D_003BB114;
 
     if (D_003BB114 == 0) {
-        EffEventSetupRecord *state = &D_00355F48;
+        EffEventSetupRecord *state = &effFramebufferQuadSetupRecord;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(state->source);
@@ -983,9 +983,9 @@ s32 effEventAdvanceScreenDrawSetup(void) {
         D_003BB114 = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&D_00355F48);
+        effReturnEventSetupWord((u32)&effFramebufferQuadSetupRecord);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&D_00355F48);
+        effEventSetupRecordNoOp(&effFramebufferQuadSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0039862B[0] < 0) {
@@ -1004,7 +1004,7 @@ void effSetLoadDescD(void *parameters) {
     memcpy(&D_00355E48, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord D_00356048;
+extern EffEventSetupRecord effSolidRectangleSetupRecord;
 extern s8 D_003BB127;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
@@ -1012,7 +1012,7 @@ s32 effEventAdvanceSolidRectangleSetup(void) {
     u8 ready = D_003BB127;
 
     if (D_003BB127 == 0) {
-        EffEventSetupRecord *state = &D_00356048;
+        EffEventSetupRecord *state = &effSolidRectangleSetupRecord;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(state->source);
@@ -1026,9 +1026,9 @@ s32 effEventAdvanceSolidRectangleSetup(void) {
         D_003BB127 = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&D_00356048);
+        effReturnEventSetupWord((u32)&effSolidRectangleSetupRecord);
         effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&D_00356048);
+        effEventSetupRecordNoOp(&effSolidRectangleSetupRecord);
         effEventSetupAfterRecordNoOp();
     }
     if (D_0039862B[0] < 0) {
@@ -1058,7 +1058,7 @@ s32 effEventAdvanceResourceTemplateSetup(void) {
         EffEventSetupRecord *state = &D_00356188;
 
         if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_00356088);
+            *state->callbackResult = state->callback(&effResourceRectangleSetupParameters);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -1082,12 +1082,12 @@ s32 effEventAdvanceResourceTemplateSetup(void) {
 
 /* Expose the resource-template setup body by address. */
 EffResourceRectParams *effEventGetResourceTemplateSetupParams(void) {
-    return &D_00356088;
+    return &effResourceRectangleSetupParameters;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
 void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters) {
-    D_00356088 = *parameters;
+    effResourceRectangleSetupParameters = *parameters;
 }
 
 extern EffEventSetupRecord D_00356360;
@@ -1101,7 +1101,7 @@ s32 effEventAdvanceScaleBlurSetup(void) {
         EffEventSetupRecord *state = &D_00356360;
 
         if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_003561C8);
+            *state->callbackResult = state->callback(&effStaggeredBlurSetupParameters);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -1125,12 +1125,12 @@ s32 effEventAdvanceScaleBlurSetup(void) {
 
 /* Expose the scale-blur setup parameters by address. */
 EffBlurScaleParams *effEventGetScaleBlurSetupParams(void) {
-    return &D_003561C8;
+    return &effStaggeredBlurSetupParameters;
 }
 
 /* Replace setup parameters without replacing the active staggered-blur work. */
 void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters) {
-    D_003561C8 = *parameters;
+    effStaggeredBlurSetupParameters = *parameters;
 }
 
 SoundMixer *effEventCloneSoundMixer(SoundMixer *source) {
