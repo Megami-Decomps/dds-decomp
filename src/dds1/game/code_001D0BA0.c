@@ -2356,7 +2356,7 @@ extern void dds3SetObjectFlags(void *, s32);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
-extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
+extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
 extern void btlResetUnitModelProgress(BtlUnit *);
 
