@@ -1517,7 +1517,7 @@ extern u32 D_00435FB4;
 extern FldTransferChunk *D_00435FB8;
 extern u32 D_00435FBC;
 extern struct FileRequest *D_00435FC8;
-extern s32 D_00435FDC;
+extern struct SdfMemBlock *D_00435FDC;
 extern u32 fldCachedRoomResourceAllocation;
 extern u32 fldCachedRoomF1ResourceAllocation;
 extern u32 fldCachedRoomF2ResourceAllocation;
@@ -1694,11 +1694,11 @@ u32 fldLoadAreaRoomResources(const char *name) {
     fldCreateResourceScriptObjects();
     fldActivateRoomFlagObjects();
     if (sceneWork->retainCachedAreaResource != 0 && area < 200 && fldAreaCachedResource != NULL) {
-        D_00435FDC = (s32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize(fldAreaCachedResource));
-        memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00435FDC),
+        D_00435FDC = sdfAllocGeneralBlock(sdfMemoryGetBlockSize(fldAreaCachedResource));
+        memcpy((void *)sdfMemoryGetBlockAddress(D_00435FDC),
                (void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
                sdfMemoryGetBlockSize(fldAreaCachedResource));
-        evtRetainSceneResource(dds3GetWorldSecondaryObject(), (void *)D_00435FDC);
+        evtRetainSceneResource(dds3GetWorldSecondaryObject(), D_00435FDC);
     }
     fldInitializeActorMotionSlots();
     fldAreaState.reuseAreaResources = 0;
@@ -1762,7 +1762,7 @@ extern u32 D_00435FBC;
 
 extern struct FileRequest *D_00435FC8;
 
-extern s32 D_00435FDC;
+extern struct SdfMemBlock *D_00435FDC;
 
 extern u32 fldCachedRoomResourceAllocation;
 
@@ -1835,7 +1835,7 @@ void fldReleaseFieldResources(void) {
         }
     }
     D_00435FA0 = 0;
-    D_00435FDC = 0;
+    D_00435FDC = NULL;
     if (fldCachedRoomResourceAllocation != 0) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomResourceAllocation);
         fldCachedRoomResourceAllocation = 0;
@@ -5807,7 +5807,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FD0);
 
 INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", fldAreaCachedResource);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00435FDC);
+INCLUDE_SDATA(const struct SdfMemBlock *, "field/fldFileResolver", D_00435FDC);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceAllocation);
 
