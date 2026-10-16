@@ -65,7 +65,7 @@ extern s16 D_00387D70[];
 
 struct EffWorldNode;
 
-extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
+extern void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 
 extern u8 D_0037F530[];
 
@@ -188,8 +188,8 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_0011F518);
 
 /* Wrap input cycles past the bounds; clamp input saturates there.
  * Coarse controls take priority over fine controls. */
-void fldStepValueByPad(f32 *value, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
-    f32 adjustedValue = *value;
+void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
+    f32 adjustedValue = *controlledValue;
 
     if ((s8)padState[5] & FIELD_EDIT_WRAP_INPUT) {
         adjustedValue += bigStep;
@@ -234,7 +234,7 @@ void fldStepValueByPad(f32 *value, u8 *padState, f32 minimum, f32 maximum, f32 s
     } else {
         return;
     }
-    *value = adjustedValue;
+    *controlledValue = adjustedValue;
 }
 
 void fldStepValueByCurrentPad(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
