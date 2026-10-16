@@ -5453,10 +5453,10 @@ void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 }
 
 extern void kwlnSetDrawColorTarget(s32, f32 *);
-extern s32 kwlnSetLightColorTarget(s32, s32, f32 *);
+extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
 extern void kwlnSetBackgroundColorTarget(s32, f32 *);
-extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void fldSetSwayMode(u32);
 extern u32 D_003BADA8;
 extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
@@ -5576,10 +5576,10 @@ extern u32 D_003BADCC;
 extern f32 D_003BADD0;
 extern u32 D_003BADD4;
 extern void kwlnSetDrawColorTarget(s32, f32 *);
-extern s32 kwlnSetLightColorTarget(s32, s32, f32 *);
+extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
 extern void kwlnSetBackgroundColorTarget(s32, f32 *);
-extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
 void fldTransitionSkyLightSet(s32 index, s32 mode) {
     FldLightSet *light;
@@ -5693,10 +5693,10 @@ void fldSetCameraObjectActiveFlag(s32 enabled) {
 
 /*BEGIN fldApplySceneLightSet*/
 extern void kwlnSetDrawColorTarget(s32, f32 *);
-extern s32 kwlnSetLightColorTarget(s32, s32, f32 *);
+extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
 extern void kwlnSetBackgroundColorTarget(s32, f32 *);
-extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void fldSetSwayMode(u32);
 extern u32 D_003BADDC;
 extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
@@ -5806,10 +5806,10 @@ void fldInitializeDisplayPointerTable(void) {
 }
 
 extern void kwlnSetDrawColorTarget(s32, f32 *);
-extern s32 kwlnSetLightColorTarget(s32, s32, f32 *);
+extern s32 kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color);
 extern void kwlnSetBackgroundColorTarget(s32, f32 *);
-extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern s32 kwlnSetLightDirectionTarget(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void fldSetSwayMode(u32);
 
 void fldApplySkyLightSetToPlayerVU(void) {
