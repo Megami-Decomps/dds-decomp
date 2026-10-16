@@ -1510,7 +1510,7 @@ s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
+extern void evtSetMovieClipPositionClampedToDuration(s32 movie, s32 unused, s32 start, s32 end, s32 offset);
 
 
 /* Clamps each movie object's playback interval using its linked track's first
