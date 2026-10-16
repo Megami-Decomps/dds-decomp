@@ -130,8 +130,8 @@ void mnuSetQuantityListTransition(struct MenuList *list, u32 countdown) {
     }
 }
 
-void mnuSetCommandPhase(ShopScene *work, u32 mode) {
-    work->action = mode;
+void mnuSetCommandPhase(ShopScene *work, u32 phase) {
+    work->action = phase;
     work->frames = 0;
 }
 
