@@ -40,8 +40,8 @@ s32 sdfMemoryGetBlockSize(const SdfMemBlock *block) {
 }
 
 /* Return the represented address, not the allocation descriptor's address. */
-u32 sdfMemoryGetBlockAddress(const SdfMemBlock *block) {
-    return block->address;
+void *sdfMemoryGetBlockAddress(const SdfMemBlock *block) {
+    return (void *)(u32)block->address;
 }
 
 extern void (*D_004389CC)(s32);
