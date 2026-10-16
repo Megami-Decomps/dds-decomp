@@ -452,7 +452,7 @@ extern u32 D_003B21A0[4];
 extern SdfPoolNode D_00380028;
 extern void *effCreateVertexDrawPacket(EffPacketParams *params);
 
-void func_001969B8(f32 *position) {
+void effDrawRotatingTriangleAtPosition(f32 *position) {
     SdfAsset *asset = D_00436458;
     SdfListHead *list;
     EffPacketParams packet;
