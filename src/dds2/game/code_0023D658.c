@@ -142,7 +142,7 @@ extern s32 scrGetWindow(void);
 
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot);
 
-extern void evtActivateStoredUnitMotionSlot(u32 arg0);
+extern void evtActivateStoredUnitMotionSlot(u32 unitAddress);
 
 extern f32 evtComputeClampedModelScale(s32);
 
