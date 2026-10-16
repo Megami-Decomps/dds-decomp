@@ -94,8 +94,6 @@ extern u32 sdfDevControlReplyValue;
 
 extern s32 sdfDevReplySemaphore;
 
-extern s32 sdfDevFindDiscFileRecordByPath(u32, u8 *, u32);
-
 extern void sdfDevSetFallbackDeviceWorker(s32 worker);
 
 extern SdfDiscFileRecord *sdfOpenDiscFileRecord;
@@ -531,7 +529,7 @@ extern s32 sdfDevSeekFile(s32 fileHandle, s32 offset, s32 origin);
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
  * the disc answers, and record the file's size in the shared record. */
-s32 sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
+SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
     u32 file[9];
     char path[256];
     char *name;
@@ -584,7 +582,7 @@ s32 sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flag
     if (flag != NULL) {
         *flag = 1;
     }
-    return (s32)&D_003F9FC0;
+    return &D_003F9FC0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E4720", sdfDevFindDiscFileRecordByPath);
@@ -594,7 +592,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 request[4];
     SdfDiscFileRecord *file;
 
-    file = (SdfDiscFileRecord *)sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
+    file = sdfDevFindDiscFileRecordByPath((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
     result = -1;
     if (file != 0) {
         D_003BDA4C = file->size;
@@ -687,18 +685,20 @@ void sdfServicePendingOperationUnderSemaphore(void) {
 }
 
 s32 sdfPacketExists(u32 request) {
+    SdfDiscFileRecord *record;
     u8 buffer[16];
 
-    return sdfDevFindDiscFileRecordByPath(request, buffer, 0) != 0;
+    record = sdfDevFindDiscFileRecordByPath(request, buffer, 0);
+    return record != 0;
 }
 
 s32 sdfPktQuery(u32 request) {
     u8 buffer[16];
-    s32 packet;
+    SdfDiscFileRecord *record;
 
-    packet = sdfDevFindDiscFileRecordByPath(request, buffer, 0);
-    if (packet != 0) {
-        return ((SdfDiscFileRecord *)packet)->size;
+    record = sdfDevFindDiscFileRecordByPath(request, buffer, 0);
+    if (record != 0) {
+        return record->size;
     }
     return -1;
 }
