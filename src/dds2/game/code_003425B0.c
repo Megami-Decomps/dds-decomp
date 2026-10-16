@@ -1474,9 +1474,9 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
     sdfDispatchNextStreamNode(0);
 }
 
-void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, u8 *source, s32 size, s32 resource) {
+void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, u8 *source, s32 size, s32 resourceWord) {
     sdfStreamOpen(node, format, source, size);
-    node->resourceWord = resource;
+    node->resourceWord = resourceWord;
     sdfSoundAppendNode(node);
 }
 
@@ -1493,9 +1493,9 @@ void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params
     sdfSoundInitAndAppendNode(node, &streamParams, source, size, sdfTexGetPrimaryResourceWord(resource));
 }
 
-void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, MovObj *readContext, s32 resource) {
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, MovObj *readContext, s32 resourceWord) {
     sdfSoundInitFormattedNode(node, format, read, readContext);
-    node->resourceWord = resource;
+    node->resourceWord = resourceWord;
     sdfSoundAppendNode(node);
 }
 
