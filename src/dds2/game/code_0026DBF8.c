@@ -2754,7 +2754,7 @@ MantraIconEntry *mnuClaimMantraIconEntry(MantraIconPool *pool, u32 flags) {
 }
 
 extern u32 mnuDrawMantraStandardIcon();
-extern s32 mnuDrawMantraShortLoopIcon(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
+extern s32 mnuDrawMantraShortLoopIcon(s32 x, s32 y, s32 z, s32 amount, MantraIconPool *pool, MantraIconEntry *icon);
 s32 mnuDrawMantraFadeIcon(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
 s32 mnuDrawMantraFadeIcon2(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
 
