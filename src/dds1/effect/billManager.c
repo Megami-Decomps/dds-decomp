@@ -681,21 +681,21 @@ void billUpdateAnimation(BillObj *obj) {
 }
 
 /* Resolve an animation entry and initialize its signed frame-delay countdown. */
-void billResolveEntry(BillData *table, s32 index, BillOut *out) {
+void billResolveEntry(BillData *animationData, s32 entryIndex, BillOut *resolvedEntry) {
     u8 *base;
     BillAnimationEntry *entry;
     s32 offset;
     s16 value;
 
-    base = table->base;
-    entry = table->entries + index;
+    base = animationData->base;
+    entry = animationData->entries + entryIndex;
     offset = entry->offset;
-    out->entry = entry;
+    resolvedEntry->entry = entry;
     base = base + offset;
-    out->frameIndex = 0;
+    resolvedEntry->frameIndex = 0;
     value = ((BillRecord *)base)->frameDelay;
-    out->record = (BillRecord *)base;
-    out->framesRemaining = value;
+    resolvedEntry->record = (BillRecord *)base;
+    resolvedEntry->framesRemaining = value;
 }
 
 extern s32 sdfDebugPrintf(const char *, ...);

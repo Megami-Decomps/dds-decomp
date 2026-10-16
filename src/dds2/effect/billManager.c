@@ -689,21 +689,21 @@ void billUpdateAnimation(BillObj *obj) {
 }
 
 /* Resolve a frame list and initialize its signed hold-time counter. */
-void billResolveEntry(BillData *table, s32 index, BillOut *out) {
+void billResolveEntry(BillData *animationData, s32 entryIndex, BillOut *resolvedEntry) {
     s16 framesRemaining;
     s32 offset;
     BillAnimationEntry *entry;
     u8 *base;
 
-    base = table->base;
-    entry = table->entries + index;
+    base = animationData->base;
+    entry = animationData->entries + entryIndex;
     offset = entry->offset;
-    out->entry = entry;
+    resolvedEntry->entry = entry;
     base = base + offset;
-    out->frameIndex = 0;
+    resolvedEntry->frameIndex = 0;
     framesRemaining = ((BillRecord *)base)->frameDelay;
-    out->record = (BillRecord *)base;
-    out->framesRemaining = (s32)framesRemaining;
+    resolvedEntry->record = (BillRecord *)base;
+    resolvedEntry->framesRemaining = (s32)framesRemaining;
 }
 
 extern s32 sdfDebugPrintf(const char *, ...);
