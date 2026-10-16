@@ -673,7 +673,7 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
-extern s32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern s32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
