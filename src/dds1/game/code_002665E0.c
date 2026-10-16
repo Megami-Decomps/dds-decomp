@@ -53,7 +53,7 @@ INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowOverlays);
 
 
 extern void mnuSetTitleSequenceVolumePan(u32);
-extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
 void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
@@ -413,7 +413,7 @@ void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 }
 
 
-extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 prfGetCapValue(u16);
 
