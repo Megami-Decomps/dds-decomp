@@ -263,18 +263,18 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
 }
 
 s32 evtTickPackLoad(KwlnTask *task) {
-    EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
+    EvtPackLoadState *packState = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
 
-    switch (state->loaded) {
+    switch (packState->loaded) {
     default:
-        if (state->loaded < 2) {
-            if (state->loaded == 0) {
-                evtBeginEventPackScriptLoad(state);
+        if (packState->loaded < 2) {
+            if (packState->loaded == 0) {
+                evtBeginEventPackScriptLoad(packState);
             }
         }
         break;
     case 1:
-        evtCompleteEventPackScriptLoad(state);
+        evtCompleteEventPackScriptLoad(packState);
         break;
     }
     return 0;
