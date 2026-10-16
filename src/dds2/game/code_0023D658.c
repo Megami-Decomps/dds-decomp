@@ -132,7 +132,7 @@ extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
-extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
+extern void effObjReplaceActiveEventNode(void *effectObject, u32 entryId);
 
 extern char D_00421AF8[];
 
