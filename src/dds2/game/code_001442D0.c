@@ -464,7 +464,7 @@ extern s32 D_00436300;
 
 extern s32 D_0043630C;
 
-extern s32 fldTestMapSlotAuxiliaryFlag();
+extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern void dds3SetObjectFlags();
 
