@@ -1735,16 +1735,7 @@ typedef struct EffMeshOutput {
     u8 mode;            // 0x14
 } EffMeshOutput;
 
-typedef struct BillCellDrawWork {
-    u8 pad0[0x10];
-    u8 transform[0x10];
-    f32 scale;
-    s32 baseColor;
-    u32 frameLimit;
-    u8 pad2C[4];
-    u32 *instances;
-    u8 *config;
-} BillCellDrawWork;
+#include "eff_bill_cell_draw_work.h"
 
 void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
