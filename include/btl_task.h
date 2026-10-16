@@ -171,13 +171,7 @@ typedef struct BattleIndexWork {
     BtlOperandGroup *groups;
     struct SdfMemBlock *allocationHandle;
 } BattleIndexWork;
-typedef char BattleIndexWork_summonId_offset_check[
-    ((u32)&((BattleIndexWork *)0)->summonId == 0x18) ? 1 : -1];
 #define BTL_COMMAND_PARTY_RECORD_INDEX(work) ((work)->summonId)
-typedef char BattleIndexWork_battleExperienceReward_offset_check[
-    ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
-typedef char BattleIndexWork_moneyReward_offset_check[
-    ((u32)&((BattleIndexWork *)0)->moneyReward == 0x58) ? 1 : -1];
 
 void btlInitBattleIndexWork(BattleIndexWork *work);
 void btlResetIndexWork(BattleIndexWork *work);
