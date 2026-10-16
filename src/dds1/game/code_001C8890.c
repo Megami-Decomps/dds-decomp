@@ -135,7 +135,7 @@ s32 btlBothSidesActive(BtlUnit *unit);
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
-void btlClearSceneTaskActiveFlag(s32 taskAddress);
+void btlClearSceneTaskActiveFlag(BtlTask *task);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 
@@ -2401,8 +2401,8 @@ extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, s32);
 extern void btlInsertPartyActorByPriority(BtlUnit *, u8, u8);
 extern u8 *btlCreateControlObject(void);
 extern BtlTask *btlCreateActionSeq(void);
-extern void btlBindActorTaskAndSelectActionNumber(s32, BtlUnit *);
-extern void btlSetSceneTaskActiveFlag(s32);
+extern void btlBindActorTaskAndSelectActionNumber(BtlTask *, BtlUnit *);
+extern void btlSetSceneTaskActiveFlag(BtlTask *);
 extern u8 *btlCreateGunLoadPollTask(u8 *);
 extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
@@ -2497,10 +2497,10 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
     }
 
     summonedAction = btlCreateActionSeq();
-    btlBindActorTaskAndSelectActionNumber((s32)summonedAction, unit);
+    btlBindActorTaskAndSelectActionNumber(summonedAction, unit);
     fldAppendTaskToGroup(summonedAction);
     btlDispatchStateHandler(summonedAction, 2);
-    btlSetSceneTaskActiveFlag((s32)summonedAction);
+    btlSetSceneTaskActiveFlag(summonedAction);
     btlDispatchStateHandler(summonedAction, 0x1B);
     summonedAction->flags |= 0x100;
     duration = 0;
@@ -3114,7 +3114,7 @@ void btlCommandTaskReleaseActor(s32 task) {
             *(u32 *)(task + 8) &= ~8;
         }
     }
-    btlClearSceneTaskActiveFlag(task);
+    btlClearSceneTaskActiveFlag((BtlTask *)task);
     *(u32 *)(task + 8) |= 2;
 }
 
