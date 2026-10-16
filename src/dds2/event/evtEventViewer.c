@@ -2344,7 +2344,7 @@ typedef struct EvtWindowShadePacket {
     EvtShadeRegister regs[10];
 } EvtWindowShadePacket;
 
-extern EvtWindowShadePacket D_00453AF0[];
+extern EvtWindowShadePacket evtWindowShadePackets[];
 extern u8 D_004372C8[4];
 extern SdfPoolNode D_00380448;
 
@@ -2375,37 +2375,37 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
         u64 color;
         SdfListHead *list;
 
-        D_00453AF0[buffer].tag.quadwordCount = 10;
-        D_00453AF0[buffer].tag.reservedByte = 0;
-        D_00453AF0[buffer].tag.control = 0x70;
-        D_00453AF0[buffer].tag.address = 0;
-        D_00453AF0[buffer].tag.firstVifCode = 0;
-        D_00453AF0[buffer].tag.secondVifCode = 0x5000000A;
-        D_00453AF0[buffer].regs[0].value = 0x1000000000000004ULL;
-        D_00453AF0[buffer].regs[0].registerId = 0xE;
-        D_00453AF0[buffer].regs[1].registerId = 0x42;
-        D_00453AF0[buffer].regs[1].value = 1;
-        D_00453AF0[buffer].regs[2].registerId = 0x49;
-        D_00453AF0[buffer].regs[2].value = 0;
-        D_00453AF0[buffer].regs[3].registerId = 0x4A;
-        D_00453AF0[buffer].regs[3].value = 0;
-        D_00453AF0[buffer].regs[4].registerId = 0x47;
-        D_00453AF0[buffer].regs[4].value = 0x31003;
-        D_00453AF0[buffer].regs[5].value = 0x1023400000008004ULL;
-        D_00453AF0[buffer].regs[5].registerId = 0xE;
+        evtWindowShadePackets[buffer].tag.quadwordCount = 10;
+        evtWindowShadePackets[buffer].tag.reservedByte = 0;
+        evtWindowShadePackets[buffer].tag.control = 0x70;
+        evtWindowShadePackets[buffer].tag.address = 0;
+        evtWindowShadePackets[buffer].tag.firstVifCode = 0;
+        evtWindowShadePackets[buffer].tag.secondVifCode = 0x5000000A;
+        evtWindowShadePackets[buffer].regs[0].value = 0x1000000000000004ULL;
+        evtWindowShadePackets[buffer].regs[0].registerId = 0xE;
+        evtWindowShadePackets[buffer].regs[1].registerId = 0x42;
+        evtWindowShadePackets[buffer].regs[1].value = 1;
+        evtWindowShadePackets[buffer].regs[2].registerId = 0x49;
+        evtWindowShadePackets[buffer].regs[2].value = 0;
+        evtWindowShadePackets[buffer].regs[3].registerId = 0x4A;
+        evtWindowShadePackets[buffer].regs[3].value = 0;
+        evtWindowShadePackets[buffer].regs[4].registerId = 0x47;
+        evtWindowShadePackets[buffer].regs[4].value = 0x31003;
+        evtWindowShadePackets[buffer].regs[5].value = 0x1023400000008004ULL;
+        evtWindowShadePackets[buffer].regs[5].registerId = 0xE;
         red = (alpha << 24) | D_004372C8[0];
         blueQ = ((u64)D_004372C8[2] << 16) | 0x3F80000000000000ULL;
         color = red | blueQ | ((u64)D_004372C8[1] << 8);
-        D_00453AF0[buffer].regs[6].registerId = 1;
-        D_00453AF0[buffer].regs[6].value = color;
-        D_00453AF0[buffer].regs[7].registerId = 5;
-        D_00453AF0[buffer].regs[7].value = 0x00FEFFFF79007000ULL;
-        D_00453AF0[buffer].regs[8].registerId = 1;
-        D_00453AF0[buffer].regs[8].value = color;
-        D_00453AF0[buffer].regs[9].registerId = 5;
-        D_00453AF0[buffer].regs[9].value = 0x00FEFFFF87009000ULL;
+        evtWindowShadePackets[buffer].regs[6].registerId = 1;
+        evtWindowShadePackets[buffer].regs[6].value = color;
+        evtWindowShadePackets[buffer].regs[7].registerId = 5;
+        evtWindowShadePackets[buffer].regs[7].value = 0x00FEFFFF79007000ULL;
+        evtWindowShadePackets[buffer].regs[8].registerId = 1;
+        evtWindowShadePackets[buffer].regs[8].value = color;
+        evtWindowShadePackets[buffer].regs[9].registerId = 5;
+        evtWindowShadePackets[buffer].regs[9].value = 0x00FEFFFF87009000ULL;
         list = sdfCreateResetPacketList();
-        sdfAppendPacket(list, (u32)&D_00453AF0[buffer]);
+        sdfAppendPacket(list, (u32)&evtWindowShadePackets[buffer]);
         D_00380448.append(&D_00380448, list);
     }
 }

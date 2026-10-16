@@ -470,7 +470,7 @@ s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
 
 /* Roster detail table entries are 0x14 bytes; the leading halfword is the ranking value. */
 typedef struct {s16 base; u8 data[0x12];} BattleRosterDetail;
-void func_001AA130(BtlUnit *dst, BtlUnit *first, BtlUnit *second, BtlUnit *third)
+void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, BtlUnit *third)
 {
   BtlUnit *sources[3];
   u32 i;
