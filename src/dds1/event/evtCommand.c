@@ -11,6 +11,7 @@
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
+#include "eff_inner_float_api.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "evt_task.h"
@@ -148,7 +149,6 @@ extern void *memset(void *dst, s32 value, u32 size);
 
 extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
 
-extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 /* Copy two source points into the primary effect object. */
 s32 evtCommandCopyEffectSourcePoints(void) {

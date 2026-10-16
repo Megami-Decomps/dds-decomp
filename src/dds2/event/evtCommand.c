@@ -11,6 +11,7 @@
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
+#include "eff_inner_float_api.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "evt_task.h"
@@ -690,7 +691,6 @@ s32 evtCommandWaitCameraOwnerResourceScale(void) {
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
-extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
 s32 evtCommandCreateWorldEffectObject(void) {
