@@ -788,7 +788,7 @@ extern s8 D_004379FC;
 
 extern char D_003E0B30[];
 
-extern char D_003E0B50[];
+extern s32 D_003E0B50[];
 
 extern s32 D_003D9D60[];
 
@@ -798,7 +798,7 @@ extern s16 D_00438FCC;
 
 extern s32 D_00437A1C;
 
-extern void sndInitializeIopSoundSystem(char *, s32, char *, s32);
+extern void sndInitializeIopSoundSystem(char *, s32, s32 *, s32);
 
 extern void sndEnsureMidiBankResident(s32);
 
