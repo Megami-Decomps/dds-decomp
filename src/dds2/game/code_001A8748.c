@@ -3884,7 +3884,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     u32 hitCount;
     u32 i;
     u32 index;
-    u32 resultIndex;
+    s32 resultIndex;
     s32 allowConsecutiveHits;
 
     targetCount = btlGetIndexListCount(targets);

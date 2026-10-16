@@ -5389,7 +5389,7 @@ void btlSwapIndexListEntries(BtlIndexList *list, s32 firstIndex, s32 secondIndex
     entries[secondIndex] = first;
 }
 
-u32 btlFindListIndex(BtlIndexList *list, void *entry) {
+s32 btlFindListIndex(BtlIndexList *list, void *entry) {
     u32 count = btlGetIndexListCount(list);
     u32 i;
 
