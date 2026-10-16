@@ -230,9 +230,9 @@ extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the sepa
 
 extern FldNpcMotion D_00391FA0[];
 
-extern void *D_004361D4;
+extern char *D_004361D4;
 
-extern void *D_004361D8;
+extern char *D_004361D8;
 
 extern u32 D_004361DC;
 
@@ -3135,10 +3135,10 @@ s32 fldGetActorMotionEntry(u32 attribute) {
             return objectNode->key;
         }
     case 3:
-        D_004361D4 = D_00391FA0[motionIndex].unk24;
+        D_004361D4 = D_00391FA0[motionIndex].roomModeGroupOneName;
         return 0;
     case 4:
-        D_004361D8 = D_00391FA0[motionIndex].unk34;
+        D_004361D8 = D_00391FA0[motionIndex].sceneBitsBarrierRoomName;
         return 0;
     case 5:
         return D_00391FA0[motionIndex].unk44;
