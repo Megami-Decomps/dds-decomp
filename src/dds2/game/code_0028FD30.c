@@ -567,14 +567,14 @@ s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
     return 1;
 }
 
-u16 mnuGetSelectedPanelValue(MnuStatusResource *object) {
+u16 mnuGetSelectedPanelValue(MnuStatusResource *resource) {
     s32 values;
 
-    values = (s32)object->menu.slots[object->list->cursor->index]->flags;
-    if (object->menu.alternateSelector != 0) {
-        return *(u16 *)(object->menu.alternateSelector->selector.fields.index * 2 + values);
+    values = (s32)resource->menu.slots[resource->list->cursor->index]->flags;
+    if (resource->menu.alternateSelector != 0) {
+        return *(u16 *)(resource->menu.alternateSelector->selector.fields.index * 2 + values);
     }
-    return *(u16 *)(object->menu.defaultSelector->selector.fields.index * 2 + values);
+    return *(u16 *)(resource->menu.defaultSelector->selector.fields.index * 2 + values);
 }
 
 u16 mnuGetPanelValueAt(MnuStatusResource *resource, s32 panelIndex) {
