@@ -134,7 +134,7 @@
 0x00106488	sdfSetViewFieldOfView	inferred	confidence=high; matched-C provider and paired native twin 0x001063A8; Stores the shared view field of view in radians for camera projection and screen-plane mapping.
 0x00106498	kwlnDrawCopyRow128	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
 0x001064B0	kwlnDrawCopyWords20	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
-0x001064E8	dds3DrawSetIndexedWord	inferred	Stores the supplied word at the indexed draw-state table entry.
+0x001064E8	dds3DrawSetLightSourcePointer	inferred	Stores a light-source pointer in the indexed light-source table slot; evtStage installs three successive world-light records.
 0x00106500	kwlnDrawInitRect	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
 0x00106520	kwlnDrawSetDc8Second	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
 0x00106530	kwlnDrawSetDc8First	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c

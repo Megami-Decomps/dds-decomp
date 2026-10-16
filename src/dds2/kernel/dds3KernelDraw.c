@@ -135,8 +135,8 @@ void kwlnDrawCopyWords20(KwlnDrawVectorParams *source) {
     memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
 }
 
-/* Store one indexed draw word; the caller supplies the array index. */
-void dds3DrawSetIndexedWord(u32 value, s32 index) {
+/* Store a light-source pointer in the indexed light-source table slot. */
+void dds3DrawSetLightSourcePointer(u32 value, s32 index) {
     D_0037F770[index] = value;
 }
 
