@@ -51,11 +51,11 @@ void evtFinalizeSolarOverlay(s32 object) {
     sdfSubmitGsTestOneRegisterPacket(0x50000, object);
 }
 
-void evtPrepareSolarOverlayTestState(s32 object) {
-    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
-    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
-    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, object);
-    sdfSubmitGsTestOneRegisterPacket(0x5100DL, object);
+void evtPrepareSolarOverlayTestState(s32 renderHandle) {
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, renderHandle);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, renderHandle);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, renderHandle);
 }
 
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
