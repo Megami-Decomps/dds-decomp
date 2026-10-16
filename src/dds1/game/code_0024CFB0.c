@@ -225,7 +225,7 @@ s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
     return 1;
 }
 
-extern s32 evtIsActiveFlagSet(s32);
+extern s32 evtIsActiveFlagSet(s32 flagIndex);
 extern char D_003AF710[];
 extern char D_0036AE48[];
 
