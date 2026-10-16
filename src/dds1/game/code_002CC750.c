@@ -613,8 +613,8 @@ s8 scrSelectOperandIndex(DatPartyRecord *unit, s32 profileId) {
     return unit->profileId;
 }
 
-u32 func_002CD7F0(u32 arg0, u32 arg1) {
-    return arg1;
+u32 func_002CD7F0(u32 unused, u32 value) {
+    return value;
 }
 
 /* Retail mode-1 item predicate: never blocks an entry; itemId is unused. */
