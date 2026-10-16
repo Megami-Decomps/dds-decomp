@@ -137,7 +137,7 @@ void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontChildGlyph *gl
 extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
 extern void sceGsExecLoadImage(void *, s32);
-extern void sceGsSyncPath(s32, s32);
+extern s32 sceGsSyncPath(s32, s32);
 extern void FlushCache(s32);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
