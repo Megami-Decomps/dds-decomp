@@ -8065,7 +8065,83 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013BF48);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013C138);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0013C2B8);
+#include "fld_trigger_shape.h"
+typedef union FldActionTransform {
+    struct {
+        f32 position[4];
+        f32 rotation[4];
+        f32 scale[4];
+    };
+    f32 values[12];
+} FldActionTransform;
+/* Serialized sphere/task prefix, transform and paired resources. */
+typedef struct FldActionRow {
+    union {
+        struct { FldTriggerSphere shape; FldTaskInfo info; } task;
+        FldTriggerShape shape;
+    } prefix;
+    FldActionTransform transform;
+    FldFileResource childResource;
+    FldFileResource displayResource;
+} FldActionRow;
+extern FldActionRow D_003309B0[];
+extern char D_00330760[];
+extern char D_00330770[];
+extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
+extern char D_00330790[];
+extern char D_003307A0[];
+void func_0013C2B8(s32 kind, s32 roomValue,
+                   f32 x, f32 y, f32 z, f32 radius) {
+    s32 index = D_003BAE34;
+    FldActionTransform *transform;
+    s32 worldKey = dds3AdvanceWorldCounter();
+    EffWorldNode *object;
+    s32 taskIndex;
+
+    if (kind == 0) {
+        object = evtSpawnActionObjD(worldKey, D_003307A0, (s32)D_00330760);
+    } else {
+        object = evtSpawnActionObjD(worldKey, D_00330790, (s32)D_00330760);
+    }
+    D_003309B0[index].displayResource.id = worldKey;
+    taskIndex = fldPushDisplayValue(
+        (u32)&D_003309B0[index].displayResource, object);
+    D_003309B0[index].prefix.task.shape.radius = radius;
+    D_003309B0[index].prefix.task.shape.kind = 0;
+    D_003309B0[index].prefix.task.info.unk0 = 1;
+    D_003309B0[index].prefix.task.info.slot = taskIndex;
+    D_003309B0[index].prefix.task.info.unk08 = 1;
+    D_003309B0[index].prefix.task.info.shape = (FldTriggerShape *)&D_003309B0[index].prefix.task.shape;
+    D_003309B0[index].childResource.data = &D_003309B0[index].prefix.task.info;
+    transform = &D_003309B0[index].transform;
+    transform->position[3] = 1.0f;
+    transform->scale[0] = 1.0f;
+    transform->scale[1] = 1.0f;
+    transform->scale[2] = 1.0f;
+    transform->scale[3] = 1.0f;
+    transform->position[0] = x;
+    transform->position[1] = y;
+    transform->position[2] = z;
+    D_003309B0[index].childResource.transform = transform->position;
+    transform->rotation[1] = 0.0f;
+    transform->rotation[2] = 0.0f;
+    transform->rotation[3] = 0.0f;
+    transform->rotation[0] = 0.0f;
+    D_003309B0[index].childResource.id = dds3AdvanceWorldCounter();
+    D_003309B0[index].childResource.name = (const char *)D_00330760;
+    object = evtSpawnActionObj11(D_003309B0[index].childResource.id,
+                                 (EvtWorldSourceTransformPrefix *)D_003309B0[index].childResource.transform,
+                                 (s32)D_00330770);
+    taskIndex = func_00138ED0(&D_003309B0[index].childResource, object);
+    if (kind == 0) {
+        fldRoomRecords[taskIndex].mode = 3;
+        fldRoomRecords[taskIndex].unk120 = roomValue;
+    } else {
+        fldRoomRecords[taskIndex].mode = 4;
+    }
+    D_003BAE34++;
+    fldRoomRecords[taskIndex].entryIndex = -1;
+}
 
 s32 fldCheckEntryActive(s32 entry) {
     s32 entryIdx = D_003BAE1C;
