@@ -9719,3 +9719,5 @@
 0x00452E90	itfOverlayColorEditorWork	inferred	battle overlay color/phase data renamed from D_00452E90; referenced from the battle overlay unit code_001A04C0.c.
 0x003B4D80	itfTestOverlayColor	inferred	battle overlay color/phase data renamed from D_003B4D80; referenced from the battle overlay unit code_001A04C0.c.
 0x003B4D50	itfOverlayColorEditorRows	inferred	battle overlay color/phase data renamed from D_003B4D50; referenced from the battle overlay unit code_001A04C0.c.
+0x0043655C	itfTextLipsUnitId	inferred	confidence=high; Unit id returned by itfGetTextLipsUnitId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x003BB16C. [PurD readability data; identifier-only]
+0x00436560	itfTextLipsMotionId	inferred	confidence=high; Motion id returned by itfGetTextLipsMotionId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x003BB170. [PurD readability data; identifier-only]

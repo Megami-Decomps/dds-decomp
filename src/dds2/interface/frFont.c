@@ -1327,9 +1327,9 @@ u32 frFontContextCursorSpacing __attribute__((section(".sdata"))) = 25;
 
 s32 frFontDefaultGlyphCellSize __attribute__((section(".sdata"))) = 20;
 
-u32 D_0043655C __attribute__((section(".sdata"))) = 0;
+u32 itfTextLipsUnitId __attribute__((section(".sdata"))) = 0;
 
-u32 D_00436560 __attribute__((section(".sdata"))) = 0;
+u32 itfTextLipsMotionId __attribute__((section(".sdata"))) = 0;
 
 u8 frFontSharedGlyphFlags __attribute__((section(".sdata"))) = 0x16;
 

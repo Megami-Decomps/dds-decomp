@@ -76,9 +76,9 @@ extern u8 frFontClearFlagBits(u8 value);
 
 extern u32 D_0043654C;
 
-extern u32 D_0043655C;
+extern u32 itfTextLipsUnitId;
 
-extern u32 D_00436560;
+extern u32 itfTextLipsMotionId;
 
 extern u32 itfFontTestScriptTask;
 
@@ -226,8 +226,8 @@ advanceLine:
         }
         break;
     case 0xF416:
-        D_0043655C = itfReadEncodedTextLead(stream);
-        D_00436560 = itfReadEncodedTextLead(stream);
+        itfTextLipsUnitId = itfReadEncodedTextLead(stream);
+        itfTextLipsMotionId = itfReadEncodedTextLead(stream);
         D_0043654C |= 8;
         break;
     case ITF_GLYPH_CONTROL_STOP_LIPS:
@@ -366,12 +366,12 @@ void itfSetIndexedTextSlot(s32 slotIndex, s32 encodedTextAddress) {
 
 /* Return the unit identifier saved by text lip-sync control 0xF416. */
 u32 itfGetTextLipsUnitId(void) {
-    return D_0043655C;
+    return itfTextLipsUnitId;
 }
 
 /* Return the motion number saved by text lip-sync control 0xF416. */
 u32 itfGetTextLipsMotionId(void) {
-    return D_00436560;
+    return itfTextLipsMotionId;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E918);
