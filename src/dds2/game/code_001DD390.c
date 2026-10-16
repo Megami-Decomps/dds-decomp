@@ -2396,7 +2396,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
     while (unit != NULL) {
         if ((unit->status.flags & 2) != 0 &&
             unit->ext != NULL &&
-            unit->unk328 != 0 &&
+            unit->soundSlotOwner != 0 &&
             mdlGetContextResourceGroup(unit->ext->owner) == effect &&
             mdlGetContextResourceId(unit->ext->owner) == model) {
             return 1;
@@ -2409,7 +2409,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 /* Inherit the source unit's sound owner, transparency model, world node and
  * event work, and mark the destination as an inheriting unit. */
 void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
-    dst->unk328 = src->unk328;
+    dst->soundSlotOwner = src->soundSlotOwner;
     dst->transparencyModel = src->transparencyModel;
     dst->effectObject = src->effectObject;
     dst->ext = src->ext;
@@ -2481,7 +2481,7 @@ void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
         }
         dds3ClearObjectFlags(unit->effectObject, 0x400);
         unit->status.flags |= 8;
-        unit->unk328 = sndAcquireSlotOwner(kind, index);
+        unit->soundSlotOwner = sndAcquireSlotOwner(kind, index);
         unit->status.flags |= 2;
     }
     btlSetUnitPosition(unit, unit->position);
@@ -2533,9 +2533,9 @@ extern char D_00417940[]; /* "btl:unit transparency delete[%p]\n" */
 
 void btlReleaseActorModelResources(BtlUnit *unit) {
     if (unit->modelBorrowed == 0) {
-        if (unit->unk328 != 0) {
-            sndReleaseSlotOwner(unit->unk328);
-            unit->unk328 = 0;
+        if (unit->soundSlotOwner != 0) {
+            sndReleaseSlotOwner(unit->soundSlotOwner);
+            unit->soundSlotOwner = 0;
         }
         if (unit->transparencyModel != 0) {
             sdfReleaseDevSlot(unit->transparencyModel, 1, 1);
@@ -2548,7 +2548,7 @@ void btlReleaseActorModelResources(BtlUnit *unit) {
             unit->ext = 0;
         }
     } else {
-        unit->unk328 = 0;
+        unit->soundSlotOwner = 0;
         unit->transparencyModel = 0;
         unit->effectObject = 0;
         unit->ext = 0;
