@@ -5397,7 +5397,7 @@ void fldDrawSkyGradient(void) {
     fldSetGsAlphaBlendEquation(0);
 }
 
-void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
+void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration) {
     if (D_004360E8 == 0 && D_00389780[0] < 40) {
         duration = 0;
     }
@@ -5411,7 +5411,7 @@ void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
         D_00436124 = (f32)duration;
     }
     D_00436118 = area;
-    D_00436104[area].mode = value;
+    D_00436104[area].mode = targetMode;
 }
 
 void fldSetSwayMode(u32 mode) {
