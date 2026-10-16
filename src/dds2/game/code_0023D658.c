@@ -994,13 +994,13 @@ u32 evtCmdPrepareUnitMotionAndLogState(void) {
 }
 
 u32 evtOpAttachUnitToWorldObject(void) {
-    s32 id;
+    s32 unitObjectKey;
     EvtUnit *unit;
     s32 worldObjectKey;
     s32 frames;
 
-    id = scrReadIntParameter(0);
-    unit = evtGetWorldUnitNestedValue(id);
+    unitObjectKey = scrReadIntParameter(0);
+    unit = evtGetWorldUnitNestedValue(unitObjectKey);
     if (unit == NULL) {
         return 1;
     }
