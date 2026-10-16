@@ -907,7 +907,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             if (kind == 1) {
                 operandFlags |= 1;
                 addedStatus = 0x4000;
-                work->unk50 += btlCalculateHuntEpReward((u8 *)action->unit, (u8 *)recipient);
+                work->huntEpReward += btlCalculateHuntEpReward((u8 *)action->unit, (u8 *)recipient);
                 work->stage = 5;
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
@@ -1077,7 +1077,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 operandFlags |= 1;
                 group->entries[hitCount - 1].flags |= 1;
                 group->entries[hitCount - 1].addedStatus = 0x4000;
-                work->unk50 += btlCalculateHuntEpReward((u8 *)action->unit, (u8 *)recipient);
+                work->huntEpReward += btlCalculateHuntEpReward((u8 *)action->unit, (u8 *)recipient);
                 work->stage = 5;
                 work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
                 if (!huntRecovered) {
@@ -1192,7 +1192,7 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->unk3C = 0;
     work->costValidationFailed = 0;
     work->unk2E = 0;
-    work->unk50 = 0;
+    work->huntEpReward = 0;
     work->battleExperienceReward = 0;
     work->moneyReward = 0;
     work->flags = 0;

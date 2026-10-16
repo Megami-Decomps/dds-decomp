@@ -1771,8 +1771,8 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                 stageTask->startCondition.value.handle = operandTask->handle;
                 btlStartTask(stageTask);
             }
-            if (action->indexWork.unk50 != 0 && groupIndex == 0 && operandIndex == operandCount - 1) {
-                task = btlCreateEffectTask3E(action->unit, (u16)action->indexWork.unk50);
+            if (action->indexWork.huntEpReward != 0 && groupIndex == 0 && operandIndex == operandCount - 1) {
+                task = btlCreateEffectTask3E(action->unit, (u16)action->indexWork.huntEpReward);
                 task->startCondition.kind = 4;
                 task->startDelay = effectFrameOffset + 0xC;
                 task->startCondition.value.handle = operandTask->handle;
@@ -1793,7 +1793,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                 btlStartTask(task);
             }
             if (groupIndex == targetCount - 1 && operandIndex == operandCount - 1) {
-                task = btlCreateActorSoundOptionTask(action->unit, action->indexWork.unk50);
+                task = btlCreateActorSoundOptionTask(action->unit, action->indexWork.huntEpReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
@@ -2313,8 +2313,8 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 stageTask->startCondition.value.handle = operandTask->handle;
                 btlStartTask(stageTask);
             }
-            if (action->indexWork.unk50 != 0 && groupIndex == 0 && operandIndex == operandCount - 1) {
-                task = btlCreateEffectTask3E(unit, (u16)action->indexWork.unk50);
+            if (action->indexWork.huntEpReward != 0 && groupIndex == 0 && operandIndex == operandCount - 1) {
+                task = btlCreateEffectTask3E(unit, (u16)action->indexWork.huntEpReward);
                 task->startCondition.kind = 4;
                 task->startDelay = effectFrameOffset + 0xC;
                 task->startCondition.value.handle = operandTask->handle;
@@ -2357,7 +2357,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             task->ownerId = commandOwner;
             btlStartTask(task);
             if (groupIndex == targetCount - 1 && operandIndex == 0) {
-                task = btlCreateActorSoundOptionTask(unit, action->indexWork.unk50);
+                task = btlCreateActorSoundOptionTask(unit, action->indexWork.huntEpReward);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
