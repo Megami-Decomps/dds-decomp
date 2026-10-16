@@ -965,8 +965,8 @@ void sdfTexSetSecondaryPacketBits(SdfTex *texture, s32 magFilter, s32 minFilter)
     buffer->samplingState = (buffer->samplingState & ~SDF_TEX_FILTER_MASK) | (magFilter << SDF_MAG_FILTER_SHIFT) | (minFilter << SDF_MIN_FILTER_SHIFT);
 }
 
-void sdfTexSetClampMode(SdfTex *texture, SdfTextureClampMode value) {
-    texture->clampMode = value;
+void sdfTexSetClampMode(SdfTex *texture, SdfTextureClampMode mode) {
+    texture->clampMode = mode;
     sdfTexRefreshResourcePackets(texture);
 }
 
