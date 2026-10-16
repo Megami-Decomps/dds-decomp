@@ -14,4 +14,8 @@ typedef struct SdfDiscFileRecord {
 typedef char SdfDiscFileRecordSizeCheck[
     sizeof(SdfDiscFileRecord) == 0x0C ? 1 : -1];
 
+/* Both lookup entry points return the shared 0x0C-byte record. */
+SdfDiscFileRecord *sdfDevFindDiscFileRecordByPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress);
+SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress);
+
 #endif
