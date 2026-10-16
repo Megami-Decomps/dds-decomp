@@ -821,7 +821,7 @@ u32 evtOpIsUnitMotionIdleOrTimed(void) {
 u32 evtOpTestUnitMotionNodeFlag(void) {
     s32 id;
     EvtUnit *unit;
-    s32 offset;
+    s32 motionNodeIndex;
     u32 result = 1;
 
     id = scrReadIntParameter(0);
@@ -829,8 +829,8 @@ u32 evtOpTestUnitMotionNodeFlag(void) {
     if (unit == NULL) {
         return result;
     }
-    offset = scrReadIntParameter(1);
-    if (((unit->slotFlags[offset] & 1) & 0xFF) == 0) {
+    motionNodeIndex = scrReadIntParameter(1);
+    if (((unit->slotFlags[motionNodeIndex] & 1) & 0xFF) == 0) {
         return result;
     }
     return mdlGetNodeMotionTerminalStatus(unit->owner, scrReadIntParameter(1)) != 0;
