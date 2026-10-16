@@ -2791,7 +2791,7 @@ void fldParseMixLb(void) {
     FldMixLbHeaderView *lb;
     FldMixLbNodeView *node;
     u32 index;
-    s32 value;
+    struct SdfMemBlock *allocation;
 
     index = 0;
     lb = (FldMixLbHeaderView *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
@@ -2799,74 +2799,74 @@ void fldParseMixLb(void) {
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:
-            value = node->resourceHandle;
-            D_003BD7EC = value;
-            D_003BD7F0 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BD7EC = (s32)(u32)allocation;
+            D_003BD7F0 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 1:
-            value = node->resourceHandle;
-            D_003BAF68 = value;
-            D_003BAF6C = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BAF68 = (s32)(u32)allocation;
+            D_003BAF6C = sdfMemoryGetBlockAddress(allocation);
             break;
         case 2:
-            value = node->resourceHandle;
-            D_003BAF50 = value;
-            D_003BAF54 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BAF50 = (s32)(u32)allocation;
+            D_003BAF54 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 3:
-            value = node->resourceHandle;
-            D_003BAF74 = value;
-            D_003BAF78 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BAF74 = (s32)(u32)allocation;
+            D_003BAF78 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 4:
-            value = node->resourceHandle;
-            D_003BAF5C = value;
-            D_003BAF60 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BAF5C = (s32)(u32)allocation;
+            D_003BAF60 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 5:
-            value = node->resourceHandle;
-            D_003BAF84 = value;
-            D_003BAF88 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BAF84 = (s32)(u32)allocation;
+            D_003BAF88 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 6:
-            value = node->resourceHandle;
-            D_003BAF44 = value;
-            D_003BAF48 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BAF44 = (s32)(u32)allocation;
+            D_003BAF48 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 7:
-            value = node->resourceHandle;
-            D_003BD7D4 = value;
-            D_003BD7D8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BD7D4 = (s32)(u32)allocation;
+            D_003BD7D8 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 8:
-            value = node->resourceHandle;
-            D_003BD7DC = value;
-            D_003BD7E0 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BD7DC = (s32)(u32)allocation;
+            D_003BD7E0 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 9:
-            value = node->resourceHandle;
-            D_003BD7E4 = value;
-            D_003BD7E8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            D_003BD7E4 = (s32)(u32)allocation;
+            D_003BD7E8 = sdfMemoryGetBlockAddress(allocation);
             break;
         case 10:
-            value = node->resourceHandle;
-            fldAreaState.mapResources[0].allocation = (struct SdfMemBlock *)(u32)value;
-            fldAreaState.mapResources[0].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            fldAreaState.mapResources[0].allocation = allocation;
+            fldAreaState.mapResources[0].resourceAddress = sdfMemoryGetBlockAddress(allocation);
             break;
         case 11:
-            value = node->resourceHandle;
-            fldAreaState.mapResources[1].allocation = (struct SdfMemBlock *)(u32)value;
-            fldAreaState.mapResources[1].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            fldAreaState.mapResources[1].allocation = allocation;
+            fldAreaState.mapResources[1].resourceAddress = sdfMemoryGetBlockAddress(allocation);
             break;
         case 12:
-            value = node->resourceHandle;
-            fldAreaState.mapResources[2].allocation = (struct SdfMemBlock *)(u32)value;
-            fldAreaState.mapResources[2].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            fldAreaState.mapResources[2].allocation = allocation;
+            fldAreaState.mapResources[2].resourceAddress = sdfMemoryGetBlockAddress(allocation);
             break;
         case 13:
-            value = node->resourceHandle;
-            fldAreaState.mapResources[3].allocation = (struct SdfMemBlock *)(u32)value;
-            fldAreaState.mapResources[3].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            allocation = node->resourceHandle;
+            fldAreaState.mapResources[3].allocation = allocation;
+            fldAreaState.mapResources[3].resourceAddress = sdfMemoryGetBlockAddress(allocation);
             break;
         }
     }

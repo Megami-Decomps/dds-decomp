@@ -3128,12 +3128,12 @@ void fldParseMixLb(void) {
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 5:
-            D_00436338 = node->resourceHandle;
-            D_0043633C = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->resourceHandle);
+            D_00436338 = (s32)(u32)node->resourceHandle;
+            D_0043633C = sdfMemoryGetBlockAddress(node->resourceHandle);
             break;
         case 6:
-            D_004362D4 = node->resourceHandle;
-            D_004362D8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->resourceHandle);
+            D_004362D4 = (s32)(u32)node->resourceHandle;
+            D_004362D8 = sdfMemoryGetBlockAddress(node->resourceHandle);
             break;
         case 0:
         case 1:
