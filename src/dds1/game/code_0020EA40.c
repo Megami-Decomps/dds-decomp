@@ -289,13 +289,13 @@ extern u32 kwlnDrawControlFlags;
 }
 
 /* Install the mode-specific battle providers before starting their setup. */
-void btlInitializeBossCallbacks(s32 mode) {
+void btlInitializeBossCallbacks(s32 battleSceneId) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     void *allocation;
     void (*setup)(void);
 
     battle->effect = NULL;
-    switch (mode) {
+    switch (battleSceneId) {
     case 0x101:
         battle->commandRestrictFlags |= 0x2000;
         mdlFlagSet(0x802);
@@ -313,7 +313,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         u32 commandFlags;
         commandFlags = battle->commandRestrictFlags;
         battle->commandRestrictFlags = commandFlags | 1;
-        if (mode != 0x109) {
+        if (battleSceneId != 0x109) {
             battle->commandRestrictFlags = commandFlags | 5;
         }
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterRestrictedCommand);
@@ -323,7 +323,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlClearUnitRestrictionFlag);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0xc, btlClearSpecialEnemyRestrictionAfterAction);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, btlResetUnitPlacement);
-        if (mode == 0x106) {
+        if (battleSceneId == 0x106) {
             BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlDisableNonBossUnits);
         }
         allocation = sdfAllocateBlockBySizeThreshold(4);
@@ -346,7 +346,7 @@ void btlInitializeBossCallbacks(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlSetFirstCriticalHpUnitSideFlag);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlInitializeResources);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlInitResourcesWrap);
-        if (mode == 0x107) {
+        if (battleSceneId == 0x107) {
             BTL_INSTALL_CALLBACK(battle->pad5B0, 0x0, btlMode107SelectSceneVariant);
         }
         allocation = sdfAllocateBlockBySizeThreshold(0x44);
