@@ -838,9 +838,9 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
     return 0;
 }
 
-void evtStoreUnitMotionSlotSelection(EvtUnit *work, s32 a, s32 b) {
-    work->firstSlot = a;
-    work->secondSlot = b;
+void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 firstSlot, s32 secondSlot) {
+    unit->firstSlot = firstSlot;
+    unit->secondSlot = secondSlot;
 }
 
 void evtActivateStoredUnitMotionSlot(EvtUnit *work) {
