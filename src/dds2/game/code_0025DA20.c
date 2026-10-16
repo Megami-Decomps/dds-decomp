@@ -103,7 +103,7 @@ extern u8 D_003CE658[];
 extern SdfTex *kwlnHeldTextureReference;
 
 
-extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
+extern s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade);
 
 extern s32 strcmp(const char *a, const char *b);
 
