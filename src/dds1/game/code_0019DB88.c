@@ -146,7 +146,7 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->optionCount = 0;
 }
 
-void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 value);
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s32 fadeLimit);
 
 
 void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
@@ -236,8 +236,8 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 
 /* Select the message panel's bounds by layout mode (2 is the wide panel) and
  * reset its fade channels; nonpositive limits default to 0x80. */
-void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 value) {
-    switch (mode) {
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s32 fadeLimit) {
+    switch (panelMode) {
     default:
         block->bounds[0] = -0x390;
         block->bounds[1] = -0x80;
@@ -246,7 +246,7 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 va
         block->red = 0x80;
         block->green = 0x80;
         block->blue = 0x80;
-        block->fadeLimit = value > 0 ? value : 0x80;
+        block->fadeLimit = fadeLimit > 0 ? fadeLimit : 0x80;
         break;
     case 1:
         block->bounds[0] = -0x390;
@@ -256,7 +256,7 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 va
         block->red = 0x80;
         block->green = 0x80;
         block->blue = 0x80;
-        block->fadeLimit = value > 0 ? value : 0x80;
+        block->fadeLimit = fadeLimit > 0 ? fadeLimit : 0x80;
         break;
     case 2:
         block->bounds[0] = -0x610;
@@ -266,7 +266,7 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 va
         block->red = 0x80;
         block->green = 0x80;
         block->blue = 0x80;
-        block->fadeLimit = value > 0 ? value : 0x80;
+        block->fadeLimit = fadeLimit > 0 ? fadeLimit : 0x80;
         break;
     }
 }
