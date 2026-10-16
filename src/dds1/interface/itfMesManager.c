@@ -1191,8 +1191,8 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub) {
     return &entries[sub->entryCount];
 }
 
-/* Return the entry's raw item-list word; the entry index is not validated. */
-u32 itfMesGetWindowEntryItems(s32 window, s32 entryIndex) {
+/* Return the entry's item-address table or branch sentinel 1; index unchecked. */
+u32 *itfMesGetWindowEntryItems(s32 window, s32 entryIndex) {
     return itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->itemList;
 }
 
@@ -1306,7 +1306,7 @@ void itfMesInitCharTable(s32 *table) {
 u8 *itfMesGetNextEntrySelectedItem(ItfMesState *mes) {
     u32 *items;
 
-    items = (u32 *)itfMesGetNextEntry(mes->sub)->itemList;
+    items = itfMesGetNextEntry(mes->sub)->itemList;
     return (u8 *)items[mes->blk14.selectedIndex];
 }
 
