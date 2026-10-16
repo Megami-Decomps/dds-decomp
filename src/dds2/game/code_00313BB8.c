@@ -458,7 +458,7 @@ extern u32 strlen(const char *text);
 extern char *strcpy(char *destination, const char *source);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
-void prfCopyMantraNamePart(u16 scriptId, s32 mode, char *destination) {
+void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
     u8 *name = D_00435E50[scriptId].encodedText;
     s32 split = 0;
     s32 offset = 0;
@@ -468,7 +468,7 @@ void prfCopyMantraNamePart(u16 scriptId, s32 mode, char *destination) {
             split = offset;
         }
     }
-    switch (mode) {
+    switch (namePartMode) {
     case 1:
         if (split >= 4) {
             strcpy(destination, (char *)&name[split + 2]);
