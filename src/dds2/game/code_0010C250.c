@@ -42,9 +42,9 @@ s32 bfTaskUpdate(KwlnTask *task) {
     }
 }
 
-void scrPushInteger(ScrData *script, s32 value) {
+void scrPushInteger(ScrData *script, s32 integerValue) {
     script->stackTypes[script->sp] = 0;
-    script->stackValues[script->sp].i = value;
+    script->stackValues[script->sp].i = integerValue;
     script->sp = script->sp + 1;
 }
 
