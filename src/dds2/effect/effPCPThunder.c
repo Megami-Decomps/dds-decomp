@@ -1803,6 +1803,8 @@ struct EffThunderGroup {
     EffThunderFragmentWork *handles[10];
     u32 color;
 };
+typedef char EffThunderGroupHeadOffsetCheck[
+    ((u32)&((EffThunderGroup *)0)->head == 0x00) ? 1 : -1];
 
 extern void *memset(void *, s32, u32);
 
@@ -1840,8 +1842,8 @@ void effThunderGroupRelease(EffThunderGroup *group) {
 }
 
 /* Preserve the address word; the paired blur caller fills the leading point vectors. */
-void *effGetPairedBlurResourceVectorRecordAddress(void *vectorRecord) {
-    return vectorRecord;
+EffBlurVectorRecord *effGetPairedBlurResourceVectorRecordAddress(EffThunderGroup *resource) {
+    return (EffBlurVectorRecord *)resource;
 }
 
 void effSetResourceBlendColor(void *resource, u32 color) {

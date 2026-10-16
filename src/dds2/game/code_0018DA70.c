@@ -15,17 +15,9 @@
 #include "pcp_vu0.h"
 
 
-/* The four interpolated VU0 vectors written into each effect resource. */
-typedef struct {
-    f32 start[4];   /* 0x00: sampled actor position */
-    f32 oneThird[4];/* 0x10 */
-    f32 twoThirds[4];/* 0x20 */
-    f32 end[4];     /* 0x30: work->startVec */
-} BlurVectorRecord;
 extern void effThunderUpdateChainSegments(EffThunderGroup *group);
 extern void effThunderGroupRelease(EffThunderGroup *group);
 extern void effSetResourceBlendColor(void *resource, u32 color);
-extern void *effGetPairedBlurResourceVectorRecordAddress(void *vectorRecord);
 
 void effFreePairedResources(PairedEffectResources *pair) {
 
@@ -44,7 +36,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
     f32 t;
     u32 blendColor;
     u32 resourceIndex;
-    BlurVectorRecord *record;
+    EffBlurVectorRecord *record;
     f32 actorPosition[4];
     if (actor != 0) {
         if (frame < total) {
