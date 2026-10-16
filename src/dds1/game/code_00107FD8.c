@@ -967,12 +967,12 @@ u8 evtWaitFileMenuTaskThree(void) {
     return operationResult == 0;
 }
 
-void evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *value) {
-    if (value == 0) {
+void evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *modeOverride) {
+    if (modeOverride == 0) {
         mnuOpenTitleMenuForMode(0);
         return;
     }
-    mnuOpenTitleMenuForMode(*value);
+    mnuOpenTitleMenuForMode(*modeOverride);
 }
 
 u32 evtCloseTitleMenu(void) {
