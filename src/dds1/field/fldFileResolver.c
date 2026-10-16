@@ -4937,11 +4937,11 @@ void fldAddCameraModelEntry(s32 motionIndex) {
     mdlAddEntryPlainEx(model, 0, motionIndex, 2.0f, 5.0f);
 }
 
-void fldAddCameraModelPair(s32 first, s32 second) {
+void fldAddCameraModelPair(s32 firstMotionIndex, s32 secondMotionIndex) {
     mdlSetNodeFrameStep(fldPlayerModelContext, 0, 1.0f);
     mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
-    mdlAddEntryFlagged(fldPlayerModelContext, 0, first);
-    mdlAddEntryFlagged(fldPlayerModelContext, 1, second);
+    mdlAddEntryFlagged(fldPlayerModelContext, 0, firstMotionIndex);
+    mdlAddEntryFlagged(fldPlayerModelContext, 1, secondMotionIndex);
 }
 
 void fldClearCameraFacingPointRequest(void) {
