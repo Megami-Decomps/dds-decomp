@@ -58,7 +58,7 @@ void itfMesDestroyWindow(s32 window);
 
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 
-s32 itfMesSetOptionValue(s32 window, s32 arg1, s32 arg2);
+s32 itfMesSetOptionValue(s32 window, s32 id, s32 value);
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
