@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_script_context.h"
 #include "evt_solar.h"
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
@@ -415,18 +416,6 @@ typedef struct PtyItemQuantityUpdate {
 
 
 
-
-typedef struct EvtScriptContext {
-    u16 stateFlags;      /* 0x00 */
-    u16 pad02;           /* 0x02 opaque */
-    s32 commandIndex;    /* 0x04 */
-    s32 firstArgument;   /* 0x08 */
-    s32 secondArgument;  /* 0x0C */
-    s32 returnValue;     /* 0x10 */
-    u16 options;         /* 0x14 */
-    u8 pad16[2];         /* 0x16 opaque */
-} EvtScriptContext;
-typedef char EvtScriptContextSizeCheck[sizeof(EvtScriptContext) == 0x18 ? 1 : -1];
 
 extern PtyRosterValueRecord ptyRosterMenuValues[];
 extern PtyItemQuantityUpdate ptyItemQuantityUpdates[];
