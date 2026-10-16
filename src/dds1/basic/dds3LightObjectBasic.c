@@ -23,13 +23,13 @@ void lightReleaseObject(EffWorldNode *light) {
     effObjFreeInner(light);
 }
 
-s32 lightBlendAmbientColors(EffWorldNode *object) {
+s32 lightBlendAmbientColors(EffWorldNode *lightObject) {
     SdfLightSources sources;
     EffLightData *data;
     u32 flags;
 
     memset(sources, 0, sizeof(sources));
-    data = object->data;
+    data = lightObject->data;
     flags = data->flags;
     if (flags & EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS) {
         if (flags & EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS) {
