@@ -2390,7 +2390,7 @@ void func_0013EEA0(s32 kind, s32 roomValue,
 
 extern s32 D_004361C0;
 
-s32 fldCheckEntryActive(s32 value) {
+s32 fldCheckEntryActive(s32 entry) {
     s32 blocked = D_004361C0;
     s32 index = D_004361AC;
 
@@ -2400,7 +2400,7 @@ s32 fldCheckEntryActive(s32 value) {
     if (index == -1) {
         return 0;
     }
-    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].entryIndex == value) {
+    if (fldRoomRecords[index].mode == 1 && fldRoomRecords[index].entryIndex == entry) {
         return 1;
     }
     return 0;
