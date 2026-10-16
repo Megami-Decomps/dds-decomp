@@ -1131,63 +1131,63 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateTimelineGroupState
 
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 duration);
 
-/* At time, selects each named unit's latest kind-9 transition key and starts,
+/* At timelineTime, selects each named unit's latest kind-9 transition key and starts,
  * ends or leaves its value transition according to the selected key flags. */
-void evtEventViewerUpdateUnitTransitions(s32 time, EvtRuntime *viewer) {
-    EffWorldNode *object;
-    EvtRuntimeGroup *node;
-    EvtRuntimeChild *key;
-    EvtRuntimeChild *selected;
-    EvtUnit *unit;
-    s32 selectedValue;
-    s32 selectedTime;
+void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
+    EffWorldNode *worldObject;
+    EvtRuntimeGroup *track;
+    EvtRuntimeChild *transitionKey;
+    EvtRuntimeChild *selectedKey;
+    EvtUnit *eventUnit;
+    s32 transitionValue;
+    s32 latestTransitionTime;
 
     if (dds3GetWorldObject() != NULL) {
-        object = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
-        while (object != NULL) {
-            if (((u8 *)object->value) != NULL) {
-                selected = NULL;
-                selectedValue = 0;
-                selectedTime = -1;
-                node = viewer->groups;
-                while (node != NULL) {
-                    if (node->type == 9) {
-                        key = node->children;
-                        while (key != NULL) {
-                            if (time >= key->frame + node->metadata.value && key->p08.sh[0] >= 0 &&
-                                object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
-                                    EVT_WORLD_SLOT_UNIT, viewer->entryName[key->p08.sh[0]])) {
-                                if (selectedTime < key->frame + node->metadata.value) {
-                                    selectedValue = (s32)node->info;
-                                    selectedTime = key->frame + node->metadata.value;
-                                    selected = key;
+        worldObject = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+        while (worldObject != NULL) {
+            if (((u8 *)worldObject->value) != NULL) {
+                selectedKey = NULL;
+                transitionValue = 0;
+                latestTransitionTime = -1;
+                track = viewer->groups;
+                while (track != NULL) {
+                    if (track->type == 9) {
+                        transitionKey = track->children;
+                        while (transitionKey != NULL) {
+                            if (timelineTime >= transitionKey->frame + track->metadata.value && transitionKey->p08.sh[0] >= 0 &&
+                                worldObject == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
+                                    EVT_WORLD_SLOT_UNIT, viewer->entryName[transitionKey->p08.sh[0]])) {
+                                if (latestTransitionTime < transitionKey->frame + track->metadata.value) {
+                                    transitionValue = (s32)track->info;
+                                    latestTransitionTime = transitionKey->frame + track->metadata.value;
+                                    selectedKey = transitionKey;
                                 }
                             }
-                            key = key->next;
+                            transitionKey = transitionKey->next;
                         }
                     }
-                    node = node->next;
+                    track = track->next;
                 }
-                unit = evtUnitGetNestedValue(object);
-                if (selected != NULL) {
-                    if (selected->p08.sh[1] != 0) {
-                        if (unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {
-                            evtSetUnitValueTransition(unit, (EffWorldNode *)selectedValue, selected->duration);
+                eventUnit = evtUnitGetNestedValue(worldObject);
+                if (selectedKey != NULL) {
+                    if (selectedKey->p08.sh[1] != 0) {
+                        if (eventUnit->currentTransitionValue != transitionValue || !(eventUnit->flags & 0x40000)) {
+                            evtSetUnitValueTransition(eventUnit, (EffWorldNode *)transitionValue, selectedKey->duration);
                         }
                     } else {
-                        if (unit->flags & 0x40000) {
-                            if (!(unit->flags & 0x100000)) {
-                                evtEndUnitValueTransition(unit, selected->duration);
+                        if (eventUnit->flags & 0x40000) {
+                            if (!(eventUnit->flags & 0x100000)) {
+                                evtEndUnitValueTransition(eventUnit, selectedKey->duration);
                             }
                         }
                     }
                 } else {
-                    if (unit->currentTransitionValue != 0) {
-                        evtEndUnitValueTransition(unit, 0);
+                    if (eventUnit->currentTransitionValue != 0) {
+                        evtEndUnitValueTransition(eventUnit, 0);
                     }
                 }
             }
-            object = object->next;
+            worldObject = worldObject->next;
         }
     }
 }
