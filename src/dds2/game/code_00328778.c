@@ -20,7 +20,7 @@ extern u8 D_00438A8C;
 
 extern void (*sdfTickCallback)(void);
 
-extern void sdfSleepThreadCount(s32);
+extern void sdfSleepThreadCount(s32 count);
 
 extern void sdfPadUpdatePorts(void);
 
