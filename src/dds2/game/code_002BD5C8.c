@@ -254,13 +254,13 @@ extern s32 scrGetIndexedRecordAddress(s32, s32 *);
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                                       s32 partyIndex, s32 surface) {
     s32 outValue;
-    s32 cost = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
+    s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
     s32 texture;
     struct FrFontGlyph *item;
 
     texture = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
-    code = selectedCode != 0 ? selectedCode : cost;
+    code = selectedCode != 0 ? selectedCode : profileId;
     if (code != 0) {
         if (scrGetIndexedRecordAddress(code & 0xFFFF, &outValue) != 0) {
             mnuDrawMenuTextById(0x16B0, 0x4B8, depth, texture, code, surface);
