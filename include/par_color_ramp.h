@@ -24,6 +24,9 @@ typedef struct ParColorRamp {
     u32 fadeOut;       /* 0x40 */
 } ParColorRamp;
 
+/* Evaluate a color through the emitter ramp at the particle's current age. */
+u32 parEvaluateColorRampAtAge(ParColorRamp *colorRamp, u32 color, s32 age);
+
 typedef char ParColorRamp_size_must_be_0x44[
     (sizeof(ParColorRamp) == 0x44) ? 1 : -1];
 typedef char ParColorRamp_r01_at_0x24[
