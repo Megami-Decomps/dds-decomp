@@ -4080,7 +4080,7 @@ s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
                 sndSetStationedSeVolume(8);
                 command->state = 8;
                 command->commandData->phase = 9;
-            } else if (D_00324510.unk23 < 0) {
+            } else if (D_00324510.primaryCancel < 0) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
@@ -6563,7 +6563,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
         return;
     }
 
-    if (D_00324510.unk23 < 0) {
+    if (D_00324510.primaryCancel < 0) {
         work->state = 4;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {

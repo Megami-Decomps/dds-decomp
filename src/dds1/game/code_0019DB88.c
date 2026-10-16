@@ -366,7 +366,7 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         if (!(mes->flags & 0x100000)) {
             mes->fade.kind = 1;
         }
-        if (!(D_00324510.confirm < 0 || D_00324510.unk23 < 0 ||
+        if (!(D_00324510.confirm < 0 || D_00324510.primaryCancel < 0 ||
               (D_00324510.primaryTriangle != 0 && mes->fade.textAdvanceFrameCount >= 5 && !(itfMessageFlags & 1))) &&
               entryBlock->textInterfaceMask != 0) {
             return;
@@ -389,7 +389,7 @@ void itfMesAdvanceEntryText(ItfMesState *mes) {
         mes->flags = (mes->flags & ~7) | 3;
         return;
     }
-    if ((D_00324510.confirm < 0 || D_00324510.unk23 < 0 || (D_00324510.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
+    if ((D_00324510.confirm < 0 || D_00324510.primaryCancel < 0 || (D_00324510.primaryTriangle != 0 && !(itfMessageFlags & 1))) &&
         !(mes->flags & 0x1000000) && !(mes->flags & 0x400000)) {
         frFontEnableNodeContextModes(entryBlock->glyphChain);
         if (mes->blk14.glyphChain != NULL) {

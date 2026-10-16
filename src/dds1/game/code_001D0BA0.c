@@ -1767,7 +1767,7 @@ void btlUpdateAutoMusic(void) {
         return;
     }
     if (flags & 0x8000) {
-        if (D_00324510.primaryTriangle < 0 || D_00324510.unk23 < 0) {
+        if (D_00324510.primaryTriangle < 0 || D_00324510.primaryCancel < 0) {
             *(u32 *)(context + 0x1F4) = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
