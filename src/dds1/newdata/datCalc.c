@@ -398,7 +398,7 @@ enum {
 };
 
 extern u8 ptyAffinityPermutationOrders[];
-extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 slot);
+extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 requirementIndex);
 
 
 extern s32 datRosterDetails;
@@ -1080,7 +1080,7 @@ u32 ptyReturnOne(void) {
 extern DatSkillList *D_003BAA58;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
-s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 slot) {
+s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 requirementIndex) {
     DatAffinityRecord *record;
     s32 requirement;
     s32 value;
@@ -1093,7 +1093,7 @@ s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 slo
     if (record->flags & 2) {
         return 0;
     }
-    requirement = record->requirements[slot];
+    requirement = record->requirements[requirementIndex];
     if (requirement == -1) {
         return 0;
     }
